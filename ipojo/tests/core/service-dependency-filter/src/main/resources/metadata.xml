@@ -17,6 +17,24 @@
 		</requires>
 		<provides />
 	</component>
+	
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.service.dependency.filter.component.FilterCheckSubscriber"
+		name="SimpleFromCheckServiceSubscriber" architecture="true">
+		<requires field="m_foo" from="A" id="id1">
+			<callback type="bind" method="Bind" />
+			<callback type="unbind" method="Unbind" />
+		</requires>
+		<provides />
+	</component>
+	
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.service.dependency.filter.component.FilterCheckProvider"
+		name="SimplePIDCheckServiceProvider" architecture="true">
+		<provides>
+			<property type="String" name="service.pid" />
+		</provides>
+	</component>
 
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.service.dependency.filter.component.FilterCheckSubscriber"

@@ -198,6 +198,11 @@ public class MethodCollector extends EmptyVisitor {
          * Comparator.
          */
         private String m_comparator;
+        
+        /**
+         * From attribute.
+         */
+        private String m_from;
 
         /**
          * Constructor.
@@ -245,6 +250,10 @@ public class MethodCollector extends EmptyVisitor {
                 m_comparator = type.getClassName();
                 return;
             }
+            if (arg0.equals("from")) {
+                m_from = arg1.toString();
+                return;
+            }
             
         }
 
@@ -290,6 +299,9 @@ public class MethodCollector extends EmptyVisitor {
                 if (m_comparator != null) {
                     req.addAttribute(new Attribute("comparator", m_comparator));
                 }
+                if (m_from != null) {
+                    req.addAttribute(new Attribute("from", m_from));
+                }
             } else {
                 String itf = req.getAttribute("interface");
                 String aggregate = req.getAttribute("aggregate");
@@ -297,7 +309,7 @@ public class MethodCollector extends EmptyVisitor {
                 String filter = req.getAttribute("filter");
                 String policy = req.getAttribute("policy");
                 String comparator = req.getAttribute("comparator");
-                
+                String from = req.getAttribute("from");
                 if (m_specification != null) {
                     if (itf == null) {
                         req.addAttribute(new Attribute("interface", m_specification));
@@ -346,10 +358,20 @@ public class MethodCollector extends EmptyVisitor {
                 if (m_comparator != null) {
                     if (comparator == null) {
                         req.addAttribute(new Attribute("comparator", m_comparator));
-                    } else if (! m_comparator.equals(policy)) {
+                    } else if (! m_comparator.equals(comparator)) {
                         System.err.println("The comparator attribute is not always the same");
                         return;
                     }
+                }
+                
+                if (m_from != null) {
+                    if (from == null) {
+                        req.addAttribute(new Attribute("from", m_from));
+                    } else if (! m_from.equals(from)) {
+                        System.err.println("The from attribute is not always the same");
+                        return;
+                    }
+                    
                 }
                 
             }

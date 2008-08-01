@@ -31,6 +31,7 @@ public class FilteredDependencyTestSuite {
 	        ots.addTestSuite(OptionalSimpleFilterDependencies.class);
 	        ots.addTestSuite(MultipleFilterDependencies.class);
 	        ots.addTestSuite(OptionalMultipleFilterDependencies.class);
+	        ots.addTestSuite(FromDependencies.class);
 		return ots;
 	}
 

@@ -157,6 +157,11 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
         private String m_comparator;
         
         /**
+         * From attribute.
+         */
+        private String m_from;
+        
+        /**
          * Constructor.
          * @param name : field name.
          */
@@ -205,6 +210,10 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
                 m_comparator = type.getClassName();
                 return;
             }
+            if (arg0.equals("from")) {
+                m_from = arg1.toString();
+                return;
+            }
         }
 
         /**
@@ -251,6 +260,9 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
             }
             if (m_comparator != null) {
                 req.addAttribute(new Attribute("comparator", m_comparator));
+            }
+            if (m_from != null) {
+                req.addAttribute(new Attribute("from", m_from));
             }
             
             if (m_id != null) { 

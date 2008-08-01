@@ -71,5 +71,10 @@ public @interface Bind {
      * The indicated class must implement {@link Comparator}
      */
     Class comparator() default Comparator.class;
+    
+    /**
+     * Set the from attribute.
+     */
+    String from() default "";
 
 }

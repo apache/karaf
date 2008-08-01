@@ -7,10 +7,14 @@ import org.apache.felix.ipojo.test.scenarios.util.Utils;
 public class FilteredDependency extends OSGiTestCase {
     
     private Element[] deps ;
+    private Element[] froms;
     
     public void setUp() {
         Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.FilteredDependency");
         deps = meta.getElements("requires");
+        
+        Element meta2 = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.FromDependency");
+        froms = meta2.getElements("requires");
     }
     
     public void testField() {
@@ -49,6 +53,29 @@ public class FilteredDependency extends OSGiTestCase {
         assertEquals("Check filter", "(foo=bar)", opt);
     }
     
+    public void testFromField() {
+        Element dep = getDependencyById(froms, "fs");
+        String from = dep.getAttribute("from");
+        assertEquals("Check from", "X", from);
+    }
+    
+    public void testFromBind() {
+        Element dep = getDependencyById(froms, "fs2");
+        String from = dep.getAttribute("from");
+        assertEquals("Check from", "X", from);
+    }
+    
+    public void testFromUnbind() {
+        Element dep = getDependencyById(froms, "inv");
+        String from = dep.getAttribute("from");
+        assertEquals("Check from", "X", from);
+    }
+    
+    public void testNoFrom() {
+        Element dep = getDependencyById(froms, "Bar");
+        String from = dep.getAttribute("from");
+        assertNull("Check from", from);
+    }
 
     
     private Element getDependencyById(Element[] deps, String name) {
@@ -66,24 +93,6 @@ public class FilteredDependency extends OSGiTestCase {
         return null;
     }
     
-    private String getBind(Element dep) {
-        Element[] elem = dep.getElements("callback");
-        for (int i = 0; elem != null && i < elem.length; i++) {
-            if (elem[i].getAttribute("type").equalsIgnoreCase("bind")) {
-                return elem[i].getAttribute("method");
-            }
-        }
-        return null;
-    }
     
-    private String getUnbind(Element dep) {
-        Element[] elem = dep.getElements("callback");
-        for (int i = 0; elem != null && i < elem.length; i++) {
-            if (elem[i].getAttribute("type").equalsIgnoreCase("unbind")) {
-                return elem[i].getAttribute("method");
-            }
-        }
-        return null;
-    }
 
 }

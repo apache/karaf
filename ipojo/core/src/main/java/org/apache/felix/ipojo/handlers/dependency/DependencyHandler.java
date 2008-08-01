@@ -267,7 +267,8 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
         
         // Get instance filters.
         Dictionary filtersConfiguration = (Dictionary) configuration.get("requires.filters");
-
+        Dictionary fromConfiguration = (Dictionary) configuration.get("requires.from");
+        
         for (int i = 0; deps != null && i < deps.length; i++) {
             // Create the dependency metadata
             String field = deps[i].getAttribute("field");
@@ -308,6 +309,23 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
                 filter = (String) filtersConfiguration.get(identitity);
             }
 
+            // Compute the 'from' attribute
+            String from = deps[i].getAttribute("from");
+            if (fromConfiguration != null && identitity != null && fromConfiguration.get(identitity) != null) {
+                from = (String) fromConfiguration.get(identitity);
+            }
+            if (from != null) {
+                String fromFilter = "(|(instance.name=" + from + ")(service.pid=" + from + "))";
+                if (aggregate) {
+                    warn("The 'from' attribute is incompatible with aggregate requirement : only one provider will match : " + fromFilter);
+                }
+                if (filter != null) {
+                    filter = "(&" + fromFilter + filter + ")"; // Append the two filters
+                } else {
+                    filter = fromFilter;
+                }
+            }
+            
             Filter fil = null;
             if (filter != null) {
                 try {
@@ -316,6 +334,7 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
                     throw new ConfigurationException("A requirement filter is invalid : " + filter + " - " + e.getMessage());
                 }
             }
+            
 
             Class spec = null;
             if (serviceSpecification != null) {

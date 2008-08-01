@@ -90,6 +90,18 @@ public class BadServiceDependencies extends OSGiTestCase {
         return elem;
     }
     
+    private Element getBadFrom() {
+        Element elem = new Element("component", "");
+        elem.addAttribute(new Attribute("classname", clazz));
+        
+        Element callback = new Element("requires", "");
+        callback.addAttribute(new Attribute("field", "fs"));
+        callback.addAttribute(new Attribute("from", "ba(d&_")); // Incorrect from
+        elem.addElement(callback);
+        elem.addElement(manipulation);
+        return elem;
+    }
+    
     private Element getBadType() {
         Element elem = new Element("component", "");
         elem.addAttribute(new Attribute("classname", clazz));
@@ -203,6 +215,23 @@ public class BadServiceDependencies extends OSGiTestCase {
             ci.dispose();
             cf.stop();
             fail("A service requirement with a bad filter must be rejected " + cf);
+        }catch (ConfigurationException e) {
+            //OK
+        } catch (UnacceptableConfiguration e) {
+            fail("Unexpected exception when creating an instance : " + e.getMessage());
+        } catch (MissingHandlerException e) {
+            fail("Unexpected exception when creating an instance : " + e.getMessage());
+        }
+    }
+    
+    public void testBadFrom() {
+        try {
+            ComponentFactory cf = new ComponentFactory(context, getBadFrom());
+            cf.start();
+            ComponentInstance ci = cf.createComponentInstance(props);
+            ci.dispose();
+            cf.stop();
+            fail("A service requirement with a bad from must be rejected " + cf);
         }catch (ConfigurationException e) {
             //OK
         } catch (UnacceptableConfiguration e) {

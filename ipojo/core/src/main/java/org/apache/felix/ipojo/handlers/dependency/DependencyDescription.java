@@ -18,34 +18,33 @@
  */
 package org.apache.felix.ipojo.handlers.dependency;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.osgi.framework.ServiceReference;
 
 /**
- * Dependency Description.
+ * Service Dependency Description.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class DependencyDescription {
 
     /**
-     * Needed Service Interface.
+     * Required Service Interface.
      */
     private String m_interface;
 
     /**
-     * Multiple ?
+     * Is the dependency aggregate?
      */
-    private boolean m_multiple;
+    private boolean m_aggregate;
 
     /**
-     * Optional ?
+     * Is the dependency optional ?
      */
     private boolean m_optional;
     
     /**
-     * Binding policy.
+     * Binding policy used by this service dependency.
      */
     private int m_bindingPolicy;
     
@@ -65,7 +64,7 @@ public class DependencyDescription {
     private int m_state;
 
     /**
-     * Filter.
+     * Dependency Filter.
      */
     private String m_filter;
     
@@ -81,12 +80,12 @@ public class DependencyDescription {
     private String m_comparator;
 
     /**
-     * Set[service reference] of the used service.
+     * List of used service references.
      */
-    private List m_usedServices = new ArrayList();
+    private List m_usedServices;
 
     /**
-     * The list of service reference.
+     * List of matching service references.
      */
     private List m_serviceReferences;
 
@@ -106,7 +105,7 @@ public class DependencyDescription {
     public DependencyDescription(String itf, boolean multiple, boolean optional, String filter, int policy, boolean nullable, String defaultImpl, String comparator, boolean frozen, int state) {
         super();
         m_interface = itf;
-        m_multiple = multiple;
+        m_aggregate = multiple;
         m_optional = optional;
         m_filter = filter;
         m_state = state;
@@ -117,7 +116,7 @@ public class DependencyDescription {
         m_isFrozen = frozen;
     }
 
-    public boolean isMultiple() { return m_multiple; }
+    public boolean isMultiple() { return m_aggregate; }
 
     public boolean isOptional() { return m_optional; }
 
@@ -142,31 +141,40 @@ public class DependencyDescription {
     public boolean isFrozen() { return m_isFrozen; }
 
     /**
-     * Get the service reference list.
-     * @return the array of service reference (only if the cardinality could be n).
+     * Gets the service reference list.
+     * @return the list of matching service reference,
+     * null if no service reference.
      */
     public List getServiceReferences() { return m_serviceReferences; }
 
     /**
-     * Get the service reference if only 1 used.
-     * @return the ServiceReference (only if the cardinality could be 1).
+     * Gets the service reference if only one service reference is used.
+     * @return the ServiceReference (only if the cardinality could be 1),
+     * or null if no service reference.
      */
-    public ServiceReference getServiceReference() { return (ServiceReference) m_serviceReferences.get(0); }
+    public ServiceReference getServiceReference() { 
+        if (m_serviceReferences == null) {
+            return null;
+        } else {
+            return (ServiceReference) m_serviceReferences.get(0);
+        }
+    }
 
     /**
-     * Set the service reference array.
+     * Sets the service reference array.
      * @param refs : the list of service reference
      */
     public void setServiceReferences(List refs) { m_serviceReferences = refs; }
 
     /**
-     * Get the used service set.
-     * @return the list [service reference] containing the used services
+     * Gets the used service set.
+     * @return the list [service reference] containing the used services,
+     * null if no providers are used
      */
     public List getUsedServices() { return m_usedServices; }
 
     /**
-     * Set the usedServices.
+     * Sets the usedServices.
      * @param usages : the list of used service reference.
      */
     public void setUsedServices(List usages) {
