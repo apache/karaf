@@ -82,6 +82,13 @@ public final class ObrRemoteClean extends AbstractMojo
     private boolean ignoreLock;
     
     /**
+     * Public URL prefix for the remote repository.
+     *
+     * @parameter expression="${prefixURL}"
+     */
+    private String prefixURL;
+
+    /**
      * Remote OBR Repository.
      * 
      * @parameter expression="${remoteOBR}" default-value="NONE"
@@ -172,6 +179,10 @@ public final class ObrRemoteClean extends AbstractMojo
 
         RemoteFileManager remoteFile = new RemoteFileManager( m_wagonManager, settings, log );
         openRepositoryConnection( remoteFile );
+        if ( null == prefixURL || prefixURL.trim().length() == 0 )
+        {
+            prefixURL = remoteFile.toString();
+        }
 
         // ======== LOCK REMOTE OBR ========
         log.info( "LOCK " + remoteFile + '/' + repositoryName );
@@ -191,7 +202,7 @@ public final class ObrRemoteClean extends AbstractMojo
 
             // Clean the downloaded file.
             Document doc = parseFile(new File(repositoryXml), initConstructor());
-            Node finalDocument = cleanDocument(tempURI, doc.getDocumentElement());
+            Node finalDocument = cleanDocument(doc.getDocumentElement());
             
             if ( finalDocument == null )
             {
@@ -262,7 +273,7 @@ public final class ObrRemoteClean extends AbstractMojo
      * @param elem : the input XML tree
      * @return the cleaned XML tree
      */
-    private Element cleanDocument( URI prefix, Element elem )
+    private Element cleanDocument( Element elem )
     {
         NodeList nodes = elem.getElementsByTagName( "resource" );
         List toRemove = new ArrayList();
@@ -275,7 +286,7 @@ public final class ObrRemoteClean extends AbstractMojo
 
             URL url;
             try {
-                url = new URL(prefix.toURL(), value);
+                url = new URL(prefixURL + '/' + value);
             } catch (MalformedURLException e) {
                 getLog().error("Malformed URL when creating the resource absolute URI : " + e.getMessage());
                 return null;
