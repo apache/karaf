@@ -27,10 +27,10 @@
     <url>http://www.osgi.org/</url>
   </organization>
   <modelVersion>4.0.0</modelVersion>
-  <name>OSGi R4 Compendium Bundle</name>
   <description>OSGi Service Platform Release 4 Compendium Interfaces and Classes.</description>
   <artifactId>org.osgi.compendium</artifactId>
   <version>1.1.0-SNAPSHOT</version>
+  <name>OSGi R4 Compendium Bundle</name>
   <packaging>bundle</packaging>
   <dependencies>
     <dependency>
@@ -58,13 +58,13 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <Bundle-Version>4.1.0</Bundle-Version>
             <Bundle-SymbolicName>org.osgi.compendium</Bundle-SymbolicName>
-            <Export-Package>org.osgi.service.cm,org.osgi.service.component,org.osgi.service.device,org.osgi.service.event,org.osgi.service.http,org.osgi.service.io,org.osgi.service.log,org.osgi.service.metatype,org.osgi.service.prefs,org.osgi.service.provisioning,org.osgi.service.upnp,org.osgi.service.useradmin,org.osgi.service.wireadmin,org.osgi.util.measurement,org.osgi.util.position,org.osgi.util.tracker,org.osgi.util.xml</Export-Package>
+            <Bundle-Copyright>Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.</Bundle-Copyright>
+            <Bundle-Category>osgi</Bundle-Category>
+            <Export-Package>info.dmtree.notification,info.dmtree.notification.spi,info.dmtree.registry,info.dmtree.security,info.dmtree.spi,org.osgi.service.application,org.osgi.service.cm,org.osgi.service.component,org.osgi.service.deploymentadmin,org.osgi.service.deploymentadmin.spi,org.osgi.service.device,org.osgi.service.event,org.osgi.service.http,org.osgi.service.io,org.osgi.service.log,org.osgi.service.metatype,org.osgi.service.monitor,org.osgi.service.prefs,org.osgi.service.provisioning,org.osgi.service.upnp,org.osgi.service.useradmin,org.osgi.service.wireadmin,org.osgi.util.gsm,org.osgi.util.measurement,org.osgi.util.mobile,org.osgi.util.position,org.osgi.util.tracker,org.osgi.util.xml</Export-Package>
             <Import-Package />
             <DynamicImport-Package>*</DynamicImport-Package>
-            <Bundle-Version>4</Bundle-Version>
-            <Bundle-Copyright>Copyright (c) OSGi Alliance (2000, 2005). All Rights Reserved.</Bundle-Copyright>
-            <Bundle-Category>osgi</Bundle-Category>
           </instructions>
         </configuration>
       </plugin>

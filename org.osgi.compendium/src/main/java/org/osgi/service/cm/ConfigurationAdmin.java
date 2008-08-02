@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.cm/src/org/osgi/service/cm/ConfigurationAdmin.java,v 1.16 2006/07/11 00:54:03 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.cm/src/org/osgi/service/cm/ConfigurationAdmin.java,v 1.17 2006/09/26 13:33:09 hargrave Exp $
  *
  * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
  *
@@ -100,7 +100,7 @@ import org.osgi.framework.InvalidSyntaxException;
  * <code>ConfigurationAdmin</code> must use a
  * {@link org.osgi.framework.ServiceFactory} to support this concept.
  * 
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public interface ConfigurationAdmin {
 	/**
@@ -230,7 +230,7 @@ public interface ConfigurationAdmin {
 	 * <code>ConfigurationPermission[*,CONFIGURE]</code>.
 	 * 
 	 * <p>
-	 * The syntax of the filter string is as defined in the <code>Filter</code>
+	 * The syntax of the filter string is as defined in the {@link org.osgi.framework.Filter}
 	 * class. The filter can test any configuration parameters including the
 	 * following system properties:
 	 * <ul>
@@ -244,10 +244,10 @@ public interface ConfigurationAdmin {
 	 * The filter can also be <code>null</code>, meaning that all
 	 * <code>Configuration</code> objects should be returned.
 	 * 
-	 * @param filter a <code>Filter</code> object, or <code>null</code> to
+	 * @param filter A filter string, or <code>null</code> to
 	 *        retrieve all <code>Configuration</code> objects.
-	 * @return all matching <code>Configuration</code> objects, or
-	 *         <code>null</code> if there aren't any
+	 * @return All matching <code>Configuration</code> objects, or
+	 *         <code>null</code> if there aren't any.
 	 * @throws IOException if access to persistent storage fails
 	 * @throws InvalidSyntaxException if the filter string is invalid
 	 */

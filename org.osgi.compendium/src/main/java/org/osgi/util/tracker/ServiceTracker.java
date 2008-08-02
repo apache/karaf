@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.util.tracker/src/org/osgi/util/tracker/ServiceTracker.java,v 1.21 2006/07/12 21:05:17 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.util.tracker/src/org/osgi/util/tracker/ServiceTracker.java,v 1.29 2007/02/19 19:04:33 hargrave Exp $
  * 
- * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,14 +40,21 @@ import org.osgi.framework.*;
  * references to the services being tracked. The <code>getService</code> and
  * <code>getServices</code> methods can be called to get the service objects
  * for the tracked service.
+ * <p>
+ * The <code>ServiceTracker</code> class is thread-safe. It does not call a
+ * <code>ServiceTrackerCustomizer</code> object while holding any locks.
+ * <code>ServiceTrackerCustomizer</code> implementations must also be
+ * thread-safe.
  * 
- * @version $Revision: 1.21 $
+ * @ThreadSafe
+ * @version $Revision: 1.29 $
  */
 public class ServiceTracker implements ServiceTrackerCustomizer {
 	/* set this to true to compile in debug messages */
 	static final boolean				DEBUG			= false;
 	/**
-	 * Bundle context against which this <code>ServiceTracker</code> object is tracking.
+	 * Bundle context against which this <code>ServiceTracker</code> object is
+	 * tracking.
 	 */
 	protected final BundleContext		context;
 	/**
@@ -80,7 +87,7 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	 * Tracked services: <code>ServiceReference</code> object -> customized
 	 * Object and <code>ServiceListener</code> object
 	 */
-	private Tracked						tracked;
+	private volatile Tracked			tracked;
 	/**
 	 * Modification count. This field is initialized to zero by open, set to -1
 	 * by close and incremented by modified.
@@ -700,16 +707,17 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	 * 
 	 * The tracking count is initialized to 0 when this
 	 * <code>ServiceTracker</code> object is opened. Every time a service is
-	 * added or removed from this <code>ServiceTracker</code> object the
-	 * tracking count is incremented.
+	 * added, modified or removed from this <code>ServiceTracker</code> object
+	 * the tracking count is incremented.
 	 * 
 	 * <p>
 	 * The tracking count can be used to determine if this
-	 * <code>ServiceTracker</code> object has added or removed a service by
-	 * comparing a tracking count value previously collected with the current
-	 * tracking count value. If the value has not changed, then no service has
-	 * been added or removed from this <code>ServiceTracker</code> object
-	 * since the previous tracking count was collected.
+	 * <code>ServiceTracker</code> object has added, modified or removed a
+	 * service by comparing a tracking count value previously collected with the
+	 * current tracking count value. If the value has not changed, then no
+	 * service has been added, modified or removed from this
+	 * <code>ServiceTracker</code> object since the previous tracking count
+	 * was collected.
 	 * 
 	 * @since 1.2
 	 * @return The tracking count for this <code>ServiceTracker</code> object
@@ -722,6 +730,8 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	/**
 	 * Called by the Tracked object whenever the set of tracked services is
 	 * modified. Increments the tracking count and clears the cache.
+	 * 
+	 * @GuardedBy tracked
 	 */
 	/*
 	 * This method must not be synchronized since it is called by Tracked while
@@ -738,13 +748,6 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	}
 
 	/**
-	 * Finalize. This method no longer performs any function but it kept to
-	 * maintain binary compatibility with prior versions of this class.
-	 */
-	protected void finalize() throws Throwable {
-	}
-
-	/**
 	 * Inner class to track services. If a <code>ServiceTracker</code> object
 	 * is reused (closed then reopened), then a new Tracked object is used. This
 	 * class is a hashtable mapping <code>ServiceReference</code> object ->
@@ -753,6 +756,7 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	 * tracked services. This is not a public class. It is only for use by the
 	 * implementation of the <code>ServiceTracker</code> class.
 	 * 
+	 * @ThreadSafe
 	 */
 	class Tracked extends Hashtable implements ServiceListener {
 		static final long			serialVersionUID	= -7420065199791006079L;
@@ -767,9 +771,11 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 		 * 
 		 * Since the ArrayList implementation is not synchronized, all access to
 		 * this list must be protected by the same synchronized object for
-		 * thread safety.
+		 * thread-safety.
+		 * 
+		 * @GuardedBy this
 		 */
-		private ArrayList			adding;
+		private final ArrayList		adding;
 
 		/**
 		 * true if the tracked object is closed.
@@ -793,9 +799,11 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 		 * 
 		 * Since the LinkedList implementation is not synchronized, all access
 		 * to this list must be protected by the same synchronized object for
-		 * thread safety.
+		 * thread-safety.
+		 * 
+		 * @GuardedBy this
 		 */
-		private LinkedList			initial;
+		private final LinkedList	initial;
 
 		/**
 		 * Tracked constructor.
@@ -816,6 +824,7 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 		 * addServiceListener call.
 		 * 
 		 * @param references The initial list of services to be tracked.
+		 * @GuardedBy this
 		 */
 		protected void setInitialServices(ServiceReference[] references) {
 			if (references == null) {
@@ -920,7 +929,7 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 				case ServiceEvent.REGISTERED :
 				case ServiceEvent.MODIFIED :
 					if (listenerFilter != null) { // constructor supplied
-													// filter
+						// filter
 						track(reference);
 						/*
 						 * If the customizer throws an unchecked exception, it
@@ -959,7 +968,7 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 		 * 
 		 * @param reference Reference to a service to be tracked.
 		 */
-		protected void track(ServiceReference reference) {
+		private void track(ServiceReference reference) {
 			Object object;
 			synchronized (this) {
 				object = this.get(reference);
@@ -1127,6 +1136,7 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 	 * This class is used by the ServiceTracker if open is called with true.
 	 * 
 	 * @since 1.3
+	 * @ThreadSafe
 	 */
 	class AllTracked extends Tracked implements AllServiceListener {
 		static final long	serialVersionUID	= 4050764875305137716L;

@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.useradmin/src/org/osgi/service/useradmin/Authorization.java,v 1.9 2006/07/11 00:54:01 hargrave Exp $
+ * $Header: /cvshome/build/org.osgi.service.useradmin/src/org/osgi/service/useradmin/Authorization.java,v 1.11 2007/02/07 18:53:08 hargrave Exp $
  *
- * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2007). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ package org.osgi.service.useradmin;
  * <code>Authorization</code> object), the service explicitly checks that the
  * calling bundle has permission to make the call.
  * 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.11 $
  */
 public interface Authorization {
 	/**
@@ -92,10 +92,10 @@ public interface Authorization {
 	public boolean hasRole(String name);
 
 	/**
-	 * Gets the names of all roles encapsulated by this <code>Authorization</code>
+	 * Gets the names of all roles implied by this <code>Authorization</code>
 	 * context.
 	 * 
-	 * @return The names of all roles encapsulated by this
+	 * @return The names of all roles implied by this
 	 *         <code>Authorization</code> context, or <code>null</code> if no roles
 	 *         are in the context. The predefined role <code>user.anyone</code>
 	 *         will not be included in this list.
