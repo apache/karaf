@@ -146,7 +146,8 @@ public final class ObrDeployFile extends AbstractFileMojo
         }
 
         URI tempURI = ObrUtils.findRepositoryXml( "", remoteOBR );
-        String repositoryName = new File( tempURI.getPath() ).getName();
+        String repositoryPath = tempURI.isOpaque() ? tempURI.getSchemeSpecificPart() : tempURI.getPath();
+        String repositoryName = new File( repositoryPath ).getName();
 
         Log log = getLog();
         ObrUpdate update;
