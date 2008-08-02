@@ -82,11 +82,11 @@ public final class ObrRemoteClean extends AbstractMojo
     private boolean ignoreLock;
     
     /**
-     * Public URL prefix for the remote repository.
+     * Optional public URL prefix for the remote repository.
      *
-     * @parameter expression="${prefixURL}"
+     * @parameter expression="${prefixUrl}"
      */
-    private String prefixURL;
+    private String prefixUrl;
 
     /**
      * Remote OBR Repository.
@@ -122,6 +122,13 @@ public final class ObrRemoteClean extends AbstractMojo
      * @parameter expression="${altDeploymentRepository}"
      */
     private String altDeploymentRepository;
+
+    /**
+     * OBR specific deployment repository. Format: id::layout::url
+     *
+     * @parameter expression="${obrDeploymentRepository}"
+     */
+    private String obrDeploymentRepository;
 
     /**
      * The Maven project.
@@ -179,9 +186,9 @@ public final class ObrRemoteClean extends AbstractMojo
 
         RemoteFileManager remoteFile = new RemoteFileManager( m_wagonManager, settings, log );
         openRepositoryConnection( remoteFile );
-        if ( null == prefixURL || prefixURL.trim().length() == 0 )
+        if ( null == prefixUrl )
         {
-            prefixURL = remoteFile.toString();
+            prefixUrl = remoteFile.toString();
         }
 
         // ======== LOCK REMOTE OBR ========
@@ -240,6 +247,12 @@ public final class ObrRemoteClean extends AbstractMojo
 
     private void openRepositoryConnection( RemoteFileManager remoteFile ) throws MojoExecutionException
     {
+        // use OBR specific deployment location?
+        if ( obrDeploymentRepository != null )
+        {
+            altDeploymentRepository = obrDeploymentRepository;
+        }
+
         if ( deploymentRepository == null && altDeploymentRepository == null )
         {
             String msg = "Deployment failed: repository element was not specified in the pom inside"
@@ -286,7 +299,7 @@ public final class ObrRemoteClean extends AbstractMojo
 
             URL url;
             try {
-                url = new URL(prefixURL + '/' + value);
+                url = new URL( new URL( prefixUrl + '/' ), value);
             } catch (MalformedURLException e) {
                 getLog().error("Malformed URL when creating the resource absolute URI : " + e.getMessage());
                 return null;
