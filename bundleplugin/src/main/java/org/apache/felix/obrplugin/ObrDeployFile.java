@@ -129,8 +129,8 @@ public final class ObrDeployFile extends AbstractFileMojo
         // ignore unsupported project types, useful when bundleplugin is configured in parent pom
         if ( !supportedProjectTypes.contains( projectType ) )
         {
-            getLog().warn( "Ignoring project type " + projectType +
-                           " - supportedProjectTypes = " + supportedProjectTypes );
+            getLog().warn(
+                "Ignoring project type " + projectType + " - supportedProjectTypes = " + supportedProjectTypes );
             return;
         }
         else if ( "NONE".equalsIgnoreCase( remoteOBR ) || "false".equalsIgnoreCase( remoteOBR ) )

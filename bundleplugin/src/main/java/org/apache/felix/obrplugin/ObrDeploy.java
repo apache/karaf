@@ -170,8 +170,8 @@ public final class ObrDeploy extends AbstractMojo
         // ignore unsupported project types, useful when bundleplugin is configured in parent pom
         if ( !supportedProjectTypes.contains( projectType ) )
         {
-            getLog().warn( "Ignoring project type " + projectType +
-                           " - supportedProjectTypes = " + supportedProjectTypes );
+            getLog().warn(
+                "Ignoring project type " + projectType + " - supportedProjectTypes = " + supportedProjectTypes );
             return;
         }
         else if ( "NONE".equalsIgnoreCase( remoteOBR ) || "false".equalsIgnoreCase( remoteOBR ) )
@@ -227,7 +227,7 @@ public final class ObrDeploy extends AbstractMojo
 
             Config userConfig = new Config();
             userConfig.setRemoteFile( true );
-            
+
             if ( bundleUrl != null )
             {
                 // public URL differs from the bundle file location
@@ -237,7 +237,8 @@ public final class ObrDeploy extends AbstractMojo
             {
                 // support absolute bundle URLs based on given prefix
                 URI bundleJar = ObrUtils.getArtifactURI( localRepository, project.getArtifact() );
-                String relative = ObrUtils.getRelativeURI( ObrUtils.toFileURI( mavenRepository ),  bundleJar).toASCIIString();
+                String relative = ObrUtils.getRelativeURI( ObrUtils.toFileURI( mavenRepository ), bundleJar )
+                    .toASCIIString();
                 URL resourceURL = new URL( new URL( prefixUrl + '/' ), relative );
                 userConfig.setRemoteBundle( URI.create( resourceURL.toString() ) );
             }

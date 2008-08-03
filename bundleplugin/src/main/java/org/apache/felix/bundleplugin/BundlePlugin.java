@@ -210,8 +210,8 @@ public class BundlePlugin extends AbstractMojo
         // ignore unsupported project types, useful when bundleplugin is configured in parent pom
         if ( !supportedProjectTypes.contains( projectType ) )
         {
-            getLog().warn( "Ignoring project type " + projectType +
-                           " - supportedProjectTypes = " + supportedProjectTypes );
+            getLog().warn(
+                "Ignoring project type " + projectType + " - supportedProjectTypes = " + supportedProjectTypes );
             return;
         }
 
@@ -362,8 +362,7 @@ public class BundlePlugin extends AbstractMojo
         // update BND instructions to add included Maven resources
         includeMavenResources( currentProject, properties, getLog() );
 
-        if ( !properties.containsKey( Analyzer.EXPORT_PACKAGE ) &&
-             !properties.containsKey( Analyzer.PRIVATE_PACKAGE ) )
+        if ( !properties.containsKey( Analyzer.EXPORT_PACKAGE ) && !properties.containsKey( Analyzer.PRIVATE_PACKAGE ) )
         {
             if ( properties.containsKey( Analyzer.EXPORT_CONTENTS ) )
             {
@@ -423,7 +422,8 @@ public class BundlePlugin extends AbstractMojo
                 }
                 else
                 {
-                    String combinedResource = StringUtils.replace( includeResource, MAVEN_RESOURCES, mavenResourcePaths );
+                    String combinedResource = StringUtils
+                        .replace( includeResource, MAVEN_RESOURCES, mavenResourcePaths );
                     properties.put( Analyzer.INCLUDE_RESOURCE, combinedResource );
                 }
             }
