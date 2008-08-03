@@ -239,7 +239,7 @@ public final class ObrDeploy extends AbstractMojo
                 URI bundleJar = ObrUtils.getArtifactURI( localRepository, project.getArtifact() );
                 String relative = ObrUtils.getRelativeURI( ObrUtils.toFileURI( mavenRepository ),  bundleJar).toASCIIString();
                 URL resourceURL = new URL( new URL( prefixUrl + '/' ), relative );
-                userConfig.setRemoteBundle( resourceURL.toURI() );
+                userConfig.setRemoteBundle( URI.create( resourceURL.toString() ) );
             }
 
             update = new ObrUpdate( repositoryXml, obrXmlFile, project, mavenRepository, userConfig, log );
