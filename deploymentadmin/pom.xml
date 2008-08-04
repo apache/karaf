@@ -30,5 +30,6 @@ under the License.
   <version>1</version>
   <modules>
       <module>service</module>
+      <module>autoconf</module>
   </modules>
 </project>
