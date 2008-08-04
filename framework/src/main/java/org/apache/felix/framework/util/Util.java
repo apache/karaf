@@ -55,14 +55,16 @@ public class Util
     {
         try
         {
-            String rev = (id.indexOf('.') >= 0)
-                ? id.substring(id.indexOf('.') + 1) : id;
-            return Integer.parseInt(rev);
+            int index = id.indexOf('.');
+            if (index >= 0)
+            {
+                return Integer.parseInt(id.substring(index + 1));
+            }
         }
         catch (NumberFormatException ex)
         {
-            return -1;
         }
+        return -1;
     }
 
     public static String getClassName(String className)

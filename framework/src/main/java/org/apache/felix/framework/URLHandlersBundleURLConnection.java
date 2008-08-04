@@ -72,11 +72,16 @@ class URLHandlersBundleURLConnection extends URLConnection
         }
         int revision = Util.getModuleRevisionFromModuleId(url.getHost());
         IModule[] modules = bundle.getInfo().getModules();
-        if ((modules == null) || (revision < 0) || (revision >= modules.length))
+        if ((modules == null) || (revision >= modules.length))
         {
             throw new IOException("Resource does not exist: " + url);
         }
 
+        // If the revision is not specified, check the latest
+        if (revision < 0)
+        {
+            revision = modules.length - 1;
+        }
         // If the resource cannot be found at the current class path index,
         // then search them all in order to see if it can be found. This is
         // necessary since the user might create a resource URL from another
@@ -86,6 +91,10 @@ class URLHandlersBundleURLConnection extends URLConnection
         // one on the class path.
         m_targetModule = modules[revision];
         m_classPathIdx = url.getPort();
+        if (m_classPathIdx < 0)
+        {
+            m_classPathIdx = 0;
+        }
         if (!modules[revision].getContentLoader().hasInputStream(m_classPathIdx, url.getPath()))
         {
             URL newurl = modules[revision].getContentLoader().getResource(url.getPath());
