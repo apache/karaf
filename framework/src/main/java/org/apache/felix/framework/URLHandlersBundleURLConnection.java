@@ -70,6 +70,8 @@ class URLHandlersBundleURLConnection extends URLConnection
         {
             throw new IOException("No bundle associated with resource: " + url);
         }
+        m_contentTime = bundle.getLastModified();
+
         int revision = Util.getModuleRevisionFromModuleId(url.getHost());
         IModule[] modules = bundle.getInfo().getModules();
         if ((modules == null) || (revision >= modules.length))
@@ -82,6 +84,7 @@ class URLHandlersBundleURLConnection extends URLConnection
         {
             revision = modules.length - 1;
         }
+
         // If the resource cannot be found at the current class path index,
         // then search them all in order to see if it can be found. This is
         // necessary since the user might create a resource URL from another
@@ -117,7 +120,6 @@ class URLHandlersBundleURLConnection extends URLConnection
             m_is = m_targetModule.getContentLoader()
                 .getInputStream(m_classPathIdx, url.getPath());
             m_contentLength = (m_is == null) ? 0 : m_is.available();
-            m_contentTime = 0L;
             m_contentType = URLConnection.guessContentTypeFromName(url.getFile());
             connected = true;
         }
