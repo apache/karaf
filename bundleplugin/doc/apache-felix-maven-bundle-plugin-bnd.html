@@ -12,22 +12,22 @@
 <ul>
 	<li><a href="http://felix.apache.org/site/news.html" title="news">news</a></li>
 	<li><a href="http://felix.apache.org/site/license.html" title="license">license</a></li>
-	<li><span class="nobr"><a href="http://felix.apache.org/site/downloads.cgi" title="Visit page outside Confluence" rel="nofollow">downloads<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><span class="nobr"><a href="http://felix.apache.org/site/downloads.cgi" title="Visit page outside Confluence" rel="nofollow">downloads<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" width="7" height="7"></sup></a></span></li>
 	<li><a href="http://felix.apache.org/site/documentation.html" title="documentation">documentation</a></li>
 	<li><a href="http://felix.apache.org/site/mailinglists.html" title="mailinglists">mailing lists</a></li>
 	<li><a href="http://felix.apache.org/site/contributing.html" title="Contributing">contributing</a></li>
-	<li><span class="nobr"><a href="http://www.apache.org/" title="Visit page outside Confluence" rel="nofollow">asf<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
-	<li><span class="nobr"><a href="http://www.apache.org/foundation/sponsorship.html" title="Visit page outside Confluence" rel="nofollow">sponsorship<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
-	<li><span class="nobr"><a href="http://www.apache.org/foundation/thanks.html" title="Visit page outside Confluence" rel="nofollow">sponsors<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span>
+	<li><span class="nobr"><a href="http://www.apache.org/" title="Visit page outside Confluence" rel="nofollow">asf<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" width="7" height="7"></sup></a></span></li>
+	<li><span class="nobr"><a href="http://www.apache.org/foundation/sponsorship.html" title="Visit page outside Confluence" rel="nofollow">sponsorship<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" width="7" height="7"></sup></a></span></li>
+	<li><span class="nobr"><a href="http://www.apache.org/foundation/thanks.html" title="Visit page outside Confluence" rel="nofollow">sponsors<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" width="7" height="7"></sup></a></span>
 <!-- ApacheCon Ad -->
-<iframe src="apache-felix-maven-bundle-plugin-bnd_files/button.html" style="border-width: 0pt; float: left; display: none;" frameborder="0" height="135" scrolling="no" width="135"></iframe>
+<iframe src="apache-felix-maven-bundle-plugin-bnd_files/button.html" style="border-width: 0pt; float: left; display: none;" scrolling="no" width="135" frameborder="0" height="135"></iframe>
 <p style="height: 100px;">
 <!-- ApacheCon Ad -->
 </p></li></ul> </div>
     <div class="main">
 <h1><a name="ApacheFelixMavenBundlePlugin(BND)-BundlePluginforMaven"></a>Bundle Plugin for Maven</h1>
 
-<p>This plugin for Maven 2 is based on the <span class="nobr"><a href="http://www.aqute.biz/Code/Bnd" title="Visit page outside Confluence" rel="nofollow">BND<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span>
+<p>This plugin for Maven 2 is based on the <span class="nobr"><a href="http://www.aqute.biz/Code/Bnd" title="Visit page outside Confluence" rel="nofollow">BND<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" width="7" height="7"></sup></a></span>
 tool from Peter Kriens. The way BND works is by treating your project
 as a big collection of classes (e.g., project code, dependencies, and
 the class path). The way you create a bundle with BND is to tell it the
@@ -35,6 +35,8 @@ content of the bundle's JAR file as a subset of the available classes.
 This plugin wraps BND to make it work specifically with the Maven 2
 project structure and to provide it with reasonable default behavior
 for Maven 2 projects.</p>
+
+<p><em>NOTE: only compile, runtime and system scoped dependencies are passed to BND. Provided and test dependencies are <b>not</b> included in the classpath seen by BND.</em></p>
 
 <p>Since the 1.4.0 release, this plugin also aims to automate OBR (OSGi
 Bundle Repository) management. It helps manage a local OBR for your
@@ -110,7 +112,7 @@ not copied to the manifest.</li>
 </ol>
 
 
-<p>The remainder of this section covers the most important aspects of BND's instructions; for complete details refer to the <span class="nobr"><a href="http://www.aqute.biz/Code/Bnd" title="Visit page outside Confluence" rel="nofollow">BND documentation<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span>.</p>
+<p>The remainder of this section covers the most important aspects of BND's instructions; for complete details refer to the <span class="nobr"><a href="http://www.aqute.biz/Code/Bnd" title="Visit page outside Confluence" rel="nofollow">BND documentation<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" width="7" height="7"></sup></a></span>.</p>
 
 <p><a name="ApacheFelixMavenBundlePlugin(BND)-instructions"></a></p>
 
@@ -194,7 +196,22 @@ part of the Maven integration, the plugin tries to set reasonable
 defaults for various instructions. For example:</p>
 
 <ul>
-	<li><tt>&lt;Bundle-SymbolicName&gt;</tt> is assumed to be "<tt>${groupId}.${artifactId</tt>}".</li>
+	<li><tt>&lt;Bundle-SymbolicName&gt;</tt> is computed using the shared <span class="nobr"><a href="http://svn.apache.org/repos/asf/maven/shared/trunk/maven-osgi/src/main/java/org/apache/maven/shared/osgi/DefaultMaven2OsgiConverter.java" title="Visit page outside Confluence" rel="nofollow">Maven2OsgiConverter<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" width="7" height="7"></sup></a></span> component, which uses the following algorithm:<br>
+Get the symbolic name as groupId + "." + artifactId, with the following exceptions:
+	<ul>
+		<li>if
+artifact.getFile is not null and the jar contains a OSGi Manifest with
+Bundle-SymbolicName property then that value is returned</li>
+		<li>if
+groupId has only one section (no dots) and artifact.getFile is not null
+then the first package name with classes is returned. eg.
+commons-logging:commons-logging -&gt; org.apache.commons.logging</li>
+		<li>if artifactId is equal to last section of groupId then groupId is returned. eg. org.apache.maven:maven -&gt; org.apache.maven</li>
+		<li>if
+artifactId starts with last section of groupId that portion is removed.
+eg. org.apache.maven:maven-core -&gt; org.apache.maven.core</li>
+	</ul>
+	</li>
 	<li><tt>&lt;Export-Package&gt;</tt> is assumed to be "<tt>&lt;Bundle-SymbolicName&gt;.*</tt>", unless <tt>&lt;Private-Package&gt;</tt> is specified, then <tt>&lt;Export-Package&gt;</tt> is assumed to be empty.</li>
 	<li><tt>&lt;Private-Package&gt;</tt> is assumed to be empty by default.</li>
 	<li><tt>&lt;Import-Package&gt;</tt> is assumed to be "<tt>*</tt>", which imports everything referred to by the bundle content, but not contained in the bundle.</li>
@@ -225,7 +242,7 @@ values (except <tt>Bundle-ManifestVersion</tt>) just by specifying the desired v
 <p>The first step in the process of using the plugin is downloading and
 installing the latest version of the Maven2 runtime. The latest Maven2
 release and instuctions for getting started with Maven2 can be found at
-the <span class="nobr"><a href="http://maven.apache.org/index.html" title="Visit page outside Confluence" rel="nofollow">Maven website<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span>.</p>
+the <span class="nobr"><a href="http://maven.apache.org/index.html" title="Visit page outside Confluence" rel="nofollow">Maven website<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" width="7" height="7"></sup></a></span>.</p>
 
 <h2><a name="ApacheFelixMavenBundlePlugin(BND)-UsingthePlugin"></a>Using the Plugin</h2>
 
@@ -253,6 +270,7 @@ Below is an example of a simple OSGi bundle POM for Maven2:</p>
       &lt;plugin&gt;    &lt;!-- (2) START --&gt;
         &lt;groupId&gt;org.apache.felix&lt;/groupId&gt;
         &lt;artifactId&gt;maven-bundle-plugin&lt;/artifactId&gt;
+
         &lt;extensions&gt;true&lt;/extensions&gt;
         &lt;configuration&gt;
           &lt;instructions&gt;
@@ -602,7 +620,7 @@ configuration options:
 
 
 <p>There are also new instructions available from the underlying BND
-tool, which continues to be improved independently; for the latest see <span class="nobr"><a href="http://aqute.biz/Code/Bnd" title="Visit page outside Confluence" rel="nofollow">BND documentation<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span>.</p>
+tool, which continues to be improved independently; for the latest see <span class="nobr"><a href="http://aqute.biz/Code/Bnd" title="Visit page outside Confluence" rel="nofollow">BND documentation<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" width="7" height="7"></sup></a></span>.</p>
 
 <p>The default goal <b><tt>bundle</tt></b> will be initialized by setting the &lt;packaging&gt; entry to "bundle".</p>
 
@@ -854,7 +872,7 @@ example POM that does this:</p>
 
 <p>and you should now be able to import this as an existing Eclipse project.</p>
 
-<p>FYI: the above POM was generated using the <tt>pax-create-bundle</tt> command from <span class="nobr"><a href="http://www.ops4j.org/projects/pax/construct/index.html" title="Visit page outside Confluence" rel="nofollow">Pax-Construct<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span> and then tweaked to demonstrate using the Maven Dependency Plugin to handle embedded jars in Eclipse.</p>
+<p>FYI: the above POM was generated using the <tt>pax-create-bundle</tt> command from <span class="nobr"><a href="http://www.ops4j.org/projects/pax/construct/index.html" title="Visit page outside Confluence" rel="nofollow">Pax-Construct<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" width="7" height="7"></sup></a></span> and then tweaked to demonstrate using the Maven Dependency Plugin to handle embedded jars in Eclipse.</p>
 
 <p>With the original Pax-Construct generated POM you would simply use:</p>
 
@@ -950,7 +968,7 @@ ant clean package
 
 <p>The <b>deploy goal</b> updates the remote OBR with the details of
 the deployed bundle from the local Maven repository. The remote OBR is
-found by querying the <tt>&lt;distributionManagement&gt;</tt> section of the project, unless <tt>-DaltDeploymentRepository</tt> is set. See <span class="nobr"><a href="http://maven.apache.org/plugins/maven-deploy-plugin/deploy-mojo.html" title="Visit page outside Confluence" rel="nofollow">http://maven.apache.org/plugins/maven-deploy-plugin/deploy-mojo.html<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span> for more details about these particular settings.</p>
+found by querying the <tt>&lt;distributionManagement&gt;</tt> section of the project, unless <tt>-DaltDeploymentRepository</tt> is set. See <span class="nobr"><a href="http://maven.apache.org/plugins/maven-deploy-plugin/deploy-mojo.html" title="Visit page outside Confluence" rel="nofollow">http://maven.apache.org/plugins/maven-deploy-plugin/deploy-mojo.html<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" width="7" height="7"></sup></a></span> for more details about these particular settings.</p>
 
 <p>(If the project has an <tt>obr.xml</tt> file somewhere in its resources, then it will be automatically detected and applied.)</p>
 
@@ -967,7 +985,7 @@ found by querying the <tt>&lt;distributionManagement&gt;</tt> section of the pro
 
 <h2><a name="ApacheFelixMavenBundlePlugin(BND)-bundle:deployfile"></a>bundle:deploy-file</h2>
 
-<p>The <b>deploy-file</b> goal updates the remote OBR with the details of a deployed bundle from the local filesystem. The remote OBR is found using the <tt>-DrepositoryId</tt> and <tt>-Durl</tt> parameters. See <span class="nobr"><a href="http://maven.apache.org/plugins/maven-deploy-plugin/deploy-file-mojo.html" title="Visit page outside Confluence" rel="nofollow">http://maven.apache.org/plugins/maven-deploy-plugin/deploy-file-mojo.html<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span> for more details about these particular settings.</p>
+<p>The <b>deploy-file</b> goal updates the remote OBR with the details of a deployed bundle from the local filesystem. The remote OBR is found using the <tt>-DrepositoryId</tt> and <tt>-Durl</tt> parameters. See <span class="nobr"><a href="http://maven.apache.org/plugins/maven-deploy-plugin/deploy-file-mojo.html" title="Visit page outside Confluence" rel="nofollow">http://maven.apache.org/plugins/maven-deploy-plugin/deploy-file-mojo.html<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/linkext7.gif" alt="" align="absmiddle" border="0" width="7" height="7"></sup></a></span> for more details about these particular settings.</p>
 
 <p>You can use the <tt>-DbundleUrl</tt> parameter to give the public location of the deployed bundle, which may differ from the remote OBR location.</p>
 
@@ -1082,6 +1100,6 @@ syntax.</li>
 
 <h1><a name="ApacheFelixMavenBundlePlugin(BND)-Feedback"></a>Feedback</h1>
 
-<p>Subscribe to the Felix users mailing list by sending a message to <span class="nobr"><a href="mailto:users-subscribe@felix.apache.org" title="Send mail to users-subscribe@felix.apache.org" rel="nofollow">users-subscribe@felix.apache.org<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/mail_small.gif" alt="" align="absmiddle" border="0" height="12" width="13"></sup></a></span>; after subscribing, email questions or feedback to <span class="nobr"><a href="mailto:users@felix.apache.org" title="Send mail to users@felix.apache.org" rel="nofollow">users@felix.apache.org<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/mail_small.gif" alt="" align="absmiddle" border="0" height="12" width="13"></sup></a></span>.</p>
+<p>Subscribe to the Felix users mailing list by sending a message to <span class="nobr"><a href="mailto:users-subscribe@felix.apache.org" title="Send mail to users-subscribe@felix.apache.org" rel="nofollow">users-subscribe@felix.apache.org<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/mail_small.gif" alt="" align="absmiddle" border="0" width="13" height="12"></sup></a></span>; after subscribing, email questions or feedback to <span class="nobr"><a href="mailto:users@felix.apache.org" title="Send mail to users@felix.apache.org" rel="nofollow">users@felix.apache.org<sup><img class="rendericon" src="apache-felix-maven-bundle-plugin-bnd_files/mail_small.gif" alt="" align="absmiddle" border="0" width="13" height="12"></sup></a></span>.</p>
     </div>
   </body></html>
