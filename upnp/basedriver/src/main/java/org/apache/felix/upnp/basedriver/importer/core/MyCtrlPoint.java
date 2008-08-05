@@ -107,7 +107,7 @@ public class MyCtrlPoint extends ControlPoint
 		this.notifierQueue = notifierQueue;
 	}
 
-	public void httpRequestRecieved(HTTPRequest httpReq) {
+	synchronized public void httpRequestRecieved(HTTPRequest httpReq) {
         Activator.logger.DEBUG("[Importer] httpRequestRecieved event");
         Activator.logger.PACKET(httpReq.toString());
 
