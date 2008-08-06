@@ -463,7 +463,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
         for ( int i = 0; i < repositories.length; i++ )
         {
             Resource[] resources = repositories[i].getResources();
-            for ( int j = 0; j < resources.length; j++ )
+            for ( int j = 0; resources != null && j < resources.length; j++ )
             {
                 Resource res = resources[j];
                 if ( bundle.getSymbolicName().equals( res.getSymbolicName() ) )
