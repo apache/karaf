@@ -383,6 +383,10 @@ public class BundleAllPlugin extends ManifestPlugin
 
             BundleInfo bundleInfo = addExportedPackages( project, exportedPackages );
 
+            // cleanup...
+            analyzer.close();
+            osgiJar.close();
+
             return bundleInfo;
         }
         /* too bad Jar.write throws Exception */

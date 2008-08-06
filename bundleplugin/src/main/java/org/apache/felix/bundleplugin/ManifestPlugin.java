@@ -36,6 +36,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 
 import aQute.lib.osgi.Analyzer;
+import aQute.lib.osgi.Builder;
 import aQute.lib.osgi.Jar;
 
 
@@ -56,7 +57,9 @@ public class ManifestPlugin extends BundlePlugin
         {
             if ( "bundle".equals( project.getPackaging() ) )
             {
-                manifest = buildOSGiBundle( project, instructions, properties, classpath ).getJar().getManifest();
+                Builder builder = buildOSGiBundle( project, instructions, properties, classpath );
+                manifest = builder.getJar().getManifest();
+                builder.close();
             }
             else
             {
@@ -131,7 +134,12 @@ public class ManifestPlugin extends BundlePlugin
             }
         }
 
-        return analyzer.getJar().getManifest();
+        Manifest manifest = analyzer.getJar().getManifest();
+
+        // cleanup...
+        analyzer.close();
+
+        return manifest;
     }
 
 

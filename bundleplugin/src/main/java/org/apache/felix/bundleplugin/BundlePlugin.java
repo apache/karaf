@@ -334,6 +334,9 @@ public class BundlePlugin extends AbstractMojo
                     getLog().error( "Error trying to write Manifest to file " + outputFile, e );
                 }
             }
+
+            // cleanup...
+            builder.close();
         }
         catch ( MojoFailureException e )
         {

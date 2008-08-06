@@ -122,6 +122,8 @@ public class BundlePluginTest extends AbstractBundlePluginTest
         analyzer.calcManifest();
 
         assertEquals( 3, analyzer.getExports().size() );
+
+        analyzer.close();
     }
 
 

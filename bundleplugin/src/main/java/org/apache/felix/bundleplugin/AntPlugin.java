@@ -82,6 +82,9 @@ public class AntPlugin extends BundlePlugin
             buildXml = StringUtils.replace( buildXml, "ARTIFACT_ID", artifactId );
 
             FileUtils.fileWrite( baseDir + BUILD_XML, buildXml );
+
+            // cleanup...
+            builder.close();
         }
         catch ( Exception e )
         {
