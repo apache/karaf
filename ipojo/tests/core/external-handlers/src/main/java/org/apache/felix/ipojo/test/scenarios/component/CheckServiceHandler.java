@@ -86,9 +86,11 @@ public class CheckServiceHandler extends PrimitiveHandler implements CheckServic
 	}
 	
 	public void stateChanged(int state) {
-		changes++;
-		props.put("changes", new Integer(changes));
-		sr.setProperties(props);
+		if (sr != null) {
+		    changes++;
+		    props.put("changes", new Integer(changes));
+		    sr.setProperties(props);
+		}
 	}
 
 	public String getName() {

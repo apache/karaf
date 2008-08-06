@@ -26,9 +26,10 @@ import junit.framework.Assert;
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.Handler;
+import org.apache.felix.ipojo.HandlerFactory;
 import org.apache.felix.ipojo.HandlerManagerFactory;
 import org.apache.felix.ipojo.ServiceContext;
-//import org.apache.felix.ipojo.composite.CompositeManager;
+import org.apache.felix.ipojo.architecture.Architecture;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -54,7 +55,7 @@ public class Utils {
     public static HandlerManagerFactory getHandlerFactoryByName(BundleContext bc, String factoryName) {
         ServiceReference[] refs;
         try {
-            refs = bc.getServiceReferences(Factory.class.getName(), "(" + Handler.HANDLER_NAME_PROPERTY + "=" + factoryName + ")");
+            refs = bc.getServiceReferences(HandlerFactory.class.getName(), "(" + Handler.HANDLER_NAME_PROPERTY + "=" + factoryName + ")");
             if (refs == null) {
                 System.err.println("Cannot get the factory " + factoryName);
                 return null;
@@ -141,6 +142,8 @@ public class Utils {
         String filter = null;
         if (itf.equals(Factory.class.getName()) || itf.equals(ManagedServiceFactory.class.getName())) {
             filter = "(" + "factory.name" + "=" + name + ")";
+        } else if (itf.equals(Architecture.class.getName())) {
+            filter = "(" + "architecture.instance" + "=" + name + ")";
         } else {
             filter = "(" + "instance.name" + "=" + name + ")";
         }

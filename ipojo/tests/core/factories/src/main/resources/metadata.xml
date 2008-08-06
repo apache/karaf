@@ -66,4 +66,10 @@
 			<property name="bar" field="m_bar" />
 		</properties>
 	</component>
+	
+	<!-- type & instance used to check instance lifecycle against factory validation & invalidation -->
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.SimpleType" architecture="true">
+		<controller field="m_controller"/>
+	</component>
+	<instance component="org.apache.felix.ipojo.test.scenarios.component.SimpleType" name="SimpleInstance"/>
 </ipojo>
