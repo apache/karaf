@@ -26,7 +26,7 @@ public class Builder extends Analyzer {
     private static final int SPLIT_FIRST       = 4;
     private static final int SPLIT_DEFAULT     = 0;
 
-    List                     inlinedJars       = new ArrayList();
+    List                     tempJars          = new ArrayList();
     boolean                  sources           = false;
     File[]                   sourcePath;
     Pattern                  NAME_URL          = Pattern
@@ -453,6 +453,7 @@ public class Builder extends Analyzer {
                     if (src != null) {
                         JarResource jarResource = new JarResource(src);
                         jar.putResource(destinationPath, jarResource);
+                        tempJars.add(src);
                     } else {
                         error("Input file does not exist: " + source);
                     }
@@ -490,7 +491,7 @@ public class Builder extends Analyzer {
             error("Can not find JAR file " + name);
         else {
             jar.addAll(sub, filter);
-            inlinedJars.add(sub);
+            tempJars.add(sub);
         }
     }
 
@@ -767,7 +768,7 @@ public class Builder extends Analyzer {
     }
 
     public void close() {
-        for (Iterator j = inlinedJars.iterator(); j.hasNext();) {
+        for (Iterator j = tempJars.iterator(); j.hasNext();) {
             Jar jar = (Jar) j.next();
             jar.close();
         }
