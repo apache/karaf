@@ -26,6 +26,7 @@ public class Builder extends Analyzer {
     private static final int SPLIT_FIRST       = 4;
     private static final int SPLIT_DEFAULT     = 0;
 
+    List                     inlinedJars       = new ArrayList();
     boolean                  sources           = false;
     File[]                   sourcePath;
     Pattern                  NAME_URL          = Pattern
@@ -487,8 +488,10 @@ public class Builder extends Analyzer {
         Jar sub = getJarFromName(name, "extract from jar");
         if (sub == null)
             error("Can not find JAR file " + name);
-        else
+        else {
             jar.addAll(sub, filter);
+            inlinedJars.add(sub);
+        }
     }
 
     private Pattern wildcard(String spec) {
@@ -764,6 +767,10 @@ public class Builder extends Analyzer {
     }
 
     public void close() {
+        for (Iterator j = inlinedJars.iterator(); j.hasNext();) {
+            Jar jar = (Jar) j.next();
+            jar.close();
+        }
         super.close();
     }
 }
