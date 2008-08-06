@@ -453,7 +453,6 @@ public class Builder extends Analyzer {
                     if (src != null) {
                         JarResource jarResource = new JarResource(src);
                         jar.putResource(destinationPath, jarResource);
-                        tempJars.add(src);
                     } else {
                         error("Input file does not exist: " + source);
                     }
