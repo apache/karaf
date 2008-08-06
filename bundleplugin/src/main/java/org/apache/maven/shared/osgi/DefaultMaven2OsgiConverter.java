@@ -82,9 +82,10 @@ public class DefaultMaven2OsgiConverter
         {
             Analyzer analyzer = new Analyzer();
 
+            JarFile jar = null;
             try
             {
-                JarFile jar = new JarFile( artifact.getFile(), false );
+                jar = new JarFile( artifact.getFile(), false );
 
                 if ( jar.getManifest() != null )
                 {
@@ -103,6 +104,19 @@ public class DefaultMaven2OsgiConverter
             {
                 throw new ManifestReadingException( "Error reading manifest in jar "
                     + artifact.getFile().getAbsolutePath(), e );
+            }
+            finally
+            {
+                if ( jar != null )
+                {
+                    try
+                    {
+                        jar.close();
+                    }
+                    catch ( IOException e )
+                    {
+                    }
+                }
             }
         }
 
@@ -156,6 +170,7 @@ public class DefaultMaven2OsgiConverter
                     }
                 }
             }
+            jar.close();
 
             /* find the top package */
             String[] groupIdSections = null;
