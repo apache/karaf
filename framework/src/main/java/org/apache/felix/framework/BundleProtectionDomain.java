@@ -18,17 +18,24 @@
  */
 package org.apache.felix.framework;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.CodeSource;
 import java.security.Permission;
 import java.security.ProtectionDomain;
+import java.security.cert.Certificate;
 
 public class BundleProtectionDomain extends ProtectionDomain
 {
     private final Felix m_felix;
     private final FelixBundle m_bundle;
 
-    public BundleProtectionDomain(Felix felix, FelixBundle bundle)
+    public BundleProtectionDomain(Felix felix, FelixBundle bundle) 
+        throws MalformedURLException
     {
-        super(null, null);
+        super(new CodeSource(new URL(new URL(null, "location:", 
+            new FakeURLStreamHandler()), felix.getBundleLocation(bundle), 
+            new FakeURLStreamHandler()), (Certificate[]) null), null);
         m_felix = felix;
         m_bundle = bundle;
     }
@@ -61,7 +68,7 @@ public class BundleProtectionDomain extends ProtectionDomain
         }
         return m_bundle == ((BundleProtectionDomain) other).m_bundle;
     }
-    
+
     public String toString()
     {
         return "[" + m_bundle + "]";

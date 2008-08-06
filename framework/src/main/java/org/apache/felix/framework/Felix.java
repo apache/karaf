@@ -3402,6 +3402,10 @@ ex.printStackTrace();
         {
             return m_securityProvider.hasBundlePermission(bundleProtectionDomain, permission, direct);
         }
+        else if ((bundleProtectionDomain.getBundle() != this) && (System.getSecurityManager() != null))
+        {
+            return m_secureAction.getPolicy().implies(bundleProtectionDomain, permission);
+        }
         return true;
     }
 
