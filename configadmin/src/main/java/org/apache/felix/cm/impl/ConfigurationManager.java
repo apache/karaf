@@ -293,9 +293,8 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     ConfigurationImpl createFactoryConfiguration( ConfigurationAdminImpl configurationAdmin, String factoryPid )
         throws IOException
     {
-        Factory factory = getFactory( factoryPid );
-
         // check Persmission if factory is bound to another bundle
+        Factory factory = getFactory( factoryPid );
         if ( factory.getBundleLocation() != null
             && !factory.getBundleLocation().equals( configurationAdmin.getBundle().getLocation() ) )
         {
@@ -305,10 +304,6 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         // create the configuration
         String pid = createPid( factoryPid );
         ConfigurationImpl config = createConfiguration( pid, factoryPid, configurationAdmin.getBundle().getLocation() );
-
-        // add the configuration to the factory
-        factory.addPID( pid );
-        factory.store();
 
         return config;
     }
@@ -325,11 +320,6 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         // create the configuration
         String pid = createPid( factoryPid );
         ConfigurationImpl config = createConfiguration( pid, factoryPid, location );
-
-        // add the configuration to the factory
-        Factory factory = getFactory( factoryPid );
-        factory.addPID( pid );
-        factory.store();
 
         return config;
     }
@@ -369,7 +359,9 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         }
 
         // else create new configuration also setting the bundle location
-        return createConfiguration( pid, null, bundleLocation );
+        // and cache the new configuration
+        config = createConfiguration( pid, null, bundleLocation );
+        return cacheConfiguration( config );
     }
 
 
@@ -585,13 +577,31 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     }
 
 
+    /**
+     * Factory method to create a new configuration object. The configuration
+     * object returned is not stored in configuration cache and only persisted
+     * if the <code>factoryPid</code> parameter is <code>null</code>.
+     * 
+     * @param pid
+     *            The PID of the new configuration object. Must not be
+     *            <code>null</code>.
+     * @param factoryPid
+     *            The factory PID of the new configuration. Not
+     *            <code>null</code> if the new configuration object belongs to
+     *            a factory. The configuration object will not be persisted if
+     *            this parameter is not <code>null</code>.
+     * @param bundleLocation
+     *            The bundle location of the bundle to which the configuration
+     *            belongs or <code>null</code> if the configuration is not
+     *            bound yet.
+     * @return The new configuration object
+     * @throws IOException
+     *             May be thrown if an error occurrs persisting the new
+     *             configuration object.
+     */
     ConfigurationImpl createConfiguration( String pid, String factoryPid, String bundleLocation ) throws IOException
     {
-        // create the configuration (which will also be stored immediately)
-        ConfigurationImpl config = new ConfigurationImpl( this, getPersistenceManagers()[0], pid, factoryPid,
-            bundleLocation );
-
-        return cacheConfiguration( config );
+        return new ConfigurationImpl( this, getPersistenceManagers()[0], pid, factoryPid, bundleLocation );
     }
 
 
@@ -996,7 +1006,10 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                     // Configuration has just been created but not yet updated
                     // we currently just ignore it and have the update mechanism
                     // provide the configuration to the ManagedServiceFactory
-                    log( LogService.LOG_DEBUG, "Ignoring new configuration pid=" + pid, null );
+                    // As of FELIX-612 (not storing new factory configurations)
+                    // this should not happen. We keep this for added stability
+                    // but raise the logging level to error.
+                    log( LogService.LOG_ERROR, "Ignoring new configuration pid=" + pid, null );
                     continue;
                 }
                 else if ( !factoryPid.equals( cfg.getFactoryPid() ) )

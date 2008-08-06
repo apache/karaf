@@ -143,11 +143,15 @@ class ConfigurationImpl
         this.bundleLocation = bundleLocation;
         this.properties = null;
 
-        // this is a new configuration object, store immediately
-        Dictionary props = new Hashtable();
-        setAutoProperties( props, true );
-        props.put( CONFIGURATION_NEW, Boolean.TRUE );
-        persistenceManager.store( pid, props );
+        // this is a new configuration object, store immediately unless
+        // the new configuration object is created from a factory, in which
+        // case the configuration is only stored when first updated
+        if (factoryPid == null) {
+            Dictionary props = new Hashtable();
+            setAutoProperties( props, true );
+            props.put( CONFIGURATION_NEW, Boolean.TRUE );
+            persistenceManager.store( pid, props );
+        }
     }
 
 
@@ -303,6 +307,19 @@ class ConfigurationImpl
             persistenceManager.store( pid, newProperties );
 
             configure( newProperties );
+            
+            // if this is a factory configuration, update the factory with
+            String factoryPid = getFactoryPid();
+            if ( factoryPid != null )
+            {
+                Factory factory = configurationManager.getFactory( factoryPid );
+                if ( factory.addPID( getPid() ) )
+                {
+                    // only write back if the pid was not already registered
+                    // with the factory
+                    factory.store();
+                }
+            }
 
             // ensure configuration is being delivered
             setDelivered( false );
