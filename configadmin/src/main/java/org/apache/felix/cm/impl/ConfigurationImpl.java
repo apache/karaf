@@ -378,6 +378,12 @@ class ConfigurationImpl
     }
 
 
+    /**
+     * Returns <code>false</code> if this configuration contains configuration
+     * properties. Otherwise <code>true</code> is returned and this is a
+     * newly creted configuration object whose {@link #update(Dictionary)}
+     * method has never been called.
+     */
     boolean isNew()
     {
         return properties == null;

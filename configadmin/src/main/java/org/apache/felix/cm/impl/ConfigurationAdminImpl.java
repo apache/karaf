@@ -125,7 +125,7 @@ public class ConfigurationAdminImpl implements ConfigurationAdmin
     public Configuration[] listConfigurations( String filter ) throws IOException, InvalidSyntaxException
     {
         ConfigurationImpl ci[] = configurationManager.listConfigurations( this, filter );
-        if ( ci == null )
+        if ( ci == null || ci.length == 0 )
         {
             return null;
         }

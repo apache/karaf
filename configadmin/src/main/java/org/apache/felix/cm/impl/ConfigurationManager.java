@@ -422,7 +422,11 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                         cfg = new ConfigurationImpl( this, pmList[i], config );
                     }
 
-                    configList.add( cfg );
+                    // FELIX-611: Ignore configuration objects without props
+                    if ( !cfg.isNew() )
+                    {
+                        configList.add( cfg );
+                    }
                 }
             }
         }
