@@ -48,6 +48,7 @@ import org.apache.felix.webconsole.internal.core.InstallAction;
 import org.apache.felix.webconsole.internal.core.SetStartLevelAction;
 import org.apache.felix.webconsole.internal.misc.ConfigurationRender;
 import org.apache.felix.webconsole.internal.misc.LicenseServlet;
+import org.apache.felix.webconsole.internal.misc.ShellServlet;
 import org.apache.felix.webconsole.internal.obr.BundleRepositoryRender;
 import org.apache.felix.webconsole.internal.obr.RefreshRepoAction;
 import org.apache.felix.webconsole.internal.system.GCAction;
@@ -129,7 +130,7 @@ public class OsgiManager extends GenericServlet
         { ComponentConfigurationPrinter.class, ComponentsServlet.class, ConfigManager.class, BundlesServlet.class,
             InstallAction.class, SetStartLevelAction.class, ConfigurationRender.class, GCAction.class,
             ShutdownAction.class, ShutdownRender.class, VMStatRender.class, BundleRepositoryRender.class,
-            LicenseServlet.class, RefreshRepoAction.class };
+            LicenseServlet.class, RefreshRepoAction.class, ShellServlet.class };
 
     private BundleContext bundleContext;
 
@@ -320,7 +321,7 @@ public class OsgiManager extends GenericServlet
         {
             req.setAttribute( ATTR_LABEL_MAP, labelMap );
             req.setAttribute( ATTR_APP_ROOT, request.getContextPath() + request.getServletPath() );
-            
+
             plugin.service( req, res );
         }
         else
