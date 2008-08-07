@@ -1,0 +1,7 @@
+<obr>
+	<capability name="ipojo.handler">
+		<p n="name" v="wbp"/>
+		<p n="namespace" v="org.apache.felix.ipojo.white-board-pattern"/>
+		<p n="type" v="primitive"/>
+	</capability>
+</obr>

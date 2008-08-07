@@ -1,0 +1,26 @@
+<obr>
+	<capability name="ipojo.handler">
+		<p n="name" v="controller"/>
+		<p n="namespace" v="org.apache.felix.ipojo"/>
+	</capability>
+	<capability name="ipojo.handler">
+		<p n="name" v="callback"/>
+		<p n="namespace" v="org.apache.felix.ipojo"/>
+	</capability>
+	<capability name="ipojo.handler">
+		<p n="name" v="requires"/>
+		<p n="namespace" v="org.apache.felix.ipojo"/>
+	</capability>
+	<capability name="ipojo.handler">
+		<p n="name" v="provides"/>
+		<p n="namespace" v="org.apache.felix.ipojo"/>
+	</capability>
+	<capability name="ipojo.handler">
+		<p n="name" v="properties"/>
+		<p n="namespace" v="org.apache.felix.ipojo"/>
+	</capability>
+		<capability name="ipojo.handler">
+		<p n="name" v="architecture"/>
+		<p n="namespace" v="org.apache.felix.ipojo"/>
+	</capability>
+</obr>

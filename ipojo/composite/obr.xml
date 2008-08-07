@@ -1,0 +1,22 @@
+<obr>
+	<capability name="ipojo.handler">
+		<p n="name" v="instance"/>
+		<p n="namespace" v="org.apache.felix.ipojo"/>
+		<p n="type" v="composite"/>
+	</capability>
+	<capability name="ipojo.handler">
+		<p n="name" v="subservice"/>
+		<p n="namespace" v="org.apache.felix.ipojo"/>
+		<p n="type" v="composite"/>
+	</capability>
+	<capability name="ipojo.handler">
+		<p n="name" v="provides"/>
+		<p n="namespace" v="org.apache.felix.ipojo"/>
+		<p n="type" v="composite"/>
+	</capability>
+	<capability name="ipojo.handler">
+		<p n="name" v="architecture"/>
+		<p n="namespace" v="org.apache.felix.ipojo"/>
+		<p n="type" v="composite"/>
+	</capability>
+</obr>

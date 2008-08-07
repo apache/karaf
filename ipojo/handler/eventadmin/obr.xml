@@ -1,0 +1,13 @@
+<obr>
+	<capability name="ipojo.handler">
+		<p n="name" v="publisher"/>
+		<p n="namespace" v="org.apache.felix.ipojo.handlers.event.EventAdminHandler"/>
+		<p n="type" v="primitive"/>
+	</capability>
+	<capability name="ipojo.handler">
+		<p n="name" v="subscriber"/>
+		<p n="namespace" v="org.apache.felix.ipojo.handlers.event.EventAdminHandler"/>
+		<p n="type" v="primitive"/>
+	</capability>
+	<require extend="false" filter="(service=org.osgi.service.event.EventAdmin)" multiple="false" name="service" optional="false">Import Event Admin service</require>
+</obr>

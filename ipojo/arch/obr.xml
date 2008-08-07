@@ -1,0 +1,6 @@
+<obr>
+	<require extend="false" filter="(service=org.apache.felix.ipojo.architecture.Architecture)" multiple="true" name="service" optional="true">Import Service org.apache.felix.ipojo.architecture.Architecture</require>
+	<require extend="false" filter="(service=org.apache.felix.ipojo.Factory)" multiple="false" name="service" optional="true">Import Service org.apache.felix.ipojo.Factory</require>
+	<require extend="false" filter="(service=org.apache.felix.ipojo.HandlerFactory)" multiple="false" name="service" optional="true">Import Service org.apache.felix.ipojo.HandlerFactory</require>
+	<require extend="false" filter="(&amp;(name=requires)(namespace=org.apache.felix.ipojo))" multiple="false" optional="false" name="ipojo.handler">Require Handler</require>
+</obr>
