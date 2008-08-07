@@ -1,3 +1,8 @@
+Changes from 1.4.2 to 1.4.3
+---------------------------
+
+ * [2008-08-07] FELIX-661: maven bundle plugin does not close the accessed fie /jar streams
+
 Changes from 1.4.1 to 1.4.2
 ---------------------------
 
