@@ -21,49 +21,52 @@ package org.apache.felix.ipojo.handlers.jmx;
 
 import javax.management.MBeanNotificationInfo;
 
-/** 
+/**
  * this calss build the notification descritpion structure.
- *  
- *  @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
+ * 
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class NotificationField {
-    /** 
+    /**
      * m_name : name of the notification.
      */
     private String m_name;
-    /** 
+    /**
      * m_description : description of the notification.
      */
     private String m_description;
-    /** 
+    /**
      * m_description : field of the notification.
      */
     private String m_field;
-    
-    /** 
+
+    /**
      * NotificationField : constructor.
-     * @param name : name of the notification 
-     * @param field : field which send a notification when it is modified
-     * @param description : descritpion which appears in jmx console
+     * 
+     * @param name
+     *            : name of the notification
+     * @param field
+     *            : field which send a notification when it is modified
+     * @param description
+     *            : descritpion which appears in jmx console
      */
-    
+
     public NotificationField(String name, String field, String description) {
         this.m_name = name;
         this.m_field = field;
         this.m_description = description;
     }
 
-    /** 
+    /**
      * getNotificationInfo : return the MBeanNotificationInfo from this class.
-     * @return          : type of the field or null if it wasn't found
+     * 
+     * @return : type of the field or null if it wasn't found
      */
     public MBeanNotificationInfo getNotificationInfo() {
         String[] notificationTypes = new String[1];
         notificationTypes[0] = m_field;
         MBeanNotificationInfo mbni = new MBeanNotificationInfo(
-                    notificationTypes,
-                    m_name,
-                    m_description);
+            notificationTypes, m_name, m_description);
         return mbni;
     }
 }

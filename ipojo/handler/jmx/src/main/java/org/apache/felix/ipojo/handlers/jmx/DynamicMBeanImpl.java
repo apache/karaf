@@ -45,24 +45,25 @@ import org.apache.felix.ipojo.parser.MethodMetadata;
 import org.apache.felix.ipojo.util.Callback;
 import org.apache.felix.ipojo.util.Logger;
 
-/** 
- * this class implements iPOJO DynamicMBean.
- * it builds the dynamic MBean 
- *  
- *  @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
+/**
+ * This class implements iPOJO DynamicMBean. it builds the dynamic MBean
+ * 
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements DynamicMBean {
-    /** 
+public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
+        DynamicMBean {
+
+    /**
+     * InstanceManager: use to store the InstanceManager instance.
+     */
+    protected final InstanceManager m_instanceManager;
+
+    /**
      * JmxConfigDFieldMap : store the data extracted from metadata.xml.
      */
     private JmxConfigFieldMap m_configMap;
 
-    /** 
-     * InstanceManager: use to store the InstanceManager instance.
-     */
-    private InstanceManager m_instanceManager;
-
-    /** 
+    /**
      * MBeanInfo : class wich store the MBean Informations.
      */
     private MBeanInfo m_mBeanInfo;
@@ -72,32 +73,41 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements 
      */
     private String m_className = this.getClass().getName();
 
-    /** 
+    /**
      * sequenceNumber : use to calculate unique id to notification.
      */
     private int m_sequenceNumber = 0;
 
-    /** 
+    /**
      * DynamicMBeanImpl : constructor.
-     * @param properties : data extracted from metadat.xml file
-     * @param instanceManager : InstanceManager instance
+     * 
+     * @param properties
+     *            : data extracted from metadat.xml file
+     * @param instanceManager
+     *            : InstanceManager instance
      */
-    public DynamicMBeanImpl(JmxConfigFieldMap properties, InstanceManager instanceManager) {
+    public DynamicMBeanImpl(JmxConfigFieldMap properties,
+            InstanceManager instanceManager) {
         m_configMap = properties;
         m_instanceManager = instanceManager;
         this.buildMBeanInfo();
     }
 
-    /** 
-     * getAttribute implements from JMX.
-     * get the value of the required attribute 
-     * @param arg0 name of required attribute
-     * @throws AttributeNotFoundException : if the attribute doesn't exist
-     * @throws MBeanException : 
-     * @throws ReflectionException : 
-     * @return  the object attribute
+    /**
+     * getAttribute implements from JMX. get the value of the required attribute
+     * 
+     * @param arg0
+     *            name of required attribute
+     * @throws AttributeNotFoundException
+     *             : if the attribute doesn't exist
+     * @throws MBeanException
+     *             :
+     * @throws ReflectionException
+     *             :
+     * @return the object attribute
      */
-    public Object getAttribute(String arg0) throws AttributeNotFoundException, MBeanException, ReflectionException {
+    public Object getAttribute(String arg0) throws AttributeNotFoundException,
+        MBeanException, ReflectionException {
         PropertyField attribute = m_configMap.getPropertyFromName(arg0);
 
         if (attribute == null) {
@@ -107,49 +117,62 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements 
         }
     }
 
-    /** 
-     * getAttributes : implement from JMX.
-     * get values of reuqired attributes 
-     * @param attributeNames : names of the required attributes
+    /**
+     * getAttributes : implement from JMX. get values of reuqired attributes
+     * 
+     * @param attributeNames
+     *            : names of the required attributes
      * @return return the list of the attribute
      */
     public AttributeList getAttributes(String[] attributeNames) {
 
         if (attributeNames == null) {
-            throw new IllegalArgumentException("attributeNames[] cannot be null");
+            throw new IllegalArgumentException(
+                "attributeNames[] cannot be null");
         }
 
         AttributeList resultList = new AttributeList();
         for (int i = 0; i < attributeNames.length; i++) {
-            PropertyField propertyField = (PropertyField) m_configMap.getPropertyFromField((String) attributeNames[i]);
+            PropertyField propertyField = (PropertyField) m_configMap
+                .getPropertyFromField((String) attributeNames[i]);
 
             if (propertyField != null) {
-                resultList.add(new Attribute(attributeNames[i], propertyField.getValue()));
+                resultList.add(new Attribute(attributeNames[i], propertyField
+                    .getValue()));
             }
         }
         return resultList;
     }
 
-    /** 
+    /**
      * getMBeanInfo : return the MBean Class builded.
-     * @return  return MBeanInfo class constructed by buildMBeanInfo
+     * 
+     * @return return MBeanInfo class constructed by buildMBeanInfo
      */
     public MBeanInfo getMBeanInfo() {
         return m_mBeanInfo;
     }
 
-    /** 
+    /**
      * invoke : invoke the required method on the targeted POJO.
-     * @param operationName : name of the method called
-     * @param params : parameters given to the method
-     * @param signature : determine which method called
+     * 
+     * @param operationName
+     *            : name of the method called
+     * @param params
+     *            : parameters given to the method
+     * @param signature
+     *            : determine which method called
      * @return Object : the object return by the method
-     * @throws MBeanException :
-     * @throws ReflectionException : 
+     * @throws MBeanException
+     *             :
+     * @throws ReflectionException
+     *             :
      */
-    public Object invoke(String operationName, Object[] params, String[] signature) throws MBeanException, ReflectionException {
+    public Object invoke(String operationName, Object[] params,
+            String[] signature) throws MBeanException, ReflectionException {
 
-        MethodField method = m_configMap.getMethodFromName(operationName, signature);
+        MethodField method = m_configMap.getMethodFromName(operationName,
+            signature);
         if (method != null) {
             MethodMetadata methodCall = method.getMethod();
             Callback mc = new Callback(methodCall, m_instanceManager);
@@ -166,86 +189,100 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements 
                 e.printStackTrace();
             }
         } else {
-            throw new ReflectionException(new NoSuchMethodException(operationName), "Cannot find the operation "
-                    + operationName
-                    + " in "
-                    + m_className);
+            throw new ReflectionException(new NoSuchMethodException(
+                operationName), "Cannot find the operation " + operationName
+                    + " in " + m_className);
         }
 
         return null;
     }
 
-    /** 
+    /**
      * setAttribute : change specified attribute value.
-     * @param attribute : attribute with new value to be changed
-     * @throws AttributeNotFoundException : if the requiered attribute was not found
-     * @throws InvalidAttributeValueException : the value is inccorrect type
-     * @throws MBeanException :
-     * @throws ReflectionException :
+     * 
+     * @param attribute
+     *            : attribute with new value to be changed
+     * @throws AttributeNotFoundException
+     *             : if the requiered attribute was not found
+     * @throws InvalidAttributeValueException
+     *             : the value is inccorrect type
+     * @throws MBeanException
+     *             :
+     * @throws ReflectionException
+     *             :
      */
-    public void setAttribute(Attribute attribute) throws AttributeNotFoundException, InvalidAttributeValueException, MBeanException,
-            ReflectionException {
+    public void setAttribute(Attribute attribute)
+        throws AttributeNotFoundException, InvalidAttributeValueException,
+        MBeanException, ReflectionException {
 
         // Check attribute is not null to avoid NullPointerException later on
         if (attribute == null) {
-            throw new RuntimeOperationsException(new IllegalArgumentException("Attribute cannot be null"), "Cannot invoke a setter of "
-                    + m_className
-                    + " with null attribute");
+            throw new RuntimeOperationsException(new IllegalArgumentException(
+                "Attribute cannot be null"), "Cannot invoke a setter of "
+                    + m_className + " with null attribute");
         }
         String name = attribute.getName();
         Object value = attribute.getValue();
 
         if (name == null) {
-            throw new RuntimeOperationsException(new IllegalArgumentException("Attribute name cannot be null"), "Cannot invoke the setter of "
-                    + m_className
-                    + " with null attribute name");
+            throw new RuntimeOperationsException(new IllegalArgumentException(
+                "Attribute name cannot be null"),
+                "Cannot invoke the setter of " + m_className
+                        + " with null attribute name");
         }
         // Check for a recognized attribute name and call the corresponding
         // setter
         //
 
-        PropertyField propertyField = (PropertyField) m_configMap.getPropertyFromName(name);
+        PropertyField propertyField = (PropertyField) m_configMap
+            .getPropertyFromName(name);
         if (propertyField == null) {
             // unrecognized attribute name:
-            throw new AttributeNotFoundException("Attribute " + name + " not found in " + m_className);
+            throw new AttributeNotFoundException("Attribute " + name
+                    + " not found in " + m_className);
         }
         if (!propertyField.isWritable()) {
-            throw new InvalidAttributeValueException("Attribute " + name + " can not be setted");
+            throw new InvalidAttributeValueException("Attribute " + name
+                    + " can not be setted");
         }
 
         if (value == null) {
             try {
                 m_instanceManager.onSet(null, propertyField.getField(), null);
             } catch (Exception e) {
-                throw new InvalidAttributeValueException("Cannot set attribute " + name + " to null");
+                throw new InvalidAttributeValueException(
+                    "Cannot set attribute " + name + " to null");
             }
-        } else { // if non null value, make sure it is assignable to the attribute
-            if (true /* TODO type.class.isAssignableFrom(value.getClass())*/) {
-                //propertyField.setValue(value);
+        } else { // if non null value, make sure it is assignable to the
+            // attribute
+            if (true /* TODO type.class.isAssignableFrom(value.getClass()) */) {
+                // propertyField.setValue(value);
                 // setValue(attributeField.getField(),null);
                 m_instanceManager.onSet(null, propertyField.getField(), value);
             } else {
-                throw new InvalidAttributeValueException("Cannot set attribute "
-                        + name
-                        + " to a "
-                        + value.getClass().getName()
-                        + " object, String expected");
+                throw new InvalidAttributeValueException(
+                    "Cannot set attribute " + name + " to a "
+                            + value.getClass().getName()
+                            + " object, String expected");
             }
         }
 
     }
 
-    /** 
+    /**
      * setAttributes : change all the attributes value.
-     * @param attributes : list of attribute value to be changed
+     * 
+     * @param attributes
+     *            : list of attribute value to be changed
      * @return AttributeList : list of new attribute
      */
     public AttributeList setAttributes(AttributeList attributes) {
 
-        //       Check attributes is not null to avoid NullPointerException later on
+        // Check attributes is not null to avoid NullPointerException later on
         if (attributes == null) {
-            throw new RuntimeOperationsException(new IllegalArgumentException("AttributeList attributes cannot be null"),
-                    "Cannot invoke a setter of " + m_className);
+            throw new RuntimeOperationsException(new IllegalArgumentException(
+                "AttributeList attributes cannot be null"),
+                "Cannot invoke a setter of " + m_className);
         }
         AttributeList resultList = new AttributeList();
 
@@ -270,9 +307,9 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements 
         return resultList;
     }
 
-    /** 
-     * buildMBeanInfo : build the MBean information on initialization.
-     * this value don't change after
+    /**
+     * buildMBeanInfo : build the MBean information on initialization. this
+     * value don't change after
      */
     private void buildMBeanInfo() {
         String dDescription = m_configMap.getDecription();
@@ -285,80 +322,103 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements 
         }
 
         if (m_configMap.getProperties() != null) {
-            List<MBeanAttributeInfo> lAttributes = null;
-            lAttributes = new ArrayList<MBeanAttributeInfo>();
+            List < MBeanAttributeInfo > lAttributes = null;
+            lAttributes = new ArrayList < MBeanAttributeInfo >();
 
-            Iterator<PropertyField> iterator = m_configMap.getProperties().iterator();
+            Iterator < PropertyField > iterator = m_configMap.getProperties()
+                .iterator();
             while (iterator.hasNext()) {
                 PropertyField propertyField = (PropertyField) iterator.next();
-                lAttributes.add(new MBeanAttributeInfo(propertyField.getName(), propertyField.getType(), propertyField.getDescription(),
-                        propertyField.isReadable(), propertyField.isWritable(), false));
+                lAttributes.add(new MBeanAttributeInfo(propertyField.getName(),
+                    propertyField.getType(), propertyField.getDescription(),
+                    propertyField.isReadable(), propertyField.isWritable(),
+                    false));
             }
-            dAttributes = (MBeanAttributeInfo[]) lAttributes.toArray(new MBeanAttributeInfo[lAttributes.size()]);
+            dAttributes = (MBeanAttributeInfo[]) lAttributes
+                .toArray(new MBeanAttributeInfo[lAttributes.size()]);
         }
 
         MBeanOperationInfo[] dOperations = null;
         if (m_configMap.getMethods() != null) {
 
-            List<MBeanOperationInfo> lOperations = new ArrayList<MBeanOperationInfo>();
+            List < MBeanOperationInfo > lOperations = new ArrayList < MBeanOperationInfo >();
 
-            Iterator<MethodField[]> iterator = m_configMap.getMethods().iterator();
+            Iterator < MethodField[] > iterator = m_configMap.getMethods()
+                .iterator();
             while (iterator.hasNext()) {
                 MethodField[] method = (MethodField[]) iterator.next();
                 for (int i = 0; i < method.length; i++) {
-                    lOperations.add(new MBeanOperationInfo(method[i].getName(), method[i].getDescription(), method[i].getParams(), method[i]
-                            .getReturnType(), MBeanOperationInfo.UNKNOWN));
+                    lOperations.add(new MBeanOperationInfo(method[i].getName(),
+                        method[i].getDescription(), method[i].getParams(),
+                        method[i].getReturnType(), MBeanOperationInfo.UNKNOWN));
                 }
-                dOperations = (MBeanOperationInfo[]) lOperations.toArray(new MBeanOperationInfo[lOperations.size()]);
+                dOperations = (MBeanOperationInfo[]) lOperations
+                    .toArray(new MBeanOperationInfo[lOperations.size()]);
             }
         }
 
         MBeanNotificationInfo[] dNotification = new MBeanNotificationInfo[0];
         if (m_configMap.getMethods() != null) {
 
-            List<MBeanNotificationInfo> lNotifications = new ArrayList<MBeanNotificationInfo>();
+            List < MBeanNotificationInfo > lNotifications = new ArrayList < MBeanNotificationInfo >();
 
-            Iterator<NotificationField> iterator = m_configMap.getNotifications().iterator();
+            Iterator < NotificationField > iterator = m_configMap
+                .getNotifications().iterator();
             while (iterator.hasNext()) {
-                NotificationField notification = (NotificationField) iterator.next();
+                NotificationField notification = (NotificationField) iterator
+                    .next();
                 lNotifications.add(notification.getNotificationInfo());
             }
-            dNotification = (MBeanNotificationInfo[]) lNotifications.toArray(new MBeanNotificationInfo[lNotifications.size()]);
+            dNotification = (MBeanNotificationInfo[]) lNotifications
+                .toArray(new MBeanNotificationInfo[lNotifications.size()]);
         }
 
-        m_mBeanInfo = new MBeanInfo(this.m_className, dDescription, dAttributes, null, // No constructor 
-                dOperations, dNotification);
+        m_mBeanInfo = new MBeanInfo(this.m_className, dDescription,
+            dAttributes, null, // No constructor
+            dOperations, dNotification);
     }
 
-    /** 
+    /**
      * getNotificationInfo : get the notification informations (use by JMX).
-     * @return MBeanNotificationInfo[] : structure which describe the notifications 
+     * 
+     * @return MBeanNotificationInfo[] : structure which describe the
+     *         notifications
      */
     public MBeanNotificationInfo[] getNotificationInfo() {
         MBeanNotificationInfo[] dNotification = new MBeanNotificationInfo[0];
         if (m_configMap.getMethods() != null) {
 
-            List<MBeanNotificationInfo> lNotifications = new ArrayList<MBeanNotificationInfo>();
+            List < MBeanNotificationInfo > lNotifications = new ArrayList < MBeanNotificationInfo >();
 
-            Iterator<NotificationField> iterator = m_configMap.getNotifications().iterator();
+            Iterator < NotificationField > iterator = m_configMap
+                .getNotifications().iterator();
             while (iterator.hasNext()) {
-                NotificationField notification = (NotificationField) iterator.next();
+                NotificationField notification = (NotificationField) iterator
+                    .next();
                 lNotifications.add(notification.getNotificationInfo());
             }
-            dNotification = (MBeanNotificationInfo[]) lNotifications.toArray(new MBeanNotificationInfo[lNotifications.size()]);
+            dNotification = (MBeanNotificationInfo[]) lNotifications
+                .toArray(new MBeanNotificationInfo[lNotifications.size()]);
         }
         return dNotification;
     }
 
-    /** 
+    /**
      * sendNotification : send a notification to a subscriver.
-     * @param msg : msg to send
-     * @param attributeName : name of the attribute
-     * @param attributeType : type of the attribute
-     * @param oldValue : oldvalue of the attribute
-     * @param newValue : new value of the attribute
+     * 
+     * @param msg
+     *            : msg to send
+     * @param attributeName
+     *            : name of the attribute
+     * @param attributeType
+     *            : type of the attribute
+     * @param oldValue
+     *            : oldvalue of the attribute
+     * @param newValue
+     *            : new value of the attribute
      */
-    public void sendNotification(String msg, String attributeName, String attributeType, Object oldValue, Object newValue) {
+    public void sendNotification(String msg, String attributeName,
+            String attributeType, Object oldValue, Object newValue) {
 
         long timeStamp = System.currentTimeMillis();
 
@@ -366,9 +426,11 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements 
             return;
         }
         m_sequenceNumber++;
-        Notification notification =
-                new AttributeChangeNotification(this, m_sequenceNumber, timeStamp, msg, attributeName, attributeType, oldValue, newValue);
+        Notification notification = new AttributeChangeNotification(this,
+            m_sequenceNumber, timeStamp, msg, attributeName, attributeType,
+            oldValue, newValue);
         sendNotification(notification);
-        m_instanceManager.getFactory().getLogger().log(Logger.INFO, "Notification sent");
+        m_instanceManager.getFactory().getLogger().log(Logger.INFO,
+            "Notification sent");
     }
 }

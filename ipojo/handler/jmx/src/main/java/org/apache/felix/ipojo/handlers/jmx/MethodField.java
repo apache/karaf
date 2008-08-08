@@ -23,33 +23,35 @@ import javax.management.MBeanParameterInfo;
 
 import org.apache.felix.ipojo.parser.MethodMetadata;
 
-/** 
+/**
  * this class build a method JMX description.
- *  
- *  @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
+ * 
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class MethodField {
 
-    /** 
+    /**
      * m_description : store the method descritpion.
      */
     private String m_description;
-    /** 
+    /**
      * m_method : store the method properties.
      */
     private MethodMetadata m_method;
-    
-    /** 
+
+    /**
      * MethodField : constructor.
-     * @param method : the metod properties
-     * @param description : thes method description
+     * 
+     * @param method
+     *            : the metod properties
+     * @param description
+     *            : thes method description
      */
     public MethodField(MethodMetadata method, String description) {
         this.m_method = method;
         this.m_description = description;
-    
+
     }
-    
 
     public MethodMetadata getMethod() {
         return m_method;
@@ -62,15 +64,18 @@ public class MethodField {
     public String getName() {
         return m_method.getMethodName();
     }
-    
-    /** 
+
+    /**
      * getParams : get the parameter in JMX format.
+     * 
      * @return MBeanParameterInfo : return info on JMX format
      */
     public MBeanParameterInfo[] getParams() {
-        MBeanParameterInfo[] mbean = new MBeanParameterInfo[m_method.getMethodArguments().length];
+        MBeanParameterInfo[] mbean = new MBeanParameterInfo[m_method
+            .getMethodArguments().length];
         for (int i = 0; i < m_method.getMethodArguments().length; i++) {
-            mbean[i] = new MBeanParameterInfo("arg" + i, m_method.getMethodArguments()[i], null);
+            mbean[i] = new MBeanParameterInfo("arg" + i, m_method
+                .getMethodArguments()[i], null);
         }
         return mbean;
     }
@@ -78,7 +83,7 @@ public class MethodField {
     public String[] getSignature() {
         return m_method.getMethodArguments();
     }
-    
+
     public String getReturnType() {
         return m_method.getMethodReturn();
     }
