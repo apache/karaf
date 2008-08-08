@@ -178,6 +178,11 @@
           <artifactId>commons-logging</artifactId>
           <version>${commons.logging.version}</version>
       </dependency>
+      <dependency>
+          <groupId>org.apache.maven.artifact</groupId>
+          <artifactId>maven-artifact</artifactId>
+          <version>3.0-alpha-1</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
