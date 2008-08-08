@@ -20,6 +20,8 @@ package org.apache.felix.framework.util;
 
 import java.io.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.felix.framework.util.manifestparser.Capability;
 import org.apache.felix.moduleloader.*;
 import org.osgi.framework.Bundle;
@@ -234,6 +236,27 @@ public class Util
             }
         }
         return null;
+    }
+
+    /**
+     * Returns all the capabilities from a module that has a specified namespace.
+     *
+     * @param module    module providing capabilities
+     * @param namespace capability namespace
+     * @return array of matching capabilities or empty if none found
+     */
+    public static ICapability[] getCapabilityByNamespace(IModule module, String namespace)
+    {
+        final List matching = new ArrayList();
+        final ICapability[] caps = module.getDefinition().getCapabilities();
+        for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
+        {
+            if (caps[capIdx].getNamespace().equals(namespace))
+            {
+                matching.add(caps[capIdx]);
+            }
+        }
+        return (ICapability[]) matching.toArray(new ICapability[matching.size()]);
     }
 
     public static IWire getWire(IModule m, String name)

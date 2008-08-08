@@ -1460,7 +1460,8 @@ for (Iterator iter = fragmentMap.entrySet().iterator(); iter.hasNext(); )
         // Test the current potential candidates to determine if they
         // are consistent. Keep looping until we find a consistent
         // set or an exception is thrown.
-        while (!isClassSpaceConsistent(rootModule, moduleMap, cycleMap, candidatesMap))
+        while (!isSingletonConsistent(rootModule, moduleMap, candidatesMap) ||
+            !isClassSpaceConsistent(rootModule, moduleMap, cycleMap, candidatesMap))
         {
             // The incrementCandidateConfiguration() method requires
             // ordered access to the candidates map, so we will create
@@ -1484,6 +1485,146 @@ for (Iterator iter = fragmentMap.entrySet().iterator(); iter.hasNext(); )
             // Clear the cycle map.
             cycleMap.clear();
         }
+    }
+
+    /**
+     * This methd checks to see if the target module and any of the candidate
+     * modules to resolve its dependencies violate any singleton constraints.
+     * Actually, it just creates a map of resolved singleton modules and then
+     * delegates all checking to another recursive method.
+     * 
+     * @param targetModule the module that is the root of the tree of modules to check.
+     * @param moduleMap a map to cache the package space of each module.
+     * @param candidatesMap a map containing the all candidates to resolve all
+     *        dependencies for all modules.
+     * @return <tt>true</tt> if all candidates are consistent with respect to singletons,
+     *         <tt>false</tt> otherwise.
+    **/
+    private boolean isSingletonConsistent(IModule targetModule, Map moduleMap, Map candidatesMap)
+    {
+        // Create a map of all resolved singleton modules.
+        Map singletonMap = new HashMap();
+        IModule[] modules = m_factory.getModules();
+        for (int i = 0; (modules != null) && (i < modules.length); i++)
+        {
+            if (isResolved(modules[i]) && isSingleton(modules[i]))
+            {
+                String symName = getBundleSymbolicName(modules[i]);
+                singletonMap.put(symName, symName);
+            }
+        }
+
+        return areCandidatesSingletonConsistent(
+            targetModule, singletonMap, moduleMap, new HashMap(), candidatesMap);
+    }
+
+    /**
+     * This method recursive checks the target module and all of its transitive
+     * dependency modules to verify that they do not violate a singleton constraint.
+     * If the target module is a singleton, then it checks that againts existing
+     * singletons. Then it checks all current unresolved candidates recursively.
+     * 
+     * @param targetModule the module that is the root of the tree of modules to check.
+     * @param singletonMap the current map of singleton symbolic names.
+     * @param moduleMap a map to cache the package space of each module.
+     * @param cycleMap a map to detect cycles.
+     * @param candidatesMap a map containing the all candidates to resolve all
+     *        dependencies for all modules.
+     * @return <tt>true</tt> if all candidates are consistent with respect to singletons,
+     *         <tt>false</tt> otherwise.
+    **/
+    private boolean areCandidatesSingletonConsistent(
+        IModule targetModule, Map singletonMap, Map moduleMap, Map cycleMap, Map candidatesMap)
+    {
+        // If we are in a cycle, then assume true for now.
+        if (cycleMap.get(targetModule) != null)
+        {
+            return true;
+        }
+
+        // Record the target module in the cycle map.
+        cycleMap.put(targetModule, targetModule);
+
+        // Check to see if the targetModule violates a singleton.
+        // If not and it is a singleton, then add it to the singleton
+        // map since it will constrain other singletons.
+        String symName = getBundleSymbolicName(targetModule);
+        boolean isSingleton = isSingleton(targetModule);
+        if (isSingleton && singletonMap.containsKey(symName))
+        {
+            return false;
+        }
+        else if (isSingleton)
+        {
+            singletonMap.put(symName, symName);
+        }
+
+        // Get the package space of the target module.
+        Map pkgMap = null;
+        try
+        {
+            pkgMap = getModulePackages(moduleMap, targetModule, candidatesMap);
+        }
+        catch (ResolveException ex)
+        {
+            m_logger.log(
+                Logger.LOG_DEBUG,
+                "Constraint violation for " + targetModule + " detected.",
+                ex);
+            return false;
+        }
+
+        // Loop through all of the target module's accessible packages and
+        // verify that all package sources are consistent.
+        for (Iterator iter = pkgMap.entrySet().iterator(); iter.hasNext(); )
+        {
+            Map.Entry entry = (Map.Entry) iter.next();
+            // Get the resolved package, which contains the set of all
+            // package sources for the given package.
+            ResolvedPackage rp = (ResolvedPackage) entry.getValue();
+            // Loop through each package source and test if it is consistent.
+            for (int srcIdx = 0; srcIdx < rp.m_sourceList.size(); srcIdx++)
+            {
+                // If the module for this package source is not resolved, then
+                // we have to see if resolving it would violate a singleton
+                // constraint.
+                PackageSource ps = (PackageSource) rp.m_sourceList.get(srcIdx);
+                if (!isResolved(ps.m_module))
+                {
+                    return areCandidatesSingletonConsistent(ps.m_module, singletonMap, moduleMap, cycleMap, candidatesMap);
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns true if the specified module is a singleton
+     * (i.e., directive singleton:=true in Bundle-SymbolicName).
+     *
+     * @param module the module to check for singleton status.
+     * @return true if the module is a singleton, false otherwise.
+    **/
+    private boolean isSingleton(IModule module)
+    {
+        final ICapability[] modCaps = Util.getCapabilityByNamespace(
+                module, Capability.MODULE_NAMESPACE);
+        if (modCaps == null || modCaps.length == 0)
+        {
+            // this should never happen?
+            return false;
+        }
+        final R4Directive[] dirs = ((Capability) modCaps[0]).getDirectives();
+        for (int dirIdx = 0; (dirs != null) && (dirIdx < dirs.length); dirIdx++)
+        {
+            if (dirs[dirIdx].getName().equalsIgnoreCase(Constants.SINGLETON_DIRECTIVE)
+                && Boolean.valueOf(dirs[dirIdx].getValue()).booleanValue())
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isClassSpaceConsistent(
@@ -3088,16 +3229,11 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         public IRequirement m_requirement = null;
         public PackageSource[] m_candidates = null;
         public int m_idx = 0;
-        public boolean m_visited = false;
         public CandidateSet(IModule module, IRequirement requirement, PackageSource[] candidates)
         {
             m_module = module;
             m_requirement = requirement;
             m_candidates = candidates;
-            if (isResolved(m_module))
-            {
-                m_visited = true;
-            }
         }
     }
 

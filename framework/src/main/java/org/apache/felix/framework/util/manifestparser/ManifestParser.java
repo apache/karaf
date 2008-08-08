@@ -797,7 +797,7 @@ public class ManifestParser
                 Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, symName, false);
             attrs[1] = new R4Attribute(
                 Constants.BUNDLE_VERSION_ATTRIBUTE, bundleVersion, false);
-            return new Capability(ICapability.MODULE_NAMESPACE, null, attrs);
+            return new Capability(ICapability.MODULE_NAMESPACE, (R4Directive[]) clauses[0][CLAUSE_DIRECTIVES_INDEX], attrs);
         }
 
         return null;
