@@ -39,7 +39,6 @@
 		<module>composite</module>
 		<module>arch</module>
 		<module>ant</module>
-		<!--<module>white.board.pattern.handler</module>-->
 		<module>handler/extender</module>
 		<module>handler/temporal</module>
 		<module>handler/eventadmin</module>
@@ -55,6 +54,7 @@
 		</activation>
 		<modules>
 			<module>annotations</module>
+			<module>handler/jmx</module>
 		</modules>
 	</profile>
 	<profile>
@@ -64,6 +64,7 @@
 		</activation>
 		<modules>
 			<module>annotations</module>
+			<module>handler/jmx</module>
 		</modules>
 	</profile>
 	<profile>

@@ -636,7 +636,6 @@ public class GoodTests extends OSGiTestCase {
         m_fooBarNutConsumer.clearDonuts();
 
         // Send donuts
-        Donut sentDonut;
         for (int i = 0; i < EahTestUtils.NUMBER_OF_TESTS; i++) {
             m_fooProvider.sellDonut();
             foos++;
@@ -647,19 +646,19 @@ public class GoodTests extends OSGiTestCase {
             m_nutProvider.sellDonut();
             nuts++;
 
-            sentDonut = m_fooBarProvider.sellDonut();
+            m_fooBarProvider.sellDonut();
             foos++;
             bars++;
 
-            sentDonut = m_barNutProvider.sellDonut();
+            m_barNutProvider.sellDonut();
             bars++;
             nuts++;
 
-            sentDonut = m_fooNutProvider.sellDonut();
+            m_fooNutProvider.sellDonut();
             foos++;
             nuts++;
 
-            sentDonut = m_fooBarNutProvider.sellDonut();
+            m_fooBarNutProvider.sellDonut();
             foos++;
             bars++;
             nuts++;
