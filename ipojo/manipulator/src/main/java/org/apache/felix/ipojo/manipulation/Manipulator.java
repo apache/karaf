@@ -138,5 +138,9 @@ public class Manipulator {
 
         return elem;
     }
+    
+    public Map getFields() {
+        return m_fields;
+    }
 
 }

@@ -348,6 +348,7 @@ public class Pojoization {
         Manipulator man = new Manipulator();
         try {
             byte[] out = man.manipulate(in); // iPOJO manipulation
+            ci.detectMissingFields(man.getFields()); // Detect missing field
             // Insert information to metadata
             ci.m_componentMetadata.addElement(man.getManipulationMetadata());
             ci.m_isManipulated = true;
@@ -407,6 +408,41 @@ public class Pojoization {
             this.m_componentMetadata = met;
             m_isManipulated = false;
         }
+        
+        /**
+         * Detects missing fields.
+         * If a referenced field does not exist in the class
+         * the method throws an error breaking the build process.
+         * @param fields : field found in the manipulated class
+         */
+        void detectMissingFields(Map fields) {
+            // First, compute the list of referred fields
+            List list = new ArrayList();
+            computeReferredFields(list, m_componentMetadata);
+            // Then, try to find each referred field in the given field map
+            for (int i = 0; i < list.size(); i++) {
+                if (!fields.containsKey(list.get(i))) {
+                    error("The field " + list.get(i) + " is referenced in the "
+                            + "metadata but does not exist in the " + m_classname + " class");
+                }
+            }
+        }
+        
+        /**
+         * Looks for 'field' attribute in the given metadata.
+         * @param list : discovered field (accumulator)
+         * @param metadata : metadata to inspect
+         */
+        private void computeReferredFields(List list, Element metadata) {
+            String field = metadata.getAttribute("field");
+            if (field != null && ! list.contains(field)) {
+                list.add(field);
+            }
+            for (int i = 0; i < metadata.getElements().length; i++) {
+                computeReferredFields(list, metadata.getElements()[i]);
+            }
+        }
+        
     }
 
     /**
