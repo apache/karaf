@@ -38,6 +38,7 @@ import org.apache.felix.framework.util.SecurityManagerEx;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.framework.util.manifestparser.Capability;
 import org.apache.felix.framework.util.manifestparser.ManifestParser;
+import org.apache.felix.framework.util.manifestparser.R4Attribute;
 import org.apache.felix.framework.util.manifestparser.R4Directive;
 import org.apache.felix.framework.util.manifestparser.R4Library;
 import org.apache.felix.framework.util.manifestparser.Requirement;
@@ -616,6 +617,46 @@ public class R4SearchPolicyCore implements ModuleListener
         return null;
     }
 
+    private IRequirement createDynamicRequirementTarget(
+        IRequirement dynReq, String pkgName)
+    {
+        IRequirement req = null;
+
+        // First check to see if the dynamic requirement matches the
+        // package name; this means we have to do wildcard matching.
+        String dynPkgName = ((Requirement) dynReq).getPackageName();
+        boolean wildcard = (dynPkgName.lastIndexOf(".*") >= 0);
+        dynPkgName = (wildcard)
+            ? dynPkgName.substring(0, dynPkgName.length() - 2) : dynPkgName;
+        // If the dynamic requirement matches the package name, then
+        // create a new requirement for the specific package.
+        if (dynPkgName.equals("*") ||
+            pkgName.equals(dynPkgName) ||
+            (wildcard && pkgName.startsWith(dynPkgName + ".")))
+        {
+            // Create a new requirement based on the dynamic requirement,
+            // but substitute the precise package name for which we are
+            // looking, because it is not possible to use the potentially
+            // wildcarded version in the dynamic requirement.
+            R4Directive[] dirs = ((Requirement) dynReq).getDirectives();
+            R4Attribute[] attrs = ((Requirement) dynReq).getAttributes();
+            R4Attribute[] newAttrs = new R4Attribute[attrs.length];
+            System.arraycopy(attrs, 0, newAttrs, 0, attrs.length);
+            for (int attrIdx = 0; attrIdx < newAttrs.length; attrIdx++)
+            {
+                if (newAttrs[attrIdx].getName().equals(ICapability.PACKAGE_PROPERTY))
+                {
+                    newAttrs[attrIdx] = new R4Attribute(
+                        ICapability.PACKAGE_PROPERTY, pkgName, false);
+                    break;
+                }
+            }
+            req = new Requirement(ICapability.PACKAGE_NAMESPACE, dirs, newAttrs);
+        }
+
+        return req;
+    }
+
     private IWire attemptDynamicImport(IModule importer, String pkgName)
     {
         R4Wire wire = null;
@@ -634,36 +675,12 @@ public class R4SearchPolicyCore implements ModuleListener
             // there is a matching one for the package from which we want to
             // load a class.
             IRequirement[] dynamics = importer.getDefinition().getDynamicRequirements();
-            for (int i = 0; (dynamics != null) && (i < dynamics.length); i++)
+            for (int dynIdx = 0; (dynamics != null) && (dynIdx < dynamics.length); dynIdx++)
             {
-                // Ignore any dynamic requirements whose packages don't match.
-                String dynPkgName = ((Requirement) dynamics[i]).getPackageName();
-                boolean wildcard = (dynPkgName.lastIndexOf(".*") >= 0);
-                dynPkgName = (wildcard)
-                    ? dynPkgName.substring(0, dynPkgName.length() - 2) : dynPkgName;
-                if (dynPkgName.equals("*") ||
-                    pkgName.equals(dynPkgName) ||
-                    (wildcard && pkgName.startsWith(dynPkgName + ".")))
+                IRequirement target =
+                    createDynamicRequirementTarget(dynamics[dynIdx], pkgName);
+                if (target != null)
                 {
-                    // Constrain the current dynamic requirement to include
-                    // the precise package name for which we are searching; this
-                    // is necessary because we cannot easily determine which
-                    // package name a given dynamic requirement matches, since
-                    // it is only a filter.
-
-                    IRequirement req = null;
-                    try
-                    {
-                        req = new Requirement(
-                            ICapability.PACKAGE_NAMESPACE,
-                            "(&" + dynamics[i].getFilter().toString()
-                                + "(package=" + pkgName + "))");
-                    }
-                    catch (InvalidSyntaxException ex)
-                    {
-                        // This should never happen.
-                    }
-
                     // See if there is a candidate exporter that satisfies the
                     // constrained dynamic requirement.
                     try
@@ -673,8 +690,8 @@ public class R4SearchPolicyCore implements ModuleListener
                         {
                             // Get "in use" and "available" candidates and put
                             // the "in use" candidates first.
-                            PackageSource[] inuse = getInUseCandidates(req);
-                            PackageSource[] available = getUnusedCandidates(req);
+                            PackageSource[] inuse = getInUseCandidates(target);
+                            PackageSource[] available = getUnusedCandidates(target);
                             PackageSource[] candidates = new PackageSource[inuse.length + available.length];
                             System.arraycopy(inuse, 0, candidates, 0, inuse.length);
                             System.arraycopy(available, 0, candidates, inuse.length, available.length);
@@ -714,7 +731,7 @@ public class R4SearchPolicyCore implements ModuleListener
 
                                 // Create the wire and add it to the module.
                                 wire = new R4Wire(
-                                    importer, dynamics[i], candidate.m_module, candidate.m_capability);
+                                    importer, dynamics[dynIdx], candidate.m_module, candidate.m_capability);
                                 newWires[newWires.length - 1] = wire;
                                 ((ModuleImpl) importer).setWires(newWires);
 m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
@@ -1492,7 +1509,7 @@ for (Iterator iter = fragmentMap.entrySet().iterator(); iter.hasNext(); )
      * modules to resolve its dependencies violate any singleton constraints.
      * Actually, it just creates a map of resolved singleton modules and then
      * delegates all checking to another recursive method.
-     * 
+     *
      * @param targetModule the module that is the root of the tree of modules to check.
      * @param moduleMap a map to cache the package space of each module.
      * @param candidatesMap a map containing the all candidates to resolve all
@@ -1523,7 +1540,7 @@ for (Iterator iter = fragmentMap.entrySet().iterator(); iter.hasNext(); )
      * dependency modules to verify that they do not violate a singleton constraint.
      * If the target module is a singleton, then it checks that againts existing
      * singletons. Then it checks all current unresolved candidates recursively.
-     * 
+     *
      * @param targetModule the module that is the root of the tree of modules to check.
      * @param singletonMap the current map of singleton symbolic names.
      * @param moduleMap a map to cache the package space of each module.
@@ -3507,67 +3524,69 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         }
 */
         // Next, check to see if the package is dynamically imported by the module.
-// TODO: RB - Fix dynamic import diagnostic.
-//        IRequirement imp = createDynamicImportTarget(module, pkgName);
-        IRequirement imp = null;
-        if (imp != null)
+        IRequirement[] dynamics = module.getDefinition().getDynamicRequirements();
+        for (int dynIdx = 0; dynIdx < dynamics.length; dynIdx++)
         {
-            // Try to see if there is an exporter available.
-            PackageSource[] exporters = getInUseCandidates(imp);
-            exporters = (exporters.length == 0)
-                ? getUnusedCandidates(imp) : exporters;
-
-            // An exporter might be available, but it may have attributes
-            // that do not match the importer's required attributes, so
-            // check that case by simply looking for an exporter of the
-            // desired package without any attributes.
-            if (exporters.length == 0)
+            IRequirement target = createDynamicRequirementTarget(dynamics[dynIdx], pkgName);
+            if (target != null)
             {
-                try
-                {
-                    IRequirement pkgReq = new Requirement(
-                        ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")");
-                    exporters = getInUseCandidates(pkgReq);
-                    exporters = (exporters.length == 0)
-                        ? getUnusedCandidates(pkgReq) : exporters;
-                }
-                catch (InvalidSyntaxException ex)
-                {
-                    // This should never happen.
-                }
-            }
+                // Try to see if there is an exporter available.
+                PackageSource[] exporters = getInUseCandidates(target);
+                exporters = (exporters.length == 0)
+                    ? getUnusedCandidates(target) : exporters;
 
-            long expId = (exporters.length == 0)
-                ? -1 : Util.getBundleIdFromModuleId(exporters[0].m_module.getId());
-
-            StringBuffer sb = new StringBuffer("*** Class '");
-            sb.append(name);
-            sb.append("' was not found, but this is likely normal since package '");
-            sb.append(pkgName);
-            sb.append("' is dynamically imported by bundle ");
-            sb.append(impId);
-            sb.append(".");
-            if (exporters.length > 0)
-            {
-                try
+                // An exporter might be available, but it may have attributes
+                // that do not match the importer's required attributes, so
+                // check that case by simply looking for an exporter of the
+                // desired package without any attributes.
+                if (exporters.length == 0)
                 {
-                    if (!imp.isSatisfied(
-                        Util.getSatisfyingCapability(exporters[0].m_module,
-                            new Requirement(ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")"))))
+                    try
                     {
-                        sb.append(" However, bundle ");
-                        sb.append(expId);
-                        sb.append(" does export this package with attributes that do not match.");
+                        IRequirement pkgReq = new Requirement(
+                            ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")");
+                        exporters = getInUseCandidates(pkgReq);
+                        exporters = (exporters.length == 0)
+                            ? getUnusedCandidates(pkgReq) : exporters;
+                    }
+                    catch (InvalidSyntaxException ex)
+                    {
+                        // This should never happen.
                     }
                 }
-                catch (InvalidSyntaxException ex)
-                {
-                    // This should never happen.
-                }
-            }
-            sb.append(" ***");
 
-            return sb.toString();
+                long expId = (exporters.length == 0)
+                    ? -1 : Util.getBundleIdFromModuleId(exporters[0].m_module.getId());
+
+                StringBuffer sb = new StringBuffer("*** Class '");
+                sb.append(name);
+                sb.append("' was not found, but this is likely normal since package '");
+                sb.append(pkgName);
+                sb.append("' is dynamically imported by bundle ");
+                sb.append(impId);
+                sb.append(".");
+                if (exporters.length > 0)
+                {
+                    try
+                    {
+                        if (!target.isSatisfied(
+                            Util.getSatisfyingCapability(exporters[0].m_module,
+                                new Requirement(ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")"))))
+                        {
+                            sb.append(" However, bundle ");
+                            sb.append(expId);
+                            sb.append(" does export this package with attributes that do not match.");
+                        }
+                    }
+                    catch (InvalidSyntaxException ex)
+                    {
+                        // This should never happen.
+                    }
+                }
+                sb.append(" ***");
+
+                return sb.toString();
+            }
         }
         IRequirement pkgReq = null;
         try

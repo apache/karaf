@@ -42,7 +42,7 @@ public class Requirement implements IRequirement
         m_filter = new FilterImpl(filterStr);
     }
 
-    public Requirement(String namespace, String pkgName, R4Directive[] directives, R4Attribute[] attributes)
+    public Requirement(String namespace, R4Directive[] directives, R4Attribute[] attributes)
     {
         m_namespace = namespace;
         m_directives = directives;

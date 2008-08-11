@@ -594,7 +594,6 @@ public class ManifestParser
                     // and add version if missing.
                     m_requirements[reqIdx] = new Requirement(
                         ICapability.PACKAGE_NAMESPACE,
-                        (String) pkgName.getValue(),
                         null,
                         new R4Attribute[] { pkgName, pkgVersion });
                 }
@@ -636,10 +635,7 @@ public class ManifestParser
 
                 map.put(
                     m_capabilities[i].getProperties().get(ICapability.PACKAGE_PROPERTY),
-                    new Requirement(
-                        ICapability.PACKAGE_NAMESPACE,
-                        (String) m_capabilities[i].getProperties().get(ICapability.PACKAGE_PROPERTY),
-                        null, attrs));
+                    new Requirement(ICapability.PACKAGE_NAMESPACE, null, attrs));
             }
         }
         m_requirements =
@@ -978,7 +974,6 @@ public class ManifestParser
                 reqList.add(
                     new Requirement(
                         ICapability.PACKAGE_NAMESPACE,
-                        null,
                         (R4Directive[]) clauses[clauseIdx][CLAUSE_DIRECTIVES_INDEX],
                         newAttrs));
             }
@@ -1033,7 +1028,6 @@ public class ManifestParser
                 reqList.add(
                     new Requirement(
                         ICapability.MODULE_NAMESPACE,
-                        null,
                         (R4Directive[]) clauses[clauseIdx][CLAUSE_DIRECTIVES_INDEX],
                         newAttrs));
             }

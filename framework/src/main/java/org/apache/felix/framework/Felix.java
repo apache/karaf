@@ -2956,7 +2956,6 @@ ex.printStackTrace();
                 new Requirement(
                     ICapability.PACKAGE_NAMESPACE,
                     null,
-                    null,
                     new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, pkgName, false) }));
 
         if (exporters != null)
@@ -2964,7 +2963,6 @@ ex.printStackTrace();
             List pkgs = new ArrayList();
 
             Requirement req = new Requirement(ICapability.PACKAGE_NAMESPACE,
-                null,
                 null,
                 new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, pkgName, false) });
 
@@ -3087,7 +3085,6 @@ ex.printStackTrace();
                         R4SearchPolicyCore.PackageSource[] inUseModules = m_policyCore.getInUseCandidates(
                             new Requirement(
                                 ICapability.PACKAGE_NAMESPACE,
-                                null,
                                 null,
                                 new R4Attribute[] { new R4Attribute(ICapability.PACKAGE_PROPERTY, ((Capability) caps[capIdx]).getPackageName(), false) }));
 
