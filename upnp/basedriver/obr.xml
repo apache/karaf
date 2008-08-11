@@ -1,0 +1,9 @@
+<obr>
+	<require extend="false" filter="(service=org.osgi.service.log.LogService)" multiple="false" name="service" optional="true">Import Service org.osgi.service.log.LogService</require>
+	<capability name="service">
+		<p n="service" v="org.apache.felix.upnp.basedriver.controller.DriverController"/>
+	</capability>
+	<capability name="service">
+		<p n="service" v="org.apache.felix.upnp.basedriver.controller.DevicesInfo"/>
+	</capability>
+</obr>
