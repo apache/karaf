@@ -19,7 +19,7 @@
 <obr>
 	<capability name="ipojo.handler">
 		<p n="name" v="config"/>
-		<p n="namespace" v="org.apache.felix.ipojo.handlers.jmx.MBeanHandler"/>
+		<p n="namespace" v="org.apache.felix.ipojo.handlers.jmx"/>
 		<p n="type" v="primitive"/>
 	</capability>
 </obr>

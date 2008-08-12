@@ -17,6 +17,6 @@
 	under the License.
 -->
 <ipojo>
-<handler classname="org.apache.felix.ipojo.handlers.jmx.MBeanHandler" name="config" namespace="org.apache.felix.ipojo.handlers.jmx.MBeanHandler">
+<handler classname="org.apache.felix.ipojo.handlers.jmx.MBeanHandler" name="config" namespace="org.apache.felix.ipojo.handlers.jmx">
 </handler>	
 </ipojo>

@@ -146,7 +146,7 @@ public class MBeanHandler extends PrimitiveHandler {
     /**
      * String : constant which store the name of the class.
      */
-    private String m_namespace = this.getClass().getName();
+    private String m_namespace = "org.apache.felix.ipojo.handlers.jmx";
     /**
      * Flag used to say if we use MOSGi framework.
      */
@@ -168,6 +168,7 @@ public class MBeanHandler extends PrimitiveHandler {
      * null.
      */
     private String m_objNameWODomainElt;
+    
     /**
      * object name domain specified in handler configuration. It can be null.
      */
