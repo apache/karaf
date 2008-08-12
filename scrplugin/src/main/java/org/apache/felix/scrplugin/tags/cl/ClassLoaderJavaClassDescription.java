@@ -194,7 +194,7 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
                      this.component.getService().getInterfaces().size() > 0 ) {
                     javaTags = new JavaTag[this.component.getService().getInterfaces().size()];
                     for(int i=0; i<this.component.getService().getInterfaces().size(); i++) {
-                        javaTags[i] = new ClassLoaderJavaTag(this, (Interface)this.component.getProperties().get(i),
+                        javaTags[i] = new ClassLoaderJavaTag(this, (Interface)this.component.getService().getInterfaces().get(i),
                                                              this.component.getService().isServicefactory());
                     }
                 }
