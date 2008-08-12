@@ -39,7 +39,7 @@ public class PropertyHandler {
      * This is a map using the property name as the key and
      * {@link PropertyDescription} as values.
      */
-    final private Map properties = new HashMap();
+    final private Map properties = new LinkedHashMap();
 
     /** The component. */
     final private Component component;
