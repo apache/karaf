@@ -24,6 +24,7 @@ import java.util.*;
 import org.apache.felix.scrplugin.om.*;
 import org.apache.felix.scrplugin.om.metatype.*;
 import org.apache.felix.scrplugin.tags.*;
+import org.apache.felix.scrplugin.tags.qdox.QDoxJavaClassDescription;
 import org.apache.felix.scrplugin.xml.ComponentDescriptorIO;
 import org.apache.felix.scrplugin.xml.MetaTypeIO;
 import org.apache.maven.model.Resource;
@@ -288,8 +289,9 @@ public class SCRDescriptorMojo extends AbstractMojo {
         while ( refIter.hasNext() ) {
             final Map.Entry entry = (Map.Entry)refIter.next();
             final String refName = entry.getKey().toString();
-            final JavaTag tag = (JavaTag)entry.getValue();
-            this.doReference(tag, refName, component);
+            final Object[] values = (Object[])entry.getValue();
+            final JavaTag tag = (JavaTag)values[0];
+            this.doReference(tag, refName, component, values[1].toString());
         }
 
         // pid handling
@@ -416,14 +418,19 @@ public class SCRDescriptorMojo extends AbstractMojo {
 
                 this.addInterfaces(service, services[i], description);
             } else {
+                String interfaceName = name;
                 // check if the value points to a class/interface
                 // and search through the imports
-                final JavaClassDescription serviceClass = description.getReferencedClass(name);
-                if ( serviceClass == null ) {
-                    throw new MojoExecutionException("Interface '"+ name + "' in class " + description.getName() + " does not point to a valid class/interface.");
+                // but only for local services
+                if ( description instanceof QDoxJavaClassDescription ) {
+                    final JavaClassDescription serviceClass = description.getReferencedClass(name);
+                    if ( serviceClass == null ) {
+                        throw new MojoExecutionException("Interface '"+ name + "' in class " + description.getName() + " does not point to a valid class/interface.");
+                    }
+                    interfaceName = serviceClass.getName();
                 }
                 final Interface interf = new Interface(services[i]);
-                interf.setInterfacename(serviceClass.getName());
+                interf.setInterfacename(interfaceName);
                 service.addInterface(interf);
             }
 
@@ -453,6 +460,14 @@ public class SCRDescriptorMojo extends AbstractMojo {
         }
     }
 
+    /**
+     * Test a newly found reference
+     * @param references
+     * @param reference
+     * @param defaultName
+     * @param isInspectedClass
+     * @throws MojoExecutionException
+     */
     protected void testReference(Map references, JavaTag reference, String defaultName, boolean isInspectedClass)
     throws MojoExecutionException {
         final String refName = this.getReferenceName(reference, defaultName);
@@ -465,21 +480,63 @@ public class SCRDescriptorMojo extends AbstractMojo {
                     throw new MojoExecutionException("Duplicate definition for reference " + refName + " in class " + reference.getJavaClassDescription().getName());
                 }
             } else {
-                references.put(refName, reference);
+                // ensure interface
+                String type = reference.getNamedParameter(Constants.REFERENCE_INTERFACE);
+                if (StringUtils.isEmpty(type)) {
+                    if ( reference.getField() != null ) {
+                        type = reference.getField().getType();
+                    }
+                } else if ( isInspectedClass ) {
+                    // check if the value points to a class/interface
+                    // and search through the imports
+                    final JavaClassDescription serviceClass = reference.getJavaClassDescription().getReferencedClass(type);
+                    if ( serviceClass == null ) {
+                        throw new MojoExecutionException("Interface '"+ type + "' in class " + reference.getJavaClassDescription().getName() + " does not point to a valid class/interface.");
+                    }
+                    type = serviceClass.getName();
+                }
+                references.put(refName, new Object[] {reference, type});
             }
         }
     }
 
-    protected String getReferenceName(JavaTag reference, String defaultName) {
+    protected String getReferenceName(JavaTag reference, String defaultName)
+    throws MojoExecutionException {
         String name = reference.getNamedParameter(Constants.REFERENCE_NAME);
-        if (StringUtils.isEmpty(name)) {
-            name = defaultName;
-        }
-
         if (!StringUtils.isEmpty(name)) {
             return name;
         }
-        return null;
+        name = reference.getNamedParameter(Constants.REFERENCE_NAME_REF);
+        if (!StringUtils.isEmpty(name)) {
+            final JavaField refField = this.getReferencedField(reference, name);
+            final String[] values = refField.getInitializationExpression();
+            if ( values == null || values.length == 0 ) {
+                throw new MojoExecutionException("Referenced field for " + name + " has no values for a reference name.");
+            }
+            if ( values.length > 1 ) {
+                throw new MojoExecutionException("Referenced field " + name + " has more than one value for a reference name.");
+            }
+            name = values[0];
+        }
+
+        return defaultName;
+    }
+
+    protected JavaField getReferencedField(final JavaTag tag, String ref)
+    throws MojoExecutionException {
+        int classSep = ref.lastIndexOf('.');
+        JavaField field = null;
+        if ( classSep == -1 ) {
+            // local variable
+            field = tag.getJavaClassDescription().getFieldByName(ref);
+        }
+        if ( field == null ) {
+            field = tag.getJavaClassDescription().getExternalFieldByName(ref);
+        }
+        if ( field == null ) {
+            throw new MojoExecutionException("Reference references unknown field " + ref + " in class " + tag.getJavaClassDescription().getName());
+        }
+        return field;
     }
 
     /**
@@ -487,16 +544,8 @@ public class SCRDescriptorMojo extends AbstractMojo {
      * @param defaultName
      * @param component
      */
-    protected void doReference(JavaTag reference, String name, Component component)
+    protected void doReference(JavaTag reference, String name, Component component, String type)
     throws MojoExecutionException {
-        // ensure interface
-        String type = reference.getNamedParameter(Constants.REFERENCE_INTERFACE);
-        if (StringUtils.isEmpty(type)) {
-            if ( reference.getField() != null ) {
-                type = reference.getField().getType();
-            }
-        }
-
         final Reference ref = new Reference(reference, component.getJavaClassDescription());
         ref.setName(name);
         ref.setInterfacename(type);

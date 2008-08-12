@@ -85,6 +85,8 @@ public class Constants {
 
     public static final String REFERENCE_NAME = "name";
 
+    public static final String REFERENCE_NAME_REF = "nameRef";
+
     public static final String REFERENCE_INTERFACE = "interface";
 
     public static final String REFERENCE_CARDINALITY = "cardinality";

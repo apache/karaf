@@ -84,7 +84,7 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
      */
     public JavaField getExternalFieldByName(String name)
     throws MojoExecutionException {
-        throw new MojoExecutionException("getExternalFieldByName not support for this class.");
+        throw new MojoExecutionException("getExternalFieldByName not supported for this class.");
     }
 
     /**
@@ -92,7 +92,7 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
      */
     public JavaClassDescription getReferencedClass(String referencedName)
     throws MojoExecutionException {
-        throw new MojoExecutionException("getDescription not support for this class.");
+        throw new MojoExecutionException("getReferencedClass not supported for this class.");
     }
 
     /**
