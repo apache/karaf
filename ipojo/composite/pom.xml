@@ -72,6 +72,9 @@
 						<Bundle-Description>
 							iPOJO Composititon Framework
 						</Bundle-Description>
+						<Bundle-DocURL>
+							http://felix.apache.org/site/apache-felix-ipojo.html
+						</Bundle-DocURL>
 						<Import-Package>
 							org.apache.felix.ipojo,
 							org.apache.felix.ipojo.architecture,

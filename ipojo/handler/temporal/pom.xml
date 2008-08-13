@@ -72,6 +72,12 @@
 						<Bundle-Vendor>
 							The Apache Software Foundation
 						</Bundle-Vendor>
+						<Bundle-Description>
+							iPOJO Temporal Dependency Handler
+						</Bundle-Description>
+						<Bundle-DocURL>
+							http://felix.apache.org/site/temporal-service-dependency.html
+						</Bundle-DocURL>
 						<Include-Resource>
 							META-INF/LICENCE=LICENSE,
 							META-INF/NOTICE=NOTICE

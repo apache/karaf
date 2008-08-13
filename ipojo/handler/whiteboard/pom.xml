@@ -63,9 +63,19 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
+						<Bundle-Name>${pom.name}</Bundle-Name>
+						<Bundle-SymbolicName>
+							org.apache.felix.ipojo.handler.whiteboard
+						</Bundle-SymbolicName>
 						<Bundle-Vendor>
 							The Apache Software Foundation
 						</Bundle-Vendor>
+						<Bundle-Description>
+							iPOJO White-Board Pattern Handler
+						</Bundle-Description>
+						<Bundle-DocURL>
+							http://felix.apache.org/site/white-board-pattern-handler.html
+						</Bundle-DocURL>
 						<Private-Package>
 							org.apache.felix.ipojo.handler.wbp
 						</Private-Package>

@@ -64,6 +64,12 @@
 						<Bundle-Vendor>
 							The Apache Software Foundation
 						</Bundle-Vendor>
+						<Bundle-Description>
+							iPOJO Arch command for Felix
+						</Bundle-Description>
+						<Bundle-DocURL>
+							http://felix.apache.org/site/architecture-handler.html
+						</Bundle-DocURL>
 						<Private-Package>
 							org.apache.felix.ipojo.arch
 						</Private-Package>

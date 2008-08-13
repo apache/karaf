@@ -66,6 +66,12 @@
 						<Bundle-Vendor>
 							The Apache Software Foundation
 						</Bundle-Vendor>
+						<Bundle-Description>
+							iPOJO Extender Pattern Handler
+						</Bundle-Description>
+						<Bundle-DocURL>
+							http://felix.apache.org/site/extender-pattern-handler.html
+						</Bundle-DocURL>
 						<Private-Package>
 							org.apache.felix.ipojo.handler.extender
 						</Private-Package>

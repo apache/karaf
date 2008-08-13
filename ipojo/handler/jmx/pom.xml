@@ -70,6 +70,12 @@
 						</Bundle-SymbolicName>
 						<Bundle-Vendor>The Apache Software 
 							Foundation</Bundle-Vendor>
+						<Bundle-Description>
+							iPOJO JMX Handler
+						</Bundle-Description>
+						<Bundle-DocURL>
+							http://felix.apache.org/site/ipojo-jmx-handler.html
+						</Bundle-DocURL>
 						<Include-Resource>
 							META-INF/LICENCE=LICENSE,
 							META-INF/NOTICE=NOTICE

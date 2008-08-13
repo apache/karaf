@@ -67,6 +67,12 @@
 						<Bundle-SymbolicName>
 							org.apache.felix.ipojo.handler.eventadmin
 						</Bundle-SymbolicName>
+						<Bundle-Description>
+							iPOJO Event Admin Handlers
+						</Bundle-Description>
+						<Bundle-DocURL>
+							http://felix.apache.org/site/event-admin-handlers.html
+						</Bundle-DocURL>
 						<Bundle-Vendor>The Apache Software
 							Foundation</Bundle-Vendor>
 						<Include-Resource>

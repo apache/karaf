@@ -73,6 +73,9 @@
 						<Bundle-Activator>
 							org.apache.felix.ipojo.Extender
 						</Bundle-Activator>
+						<Bundle-DocURL>
+							http://felix.apache.org/site/apache-felix-ipojo.html
+						</Bundle-DocURL>
 						<IPOJO-Extension>
 							component:org.apache.felix.ipojo.ComponentFactory,
 							handler:org.apache.felix.ipojo.HandlerManagerFactory
