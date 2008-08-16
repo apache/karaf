@@ -3225,7 +3225,6 @@ ex.printStackTrace();
     {
         // Acquire locks for all impacted bundles.
         FelixBundle[] bundles = acquireBundleRefreshLocks(targets);
-
         boolean restart = false;
 
         Bundle systemBundle = getBundle(0);

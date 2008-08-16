@@ -427,7 +427,12 @@ class BundleImpl extends FelixBundle
 
     public String toString()
     {
-        return m_felix.getBundleSymbolicName(this) + " [" + getBundleId() +"]";
+        String sym = m_felix.getBundleSymbolicName(this);
+        if (sym != null)
+        {
+            return m_felix.getBundleSymbolicName(this) + " [" + getBundleId() +"]";
+        }
+        return "[" + getBundleId() +"]";
     }
 
     Object getSignerMatcher()

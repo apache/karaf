@@ -1034,12 +1034,6 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                 targetFragment = rootModule;
                 List hostList = getPotentialHosts(targetFragment);
                 rootModule = (IModule) hostList.get(0);
-String msg = "(FRAGMENT) POSSILE HOST(S): ";
-for (int i = 0; i < hostList.size(); i++)
-{
-    msg += (hostList.get(i).toString() + " ");
-}
-m_logger.log(Logger.LOG_DEBUG, msg);
             }
 
             // Get the available fragments for the host.
@@ -1060,7 +1054,7 @@ for (Iterator iter = fragmentMap.entrySet().iterator(); iter.hasNext(); )
     String symName = (String) entry.getKey();
     IModule[] fragments = (IModule[]) entry.getValue();
     m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: "
-        + rootModule + " -> " + symName + "[" + fragments.length + "] -> " + fragments[0]);
+        + rootModule + " -> " + symName + " -> " + fragments[0]);
 }
 
             // This variable maps an unresolved module to a list of candidate
@@ -1113,14 +1107,13 @@ for (Iterator iter = fragmentMap.entrySet().iterator(); iter.hasNext(); )
                 {
                     Map.Entry entry = (Map.Entry) iter.next();
                     IModule[] fragments = (IModule[]) entry.getValue();
-                    list.add(fragments[0].getContentLoader().getContent()
-                        .getEntryAsContent(FelixConstants.CLASS_PATH_DOT));
+// TODO: FRAGMENT - For now, just attach first candidate.
+                    list.add(fragments[0]);
                 }
                 try
                 {
-                    ((ContentLoaderImpl) rootModule.getContentLoader())
-                        .setFragmentContents(
-                            (IContent[]) list.toArray(new IContent[list.size()]));
+                    ((ModuleImpl) rootModule).attachFragments(
+                        (IModule[]) list.toArray(new IModule[list.size()]));
                 }
                 catch (Exception ex)
                 {
@@ -2944,6 +2937,16 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                 }
             }
 
+            // Set fragments to null, which will remove the module from all
+            // of its dependent fragment modules.
+            try
+            {
+                ((ModuleImpl) event.getModule()).attachFragments(null);
+            }
+            catch (Exception ex)
+            {
+                m_logger.log(Logger.LOG_ERROR, "Error detaching fragments.", ex);
+            }
             // Set wires to null, which will remove the module from all
             // of its dependent modules.
             ((ModuleImpl) event.getModule()).setWires(null);

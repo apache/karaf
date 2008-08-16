@@ -22,6 +22,8 @@ import java.net.URL;
 import java.util.Enumeration;
 
 import org.apache.felix.framework.Logger;
+import org.apache.felix.framework.searchpolicy.ContentLoaderImpl;
+import org.apache.felix.framework.util.FelixConstants;
 
 public class ModuleImpl implements IModule
 {
@@ -30,6 +32,7 @@ public class ModuleImpl implements IModule
     private boolean m_removalPending = false;
     private IModuleDefinition m_md = null;
     private IContentLoader m_contentLoader = null;
+    private IModule[] m_fragments = null;
     private IWire[] m_wires = null;
     private IModule[] m_dependents = new IModule[0];
 
@@ -60,6 +63,36 @@ public class ModuleImpl implements IModule
         m_contentLoader = contentLoader;
     }
 
+    public synchronized void attachFragments(IModule[] fragments) throws Exception
+    {
+        // Remove module from old fragment dependencies.
+        // We will generally only remove module fragment
+        // dependencies when we are uninstalling the module.
+        for (int i = 0; (m_fragments != null) && (i < m_fragments.length); i++)
+        {
+            ((ModuleImpl) m_fragments[i]).removeDependent(this);
+        }
+
+        // Update the dependencies on the new fragments.
+        m_fragments = fragments;
+        if (m_fragments != null)
+        {
+            // We need to add ourself as a dependent of each fragment
+            // module. We also need to create an array of fragment contents
+            // to attach to our content loader.
+            IContent[] fragmentContents = new IContent[m_fragments.length];
+            for (int i = 0; (m_fragments != null) && (i < m_fragments.length); i++)
+            {
+                ((ModuleImpl) m_fragments[i]).addDependent(this);
+                fragmentContents[i] =
+                    m_fragments[i].getContentLoader().getContent()
+                        .getEntryAsContent(FelixConstants.CLASS_PATH_DOT);
+            }
+            // Now attach the fragment contents to our content loader.
+            ((ContentLoaderImpl) m_contentLoader).attachFragmentContents(fragmentContents);
+        }
+    }
+
     public synchronized IWire[] getWires()
     {
         return m_wires;
@@ -80,7 +113,7 @@ public class ModuleImpl implements IModule
         }
     }
 
-    public synchronized void addDependent(IModule module)
+    private synchronized void addDependent(IModule module)
     {
         // Make sure the dependent module is not already present.
         for (int i = 0; i < m_dependents.length; i++)
@@ -96,7 +129,7 @@ public class ModuleImpl implements IModule
         m_dependents = tmp;
     }
 
-    public synchronized void removeDependent(IModule module)
+    private synchronized void removeDependent(IModule module)
     {
         // Make sure the dependent module is not already present.
         for (int i = 0; i < m_dependents.length; i++)

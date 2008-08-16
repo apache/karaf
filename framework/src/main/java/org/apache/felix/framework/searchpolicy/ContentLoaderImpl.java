@@ -41,7 +41,7 @@ public class ContentLoaderImpl implements IContentLoader
     private final Logger m_logger;
     private final IContent m_content;
     private IContent[] m_contentPath;
-    private IContent[] m_fragments = null;
+    private IContent[] m_fragmentContents = null;
     private ISearchPolicy m_searchPolicy = null;
     private IURLPolicy m_urlPolicy = null;
     private ContentClassLoader m_classLoader;
@@ -66,6 +66,10 @@ public class ContentLoaderImpl implements IContentLoader
         {
             m_contentPath[i].close();
         }
+        for (int i = 0; (m_fragmentContents != null) && (i < m_fragmentContents.length); i++)
+        {
+            m_fragmentContents[i].close();
+        }
     }
 
     public IContent getContent()
@@ -89,23 +93,27 @@ public class ContentLoaderImpl implements IContentLoader
         return m_contentPath;
     }
 
-    public synchronized void setFragmentContents(IContent[] contents) throws Exception
+    public synchronized void attachFragmentContents(IContent[] fragmentContents)
+        throws Exception
     {
-        m_fragments = contents;
-// TODO: FRAGMENT - If this is not null, then we probably need to close
-//       the existing contents; this might happen when a resource is loaded
-//       from a bundle that could not be resolved.
-if (m_contentPath != null)
-{
-m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) CONTENT PATH SHOULD BE NULL = " + m_contentPath);
-}
+        // Close existing fragment contents.
+        if (m_fragmentContents != null)
+        {
+            for (int i = 0; i < m_fragmentContents.length; i++)
+            {
+                m_fragmentContents[i].close();
+            }
+        }
+        m_fragmentContents = fragmentContents;
+
+        if (m_contentPath != null)
+        {
+            for (int i = 0; i < m_contentPath.length; i++)
+            {
+                m_contentPath[i].close();
+            }
+        }
         m_contentPath = initializeContentPath();
-String msg = "(FRAGMENT) HOST CLASSPATH = ";
-for (int i = 0; i < m_contentPath.length; i++)
-{
-    msg += (m_contentPath[i].toString() + " ");
-}
-m_logger.log(Logger.LOG_DEBUG, msg);
     }
 
     public synchronized void setSearchPolicy(ISearchPolicy searchPolicy)
@@ -301,9 +309,9 @@ m_logger.log(Logger.LOG_DEBUG, msg);
     {
         List contentList = new ArrayList();
         calculateContentPath(m_content, contentList, true);
-        for (int i = 0; (m_fragments != null) && (i < m_fragments.length); i++)
+        for (int i = 0; (m_fragmentContents != null) && (i < m_fragmentContents.length); i++)
         {
-            calculateContentPath(m_fragments[i], contentList, false);
+            calculateContentPath(m_fragmentContents[i], contentList, false);
         }
         return (IContent[]) contentList.toArray(new IContent[contentList.size()]);
     }
@@ -365,10 +373,10 @@ m_logger.log(Logger.LOG_DEBUG, msg);
                 // so try to search the fragments if necessary.
                 for (int fragIdx = 0;
                     searchFragments && (embeddedContent == null)
-                        && (m_fragments != null) && (fragIdx < m_fragments.length);
+                        && (m_fragmentContents != null) && (fragIdx < m_fragmentContents.length);
                     fragIdx++)
                 {
-                    embeddedContent = m_fragments[fragIdx].getEntryAsContent(classPathStrings[i]);
+                    embeddedContent = m_fragmentContents[fragIdx].getEntryAsContent(classPathStrings[i]);
                 }
                 // If we found the embedded content, then add it to the
                 // class path content list.
