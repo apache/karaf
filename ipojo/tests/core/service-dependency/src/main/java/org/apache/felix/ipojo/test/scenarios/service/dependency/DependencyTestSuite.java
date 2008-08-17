@@ -47,6 +47,8 @@ public class DependencyTestSuite {
         ots.addTestSuite(MethodDelayedOptionalMultipleDependencies.class);
         ots.addTest(DefaultImplementationTestSuite.suite(bc));
         ots.addTestSuite(DependencyArchitectureTest.class);
+        ots.addTestSuite(ListMultipleDependencies.class);
+        ots.addTestSuite(VectorMultipleDependencies.class);
 		return ots;
 	}
 

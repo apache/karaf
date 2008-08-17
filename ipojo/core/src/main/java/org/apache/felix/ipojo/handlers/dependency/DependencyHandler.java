@@ -20,6 +20,8 @@ package org.apache.felix.ipojo.handlers.dependency;
 
 import java.util.Comparator;
 import java.util.Dictionary;
+import java.util.List;
+import java.util.Vector;
 
 import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.IPojoContext;
@@ -42,6 +44,18 @@ import org.osgi.framework.ServiceReference;
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class DependencyHandler extends PrimitiveHandler implements DependencyStateListener {
+
+    /**
+     * Dependency field type : Vector
+     * The dependency will be injected as a vector.
+     */
+    protected static final int VECTOR = 2;
+
+    /**
+     * Dependency Field Type : List.
+     * The dependency will be injected as a list.
+     */
+    protected static final int LIST = 1;
 
     /**
      * List of dependencies of the component.
@@ -198,6 +212,12 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
                 // Set the dependency to multiple
                 dep.setAggregate(true);
                 type = type.substring(0, type.length() - 2);
+            } else if (type.equals(List.class.getName())) {
+                dep.setType(LIST);
+                type = null;
+            } else if (type.equals(Vector.class.getName())) {
+                dep.setType(VECTOR);
+                type = null;
             } else {
                 if (dep.isAggregate()) {
                     throw new ConfigurationException("A required service is not correct : the field "
@@ -205,7 +225,7 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
                             + " must be an array to support aggregate injections");
                 }
             }
-            setSpecification(dep, type, true); // Throw an exception if the filed type mismatch.
+            setSpecification(dep, type, true); // Throws an exception if the field type mismatch.
         }
 
         // Check that all required info are set
@@ -220,31 +240,42 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
      * @throws ConfigurationException : the specification class cannot be loaded correctly
      */
     private void setSpecification(Dependency dep, String className, boolean error) throws ConfigurationException {
-        // We have to set the dependency in two cases : either the dependency as no specification, or the specification is different from the given
-        // one
-        if (dep.getSpecification() == null || !dep.getSpecification().getName().equals(className)) {
-            if (dep.getSpecification() != null) {
+        if (className == null) {
+            // No found type (list and vector)
+            if (dep.getSpecification() == null) {
                 if (error) {
-                    throw new ConfigurationException("A required service is not correct : the discoevered type ["
+                    throw new ConfigurationException("Cannot discover the required specification for " + dep.getField());
+                } else {
+                    // If the specification is different, warn that we will override it.
+                    warn("Cannot discover the required specification for " + dep.getField());
+                }
+            }
+        } else { // In all other case, className is not null.
+            if (dep.getSpecification() == null || !dep.getSpecification().getName().equals(className)) {
+                if (dep.getSpecification() != null) {
+                    if (error) {
+                        throw new ConfigurationException("A required service is not correct : the discovered type ["
                             + className
                             + "] and the specified (or already discovered)  service interface ["
                             + dep.getSpecification().getName()
                             + "] are not the same");
-                } else {
-                    // If the specification is different, warn that we will overide it.
-                    warn("[DependencyHandler on "
+                    } else {
+                        // If the specification is different, warn that we will override it.
+                        warn("[DependencyHandler on "
                             + getInstanceManager().getInstanceName()
                             + "] The field type ["
                             + className
                             + "] and the needed service interface ["
                             + dep.getSpecification()
                             + "] are not the same");
+                    }
                 }
-            }
-            try {
-                dep.setSpecification(getInstanceManager().getContext().getBundle().loadClass(className));
-            } catch (ClassNotFoundException e) {
-                throw new ConfigurationException("The required service interface cannot be loaded : " + e.getMessage());
+            
+                try {
+                    dep.setSpecification(getInstanceManager().getContext().getBundle().loadClass(className));
+                } catch (ClassNotFoundException e) {
+                    throw new ConfigurationException("The required service interface cannot be loaded : " + e.getMessage());
+                }
             }
         }
     }

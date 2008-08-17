@@ -36,12 +36,12 @@ public class ServiceUsage extends ThreadLocal {
          */
         int m_stack = 0;
         /**
-         * List of used objects.
+         * Object to inject.
          */
-        Object[] m_objects;
+        Object m_object;
         
         /**
-         * Increment the statck level.
+         * Increment the stack level.
          */
         public void inc() {
             m_stack++;
@@ -60,7 +60,7 @@ public class ServiceUsage extends ThreadLocal {
          * Clear the service object array.
          */
         public void clear() {
-            m_objects = null;
+            m_object = null;
         }
         
     }

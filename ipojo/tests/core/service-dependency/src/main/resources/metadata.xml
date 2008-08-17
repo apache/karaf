@@ -424,4 +424,37 @@
 		<provides />
 	</component>
 	
+	<!-- Aggregate dependency as List -->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.ListCheckService"
+		name="SimpleListCheckServiceProvider" architecture="true">
+		<requires field="fs" interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"/>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.ListCheckService"
+		name="OptionalListCheckServiceProvider"
+		architecture="true">
+		<requires interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService" field="fs" optional="true" />
+		<provides />
+	</component>
+	
+		<!-- Aggregate dependency as Vector -->
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.VectorCheckService"
+		name="SimpleVectorCheckServiceProvider" architecture="true">
+		<requires field="fs">
+			<callback type="bind" method="objectBind"/>
+			<callback type="unbind" method="objectUnbind"/>
+		</requires>
+		<provides />
+	</component>
+	<component
+		className="org.apache.felix.ipojo.test.scenarios.component.VectorCheckService"
+		name="OptionalVectorCheckServiceProvider"
+		architecture="true">
+		<requires interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService" field="fs" optional="true" />
+		<provides />
+	</component>
+	
 </ipojo>

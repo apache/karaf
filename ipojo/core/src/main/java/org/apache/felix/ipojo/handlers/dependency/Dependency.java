@@ -22,9 +22,11 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Vector;
 
 import org.apache.felix.ipojo.FieldInterceptor;
 import org.apache.felix.ipojo.InstanceManager;
@@ -79,6 +81,12 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * Thread Local.
      */
     private final ServiceUsage m_usage;
+    
+    /**
+     * Type of the object to inject.
+     * Cannot change once set.
+     */
+    private int m_type;
 
     /**
      * Nullable object.
@@ -416,42 +424,74 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * @see org.apache.felix.ipojo.FieldInterceptor#onGet(java.lang.Object, java.lang.String, java.lang.Object)
      */
     public Object onGet(Object pojo, String fieldName, Object value) {        
-     //     Initialize the thread local object is not already touched.
+        // Initialize the thread local object is not already touched.
         Usage usage = (Usage) m_usage.get();
         if (usage.m_stack == 0) { // uninitialized usage.
-            ServiceReference[] refs = super.getServiceReferences();
-            if (isAggregate()) { // If we are aggregate we get the objects.
-                if (refs == null) {
-                    usage.m_objects = (Object[]) Array.newInstance(getSpecification(), 0); // Create an empty array.
-                } else {
-                   // Use a reflective construction to avoid class cast exception. This method allow to set the component type.
-                    usage.m_objects = (Object[]) Array.newInstance(getSpecification(), refs.length); 
-                    for (int i = 0; refs != null && i < refs.length; i++) {
-                        ServiceReference ref = refs[i];
-                        usage.m_objects[i] = getService(ref);
-                    }
-                }
-            } else { // We are not aggregate.
-                // Use a reflective construction to avoid class cast exception. This method allow to set the component type.
-                usage.m_objects = (Object[]) Array.newInstance(getSpecification(), 1);
-                if (refs == null) {
-                    if (m_nullable == null && m_supportNullable) {
-                        m_handler.warn("[" + m_handler.getInstanceManager().getInstanceName() + "] The dependency is not optional, however no service object can be injected in " + m_field + " -> " + getSpecification().getName());
-                    }
-                    usage.m_objects[0] = m_nullable; // Add null if the Nullable pattern is disable.
-                } else {
-                    ServiceReference ref = getServiceReference();
-                    usage.m_objects[0] = getService(ref);
-                }
-            }
-            usage.inc(); // Start the tracking, so fix the stack level to 1
+            createServiceObject(usage);
+            usage.inc(); // Start the caching, so set the stack level to 1
             m_usage.set(usage);
         }
 
-        if (isAggregate()) { // Multiple dependency
-            return usage.m_objects;
+        return usage.m_object;
+
+    }
+
+    
+    /**
+     * Creates the object to store in the given Thread Local.
+     * This object will be injected inside the POJO field.
+     * @param usage : Thread Local to populate.
+     */
+    private void createServiceObject(Usage usage) {
+        ServiceReference[] refs = getServiceReferences();
+        if (! isAggregate()) {
+            if (refs == null) {
+                if (m_nullable == null && m_supportNullable) {
+                    m_handler.warn("[" + m_handler.getInstanceManager().getInstanceName() + "] The dependency is not optional, however no service object can be injected in " + m_field + " -> " + getSpecification().getName());
+                }
+                usage.m_object = m_nullable; // Add null if the Nullable pattern is disable.
+            } else {
+                ServiceReference ref = getServiceReference();
+                usage.m_object = getService(ref);
+            }
         } else {
-            return usage.m_objects[0];
+            if (m_type == 0) { // Array
+                if (refs == null) {
+                    usage.m_object = (Object[]) Array.newInstance(getSpecification(), 0); // Create an empty array.
+                } else {
+                   // Use a reflective construction to avoid class cast exception. This method allows setting the component type.
+                    Object[] objs = (Object[]) Array.newInstance(getSpecification(), refs.length); 
+                    for (int i = 0; refs != null && i < refs.length; i++) {
+                        ServiceReference ref = refs[i];
+                        objs[i] = getService(ref);
+                    }
+                    usage.m_object = objs;
+                }
+            } else if (m_type == 1) {
+                if (refs == null) {
+                    usage.m_object = new ArrayList(0); // Create an empty list.
+                } else {
+                   // Use a list to store service objects
+                    List objs = new ArrayList(refs.length); 
+                    for (int i = 0; refs != null && i < refs.length; i++) {
+                        ServiceReference ref = refs[i];
+                        objs.add(getService(ref));
+                    }
+                    usage.m_object = objs;
+                }
+            } else if (m_type == 2) {
+                if (refs == null) {
+                    usage.m_object = new Vector(0); // Create an empty vector.
+                } else {
+                   // Use a vector to store service objects
+                    Vector objs = new Vector(refs.length); 
+                    for (int i = 0; refs != null && i < refs.length; i++) {
+                        ServiceReference ref = refs[i];
+                        objs.add(getService(ref));
+                    }
+                    usage.m_object = objs;
+                }
+            }
         }
     }
 
@@ -536,6 +576,16 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
     
     public String getDefaultImplementation() {
         return m_di;
+    }
+
+    /**
+     * Set the type to inject.
+     * This method set the dependency as aggregate.
+     * @param type either list of vector
+     */
+    protected void setType(int type) {
+        setAggregate(true);
+        m_type = type;
     }
 
 }
