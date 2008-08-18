@@ -25,7 +25,9 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
 import org.apache.felix.ipojo.FieldInterceptor;
@@ -467,7 +469,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
                     }
                     usage.m_object = objs;
                 }
-            } else if (m_type == 1) {
+            } else if (m_type == DependencyHandler.LIST) {
                 if (refs == null) {
                     usage.m_object = new ArrayList(0); // Create an empty list.
                 } else {
@@ -479,12 +481,24 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
                     }
                     usage.m_object = objs;
                 }
-            } else if (m_type == 2) {
+            } else if (m_type == DependencyHandler.VECTOR) {
                 if (refs == null) {
                     usage.m_object = new Vector(0); // Create an empty vector.
                 } else {
                    // Use a vector to store service objects
                     Vector objs = new Vector(refs.length); 
+                    for (int i = 0; refs != null && i < refs.length; i++) {
+                        ServiceReference ref = refs[i];
+                        objs.add(getService(ref));
+                    }
+                    usage.m_object = objs;
+                }
+            } else if (m_type == DependencyHandler.SET) {
+                if (refs == null) {
+                    usage.m_object = new HashSet(0); // Create an empty vector.
+                } else {
+                   // Use a vector to store service objects
+                    Set objs = new HashSet(refs.length); 
                     for (int i = 0; refs != null && i < refs.length; i++) {
                         ServiceReference ref = refs[i];
                         objs.add(getService(ref));

@@ -49,6 +49,8 @@ public class DependencyTestSuite {
         ots.addTestSuite(DependencyArchitectureTest.class);
         ots.addTestSuite(ListMultipleDependencies.class);
         ots.addTestSuite(VectorMultipleDependencies.class);
+        ots.addTestSuite(SetMultipleDependencies.class);
+        ots.addTestSuite(CollectionMultipleDependencies.class);
 		return ots;
 	}
 

@@ -18,9 +18,11 @@
  */
 package org.apache.felix.ipojo.handlers.dependency;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
 import org.apache.felix.ipojo.ConfigurationException;
@@ -56,6 +58,12 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
      * The dependency will be injected as a list.
      */
     protected static final int LIST = 1;
+    
+    /**
+     * Dependency Field Type : Set.
+     * The dependency will be injected as a set.
+     */
+    protected static final int SET = 3;
 
     /**
      * List of dependencies of the component.
@@ -212,11 +220,14 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
                 // Set the dependency to multiple
                 dep.setAggregate(true);
                 type = type.substring(0, type.length() - 2);
-            } else if (type.equals(List.class.getName())) {
+            } else if (type.equals(List.class.getName()) || type.equals(Collection.class.getName())) {
                 dep.setType(LIST);
                 type = null;
             } else if (type.equals(Vector.class.getName())) {
                 dep.setType(VECTOR);
+                type = null;
+            } else if (type.equals(Set.class.getName())) {
+                dep.setType(SET);
                 type = null;
             } else {
                 if (dep.isAggregate()) {
