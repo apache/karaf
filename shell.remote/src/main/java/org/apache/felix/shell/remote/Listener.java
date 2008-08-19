@@ -23,6 +23,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
+import org.osgi.framework.BundleContext;
+
 
 /**
  * Implements a simple listener that will accept a single connection.
@@ -44,25 +46,11 @@ class Listener
     /**
      * Activates this listener on a listener thread (telnetconsole.Listener).
      */
-    public void activate()
+    public void activate( BundleContext bundleContext )
     {
-        //configure from system property
-        try
-        {
-            m_Port = Integer.parseInt( System.getProperty( "osgi.shell.telnet.port", "6666" ) );
-        }
-        catch ( NumberFormatException ex )
-        {
-            Activator.getServices().error( "Listener::activate()", ex );
-        }
-        try
-        {
-            m_MaxConnections = Integer.parseInt( System.getProperty( "osgi.shell.telnet.maxconn", "2" ) );
-        }
-        catch ( NumberFormatException ex )
-        {
-            Activator.getServices().error( "Listener::activate()", ex );
-        }
+        //configure from framework property
+        m_Port = getProperty( bundleContext, "osgi.shell.telnet.port", 6666 );
+        m_MaxConnections = getProperty( bundleContext, "osgi.shell.telnet.maxconn", 2 );
         m_UseCounter = new AtomicInteger( 0 );
         m_ListenerThread = new Thread( new Acceptor(), "telnetconsole.Listener" );
         m_ListenerThread.start();
@@ -157,5 +145,24 @@ class Listener
 
     private static final String INUSE_MESSAGE = "Connection refused.\r\n"
         + "All possible connections are currently being used.\r\n";
+
+
+    private int getProperty( BundleContext bundleContext, String propName, int defaultValue )
+    {
+        String propValue = bundleContext.getProperty( propName );
+        if ( propValue != null )
+        {
+            try
+            {
+                return Integer.parseInt( propValue );
+            }
+            catch ( NumberFormatException ex )
+            {
+                Activator.getServices().error( "Listener::activate()", ex );
+            }
+        }
+
+        return defaultValue;
+    }
 
 }//class Listener

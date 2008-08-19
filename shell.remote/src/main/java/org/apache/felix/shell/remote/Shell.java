@@ -17,12 +17,12 @@
 package org.apache.felix.shell.remote;
 
 
-import org.apache.felix.shell.ShellService;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
+
+import org.apache.felix.shell.ShellService;
 
 
 /**

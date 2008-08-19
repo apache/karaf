@@ -41,7 +41,7 @@ public class Activator implements BundleActivator
 
         //2. Prepare the listener
         m_Listener = new Listener();
-        m_Listener.activate();
+        m_Listener.activate( bundleContext );
     }
 
 
