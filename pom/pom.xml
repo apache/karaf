@@ -134,6 +134,7 @@
         <module>../shell.tui</module>
         <module>../shell.gui</module>
         <module>../shell.gui.plugin</module>
+        <module>../shell.remote</module>
         <module>../org.osgi.service.obr</module>
         <module>../bundlerepository</module>
         <module>../log</module>
