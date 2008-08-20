@@ -24,9 +24,6 @@ import java.io.PrintStream;
 
 /**
  * Class implementing a <tt>TerminalPrintStream</tt>.
- * <p/>
- *
- * @author Dieter Wimberger (wimpi)
  */
 class TerminalPrintStream extends PrintStream
 {

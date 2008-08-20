@@ -23,8 +23,6 @@ import org.osgi.framework.BundleContext;
 
 /**
  * Activator for the telnet console.
- *
- * @author Dieter Wimberger (wimpi)
  */
 public class Activator implements BundleActivator
 {

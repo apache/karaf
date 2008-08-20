@@ -28,9 +28,6 @@ import org.osgi.framework.BundleContext;
 
 /**
  * Implements a simple listener that will accept a single connection.
- * <p/>
- *
- * @author Dieter Wimberger (wimpi)
  */
 class Listener
 {

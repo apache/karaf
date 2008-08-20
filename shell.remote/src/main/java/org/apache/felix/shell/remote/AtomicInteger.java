@@ -19,9 +19,6 @@ package org.apache.felix.shell.remote;
 
 /**
  * Provides an atomic integer.
- * <p/>
- *
- * @author Dieter Wimberger (wimpi)
  */
 class AtomicInteger
 {

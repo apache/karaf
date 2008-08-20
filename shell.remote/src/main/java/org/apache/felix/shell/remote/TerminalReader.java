@@ -28,8 +28,6 @@ import java.io.Reader;
  * originally designed for the BeanShell Interpreter.
  * <p/>
  * Provides simple line editing (Backspace, Strg-U and a history).
- *
- * @author Dieter Wimberger (wimpi)
  */
 class TerminalReader extends Reader
 {

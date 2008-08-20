@@ -27,9 +27,6 @@ import org.apache.felix.shell.ShellService;
 
 /**
  * Implements the shell.
- * <p/>
- *
- * @author Dieter Wimberger (wimpi)
  */
 class Shell implements Runnable
 {

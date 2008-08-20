@@ -30,9 +30,6 @@ import org.osgi.service.log.LogService;
 
 /**
  * Implements a mediator pattern class for services from the OSGi container.
- * <p/>
- *
- * @author Dieter Wimberger (wimpi)
  */
 class ServiceMediator
 {

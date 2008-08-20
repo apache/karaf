@@ -21,8 +21,6 @@ package org.apache.felix.shell.remote;
  * Implements a reentrant lock.
  * <p/>
  * Public domain code.
- *
- * @author Doug Lea
  */
 class ReentrantLock
 {

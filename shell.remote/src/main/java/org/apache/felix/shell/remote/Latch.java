@@ -45,8 +45,6 @@ package org.apache.felix.shell.remote;
  *   }
  * }
  * </pre>
- *
- * @author Doug Lea
  */
 class Latch
 {
