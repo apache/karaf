@@ -172,7 +172,7 @@ public class ModuleImpl implements IModule
         m_removalPending = removalPending;
     }
 
-    public Class getClass(String name)
+    public Class getClass(String name) throws ClassNotFoundException
     {
         try
         {
@@ -184,8 +184,8 @@ public class ModuleImpl implements IModule
                 Logger.LOG_WARNING,
                 ex.getMessage(),
                 ex);
+            throw ex;
         }
-        return null;
     }
 
     public URL getResource(String name)

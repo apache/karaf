@@ -30,7 +30,7 @@ public interface IModule
 
     public boolean isRemovalPending();
 
-    public Class getClass(String name);
+    public Class getClass(String name) throws ClassNotFoundException;
     public URL getResource(String name);
     public Enumeration getResources(String name);
 }

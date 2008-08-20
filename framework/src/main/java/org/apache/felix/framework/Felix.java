@@ -1522,12 +1522,7 @@ ex.printStackTrace();
                 throw new ClassNotFoundException(name);
             }
         }
-        Class clazz = bundle.getInfo().getCurrentModule().getClass(name);
-        if (clazz == null)
-        {
-            throw new ClassNotFoundException(name);
-        }
-        return clazz;
+        return bundle.getInfo().getCurrentModule().getClass(name);
     }
 
     /**
@@ -2937,7 +2932,14 @@ ex.printStackTrace();
                 }
             }
         }
-        return (getInfo().getCurrentModule().getClass(clazz.getName()) == clazz) ? this : null;
+        try 
+        {
+            return (getInfo().getCurrentModule().getClass(clazz.getName()) == clazz) ? this : null;
+        }
+        catch(ClassNotFoundException ex) 
+        {
+            return null;
+        }
     }
 
     /**
@@ -3549,12 +3551,16 @@ ex.printStackTrace();
             if (className != null)
             {
                 className = className.trim();
-                Class clazz = info.getCurrentModule().getClass(className);
-                if (clazz == null)
+                Class clazz;
+                try 
                 {
-                    throw new BundleException("Not found: "
-                        + className, new ClassNotFoundException(className));
+                    clazz = info.getCurrentModule().getClass(className);
                 }
+                catch (ClassNotFoundException ex) {
+                    throw new BundleException("Not found: "
+                        + className, ex);
+                }
+
                 activator = (BundleActivator) clazz.newInstance();
             }
         }
