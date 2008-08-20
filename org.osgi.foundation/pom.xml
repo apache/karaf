@@ -30,5 +30,11 @@
   <modelVersion>4.0.0</modelVersion>
   <name>OSGi R4 Foundation EE</name>
   <artifactId>org.osgi.foundation</artifactId>
-  <version>1.1.1-SNAPSHOT</version>
+  <version>1.2.0</version>
+
+  <scm>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.osgi.foundation-1.2.0</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.osgi.foundation-1.2.0</developerConnection>
+    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.osgi.foundation-1.2.0</url>
+  </scm>
 </project>
