@@ -40,7 +40,6 @@ function renderBundle( /* Array of Data Objects */ bundleData )
     footer( columns );
 }
 
-
 function installForm( /* int */ startLevel )
 {
     document.write( "<form method='post' enctype='multipart/form-data'>" );
