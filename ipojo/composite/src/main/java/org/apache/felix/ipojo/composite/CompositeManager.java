@@ -131,7 +131,7 @@ public class CompositeManager implements ComponentInstance, InstanceStateListene
      */
     public void configure(Element metadata, Dictionary configuration) throws ConfigurationException {        
         // Add the name
-        m_name = (String) configuration.get("name");
+        m_name = (String) configuration.get("instance.name");
         
         // Create the standard handlers and add these handlers to the list
         for (int i = 0; i < m_handlers.length; i++) {

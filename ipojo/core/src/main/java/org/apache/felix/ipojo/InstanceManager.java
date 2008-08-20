@@ -147,7 +147,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
         m_className = metadata.getAttribute("classname");
 
         // Add the name
-        m_name = (String) configuration.get("name");
+        m_name = (String) configuration.get("instance.name");
 
         // Get the factory method if presents.
         m_factoryMethod = (String) metadata.getAttribute("factory-method");
@@ -794,8 +794,8 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
             initialValue = m_fields.get(fieldName);
         }
         Object result = initialValue;
+        boolean hasChanged = false;
         // Get the list of registered handlers
-
         FieldInterceptor[] list = (FieldInterceptor[]) m_fieldRegistration.get(fieldName); // Immutable list.
         for (int i = 0; list != null && i < list.length; i++) {
             // Call onGet outside of a synchronized block.
@@ -804,6 +804,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
                 continue; // Non-binding case (default implementation).
             } else {
                 if (result != initialValue) {
+                    //TODO analyze impact of removing conflict detection
                     if ((handlerResult != null && !handlerResult.equals(result)) || (result != null && handlerResult == null)) {
                         m_factory.getLogger().log(
                                                   Logger.WARNING,
@@ -812,11 +813,14 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
                     }
                 }
                 result = handlerResult;
+                hasChanged = true;
             }
         }
-
-        if ((result != null && !result.equals(initialValue)) || (result == null && initialValue != null)) {
+        // TODO use a boolean to speed up the test
+        //if ((result != null && !result.equals(initialValue)) || (result == null && initialValue != null)) {
+        if (hasChanged) {
             // A change occurs => notify the change
+            //TODO consider just changing the reference, however multiple thread can be an issue
             synchronized (this) {
                 m_fields.put(fieldName, result);
             }

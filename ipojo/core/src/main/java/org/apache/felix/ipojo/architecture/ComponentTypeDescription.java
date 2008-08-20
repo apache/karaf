@@ -109,9 +109,9 @@ public class ComponentTypeDescription {
      */
     public void addProperty(PropertyDescription pd) { //NOPMD remove the instance name of the 'name' property.
         String name = pd.getName();
-        if ("name".equals(name)) {
-            pd = new PropertyDescription(name, pd.getType(), null); //NOPMD Instance name case.
-        } 
+//        if ("name".equals(name)) {
+//            pd = new PropertyDescription(name, pd.getType(), null); //NOPMD Instance name case.
+//        } 
         
         // Check if the property is not already in the array
         for (int i = 0; i < m_properties.length; i++) {

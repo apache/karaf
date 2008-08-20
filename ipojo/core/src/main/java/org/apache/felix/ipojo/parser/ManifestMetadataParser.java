@@ -85,7 +85,7 @@ public class ManifestMetadataParser {
         String name = instance.getAttribute("name");
         String comp = instance.getAttribute("component");
         if (name != null) {
-            dict.put("name", instance.getAttribute("name"));
+            dict.put("instance.name", instance.getAttribute("name"));
         }
 
         if (comp == null) {
@@ -115,6 +115,7 @@ public class ManifestMetadataParser {
         if (name == null) {
             throw new ParseException("A property does not have the 'name' attribute: " + prop);
         }
+        
         //case : the property element has no 'value' attribute
         if (value == null) {
             // Recursive case

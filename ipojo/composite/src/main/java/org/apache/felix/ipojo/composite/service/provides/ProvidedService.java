@@ -199,7 +199,7 @@ public class ProvidedService implements DependencyStateListener {
      */
     public void register() {
         Properties props = new Properties();
-        props.put("name", m_instanceName);
+        props.put("instance.name", m_instanceName);
         List fields = m_composition.getFieldList();
         for (int i = 0; i < fields.size(); i++) {
             FieldMetadata field = (FieldMetadata) fields.get(i);

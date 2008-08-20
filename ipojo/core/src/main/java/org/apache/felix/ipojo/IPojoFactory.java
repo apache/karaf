@@ -229,14 +229,19 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
         }
 
         String name;
-        if (configuration.get("name") == null) {
+        if (configuration.get("instance.name") == null && configuration.get("name") == null) { // Support both instance.name & name
             name = generateName();
-            configuration.put("name", name);
+            configuration.put("instance.name", name);
         } else {
-            name = (String) configuration.get("name");
+            name = (String) configuration.get("instance.name");
+            if (name == null) {
+                name = (String) configuration.get("name");
+                getLogger().log(Logger.WARNING, "The 'name' (" + name + ") attribute, used as the instance name, is deprecated, please use the 'instance.name' attribute");
+                configuration.put("instance.name", name);
+            }
             if (m_instancesName.contains(name)) {
                 m_logger.log(Logger.ERROR, "The configuration is not acceptable : Name already used");
-                throw new UnacceptableConfiguration("Name already used : " + name);
+                throw new UnacceptableConfiguration(getFactoryName() + " : Name already used : " + name);
             }
         }
         // Here we are sure to be valid until the end of the method.
@@ -397,10 +402,14 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
      * @see org.apache.felix.ipojo.Factory#reconfigure(java.util.Dictionary)
      */
     public synchronized void reconfigure(Dictionary properties) throws UnacceptableConfiguration, MissingHandlerException {
-        if (properties == null || properties.get("name") == null) {
-            throw new UnacceptableConfiguration("The configuration does not contains the \"name\" property");
+        if (properties == null || (properties.get("instance.name") == null && properties.get("name") == null)) { // Support both instance.name and name
+            throw new UnacceptableConfiguration("The configuration does not contains the \"instance.name\" property");
         }
-        String name = (String) properties.get("name");
+
+        String name = (String) properties.get("instance.name");
+        if (name == null) {
+            name = (String) properties.get("name");
+        }
         
         ComponentInstance instance = (ComponentInstance) m_componentInstances.get(name);
         if (instance == null) { // The instance does not exists.
@@ -523,7 +532,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
         
         if (instance == null) {
             try {
-                properties.put("name", name); // Add the name in the configuration
+                properties.put("instance.name", name); // Add the name in the configuration
                 // If an instance with this name was created before, this creation will failed.
                 createComponentInstance(properties);
             } catch (UnacceptableConfiguration e) {
@@ -538,7 +547,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
             }
         } else {
             try {
-                properties.put("name", name); // Add the name in the configuration
+                properties.put("instance.name", name); // Add the name in the configuration
                 reconfigure(properties); // re-configure the component
             } catch (UnacceptableConfiguration e) {
                 m_logger.log(Logger.ERROR, "The configuration is not acceptable : " + e.getMessage());

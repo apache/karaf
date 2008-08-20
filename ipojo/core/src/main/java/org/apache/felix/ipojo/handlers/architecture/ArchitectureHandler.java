@@ -43,7 +43,7 @@ public class ArchitectureHandler extends PrimitiveHandler implements Architectur
      * @see org.apache.felix.ipojo.Handler#configure(org.apache.felix.ipojo.metadata.Element, java.util.Dictionary)
      */
     public void configure(Element metadata, Dictionary configuration) {
-        m_name = (String) configuration.get("name");
+        m_name = (String) configuration.get("instance.name");
     }
 
     /**

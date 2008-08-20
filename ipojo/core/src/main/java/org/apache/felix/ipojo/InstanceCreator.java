@@ -295,11 +295,17 @@ public class InstanceCreator implements FactoryStateListener {
                 // Test factory accessibility
                 if (factory.m_isPublic || factory.getBundleContext().getBundle().getBundleId() == m_bundleId) {
                     // Test the configuration validity.
-                    if (factory.isAcceptable(m_configuration)) {
+                    try {
+                        factory.checkAcceptability(m_configuration);
                         return true;
-                    } else {
+                    } catch (UnacceptableConfiguration e) {
                         m_logger.log(Logger.ERROR, "An instance can be bound to a matching factory, however the configuration seems unacceptable : "
-                                + m_configuration);
+                                + e.getMessage());
+                        return false;
+                    } catch (MissingHandlerException e) {
+                        m_logger.log(Logger.ERROR, "An instance can be bound to a matching factory, but this factory cannot be used : "
+                                + e.getMessage());
+                        return false;
                     }
                 }
             }
