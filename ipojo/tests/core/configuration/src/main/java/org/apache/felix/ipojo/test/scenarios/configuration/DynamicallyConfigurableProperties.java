@@ -36,7 +36,7 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
 		String type = "CONFIG-FooProviderType-3";
 		
 		Properties p1 = new Properties();
-		p1.put("name", "instance");
+		p1.put("instance.name","instance");
 		p1.put("foo", "foo");
 		p1.put("bar", "2");
 		p1.put("baz", "baz");

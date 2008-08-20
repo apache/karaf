@@ -37,32 +37,32 @@ public class SimpleDependencies extends OSGiTestCase {
 	public void setUp() {
 		try {
 			Properties prov = new Properties();
-			prov.put("name", "FooProvider");
+			prov.put("instance.name","FooProvider");
 			fooProvider = Utils.getFactoryByName(context, "FooProviderType-1").createComponentInstance(prov);
 			fooProvider.stop();
 		
 			Properties i1 = new Properties();
-			i1.put("name", "Simple");
+			i1.put("instance.name","Simple");
 			instance1 = Utils.getFactoryByName(context, "SimpleCheckServiceProvider").createComponentInstance(i1);
 		
 			Properties i2 = new Properties();
-			i2.put("name", "Void");
+			i2.put("instance.name","Void");
 			instance2 = Utils.getFactoryByName(context, "VoidCheckServiceProvider").createComponentInstance(i2);
 		
 			Properties i3 = new Properties();
-			i3.put("name", "Object");
+			i3.put("instance.name","Object");
 			instance3 = Utils.getFactoryByName(context, "ObjectCheckServiceProvider").createComponentInstance(i3);
 		
 			Properties i4 = new Properties();
-			i4.put("name", "Ref");
+			i4.put("instance.name","Ref");
 			instance4 = Utils.getFactoryByName(context, "RefCheckServiceProvider").createComponentInstance(i4);
 			
 			Properties i5 = new Properties();
-            i5.put("name", "Both");
+            i5.put("instance.name","Both");
             instance5 = Utils.getFactoryByName(context, "BothCheckServiceProvider").createComponentInstance(i5);
             
             Properties i6 = new Properties();
-            i6.put("name", "Double");
+            i6.put("instance.name","Double");
             instance6 = Utils.getFactoryByName(context, "DoubleCheckServiceProvider").createComponentInstance(i6);
 		} catch(Exception e) { 
 		    e.printStackTrace();

@@ -94,4 +94,21 @@
 	
 	<!-- Try calling super constructors -->
 	 <component className="org.apache.felix.ipojo.test.scenarios.component.CallSuperConstructor" immediate="true"/>
+
+	<!-- Nested & Inner classes -->
+	<component name="inners" classname="org.apache.felix.ipojo.test.scenarios.component.InnerClasses">
+		<provides>
+			<property field="privateObject"/>
+			<property field="privateInt"/>
+			
+			<property field="protectedObject"/>
+			<property field="protectedInt"/>
+			
+			<property field="packageObject"/>
+			<property field="packageInt"/>
+			
+			<property field="publicObject"/>
+			<property field="publicInt"/>
+		</provides>
+	</component>
 </ipojo>

@@ -39,9 +39,9 @@ public class MultipleExport extends OSGiTestCase {
 		assertNotNull("Check fooProvider availability", fooProvider);
 		
 		Properties p1 = new Properties();
-		p1.put("name", "foo1");
+		p1.put("instance.name","foo1");
 		Properties p2 = new Properties();
-		p2.put("name", "foo2");
+		p2.put("instance.name","foo2");
 		
 		try {
 			foo1 = fooProvider.createComponentInstance(p1);
@@ -55,7 +55,7 @@ public class MultipleExport extends OSGiTestCase {
 		
 		Factory factory = Utils.getFactoryByName(context, "composite.export.3");
 		Properties props = new Properties();
-		props.put("name", "export");
+		props.put("instance.name","export");
 		try {
 			export3 = factory.createComponentInstance(props);
 		} catch(Exception e) {

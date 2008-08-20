@@ -35,11 +35,11 @@ public class StaticProps extends OSGiTestCase {
 		String type = "PS-FooProviderType-2";
 		
 		Properties p1 = new Properties();
-		p1.put("name", "FooProvider-1");
+		p1.put("instance.name","FooProvider-1");
 		fooProvider1 = Utils.getComponentInstance(context, type, p1);
 		
 		Properties p2 = new Properties();
-		p2.put("name", "FooProvider-2");
+		p2.put("instance.name","FooProvider-2");
 		p2.put("int", new Integer(4));
 		p2.put("long", new Long(42));
 		p2.put("string", new String("bar"));

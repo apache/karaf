@@ -36,7 +36,7 @@ public class TestMethodProperties extends OSGiTestCase {
     public void setUp() {
         Factory fact = Utils.getFactoryByName(context, "CONFIG-MethodConfigurableCheckService");
         Properties props = new Properties();
-        props.put("name", "under-test");
+        props.put("instance.name","under-test");
         props.put("b", "1");
         props.put("s", "1");
         props.put("i", "1");
@@ -63,7 +63,7 @@ public class TestMethodProperties extends OSGiTestCase {
         }
         
         Properties props2 = new Properties();
-        props2.put("name", "under-test-2");
+        props2.put("instance.name","under-test-2");
         props2.put("b", new Byte("1"));
         props2.put("s", new Short("1"));
         props2.put("i", new Integer("1"));
@@ -1094,7 +1094,6 @@ public class TestMethodProperties extends OSGiTestCase {
     
     private void reconfigure(ComponentInstance ci) {
         Properties props2 = new Properties();
-        props2.put("name", "under-test");
         props2.put("b", new Byte("2"));
         props2.put("s", new Short("2"));
         props2.put("i", new Integer("2"));
@@ -1119,7 +1118,6 @@ public class TestMethodProperties extends OSGiTestCase {
     
     private void reconfigureString(ComponentInstance ci) {
         Properties props2 = new Properties();
-        props2.put("name", "under-test");
         props2.put("b", "2");
         props2.put("s", "2");
         props2.put("i", "2");

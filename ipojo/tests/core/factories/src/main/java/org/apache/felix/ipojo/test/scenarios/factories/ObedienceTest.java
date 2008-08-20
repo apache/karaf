@@ -41,9 +41,9 @@ public class ObedienceTest extends OSGiTestCase {
 		assertNotNull("Check factory existing", factory);
 		
 		Properties props1 = new Properties();
-		props1.put("name", "foo1");
+		props1.put("instance.name","foo1");
 		Properties props2 = new Properties();
-		props2.put("name", "foo2");
+		props2.put("instance.name","foo2");
 		
 		ComponentInstance ci1 = null, ci2 = null;
 		try {

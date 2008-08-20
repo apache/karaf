@@ -298,33 +298,38 @@ public class GoodTests extends OSGiTestCase {
         m_topicsProviders = new DonutProvider[TOPICS_LIST.length];
 
         // Create the (asynchronous) donut provider
-        properties.put("name", "asynchronous donut provider");
+        properties.put("instance.name","asynchronous donut provider");
         m_providersInstances[0] = m_utils.getDonutProviderFactory()
                 .createComponentInstance(properties);
 
         // Create the synchronous donut provider
-        properties.put("name", "synchronous donut provider");
+        properties = new Hashtable();
+        properties.put("instance.name","synchronous donut provider");
         m_providersInstances[1] = m_utils.getSynchronousDonutProviderFactory()
                 .createComponentInstance(properties);
 
         // Create the (asynchronous) donut event provider
-        properties.put("name", "asynchronous donut event provider");
+        properties = new Hashtable();
+        properties.put("instance.name","asynchronous donut event provider");
         m_providersInstances[2] = m_utils.getDonutEventProviderFactory()
                 .createComponentInstance(properties);
 
         // Create the synchronous donut event provider
-        properties.put("name", "synchronous donut event provider");
+        properties = new Hashtable();
+        properties.put("instance.name","synchronous donut event provider");
         m_providersInstances[3] = m_utils
                 .getSynchronousDonutEventProviderFactory()
                 .createComponentInstance(properties);
 
         // Create the (asynchronous) event provider
-        properties.put("name", "asynchronous event provider");
+        properties = new Hashtable();
+        properties.put("instance.name","asynchronous event provider");
         m_providersInstances[4] = m_utils.getEventProviderFactory()
                 .createComponentInstance(properties);
 
         // Create the synchronous event provider
-        properties.put("name", "synchronous event provider");
+        properties = new Hashtable();
+        properties.put("instance.name","synchronous event provider");
         m_providersInstances[5] = m_utils.getSynchronousEventProviderFactory()
                 .createComponentInstance(properties);
 
@@ -362,38 +367,43 @@ public class GoodTests extends OSGiTestCase {
         m_topicsConsumers = new DonutConsumer[TOPICS_LIST.length];
 
         // Create the (quick) donut consumer
-        properties.put("name", "quick donut consumer");
+        properties = new Hashtable();
+        properties.put("instance.name","quick donut consumer");
         m_consumersInstances[0] = m_utils.getDonutConsumerFactory()
                 .createComponentInstance(properties);
 
         // Create the (quick) donut event consumer
-        properties.put("name", "quick donut event consumer");
+        properties = new Hashtable();
+        properties.put("instance.name","quick donut event consumer");
         m_consumersInstances[1] = m_utils.getDonutEventConsumerFactory()
                 .createComponentInstance(properties);
 
         // Create the (quick) event consumer
-        properties.put("name", "quick event consumer");
+        properties = new Hashtable();
+        properties.put("instance.name","quick event consumer");
         m_consumersInstances[2] = m_utils.getEventConsumerFactory()
                 .createComponentInstance(properties);
 
-        properties.put("slow", Boolean.TRUE);
-
         // Create the slow donut consumer
-        properties.put("name", "slow donut consumer");
+        properties = new Hashtable();
+        properties.put("slow", Boolean.TRUE);
+        properties.put("instance.name","slow donut consumer");
         m_consumersInstances[3] = m_utils.getDonutConsumerFactory()
                 .createComponentInstance(properties);
 
         // Create the slow donut event consumer
-        properties.put("name", "slow donut event consumer");
+        properties = new Hashtable();
+        properties.put("instance.name","slow donut event consumer");
+        properties.put("slow", Boolean.TRUE);
         m_consumersInstances[4] = m_utils.getDonutEventConsumerFactory()
                 .createComponentInstance(properties);
 
         // Create the slow event consumer
-        properties.put("name", "slow event consumer");
+        properties = new Hashtable();
+        properties.put("instance.name","slow event consumer");
+        properties.put("slow", Boolean.TRUE);
         m_consumersInstances[5] = m_utils.getEventConsumerFactory()
                 .createComponentInstance(properties);
-
-        properties.remove("slow");
 
         // Get all the services references
         for (int i = 0; i < NUMBER_OF_CONSUMERS; i++) {
@@ -408,7 +418,8 @@ public class GoodTests extends OSGiTestCase {
         m_quickConsumers[2] = m_consumers[2];
 
         // Create the event tracker
-        properties.put("name", "event tracker");
+        properties = new Hashtable();
+        properties.put("instance.name","event tracker");
         m_eventTrackerInstance = m_utils.getEventTrackerFactory()
                 .createComponentInstance(properties);
         m_eventTrackerService = IPojoTestUtils.getServiceReferenceByName(
@@ -421,8 +432,9 @@ public class GoodTests extends OSGiTestCase {
         Dictionary filter = new Hashtable();
         for (int i = 0; i < Donut.FLAVOURS.length; i++) {
             String flavour = Donut.FLAVOURS[i];
+            properties = new Hashtable();
             filter.put("donut-event-subscriber", "(flavour=" + flavour + ")");
-            properties.put("name", flavour + " donut consumer");
+            properties.put("instance.name",flavour + " donut consumer");
             properties.put("event.filter", filter);
             m_filteredConsumersInstances[i] = m_utils
                     .getDonutEventConsumerFactory().createComponentInstance(
@@ -434,18 +446,17 @@ public class GoodTests extends OSGiTestCase {
             m_filteredConsumers[i] = (DonutConsumer) context
                     .getService(m_filteredConsumersServices[i]);
         }
-        properties.remove("event.filter");
 
         // Create the providers and consumers selling and receiving donuts on
         // specific topics
         Dictionary topics = new Hashtable();
         for (int i = 0; i < TOPICS_LIST.length; i++) {
             String topicsString = TOPICS_LIST[i];
-
+            properties = new Hashtable();
             // Create provider
             topics.put("donut-publisher", topicsString);
             properties.put("event.topics", topics);
-            properties.put("name", topicsString + " donut provider");
+            properties.put("instance.name",topicsString + " donut provider");
             m_topicsProvidersInstances[i] = m_utils
                     .getSynchronousDonutProviderFactory()
                     .createComponentInstance(properties);
@@ -455,12 +466,12 @@ public class GoodTests extends OSGiTestCase {
                             .getInstanceName());
             m_topicsProviders[i] = (DonutProvider) context
                     .getService(m_topicsProvidersServices[i]);
-            topics.remove("donut-publisher");
 
             // Create consumer
+            properties = new Hashtable();
             topics.put("donut-subscriber", topicsString);
             properties.put("event.topics", topics);
-            properties.put("name", topicsString + " donut consumer");
+            properties.put("instance.name",topicsString + " donut consumer");
 
             m_topicsConsumersInstances[i] = m_utils.getDonutConsumerFactory()
                     .createComponentInstance(properties);
@@ -472,7 +483,7 @@ public class GoodTests extends OSGiTestCase {
                     .getService(m_topicsConsumersServices[i]);
             topics.remove("donut-subscriber");
         }
-        properties.remove("event.topics");
+
         m_fooProvider = m_topicsProviders[0];
         m_barProvider = m_topicsProviders[1];
         m_nutProvider = m_topicsProviders[2];

@@ -69,7 +69,7 @@ public class FactoryManagementTest extends OSGiTestCase {
 	public void setUp() {
 		emptyFactory = Utils.getFactoryByName(context, "composite.empty");
 		Properties props = new Properties();
-		props.put("name", "empty-1");
+		props.put("instance.name","empty-1");
 		try {
 			empty = emptyFactory.createComponentInstance(props);
 		} catch (Exception e) { fail("Cannot create empty instance " + e.getMessage()); }
@@ -100,7 +100,7 @@ public class FactoryManagementTest extends OSGiTestCase {
 		
 		Factory fact = Utils.getFactoryByName(sc1, "composite.empty");
 		Properties p = new Properties();
-		p.put("name", "empty2");
+		p.put("instance.name","empty2");
 		ComponentInstance empty2 = null;
 		try {
 			empty2 = fact.createComponentInstance(p);
@@ -130,7 +130,7 @@ public class FactoryManagementTest extends OSGiTestCase {
 		
 		Factory fact = Utils.getFactoryByName(sc1, "composite.empty");
 		Properties p = new Properties();
-		p.put("name", "empty2");
+		p.put("instance.name","empty2");
 		ComponentInstance empty2 = null;
 		try {
 			empty2 = fact.createComponentInstance(p);
@@ -207,7 +207,7 @@ public class FactoryManagementTest extends OSGiTestCase {
 		ServiceContext sc1 = Utils.getServiceContext(empty);		
 		Factory fact = Utils.getFactoryByName(sc1, "composite.empty");
 		Properties p = new Properties();
-		p.put("name", "empty2");
+		p.put("instance.name","empty2");
 		ComponentInstance empty2 = null;
 		try {
 			empty2 = fact.createComponentInstance(p);
@@ -219,7 +219,7 @@ public class FactoryManagementTest extends OSGiTestCase {
 		
 		Factory fact1 = Utils.getFactoryByName(sc2, "COMPO-SimpleCheckServiceProvider");
 		Properties props = new Properties();
-		props.put("name", "client");
+		props.put("instance.name","client");
 		ComponentInstance client = null;
 		try {
 			client = fact1.createComponentInstance(props);
@@ -227,7 +227,7 @@ public class FactoryManagementTest extends OSGiTestCase {
 		
 		Factory fact2 = Utils.getFactoryByName(sc2, "COMPO-FooProviderType-1");
 		Properties props2 = new Properties();
-		props2.put("name", "provider");
+		props2.put("instance.name","provider");
 		ComponentInstance provider = null;
 		try {
 			provider = fact2.createComponentInstance(props2);

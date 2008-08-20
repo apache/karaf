@@ -35,7 +35,7 @@ public class TestBothProperties extends OSGiTestCase {
     public void setUp() {
         Factory fact = Utils.getFactoryByName(context, "CONFIG-BothConfigurableCheckService");
         Properties props = new Properties();
-        props.put("name", "under-test");
+        props.put("instance.name","under-test");
         props.put("b", "1");
         props.put("s", "1");
         props.put("i", "1");
@@ -567,7 +567,7 @@ public class TestBothProperties extends OSGiTestCase {
     
     private void reconfigure() {
         Properties props2 = new Properties();
-        props2.put("name", "under-test");
+        props2.put("instance.name","under-test");
         props2.put("b", new Byte("2"));
         props2.put("s", new Short("2"));
         props2.put("i", new Integer("2"));
@@ -592,7 +592,7 @@ public class TestBothProperties extends OSGiTestCase {
     
     private void reconfigureString() {
         Properties props2 = new Properties();
-        props2.put("name", "under-test");
+        props2.put("instance.name","under-test");
         props2.put("b", "2");
         props2.put("s", "2");
         props2.put("i", "2");

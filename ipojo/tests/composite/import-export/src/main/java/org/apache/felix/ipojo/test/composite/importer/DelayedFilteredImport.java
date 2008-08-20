@@ -37,7 +37,7 @@ public class DelayedFilteredImport extends OSGiTestCase {
 	public void setUp() {
 		
 		Properties p = new Properties();
-		p.put("name", "importer");
+		p.put("instance.name","importer");
 		Factory compFact = Utils.getFactoryByName(context, "composite.requires.1");
 		try {
 			import1 = compFact.createComponentInstance(p);
@@ -51,9 +51,9 @@ public class DelayedFilteredImport extends OSGiTestCase {
 		assertNotNull("Check fooProvider availability", fooProvider);
 		
 		Properties p1 = new Properties();
-		p1.put("name", "foo1");
+		p1.put("instance.name","foo1");
 		Properties p2 = new Properties();
-		p2.put("name", "foo2");
+		p2.put("instance.name","foo2");
 		try {
 			foo1 = fooProvider.createComponentInstance(p1);
 			foo2 = fooProvider.createComponentInstance(p2);

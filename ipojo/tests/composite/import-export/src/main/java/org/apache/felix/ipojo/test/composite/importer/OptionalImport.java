@@ -38,7 +38,7 @@ public class OptionalImport extends OSGiTestCase {
 		assertNotNull("Check fooProvider availability", fooProvider);
 		
 		Properties p = new Properties();
-		p.put("name", "importer");
+		p.put("instance.name","importer");
 		Factory compFact = Utils.getFactoryByName(context, "composite.requires.3");
 		try {
 			import3 = compFact.createComponentInstance(p);
@@ -58,7 +58,7 @@ public class OptionalImport extends OSGiTestCase {
 		
 		ComponentInstance foo = null;
 		Properties p = new Properties();
-		p.put("name", "foo");
+		p.put("instance.name","foo");
 		try {
 			foo = fooProvider.createComponentInstance(p);
 		} catch(Exception e) {
@@ -67,7 +67,7 @@ public class OptionalImport extends OSGiTestCase {
 		
 		ComponentInstance foo2 = null;
 		Properties p2 = new Properties();
-		p2.put("name", "foo2");
+		p2.put("instance.name","foo2");
 		try {
 			foo2 = fooProvider.createComponentInstance(p2);
 		} catch(Exception e) {
@@ -122,7 +122,7 @@ public class OptionalImport extends OSGiTestCase {
 		
 		ComponentInstance foo1 = null;
 		Properties p = new Properties();
-		p.put("name", "foo");
+		p.put("instance.name","foo");
 		try {
 			foo1 = fooProvider.createComponentInstance(p);
 		} catch(Exception e) {
@@ -131,7 +131,7 @@ public class OptionalImport extends OSGiTestCase {
 		
 		ComponentInstance foo2 = null;
 		Properties p2 = new Properties();
-		p2.put("name", "foo2");
+		p2.put("instance.name","foo2");
 		try {
 			foo2 = fooProvider.createComponentInstance(p2);
 		} catch(Exception e) {

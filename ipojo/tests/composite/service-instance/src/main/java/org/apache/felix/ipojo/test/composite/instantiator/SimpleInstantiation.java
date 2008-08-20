@@ -40,7 +40,7 @@ public class SimpleInstantiation extends OSGiTestCase {
 		bar1Factory = (ComponentFactory) Utils.getFactoryByName(context, "composite.bar.1");
 		Factory fact = Utils.getFactoryByName(context, "composite.empty");
 		Properties props = new Properties();
-		props.put("name", "empty-X");
+		props.put("instance.name","empty-X");
 		try {
 			empty = fact.createComponentInstance(props);
 		} catch(Exception e) {
@@ -55,7 +55,7 @@ public class SimpleInstantiation extends OSGiTestCase {
 	
 	public void testCreation() {
 		Properties props = new Properties();
-		props.put("name", "under");
+		props.put("instance.name","under");
 		ComponentInstance under = null;
 		try {
 			under = bar1Factory.createComponentInstance(props);
@@ -69,7 +69,7 @@ public class SimpleInstantiation extends OSGiTestCase {
 	
 	public void testServiceAvailability() {
 		Properties props = new Properties();
-		props.put("name", "under");
+		props.put("instance.name","under");
 		ComponentInstance under = null;
 		try {
 			under = bar1Factory.createComponentInstance(props);
@@ -86,7 +86,7 @@ public class SimpleInstantiation extends OSGiTestCase {
 	public void testCreationLevel2() {
 		ServiceContext sc = Utils.getServiceContext(empty);
 		Properties props = new Properties();
-		props.put("name", "under");
+		props.put("instance.name","under");
 		ComponentInstance under = null;
 		try {
 			under = bar1Factory.createComponentInstance(props, sc);
@@ -100,7 +100,7 @@ public class SimpleInstantiation extends OSGiTestCase {
 	public void testServiceAvailabilityLevel2() {
 		ServiceContext sc = Utils.getServiceContext(empty);
 		Properties props = new Properties();
-		props.put("name", "under-X");
+		props.put("instance.name","under-X");
 		ComponentInstance under = null;
 		try {
 			under = bar1Factory.createComponentInstance(props, sc);
@@ -116,7 +116,7 @@ public class SimpleInstantiation extends OSGiTestCase {
 	
 	public void testFactoryManagement() {
 		Properties props = new Properties();
-		props.put("name", "under");
+		props.put("instance.name","under");
 		ComponentInstance under = null;
 		try {
 			under = bar1Factory.createComponentInstance(props);
@@ -150,7 +150,7 @@ public class SimpleInstantiation extends OSGiTestCase {
 	public void testFactoryManagementLevel2() {
 		ServiceContext sc = Utils.getServiceContext(empty);
 		Properties props = new Properties();
-		props.put("name", "under");
+		props.put("instance.name","under");
 		ComponentInstance under = null;
 		try {
 			under = bar1Factory.createComponentInstance(props, sc);
@@ -182,7 +182,7 @@ public class SimpleInstantiation extends OSGiTestCase {
 	
 	public void testArchitecture() {
 		Properties props = new Properties();
-		props.put("name", "under");
+		props.put("instance.name","under");
 		ComponentInstance under = null;
 		try {
 			under = bar1Factory.createComponentInstance(props);

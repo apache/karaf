@@ -37,23 +37,23 @@ public class Exposition extends OSGiTestCase {
 	
 	public void setUp(){ 
 		Properties p1 = new Properties();
-		p1.put("name", "fooProviderSimple");
+		p1.put("instance.name","fooProviderSimple");
 		fooProviderSimple = Utils.getComponentInstance(context, "PS-FooProviderType-1", p1);
 		
 		Properties p2 = new Properties();
-		p2.put("name", "fooProviderItf");
+		p2.put("instance.name","fooProviderItf");
 		fooProviderItf = Utils.getComponentInstance(context, "PS-FooProviderType-itf", p2);
 		
 		Properties p3 = new Properties();
-		p3.put("name", "fooProviderItfs");
+		p3.put("instance.name","fooProviderItfs");
 		fooBarProvider = Utils.getComponentInstance(context, "PS-FooBarProviderType-1", p3);
 		
 		Properties p4 = new Properties();
-		p4.put("name", "fooProviderItfs2");
+		p4.put("instance.name","fooProviderItfs2");
 		fooBarProvider2 = Utils.getComponentInstance(context, "PS-FooBarProviderType-2", p4);
 		
 		Properties p5 = new Properties();
-		p5.put("name", "fooProviderItfs3");
+		p5.put("instance.name","fooProviderItfs3");
 		fooBarProvider3 = Utils.getComponentInstance(context, "PS-FooBarProviderType-3", p5);
 		
 		assertNotNull("Check the instance creation of fooProviderSimple", fooProviderSimple);

@@ -276,7 +276,7 @@ public class BadTests extends OSGiTestCase {
         ComponentFactory providerFactory = new ComponentFactory(context,
                 m_provider);
         providerFactory.start();
-        properties.put("name", "Emperor of donuts");
+        properties.put("instance.name","Emperor of donuts");
         ComponentInstance providerInstance = providerFactory
                 .createComponentInstance(properties);
         ServiceReference providerService = IPojoTestUtils
@@ -286,10 +286,11 @@ public class BadTests extends OSGiTestCase {
                 .getService(providerService);
 
         // The consumer
+        properties = new Hashtable();
         ComponentFactory consumerFactory = new ComponentFactory(context,
                 m_consumer);
         consumerFactory.start();
-        properties.put("name", "Homer Simpson");
+        properties.put("instance.name","Homer Simpson");
         properties.put("slow", "false");
         ComponentInstance consumerInstance = consumerFactory
                 .createComponentInstance(properties);
@@ -476,7 +477,7 @@ public class BadTests extends OSGiTestCase {
 
         // Try to create an instance without specified topics
         Dictionary conf = new Hashtable();
-        conf.put("name", "provider without topics");
+        conf.put("instance.name","provider without topics");
 
         ComponentInstance instance;
         try {
@@ -552,7 +553,7 @@ public class BadTests extends OSGiTestCase {
 
         // Try to create an instance with malformed specified topics
         Dictionary conf = new Hashtable();
-        conf.put("name", "provider with malformed topics");
+        conf.put("instance.name","provider with malformed topics");
         Dictionary topics = new Hashtable();
         topics.put("donut-publisher", "| |\\| \\/ /-\\ |_ | |)");
         conf.put("event.topics", topics);
@@ -657,7 +658,7 @@ public class BadTests extends OSGiTestCase {
 
         // Try to create an instance without specified topics
         Dictionary conf = new Hashtable();
-        conf.put("name", "consumer without topics");
+        conf.put("instance.name","consumer without topics");
         conf.put("slow", "false");
 
         ComponentInstance instance;
@@ -734,7 +735,7 @@ public class BadTests extends OSGiTestCase {
 
         // Try to create an instance with malformed specified topics
         Dictionary conf = new Hashtable();
-        conf.put("name", "consumer with malformed topics");
+        conf.put("instance.name","consumer with malformed topics");
         Dictionary topics = new Hashtable();
         topics.put("donut-subscriber", "| |\\| \\/ /-\\ |_ | |)");
         conf.put("event.topics", topics);

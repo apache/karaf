@@ -40,7 +40,7 @@ public class PrimitiveTypeTest2 extends OSGiTestCase {
 
     public void setUp() {
         Properties p1 = new Properties();
-        p1.put("name", "primitives");
+        p1.put("instance.name","primitives");
         instance = Utils.getComponentInstance(context, "Manipulation-PrimitiveManipulationTesterA", p1);
         assertTrue("check instance state", instance.getState() == ComponentInstance.VALID);
         prim_ref = Utils.getServiceReferenceByName(context, PrimitiveManipulationTestService.class.getName(), instance.getInstanceName());

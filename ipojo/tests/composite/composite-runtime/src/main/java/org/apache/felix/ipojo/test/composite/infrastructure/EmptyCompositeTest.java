@@ -35,7 +35,7 @@ public class EmptyCompositeTest extends OSGiTestCase {
 	public void testEmptyCompositeCreation() {
 		Factory factory = Utils.getFactoryByName(context, "composite.empty");
 		Properties props = new Properties();
-		props.put("name", "empty");
+		props.put("instance.name","empty");
 		
 		ComponentInstance ci = null;
 		try {
@@ -71,7 +71,7 @@ public class EmptyCompositeTest extends OSGiTestCase {
 	public void testInstanceCreation1() {
 		Factory factory = Utils.getFactoryByName(context, "composite.empty");
 		Properties props = new Properties();
-		props.put("name", "empty");
+		props.put("instance.name","empty");
 		
 		ComponentInstance ci = null;
 		try {
@@ -91,7 +91,7 @@ public class EmptyCompositeTest extends OSGiTestCase {
 		}
 		
 		Properties props2 = new Properties();
-		props2.put("name", "empty2");
+		props2.put("instance.name","empty2");
 		ComponentInstance ci2 = null;
 		try {
 			ci2 = factory.createComponentInstance(props2, sc);
@@ -121,7 +121,7 @@ public class EmptyCompositeTest extends OSGiTestCase {
 	public void testInstanceCreation2() {
 		Factory factory = Utils.getFactoryByName(context, "composite.empty");
 		Properties props = new Properties();
-		props.put("name", "empty");
+		props.put("instance.name","empty");
 		
 		ComponentInstance ci = null;
 		try {
@@ -142,7 +142,7 @@ public class EmptyCompositeTest extends OSGiTestCase {
 		Factory factory2 = Utils.getFactoryByName(sc, "composite.empty");
 		assertNotNull("Check factory2 not null", factory2);
 		Properties props2 = new Properties();
-		props2.put("name", "empty2");
+		props2.put("instance.name","empty2");
 		ComponentInstance ci2 = null;
 		try {
 			ci2 = factory2.createComponentInstance(props2);
@@ -171,7 +171,7 @@ public class EmptyCompositeTest extends OSGiTestCase {
 	public void testInstanceCreation3() {
 		Factory factory = Utils.getFactoryByName(context, "composite.empty");
 		Properties props = new Properties();
-		props.put("name", "empty");
+		props.put("instance.name","empty");
 		
 		ComponentInstance ci = null;
 		try {
@@ -192,7 +192,7 @@ public class EmptyCompositeTest extends OSGiTestCase {
 		Factory factory2 = Utils.getFactoryByName(sc, "composite.empty");
 		assertNotNull("Check factory2 not null", factory2);
 		Properties props2 = new Properties();
-		props2.put("name", "empty2");
+		props2.put("instance.name","empty2");
 		ComponentInstance ci2 = null;
 		try {
 			ci2 = factory2.createComponentInstance(props2, sc);

@@ -44,7 +44,7 @@ public class SimpleInstance extends OSGiTestCase {
         compoFactory = (ComponentFactory) Utils.getFactoryByName(context, "composite.inst.1");
 		Factory fact = Utils.getFactoryByName(context, "composite.empty");
 		Properties props = new Properties();
-		props.put("name", "empty-X");
+		props.put("instance.name","empty-X");
 		try {
 			empty = fact.createComponentInstance(props);
 		} catch(Exception e) {
@@ -59,7 +59,7 @@ public class SimpleInstance extends OSGiTestCase {
 	
 	public void testCreation() {
 		Properties props = new Properties();
-		props.put("name", "under-A");
+		props.put("instance.name","under-A");
 		ComponentInstance under = null;
 		try {
 			under = compoFactory.createComponentInstance(props);
@@ -74,7 +74,7 @@ public class SimpleInstance extends OSGiTestCase {
 	
 	public void testServiceAvailability() {
 		Properties props = new Properties();
-		props.put("name", "under");
+		props.put("instance.name","under");
 		ComponentInstance under = null;
 		try {
 			under = compoFactory.createComponentInstance(props);
@@ -93,7 +93,7 @@ public class SimpleInstance extends OSGiTestCase {
 	public void testCreationLevel2() {
 		ServiceContext sc = Utils.getServiceContext(empty);
 		Properties props = new Properties();
-		props.put("name", "under");
+		props.put("instance.name","under");
 		ComponentInstance under = null;
 		try {
 			under = compoFactory.createComponentInstance(props, sc);
@@ -108,7 +108,7 @@ public class SimpleInstance extends OSGiTestCase {
 	public void testServiceAvailabilityLevel2() {
 		ServiceContext sc = Utils.getServiceContext(empty);
 		Properties props = new Properties();
-		props.put("name", "under-X");
+		props.put("instance.name","under-X");
 		ComponentInstance under = null;
 		try {
 			under = compoFactory.createComponentInstance(props, sc);
@@ -126,7 +126,7 @@ public class SimpleInstance extends OSGiTestCase {
 	
 	public void testFactoryManagement() {
 		Properties props = new Properties();
-		props.put("name", "under");
+		props.put("instance.name","under");
 		ComponentInstance under = null;
 		try {
 			under = compoFactory.createComponentInstance(props);
@@ -155,7 +155,7 @@ public class SimpleInstance extends OSGiTestCase {
 	public void testFactoryManagementLevel2() {
 		ServiceContext sc = Utils.getServiceContext(empty);
 		Properties props = new Properties();
-		props.put("name", "under");
+		props.put("instance.name","under");
 		ComponentInstance under = null;
 		try {
 			under = compoFactory.createComponentInstance(props, sc);
@@ -185,7 +185,7 @@ public class SimpleInstance extends OSGiTestCase {
 	
 	public void atestArchitecture() { // TODO fix and reactivate the method.
 		Properties props = new Properties();
-		props.put("name", "under");
+		props.put("instance.name","under");
 		ComponentInstance under = null;
 		try {
 			under = compoFactory.createComponentInstance(props);

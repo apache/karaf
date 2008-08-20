@@ -37,36 +37,36 @@ public class DelayedMultipleDependencies extends OSGiTestCase {
 	public void setUp() {
 		try {
 			Properties i1 = new Properties();
-			i1.put("name", "Simple");
+			i1.put("instance.name","Simple");
 			instance1 = Utils.getFactoryByName(context, "SimpleMultipleCheckServiceProvider").createComponentInstance(i1);
 			instance1.stop();
 		
 			Properties i2 = new Properties();
-			i2.put("name", "Void");
+			i2.put("instance.name","Void");
 			instance2 = Utils.getFactoryByName(context, "VoidMultipleCheckServiceProvider").createComponentInstance(i2);
 			instance2.stop();
 		
 			Properties i3 = new Properties();
-			i3.put("name", "Object");
+			i3.put("instance.name","Object");
 			instance3 = Utils.getFactoryByName(context, "ObjectMultipleCheckServiceProvider").createComponentInstance(i3);
 			instance3.stop();
 		
 			Properties i4 = new Properties();
-			i4.put("name", "Ref");
+			i4.put("instance.name","Ref");
 			instance4 = Utils.getFactoryByName(context, "RefMultipleCheckServiceProvider").createComponentInstance(i4);
 			instance4.stop();
 			
 	         Properties i5 = new Properties();
-	            i5.put("name", "Both");
+	            i5.put("instance.name","Both");
 	            instance5 = Utils.getFactoryByName(context, "BothMultipleCheckServiceProvider").createComponentInstance(i5);
 	            instance5.stop();
 		
 			Properties prov = new Properties();
-			prov.put("name", "FooProvider1");
+			prov.put("instance.name","FooProvider1");
 			fooProvider1 = Utils.getFactoryByName(context, "FooProviderType-1").createComponentInstance(prov);
 		
 			Properties prov2 = new Properties();
-			prov2.put("name", "FooProvider2");
+			prov2.put("instance.name","FooProvider2");
 			fooProvider2 = Utils.getFactoryByName(context, "FooProviderType-1").createComponentInstance(prov2);
 		} catch(Exception e) { fail(e.getMessage()); }
 	}

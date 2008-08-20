@@ -39,11 +39,11 @@ public class StaticPropsReconfiguration extends OSGiTestCase {
 		String type = "PS-FooProviderType-2";
 		
 		Properties p1 = new Properties();
-		p1.put("name", "FooProvider-1");
+		p1.put("instance.name","FooProvider-1");
 		fooProvider1 = Utils.getComponentInstance(context, type, p1);
 		
 		Properties p2 = new Properties();
-		p2.put("name", "FooProvider-2");
+		p2.put("instance.name","FooProvider-2");
 		p2.put("int", new Integer(4));
 		p2.put("long", new Long(42));
 		p2.put("string", new String("bar"));
@@ -88,7 +88,7 @@ public class StaticPropsReconfiguration extends OSGiTestCase {
 		// Reconfiguration
 		ServiceReference fact_ref = Utils.getServiceReferenceByName(context, Factory.class.getName(), "PS-FooProviderType-2");
 		Dictionary reconf = new Properties();
-		reconf.put("name", "FooProvider-1");
+		reconf.put("instance.name","FooProvider-1");
 		reconf.put("int", new Integer(5));
 		reconf.put("long", new Long(43));
 		reconf.put("string", new String("toto"));
@@ -159,7 +159,7 @@ public class StaticPropsReconfiguration extends OSGiTestCase {
 		// Reconfiguration
 		ServiceReference fact_ref = Utils.getServiceReferenceByName(context, Factory.class.getName(), "PS-FooProviderType-2");
 		Dictionary reconf = new Properties();
-		reconf.put("name", "FooProvider-2");
+		reconf.put("instance.name","FooProvider-2");
 		reconf.put("int", new Integer(5));
 		reconf.put("long", new Long(43));
 		reconf.put("string", new String("toto"));

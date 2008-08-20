@@ -42,7 +42,7 @@ public class CheckServiceHandler extends PrimitiveHandler implements CheckServic
 		Element[] meta = metadata.getElements("check", NAMESPACE);
 		if(meta == null) { return;	}		
 		// Get handler props 
-		props.put("instance.name", configuration.get("name"));
+		props.put("instance.name", configuration.get("instance.name"));
 		if(configuration.get("csh.simple") != null) { props.put("Simple", configuration.get("csh.simple")); }
 		if(configuration.get("csh.map") != null) { 
 			Dictionary m = (Dictionary) configuration.get("csh.map");

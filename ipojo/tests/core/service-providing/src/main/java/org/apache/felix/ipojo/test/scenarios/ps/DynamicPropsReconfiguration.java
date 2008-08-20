@@ -35,7 +35,7 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
 	public void setUp() {		
 		String type2 = "PS-FooProviderType-Dyn2";
 		Properties p3 = new Properties();
-		p3.put("name", "FooProvider-3");
+		p3.put("instance.name","FooProvider-3");
 		p3.put("int", new Integer(0));
 		p3.put("boolean", new Boolean(true));
 		p3.put("string", new String(""));
@@ -78,7 +78,7 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
     	ServiceReference fact_ref = Utils.getServiceReferenceByName(context, Factory.class.getName() , "PS-FooProviderType-Dyn2");
     	Factory fact = (Factory) context.getService(fact_ref);
     	Properties p3 = new Properties();
-    	p3.put("name", "FooProvider-3");
+    	p3.put("instance.name","FooProvider-3");
     	p3.put("int", new Integer(1));
     	p3.put("boolean", new Boolean(true));
     	p3.put("string", new String("foo"));
@@ -139,7 +139,7 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
     	fact_ref = Utils.getServiceReferenceByName(context, Factory.class.getName() , "PS-FooProviderType-Dyn2");
     	fact = (Factory) context.getService(fact_ref);
     	p3 = new Properties();
-    	p3.put("name", "FooProvider-3");
+    	p3.put("instance.name","FooProvider-3");
     	p3.put("int", new Integer(1));
     	p3.put("boolean", new Boolean(true));
     	p3.put("string", new String("foo"));
@@ -210,7 +210,7 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
 		ServiceReference fact_ref = Utils.getServiceReferenceByName(context, Factory.class.getName() , "PS-FooProviderType-Dyn2");
 		Factory fact = (Factory) context.getService(fact_ref);
 		Properties p3 = new Properties();
-		p3.put("name", "FooProvider-3");
+		p3.put("instance.name","FooProvider-3");
 		p3.put("int", "1");
 		p3.put("boolean", "true");
 		p3.put("string", "foo");
@@ -271,7 +271,7 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
 		fact_ref = Utils.getServiceReferenceByName(context, Factory.class.getName() , "PS-FooProviderType-Dyn2");
 		fact = (Factory) context.getService(fact_ref);
 		p3 = new Properties();
-		p3.put("name", "FooProvider-3");
+		p3.put("instance.name","FooProvider-3");
 		p3.put("int", "1");
 		p3.put("boolean", "true");
 		p3.put("string", "foo");

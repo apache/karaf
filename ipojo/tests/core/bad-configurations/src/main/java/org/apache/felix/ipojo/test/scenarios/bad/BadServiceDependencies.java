@@ -42,7 +42,7 @@ public class BadServiceDependencies extends OSGiTestCase {
     public void setUp() {
         manipulation = getManipulationForComponent();
         props = new Properties();
-        props.put("name", "BAD");
+        props.put("instance.name","BAD");
     }
     
     

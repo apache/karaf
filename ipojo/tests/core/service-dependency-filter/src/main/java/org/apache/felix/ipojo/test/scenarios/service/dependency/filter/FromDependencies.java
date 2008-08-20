@@ -35,12 +35,12 @@ public class FromDependencies extends OSGiTestCase {
 	public void setUp() {
 		try {
 			Properties prov = new Properties();
-			prov.put("name", "A");
+			prov.put("instance.name","A");
 			providerA = Utils.getFactoryByName(context, "SimpleFilterCheckServiceProvider").createComponentInstance(prov);
 			providerA.stop();
 			
 			Properties prov2 = new Properties();
-            prov2.put("name", "B");
+            prov2.put("instance.name","B");
             providerB = Utils.getFactoryByName(context, "SimpleFilterCheckServiceProvider").createComponentInstance(prov2);
             providerB.stop();
             
@@ -51,18 +51,18 @@ public class FromDependencies extends OSGiTestCase {
             
             Properties prov4 = new Properties();
             prov4.put("service.pid", "D");
-            prov4.put("name", "D");
+            prov4.put("instance.name","D");
             providerD = Utils.getFactoryByName(context, "SimplePIDCheckServiceProvider").createComponentInstance(prov4);
             providerD.stop();
 		
             // Uses the component type from value
 			Properties i1 = new Properties();
-			i1.put("name", "Subscriber1");
+			i1.put("instance.name","Subscriber1");
 			instance1 = Utils.getFactoryByName(context, "SimpleFromCheckServiceSubscriber").createComponentInstance(i1);
 			
 			// Uses the instance configuration from value
 			Properties i2 = new Properties();
-            i2.put("name", "Subscriber2");
+            i2.put("instance.name","Subscriber2");
             Properties ii2 = new Properties();
             ii2.put("id1", "B");
             i2.put("requires.from", ii2);
@@ -70,7 +70,7 @@ public class FromDependencies extends OSGiTestCase {
             
             // Uses the instance configuration from value (*)
             Properties i3 = new Properties();
-            i3.put("name", "Subscriber3");
+            i3.put("instance.name","Subscriber3");
             Properties ii3 = new Properties();
             ii3.put("id1", "*");
             i3.put("requires.from", ii3);
@@ -78,7 +78,7 @@ public class FromDependencies extends OSGiTestCase {
 			
             // Uses the instance configuration from value, merge filter and from
             Properties i4 = new Properties();
-            i4.put("name", "Subscriber4");
+            i4.put("instance.name","Subscriber4");
             Properties ii4 = new Properties();
             ii4.put("id1", "D");
             i4.put("requires.from", ii4);

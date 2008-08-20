@@ -36,11 +36,11 @@ public class DynamicProps extends OSGiTestCase {
 		String type = "PS-FooProviderType-Dyn";
 		
 		Properties p1 = new Properties();
-		p1.put("name", "FooProvider-1");
+		p1.put("instance.name","FooProvider-1");
 		fooProvider1 = Utils.getComponentInstance(context, type, p1);
 		
 		Properties p2 = new Properties();
-		p2.put("name", "FooProvider-2");
+		p2.put("instance.name","FooProvider-2");
 		p2.put("int", new Integer(4));
 		p2.put("boolean", new Boolean(false));
 		p2.put("string", new String("bar"));
@@ -50,7 +50,7 @@ public class DynamicProps extends OSGiTestCase {
 		
 		String type2 = "PS-FooProviderType-Dyn2";
 		Properties p3 = new Properties();
-		p3.put("name", "FooProvider-3");
+		p3.put("instance.name","FooProvider-3");
 		p3.put("int", new Integer(0));
 		p3.put("boolean", new Boolean(true));
 		p3.put("string", new String(""));

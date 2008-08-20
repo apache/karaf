@@ -44,7 +44,7 @@ public class LifeCycleControllerTest extends OSGiTestCase {
     public void testOne() {
         Properties props = new Properties();
         props.put("conf", "foo");
-        props.put("name", "under");
+        props.put("instance.name","under");
         under = Utils.getComponentInstance(context, "LFC-Test", props);
 
         // The conf is correct, the PS must be provided
@@ -92,7 +92,7 @@ public class LifeCycleControllerTest extends OSGiTestCase {
     public void notestTwo() {
         Properties props = new Properties();
         props.put("conf", "bar");
-        props.put("name", "under");
+        props.put("instance.name","under");
         under = Utils.getComponentInstance(context, "LFC-Test", props);
 
         // The conf is incorrect, but the test can appears only when the object is created : the PS must be provided

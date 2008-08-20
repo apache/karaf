@@ -45,7 +45,7 @@ public class ProvidedServiceArchitectureTest extends OSGiTestCase {
 		assertNotNull("Cannot find the factory FooProvider-1", fact);
 		
 		Properties props = new Properties();
-		props.put("name", compName);
+		props.put("instance.name",compName);
 		ComponentInstance ci = null;
 		try {
 			ci = fact.createComponentInstance(props);
@@ -98,7 +98,7 @@ public class ProvidedServiceArchitectureTest extends OSGiTestCase {
 		assertNotNull("Cannot find the factory FooProvider", fact);
 		
 		Properties props = new Properties();
-		props.put("name", compName);
+		props.put("instance.name",compName);
 		props.put("foo", "foo");
 		props.put("bar", "2");
 		props.put("baz", "baz");
@@ -156,7 +156,7 @@ public class ProvidedServiceArchitectureTest extends OSGiTestCase {
 		assertNotNull("Cannot find the factory FooProvider", fact);
 		
 		Properties props = new Properties();
-		props.put("name", compName);
+		props.put("instance.name",compName);
 		ComponentInstance ci = null;
 		try {
 			ci = fact.createComponentInstance(props);

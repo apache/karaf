@@ -46,7 +46,7 @@ public class ConfigurableInstantiation extends OSGiTestCase {
 	
 	public void testAccept() {
 		Properties props = new Properties();
-		props.put("name", "under-A");
+		props.put("instance.name","under-A");
 		ComponentInstance under = null;
 		try {
 			under = acceptF.createComponentInstance(props);
@@ -72,7 +72,7 @@ public class ConfigurableInstantiation extends OSGiTestCase {
 	
 	public void testRefuse1() {
 		Properties props = new Properties();
-		props.put("name", "under-ref1");
+		props.put("instance.name","under-ref1");
 		ComponentInstance under = null;
 		try {
 			under = refuse1F.createComponentInstance(props);
@@ -87,7 +87,7 @@ public class ConfigurableInstantiation extends OSGiTestCase {
 	
 	public void testRefuse2() {
 		Properties props = new Properties();
-		props.put("name", "under-ref2");
+		props.put("instance.name","under-ref2");
 		ComponentInstance under = null;
 		try {
 			under = refuse2F.createComponentInstance(props);

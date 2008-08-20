@@ -36,7 +36,7 @@ public class CompositeTest extends OSGiTestCase {
 	public void testAPI() {
 		Factory fact1 = Utils.getFactoryByName(context, "composite.empty");
 		Properties p = new Properties();
-		p.put("name", "empty-1");
+		p.put("instance.name","empty-1");
 		ComponentInstance empty = null;
 		try {
 			empty = fact1.createComponentInstance(p);
@@ -49,10 +49,10 @@ public class CompositeTest extends OSGiTestCase {
 		
 		Factory fact2 = Utils.getFactoryByName(context, "composite.test.2");
 		Properties props2 = new Properties();
-		props2.put("name", "2"); // 2
+		props2.put("instance.name","2"); // 2
 		Factory fact3 = Utils.getFactoryByName(context, "composite.test.3");
 		Properties props3 = new Properties();
-		props3.put("name", "3");
+		props3.put("instance.name","3");
 		ComponentInstance comp2 = null;
 		ComponentInstance comp3 = null;
 		try {
@@ -84,7 +84,7 @@ public class CompositeTest extends OSGiTestCase {
 		Factory fact = Utils.getFactoryByName(context, type);
 		ComponentInstance ci = null;
 		Properties p = new Properties();
-		p.put("name", "mon_coeur");
+		p.put("instance.name","mon_coeur");
 		try {
 			ci = fact.createComponentInstance(p);
 		} catch(Exception e) {
@@ -108,7 +108,7 @@ public class CompositeTest extends OSGiTestCase {
 	public void testAPI2() {
 		Factory fact1 = Utils.getFactoryByName(context, "composite.empty");
 		Properties p = new Properties();
-		p.put("name", "empty-2");
+		p.put("instance.name","empty-2");
 		ComponentInstance empty = null;
 		try {
 			empty = fact1.createComponentInstance(p);
@@ -120,10 +120,10 @@ public class CompositeTest extends OSGiTestCase {
 		
 		Factory fact2 = Utils.getFactoryByName(sc, "composite.test.2");
 		Properties props2 = new Properties();
-		props2.put("name", "4");
+		props2.put("instance.name","4");
 		Factory fact3 = Utils.getFactoryByName(sc, "composite.test.3");
 		Properties props3 = new Properties();
-		props3.put("name", "5");
+		props3.put("instance.name","5");
 		ComponentInstance comp2 = null;
 		ComponentInstance comp3 = null;
 		try {
@@ -154,7 +154,7 @@ public class CompositeTest extends OSGiTestCase {
 		Factory factory = Utils.getFactoryByName(context, "composite.test.1");
 		ComponentInstance ci = null;
 		Properties props = new Properties();
-		props.put("name", "Test");
+		props.put("instance.name","Test");
 		try {
 			ci = factory.createComponentInstance(props);
 		} catch(Exception e) {

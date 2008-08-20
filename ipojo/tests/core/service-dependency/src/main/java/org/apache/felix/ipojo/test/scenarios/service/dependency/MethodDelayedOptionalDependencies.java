@@ -37,21 +37,21 @@ public class MethodDelayedOptionalDependencies extends OSGiTestCase {
     public void setUp() {
         try {
             Properties prov = new Properties();
-            prov.put("name", "FooProvider");
+            prov.put("instance.name","FooProvider");
             fooProvider = Utils.getFactoryByName(context, "FooProviderType-1").createComponentInstance(prov);
 
             Properties i3 = new Properties();
-            i3.put("name", "Object");
+            i3.put("instance.name","Object");
             instance3 = Utils.getFactoryByName(context, "MObjectOptionalCheckServiceProvider").createComponentInstance(i3);
             instance3.stop();
 
             Properties i4 = new Properties();
-            i4.put("name", "Ref");
+            i4.put("instance.name","Ref");
             instance4 = Utils.getFactoryByName(context, "MRefOptionalCheckServiceProvider").createComponentInstance(i4);
             instance4.stop();
 
             Properties i5 = new Properties();
-            i5.put("name", "Both");
+            i5.put("instance.name","Both");
             instance5 = Utils.getFactoryByName(context, "MBothOptionalCheckServiceProvider").createComponentInstance(i5);
             instance5.stop();
         } catch (Exception e) {

@@ -36,31 +36,31 @@ public class DelayedOptionalMultipleDependencies extends OSGiTestCase {
 	public void setUp() {		
 		try {
 			Properties i1 = new Properties();
-			i1.put("name", "Simple");
+			i1.put("instance.name","Simple");
 			instance1 = Utils.getFactoryByName(context, "SimpleOptionalMultipleCheckServiceProvider").createComponentInstance(i1);
 			instance1.stop();
 		
 			Properties i2 = new Properties();
-			i2.put("name", "Void");
+			i2.put("instance.name","Void");
 			instance2 = Utils.getFactoryByName(context, "VoidOptionalMultipleCheckServiceProvider").createComponentInstance(i2);
 			instance2.stop();
 		
 			Properties i3 = new Properties();
-			i3.put("name", "Object");
+			i3.put("instance.name","Object");
 			instance3 = Utils.getFactoryByName(context, "ObjectOptionalMultipleCheckServiceProvider").createComponentInstance(i3);
 			instance3.stop();
 		
 			Properties i4 = new Properties();
-			i4.put("name", "Ref");
+			i4.put("instance.name","Ref");
 			instance4 = Utils.getFactoryByName(context, "RefOptionalMultipleCheckServiceProvider").createComponentInstance(i4);
 			instance4.stop();
 		
 			Properties prov = new Properties();
-			prov.put("name", "FooProvider1");
+			prov.put("instance.name","FooProvider1");
 			fooProvider1 = Utils.getFactoryByName(context, "FooProviderType-1").createComponentInstance(prov);
 		
 			Properties prov2 = new Properties();
-			prov2.put("name", "FooProvider2");
+			prov2.put("instance.name","FooProvider2");
 			fooProvider2 = Utils.getFactoryByName(context, "FooProviderType-1").createComponentInstance(prov2);
 		} catch(Exception e) { fail(e.getMessage()); }		
 	}

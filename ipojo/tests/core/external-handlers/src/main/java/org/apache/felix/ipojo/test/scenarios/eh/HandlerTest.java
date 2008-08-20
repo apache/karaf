@@ -36,7 +36,7 @@ public class HandlerTest extends OSGiTestCase {
 
 	public void setUp() {
 		Properties props = new Properties();
-		props.put("name", "HandlerTest-1");
+		props.put("instance.name","HandlerTest-1");
 		props.put("csh.simple", "simple");
 		Properties p = new Properties();
 		p.put("a", "a");
@@ -194,7 +194,7 @@ public class HandlerTest extends OSGiTestCase {
         f.start();
         
         Properties props = new Properties();
-        props.put("name", "HandlerTest-1");
+        props.put("instance.name","HandlerTest-1");
         props.put("csh.simple", "simple");
         Properties p = new Properties();
         p.put("a", "a");

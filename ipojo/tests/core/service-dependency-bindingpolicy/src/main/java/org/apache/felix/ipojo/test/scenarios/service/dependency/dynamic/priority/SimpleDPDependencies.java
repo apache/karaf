@@ -39,23 +39,23 @@ public class SimpleDPDependencies extends OSGiTestCase {
 	public void setUp() {
 		try {
 			Properties prov = new Properties();
-			prov.put("name", "FooProvider-1");
+			prov.put("instance.name","FooProvider-1");
 			prov.put("service.ranking", "1");
 			fooProvider = Utils.getFactoryByName(context, "RankedFooProviderType").createComponentInstance(prov);
 			fooProvider.stop();
 			
 			Properties prov2 = new Properties();
-            prov2.put("name", "FooProvider-2");
+            prov2.put("instance.name","FooProvider-2");
             prov2.put("service.ranking", "0");
             fooProvider2 = Utils.getFactoryByName(context, "RankedFooProviderType").createComponentInstance(prov2);
             fooProvider2.stop();
 		
 			Properties i1 = new Properties();
-			i1.put("name", "Simple");
+			i1.put("instance.name","Simple");
 			instance1 = Utils.getFactoryByName(context, "DPSimpleCheckServiceProvider").createComponentInstance(i1);
 		
 			Properties i3 = new Properties();
-			i3.put("name", "Object");
+			i3.put("instance.name","Object");
 			instance3 = Utils.getFactoryByName(context, "DPObjectCheckServiceProvider").createComponentInstance(i3);
 			
 		} catch(Exception e) { 

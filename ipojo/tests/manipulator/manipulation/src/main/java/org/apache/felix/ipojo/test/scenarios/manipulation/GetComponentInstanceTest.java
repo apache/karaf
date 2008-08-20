@@ -49,11 +49,13 @@ public class GetComponentInstanceTest extends OSGiTestCase {
 		assertNotNull("Cannot find the factory FooProvider-1", fact);
 		
 		Properties props = new Properties();
-		props.put("name", compName);
+		props.put("instance.name",compName);
 		ComponentInstance ci = null;
 		try {
 			ci = fact.createComponentInstance(props);
-		} catch (Exception e1) { fail(e1.getMessage()); }		
+		} catch (Exception e1) { fail(e1.getMessage()); }
+		
+		assertEquals("Check instance name", compName, ci.getInstanceName());
 		
 		// Get a FooService provider
 		try {

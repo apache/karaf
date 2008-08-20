@@ -41,29 +41,29 @@ public class DependencyArchitectureTest extends OSGiTestCase {
 	public void setUp() {
 		try {
 			Properties prov = new Properties();
-			prov.put("name", "FooProvider");
+			prov.put("instance.name","FooProvider");
 			fooProvider1 = Utils.getFactoryByName(context, "FooProviderType-1").createComponentInstance(prov);
 			fooProvider1.stop();
 		
 			Properties prov2 = new Properties();
-			prov2.put("name", "FooProvider2");
+			prov2.put("instance.name","FooProvider2");
 			fooProvider2 = Utils.getFactoryByName(context, "FooProviderType-1").createComponentInstance(prov2);
 			fooProvider2.stop();
 		
 			Properties i1 = new Properties();
-			i1.put("name", "Simple");
+			i1.put("instance.name","Simple");
 			instance1 = Utils.getFactoryByName(context, "SimpleCheckServiceProvider").createComponentInstance(i1);
 		
 			Properties i2 = new Properties();
-			i2.put("name", "Optional");
+			i2.put("instance.name","Optional");
 			instance2 = Utils.getFactoryByName(context, "SimpleOptionalCheckServiceProvider").createComponentInstance(i2);
 		
 			Properties i3 = new Properties();
-			i3.put("name", "Multiple");
+			i3.put("instance.name","Multiple");
 			instance3 = Utils.getFactoryByName(context, "SimpleMultipleCheckServiceProvider").createComponentInstance(i3);
 		
 			Properties i4 = new Properties();
-			i4.put("name", "OptionalMultiple");
+			i4.put("instance.name","OptionalMultiple");
 			instance4 = Utils.getFactoryByName(context, "SimpleOptionalMultipleCheckServiceProvider").createComponentInstance(i4);
 		} catch(Exception e) {
 			throw new RuntimeException(e.getMessage());

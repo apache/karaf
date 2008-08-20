@@ -71,7 +71,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 	public void testEmptyConfiguration2() {
 		Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2");
 		Properties  p = new Properties();
-		p.put("name", "ko");
+		p.put("instance.name","ko");
 		ComponentInstance ci = null;
 		try {
 			ci = f.createComponentInstance(p);
@@ -116,7 +116,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 		Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-2");
 		
 		Properties  p = new Properties();
-		p.put("name", "ok");
+		p.put("instance.name","ok");
 		p.put("int", new Integer(3));
 		p.put("long", new Long(42));
 		p.put("string", "absdir");
@@ -139,7 +139,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 		Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn");
 		
 		Properties  p = new Properties();
-		p.put("name", "ok");
+		p.put("instance.name","ok");
 		p.put("int", new Integer(3));
 		p.put("boolean", new Boolean(true));
 		p.put("string", "absdir");
@@ -163,7 +163,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 		Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn");
 		
 		Properties  p = new Properties();
-		p.put("name", "ok");
+		p.put("instance.name","ok");
 		p.put("int", new Integer(3));
 		p.put("long", new Long(42));
 		p.put("string", "absdir");
@@ -186,7 +186,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 		Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2");
 		
 		Properties  p = new Properties();
-		p.put("name", "ok");
+		p.put("instance.name","ok");
 		p.put("int", new Integer(3));
 		p.put("boolean", new Boolean(true));
 		p.put("string", "absdir");
@@ -209,7 +209,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 		Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2");
 		
 		Properties  p = new Properties();
-		p.put("name", "ok");
+		p.put("instance.name","ok");
 		p.put("boolean", new Boolean(true));
 		p.put("string", "absdir");
 		p.put("strAProp", new String[] {"a"});
@@ -230,7 +230,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 		Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2");
 		
 		Properties  p = new Properties();
-		p.put("name", "ok");
+		p.put("instance.name","ok");
 		p.put("boolean", new Boolean(true));
 		p.put("string", "absdir");
 		p.put("strAProp", new String[] {"a"});
@@ -252,7 +252,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 		Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2");
 		
 		Properties  p = new Properties();
-		p.put("name", "ok");
+		p.put("instance.name","ok");
 		p.put("string", "absdir");
 		p.put("strAProp", new String[] {"a"});
 		p.put("intAProp", new int[] {1,2});
@@ -273,7 +273,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 		Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2");
 		
 		Properties  p = new Properties();
-		p.put("name", "ok");
+		p.put("instance.name","ok");
 		p.put("int", new Integer(3));
 		p.put("boolean", new Boolean(true));
 		p.put("string", "absdir");
@@ -297,7 +297,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 		Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2");
 		
 		Properties  p = new Properties();
-		p.put("name", "ok");
+		p.put("instance.name","ok");
 		p.put("int", new Integer(3));
 		p.put("boolean", new Boolean(true));
 		p.put("string", "absdir");
@@ -344,13 +344,13 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
         ComponentInstance ci1,ci2, ci3 = null;
         try {
             Properties p1 = new Properties();
-            p1.put("name", "name1");
+            p1.put("instance.name","name1");
             ci1 = f.createComponentInstance(p1);
             Properties p2 = new Properties();
-            p2.put("name", "name2");
+            p2.put("instance.name","name2");
             ci2 = f.createComponentInstance(p2);
             Properties p3 = new Properties();
-            p3.put("name", "name3");
+            p3.put("instance.name","name3");
             ci3 = f.createComponentInstance(p3);
             assertNotEquals("Check name ci1, ci2", ci1.getInstanceName(), ci2.getInstanceName());
             assertNotEquals("Check name ci1, ci3", ci1.getInstanceName(), ci3.getInstanceName());
@@ -370,10 +370,10 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
         ComponentInstance ci1 = null,ci2 = null, ci3 = null;
         try {
             Properties p1 = new Properties();
-            p1.put("name", "name1");
+            p1.put("instance.name","name1");
             ci1 = f.createComponentInstance(p1);
             Properties p2 = new Properties();
-            p2.put("name", "name1");
+            p2.put("instance.name","name1");
             ci2 = f.createComponentInstance(p2);
             assertNotEquals("Check name ci1, ci2", ci1.getInstanceName(), ci2.getInstanceName());
             assertNotEquals("Check name ci1, ci3", ci1.getInstanceName(), ci3.getInstanceName());
@@ -398,10 +398,10 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
         ComponentInstance ci1 = null,ci2 = null, ci3 = null;
         try {
             Properties p1 = new Properties();
-            p1.put("name", "name1");
+            p1.put("instance.name","name1");
             ci1 = f.createComponentInstance(p1);
             Properties p2 = new Properties();
-            p2.put("name", "name1");
+            p2.put("instance.name","name1");
             ci2 = f2.createComponentInstance(p2);
             System.err.println("==== " + ci1.getInstanceName() + " === " + ci2.getInstanceName());
             assertNotEquals("Check name ci1, ci2", ci1.getInstanceName(), ci2.getInstanceName());

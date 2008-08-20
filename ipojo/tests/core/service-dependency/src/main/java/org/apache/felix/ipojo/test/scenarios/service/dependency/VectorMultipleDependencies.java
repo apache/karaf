@@ -36,21 +36,21 @@ public class VectorMultipleDependencies extends OSGiTestCase {
 	public void setUp() {
 		try {
 			Properties prov = new Properties();
-			prov.put("name", "FooProvider1");
+			prov.put("instance.name","FooProvider1");
 			fooProvider1 = Utils.getFactoryByName(context, "FooProviderType-1").createComponentInstance(prov);
 			fooProvider1.stop();
 		
 			Properties prov2 = new Properties();
-			prov2.put("name", "FooProvider2");
+			prov2.put("instance.name","FooProvider2");
 			fooProvider2 = Utils.getFactoryByName(context, "FooProviderType-1").createComponentInstance(prov2);
 			fooProvider2.stop();
 		
 			Properties i1 = new Properties();
-			i1.put("name", "Simple");
+			i1.put("instance.name","Simple");
 			instance1 = Utils.getFactoryByName(context, "SimpleVectorCheckServiceProvider").createComponentInstance(i1);
 			
 			Properties i2 = new Properties();
-            i2.put("name", "Optional");
+            i2.put("instance.name","Optional");
             instance2 = Utils.getFactoryByName(context, "OptionalVectorCheckServiceProvider").createComponentInstance(i2);
 		} catch(Exception e) { fail(e.getMessage()); }
 		

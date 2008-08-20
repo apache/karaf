@@ -34,6 +34,7 @@ public class ManipulationTestSuite {
         ots.addTestSuite(ManipulationMetadataAPI.class);
         ots.addTestSuite(ExceptionTest.class);
         ots.addTestSuite(POJOCreation.class);
+        ots.addTestSuite(NestedClassesTests.class);
 		return ots;
 	}
 

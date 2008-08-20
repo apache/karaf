@@ -43,7 +43,7 @@ public class ManagedServiceConfigurableProperties extends OSGiTestCase {
 	public void setUp() {
 	    String type = "CONFIG-FooProviderType-4";
         Properties p = new Properties();
-        p.put("name", "instance");
+        p.put("instance.name","instance");
         p.put("foo", "foo");
         p.put("bar", "2");
         p.put("baz", "baz");
@@ -52,7 +52,7 @@ public class ManagedServiceConfigurableProperties extends OSGiTestCase {
         
 		type = "CONFIG-FooProviderType-3";
 		Properties p1 = new Properties();
-		p1.put("name", "instance-2");
+		p1.put("instance.name","instance-2");
 		p1.put("foo", "foo");
 		p1.put("bar", "2");
 		p1.put("baz", "baz");

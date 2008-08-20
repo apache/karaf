@@ -45,14 +45,14 @@ public class ExceptionTest extends OSGiTestCase {
 		String compName = "FooProvider-1";
 		
 		Properties p = new Properties();
-		p.put("name", compName);
+		p.put("instance.name",compName);
 		ci_lazzy = Utils.getComponentInstance(context, factName, p);
 		
 		String factName2 = "Manipulation-ImmediateFooProviderType";
 		String compName2 = "FooProvider-2";
 		
 		Properties p2 = new Properties();
-		p2.put("name", compName2);
+		p2.put("instance.name",compName2);
 		ci_immediate = Utils.getComponentInstance(context, factName2, p2);
 		
 		lazzyRef = Utils.getServiceReference(context, Architecture.class.getName(), "(architecture.instance="+compName+")");

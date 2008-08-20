@@ -37,28 +37,28 @@ public class OptionalSimpleFilterDependencies extends OSGiTestCase {
 	public void setUp() {
 		try {
 			Properties prov = new Properties();
-			prov.put("name", "FooProvider1");
+			prov.put("instance.name","FooProvider1");
 			fooProvider1 = Utils.getFactoryByName(context, "SimpleFilterCheckServiceProvider").createComponentInstance(prov);
 			fooProvider1.stop();
 			
 			prov = new Properties();
-            prov.put("name", "FooProvider2");
+            prov.put("instance.name","FooProvider2");
             fooProvider2 = Utils.getFactoryByName(context, "SimpleFilterCheckServiceProvider").createComponentInstance(prov);
             fooProvider2.stop();
 		
 			Properties i1 = new Properties();
-			i1.put("name", "Subscriber1");
+			i1.put("instance.name","Subscriber1");
 			instance1 = Utils.getFactoryByName(context, "OptionalSimpleFilterCheckServiceSubscriber").createComponentInstance(i1);
 			
 			Properties i2 = new Properties();
-            i2.put("name", "Subscriber2");
+            i2.put("instance.name","Subscriber2");
             Properties ii2 = new Properties();
             ii2.put("id2", "(toto=A)");
             i2.put("requires.filters", ii2);
             instance2 = Utils.getFactoryByName(context, "OptionalSimpleFilterCheckServiceSubscriber2").createComponentInstance(i2);
             
             Properties i3 = new Properties();
-            i3.put("name", "Subscriber3");
+            i3.put("instance.name","Subscriber3");
             Properties ii3 = new Properties();
             ii3.put("id1", "(toto=A)");
             i3.put("requires.filters", ii3);

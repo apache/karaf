@@ -39,7 +39,7 @@ public class ImmediateLifeCycleControllerTest extends OSGiTestCase {
     public void testOne() {
         Properties props = new Properties();
         props.put("conf", "foo");
-        props.put("name", "under");
+        props.put("instance.name","under");
         under = Utils.getComponentInstance(context, "LFC-Test-Immediate", props);
         
         // The conf is correct, the PS must be provided
@@ -83,7 +83,7 @@ public class ImmediateLifeCycleControllerTest extends OSGiTestCase {
     public void testTwo() {        
         Properties props = new Properties();
         props.put("conf", "bar");
-        props.put("name", "under");
+        props.put("instance.name","under");
         under = Utils.getComponentInstance(context, "LFC-Test-Immediate", props);    
         
         assertEquals("check under state", under.getState(), ComponentInstance.INVALID);

@@ -35,12 +35,12 @@ public class ImmediateCallbackTest extends OSGiTestCase {
 
     public void setUp() {
         Properties p2 = new Properties();
-        p2.put("name", "fooProvider");
+        p2.put("instance.name","fooProvider");
         fooProvider = Utils.getComponentInstance(context, "LFCB-FooProviderType-1", p2);
         fooProvider.stop();
         
         Properties p1 = new Properties();
-        p1.put("name", "callback");
+        p1.put("instance.name","callback");
         instance = Utils.getComponentInstance(context, "LFCB-ImmediateCallbackCheckService", p1);
         
     }

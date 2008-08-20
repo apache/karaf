@@ -48,7 +48,7 @@ public class TestComp1 extends OSGiTestCase {
         tataFactory.stop();
         
         Properties props = new Properties();
-        props.put("name", "toto provider");
+        props.put("instance.name","toto provider");
         try {
             totoProv = totoFactory.createComponentInstance(props);
         } catch(Exception e) {
@@ -56,7 +56,7 @@ public class TestComp1 extends OSGiTestCase {
         }
         
         Properties props3 = new Properties();
-        props3.put("name", "toto provider 2");
+        props3.put("instance.name","toto provider 2");
         try {
             totoProv2 = totoFactory.createComponentInstance(props3);
         } catch(Exception e) {

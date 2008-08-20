@@ -39,7 +39,7 @@ public class OptionalMultipleInstantiation extends OSGiTestCase {
 		
 		Factory fact = Utils.getFactoryByName(context, "composite.empty");
 		Properties props = new Properties();
-		props.put("name", "empty");
+		props.put("instance.name","empty");
 		try {
 			empty = fact.createComponentInstance(props);
 		} catch(Exception e) {
@@ -54,7 +54,7 @@ public class OptionalMultipleInstantiation extends OSGiTestCase {
 	
 	public void testCreation() {
 		Properties props = new Properties();
-		props.put("name", "under");
+		props.put("instance.name","under");
 		ComponentInstance under = null;
 		try {
 			under = bar2Factory.createComponentInstance(props);
@@ -67,7 +67,7 @@ public class OptionalMultipleInstantiation extends OSGiTestCase {
 	
 	public void testServiceAvailability() {
 		Properties props = new Properties();
-		props.put("name", "under");
+		props.put("instance.name","under");
 		ComponentInstance under = null;
 		try {
 			under = bar2Factory.createComponentInstance(props);
@@ -86,7 +86,7 @@ public class OptionalMultipleInstantiation extends OSGiTestCase {
 	public void testCreationLevel2() {
 		ServiceContext sc = Utils.getServiceContext(empty);
 		Properties props = new Properties();
-		props.put("name", "under");
+		props.put("instance.name","under");
 		ComponentInstance under = null;
 		try {
 			under = bar2Factory.createComponentInstance(props, sc);
@@ -100,7 +100,7 @@ public class OptionalMultipleInstantiation extends OSGiTestCase {
 	public void testServiceAvailabilityLevel2() {
 		ServiceContext sc = Utils.getServiceContext(empty);
 		Properties props = new Properties();
-		props.put("name", "under");
+		props.put("instance.name","under");
 		ComponentInstance under = null;
 		try {
 			under = bar2Factory.createComponentInstance(props, sc);
@@ -117,7 +117,7 @@ public class OptionalMultipleInstantiation extends OSGiTestCase {
 	
 	public void testFactoryManagement() {
 		Properties props = new Properties();
-		props.put("name", "under");
+		props.put("instance.name","under");
 		ComponentInstance under = null;
 		try {
 			under = bar2Factory.createComponentInstance(props);
@@ -155,7 +155,7 @@ public class OptionalMultipleInstantiation extends OSGiTestCase {
 	public void testFactoryManagementLevel2() {
 		ServiceContext sc = Utils.getServiceContext(empty);
 		Properties props = new Properties();
-		props.put("name", "under");
+		props.put("instance.name","under");
 		ComponentInstance under = null;
 		try {
 			under = bar2Factory.createComponentInstance(props, sc);

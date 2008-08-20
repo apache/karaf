@@ -37,21 +37,21 @@ public class MethodDelayedOptionalMultipleDependencies extends OSGiTestCase {
 	public void setUp() {		
 		try {
 			Properties i3 = new Properties();
-			i3.put("name", "Object");
+			i3.put("instance.name","Object");
 			instance3 = Utils.getFactoryByName(context, "MObjectOptionalMultipleCheckServiceProvider").createComponentInstance(i3);
 			instance3.stop();
 		
 			Properties i4 = new Properties();
-			i4.put("name", "Ref");
+			i4.put("instance.name","Ref");
 			instance4 = Utils.getFactoryByName(context, "MRefOptionalMultipleCheckServiceProvider").createComponentInstance(i4);
 			instance4.stop();
 		
 			Properties prov = new Properties();
-			prov.put("name", "FooProvider1");
+			prov.put("instance.name","FooProvider1");
 			fooProvider1 = Utils.getFactoryByName(context, "FooProviderType-1").createComponentInstance(prov);
 		
 			Properties prov2 = new Properties();
-			prov2.put("name", "FooProvider2");
+			prov2.put("instance.name","FooProvider2");
 			fooProvider2 = Utils.getFactoryByName(context, "FooProviderType-1").createComponentInstance(prov2);
 		} catch(Exception e) { fail(e.getMessage()); }		
 	}

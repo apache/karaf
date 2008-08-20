@@ -126,7 +126,7 @@ public class Utils {
 
         try {
             Properties props = new Properties();
-            props.put("name", name);
+            props.put("instance.name",name);
             return fact.createComponentInstance(props);
         } catch (Exception e) {
             System.err.println("Cannot create the instance from " + factoryName + " : " + e.getMessage());
