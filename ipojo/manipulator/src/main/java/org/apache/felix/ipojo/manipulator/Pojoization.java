@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
@@ -38,6 +39,7 @@ import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
+import org.apache.felix.ipojo.manipulation.InnerClassManipulator;
 import org.apache.felix.ipojo.manipulation.Manipulator;
 import org.apache.felix.ipojo.manipulation.annotations.MetadataCollector;
 import org.apache.felix.ipojo.metadata.Attribute;
@@ -307,6 +309,14 @@ public class Pojoization {
                         if (ci.m_classname.equals(curEntry.getName())) {
                             byte[] outClazz = manipulateComponent(in, curEntry, ci);
                             m_classes.put(curEntry.getName(), outClazz);
+                            
+                            // Manipulate inner classes ?
+                            if (!ci.m_inners.isEmpty()) {
+                                for (int k = 0; k < ci.m_inners.size(); k++) {
+                                    JarEntry inner = inputJar.getJarEntry((String) ci.m_inners.get(k) + ".class");
+                                    manipulateInnerClass(inputJar, inner, (String) ci.m_inners.get(k), ci);
+                                }
+                            }
                         }
                     }
                 } catch (IOException e) {
@@ -315,6 +325,32 @@ public class Pojoization {
                 }
             }
         }
+    }
+    
+    /**
+     * Manipulates an inner class.
+     * @param inputJar input jar
+     * @param je inner class jar entry
+     * @param innerClassName inner class name
+     * @param ci component info of the component owning the inner class
+     * @throws IOException the inner class cannot be read
+     */
+    private void manipulateInnerClass(JarFile inputJar, JarEntry je, String innerClassName, ComponentInfo ci) throws IOException {
+        InputStream currIn = inputJar.getInputStream(je);
+        byte[] in = new byte[0];
+        int c;
+        while ((c = currIn.read()) >= 0) {
+            byte[] in2 = new byte[in.length + 1];
+            System.arraycopy(in, 0, in2, 0, in.length);
+            in2[in.length] = (byte) c;
+            in = in2;
+        }
+        
+        InnerClassManipulator man = new InnerClassManipulator(ci.m_classname.substring(0, ci.m_classname.length() - 6), ci.m_fields);
+        byte[] out = man.manipulate(in);
+        
+        m_classes.put(je.getName(), out);
+        
     }
 
     /**
@@ -352,6 +388,8 @@ public class Pojoization {
             // Insert information to metadata
             ci.m_componentMetadata.addElement(man.getManipulationMetadata());
             ci.m_isManipulated = true;
+            ci.m_inners = man.getInnerClasses();
+            ci.m_fields = man.getFields().keySet();
             return out;
         } catch (IOException e) {
             error("Cannot manipulate the class " + je.getName() + " : " + e.getMessage());
@@ -397,6 +435,16 @@ public class Pojoization {
          * Is the class already manipulated. 
          */
         boolean m_isManipulated;
+        
+        /**
+         * List of inner classes of the implementation class.
+         */
+        List m_inners;
+        
+        /**
+         * Set of fields of the implementation class.
+         */
+        Set m_fields;
 
         /**
          * Constructor.

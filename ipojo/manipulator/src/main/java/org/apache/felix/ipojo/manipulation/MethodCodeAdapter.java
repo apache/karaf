@@ -68,11 +68,11 @@ public class MethodCodeAdapter extends GeneratorAdapter implements Opcodes {
         if (owner.equals(m_owner) && m_fields.contains(name)) {
             if (opcode == GETFIELD) {
                 String gDesc = "()" + desc;
-                visitMethodInsn(INVOKESPECIAL, owner, "__get" + name, gDesc);
+                visitMethodInsn(INVOKEVIRTUAL, owner, "__get" + name, gDesc);
                 return;
             } else if (opcode == PUTFIELD) {
                 String sDesc = "(" + desc + ")V";
-                visitMethodInsn(INVOKESPECIAL, owner, "__set" + name, sDesc);
+                visitMethodInsn(INVOKEVIRTUAL, owner, "__set" + name, sDesc);
                 return;
             }
         }

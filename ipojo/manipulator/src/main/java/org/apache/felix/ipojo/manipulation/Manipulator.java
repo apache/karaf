@@ -55,6 +55,11 @@ public class Manipulator {
      * Pojo super class.
      */
     private String m_superClass;
+    
+    /**
+     * List of owned inner classed.
+     */
+    private List m_inners;
 
     /**
      * Manipulate the given byte array.
@@ -79,6 +84,8 @@ public class Manipulator {
 
         // Get the methods list
         m_methods = ck.getMethods();
+        
+        m_inners = ck.getInnerClasses();
 
         ClassWriter finalWriter = null;
         if (!ck.isalreadyManipulated()) {
@@ -141,6 +148,10 @@ public class Manipulator {
     
     public Map getFields() {
         return m_fields;
+    }
+    
+    public List getInnerClasses() {
+        return m_inners;
     }
 
 }

@@ -147,7 +147,7 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
      * @param desc : method descriptor
      * @param signature : signature
      * @param exceptions : declared exceptions.
-     * @return the MethodVisitor wichi will visit the method code.
+     * @return the MethodVisitor wich will visit the method code.
      * @see org.objectweb.asm.ClassAdapter#visitMethod(int, java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
      */
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
@@ -176,6 +176,11 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
             MethodVisitor mv = super.visitMethod(ACC_PRIVATE, "<init>", newDesc, signature, exceptions);
             return new ConstructorCodeAdapter(mv, m_owner, m_fields, ACC_PRIVATE, name, newDesc);
         }
+        
+        if ((access & ACC_SYNTHETIC) == ACC_SYNTHETIC && name.startsWith("access$")) { 
+            MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
+            return new MethodCodeAdapter(mv, m_owner, access, name, desc, m_fields); 
+        }
 
         if ((access & ACC_STATIC) == ACC_STATIC) { return super.visitMethod(access, name, desc, signature, exceptions); }
 
@@ -186,7 +191,7 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
         MethodVisitor mv = super.visitMethod(ACC_PRIVATE, PREFIX + name, desc, signature, exceptions);
         return new MethodCodeAdapter(mv, m_owner, ACC_PRIVATE, PREFIX + name, desc, m_fields);
     }
-
+    
     /**
      * Visit a Field.
      * This field access is replaced by an invocation to the getter method or to the setter method.
@@ -606,7 +611,7 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
      */
     private void createArrayGetter(String name, String desc, Type type) {
         String methodName = "__get" + name;
-        MethodVisitor mv = cv.visitMethod(ACC_PRIVATE, methodName, desc, null, null);
+        MethodVisitor mv = cv.visitMethod(0, methodName, desc, null, null);
         mv.visitCode();
 
         String internalType = desc.substring(2);
@@ -641,7 +646,7 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
      */
     private void createSimpleGetter(String name, String desc, Type type) {
         String methodName = "__get" + name;
-        MethodVisitor mv = cv.visitMethod(ACC_PRIVATE, methodName, desc, null, null);
+        MethodVisitor mv = cv.visitMethod(0, methodName, desc, null, null);
         mv.visitCode();
 
         switch (type.getSort()) {
@@ -821,7 +826,7 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
      * @param type : type of the property
      */
     private void createSimpleSetter(String name, String desc, Type type) {
-        MethodVisitor mv = cv.visitMethod(ACC_PRIVATE, "__set" + name, desc, null, null);
+        MethodVisitor mv = cv.visitMethod(0, "__set" + name, desc, null, null);
         mv.visitCode();
 
         switch (type.getSort()) {

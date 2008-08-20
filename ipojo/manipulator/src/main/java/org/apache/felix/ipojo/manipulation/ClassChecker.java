@@ -31,7 +31,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.EmptyVisitor;
 
 /**
- * Check that a POJO is already manipulated or not.
+ * Checks that a POJO is already manipulated or not.
  * Moreover it allows to get manipulation data about this class. 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
@@ -61,6 +61,16 @@ public class ClassChecker extends EmptyVisitor implements ClassVisitor, Opcodes 
      * Super class if not java.lang.Object.
      */
     private String m_superClass;
+    
+    /**
+     * Class name.
+     */
+    private String m_className;
+    
+    /**
+     * List of visited inner class owned by the implementation class.
+     */
+    private List m_inners = new ArrayList();
 
     /**
      * Check if the _cm field already exists.
@@ -102,6 +112,22 @@ public class ClassChecker extends EmptyVisitor implements ClassVisitor, Opcodes 
 
         return null;
     }
+    
+    /**
+     * Add the inner class to the list of inner class to manipulate.
+     * The method checks that the inner class is really owned by the implementation class.
+     * @param name inner class qualified name
+     * @param outerName outer class name (may be null for anonymous class)
+     * @param innerName inner class simple (i.e. short) name
+     * @param access inner class visibility
+     * @see org.objectweb.asm.commons.EmptyVisitor#visitInnerClass(java.lang.String, java.lang.String, java.lang.String, int)
+     */
+    public void visitInnerClass(String name, String outerName, String innerName, int access) {
+        if (m_className.equals(outerName)  || outerName == null) { // Anonymous classes does not have an outer class.
+            m_inners.add(name);
+        }
+    }
+
 
     /**
      * Check if the class was already manipulated.
@@ -134,6 +160,8 @@ public class ClassChecker extends EmptyVisitor implements ClassVisitor, Opcodes 
                 m_itfs.add(interfaces[i].replace('/', '.'));
             }
         }
+        
+        m_className = name;
     }
 
     /**
@@ -193,6 +221,10 @@ public class ClassChecker extends EmptyVisitor implements ClassVisitor, Opcodes 
     
     public String getSuperClass() {
         return m_superClass;
+    }
+    
+    public List getInnerClasses() {
+        return m_inners;
     }
 
 }
