@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.felix.fileinstall;
 
 import java.util.*;
@@ -28,7 +29,7 @@ import org.osgi.util.tracker.*;
 /**
  * This clever little bundle watches a directory and will install any jar file
  * if finds in that directory (as long as it is a valid bundle and not a
- * fragment).
+ * fragment). Test
  * 
  */
 public class FileInstall implements BundleActivator, ManagedServiceFactory
