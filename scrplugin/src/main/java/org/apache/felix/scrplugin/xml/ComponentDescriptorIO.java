@@ -41,6 +41,8 @@ public class ComponentDescriptorIO {
 
     public static final String NAMESPACE_URI = "http://www.osgi.org/xmlns/scr/v1.0.0";
 
+    public static final String INNER_NAMESPACE_URI = "";
+
     private static final String PREFIX = "scr";
 
     private static final String COMPONENTS = "components";
@@ -180,8 +182,8 @@ public class ComponentDescriptorIO {
         final AttributesImpl ai = new AttributesImpl();
         IOUtils.addAttribute(ai, "class", implementation.getClassame());
         IOUtils.indent(contentHandler, 2);
-        contentHandler.startElement(NAMESPACE_URI, ComponentDescriptorIO.IMPLEMENTATION, ComponentDescriptorIO.IMPLEMENTATION_QNAME, ai);
-        contentHandler.endElement(NAMESPACE_URI, ComponentDescriptorIO.IMPLEMENTATION, ComponentDescriptorIO.IMPLEMENTATION_QNAME);
+        contentHandler.startElement(INNER_NAMESPACE_URI, ComponentDescriptorIO.IMPLEMENTATION, ComponentDescriptorIO.IMPLEMENTATION_QNAME, ai);
+        contentHandler.endElement(INNER_NAMESPACE_URI, ComponentDescriptorIO.IMPLEMENTATION, ComponentDescriptorIO.IMPLEMENTATION_QNAME);
         IOUtils.newline(contentHandler);
     }
 
@@ -196,7 +198,7 @@ public class ComponentDescriptorIO {
         final AttributesImpl ai = new AttributesImpl();
         IOUtils.addAttribute(ai, "servicefactory", String.valueOf(service.isServicefactory()));
         IOUtils.indent(contentHandler, 2);
-        contentHandler.startElement(NAMESPACE_URI, ComponentDescriptorIO.SERVICE, ComponentDescriptorIO.SERVICE_QNAME, ai);
+        contentHandler.startElement(INNER_NAMESPACE_URI, ComponentDescriptorIO.SERVICE, ComponentDescriptorIO.SERVICE_QNAME, ai);
         if ( service.getInterfaces() != null && service.getInterfaces().size() > 0 ) {
             IOUtils.newline(contentHandler);
             final Iterator i = service.getInterfaces().iterator();
@@ -206,7 +208,7 @@ public class ComponentDescriptorIO {
             }
             IOUtils.indent(contentHandler, 2);
         }
-        contentHandler.endElement(NAMESPACE_URI, ComponentDescriptorIO.SERVICE, ComponentDescriptorIO.SERVICE_QNAME);
+        contentHandler.endElement(INNER_NAMESPACE_URI, ComponentDescriptorIO.SERVICE, ComponentDescriptorIO.SERVICE_QNAME);
         IOUtils.newline(contentHandler);
     }
 
@@ -221,8 +223,8 @@ public class ComponentDescriptorIO {
         final AttributesImpl ai = new AttributesImpl();
         IOUtils.addAttribute(ai, "interface", interf.getInterfacename());
         IOUtils.indent(contentHandler, 3);
-        contentHandler.startElement(NAMESPACE_URI, ComponentDescriptorIO.INTERFACE, ComponentDescriptorIO.INTERFACE_QNAME, ai);
-        contentHandler.endElement(NAMESPACE_URI, ComponentDescriptorIO.INTERFACE, ComponentDescriptorIO.INTERFACE_QNAME);
+        contentHandler.startElement(INNER_NAMESPACE_URI, ComponentDescriptorIO.INTERFACE, ComponentDescriptorIO.INTERFACE_QNAME, ai);
+        contentHandler.endElement(INNER_NAMESPACE_URI, ComponentDescriptorIO.INTERFACE, ComponentDescriptorIO.INTERFACE_QNAME);
         IOUtils.newline(contentHandler);
     }
 
@@ -252,7 +254,7 @@ public class ComponentDescriptorIO {
             }
         }
         IOUtils.indent(contentHandler, 2);
-        contentHandler.startElement(NAMESPACE_URI, ComponentDescriptorIO.PROPERTY, ComponentDescriptorIO.PROPERTY_QNAME, ai);
+        contentHandler.startElement(INNER_NAMESPACE_URI, ComponentDescriptorIO.PROPERTY, ComponentDescriptorIO.PROPERTY_QNAME, ai);
         if ( property.getMultiValue() != null && property.getMultiValue().length > 0 ) {
             // generate a new line first
             IOUtils.text(contentHandler, "\n");
@@ -263,7 +265,7 @@ public class ComponentDescriptorIO {
             }
             IOUtils.indent(contentHandler, 2);
         }
-        contentHandler.endElement(NAMESPACE_URI, ComponentDescriptorIO.PROPERTY, ComponentDescriptorIO.PROPERTY_QNAME);
+        contentHandler.endElement(INNER_NAMESPACE_URI, ComponentDescriptorIO.PROPERTY, ComponentDescriptorIO.PROPERTY_QNAME);
         IOUtils.newline(contentHandler);
     }
 
@@ -287,8 +289,8 @@ public class ComponentDescriptorIO {
             IOUtils.addAttribute(ai, "checked", String.valueOf(reference.isChecked()));
         }
         IOUtils.indent(contentHandler, 2);
-        contentHandler.startElement(NAMESPACE_URI, ComponentDescriptorIO.REFERENCE, ComponentDescriptorIO.REFERENCE_QNAME, ai);
-        contentHandler.endElement(NAMESPACE_URI, ComponentDescriptorIO.REFERENCE, ComponentDescriptorIO.REFERENCE_QNAME);
+        contentHandler.startElement(INNER_NAMESPACE_URI, ComponentDescriptorIO.REFERENCE, ComponentDescriptorIO.REFERENCE_QNAME, ai);
+        contentHandler.endElement(INNER_NAMESPACE_URI, ComponentDescriptorIO.REFERENCE, ComponentDescriptorIO.REFERENCE_QNAME);
         IOUtils.newline(contentHandler);
     }
 
@@ -313,6 +315,9 @@ public class ComponentDescriptorIO {
         /** Flag for detecting the first element. */
         protected boolean firstElement = true;
 
+        /** Flag for elements inside a component element */
+        protected boolean isComponent = false;
+
         /** Override namespace. */
         protected String overrideNamespace;
 
@@ -332,9 +337,18 @@ public class ComponentDescriptorIO {
                 uri = this.overrideNamespace;
             }
 
+            // however the spec also states that the inner elements
+            // of a component are unqualified, so they don't have
+            // the namespace - we allow both: with or without namespace!
+            if ( this.isComponent && "".equals(uri) )  {
+                uri = NAMESPACE_URI;
+            }
+
+            // from here on, uri has the namespace regardless of the used xml format
             if ( NAMESPACE_URI.equals(uri) ) {
 
                 if (localName.equals(COMPONENT)) {
+                    this.isComponent = true;
 
                     this.currentComponent = new Component();
                     this.currentComponent.setName(attributes.getValue("name"));
@@ -424,11 +438,16 @@ public class ComponentDescriptorIO {
                 uri = this.overrideNamespace;
             }
 
+            if ( this.isComponent && "".equals(uri) )  {
+                uri = NAMESPACE_URI;
+            }
+
             if ( NAMESPACE_URI.equals(uri) ) {
-                if (localName.equals("component") ) {
+                if (localName.equals(COMPONENT) ) {
                     this.components.addComponent(this.currentComponent);
                     this.currentComponent = null;
-                } else if (localName.equals("property") && this.pendingProperty != null) {
+                    this.isComponent = false;
+                } else if (localName.equals(PROPERTY) && this.pendingProperty != null) {
                     // now split the value
                     final String text = this.pendingProperty.getValue();
                     if ( text != null ) {
