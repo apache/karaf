@@ -59,6 +59,9 @@ public class XmlHandler implements KXml2SAXHandler
     /** Override namespace. */
     protected String overrideNamespace;
 
+    /** Flag for elements inside a component element */
+    protected boolean isComponent = false;
+
 
     // creates an instance with the bundle owning the component descriptor
     // file parsed by this instance
@@ -94,6 +97,16 @@ public class XmlHandler implements KXml2SAXHandler
         {
             uri = overrideNamespace;
         }
+
+        // FELIX-695: however the spec also states that the inner elements
+        // of a component are unqualified, so they don't have
+        // the namespace - we allow both: with or without namespace!
+        if ( this.isComponent && "".equals(uri) )
+        {
+            uri = NAMESPACE_URI;
+        }
+
+        // from now on uri points to the namespace
         if ( NAMESPACE_URI.equals( uri ) )
         {
             try
@@ -102,6 +115,7 @@ public class XmlHandler implements KXml2SAXHandler
                 // 112.4.3 Component Element
                 if ( localName.equals( "component" ) )
                 {
+                    this.isComponent = true;
 
                     // Create a new ComponentMetadata
                     m_currentComponent = new ComponentMetadata();
@@ -235,10 +249,16 @@ public class XmlHandler implements KXml2SAXHandler
             uri = overrideNamespace;
         }
 
+        if ( this.isComponent && "".equals(uri) )
+        {
+            uri = NAMESPACE_URI;
+        }
+
         if ( NAMESPACE_URI.equals( uri ) )
         {
             if ( localName.equals( "component" ) )
             {
+                this.isComponent = false;
                 // When the closing tag for a component is found, the component is validated to check if
                 // the implementation class has been set
                 m_currentComponent.validate();
