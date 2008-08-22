@@ -53,23 +53,23 @@ public class ComponentDescriptorIO {
 
     private static final String IMPLEMENTATION = "implementation";
 
-    private static final String IMPLEMENTATION_QNAME = PREFIX + ':' + IMPLEMENTATION;
+    private static final String IMPLEMENTATION_QNAME = IMPLEMENTATION;
 
     private static final String SERVICE = "service";
 
-    private static final String SERVICE_QNAME = PREFIX + ':' + SERVICE;
+    private static final String SERVICE_QNAME = SERVICE;
 
     private static final String PROPERTY = "property";
 
-    private static final String PROPERTY_QNAME = PREFIX + ':' + PROPERTY;
+    private static final String PROPERTY_QNAME = PROPERTY;
 
     private static final String REFERENCE = "reference";
 
-    private static final String REFERENCE_QNAME = PREFIX + ':' + REFERENCE;
+    private static final String REFERENCE_QNAME = REFERENCE;
 
     private static final String INTERFACE = "provide";
 
-    private static final String INTERFACE_QNAME = PREFIX + ':' + INTERFACE;
+    private static final String INTERFACE_QNAME = INTERFACE;
 
     public static Components read(File file)
     throws MojoExecutionException {
