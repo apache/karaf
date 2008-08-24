@@ -324,6 +324,9 @@ public class ContentLoaderImpl implements IContentLoader
         // is on the bundle's class path and then creating content
         // objects for everything on the class path.
 
+        // Create a list to contain the content path for the specified content.
+        List localContentList = new ArrayList();
+
         // Get the bundle's manifest header.
         InputStream is = null;
         Map headers = null;
@@ -361,7 +364,7 @@ public class ContentLoaderImpl implements IContentLoader
             // Check for the bundle itself on the class path.
             if (classPathStrings[i].equals(FelixConstants.CLASS_PATH_DOT))
             {
-                contentList.add(content);
+                localContentList.add(content);
             }
             else
             {
@@ -382,7 +385,7 @@ public class ContentLoaderImpl implements IContentLoader
                 // class path content list.
                 if (embeddedContent != null)
                 {
-                    contentList.add(embeddedContent);
+                    localContentList.add(embeddedContent);
                 }
                 else
                 {
@@ -397,11 +400,13 @@ public class ContentLoaderImpl implements IContentLoader
 
         // If there is nothing on the class path, then include
         // "." by default, as per the spec.
-        if (contentList.size() == 0)
+        if (localContentList.size() == 0)
         {
-            contentList.add(content);
+            localContentList.add(content);
         }
 
+        // Now add the local contents to the global content list and return it.
+        contentList.addAll(localContentList);
         return contentList;
     }
 }
