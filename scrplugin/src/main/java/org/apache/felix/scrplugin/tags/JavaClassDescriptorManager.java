@@ -139,54 +139,58 @@ public class JavaClassDescriptorManager {
         while ( it.hasNext() ) {
             final Artifact declared = (Artifact) it.next();
             this.log.debug("Checking artifact " + declared);
-            if (Artifact.SCOPE_COMPILE.equals(declared.getScope())
-                || Artifact.SCOPE_RUNTIME.equals(declared.getScope())
-                || Artifact.SCOPE_PROVIDED.equals(declared.getScope())) {
-                this.log.debug("Resolving artifact " + declared);
-                final Artifact artifact = (Artifact) resolved.get(ArtifactUtils.versionlessKey(declared));
-                if (artifact != null) {
-                    this.log.debug("Trying to get manifest from artifact " + artifact);
-                    try {
-                        final Manifest manifest = this.getManifest(artifact);
-                        if ( manifest != null ) {
-                            // read Service-Component entry
-                            if ( manifest.getMainAttributes().getValue(JavaClassDescriptorManager.SERVICE_COMPONENT) != null ) {
-                                final String serviceComponent = manifest.getMainAttributes().getValue(JavaClassDescriptorManager.SERVICE_COMPONENT);
-                                this.log.debug("Found Service-Component: " + serviceComponent + " in artifact " + artifact);
-                                final StringTokenizer st = new StringTokenizer(serviceComponent, ",");
-                                while ( st.hasMoreTokens() ) {
-                                    final String entry = st.nextToken().trim();
-                                    if ( entry.length() > 0 ) {
-                                        components.addAll(this.readServiceComponentDescriptor(artifact, entry).getComponents());
+            if ( this.isJavaArtifact(declared)) {
+                if (Artifact.SCOPE_COMPILE.equals(declared.getScope())
+                    || Artifact.SCOPE_RUNTIME.equals(declared.getScope())
+                    || Artifact.SCOPE_PROVIDED.equals(declared.getScope())) {
+                    this.log.debug("Resolving artifact " + declared);
+                    final Artifact artifact = (Artifact) resolved.get(ArtifactUtils.versionlessKey(declared));
+                    if (artifact != null) {
+                        this.log.debug("Trying to get manifest from artifact " + artifact);
+                        try {
+                            final Manifest manifest = this.getManifest(artifact);
+                            if ( manifest != null ) {
+                                // read Service-Component entry
+                                if ( manifest.getMainAttributes().getValue(JavaClassDescriptorManager.SERVICE_COMPONENT) != null ) {
+                                    final String serviceComponent = manifest.getMainAttributes().getValue(JavaClassDescriptorManager.SERVICE_COMPONENT);
+                                    this.log.debug("Found Service-Component: " + serviceComponent + " in artifact " + artifact);
+                                    final StringTokenizer st = new StringTokenizer(serviceComponent, ",");
+                                    while ( st.hasMoreTokens() ) {
+                                        final String entry = st.nextToken().trim();
+                                        if ( entry.length() > 0 ) {
+                                            components.addAll(this.readServiceComponentDescriptor(artifact, entry).getComponents());
+                                        }
                                     }
+                                } else {
+                                    this.log.debug("Artifact has no service component entry in manifest " + artifact);
                                 }
                             } else {
-                                this.log.debug("Artifact has no service component entry in manifest " + artifact);
+                                this.log.debug("Unable to get manifest from artifact " + artifact);
                             }
-                        } else {
-                            this.log.debug("Unable to get manifest from artifact " + artifact);
+                        } catch (IOException ioe) {
+                            throw new MojoExecutionException("Unable to get manifest from artifact " + artifact, ioe);
                         }
-                    } catch (IOException ioe) {
-                        throw new MojoExecutionException("Unable to get manifest from artifact " + artifact, ioe);
-                    }
-                    this.log.debug("Trying to get scrinfo from artifact " + artifact);
-                    // now read the scr private file - components stored there overwrite components already
-                    // read from the service component section.
-                    try {
-                        final File scrInfoFile = this.getFile(artifact, Constants.ABSTRACT_DESCRIPTOR_ARCHIV_PATH);
-                        if ( scrInfoFile != null ) {
-                            components.addAll(this.parseServiceComponentDescriptor(artifact, scrInfoFile).getComponents());
-                        } else {
-                            this.log.debug("Artifact has no scrinfo file (it's optional): " + artifact);
+                        this.log.debug("Trying to get scrinfo from artifact " + artifact);
+                        // now read the scr private file - components stored there overwrite components already
+                        // read from the service component section.
+                        try {
+                            final File scrInfoFile = this.getFile(artifact, Constants.ABSTRACT_DESCRIPTOR_ARCHIV_PATH);
+                            if ( scrInfoFile != null ) {
+                                components.addAll(this.parseServiceComponentDescriptor(artifact, scrInfoFile).getComponents());
+                            } else {
+                                this.log.debug("Artifact has no scrinfo file (it's optional): " + artifact);
+                            }
+                        } catch (IOException ioe) {
+                            throw new MojoExecutionException("Unable to get scrinfo from artifact " + artifact, ioe);
                         }
-                    } catch (IOException ioe) {
-                        throw new MojoExecutionException("Unable to get scrinfo from artifact " + artifact, ioe);
+                    } else {
+                        this.log.debug("Unable to resolve artifact " + declared);
                     }
                 } else {
-                    this.log.debug("Unable to resolve artifact " + declared);
+                    this.log.debug("Artifact " + declared + " has not scope compile or runtime, but " + declared.getScope());
                 }
             } else {
-                this.log.debug("Artifact " + declared + " has not scope compile or runtime, but " + declared.getScope());
+                this.log.debug("Artifact " + declared + " is not a java artifact, type is " + declared.getType());
             }
         }
         // now create map with component descriptions
@@ -195,6 +199,19 @@ public class JavaClassDescriptorManager {
             final Component component = (Component) cI.next();
             this.componentDescriptions.put(component.getImplementation().getClassame(), component);
         }
+    }
+
+    /**
+     * Check if the artifact is a java artifact (jar or bundle)
+     */
+    private boolean isJavaArtifact(Artifact artifact) {
+        if ( "jar".equals(artifact.getType()) ) {
+            return true;
+        }
+        if ( "bundle".equals(artifact.getType()) ) {
+            return true;
+        }
+        return false;
     }
 
     /**
