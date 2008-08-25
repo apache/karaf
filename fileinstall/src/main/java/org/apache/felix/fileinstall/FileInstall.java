@@ -31,23 +31,24 @@ import org.osgi.util.tracker.*;
  * fragment).
  * 
  */
-public class FileInstall implements BundleActivator, ManagedServiceFactory {
+public class FileInstall implements BundleActivator, ManagedServiceFactory
+{
     static ServiceTracker padmin;
     static ServiceTracker cmTracker;
-    BundleContext         context;
-    Map                   watchers = new HashMap();
+    BundleContext context;
+    Map watchers = new HashMap();
 
-    public void start(BundleContext context) throws Exception {
+    public void start(BundleContext context) throws Exception
+    {
         this.context = context;
         Hashtable props = new Hashtable();
         props.put(Constants.SERVICE_PID, getName());
         context.registerService(ManagedServiceFactory.class.getName(), this,
-                props);
+            props);
 
         padmin = new ServiceTracker(context, PackageAdmin.class.getName(), null);
         padmin.open();
-        cmTracker = new ServiceTracker(context, ConfigurationAdmin.class
-                .getName(), null);
+        cmTracker = new ServiceTracker(context, ConfigurationAdmin.class.getName(), null);
         cmTracker.open();
 
         // Created the initial configuration
@@ -60,23 +61,32 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory {
     }
 
     // Adapted for FELIX-524
-    private void set(Hashtable ht, String key) {
+    private void set(Hashtable ht, String key)
+    {
         Object o = context.getProperty(key);
-        if (o == null) {
+        if (o == null)
+        {
             o = System.getenv(key.toUpperCase().replaceAll(".", "_"));
             if (o == null)
+            {
                 return;
+            }
         }
         ht.put(key, o);
     }
 
-    public void stop(BundleContext context) throws Exception {
-        for (Iterator w = watchers.values().iterator(); w.hasNext();) {
-            try {
+    public void stop(BundleContext context) throws Exception
+    {
+        for (Iterator w = watchers.values().iterator(); w.hasNext();)
+        {
+            try
+            {
                 DirectoryWatcher dir = (DirectoryWatcher) w.next();
                 w.remove();
                 dir.close();
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 // Ignore
             }
         }
@@ -84,19 +94,23 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory {
         padmin.close();
     }
 
-    public void deleted(String pid) {
+    public void deleted(String pid)
+    {
         DirectoryWatcher watcher = (DirectoryWatcher) watchers.remove(pid);
-        if (watcher != null) {
+        if (watcher != null)
+        {
             watcher.close();
         }
     }
 
-    public String getName() {
+    public String getName()
+    {
         return "org.apache.felix.fileinstall";
     }
 
     public void updated(String pid, Dictionary properties)
-            throws ConfigurationException {
+        throws ConfigurationException
+    {
         deleted(pid);
         DirectoryWatcher watcher = new DirectoryWatcher(properties, context);
         watchers.put(pid, watcher);
