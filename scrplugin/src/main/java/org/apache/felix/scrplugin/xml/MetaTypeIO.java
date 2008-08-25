@@ -42,25 +42,27 @@ public class MetaTypeIO {
 
     public static final String NAMESPACE_URI = "http://www.osgi.org/xmlns/metatype/v1.0.0";
 
+    public static final String INNER_NAMESPACE_URI = "";
+
     public static final String PREFIX = "metatype";
 
     protected static final String METADATA_ELEMENT = "MetaData";
     protected static final String METADATA_ELEMENT_QNAME = PREFIX + ':' + METADATA_ELEMENT;
 
     protected static final String OCD_ELEMENT = "OCD";
-    protected static final String OCD_ELEMENT_QNAME = PREFIX + ':' + OCD_ELEMENT;
+    protected static final String OCD_ELEMENT_QNAME = OCD_ELEMENT;
 
     protected static final String DESIGNATE_ELEMENT = "Designate";
-    protected static final String DESIGNATE_ELEMENT_QNAME = PREFIX + ':' + DESIGNATE_ELEMENT;
+    protected static final String DESIGNATE_ELEMENT_QNAME = DESIGNATE_ELEMENT;
 
     protected static final String OBJECT_ELEMENT = "Object";
-    protected static final String OBJECT_ELEMENT_QNAME = PREFIX + ':' + OBJECT_ELEMENT;
+    protected static final String OBJECT_ELEMENT_QNAME = OBJECT_ELEMENT;
 
     protected static final String AD_ELEMENT = "AD";
-    protected static final String AD_ELEMENT_QNAME = PREFIX + ':' + AD_ELEMENT;
+    protected static final String AD_ELEMENT_QNAME = AD_ELEMENT;
 
     protected static final String OPTION_ELEMENT = "Option";
-    protected static final String OPTION_ELEMENT_QNAME = PREFIX + ':' + OPTION_ELEMENT;
+    protected static final String OPTION_ELEMENT_QNAME = OPTION_ELEMENT;
 
     public static void write(MetaData metaData, File file)
     throws MojoExecutionException {
@@ -116,7 +118,7 @@ public class MetaTypeIO {
         IOUtils.addAttribute(ai, "name", ocd.getName());
         IOUtils.addAttribute(ai, "description", ocd.getDescription());
         IOUtils.indent(contentHandler, 1);
-        contentHandler.startElement(NAMESPACE_URI, OCD_ELEMENT, OCD_ELEMENT_QNAME, ai);
+        contentHandler.startElement(INNER_NAMESPACE_URI, OCD_ELEMENT, OCD_ELEMENT_QNAME, ai);
 
         if ( ocd.getProperties().size() > 0 ) {
             IOUtils.newline(contentHandler);
@@ -128,7 +130,7 @@ public class MetaTypeIO {
             IOUtils.indent(contentHandler, 1);
         }
 
-        contentHandler.endElement(NAMESPACE_URI, OCD_ELEMENT, OCD_ELEMENT_QNAME);
+        contentHandler.endElement(INNER_NAMESPACE_URI, OCD_ELEMENT, OCD_ELEMENT_QNAME);
         IOUtils.newline(contentHandler);
     }
 
@@ -153,7 +155,7 @@ public class MetaTypeIO {
         IOUtils.addAttribute(ai, "description", ad.getDescription());
         IOUtils.addAttribute(ai, "cardinality", ad.getCardinality());
         IOUtils.indent(contentHandler, 2);
-        contentHandler.startElement(NAMESPACE_URI, AD_ELEMENT, AD_ELEMENT_QNAME, ai);
+        contentHandler.startElement(INNER_NAMESPACE_URI, AD_ELEMENT, AD_ELEMENT_QNAME, ai);
 
         if (ad.getOptions() != null && ad.getOptions().size() > 0) {
             IOUtils.newline(contentHandler);
@@ -163,14 +165,14 @@ public class MetaTypeIO {
                 IOUtils.addAttribute(ai, "value", String.valueOf(entry.getKey()));
                 IOUtils.addAttribute(ai, "label", String.valueOf(entry.getValue()));
                 IOUtils.indent(contentHandler, 3);
-                contentHandler.startElement(NAMESPACE_URI, OPTION_ELEMENT, OPTION_ELEMENT_QNAME, ai);
-                contentHandler.endElement(NAMESPACE_URI, OPTION_ELEMENT, OPTION_ELEMENT_QNAME);
+                contentHandler.startElement(INNER_NAMESPACE_URI, OPTION_ELEMENT, OPTION_ELEMENT_QNAME, ai);
+                contentHandler.endElement(INNER_NAMESPACE_URI, OPTION_ELEMENT, OPTION_ELEMENT_QNAME);
                 IOUtils.newline(contentHandler);
             }
             IOUtils.indent(contentHandler, 2);
         }
 
-        contentHandler.endElement(NAMESPACE_URI, AD_ELEMENT, AD_ELEMENT_QNAME);
+        contentHandler.endElement(INNER_NAMESPACE_URI, AD_ELEMENT, AD_ELEMENT_QNAME);
         IOUtils.newline(contentHandler);
     }
 
@@ -179,13 +181,13 @@ public class MetaTypeIO {
         final AttributesImpl ai = new AttributesImpl();
         IOUtils.addAttribute(ai, "pid", designate.getPid());
         IOUtils.indent(contentHandler, 1);
-        contentHandler.startElement(NAMESPACE_URI, DESIGNATE_ELEMENT, DESIGNATE_ELEMENT_QNAME, ai);
+        contentHandler.startElement(INNER_NAMESPACE_URI, DESIGNATE_ELEMENT, DESIGNATE_ELEMENT_QNAME, ai);
         IOUtils.newline(contentHandler);
 
         generateXML(designate.getObject(), contentHandler);
 
         IOUtils.indent(contentHandler, 1);
-        contentHandler.endElement(NAMESPACE_URI, DESIGNATE_ELEMENT, DESIGNATE_ELEMENT_QNAME);
+        contentHandler.endElement(INNER_NAMESPACE_URI, DESIGNATE_ELEMENT, DESIGNATE_ELEMENT_QNAME);
         IOUtils.newline(contentHandler);
     }
 
@@ -194,8 +196,8 @@ public class MetaTypeIO {
         final AttributesImpl ai = new AttributesImpl();
         IOUtils.addAttribute(ai, "ocdref", obj.getOcdref());
         IOUtils.indent(contentHandler, 2);
-        contentHandler.startElement(NAMESPACE_URI, OBJECT_ELEMENT, OBJECT_ELEMENT_QNAME, ai);
-        contentHandler.endElement(NAMESPACE_URI, OBJECT_ELEMENT, OBJECT_ELEMENT_QNAME);
+        contentHandler.startElement(INNER_NAMESPACE_URI, OBJECT_ELEMENT, OBJECT_ELEMENT_QNAME, ai);
+        contentHandler.endElement(INNER_NAMESPACE_URI, OBJECT_ELEMENT, OBJECT_ELEMENT_QNAME);
         IOUtils.newline(contentHandler);
     }
 }
