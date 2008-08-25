@@ -230,8 +230,21 @@ public class Activator implements BundleActivator, SynchronousBundleListener
         }
         catch ( Exception e )
         {
-            log( LogService.LOG_ERROR, m_context.getBundle(), "Error while loading components of bundle "
-                + bundle.getSymbolicName(), e );
+            if ( e instanceof IllegalStateException && bundle.getState() != Bundle.ACTIVE )
+            {
+                log(
+                    LogService.LOG_INFO,
+                    m_context.getBundle(),
+                    "Bundle "
+                        + bundle.getSymbolicName()
+                        + " has been stopped while trying to activate its components. Trying again when the bundles gets startet again.",
+                    e );
+            }
+            else
+            {
+                log( LogService.LOG_ERROR, m_context.getBundle(), "Error while loading components of bundle "
+                    + bundle.getSymbolicName(), e );
+            }
         }
     }
 
