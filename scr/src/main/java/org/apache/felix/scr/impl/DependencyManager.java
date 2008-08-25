@@ -709,7 +709,7 @@ class DependencyManager implements ServiceListener, Reference
      * @throws InvocationTargetException If an unexpected error occurrs trying
      *      to get the method from the targetClass.
      */
-    private Method getBindingMethod( String methodname, Class targetClass, Bundle serviceBundle, String parameterClassName )
+    private Method getBindingMethod( String methodname, Class targetClass, String parameterClassName )
         throws InvocationTargetException
     {
         Class parameterClass = null;
@@ -732,7 +732,7 @@ class DependencyManager implements ServiceListener, Reference
             try
             {
                 // Case2 - Service object parameter
-                parameterClass = serviceBundle.loadClass(
+                parameterClass = targetClass.getClassLoader().loadClass(
                     parameterClassName );
                 return AbstractComponentManager.getMethod( targetClass, methodname, new Class[]
                     { parameterClass }, true );
@@ -784,14 +784,14 @@ class DependencyManager implements ServiceListener, Reference
             }
             catch ( ClassNotFoundException ex2 )
             {
-                m_componentManager.log( LogService.LOG_ERROR, "Cannot load class used as parameter "
-                    + parameterClassName, m_componentManager.getComponentMetadata(), ex2 );
+                // if we can't load the class, perhaps the method is declared in a super class
+                // so we try this class next
             }
         }
 
         // if we get here, we have no method, so check the super class
         targetClass = targetClass.getSuperclass();
-        return ( targetClass != null ) ? getBindingMethod( methodname, targetClass, serviceBundle, parameterClassName ) : null;
+        return ( targetClass != null ) ? getBindingMethod( methodname, targetClass, parameterClassName ) : null;
     }
 
 
@@ -826,7 +826,7 @@ class DependencyManager implements ServiceListener, Reference
                 if ( m_bind == null )
                 {
                     m_bind = getBindingMethod( m_dependencyMetadata.getBind(), implementationObject.getClass(),
-                        ref.getBundle(), m_dependencyMetadata.getInterface() );
+                        m_dependencyMetadata.getInterface() );
 
                     // 112.3.1 If the method is not found , SCR must log an error
                     // message with the log service, if present, and ignore the
@@ -930,7 +930,7 @@ class DependencyManager implements ServiceListener, Reference
                 if ( m_unbind == null )
                 {
                     m_unbind = getBindingMethod( m_dependencyMetadata.getUnbind(), implementationObject.getClass(),
-                        ref.getBundle(), m_dependencyMetadata.getInterface() );
+                        m_dependencyMetadata.getInterface() );
 
                     if ( m_unbind == null )
                     {
