@@ -50,7 +50,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>org.apache.felix.fileinstall,org.osgi.service.cm</Export-Package>
+            <Export-Package>org.apache.felix.fileinstall,org.osgi.service.cm, org.osgi.service.log</Export-Package>
             <Bundle-Activator>org.apache.felix.fileinstall.FileInstall</Bundle-Activator>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
