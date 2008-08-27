@@ -167,10 +167,11 @@ public class ManifestPlugin extends BundlePlugin
         properties.putAll( transformDirectives( instructions ) );
 
         PackageVersionAnalyzer analyzer = new PackageVersionAnalyzer();
-        analyzer.setProperties( properties );
 
         if ( project.getBasedir() != null )
             analyzer.setBase( project.getBasedir() );
+
+        analyzer.setProperties( properties );
 
         if ( classpath != null )
             analyzer.setClasspath( classpath );
