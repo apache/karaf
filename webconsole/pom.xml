@@ -32,7 +32,9 @@
 
     <name>Apache Felix Web Management Console</name>
     <description>
-        Web Based Management Console for OSGi Frameworks
+        Web Based Management Console for OSGi Frameworks. See
+        http://felix.apache.org/apache-felix-web-console.html for more
+        information on this bundle.
     </description>
 
     <scm>
@@ -74,7 +76,7 @@
                             The Apache Software Foundation
                         </Bundle-Vendor>
                         <Bundle-DocURL>
-                            http://felix.apache.org
+                            http://felix.apache.org/apache-felix-web-console.html
                         </Bundle-DocURL>
                         <Bundle-Activator>
                             org.apache.felix.webconsole.internal.OsgiManagerActivator
@@ -136,13 +138,13 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <version>1.2.0</version>
+            <version>1.0.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.osgi.compendium</artifactId>
-            <version>1.2.0</version>
+            <version>1.0.1</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
