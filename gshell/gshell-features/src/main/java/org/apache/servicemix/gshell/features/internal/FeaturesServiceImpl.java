@@ -220,7 +220,8 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
         Collection<String> features = new ArrayList<String>();
         for (Repository repo : repositories.values()) {
             for (Feature f : repo.getFeatures()) {
-                features.add(f.getName());
+            	String installStatus = installed.containsKey(f.getName()) ? "installed" : "uninstalled";
+                features.add(f.getName() + " " + installStatus);
             }
         }
         return features.toArray(new String[features.size()]);
