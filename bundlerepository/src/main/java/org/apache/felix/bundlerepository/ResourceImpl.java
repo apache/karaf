@@ -67,16 +67,24 @@ public class ResourceImpl implements Resource
 
     public boolean equals(Object o)
     {
+        if (getSymbolicName() == null || getVersion() == null)
+        {
+            return this == o;
+        }
         if (o instanceof Resource)
         {
-            return ((Resource) o).getSymbolicName().equals(getSymbolicName())
-                && ((Resource) o).getVersion().equals(getVersion());
+            return getSymbolicName().equals(((Resource) o).getSymbolicName())
+                && getVersion().equals(((Resource) o).getVersion());
         }
         return false;
     }
 
     public int hashCode()
     {
+        if (getSymbolicName() == null || getVersion() == null)
+        {
+            return super.hashCode();
+        }
         return getSymbolicName().hashCode() ^ getVersion().hashCode();
     }
 
