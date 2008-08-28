@@ -17,7 +17,6 @@
 package org.apache.servicemix.gshell.features.internal.commands;
 
 import org.apache.servicemix.gshell.features.FeaturesService;
-import org.apache.servicemix.gshell.features.Repository;
 import org.apache.geronimo.gshell.command.annotation.CommandComponent;
 import org.apache.geronimo.gshell.clp.Option;
 
@@ -32,6 +31,8 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
         if (installed) {
             features = admin.listInstalledFeatures();
         } else {
+        	// Print column headers.
+        	io.out.println("  State       Name");
             features = admin.listFeatures();
         }
         if ((features != null) && (features.length > 0)) {

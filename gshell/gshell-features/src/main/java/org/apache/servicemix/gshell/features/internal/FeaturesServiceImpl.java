@@ -163,6 +163,7 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
             bundles.add(b.getBundleId());
         }
         installed.put(name, bundles);
+        f.setInstallStatus(true);
         saveState();
     }
 
@@ -220,8 +221,8 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
         Collection<String> features = new ArrayList<String>();
         for (Repository repo : repositories.values()) {
             for (Feature f : repo.getFeatures()) {
-            	String installStatus = installed.containsKey(f.getName()) ? "installed" : "uninstalled";
-                features.add(f.getName() + " " + installStatus);
+            	String installStatus = f.getInstallStatus() ? "installed  " : "uninstalled";
+                features.add("[" + installStatus + "] " + f.getName());
             }
         }
         return features.toArray(new String[features.size()]);
