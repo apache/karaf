@@ -69,7 +69,7 @@
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Export-Service>org.apache.felix.shell.gui.Plugin</Export-Service>
-            <Import-Service>org.apache.felix.shell.ShellService,org.apache.felix.bundlerepository.RepostioryAdmin</Import-Service>
+            <Import-Service>org.apache.felix.shell.ShellService,org.osgi.service.obr.RepositoryAdmin</Import-Service>
             <Private-Package>org.apache.felix.shell.gui.plugin.*</Private-Package>
           </instructions>
         </configuration>
