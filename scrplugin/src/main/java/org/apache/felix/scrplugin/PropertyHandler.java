@@ -351,7 +351,7 @@ public class PropertyHandler {
                 final String name = entry.getKey().toString();
 
                 // check if the service already provides this property
-                if ( !properties.containsKey(name) ) {
+                if ( !properties.containsKey(name) && entry.getValue() != null ) {
                     final String value = entry.getValue().toString();
 
                     final Property p = new Property();
