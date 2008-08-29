@@ -332,6 +332,10 @@ public class ContentLoaderImpl implements IContentLoader
         Map headers = null;
         try
         {
+// TODO: REFACTOR - It seems that we shouldn't have to get the manifest
+//       here since we already have it in our module definition, but we
+//       don't have access to the module definition here. This is something
+//       to be considered when we refactor the module layer.
             is = content.getEntryAsStream("META-INF/MANIFEST.MF");
             headers = new StringMap(new Manifest(is).getMainAttributes(), false);
         }

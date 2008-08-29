@@ -48,7 +48,6 @@ class JarRevision extends BundleRevision
     private static final transient String BUNDLE_JAR_FILE = "bundle.jar";
 
     private File m_bundleFile = null;
-    private Map m_header = null;
 
     public JarRevision(
         Logger logger, File revisionRootDir, String location, boolean byReference)
@@ -81,11 +80,6 @@ class JarRevision extends BundleRevision
 
     public synchronized Map getManifestHeader() throws Exception
     {
-        if (m_header != null)
-        {
-            return m_header;
-        }
-
         // Get the embedded resource.
         JarFile jarFile = null;
 
@@ -101,9 +95,7 @@ class JarRevision extends BundleRevision
             // Get manifest.
             Manifest mf = jarFile.getManifest();
             // Create a case insensitive map of manifest attributes.
-            m_header = new StringMap(mf.getMainAttributes(), false);
-            return m_header;
-
+            return new StringMap(mf.getMainAttributes(), false);
         }
         finally
         {

@@ -18,24 +18,32 @@
  */
 package org.apache.felix.framework.searchpolicy;
 
+import java.util.Map;
 import org.apache.felix.framework.util.manifestparser.R4Library;
 import org.apache.felix.moduleloader.*;
 
 public class ModuleDefinition implements IModuleDefinition
 {
-    public ICapability[] m_capabilities = null;
-    public IRequirement[] m_requirements = null;
-    public IRequirement[] m_dynamicRequirements = null;
+    private Map m_headerMap = null;
+    private ICapability[] m_capabilities = null;
+    private IRequirement[] m_requirements = null;
+    private IRequirement[] m_dynamicRequirements = null;
     private R4Library[] m_libraries = null;
 
     public ModuleDefinition(
-        ICapability[] capabilities, IRequirement[] requirements,
+        Map headerMap, ICapability[] capabilities, IRequirement[] requirements,
         IRequirement[] dynamicRequirements, R4Library[] libraries)
     {
+        m_headerMap = headerMap;
         m_capabilities = capabilities;
         m_requirements = requirements;
         m_dynamicRequirements = dynamicRequirements;
         m_libraries = libraries;
+    }
+
+    public Map getHeaders()
+    {
+        return m_headerMap;
     }
 
     public ICapability[] getCapabilities()

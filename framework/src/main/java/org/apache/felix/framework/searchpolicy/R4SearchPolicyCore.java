@@ -33,7 +33,6 @@ import java.util.StringTokenizer;
 import org.apache.felix.framework.BundleProtectionDomain;
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.CompoundEnumeration;
-import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.SecurityManagerEx;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.framework.util.manifestparser.Capability;
@@ -43,7 +42,6 @@ import org.apache.felix.framework.util.manifestparser.R4Directive;
 import org.apache.felix.framework.util.manifestparser.R4Library;
 import org.apache.felix.framework.util.manifestparser.Requirement;
 import org.apache.felix.moduleloader.ICapability;
-import org.apache.felix.moduleloader.IContent;
 import org.apache.felix.moduleloader.IModule;
 import org.apache.felix.moduleloader.IModuleFactory;
 import org.apache.felix.moduleloader.IRequirement;
@@ -158,25 +156,23 @@ public class R4SearchPolicyCore implements ModuleListener
 
     public Object[] definePackage(IModule module, String pkgName)
     {
-        try
+        Map headerMap = ((ModuleDefinition) module.getDefinition()).getHeaders();
+        String spectitle = (String) headerMap.get("Specification-Title");
+        String specversion = (String) headerMap.get("Specification-Version");
+        String specvendor = (String) headerMap.get("Specification-Vendor");
+        String impltitle = (String) headerMap.get("Implementation-Title");
+        String implversion = (String) headerMap.get("Implementation-Version");
+        String implvendor = (String) headerMap.get("Implementation-Vendor");
+        if ((spectitle != null)
+            || (specversion != null)
+            || (specvendor != null)
+            || (impltitle != null)
+            || (implversion != null)
+            || (implvendor != null))
         {
-            ICapability cap = Util.getSatisfyingCapability(module,
-                new Requirement(ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")"));
-            if (cap != null)
-            {
-                return new Object[] {
-                    pkgName, // Spec title.
-                    cap.getProperties().get(ICapability.VERSION_PROPERTY).toString(), // Spec version.
-                    "", // Spec vendor.
-                    "", // Impl title.
-                    "", // Impl version.
-                    "" // Impl vendor.
-                };
-            }
-        }
-        catch (InvalidSyntaxException ex)
-        {
-            // This should never happen.
+            return new Object[] {
+                spectitle, specversion, specvendor, impltitle, implversion, implvendor
+            };
         }
         return null;
     }

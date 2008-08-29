@@ -3445,6 +3445,7 @@ ex.printStackTrace();
         // Note, in case this is an extension bundle it's exports are removed -
         // they will be added to the system bundle directly later on.
         IModuleDefinition md = new ModuleDefinition(
+            headerMap,
             (isExtensionBundle) ? null : mp.getCapabilities(),
             mp.getRequirements(),
             mp.getDynamicRequirements(),

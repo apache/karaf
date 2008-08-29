@@ -21,18 +21,12 @@ package org.apache.felix.framework.cache;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.jar.Manifest;
 
 import org.apache.felix.framework.Logger;
-import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.StringMap;
-import org.apache.felix.framework.util.manifestparser.ManifestParser;
-import org.apache.felix.framework.cache.DirectoryContent;
 import org.apache.felix.moduleloader.IContent;
-import org.apache.felix.framework.cache.JarContent;
 
 /**
  * <p>
@@ -44,7 +38,6 @@ import org.apache.felix.framework.cache.JarContent;
 class DirectoryRevision extends BundleRevision
 {
     private File m_refDir = null;
-    private Map m_header = null;
 
     public DirectoryRevision(
         Logger logger, File revisionRootDir, String location) throws Exception
@@ -76,11 +69,6 @@ class DirectoryRevision extends BundleRevision
     public synchronized Map getManifestHeader()
         throws Exception
     {
-        if (m_header != null)
-        {
-            return m_header;
-        }
-
         // Read the header file from the reference directory.
         InputStream is = null;
 
@@ -98,8 +86,7 @@ class DirectoryRevision extends BundleRevision
             // Get manifest.
             Manifest mf = new Manifest(is);
             // Create a case insensitive map of manifest attributes.
-            m_header = new StringMap(mf.getMainAttributes(), false);
-            return m_header;
+            return new StringMap(mf.getMainAttributes(), false);
         }
         finally
         {
