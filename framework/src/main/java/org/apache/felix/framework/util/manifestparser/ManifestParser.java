@@ -97,6 +97,7 @@ public class ManifestParser
             (String) headerMap.get(Constants.FRAGMENT_HOST));
         if (clauses.length > 0)
         {
+            validateFragment(headerMap);
             try
             {
                 reqList.add(
@@ -236,6 +237,27 @@ public class ManifestParser
         else
         {
             checkAndNormalizeR3();
+        }
+    }
+
+    /**
+     * Checks whether a fragment uses features that we do not currently support
+     * (e.g., Import-Package, Export-Package, and Bundle-NativeCode). If so, we
+     * throw an exception.
+     * @param headerMap the header to validate.
+    **/
+    private void validateFragment(Map headerMap) throws BundleException
+    {
+        String fragmentHost = (String) headerMap.get(Constants.FRAGMENT_HOST);
+        if (fragmentHost != null)
+        {
+            if ((headerMap.get(Constants.IMPORT_PACKAGE) != null)
+                || (headerMap.get(Constants.EXPORT_PACKAGE) != null)
+                || (headerMap.get(Constants.BUNDLE_NATIVECODE) != null))
+            {
+                throw new BundleException(
+                    "Fragments with exports, imports, or native code are not currently supported.");
+            }
         }
     }
 
