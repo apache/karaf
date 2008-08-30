@@ -485,11 +485,21 @@ public class ResolverImpl implements Resolver
                     // Update the installed bundle.
                     try
                     {
+                        // stop the bundle before updating to prevent
+                        // the bundle update from throwing due to not yet
+                        // resolved dependencies
+                        boolean doStartBundle = start;
+                        if (localResource.getBundle().getState() == Bundle.ACTIVE)
+                        {
+                            doStartBundle = true;
+                            localResource.getBundle().stop();
+                        }
+                        
                         localResource.getBundle().update(deployResources[i].getURL().openStream());
 
                         // If necessary, save the updated bundle to be
                         // started later.
-                        if (start)
+                        if (doStartBundle)
                         {
                             startList.add(localResource.getBundle());
                         }
