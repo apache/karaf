@@ -27,7 +27,7 @@
   <packaging>bundle</packaging>
   <name>Apache Felix Shell TUI</name>
   <description>A simple textual user interface for Felix' shell service.</description>
-  <version>1.0.2</version>
+  <version>1.1.0-SNAPSHOT</version>
   <artifactId>org.apache.felix.shell.tui</artifactId>
   <dependencies>
     <dependency>
@@ -63,10 +63,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.shell.tui-1.0.2</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.shell.tui-1.0.2</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.shell.tui-1.0.2</url>
-  </scm>
 </project>
