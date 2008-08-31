@@ -1,3 +1,21 @@
+Changes from 1.0.3 to 1.2.0
+---------------------------
+
+* [2008-08-30] Prevent issues when updating running bundles. (FELIX-701)
+* [2008-08-28] Prevent NullPointerException if a locally installed bundle
+  does not have a Bundle-SymbolicName or version. (FELIX-108)
+* [2008-08-12] Added OBR descriptor and updated to the newest bundle plugin. (FELIX-672)
+* [2008-07-31] Use LogService instead of System.err. (FELIX-482)
+* [2008-07-21] Modified OBR to correctly consider the namespace attribute 
+  when matching capabilities to requirements. (FELIX-638)
+* [2008-06-26] Implement referral with hop count support. (FELIX-399)
+* [2008-05-09] Return an empty resource array when querying with a filter
+  with invalid syntax. (FELIX-480)
+* [2008-05-09] Fixed improper synchronization with respect to visibility rules.
+* [2008-05-09] Ignore resources with invalid filters. (FELIX-484)
+* [2008-05-09] Move repository URL list initialization to a later time to 
+  avoid the default repository URL if it is not desired. (FELIX-485)
+
 Changes from 1.0.2 to 1.0.3
 ---------------------------
 
