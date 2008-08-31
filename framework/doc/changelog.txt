@@ -1,3 +1,31 @@
+Changes from 1.0.4 to 1.2.0
+---------------------------
+
+* [2008-08-29] Support JAR-wide manifest package metadata. (FELIX-682)
+* [2008-08-29] Throw an exception when installing a fragment that uses 
+  features that we do not support.
+* [2008-08-20] Improve error reporting when loading bundle classes using 
+  Bundle.loadClass. 
+* [2008-08-16] Fix attribute checking when resolving dynamic imports. 
+  (FELIX-676)
+* [2008-08-08] Implement singleton bundle support. (FELIX-102)
+* [2008-08-06] Default to current security policy if no security extension is 
+  installed in order to make Subject.doAs work. (FELIX-654)
+* [2008-08-04] Return Bundle.getLastModified() for bundle URLs 
+  lastModified(). (FELIX-582)
+* [2008-08-04] Improve handling of improper resource URLs. (FELIX-577)
+* [2008-08-01] Add necessary stub methods to implement new R4.1 methods. 
+  (FELIX-595)
+* [2008-08-01] Applied patch to properly return symbolic name when it has
+  parameters. (FELIX-650)
+* [2008-07-25] Fix some rollback issues after a bundle update throws an 
+  exception. (FELIX-647)
+* [2008-07-23] Modified manifest parser to be more lenient. (FELIX-641)
+* [2008-07-07] Add support for the standard symbolic name for the system 
+  bundle. (FELIX-602)
+* [2008-06-01] Add initial fragment support for extending the host bundle 
+  class path. (FELIX-29, FELIX-656)
+
 Changes from 1.0.3 to 1.0.4
 ___________________________
 
