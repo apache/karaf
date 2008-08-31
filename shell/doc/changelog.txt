@@ -1,3 +1,11 @@
+Changes from 1.0.1 to 1.0.2
+---------------------------
+
+* [2008-08-12] Added OBR descriptor and updated to bundle plugin version
+  1.4.3. (FELIX-669)
+* [2008-05-08] Modified "update" command to not append ".jar" to URLs and 
+  modified the "install" command to use the same code. (FELIX-544)
+
 Changes from 1.0.0 to 1.0.1
 ---------------------------
 
