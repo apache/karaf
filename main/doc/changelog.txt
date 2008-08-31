@@ -1,3 +1,9 @@
+Changes from 1.0.3 to 1.2.0
+---------------------------
+
+* [2008-08-03] Change to the R4.1 version of the spec. (FELIX-514)
+* [2008-05-08] Fixed a NPE. (FELIX-525)
+
 Changes from 1.0.3 to 1.0.4
 ---------------------------
 
