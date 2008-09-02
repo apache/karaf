@@ -418,7 +418,7 @@ public class DirectoryWatcher extends Thread
         }
         else
         {
-            if (e == null)
+            if (e != null)
             {
                 log.log(LogService.LOG_ERROR, message, e);
                 if (debug > 0 && e != null)
