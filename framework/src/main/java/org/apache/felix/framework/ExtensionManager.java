@@ -442,17 +442,23 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
 
         for (int i = 0; (m_capabilities != null) && (i < m_capabilities.length); i++)
         {
-            if (i > 0)
+            if (m_capabilities[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
             {
-                exportSB.append(", ");
+                // Add a comma separate if there is an existing package.
+                if (exportSB.length() > 0)
+                {
+                    exportSB.append(", ");
+                }
+
+                // Append exported package information.
+                exportSB.append(((Capability) m_capabilities[i]).getPackageName());
+                exportSB.append("; version=\"");
+                exportSB.append(((Capability) m_capabilities[i]).getPackageVersion().toString());
+                exportSB.append("\"");
+
+                // Remember exported packages.
+                exportNames.add(((Capability) m_capabilities[i]).getPackageName());
             }
-
-            exportSB.append(((Capability) m_capabilities[i]).getPackageName());
-            exportSB.append("; version=\"");
-            exportSB.append(((Capability) m_capabilities[i]).getPackageVersion().toString());
-            exportSB.append("\"");
-
-            exportNames.add(((Capability) m_capabilities[i]).getPackageName());
         }
 
         m_exportNames = exportNames;
