@@ -24,6 +24,9 @@ import java.security.ProtectionDomain;
 import java.util.*;
 
 import org.apache.felix.framework.cache.BundleArchive;
+import org.apache.felix.framework.searchpolicy.ModuleDefinition;
+import org.apache.felix.framework.util.manifestparser.ManifestParser;
+import org.apache.felix.moduleloader.ICapability;
 import org.apache.felix.moduleloader.IContentLoader;
 import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.*;
@@ -36,9 +39,11 @@ class BundleInfo
     private int m_state = 0;
     private BundleActivator m_activator = null;
     private BundleContext m_context = null;
+    private String m_cachedSymbolicName = null;
+    private long m_cachedSymbolicNameTimestamp;
     private Map m_cachedHeaders = new HashMap();
     private long m_cachedHeadersTimestamp;
-    
+
     // Indicates whether the bundle is stale, meaning that it has
     // been refreshed and completely removed from the framework.
     private boolean m_stale = false;
@@ -131,6 +136,31 @@ class BundleInfo
         m_modules = dest;
     }
 
+    public synchronized String getSymbolicName()
+    {
+        // If the bundle has been updated, clear the cached symbolic name.
+        if (getLastModified() > m_cachedSymbolicNameTimestamp)
+        {
+            m_cachedSymbolicName = null;
+            m_cachedSymbolicNameTimestamp = getLastModified();
+            try
+            {
+                // TODO: FRAMEWORK - Rather than reparsing every time, I wonder if
+                //       we should be caching this value some place.
+                final ICapability moduleCap = ManifestParser.parseBundleSymbolicName(getCurrentHeader());
+                if (moduleCap != null)
+                {
+                    m_cachedSymbolicName = (String) moduleCap.getProperties().get(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE);
+                }
+            }
+            catch (BundleException ex)
+            {
+                // Return null.
+            }
+        }
+        return m_cachedSymbolicName;
+    }
+
     public long getBundleId()
     {
         try
@@ -196,20 +226,27 @@ class BundleInfo
 
     public Map getCurrentHeader()
     {
-        try
+        Map headerMap = null;
+        // Special case the system bundle
+        if (getBundleId() == 0)
         {
-            // Return the header for the most recent bundle revision only,
-            // since we shouldn't ever need access to older revisions.
-            return m_archive.getRevision(m_archive.getRevisionCount() - 1).getManifestHeader();
+            // TODO: REFACTOR - This is sort of a hack, we should just expose
+            //       the bundle symbolic name from our API.
+            try
+            {
+                headerMap = m_archive.getRevision(0).getManifestHeader();
+            }
+            catch (Exception ex)
+            {
+                // This should never happen.
+            }
         }
-        catch (Exception ex)
+        else
         {
-            m_logger.log(
-                Logger.LOG_ERROR,
-                "Error reading manifest from bundle archive.",
-                ex);
-            return null;
+            headerMap = ((ModuleDefinition) getCurrentModule().getDefinition()).getHeaders();
         }
+            
+        return headerMap;
     }
 
     public Map getCurrentLocalizedHeader(String locale)
@@ -231,21 +268,9 @@ class BundleInfo
             }
         }
 
-        Map headers;
-        try
-        {
-            Map rawHeaders = m_archive.getRevision(m_archive.getRevisionCount() - 1).getManifestHeader();
-            headers = new HashMap(rawHeaders.size());
-            headers.putAll(rawHeaders);
-        }
-        catch (Exception ex)
-        {
-            m_logger.log(
-                Logger.LOG_ERROR,
-                "Error reading manifest from bundle archive.",
-                ex);
-            return null;
-        }
+        Map rawHeaders = getCurrentHeader();
+        Map headers = new HashMap(rawHeaders.size());
+        headers.putAll(rawHeaders);
 
         // Check to see if we actually need to localize anything
         boolean needsLocalization = false;
@@ -321,7 +346,7 @@ class BundleInfo
 
     private void updateHeaderCache(String locale, Map localizedHeaders)
     {
-        synchronized(m_cachedHeaders)
+        synchronized (m_cachedHeaders)
         {
             m_cachedHeaders.put(locale, localizedHeaders);
             m_cachedHeadersTimestamp = System.currentTimeMillis();
@@ -533,22 +558,22 @@ class BundleInfo
         m_lockCount = info.m_lockCount;
         m_lockThread = info.m_lockThread;
     }
-    
+
     public synchronized void setProtectionDomain(ProtectionDomain pd)
     {
         getCurrentModule().getContentLoader().setSecurityContext(pd);
     }
-    
+
     public synchronized ProtectionDomain getProtectionDomain()
     {
         ProtectionDomain pd = null;
-        
+
         for (int i = m_modules.length - 1; (i >= 0) && (pd == null); i--)
         {
-            pd = (ProtectionDomain) 
+            pd = (ProtectionDomain)
                 m_modules[i].getContentLoader().getSecurityContext();
         }
-        
+
         return pd;
     }
 }

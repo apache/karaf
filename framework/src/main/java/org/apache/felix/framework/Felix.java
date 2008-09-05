@@ -1334,28 +1334,6 @@ ex.printStackTrace();
     //
 
     /**
-     * Implementation for Bundle.getSymbolicName().
-    **/
-    protected String getBundleSymbolicName(FelixBundle bundle)
-    {
-        try
-        {
-            // TODO: FRAMEWORK - Rather than reparsing every time, I wonder if
-            //       we should be caching this value some place.
-            final ICapability moduleCap = ManifestParser.parseBundleSymbolicName(bundle.getInfo().getCurrentHeader());
-            if (moduleCap != null)
-            {
-                return (String) moduleCap.getProperties().get(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE);
-            }
-        }
-        catch (BundleException ex)
-        {
-            // Return null.
-        }
-        return null;
-    }
-
-    /**
      * Get bundle headers and resolve any localized strings from resource bundles.
      * @param bundle
      * @param locale
@@ -1828,13 +1806,15 @@ ex.printStackTrace();
                     // extension bundle (info.isExtension) or an update from
                     // a normal bundle to an extension bundle
                     // (isExtensionBundle())
+                    Map headerMap = archive.getRevision(
+                        archive.getRevisionCount() - 1).getManifestHeader();
                     IModule module = createModule(
                         info.getBundleId(),
                         archive.getRevisionCount() - 1,
-                        info.getCurrentHeader(),
+                        headerMap,
                         (bundle.getInfo().isExtension() ||
                         m_extensionManager.isExtensionBundle(
-                            bundle.getInfo().getCurrentHeader())));
+                            headerMap)));
 
                     // Add module to bundle info.
                     info.addModule(module);
@@ -2330,9 +2310,11 @@ ex.printStackTrace();
             try
             {
                 BundleArchive archive = m_cache.getArchive(id);
-                bundle = new BundleImpl(this, createBundleInfo(archive,
-                    m_extensionManager.isExtensionBundle(archive.getRevision(
-                    archive.getRevisionCount() - 1).getManifestHeader())));
+                Map headerMap = archive.getRevision(
+                    archive.getRevisionCount() - 1).getManifestHeader();
+                bundle = new BundleImpl(
+                    this, createBundleInfo(
+                        archive, headerMap, m_extensionManager.isExtensionBundle(headerMap)));
 
                 verifyExecutionEnvironment(bundle);
 
@@ -3325,28 +3307,9 @@ ex.printStackTrace();
     // Miscellaneous private methods.
     //
 
-    private BundleInfo createBundleInfo(BundleArchive archive, boolean isExtension)
+    private BundleInfo createBundleInfo(BundleArchive archive, Map headerMap, boolean isExtension)
         throws Exception
     {
-        // Get the bundle manifest.
-        Map headerMap = null;
-        try
-        {
-            // Although there should only ever be one revision at this
-            // point, get the header for the current revision to be safe.
-            headerMap = archive.getRevision(archive.getRevisionCount() - 1).getManifestHeader();
-        }
-        catch (Exception ex)
-        {
-            throw new BundleException("Unable to read JAR manifest.", ex);
-        }
-
-        // We can't do anything without the manifest header.
-        if (headerMap == null)
-        {
-            throw new BundleException("Unable to read JAR manifest header.");
-        }
-
         // Create the module for the bundle; although there should only
         // ever be one revision at this point, create the module for
         // the current revision to be safe.
@@ -3509,9 +3472,7 @@ ex.printStackTrace();
         {
             try
             {
-                activator =
-                    m_cache.getArchive(info.getBundleId())
-                        .getActivator(info.getCurrentModule());
+                activator = info.getArchive().getActivator(info.getCurrentModule());
             }
             catch (Exception ex)
             {
@@ -3523,13 +3484,8 @@ ex.printStackTrace();
         // class from the bundle manifest.
         if (activator == null)
         {
-            // Get the associated bundle archive.
-            BundleArchive ba = m_cache.getArchive(info.getBundleId());
-            // Get the manifest from the current revision; revision is
-            // base zero so subtract one from the count to get the
-            // current revision.
-            Map headerMap = ba.getRevision(ba.getRevisionCount() - 1).getManifestHeader();
-            // Get the activator class attribute.
+            // Get the activator class from the header map.
+            Map headerMap = info.getCurrentHeader();
             String className = (String) headerMap.get(Constants.BUNDLE_ACTIVATOR);
             // Try to instantiate activator class if present.
             if (className != null)
@@ -4046,8 +4002,8 @@ ex.printStackTrace();
                 try
                 {
                     BundleInfo info = m_bundle.getInfo();
-                    BundleInfo newInfo = createBundleInfo(info.getArchive(),
-                        info.isExtension());
+                    BundleInfo newInfo = createBundleInfo(
+                        info.getArchive(), info.getCurrentHeader(), info.isExtension());
                     newInfo.syncLock(info);
                     ((BundleImpl) m_bundle).setInfo(newInfo);
                     addSecurity(m_bundle);

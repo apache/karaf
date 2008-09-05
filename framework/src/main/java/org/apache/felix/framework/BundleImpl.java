@@ -330,7 +330,7 @@ class BundleImpl extends FelixBundle
 
     public String getSymbolicName()
     {
-        return m_felix.getBundleSymbolicName(this);
+        return m_info.getSymbolicName();
     }
 
     public boolean hasPermission(Object obj)
@@ -427,10 +427,10 @@ class BundleImpl extends FelixBundle
 
     public String toString()
     {
-        String sym = m_felix.getBundleSymbolicName(this);
+        String sym = m_info.getSymbolicName();
         if (sym != null)
         {
-            return m_felix.getBundleSymbolicName(this) + " [" + getBundleId() +"]";
+            return sym + " [" + getBundleId() +"]";
         }
         return "[" + getBundleId() +"]";
     }
