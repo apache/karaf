@@ -114,7 +114,11 @@ public class GShell implements Runnable, BundleContextAware {
             if (args != null && args.length > 0) {
                 waitForFrameworkToStart();
                 log.info("Executing Shell with arguments: " + Arguments.asString(args));
-                Object value = shell.execute((Object[]) args);
+                StringBuilder sb = new StringBuilder();
+                for (String arg : args) {
+                    sb.append(arg).append(" ");
+                }
+                Object value = shell.execute(sb.toString());
                 if (mainService != null) {
                     if (value instanceof Number) {
                         mainService.setExitCode(((Number) value).intValue());
@@ -122,15 +126,12 @@ public class GShell implements Runnable, BundleContextAware {
                         mainService.setExitCode(value != null ? 1 : 0);
                     }
                     log.info("Exiting shell due to terminated command");
-                    try {
-                        getBundleContext().getBundle(0).stop();
-                    } catch (BundleException e2) {
-                        log.info("Caught exception while shutting down framework: " + e2, e2);
-                    }
+                    asyncShutdown();
                 }
             } else {
                 // Otherwise go into a command shell.
                 shell.run();
+                asyncShutdown();
             }
 
         } catch (Throwable e) {
@@ -149,16 +150,20 @@ public class GShell implements Runnable, BundleContextAware {
                 }
                 log.info("Exiting shell due to caught exception " + e, e);
             }
-            new Thread() {
-                public void run() {
-                    try {
-                        getBundleContext().getBundle(0).stop();
-                    } catch (BundleException e2) {
-                        log.info("Caught exception while shutting down framework: " + e2, e2);
-                    }
-                }
-            }.start();
+            asyncShutdown();
         }
+    }
+
+    private void asyncShutdown() {
+        new Thread() {
+            public void run() {
+                try {
+                    getBundleContext().getBundle(0).stop();
+                } catch (BundleException e2) {
+                    log.info("Caught exception while shutting down framework: " + e2, e2);
+                }
+            }
+        }.start();
     }
 
     /**
