@@ -1,3 +1,11 @@
+Changes from 1.2.0 to 1.2.1
+---------------------------
+
+* [2008-09-05] Fixed a performance regression that was caused by uncached 
+  access to the bundle manifest headers. (FELIX-711)
+* [2008-09-03] Fixed a bug in calculating the system bundle's exported 
+  packages which added a null export package.
+
 Changes from 1.0.4 to 1.2.0
 ---------------------------
 
