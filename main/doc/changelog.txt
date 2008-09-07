@@ -1,3 +1,10 @@
+Changes from 1.2.0 to 1.2.1
+---------------------------
+
+* [2008-09-07] Hide WIRE log messages. (FELIX-707)
+* [2008-09-07] Use the new Felix releases obr repository URL. 
+  (FELIX-708)
+
 Changes from 1.0.3 to 1.2.0
 ---------------------------
 
