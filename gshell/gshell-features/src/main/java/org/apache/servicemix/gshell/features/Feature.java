@@ -26,17 +26,14 @@ public interface Feature {
 
     String getName();
 
+    String getVersion();
+
     List<String> getDependencies();
 
     List<String> getBundles();
 
     Map<String, Map<String, String>> getConfigurations();
 
-    boolean getInstallStatus();
-    
-    void setInstallStatus(boolean status);
-    
-    void setVersion(String version);
-    
-    String getVersion();
+    boolean isInstalled();
+
 }

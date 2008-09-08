@@ -33,7 +33,7 @@ public class FeatureImpl implements Feature {
     private List<String> dependencies = new ArrayList<String>();
     private List<String> bundles = new ArrayList<String>();
     private Map<String, Map<String,String>> configs = new HashMap<String, Map<String,String>>();
-    private boolean installStatus = false;
+    private boolean installed = false;
     
     
     public FeatureImpl(String name) {
@@ -69,15 +69,15 @@ public class FeatureImpl implements Feature {
         configs.put(name, properties);
     }
 
-	public boolean getInstallStatus() {
-		return installStatus;
-	}
+    public boolean isInstalled() {
+        return installed;
+    }
 
-	public void setInstallStatus(boolean status) {
-		installStatus = status;		
-	}
+    public void setInstalled(boolean installed) {
+        this.installed = installed;
+    }
 
-	public String getVersion() {
+    public String getVersion() {
 		return version;
 	}
 
