@@ -53,6 +53,8 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.BundleListener;
+import org.osgi.framework.BundleEvent;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -86,8 +88,10 @@ public class FileMonitor {
     private List<Bundle> bundlesToStart = new ArrayList<Bundle>();
     private List<Bundle> bundlesToUpdate = new ArrayList<Bundle>();
     private Map<String, String> artifactToBundle = new HashMap<String, String>();
-    private Set<String> pendingArtifacts = new HashSet<String>();
-    private ServiceListener listener;
+    private final Set<String> pendingTransformationArtifacts = new HashSet<String>();
+    private final Set<Bundle> pendingStartBundles = new HashSet<Bundle>();
+    private ServiceListener deployerListener;
+    private BundleListener bundleListener;
     private Executor executor;
 
     public FileMonitor() {
@@ -262,7 +266,7 @@ public class FileMonitor {
                     File f = transformArtifact(file);
                     if (f == null) {
                         LOGGER.warn("Unsupported deployment: " + name);
-                        reschedule(file);
+                        rescheduleTransformation(file);
                         continue;
                     }
                     file = f;
@@ -293,34 +297,33 @@ public class FileMonitor {
         refreshPackagesAndStartOrUpdateBundles();
     }
 
-    private void reschedule(File file) {
-        synchronized (pendingArtifacts) {
-            pendingArtifacts.add(file.getAbsolutePath());
+    private void rescheduleTransformation(File file) {
+        synchronized (pendingTransformationArtifacts) {
+            pendingTransformationArtifacts.add(file.getAbsolutePath());
         }
-        if (listener == null) {
+        if (deployerListener == null) {
             try {
                 String filter = "(" + Constants.OBJECTCLASS + "=" + DeploymentListener.class.getName() + ")";
-                listener = new ServiceListener() {
+                deployerListener = new ServiceListener() {
                     public void serviceChanged(ServiceEvent event) {
                         executor.execute(new Runnable() {
                             public void run() {
                                 Set<String> files;
-                                synchronized (pendingArtifacts) {
-                                    files = new HashSet<String>(pendingArtifacts);
-                                    pendingArtifacts.clear();
+                                synchronized (pendingTransformationArtifacts) {
+                                    files = new HashSet<String>(pendingTransformationArtifacts);
+                                    pendingTransformationArtifacts.clear();
                                 }
                                 onFilesChanged(files);
                             }
                         });
                     }
                 };
-                getContext().addServiceListener(listener, filter);
+                getContext().addServiceListener(deployerListener, filter);
             } catch (InvalidSyntaxException e) {
                 // Ignore
             }
         }
     }
-
 
     private File transformArtifact(File file) throws Exception {
         // Check registered deployers
@@ -401,8 +404,7 @@ public class FileMonitor {
     protected Bundle getBundleForJarFile(File file) throws IOException {
         String absoluteFilePath = file.getAbsoluteFile().toURI().toString();
         Bundle bundles[] = getContext().getBundles();
-        for (int i = 0; i < bundles.length; i++) {
-            Bundle bundle = bundles[i];
+        for (Bundle bundle : bundles) {
             String location = bundle.getLocation();
             if (filePathsMatch(absoluteFilePath, location)) {
                 return bundle;
@@ -550,12 +552,59 @@ public class FileMonitor {
             }
             catch (BundleException e) {
                 LOGGER.warn("Failed to start bundle: " + bundle + ". Reason: " + e, e);
+                rescheduleStart(bundle);
             }
         }
 
         PackageAdmin packageAdmin = getPackageAdmin();
         if (packageAdmin != null) {
             packageAdmin.refreshPackages(null);
+        }
+    }
+
+    private void rescheduleStart(Bundle bundle) {
+        synchronized (pendingStartBundles) {
+            pendingStartBundles.add(bundle);
+            if (bundleListener == null) {
+                bundleListener = new BundleListener() {
+                    public void bundleChanged(BundleEvent event) {
+                        if (event.getType() == BundleEvent.RESOLVED) {
+                            executor.execute(new Runnable() {
+                                public void run() {
+                                    retryPendingStartBundles();
+                                }
+                            });
+                        }
+                    }
+                };
+                getContext().addBundleListener(bundleListener);
+            }
+        }
+    }
+
+    protected void retryPendingStartBundles() {
+        synchronized (pendingStartBundles) {
+            Set<Bundle> bundles = new HashSet<Bundle>();
+            bundles.addAll(pendingStartBundles);
+            pendingStartBundles.clear();
+            boolean success = false;
+            for (Bundle bundle : bundles) {
+                try {
+                    bundle.start();
+                    LOGGER.info("Pending bundle started: " + bundle);
+                    success = true;
+                }
+                catch (BundleException e) {
+                    LOGGER.info("Pending bundle not started: " + bundle);
+                    pendingStartBundles.add(bundle);
+                }
+            }
+            if (success) {
+                PackageAdmin packageAdmin = getPackageAdmin();
+                if (packageAdmin != null) {
+                    packageAdmin.refreshPackages(null);
+                }
+            }
         }
     }
 
