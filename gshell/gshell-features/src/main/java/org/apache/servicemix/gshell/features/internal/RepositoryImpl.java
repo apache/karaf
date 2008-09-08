@@ -18,7 +18,6 @@ package org.apache.servicemix.gshell.features.internal;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -75,6 +74,11 @@ public class RepositoryImpl implements Repository {
                 Element e = (Element) nodes.item(i);
                 String name = e.getAttribute("name");
                 FeatureImpl f = new FeatureImpl(name);
+                String version = e.getAttribute("version");
+                if (version != null && version.length() > 0) {
+                	f.setVersion(version);
+                }
+                
                 NodeList featureNodes = e.getElementsByTagName("feature");
                 for (int j = 0; j < featureNodes.getLength(); j++) {
                     Element b = (Element) featureNodes.item(j);

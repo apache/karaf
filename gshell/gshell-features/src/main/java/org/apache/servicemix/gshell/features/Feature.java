@@ -35,4 +35,8 @@ public interface Feature {
     boolean getInstallStatus();
     
     void setInstallStatus(boolean status);
+    
+    void setVersion(String version);
+    
+    String getVersion();
 }

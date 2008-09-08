@@ -29,6 +29,7 @@ import org.apache.servicemix.gshell.features.Feature;
 public class FeatureImpl implements Feature {
 
     private String name;
+    private String version;
     private List<String> dependencies = new ArrayList<String>();
     private List<String> bundles = new ArrayList<String>();
     private Map<String, Map<String,String>> configs = new HashMap<String, Map<String,String>>();
@@ -37,6 +38,7 @@ public class FeatureImpl implements Feature {
     
     public FeatureImpl(String name) {
         this.name = name;
+        this.version = "0.0.0";
     }
 
     public String getName() {
@@ -73,5 +75,13 @@ public class FeatureImpl implements Feature {
 
 	public void setInstallStatus(boolean status) {
 		installStatus = status;		
+	}
+
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
 	}
 }
