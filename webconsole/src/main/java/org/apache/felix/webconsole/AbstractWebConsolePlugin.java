@@ -197,7 +197,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         Map labelMap = ( Map ) request.getAttribute( OsgiManager.ATTR_LABEL_MAP );
         if ( labelMap != null )
         {
-            pw.println( "<p id='technav'>" );
+            pw.println( "<div id='technav'>" );
 
             SortedMap map = new TreeMap();
             for ( Iterator ri = labelMap.entrySet().iterator(); ri.hasNext(); )
@@ -229,10 +229,12 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
 
             for ( Iterator li = map.values().iterator(); li.hasNext(); )
             {
-                pw.println( li.next() );
+                pw.print  ( "<nobr>" );
+                pw.print  ( li.next() );
+                pw.println( "</nobr>" );
             }
 
-            pw.println( "</p>" );
+            pw.println( "</div>" );
         }
     }
 
