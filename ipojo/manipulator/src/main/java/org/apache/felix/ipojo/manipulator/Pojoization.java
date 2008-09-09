@@ -49,7 +49,10 @@ import org.apache.felix.ipojo.xml.parser.XMLMetadataParser;
 import org.objectweb.asm.ClassReader;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
+
+import com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaValidator;
 
 /**
  * Pojoization allows creating an iPOJO bundle from a "normal" bundle.  
@@ -655,6 +658,13 @@ public class Pojoization {
             XMLReader parser = (XMLReader) Class.forName("org.apache.xerces.parsers.SAXParser").newInstance();
             XMLMetadataParser handler = new XMLMetadataParser();
             parser.setContentHandler(handler);
+            parser.setFeature("http://xml.org/sax/features/validation",
+                    true); 
+            parser.setFeature("http://apache.org/xml/features/validation/schema", 
+                    true);
+           
+            parser.setErrorHandler(handler);
+            
             InputSource is = new InputSource(stream);
             parser.parse(is);
             meta = handler.getMetadata();
@@ -668,6 +678,9 @@ public class Pojoization {
             return null;
         } catch (ParseException e) {
             error("Parsing Error when parsing the XML file " + path + " : " + e.getMessage());
+            return null;
+        } catch (SAXParseException e) {
+            error("Error during metadata parsing at line " + e.getLineNumber() + " : " + e.getMessage());
             return null;
         } catch (SAXException e) {
             error("Parsing Error when parsing (Sax Error) the XML file " + path + " : " + e.getMessage());

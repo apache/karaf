@@ -1,16 +1,21 @@
-<ipojo xmlns:wbp="org.apache.felix.ipojo.white-board-pattern">
-	<component className="org.apache.felix.ipojo.test.FooProvider" name="fooprovider">
+<ipojo 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/schemas/core.xsd 
+	    org.apache.felix.ipojo.white-board-pattern http://people.apache.org/~clement/ipojo/schemas/whiteboard-pattern.xsd"
+	xmlns="org.apache.felix.ipojo"
+	xmlns:wbp="org.apache.felix.ipojo.white-board-pattern">
+	<component classname="org.apache.felix.ipojo.test.FooProvider" name="fooprovider">
 		<provides>
 			<property field="foo" value="foo"/>
 		</provides>
 	</component>
 	
-	<component className="org.apache.felix.ipojo.test.FooWhiteBoardPattern" name="under-providers">
+	<component classname="org.apache.felix.ipojo.test.FooWhiteBoardPattern" name="under-providers">
 		<wbp:wbp filter="(objectclass=org.apache.felix.ipojo.test.FooService)" onArrival="onArrival" onDeparture="onDeparture" onModification="onModification"/>
 		<provides/>
 	</component>
 	
-	<component className="org.apache.felix.ipojo.test.FooWhiteBoardPattern" name="under-properties">
+	<component classname="org.apache.felix.ipojo.test.FooWhiteBoardPattern" name="under-properties">
 		<wbp:wbp filter="(foo=foo)" onArrival="onArrival" onDeparture="onDeparture" onModification="onModification"/>
 		<provides/>
 	</component>

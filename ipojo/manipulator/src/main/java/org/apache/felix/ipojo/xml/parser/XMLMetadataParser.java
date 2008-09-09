@@ -22,15 +22,17 @@ import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 /**
  * XML Metadata parser.
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class XMLMetadataParser implements ContentHandler {
+public class XMLMetadataParser implements ContentHandler, ErrorHandler {
 
     /**
      * Element of the metadata.
@@ -82,11 +84,6 @@ public class XMLMetadataParser implements ContentHandler {
     public void endElement(String namespaceURI, String localName, String qName) throws SAXException {
         // Get the last element of the list
         Element lastElement = removeLastElement();
-
-        // Check if the name is consistent with the name of this end tag
-        if (!lastElement.getName().equalsIgnoreCase(qName) && !lastElement.getNameSpace().equalsIgnoreCase(namespaceURI)) {
-            throw new SAXException("Parse error when ending an element : " + qName + " [" + namespaceURI + "]");
-        }
 
         // The name is consistent
         // Add this element last element with if it is not the root
@@ -174,7 +171,13 @@ public class XMLMetadataParser implements ContentHandler {
      * @see org.xml.sax.ContentHandler#startElement(java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
      */
     public void startElement(String namespaceURI, String localName, String qName, Attributes atts) throws SAXException {
-        Element elem = new Element(localName, namespaceURI);
+        String namespace = namespaceURI;
+        if (namespaceURI != null
+                && (namespaceURI.equalsIgnoreCase("org.apache.felix.ipojo") || namespaceURI.equalsIgnoreCase("org.apache.felix.ipojo.composite"))) {
+            namespace = null; // Remove the 'org.apache.felix.ipojo' namespace
+        }
+        
+        Element elem = new Element(localName, namespace);
         for (int i = 0; i < atts.getLength(); i++) {
             String name = (String) atts.getLocalName(i);
             String ns = (String) atts.getURI(i);
@@ -240,5 +243,27 @@ public class XMLMetadataParser implements ContentHandler {
             }
         }
         return last;
+    }
+
+
+    public void error(SAXParseException saxparseexception) throws SAXException {
+        if (saxparseexception.getMessage().contains("cvc-elt.1")) {
+            return; // Do not throw an exception when no schema defined.
+        }
+        throw saxparseexception;
+    }
+
+
+    public void fatalError(SAXParseException saxparseexception)
+            throws SAXException {
+        System.err.println("Fatal error during XML-Schema parsing : " + saxparseexception);
+        throw saxparseexception;
+    }
+
+
+    public void warning(SAXParseException saxparseexception)
+            throws SAXException {
+        System.err.println("Warning : an error was detected in the metadata file : " + saxparseexception);
+        
     }
 }

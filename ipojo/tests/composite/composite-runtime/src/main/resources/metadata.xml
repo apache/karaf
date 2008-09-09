@@ -1,12 +1,18 @@
-<ipojo xmlns:cs="org.apache.felix.ipojo.test.composite.handler.CheckServiceHandler">
+<ipojo
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/schemas/core.xsd 
+	    org.apache.felix.composite http://people.apache.org/~clement/ipojo/schemas/composite.xsd"
+	xmlns="org.apache.felix.ipojo"
+	xmlns:comp="org.apache.felix.ipojo.composite"
+	xmlns:cs="org.apache.felix.ipojo.test.composite.handler.CheckServiceHandler">
 	<!-- Used component type -->
 	<component
-		className="org.apache.felix.ipojo.test.composite.component.FooProviderType1"
+		classname="org.apache.felix.ipojo.test.composite.component.FooProviderType1"
 		name="COMPO-FooProviderType-1" architecture="true">
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.composite.component.FooProviderType1"
+		classname="org.apache.felix.ipojo.test.composite.component.FooProviderType1"
 		name="COMPO-FooProviderType-2" architecture="true">
 		<provides>
 			<property name="int" type="int" value="2" />
@@ -18,7 +24,7 @@
 		</provides>
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.composite.component.FooProviderTypeDyn"
+		classname="org.apache.felix.ipojo.test.composite.component.FooProviderTypeDyn"
 		name="COMPO-FooProviderType-Dyn" architecture="true">
 		<provides>
 			<property name="int" field="intProp" value="2" />
@@ -30,7 +36,7 @@
 		</provides>
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.composite.component.FooProviderTypeDyn2"
+		classname="org.apache.felix.ipojo.test.composite.component.FooProviderTypeDyn2"
 		name="COMPO-FooProviderType-Dyn2" architecture="true">
 		<provides>
 			<property name="int" field="intProp" value="4" />
@@ -42,24 +48,24 @@
 		</provides>
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.composite.component.CheckServiceProvider"
+		classname="org.apache.felix.ipojo.test.composite.component.CheckServiceProvider"
 		name="COMPO-SimpleCheckServiceProvider" architecture="true">
 		<requires field="fs" />
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.composite.component.FooBarProviderType1"
+		classname="org.apache.felix.ipojo.test.composite.component.FooBarProviderType1"
 		name="COMPO-FooBarProviderType-1" architecture="true">
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.composite.component.FooBarProviderType1"
+		classname="org.apache.felix.ipojo.test.composite.component.FooBarProviderType1"
 		name="COMPO-FooBarProviderType-2" architecture="true">
 		<provides
 			interface="{org.apache.felix.ipojo.test.composite.service.FooService, org.apache.felix.ipojo.test.composite.service.BarService }" />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.composite.component.FooBarProviderType1"
+		classname="org.apache.felix.ipojo.test.composite.component.FooBarProviderType1"
 		name="COMPO-FooBarProviderType-3" architecture="true">
 		<provides
 			interface="{org.apache.felix.ipojo.test.composite.service.FooService}">
@@ -72,8 +78,8 @@
 	</component>
 	
 	<component
-		className="org.apache.felix.ipojo.test.composite.component.BazProviderType1"
-		name="BazProviderType" scope="composite">
+		classname="org.apache.felix.ipojo.test.composite.component.BazProviderType1"
+		name="BazProviderType">
 		<provides />
 	</component>
 	
@@ -96,10 +102,10 @@
 	</component>
 	
 	<!--  Composite -->
-	<composite name="composite.empty" architecture="true">
-	</composite>
+	<comp:composite name="composite.empty" architecture="true">
+	</comp:composite>
 	
-	<component className="org.apache.felix.ipojo.test.composite.component.Baz2CheckProvider" name="Baz2CheckProvider" architecture="true">
+	<component classname="org.apache.felix.ipojo.test.composite.component.Baz2CheckProvider" name="Baz2CheckProvider" architecture="true">
 		<requires field="fs" scope="composite"/>
 		<provides/>
 	</component>

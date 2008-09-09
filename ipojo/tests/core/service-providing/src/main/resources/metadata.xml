@@ -1,20 +1,24 @@
-<ipojo>
+<ipojo
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/schemas/core.xsd"
+    xmlns="org.apache.felix.ipojo"
+>
 	<!-- Simple provider  -->
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="PS-FooProviderType-1" architecture="true">
 		<provides />
 	</component>
 	
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="PS-FooProviderType-itf" architecture="true">
 		<provides
 			interface="org.apache.felix.ipojo.test.scenarios.ps.service.FooService" />
 	</component>
 	
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="PS-FooProviderType-3" architecture="true">
 		<provides>
 			<property name="foo" field="m_foo" />
@@ -29,18 +33,18 @@
 	
 	<!-- Providers providing 2 services -->
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
 		name="PS-FooBarProviderType-1" architecture="true">
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
 		name="PS-FooBarProviderType-2" architecture="true">
 		<provides
 			interface="{org.apache.felix.ipojo.test.scenarios.ps.service.FooService, org.apache.felix.ipojo.test.scenarios.ps.service.BarService }" />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
 		name="PS-FooBarProviderType-3" architecture="true">
 		<provides
 			interface="{org.apache.felix.ipojo.test.scenarios.ps.service.FooService}">
@@ -55,7 +59,7 @@
 
 	<!-- Provider with dynamic property -->
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn"
 		name="PS-FooProviderType-Dyn" architecture="true">
 		<provides>
 			<property name="int" field="intProp" value="2" />
@@ -68,7 +72,7 @@
 	</component>
 	
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="PS-FooProviderType-2" architecture="true">
 		<provides>
 			<property name="int" type="int" value="2" />
@@ -81,7 +85,7 @@
 	</component>
 	
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn2"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn2"
 		name="PS-FooProviderType-Dyn2" architecture="true">
 		<provides>
 			<property name="int" field="intProp" value="4" />

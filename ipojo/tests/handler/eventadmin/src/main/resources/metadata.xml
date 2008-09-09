@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ipojo xmlns:ev="org.apache.felix.ipojo.handlers.event.EventAdminHandler">
+<ipojo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/schemas/core.xsd 
+	    org.apache.felix.ipojo.handlers.event.EventAdminHandler http://people.apache.org/~clement/ipojo/schemas/event-admin.xsd"
+	xmlns="org.apache.felix.ipojo"
+	xmlns:ev="org.apache.felix.ipojo.handlers.event.EventAdminHandler">
 	
 	<!-- The (asynchronous) donut provider -->
-	<component className="org.apache.felix.ipojo.test.donut.DonutProviderImpl"
+	<component classname="org.apache.felix.ipojo.test.donut.DonutProviderImpl"
 		name="donut-provider">
 		<!-- Expose the donut provider service -->
 		<provides interface="org.apache.felix.ipojo.test.donut.DonutProvider">
@@ -14,7 +18,7 @@
 	</component>
 	
 	<!-- The synchronous donut provider -->
-	<component className="org.apache.felix.ipojo.test.donut.DonutProviderImpl"
+	<component classname="org.apache.felix.ipojo.test.donut.DonutProviderImpl"
 		name="synchronous-donut-provider">
 		<!-- Expose the donut provider service -->
 		<provides interface="org.apache.felix.ipojo.test.donut.DonutProvider">
@@ -27,7 +31,7 @@
 	
 	<!-- The (asynchronous) donut event provider -->
 	<component
-		className="org.apache.felix.ipojo.test.donut.DonutEventProviderImpl"
+		classname="org.apache.felix.ipojo.test.donut.DonutEventProviderImpl"
 		name="donut-event-provider">
 		<!-- Expose the donut provider service -->
 		<provides interface="org.apache.felix.ipojo.test.donut.DonutProvider">
@@ -40,7 +44,7 @@
 	
 	<!-- The synchronous donut event provider -->
 	<component
-		className="org.apache.felix.ipojo.test.donut.DonutEventProviderImpl"
+		classname="org.apache.felix.ipojo.test.donut.DonutEventProviderImpl"
 		name="synchronous-donut-event-provider">
 		<!-- Expose the donut provider service -->
 		<provides interface="org.apache.felix.ipojo.test.donut.DonutProvider">
@@ -53,7 +57,7 @@
 	
 	<!-- The (asynchronous) event provider -->
 	<component
-		className="org.apache.felix.ipojo.test.donut.AsyncEventProviderImpl"
+		classname="org.apache.felix.ipojo.test.donut.AsyncEventProviderImpl"
 		name="event-provider">
 		<!-- Expose the donut provider service -->
 		<provides interface="org.apache.felix.ipojo.test.donut.DonutProvider">
@@ -65,7 +69,7 @@
 	
 	<!-- The synchronous event provider -->
 	<component
-		className="org.apache.felix.ipojo.test.donut.SyncEventProviderImpl"
+		classname="org.apache.felix.ipojo.test.donut.SyncEventProviderImpl"
 		name="synchronous-event-provider">
 		<!-- Expose the donut provider service -->
 		<provides interface="org.apache.felix.ipojo.test.donut.DonutProvider">
@@ -76,7 +80,7 @@
 	</component>
 	
 	<!-- The donut consumer -->
-	<component className="org.apache.felix.ipojo.test.donut.DonutConsumerImpl"
+	<component classname="org.apache.felix.ipojo.test.donut.DonutConsumerImpl"
 		name="donut-consumer">
 		<!-- Expose the donut consumer service -->
 		<provides interface="org.apache.felix.ipojo.test.donut.DonutConsumer">
@@ -90,7 +94,7 @@
 	</component>
 	
 	<!-- The donut event consumer -->
-	<component className="org.apache.felix.ipojo.test.donut.DonutConsumerImpl"
+	<component classname="org.apache.felix.ipojo.test.donut.DonutConsumerImpl"
 		name="donut-event-consumer">
 		<!-- Expose the donut consumer service -->
 		<provides interface="org.apache.felix.ipojo.test.donut.DonutConsumer">
@@ -103,7 +107,7 @@
 	</component>
 	
 	<!-- The event consumer -->
-	<component className="org.apache.felix.ipojo.test.donut.EventConsumerImpl"
+	<component classname="org.apache.felix.ipojo.test.donut.EventConsumerImpl"
 		name="event-consumer">
 		<!-- Expose the donut consumer service -->
 		<provides
@@ -115,7 +119,7 @@
 	</component>
 	
 	<!-- The event tracker -->
-	<component className="org.apache.felix.ipojo.test.donut.EventTrackerImpl"
+	<component classname="org.apache.felix.ipojo.test.donut.EventTrackerImpl"
 		name="event-tracker">
 		<!-- Expose the donut consumer service -->
 		<provides

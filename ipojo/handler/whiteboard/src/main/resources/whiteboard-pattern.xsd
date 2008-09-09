@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!--
 	Licensed to the Apache Software Foundation (ASF) under one
 	or more contributor license agreements.  See the NOTICE file
@@ -17,14 +16,15 @@
 	specific language governing permissions and limitations
 	under the License.
 -->
-<ipojo>
-	<component classname="org.apache.felix.ipojo.arch.ArchCommandImpl"
-		public="false">
-		<Provides />
-		<requires field="m_archs" optional="true" />
-		<requires field="m_factories" optional="true"/>
-		<requires field="m_handlers" optional="true"/>
-	</component>
-	<instance component="org.apache.felix.ipojo.arch.ArchCommandImpl"
-		name="ArchCommand" />
-</ipojo>
+<xs:schema targetNamespace="org.apache.felix.ipojo.white-board-pattern"
+	xmlns="org.apache.felix.ipojo.white-board-pattern"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	elementFormDefault="qualified">
+	<xs:element name="wbp" type="WBPType"></xs:element>
+	<xs:complexType name="WBPType">
+		<xs:attribute name="onArrival" type="xs:string" use="required"></xs:attribute>
+		<xs:attribute name="onDeparture" type="xs:string" use="required"></xs:attribute>
+		<xs:attribute name="onModification" type="xs:string" use="optional"></xs:attribute>
+		<xs:attribute name="filter" type="xs:string" use="required"></xs:attribute>
+	</xs:complexType>	
+</xs:schema>

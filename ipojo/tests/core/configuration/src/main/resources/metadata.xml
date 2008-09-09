@@ -1,6 +1,7 @@
-<ipojo>
-	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn"
+<ipojo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/schemas/core.xsd" xmlns="org.apache.felix.ipojo">
+		<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn"
 		name="CONFIG-FooProviderType-Conf" architecture="true">
 		<provides />
 		<properties propagation="false">
@@ -13,7 +14,7 @@
 		</properties>
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="CONFIG-FooProviderType-3" architecture="true">
 		<provides>
 			<property name="foo" field="m_foo" />
@@ -27,7 +28,7 @@
 	</component>
 	<!-- Configuration Management Test -->
 	<component name="CONFIG-FieldConfigurableCheckService"
-		className="org.apache.felix.ipojo.test.scenarios.component.ConfigurableCheckServiceProvider"
+		classname="org.apache.felix.ipojo.test.scenarios.component.ConfigurableCheckServiceProvider"
 		architecture="true">
 		<provides />
 		<properties propagation="true">
@@ -53,7 +54,7 @@
 	</component>
 
 	<component name="CONFIG-BothConfigurableCheckService"
-		className="org.apache.felix.ipojo.test.scenarios.component.ConfigurableCheckServiceProvider"
+		classname="org.apache.felix.ipojo.test.scenarios.component.ConfigurableCheckServiceProvider"
 		architecture="true">
 		<provides />
 		<properties propagation="true">
@@ -79,7 +80,7 @@
 	</component>
 
 	<component name="CONFIG-MethodConfigurableCheckService"
-		className="org.apache.felix.ipojo.test.scenarios.component.ConfigurableCheckServiceProvider"
+		classname="org.apache.felix.ipojo.test.scenarios.component.ConfigurableCheckServiceProvider"
 		architecture="true">
 		<provides />
 		<properties propagation="true">
@@ -105,7 +106,7 @@
 	</component>
 
 	<component name="CONFIG-ParentMethodConfigurableCheckService"
-		className="org.apache.felix.ipojo.test.scenarios.component.ParentConfigurableCheckServiceProvider"
+		classname="org.apache.felix.ipojo.test.scenarios.component.ParentConfigurableCheckServiceProvider"
 		architecture="true">
 		<provides />
 		<properties propagation="true">
@@ -132,7 +133,7 @@
 	</component>
 	
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="CONFIG-FooProviderType-4" architecture="true">
 		<provides>
 			<property name="foo" field="m_foo" />

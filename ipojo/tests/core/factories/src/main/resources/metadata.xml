@@ -1,21 +1,25 @@
-<ipojo>
+<ipojo
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/schemas/core.xsd"
+    xmlns="org.apache.felix.ipojo"
+    >
 	<!-- Simple provider  -->
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="Factories-FooProviderType-1" architecture="true">
 		<provides />
 	</component>
 	
 	<!-- Provider providing 2 services -->
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
 		name="Factories-FooBarProviderType-1" architecture="true">
 		<provides />
 	</component>
 	
 	<!-- Provider with dynamic property -->
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn"
 		name="Factories-FooProviderType-Dyn" architecture="true">
 		<provides>
 			<property name="int" field="intProp" value="2" />
@@ -28,7 +32,7 @@
 	</component>
 	
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="Factories-FooProviderType-2" architecture="true">
 		<provides>
 			<property name="int" type="int" value="2" />
@@ -41,7 +45,7 @@
 	</component>
 	
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn2"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn2"
 		name="Factories-FooProviderType-Dyn2" architecture="true">
 		<provides>
 			<property name="int" field="intProp" value="4" />
@@ -54,7 +58,7 @@
 	</component>
 	
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="Factories-FooProviderType-3" architecture="true">
 		<provides>
 			<property name="foo" field="m_foo" />

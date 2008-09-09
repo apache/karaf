@@ -1,14 +1,18 @@
-<ipojo>
+<ipojo
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/schemas/core.xsd"
+    xmlns="org.apache.felix.ipojo"
+>
 	<!-- Simple provider  used for manipulation analysis -->
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="Manipulation-FooProviderType-1" architecture="true">
 		<provides />
 	</component>
 	
 	<!-- Non lazzy service provider, to check instantiation -->
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="Manipulation-ImmediateFooProviderType" immediate="true"
 		architecture="true">
 		<provides />
@@ -16,14 +20,14 @@
 	
 	<!-- Provider providing 2 services -->
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
 		name="Manipulation-FooBarProviderType-1" architecture="true">
 		<provides />
 	</component>
 	
 	<!-- Provider with dynamic property -->
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn"
 		name="Manipulation-FooProviderType-Dyn" architecture="true">
 		<provides>
 			<property name="int" field="intProp" value="2" />
@@ -37,20 +41,20 @@
 	
 	<!-- Manipulation -->
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.Manipulation23Tester"
+		classname="org.apache.felix.ipojo.test.scenarios.component.Manipulation23Tester"
 		name="Manipulation-PrimitiveManipulationTester" architecture="true">
 		<provides />
 	</component>
 
 	<!-- Manipulation with numbers -->
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.A123.Manipulation23Tester"
+		classname="org.apache.felix.ipojo.test.scenarios.component.A123.Manipulation23Tester"
 		name="Manipulation-PrimitiveManipulationTesterA" architecture="true">
 		<provides />
 	</component>
 	
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+		classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
 		name="Manipulation-SimpleMultipleCheckServiceProvider" architecture="true">
 		<requires field="fs" />
 		<provides />
@@ -58,42 +62,42 @@
 	
 	<!-- Type checking different creation policy -->
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="Manipulation-FooProviderType-1-Sing" factory-method="singleton"
 		architecture="true">
 		<provides />
 	</component>
 	
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="Manipulation-FooProviderType-1-Sev" factory-method="several"
 		architecture="true">
 		<provides />
 	</component>
 	
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="Manipulation-FooProviderType-1-SingM" factory-method="singleton"
 		architecture="true">
 		<provides/>
 	</component>
 	
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="Manipulation-FooProviderType-1-SevM" factory-method="several"
 		architecture="true">
 		<provides/>
 	</component>
 	
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="Manipulation-ImmediateFooProviderTypeSingleton" immediate="true"
 		factory-method="singleton" architecture="true">
 		<provides />
 	</component>
 	
 	<!-- Try calling super constructors -->
-	 <component className="org.apache.felix.ipojo.test.scenarios.component.CallSuperConstructor" immediate="true"/>
+	 <component classname="org.apache.felix.ipojo.test.scenarios.component.CallSuperConstructor" immediate="true"/>
 
 	<!-- Nested & Inner classes -->
 	<component name="inners" classname="org.apache.felix.ipojo.test.scenarios.component.InnerClasses">

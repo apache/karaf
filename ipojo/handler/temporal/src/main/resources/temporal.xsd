@@ -1,0 +1,39 @@
+<!--
+	Licensed to the Apache Software Foundation (ASF) under one
+	or more contributor license agreements.  See the NOTICE file
+	distributed with this work for additional information
+	regarding copyright ownership.  The ASF licenses this file
+	to you under the Apache License, Version 2.0 (the
+	"License"); you may not use this file except in compliance
+	with the License.  You may obtain a copy of the License at
+	
+	http://www.apache.org/licenses/LICENSE-2.0
+	
+	Unless required by applicable law or agreed to in writing,
+	software distributed under the License is distributed on an
+	"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	KIND, either express or implied.  See the License for the
+	specific language governing permissions and limitations
+	under the License.
+-->
+<xs:schema targetNamespace="org.apache.felix.ipojo.handler.temporal"
+	xmlns="org.apache.felix.ipojo.handler.temporal"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	elementFormDefault="qualified">
+	<xs:element name="requires" type="TemporalServiceDependencyType"></xs:element>
+
+	<xs:complexType name="TemporalServiceDependencyType">
+
+		<xs:attribute name="field" type="xs:string" use="required"></xs:attribute>
+		<xs:attribute name="filter" type="xs:string" use="optional"></xs:attribute>
+		<xs:attribute name="timeout" type="xs:int" use="optional">
+			<xs:annotation>
+				<xs:documentation>Specifies the timeout after which the onTimeout policy is executed.The value is the time in ms to wait. -1 is used to indicate an infinite wait. </xs:documentation>
+			</xs:annotation></xs:attribute>
+		<xs:attribute name="onTimeout" use="optional" type="xs:string">
+            <xs:annotation>
+            	<xs:documentation>Specifies the onTimeout policy. This determines the object to inject when the service stills unavailable when the timeout expires.Several values are supported:- 'nullable' means that a Nullable object will be injected- 'empty-array' injects an empty array (only for aggregate dependency)- 'null' injects Null- any other value are interpreted as the default implementation class to use.If the onTimetout attribute is not specified, a RuntimeException is thrown when the timeout is reached.</xs:documentation>
+            </xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+</xs:schema>

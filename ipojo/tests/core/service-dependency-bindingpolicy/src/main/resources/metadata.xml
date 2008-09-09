@@ -1,14 +1,18 @@
-<ipojo>
+<ipojo 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/schemas/core.xsd"
+    xmlns="org.apache.felix.ipojo"
+>
 
 	<!-- Static Dependencies -->
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.CheckServiceProvider"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.CheckServiceProvider"
 		name="StaticSimpleCheckServiceProvider" architecture="true">
 		<requires field="fs" policy="static" />
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.CheckServiceProvider"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.CheckServiceProvider"
 		name="StaticVoidCheckServiceProvider" architecture="true">
 		<requires field="fs" policy="static">
 			<callback type="bind" method="voidBind" />
@@ -17,7 +21,7 @@
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.CheckServiceProvider"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.CheckServiceProvider"
 		name="StaticObjectCheckServiceProvider" architecture="true">
 		<requires field="fs" policy="static">
 			<callback type="bind" method="objectBind" />
@@ -26,7 +30,7 @@
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.CheckServiceProvider"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.CheckServiceProvider"
 		name="StaticRefCheckServiceProvider" architecture="true">
 		<requires field="fs" policy="static">
 			<callback type="bind" method="refBind" />
@@ -35,7 +39,7 @@
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.CheckServiceProvider"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.CheckServiceProvider"
 		name="StaticBothCheckServiceProvider" architecture="true">
 		<requires field="fs" policy="static">
 			<callback type="bind" method="bothBind" />
@@ -44,7 +48,7 @@
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MethodCheckServiceProvider"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MethodCheckServiceProvider"
 		name="StaticMObjectCheckServiceProvider" architecture="true">
 		<requires policy="static">
 			<callback type="bind" method="objectBind" />
@@ -53,7 +57,7 @@
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MethodCheckServiceProvider"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MethodCheckServiceProvider"
 		name="StaticMRefCheckServiceProvider" architecture="true">
 		<requires
 			interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
@@ -64,7 +68,7 @@
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MethodCheckServiceProvider"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MethodCheckServiceProvider"
 		name="StaticMBothCheckServiceProvider" architecture="true">
 		<requires policy="static">
 			<callback type="bind" method="bothBind" />
@@ -75,14 +79,14 @@
 
 	<!-- Static Simple & Optional Dependencies -->
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.CheckServiceProvider"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.CheckServiceProvider"
 		name="StaticSimpleOptionalCheckServiceProvider"
 		architecture="true">
 		<requires field="fs" optional="true" policy="static" />
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.CheckServiceProvider"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.CheckServiceProvider"
 		name="StaticVoidOptionalCheckServiceProvider"
 		architecture="true">
 		<requires field="fs" optional="true" policy="static">
@@ -92,7 +96,7 @@
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.CheckServiceProvider"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.CheckServiceProvider"
 		name="StaticObjectOptionalCheckServiceProvider"
 		architecture="true">
 		<requires field="fs" optional="true" policy="static">
@@ -102,7 +106,7 @@
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.CheckServiceProvider"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.CheckServiceProvider"
 		name="StaticRefOptionalCheckServiceProvider" architecture="true">
 		<requires field="fs" optional="true" policy="static">
 			<callback type="bind" method="refBind" />
@@ -111,7 +115,7 @@
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.CheckServiceProvider"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.CheckServiceProvider"
 		name="StaticBothOptionalCheckServiceProvider"
 		architecture="true">
 		<requires field="fs" optional="true" policy="static">
@@ -121,7 +125,7 @@
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MethodCheckServiceProvider"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MethodCheckServiceProvider"
 		name="StaticMObjectOptionalCheckServiceProvider"
 		architecture="true">
 		<requires optional="true" policy="static">
@@ -131,7 +135,7 @@
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MethodCheckServiceProvider"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MethodCheckServiceProvider"
 		name="StaticMRefOptionalCheckServiceProvider"
 		architecture="true">
 		<requires
@@ -143,7 +147,7 @@
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MethodCheckServiceProvider"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MethodCheckServiceProvider"
 		name="StaticMBothOptionalCheckServiceProvider"
 		architecture="true">
 		<requires
@@ -156,14 +160,14 @@
 	</component>
 	<!--  Static Multiple Dependencies -->
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MultipleCheckService"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MultipleCheckService"
 		name="StaticSimpleMultipleCheckServiceProvider"
 		architecture="true">
 		<requires field="fs" policy="static" />
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MultipleCheckService"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MultipleCheckService"
 		name="StaticVoidMultipleCheckServiceProvider"
 		architecture="true">
 		<requires field="fs" policy="static">
@@ -173,7 +177,7 @@
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MultipleCheckService"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MultipleCheckService"
 		name="StaticObjectMultipleCheckServiceProvider"
 		architecture="true">
 		<requires field="fs" policy="static">
@@ -183,7 +187,7 @@
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MultipleCheckService"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MultipleCheckService"
 		name="StaticRefMultipleCheckServiceProvider" architecture="true">
 		<requires field="fs" policy="static">
 			<callback type="bind" method="refBind" />
@@ -192,7 +196,7 @@
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MultipleCheckService"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MultipleCheckService"
 		name="StaticBothMultipleCheckServiceProvider"
 		architecture="true">
 		<requires field="fs" policy="static">
@@ -202,7 +206,7 @@
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MethodMultipleCheckService"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MethodMultipleCheckService"
 		name="StaticMObjectMultipleCheckServiceProvider"
 		architecture="true">
 		<requires aggregate="true" policy="static">
@@ -212,7 +216,7 @@
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MethodMultipleCheckService"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MethodMultipleCheckService"
 		name="StaticMRefMultipleCheckServiceProvider"
 		architecture="true">
 		<requires
@@ -224,7 +228,7 @@
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MethodMultipleCheckService"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MethodMultipleCheckService"
 		name="StaticMBothMultipleCheckServiceProvider"
 		architecture="true">
 		<requires aggregate="true" policy="static">
@@ -236,20 +240,20 @@
 	
 	<!-- Dynamic-Priority -->
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.dynamic.priority.RankedFooProviderType1"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.dynamic.priority.RankedFooProviderType1"
 		name="RankedFooProviderType" architecture="true">
 		<provides>
 			<property field="m_grade" name="service.ranking"/>
 		</provides>
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.DynCheckServiceProvider"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.DynCheckServiceProvider"
 		name="DPSimpleCheckServiceProvider" architecture="true">
 		<requires field="fs" policy="dynamic-priority" />
 		<provides />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.DynCheckServiceProvider"
+		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.DynCheckServiceProvider"
 		name="DPObjectCheckServiceProvider" architecture="true">
 		<requires field="fs" policy="dynamic-priority">
 			<callback type="bind" method="objectBind" />

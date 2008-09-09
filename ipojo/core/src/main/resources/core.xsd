@@ -1,0 +1,275 @@
+<!--
+	Licensed to the Apache Software Foundation (ASF) under one
+	or more contributor license agreements.  See the NOTICE file
+	distributed with this work for additional information
+	regarding copyright ownership.  The ASF licenses this file
+	to you under the Apache License, Version 2.0 (the
+	"License"); you may not use this file except in compliance
+	with the License.  You may obtain a copy of the License at
+	
+	http://www.apache.org/licenses/LICENSE-2.0
+	
+	Unless required by applicable law or agreed to in writing,
+	software distributed under the License is distributed on an
+	"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	KIND, either express or implied.  See the License for the
+	specific language governing permissions and limitations
+	under the License.
+-->
+<xs:schema elementFormDefault="qualified" targetNamespace="org.apache.felix.ipojo"
+	xmlns="org.apache.felix.ipojo" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:annotation>
+    	<xs:documentation>iPOJO Core XML-Schema.This grammars models iPOJO descriptor using core features. It provides several extensibility mechanism in order to compose this schema with external handlers and other component implementation type such as compositions.</xs:documentation></xs:annotation>
+    <xs:element name="ipojo">
+		<xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:element ref="handler" minOccurs="0" maxOccurs="unbounded">
+				</xs:element>
+				<xs:element ref="instance" minOccurs="0" maxOccurs="unbounded">
+				</xs:element>
+				<xs:element ref="component" minOccurs="0" maxOccurs="unbounded">
+				</xs:element>
+				<xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded">
+				</xs:any>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="HandlerType">
+		<xs:complexContent>
+			<xs:extension base="RootElementType">
+				<xs:sequence maxOccurs="unbounded" minOccurs="0">
+					<xs:any minOccurs="0" maxOccurs="unbounded" namespace="##any"
+						processContents="skip">
+					</xs:any>
+				</xs:sequence>
+				<xs:attribute name="classname" type="xs:string" use="required">
+				</xs:attribute>
+				<xs:attribute name="name" type="xs:string" use="required">
+				</xs:attribute>
+				<xs:attribute name="namespace" type="xs:string" use="optional">
+				</xs:attribute>
+				<xs:attribute name="architecture" type="xs:boolean"
+					use="optional" fixed="false">
+				</xs:attribute>
+				<xs:attribute name="level" type="xs:int" use="optional">
+				</xs:attribute>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="InstanceType">
+		<xs:complexContent>
+			<xs:extension base="RootElementType">
+				<xs:sequence minOccurs="0" maxOccurs="unbounded">
+					<xs:element name="property" type="InstancePropertyType"></xs:element>
+				</xs:sequence>
+				<xs:attribute name="component" type="xs:string"></xs:attribute>
+				<xs:attribute name="name" type="xs:string" use="optional">
+				</xs:attribute>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="InstancePropertyType">
+		<xs:sequence>
+			<xs:element name="property" type="InstancePropertyType" minOccurs="0" maxOccurs="unbounded"></xs:element>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" use="optional"></xs:attribute>
+		<xs:attribute name="value" type="xs:string" use="optional"></xs:attribute>
+		<xs:attribute name="type" type="xs:string" use="optional"></xs:attribute>
+	</xs:complexType>
+	<xs:complexType name="RootElementType"></xs:complexType>
+	<xs:complexType name="ComponentType">
+		<xs:annotation>
+			<xs:documentation>
+				Declares an atomic (i.e. primitive) component type
+			</xs:documentation>
+		</xs:annotation>
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
+			<xs:element ref="callback" minOccurs="0"
+				maxOccurs="unbounded">
+			</xs:element>
+			<xs:element ref="provides" minOccurs="0"
+				maxOccurs="unbounded">
+			</xs:element>
+			<xs:element ref="requires" minOccurs="0"
+				maxOccurs="unbounded">
+			</xs:element>
+			<xs:element ref="properties" minOccurs="0"
+				maxOccurs="unbounded">
+			</xs:element>
+			<xs:element ref="controller" minOccurs="0" maxOccurs="1"></xs:element>
+			<xs:any namespace="##other" processContents="lax"
+				minOccurs="0" maxOccurs="unbounded">
+			</xs:any>
+		</xs:choice>
+		<xs:attribute name="name" type="xs:string" use="optional">
+			<xs:annotation>
+				<xs:documentation>
+					Specifies the name of the component type. This name
+					is used to identify the factory attached to this
+					type. If not specified, the factory name is the
+					implementation class name.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="public" type="xs:boolean" use="optional">
+			<xs:annotation>
+				<xs:documentation>
+					Determines if the component type is public or
+					private. A public factory (default) can be used from
+					any bundles.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="classname" type="xs:string"
+			use="required">
+			<xs:annotation>
+				<xs:documentation>
+					Specifies the implementation class of the component
+					type.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="architecture" type="xs:boolean"
+			use="optional">
+			<xs:annotation>
+				<xs:documentation>
+					Enable or disable the architecture exposition. By
+					default, the architecture is exposed. This allows
+					instance introspection.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="immediate" type="xs:boolean"
+			use="optional">
+		</xs:attribute>
+		<xs:attribute name="factory-method" type="xs:string" use="optional"></xs:attribute>
+	</xs:complexType>
+	<xs:complexType name="RequiresType">
+		<xs:complexContent>
+			<xs:extension base="ServiceDependencyType">
+				<xs:sequence minOccurs="0" maxOccurs="unbounded">
+					<xs:element name="callback"
+						type="DependencyCallbackType">
+					</xs:element>
+				</xs:sequence>
+				
+				<xs:attribute name="interface" type="xs:string"
+				    use="optional">
+				</xs:attribute>
+
+				<xs:attribute name="field" type="xs:string"
+					use="optional">
+				</xs:attribute>
+
+				<xs:attribute name="nullable" type="xs:boolean"
+					use="optional">
+				</xs:attribute>
+
+				<xs:attribute name="default-implementation"
+					type="xs:string" use="optional">
+				</xs:attribute>
+
+				<xs:attribute name="from" type="xs:string"
+					use="optional">
+				</xs:attribute>
+				
+				<xs:attribute name="scope" use="optional">
+					<xs:simpleType>
+						<xs:restriction base="xs:string">
+							<xs:enumeration value="global"></xs:enumeration>
+							<xs:enumeration value="composite"></xs:enumeration>
+							<xs:enumeration value="composite+global"></xs:enumeration>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="DependencyCallbackType">
+		<xs:attribute name="method" type="xs:string" use="required"></xs:attribute>
+		<xs:attribute name="type" use="required">
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:enumeration value="bind"></xs:enumeration>
+					<xs:enumeration value="unbind"></xs:enumeration>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+	</xs:complexType>
+	<xs:complexType name="CallbackType">
+        <xs:annotation>
+        	<xs:documentation>Lifecycle Callback.Allows a POJO to be notified when the instance becomes valid or invalid.</xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="method" type="xs:string" use="required">
+        	<xs:annotation>
+        		<xs:documentation>Specifies the method to call on the transition</xs:documentation>
+        	</xs:annotation></xs:attribute>
+		<xs:attribute name="transition" use="required">
+            <xs:annotation>
+            	<xs:documentation>Specifies the transition when the callback needs to be invoked.</xs:documentation>
+            </xs:annotation>
+            <xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:enumeration value="validate"></xs:enumeration>
+					<xs:enumeration value="invalidate"></xs:enumeration>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+	</xs:complexType>
+	<xs:element name="provides" type="ProvidesType" id="provides"></xs:element>
+	<xs:complexType name="ProvidesType">
+		<xs:sequence minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="property" type="PropertyType"></xs:element>
+		</xs:sequence>
+		<xs:attribute name="interface" type="xs:string" use="optional"></xs:attribute>
+		<xs:attribute name="factory" type="xs:string" use="optional"></xs:attribute>
+	</xs:complexType>
+	<xs:complexType name="PropertyType">
+		<xs:attribute name="field" type="xs:string" use="optional"></xs:attribute>
+		<xs:attribute name="method" type="xs:string" use="optional"></xs:attribute>
+		<xs:attribute name="name" type="xs:string" use="optional"></xs:attribute>
+		<xs:attribute name="value" type="xs:string" use="optional"></xs:attribute>
+		<xs:attribute name="type" type="xs:string" use="optional"></xs:attribute>
+	</xs:complexType>
+	<xs:element name="callback" type="CallbackType" id="callback"></xs:element>
+	<xs:element name="controller" type="ControllerType" id="controller"></xs:element>
+	<xs:element name="requires" type="RequiresType" id="requires"></xs:element>
+	<xs:element name="component" type="ComponentType" id="component"></xs:element>
+	<xs:element name="handler" type="HandlerType" id="handler"></xs:element>
+	<xs:element name="instance" type="InstanceType" id="instance"></xs:element>
+
+    <xs:element name="properties" type="PropertiesType" id="properties"></xs:element>
+	<xs:complexType name="PropertiesType">
+		<xs:sequence minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="property" type="PropertyType"></xs:element>
+		</xs:sequence>
+		<xs:attribute name="propagation" type="xs:boolean" use="optional"></xs:attribute>
+		<xs:attribute name="pid" type="xs:string" use="optional"></xs:attribute>
+	</xs:complexType>
+	
+	<xs:complexType name="ServiceDependencyType">
+		<xs:attribute name="optional" type="xs:boolean" use="optional">
+		</xs:attribute>
+		<xs:attribute name="aggregate" type="xs:boolean" use="optional">
+		</xs:attribute>
+		<xs:attribute name="policy" use="optional">
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:enumeration value="dynamic"></xs:enumeration>
+					<xs:enumeration value="static"></xs:enumeration>
+					<xs:enumeration value="dynamic-priority"></xs:enumeration>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="comparator" type="xs:string" use="optional">
+		</xs:attribute>
+		<xs:attribute name="filter" type="xs:string" use="optional"></xs:attribute>
+		<xs:attribute name="id" type="xs:string" use="optional"></xs:attribute>
+	</xs:complexType>
+
+    <xs:complexType name="ControllerType">
+    	<xs:attribute name="field" type="xs:string" use="required">
+		</xs:attribute>
+    </xs:complexType>
+</xs:schema>

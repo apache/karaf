@@ -1,4 +1,7 @@
 <ipojo
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/schemas/core.xsd"
+    xmlns="org.apache.felix.ipojo"
 	xmlns:cs="org.apache.felix.ipojo.test.handler.checkservice">
 	<handler
 		classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceHandler"
@@ -8,7 +11,7 @@
 		<controller field="isValid" />
 	</handler>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="HANDLER-HandlerTester" architecture="true">
 		<cs:check />
 	</component>

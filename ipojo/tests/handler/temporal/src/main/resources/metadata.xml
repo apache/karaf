@@ -1,4 +1,9 @@
-<ipojo xmlns:temp="org.apache.felix.ipojo.handler.temporal">
+<ipojo 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/schemas/core.xsd 
+	    org.apache.felix.ipojo.handler.temporal http://people.apache.org/~clement/ipojo/schemas/temporal.xsd"
+	xmlns="org.apache.felix.ipojo"
+	xmlns:temp="org.apache.felix.ipojo.handler.temporal">
 	<component classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider" name="TEMPORAL-CheckServiceProvider">
 		<temp:requires field="fs"/>
 		<provides/>
@@ -10,7 +15,7 @@
 	</component>
 	
 	<component classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckServiceProvider" name="TEMPORAL-MultipleCheckServiceProvider">
-		<temp:requires field="fs" aggregate="true"/>
+		<temp:requires field="fs"/>
 		<provides/>
 	</component>
 	

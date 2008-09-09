@@ -1,13 +1,17 @@
-<ipojo>
+<ipojo
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/schemas/core.xsd"
+    xmlns="org.apache.felix.ipojo"
+>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="LFCB-FooProviderType-1" architecture="true">
 		<provides />
 	</component>
 	
 	<!-- Lifecycle Callback -->
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.CallbackCheckService"
+		classname="org.apache.felix.ipojo.test.scenarios.component.CallbackCheckService"
 		name="LFCB-CallbackCheckService" architecture="true">
 		<requires field="fs" />
 		<provides />
@@ -15,7 +19,7 @@
 		<callback transition="invalidate" method="stop" />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.CallbackCheckService"
+		classname="org.apache.felix.ipojo.test.scenarios.component.CallbackCheckService"
 		name="LFCB-ParentCallbackCheckService" architecture="true">
 		<requires field="fs" />
 		<provides />
@@ -23,7 +27,7 @@
 		<callback transition="invalidate" method="parentStop" />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.CallbackCheckService"
+		classname="org.apache.felix.ipojo.test.scenarios.component.CallbackCheckService"
 		immediate="true" name="LFCB-ImmediateCallbackCheckService"
 		architecture="true">
 		<requires field="fs" />
@@ -32,7 +36,7 @@
 		<callback transition="invalidate" method="stop" />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.CallbackCheckService"
+		classname="org.apache.felix.ipojo.test.scenarios.component.CallbackCheckService"
 		immediate="true" name="LFCB-ImmediateCallbackCheckServiceSingleton"
 		factory-method="singleton" architecture="true">
 		<requires field="fs" />
@@ -41,7 +45,7 @@
 		<callback transition="invalidate" method="stop" />
 	</component>
 	<component
-		className="org.apache.felix.ipojo.test.scenarios.component.CallbackCheckService"
+		classname="org.apache.felix.ipojo.test.scenarios.component.CallbackCheckService"
 		immediate="true" name="LFCB-ImmediateCallbackCheckServiceSeveral"
 		factory-method="several" architecture="true">
 		<requires field="fs" />

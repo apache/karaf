@@ -1,4 +1,7 @@
-<ipojo>
+<ipojo
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/schemas/core.xsd"
+    xmlns="org.apache.felix.ipojo">
 	<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.LifecycleControllerTest"
 		name="LFC-Test">

@@ -16,11 +16,13 @@
 	specific language governing permissions and limitations
 	under the License.
 -->
-<ipojo>
+<ipojo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/schemas/core.xsd" 
+    xmlns="org.apache.felix.ipojo">
 	<!-- Primitives handler -->
 	<handler
 		classname="org.apache.felix.ipojo.handlers.lifecycle.controller.ControllerHandler"
-		name="controller" architecture="false" />
+		name="controller" architecture="false"/>
 	<handler
 		classname="org.apache.felix.ipojo.handlers.lifecycle.callback.LifecycleCallbackHandler"
 		name="callback" level="1" architecture="false" />
