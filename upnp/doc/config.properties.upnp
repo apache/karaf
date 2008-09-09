@@ -32,12 +32,12 @@ felix.cache.profile=upnp
 felix.auto.start.1= \
  file:bundle/org.apache.felix.shell-1.1.0-SNAPSHOT.jar \
  file:bundle/org.apache.felix.shell.tui-1.1.0-SNAPSHOT.jar \
- file:bundle/org.apache.felix.bundlerepository-1.1.0-SNAPSHOT.jar \
- file:../org.osgi.core/target/org.osgi.core-1.1.0-SNAPSHOT.jar \
+ file:bundle/org.apache.felix.bundlerepository-1.3.0-SNAPSHOT.jar \
+ file:../org.osgi.core/target/org.osgi.core-1.3.0-SNAPSHOT.jar \
  file:../javax.servlet/target/javax.servlet-1.0.1-SNAPSHOT.jar \
- file:../org.osgi.compendium/target/org.osgi.compendium-1.1.0-SNAPSHOT.jar \
+ file:../org.osgi.compendium/target/org.osgi.compendium-1.3.0-SNAPSHOT.jar \
  file:../http.jetty/target/org.apache.felix.http.jetty-0.9.0-SNAPSHOT.jar \
- file:../upnp/basedriver/target/org.apache.felix.upnp.basedriver-0.9.0-SNAPSHOT.jar \
+ file:../upnp/basedriver/target/org.apache.felix.upnp.basedriver-0.8.0-SNAPSHOT.jar \
  file:../upnp/extra/target/org.apache.felix.upnp.extra-0.3.0-SNAPSHOT.jar \
  file:../upnp/tester/target/org.apache.felix.upnp.tester-0.2.0-SNAPSHOT.jar \
  file:../upnp/samples/tv/target/org.apache.felix.upnp.sample.tv-0.2.0-SNAPSHOT.jar \
