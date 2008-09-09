@@ -273,10 +273,12 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
                 public void run() {
                     String[] list = boot.split(",");
                     for (String f : list) {
-                        try {
-                            installFeature(f);
-                        } catch (Exception e) {
-                            LOGGER.error("Error installing boot feature " + f, e);
+                        if (f.length() > 0) {
+                            try {
+                                installFeature(f);
+                            } catch (Exception e) {
+                                LOGGER.error("Error installing boot feature " + f, e);
+                            }
                         }
                     }
                 }
