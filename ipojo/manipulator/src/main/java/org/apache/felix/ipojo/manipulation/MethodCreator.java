@@ -106,6 +106,12 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
      * This set contains method id.
      */
     private List m_methods = new ArrayList(); // Contains method id.
+    
+    /**
+     * List of fields injected as method flag in the class.
+     * This set contains field name generate from method id.
+     */
+    private List m_methodFlags = new ArrayList(); 
 
     /**
      * Constructor.
@@ -155,8 +161,6 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
         if (name.equals("<clinit>") || name.equals("class$")) { return super.visitMethod(access, name, desc, signature, exceptions); }
         // The constructor is manipulated separately
         if (name.equals("<init>")) {
-            //TODO : do not manipulate non matching constructor.
-            
             
             // 1) change the constructor descriptor (add a component manager arg as first argument)
             String newDesc = desc.substring(1);
@@ -185,8 +189,14 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
         if ((access & ACC_STATIC) == ACC_STATIC) { return super.visitMethod(access, name, desc, signature, exceptions); }
 
         generateMethodHeader(access, name, desc, signature, exceptions);
-        FieldVisitor flagField = cv.visitField(Opcodes.ACC_PRIVATE, generateMethodFlag(name, desc), "Z", null, null);
-        flagField.visitEnd();
+        
+        
+        String id = generateMethodFlag(name, desc);
+        if (! m_methodFlags.contains(id)) {
+            FieldVisitor flagField = cv.visitField(Opcodes.ACC_PRIVATE, id, "Z", null, null);
+            flagField.visitEnd();
+            m_methodFlags.add(id);
+        }
 
         MethodVisitor mv = super.visitMethod(ACC_PRIVATE, PREFIX + name, desc, signature, exceptions);
         return new MethodCodeAdapter(mv, m_owner, ACC_PRIVATE, PREFIX + name, desc, m_fields);
@@ -382,7 +392,7 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
      * Generate a method flag name.
      * @param name : method name.
      * @param desc : method descriptor.
-     * @return the method flag name.
+     * @return the method flag name
      */
     private String generateMethodFlag(String name, String desc) {
         return METHOD_FLAG_PREFIX + generateMethodId(name, desc);
@@ -473,6 +483,7 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
         createGetComponentInstanceMethod();
 
         m_methods.clear();
+        m_methodFlags.clear();
 
         cv.visitEnd();
     }

@@ -35,6 +35,7 @@ public class ManipulationTestSuite {
         ots.addTestSuite(ExceptionTest.class);
         ots.addTestSuite(POJOCreation.class);
         ots.addTestSuite(NestedClassesTests.class);
+        ots.addTestSuite(DuplicateMethod.class);
 		return ots;
 	}
 

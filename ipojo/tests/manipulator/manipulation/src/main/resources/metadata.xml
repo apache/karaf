@@ -115,4 +115,9 @@
 			<property field="publicInt"/>
 		</provides>
 	</component>
+	
+	<!-- Check duplicate method issue -->
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.PlopImpl" name="plopimpl">
+		<provides></provides>
+	</component>
 </ipojo>
