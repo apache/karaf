@@ -16,6 +16,39 @@
  */
 
 
+                    Apache ServiceMix Kernel 1.0.0
+                    ==============================
+
+  Overview
+  --------
+
+ This release is the first GA release of ServiceMix Kernel.  A few bugs and enhancements have been done 
+ to the Kernel since the second release candidate. The most two important fixes from a user point of view
+ are SMX4KNL-70 which makes sure the bundles provided in the distribution are used first instead of the ones
+ from the user's local maven repository and SMx4KNL-77 which allows artifacts in the /deploy folder to be 
+ started when the needed dependencies have been installed successfully (the previous behavior was to fail
+ if there were missing bundles when the artifact is processed).
+ See the change log below for more informations.
+
+  Changelog
+  ---------
+
+  The following list shows the bug fixes and enhancements included in this release:
+
+ ** Bug
+     * [SMX4KNL-70] - Bundles in /system folder should take precedence over local Maven repository
+     * [SMX4KNL-79] - When starting the kernel, a log entry states "Can not install feature ''"
+
+ ** Improvement
+     * [SMX4KNL-69] - Add installation status for the 'features list' result.
+     * [SMX4KNL-71] - Export the gshell CommandExecutor in the OSGi registry
+     * [SMX4KNL-73] - Require work around for blocking in.read() call in ProxyIO for automated testing.
+     * [SMX4KNL-75] - Modify GShell argument processing to execute multiple commands.
+     * [SMX4KNL-77] - The deployer should keep a list of installed bundles that failed to start and retry those when new bundles have been resolved
+     * [SMX4KNL-78] - Small refactoring of the Feature interface
+
+
+
                   Apache ServiceMix Kernel 1.0.0-rc2
                   ==================================
 
