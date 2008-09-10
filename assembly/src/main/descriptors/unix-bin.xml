@@ -45,8 +45,8 @@
             <lineEnding>unix</lineEnding>
         </fileSet>        
         <fileSet>
-            <directory>target/classes</directory>
-            <outputDirectory>/</outputDirectory>
+            <directory>target/classes/etc</directory>
+            <outputDirectory>/etc/</outputDirectory>
             <lineEnding>unix</lineEnding>
         </fileSet>
 
@@ -91,6 +91,13 @@
             <source>${basedir}/target/maven-shared-archive-resources/META-INF/NOTICE</source>
             <outputDirectory>/</outputDirectory>
             <destName>NOTICE.txt</destName>
+            <fileMode>0644</fileMode>
+            <lineEnding>unix</lineEnding>
+        </file>
+        <file>
+            <source>${basedir}/target/classes/features.xml</source>
+            <outputDirectory>/system/org/apache/servicemix/kernel/apache-servicemix-kernel/${version}</outputDirectory>
+            <destName>apache-servicemix-kernel-${version}-features.xml</destName>
             <fileMode>0644</fileMode>
             <lineEnding>unix</lineEnding>
         </file>
