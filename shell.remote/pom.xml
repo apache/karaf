@@ -57,22 +57,16 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Private-Package>
-                            org.apache.felix.shell.remote.*
-                        </Private-Package>
                         <Bundle-Category>console</Bundle-Category>
                         <Bundle-Activator>
                             org.apache.felix.shell.remote.Activator
                         </Bundle-Activator>
-                        <Bundle-SymbolicName>
-                            ${pom.artifactId}
-                        </Bundle-SymbolicName>
-                        <Bundle-Vendor>
-                            The Apache Software Foundation
-                        </Bundle-Vendor>
-                        <Bundle-Copyright>
-                            Dieter Wimberger
-                        </Bundle-Copyright>
+                        <Private-Package>
+                            org.apache.felix.shell.remote.*
+                        </Private-Package>
+                        <Import-Package>
+                            org.osgi.service.log;resolution:=optional,* 
+                        </Import-Package>
                         <Import-Service>
                             org.apache.felix.shell.ShellService
                         </Import-Service>

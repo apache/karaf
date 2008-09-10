@@ -207,9 +207,18 @@ class ServiceMediator
         //prepareDefinitions listener
         ServiceListener serviceListener = new ServiceListenerImpl();
 
-        //prepareDefinitions the filter
-        String filter = "(|(objectclass=" + ShellService.class.getName() + ")" + "(objectclass="
-            + LogService.class.getName() + "))";
+        //prepareDefinitions the filter, ShellService is required,
+        //LogService may be missing, in which case we only use the
+        // ShellService part of the filter
+        String filter = "(objectclass=" + ShellService.class.getName() + ")";
+        try
+        {
+            filter = "(|" + filter + "(objectclass=" + LogService.class.getName() + "))";
+        }
+        catch ( Throwable t )
+        {
+            // ignore
+        }
 
         try
         {
