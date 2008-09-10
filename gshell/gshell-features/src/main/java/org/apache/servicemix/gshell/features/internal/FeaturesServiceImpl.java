@@ -137,7 +137,7 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     }
 
     public void installFeature(String name) throws Exception {
-        FeatureImpl f = (FeatureImpl) getFeature(name);
+        Feature f = getFeature(name);
         if (f == null) {
             throw new Exception("No feature named '" + name + "' available");
         }
@@ -163,7 +163,6 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
             bundles.add(b.getBundleId());
         }
         installed.put(name, bundles);
-        f.setInstalled(true);
         saveState();
     }
 
@@ -221,7 +220,7 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
         Collection<String> features = new ArrayList<String>();
         for (Repository repo : repositories.values()) {
             for (Feature f : repo.getFeatures()) {
-            	String installStatus = f.isInstalled() ? "installed  " : "uninstalled";
+            	String installStatus = installed.containsKey(f.getName()) ? "installed  " : "uninstalled";
             	String version = f.getVersion();
             	switch (version.length()) {
             	case 1: version = "       " + version;

@@ -33,8 +33,6 @@ public class FeatureImpl implements Feature {
     private List<String> dependencies = new ArrayList<String>();
     private List<String> bundles = new ArrayList<String>();
     private Map<String, Map<String,String>> configs = new HashMap<String, Map<String,String>>();
-    private boolean installed = false;
-    
     
     public FeatureImpl(String name) {
         this.name = name;
@@ -44,6 +42,14 @@ public class FeatureImpl implements Feature {
     public String getName() {
         return name;
     }
+
+    public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
 
     public List<String> getDependencies() {
         return dependencies;
@@ -69,19 +75,4 @@ public class FeatureImpl implements Feature {
         configs.put(name, properties);
     }
 
-    public boolean isInstalled() {
-        return installed;
-    }
-
-    public void setInstalled(boolean installed) {
-        this.installed = installed;
-    }
-
-    public String getVersion() {
-		return version;
-	}
-
-	public void setVersion(String version) {
-		this.version = version;
-	}
 }
