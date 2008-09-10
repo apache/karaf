@@ -38,9 +38,10 @@ import org.apache.felix.upnp.sample.binaryLight.statevariables.TargetStateVariab
 
 public class PowerSwitchService implements UPnPService{
 	
-	final private String SERVICE_ID = "urn:upnp-org:serviceId:SwitchPower:1";
-	final private String SERVICE_TYPE = "urn:schemas-upnp-org:service:SwitchPower:1";
-	final private String VERSION ="1";
+	final static private String SERVICE_ID = "urn:upnp-org:serviceId:SwitchPower:1";
+	final static private String SERVICE_TYPE = "urn:schemas-upnp-org:service:SwitchPower:"
+		+ PowerSwitchService.VERSION;
+	final static private String VERSION = "1";
 
 	private LightModel model;
 	private UPnPStateVariable status,target;

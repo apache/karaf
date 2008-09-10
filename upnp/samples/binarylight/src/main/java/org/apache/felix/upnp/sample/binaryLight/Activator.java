@@ -40,6 +40,7 @@ import org.apache.felix.upnp.sample.binaryLight.devices.LightDevice;
 public class Activator implements BundleActivator {
 
 	static BundleContext context;
+	
 	private ServiceRegistration serviceRegistration;
 	private LightDevice light;
 	private HttpService httpServ;

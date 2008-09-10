@@ -23,6 +23,7 @@ import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Dictionary;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.Random;
 
@@ -94,11 +95,8 @@ public class TvDevice implements UPnPDevice,UPnPEventListener,ServiceListener  {
 	private void setupDeviceProperties(){
 		dictionary = new Properties();
 		dictionary.put(UPnPDevice.UPNP_EXPORT,"");
-		//org.osgi.service.device.Constants.DEVICE_CATEGORY
-		//dictionary.put("DEVICE_CATEGORY","UPnP");
 		dictionary.put(
-	        org.osgi.service
-	        	.device.Constants.DEVICE_CATEGORY,
+	        org.osgi.service.device.Constants.DEVICE_CATEGORY,
         	new String[]{UPnPDevice.DEVICE_CATEGORY}
         );
 		dictionary.put(UPnPDevice.FRIENDLY_NAME,"Felix Sample Tv");
@@ -108,12 +106,20 @@ public class TvDevice implements UPnPDevice,UPnPEventListener,ServiceListener  {
 		dictionary.put(UPnPDevice.MODEL_NAME,"BimbiTv");
 		dictionary.put(UPnPDevice.MODEL_NUMBER,"1.0");
 		dictionary.put(UPnPDevice.MODEL_URL,"http://felix.apache.org/site/upnp-examples.html");
-		//dictionary.put(UPnPDevice.PRESENTATION_URL,"http://felix.apache.org/BimbiTv/presentation");
 		dictionary.put(UPnPDevice.SERIAL_NUMBER,"123456789");
 		dictionary.put(UPnPDevice.TYPE,"urn:schemas-upnp-org:device:tv:1");
 		dictionary.put(UPnPDevice.UDN,DEVICE_ID);
-		//dictionary.put(UPnPDevice.ID,dictionary.get(UPnPDevice.UDN));
 		dictionary.put(UPnPDevice.UPC,"1213456789");
+
+		HashSet types = new HashSet(services.length+5);
+		String[] ids = new String[services.length];
+		for (int i = 0; i < services.length; i++) {
+			ids[i]=services[i].getId();
+			types.add(services[i].getType());
+		}
+		
+		dictionary.put(UPnPService.TYPE, types.toArray(new String[]{}));
+		dictionary.put(UPnPService.ID, ids);		
 	}
 	
 	

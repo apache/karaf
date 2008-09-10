@@ -22,6 +22,7 @@ package org.apache.felix.upnp.sample.binaryLight.devices;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Dictionary;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.Random;
 
@@ -75,11 +76,9 @@ public class LightDevice implements UPnPDevice {
 		dictionary = new Properties();
 		dictionary.put(UPnPDevice.UPNP_EXPORT,"");
 		dictionary.put(
-		        org.osgi.service
-		        	.device.Constants.DEVICE_CATEGORY,
+		        org.osgi.service.device.Constants.DEVICE_CATEGORY,
 	        	new String[]{UPnPDevice.DEVICE_CATEGORY}
 	        );
-		//dictionary.put(UPnPDevice.DEVICE_CATEGORY,new String[]{UPnPDevice.DEVICE_CATEGORY});
 		dictionary.put(UPnPDevice.FRIENDLY_NAME,"Felix OSGi-UPnP BinaryLight");
 		dictionary.put(UPnPDevice.MANUFACTURER,"Apache Software Foundation");
 		dictionary.put(UPnPDevice.MANUFACTURER_URL,"http://felix.apache.org");
@@ -92,16 +91,24 @@ public class LightDevice implements UPnPDevice {
 		try {
 			inet = InetAddress.getLocalHost();
 	        String hostname = inet.getHostName();
-            //String hostname = inet.getHostAddress();
-		dictionary.put(UPnPDevice.PRESENTATION_URL,"http://"+hostname + ":"+port+"/upnp/binaryLight/");
+	        dictionary.put(UPnPDevice.PRESENTATION_URL,"http://"+hostname + ":"+port+"/upnp/binaryLight/");
 		} catch (UnknownHostException e) {
 			System.out.println("Warning: enable to cacth localhost name");
 		}
 		dictionary.put(UPnPDevice.SERIAL_NUMBER,"123456789");
 		dictionary.put(UPnPDevice.TYPE,"urn:schemas-upnp-org:device:BinaryLight:1");
 		dictionary.put(UPnPDevice.UDN,DEVICE_ID);
-		//dictionary.put(UPnPDevice.ID,dictionary.get(UPnPDevice.UDN));
 		dictionary.put(UPnPDevice.UPC,"1213456789");
+
+		HashSet types = new HashSet(services.length+5);
+		String[] ids = new String[services.length];
+		for (int i = 0; i < services.length; i++) {
+			ids[i]=services[i].getId();
+			types.add(services[i].getType());
+		}
+		
+		dictionary.put(UPnPService.TYPE, types.toArray(new String[]{}));
+		dictionary.put(UPnPService.ID, ids);		
 	}
 	
 	

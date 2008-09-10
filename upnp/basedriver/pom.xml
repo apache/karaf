@@ -33,6 +33,85 @@
   </repositories>
   <!-- <url>http://maven.apache.org</url> -->
 
+  <profiles>
+    <profile>
+      <id>cyberlink</id>
+      <activation>
+      	<property>
+	  <name>cyberlink</name><value>true</value>
+	</property>	
+      </activation>
+
+      <repositories>
+        <repository>
+          <id>release.cgupnpjava.sourceforge.net</id>
+          <name>CyberLink for Java Repository</name>
+          <url>http://cgupnpjava.sourceforge.net/repository/</url>
+          <snapshots><enabled>false</enabled></snapshots>
+        </repository>
+        <repository>
+          <id>snapshot.cgupnpjava.sourceforge.net</id>
+          <name>CyberLink for Java Development Repository</name>
+          <url>http://cgupnpjava.sourceforge.net/snapshots-repository/</url>
+          <releases><enabled>false</enabled></releases>
+        </repository>
+      </repositories>
+
+      <build>
+        <plugins>
+	  <plugin>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>maven-bundle-plugin</artifactId>
+            <version>1.5.0-SNAPSHOT</version>
+            <executions>
+              <execution>
+                <id>cyberlink</id>
+                <goals><goal>bundle</goal></goals>
+                <configuration>
+                  <classifier>cyberlink</classifier>
+                  <manifestLocation>${project.build.outputDirectory}/META-INF-cyberlink</manifestLocation>
+                  <excludeDependencies>it.cnr.isti.domoware.cyberdomo:upnp-stack,it.cnr.isti.domoware.cyberdomo:upnp-stack-jdk13</excludeDependencies>
+                  <instructions>
+                    <Export-Package>
+                      org.apache.felix.upnp.basedriver.controller;version=0.1.0,
+                      org.apache.felix.upnp.basedriver.util;version=0.3.0,
+                      org.apache.felix.upnp.basedriver.resources;version=0.3.0
+                    </Export-Package>
+                    <Import-Package>
+                      org.osgi.*, javax.xml.parsers, org.w3c.dom, org.xml.sax,
+		      !org.kxml2.io, !org.xmlpull.v1, !org.apache.xerces.parsers
+                    </Import-Package>
+                    <Private-Package>
+                      org.apache.felix.upnp.basedriver.*;-split-package:=merge-first,
+                      org.cybergarage.*,
+                      org.apache.xerces.impl.dv.util
+                    </Private-Package>
+                  </instructions>
+                </configuration>
+              </execution>
+            </executions>
+	  </plugin>
+	</plugins>
+      </build>
+      
+      <dependencies>
+        <dependency>
+          <groupId>org.cybergarage.cyberlink</groupId>
+          <artifactId>upnp-stack</artifactId>
+          <version>1.8.0-SNAPSHOT</version>
+          <optional>true</optional>
+	  <exclusions>
+	    <exclusion>
+              <groupId>xerces</groupId>
+              <artifactId>xercesImpl</artifactId>
+	    </exclusion>
+	  </exclusions>
+	</dependency>
+      </dependencies>
+
+    </profile>
+  </profiles>
+  
   <build>
     <plugins>
       <plugin>
@@ -41,6 +120,7 @@
         <version>1.4.0</version>
         <extensions>true</extensions>
         <configuration>
+	  <excludeDependencies>org.cybergarage.cyberlink:upnp-stack,upnp-stack-jdk13</excludeDependencies>
           <instructions>
             <Bundle-Name>${pom.name}</Bundle-Name>
             <Bundle-Activator>
@@ -71,7 +151,6 @@
               org.apache.xerces.impl.dv.util
             </Private-Package>
           </instructions>
-	  <excludeDependencies>upnp-stack-jdk13</excludeDependencies>
         </configuration>
 	<executions>
 	  <execution>
@@ -101,19 +180,37 @@
 	  </execution>
 	</executions>
       </plugin>      
+      <!--plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>minijar-maven-plugin</artifactId>
+        <version>1.0-alpha-3</version>
+	<executions>
+	  <execution>
+	    <id>ueberjar</id>
+	    <phase>package</phase>
+	    <goals><goal>ueberjar</goal></goals>
+            <configuration>
+	      <stripUnusedClasses>true</stripUnusedClasses>
+	      <includeDependencies>
+	        <param>none:dependency</param>
+	      </includeDependencies>
+            </configuration>
+	  </execution>
+	</executions>
+      </plugin-->
     </plugins>
   </build>
 
 
   <dependencies>
     <dependency>
-      <groupId>${pom.groupId}</groupId>
+      <groupId>org.apache.felix</groupId>
       <artifactId>org.osgi.core</artifactId>
       <version>1.0.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>${pom.groupId}</groupId>
+      <groupId>org.apache.felix</groupId>
       <artifactId>org.osgi.compendium</artifactId>
       <version>1.0.0</version>
     </dependency>

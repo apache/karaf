@@ -30,9 +30,10 @@ import org.osgi.service.upnp.UPnPStateVariable;
 */
 
 public class TimerService implements UPnPService {
-	final private String SERVICE_ID = "urn:schemas-upnp-org:serviceId:timer:1";
-	final private String SERVICE_TYPE = "urn:schemas-upnp-org:service:timer:1";
-	final private String VERSION ="1";
+	final static private String SERVICE_ID = "urn:schemas-upnp-org:serviceId:timer:1";
+	final static private String SERVICE_TYPE = "urn:schemas-upnp-org:service:timer:" 
+		+ TimerService.VERSION;
+	final static private String VERSION = "1";
 
 	private UPnPStateVariable time,result;
 	private UPnPStateVariable[] states;
