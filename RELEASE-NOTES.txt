@@ -38,6 +38,10 @@
  ** Bug
      * [SMX4KNL-70] - Bundles in /system folder should take precedence over local Maven repository
      * [SMX4KNL-79] - When starting the kernel, a log entry states "Can not install feature ''"
+     * [SMX4KNL-80] - "features list" output has a "version" column but no infos
+     * [SMX4KNL-81] - The wrapper feature can not be installed out of the box
+     * [SMX4KNL-82] - The installation state of a feature is not displayed correctly after a restart when using the "features list" command
+     * [SMX4KNL-83] - When using the wrapper command, ServiceMix Kernel does not start correctly
 
  ** Improvement
      * [SMX4KNL-69] - Add installation status for the 'features list' result.
