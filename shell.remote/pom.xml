@@ -29,7 +29,7 @@
     <description>
         A simple remote textual user interface for Felix' shell service.
     </description>
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
     <artifactId>org.apache.felix.shell.remote</artifactId>
     <dependencies>
         <dependency>
@@ -67,12 +67,6 @@
                         <Import-Package>
                             org.osgi.service.log;resolution:=optional,* 
                         </Import-Package>
-                        <Import-Service>
-                            org.apache.felix.shell.ShellService
-                        </Import-Service>
-                        <Import-Service>
-                            org.osgi.service.log.LogService
-                        </Import-Service>
                     </instructions>
                 </configuration>
             </plugin>
