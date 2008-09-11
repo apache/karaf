@@ -112,7 +112,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         // descriptive service properties
         props.put( Constants.SERVICE_DESCRIPTION, "ManagedServiceFactory for Factory Component"
             + getComponentMetadata().getName() );
-        props.put( Constants.SERVICE_VENDOR, "Apache Software Foundation" );
+        props.put( Constants.SERVICE_VENDOR, "The Apache Software Foundation" );
 
         return props;
     }
@@ -184,7 +184,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
      * ComponentManager instances created by this method are not registered
      * with the ComponentRegistry. Therefore, any configuration update to these
      * components must be effected by this class !
-     * 
+     *
      * @param configuration The (initial) configuration for the new
      *      component manager
      * @param isNewInstance <code>true</code> if this component manager is
