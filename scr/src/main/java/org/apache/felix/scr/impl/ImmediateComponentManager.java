@@ -21,10 +21,7 @@ package org.apache.felix.scr.impl;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
@@ -80,7 +77,7 @@ class ImmediateComponentManager extends AbstractComponentManager
             props.put( Constants.SERVICE_PID, getComponentMetadata().getName() );
             props.put( Constants.SERVICE_DESCRIPTION, "ManagedService for Component "
                 + getComponentMetadata().getName() );
-            props.put( Constants.SERVICE_VENDOR, "Apache Software Foundation" );
+            props.put( Constants.SERVICE_VENDOR, "The Apache Software Foundation" );
 
             // register an anonymous managed service instance
             ManagedService ms = new ManagedService()
