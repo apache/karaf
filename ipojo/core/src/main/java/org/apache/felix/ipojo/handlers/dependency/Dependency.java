@@ -395,12 +395,32 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
 
     /**
      * The dependency has been reconfigured.
-     * @param departs : service no more matching.
+     * Call unbind method and then bind methods. If the dependency cache is not reset, 
+     * the thread continues to get older services.
+     * @param departs : no more matching services.
      * @param arrivals : new services
      * @see org.apache.felix.ipojo.util.DependencyModel#onDependencyReconfiguration(org.osgi.framework.ServiceReference[], org.osgi.framework.ServiceReference[])
      */
     public void onDependencyReconfiguration(ServiceReference[] departs, ServiceReference[] arrivals) {
-        throw new UnsupportedOperationException("Dependency set change is not yet supported");
+        for (int i = 0; departs != null && i < departs.length; i++) {
+            callUnbindMethod(departs[i]);
+        }
+        
+        for (int i = 0; arrivals != null && i < arrivals.length; i++) {
+            callBindMethod(arrivals[i]);
+        }
+    }
+    
+    /**
+     * Reset the thread local cache if used.
+     */
+    public void resetLocalCache() {
+        if (m_usage != null) {
+            Usage usage = (Usage) m_usage.get();
+            if (usage.m_stack > 0) {
+                createServiceObject(usage);
+            }
+        }
     }
 
     /**
