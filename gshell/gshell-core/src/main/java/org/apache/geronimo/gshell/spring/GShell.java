@@ -173,7 +173,8 @@ public class GShell implements Runnable, BundleContextAware {
      * @throws InterruptedException
      */
     private void waitForFrameworkToStart() throws InterruptedException {
-		if( frameworkStarted.await(5, TimeUnit.SECONDS) ) {
+        log.info("Waiting from framework to start.");
+        if (frameworkStarted.await(60, TimeUnit.SECONDS)) {
 			log.info("System completed startup.");
 		} else {
 			log.warn("System took too long startup... continuing");

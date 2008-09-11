@@ -17,10 +17,17 @@
 package org.apache.servicemix.kernel.testing.support;
 
 import java.util.Properties;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Enumeration;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Constructor;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
@@ -46,7 +53,7 @@ public class SmxKernelPlatform implements OsgiPlatform {
 
     private BundleContext context;
 
-    private Felix platform;
+    private Object platform;
 
     private File felixStorageDir;
 
@@ -72,12 +79,31 @@ public class SmxKernelPlatform implements OsgiPlatform {
         return context;
     }
 
+    private Set<String> getJars(Class... classes) {
+        Set<String> jars = new HashSet<String>();
+        for (Class cl : classes) {
+            String name = cl.getName().replace('.', '/') + ".class";
+            URL url = (cl.getClassLoader() != null ? cl.getClassLoader() : getClass().getClassLoader()).getResource(name);
+            String path = url.toString();
+            path = path.substring(0, path.indexOf('!'));
+            jars.add(path);
+        }
+        return jars;
+    }
+
     public void start() throws Exception {
+        Set<String> jars = getJars(Boolean.class, Felix.class);
+        System.out.println(jars);
+        ClassLoader classLoader = new GuardClassLoader(jars);
+        Thread.currentThread().setContextClassLoader(classLoader);
+        Class cl = classLoader.loadClass(Felix.class.getName());
+        Constructor cns = cl.getConstructor(Map.class, List.class);
+        platform = cns.newInstance(getConfigurationProperties(), null);
+        platform.getClass().getMethod("start").invoke(platform);
+        //platform = new Felix(getConfigurationProperties(), null);
+        //platform.start();
 
-        platform = new Felix(getConfigurationProperties(), null);
-        platform.start();
-
-        Bundle systemBundle = platform;
+        Bundle systemBundle = (Bundle) platform;
 
         // call getBundleContext
         final Method getContext = systemBundle.getClass().getDeclaredMethod("getBundleContext", null);
@@ -94,7 +120,8 @@ public class SmxKernelPlatform implements OsgiPlatform {
 
     public void stop() throws Exception {
         try {
-            platform.stop();
+            platform.getClass().getMethod("stop").invoke(platform);
+            //platform.stop();
         }
         finally {
             // remove cache folder
@@ -189,5 +216,69 @@ public class SmxKernelPlatform implements OsgiPlatform {
 
         // The directory is now empty so delete it
         return (success &= file.delete());
+    }
+
+    public static class GuardClassLoader extends ClassLoader {
+        private Set<String> jars;
+
+        public GuardClassLoader(Set<String> jars) {
+            this.jars = jars;
+        }
+
+        protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+            System.err.println("Loading class: " + name);
+            Class c = findLoadedClass(name);
+            if (c == null) {
+                c = getParent().loadClass(name);
+                String path = getParent().getResource(name.replace('.', '/') + ".class").toString();
+                path = path.substring(0, path.indexOf('!'));
+                if (!jars.contains(path)) {
+                    throw new ClassNotFoundException(name);
+                }
+            }
+            if (resolve) {
+                resolveClass(c);
+            }
+            return c;
+        }
+
+        public URL getResource(String name) {
+            URL u = getParent().getResource(name);
+            if (u != null) {
+                String path = u.toString();
+                int idx = path.indexOf('!');
+                if (idx > 0) {
+                    path = path.substring(0, idx);
+                    if (!jars.contains(path)) {
+                        return null;
+                    }
+                } else {
+                    idx = 0;
+                }
+            }
+            return u;
+        }
+
+        public Enumeration<URL> getResources(String name) throws IOException {
+            final Enumeration<URL> e = getParent().getResources(name);
+            return new Enumeration<URL>() {
+                URL next = null;
+                public boolean hasMoreElements() {
+                    while (next == null && e.hasMoreElements()) {
+                        next = e.nextElement();
+                        String path = next.toString();
+                        path = path.substring(0, path.indexOf('!'));
+                        if (!jars.contains(path)) {
+                            next = null;
+                        }
+                    }
+                    return next != null;
+                }
+
+                public URL nextElement() {
+                    return next;
+                }
+            };
+        }
     }
 }
