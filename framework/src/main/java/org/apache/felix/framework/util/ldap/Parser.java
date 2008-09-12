@@ -582,12 +582,16 @@ loop:   for (;;)
 
         public void buildTree(Stack operands)
         {
-            children = new Operator[operandCount];
-            // need to preserve stack order
-            for (int i = 0; i < operandCount; i++)
+            if (children == null)
             {
-                children[(operandCount - 1) - i] =
-                    (Operator) operands.pop();
+                Operator[] tmp = new Operator[operandCount];
+                // need to preserve stack order
+                for (int i = 0; i < operandCount; i++)
+                {
+                    tmp[(operandCount - 1) - i] =
+                        (Operator) operands.pop();
+                }
+                children = tmp;
             }
             operands.push(this);
         }
@@ -647,12 +651,17 @@ loop:   for (;;)
 
         public void buildTree(Stack operands)
         {
-            children = new Operator[operandCount];
-            // need to preserve stack order
-            for (int i = 0; i < operandCount; i++)
+            if (children == null) 
             {
-                children[(operandCount - 1) - i] =
-                    (Operator) operands.pop();
+                Operator[] tmp = new Operator[operandCount];
+            
+                // need to preserve stack order
+                for (int i = 0; i < operandCount; i++)
+                {
+                    tmp[(operandCount - 1) - i] =
+                        (Operator) operands.pop();
+                }
+                children = tmp;
             }
             operands.push(this);
         }
@@ -693,8 +702,11 @@ loop:   for (;;)
 
         public void buildTree(Stack operands)
         {
-            children = new Operator[1];
-            children[0] = (Operator) operands.pop();
+            if (children == null)
+            {
+                children = new Operator[]{
+                    (Operator) operands.pop()};
+            }
             operands.push(this);
         }
 
@@ -787,12 +799,17 @@ loop:   for (;;)
 
         public void buildTree(Stack operands)
         {
-            children = new Operator[2];
-            // need to preserve stack order
-            for (int i = 0; i < 2; i++)
-            {
-                Operator o = (Operator) operands.pop();
-                children[1 - i] = o;
+            if (children == null)
+            { 
+                Operator[] tmp = new Operator[2];
+            
+                // need to preserve stack order
+                for (int i = 0; i < 2; i++)
+                {
+                    Operator o = (Operator) operands.pop();
+                    tmp[1 - i] = o;
+                }
+                children = tmp;
             }
             operands.push(this);
         }
@@ -845,11 +862,16 @@ loop:   for (;;)
 
         public void buildTree(Stack operands)
         {
-            children = new Operator[2];
-            // need to preserve stack order
-            for (int i = 0; i < 2; i++)
+            if (children == null)
             {
-                children[1 - i] = (Operator) operands.pop();
+                Operator[] tmp = new Operator[2];
+            
+                // need to preserve stack order
+                for (int i = 0; i < 2; i++)
+                {
+                    tmp[1 - i] = (Operator) operands.pop();
+                }
+                children = tmp;
             }
             operands.push(this);
         }
@@ -901,11 +923,16 @@ loop:   for (;;)
 
         public void buildTree(Stack operands)
         {
-            children = new Operator[2];
-            // need to preserve stack order
-            for (int i = 0; i < 2; i++)
+            if (children == null)
             {
-                children[1 - i] = (Operator) operands.pop();
+                Operator[] tmp = new Operator[2];
+            
+                // need to preserve stack order
+                for (int i = 0; i < 2; i++)
+                {
+                    tmp[1 - i] = (Operator) operands.pop();
+                }
+                children = tmp;
             }
             operands.push(this);
         }
@@ -957,11 +984,16 @@ loop:   for (;;)
 
         public void buildTree(Stack operands)
         {
-            children = new Operator[2];
-            // need to preserve stack order
-            for (int i = 0; i < 2; i++)
+            if (children == null)
             {
-                children[1 - i] = (Operator) operands.pop();
+                Operator[] tmp = new Operator[2];
+            
+                // need to preserve stack order
+                for (int i = 0; i < 2; i++)
+                {
+                    tmp[1 - i] = (Operator) operands.pop();
+                }
+                children = tmp;
             }
             operands.push(this);
         }
@@ -1230,8 +1262,11 @@ loop:   for (;;)
 
         public void buildTree(Stack operands)
         {
-            children = new Operator[1];
-            children[0] = (Operator) operands.pop();
+            if (children == null) 
+            {
+                children = new Operator[]{
+                    (Operator) operands.pop()};
+            }
             operands.push(this);
         }
 

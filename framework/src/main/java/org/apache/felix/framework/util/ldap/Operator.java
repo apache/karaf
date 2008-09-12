@@ -32,5 +32,5 @@ public abstract class Operator
 
     // Place to store the reconstructed parsetree
     // Vector -> ArrayList is using jdk1.2 or later
-    public Operator[] children = null;
+    public volatile Operator[] children = null;
 }
