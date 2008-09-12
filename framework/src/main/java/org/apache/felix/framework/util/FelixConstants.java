@@ -51,6 +51,11 @@ public interface FelixConstants extends org.osgi.framework.Constants
         = "felix.startlevel.bundle";
     public static final String SERVICE_URLHANDLERS_PROP = "felix.service.urlhandlers";
 
+    // THESE CAN BE DELETED ONCE WE HAVE COMPLETE FRAGMENT SUPPORT.
+    public static final String FRAGMENT_VALIDATION_PROP = "felix.fragment.validation";
+    public static final String FRAGMENT_VALIDATION_EXCEPTION_VALUE = "exception";
+    public static final String FRAGMENT_VALIDATION_WARNING_VALUE = "warning";
+
     // Start level-related constants.
     public static final int FRAMEWORK_INACTIVE_STARTLEVEL = 0;
     public static final int FRAMEWORK_DEFAULT_STARTLEVEL = 1;

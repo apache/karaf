@@ -255,8 +255,18 @@ public class ManifestParser
                 || (headerMap.get(Constants.EXPORT_PACKAGE) != null)
                 || (headerMap.get(Constants.BUNDLE_NATIVECODE) != null))
             {
-                throw new BundleException(
-                    "Fragments with exports, imports, or native code are not currently supported.");
+                String s = (String) m_configMap.get(FelixConstants.FRAGMENT_VALIDATION_PROP);
+                s = (s == null) ? FelixConstants.FRAGMENT_VALIDATION_EXCEPTION_VALUE : s;
+                if (s.equalsIgnoreCase(FelixConstants.FRAGMENT_VALIDATION_WARNING_VALUE))
+                {
+                    m_logger.log(Logger.LOG_WARNING,
+                        "Fragments with exports, imports, or native code are not currently supported.");
+                }
+                else
+                {
+                    throw new BundleException(
+                        "Fragments with exports, imports, or native code are not currently supported.");
+                }
             }
         }
     }
