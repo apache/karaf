@@ -248,6 +248,9 @@ public class ManifestParser
     **/
     private void validateFragment(Map headerMap) throws BundleException
     {
+        // TODO: FRAGMENTS - We should delete this method and the related
+        //       fragment constants in FelixConstants when fragments are
+        //       fully implemented.
         String fragmentHost = (String) headerMap.get(Constants.FRAGMENT_HOST);
         if (fragmentHost != null)
         {
