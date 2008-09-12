@@ -46,9 +46,7 @@ class BundleContextImpl implements FelixBundleContext
 
     public void addRequirement(String s) throws BundleException
     {
-        // TODO: EXPERIMENTAL - Experimental implicit wire concept to try
-        //       to deal with code generation.
-        m_felix.addRequirement(m_bundle, s);
+        throw new BundleException("Not implemented yet.");
     }
 
     public void removeRequirement() throws BundleException

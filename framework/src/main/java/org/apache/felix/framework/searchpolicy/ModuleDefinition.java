@@ -62,13 +62,6 @@ public class ModuleDefinition implements IModuleDefinition
         return m_dynamicRequirements;
     }
 
-    // TODO: EXPERIMENTAL - Experimental implicit wire concept to try
-    //       to deal with code generation.
-    public void setDynamicRequirements(IRequirement[] reqs)
-    {
-        m_dynamicRequirements = reqs;
-    }
-
     public R4Library[] getLibraries()
     {
         return m_libraries;
