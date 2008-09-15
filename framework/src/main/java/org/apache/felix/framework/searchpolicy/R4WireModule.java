@@ -30,12 +30,12 @@ import org.apache.felix.moduleloader.*;
 
 public class R4WireModule implements IWire
 {
-    private IModule m_importer = null;
-    private IRequirement m_requirement = null;
-    private IModule m_exporter = null;
-    private ICapability m_capability = null;
-    private Map m_pkgMap = null;
-    
+    private final IModule m_importer;
+    private final IRequirement m_requirement;
+    private final IModule m_exporter;
+    private final ICapability m_capability;
+    private final Map m_pkgMap;
+
     public R4WireModule(IModule importer, IRequirement requirement,
         IModule exporter, ICapability capability, Map pkgMap)
     {
@@ -45,7 +45,7 @@ public class R4WireModule implements IWire
         m_capability = capability;
         m_pkgMap = pkgMap;
     }
-    
+
     /* (non-Javadoc)
      * @see org.apache.felix.framework.searchpolicy.IWire#getImporter()
      */
@@ -53,7 +53,7 @@ public class R4WireModule implements IWire
     {
         return m_importer;
     }
-    
+
     /* (non-Javadoc)
      * @see org.apache.felix.framework.searchpolicy.IWire#getRequirement()
      */
@@ -69,13 +69,21 @@ public class R4WireModule implements IWire
     {
         return m_exporter;
     }
-    
+
     /* (non-Javadoc)
      * @see org.apache.felix.framework.searchpolicy.IWire#getCapability()
      */
     public ICapability getCapability()
     {
         return m_capability;
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.felix.framework.searchpolicy.IWire#hasPackage(java.lang.String)
+     */
+    public boolean hasPackage(String pkgName)
+    {
+        return (m_pkgMap.get(pkgName) != null);
     }
 
     /* (non-Javadoc)

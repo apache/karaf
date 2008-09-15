@@ -613,59 +613,15 @@ public class R4SearchPolicyCore implements ModuleListener
         return null;
     }
 
-    private IRequirement createDynamicRequirementTarget(
-        IRequirement dynReq, String pkgName)
-    {
-        IRequirement req = null;
-
-        // First check to see if the dynamic requirement matches the
-        // package name; this means we have to do wildcard matching.
-        String dynPkgName = ((Requirement) dynReq).getPackageName();
-        boolean wildcard = (dynPkgName.lastIndexOf(".*") >= 0);
-        dynPkgName = (wildcard)
-            ? dynPkgName.substring(0, dynPkgName.length() - 2) : dynPkgName;
-        // If the dynamic requirement matches the package name, then
-        // create a new requirement for the specific package.
-        if (dynPkgName.equals("*") ||
-            pkgName.equals(dynPkgName) ||
-            (wildcard && pkgName.startsWith(dynPkgName + ".")))
-        {
-            // Create a new requirement based on the dynamic requirement,
-            // but substitute the precise package name for which we are
-            // looking, because it is not possible to use the potentially
-            // wildcarded version in the dynamic requirement.
-            R4Directive[] dirs = ((Requirement) dynReq).getDirectives();
-            R4Attribute[] attrs = ((Requirement) dynReq).getAttributes();
-            R4Attribute[] newAttrs = new R4Attribute[attrs.length];
-            System.arraycopy(attrs, 0, newAttrs, 0, attrs.length);
-            for (int attrIdx = 0; attrIdx < newAttrs.length; attrIdx++)
-            {
-                if (newAttrs[attrIdx].getName().equals(ICapability.PACKAGE_PROPERTY))
-                {
-                    newAttrs[attrIdx] = new R4Attribute(
-                        ICapability.PACKAGE_PROPERTY, pkgName, false);
-                    break;
-                }
-            }
-            req = new Requirement(ICapability.PACKAGE_NAMESPACE, dirs, newAttrs);
-        }
-
-        return req;
-    }
-
     private IWire attemptDynamicImport(IModule importer, String pkgName)
     {
         R4Wire wire = null;
         PackageSource candidate = null;
 
-        // There is an overriding assumption here that a package is
-        // never split across bundles. If a package can be split
-        // across bundles, then this will fail.
-
-        // Only attempt to dynamically import a package if the module does
-        // not already have a wire for the package; this may be the case if
-        // the class being searched for actually does not exist.
-        if (Util.getWire(importer, pkgName) == null)
+        // We can only search dynamic imports if the bundle
+        // doesn't import, export, nor require the package in
+        // question. Check these conditions first.
+        if (isDynamicImportAllowed(importer, pkgName))
         {
             // Loop through the importer's dynamic requirements to determine if
             // there is a matching one for the package from which we want to
@@ -744,6 +700,73 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         }
 
         return null;
+    }
+
+    private boolean isDynamicImportAllowed(IModule importer, String pkgName)
+    {
+        // If any of the module exports this package, then we cannot
+        // attempt to dynamically import it.
+        ICapability[] caps = importer.getDefinition().getCapabilities();
+        for (int i = 0; (caps != null) && (i < caps.length); i++)
+        {
+            if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE)
+                && caps[i].getProperties().get(ICapability.PACKAGE_PROPERTY).equals(pkgName))
+            {
+                return false;
+            }
+        }
+        // If any of our wires have this package, then we cannot
+        // attempt to dynamically import it.
+        IWire[] wires = importer.getWires();
+        for (int i = 0; (wires != null) && (i < wires.length); i++)
+        {
+            if (wires[i].hasPackage(pkgName))
+            {
+                return false;
+            }
+        }
+        // Ok to attempt to dynamically import the package.
+        return true;
+    }
+
+    private IRequirement createDynamicRequirementTarget(
+        IRequirement dynReq, String pkgName)
+    {
+        IRequirement req = null;
+
+        // First check to see if the dynamic requirement matches the
+        // package name; this means we have to do wildcard matching.
+        String dynPkgName = ((Requirement) dynReq).getPackageName();
+        boolean wildcard = (dynPkgName.lastIndexOf(".*") >= 0);
+        dynPkgName = (wildcard)
+            ? dynPkgName.substring(0, dynPkgName.length() - 2) : dynPkgName;
+        // If the dynamic requirement matches the package name, then
+        // create a new requirement for the specific package.
+        if (dynPkgName.equals("*") ||
+            pkgName.equals(dynPkgName) ||
+            (wildcard && pkgName.startsWith(dynPkgName + ".")))
+        {
+            // Create a new requirement based on the dynamic requirement,
+            // but substitute the precise package name for which we are
+            // looking, because it is not possible to use the potentially
+            // wildcarded version in the dynamic requirement.
+            R4Directive[] dirs = ((Requirement) dynReq).getDirectives();
+            R4Attribute[] attrs = ((Requirement) dynReq).getAttributes();
+            R4Attribute[] newAttrs = new R4Attribute[attrs.length];
+            System.arraycopy(attrs, 0, newAttrs, 0, attrs.length);
+            for (int attrIdx = 0; attrIdx < newAttrs.length; attrIdx++)
+            {
+                if (newAttrs[attrIdx].getName().equals(ICapability.PACKAGE_PROPERTY))
+                {
+                    newAttrs[attrIdx] = new R4Attribute(
+                        ICapability.PACKAGE_PROPERTY, pkgName, false);
+                    break;
+                }
+            }
+            req = new Requirement(ICapability.PACKAGE_NAMESPACE, dirs, newAttrs);
+        }
+
+        return req;
     }
 
     private boolean resolveDynamicImportCandidate(IModule provider, IModule importer)

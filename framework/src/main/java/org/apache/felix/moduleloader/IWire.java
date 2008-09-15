@@ -27,6 +27,7 @@ public interface IWire
     public IRequirement getRequirement();
     public IModule getExporter();
     public ICapability getCapability();
+    public boolean hasPackage(String pkgName);
     public Class getClass(String name) throws ClassNotFoundException;
     public URL getResource(String name) throws ResourceNotFoundException;
     public Enumeration getResources(String name) throws ResourceNotFoundException;

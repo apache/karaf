@@ -27,10 +27,10 @@ import org.apache.felix.moduleloader.*;
 
 public class R4Wire implements IWire
 {
-    private IModule m_importer = null;
-    private IRequirement m_requirement = null;
-    private IModule m_exporter = null;
-    private ICapability m_capability = null;
+    private final IModule m_importer;
+    private final IRequirement m_requirement;
+    private final IModule m_exporter;
+    private final ICapability m_capability;
 
     public R4Wire(IModule importer, IRequirement requirement,
         IModule exporter, ICapability capability)
@@ -71,6 +71,15 @@ public class R4Wire implements IWire
     public ICapability getCapability()
     {
         return m_capability;
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.felix.framework.searchpolicy.IWire#getClass(java.lang.String)
+     */
+    public boolean hasPackage(String pkgName)
+    {
+        return (m_capability.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
+            m_capability.getProperties().get(ICapability.PACKAGE_PROPERTY).equals(pkgName));
     }
 
     /* (non-Javadoc)
