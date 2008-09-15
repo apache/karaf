@@ -279,7 +279,7 @@ public class MethodCollector extends EmptyVisitor {
                 // Add the complete requires
                 req = new Element("requires", "");
                 if (m_specification != null) {
-                    req.addAttribute(new Attribute("interface", m_specification));
+                    req.addAttribute(new Attribute("specification", m_specification));
                 }
                 if (m_aggregate != null) {
                     req.addAttribute(new Attribute("aggregate", m_aggregate));
@@ -303,7 +303,7 @@ public class MethodCollector extends EmptyVisitor {
                     req.addAttribute(new Attribute("from", m_from));
                 }
             } else {
-                String itf = req.getAttribute("interface");
+                String itf = req.getAttribute("specification");
                 String aggregate = req.getAttribute("aggregate");
                 String optional = req.getAttribute("optional");
                 String filter = req.getAttribute("filter");
@@ -312,7 +312,7 @@ public class MethodCollector extends EmptyVisitor {
                 String from = req.getAttribute("from");
                 if (m_specification != null) {
                     if (itf == null) {
-                        req.addAttribute(new Attribute("interface", m_specification));
+                        req.addAttribute(new Attribute("specification", m_specification));
                     } else if (! m_specification.equals(itf)) {
                         System.err.println("The required specification is not the same than previouly : " + m_specification + " & " + itf);
                         return;

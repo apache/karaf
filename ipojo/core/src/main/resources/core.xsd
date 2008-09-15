@@ -249,6 +249,7 @@
 	</xs:complexType>
 	
 	<xs:complexType name="ServiceDependencyType">
+	    <xs:attribute name="specification" type="xs:string" use="optional"/>
 		<xs:attribute name="optional" type="xs:boolean" use="optional">
 		</xs:attribute>
 		<xs:attribute name="aggregate" type="xs:boolean" use="optional">

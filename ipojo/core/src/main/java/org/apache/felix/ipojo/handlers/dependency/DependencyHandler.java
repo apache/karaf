@@ -314,7 +314,15 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
         for (int i = 0; deps != null && i < deps.length; i++) {
             // Create the dependency metadata
             String field = deps[i].getAttribute("field");
+            
             String serviceSpecification = deps[i].getAttribute("interface");
+            // the 'interface' attribute is deprecated
+            if (serviceSpecification != null) {
+                warn("The 'interface' attribute is deprecated, use the 'specification' attribute instead");
+            } else {
+                serviceSpecification = deps[i].getAttribute("specification");
+            }
+            
             String filter = deps[i].getAttribute("filter");
             String opt = deps[i].getAttribute("optional");
             boolean optional = opt != null && opt.equalsIgnoreCase("true");
@@ -425,26 +433,6 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
             }
         }
     }
-
-//    /**
-//     * GetterCallback Method.
-//     * @param pojo : the pojo object on which the field is accessed
-//     * @param fieldName : the field name.
-//     * @param value : the value passed to the field (by the previous handler).
-//     * @return the object that the dependency handler want to push.
-//     * @see org.apache.felix.ipojo.Handler#onGet(Object, java.lang.String, java.lang.Object)
-//     */
-//    public Object onGet(Object pojo, String fieldName, Object value) {
-//        for (int i = 0; i < m_dependencies.length; i++) {
-//            Dependency dep = m_dependencies[i];
-//            if (fieldName.equals(dep.getField())) {
-//                // The field name is a dependency, return the get
-//                return dep.get();
-//            }
-//        }
-//        // Else return the value
-//        return value;
-//    }
 
     /**
      * Handler start method.

@@ -74,7 +74,7 @@
 		classname="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
 		name="MRefCheckServiceProvider" architecture="true">
 		<requires
-			interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService">
+			specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService">
 			<callback type="bind" method="refBind" />
 			<callback type="unbind" method="refUnbind" />
 		</requires>
@@ -189,7 +189,7 @@
 		classname="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
 		name="MRefOptionalCheckServiceProvider" architecture="true">
 		<requires
-			interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
+			specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
 			optional="true">
 			<callback type="bind" method="refBind" />
 			<callback type="unbind" method="refUnbind" />
@@ -200,7 +200,7 @@
 		classname="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
 		name="MBothOptionalCheckServiceProvider" architecture="true">
 		<requires
-			interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
+			specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
 			optional="true">
 			<callback type="bind" method="bothBind" />
 			<callback type="unbind" method="bothUnbind" />
@@ -271,7 +271,7 @@
 		classname="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
 		name="DIMRefOptionalCheckServiceProvider" architecture="true">
 		<requires
-			interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
+			specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
 			optional="true"
 			default-implementation="org.apache.felix.ipojo.test.scenarios.component.FooServiceDefaultImpl">
 			<callback type="bind" method="refBind" />
@@ -283,7 +283,7 @@
 		classname="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
 		name="DIMBothOptionalCheckServiceProvider" architecture="true">
 		<requires
-			interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
+			specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
 			optional="true"
 			default-implementation="org.apache.felix.ipojo.test.scenarios.component.FooServiceDefaultImpl">
 			<callback type="bind" method="bothBind" />
@@ -348,7 +348,7 @@
 		classname="org.apache.felix.ipojo.test.scenarios.component.MethodMultipleCheckService"
 		name="MRefMultipleCheckServiceProvider" architecture="true">
 		<requires
-			interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
+			specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
 			aggregate="true">
 			<callback type="bind" method="refBind" />
 			<callback type="unbind" method="refUnbind" />
@@ -418,7 +418,7 @@
 		name="MRefOptionalMultipleCheckServiceProvider"
 		architecture="true">
 		<requires
-			interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
+			specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
 			aggregate="true" optional="true">
 			<callback type="bind" method="refBind" />
 			<callback type="unbind" method="refUnbind" />
@@ -430,14 +430,14 @@
 	<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.ListCheckService"
 		name="SimpleListCheckServiceProvider" architecture="true">
-		<requires field="fs" interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"/>
+		<requires field="fs" specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"/>
 		<provides />
 	</component>
 	<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.ListCheckService"
 		name="OptionalListCheckServiceProvider"
 		architecture="true">
-		<requires interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService" field="fs" optional="true" />
+		<requires specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService" field="fs" optional="true" />
 		<provides />
 	</component>
 	
@@ -455,7 +455,7 @@
 		classname="org.apache.felix.ipojo.test.scenarios.component.VectorCheckService"
 		name="OptionalVectorCheckServiceProvider"
 		architecture="true">
-		<requires interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService" field="fs" optional="true" />
+		<requires specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService" field="fs" optional="true" />
 		<provides />
 	</component>
 	
@@ -463,14 +463,14 @@
 	<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.SetCheckService"
 		name="SimpleSetCheckServiceProvider" architecture="true">
-		<requires field="fs" interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"/>
+		<requires field="fs" specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"/>
 		<provides />
 	</component>
 	<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.SetCheckService"
 		name="OptionalSetCheckServiceProvider"
 		architecture="true">
-		<requires interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService" field="fs" optional="true" />
+		<requires specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService" field="fs" optional="true" />
 		<provides />
 	</component>
 	
@@ -478,14 +478,14 @@
 	<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.CollectionCheckService"
 		name="SimpleCollectionCheckServiceProvider" architecture="true">
-		<requires field="fs" interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"/>
+		<requires field="fs" specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"/>
 		<provides />
 	</component>
 	<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.CollectionCheckService"
 		name="OptionalCollectionCheckServiceProvider"
 		architecture="true">
-		<requires interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService" field="fs" optional="true" />
+		<requires specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService" field="fs" optional="true" />
 		<provides />
 	</component>
 	
