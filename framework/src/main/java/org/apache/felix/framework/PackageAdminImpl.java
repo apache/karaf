@@ -227,9 +227,9 @@ class PackageAdminImpl implements PackageAdmin, Runnable
     {
         // This thread loops forever, thus it should
         // be a daemon thread.
-        Bundle[] bundles = null;
         while (true)
         {
+            Bundle[] bundles = null;
             synchronized (this)
             {
                 // Wait for a refresh request.

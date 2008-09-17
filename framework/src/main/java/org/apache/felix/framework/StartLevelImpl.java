@@ -226,12 +226,11 @@ public class StartLevelImpl implements StartLevel, Runnable
 
     public void run()
     {
-        Object request = null;
-
         // This thread loops forever, thus it should
         // be a daemon thread.
         while (true)
         {
+            Object request = null;
             synchronized (m_requestList)
             {
                 // Wait for a request.
