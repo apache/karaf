@@ -32,7 +32,7 @@ import org.osgi.framework.ServiceReference;
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
+public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, ServiceComponentDependency {
     private boolean m_isRequired;
     private Service m_service;
     private ServiceTracker m_tracker;
@@ -51,6 +51,9 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
     private ServiceReference m_reference;
     private Object m_serviceInstance;
     private final Logger m_logger;
+    private String m_autoConfigInstance;
+    private Object m_defaultImplementation;
+    private Object m_defaultImplementationInstance;
     
     /**
      * Creates a new service dependency.
@@ -82,7 +85,10 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
             service = m_tracker.getService();
         }
         if (service == null) {
-            service = getNullObject(); 
+            service = getDefaultImplementation();
+            if (service == null) {
+                service = getNullObject();
+            }
         }
         return service;
     }
@@ -93,9 +99,31 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
             synchronized (this) {
                 trackedServiceName = m_trackedServiceName;
             }
-            m_nullObject = Proxy.newProxyInstance(trackedServiceName.getClassLoader(), new Class[] {trackedServiceName}, new DefaultNullObject()); 
+            try {
+                m_nullObject = Proxy.newProxyInstance(trackedServiceName.getClassLoader(), new Class[] {trackedServiceName}, new DefaultNullObject()); 
+            }
+            catch (Exception e) {
+                m_logger.log(Logger.LOG_ERROR, "Could not create null object for " + trackedServiceName + ".", e);
+            }
         }
         return m_nullObject;
+    }
+    
+    private Object getDefaultImplementation() {
+        if (m_defaultImplementation != null) {
+            if (m_defaultImplementation instanceof Class) {
+                try {
+                    m_defaultImplementationInstance = ((Class) m_defaultImplementation).newInstance();
+                }
+                catch (Exception e) {
+                    m_logger.log(Logger.LOG_ERROR, "Could not create default implementation instance of class " + m_defaultImplementation + ".", e);
+                }
+            }
+            else {
+                m_defaultImplementationInstance = m_defaultImplementation;
+            }
+        }
+        return m_defaultImplementationInstance;
     }
     
     public synchronized Class getInterface() {
@@ -373,6 +401,22 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
         m_trackedServiceFilter = null;
         return this;
     }
+    
+    /**
+     * Sets the default implementation for this service dependency. You can use this to supply
+     * your own implementation that will be used instead of a Null Object when the dependency is
+     * not available. This is also convenient if the service dependency is not an interface
+     * (which would cause the Null Object creation to fail) but a class.
+     * 
+     * @param implementation the instance to use or the class to instantiate if you want to lazily
+     *     instantiate this implementation
+     * @return this service dependency
+     */
+    public synchronized ServiceDependency setDefaultImplementation(Object implementation) {
+        ensureNotActive();
+        m_defaultImplementation = implementation;
+        return this;
+    }
 
     /**
      * Sets the required flag which determines if this service is required or not.
@@ -397,6 +441,21 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
     public synchronized ServiceDependency setAutoConfig(boolean autoConfig) {
         ensureNotActive();
         m_autoConfig = autoConfig;
+        return this;
+    }
+    
+    /**
+     * Sets auto configuration for this service. Auto configuration allows the
+     * dependency to fill in the attribute in the service implementation that
+     * has the same type and instance name.
+     * 
+     * @param instanceName the name of attribute to auto config
+     * @return this service dependency
+     */
+    public synchronized ServiceDependency setAutoConfig(String instanceName) {
+        ensureNotActive();
+        m_autoConfig = (instanceName != null);
+        m_autoConfigInstance = instanceName;
         return this;
     }
     
@@ -446,5 +505,21 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer {
     
     public synchronized String toString() {
         return "ServiceDependency[" + m_trackedServiceName + " " + m_trackedServiceFilter + "]";
+    }
+
+    public String getAutoConfigName() {
+        return m_autoConfigInstance;
+    }
+
+    public String getName() {
+        return m_trackedServiceName.getName();
+    }
+
+    public int getState() {
+        return (isAvailable() ? 1 : 0) + (isRequired() ? 2 : 0);
+    }
+
+    public String getType() {
+        return "service";
     }
 }

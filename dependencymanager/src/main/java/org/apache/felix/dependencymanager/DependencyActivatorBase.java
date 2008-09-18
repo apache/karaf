@@ -95,7 +95,7 @@ public abstract class DependencyActivatorBase implements BundleActivator {
      * @return the new service
      */
     public Service createService() {
-        return new ServiceImpl(m_context, m_logger);
+        return new ServiceImpl(m_context, m_manager, m_logger);
     }
     
     /**

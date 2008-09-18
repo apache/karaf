@@ -73,7 +73,7 @@ public class DependencyManager {
      * @return the new service
      */
     public Service createService() {
-        return new ServiceImpl(m_context, m_logger);
+        return new ServiceImpl(m_context, this, m_logger);
     }
     
     /**

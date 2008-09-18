@@ -47,7 +47,7 @@ import org.osgi.service.cm.ManagedService;
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ConfigurationDependency implements Dependency, ManagedService {
+public class ConfigurationDependency implements Dependency, ManagedService, ServiceComponentDependency {
 	private BundleContext m_context;
 	private String m_pid;
 	private ServiceRegistration m_registration;
@@ -170,5 +170,17 @@ public class ConfigurationDependency implements Dependency, ManagedService {
     
     public String toString() {
     	return "ConfigurationDependency[" + m_pid + "]";
+    }
+
+    public String getName() {
+        return m_pid;
+    }
+
+    public int getState() {
+        return (isAvailable() ? 1 : 0) + (isRequired() ? 2 : 0);
+    }
+
+    public String getType() {
+        return "configuration";
     }
 }

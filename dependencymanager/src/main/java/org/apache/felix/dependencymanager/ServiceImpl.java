@@ -39,12 +39,13 @@ import org.osgi.framework.ServiceRegistration;
  *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ServiceImpl implements Service {
+public class ServiceImpl implements Service, ServiceComponent {
     private static final Class[] VOID = new Class[] {};
 	private static final ServiceRegistration NULL_REGISTRATION;
     private static final ServiceStateListener[] SERVICE_STATE_LISTENER_TYPE = new ServiceStateListener[] {};
 
     private final BundleContext m_context;
+    private final DependencyManager m_manager;
 
     // configuration (static)
     private String m_callbackInit;
@@ -84,11 +85,13 @@ public class ServiceImpl implements Service {
 	
 	// internal logging
     private final Logger m_logger;
+    private ServiceRegistration m_serviceRegistration;
 
-    public ServiceImpl(BundleContext context, Logger logger) {
+    public ServiceImpl(BundleContext context, DependencyManager manager, Logger logger) {
     	m_logger = logger;
         m_state = new State((List) m_dependencies.clone(), false);
         m_context = context;
+        m_manager = manager;
         m_callbackInit = "init";
         m_callbackStart = "start";
         m_callbackStop = "stop";
@@ -237,6 +240,7 @@ public class ServiceImpl implements Service {
     }
 
     public synchronized void start() {
+        m_serviceRegistration = m_context.registerService(ServiceComponent.class.getName(), this, null);
     	State oldState, newState;
         synchronized (m_dependencies) {
         	oldState = m_state;
@@ -254,6 +258,7 @@ public class ServiceImpl implements Service {
             m_state = newState;
         }
         calculateStateChanges(oldState, newState);
+        m_serviceRegistration.unregister();
     }
 
     public synchronized Service setInterface(String serviceName, Dictionary properties) {
@@ -588,6 +593,7 @@ public class ServiceImpl implements Service {
 	        // configure the bundle context
 	        configureImplementation(BundleContext.class, m_context);
 	        configureImplementation(ServiceRegistration.class, NULL_REGISTRATION);
+	        configureImplementation(DependencyManager.class, m_manager);
     	}
     }
 
@@ -676,7 +682,7 @@ public class ServiceImpl implements Service {
             // update the dependency in the service instance (it will use
             // a null object if necessary)
             if (sd.isAutoConfig()) {
-                configureImplementation(sd.getInterface(), sd.getService());
+                configureImplementation(sd.getInterface(), sd.getService(), sd.getAutoConfigName());
             }
         }
         else if (dependency instanceof ConfigurationDependency) {
@@ -696,8 +702,9 @@ public class ServiceImpl implements Service {
      *
      * @param clazz the class to search for
      * @param instance the instance to fill in
+     * @param instanceName the name of the instance to fill in, or <code>null</code> if not used
      */
-    private void configureImplementation(Class clazz, Object instance) {
+    private void configureImplementation(Class clazz, Object instance, String instanceName) {
     	Object[] instances = null;
     	if (m_compositionManagerGetMethod != null) {
 			if (m_compositionManager != null) {
@@ -728,7 +735,7 @@ public class ServiceImpl implements Service {
 		        while (serviceClazz != null) {
 		            Field[] fields = serviceClazz.getDeclaredFields();
 		            for (int j = 0; j < fields.length; j++) {
-		                if (fields[j].getType().equals(clazz)) {
+		                if (fields[j].getType().equals(clazz) && (instanceName == null || fields[j].getName().equals(instanceName))) {
 		                    try {
 		                    	fields[j].setAccessible(true);
 		                        // synchronized makes sure the field is actually written to immediately
@@ -747,6 +754,10 @@ public class ServiceImpl implements Service {
 	    	}
     	}
     }
+    
+    private void configureImplementation(Class clazz, Object instance) {
+        configureImplementation(clazz, instance, null);
+    }
 
     private void configureServices(State state) {
         Iterator i = state.getDependencies().iterator();
@@ -755,7 +766,7 @@ public class ServiceImpl implements Service {
             if (dependency instanceof ServiceDependency) {
                 ServiceDependency sd = (ServiceDependency) dependency;
                 if (sd.isAutoConfig()) {
-                    configureImplementation(sd.getInterface(), sd.getService());
+                    configureImplementation(sd.getInterface(), sd.getService(), sd.getAutoConfigName());
                 }
                 // for required dependencies, we invoke any callbacks here
                 if (sd.isRequired()) {
@@ -796,6 +807,58 @@ public class ServiceImpl implements Service {
         return (state.isTrackingOptional());
     }
 
+    // ServiceComponent interface
+    
+    static class SCDImpl implements ServiceComponentDependency {
+        private final String m_name;
+        private final int m_state;
+        private final String m_type;
+
+        public SCDImpl(String name, int state, String type) {
+            m_name = name;
+            m_state = state;
+            m_type = type;
+        }
+
+        public String getName() {
+            return m_name;
+        }
+
+        public int getState() {
+            return m_state;
+        }
+
+        public String getType() {
+            return m_type;
+        }
+    }
+    
+    public ServiceComponentDependency[] getComponentDependencies() {
+        List deps = getDependencies();
+        if (deps != null) {
+            ServiceComponentDependency[] result = new ServiceComponentDependency[deps.size()];
+            for (int i = 0; i < result.length; i++) {
+                Dependency dep = (Dependency) deps.get(i);
+                if (dep instanceof ServiceComponentDependency) {
+                    result[i] = (ServiceComponentDependency) dep;
+                }
+                else {
+                    result[i] = new SCDImpl(dep.toString(), (dep.isAvailable() ? 1 : 0) + (dep.isRequired() ? 2 : 0), dep.getClass().getName());
+                }
+            }
+            return result;
+        }
+        return null;
+    }
+
+    public String getName() {
+        return (String) (m_serviceName != null ? m_serviceName : m_serviceInstance);
+    }
+
+    public int getState() {
+        return (isRegistered() ? 1 : 0);
+    }
+    
     static {
         NULL_REGISTRATION = (ServiceRegistration) Proxy.newProxyInstance(ServiceImpl.class.getClassLoader(), new Class[] {ServiceRegistration.class}, new DefaultNullObject());
     }
