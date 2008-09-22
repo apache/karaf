@@ -27,29 +27,28 @@ import org.osgi.framework.BundleContext;
 
 /**
  * The handler manager manages an handler instance.
- * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class HandlerManager extends InstanceManager {
 
     /**
-     * Handler object (contained).
+     * The internal handler object.
      * Immutable once set.
      */
     private Handler m_handler;
 
     /**
-     * Constructor.
-     * @param factory : handler factory
-     * @param context : bundle context
-     * @param handlers : handler array
+     * Creates a handler manager.
+     * @param factory the handler factory
+     * @param context the bundle context
+     * @param handlers the handler array
      */
     public HandlerManager(ComponentFactory factory, BundleContext context, HandlerManager[] handlers) {
         super(factory, context, handlers);
     }
 
     /**
-     * Get the contained handler object.
+     * Gets the contained handler object.
      * If not already created it creates the object.
      * @return the handler object.
      */
@@ -61,10 +60,10 @@ public class HandlerManager extends InstanceManager {
     }
 
     /**
-     * Create and initialize the handler object.
-     * @param instance : component instance on which the handler will be attached.
-     * @param metadata : component metadata.
-     * @param configuration : instance configuration.
+     * Creates and initializes the handler object.
+     * @param instance the component instance on which the handler will be attached.
+     * @param metadata the component metadata.
+     * @param configuration the instance configuration.
      * @throws ConfigurationException if the handler configuration failed.
      */
     public void init(ComponentInstance instance, Element metadata, Dictionary configuration) throws ConfigurationException {
@@ -75,7 +74,7 @@ public class HandlerManager extends InstanceManager {
     }
 
     /**
-     * Create the handler object.
+     * Creates the handler object.
      * This method does nothing if the object is already created.
      * This method does not need locking protocol as only one thread (the creator thread) can create an instance.
      */
@@ -85,7 +84,7 @@ public class HandlerManager extends InstanceManager {
     }
 
     /**
-     * Start the instance manager.
+     * Starts the instance manager.
      */
     public void start() {
         synchronized (this) {
@@ -119,7 +118,7 @@ public class HandlerManager extends InstanceManager {
     }
 
     /**
-     * Stop the instance manager.
+     * Stops the instance manager.
      */
     public void stop() {
         synchronized (this) {
@@ -158,7 +157,7 @@ public class HandlerManager extends InstanceManager {
     }
 
     /** 
-     * Dispose the instance.
+     * Disposes the instance.
      * @see org.apache.felix.ipojo.ComponentInstance#dispose()
      */
     public void dispose() {
@@ -167,7 +166,7 @@ public class HandlerManager extends InstanceManager {
     }
 
     /**
-     * Kill the current instance.
+     * Kills the current instance.
      * Only the factory of this instance can call this method.
      */
     protected void kill() {
@@ -178,8 +177,8 @@ public class HandlerManager extends InstanceManager {
     /**
      * State Change listener callback.
      * This method is notified at each time a plugged handler becomes invalid.
-     * @param instance : changing instance 
-     * @param newState : new state
+     * @param instance the changing instance 
+     * @param newState the new state
      * @see org.apache.felix.ipojo.InstanceStateListener#stateChanged(org.apache.felix.ipojo.ComponentInstance, int)
      */
     public void stateChanged(ComponentInstance instance, int newState) {

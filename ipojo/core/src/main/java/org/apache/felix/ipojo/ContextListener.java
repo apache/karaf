@@ -20,16 +20,18 @@ package org.apache.felix.ipojo;
 
 
 /**
- * Context Source Listener.
+ * Context Source Listener interface.
+ * A context source listener is notified when a monitored context 
+ * property value changed.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface ContextListener {
     
     /**
      * A monitored value has been modified.
-     * @param source : context source containing the property
-     * @param property : modified property name
-     * @param value : new value of the property
+     * @param source the context source containing the property
+     * @param property the modified property name
+     * @param value the new value of the property
      */
     void update(ContextSource source, String property, Object value);
 

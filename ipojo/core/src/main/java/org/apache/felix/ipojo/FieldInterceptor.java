@@ -19,28 +19,30 @@
 package org.apache.felix.ipojo;
 
 /**
-* Field interceptor.
-* A class implementing this interface is able to be notified of field accesses.
-* The listener need to be register on the instance manager. 
-* 
+* A field interceptor is notified when a monitored field asks for a value or
+* receives a new value. A class implementing this interface is able to be 
+* notified of field accesses, and is able to inject a value to this field.
+* The listener needs to be register on the instance manager. 
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */
 public interface FieldInterceptor {
     
     /**
-     * This method is called when a PUTFIELD operation is detected.
-     * @param pojo : the pojo object setting the value
-     * @param fieldName : the field name
-     * @param value : the value passed to the field
+     * This method is called when a PUTFIELD operation is detected,
+     * e.g. an assignation.
+     * @param pojo the pojo object setting the value
+     * @param fieldName the field name
+     * @param value the value passed to the field
      */
     void onSet(Object pojo, String fieldName, Object value);
 
     /**
      * This method is called when a GETFIELD operation is detected.
-     * @param pojo : the pojo object getting the value
-     * @param fieldName : the field name
-     * @param value : the value passed to the field (by the previous call)
-     * @return : the managed value of the field
+     * This method allows to inject a value to the field.
+     * @param pojo the pojo object getting the value
+     * @param fieldName the field name
+     * @param value the value passed to the field (by the previous call)
+     * @return the managed value of the field
      */
     Object onGet(Object pojo, String fieldName, Object value);
 

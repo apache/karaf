@@ -40,51 +40,54 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * The component factory manages component instance objects. This management
- * consist in creating and managing component instance build with the component
- * factory. This class could export Factory and ManagedServiceFactory services.
- * 
+ * consists to create and manage component instances build with the current 
+ * component factory. This class could export Factory and ManagedServiceFactory
+ * services.
+ * @see IPojoFactory
+ * @see TrackerCustomizer
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ComponentFactory extends IPojoFactory implements TrackerCustomizer {
 
     /**
-     * Tracker used to track required handler factories.
+     * The tracker used to track required handler factories.
      * Immutable once set.
      */
     protected Tracker m_tracker;
 
     /**
-     * Class loader to delegate loading.
+     * The class loader to delegate classloading.
      * Immutable once set.
      */
     private FactoryClassloader m_classLoader;
 
     /**
-     * Component Implementation class.
+     * The component implementation class.
+     * (manipulated byte array)
      */
     private byte[] m_clazz;
 
     /**
-     * Component Implementation Class Name.
+     * The component implementation qualified class name.
      * Immutable once set.
-     * This attribute is set during the construction of the factory.
+     * This attribute is set during the creation of the factory.
      */
     private String m_classname;
 
     /**
-     * Manipulation Metadata of the internal POJO.
+     * The manipulation metadata of the implementation class.
      * Immutable once set.
-     * This attribute is set during the construction of the factory.
+     * This attribute is set during the creation of the factory.
      */
     private PojoMetadata m_manipulation;
 
     /**
-     * Create a instance manager factory. The class is given in parameter. The
-     * component type is not a composite.
-     * @param context : bundle context
-     * @param clazz : the component class
-     * @param element : metadata of the component
-     * @throws ConfigurationException occurs when the element describing the factory is malformed.
+     * Creates a instance manager factory.
+     * The class is given in parameter. The component type is not a composite.
+     * @param context the bundle context
+     * @param clazz the component class
+     * @param element the metadata of the component
+     * @throws ConfigurationException if the element describing the factory is malformed.
      */
     public ComponentFactory(BundleContext context, byte[] clazz, Element element) throws ConfigurationException {
         this(context, element);
@@ -93,25 +96,30 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
 
     /**
      * Create a instance manager factory.
-     * @param context : bundle context
-     * @param element : metadata of the component to create
-     * @throws ConfigurationException occurs when the element describing the factory is malformed.
+     * @param context the bundle context
+     * @param element the metadata of the component to create
+     * @throws ConfigurationException if element describing the factory is malformed.
      */
     public ComponentFactory(BundleContext context, Element element) throws ConfigurationException {
         super(context, element);
         check(element); // NOPMD. This invocation is normal.
     }
 
+    /**
+     * Gets the component type description of the current factory.
+     * @return the description of the component type attached to this factory.
+     * @see org.apache.felix.ipojo.IPojoFactory#getComponentTypeDescription()
+     */
     public ComponentTypeDescription getComponentTypeDescription() {
         return new PrimitiveTypeDescription(this);
     }
 
     /**
-     * Check method : allows a factory to check if given element is well-formed.
-     * A component factory metadata are correct if they contain the 'classname' attribute.
-     * As this method is called from the (single-thread) constructor, no synchronization is needed.
-     * @param element : the metadata
-     * @throws ConfigurationException occurs when the element describing the factory is malformed.
+     * Allows a factory to check if the given element is well-formed.
+     * A component factory metadata is correct if they contain the 'classname' attribute.
+     * As this method is called from the (single-threaded) constructor, no synchronization is needed.
+     * @param element the metadata describing the component
+     * @throws ConfigurationException if the element describing the factory is malformed.
      */
     public void check(Element element) throws ConfigurationException {
         m_classname = element.getAttribute("classname");
@@ -132,11 +140,11 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
     /**
      * Creates a primitive instance.
      * This method is called when holding the lock.
-     * @param config : instance configuration
-     * @param context : service context.
-     * @param handlers : handler to use
+     * @param config the instance configuration
+     * @param context the service context (null if the instance has to be created in the global space).
+     * @param handlers the handlers to attach to the instance
      * @return the created instance
-     * @throws org.apache.felix.ipojo.ConfigurationException : if the configuration process failed.
+     * @throws org.apache.felix.ipojo.ConfigurationException if the configuration process failed.
      * @see org.apache.felix.ipojo.IPojoFactory#createInstance(java.util.Dictionary, org.apache.felix.ipojo.IPojoContext, org.apache.felix.ipojo.HandlerManager[])
      */
     public ComponentInstance createInstance(Dictionary config, IPojoContext context, HandlerManager[] handlers) throws org.apache.felix.ipojo.ConfigurationException {
@@ -167,10 +175,13 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
 
     /**
      * Defines a class.
-     * This method need to be synchronized to avoid that the classloader is created twice.
-     * @param name : qualified name of the class
-     * @param clazz : byte array of the class
-     * @param domain : protection domain of the class
+     * This method needs to be synchronized to avoid that the classloader 
+     * is created twice.
+     * This method delegate the <code>define</code> method invocation to the
+     * factory classloader.
+     * @param name the qualified name of the class
+     * @param clazz the byte array of the class
+     * @param domain the protection domain of the class
      * @return the defined class object
      */
     public synchronized Class defineClass(String name, byte[] clazz, ProtectionDomain domain) {
@@ -182,20 +193,25 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
 
     /**
      * Returns the URL of a resource.
-     * @param resName : resource name
+     * This methods delegates the invocation to the 
+     * {@link Bundle#getResource(String)} method.
+     * @param resName the resource name
      * @return the URL of the resource
      */
     public URL getResource(String resName) {
-        //No synchronization needed, the context is immutable and the call is managed by the underlying framework.
+        //No synchronization needed, the context is immutable and
+        //the call is managed by the underlying framework.
         return m_context.getBundle().getResource(resName);
     }
 
     /**
-     * Loads a class.
-     * @param className : name of the class to load
+     * Loads a class. This method checks if the class
+     * to load is the implementation class or not.
+     * If it is, the factory classloader is used, else
+     * the {@link Bundle#loadClass(String)} is called.
+     * @param className the name of the class to load
      * @return the resulting Class object
-     * @throws ClassNotFoundException 
-     * @throws ClassNotFoundException : happen when the class is not found
+     * @throws ClassNotFoundException if the class is not found
      */
     public Class loadClass(String className) throws ClassNotFoundException {
         if (m_clazz != null && m_classname.equals(className)) {  // Immutable fields.
@@ -206,7 +222,7 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
 
     /**
      * Starts the factory.
-     * This method is called with the lock.
+     * This method is called when holding the monitor lock.
      */
     public void starting() {
         if (m_tracker != null) {
@@ -227,7 +243,7 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
 
     /**
      * Stops all the instance managers.
-     * This method is called with the lock.
+     * This method is called when holding the lock.
      */
     public void stopping() {
         if (m_tracker != null) {
@@ -237,8 +253,10 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
     }
 
     /**
-     * Computes the factory name.
-     * This method does not manipulate any non-immutable fields, so does not need to be synchronized. 
+     * Computes the factory name. The factory name is computed from
+     * the 'name' and 'classname' attributes.
+     * This method does not manipulate any non-immutable fields,
+     * so does not need to be synchronized. 
      * @return the factory name.
      */
     public String getFactoryName() {
@@ -252,7 +270,8 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
 
     /**
      * Computes required handlers.
-     * This method does not manipulate any non-immutable fields, so does not need to be synchronized.
+     * This method does not manipulate any non-immutable fields, 
+     * so does not need to be synchronized.
      * @return the required handler list.
      */
     public List getRequiredHandlerList() {
@@ -302,11 +321,12 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
     }
 
     /**
-     * A new handler factory is detected.
+     * This method is called when a new handler factory is detected.
      * Test if the factory can be used or not.
-     * This method need to be synchronized as it accesses to the content of required handlers.
-     * @param reference : the new service reference.
-     * @return true if the given factory reference match with a required handler.
+     * This method need to be synchronized as it accesses to the content 
+     * of required handlers.
+     * @param reference the new service reference.
+     * @return <code>true</code> if the given factory reference matches with a required handler.
      * @see org.apache.felix.ipojo.util.TrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
      */
     public synchronized boolean addingService(ServiceReference reference) {        
@@ -327,9 +347,10 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
     }
 
     /**
-     * A matching service has been added to the tracker, we can no compute the factory state. This method is synchronized to avoid concurrent calls to
-     * method modifying the factory state.
-     * @param reference : added reference.
+     * This method is called when a matching service has been added to the tracker, 
+     * we can no compute the factory state. This method is synchronized to avoid 
+     * concurrent calls to method modifying the factory state.
+     * @param reference the added service reference.
      * @see org.apache.felix.ipojo.util.TrackerCustomizer#addedService(org.osgi.framework.ServiceReference)
      */
     public synchronized void addedService(ServiceReference reference) {
@@ -339,10 +360,11 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
     }
 
     /**
-     * A used factory disappears.
-     * This method is synchronized to avoid concurrent calls to method modifying the factory state.
-     * @param reference : service reference.
-     * @param service : factory object.
+     * This method is called when a used handler factory disappears.
+     * This method is synchronized to avoid concurrent calls to method modifying 
+     * the factory state.
+     * @param reference the leaving service reference.
+     * @param service  the handler factory object.
      * @see org.apache.felix.ipojo.util.TrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
     public synchronized void removedService(ServiceReference reference, Object service) {
@@ -358,9 +380,11 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
     }
 
     /**
-     * A used handler factory is modified.
-     * @param reference : the service reference
-     * @param service : the Factory object (if already get)
+     * This method is called when a used handler factory is modified.
+     * However, handler factory modification is not possible, so this method
+     * is never called.
+     * @param reference the service reference
+     * @param service the Factory object (if already get)
      * @see org.apache.felix.ipojo.util.TrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
     public void modifiedService(ServiceReference reference, Object service) {
@@ -376,21 +400,25 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
     }
 
     /**
-     * FactoryClassloader.
+     * this class defines the classloader attached to a factory.
+     * This class loader is used to load the implementation (e.g. manipulated)
+     * class.
+     * @see ClassLoader
+     * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
      */
     private class FactoryClassloader extends ClassLoader {
 
         /**
-         * Map of defined classes [Name, Class Object].
+         * The map of defined classes [Name, Class Object].
          */
         private final Map m_definedClasses = new HashMap();
 
         /**
          * The defineClass method.
-         * @param name : name of the class
-         * @param clazz : the byte array of the class
-         * @param domain : the protection domain
-         * @return : the defined class.
+         * @param name name of the class
+         * @param clazz the byte array of the class
+         * @param domain the protection domain
+         * @return the defined class.
          */
         public Class defineClass(String name, byte[] clazz, ProtectionDomain domain) {
             if (m_definedClasses.containsKey(name)) { return (Class) m_definedClasses.get(name); }
@@ -400,8 +428,8 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
         }
 
         /**
-         * Return the URL of the asked resource.
-         * @param arg : the name of the resource to find.
+         * Returns the URL of the required resource.
+         * @param arg the name of the resource to find.
          * @return the URL of the resource.
          * @see java.lang.ClassLoader#getResource(java.lang.String)
          */
@@ -410,31 +438,38 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
         }
 
         /**
-         * Load the class.
+         * Loads the given class.
          * @see java.lang.ClassLoader#loadClass(java.lang.String, boolean)
-         * @param name : the name of the class
-         * @param resolve : should be the class resolve now ?
-         * @return : the loaded class
-         * @throws ClassNotFoundException : the class to load is not found
+         * @param name the name of the class
+         * @param resolve should be the class resolve now ?
+         * @return the loaded class object
+         * @throws ClassNotFoundException if the class to load is not found
+         * @see java.lang.ClassLoader#loadClass(String, boolean)
          */
         protected synchronized Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
             return m_context.getBundle().loadClass(name);
         }
     }
 
+    /**
+     * This class defines the description of primitive (non-composite) component
+     * types. An instance of this class will be returned when invoking the 
+     * {@link ComponentFactory#getComponentDescription()} method.
+     * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
+     */
     private final class PrimitiveTypeDescription extends ComponentTypeDescription {
 
         /**
-         * Constructor.
-         * @param factory : the represented factory.
+         * Creates a PrimitiveTypeDescription object.
+         * @param factory the factory attached to this component type description.
          */
         public PrimitiveTypeDescription(Factory factory) {
             super(factory);
         }
 
         /**
-         * Compute the properties to publish : 
-         * component.class contains the pojo class name.
+         * Computes the properties to publish. 
+         * The <code>component.class</code> property contains the implementation class name.
          * @return the dictionary of properties to publish
          * @see org.apache.felix.ipojo.architecture.ComponentTypeDescription#getPropertiesToPublish()
          */
@@ -447,7 +482,7 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
         }
 
         /**
-         * Add the "implementation-class" attribute to the type description.
+         * Adds the "implementation-class" attribute to the type description.
          * @return the component type description.
          * @see org.apache.felix.ipojo.architecture.ComponentTypeDescription#getDescription()
          */

@@ -29,7 +29,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 
 /**
- * Package an OSGi jar "bundle" as an "iPOJO bundle".
+ * Packages an OSGi jar "bundle" as an "iPOJO bundle".
  *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  * @version $Rev$, $Date$
@@ -66,7 +66,7 @@ public class ManipulatorMojo extends AbstractMojo {
     private String m_jarName;
 
     /**
-     * Metadata file location.
+     * Location of the metadata file.
      * @parameter alias="metadata" default-value="metadata.xml"
      */
     private String m_metadata;
@@ -111,7 +111,7 @@ public class ManipulatorMojo extends AbstractMojo {
     }
 
     /**
-     * Execute method : launch the pojoization.
+     * Execute method : this method launches the pojoization.
      * @throws MojoExecutionException : an exception occurs during the manipulation.
      * @see org.apache.maven.plugin.AbstractMojo#execute()
      */

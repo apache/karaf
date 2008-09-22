@@ -23,34 +23,35 @@ import java.util.Dictionary;
 
 /**
  * Context Source service interface.
+ * A context source advertises of context changes.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface ContextSource {
     
     /**
-     * Get the current value of the given property.
-     * @param property : property name
-     * @return the property value, null if unknown
+     * Gets the current value of the given property.
+     * @param property property name
+     * @return the property value (<code>null</code> if unknown)
      */
     Object getProperty(String property);
     
     /**
-     * Get the whole context.
+     * Gets the entire context.
      * @return the dictionary [Property, Value]
      */
     Dictionary getContext();
     
     /**
-     * Register a context listener on the given set of properties.
-     * The listener will be notified of every change made on these properties.
-     * @param listener : the context listener to register.
-     * @param properties : property set monitored by the listener.
+     * Registers a context listener on the given set of properties.
+     * The listener will be notified of every changes made on monitored properties.
+     * @param listener the context listener to register.
+     * @param properties property set monitored by the listener.
      */
     void registerContextListener(ContextListener listener, String[] properties);
     
     /**
-     * Unregister the given context listener.
-     * @param listener : the listener to unregister.
+     * Unregisters the given context listener.
+     * @param listener the listener to unregister.
      */
     void unregisterContextListener(ContextListener listener);
 

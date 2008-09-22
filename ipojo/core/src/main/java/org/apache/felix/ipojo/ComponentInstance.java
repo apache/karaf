@@ -24,13 +24,13 @@ import org.apache.felix.ipojo.architecture.InstanceDescription;
 import org.osgi.framework.BundleContext;
 
 /**
- * The component instance class manages one instance of a component type.
+ * This class defines the iPOJO's component instance concept.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface ComponentInstance {
 
     /**
-     * Component Instance State : DISPOSED. The instance was destroyed.
+     * Component Instance State : DISPOSED. The component instance was disposed.
      */
     int DISPOSED = -1;
     
@@ -41,87 +41,87 @@ public interface ComponentInstance {
     int STOPPED = 0;
 
     /**
-     * Component Instance State : INVALID. The component is invalid when it
-     * start or when a component dependency is invalid.
+     * Component Instance State : INVALID. The component instance is invalid when it
+     * starts or when a component dependency is invalid.
      */
     int INVALID = 1;
 
     /**
-     * Component Instance State : VALID. The component is resolved when it is
-     * running and all its component dependencies are valid.
+     * Component Instance State : VALID. The component instance is resolved when it is
+     * running and all its attached handlers are valid.
      */
     int VALID = 2;
 
     /**
-     * Start the component instance.
+     * Starts the component instance.
      */
     void start();
 
     /**
-     * Stop the component instance.
+     * Stops the component instance.
      * A stopped instance can be re-started.
      */
     void stop();
     
     /**
-     * Dispose the component instance.
+     * Disposes the component instance.
      * A disposed instance cannot be re-started.
      */
     void dispose();
 
     /**
-     * Return the actual state of the instance. 
+     * Returns the actual state of the instance. 
      * @return the actual state of the component instance.
      */
     int getState();
 
     /**
-     * Return the instance description.
+     * Returns the instance description.
      * @return the instance description of the current instance
      */
     InstanceDescription getInstanceDescription();
 
     /**
-     * Return the factory which create this instance.
+     * Returns the factory who created this instance.
      * @return the factory of the component instance.
      */
     ComponentFactory getFactory();
 
     /**
-     * Return the bundle context of this instance.
+     * Returns the bundle context of this instance.
      * @return the context of the component instance
      */
     BundleContext getContext();
 
     /**
-     * Return the name of the instance.
+     * Returns the name of the instance.
      * @return the name of the component instance
      */
     String getInstanceName();
 
     /**
-     * Check if the instance is started.
-     * @return true if getState returns INVALID or VALID.
+     * Checks if the instance is started.
+     * @return <code>true</code> if {@link ComponentInstance#getState()} 
+     * returns {@link ComponentInstance#INVALID} or {@link ComponentInstance#VALID}.
      */
     boolean isStarted();
 
     /**
-     * Re-configure an instance. Do nothing if the instance does not support
+     * Re-configures an instance. Do nothing if the instance does not support
      * dynamic reconfiguration. The reconfiguration does not stop the instance.
-     * 
-     * @param configuration : the new configuration.
+     * @param configuration the new configuration.
      */
     void reconfigure(Dictionary configuration);
     
     /**
-     * Add an instance state listener on the current instance.
-     * @param listener : the listener to add.
+     * Adds an instance state listener on the current instance.
+     * @param listener the listener to add.
      */
     void addInstanceStateListener(InstanceStateListener listener);
     
     /**
-     * Remove an instance state listener on the current instance.
-     * @param listener : the listener to remove.
+     * Removes an instance state listener on the current instance.
+     * @param listener the listener to remove.
      */
     void removeInstanceStateListener(InstanceStateListener listener);
 

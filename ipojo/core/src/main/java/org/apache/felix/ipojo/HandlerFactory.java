@@ -20,13 +20,16 @@ package org.apache.felix.ipojo;
 
 
 /**
- * Service interface published by handler factory. 
+ * Service interface published by handler factory.
+ * This interface allows interacting the the handler factory to create
+ * {@link Handler} objects.
+ * @see Factory 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface HandlerFactory extends Factory {
 
     /**
-     * iPOJO Default Namespace.
+     * The iPOJO Default Namespace.
      */
     String IPOJO_NAMESPACE = "org.apache.felix.ipojo";
 
@@ -43,15 +46,15 @@ public interface HandlerFactory extends Factory {
     String getHandlerName();
 
     /**
-     * Gets the type of created handler.
+     * Gets the type of the handler factory.
      * The handler can only be plugged on instance container with the same type.
-     * Basically, types are primitive and composite.
-     * @return the types of the handler
+     * Basically, types are <code>primitive</code> and <code>composite</code>.
+     * @return the type of the handler
      */
     String getType();
 
     /**
-     * Gets the start level of the handlers created by this factory.
+     * Gets the start level of the handler objects created by this factory.
      * Handlers with a low start level are configured and started before 
      * handlers with an higher start level. Moreover, these handlers are
      * stopped and disposed after.

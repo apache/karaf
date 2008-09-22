@@ -35,27 +35,28 @@ import org.osgi.framework.BundleContext;
 public class HandlerManagerFactory extends ComponentFactory implements HandlerFactory {
 
     /**
-     * Handler type (composite|primitive).
+     * The Handler type (<code>composite</code> or <code>primitive</code>).
      */
     private final String m_type;
 
     /**
-     * iPOJO Handler Namespace.
-     * (Set the the iPOJO default namespace is not specified)
+     * The iPOJO Handler Namespace.
+     * (Uses the iPOJO default namespace is not specified)
      */
     private final String m_namespace;
 
     /**
-     * Handler start level.
-     * Lower level are priority are configured and started before higher level, and are stopped after. 
+     * The handler start level.
+     * Lower levels are priority and so are configured and started 
+     * before higher levels, and are stopped after. 
      */
     private final int m_level;
     
     /**
      * Creates a handler factory.
-     * @param context : bundle context
-     * @param metadata : metadata of the component to create
-     * @throws ConfigurationException occurs when the element describing the factory is malformed.
+     * @param context the bundle context
+     * @param metadata the metadata of the component to create
+     * @throws ConfigurationException if the element describing the factory is malformed.
      */
     public HandlerManagerFactory(BundleContext context, Element metadata) throws ConfigurationException {
         super(context, metadata);
@@ -124,12 +125,11 @@ public class HandlerManagerFactory extends ComponentFactory implements HandlerFa
     /**
      * Creates an instance. The given configuration needs to contain the 'name'
      * property. This method is called when holding the lock.
-     * @param configuration : configuration of the created instance.
-     * @param context : the service context to push for this instance.
-     * @param handlers : handler array to used.
-     * @return the created component instance.
-     * not consistent with the component type of this factory.
-     * @throws org.apache.felix.ipojo.ConfigurationException : when the instance configuration failed.
+     * @param configuration the configuration of the created instance.
+     * @param context  the service context to push for this instance.
+     * @param handlers the handler array to attach to the instance.
+     * @return the created {@link HandlerManager}.
+     * @throws org.apache.felix.ipojo.ConfigurationException if the instance configuration failed.
      * @see org.apache.felix.ipojo.Factory#createComponentInstance(java.util.Dictionary)
      */
     public ComponentInstance createInstance(Dictionary configuration, IPojoContext context, HandlerManager[] handlers) throws ConfigurationException {
@@ -142,9 +142,9 @@ public class HandlerManagerFactory extends ComponentFactory implements HandlerFa
     /**
      * Computes required handlers. This method does not manipulate any
      * non-immutable fields, so does not need to be synchronized.
-     * This method is overridden to avoid to use the same detection rules
-     * than atomic components. Indeed, architecture is disable by default,
-     * and an handler is never immediate.
+     * This method is overridden to avoid using the same detection rules
+     * than 'primitive' components. Indeed, architecture is disable by default,
+     * and a handler is never immediate.
      * @return the required handler list.
      */
     public List getRequiredHandlerList() {
@@ -171,20 +171,28 @@ public class HandlerManagerFactory extends ComponentFactory implements HandlerFa
         return list;
     }
 
+    /**
+     * Defines the handler type description.
+     * @see ComponentDescription
+     */
     private class HandlerTypeDescription extends ComponentTypeDescription {
 
         /**
-         * Constructor.
-         * @param factory : factory.
+         * Creates the HandlerTypeDescription.
+         * @param factory the factory.
+         * @see ComponentTypeDescription#ComponentTypeDescription(Factory)
          */
         public HandlerTypeDescription(Factory factory) {
             super(factory);
         }
 
         /**
-         * Add properties to publish : 
-         * handler.name, handler.namespace, handler.type and handler.level if the level is not Integer.MAX.
-         * @return return the dictionary to publish.
+         * Add properties to publish.
+         * <li>handler.name</li>
+         * <li>handler.namespace</li> 
+         * <li>handler.type</li>
+         * <li>handler.level if the level is not Integer.MAX</li>
+         * @return returns the dictionary to publish.
          * @see org.apache.felix.ipojo.architecture.ComponentTypeDescription#getPropertiesToPublish()
          */
         public Dictionary getPropertiesToPublish() {

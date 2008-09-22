@@ -19,17 +19,18 @@
 package org.apache.felix.ipojo;
 
 /**
- * Factory state listener.
+ * A factory state listener received notification about monitored factory state changes.
  * This listener allows anyone to be notified when the listened factory state changes. 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface FactoryStateListener {
     
     /**
-     * State change listener.
-     * Each time an instance state change, this method is called.
-     * @param factory : changing factory
-     * @param newState : new instance state
+     * Notification listener.
+     * Each time an instance state changes, this method is called
+     * with the new factory state.
+     * @param factory the changing factory
+     * @param newState the new factory state
      */
     void stateChanged(Factory factory, int newState);
 }

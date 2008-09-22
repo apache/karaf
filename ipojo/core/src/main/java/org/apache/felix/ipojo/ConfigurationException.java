@@ -19,8 +19,9 @@
 package org.apache.felix.ipojo;
 
 /**
- * Configuration Exception.
+ * This class defines the exception thrown when an instance cannot be configured correctly.
  * This exception occurs when component metadata are not correct.
+ * @see Exception
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ConfigurationException extends Exception {
@@ -31,14 +32,16 @@ public class ConfigurationException extends Exception {
     private static final long serialVersionUID = 1L;
     
     /**
-     * Component Type on which the error occurs.
+     * The component type on which the error occurs.
+     * Uses the factory name.
      */
     private String m_type;
     
     /**
-     * Constructor.
-     * @param mes : message
-     * @param typ : component type
+     * Creates a new configuration exception.
+     * @param mes the error message
+     * @param typ the component type
+     * @see Exception#Exception(String)
      */
     ConfigurationException(String mes, String typ) {
         super(mes);
@@ -46,15 +49,16 @@ public class ConfigurationException extends Exception {
     }
     
     /**
-     * Constructor.
-     * @param mes : message
+     * Creates a new configuration exception.
+     * @param mes the error message
+     * @see Exception#Exception(String)
      */
     public ConfigurationException(String mes) {
         super(mes);
     }
     
     /**
-     * Get the error message.
+     * Gets the error message.
      * @return the error message.
      * @see java.lang.Throwable#getMessage()
      */
