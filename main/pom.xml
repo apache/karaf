@@ -100,6 +100,7 @@
           <instructions>
             <_donotcopy>(CVS|.svn|config.properties)</_donotcopy>
             <Main-Class>org.apache.felix.main.Main</Main-Class>
+            <Bundle-SymbolicName>org.apache.felix.main</Bundle-SymbolicName>
             <Bundle-Name>Apache Felix</Bundle-Name>
             <Bundle-Description>OSGi R4 framework.</Bundle-Description>
             <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
