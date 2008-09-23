@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.geronimo.gshell.spring;
+package org.apache.servicemix.kernel.gshell.admin;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,27 +25,71 @@ import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.net.ServerSocket;
 
 import org.apache.geronimo.gshell.clp.Argument;
+import org.apache.geronimo.gshell.clp.Option;
 import org.apache.geronimo.gshell.command.annotation.CommandComponent;
-import org.apache.geronimo.gshell.common.io.PumpStreamHandler;
 import org.apache.geronimo.gshell.support.OsgiCommandSupport;
+import org.osgi.service.prefs.PreferencesService;
+import org.osgi.service.prefs.Preferences;
 
 /**
  * Creates a new servicemix instance 
  *
- * @version $Rev$ $Date$
+ * @version $Rev: 679826 $ $Date: 2008-07-25 17:00:12 +0200 (Fri, 25 Jul 2008) $
  */
 @CommandComponent(id="smx:create", description="Create a new ServiceMix instance")
 public class CreateCommand
     extends OsgiCommandSupport
 {
+    @Option(name = "-p", aliases = { "--port"}, description = "Port number for remote shell connection")
+    private int port = 0;
+
     @Argument(index=0, required=true, description="Where to create the new ServiceMix instance")
     private String instance = null;
 
+    private PreferencesService preferences;
+
+    private int defaultPortStart = 8101;
+
+    public PreferencesService getPreferences() {
+        return preferences;
+    }
+
+    public void setPreferences(PreferencesService preferences) {
+        this.preferences = preferences;
+    }
+
+    protected OsgiCommandSupport createCommand() throws Exception {
+        CreateCommand command = new CreateCommand();
+        command.setPreferences(getPreferences());
+        return command;
+    }
+
     protected Object doExecute() throws Exception {
         File serviceMixBase = new File(instance).getCanonicalFile();
-        io.out.println("Creating new instance at: @|bold " + serviceMixBase + "|");
+        int remoteShellPort = port;
+        if (remoteShellPort <= 0) {
+            try {
+                Preferences prefs = preferences.getUserPreferences("CreateCommandState");
+                remoteShellPort = prefs.getInt("port", defaultPortStart + 1);
+                prefs.putInt("port", remoteShellPort + 1);
+                prefs.flush();
+                prefs.sync();
+            } catch (Exception e) {
+                try {
+                    ServerSocket ss = new ServerSocket(0);
+                    remoteShellPort = ss.getLocalPort();
+                    ss.close();
+                } catch (Exception t) {
+                }
+            }
+            if (remoteShellPort <= 0) {
+                remoteShellPort = defaultPortStart;
+            }
+        }
+        io.out.println("Creating new instance on port " + remoteShellPort + " at: @|bold " + serviceMixBase + "|");
 
         mkdir(serviceMixBase, "bin");
         mkdir(serviceMixBase, "etc");
@@ -55,7 +99,6 @@ public class CreateCommand
 
         copyResourceToDir(serviceMixBase, "etc/config.properties", true);
         copyResourceToDir(serviceMixBase, "etc/org.apache.servicemix.features.cfg", true);
-        copyResourceToDir(serviceMixBase, "etc/org.apache.servicemix.shell.cfg", true);
         copyResourceToDir(serviceMixBase, "etc/org.ops4j.pax.logging.cfg", true);
         copyResourceToDir(serviceMixBase, "etc/org.ops4j.pax.url.mvn.cfg", true);
         copyResourceToDir(serviceMixBase, "etc/startup.properties", true);
@@ -64,6 +107,8 @@ public class CreateCommand
         HashMap<String, String> props = new HashMap<String, String>();
         props.put("${servicemix.home}", System.getProperty("servicemix.home"));
         props.put("${servicemix.base}", serviceMixBase.getPath());
+        props.put("${servicemix.remoteShellPort}", Integer.toString(remoteShellPort));
+        copyFilteredResourceToDir(serviceMixBase, "etc/org.apache.servicemix.shell.cfg", props);
         if( System.getProperty("os.name").startsWith("Win") ) {
             copyFilteredResourceToDir(serviceMixBase, "bin/servicemix.bat", props);
         } else {

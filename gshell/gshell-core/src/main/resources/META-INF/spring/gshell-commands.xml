@@ -54,8 +54,6 @@
 
     <bean id="unset" class="org.apache.geronimo.gshell.commands.builtins.UnsetCommand" />
 
-    <bean id="create" class="org.apache.geronimo.gshell.spring.CreateCommand" />
-
     <bean id="grep" class="org.apache.geronimo.gshell.commands.utils.GrepCommand" />
 
     <bean id="cat" class="org.apache.geronimo.gshell.commands.utils.CatCommand" />

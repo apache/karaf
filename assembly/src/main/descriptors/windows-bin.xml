@@ -180,6 +180,7 @@
             <outputFileNameMapping>org/apache/servicemix/kernel/gshell/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
                 <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.core</include>
+                <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.admin</include>
                 <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.osgi</include>
                 <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.log</include>
                 <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.obr</include>

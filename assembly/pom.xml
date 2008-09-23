@@ -105,6 +105,11 @@
       </dependency>
       <dependency>
           <groupId>org.apache.servicemix.kernel.gshell</groupId>
+          <artifactId>org.apache.servicemix.kernel.gshell.admin</artifactId>
+          <version>${pom.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.servicemix.kernel.gshell</groupId>
           <artifactId>org.apache.servicemix.kernel.gshell.obr</artifactId>
           <version>${pom.version}</version>
       </dependency>
