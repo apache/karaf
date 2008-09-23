@@ -19,6 +19,7 @@
 package org.apache.felix.framework.cache;
 
 import java.io.*;
+import java.net.URLDecoder;
 
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.ObjectInputStreamX;
@@ -1039,6 +1040,9 @@ public class BundleArchive
                 {
                     throw new IOException("Reference URLs can only be files: " + location);
                 }
+
+                // Decode any URL escaped sequences.
+                location = URLDecoder.decode(location);
 
                 // Make sure the referenced file exists.
                 File file = new File(location.substring(FILE_PROTOCOL.length()));
