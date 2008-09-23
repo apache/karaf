@@ -26,8 +26,8 @@ import org.osgi.framework.*;
 public class Activator implements BundleActivator
 {
     private BundleContext m_context = null;
-    private ShellTuiRunnable m_runnable = null;
-    private Thread m_thread = null;
+    private volatile ShellTuiRunnable m_runnable = null;
+    private volatile Thread m_thread = null;
     private ServiceReference m_shellRef = null;
     private ShellService m_shell = null;
 
@@ -116,7 +116,7 @@ public class Activator implements BundleActivator
 
     private class ShellTuiRunnable implements Runnable
     {
-        private boolean stop = false;
+        private volatile boolean stop = false;
 
         public void stop()
         {
@@ -144,14 +144,15 @@ public class Activator implements BundleActivator
 
                 synchronized (Activator.this)
                 {
+                    if (line == null)
+                    {
+                        System.err.println("ShellTUI: No standard input...exiting.");
+                        break;
+                    }
+
                     if (m_shell == null)
                     {
                         System.out.println("No impl service available.");
-                        continue;
-                    }
-
-                    if (line == null)
-                    {
                         continue;
                     }
 
@@ -168,7 +169,7 @@ public class Activator implements BundleActivator
                     }
                     catch (Exception ex)
                     {
-                        System.err.println("ShellTui: " + ex);
+                        System.err.println("ShellTUI: " + ex);
                         ex.printStackTrace();
                     }
                 }
