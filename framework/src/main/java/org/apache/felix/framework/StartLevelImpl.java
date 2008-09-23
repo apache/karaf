@@ -21,7 +21,6 @@ package org.apache.felix.framework;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.naming.OperationNotSupportedException;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
 import org.osgi.service.startlevel.StartLevel;
