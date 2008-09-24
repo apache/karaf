@@ -22,4 +22,4 @@ SET SERVICEMIX_BASE=${servicemix.base}
 SETLOCAL
 SET SERVICEMIX_HOME=${servicemix.home}
 
-%SERVICEMIX_HOME%\bin\servicemix.bat "$*"
+%SERVICEMIX_HOME%\bin\servicemix.bat %*
