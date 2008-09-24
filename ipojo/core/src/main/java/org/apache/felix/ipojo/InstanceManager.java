@@ -518,12 +518,8 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
         }
         return m_pojoObjects.toArray(new Object[m_pojoObjects.size()]);
     }
-
-    /**
-     * Create an instance of the component. This method need to be called one time only for singleton provided service.
-     * @return a new instance
-     */
-    public Object createPojoObject() {
+    
+    private Object createObject() {
         if (m_clazz == null) {
             load();
         }
@@ -662,6 +658,16 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
                 return null;
             }
         }
+        return instance;
+    }
+
+    /**
+     * Create an instance of the component. 
+     * This method need to be called one time only for singleton provided service.
+     * @return a new instance
+     */
+    public Object createPojoObject() {
+        Object instance = createObject();
 
         // Add the new instance in the instance list.
         synchronized (this) {
@@ -684,17 +690,27 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      */
     public Object getPojoObject() {
         Object pojo = null;
+        boolean newPOJO = false;
         synchronized (this) {
             if (m_pojoObjects != null) {
                 pojo = m_pojoObjects.get(0); // Stack confinement
+            } else {
+                pojo = createObject();  // Stack confinement
+                if (m_pojoObjects == null) {
+                    m_pojoObjects = new ArrayList(1);
+                }
+                m_pojoObjects.add(pojo);
+                newPOJO = true;
             }
         }
         
-        if (pojo == null) {
-            return createPojoObject(); // This method must be called without the lock.
-        } else {
-            return pojo;
-        }
+        // Call createInstance on Handlers :
+        for (int i = 0; newPOJO && i < m_handlers.length; i++) {
+            ((PrimitiveHandler) m_handlers[i].getHandler()).onCreation(pojo);
+        } 
+        //NOTE this method allows returning a POJO object before calling the onCreation on handler.
+
+        return pojo;
     }
 
     /**

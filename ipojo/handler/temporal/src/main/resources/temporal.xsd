@@ -24,15 +24,23 @@
 
 	<xs:complexType name="TemporalServiceDependencyType">
 
-		<xs:attribute name="field" type="xs:string" use="required"></xs:attribute>
-		<xs:attribute name="filter" type="xs:string" use="optional"></xs:attribute>
+        <xs:annotation>
+        	<xs:documentation>Description of a temporal dependency.</xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="field" type="xs:string" use="required">
+        	<xs:annotation>
+        		<xs:documentation>The implementation field supporting the dependency.</xs:documentation>
+        	</xs:annotation></xs:attribute>
+		<xs:attribute name="filter" type="xs:string" use="optional">
+			<xs:annotation>
+				<xs:documentation>Filter use to discover matching filter.</xs:documentation></xs:annotation></xs:attribute>
 		<xs:attribute name="timeout" type="xs:int" use="optional">
 			<xs:annotation>
-				<xs:documentation>Specifies the timeout after which the onTimeout policy is executed.The value is the time in ms to wait. -1 is used to indicate an infinite wait. </xs:documentation>
+				<xs:documentation>Specifies the timeout after which the onTimeout policy is executed. The value is the time in ms to wait. -1 is used to indicate an infinite wait.</xs:documentation>
 			</xs:annotation></xs:attribute>
 		<xs:attribute name="onTimeout" use="optional" type="xs:string">
             <xs:annotation>
-            	<xs:documentation>Specifies the onTimeout policy. This determines the object to inject when the service stills unavailable when the timeout expires.Several values are supported:- 'nullable' means that a Nullable object will be injected- 'empty-array' injects an empty array (only for aggregate dependency)- 'null' injects Null- any other value are interpreted as the default implementation class to use.If the onTimetout attribute is not specified, a RuntimeException is thrown when the timeout is reached.</xs:documentation>
+            	<xs:documentation>Specifies the onTimeout policy. This determines the object to inject when the service stills unavailable when the timeout expires. Several values are supported: 'nullable' means that a Nullable object will be injected, 'empty-array' injects an empty array (only for aggregate dependency), 'null' injects Null, any other value are interpreted as the default implementation class to use. If the onTimetout attribute is not specified, a RuntimeException is thrown when the timeout is reached.</xs:documentation>
             </xs:annotation>
 		</xs:attribute>
 	</xs:complexType>

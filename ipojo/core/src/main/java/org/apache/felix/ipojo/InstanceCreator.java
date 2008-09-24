@@ -30,43 +30,46 @@ import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.BundleContext;
 
 /**
- * An instance creator aims to create instances and to track their factories. It's allow to create instance from outside factories.
+ * The instance creator creates instances and tracks their factories. 
+ * It allows creating instances from external factories.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class InstanceCreator implements FactoryStateListener {
 
     /**
-     * Logger to log messages if error occurs.
+     * The logger to log messages if errors occur.
      */
     private Logger m_logger;
 
     /**
-     * Configurations to create and maintains.
+     * The configurations to create and to maintain.
      */
     private List m_idle = new ArrayList();
 
     /**
-     * Map storing created instance. [AbstractFactory, List [ManagedInstance]]
+     * The map storing created instances.
+     * This map contains [AbstractFactory, List [ManagedInstance]] couples.
      */
     private Map m_attached = new HashMap();
 
     /**
-     * Abstract Factory list.
+     * The abstract factory list.
      */
     private List m_factories = new ArrayList();
 
     /**
-     * Constructor.
-     * @param context : iPOJO bundle context.
+     * Creates the instance creator.
+     * This object is generally a singleton.
+     * @param context the bundle context of the iPOJO bundle.
      */
     public InstanceCreator(BundleContext context) {
         m_logger = new Logger(context, "iPOJO Instance Creator");
     }
 
     /**
-     * Add an instance to manage.
-     * @param instance : instance configuration
-     * @param bundle : bundle id declaring the instance
+     * Adds an instance to manage.
+     * @param instance the instance configuration
+     * @param bundle the bundle id declaring the instance
      */
     synchronized void addInstance(Dictionary instance, long bundle) {
         ManagedInstance managed = new ManagedInstance(instance, bundle);
@@ -92,8 +95,8 @@ public class InstanceCreator implements FactoryStateListener {
     }
 
     /**
-     * Dispose and stop to manage all instances declared by the given bundle.
-     * @param bundle : bundle.
+     * Disposes all instances declared by the given (leaving) bundle.
+     * @param bundle the bundle.
      */
     void removeInstancesFromBundle(long bundle) {
         // Disposes instance from attached instances
@@ -136,8 +139,8 @@ public class InstanceCreator implements FactoryStateListener {
     }
 
     /**
-     * A new factory appears.
-     * @param factory : the new factory.
+     * This method is called when a factory appears.
+     * @param factory the new factory.
      */
     public synchronized void addFactory(IPojoFactory factory) {
         List createdInstances = new ArrayList(1);
@@ -167,8 +170,8 @@ public class InstanceCreator implements FactoryStateListener {
     }
 
     /**
-     * A factory is leaving.
-     * @param factory : the leaving factory
+     * This method is called when a factory is leaving.
+     * @param factory the leaving factory
      */
     void removeFactory(IPojoFactory factory) {
         factory.removeFactoryStateListener(this);
@@ -178,8 +181,8 @@ public class InstanceCreator implements FactoryStateListener {
     }
 
     /**
-     * The given factory becomes valid.
-     * @param factory : the factory becoming valid.
+     * This method is called when the given factory becomes valid.
+     * @param factory the factory becoming valid.
      */
     private void onValidation(IPojoFactory factory) {
         List toRemove = new ArrayList();
@@ -204,8 +207,8 @@ public class InstanceCreator implements FactoryStateListener {
     }
 
     /**
-     * The given factory becomes invalid.
-     * @param factory : factory which becomes invalid.
+     * This method is called when the given factory becomes invalid.
+     * @param factory the factory becoming invalid.
      */
     private void onInvalidation(IPojoFactory factory) {
         List instances = (List) m_attached.remove(factory);
@@ -219,9 +222,9 @@ public class InstanceCreator implements FactoryStateListener {
     }
 
     /**
-     * Factory state changed method.
-     * @param factory : factory.
-     * @param newState : new state.
+     * This method is called when the state of a factory changes.
+     * @param factory the factory.
+     * @param newState the new state.
      * @see org.apache.felix.ipojo.FactoryStateListener#stateChanged(org.apache.felix.ipojo.Factory, int)
      */
     public void stateChanged(Factory factory, int newState) {
@@ -233,33 +236,35 @@ public class InstanceCreator implements FactoryStateListener {
     }
 
     /**
-     * This structure aims to manage a configuration. It stores all necessary information to create an instance and to track the factory.
+     * This structure aims to manage a configuration. 
+     * It stores all necessary information to create an instance 
+     * and to track the factory.
      */
     private class ManagedInstance {
         /**
-         * Configuration of the instance to create.
+         * The configuration of the instance to create.
          */
         private Dictionary m_configuration;
 
         /**
-         * Bundle which create the instance.
+         * The bundle which creates the instance.
          */
         private long m_bundleId;
 
         /**
-         * Factory used to create the instance.
+         * The factory used to create the instance.
          */
         private IPojoFactory m_factory;
 
         /**
-         * Created instance.
+         * The created instance.
          */
         private ComponentInstance m_instance;
 
         /**
-         * Constructor.
-         * @param conf : the configuration to create.
-         * @param bundle : the bundle in which the instance is declared.
+         * Creates a ManagedInstance.
+         * @param conf the configuration to create.
+         * @param bundle the bundle in which the instance is declared.
          */
         ManagedInstance(Dictionary conf, long bundle) {
             m_configuration = conf;
@@ -267,7 +272,7 @@ public class InstanceCreator implements FactoryStateListener {
         }
 
         /**
-         * Return the used factory name.
+         * Returns the used factory.
          * @return the factory
          */
         IPojoFactory getFactory() {
@@ -275,18 +280,21 @@ public class InstanceCreator implements FactoryStateListener {
         }
 
         /**
-         * Return the created instance.
-         * @return the instance (or null if no instance are created).
+         * Returns the created instance.
+         * @return the instance (or <code>null</code> if no instance are created).
          */
         ComponentInstance getInstance() {
             return m_instance;
         }
 
         /**
-         * Test if the given factory match with the factory required by this instance. A factory matches if its name or its class name is equals to
-         * the 'component' property of the instance. Then the acceptability of the configuration is checked.
-         * @param factory : the factory to confront against the current instance.
-         * @return true if the factory match.
+         * Checks if the given factory match with the factory 
+         * required by this instance. A factory matches if its 
+         * name or its class name is equals to the 'component' 
+         * property of the instance. Then the acceptability of 
+         * the configuration is checked.
+         * @param factory the factory to confront against the current instance.
+         * @return <code>true</code> if the factory matches.
          */
         public boolean match(IPojoFactory factory) {
             // Test factory name (and classname)
@@ -313,8 +321,8 @@ public class InstanceCreator implements FactoryStateListener {
         }
 
         /**
-         * Create the instance by using the given factory.
-         * @param factory : the factory to use to create the instance. The factory must match.
+         * Creates the instance by using the given factory.
+         * @param factory the factory to use to create the instance. The factory must match.
          */
         public void create(IPojoFactory factory) {
             try {
@@ -333,7 +341,7 @@ public class InstanceCreator implements FactoryStateListener {
         }
 
         /**
-         * Dispose the current instance.
+         * Disposes the current instance if not <code>null</code>.
          */
         public void dispose() {
             if (m_instance != null) {

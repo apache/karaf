@@ -22,9 +22,24 @@
 	elementFormDefault="qualified">
 	<xs:element name="wbp" type="WBPType"></xs:element>
 	<xs:complexType name="WBPType">
-		<xs:attribute name="onArrival" type="xs:string" use="required"></xs:attribute>
-		<xs:attribute name="onDeparture" type="xs:string" use="required"></xs:attribute>
-		<xs:attribute name="onModification" type="xs:string" use="optional"></xs:attribute>
-		<xs:attribute name="filter" type="xs:string" use="required"></xs:attribute>
+        <xs:annotation>
+        	<xs:documentation>Description of the white-board architecture.</xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="onArrival" type="xs:string" use="required">
+        	<xs:annotation>
+        		<xs:documentation>Declaring the method to invoke when a matching service arrives.</xs:documentation>
+        	</xs:annotation></xs:attribute>
+		<xs:attribute name="onDeparture" type="xs:string" use="required">
+			<xs:annotation>
+				<xs:documentation>Declaring the method to invoke when a matching service leaves.</xs:documentation>
+			</xs:annotation></xs:attribute>
+		<xs:attribute name="onModification" type="xs:string" use="optional">
+			<xs:annotation>
+				<xs:documentation>Method called when an injected service reference is modified but stills valid against the filter.</xs:documentation>
+			</xs:annotation></xs:attribute>
+		<xs:attribute name="filter" type="xs:string" use="required">
+			<xs:annotation>
+				<xs:documentation>Filter use to discover matching filter.</xs:documentation>
+			</xs:annotation></xs:attribute>
 	</xs:complexType>	
 </xs:schema>

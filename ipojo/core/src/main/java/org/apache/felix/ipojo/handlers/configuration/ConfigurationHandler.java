@@ -321,7 +321,8 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
      * @param configuration : the new configuration
      * @see org.apache.felix.ipojo.Handler#reconfigure(java.util.Dictionary)
      */
-    public synchronized void reconfigure(Dictionary configuration) {   
+    public synchronized void reconfigure(Dictionary configuration) {  
+        warn(getInstanceManager().getInstanceName() + " is reconfiguring the properties : " + configuration);
         Properties props = reconfigureProperties(configuration);
         propagate(props, m_propagatedFromInstance);
         m_propagatedFromInstance = props;
@@ -348,12 +349,16 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
                             m_configurableProperties[i].setValue(value);
                             getInstanceManager().onSet(null, m_configurableProperties[i].getField(), m_configurableProperties[i].getValue()); // Notify other handler of the field value change.
                             if (m_configurableProperties[i].hasMethod()) {
-                                m_configurableProperties[i].invoke(null); // Call on all created pojo objects.
+                                if (getInstanceManager().getPojoObjects() != null) {
+                                    m_configurableProperties[i].invoke(null); // Call on all created pojo objects.
+                                }
                             }
                         }
                     } else if (m_configurableProperties[i].hasMethod()) { // Method but no field
                         m_configurableProperties[i].setValue(value);
-                        m_configurableProperties[i].invoke(null); // Call on all created pojo objects.
+                        if (getInstanceManager().getPojoObjects() != null) {
+                            m_configurableProperties[i].invoke(null); // Call on all created pojo objects.
+                        }
                     }
                     found = true;
                     break;

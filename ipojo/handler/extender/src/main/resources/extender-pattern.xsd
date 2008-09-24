@@ -22,8 +22,21 @@
 	elementFormDefault="qualified">
 	<xs:element name="extender" type="ExtenderType"></xs:element>
 	<xs:complexType name="ExtenderType">
-		<xs:attribute name="onArrival" type="xs:string" use="required"></xs:attribute>
-		<xs:attribute name="onDeparture" type="xs:string" use="required"></xs:attribute>
-		<xs:attribute name="extension" type="xs:string" use="required"></xs:attribute>
+        <xs:annotation>
+        	<xs:documentation>Description of the extender pattern configuration.
+The extender tracks extensions. The particularity of this architecture-style is that extensions are packaged in different bundles. An extension is detected by analyzing the bundle. The mark is currently a header in the bundle manifest. At each time a matching bundle appears or disappears, a callback is invoked. </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="onArrival" type="xs:string" use="required">
+        	<xs:annotation>
+        		<xs:documentation>Declaring the method to invoke when a matching bundle arrives</xs:documentation>
+        	</xs:annotation></xs:attribute>
+		<xs:attribute name="onDeparture" type="xs:string" use="required">
+			<xs:annotation>
+				<xs:documentation>Declaring the method to invoke when a matching bundle leaves</xs:documentation>
+			</xs:annotation></xs:attribute>
+		<xs:attribute name="extension" type="xs:string" use="required">
+			<xs:annotation>
+				<xs:documentation>Declaring the looked manifest header.</xs:documentation>
+			</xs:annotation></xs:attribute>
 	</xs:complexType>	
 </xs:schema>
