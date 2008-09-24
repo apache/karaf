@@ -54,6 +54,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.PackagePermission;
 import org.osgi.framework.Version;
+import org.osgi.framework.Bundle;
 
 public class R4SearchPolicyCore implements ModuleListener
 {
@@ -595,7 +596,13 @@ public class R4SearchPolicyCore implements ModuleListener
                         break;
                     }
                 }
-                if (delegate)
+                // If delegate is true then there are no bundles 
+                // providing exports for this package and the instigating 
+                // class was not from a bundle. Therefore, 
+                // delegate to the parent class loader in case
+                // that this is not due to outside code calling a method
+                // on the bundle interface (e.g., Bundle.loadClass()).
+                if (delegate && !Bundle.class.isInstance(classes[i - 1])) 
                 {
                     try
                     {
