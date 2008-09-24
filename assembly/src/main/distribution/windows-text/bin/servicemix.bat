@@ -110,15 +110,38 @@ rem Setup the classpath
 set CLASSPATH=%CLASSPATH%;%SERVICEMIX_HOME%\lib\servicemix.jar;%SERVICEMIX_HOME%\lib\servicemix-jaas-boot.jar
 
 rem Execute the JVM or the load the profiler
-if "%SERVICEMIX_PROFILER%" == "" goto :EXECUTE
+if "%SERVICEMIX_PROFILER%" == "" goto :RUN
     rem Execute the profiler if it has been configured
     call :warn Loading profiler script: %SERVICEMIX_PROFILER_SCRIPT%
     call %SERVICEMIX_PROFILER_SCRIPT%
 
+:RUN
+    SET OPTS=-Dservicemix.startLocalConsole=true -Dservicemix.startRemoteShell=true
+    SET SHIFT=false
+    if "%1" == "console" goto :EXECUTE_CONSOLE
+    if "%1" == "server" goto :EXECUTE_SERVER
+    if "%1" == "client" goto :EXECUTE_CLIENT
+    goto :EXECUTE
+
+:EXECUTE_CONSOLE
+    SET SHIFT=true
+    goto :EXECUTE    
+
+:EXECUTE_SERVER
+    SET OPTS="-Dservicemix.startLocalConsole=false -Dservicemix.startRemoteShell=true"
+    SET SHIFT=true
+    goto :EXECUTE
+
+:EXECUTE_CLIENT
+    SET OPTS="-Dservicemix.startLocalConsole=true -Dservicemix.startRemoteShell=false"
+    SET SHIFT=true
+    goto :EXECUTE
+
 :EXECUTE
-    SET OPTS=-Dservicemix.startLocalConsole=true -Dservicemix.startRemoteShell=true    
+    if "%SHIFT%" == "true" SET ARGS=%2 %3 %4 %5 %6 %7 %8
+    if not "%SHIFT%" == "true" SET ARGS=%1 %2 %3 %4 %5 %6 %7 %8    
     rem Execute the Java Virtual Machine
-    "%JAVA%" %JAVA_OPTS% %OPTS% -classpath "%CLASSPATH%" -Dservicemix.home="%SERVICEMIX_HOME%" -Dservicemix.base="%SERVICEMIX_BASE%" org.apache.servicemix.kernel.main.Main %*
+    "%JAVA%" %JAVA_OPTS% %OPTS% -classpath "%CLASSPATH%" -Dservicemix.home="%SERVICEMIX_HOME%" -Dservicemix.base="%SERVICEMIX_BASE%" org.apache.servicemix.kernel.main.Main %ARGS%
 
 rem # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
