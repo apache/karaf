@@ -62,11 +62,11 @@ public class R4SearchPolicyCore implements ModuleListener
     private Map m_configMap = null;
     private IModuleFactory m_factory = null;
     // Maps a package name to an array of modules.
-    private Map m_availPkgIndexMap = new HashMap();
+    private Map m_unresolvedPkgIndexMap = new HashMap();
     // Maps a package name to an array of modules.
-    private Map m_inUsePkgIndexMap = new HashMap();
+    private Map m_resolvedPkgIndexMap = new HashMap();
     // Maps a module to an array of capabilities.
-    private Map m_inUseCapMap = new HashMap();
+    private Map m_resolvedCapMap = new HashMap();
     private Map m_moduleDataMap = new HashMap();
 
     // Boot delegation packages.
@@ -647,13 +647,13 @@ public class R4SearchPolicyCore implements ModuleListener
                         // Lock module manager instance to ensure that nothing changes.
                         synchronized (m_factory)
                         {
-                            // Get "in use" and "available" candidates and put
-                            // the "in use" candidates first.
-                            PackageSource[] inuse = getInUseCandidates(target);
-                            PackageSource[] available = getUnusedCandidates(target);
-                            PackageSource[] candidates = new PackageSource[inuse.length + available.length];
-                            System.arraycopy(inuse, 0, candidates, 0, inuse.length);
-                            System.arraycopy(available, 0, candidates, inuse.length, available.length);
+                            // Get "resolved" and "unresolved" candidates and put
+                            // the "resolved" candidates first.
+                            PackageSource[] resolved = getResolvedCandidates(target);
+                            PackageSource[] unresolved = getUnresolvedCandidates(target);
+                            PackageSource[] candidates = new PackageSource[resolved.length + unresolved.length];
+                            System.arraycopy(resolved, 0, candidates, 0, resolved.length);
+                            System.arraycopy(unresolved, 0, candidates, resolved.length, unresolved.length);
 
                             // Take the first candidate that can resolve.
                             for (int candIdx = 0;
@@ -895,7 +895,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         return null;
     }
 
-    public PackageSource[] getInUseCandidates(IRequirement req)
+    public PackageSource[] getResolvedCandidates(IRequirement req)
     {
         // Synchronized on the module manager to make sure that no
         // modules are added, removed, or resolved.
@@ -903,15 +903,15 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         {
             PackageSource[] candidates = m_emptySources;
             if (req.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
-                (((Requirement) req).getPackageName() != null))
+                    (((Requirement) req).getPackageName() != null))
             {
                 String pkgName = ((Requirement) req).getPackageName();
-                IModule[] modules = (IModule[]) m_inUsePkgIndexMap.get(pkgName);
+                IModule[] modules = (IModule[]) m_resolvedPkgIndexMap.get(pkgName);
 
                 for (int modIdx = 0; (modules != null) && (modIdx < modules.length); modIdx++)
                 {
-                    ICapability inUseCap = Util.getSatisfyingCapability(modules[modIdx], req);
-                    if (inUseCap != null)
+                    ICapability resolvedCap = Util.getSatisfyingCapability(modules[modIdx], req);
+                    if (resolvedCap != null)
                     {
 // TODO: RB - Is this permission check correct.
                         if ((System.getSecurityManager() != null) &&
@@ -929,7 +929,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                             PackageSource[] tmp = new PackageSource[candidates.length + 1];
                             System.arraycopy(candidates, 0, tmp, 0, candidates.length);
                             tmp[candidates.length] =
-                                new PackageSource(modules[modIdx], inUseCap);
+                                new PackageSource(modules[modIdx], resolvedCap);
                             candidates = tmp;
                         }
                     }
@@ -937,34 +937,34 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             }
             else
             {
-                Iterator i = m_inUseCapMap.entrySet().iterator();
+                Iterator i = m_resolvedCapMap.entrySet().iterator();
                 while (i.hasNext())
                 {
                     Map.Entry entry = (Map.Entry) i.next();
                     IModule module = (IModule) entry.getKey();
-                    ICapability[] inUseCaps = (ICapability[]) entry.getValue();
-                    for (int capIdx = 0; capIdx < inUseCaps.length; capIdx++)
+                    ICapability[] resolvedCaps = (ICapability[]) entry.getValue();
+                    for (int capIdx = 0; capIdx < resolvedCaps.length; capIdx++)
                     {
-                        if (req.isSatisfied(inUseCaps[capIdx]))
+                        if (req.isSatisfied(resolvedCaps[capIdx]))
                         {
 // TODO: RB - Is this permission check correct.
-                            if (inUseCaps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
+                            if (resolvedCaps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
                                 (System.getSecurityManager() != null) &&
                                 !((BundleProtectionDomain) module.getContentLoader().getSecurityContext()).impliesDirect(
                                     new PackagePermission(
-                                        (String) inUseCaps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY),
+                                        (String) resolvedCaps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY),
                                         PackagePermission.EXPORT)))
                             {
                                 m_logger.log(Logger.LOG_DEBUG,
                                     "PackagePermission.EXPORT denied for "
-                                    + inUseCaps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY)
+                                    + resolvedCaps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY)
                                     + "from " + module.getId());
                             }
                             else
                             {
                                 PackageSource[] tmp = new PackageSource[candidates.length + 1];
                                 System.arraycopy(candidates, 0, tmp, 0, candidates.length);
-                                tmp[candidates.length] = new PackageSource(module, inUseCaps[capIdx]);
+                                tmp[candidates.length] = new PackageSource(module, resolvedCaps[capIdx]);
                                 candidates = tmp;
                             }
                         }
@@ -976,20 +976,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         }
     }
 
-    private boolean isCapabilityInUse(IModule module, ICapability cap)
-    {
-        ICapability[] caps = (ICapability[]) m_inUseCapMap.get(module);
-        for (int i = 0; (caps != null) && (i < caps.length); i++)
-        {
-            if (caps[i].equals(cap))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public PackageSource[] getUnusedCandidates(IRequirement req)
+    public PackageSource[] getUnresolvedCandidates(IRequirement req)
     {
         // Synchronized on the module manager to make sure that no
         // modules are added, removed, or resolved.
@@ -1000,7 +987,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             if (req.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
                 (((Requirement) req).getPackageName() != null))
             {
-                modules = (IModule[]) m_availPkgIndexMap.get(((Requirement) req).getPackageName());
+                modules = (IModule[]) m_unresolvedPkgIndexMap.get(((Requirement) req).getPackageName());
             }
             else
             {
@@ -1013,9 +1000,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
             {
                 // Get the module's export package for the target package.
                 ICapability cap = Util.getSatisfyingCapability(modules[modIdx], req);
-                // If compatible and it is not currently used, then add
-                // the available candidate to the list.
-                if ((cap != null) && !isCapabilityInUse(modules[modIdx], cap))
+                // If compatible and it is not currently resolved, then add
+                // the unresolved candidate to the list.
+                if ((cap != null) && !isResolved(modules[modIdx]))
                 {
                     PackageSource[] tmp = new PackageSource[candidates.length + 1];
                     System.arraycopy(candidates, 0, tmp, 0, candidates.length);
@@ -1146,7 +1133,7 @@ for (Iterator iter = fragmentMap.entrySet().iterator(); iter.hasNext(); )
                     m_logger.log(Logger.LOG_ERROR, "Unable to attach fragments", ex);
                 }
             }
-//dumpUsedPackages();
+//dumpResolvedPackages();
         } // End of synchronized block on module manager.
 
         // Fire resolved events for all resolved modules;
@@ -1377,15 +1364,15 @@ for (Iterator iter = fragmentMap.entrySet().iterator(); iter.hasNext(); )
         IRequirement[] reqs = module.getDefinition().getRequirements();
         for (int reqIdx = 0; (reqs != null) && (reqIdx < reqs.length); reqIdx++)
         {
-            // Get the candidates from the "in use" and "available"
-            // package maps. Candidates "in use" have higher priority
-            // than "available" ones, so put the "in use" candidates
+            // Get the candidates from the "resolved" and "unresolved"
+            // package maps. The "resolved" candidates have higher priority
+            // than "unresolved" ones, so put the "resolved" candidates
             // at the front of the list of candidates.
-            PackageSource[] inuse = getInUseCandidates(reqs[reqIdx]);
-            PackageSource[] available = getUnusedCandidates(reqs[reqIdx]);
-            PackageSource[] candidates = new PackageSource[inuse.length + available.length];
-            System.arraycopy(inuse, 0, candidates, 0, inuse.length);
-            System.arraycopy(available, 0, candidates, inuse.length, available.length);
+            PackageSource[] resolved = getResolvedCandidates(reqs[reqIdx]);
+            PackageSource[] unresolved = getUnresolvedCandidates(reqs[reqIdx]);
+            PackageSource[] candidates = new PackageSource[resolved.length + unresolved.length];
+            System.arraycopy(resolved, 0, candidates, 0, resolved.length);
+            System.arraycopy(unresolved, 0, candidates, resolved.length, unresolved.length);
 
             // If we have candidates, then we need to recursively populate
             // the resolver map with each of them.
@@ -1447,12 +1434,36 @@ for (Iterator iter = fragmentMap.entrySet().iterator(); iter.hasNext(); )
         }
     }
 
-    private void dumpUsedPackages()
+    private void dumpPackageIndexMap(Map pkgIndexMap)
     {
         synchronized (this)
         {
-            System.out.println("PACKAGES IN USE MAP:");
-            for (Iterator i = m_inUseCapMap.entrySet().iterator(); i.hasNext(); )
+            for (Iterator i = pkgIndexMap.entrySet().iterator(); i.hasNext(); )
+            {
+                Map.Entry entry = (Map.Entry) i.next();
+                System.out.println(entry.getKey().getClass());
+                System.out.println(entry.getValue().getClass());
+/*
+                ICapability[] caps = (ICapability[]) entry.getValue();
+                if ((caps != null) && (caps.length > 0))
+                {
+                    System.out.println("  " + entry.getKey());
+                    for (int j = 0; j < caps.length; j++)
+                    {
+                        System.out.println("    " + caps[j]);
+                    }
+                }
+*/
+            }
+        }
+    }
+
+    private void dumpResolvedPackages()
+    {
+        synchronized (this)
+        {
+            System.out.println("RESOLVED CAPABILITY MAP:");
+            for (Iterator i = m_resolvedCapMap.entrySet().iterator(); i.hasNext(); )
             {
                 Map.Entry entry = (Map.Entry) i.next();
                 ICapability[] caps = (ICapability[]) entry.getValue();
@@ -1893,11 +1904,6 @@ for (Iterator iter = fragmentMap.entrySet().iterator(); iter.hasNext(); )
         {
             map = calculateModulePackages(module, candidatesMap);
             moduleMap.put(module, map);
-//if (!module.getId().equals("0"))
-//{
-//    System.out.println("PACKAGES FOR " + module.getId() + ":");
-//    dumpPackageSources(map);
-//}
         }
         return map;
     }
@@ -2449,92 +2455,82 @@ for (Iterator iter = fragmentMap.entrySet().iterator(); iter.hasNext(); )
                 ((ModuleImpl) module).setWires(wires);
             }
 
-            // Remove the wire's exporting module from the "available"
-            // package map and put it into the "in use" package map;
+            // Remove the wire's exporting module from the "unresolved"
+            // package map and put it into the "resolved" package map;
             // these steps may be a no-op.
             for (int wireIdx = 0;
                 (wires != null) && (wireIdx < wires.length);
                 wireIdx++)
             {
 m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
-                // Add the exporter module of the wire to the "in use" capability map.
-                ICapability[] inUseCaps = (ICapability[]) m_inUseCapMap.get(wires[wireIdx].getExporter());
-                inUseCaps = addCapabilityToArray(inUseCaps, wires[wireIdx].getCapability());
-                m_inUseCapMap.put(wires[wireIdx].getExporter(), inUseCaps);
-
-                // If the capability is a package, then add the exporter module
-                // of the wire to the "in use" package index and remove it
-                // from the "available" package index.
-                if (wires[wireIdx].getCapability().getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
-                {
-                    // Get package name.
-                    String pkgName = (String)
-                        wires[wireIdx].getCapability().getProperties().get(ICapability.PACKAGE_PROPERTY);
-                    // Add to "in use" package index.
-                    indexPackageCapability(
-                        m_inUsePkgIndexMap,
-                        wires[wireIdx].getExporter(),
-                        wires[wireIdx].getCapability());
-                    // Remove from "available" package index.
-                    m_availPkgIndexMap.put(
-                        pkgName,
-                        removeModuleFromArray(
-                            (IModule[]) m_availPkgIndexMap.get(pkgName),
-                            wires[wireIdx].getExporter()));
-                }
             }
 
-            // Also add the module's capabilities to the "in use" map
+            // Also add the module's capabilities to the "resolved" map
             // if the capability is not matched by a requirement. If the
-            // capability is matched by a requirement, then it is handled
-            // above when adding the wired modules to the "in use" map.
-// TODO: RB - Bug here because a requirement for a package need not overlap the
-//            capability for that package and this assumes it does. This might
-//            require us to introduce the notion of a substitutable capability.
+            // capability is matched by a requirement.
             ICapability[] caps = module.getDefinition().getCapabilities();
             IRequirement[] reqs = module.getDefinition().getRequirements();
             for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
             {
-                boolean matched = false;
+                // We want to put all of the resolved module's capabilities
+                // into the resolved capability map, except those package
+                // exports that ended up being imported instead of exported
+                // because the module both imported and exported the same
+                // package. In this case, the export capability should be
+                // ignored because the framework discarded it.
+// TODO: RB - Bug here because a requirement for a package need not overlap the
+//            capability for that package and this assumes it does. This might
+//            require us to introduce the notion of a substitutable capability.
+/*
+                boolean ignoreCap = false;
                 for (int reqIdx = 0;
-                    !matched && (reqs != null) && (reqIdx < reqs.length);
+                    !ignoreCap && (reqs != null) && (reqIdx < reqs.length);
                     reqIdx++)
                 {
                     if (reqs[reqIdx].isSatisfied(caps[capIdx]))
                     {
-                        matched = true;
+                        ignoreCap = true;
                     }
                 }
-                if (!matched)
+*/
+                // Removed all package capabilities from the unresolved
+                // package index, since the module is now resolved.
+                if (caps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
                 {
-                    ICapability[] inUseCaps = (ICapability[]) m_inUseCapMap.get(module);
-                    inUseCaps = addCapabilityToArray(inUseCaps, caps[capIdx]);
-                    m_inUseCapMap.put(module, inUseCaps);
+                    // Get package name.
+                    String pkgName = (String)
+                        caps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY);
+                    // Remove the module's capability for the package.
+                    m_unresolvedPkgIndexMap.put(
+                        pkgName,
+                        removeModuleFromArray(
+                            (IModule[]) m_unresolvedPkgIndexMap.get(pkgName),
+                            module));
+                }
 
-                    // If the capability is a package, then add the exporter module
-                    // of the wire to the "in use" package index and remove it
-                    // from the "available" package index.
-                    if (caps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
-                    {
-                        // Get package name.
-                        String pkgName = (String)
-                            caps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY);
-                        // Add to "in use" package index.
-                        indexPackageCapability(
-                            m_inUsePkgIndexMap,
-                            module,
-                            caps[capIdx]);
-                        // Remove from "available" package index.
-                        m_availPkgIndexMap.put(
-                            pkgName,
-                            removeModuleFromArray(
-                                (IModule[]) m_availPkgIndexMap.get(pkgName),
-                                module));
-                    }
+                ICapability[] resolvedCaps = (ICapability[]) m_resolvedCapMap.get(module);
+                resolvedCaps = addCapabilityToArray(resolvedCaps, caps[capIdx]);
+                m_resolvedCapMap.put(module, resolvedCaps);
+
+                // If the capability is a package, then add the exporter module
+                // of the wire to the "resolved" package index and remove it
+                // from the "unresolved" package index.
+                if (caps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                {
+                    // Add to "resolved" package index.
+                    indexPackageCapability(
+                        m_resolvedPkgIndexMap,
+                        module,
+                        caps[capIdx]);
+                    // Remove from "unresolved" package index.
                 }
             }
         }
 
+System.out.println("UNRESOLVED INDEX:");
+dumpPackageIndexMap(m_unresolvedPkgIndexMap);
+System.out.println("RESOLVED INDEX:");
+dumpPackageIndexMap(m_resolvedPkgIndexMap);
         return resolvedModuleWireMap;
     }
 
@@ -2749,17 +2745,17 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
     {
         synchronized (m_factory)
         {
-            // When a module is added, create an aggregated list of available
+            // When a module is added, create an aggregated list of unresolved
             // exports to simplify later processing when resolving bundles.
             IModule module = event.getModule();
             ICapability[] caps = module.getDefinition().getCapabilities();
 
-            // Add exports to available package map.
+            // Add exports to unresolved package map.
             for (int i = 0; (caps != null) && (i < caps.length); i++)
             {
                 if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
                 {
-                    indexPackageCapability(m_availPkgIndexMap, module, caps[i]);
+                    indexPackageCapability(m_unresolvedPkgIndexMap, module, caps[i]);
                 }
             }
         }
@@ -2768,8 +2764,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
     public void moduleRemoved(ModuleEvent event)
     {
         // When a module is removed from the system, we need remove
-        // its exports from the "in use" and "available" package maps
-        // as well as remove the module from the module data map.
+        // its exports from the "resolved" and "unresolved" package maps,
+        // remove the module's dependencies on fragments and exporters,
+        // and remove the module from the module data map.
 
         // Synchronize on the module manager, since we don't want any
         // bundles to be installed or removed.
@@ -2784,20 +2781,20 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                     // Get package name.
                     String pkgName = (String)
                         caps[i].getProperties().get(ICapability.PACKAGE_PROPERTY);
-                    // Remove from "available" package map.
-                    IModule[] modules = (IModule[]) m_availPkgIndexMap.get(pkgName);
+                    // Remove from "unresolved" package map.
+                    IModule[] modules = (IModule[]) m_unresolvedPkgIndexMap.get(pkgName);
                     if (modules != null)
                     {
                         modules = removeModuleFromArray(modules, event.getModule());
-                        m_availPkgIndexMap.put(pkgName, modules);
+                        m_unresolvedPkgIndexMap.put(pkgName, modules);
                     }
 
-                    // Remove from "in use" package map.
-                    modules = (IModule[]) m_inUsePkgIndexMap.get(pkgName);
+                    // Remove from "resolved" package map.
+                    modules = (IModule[]) m_resolvedPkgIndexMap.get(pkgName);
                     if (modules != null)
                     {
                         modules = removeModuleFromArray(modules, event.getModule());
-                        m_inUsePkgIndexMap.put(pkgName, modules);
+                        m_resolvedPkgIndexMap.put(pkgName, modules);
                     }
                 }
             }
@@ -2815,9 +2812,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             // Set wires to null, which will remove the module from all
             // of its dependent modules.
             ((ModuleImpl) event.getModule()).setWires(null);
-            // Remove the module from the "in use" map.
+            // Remove the module from the "resolved" map.
 // TODO: RB - Maybe this can be merged with ModuleData.
-            m_inUseCapMap.remove(event.getModule());
+            m_resolvedCapMap.remove(event.getModule());
             // Finally, remove module data.
             m_moduleDataMap.remove(event.getModule());
         }
@@ -2842,40 +2839,28 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         synchronized (m_factory)
         {
             IModule module = event.getModule();
-         // Remove exports from package maps.
+            // Remove exports from package maps.
             ICapability[] caps = event.getModule().getDefinition().getCapabilities();
-            // Add exports to available package map.
+            // Add exports to unresolved package map.
             for (int i = 0; (caps != null) && (i < caps.length); i++)
             {
-                if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
-                {
-                    indexPackageCapability(m_availPkgIndexMap, module, caps[i]);
-                }
-
-
-                ICapability[] inUseCaps = (ICapability[]) m_inUseCapMap.get(module);
-                inUseCaps = addCapabilityToArray(inUseCaps, caps[i]);
-                m_inUseCapMap.put(module, inUseCaps);
+                ICapability[] resolvedCaps = (ICapability[]) m_resolvedCapMap.get(module);
+                resolvedCaps = addCapabilityToArray(resolvedCaps, caps[i]);
+                m_resolvedCapMap.put(module, resolvedCaps);
 
                 // If the capability is a package, then add the exporter module
-                // of the wire to the "in use" package index and remove it
-                // from the "available" package index.
+                // of the wire to the "resolved" package index and remove it
+                // from the "unresolved" package index.
                 if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
                 {
                     // Get package name.
                     String pkgName = (String)
                         caps[i].getProperties().get(ICapability.PACKAGE_PROPERTY);
-                    // Add to "in use" package index.
+                    // Add to "resolved" package index.
                     indexPackageCapability(
-                        m_inUsePkgIndexMap,
+                        m_resolvedPkgIndexMap,
                         module,
                         caps[i]);
-                    // Remove from "available" package index.
-                    m_availPkgIndexMap.put(
-                        pkgName,
-                        removeModuleFromArray(
-                            (IModule[]) m_availPkgIndexMap.get(pkgName),
-                            module));
                 }
             }
         }
@@ -2889,10 +2874,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                 capability.getProperties().get(ICapability.PACKAGE_PROPERTY);
             IModule[] modules = (IModule[]) map.get(pkgName);
 
-            // We want to add the module into the list of available
-            // exporters in sorted order (descending version and
-            // ascending bundle identifier). Insert using a simple
-            // binary search algorithm.
+            // We want to add the module into the list of exporters
+            // in sorted order (descending version and ascending bundle
+            // identifier). Insert using a simple binary search algorithm.
             if (modules == null)
             {
                 modules = new IModule[] { module };
@@ -3070,7 +3054,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
 
     private static ICapability[] addCapabilityToArray(ICapability[] caps, ICapability cap)
     {
-        // Verify that the inuse is not already in the array.
+        // Verify that the capability is not already in the array.
         for (int i = 0; (caps != null) && (i < caps.length); i++)
         {
             if (caps[i].equals(cap))
@@ -3340,9 +3324,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             if (reqs[i].getName().equals(pkgName) && reqs[i].isOptional())
             {
                 // Try to see if there is an exporter available.
-                IModule[] exporters = getInUseExporters(reqs[i], true);
+                IModule[] exporters = getResolvedExporters(reqs[i], true);
                 exporters = (exporters.length == 0)
-                    ? getAvailableExporters(reqs[i], true) : exporters;
+                    ? getUnresolvedExporters(reqs[i], true) : exporters;
 
                 // An exporter might be available, but it may have attributes
                 // that do not match the importer's required attributes, so
@@ -3352,9 +3336,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                 {
                     IRequirement pkgReq = new Requirement(
                         ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")");
-                    exporters = getInUseExporters(pkgReq, true);
+                    exporters = getResolvedExporters(pkgReq, true);
                     exporters = (exporters.length == 0)
-                        ? getAvailableExporters(pkgReq, true) : exporters;
+                        ? getUnresolvedExporters(pkgReq, true) : exporters;
                 }
 
                 long expId = (exporters.length == 0)
@@ -3399,9 +3383,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
             if (target != null)
             {
                 // Try to see if there is an exporter available.
-                PackageSource[] exporters = getInUseCandidates(target);
+                PackageSource[] exporters = getResolvedCandidates(target);
                 exporters = (exporters.length == 0)
-                    ? getUnusedCandidates(target) : exporters;
+                    ? getUnresolvedCandidates(target) : exporters;
 
                 // An exporter might be available, but it may have attributes
                 // that do not match the importer's required attributes, so
@@ -3413,9 +3397,9 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
                     {
                         IRequirement pkgReq = new Requirement(
                             ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")");
-                        exporters = getInUseCandidates(pkgReq);
+                        exporters = getResolvedCandidates(pkgReq);
                         exporters = (exporters.length == 0)
-                            ? getUnusedCandidates(pkgReq) : exporters;
+                            ? getUnresolvedCandidates(pkgReq) : exporters;
                     }
                     catch (InvalidSyntaxException ex)
                     {
@@ -3465,8 +3449,8 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
         {
             // This should never happen.
         }
-        PackageSource[] exporters = getInUseCandidates(pkgReq);
-        exporters = (exporters.length == 0) ? getUnusedCandidates(pkgReq) : exporters;
+        PackageSource[] exporters = getResolvedCandidates(pkgReq);
+        exporters = (exporters.length == 0) ? getUnresolvedCandidates(pkgReq) : exporters;
         if (exporters.length > 0)
         {
             boolean classpath = false;

@@ -275,6 +275,9 @@ public class Felix extends FelixBundle
             m_logger, new SystemBundleArchive(m_cache), null);
         m_extensionManager =
             new ExtensionManager(m_logger, m_configMap, m_systemBundleInfo);
+// TODO: REFACTOR - Right now this module added event is getting lost
+//       by R4SearchPolicyCore, which uses it to populate the avail package
+//       map. Not super important, since it gets the resolved event.
         m_systemBundleInfo.addModule(
             m_factory.createModule("0", m_extensionManager));
     }
@@ -2894,7 +2897,7 @@ ex.printStackTrace();
     {
         // First, get all exporters of the package.
         R4SearchPolicyCore.PackageSource[] exporters =
-            m_policyCore.getInUseCandidates(
+            m_policyCore.getResolvedCandidates(
                 new Requirement(
                     ICapability.PACKAGE_NAMESPACE,
                     null,
@@ -3024,7 +3027,7 @@ ex.printStackTrace();
                     // "in use" exporters of the package.
                     if (caps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
                     {
-                        R4SearchPolicyCore.PackageSource[] inUseModules = m_policyCore.getInUseCandidates(
+                        R4SearchPolicyCore.PackageSource[] inUseModules = m_policyCore.getResolvedCandidates(
                             new Requirement(
                                 ICapability.PACKAGE_NAMESPACE,
                                 null,
