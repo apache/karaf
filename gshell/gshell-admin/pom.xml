@@ -42,9 +42,11 @@
             org.apache.geronimo.gshell*,
         </gshell.osgi.import>
         <gshell.osgi.export>
+            org.apache.servicemix.jpm
         </gshell.osgi.export>
         <gshell.osgi.private>
           org.apache.servicemix.kernel.gshell.admin.*,
+          org.apache.servicemix.jpm.impl
         </gshell.osgi.private>
     </properties>
 
@@ -108,7 +110,7 @@
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
                         <Export-Package>org.apache.servicemix.kernel.gshell.admin.*;version=${project.version}</Export-Package>
                         <Import-Package>*</Import-Package>
-                        <Private-Package>!*</Private-Package>
+                        <Private-Package>org.apache.servicemix.jpm.*</Private-Package>
                         <Spring-Context>*;publish-context:=false;create-asynchronously:=false</Spring-Context>
                     </instructions>
                 </configuration>
