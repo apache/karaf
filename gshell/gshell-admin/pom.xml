@@ -76,6 +76,13 @@
           <artifactId>spring-osgi-core</artifactId>
           <version>${spring.osgi.version}</version>
       </dependency>
+
+      <dependency>
+          <groupId>org.apache.servicemix.bundles</groupId>
+          <artifactId>org.apache.servicemix.bundles.junit</artifactId>
+          <version>${junit.version}</version>
+          <scope>test</scope>
+      </dependency>
     </dependencies>
 
     <build>
