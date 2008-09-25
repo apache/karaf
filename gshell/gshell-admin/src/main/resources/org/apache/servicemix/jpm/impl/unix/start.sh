@@ -3,6 +3,8 @@
 #exec 2>${err.file}
 exec 1>/dev/null
 exec 2>/dev/null
-cd ${dir}
+if [ "x${dir}" != "x" ]; then
+    cd ${dir}
+fi
 nohup ${command} &
 echo $! > ${pid.file}
