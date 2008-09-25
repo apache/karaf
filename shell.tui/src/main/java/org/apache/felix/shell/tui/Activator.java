@@ -139,7 +139,7 @@ public class Activator implements BundleActivator
                 catch (IOException ex)
                 {
                     System.err.println("Could not read input, please try again.");
-                    continue;
+                    break;
                 }
 
                 synchronized (Activator.this)
