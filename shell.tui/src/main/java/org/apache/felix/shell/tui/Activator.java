@@ -138,7 +138,7 @@ public class Activator implements BundleActivator
                 }
                 catch (IOException ex)
                 {
-                    System.err.println("Could not read input, please try again.");
+                    System.err.println("ShellTUI: Error reading from stdin...exiting.");
                     break;
                 }
 
