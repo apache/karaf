@@ -19,18 +19,27 @@ package org.apache.geronimo.gshell.remote.client;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.io.FilterInputStream;
+import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.io.IOException;
 
 import jline.Terminal;
 import org.apache.geronimo.gshell.ExitNotification;
+import org.apache.geronimo.gshell.spring.NoCloseInputStream;
 import org.apache.geronimo.gshell.support.OsgiCommandSupport;
 import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.geronimo.gshell.clp.Option;
 import org.apache.geronimo.gshell.command.annotation.CommandComponent;
+import org.apache.geronimo.gshell.command.IO;
 import org.apache.geronimo.gshell.console.PromptReader;
 import org.apache.geronimo.gshell.remote.client.handler.ClientMessageHandler;
 import org.apache.geronimo.gshell.remote.client.proxy.RemoteShellProxy;
 import org.apache.geronimo.gshell.remote.crypto.CryptoContext;
 import org.apache.geronimo.gshell.whisper.transport.TransportFactoryLocator;
+import org.apache.geronimo.gshell.whisper.stream.StreamFeeder;
 
 /**
  * Created by IntelliJ IDEA.
@@ -82,55 +91,74 @@ public class SpringRshCommand extends OsgiCommandSupport {
     protected Object doExecute() throws Exception {
         io.info("Connecting to: {}", remote);
 
-        RshClient client = new RshClient(crypto, locator, handlers);
-        client.initialize();
-        PromptReader prompter = new PromptReader(terminal, io);
-        prompter.initialize();      
-
-        client.connect(remote, local);
-
-        io.info("Connected");
-
-        // If the username/password was not configured via cli, then prompt the user for the values
-        if (username == null || password == null) {
-            if (username == null) {
-                username = prompter.readLine("Username: ");
-            }
-
-            if (password == null) {
-                password = prompter.readPassword("Password: ");
-            }
-
-            //
-            // TODO: Handle null inputs...
-            //
-        }
-
-        client.login(username, password);
-
-        // client.echo("HELLO");
-        // Thread.sleep(1 * 1000);
-
-        RemoteShellProxy shell = new RemoteShellProxy(client, io, terminal);
-
-        Object rv = SUCCESS;
+        final NoCloseInputStream ncis = new NoCloseInputStream(this.io.inputStream);
+        final IO io = new IO(ncis, this.io.outputStream, this.io.errorStream);
+        final AtomicBoolean disconnected = new AtomicBoolean(false);
 
         try {
-            shell.run(command.toArray());
+            SpringRshClient client = new SpringRshClient(crypto, locator, handlers) {
+                protected void onSessionClosed() {
+                    disconnected.set(true);
+                    try {
+                        ncis.close();
+                    } catch (IOException e) {}
+                }
+            };
+            client.initialize();
+            PromptReader prompter = new PromptReader(terminal, io);
+            prompter.initialize();
+
+            client.connect(remote, local);
+
+            this.io.info("Connected");
+
+            // If the username/password was not configured via cli, then prompt the user for the values
+            if (username == null || password == null) {
+                if (username == null) {
+                    username = prompter.readLine("Username: ");
+                }
+
+                if (password == null) {
+                    password = prompter.readPassword("Password: ");
+                }
+
+                //
+                // TODO: Handle null inputs...
+                //
+            }
+
+            client.login(username, password);
+
+            // client.echo("HELLO");
+            // Thread.sleep(1 * 1000);
+
+            RemoteShellProxy shell = new RemoteShellProxy(client, io, terminal);
+
+            Object rv = SUCCESS;
+
+            try {
+                shell.run(command.toArray());
+            }
+            catch (ExitNotification n) {
+                // Make sure that we catch this notification, so that our parent shell doesn't exit when the remote shell does
+                rv = n.code;
+            }
+
+            if (!disconnected.get()) {
+                shell.close();
+            }
+
+            this.io.verbose("Disconnecting");
+
+            client.close();
+
+            this.io.verbose("Disconnected");
+
+            return rv;
+        } finally {
+            try {
+                ncis.close();
+            } catch (IOException e) {}
         }
-        catch (ExitNotification n) {
-            // Make sure that we catch this notification, so that our parent shell doesn't exit when the remote shell does
-            rv = n.code;
-        }
-
-        shell.close();
-
-        io.verbose("Disconnecting");
-
-        client.close();
-
-        io.verbose("Disconnected");
-
-        return rv;
     }
 }

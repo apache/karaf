@@ -17,14 +17,13 @@
 package org.apache.servicemix.kernel.client;
 
 import java.net.URI;
+import java.net.URL;
 import java.util.List;
 import java.util.LinkedList;
-import java.io.Reader;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 
 import org.apache.geronimo.gshell.remote.crypto.CryptoContext;
-import org.apache.geronimo.gshell.remote.client.RshClient;
 import org.apache.geronimo.gshell.remote.client.RemoteExecuteException;
 import org.apache.geronimo.gshell.remote.client.handler.EchoHandler;
 import org.apache.geronimo.gshell.remote.client.handler.ClientMessageHandler;
@@ -33,7 +32,6 @@ import org.apache.geronimo.gshell.whisper.transport.TransportFactory;
 import org.apache.geronimo.gshell.whisper.transport.TransportFactoryLocator;
 import org.apache.geronimo.gshell.whisper.transport.tcp.SpringTcpTransportFactory;
 import org.apache.geronimo.gshell.whisper.stream.StreamFeeder;
-import org.apache.geronimo.gshell.layout.NotFoundException;
 import org.apache.geronimo.gshell.ExitNotification;
 
 /**
@@ -80,7 +78,11 @@ public class Main {
             CryptoContext context = new CryptoContext("RSA", null);
             List<ClientMessageHandler> handlers = new LinkedList<ClientMessageHandler>();
             handlers.add(new EchoHandler());
-            client = new RshClient(context, new Locator(), handlers);
+            client = new RshClient(context, new Locator(), handlers) {
+                protected void onSessionClosed() {
+                    System.exit(2);
+                }
+            };
 
             client.initialize();
             client.connect(address, new URI("tcp://0.0.0.0:0"));

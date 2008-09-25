@@ -21,18 +21,22 @@ import org.apache.geronimo.gshell.support.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
 
 /**
- * Created by IntelliJ IDEA.
- * User: gnodet
- * Date: Oct 3, 2007
- * Time: 1:59:04 PM
- * To change this template use File | Settings | File Templates.
+ * Command to shut down ServiceMix Kernel
  */
 @CommandComponent(id="osgi:shutdown", description="Shutdown")
 public class Shutdown extends OsgiCommandSupport {
 
     protected Object doExecute() throws Exception {
-        Bundle bundle = getBundleContext().getBundle(0);
-        bundle.stop();
+        new Thread() {
+            public void run() {
+                try {
+                    Bundle bundle = getBundleContext().getBundle(0);
+                    bundle.stop();
+                } catch (Exception e) {
+                    log.error("Error when shutting down ServiceMix Kernel", e);
+                }
+            }
+        }.start();
         return SUCCESS;
     }
 
