@@ -48,6 +48,7 @@ public class ProcessTest {
         assertTrue(p.isRunning());
         System.err.println("Destroying");
         p.destroy();
+        Thread.currentThread().sleep(1000);
         System.err.println("Running: " + p.isRunning());
         assertFalse(p.isRunning());
     }
