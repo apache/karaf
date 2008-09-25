@@ -16,18 +16,24 @@
  */
 package org.apache.servicemix.jpm;
 
+import java.io.File;
+
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import org.apache.servicemix.jpm.impl.ScriptUtils;
 
 public class ProcessTest {
 
     @Test
     public void testCreate() throws Exception {
+        String javaPath = new File(System.getProperty("java.home"), "bin/java" + (ScriptUtils.isWindows() ? ".exe" : "")).getCanonicalPath();
+        System.err.println(javaPath);
         StringBuilder command = new StringBuilder();
-        command.append("java -classpath ");
+        command.append(javaPath);
+        command.append(" -classpath ");
         String clRes = getClass().getName().replace('.', '/') + ".class";
         String str = getClass().getClassLoader().getResource(clRes).toString();
         str = str.substring("file:".length(), str.indexOf(clRes));
