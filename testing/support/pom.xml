@@ -77,27 +77,14 @@
       <dependency>
           <groupId>org.springframework.osgi</groupId>
           <artifactId>spring-osgi-test</artifactId>
-          <version>${spring.osgi.version}</version>
-          <exclusions>
-              <exclusion>
-                  <groupId>org.springframework.osgi</groupId>
-                  <artifactId>asm.osgi</artifactId>
-              </exclusion>
-              <exclusion>
-                  <groupId>org.springframework.osgi</groupId>
-                  <artifactId>junit.osgi</artifactId>
-              </exclusion>
-          </exclusions>
       </dependency>
       <dependency>
           <groupId>org.springframework.osgi</groupId>
           <artifactId>spring-osgi-extender</artifactId>
-          <version>${spring.osgi.version}</version>
       </dependency>
       <dependency>
           <groupId>org.springframework.osgi</groupId>
           <artifactId>spring-osgi-annotation</artifactId>
-          <version>${spring.osgi.version}</version>
       </dependency>
       <dependency>
           <groupId>org.apache.geronimo.specs</groupId>
