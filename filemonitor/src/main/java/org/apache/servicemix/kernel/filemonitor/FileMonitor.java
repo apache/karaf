@@ -78,9 +78,9 @@ public class FileMonitor {
     private static final Log LOGGER = LogFactory.getLog(FileMonitor.class);
 
     private FileMonitorActivator activator;
-    private File configDir = new File("./etc");
-    private File deployDir = new File("./deploy");
-    private File generateDir = new File("./data/generated-bundles");
+    private File configDir;
+    private File deployDir;
+    private File generateDir;
     private Scanner scanner = new Scanner();
     private Project project = new Project();
     private long scanInterval = 500L;
@@ -95,10 +95,16 @@ public class FileMonitor {
     private Executor executor;
 
     public FileMonitor() {
+        String base = System.getProperty("servicemix.base", ".");
+        configDir = new File(base, "etc");
+        deployDir = new File(base, "deploy");
+        generateDir = new File(base, "data/generated-bundles");
     }
 
     @SuppressWarnings("unchecked")
     public FileMonitor(FileMonitorActivator activator, Dictionary properties) {
+        this();
+        
         this.activator = activator;
 
         File value = getFileValue(properties, CONFIG_DIR);
