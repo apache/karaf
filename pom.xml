@@ -175,6 +175,10 @@
                   <groupId>org.junit</groupId>
                   <artifactId>com.springsource.junit</artifactId>
               </exclusion>
+              <exclusion>
+                  <groupId>org.objectweb.asm</groupId>
+                  <artifactId>com.springsource.org.objectweb.asm</artifactId>
+              </exclusion>
           </exclusions>
       </dependency>
       <dependency>
