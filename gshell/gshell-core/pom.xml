@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <!--
 
@@ -64,168 +65,98 @@
         <dependency>
             <groupId>org.apache.servicemix.kernel</groupId>
             <artifactId>org.apache.servicemix.kernel.main</artifactId>
-            <version>${pom.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.kernel.jaas</groupId>
             <artifactId>org.apache.servicemix.kernel.jaas.config</artifactId>
-            <version>${pom.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.cglib</artifactId>
-            <version>${cglib.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.osgi</groupId>
             <artifactId>spring-osgi-core</artifactId>
-            <version>${spring.osgi.version}</version>
-        </dependency>        
+        </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell</groupId>
             <artifactId>gshell-core</artifactId>
-            <version>${gshell.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell</groupId>
             <artifactId>gshell-command-api</artifactId>
-            <version>${gshell.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell.support</groupId>
             <artifactId>gshell-common</artifactId>
-            <version>${gshell.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell.support</groupId>
             <artifactId>gshell-ansi</artifactId>
-            <version>${gshell.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell.support</groupId>
             <artifactId>gshell-i18n</artifactId>
-            <version>${gshell.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell.support</groupId>
             <artifactId>gshell-clp</artifactId>
-            <version>${gshell.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell</groupId>
             <artifactId>gshell-parser</artifactId>
-            <version>${gshell.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell</groupId>
             <artifactId>gshell-whisper</artifactId>
-            <version>${gshell.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.mina</groupId>
-					<artifactId>mina-filter-ssl</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.mina</groupId>
-					<artifactId>mina-core</artifactId>
-				</exclusion>
-			</exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell.remote</groupId>
             <artifactId>gshell-remote-client</artifactId>
-            <version>${gshell.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.mina</groupId>
-					<artifactId>mina-filter-ssl</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.mina</groupId>
-					<artifactId>mina-core</artifactId>
-				</exclusion>
-			</exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell.remote</groupId>
             <artifactId>gshell-remote-common</artifactId>
-            <version>${gshell.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.mina</groupId>
-					<artifactId>mina-filter-ssl</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.mina</groupId>
-					<artifactId>mina-core</artifactId>
-				</exclusion>
-			</exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell.remote</groupId>
             <artifactId>gshell-remote-server</artifactId>
-            <version>${gshell.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.mina</groupId>
-					<artifactId>mina-filter-ssl</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.mina</groupId>
-					<artifactId>mina-core</artifactId>
-				</exclusion>
-			</exclusions>
-        </dependency>
-        <dependency>
-            <groupId>commons-jexl</groupId>
-            <artifactId>commons-jexl</artifactId>
-            <version>1.1</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>jline</groupId>
             <artifactId>jline</artifactId>
-            <version>${jline.version}</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-component-api</artifactId>
-            <version>1.0-alpha-32</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-utils</artifactId>
-            <version>1.4.5</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.4.3</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
-            <version>1.4.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.mina</artifactId>
-            <version>${mina.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
         </dependency>
     </dependencies>
 
@@ -284,7 +215,6 @@
                                     <include>org.apache.geronimo.gshell:gshell-command-api</include>
                                     <include>org.apache.geronimo.gshell:gshell-core</include>
                                     <include>jline:jline</include>
-                                    <include>commons-jexl:commons-jexl</include>
                                     <include>${project.groupId}:${project.artifactId}</include>
                                 </includes>
                             </artifactSet>
@@ -311,12 +241,6 @@
                                     <artifact>jline:jline</artifact>
                                     <excludes>
                                         <exclude>jline/**</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>commons-jexl:commons-jexl</artifact>
-                                    <excludes>
-                                        <exclude>org/apache/commons/jexl/**</exclude>
                                     </excludes>
                                 </filter>
                             </filters>

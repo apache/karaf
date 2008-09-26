@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <!--
 
@@ -36,173 +37,135 @@
         <dependency>
             <groupId>org.apache.servicemix.kernel</groupId>
             <artifactId>org.apache.servicemix.kernel.main</artifactId>
-            <version>${pom.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.kernel</groupId>
             <artifactId>org.apache.servicemix.kernel.client</artifactId>
-            <version>${pom.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.kernel</groupId>
             <artifactId>org.apache.servicemix.kernel.filemonitor</artifactId>
-            <version>${pom.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.kernel</groupId>
             <artifactId>org.apache.servicemix.kernel.spring</artifactId>
-            <version>${pom.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.kernel.gshell</groupId>
+            <artifactId>org.apache.servicemix.kernel.gshell.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.kernel.gshell</groupId>
+            <artifactId>org.apache.servicemix.kernel.gshell.admin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.kernel.gshell</groupId>
+            <artifactId>org.apache.servicemix.kernel.gshell.obr</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.kernel.gshell</groupId>
+            <artifactId>org.apache.servicemix.kernel.gshell.osgi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.kernel.gshell</groupId>
+            <artifactId>org.apache.servicemix.kernel.gshell.log</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.kernel.gshell</groupId>
+            <artifactId>org.apache.servicemix.kernel.gshell.features</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.kernel.jaas</groupId>
+            <artifactId>org.apache.servicemix.kernel.jaas.boot</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.kernel.jaas</groupId>
+            <artifactId>org.apache.servicemix.kernel.jaas.config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.kernel.jaas</groupId>
+            <artifactId>org.apache.servicemix.kernel.jaas.keystore</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.osgi</groupId>
             <artifactId>spring-osgi-extender</artifactId>
-            <version>${spring.osgi.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.osgi</groupId>
             <artifactId>spring-osgi-core</artifactId>
-            <version>${spring.osgi.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.osgi</groupId>
             <artifactId>spring-osgi-io</artifactId>
-            <version>${spring.osgi.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-tx</artifactId>
-            <version>${spring.version}</version>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.bundlerepository</artifactId>
         </dependency>
-      <dependency>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>org.apache.felix.bundlerepository</artifactId>
-          <version>${felix.bundlerepository.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.servicemix.kernel.gshell</groupId>
-          <artifactId>org.apache.servicemix.kernel.gshell.core</artifactId>
-          <version>${pom.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.servicemix.kernel.gshell</groupId>
-          <artifactId>org.apache.servicemix.kernel.gshell.admin</artifactId>
-          <version>${pom.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.servicemix.kernel.gshell</groupId>
-          <artifactId>org.apache.servicemix.kernel.gshell.obr</artifactId>
-          <version>${pom.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.servicemix.kernel.gshell</groupId>
-          <artifactId>org.apache.servicemix.kernel.gshell.osgi</artifactId>
-          <version>${pom.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.servicemix.kernel.gshell</groupId>
-          <artifactId>org.apache.servicemix.kernel.gshell.log</artifactId>
-          <version>${pom.version}</version>
-      </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.kernel.gshell</groupId>
-            <artifactId>org.apache.servicemix.kernel.gshell.features</artifactId>
-            <version>${pom.version}</version>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.mina</artifactId>
         </dependency>
-      <dependency>
-          <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.mina</artifactId>
-          <version>${mina.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
-          <version>${aopalliance.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.asm</artifactId>
-          <version>${asm.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.cglib</artifactId>
-          <version>${cglib.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.ant</artifactId>
-          <version>${ant.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>org.osgi.compendium</artifactId>
-          <version>${felix.compendium.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>org.apache.felix.configadmin</artifactId>
-          <version>${felix.configadmin.version}</version>
-      </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.asm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.cglib</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.ant</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.configadmin</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.prefs</artifactId>
-            <version>${felix.prefs.version}</version>
         </dependency>
-      <dependency>
-          <groupId>org.ops4j.pax.logging</groupId>
-          <artifactId>pax-logging-api</artifactId>
-          <version>${pax.logging.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.ops4j.pax.logging</groupId>
-          <artifactId>pax-logging-service</artifactId>
-          <version>${pax.logging.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.ops4j.pax.url</groupId>
-          <artifactId>pax-url-mvn</artifactId>
-          <version>${pax.url.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.geronimo.specs</groupId>
-          <artifactId>geronimo-servlet_2.5_spec</artifactId>
-          <version>${geronimo.servlet.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.servicemix.kernel.jaas</groupId>
-          <artifactId>org.apache.servicemix.kernel.jaas.boot</artifactId>
-          <version>${pom.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.servicemix.kernel.jaas</groupId>
-          <artifactId>org.apache.servicemix.kernel.jaas.config</artifactId>
-          <version>${pom.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.servicemix.kernel.jaas</groupId>
-          <artifactId>org.apache.servicemix.kernel.jaas.keystore</artifactId>
-          <version>${pom.version}</version>
-      </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.logging</groupId>
+            <artifactId>pax-logging-service</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.url</groupId>
+            <artifactId>pax-url-mvn</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-servlet_2.5_spec</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <resources>
@@ -280,7 +243,7 @@
                             <artifacts>
                                 <artifact>
                                     <file>target/classes/features.xml</file>
-                                    <type>xml </type>
+                                    <type>xml</type>
                                     <classifier>features</classifier>
                                 </artifact>
                             </artifacts>
@@ -319,7 +282,7 @@
                             </descriptors>
                             <finalName>${pom.artifactId}-${pom.version}</finalName>
                             <appendAssemblyId>true</appendAssemblyId>
-                            <assemblyId />
+                            <assemblyId/>
                         </configuration>
                     </execution>
                     <execution>
@@ -349,12 +312,12 @@
                     </execution>
                 </executions>
             </plugin>
-          <plugin>
-              <artifactId>maven-remote-resources-plugin</artifactId>
-              <version>1.0-beta-2</version>
-              <executions>
-              </executions>
-          </plugin>
+            <plugin>
+                <artifactId>maven-remote-resources-plugin</artifactId>
+                <version>1.0-beta-2</version>
+                <executions>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <!--
 
@@ -45,44 +46,39 @@
             org.apache.servicemix.jpm
         </gshell.osgi.export>
         <gshell.osgi.private>
-          org.apache.servicemix.kernel.gshell.admin.*,
-          org.apache.servicemix.jpm.impl
+            org.apache.servicemix.kernel.gshell.admin.*,
+            org.apache.servicemix.jpm.impl
         </gshell.osgi.private>
     </properties>
 
     <dependencies>
-      <dependency>
-          <groupId>org.apache.servicemix.kernel.gshell</groupId>
-          <artifactId>org.apache.servicemix.kernel.gshell.core</artifactId>
-          <version>${pom.version}</version>
-      </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.kernel.gshell</groupId>
+            <artifactId>org.apache.servicemix.kernel.gshell.core</artifactId>
+        </dependency>
 
-      <dependency>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>org.osgi.core</artifactId>
-          <version>${felix.osgi.version}</version>
-          <scope>provided</scope>
-      </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
-      <dependency>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>org.osgi.compendium</artifactId>
-          <version>${felix.compendium.version}</version>
-          <scope>provided</scope>
-      </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
-      <dependency>
-          <groupId>org.springframework.osgi</groupId>
-          <artifactId>spring-osgi-core</artifactId>
-          <version>${spring.osgi.version}</version>
-      </dependency>
+        <dependency>
+            <groupId>org.springframework.osgi</groupId>
+            <artifactId>spring-osgi-core</artifactId>
+        </dependency>
 
-      <dependency>
-          <groupId>org.apache.servicemix.bundles</groupId>
-          <artifactId>org.apache.servicemix.bundles.junit</artifactId>
-          <version>${junit.version}</version>
-          <scope>test</scope>
-      </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.junit</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -115,7 +111,8 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
-                        <Export-Package>org.apache.servicemix.kernel.gshell.admin.*;version=${project.version}</Export-Package>
+                        <Export-Package>org.apache.servicemix.kernel.gshell.admin.*;version=${project.version}
+                        </Export-Package>
                         <Import-Package>*</Import-Package>
                         <Private-Package>org.apache.servicemix.jpm.*</Private-Package>
                         <Spring-Context>*;publish-context:=false;create-asynchronously:=false</Spring-Context>

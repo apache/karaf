@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <!--
 
@@ -21,9 +22,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-      <groupId>org.apache.servicemix.kernel</groupId>
-      <artifactId>kernel</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
+        <groupId>org.apache.servicemix.kernel</groupId>
+        <artifactId>kernel</artifactId>
+        <version>1.1.0-SNAPSHOT</version>
     </parent>
 
     <groupId>org.apache.servicemix.kernel</groupId>
@@ -36,7 +37,6 @@
         <dependency>
             <groupId>org.apache.servicemix.kernel.gshell</groupId>
             <artifactId>org.apache.servicemix.kernel.gshell.core</artifactId>
-            <version>${pom.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -47,12 +47,10 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.5.0</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-nop</artifactId>
-            <version>1.5.0</version>
         </dependency>
     </dependencies>
     <build>
@@ -70,7 +68,7 @@
                         </Class-Path>
                         <Bundle-Name>Apache ServiceMix Shell Client</Bundle-Name>
                         <Bundle-Description>Shell client bundle for Apache ServiceMix Kernel.</Bundle-Description>
-			            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
                         <Export-Package>org.apache.servicemix.kernel.client</Export-Package>
                         <Private-Package>
                             org.apache.servicemix.kernel.client;-split-package:=merge-first,

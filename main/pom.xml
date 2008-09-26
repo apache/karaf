@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <!--
 
@@ -21,9 +22,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-      <groupId>org.apache.servicemix.kernel</groupId>
-      <artifactId>kernel</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
+        <groupId>org.apache.servicemix.kernel</groupId>
+        <artifactId>kernel</artifactId>
+        <version>1.1.0-SNAPSHOT</version>
     </parent>
 
     <groupId>org.apache.servicemix.kernel</groupId>
@@ -36,23 +37,14 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.framework</artifactId>
-            <version>${felix.framework.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>org.osgi.compendium</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <version>${felix.osgi.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.junit</artifactId>
-            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -67,7 +59,7 @@
                         <Main-Class>org.apache.servicemix.kernel.main.Main</Main-Class>
                         <Bundle-Name>Apache ServiceMix</Bundle-Name>
                         <Bundle-Description>OSGi R4 framework.</Bundle-Description>
-			            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
                         <Export-Package>org.apache.servicemix.kernel.main.spi.*;version=${pom.version}</Export-Package>
                         <Private-Package>
                             org.apache.servicemix.kernel.main;-split-package:=merge-first,
@@ -156,7 +148,7 @@
                                         <artifactItem>
                                             <groupId>org.apache.felix</groupId>
                                             <artifactId>org.osgi.core</artifactId>
-			                                <version>${felix.osgi.version}</version>
+                                            <version>${felix.osgi.version}</version>
                                             <classifier>sources</classifier>
                                         </artifactItem>
                                         <artifactItem>
