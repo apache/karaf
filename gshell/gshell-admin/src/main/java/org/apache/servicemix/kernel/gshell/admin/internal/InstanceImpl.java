@@ -30,6 +30,7 @@ import java.net.URI;
 
 import org.apache.servicemix.jpm.Process;
 import org.apache.servicemix.jpm.ProcessBuilderFactory;
+import org.apache.servicemix.jpm.impl.ScriptUtils;
 import org.apache.servicemix.kernel.gshell.admin.Instance;
 import org.apache.geronimo.gshell.common.io.PumpStreamHandler;
 import org.apache.geronimo.gshell.command.IO;
@@ -111,21 +112,20 @@ public class InstanceImpl implements Instance {
         if (this.process != null) {
             throw new IllegalStateException("Instance already started");
         }
-        /*
-        this.process = new ProcessBuilder()
-                            .directory(new File(name))
-                            .command(isWindows() ? "bin\\servicemix.bat" : "bin/servicemix", "server")
-                            .start();
-        IO io = ProxyIO.getIO();
-        this.handler = new PumpStreamHandler(new ByteArrayInputStream(new byte[0]),
-                                             io != null ? io.outputStream : new ByteArrayOutputStream(),
-                                             io != null ? io.errorStream : new ByteArrayOutputStream());
-        this.handler.attach(this.process);
-        this.handler.start();
-        */
+        String command = new File(System.getProperty("java.home"), "bin/java" + (ScriptUtils.isWindows() ? ".exe" : "")).getCanonicalPath()
+                + " -server -Xms128M -Xmx512M -Dcom.sun.management.jmxremote"
+                + " -Dservicemix.home=\"" + System.getProperty("servicemix.home") + "\""
+                + " -Dservicemix.base=\"" + new File(name).getCanonicalPath() + "\""
+                + " -Dservicemix.startLocalConsole=false"
+                + " -Dservicemix.startRemoteShell=true"
+                + " -classpath "
+                + new File(System.getProperty("servicemix.home"), "lib/servicemix.jar").getCanonicalPath()
+                + System.getProperty("path.separator")
+                + new File(System.getProperty("servicemix.home"), "lib/servicemix-jaas-boot.jar").getCanonicalPath()
+                + " org.apache.servicemix.kernel.main.Main";
         this.process = ProcessBuilderFactory.newInstance().newBuilder()
                         .directory(new File(name))
-                        .command(isWindows() ? "bin\\servicemix.bat server" : "bin/servicemix server")
+                        .command(command)
                         .start();
         this.service.saveState();
     }
@@ -174,16 +174,6 @@ public class InstanceImpl implements Instance {
             } catch (IOException e) {
             }
         }
-    }
-
-    private static final boolean windows;
-
-    static {
-        windows = System.getProperty("os.name").toLowerCase().indexOf("windows") != -1;
-    }
-
-    protected static boolean isWindows() {
-        return windows;
     }
 
     protected static boolean deleteFile(File fileToDelete) {
