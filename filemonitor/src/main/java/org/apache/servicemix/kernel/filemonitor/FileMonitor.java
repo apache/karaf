@@ -227,12 +227,10 @@ public class FileMonitor {
         bundlesToUpdate.clear();
         Set<File> bundleJarsCreated = new HashSet<File>();
 
-        for (Object filename : filenames) {
-            String name = filename.toString();
-
-            File file = new File(name);
+        for (String filename : filenames) {
+            File file = new File(filename);
             try {
-                LOGGER.debug("File changed: " + filename + " with type: " + filename.getClass().getName());
+                LOGGER.debug("File changed: " + filename);
 
                 // Handle config files
                 if (isValidConfigFile(file)) {
@@ -271,13 +269,13 @@ public class FileMonitor {
                 if (file.exists()) {
                     File f = transformArtifact(file);
                     if (f == null) {
-                        LOGGER.warn("Unsupported deployment: " + name);
+                        LOGGER.warn("Unsupported deployment: " + filename);
                         rescheduleTransformation(file);
                         continue;
                     }
                     file = f;
                 } else {
-                	String transformedFile = artifactToBundle.get(name);
+                	String transformedFile = artifactToBundle.get(filename);
                 	if (transformedFile != null) {
                 		file = new File(transformedFile);
                 		if (file.exists()) {
