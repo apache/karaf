@@ -19,8 +19,14 @@ package org.apache.servicemix.kernel.spring;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.jar.JarInputStream;
+
+import javax.xml.transform.dom.DOMSource;
 
 import junit.framework.TestCase;
 
@@ -29,12 +35,27 @@ public class SpringDeploymentListenerTest extends TestCase {
     public void testPackagesExtraction() throws Exception {
         SpringDeploymentListener l = new SpringDeploymentListener();
         File f = new File(getClass().getClassLoader().getResource("META-INF/spring/spring-deployer.xml").toURI());
-        Set<String> pkgs = SpringTransformer.analyze(new FileInputStream(f));
+        Set<String> pkgs = SpringTransformer.analyze(new DOMSource(SpringTransformer.parse(f.toURL())));
         assertNotNull(pkgs);
         assertEquals(2, pkgs.size());
         Iterator<String> it = pkgs.iterator();
         assertEquals("org.apache.servicemix.kernel.spring", it.next());
         assertEquals("org.osgi.service.url", it.next());
+    }
+
+    public void testCustomManifest() throws Exception {
+        File f = File.createTempFile("smx", ".jar");
+        try {
+            OutputStream os = new FileOutputStream(f);
+            SpringTransformer.transform(getClass().getClassLoader().getResource("test.xml"), os);
+            os.close();
+            InputStream is = new FileInputStream(f);
+            JarInputStream jar = new JarInputStream(is);
+            jar.getManifest().write(System.err);
+            is.close();
+        } finally {
+            f.delete();
+        }
     }
 
     public void testVersions() {

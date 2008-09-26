@@ -26,6 +26,8 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Properties;
+import java.util.Enumeration;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
@@ -39,38 +41,59 @@ import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Element;
 
 public class SpringTransformer {
 
     static Transformer transformer;
     static DocumentBuilderFactory dbf;
+    static TransformerFactory tf;
 
 
     public static void transform(URL url, OutputStream os) throws Exception {
+        // Build dom document
         Document doc = parse(url);
+        // Heuristicly retrieve name and version
         String name = url.getPath();
         int idx = name.lastIndexOf('/');
         if (idx >= 0) {
             name = name.substring(idx + 1);
         }
         String[] str = extractNameVersionType(name);
-
+        // Create manifest
         Manifest m = new Manifest();
         m.getMainAttributes().putValue("Manifest-Version", "2");
         m.getMainAttributes().putValue("Bundle-SymbolicName", str[0]);
         m.getMainAttributes().putValue("Bundle-Version", str[1]);
         m.getMainAttributes().putValue("Spring-Context", "*;publish-context:=false;create-asynchronously:=true");
-        InputStream is = url.openStream();
-        String importPkgs = getImportPackages(analyze(is));
-        is.close();
+        String importPkgs = getImportPackages(analyze(new DOMSource(doc)));
         if (importPkgs != null && importPkgs.length() > 0) {
             m.getMainAttributes().putValue("Import-Package", importPkgs);
         }
         m.getMainAttributes().putValue("DynamicImport-Package", "*");
+        // Extract manifest entries from the DOM
+        NodeList l = doc.getElementsByTagName("manifest");
+        if (l != null) {
+            for (int i = 0; i < l.getLength(); i++) {
+                Element e = (Element) l.item(i);
+                String text = e.getTextContent();
+                Properties props = new Properties();
+                props.load(new ByteArrayInputStream(text.trim().getBytes()));
+                Enumeration en = props.propertyNames();
+                while (en.hasMoreElements()) {
+                    String k = (String) en.nextElement();
+                    String v = props.getProperty(k);
+                    m.getMainAttributes().putValue(k, v);
+                }
+                e.getParentNode().removeChild(e);
+            }
+        }
 
         JarOutputStream out = new JarOutputStream(os);
         ZipEntry e = new ZipEntry(JarFile.MANIFEST_NAME);
@@ -84,9 +107,11 @@ public class SpringTransformer {
         out.closeEntry();
         e = new ZipEntry("META-INF/spring/" + name);
         out.putNextEntry(e);
-        is = url.openStream();
-        copyInputStream(is, out);
-        is.close();
+        // Copy the new DOM
+        if (tf == null) {
+            tf = TransformerFactory.newInstance();
+        }
+        tf.newTransformer().transform(new DOMSource(doc), new StreamResult(out));
         out.closeEntry();
         out.close();
     }
@@ -152,19 +177,20 @@ public class SpringTransformer {
         }
     }
 
-    public static Set<String> analyze(InputStream in) throws Exception {
+    public static Set<String> analyze(Source source) throws Exception {
         if (transformer == null) {
-            TransformerFactory tf = TransformerFactory.newInstance();
-            Source source = new StreamSource(SpringTransformer.class.getResourceAsStream("extract.xsl"));
-            transformer = tf.newTransformer(source);
+            if (tf == null) {
+                tf = TransformerFactory.newInstance();
+            }
+            Source s = new StreamSource(SpringTransformer.class.getResourceAsStream("extract.xsl"));
+            transformer = tf.newTransformer(s);
         }
 
         Set<String> refers = new TreeSet<String>();
 
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         Result r = new StreamResult(bout);
-        Source s = new StreamSource(in);
-        transformer.transform(s, r);
+        transformer.transform(source, r);
 
         ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
         bout.close();
