@@ -19,6 +19,8 @@
 package org.apache.felix.shell.impl;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import org.apache.felix.shell.Command;
@@ -26,6 +28,8 @@ import org.osgi.framework.*;
 
 public class StartCommandImpl extends InstallCommandImpl implements Command
 {
+    private static final String TRANSIENT_SWITCH = "-t";
+
     private BundleContext m_context = null;
 
     public StartCommandImpl(BundleContext context)
@@ -41,7 +45,7 @@ public class StartCommandImpl extends InstallCommandImpl implements Command
 
     public String getUsage()
     {
-        return "start <id> [<id> <URL> ...]";
+        return "start [-t] <id> [<id> <URL> ...]";
     }
 
     public String getShortDescription()
@@ -56,14 +60,33 @@ public class StartCommandImpl extends InstallCommandImpl implements Command
         // Ignore the command name.
         st.nextToken();
 
-        // There should be at least one bundle id.
-        if (st.countTokens() >= 1)
+        // Put the remaining tokens into a list.
+        List tokens = new ArrayList();
+        for (int i = 0; st.hasMoreTokens(); i++)
         {
-            while (st.hasMoreTokens())
-            {
-                String id = st.nextToken().trim();
+            tokens.add(st.nextToken());
+        }
 
-                try {
+        // Default switch value.
+        boolean isTransient = false;
+
+        // Check for "transient" switch.
+        if (tokens.contains(TRANSIENT_SWITCH))
+        {
+            // Remove the switch and set boolean flag.
+            tokens.remove(TRANSIENT_SWITCH);
+            isTransient = true;
+        }
+
+        // There should be at least one bundle id.
+        if (tokens.size() >= 1)
+        {
+            while (tokens.size() > 0)
+            {
+                String id = ((String) tokens.remove(0)).trim();
+
+                try
+                {
                     Bundle bundle = null;
 
                     // The id may be a number or a URL, so check.
@@ -79,15 +102,19 @@ public class StartCommandImpl extends InstallCommandImpl implements Command
 
                     if (bundle != null)
                     {
-                        bundle.start();
+                        bundle.start(isTransient ? Bundle.START_TRANSIENT : 0);
                     }
                     else
                     {
                         err.println("Bundle ID " + id + " is invalid.");
                     }
-                } catch (NumberFormatException ex) {
+                }
+                catch (NumberFormatException ex)
+                {
                     err.println("Unable to parse id '" + id + "'.");
-                } catch (BundleException ex) {
+                }
+                catch (BundleException ex)
+                {
                     if (ex.getNestedException() != null)
                     {
                         ex.printStackTrace();
@@ -97,7 +124,9 @@ public class StartCommandImpl extends InstallCommandImpl implements Command
                     {
                         err.println(ex.toString());
                     }
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     err.println(ex.toString());
                 }
             }
