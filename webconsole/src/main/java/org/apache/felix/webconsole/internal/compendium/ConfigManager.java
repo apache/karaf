@@ -729,7 +729,17 @@ public class ConfigManager extends ConfigManagerBase
                     {
                         // scalar of non-string
                         String prop = request.getParameter( propName );
-                        props.put( propName, this.toType( ad.getType(), prop ) );
+                        if ( prop != null )
+                        {
+                            try
+                            {
+                                props.put( propName, this.toType( ad.getType(), prop ) );
+                            }
+                            catch ( NumberFormatException nfe )
+                            {
+                                // don't care
+                            }
+                        }
                     }
                     else
                     {
@@ -741,7 +751,14 @@ public class ConfigManager extends ConfigManagerBase
                         {
                             for ( int i = 0; i < properties.length; i++ )
                             {
-                                vec.add( this.toType( ad.getType(), properties[i] ) );
+                                try
+                                {
+                                    vec.add( this.toType( ad.getType(), properties[i] ) );
+                                }
+                                catch ( NumberFormatException nfe )
+                                {
+                                    // don't care
+                                }
                             }
                         }
 
@@ -785,6 +802,10 @@ public class ConfigManager extends ConfigManagerBase
     }
 
 
+    /**
+     * @throws NumberFormatException If the value cannot be converted to
+     *      a number and type indicates a numeric type
+     */
     private Object toType( int type, String value )
     {
         switch ( type )
