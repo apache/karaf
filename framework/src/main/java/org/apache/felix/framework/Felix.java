@@ -896,9 +896,11 @@ ex.printStackTrace();
         fireFrameworkEvent(FrameworkEvent.STARTED, this, null);
     }
 
-	public void start(int options) throws BundleException
+    public void start(int options) throws BundleException
     {
-        throw new UnsupportedOperationException("This feature has not yet been implemented.");
+        // TODO: FRAMEWORK - For now, ignore all options when starting the
+        //       system bundle.
+        start();
     }
 
     /**
@@ -918,9 +920,11 @@ ex.printStackTrace();
         stopBundle(this, true);
     }
 
-	public void stop(int options) throws BundleException
+    public void stop(int options) throws BundleException
     {
-        throw new UnsupportedOperationException("This feature has not yet been implemented.");
+        // TODO: FRAMEWORK - For now, ignore all options when stopping the
+        //       system bundle.
+        stop();
     }
 
     public void stopAndWait()
@@ -1553,9 +1557,12 @@ ex.printStackTrace();
     private void _startBundle(FelixBundle bundle, boolean record)
         throws BundleException
     {
+        // Get bundle info object.
+        BundleInfo info = bundle.getInfo();
+
         // The spec doesn't say whether it is possible to start an extension
         // We just do nothing
-        if (bundle.getInfo().isExtension())
+        if (info.isExtension())
         {
             return;
         }
@@ -1564,17 +1571,23 @@ ex.printStackTrace();
         // if we are supposed to record state change.
         if (record)
         {
-            bundle.getInfo().setPersistentStateActive();
+            info.setPersistentStateActive();
         }
 
-        // Try to start the bundle.
-        BundleInfo info = bundle.getInfo();
-
-        // Ignore bundles whose persistent state is not active
-        // or whose start level is greater than the framework's.
-        if ((info.getPersistentState() != Bundle.ACTIVE)
-            || (info.getStartLevel(getInitialBundleStartLevel()) > getStartLevel()))
+        // Check to see if the bundle's start level is greater than the
+        // the framework's start level.
+        if (info.getStartLevel(getInitialBundleStartLevel()) > getStartLevel())
         {
+            // Throw an exception for transient starts.
+            if (!record)
+            {
+                throw new BundleException(
+                    "Cannot start the bundle because its start level is "
+                    + info.getStartLevel(getInitialBundleStartLevel())
+                    + ", which is greater than the framework's start level of "
+                    + getStartLevel() + ".");
+            }
+            // Ignore persistent starts.
             return;
         }
 
@@ -1767,7 +1780,8 @@ ex.printStackTrace();
 
             // Cannot update an uninstalled bundle.
             BundleInfo info = bundle.getInfo();
-            if (info.getState() == Bundle.UNINSTALLED)
+            final int oldState = info.getState();
+            if (oldState == Bundle.UNINSTALLED)
             {
                 throw new IllegalStateException("The bundle is uninstalled.");
             }
@@ -1914,10 +1928,12 @@ ex.printStackTrace();
                 }
             }
 
-            // Restart bundle, but do not change the persistent state.
-            // This will not start the bundle if it was not previously
-            // active.
-            startBundle(bundle, false);
+            // Restart the bundle if necessary, but do not change its
+            // persistent state.
+            if (oldState == Bundle.ACTIVE)
+            {
+                startBundle(bundle, false);
+            }
 
             // If update failed, rethrow exception.
             if (rethrow != null)
@@ -3920,6 +3936,7 @@ ex.printStackTrace();
     private class RefreshHelper
     {
         private FelixBundle m_bundle = null;
+        private int m_oldState = Bundle.INSTALLED;
 
         public RefreshHelper(Bundle bundle)
         {
@@ -3930,6 +3947,7 @@ ex.printStackTrace();
         {
             if (m_bundle.getInfo().getState() == Bundle.ACTIVE)
             {
+                m_oldState = Bundle.ACTIVE;
                 try
                 {
                     stopBundle(m_bundle, false);
@@ -3996,7 +4014,7 @@ ex.printStackTrace();
 
         public void restart()
         {
-            if (m_bundle != null)
+            if ((m_bundle != null) && (m_oldState == Bundle.ACTIVE))
             {
                 try
                 {

@@ -360,6 +360,17 @@ class BundleImpl extends FelixBundle
 
     public void start() throws BundleException
     {
+        start(0);
+    }
+
+    public void start(int options) throws BundleException
+    {
+        if ((options & Bundle.START_ACTIVATION_POLICY) > 0)
+        {
+            throw new UnsupportedOperationException(
+                "The activation policy feature has not yet been implemented.");
+        }
+
         Object sm = System.getSecurityManager();
 
         if (sm != null)
@@ -368,12 +379,7 @@ class BundleImpl extends FelixBundle
                 AdminPermission.EXECUTE));
         }
 
-        m_felix.startBundle(this, true);
-    }
-
-	public void start(int options) throws BundleException
-    {
-        throw new UnsupportedOperationException("This feature has not yet been implemented.");
+        m_felix.startBundle(this, ((options & Bundle.START_TRANSIENT) == 0));
     }
 
     public void update() throws BundleException
@@ -396,6 +402,11 @@ class BundleImpl extends FelixBundle
 
     public void stop() throws BundleException
     {
+        stop(0);
+    }
+
+    public void stop(int options) throws BundleException
+    {
         Object sm = System.getSecurityManager();
 
         if (sm != null)
@@ -404,12 +415,7 @@ class BundleImpl extends FelixBundle
                 AdminPermission.EXECUTE));
         }
 
-        m_felix.stopBundle(this, true);
-    }
-
-	public void stop(int options) throws BundleException
-    {
-        throw new UnsupportedOperationException("This feature has not yet been implemented.");
+        m_felix.stopBundle(this, ((options & Bundle.STOP_TRANSIENT) == 0));
     }
 
     public void uninstall() throws BundleException
