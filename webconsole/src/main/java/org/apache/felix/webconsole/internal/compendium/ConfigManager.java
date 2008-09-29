@@ -17,9 +17,24 @@
 package org.apache.felix.webconsole.internal.compendium;
 
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.Vector;
 import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,9 +42,18 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.internal.Util;
 import org.apache.felix.webconsole.internal.servlet.OsgiManager;
-import org.json.*;
-import org.osgi.framework.*;
-import org.osgi.service.cm.*;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONWriter;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.Version;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.cm.ManagedService;
+import org.osgi.service.cm.ManagedServiceFactory;
 import org.osgi.service.metatype.AttributeDefinition;
 import org.osgi.service.metatype.ObjectClassDefinition;
 
@@ -39,6 +63,8 @@ import org.osgi.service.metatype.ObjectClassDefinition;
  */
 public class ConfigManager extends ConfigManagerBase
 {
+
+    private static final String PID_FILTER = "pidFilter";
 
     public static final String NAME = "configMgr";
 
@@ -73,6 +99,9 @@ public class ConfigManager extends ConfigManagerBase
             pid = info.substring( info.lastIndexOf( '/' ) + 1 );
         }
 
+        // the filter to select part of the configurations
+        String pidFilter = request.getParameter( PID_FILTER );
+
         ConfigurationAdmin ca = this.getConfigurationAdmin();
 
         // ignore this request if the pid and/or configuration admin is missing
@@ -96,6 +125,10 @@ public class ConfigManager extends ConfigManagerBase
             String redirect = applyConfiguration( request, ca, pid );
             if ( redirect != null )
             {
+                if (pidFilter != null) {
+                    redirect += "?" + PID_FILTER + "=" + pidFilter;
+                }
+                
                 response.sendRedirect( redirect );
             }
 
@@ -110,7 +143,7 @@ public class ConfigManager extends ConfigManagerBase
         // send the result
         response.setContentType( "text/javascript" );
         response.setCharacterEncoding( "UTF-8" );
-        printConfigurationJson( response.getWriter(), pid, config, getLocale( request ) );
+        printConfigurationJson( response.getWriter(), pid, config, pidFilter, getLocale( request ) );
     }
 
 
@@ -119,6 +152,35 @@ public class ConfigManager extends ConfigManagerBase
 
         // true if MetaType service information is not required
         boolean optionalMetaType = false;
+
+        // extract the configuration pid from the request path
+        String pid = request.getPathInfo();
+        pid = pid.substring( pid.lastIndexOf( '/' ) + 1 );
+        
+        // check whether the pid is actually a filter for the selection
+        // of configurations to display, if the filter correctly converts
+        // into an OSGi filter, we use it to select configurations
+        // to display
+        String pidFilter = request.getParameter( PID_FILTER );
+        if ( pidFilter == null )
+        {
+            pidFilter = pid;
+        }
+        try
+        {
+            getBundleContext().createFilter( pidFilter );
+            
+            // if the pidFilter was set from the pid, clear the pid
+            if ( pid == pidFilter )
+            {
+                pid = null;
+            }
+        }
+        catch ( InvalidSyntaxException ise )
+        {
+            // its ok, if the pid is just a single PID
+            pidFilter = null;
+        }
 
         Locale loc = getLocale( request );
         String locale = ( loc != null ) ? loc.toString() : null;
@@ -145,14 +207,14 @@ public class ConfigManager extends ConfigManagerBase
             pw.println( "<tr class='content' id='configField'>" );
             pw.println( "<td class='content'>Configurations</th>" );
             pw.println( "<td class='content'>" );
-            this.listConfigurations( pw, ca, optionalMetaType, locale );
+            this.listConfigurations( pw, ca, pidFilter, optionalMetaType, locale );
             pw.println( "</td>" );
             pw.println( "</tr>" );
 
             pw.println( "<tr class='content' id='factoryField'>" );
             pw.println( "<td class='content'>Factory Configurations</th>" );
             pw.println( "<td class='content'>" );
-            this.listFactoryConfigurations( pw, ca, optionalMetaType, locale );
+            this.listFactoryConfigurations( pw, ca, pidFilter, optionalMetaType, locale );
             pw.println( "</td>" );
             pw.println( "</tr>" );
         }
@@ -160,13 +222,23 @@ public class ConfigManager extends ConfigManagerBase
         pw.println( "</table>" );
 
         // if a configuration is addressed, display it immediately
-        Configuration config = getConfiguration( getConfigurationAdmin(), request.getPathInfo() );
+        Configuration config;
+        if ( request.getParameter( "create" ) != null && pid != null )
+        {
+            config = new PlaceholderConfiguration( pid );
+            pid = config.getPid();
+        }
+        else
+        {
+            config = getConfiguration( getConfigurationAdmin(), pid );
+        }
+        
         if ( config != null )
         {
             Util.startScript( pw );
 
             pw.println( "var configuration=" );
-            printConfigurationJson( pw, config.getPid(), config, getLocale( request ) );
+            printConfigurationJson( pw, config.getPid(), config, pidFilter, getLocale( request ) );
             pw.println( ";" );
 
             pw.println( "displayConfigForm(configuration);" );
@@ -178,11 +250,8 @@ public class ConfigManager extends ConfigManagerBase
 
     private Configuration getConfiguration( ConfigurationAdmin ca, String pid )
     {
-        if ( ca != null )
+        if ( ca != null && pid != null )
         {
-            // only use last part of the pathInfo
-            pid = pid.substring( pid.lastIndexOf( '/' ) + 1 );
-
             try
             {
                 // we use listConfigurations to not create configuration
@@ -210,15 +279,15 @@ public class ConfigManager extends ConfigManagerBase
     }
 
 
-    private void listConfigurations( PrintWriter pw, ConfigurationAdmin ca, boolean optionalMetaType, String locale )
+    private void listConfigurations( PrintWriter pw, ConfigurationAdmin ca, String pidFilter, boolean optionalMetaType, String locale )
     {
         try
         {
             // start with ManagedService instances
-            SortedMap optionsPlain = getServices( ManagedService.class.getName(), optionalMetaType, locale );
+            SortedMap optionsPlain = getServices( ManagedService.class.getName(), pidFilter, optionalMetaType, locale );
 
             // add in existing configuration (not duplicating ManagedServices)
-            Configuration[] cfgs = ca.listConfigurations( null );
+            Configuration[] cfgs = ca.listConfigurations( pidFilter );
             for ( int i = 0; cfgs != null && i < cfgs.length; i++ )
             {
 
@@ -258,12 +327,12 @@ public class ConfigManager extends ConfigManagerBase
     }
 
 
-    private void listFactoryConfigurations( PrintWriter pw, ConfigurationAdmin ca, boolean optionalMetaType,
+    private void listFactoryConfigurations( PrintWriter pw, ConfigurationAdmin ca, String pidFilter, boolean optionalMetaType,
         String locale )
     {
         try
         {
-            SortedMap optionsFactory = getServices( ManagedServiceFactory.class.getName(), optionalMetaType, locale );
+            SortedMap optionsFactory = getServices( ManagedServiceFactory.class.getName(), pidFilter, optionalMetaType, locale );
             printOptionsForm( pw, optionsFactory, "configSelection_factory", "create", "Create" );
         }
         catch ( Exception e )
@@ -273,14 +342,14 @@ public class ConfigManager extends ConfigManagerBase
     }
 
 
-    private SortedMap getServices( String serviceClass, boolean optionalMetaType, String locale )
+    private SortedMap getServices( String serviceClass, String serviceFilter, boolean optionalMetaType, String locale )
         throws InvalidSyntaxException
     {
         // sorted map of options
         SortedMap optionsFactory = new TreeMap( String.CASE_INSENSITIVE_ORDER );
 
         // find all ManagedServiceFactories to get the factoryPIDs
-        ServiceReference[] refs = this.getBundleContext().getServiceReferences( serviceClass, null );
+        ServiceReference[] refs = this.getBundleContext().getServiceReferences( serviceClass, serviceFilter );
         for ( int i = 0; refs != null && i < refs.length; i++ )
         {
             Object pidObject = refs[i].getProperty( Constants.SERVICE_PID );
@@ -313,12 +382,22 @@ public class ConfigManager extends ConfigManagerBase
     private void printOptionsForm( PrintWriter pw, SortedMap options, String formId, String submitMethod,
         String submitLabel )
     {
-        pw.println( "<select class='select' name='pid' id='" + formId + "' onChange='" + submitMethod + "();'>" );
+        SortedSet set = new TreeSet();
         for ( Iterator ei = options.entrySet().iterator(); ei.hasNext(); )
         {
             Entry entry = ( Entry ) ei.next();
-            pw.print( "<option value='" + entry.getKey() + "'>" );
-            pw.print( entry.getValue() );
+            set.add(entry.getValue().toString() + Character.MAX_VALUE + entry.getKey().toString());
+        }
+
+        pw.println( "<select class='select' name='pid' id='" + formId + "' onChange='" + submitMethod + "();'>" );
+        for ( Iterator ei = set.iterator(); ei.hasNext(); )
+        {
+            String entry = ( String ) ei.next();
+            int sep = entry.indexOf( Character.MAX_VALUE );
+            String value = entry.substring( 0, sep );
+            String key = entry.substring( sep + 1 );
+            pw.print( "<option value='" + key + "'>" );
+            pw.print( value );
             pw.println( "</option>" );
         }
         pw.println( "</select>" );
@@ -329,8 +408,8 @@ public class ConfigManager extends ConfigManagerBase
     }
 
 
-    private void printConfigurationJson( PrintWriter pw, String pid, Configuration config, Locale locale )
-        throws IOException
+    private void printConfigurationJson( PrintWriter pw, String pid, Configuration config, String pidFilter,
+        Locale locale )
     {
 
         JSONWriter result = new JSONWriter( pw );
@@ -340,7 +419,7 @@ public class ConfigManager extends ConfigManagerBase
             try
             {
                 result.object();
-                this.configForm( result, pid, config, locale );
+                this.configForm( result, pid, config, pidFilter, locale );
                 result.endObject();
             }
             catch ( Exception e )
@@ -352,8 +431,8 @@ public class ConfigManager extends ConfigManagerBase
     }
 
 
-    private void configForm( JSONWriter json, String pid, Configuration config, Locale loc ) throws IOException,
-        JSONException
+    private void configForm( JSONWriter json, String pid, Configuration config, String pidFilter, Locale loc )
+        throws JSONException
     {
         String locale = ( loc == null ) ? null : loc.toString();
 
@@ -364,6 +443,12 @@ public class ConfigManager extends ConfigManagerBase
         {
             json.key( ConfigManager.factoryPID );
             json.value( config.getFactoryPid() );
+        }
+        
+        if ( pidFilter != null )
+        {
+            json.key( PID_FILTER );
+            json.value( pidFilter );
         }
 
         Dictionary props = null;
@@ -592,7 +677,7 @@ public class ConfigManager extends ConfigManagerBase
                 Configuration config = ca.getConfiguration( pid, null );
                 config.delete();
             }
-            return ""; // up a level
+            return request.getHeader( "Referer" );
         }
 
         String factoryPid = request.getParameter( ConfigManager.factoryPID );
