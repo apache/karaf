@@ -26,8 +26,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.bundlerepository.*;
+import org.apache.felix.shell.impl.UpdateCommandImpl;
 import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.apache.felix.webconsole.internal.Util;
+import org.apache.felix.webconsole.internal.obr.DeployerThread;
 import org.apache.felix.webconsole.internal.servlet.OsgiManager;
 import org.json.JSONException;
 import org.json.JSONWriter;
@@ -193,6 +195,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
             else if ( "update".equals( action ) )
             {
                 // update bundle
+                update( bundle );
                 success = true;
             }
             else if ( "uninstall".equals( action ) )
@@ -443,15 +446,15 @@ public class BundlesServlet extends BaseWebConsolePlugin
     {
         //        enabled = bundle.getState() != Bundle.UNINSTALLED && this.hasUpdates( bundle );
 
-        // no updates if there is no installer service
-        Object isObject = getService( REPOSITORY_ADMIN_NAME );
-        if ( isObject == null )
+        // don't care for bundles with no symbolic name
+        if ( bundle.getSymbolicName() == null )
         {
             return false;
         }
 
-        // don't care for bundles with no symbolic name
-        if ( bundle.getSymbolicName() == null )
+        // no updates if there is no installer service
+        Object isObject = getService( REPOSITORY_ADMIN_NAME );
+        if ( isObject == null )
         {
             return false;
         }
@@ -511,12 +514,21 @@ public class BundlesServlet extends BaseWebConsolePlugin
         keyVal( jw, "Location", bundle.getLocation() );
         keyVal( jw, "Last Modification", new Date( bundle.getLastModified() ) );
 
+        String docUrl = ( String ) headers.get( Constants.BUNDLE_DOCURL );
+        if ( docUrl != null )
+        {
+            docUrl = "<a href=\"" + docUrl + "\" target=\"_blank\">" + docUrl + "</a>";
+            keyVal( jw, "Bundle Documentation", docUrl );
+        }
+
         keyVal( jw, "Vendor", headers.get( Constants.BUNDLE_VENDOR ) );
         keyVal( jw, "Copyright", headers.get( Constants.BUNDLE_COPYRIGHT ) );
         keyVal( jw, "Description", headers.get( Constants.BUNDLE_DESCRIPTION ) );
 
         keyVal( jw, "Start Level", getStartLevel( bundle ) );
-
+        
+        keyVal( jw, "Bundle Classpath", headers.get( Constants.BUNDLE_CLASSPATH ) );
+        
         if ( bundle.getState() == Bundle.INSTALLED )
         {
             listImportExportsUnresolved( jw, bundle );
@@ -631,7 +643,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
                 for ( int i = 0; i < packages.length; i++ )
                 {
                     ExportedPackage ep = packages[i];
-                    printImport( val, ep.getName(), ep.getVersion(), ep );
+                    printImport( val, ep.getName(), ep.getVersion(), false, ep );
                 }
             }
             else
@@ -751,7 +763,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
                             }
                         }
 
-                        printImport( val, r4Import.getName(), r4Import.getVersion(), ep );
+                        printImport( val, r4Import.getName(), r4Import.getVersion(), r4Import.isOptional(), ep );
                     }
                 }
                 else
@@ -851,10 +863,12 @@ public class BundlesServlet extends BaseWebConsolePlugin
     }
 
 
-    private void printImport( StringBuffer val, String name, Version version, ExportedPackage export )
+    private void printImport( StringBuffer val, String name, Version version, boolean optional, ExportedPackage export )
     {
         boolean bootDel = isBootDelegated( name );
-        if ( bootDel || export == null )
+        boolean isSpan = bootDel || export == null;
+
+        if ( isSpan )
         {
             val.append( "<span style=\"color: red\">!! " );
         }
@@ -869,19 +883,29 @@ public class BundlesServlet extends BaseWebConsolePlugin
 
             if ( bootDel )
             {
-                val.append( " -- Overwritten by Boot Delegation</span>" );
+                val.append( " -- Overwritten by Boot Delegation" );
             }
         }
         else
         {
             val.append( " -- Cannot be resolved" );
+            
+            if ( optional )
+            {
+                val.append( " but is not required" );
+            }
+
             if ( bootDel )
             {
                 val.append( " and overwritten by Boot Delegation" );
             }
-            val.append( "</span>" );
         }
 
+        if ( isSpan )
+        {
+            val.append( "</span>" );
+        }
+        
         val.append( "<br />" );
     }
 
@@ -957,4 +981,43 @@ public class BundlesServlet extends BaseWebConsolePlugin
         return val.toString();
     }
 
+
+    private void update( final Bundle bundle )
+    {
+        final RepositoryAdmin repoAdmin = ( RepositoryAdmin ) getService( REPOSITORY_ADMIN_NAME );
+        if ( repoAdmin != null && bundle.getSymbolicName() != null )
+        {
+            // current bundle version
+            Version bundleVersion = Version
+                .parseVersion( ( String ) bundle.getHeaders().get( Constants.BUNDLE_VERSION ) );
+
+            // discover candidates for the update
+            String filter = "(&(symbolicname=" + bundle.getSymbolicName() + ")(version>=" + bundleVersion + "))";
+            Resource[] cand = repoAdmin.discoverResources( filter );
+
+            // find the candidate with the highest version number
+            Version base = bundleVersion;
+            int idx = -1;
+            for ( int i = 0; cand != null && i < cand.length; i++ )
+            {
+                if ( cand[i].getVersion().compareTo( base ) > 0 )
+                {
+                    base = cand[i].getVersion();
+                    idx = i;
+                }
+            }
+
+            // try to resolve and deploy the best candidate
+            if ( idx >= 0 )
+            {
+                Resolver resolver = repoAdmin.resolver();
+                resolver.add( cand[idx] );
+
+                DeployerThread dt = new DeployerThread( resolver, getLog(), bundle.getState() == Bundle.ACTIVE,
+                    "Update " + bundle.getSymbolicName() );
+                dt.start();
+            }
+        }
+
+    }
 }

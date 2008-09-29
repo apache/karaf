@@ -253,10 +253,13 @@ public class InstallAction extends BundleAction
             {
                 Bundle bundle = getBundleContext().installBundle( location, bundleStream );
 
-                StartLevel sl = getStartLevel();
-                if ( sl != null )
+                if ( startlevel > 0 )
                 {
-                    sl.setBundleStartLevel( bundle, startlevel );
+                    StartLevel sl = getStartLevel();
+                    if ( sl != null )
+                    {
+                        sl.setBundleStartLevel( bundle, startlevel );
+                    }
                 }
 
                 if ( doStart )
