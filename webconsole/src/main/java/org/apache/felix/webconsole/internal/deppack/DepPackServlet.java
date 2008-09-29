@@ -37,8 +37,7 @@ import org.osgi.service.deploymentadmin.*;
 
 
 /**
- * The <code>DepPackServlet</code> TODO
- * @scr.component metainfo="false"
+ * @scr.component metatype="false"
  * @scr.service interface="javax.servlet.Servlet"
  * @scr.property name="felix.webconsole.label" valueRef="LABEL"
  */
