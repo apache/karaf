@@ -128,7 +128,6 @@ public class BundleRepositoryRender extends AbstractObrPlugin implements Render
 
                 pw.println( "<tr class='content'>" );
                 pw.println( "<td class='content'>" + repo.getName() + "</td>" );
-                pw.println( "<td class='content'>" + repo.getURL() + "</td>" );
 
                 pw.print ( "<td class='content'>" );
                 pw.print ( "<a href='" + repo.getURL() + "' target='_blank' title='Show Repository " + repo.getURL()

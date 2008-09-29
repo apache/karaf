@@ -17,10 +17,17 @@
 package org.apache.felix.webconsole.internal.obr;
 
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.felix.webconsole.Action;
+import org.osgi.service.log.LogService;
+import org.osgi.service.obr.RepositoryAdmin;
+import org.osgi.service.obr.Resolver;
+import org.osgi.service.obr.Resource;
 
 
-public abstract class InstallFromRepoAction extends AbstractObrPlugin implements Action
+public class InstallFromRepoAction extends AbstractObrPlugin implements Action
 {
 
     public static final String NAME = "installFromOBR";
@@ -37,58 +44,64 @@ public abstract class InstallFromRepoAction extends AbstractObrPlugin implements
         return NAME;
     }
 
+
     /*
      * (non-Javadoc)
      *
      * @see org.apache.sling.manager.web.internal.Action#performAction(javax.servlet.http.HttpServletRequest,
      *      javax.servlet.http.HttpServletResponse)
-    public boolean performAction(HttpServletRequest request,
-            HttpServletResponse response) {
+     */
+    public boolean performAction( HttpServletRequest request, HttpServletResponse response )
+    {
 
         // check whether we have to do something
-        String[] bundles = request.getParameterValues("bundle");
-        if (bundles == null || bundles.length == 0) {
-            getLog().log(LogService.LOG_INFO, "No resources to deploy");
+        String[] bundles = request.getParameterValues( "bundle" );
+        if ( bundles == null || bundles.length == 0 )
+        {
+            getLog().log( LogService.LOG_INFO, "No resources to deploy" );
             return true;
         }
 
-        InstallerService installerService = getInstallerService();
-        if (installerService != null) {
-            Installer installer = installerService.getInstaller();
+        RepositoryAdmin repoAdmin = getRepositoryAdmin();
+        if ( repoAdmin != null )
+        {
+
+            Resolver resolver = repoAdmin.resolver();
 
             // prepare the deployment
-            for (int i = 0; i < bundles.length; i++) {
+            for ( int i = 0; i < bundles.length; i++ )
+            {
                 String bundle = bundles[i];
-                int comma = bundle.indexOf(',');
-                String name = (comma > 0) ? bundle.substring(0, comma) : bundle;
-                String version = (comma < bundle.length() - 1)
-                        ? bundle.substring(comma + 1)
-                        : null;
+                int comma = bundle.indexOf( ',' );
+                String name = ( comma > 0 ) ? bundle.substring( 0, comma ) : bundle;
+                String version = ( comma < bundle.length() - 1 ) ? bundle.substring( comma + 1 ) : null;
 
-                if (name.length() > 0) {
+                if ( name.length() > 0 )
+                {
                     // no name, ignore this one
-                    VersionRange versionRange = new VersionRange(version);
-                    installer.addBundle(name, versionRange, -1);
+                    if ( version == null )
+                    {
+                        version = "*";
+                    }
+
+                    String filter = "(&(symbolicname=" + name + ")(version=" + version + "))";
+                    Resource[] resources = repoAdmin.discoverResources( filter );
+                    if ( resources != null && resources.length > 0 )
+                    {
+                        resolver.add( resources[0] );
+                    }
                 }
+
             }
 
             // check whether the "deploystart" button was clicked
-            boolean start = request.getParameter("deploystart") != null;
+            boolean start = request.getParameter( "deploystart" ) != null;
 
-            try {
-                installer.install(start);
-            } catch (InstallerException ie) {
-                Throwable cause = (ie.getCause() != null) ? ie.getCause() : ie;
-                getLog().log(LogService.LOG_ERROR, "Cannot install bundles",
-                    cause);
-            } finally {
-                installer.dispose();
-            }
+            DeployerThread dt = new DeployerThread( resolver, getLog(), start );
+            dt.start();
         }
 
         // redirect to bundle list
         return true;
     }
-     */
-
 }
