@@ -97,6 +97,17 @@ function displayConfigForm(obj) {
         formEl.appendChild( inputEl );
     }
     
+    // add the PID filter as a hidden form field if present
+    if (obj.pidFilter)
+    {
+        inputEl = createElement( "input", null, {
+                type: "hidden",
+                name: "pidFilter",
+                value: obj.pidFilter
+            });
+        formEl.appendChild( inputEl );
+    }
+    
     inputEl = createElement( "input", null, {
             type: "hidden",
             name: "action",
