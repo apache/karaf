@@ -109,12 +109,25 @@ public class Main implements MainService, BundleActivator {
      */
     public static final String PROPERTY_CONVERT_TO_MAVEN_URL = "servicemix.maven.convert";
 
+    /**
+     * If a lock should be used before starting the runtime
+     */
+    public static final String PROPERTY_USE_LOCK = "servicemix.lock";
+
+    /**
+     * The lock implementation
+     */
+    public static final String PROPERTY_LOCK_CLASS = "servicemix.lock.class";
+
+    public static final String PROPERTY_LOCK_CLASS_DEFAULT = SimpleFileLock.class.getName();
+
     private File servicemixHome;
     private File servicemixBase;
     private static Properties m_configProps = null;
     private static Felix m_felix = null;
     private final String[] args;
     private int exitCode;
+    private Lock lock;
 
     public Main(String[] args) {
         this.args = args;
@@ -266,6 +279,7 @@ public class Main implements MainService, BundleActivator {
         activations.add(main);
 
         try {
+            main.lock(m_configProps);
             // Start up the OSGI framework
             m_felix = new Felix(new StringMap(m_configProps, false), activations);
             m_felix.start();
@@ -285,6 +299,7 @@ public class Main implements MainService, BundleActivator {
             System.err.println("Error occured shutting down framework: " + ex);
             ex.printStackTrace();
         } finally {
+            main.unlock();
             System.exit(main.getExitCode());
         }
     }
@@ -305,7 +320,7 @@ public class Main implements MainService, BundleActivator {
             }
         }
 
-        // Try to figure it out using the jar file this class was loaded from. 
+        // Try to figure it out using the jar file this class was loaded from.
         if (rc == null) {
             // guess the home from the location of the jar
             URL url = Main.class.getClassLoader().getResource(Main.class.getName().replace(".", "/") + ".class");
@@ -782,6 +797,7 @@ public class Main implements MainService, BundleActivator {
              e.hasMoreElements();) {
             String key = (String) e.nextElement();
             if (key.startsWith("felix.") ||
+                    key.startsWith("servicemix.") ||
                     key.equals("org.osgi.framework.system.packages") ||
                     key.equals("org.osgi.framework.bootdelegation")) {
                 configProps.setProperty(key, System.getProperty(key));
@@ -1031,5 +1047,31 @@ public class Main implements MainService, BundleActivator {
 
     public File getServicemixBase() {
         return servicemixBase;
+    }
+
+    public void lock(Properties props) throws Exception {
+        if (Boolean.parseBoolean(props.getProperty(PROPERTY_USE_LOCK, "true"))) {
+            String clz = props.getProperty(PROPERTY_LOCK_CLASS, PROPERTY_LOCK_CLASS_DEFAULT);
+            lock = (Lock) Class.forName(clz).getConstructor(Properties.class).newInstance(props);
+            boolean lockLogged = false;
+            for (;;) {
+                if (lock.lock()) {
+                    if (lockLogged) {
+                        System.out.println("Lock acquired.");
+                    }
+                    break;
+                } else if (!lockLogged) {
+                    System.out.println("Waiting for the lock ...");
+                    lockLogged = true;
+                }
+                Thread.sleep(1000);
+            }
+        }
+    }
+
+    public void unlock() throws Exception {
+        if (lock != null) {
+            lock.release();
+        }
     }
 }
