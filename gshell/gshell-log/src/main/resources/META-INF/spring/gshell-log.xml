@@ -37,6 +37,10 @@
         <property name="pattern" value="${pattern}" />
     </bean>
 
+    <bean id="display-exception" class="org.apache.servicemix.gshell.log.DisplayException">
+        <property name="events" ref="events" />
+    </bean>
+
     <bean id="get-log-level" class="org.apache.servicemix.gshell.log.GetLogLevel" />
 
     <bean id="set-log-level" class="org.apache.servicemix.gshell.log.SetLogLevel" />
@@ -54,6 +58,13 @@
         <entry key="shell" value="log"/>
         <entry key="alias" value="display"/>
         <entry key="alias" value="d"/>
+      </osgi:service-properties>
+    </osgi:service>
+
+    <osgi:service ref="display-exception" interface="org.apache.geronimo.gshell.command.Command">
+      <osgi:service-properties>
+        <entry key="shell" value="log"/>
+        <entry key="alias" value="de"/>
       </osgi:service-properties>
     </osgi:service>
 
