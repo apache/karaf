@@ -294,11 +294,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
         {
             bundle.getInfo().setExtension(true);
 
-            SystemBundleArchive systemArchive =
-                (SystemBundleArchive) felix.getInfo().getArchive();
-
             // Merge the exported packages with the exported packages of the systembundle.
-            Map headers = null;
             ICapability[] exports = null;
             try
             {
