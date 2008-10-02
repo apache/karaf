@@ -40,6 +40,10 @@
         <property name="adminService" ref="adminService" />
     </bean>
 
+    <bean id="connect" class="org.apache.servicemix.kernel.gshell.admin.internal.commands.ConnectCommand">
+        <property name="adminService" ref="adminService" />
+    </bean>
+
     <bean id="list" class="org.apache.servicemix.kernel.gshell.admin.internal.commands.ListCommand">
         <property name="adminService" ref="adminService" />
     </bean>
@@ -64,6 +68,13 @@
       <osgi:service-properties>
         <entry key="shell" value="admin"/>
       	<entry key="name" value="create"/>
+      </osgi:service-properties>
+    </osgi:service>
+
+    <osgi:service ref="connect" interface="org.apache.geronimo.gshell.command.Command">
+      <osgi:service-properties>
+        <entry key="shell" value="admin"/>
+      	<entry key="name" value="connect"/>
       </osgi:service-properties>
     </osgi:service>
 
