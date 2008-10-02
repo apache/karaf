@@ -18,15 +18,19 @@ package org.apache.servicemix.kernel.gshell.admin.internal.commands;
 
 import org.apache.geronimo.gshell.command.annotation.CommandComponent;
 import org.apache.geronimo.gshell.clp.Argument;
+import org.apache.geronimo.gshell.clp.Option;
 
 @CommandComponent(id="admin:start", description="Start an instance")
 public class StartCommand extends AdminCommandSupport {
+
+    @Option(name = "-o", aliases = { "--java-opts"}, description = "Java options when launching the instance")
+    private String javaOpts;
 
     @Argument(index=0, required=true, description="The instance name")
     private String instance = null;
 
     protected Object doExecute() throws Exception {
-        getExistingInstance(instance).start();
+        getExistingInstance(instance).start(javaOpts);
         return SUCCESS;
     }
 }

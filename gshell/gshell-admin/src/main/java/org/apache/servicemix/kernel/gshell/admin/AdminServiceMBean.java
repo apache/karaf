@@ -18,7 +18,7 @@ package org.apache.servicemix.kernel.gshell.admin;
 
 public interface AdminServiceMBean {
 
-    void createInstance(String name, int port) throws Exception;
+    void createInstance(String name, int port, String location) throws Exception;
 
     String[] getInstances();
 
@@ -28,7 +28,7 @@ public interface AdminServiceMBean {
 
     boolean isRunning(String name) throws Exception;
 
-    void start(String name) throws Exception;
+    void start(String name, String javaOpts) throws Exception;
 
     void stop(String name) throws Exception;
 

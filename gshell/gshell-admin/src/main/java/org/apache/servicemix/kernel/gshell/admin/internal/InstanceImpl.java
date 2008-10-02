@@ -41,12 +41,14 @@ public class InstanceImpl implements Instance {
 
     private AdminServiceImpl service;
     private String name;
+    private String location;
     private Process process;
     //private PumpStreamHandler handler;
 
-    public InstanceImpl(AdminServiceImpl service, String name) {
+    public InstanceImpl(AdminServiceImpl service, String name, String location) {
         this.service = service;
         this.name = name;
+        this.location = location;
     }
 
     public void attach(int pid) throws IOException {
@@ -61,6 +63,10 @@ public class InstanceImpl implements Instance {
         return this.name;
     }
 
+    public String getLocation() {
+        return location;
+    }
+
     public int getPid() {
         checkProcess();
         return this.process != null ? this.process.getPid() : 0;
@@ -69,7 +75,7 @@ public class InstanceImpl implements Instance {
     public int getPort() throws Exception {
         InputStream is = null;
         try {
-            File f = new File(name, "etc/org.apache.servicemix.shell.cfg");
+            File f = new File(location, "etc/org.apache.servicemix.shell.cfg");
             is = new FileInputStream(f);
             Properties props = new Properties();
             props.load(is);
@@ -89,7 +95,7 @@ public class InstanceImpl implements Instance {
             throw new IllegalStateException("Instance not stopped");
         }
         Properties props = new Properties();
-        File f = new File(name, "etc/org.apache.servicemix.shell.cfg");
+        File f = new File(location, "etc/org.apache.servicemix.shell.cfg");
         InputStream is = new FileInputStream(f);
         try {
             props.load(is);
@@ -107,15 +113,18 @@ public class InstanceImpl implements Instance {
         }
     }
 
-    public synchronized void start() throws Exception {
+    public synchronized void start(String javaOpts) throws Exception {
         checkProcess();
         if (this.process != null) {
             throw new IllegalStateException("Instance already started");
         }
+        if (javaOpts == null) {
+            javaOpts = "-server -Xms128M -Xmx512M -Dcom.sun.management.jmxremote";
+        }
         String command = new File(System.getProperty("java.home"), "bin/java" + (ScriptUtils.isWindows() ? ".exe" : "")).getCanonicalPath()
-                + " -server -Xms128M -Xmx512M -Dcom.sun.management.jmxremote"
+                + " " + javaOpts
                 + " -Dservicemix.home=\"" + System.getProperty("servicemix.home") + "\""
-                + " -Dservicemix.base=\"" + new File(name).getCanonicalPath() + "\""
+                + " -Dservicemix.base=\"" + new File(location).getCanonicalPath() + "\""
                 + " -Dservicemix.startLocalConsole=false"
                 + " -Dservicemix.startRemoteShell=true"
                 + " -classpath "
@@ -124,7 +133,7 @@ public class InstanceImpl implements Instance {
                 + new File(System.getProperty("servicemix.home"), "lib/servicemix-jaas-boot.jar").getCanonicalPath()
                 + " org.apache.servicemix.kernel.main.Main";
         this.process = ProcessBuilderFactory.newInstance().newBuilder()
-                        .directory(new File(name))
+                        .directory(new File(location))
                         .command(command)
                         .start();
         this.service.saveState();
@@ -143,7 +152,7 @@ public class InstanceImpl implements Instance {
         if (this.process != null) {
             throw new IllegalStateException("Instance not stopped");
         }
-        deleteFile(new File(name));
+        deleteFile(new File(location));
         this.service.forget(name);
         this.service.saveState();
     }

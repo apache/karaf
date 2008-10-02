@@ -18,7 +18,7 @@ package org.apache.servicemix.kernel.gshell.admin;
 
 public interface AdminService {
 
-    Instance createInstance(String name, int port) throws Exception;
+    Instance createInstance(String name, int port, String location) throws Exception;
 
     Instance[] getInstances();
 

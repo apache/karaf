@@ -32,8 +32,8 @@ public class AdminServiceMBeanImpl implements AdminServiceMBean {
         this.adminService = adminService;
     }
 
-    public void createInstance(String name, int port) throws Exception {
-        adminService.createInstance(name, port);
+    public void createInstance(String name, int port, String location) throws Exception {
+        adminService.createInstance(name, port, location);
     }
 
     public String[] getInstances() {
@@ -57,8 +57,8 @@ public class AdminServiceMBeanImpl implements AdminServiceMBean {
         return getExistingInstance(name).isRunning();
     }
 
-    public void start(String name) throws Exception {
-        getExistingInstance(name).start();
+    public void start(String name, String javaOpts) throws Exception {
+        getExistingInstance(name).start(javaOpts);
     }
 
     public void stop(String name) throws Exception {

@@ -17,6 +17,7 @@
 package org.apache.servicemix.kernel.gshell.admin.internal.commands;
 
 import org.apache.geronimo.gshell.command.annotation.CommandComponent;
+import org.apache.geronimo.gshell.clp.Option;
 import org.apache.servicemix.kernel.gshell.admin.Instance;
 
 /**
@@ -25,9 +26,16 @@ import org.apache.servicemix.kernel.gshell.admin.Instance;
 @CommandComponent(id="admin:list", description="List existing ServiceMix instances")
 public class ListCommand extends AdminCommandSupport {
 
+    @Option(name = "-l", aliases = { "--location" }, description = "Display instances location")
+    boolean location;
+
     protected Object doExecute() throws Exception {
         Instance[] instances = getAdminService().getInstances();
-        io.out.println("  Port   State       Pid  Name");
+        if (location) {
+            io.out.println("  Port   State       Pid  Location");
+        } else {
+            io.out.println("  Port   State       Pid  Name");
+        }
         for (Instance instance : instances) {
             StringBuilder sb = new StringBuilder();
             sb.append('[');
@@ -45,7 +53,11 @@ public class ListCommand extends AdminCommandSupport {
             }
             sb.append(s);
             sb.append("] ");
-            sb.append(instance.getName());
+            if (location) {
+                sb.append(instance.getLocation());
+            } else {
+                sb.append(instance.getName());
+            }
             io.out.println(sb.toString());
         }
         return SUCCESS;

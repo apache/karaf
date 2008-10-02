@@ -20,13 +20,15 @@ public interface Instance {
 
     String getName();
 
+    String getLocation();
+
     int getPid();
 
     int getPort() throws Exception;
 
     void changePort(int port) throws Exception;
 
-    void start() throws Exception;
+    void start(String javaOpts) throws Exception;
 
     void stop() throws Exception;
 

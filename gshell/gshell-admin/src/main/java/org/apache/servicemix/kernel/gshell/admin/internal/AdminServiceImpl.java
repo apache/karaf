@@ -64,9 +64,10 @@ public class AdminServiceImpl implements AdminService, InitializingBean {
             Map<String, Instance> newInstances = new HashMap<String, Instance>();
             for (int i = 0; i < count; i++) {
                 String name = child.get("item." + i + ".name", null);
+                String loc = child.get("item." + i + ".loc", null);
                 int pid = child.getInt("item." + i + ".pid", 0);
                 if (name != null) {
-                    InstanceImpl instance = new InstanceImpl(this, name);
+                    InstanceImpl instance = new InstanceImpl(this, name, loc);
                     if (pid > 0) {
                         try {
                             instance.attach(pid);
@@ -83,11 +84,11 @@ public class AdminServiceImpl implements AdminService, InitializingBean {
         }
     }
 
-    public synchronized Instance createInstance(String name, int port) throws Exception {
+    public synchronized Instance createInstance(String name, int port, String location) throws Exception {
         if (instances.get(name) != null) {
             throw new IllegalArgumentException("Instance '" + name + "' already exists");
         }
-        File serviceMixBase = new File(name).getCanonicalFile();
+        File serviceMixBase = new File(location != null ? location : ("instances/" + name)).getCanonicalFile();
         int remoteShellPort = port;
         if (remoteShellPort <= 0) {
             try {
@@ -134,7 +135,7 @@ public class AdminServiceImpl implements AdminService, InitializingBean {
             copyFilteredResourceToDir(serviceMixBase, "bin/servicemix", props);
             chmod(new File(serviceMixBase, "bin/servicemix"), "a+x");
         }
-        Instance instance = new InstanceImpl(this, name);
+        Instance instance = new InstanceImpl(this, name, serviceMixBase.toString());
         instances.put(name, instance);
         saveState();
         return instance;
@@ -160,6 +161,7 @@ public class AdminServiceImpl implements AdminService, InitializingBean {
         child.putInt("count", data.length);
         for (int i = 0; i < data.length; i++) {
             child.put("item." + i + ".name", data[i].getName());
+            child.put("item." + i + ".loc", data[i].getLocation());
             child.putInt("item." + i + ".pid", data[i].getPid());
         }
         prefs.flush();

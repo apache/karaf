@@ -31,11 +31,14 @@ public class CreateCommand extends AdminCommandSupport
     @Option(name = "-p", aliases = { "--port"}, description = "Port number for remote shell connection")
     private int port = 0;
 
-    @Argument(index=0, required=true, description="Where to create the new ServiceMix instance")
+    @Option(name = "-l", aliases = { "--location"}, description = "Location of the new instance on the file system")
+    private String location;
+
+    @Argument(index=0, required=true, description="Name of the new ServiceMix instance")
     private String instance = null;
 
     protected Object doExecute() throws Exception {
-        getAdminService().createInstance(instance, port);
+        getAdminService().createInstance(instance, port, location);
         return SUCCESS;
     }
 
