@@ -30,7 +30,7 @@ public interface TrackerCustomizer {
      * A service is being added to the Tracker object.
      * This method is called before a service which matched the search parameters of the Tracker object is added to it. This method should return the service object to be tracked for this ServiceReference object.
      * The returned service object is stored in the Tracker object and is available from the getService and getServices methods.
-     * @param reference Reference to service being added to the Tracker object.
+     * @param reference the Reference to service being added to the Tracker object.
      * @return The service object to be tracked for the ServiceReference object or null if the ServiceReference object should not be tracked.
      */
     boolean addingService(ServiceReference reference);
@@ -45,7 +45,7 @@ public interface TrackerCustomizer {
     /**
      * A service tracked by the Tracker object has been modified.
      * This method is called when a service being tracked by the Tracker object has had it properties modified.
-     * @param reference Reference to service that has been modified.
+     * @param reference the Reference to service that has been modified.
      * @param service The service object for the modified service.
      */
     void modifiedService(ServiceReference reference, Object service);
@@ -53,7 +53,7 @@ public interface TrackerCustomizer {
     /**
      * A service tracked by the Tracker object has been removed.
      * This method is called after a service is no longer being tracked by the Tracker object.
-     * @param reference Reference to service that has been removed.
+     * @param reference the Reference to service that has been removed.
      * @param service The service object for the removed service.
      */
     void removedService(ServiceReference reference, Object service);

@@ -19,7 +19,7 @@
 package org.apache.felix.ipojo.parser;
 
 /**
- * Exceptions thrown by parsers.
+ * Exception thrown by parsers.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ParseException extends Exception {

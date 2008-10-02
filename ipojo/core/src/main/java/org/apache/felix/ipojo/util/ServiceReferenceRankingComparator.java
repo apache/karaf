@@ -25,16 +25,18 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * Service Reference Comparator.
- * This comparator follow OSGi Ranking policy.
+ * This comparator follows OSGi Ranking policy.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ServiceReferenceRankingComparator implements Comparator {
 
     /**
-     * Compare two service reference.
-     * @param ref1 : reference 1
-     * @param ref2 : reference 2
-     * @return -1 if the reference 1 is 'higher' than the reference 2, 1 otherwise. (higher is term of ranking means a lower index)
+     * Compares two service reference.
+     * @param ref1 the reference 1
+     * @param ref2 the reference 2
+     * @return <code>-1</code> if the reference 1 
+     * is 'higher' than the reference 2, <code>1</code> otherwise. 
+     * (higher is term of ranking means a lower index)
      * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
      */
     public int compare(Object ref1, Object ref2) {

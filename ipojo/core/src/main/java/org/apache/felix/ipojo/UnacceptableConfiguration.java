@@ -20,7 +20,9 @@ package org.apache.felix.ipojo;
 
 /**
  * UnacceptableConfiguration occurs when a factory refuses to create an
- * instance.
+ * instance. This exception is thrown when the instance configuration does not
+ * specify a value for a required property or when the configuration tries to override
+ * the value of an immutable property
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
@@ -32,8 +34,8 @@ public class UnacceptableConfiguration extends Exception {
     private static final long serialVersionUID = 2998931848886223965L;
 
     /**
-     * Constructor.
-     * @param message : message indicating the error.
+     * Creates an UnacceptableConfiguration.
+     * @param message : message about the error.
      */
     public UnacceptableConfiguration(String message) {
         super(message);

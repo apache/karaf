@@ -31,60 +31,62 @@ import org.apache.felix.ipojo.parser.ParseUtils;
 import org.osgi.framework.BundleContext;
 
 /**
- * Property class managing a property.
- * This class allows storing property value and calling setter method too.
+ * Property class managing a managed value.
+ * This class managed the method invocation as well as field injection.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class Property implements FieldInterceptor {
 
     /**
-     * Name of the property (filed name if not set).
+     * The name of the property (field name if not set).
+     * Cannot change once set.
      */
     private final String m_name;
 
     /**
-     * Field of the property.
+     * The field of the property.
      * Cannot change once set.
      */
     private final String m_field;
 
     /**
-     * Setter method of the property.
+     * The setter method of the property.
+     * Cannot change once set.
      */
     private final Callback m_method;
 
     /**
-     * Value of the property.
+     * The value of the property.
      */
     private Object m_value;
 
     /**
-     * Type of the property.
+     * The type of the property.
      */
     private final Class m_type;
 
     /**
-     * Handler object on to use the logger.
+     * The handler object to get the logger.
      */
     private final Handler m_handler;
     
     /**
-     * Instance Manager.
+     * The instance manager.
      */
     private final InstanceManager m_manager;
 
     /**
-     * Configurable Property Constructor. At least the method or the field need
-     * to be referenced.
-     * 
-     * @param name : name of the property (optional)
-     * @param field : name of the field
-     * @param method : method name
-     * @param value : initial value of the property (optional)
-     * @param type : the type of the property
-     * @param manager : instance manager
-     * @param handler : handler object which manage this property.
-     * @throws ConfigurationException : occurs when the property value cannot be set.
+     * Creates a property. 
+     * At least the method or the field need
+     * to be specified.
+     * @param name the name of the property (optional)
+     * @param field the name of the field
+     * @param method the method name
+     * @param value the initial value of the property (optional)
+     * @param type the the type of the property
+     * @param manager the instance manager
+     * @param handler the handler object which manage this property.
+     * @throws ConfigurationException if the property value cannot be set.
      */
     public Property(String name, String field, String method, String value, String type, InstanceManager manager, Handler handler) throws ConfigurationException {
         m_handler = handler;
@@ -115,9 +117,9 @@ public class Property implements FieldInterceptor {
     }
 
     /**
-     * The set type method computes and returns the property type according to the given type name.
-     * @param type : the type name
-     * @param context : bundle context (used to load classes)
+     * Computes and returns the property type according to the given type name.
+     * @param type the the type name
+     * @param context the bundle context (used to load classes)
      * @return the class of the given type
      * @throws ConfigurationException if an error occurs when loading the type class for non-primitive types.
      */
@@ -161,11 +163,11 @@ public class Property implements FieldInterceptor {
     }
 
     /**
-     * Get the Class object of a type array.
-     * @param type : the string descriptor of the type (must end by [] )
-     * @param context : bundle context (used to load classes)
+     * Gets the Class object of a type array.
+     * @param type the string descriptor of the type (must end by [] )
+     * @param context the bundle context (used to load classes)
      * @return the Class object of the given type array.
-     * @throws ConfigurationException : if the class cannot be loaded
+     * @throws ConfigurationException if the class cannot be loaded
      */
     private static Class computeArrayType(String type, BundleContext context) throws ConfigurationException {
         String internalType = type.substring(0, type.length() - 2);
@@ -220,7 +222,8 @@ public class Property implements FieldInterceptor {
     }
 
     /**
-     * Get method name, null if no method.
+     * Gets the method name, 
+     * <code>null</code> if no method.
      * @return the method name.
      */
     public String getMethod() {
@@ -229,16 +232,16 @@ public class Property implements FieldInterceptor {
     }
 
     /**
-     * Check if the property has a method callback.
-     * @return true if the property has a method.
+     * Checks if the property has a method callback.
+     * @return <code>true</code> if the property has a method.
      */
     public boolean hasMethod() {
         return m_method != null;
     }
 
     /**
-     * Check if the property has a field.
-     * @return true if the property has a field.
+     * Checks if the property has a field.
+     * @return <code>true</code> if the property has a field.
      */
     public boolean hasField() {
         return m_field != null;
@@ -249,8 +252,8 @@ public class Property implements FieldInterceptor {
     }
 
     /**
-     * Fix the value of the property.
-     * @param value : the new value.
+     * Sets the value of the property.
+     * @param value the new value.
      */
     public void setValue(Object value) {
         synchronized (this) {
@@ -275,10 +278,10 @@ public class Property implements FieldInterceptor {
     }
 
     /**
-     * Test if the given value is assignable to the given type.
-     * @param type : class of the type
-     * @param value : object to check
-     * @return true if the object is assignable in the property of type 'type'.
+     * Checks if the given value is assignable to the given type.
+     * @param type the class of the type
+     * @param value the object to check
+     * @return <code>true</code> if the object is assignable in the property of type 'type'.
      */
     public static boolean isAssignable(Class type, Object value) {
         if (value == null || type.isInstance(value)) { // When the value is null, the assign works necessary.
@@ -301,11 +304,11 @@ public class Property implements FieldInterceptor {
     }
 
     /**
-     * Create an object of the given type with the given String value.
-     * @param type : type of the returned object
-     * @param strValue : String value.
+     * Creates an object of the given type with the given String value.
+     * @param type the type of the returned object
+     * @param strValue the String value.
      * @return the object of type 'type' created from the String 'value'
-     * @throws ConfigurationException occurs when the object cannot be created.
+     * @throws ConfigurationException if the object cannot be created.
      */
     public static Object create(Class type, String strValue) throws ConfigurationException {
         if (Boolean.TYPE.equals(type)) { return new Boolean(strValue); }
@@ -343,11 +346,12 @@ public class Property implements FieldInterceptor {
     }
 
     /**
-     * Create an array object containing the type 'interntype' from the String array 'values'.
-     * @param interntype : internal type of the array.
-     * @param values : String array
+     * Creates an array object containing the type component type from 
+     * the String array 'values'.
+     * @param interntype the internal type of the array.
+     * @param values the String array
      * @return the array containing objects created from the 'values' array
-     * @throws ConfigurationException occurs when the array cannot be created correctly
+     * @throws ConfigurationException if the array cannot be created correctly
      */
     public static Object createArrayObject(Class interntype, String[] values) throws ConfigurationException {
         if (Boolean.TYPE.equals(interntype)) {
@@ -430,8 +434,9 @@ public class Property implements FieldInterceptor {
     }
 
     /**
-     * Invoke the setter method on the given pjo object. If no specified pojo object, will call on each created pojo object.
-     * @param instance : the created object (could be null
+     * Invokes the setter method on the given pojo object. 
+     * If no specified pojo object, it calls on each created pojo object.
+     * @param instance the created object (could be <code>null</code>)
      * @see org.apache.felix.ipojo.Handler#onCreation(java.lang.Object)
      */
     public synchronized void invoke(Object instance) {
@@ -455,9 +460,9 @@ public class Property implements FieldInterceptor {
 
     /**
      * A field value is required by the object 'pojo'.
-     * @param pojo : POJO object
-     * @param fieldName : field
-     * @param value : last value
+     * @param pojo the POJO object
+     * @param fieldName the field
+     * @param value the last value
      * @return the value if the handler want to inject this value.
      * @see org.apache.felix.ipojo.FieldInterceptor#onGet(java.lang.Object, java.lang.String, java.lang.Object)
      */
@@ -467,9 +472,9 @@ public class Property implements FieldInterceptor {
 
     /**
      * The field 'field' receives a new value.
-     * @param pojo : pojo
-     * @param fieldName : field name
-     * @param value : new value
+     * @param pojo the pojo
+     * @param fieldName the field name
+     * @param value the new value
      * @see org.apache.felix.ipojo.FieldInterceptor#onSet(java.lang.Object, java.lang.String, java.lang.Object)
      */
     public void onSet(Object pojo, String fieldName, Object value) {

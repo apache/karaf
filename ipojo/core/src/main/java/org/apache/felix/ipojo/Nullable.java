@@ -20,7 +20,12 @@ package org.apache.felix.ipojo;
 
 /**
  * A Nullable object must implement this interface.
- * 
+ * This allows to the code checking if the injected object is
+ * a Nullable object or not such as in:<br/>
+ * <code>if(foo instanceof Nullable){...}</code>
+ * <br/>
+ * This interface does not define any methods. Nullable objects owns
+ * the same methods than the 'real' object.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface Nullable {

@@ -43,11 +43,21 @@ import org.osgi.framework.SynchronousBundleListener;
 
 /**
  * iPOJO Extender.
- * Looks for iPOJO Bundle and start the management of these bundles if needed.
+ * This class listens bundle arrivals and departures in order to detect and manage
+ * iPOJO powered bundles. This class creates factories and ask for instance creation.
+ * @see SynchronousBundleListener
+ * @see BundleActivator
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class Extender implements SynchronousBundleListener, BundleActivator {
 
+    /**
+     * Enables the iPOJO internal dispatcher.
+     * This internal dispatcher helps the OSGi framework to support large
+     * scale applications. The internal dispatcher is disabled by default.
+     */
+    protected static final boolean DISPATCHER_ENABLED = false;
+    
     /**
      * iPOJO Component Type and Instance declaration header.
      */
@@ -59,46 +69,53 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
     private static final String IPOJO_EXTENSION = "IPOJO-Extension";
 
     /**
-     * iPOJO Extender logger.
+     * The iPOJO Extender logger.
      */
     private Logger m_logger;
 
     /**
-     * iPOJO Bundle Context.
+     * The Bundle Context of the iPOJO Core bundle.
      */
     private BundleContext m_context;
 
     /**
-     * Declared instance manager.
+     * The instance creator used to create instances.
+     * (Singleton)
      */
     private InstanceCreator m_creator;
 
     /**
-     * iPOJO Bundle.
+     * The iPOJO Bundle.
      */
     private Bundle m_bundle;
 
     /**
-     * List of factory types.
+     * The list of factory types.
      */
     private List m_factoryTypes = new ArrayList();
 
     /**
-     * List of unbound types.
+     * The list of unbound types.
+     * A type is unbound if the matching extension is not deployed.
      */
     private final List m_unboundTypes = new ArrayList();
     
     /**
-     * Thread analyzing arriving bundles and creating iPOJO contributions.
+     * The thread analyzing arriving bundles and creating iPOJO contributions.
      */
     private final CreatorThread m_thread = new CreatorThread();
+    
+    /**
+     * The internal iPOJO dispatcher.
+     */
+    private EventDispatcher m_dispatcher;
 
     /**
      * Bundle Listener Notification.
-     * @param event : the bundle event.
+     * @param event the bundle event.
      * @see org.osgi.framework.BundleListener#bundleChanged(org.osgi.framework.BundleEvent)
      */
-    public synchronized void bundleChanged(BundleEvent event) {
+    public synchronized void bundleChanged(final BundleEvent event) {
         if (event.getBundle() == m_bundle) { return; }
 
         switch (event.getType()) {
@@ -117,8 +134,11 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
     }
 
     /**
-     * Ends the iPOJO Management for the given bundle.
-     * @param bundle : the bundle.
+     * Ends the iPOJO Management for the given bundle. 
+     * Generally the bundle is leaving. This method
+     * stops every factories declared is the bundle and 
+     * disposed every declared instances.
+     * @param bundle the bundle.
      */
     private void closeManagementFor(Bundle bundle) {
         List toRemove = new ArrayList();
@@ -168,8 +188,9 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
     }
 
     /**
-     * Check if the given bundle is an iPOJO bundle, and begin the iPOJO management is true.
-     * @param bundle : the bundle to check.
+     * Checks if the given bundle is an iPOJO bundle, and begin 
+     * the iPOJO management is true.
+     * @param bundle the bundle to check.
      */
     private void startManagementFor(Bundle bundle) {
         Dictionary dict = bundle.getHeaders();
@@ -193,9 +214,10 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
     }
 
     /**
-     * Parse an IPOJO-Extension manifest header.
-     * @param bundle : bundle containing the header.
-     * @param header : header to parse.
+     * Parses an IPOJO-Extension manifest header and then creates
+     * iPOJO extensions (factory types).
+     * @param bundle the bundle containing the header.
+     * @param header the header to parse.
      */
     private void parseAbstractFactoryType(Bundle bundle, String header) {
         String[] arr = ParseUtils.split(header, ",");
@@ -224,11 +246,13 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
     }
 
     /**
-     * Parse the internal metadata (from the manifest (in the iPOJO-Components property)).
-     * @param bundle : the owner bundle.
-     * @param components : iPOJO Header String.
-     * @throws IOException : the manifest could not be found
-     * @throws ParseException : the parsing process failed
+     * Parses the internal metadata (from the manifest 
+     * (in the iPOJO-Components property)). This methods
+     * creates factories and add instances to the instance creator.
+     * @param bundle the owner bundle.
+     * @param components The iPOJO Header String.
+     * @throws IOException if the manifest can not be found
+     * @throws ParseException if the parsing process failed
      */
     private void parse(Bundle bundle, String components) throws IOException, ParseException {
         ManifestMetadataParser parser = new ManifestMetadataParser();
@@ -246,8 +270,8 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
     }
 
     /**
-     * iPOJO Starting method.
-     * @param context : iPOJO bundle context.
+     * iPOJO Start method.
+     * @param context the iPOJO bundle context.
      * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
      */
     public void start(BundleContext context) {
@@ -256,6 +280,9 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
         m_creator = new InstanceCreator(context);
 
         m_logger = new Logger(m_context, "IPOJO-Extender");
+        
+        m_dispatcher = new EventDispatcher(context);
+        m_dispatcher.start();
 
         // Begin by initializing core handlers
         startManagementFor(m_bundle);
@@ -275,13 +302,14 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
     }
 
     /**
-     * Stop the iPOJO Management.
-     * @param context : bundle context.
+     * Stops the iPOJO Bundle.
+     * @param context the bundle context.
      * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
      */
     public void stop(BundleContext context) {
         m_thread.stop(); // Stop the thread processing bundles.
         m_context.removeBundleListener(this);
+        m_dispatcher.stop();
 
         for (int k = 0; k < m_factoryTypes.size(); k++) {
             ManagedAbstractFactoryType mft = (ManagedAbstractFactoryType) m_factoryTypes.get(k);
@@ -305,9 +333,9 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
     }
 
     /**
-     * Add a component factory to the factory list.
-     * @param metadata : the new component metadata.
-     * @param bundle : the bundle.
+     * Adds a component factory to the factory list.
+     * @param metadata the new component metadata.
+     * @param bundle the bundle.
      */
     private void createAbstractFactory(Bundle bundle, Element metadata) {
         ManagedAbstractFactoryType factoryType = null;
@@ -376,30 +404,30 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
      */
     private final class ManagedAbstractFactoryType {
         /**
-         * Type (i.e.) name of the extension.
+         * The type (i.e.) name of the extension.
          */
         String m_type;
 
         /**
-         * Abstract Factory class.
+         * The abstract Factory class.
          */
         Class m_clazz;
 
         /**
-         * Bundle object containing the declaration of the extension.
+         * The bundle object containing the declaration of the extension.
          */
         Bundle m_bundle;
 
         /**
-         * Factories created by this extension. 
+         * The factories created by this extension. 
          */
         private Map m_created;
 
         /**
-         * Constructor.
-         * @param factory : abstract factory class.
-         * @param type : name of the extension.
-         * @param bundle : bundle declaring the extension.
+         * Creates a ManagedAbstractFactoryType.
+         * @param factory the abstract factory class.
+         * @param type the name of the extension.
+         * @param bundle the bundle declaring the extension.
          */
         protected ManagedAbstractFactoryType(Class factory, String type, Bundle bundle) {
             m_bundle = bundle;
@@ -409,30 +437,30 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
     }
 
     /**
-     * Structure storing unbound component type declaration.
-     * Unbound means that there is no extension able to manage it.
+     * Structure storing unbound component type declarations.
+     * Unbound means that there is no extension able to manage the extension.
      */
     private final class UnboundComponentType {
         /**
-         * Component type description.
+         * The component type description.
          */
         private final Element m_description;
 
         /**
-         * Bundle declaring this type.
+         * The bundle declaring this type.
          */
         private final Bundle m_bundle;
 
         /**
-         * Required extension name.
+         * The required extension name.
          */
         private final String m_type;
 
         /**
-         * Constructor.
-         * @param description : description of the component type.
-         * @param bundle : bundle declaring this type.
-         * @param type : required extension name.
+         * Creates a UnboundComponentType.
+         * @param description the description of the component type.
+         * @param bundle the bundle declaring this type.
+         * @param type the required extension name.
          */
         protected UnboundComponentType(String type, Element description, Bundle bundle) {
             m_type = type;
@@ -442,8 +470,8 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
     }
 
     /**
-     * Compute the bundle context from the bundle class by introspection.
-     * @param bundle : bundle.
+     * Computes the bundle context from the bundle class by introspection.
+     * @param bundle the bundle.
      * @return the bundle context object or null if not found.
      */
     public BundleContext getBundleContext(Bundle bundle) {
@@ -513,7 +541,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
     
 
     /**
-     * The creator thread analyze arriving bundle to create iPOJO contribution.
+     * The creator thread analyzes arriving bundles to create iPOJO contribution.
      */
     private class CreatorThread implements Runnable {
 
@@ -523,14 +551,14 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
         private boolean m_started = true;
         
         /**
-         * List of bundle that are going to be analyzed.
+         * The list of bundle that are going to be analyzed.
          */
         private List m_bundles = new ArrayList();
         
         /**
-         * A bundle is arrived.
+         * A bundle is arriving.
          * This method is synchronized to avoid concurrent modification of the waiting list.
-         * @param bundle : new bundle
+         * @param bundle the new bundle
          */
         public synchronized void addBundle(Bundle bundle) {
             m_bundles.add(bundle);
@@ -542,14 +570,14 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
          * A bundle is leaving.
          * If the bundle was not already processed, the bundle is remove from the waiting list.
          * This method is synchronized to avoid concurrent modification of the waiting list.
-         * @param bundle : the leaving bundle.
+         * @param bundle the leaving bundle.
          */
         public synchronized void removeBundle(Bundle bundle) {
             m_bundles.remove(bundle);
         }
         
         /**
-         * Stop the creator thread.
+         * Stops the creator thread.
          */
         public synchronized void stop() {
             m_started = false;
@@ -558,10 +586,10 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
         }
 
         /**
-         * Creator thread run method.
-         * While the waiting list is not empty, the thread launch the bundle analyzing.
+         * Creator thread's run method.
+         * While the list is not empty, the thread launches the bundle analyzing on the next bundle.
          * When the list is empty, the thread sleeps until the arrival of a new bundle 
-         * or that iPOJO stops.
+         * or until iPOJO stops.
          * @see java.lang.Runnable#run()
          */
         public void run() {

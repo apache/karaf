@@ -27,40 +27,41 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Element.
- * 
+ * An element represents an XML Element.
+ * It contains a name, a namepace, {@link Attribute} objects
+ * and sub-elements. This class is used to parse iPOJO metadata.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class Element {
 
     /**
-     * Name of the element.
+     * The name of the element.
      */
     private String m_name;
 
     /**
-     * Name space of the element.
+     * The namespace of the element.
      */
     private String m_nameSpace;
 
     /**
-     * Map of attributes of the element.
-     * The map key is the qualified name of the attribute (ns:name)
+     * The map of attributes of the element (attribute name -> {@link Attribute}).
+     * The map key is the qualified name of the attribute (<code>ns:name</code>)
      * The value is the attribute object.
      */
     private Map m_attributes = new HashMap();
 
     /**
-     * Map of the sub-element of the element.
+     * The map of the sub-element of the element (element name -> {@link Element}.
      * The map key is the element qualified name (ns:name).
      * The value is the array of element of this name.
      */
     private Map m_elements = new HashMap();
 
     /**
-     * Constructor.
-     * @param name : the name of the element
-     * @param ns : the namespace of the element
+     * Creates an Element.
+     * @param name the name of the element
+     * @param ns the namespace of the element
      */
     public Element(String name, String ns) {
         m_name = name.toLowerCase();
@@ -70,7 +71,8 @@ public class Element {
     }
 
     /**
-     * Get sub-elements.
+     * Gets sub-elements.
+     * If no sub-elements, an empty array is returned.
      * @return the sub elements
      */
     public Element[] getElements() {
@@ -87,7 +89,8 @@ public class Element {
     }
 
     /**
-     * Get element attributes.
+     * Gets element attributes.
+     * If no attributes, an empty array is returned.
      * @return the attributes
      */
     public Attribute[] getAttributes() {
@@ -95,7 +98,7 @@ public class Element {
     }
 
     /**
-     * Get element name.
+     * Gets element name.
      * @return the name of the element
      */
     public String getName() {
@@ -103,7 +106,7 @@ public class Element {
     }
 
     /**
-     * Get element namespace.
+     * Gets element namespace.
      * @return the namespace of the element
      */
     public String getNameSpace() {
@@ -111,9 +114,10 @@ public class Element {
     }
 
     /**
-     * Return the value of the attribute given in parameter.
-     * @param name : the name of the searched attribute
-     * @return the value of the attribute given in parameter, null if the attribute does not exist
+     * Returns the value of the attribute given in parameter.
+     * @param name the name of the searched attribute
+     * @return the value of the attribute given in parameter,
+     * <code>null</code> if the attribute does not exist
      */
     public String getAttribute(String name) {
         name = name.toLowerCase();
@@ -126,10 +130,11 @@ public class Element {
     }
 
     /**
-     * Return the value of the attribute "name" of the namespace "ns".
-     * @param name : name of the attribute to find
-     * @param ns : namespace of the attribute to find
-     * @return the String value of the attribute, or null if the attribute is not found.
+     * Returns the value of the attribute "name" of the namespace "ns".
+     * @param name the name of the attribute to find
+     * @param ns the namespace of the attribute to find
+     * @return the String value of the attribute, or 
+     * <code>null</code> if the attribute is not found.
      */
     public String getAttribute(String name, String ns) {
         name = ns.toLowerCase() + ":" + name.toLowerCase();
@@ -137,7 +142,7 @@ public class Element {
     }
     
     /**
-     * Get the qualified name of the current element.
+     * Gets the qualified name of the current element.
      * @return the qualified name of the current element.
      */
     private String getQualifiedName() {
@@ -149,8 +154,8 @@ public class Element {
     }
 
     /**
-     * Add a sub-element.
-     * @param elem : the element to add
+     * Adds a sub-element.
+     * @param elem the element to add
      */
     public void addElement(Element elem) {
         Element[] array = (Element[]) m_elements.get(elem.getQualifiedName());
@@ -165,8 +170,8 @@ public class Element {
     }
 
     /**
-     * Remove a sub-element.
-     * @param elem : the element to remove
+     * Removes a sub-element.
+     * @param elem the element to remove
      */
     public void removeElement(Element elem) {
         Element[] array = (Element[]) m_elements.get(elem.getQualifiedName());
@@ -197,8 +202,8 @@ public class Element {
     }
 
     /**
-     * Add a attribute.
-     * @param att : the attribute to add
+     * Adds a attribute.
+     * @param att the attribute to add
      */
     public void addAttribute(Attribute att) {
         String name = att.getName().toLowerCase();
@@ -209,8 +214,8 @@ public class Element {
     }
 
     /**
-     * Remove an attribute.
-     * @param att : the attribute to remove
+     * Removes an attribute.
+     * @param att the attribute to remove
      */
     public void removeAttribute(Attribute att) {
         String name = att.getName();
@@ -221,9 +226,10 @@ public class Element {
     }
 
     /**
-     * Get the elements array of the element type given in parameter. This method look for an empty namespace.
-     * @param name : the type of the element to find (element name)
-     * @return the resulting element array (null if the search failed)
+     * Gets the elements array of the element type given in parameter. 
+     * This method look for an empty namespace.
+     * @param name the type of the element to find (element name)
+     * @return the resulting element array (<code>null</code> if the search failed)
      */
     public Element[] getElements(String name) {
         Element[] elems = (Element[]) m_elements.get(name.toLowerCase());
@@ -231,10 +237,10 @@ public class Element {
     }
 
     /**
-     * Get the elements array of the element type given in parameter.
-     * @param name : the type of the element to find (element name)
-     * @param ns : the namespace of the element
-     * @return the resulting element array (null if the search failed)
+     * Gets the elements array of the element type given in parameter.
+     * @param name the type of the element to find (element name)
+     * @param ns the namespace of the element
+     * @return the resulting element array (<code>null</code> if the search failed)
      */
     public Element[] getElements(String name, String ns) {
         if (ns == null || ns.length() == 0) {
@@ -245,19 +251,19 @@ public class Element {
     }
 
     /**
-     * Is the element contains a sub-element of the type given in parameter.
-     * @param name : type of the element to check.
-     * @return true if the element contains an element of the type "name"
+     * Does the element contain a sub-element of the type given in parameter.
+     * @param name the type of the element to check.
+     * @return <code>true</code> if the element contains an element of the type "name"
      */
     public boolean containsElement(String name) {
         return m_elements.containsKey(name.toLowerCase());
     }
 
     /**
-     * Is the element contains a sub-element of the type given in parameter. 
-     * @param name : type of the element to check.
-     * @param ns : the namespace of the element to check.
-     * @return true if the element contains an element of the type "name"
+     * Does the element contain a sub-element of the type given in parameter. 
+     * @param name the type of the element to check.
+     * @param ns the namespace of the element to check.
+     * @return <code>true</code> if the element contains an element of the type "name"
      */
     public boolean containsElement(String name, String ns) {
         if (ns != null && ns.length() != 0) {
@@ -267,16 +273,16 @@ public class Element {
     }
 
     /**
-     * Is the element contains an attribute of the name given in parameter.
-     * @param name : name of the element
-     * @return true if the element contains an attribute of the type "name"
+     * Does the element contain an attribute of the name given in parameter.
+     * @param name the name of the element
+     * @return <code>true</code> if the element contains an attribute of the type "name"
      */
     public boolean containsAttribute(String name) {
         return m_attributes.containsKey(name.toLowerCase());
     }
     
     /**
-     * Get the XML form of this element.
+     * Gets the XML form of this element.
      * @return the XML snippet representing this element.
      */
     public String toXMLString() {
@@ -285,7 +291,7 @@ public class Element {
 
     /**
      * Internal method to get XML form of an element.
-     * @param indent : indentation to used.
+     * @param indent the indentation to used.
      * @return the XML snippet representing this element.
      */
     private String toXMLString(int indent) {
@@ -343,8 +349,8 @@ public class Element {
 
     /**
      * Internal method to compute the toString method.
-     * @param indent : indentation to use.
-     * @return : the String form of this element.
+     * @param indent the indentation to use.
+     * @return the String form of this element.
      */
     private String toString(int indent) {
         String xml = "";

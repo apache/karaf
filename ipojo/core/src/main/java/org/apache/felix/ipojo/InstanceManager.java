@@ -37,70 +37,78 @@ import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.BundleContext;
 
 /**
- * The instance manager class manages one instance of a component type. It manages component lifecycle, component instance creation and handlers.
+ * This class defines the container of primitive instances. It manages content initialization 
+ * and handlers cooperation.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class InstanceManager implements ComponentInstance, InstanceStateListener {
     /**
-     * Name of the component instance.
+     * The name of the component instance.
      */
     protected String m_name;
 
     /**
-     * Name of the component type implementation class.
+     * The name of the component type implementation class.
      */
     protected String m_className;
 
     /**
-     * Handler list.
+     * The handler object list.
      */
     protected final HandlerManager[] m_handlers;
 
     /**
-     * Component state (STOPPED at the beginning).
+     * The current instance state ({@link ComponentInstance#STOPPED} at the beginning).
+     * Possible value are 
+     * <li>{@link ComponentInstance#INVALID}</li>
+     * <li>{@link ComponentInstance#VALID}</li>
+     * <li>{@link ComponentInstance#DISPOSED}</li>
+     * <li>{@link ComponentInstance#STOPPED}</li>
      */
     protected int m_state = STOPPED;
 
     /**
-     * Instance State Listener List.
+     * The instance state listener list.
+     * @see InstanceStateListener
      */
     protected List m_listeners = null;
 
     /**
-     * Parent factory (ComponentFactory).
+     * The instance factory.
      */
     private final ComponentFactory m_factory;
 
     /**
-     * The context of the component.
+     * The bundle context of the instance.
      */
     private final BundleContext m_context;
 
     /**
-     * Map [field, field interceptor list] storing handlers interested by the field.
+     * The map [field, {@link FieldInterceptor} list] storing interceptors monitoring fields.
      * Once configured, this map can't change.
      */
     private Map m_fieldRegistration;
 
     /**
-     * Map [method identifier, method interceptor list] storing handlers interested by the method.
+     * the map [method identifier, {@link MethodInterceptor} list] storing handlers interested by the method.
      * Once configure this map can't change.
      */
     private Map m_methodRegistration;
 
     /**
-     * Manipulated class.
+     * The manipulated class.
      * Once set, this field doesn't change.
      */
     private Class m_clazz;
 
     /**
-     * Instances of the components.
+     * The content of the current instance.
      */
     private List m_pojoObjects;
 
     /**
-     * Factory method. Contains the name of the static method used to create POJO objects.
+     * The factory method used to create content objects.
+     * If <code>null</code>, the regular constructor is used. 
      * Once set, this field is immutable.
      */
     private String m_factoryMethod = null;
@@ -111,25 +119,28 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     private boolean m_inTransition = false;
 
     /**
-     * Queue of stored state changed.
+     * The queue of stored state changed.
      */
     private List m_stateQueue = new ArrayList();
 
     /**
-     * Map of [field, value], storing POJO field value.
+     * The map of [field, value], storing POJO managed 
+     * field value.
      */
     private Map m_fields = new HashMap();
 
     /**
-     * Map method [id=>method].
+     * The Map storing the Method objects by ids.
+     * [id=>{@link Method}].
      */
     private Map m_methods = new HashMap();
 
     /**
-     * Construct a new Component Manager.
-     * @param factory : the factory managing the instance manager
-     * @param context : the bundle context to give to the instance
-     * @param handlers : handlers array
+     * Creates a new Component Manager.
+     * The instance is not initialized.
+     * @param factory  the factory managing the instance manager
+     * @param context  the bundle context to give to the instance
+     * @param handlers handler object array
      */
     public InstanceManager(ComponentFactory factory, BundleContext context, HandlerManager[] handlers) {
         m_factory = factory;
@@ -138,10 +149,12 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Configure the instance manager. Stop the existing handler, clear the handler list, change the metadata, recreate the handlers
-     * @param metadata : the component type metadata
-     * @param configuration : the configuration of the instance
-     * @throws ConfigurationException : occurs if the metadata are not correct
+     * Configures the instance manager.
+     * Sets the class name, and the instance name as well as the factory method.
+     * Initializes handlers.
+     * @param metadata the component type metadata
+     * @param configuration the configuration of the instance
+     * @throws ConfigurationException if the metadata are not correct
      */
     public void configure(Element metadata, Dictionary configuration) throws ConfigurationException {
         m_className = metadata.getAttribute("classname");
@@ -159,7 +172,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Get the description of the current instance.
+     * Gets the description of the current instance.
      * @return the instance description.
      * @see org.apache.felix.ipojo.ComponentInstance#getInstanceDescription()
      */
@@ -186,7 +199,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Get the list of handlers plugged on the instance.
+     * Gets the list of handlers plugged (i.e. attached) on the instance.
      * This method does not need a synchronized block as the handler set is constant.
      * @return the handler array of plugged handlers.
      */
@@ -199,10 +212,11 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Return a specified handler.
+     * Returns a specified handler.
+     * This method allows cross-handler interactions.
      * This must does not need a synchronized block as the handler set is constant.
-     * @param name : class name of the handler to find or its qualified name (namespace:name)
-     * @return : the handler, or null if not found
+     * @param name the class name of the handler to find or its qualified name (namespace:name)
+     * @return the handler, or null if not found
      */
     public Handler getHandler(String name) {
         for (int i = 0; i < m_handlers.length; i++) {
@@ -215,11 +229,11 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Give access to a field value to the first created pojo.
-     * This method process by analyzing both managed fields and pojo fields (by reflection).
+     * Gives access to a field value of the first created pojo.
+     * This method processes by analyzing both managed fields and pojo fields (by reflection).
      * If no pojo were already created try only on managed fields.
-     * @param fieldName : field name.
-     * @return the field value, null is returned if the value is managed and not already set.
+     * @param fieldName the field name.
+     * @return the field value, <code>null</code> is returned if the value is managed and not already set.
      */
     public synchronized Object getFieldValue(String fieldName) {
         if (m_pojoObjects == null) {
@@ -230,12 +244,12 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Give access to a field value to the given created pojo.
-     * This method process by analyzing both managed fields and pojo fields (by reflection).
-     * If the given pojo is null, try only on managed fields.
-     * @param fieldName : field name.
-     * @param pojo : the pojo on which computing field value.
-     * @return the field value, null is returned if the value is managed and not already set.
+     * Gives access to a field value to the given created pojo.
+     * This method processes by analyzing both managed fields and pojo fields (by reflection).
+     * If the given pojo is <code>null</code>, tries only on managed fields.
+     * @param fieldName the field name.
+     * @param pojo  the pojo on which computing field value.
+     * @return the field value, <code>null</code> is returned if the value is managed and not already set.
      */
     public synchronized Object getFieldValue(String fieldName, Object pojo) {
         Object setByContainer = null;
@@ -268,7 +282,9 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Start the instance manager.
+     * Starts the instance manager.
+     * This method activates plugged handlers,
+     * and computes the initial instance state.
      */
     public void start() {
         synchronized (this) {
@@ -300,7 +316,10 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Stop the instance manager.
+     * Stops the instance manager.
+     * This methods sets the instance state to {@link ComponentInstance#STOPPED},
+     * disables attached handlers, and notifies listeners ({@link InstanceStateListener})
+     * of the instance stopping process.
      */
     public void stop() {
         List listeners = null;
@@ -336,12 +355,17 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Dispose the instance.
+     * Disposes the instance.
+     * This method does the following process:
+     * <li>Stop the instance is not {@link ComponentInstance#STOPPED}</li>
+     * <li>Notifies listeners {@link InstanceStateListener} of the destruction</li>
+     * <li>Disposes attached handlers</li>
+     * <li>Clears structures</li>
      * @see org.apache.felix.ipojo.ComponentInstance#dispose()
      */
     public void dispose() {
         List listeners = null;
-        int state = -2;
+        int state = -2; // Temporary state
         synchronized (this) {
             state = m_state; // Stack confinement
             if (m_listeners != null) {
@@ -376,10 +400,11 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Set the state of the component instance. if the state changed call the stateChanged(int) method on the handlers. This method has a reentrant
-     * mechanism. If in the flow of the first call the method is called another times, the second call is stored and executed after the first one is
-     * finished.
-     * @param state : the new state
+     * Sets the state of the component instance. 
+     * If the state changes, calls the {@link PrimitiveHandler#stateChanged(int)} method on the attached handlers.
+     * This method has a reentrant mechanism. If in the flow of the first call the method is called another times, 
+     * the second call is stored and executed after the first one finished.
+     * @param state the new state
      */
     public void setState(int state) {
         int originalState = -2;
@@ -443,7 +468,12 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Get the actual state of the instance.
+     * Gets the actual state of the instance.
+     * Possible values are:
+     * <li>{@link ComponentInstance#INVALID}</li>
+     * <li>{@link ComponentInstance#VALID}</li>
+     * <li>{@link ComponentInstance#DISPOSED}</li>
+     * <li>{@link ComponentInstance#STOPPED}</li>
      * @return the actual state of the component instance.
      * @see org.apache.felix.ipojo.ComponentInstance#getState()
      */
@@ -452,8 +482,10 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Check if the instance if started.
-     * @return true if the instance is started.
+     * Checks if the instance is started.
+     * An instance is started if the state is either 
+     * {@link ComponentInstance#VALID} or {@link ComponentInstance#INVALID}.
+     * @return <code>true</code> if the instance is started.
      * @see org.apache.felix.ipojo.ComponentInstance#isStarted()
      */
     public synchronized boolean isStarted() {
@@ -461,8 +493,8 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Register an instance state listener.
-     * @param listener : listener to register.
+     * Registers an instance state listener.
+     * @param listener the listener to register.
      * @see org.apache.felix.ipojo.ComponentInstance#addInstanceStateListener(org.apache.felix.ipojo.InstanceStateListener)
      */
     public synchronized void addInstanceStateListener(InstanceStateListener listener) {
@@ -473,8 +505,8 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Unregister an instance state listener.
-     * @param listener : listener to unregister.
+     * Unregisters an instance state listener.
+     * @param listener the listener to unregister.
      * @see org.apache.felix.ipojo.ComponentInstance#removeInstanceStateListener(org.apache.felix.ipojo.InstanceStateListener)
      */
     public synchronized void removeInstanceStateListener(InstanceStateListener listener) {
@@ -487,7 +519,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Get the factory which create the current instance.
+     * Gets the factory which has created the current instance.
      * @return the factory of the component
      * @see org.apache.felix.ipojo.ComponentInstance#getFactory()
      */
@@ -496,7 +528,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Load the manipulated class.
+     * Loads the manipulated class.
      */
     private void load() {
         try {
@@ -509,8 +541,8 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Get the array of object created by the instance.
-     * @return the created instance of the component instance.
+     * Gets the object array created by the instance.
+     * @return the created content objects of the component instance.
      */
     public synchronized Object[] getPojoObjects() {
         if (m_pojoObjects == null) {
@@ -519,6 +551,17 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
         return m_pojoObjects.toArray(new Object[m_pojoObjects.size()]);
     }
     
+    /**
+     * Creates a POJO objects.
+     * This method is not synchronized and does require any locks.
+     * If a {@link InstanceManager#m_factoryMethod} is specified,
+     * this method called this static method to creates the object.
+     * Otherwise, the methods uses the regular constructor.
+     * All those methods can receive the {@link BundleContext} in
+     * argument.
+     * @return the created object or <code>null</code> if an error
+     * occurs during the creation.
+     */
     private Object createObject() {
         if (m_clazz == null) {
             load();
@@ -662,13 +705,18 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Create an instance of the component. 
-     * This method need to be called one time only for singleton provided service.
-     * @return a new instance
+     * Creates an instance of the content. 
+     * This method needs to be called once only for singleton provided service.
+     * This methods call the {@link InstanceManager#createObject()} method, and adds
+     * the created object to the {@link InstanceManager#m_pojoObjects} list. Then,
+     * it calls the {@link PrimitiveHandler#onCreation(Object)} methods on attached 
+     * handlers.
+     * @return a new instance or <code>null</code> if an error occurs during the
+     * creation.
      */
     public Object createPojoObject() {
         Object instance = createObject();
-
+        
         // Add the new instance in the instance list.
         synchronized (this) {
             if (m_pojoObjects == null) {
@@ -678,6 +726,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
         }
         // Call createInstance on Handlers :
         for (int i = 0; i < m_handlers.length; i++) {
+            // This methods must be call without the monitor lock.
             ((PrimitiveHandler) m_handlers[i].getHandler()).onCreation(instance);
         }
         
@@ -685,8 +734,20 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Get the first object created by the instance. If no object created, create and return one object.
-     * @return the instance of the component instance to use for singleton component
+     * Gets the first object created by the instance. 
+     * If no object created, creates and returns a POJO object.
+     * This methods call the {@link InstanceManager#createObject()} method, and adds
+     * the created object to the {@link InstanceManager#m_pojoObjects} list. Then,
+     * it calls the {@link PrimitiveHandler#onCreation(Object)} methods on attached 
+     * handlers.
+     * <br/>
+     * <p>
+     * <b>TODO</b> this method has a potential race condition if two threads require a pojo
+     * object at the same time. Only one object will be created, but the second thread
+     * can receive the created object before the {@link PrimitiveHandler#onCreation(Object)}
+     * calls.
+     * </p>
+     * @return the pojo object of the component instance to use for singleton component
      */
     public Object getPojoObject() {
         Object pojo = null;
@@ -714,7 +775,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Get the manipulated class.
+     * Gets the manipulated class.
      * The method does not need to be synchronized.
      * Reassigning the internal class will use the same class object.
      * @return the manipulated class
@@ -727,11 +788,14 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Register an handler. The handler will be notified of event on each field given in the list.
-     * @param handler : the handler to register
-     * @param fields : the field metadata list
-     * @param methods : the method metadata list
-     * @deprecated use register(FieldMetadata fm, FieldInterceptor fi) and register(MethodMetadata mm, MethodInterceptor mi) instead. 
+     * Registers an handler.
+     * This methods is called by handler wanting to monitor
+     * fields and/or methods of the implementation class.  
+     * @param handler the handler to register
+     * @param fields the field metadata list
+     * @param methods the method metadata list
+     * @deprecated use {@link InstanceManager#register(FieldMetadata, FieldInterceptor)}
+     * and {@link InstanceManager#register(FieldMetadata, MethodInterceptor)} instead. 
      */
     public void register(PrimitiveHandler handler, FieldMetadata[] fields, MethodMetadata[] methods) {
         for (int i = 0; fields != null && i < fields.length; i++) {
@@ -744,9 +808,11 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
     
     /**
-     * Register a field interceptor.
-     * @param field : intercepted field
-     * @param interceptor : interceptor
+     * Registers a field interceptor.
+     * A field interceptor will be notified of field access of the
+     * implementation class. Note that handlers are field interceptors.
+     * @param field the field to monitor
+     * @param interceptor the field interceptor object
      */
     public void register(FieldMetadata field, FieldInterceptor interceptor) {
         if (m_fieldRegistration == null) {
@@ -771,9 +837,11 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
     
     /**
-     * Register a method interceptor.
-     * @param method : intercepted method
-     * @param interceptor : interceptor
+     * Registers a method interceptor.
+     * A method interceptor will be notified of method entries, exits
+     * and errors. Note that handlers are method interceptors.
+     * @param method the field to monitor
+     * @param interceptor the field interceptor object
      */
     public void register(MethodMetadata method, MethodInterceptor interceptor) {
         if (m_methodRegistration == null) {
@@ -798,11 +866,14 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * This method is called by the manipulated class each time that a GETFIELD instruction is found. The method ask to each handler which value need
-     * to be returned.
-     * @param pojo : the pojo object on which the field was get
-     * @param fieldName : the field name on which the GETFIELD instruction is called
-     * @return the value decided by the last asked handler (throw a warning if two fields decide two different values)
+     * This method is called by the manipulated class each time that a GETFIELD instruction is executed.
+     * The method asks to each attached handler monitoring this field which value need
+     * to be injected (i.e. returned) by invoking the {@link PrimitiveHandler#onGet(Object, String, Object)}
+     * method. If the field value changes, this method call the {@link PrimitiveHandler#onSet(Object, String, Object)}
+     * method on each field interceptor monitoring the field in order to advertize the new value.
+     * @param pojo the pojo object on which the field was get
+     * @param fieldName the field name on which the GETFIELD instruction is called
+     * @return the value decided by the last asked handler (throws a warning if two fields decide two different values)
      */
     public Object  onGet(Object pojo, String fieldName) {
         Object initialValue = null;
@@ -850,10 +921,12 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Dispatch entry method event on registered handler.
-     * @param pojo : the pojo object on which method is invoked.
-     * @param methodId : method id
-     * @param args : argument array
+     * Dispatches entry method events on registered method interceptors.
+     * This method calls the {@link PrimitiveHandler#onEntry(Object, Method, Object[])}
+     * methods on method interceptors monitoring the method.
+     * @param pojo the pojo object on which method is invoked.
+     * @param methodId the method id used to compute the {@link Method} object.
+     * @param args the argument array
      */
     public void onEntry(Object pojo, String methodId, Object[] args) {
         if (m_methodRegistration == null) { // Immutable field.
@@ -867,11 +940,15 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Dispatch exit method event on registered handler. The given returned object is an instance of Exception if the method has launched an
-     * exception. If the given object is null, either the method returns void, either the method has returned null.
-     * @param pojo : the pojo object on which the method was invoked
-     * @param methodId : method id
-     * @param result : returned object.
+     * Dispatches exit method events on registered method interceptors.
+     * The given returned object is an instance of {@link Exception} if the method thrown an
+     * exception. If the given object is <code>null</code>, either the method returns <code>void</code>,
+     * or the method has returned <code>null</code>
+     * This method calls the {@link PrimitiveHandler#onExit(Object, Method, Object[])} and the 
+     * {@link PrimitiveHandler#onFinally(Object, Method)} methods on method interceptors monitoring the method.
+     * @param pojo the pojo object on which method was invoked.
+     * @param methodId the method id used to compute the {@link Method} object.
+     * @param result the returned object.
      */
     public void onExit(Object pojo, String methodId, Object result) {
         if (m_methodRegistration == null) {
@@ -888,11 +965,14 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Dispatch error method event on registered handler. The given returned object is an instance of Exception if the method has thrown an exception.
-     * If the given object is null, either the method returns void, either the method has returned null.
-     * @param pojo : the pojo object on which the method was invoked
-     * @param methodId : method id
-     * @param error : throwable object.
+     * Dispatches error method events on registered method interceptors.
+     * or the method has returned <code>null</code>
+     * This method calls the {@link PrimitiveHandler#onExit(Object, Method, Object[])} and the 
+     * {@link PrimitiveHandler#onFinally(Object, Method)} methods on method interceptors monitoring 
+     * the method.
+     * @param pojo the pojo object on which the method was invoked
+     * @param methodId the method id used to compute the {@link Method} object.
+     * @param error the Throwable object.
      */
     public void onError(Object pojo, String methodId, Throwable error) {        
         if (m_methodRegistration == null) {
@@ -909,9 +989,11 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Get method object by id.
-     * @param methodId : method id
-     * @return : the method object or null if the method cannot be found.
+     * Computes the {@link Method} object from the given id.
+     * Once computes, a map is used as a cache to avoid to recompute for
+     * the same id.
+     * @param methodId the method id
+     * @return the method object or <code>null</code> if the method cannot be found.
      */
     private Method getMethodById(String methodId) {
         // Not necessary synchronized as recomputing the methodID will give the same Method twice.
@@ -940,10 +1022,14 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * This method is called by the manipulated class each time that a PUTFILED instruction is found. the method send to each handler the new value.
-     * @param pojo : the pojo object on which the field was set
-     * @param fieldName : the field name on which the PUTFIELD instruction is called
-     * @param objectValue : the value of the field
+     * This method is called by the manipulated class each time that a PUTFILED instruction is executed. 
+     * The method calls the {@link PrimitiveHandler#onSet(Object, String, Object)} method on each field
+     * interceptors monitoring this field.
+     * This method can be invoked with a <code>null</code> pojo argument when the changes comes from another
+     * handler.
+     * @param pojo the pojo object on which the field was set
+     * @param fieldName the field name on which the PUTFIELD instruction is called
+     * @param objectValue the new value of the field
      */
     public void onSet(Object pojo, String fieldName, Object objectValue) {
         Object value = null; // Stack confinement
@@ -961,8 +1047,9 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
         }
     }
 
+    
     /**
-     * Get the bundle context used by this component instance.
+     * Gets the bundle context used by this component instance.
      * @return the context of the component.
      * @see org.apache.felix.ipojo.ComponentInstance#getContext()
      */
@@ -970,16 +1057,31 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
         return m_context; // Immutable
     }
 
+    /**
+     * Gets the global bundle context. This is the bundle context
+     * of the bundle declaring the component type.
+     * @return the bundle context of the bundle declaring the component
+     * type.
+     */
     public BundleContext getGlobalContext() {
         return ((IPojoContext) m_context).getGlobalContext(); // Immutable
     }
-
+    
+    
+    /**
+     * Gets the local service context. This service context gives
+     * access to the 'local' service registry (the composite one).
+     * If the instance lives in the global (i.e. OSGi) context,
+     * this method returns <code>null</code>
+     * @return the local service context or <code>null</code> if the
+     * instance doesn't live in a composite.
+     */
     public ServiceContext getLocalServiceContext() {
         return ((IPojoContext) m_context).getServiceContext(); // Immutable
     }
 
     /**
-     * Get the instance name.
+     * Gets the instance name.
      * @return the instance name.
      * @see org.apache.felix.ipojo.ComponentInstance#getInstanceName()
      */
@@ -988,8 +1090,15 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Reconfigure the current instance.
-     * @param configuration : the new configuration to push
+     * Reconfigures the current instance.
+     * Reconfiguring an instance means re-injecting a new
+     * instance configuration. Some properties are immutable
+     * such as the instance name.
+     * This methods calls the {@link PrimitiveHandler#reconfigure(Dictionary)}
+     * methods on each attached handler, and then recompute the instance
+     * state. Note that the reconfiguration process does not deactivate the 
+     * instance. 
+     * @param configuration the new configuration to push
      * @see org.apache.felix.ipojo.ComponentInstance#reconfigure(java.util.Dictionary)
      */
     public void reconfigure(Dictionary configuration) {
@@ -1011,19 +1120,22 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Get the implementation class of the component type.
+     * Gets the implementation class of the component type.
      * This method does not need to be synchronized as the
      * class name is constant once set. 
-     * @return the class name of the component type.
+     * @return the class name of the component implementation.
      */
     public String getClassName() {
         return m_className;
     }
 
     /**
-     * State Change listener callback. This method is notified at each time a plugged handler becomes invalid.
-     * @param instance : changing instance
-     * @param newState : new state
+     * State Change listener callback.
+     * This method is called every time that a plugged handler becomes valid or invalid.
+     * This method computes the new instance state and applies it (by calling the
+     * {@link InstanceManager#setState(int)} method.
+     * @param instance the handler becoming valid or invalid
+     * @param newState the new state of the handler
      * @see org.apache.felix.ipojo.InstanceStateListener#stateChanged(org.apache.felix.ipojo.ComponentInstance, int)
      */
     public void stateChanged(ComponentInstance instance, int newState) {
@@ -1055,7 +1167,9 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Get the list of registered fields. This method is invoked by the POJO itself.
+     * Gets the list of registered fields (containing field names). 
+     * This method is invoked by the POJO itself during
+     * its initialization.
      * @return the set of registered fields.
      */
     public Set getRegistredFields() {
@@ -1066,7 +1180,9 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
     }
 
     /**
-     * Get the list of registered methods. This method is invoked by the POJO itself.
+     * Gets the list of registered methods (containing method ids). 
+     * This method is invoked by the POJO itself during its
+     * initialization.
      * @return the set of registered methods.
      */
     public Set getRegistredMethods() {

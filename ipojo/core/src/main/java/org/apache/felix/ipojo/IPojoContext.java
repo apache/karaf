@@ -26,6 +26,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleListener;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.InvalidSyntaxException;
@@ -36,45 +37,61 @@ import org.osgi.framework.ServiceRegistration;
 /**
  * The iPOJO Context is a BundleContext implementation allowing the separation
  * between Bundle context and Service (Bundle) Context.
- * 
+ * This is used inside composition to differentiate the classloading context (i.e.
+ * Bundle) and the service registry access.
+ * This class delegates calls to the good internal context (either the BundleContext
+ * or the ServiceContext) according to the method. If the instance does not have a valid
+ * service context, the bundle context is always used. 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class IPojoContext implements BundleContext, ServiceContext {
 
     /**
-     * BundleContext used to access bundle method.
+     * The bundleContext used to access bundle methods.
      */
     private BundleContext m_bundleContext;
 
     /**
-     * Service Context used to access service interaction.
+     * The service context used to access to the service registry.
      */
     private ServiceContext m_serviceContext;
+    
+    /**
+     * The internal event dispatcher used to avoid the multiplication
+     * of service listeners. The dispatcher is only used when the service context is
+     * not specified and if the internal dispatching is enabled ({@link Extender#DISPATCHER_ENABLED}
+     */
+    private EventDispatcher m_dispatcher;
 
     /**
-     * Constructor. Used when the service context = the bundle context
-     * 
-     * @param context : bundle context
+     * Creates an iPOJO Context.
+     * No service context is specified.
+     * This constructor is used when the
+     * instance lives in the global context.
+     * @param context the bundle context
      */
     public IPojoContext(BundleContext context) {
         m_bundleContext = context;
+        m_dispatcher = EventDispatcher.getDispatcher();
     }
 
     /**
-     * Constructor. Used when the service context and the bundle context are
-     * different
-     * 
-     * @param bundleContext : bundle context
-     * @param serviceContext : service context
+     * Creates an iPOJO Context.
+     * A service context is used to refer to the
+     * service registry. The service context will be 
+     * used for all service accesses.
+     * @param bundleContext the bundle context
+     * @param serviceContext the service context
      */
     public IPojoContext(BundleContext bundleContext, ServiceContext serviceContext) {
         m_bundleContext = bundleContext;
         m_serviceContext = serviceContext;
+        m_dispatcher = EventDispatcher.getDispatcher();
     }
 
     /**
-     * Add a bundle listener.
-     * @param listener : the listener to add
+     * Adds a bundle listener.
+     * @param listener the listener to add
      * @see org.osgi.framework.BundleContext#addBundleListener(org.osgi.framework.BundleListener)
      */
     public void addBundleListener(BundleListener listener) {
@@ -82,8 +99,8 @@ public class IPojoContext implements BundleContext, ServiceContext {
     }
 
     /**
-     * Add a framework listener.
-     * @param listener : the listener object to add
+     * Adds a framework listener.
+     * @param listener the listener object to add
      * @see org.osgi.framework.BundleContext#addFrameworkListener(org.osgi.framework.FrameworkListener)
      */
     public void addFrameworkListener(FrameworkListener listener) {
@@ -91,15 +108,30 @@ public class IPojoContext implements BundleContext, ServiceContext {
     }
 
     /**
-     * Add a service listener.
-     * @param listener : the service listener to add.
-     * @param filter : the LDAP filter
-     * @throws InvalidSyntaxException : occurs when the LDAP filter is malformed
+     * Adds a service listener.
+     * This methods registers the listener on the service context
+     * if it specified. Otherwise, if the internal dispatcher is enabled,
+     * it registers the listener inside the internal dispatcher (if
+     * the filter match against the iPOJO Filter format 
+     * {@link IPojoContext#match(String)}). Finally, if the internal 
+     * dispatcher is disabled, it uses the "regular" bundle context.
+     * @param listener the service listener to add.
+     * @param filter the LDAP filter
+     * @throws InvalidSyntaxException if LDAP filter is malformed
      * @see org.osgi.framework.BundleContext#addServiceListener(org.osgi.framework.ServiceListener, java.lang.String)
      */
     public void addServiceListener(ServiceListener listener, String filter) throws InvalidSyntaxException {
         if (m_serviceContext == null) {
-            m_bundleContext.addServiceListener(listener, filter);
+            if (Extender.DISPATCHER_ENABLED) {
+                String itf = match(filter);
+                if (itf != null) {
+                    m_dispatcher.addListener(itf, listener);
+                } else {
+                    m_bundleContext.addServiceListener(listener, filter);
+                }
+            } else {
+                m_bundleContext.addServiceListener(listener, filter);
+            }
         } else {
             m_serviceContext.addServiceListener(listener, filter);
         }
@@ -107,7 +139,9 @@ public class IPojoContext implements BundleContext, ServiceContext {
 
     /**
      * Add a service listener.
-     * @param listener : the service listener to add.
+     * This methods registers the listener on the service context
+     * if it specified. Otherwise, it uses the "regular" bundle context.
+     * @param listener the service listener to add.
      * @see org.osgi.framework.BundleContext#addServiceListener(org.osgi.framework.ServiceListener)
      */
     public void addServiceListener(ServiceListener listener) {
@@ -117,12 +151,31 @@ public class IPojoContext implements BundleContext, ServiceContext {
             m_serviceContext.addServiceListener(listener);
         }
     }
+    
+    /**
+     * This method checks if the filter matches with the iPOJO
+     * filter format: <code>(OBJECTCLASS=$ITF)</code>. It tries
+     * to extract the required interface (<code>$ITF</code>).
+     * @param filter the filter to analyze
+     * @return the required interface or <code>null</code>
+     * if the filter doesn't match with the iPOJO format.
+     */
+    private String match(String filter) {
+        if (filter != null && filter.startsWith("(" + Constants.OBJECTCLASS + "=") // check the beginning (OBJECTCLASS
+            && filter.lastIndexOf(')') == filter.indexOf(')')) { // check that there is only one )
+            return filter.substring(("(" + Constants.OBJECTCLASS + "=").length(), filter.length() - 1);
+        }
+        return null;
+    }
+    
+    
 
     /**
-     * Create a Filter object.
-     * @param filter : the string form of the LDAP filter to create
-     * @return the Filter object.
-     * @throws InvalidSyntaxException : occurs when the given filter is malformed
+     * Creates a filter objects.
+     * This method always uses the bundle context.
+     * @param filter the string form of the LDAP filter to create
+     * @return the filter object.
+     * @throws InvalidSyntaxException if the given filter is malformed
      * @see org.osgi.framework.BundleContext#createFilter(java.lang.String)
      */
     public Filter createFilter(String filter) throws InvalidSyntaxException {
@@ -130,11 +183,13 @@ public class IPojoContext implements BundleContext, ServiceContext {
     }
 
     /**
-     * Get the service references matching with the given query.
-     * @param clazz : Required interface
-     * @param filter : LDAP filter
-     * @return the array of available service reference
-     * @throws InvalidSyntaxException : occurs if the LDAP filter is malformed
+     * Gets the service references matching with the given query.
+     * Uses the service context if specified, used the bundle context
+     * otherwise.
+     * @param clazz the required interface
+     * @param filter the LDAP filter
+     * @return the array of available service references
+     * @throws InvalidSyntaxException if the LDAP filter is malformed
      * @see org.osgi.framework.BundleContext#getAllServiceReferences(java.lang.String, java.lang.String)
      */
     public ServiceReference[] getAllServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
@@ -146,8 +201,9 @@ public class IPojoContext implements BundleContext, ServiceContext {
     }
 
     /**
-     * Get the current bundle.
-     * @return the current bundle
+     * Gets the current bundle object.
+     * @return the bundle declaring the component type of the instance
+     * using the current IPojoContext.
      * @see org.osgi.framework.BundleContext#getBundle()
      */
     public Bundle getBundle() {
@@ -155,8 +211,8 @@ public class IPojoContext implements BundleContext, ServiceContext {
     }
 
     /**
-     * Get the bundle object with the given id.
-     * @param bundleId : bundle id
+     * Gets the bundle object with the given id.
+     * @param bundleId the bundle id
      * @return the bundle object
      * @see org.osgi.framework.BundleContext#getBundle(long)
      */
@@ -165,7 +221,7 @@ public class IPojoContext implements BundleContext, ServiceContext {
     }
 
     /**
-     * Get installed bundles.
+     * Gets installed bundles.
      * @return the list of installed bundles
      * @see org.osgi.framework.BundleContext#getBundles()
      */
@@ -174,8 +230,8 @@ public class IPojoContext implements BundleContext, ServiceContext {
     }
 
     /**
-     * Get a data file.
-     * @param filename : File name.
+     * Gets a data file.
+     * @param filename the file name.
      * @return the File object
      * @see org.osgi.framework.BundleContext#getDataFile(java.lang.String)
      */
@@ -184,9 +240,10 @@ public class IPojoContext implements BundleContext, ServiceContext {
     }
 
     /**
-     * Get a property value.
-     * @param key : key of the asked property
-     * @return the property value (object) or null if no property are associated with the given key
+     * Gets a property value.
+     * @param key the key of the asked property
+     * @return the property value (object) or <code>null</code> if no
+     * property are associated with the given key
      * @see org.osgi.framework.BundleContext#getProperty(java.lang.String)
      */
     public String getProperty(String key) {
@@ -194,9 +251,14 @@ public class IPojoContext implements BundleContext, ServiceContext {
     }
 
     /**
-     * Get a service object.
-     * @param reference : the required service reference 
-     * @return the service object or null if the service reference is no more valid or if the service object is not accessible
+     * Gets a service object.
+     * The given service reference must come from the same context than
+     * where the service is get.
+     * This method uses the service context if specified, the bundle
+     * context otherwise.
+     * @param reference the required service reference 
+     * @return the service object or <code>null</code> if the service reference 
+     * is no more valid or if the service object is not accessible.
      * @see org.osgi.framework.BundleContext#getService(org.osgi.framework.ServiceReference)
      */
     public Object getService(ServiceReference reference) {
@@ -208,9 +270,12 @@ public class IPojoContext implements BundleContext, ServiceContext {
     }
 
     /**
-     * Get a service reference for the given interface.
-     * @param clazz : the required interface name
-     * @return a service reference on a available provider or null if no provider available
+     * Gets a service reference for the given interface.
+     * This method uses the service context if specified, the bundle
+     * context otherwise.
+     * @param clazz the required interface name
+     * @return a service reference on a available provider or <code>null</code>
+     * if no providers available
      * @see org.osgi.framework.BundleContext#getServiceReference(java.lang.String)
      */
     public ServiceReference getServiceReference(String clazz) {
@@ -222,11 +287,14 @@ public class IPojoContext implements BundleContext, ServiceContext {
     }
 
     /**
-     * Get service reference list for the given query.
-     * @param clazz : the name of the required service interface
-     * @param filter : LDAP filter to apply on service provider
-     * @return : the array of consistent service reference or null if no available provider
-     * @throws InvalidSyntaxException : occurs if the LDAP filter is malformed
+     * Gets service reference list for the given query.
+     * This method uses the service context if specified, the bundle
+     * context otherwise.
+     * @param clazz the name of the required service interface
+     * @param filter the LDAP filter to apply on service provider
+     * @return the array of consistent service reference or <code>null</code>
+     * if no available providers
+     * @throws InvalidSyntaxException if the LDAP filter is malformed
      * @see org.osgi.framework.BundleContext#getServiceReferences(java.lang.String, java.lang.String)
      */
     public ServiceReference[] getServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
@@ -238,10 +306,10 @@ public class IPojoContext implements BundleContext, ServiceContext {
     }
 
     /**
-     * Install a bundle.
-     * @param location : URL of the bundle to install
+     * Installs a bundle.
+     * @param location the URL of the bundle to install
      * @return the installed bundle
-     * @throws BundleException : if the bundle cannot be installed correctly
+     * @throws BundleException if the bundle cannot be installed correctly
      * @see org.osgi.framework.BundleContext#installBundle(java.lang.String)
      */
     public Bundle installBundle(String location) throws BundleException {
@@ -249,11 +317,11 @@ public class IPojoContext implements BundleContext, ServiceContext {
     }
 
     /**
-     * Install a bundle.
-     * @param location : URL of the bundle to install
-     * @param input : 
+     * Installs a bundle.
+     * @param location the URL of the bundle to install
+     * @param input the input stream to load the bundle.
      * @return the installed bundle
-     * @throws BundleException : if the bundle cannot be installed correctly
+     * @throws BundleException  if the bundle cannot be installed correctly
      * @see org.osgi.framework.BundleContext#installBundle(java.lang.String, java.io.InputStream)
      */
     public Bundle installBundle(String location, InputStream input) throws BundleException {
@@ -261,10 +329,13 @@ public class IPojoContext implements BundleContext, ServiceContext {
     }
 
     /**
-     * Register a service.
-     * @param clazzes : interfaces provided by the service.
-     * @param service : the service object.
-     * @param properties : service properties.
+     * Registers a service.
+     * This method uses the service context if specified (and so, registers
+     * the service in this service registry), the bundle context otherwise (the
+     * service will be available to every global instances).
+     * @param clazzes the interfaces provided by the service.
+     * @param service the service object.
+     * @param properties the service properties to publish
      * @return the service registration for this service publication.
      * @see org.apache.felix.ipojo.ServiceContext#registerService(java.lang.String[], java.lang.Object, java.util.Dictionary)
      */
@@ -277,10 +348,13 @@ public class IPojoContext implements BundleContext, ServiceContext {
     }
 
     /**
-     * Register a service.
-     * @param clazz : interface provided by the service.
-     * @param service : the service object.
-     * @param properties : service properties.
+     * Registers a service.
+     * This method uses the service context if specified (and so, registers
+     * the service in this service registry), the bundle context otherwise (the
+     * service will be available to every global instances).
+     * @param clazz the interface provided by the service.
+     * @param service the the service object.
+     * @param properties the service properties to publish.
      * @return the service registration for this service publication.
      * @see org.osgi.framework.BundleContext#registerService(java.lang.String, java.lang.Object, java.util.Dictionary)
      */
@@ -293,8 +367,8 @@ public class IPojoContext implements BundleContext, ServiceContext {
     }
 
     /**
-     * Remove a bundle listener.
-     * @param listener : the listener to remove
+     * Removes a bundle listener.
+     * @param listener the listener to remove
      * @see org.osgi.framework.BundleContext#removeBundleListener(org.osgi.framework.BundleListener)
      */
     public void removeBundleListener(BundleListener listener) {
@@ -302,8 +376,8 @@ public class IPojoContext implements BundleContext, ServiceContext {
     }
 
     /**
-     * Remove a framework listener.
-     * @param listener : the listener to remove
+     * Removes a framework listener.
+     * @param listener the listener to remove
      * @see org.osgi.framework.BundleContext#removeFrameworkListener(org.osgi.framework.FrameworkListener)
      */
     public void removeFrameworkListener(FrameworkListener listener) {
@@ -311,23 +385,29 @@ public class IPojoContext implements BundleContext, ServiceContext {
     }
 
     /**
-     * Remove a service listener.
-     * @param listener : the service listener to remove
+     * Removes a service listener.
+     * Removes the service listener from where it was registered so either in
+     * the global context, or in the service context or in the internal dispatcher.
+     * @param listener the service listener to remove
      * @see org.apache.felix.ipojo.ServiceContext#removeServiceListener(org.osgi.framework.ServiceListener)
      * @see org.osgi.framework.BundleContext#removeServiceListener(org.osgi.framework.ServiceListener)
      */
     public void removeServiceListener(ServiceListener listener) {
         if (m_serviceContext == null) {
-            m_bundleContext.removeServiceListener(listener);
+            if (! Extender.DISPATCHER_ENABLED || ! m_dispatcher.removeListener(listener)) {
+                m_bundleContext.removeServiceListener(listener);
+            }
         } else {
             m_serviceContext.removeServiceListener(listener);
         }
     }
 
     /**
-     * Unget the service reference.
-     * @param reference : the reference to unget
-     * @return true if you are the last user of the reference
+     * Ungets the service reference.
+     * This method uses the service context if specified, 
+     * the bundle context otherwise.
+     * @param reference the reference to unget
+     * @return <code>true</code> if you are the last user of the reference
      * @see org.osgi.framework.BundleContext#ungetService(org.osgi.framework.ServiceReference)
      */
     public boolean ungetService(ServiceReference reference) {
@@ -339,7 +419,7 @@ public class IPojoContext implements BundleContext, ServiceContext {
     }
 
     /**
-     * Get the global context, i.e. the bundle context of the factory.
+     * Gets the global context, i.e. the bundle context of the factory.
      * @return the global bundle context.
      */
     public BundleContext getGlobalContext() {
@@ -347,8 +427,10 @@ public class IPojoContext implements BundleContext, ServiceContext {
     }
 
     /**
-     * Get the service context, i.e. the composite context.
-     * @return the service context.
+     * Gets the service context, i.e. the composite context.
+     * Returns <code>null</code> if the instance does not live
+     * inside a composite.
+     * @return the service context or <code>null</code>.
      */
     public ServiceContext getServiceContext() {
         return m_serviceContext;

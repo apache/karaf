@@ -20,14 +20,15 @@ package org.apache.felix.ipojo.architecture;
 
 /**
  * Architecture service.
- * Allows to have information on the component.
+ * This service allows collecting information on the component instance,
+ * such as its state, plugged handlers ...
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface Architecture {
 
     /**
-     * Return the description of the instance.
-     * @return : the current component instance description
+     * Returns the description of the instance.
+     * @return the current component instance description
      */
     InstanceDescription getInstanceDescription();
 

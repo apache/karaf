@@ -21,26 +21,29 @@ package org.apache.felix.ipojo.parser;
 import org.apache.felix.ipojo.metadata.Element;
 
 /**
- * A Field Metadata represent a field of an implementation class.
- * This class allow to avoid reflection to get the type and the name of a field.
+ * A Field Metadata represents a field of the implementation class.
+ * This class avoids using reflection to get the type and the name of a field.
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class FieldMetadata {
     
     /**
-     * Name of the field.
+     * The name of the field.
      */
     private String m_name;
     
     /**
-     * Type of the field. 
+     * The yype of the field. 
      */
     private String m_type;
     
     /**
-     * Constructor.
-     * @param metadata : field manipulation element.
+     * Creates a field metadata.
+     * This constructor is used when creating the {@link PojoMetadata}
+     * object.
+     * @param metadata the field manipulation element from Manipulation
+     * Metadata.
      */
     FieldMetadata(Element metadata) {
         m_name = metadata.getAttribute("name");
@@ -48,9 +51,12 @@ public class FieldMetadata {
     }
     
     /**
-     * Constructor.
-     * @param field : field name.
-     * @param type : type of the field.
+     * Creates a field metadata.
+     * This constructor can be used to avoid using {@link PojoMetadata}.
+     * Be care that creating such {@link FieldMetadata} does not assert its 
+     * presence in the implementation class.
+     * @param field the field name.
+     * @param type the type of the field.
      */
     public FieldMetadata(String field, String type) {
         m_name = field;
@@ -62,10 +68,11 @@ public class FieldMetadata {
     public String getFieldType() { return m_type; }
     
     /**
-     * Get the 'reflective' type of the given type.
+     * Gets the 'reflective' type of the given type.
      * The reflective type is the type used by the Java Reflection API.
-     * @param type : the type to analyze to find the Java reflective type.
-     * @return : the reflective type corresponding to this field.
+     * More precisely this method handles the array cases 
+     * @param type the type to analyze to find the Java reflective type.
+     * @return the reflective type corresponding to this field.
      */
     public static String getReflectionType(String type) {
         // Primitive Array 
@@ -83,9 +90,9 @@ public class FieldMetadata {
     }
     
     /**
-     * Get the internal notation for primitive type.
-     * @param string : String form of the type
-     * @return the internal notation or null if not found
+     * Gets the internal notation for primitive type.
+     * @param string the String form of the type
+     * @return the internal notation or <code>null</code> if not found
      */
     public static String getInternalPrimitiveType(String string) {
         if (string.equalsIgnoreCase("boolean")) {
@@ -116,9 +123,10 @@ public class FieldMetadata {
     }
     
     /**
-     * Get the iPOJO primitive type from the given primitive class.
-     * @param clazz : a primitive class
-     * @return the primitive type.
+     * Gets the iPOJO primitive type from the given primitive class.
+     * @param clazz the class of the primitive type
+     * @return the iPOJO primitive type name or <code>null</code> if
+     * not found.
      */
     public static String getPrimitiveTypeByClass(Class clazz) {
         if (clazz.equals(Boolean.TYPE)) {

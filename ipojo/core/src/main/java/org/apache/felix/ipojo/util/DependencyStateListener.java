@@ -20,20 +20,20 @@ package org.apache.felix.ipojo.util;
 
 
 /**
- * This interface allows a class to be notified of dependency state changes.
+ * This interface allows a class to be notified of service dependency state changes.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface DependencyStateListener {
 
     /**
      * The given dependency becomes valid.
-     * @param dependency : dependency becoming valid.
+     * @param dependency the dependency becoming valid.
      */
     void validate(DependencyModel dependency);
     
     /**
      * The given dependency becomes invalid.
-     * @param dependency : dependency becoming invalid.
+     * @param dependency the dependency becoming invalid.
      */
     void invalidate(DependencyModel dependency);
 }

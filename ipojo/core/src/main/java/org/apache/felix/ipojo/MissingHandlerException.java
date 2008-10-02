@@ -22,7 +22,9 @@ import java.util.List;
 
 /**
  * Missing Handler Exception.
- * This exception occurs when an handler is missing to build an instance.
+ * This exception occurs when an handler factory is missing to create an instance.
+ * In fact, when a required handler factory is not avialable or valid, the {@link Handler}
+ * object cannot be created, and so the instance container cannot be completed.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class MissingHandlerException extends Exception {
@@ -33,13 +35,15 @@ public class MissingHandlerException extends Exception {
     private static final long serialVersionUID = 5047792897590881478L;
     
     /**
-     * Message. 
+     * The message. 
      */
     private String m_message;
     
     /**
-     * Constructor.
-     * @param missing : list of missing handlers.
+     * Creates a MissingHandlerException.
+     * This methods computes the message from
+     * the given list.
+     * @param missing the list of missing handlers.
      */
     public MissingHandlerException(List missing) {
         super();
@@ -50,8 +54,8 @@ public class MissingHandlerException extends Exception {
     }
     
     /**
-     * Get the error message.
-     * @return : the error message
+     * Gets the error message.
+     * @return the error message
      * @see java.lang.Throwable#getMessage()
      */
     public String getMessage() {

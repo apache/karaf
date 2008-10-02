@@ -23,16 +23,16 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 /**
- * Parse Utility Methods.
- * 
+ * Parser Utility Methods.
+ * This class contains helper method to parse iPOJO metadata.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public final class ParseUtils {
 
     /**
-     * Parse the string form of an array as {a, b, c}.
-     * 
-     * @param str : the string form
+     * Parses the iPOJO string form of an array as {a, b, c}
+     * or [a, b, c].
+     * @param str the string form
      * @return the resulting string array
      */
     public static String[] parseArrays(String str) {
@@ -55,10 +55,10 @@ public final class ParseUtils {
     }
     
     /**
-     * Parse the string form of an array as {a, b, c}.
-     * 
-     * @param str : the string form
-     * @return the resulting string array
+     * Parses the string form of an array as {a, b, c}
+     * or [a, b, c] as a list.
+     * @param str the string form
+     * @return the resulting list
      */
     public static List parseArraysAsList(String str) {
         return Arrays.asList(parseArrays(str));
@@ -68,9 +68,9 @@ public final class ParseUtils {
      * Split method. 
      * This method is equivalent of the String.split in java 1.4
      * The result array contains 'trimmed' String
-     * @param toSplit : String to split
-     * @param separator : separator
-     * @return the token array 
+     * @param toSplit the String to split
+     * @param separator the separator
+     * @return the split array 
      */
     public static String[] split(String toSplit, String separator) {
         StringTokenizer tokenizer = new StringTokenizer(toSplit, separator);

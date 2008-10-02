@@ -23,39 +23,41 @@ import org.apache.felix.ipojo.metadata.Element;
 
 /**
  * Manipulation Metadata allows getting information about the implementation class
- * without doing reflection. 
- * 
+ * without using reflection such as implemented interfaces, super class,
+ * methods and fields. 
+ * This method allows getting object to register {@link org.apache.felix.ipojo.FieldInterceptor} and
+ * {@link org.apache.felix.ipojo.MethodInterceptor}.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class PojoMetadata {
     
     /**
-     * List of implemented interfaces.
+     * The list of implemented interfaces.
      */
     private String[] m_interfaces = new String[0];
     
     /**
-     * List of fields.
+     * The list of fields.
      */
     private FieldMetadata[] m_fields = new FieldMetadata[0];
     
     /**
-     * List of methods. 
+     * The list of methods. 
      */
     private MethodMetadata[] m_methods = new MethodMetadata[0];
 
     /**
-     * Super class (if not java.lang.object).
+     * The Super class (if <code>null</code> for {@link Object}).
      */
     private String m_super;
     
     
     /**
-     * Constructor.
+     * Creates Pojo metadata.
      * Manipulation Metadata object are created from component type metadata by
      * parsing manipulation metadata.
-     * @param metadata : component type metadata
-     * @throws ConfigurationException : the manipulation metadata cannot be found
+     * @param metadata the component type metadata
+     * @throws ConfigurationException if the manipulation metadata cannot be found
      */
     public PojoMetadata(Element metadata) throws ConfigurationException {
         Element[] elems = metadata.getElements("manipulation", "");
@@ -87,9 +89,9 @@ public class PojoMetadata {
     public String[] getInterfaces() { return m_interfaces; }
     
     /**
-     * Get the field metadata for the given name. 
-     * @param name : name of the field
-     * @return the corresponding field metadata or null if not found
+     * Gets the field metadata for the given name. 
+     * @param name : the name of the field
+     * @return the corresponding field metadata or <code>null</code> if not found
      */
     public FieldMetadata getField(String name) { 
         for (int i = 0; i < m_fields.length; i++) {
@@ -99,10 +101,10 @@ public class PojoMetadata {
     }
     
     /**
-     * Get the field metadata for the given name and type. 
-     * @param name : name of the field
-     * @param type : type of the field
-     * @return the corresponding field metadata or null if not found
+     * Gets the field metadata for the given name and type. 
+     * @param name : the name of the field
+     * @param type : the type of the field
+     * @return the corresponding field metadata or <code>null</code> if not found
      */
     public FieldMetadata getField(String name, String type) { 
         for (int i = 0; i < m_fields.length; i++) {
@@ -112,9 +114,12 @@ public class PojoMetadata {
     }
     
     /**
-     * Check if the given interface name is implemented.
-     * @param itf : interface to check.
-     * @return true if the implementation class implement the given interface.
+     * Checks if the given interface name is implemented.
+     * This methods checks on interface directly implemented
+     * by the implementation class.
+     * @param itf the interface to check.
+     * @return <code>true</code> if the implementation class implements
+     * the given interface.
      */
     public boolean isInterfaceImplemented(String itf) {
         for (int i = 0; i < m_interfaces.length; i++) {
@@ -124,11 +129,12 @@ public class PojoMetadata {
     }
     
     /**
-     * Get the MethodMetadata corresponding to the method
-     * (contained in the implementation class) to given name.
-     * If several method match, the first one is returned.
-     * @param name : name of the method to look for.
-     * @return the Method Metadate or null if not found
+     * Gets the MethodMetadata corresponding to the method
+     * (contained in the implementation class) with
+     * the given name.
+     * If several methods match, the first one is returned.
+     * @param name the name of the method to find.
+     * @return the method metadata object or <code>null</code> if not found
      */
     public MethodMetadata getMethod(String name) {
         for (int i = 0; i < m_methods.length; i++) {
@@ -138,11 +144,11 @@ public class PojoMetadata {
     }
     
     /**
-     * Get the MethodMetadata list corresponding to the method
+     * Gets the MethodMetadata list corresponding to the method
      * (contained in the implementation class) to given name.
      * All methods contained in the implementation class matching 
      * with the name are in the returned list.
-     * @param name : name of the method to look for.
+     * @param name the name of the method to look for.
      * @return the Method Metadata array or an empty array if not found
      */
     public MethodMetadata[] getMethods(String name) {
@@ -163,12 +169,12 @@ public class PojoMetadata {
     }
     
     /**
-     * Get the MethodMetadata corresponding to the method
+     * Gets the MethodMetadata corresponding to the method
      * (contained in the implementation class) to given name 
      * and argument types.
-     * @param name : name of the method to look for.
-     * @param types : array of the argument types of the method 
-     * @return the Method Metadate or null if not found
+     * @param name the name of the method to look for.
+     * @param types the array of the argument types of the method 
+     * @return the Method Metadata or <code>null</code> if not found
      */
     public MethodMetadata getMethod(String name, String[] types) {
         for (int i = 0; i < m_methods.length; i++) {
@@ -186,8 +192,10 @@ public class PojoMetadata {
     }
         
      /**
-      * Add a method to the list.
-     * @param method : Method Metadata to add.
+     * Adds a method to the list.
+     * This method is used during the creation of the {@link PojoMetadata}
+     * object.
+     * @param method the Method Metadata to add.
      */
     private void addMethod(MethodMetadata method) {
         for (int i = 0; (m_methods != null) && (i < m_methods.length); i++) {
@@ -207,8 +215,10 @@ public class PojoMetadata {
     }
         
      /**
-      * Add a field to the list.
-     * @param field : the Field Metadata to add.
+     * Adds a field to the list.
+     * This method is used during the creation of the {@link PojoMetadata}
+     * object.
+     * @param field the Field Metadata to add.
      */
     private void addField(FieldMetadata field) {
         for (int i = 0; (m_fields != null) && (i < m_fields.length); i++) {
@@ -228,8 +238,10 @@ public class PojoMetadata {
     }
         
     /**
-     * Add the interface to the list.
-     * @param itf : the interface name to add.
+     * Adds the interface to the list.
+     * This method is used during the creation of the {@link PojoMetadata}
+     * object.
+     * @param itf the interface name to add.
      */
     private void addInterface(String itf) {
         for (int i = 0; (m_interfaces != null) && (i < m_interfaces.length); i++) {

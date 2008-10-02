@@ -22,47 +22,52 @@ import java.lang.reflect.Method;
 
 /**
 * Method interceptor.
-* A class implementing this interface is able to be notified of method invocation.
-* The listener need to be register on the instance manager. 
-* For event are send to the listener : before the method entry, after the method returns, 
-* when an error is thrown by the method, and before the after either a returns or an error (finally) 
-* 
+* A class implementing this interface is able to be notified of method invocations (
+* i.e. entries, exits, and errors).
+* The listener needs to be register on the instance manager with the 
+* {@link InstanceManager#register(org.apache.felix.ipojo.parser.MethodMetadata, MethodInterceptor)}
+* method. 
+* Events are sent before the method entry (onEntry), after the method returns (onExit), 
+* when an error is thrown by the method (onError), and before the after either a returns or an error (onFinally)
 * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 */
 public interface MethodInterceptor {
     
     /**
-     * This method is called when the execution enter in a method.
-     * @param pojo : pojo on which the method is called.
-     * @param method : method invoked.
-     * @param args arguments array.
+     * This method is called when the execution enters in a method.
+     * @param pojo the pojo on which the method is called.
+     * @param method the invoked method.
+     * @param args the arguments array.
      */
     void onEntry(Object pojo, Method method, Object[] args);
 
     /**
-     * This method is called when the execution exit a method (before a return or a throw).
-     * If the given returned object is null, either the method is void, either it returns null.
+     * This method is called when the execution exits a method :
+     * before a <code>return</code>.
+     * If the given returned object is <code>null</code>, either the method is 
+     * <code>void</code>, or it returns <code>null</code>.
      * You must not modified the returned object.
-     * @param pojo : the pojo on which the method exits.
-     * @param method : exiting method.
-     * @param returnedObj : the returned object (boxed for primitive type)
+     * @param pojo the pojo on which the method exits.
+     * @param method the exiting method.
+     * @param returnedObj the the returned object (boxed for primitive type)
      */
     void onExit(Object pojo, Method method, Object returnedObj);
     
     /**
-     * This method is called when the execution throw an exception in the given method.
-     * @param pojo : the pojo on which the method was accessed.
-     * @param method : invoked method.
-     * @param throwable : the thrown exception
+     * This method is called when the execution throws an exception in the given 
+     * method.
+     * @param pojo the pojo on which the method was accessed.
+     * @param method the invoked method.
+     * @param throwable the thrown exception
      */
     void onError(Object pojo, Method method, Throwable throwable);
     
     /**
-     * This method is called when the execution of a method will terminate : 
+     * This method is called when the execution of a method is going to terminate : 
      * just before to throw an exception or before to return.
-     * OnError or OnExit was already called.
-     * @param pojo : the pojo on which the method was accessed.
-     * @param method : invoked method.
+     * (onError or onExit was already called).
+     * @param pojo the pojo on which the method was accessed.
+     * @param method the invoked method.
      */
     void onFinally(Object pojo, Method method);
 

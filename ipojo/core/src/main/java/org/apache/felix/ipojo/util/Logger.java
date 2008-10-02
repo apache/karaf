@@ -23,58 +23,60 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
 
 /**
- * iPOJO Logger. This logger send log message to a log service if presents.
+ * iPOJO Logger.
+ * This class is an helper class implementing a simple log system. 
+ * This logger sends log messages to a log service if available.
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class Logger {
     
     /**
-     * Ipojo default log level property.
+     * The iPOJO default log level property.
      */
     public static final String IPOJO_LOG_LEVEL = "ipojo.log.level";
 
     /**
-     * Log Level ERROR.
+     * The Log Level ERROR.
      */
     public static final int ERROR = 1;
 
     /**
-     * Log Level WARNING.
+     * The Log Level WARNING.
      */
     public static final int WARNING = 2;
 
     /**
-     * Log Level INFO.
+     * The Log Level INFO.
      */
     public static final int INFO = 3;
 
     /**
-     * Log Level DEBUG.
+     * The Log Level DEBUG.
      */
     public static final int DEBUG = 4;
 
     /**
-     * Bundle Context.
+     * The Bundle Context used to get the
+     * log service.
      */
     private BundleContext m_context;
 
     /**
-     * Name of the logger.
+     * The name of the logger.
      */
     private String m_name;
 
     /**
-     * trace level of this logger.
+     * The trace level of this logger.
      */
     private int m_level;
 
     /**
-     * Constructor.
-     * 
-     * @param context : bundle context
-     * @param name : name of the logger
-     * @param level : trace level
+     * Creates a logger.
+     * @param context the bundle context
+     * @param name the name of the logger
+     * @param level the trace level
      */
     public Logger(BundleContext context, String name, int level) {
         m_name = name;
@@ -83,20 +85,19 @@ public class Logger {
     }
     
     /**
-     * Constructor.
-     * 
-     * @param context : bundle context
-     * @param name : name of the logger
+     * Create a logger.
+     * Uses the default logger level.
+     * @param context the bundle context
+     * @param name the name of the logger
      */
     public Logger(BundleContext context, String name) {
         this(context, name, getDefaultLevel(context));
     }
 
     /**
-     * Log a message.
-     * 
-     * @param level : level of the message
-     * @param msg : the message to log
+     * Logs a message.
+     * @param level the level of the message
+     * @param msg the the message to log
      */
     public void log(int level, String msg) {
         if (m_level >= level) {
@@ -105,11 +106,10 @@ public class Logger {
     }
 
     /**
-     * Log a message with an exception.
-     * 
-     * @param level : level of the message
-     * @param msg : message to log
-     * @param exception : exception attached to the message
+     * Logs a message with an exception.
+     * @param level the level of the message
+     * @param msg the message to log
+     * @param exception the exception attached to the message
      */
     public void log(int level, String msg, Throwable exception) {
         if (m_level >= level) {
@@ -118,10 +118,9 @@ public class Logger {
     }
     
     /**
-     * Internal log method.
-     * 
-     * @param level : level of the message.
-     * @param msg : message to log
+     * Internal log method. 
+     * @param level the level of the message.
+     * @param msg the message to log
      */
     private void dispatch(int level, String msg) {
         
@@ -173,10 +172,9 @@ public class Logger {
 
     /**
      * Internal log method.
-     * 
-     * @param level : level of the message.
-     * @param msg : message to log
-     * @param exception : exception attached to the message
+     * @param level the level of the message.
+     * @param msg the message to log
+     * @param exception the exception attached to the message
      */
     private void dispatch(int level, String msg, Throwable exception) {
         
@@ -232,10 +230,11 @@ public class Logger {
     }
     
     /**
-     * Get the default logger level.
-     * The property is searched inside the framework properties, the system properties,
-     * and in the manifest from the given bundle context. By default, set the level to WARNING. 
-     * @param context : bundle context.
+     * Gets the default logger level.
+     * The property is searched inside the framework properties, 
+     * the system properties, and in the manifest from the given 
+     * bundle context. By default, set the level to {@link Logger#WARNING}. 
+     * @param context the bundle context.
      * @return the default log level.
      */
     private static int getDefaultLevel(BundleContext context) {

@@ -19,17 +19,25 @@
 package org.apache.felix.ipojo;
 
 /**
- * Instance state listener.
- * This listener allows anyone to be notified when the listened instance state changes. 
+ * This class defines instance state listeners.
+ * An instance state listener is notified of instance state changes. It needs to be
+ * registered on the instance by invoking the ({@link ComponentInstance#addInstanceStateListener(InstanceStateListener)}
+ * method. Once registered, the listener can track instance state changes. 
+ * Received states are:
+ * <li>{@link ComponentInstance#VALID}</li>
+ * <li>{@link ComponentInstance#INVALID}</li>
+ * <li>{@link ComponentInstance#STOPPED}</li>
+ * <li>{@link ComponentInstance#DISPOSED}</li> 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface InstanceStateListener {
     
     /**
-     * State change listener.
-     * Each time an instance state change, this method is called.
-     * @param instance : changing instance
-     * @param newState : new instance state
+     * State change listener callback method.
+     * Every time that a monitored instance's state changes,
+     * this method is called with the instance and the new state.
+     * @param instance the changing instance
+     * @param newState the new instance state
      */
     void stateChanged(ComponentInstance instance, int newState);
 }

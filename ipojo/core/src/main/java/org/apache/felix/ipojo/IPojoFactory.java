@@ -37,7 +37,10 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ManagedServiceFactory;
 
 /**
- * This class abstracts iPOJO factories.
+ * This class defines common mechanisms of iPOJO component factories
+ * (i.e. component type).
+ * This class implements both the Factory and ManagedServiceFactory
+ * services.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
@@ -47,22 +50,25 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
      */
 
     /**
-     * List of the managed instance name. This list is shared by all factories.
+     * The list of the managed instance name.
+     * This list is shared by all factories and is
+     * used to assert name unicity.
      */
     protected static List m_instancesName = new ArrayList();
 
     /**
-     * Component-Type description exposed by the factory service.
+     * The component type description exposed by the {@link Factory} service.
      */
     protected ComponentTypeDescription m_componentDesc;
 
     /**
-     * List of the managed instance managers. The key of this map is the name (i.e. instance names) of the created instance
+     * The list of the managed instance managers. 
+     * The key of this map is the name (i.e. instance names) of the created instance
      */
     protected final Map m_componentInstances = new HashMap();
 
     /**
-     * Component Type provided by this factory.
+     * The component type metadata.
      */
     protected final Element m_componentMetadata;
 
@@ -72,56 +78,69 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
     protected final BundleContext m_context;
 
     /**
-     * Factory Name. Could be the component class name if the factory name is not set.
+     * The factory name. 
+     * Could be the component class name if the factory name is not set.
      * Immutable once set.
      */
     protected String m_factoryName;
 
     /**
-     * List of required handler.
+     * The list of required handlers.
      */
     protected List m_requiredHandlers = new ArrayList();
 
     /**
-     * List of listeners.
+     * The list of factory state listeners.
+     * @see FactoryStateListener
      */
     protected List m_listeners = new ArrayList(1);
 
     /**
-     * Logger for the factory (and all component instance).
+     * The logger for the factory (and all component instances).
      */
     protected final Logger m_logger;
 
     /**
-     * Is the factory public (expose as a service).
+     * Is the factory public (exposed as services).
      */
     protected final boolean m_isPublic;
 
     /**
-     * Service Registration of this factory (Factory & ManagedServiceFactory).
+     * The service registration of this factory (Factory & ManagedServiceFactory).
+     * @see ManagedServiceFactory
+     * @see Factory
      */
     protected ServiceRegistration m_sr;
 
     /**
-     * Factory state.
+     * The factory state.
+     * Can be:
+     * <li>{@link Factory#INVALID}</li>
+     * <li>{@link Factory#VALID}</li>
+     * The factory is invalid at the beginning.
+     * A factory becomes valid if every required handlers
+     * are available (i.e. can be created).
      */
     protected int m_state = Factory.INVALID;
 
     /**
-     * Index used to generate instance name if not set.
+     * The index used to generate instance name if not set.
      */
     private long m_index = 0;
 
     /**
-     * Flag indicating if this factory has already a computed description or not.
+     * The flag indicating if this factory has already a 
+     * computed description or not.
      */
     private boolean m_described;
 
     /**
-     * Constructor.
-     * @param context : bundle context of the bundle containing the factory.
-     * @param metadata : description of the component type.
-     * @throws ConfigurationException occurs when the element describing the factory is malformed.
+     * Creates an iPOJO Factory.
+     * At the end of this method, the required set of handler is computed.
+     * But the result is computed by a sub-class.
+     * @param context the bundle context of the bundle containing the factory.
+     * @param metadata the description of the component type.
+     * @throws ConfigurationException if the element describing the factory is malformed.
      */
     public IPojoFactory(BundleContext context, Element metadata) throws ConfigurationException {
         m_context = context;
@@ -133,13 +152,17 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
         m_requiredHandlers = getRequiredHandlerList(); // Call sub-class to get the list of required handlers.
     }
 
+    /**
+     * Gets the component type description.
+     * @return the component type description
+     */
     public ComponentTypeDescription getComponentTypeDescription() {
         return new ComponentTypeDescription(this);
     }
 
     /**
      * Adds a factory listener.
-     * @param listener : the factory listener to add.
+     * @param listener the factory listener to add.
      * @see org.apache.felix.ipojo.Factory#addFactoryStateListener(org.apache.felix.ipojo.FactoryStateListener)
      */
     public void addFactoryStateListener(FactoryStateListener listener) {
@@ -149,7 +172,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
     }
 
     /**
-     * Gets the logger used by instances of he current factory.
+     * Gets the logger used by instances created by the current factory.
      * @return the factory logger.
      */
     public Logger getLogger() {
@@ -158,35 +181,38 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
 
     /**
      * Computes the factory name.
+     * Each sub-type must override this method. 
      * @return the factory name.
      */
     public abstract String getFactoryName();
 
     /**
      * Computes the required handler list.
+     * Each sub-type must override this method.
      * @return the required handler list
      */
     public abstract List getRequiredHandlerList();
 
     /**
      * Creates an instance.
-     * This method is called with the lock.
-     * @param config : instance configuration
-     * @param context : ipojo context to use
-     * @param handlers : handler array to use
+     * This method is called with the monitor lock.
+     * @param config the instance configuration
+     * @param context the iPOJO context to use
+     * @param handlers the handler array to use
      * @return the new component instance.
-     * @throws ConfigurationException : occurs when the instance creation failed during the configuration process.
+     * @throws ConfigurationException if the instance creation failed during the configuration process.
      */
     public abstract ComponentInstance createInstance(Dictionary config, IPojoContext context, HandlerManager[] handlers)
             throws ConfigurationException;
 
     /**
-     * Creates an instance. The given configuration needs to contain the 'name' property.
-     * @param configuration : configuration of the created instance.
+     * Creates an instance.
+     * This method creates the instance in the global context.
+     * @param configuration the configuration of the created instance.
      * @return the created component instance.
-     * @throws UnacceptableConfiguration : occurs if the given configuration is not consistent with the component type of this factory.
-     * @throws MissingHandlerException : occurs if an handler is unavailable when the instance is created.
-     * @throws org.apache.felix.ipojo.ConfigurationException : occurs when the instance or type configuration are not correct.
+     * @throws UnacceptableConfiguration if the given configuration is not consistent with the component type of this factory.
+     * @throws MissingHandlerException if an handler is unavailable when the instance is created.
+     * @throws org.apache.felix.ipojo.ConfigurationException if the instance or type configuration are not correct.
      * @see org.apache.felix.ipojo.Factory#createComponentInstance(java.util.Dictionary)
      */
     public ComponentInstance createComponentInstance(Dictionary configuration) throws UnacceptableConfiguration, MissingHandlerException,
@@ -195,15 +221,17 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
     }
 
     /**
-     * Creates an instance. The given configuration needs to contain the 'name' property.
+     * Creates an instance in the specified service context.
      * This method is synchronized to assert the validity of the factory during the creation.
-     * Callbacks to sub-class and to create instance need to be aware that they are holding the lock.
-     * @param configuration : configuration of the created instance.
-     * @param serviceContext : the service context to push for this instance.
+     * Callbacks to sub-class and  created instances need to be aware that they are holding the monitor lock.
+     * This method call the override {@link IPojoFactory#createInstance(Dictionary, IPojoContext, HandlerManager[])
+     * method.
+     * @param configuration the configuration of the created instance.
+     * @param serviceContext the service context to push for this instance.
      * @return the created component instance.
-     * @throws UnacceptableConfiguration : occurs if the given configuration is not consistent with the component type of this factory.
-     * @throws MissingHandlerException : occurs when an handler is unavailable when creating the instance.
-     * @throws org.apache.felix.ipojo.ConfigurationException : when the instance configuration failed.
+     * @throws UnacceptableConfiguration if the given configuration is not consistent with the component type of this factory.
+     * @throws MissingHandlerException if an handler is unavailable when creating the instance.
+     * @throws org.apache.felix.ipojo.ConfigurationException if the instance configuration failed.
      * @see org.apache.felix.ipojo.Factory#createComponentInstance(java.util.Dictionary)
      */
     public synchronized ComponentInstance createComponentInstance(Dictionary configuration, ServiceContext serviceContext) throws UnacceptableConfiguration, // NOPMD
@@ -262,6 +290,11 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
         }
     }
 
+    /**
+     * Gets the bundle context of the factory.
+     * @return the bundle context of the factory.
+     * @see org.apache.felix.ipojo.Factory#getBundleContext()
+     */
     public BundleContext getBundleContext() {
         return m_context;
     }
@@ -275,7 +308,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
 
     /**
      * Gets the component type description.
-     * @return the component type description object. Null if not already computed.
+     * @return the component type description object. <code>Null</code> if not already computed.
      */
     public synchronized ComponentTypeDescription getComponentDescription() {
         return m_componentDesc;
@@ -295,8 +328,8 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
     }
 
     /**
-     * Computes the list of missing handlers. This method is called with the lock.
-     * @return list of missing handlers.
+     * Computes the list of missing handlers. This method is called with the monitor lock.
+     * @return the list of missing handlers.
      * @see org.apache.felix.ipojo.Factory#getMissingHandlers()
      */
     public List getMissingHandlers() {
@@ -324,7 +357,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
      * Gets the list of required handlers.
      * This method is synchronized to avoid the concurrent modification
      * of the required handlers.
-     * @return list of required handlers.
+     * @return the list of required handlers.
      * @see org.apache.felix.ipojo.Factory#getRequiredHandlers()
      */
     public synchronized List getRequiredHandlers() {
@@ -348,8 +381,8 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
 
     /**
      * Checks if the configuration is acceptable.
-     * @param conf : the configuration to test.
-     * @return true if the configuration is acceptable.
+     * @param conf the configuration to test.
+     * @return <code>true</code> if the configuration is acceptable.
      * @see org.apache.felix.ipojo.Factory#isAcceptable(java.util.Dictionary)
      */
     public boolean isAcceptable(Dictionary conf) {
@@ -365,9 +398,13 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
 
     /**
      * Checks if the configuration is acceptable.
-     * @param conf : the configuration to test.
-     * @throws UnacceptableConfiguration occurs if the configuration is unacceptable.
-     * @throws MissingHandlerException occurs if an handler is missing.
+     * This method checks the following assertions:
+     * <li>All handlers can be creates</li>
+     * <li>The configuration does not override immutable properties</li>
+     * <li>The configuration contains a value for every unvalued property</li>
+     * @param conf the configuration to test.
+     * @throws UnacceptableConfiguration if the configuration is unacceptable.
+     * @throws MissingHandlerException if an handler is missing.
      */
     public void checkAcceptability(Dictionary conf) throws UnacceptableConfiguration, MissingHandlerException {
         PropertyDescription[] props;
@@ -395,10 +432,13 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
 
     /**
      * Reconfigures an existing instance.
+     * The acceptability of the configuration is checked before the reconfiguration. Moreover,
+     * the configuration must contain the 'instance.name' property specifying the instance 
+     * to reconfigure.
      * This method is synchronized to assert the validity of the factory during the reconfiguration.
-     * @param properties : the new configuration to push.
-     * @throws UnacceptableConfiguration : occurs if the new configuration is not consistent with the component type.
-     * @throws MissingHandlerException : occurs if the current factory is not valid.
+     * @param properties the new configuration to push.
+     * @throws UnacceptableConfiguration if the new configuration is not consistent with the component type.
+     * @throws MissingHandlerException if the current factory is not valid.
      * @see org.apache.felix.ipojo.Factory#reconfigure(java.util.Dictionary)
      */
     public synchronized void reconfigure(Dictionary properties) throws UnacceptableConfiguration, MissingHandlerException {
@@ -422,7 +462,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
 
     /**
      * Removes a factory listener.
-     * @param listener : the factory listener to remove.
+     * @param listener the factory listener to remove.
      * @see org.apache.felix.ipojo.Factory#removeFactoryStateListener(org.apache.felix.ipojo.FactoryStateListener)
      */
     public void removeFactoryStateListener(FactoryStateListener listener) {
@@ -432,13 +472,18 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
     }
 
     /**
-     * Stopping method. This method is call when the factory is stopping.
+     * Stopping method. 
+     * This method is call when the factory is stopping.
      * This method is called when holding the lock on the factory.
      */
     public abstract void stopping();
 
     /**
      * Stops all the instance managers.
+     * This method calls the {@link IPojoFactory#stopping()} method,
+     * notifies listeners, and disposes created instances. Moreover,
+     * if the factory is public, services are also unregistered.
+     *  
      */
     public synchronized void stop() {
         ComponentInstance[] instances;
@@ -482,7 +527,8 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
     }
 
     /**
-     * Destroys the factory. The factory cannot be restarted. Only the extender can call this method.
+     * Destroys the factory. 
+     * The factory cannot be restarted. Only the {@link Extender} can call this method.
      */
     synchronized void dispose() {
         stop(); // Does not hold the lock.
@@ -491,12 +537,17 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
     }
 
     /**
-     * Starting method. This method is called when the factory is starting. This method is called when holding the lock on the factory.
+     * Starting method. 
+     * This method is called when the factory is starting.
+     * This method is called when holding the lock on the factory.
      */
     public abstract void starting();
 
     /**
      * Starts the factory.
+     * Tries to compute the component type description,
+     * calls the {@link IPojoFactory#starting()} method,
+     * and published services if the factory is public.
      */
     public synchronized void start() {
         if (m_described) { // Already started.
@@ -519,9 +570,9 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
 
     /**
      * Creates or updates an instance.
-     * @param name : name of the instance
-     * @param properties : configuration of the instance
-     * @throws org.osgi.service.cm.ConfigurationException : if the configuration is not consistent for this component type
+     * @param name the name of the instance
+     * @param properties the new configuration of the instance
+     * @throws org.osgi.service.cm.ConfigurationException if the configuration is not consistent for this component type
      * @see org.osgi.service.cm.ManagedServiceFactory#updated(java.lang.String, java.util.Dictionary)
      */
     public void updated(String name, Dictionary properties) throws org.osgi.service.cm.ConfigurationException {
@@ -561,7 +612,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
 
     /**
      * Deletes an instance.
-     * @param name : name of the instance to delete
+     * @param name the name of the instance to delete
      * @see org.osgi.service.cm.ManagedServiceFactory#deleted(java.lang.String)
      */
     public synchronized void deleted(String name) {
@@ -574,7 +625,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
 
     /**
      * Callback called by instance when disposed.
-     * @param instance : the destroyed instance
+     * @param instance the destroyed instance
      */
     public void disposed(ComponentInstance instance) {
         String name = instance.getInstanceName();
@@ -585,7 +636,11 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
     }
 
     /**
-     * Computes the component type description. The factory must be valid when calling this method.
+     * Computes the component type description.
+     * To do this, it creates a 'ghost' instance of the handler 
+     * and calls the {@link Handler#initializeComponentFactory(ComponentTypeDescription, Element)}
+     * method. The handler instance is then deleted. 
+     * The factory must be valid when calling this method.
      * This method is called with the lock.
      */
     protected void computeDescription() {
@@ -607,7 +662,10 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
 
     /**
      * Computes factory state.
-     * This method is call when holding the lock on the current factory.
+     * The factory is valid if every required handler are available.
+     * If the factory becomes valid for the first time, the component
+     * type description is computed.
+     * This method is called when holding the lock on the current factory.
      */
     protected void computeFactoryState() {
         boolean isValid = true;
@@ -669,11 +727,11 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
     }
 
     /**
-     * Checks if the given handler identifier and the service reference can match.
+     * Checks if the given handler identifier and the service reference match.
      * Does not need to be synchronized as the method does not use any fields.
-     * @param req : the handler identifier.
-     * @param ref : the service reference.
-     * @return true if the service reference can fulfill the handler requirement
+     * @param req the handler identifier.
+     * @param ref the service reference.
+     * @return <code>true</code> if the service reference can fulfill the handler requirement
      */
     protected boolean match(RequiredHandler req, ServiceReference ref) {
         String name = (String) ref.getProperty(Handler.HANDLER_NAME_PROPERTY);
@@ -685,11 +743,12 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
     }
 
     /**
-     * Returns the handler object for the given required handler. The handler is instantiated in the given service context.
+     * Returns the handler object for the given required handler.
+     * The handler is instantiated in the given service context.
      * This method is called with the lock.
-     * @param req : handler to create.
-     * @param context : service context in which create the handler (instance context).
-     * @return the Handler object.
+     * @param req the handler to create.
+     * @param context the service context in which the handler is created (same as the instance context).
+     * @return the handler object.
      */
     protected HandlerManager getHandler(RequiredHandler req, ServiceContext context) {
         try {
@@ -716,9 +775,9 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
     }
 
     /**
-     * Helping method generating a new unique name.
+     * Helper method generating a new unique name.
      * This method is call when holding the lock to assert generated name unicity.
-     * @return an non already used name
+     * @return a non already used name
      */
     protected String generateName() {
         String name = m_factoryName + "-" + m_index;
@@ -736,34 +795,34 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
      */
     protected class RequiredHandler implements Comparable {
         /**
-         * Factory to create this handler.
+         * The factory to create this handler.
          */
         private HandlerFactory m_factory;
 
         /**
-         * Handler name.
+         * The handler name.
          */
         private final String m_name;
 
         /**
-         * Handler start level.
+         * The handler start level.
          */
         private int m_level = Integer.MAX_VALUE;
 
         /**
-         * Handler namespace.
+         * The handler namespace.
          */
         private final String m_namespace;
 
         /**
-         * Service Reference of the handler factory.
+         * The Service Reference of the handler factory.
          */
         private ServiceReference m_reference;
 
         /**
-         * Constructor.
-         * @param name : handler name.
-         * @param namespace : handler namespace.
+         * Crates a Required Handler.
+         * @param name the handler name.
+         * @param namespace the handler namespace.
          */
         public RequiredHandler(String name, String namespace) {
             m_name = name;
@@ -771,9 +830,10 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
         }
 
         /**
-         * Equals method. Two handlers are equals if they have same name and namespace or they share the same service reference.
-         * @param object : object to compare to the current object.
-         * @return : true if the two compared object are equals
+         * Equals method.
+         * Two handlers are equals if they have same name and namespace or they share the same service reference.
+         * @param object the object to compare to the current object.
+         * @return <code>true</code> if the two compared object are equals
          * @see java.lang.Object#equals(java.lang.Object)
          */
         public boolean equals(Object object) {
@@ -791,7 +851,8 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
         }
 
         /**
-         * Gets the factory object used for this handler. The object is get when used for the first time.
+         * Gets the factory object used for this handler. 
+         * The object is get when used for the first time.
          * This method is called with the lock avoiding concurrent modification and on a valid factory.
          * @return the factory object.
          */
@@ -806,7 +867,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
         }
 
         /**
-         * Get the handler full name (namespace:name).
+         * Gets the handler qualified name (<code>namespace:name</code>).
          * @return the handler full name
          */
         public String getFullName() {
@@ -834,7 +895,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
         }
 
         /**
-         * Release the reference of the used factory.
+         * Releases the reference of the used factory.
          * This method is called with the lock on the current factory.
          */
         public void unRef() {
@@ -845,9 +906,9 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
         }
 
         /**
-         * Set the service reference. If the new service reference is null, it unget the used factory (if already get).
+         * Sets the service reference. If the new service reference is <code>null</code>, it ungets the used factory (if already get).
          * This method is called with the lock on the current factory.
-         * @param ref : new service reference.
+         * @param ref the new service reference.
          */
         public void setReference(ServiceReference ref) {
             m_reference = ref;
@@ -858,10 +919,11 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
         }
 
         /**
-         * Start level Comparison. This method is used to sort the handler array.
+         * Start level Comparison.
+         * This method is used to sort the handler array.
          * This method is called with the lock.
-         * @param object : object on which compare.
-         * @return -1, 0, +1 according to the comparison of their start level.
+         * @param object the object on which compare.
+         * @return <code>-1</code>, <code>0</code>, <code>+1</code> according to the comparison of their start levels.
          * @see java.lang.Comparable#compareTo(java.lang.Object)
          */
         public int compareTo(Object object) {

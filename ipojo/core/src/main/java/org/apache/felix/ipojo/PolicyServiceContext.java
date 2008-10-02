@@ -34,52 +34,65 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- * The policy service context is a service context aiming to solve service requirement.
- * It's parameterized by a resolving policy. Three policies are managed : 
- * - Local : services are only solve un the local service registry
- * - Global : services are resolved only in the global (i.e. OSGi) service registry
- * - Local and Global : services are resolved inside the local registry and the global registry  
+ * The policy service context is a service context aiming to resolve service dependencies
+ * inside different service context according to a policy.
+ * So, the policy service context behavior follows one of the three following policy:
+ * <li> Local : services are only resolved in the local service context.</li>
+ * <li> Global : services are only resolved in the global context (hte OSGi one)</li>
+ * <li> Local and Global : services are resolved inside the local context and inside
+ * the global context</li>
+ *    
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class PolicyServiceContext implements ServiceContext {
     
     /**
-     * Resolving policy, look only in the composite.
+     * Resolving policy, resolves services only in the composite
+     * context (local).
+     * This policy is the default one for services inherited from
+     * service-level dependencies.
      */
     public static final int LOCAL = 0;
     
     /**
-     * Resolving policy, look inside the composite and in the global scope.
+     * Resolving policy, resolves services only in the composite
+     * (local) and in the global context.
      * This policy is the default one for implementation dependency.
      */
     public static final int LOCAL_AND_GLOBAL = 1;
     
     /**
-     * Resolving policy, look inside the global only.
+     * Resolving policy, resolves services inside the global context
+     * only.
      */
     public static final int GLOBAL = 2;
     
     /**
-     * Global service registry.
+     * The global service registry.
+     * Targets the OSGi service registry.
      */
     public BundleContext m_global;
     
     /**
-     * Local (Composite) Service Registry.
+     * The local (Composite) Service Registry.
      */
     public ServiceContext m_local;
     
     /**
-     * Resolving policy.
+     * The resolving policy to use to resolve
+     * dependencies.
      */
     private int m_policy = LOCAL_AND_GLOBAL;
     
     
     /**
-     * Create a new PolicyServiceContext.
-     * @param global : global bundle context
-     * @param local : parent (local) service context
-     * @param policy : resolution policy
+     * Creates a PolicyServiceContext.
+     * If the local context is null, sets the policy to
+     * {@link PolicyServiceContext#GLOBAL}, else use the 
+     * given policy.
+     * @param global the global bundle context
+     * @param local the parent (local) service context
+     * @param policy the resolution policy
      */
     public PolicyServiceContext(BundleContext global, ServiceContext local, int policy) {
         m_global = global;
@@ -92,10 +105,12 @@ public class PolicyServiceContext implements ServiceContext {
     }
 
     /**
-     * Add a service listener according to the policy.
-     * @param listener : the listener to add
-     * @param filter : LDAP filter
-     * @throws InvalidSyntaxException occurs when the filter is malformed.
+     * Adds a service listener according to the policy.
+     * Be aware, that the listener can be registered both in the local and in the global context
+     * if the {@link PolicyServiceContext#LOCAL_AND_GLOBAL} is used.
+     * @param listener the listener to add
+     * @param filter the LDAP filter
+     * @throws InvalidSyntaxException if the filter is malformed.
      * @see org.apache.felix.ipojo.ServiceContext#addServiceListener(org.osgi.framework.ServiceListener, java.lang.String)
      */
     public void addServiceListener(ServiceListener listener, String filter) throws InvalidSyntaxException {
@@ -109,8 +124,10 @@ public class PolicyServiceContext implements ServiceContext {
     }
 
     /**
-     * Add a service listener according to the policy.
-     * @param listener : the listener to add
+     * Adds a service listener according to the policy.
+     * Be aware, that the listener can be registered both in the local and in the global context
+     * if the {@link PolicyServiceContext#LOCAL_AND_GLOBAL} is used.
+     * @param listener the listener to add
      * @see org.apache.felix.ipojo.ServiceContext#addServiceListener(org.osgi.framework.ServiceListener)
      */
     public void addServiceListener(ServiceListener listener) {
@@ -123,11 +140,13 @@ public class PolicyServiceContext implements ServiceContext {
     }
 
     /**
-     * Get all service references. These reference are found inside the local registry, global registry or both according to the policy.
-     * @param clazz : required service specification.
-     * @param filter : LDAP filter
-     * @return the array of service reference, null if no service available
-     * @throws InvalidSyntaxException occurs when the LDAP filter is malformed 
+     * Gets all service references.
+     * These references are found inside the local registry, global registry or both according to the policy.
+     * The returned array can contain service references from both context.
+     * @param clazz the required service specification.
+     * @param filter the LDAP filter
+     * @return the array of service reference, <code>null</code> if no service available
+     * @throws InvalidSyntaxException if the LDAP filter is malformed 
      * @see org.apache.felix.ipojo.ServiceContext#getAllServiceReferences(java.lang.String, java.lang.String)
      */
     public ServiceReference[] getAllServiceReferences(String clazz,
@@ -147,8 +166,9 @@ public class PolicyServiceContext implements ServiceContext {
     }
 
     /**
-     * Get the service object for the given reference.
-     * @param ref : the service reference
+     * Gets the service object for the given references.
+     * The service is get inside the context according to the policy.
+     * @param ref the service reference
      * @return the service object
      * @see org.apache.felix.ipojo.ServiceContext#getService(org.osgi.framework.ServiceReference)
      */
@@ -172,9 +192,10 @@ public class PolicyServiceContext implements ServiceContext {
     }
 
     /**
-     * Get a service reference for the required service specification.
-     * @param clazz : the required service specification
-     * @return a service reference or null if not consistent service available
+     * Gets a service reference for the required service specification.
+     * The service is looked inside the context according to the policy.
+     * @param clazz the required service specification
+     * @return a service reference or <code>null</code> if no matching service available
      * @see org.apache.felix.ipojo.ServiceContext#getServiceReference(java.lang.String)
      */
     public ServiceReference getServiceReference(String clazz) {
@@ -197,10 +218,11 @@ public class PolicyServiceContext implements ServiceContext {
 
     /**
      * Get a service reference for the required service specification.
-     * @param clazz : the required service specification
-     * @param filter : LDAP filter
-     * @return a service reference array or null if not consistent service available
-     * @throws InvalidSyntaxException occurs when the LDAP filter is malformed 
+     * The services are looked inside the context according to the policy.
+     * @param clazz the required service specification
+     * @param filter the LDAP filter
+     * @return a service reference array or <code>null</code> if not consistent service available
+     * @throws InvalidSyntaxException if the LDAP filter is malformed 
      * @see org.apache.felix.ipojo.ServiceContext#getServiceReference(java.lang.String)
      */
     public ServiceReference[] getServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
@@ -220,10 +242,11 @@ public class PolicyServiceContext implements ServiceContext {
     }
     
     /**
-     * Compute the service reference array from the two given set of service references.
-     * @param refLocal : local references
-     * @param refGlobal : global references
-     * @return the set of service reference
+     * Computes the service reference array from the two given set of service references
+     * according to the policy.
+     * @param refLocal the set of local references
+     * @param refGlobal the set of global references
+     * @return the set of service references
      */
     private ServiceReference[] computeServiceReferencesFromBoth(ServiceReference[] refLocal, ServiceReference[] refGlobal) {
         if (refLocal == null) {
@@ -240,31 +263,33 @@ public class PolicyServiceContext implements ServiceContext {
 
     /**
      * This method is not supported.
-     * @param clazzes : specifications
-     * @param service : service object
-     * @param properties : service properties
-     * @return : the service registration object
+     * This context can only be used to resolve service dependencies.
+     * @param clazzes the specifications
+     * @param service the service object
+     * @param properties the service properties
+     * @return the service registration object
      * @see org.apache.felix.ipojo.ServiceContext#registerService(java.lang.String[], java.lang.Object, java.util.Dictionary)
      */
     public ServiceRegistration registerService(String[] clazzes, Object service, Dictionary properties) {
-        throw new UnsupportedOperationException("PolicyServiceContext can only be used for service dependency and not service providing");
+        throw new UnsupportedOperationException("PolicyServiceContext can only be used for service dependency and not to provide services");
     }
 
     /**
      * This method is not supported.
-     * @param clazz : specification
-     * @param service : service object
-     * @param properties : service properties
-     * @return : the service registration object
+     * This context can only be used to resolve service dependencies.
+     * @param clazz the specification
+     * @param service the service object
+     * @param properties the service properties to publish
+     * @return the service registration object
      * @see org.apache.felix.ipojo.ServiceContext#registerService(java.lang.String, java.lang.Object, java.util.Dictionary)
      */
     public ServiceRegistration registerService(String clazz, Object service, Dictionary properties) {
-        throw new UnsupportedOperationException("PolicyServiceContext can only be used for service dependency and not service providing");
+        throw new UnsupportedOperationException("PolicyServiceContext can only be used for service dependency and not to provide services");
     }
 
     /**
-     * Remove a service listener.
-     * @param listener : the service listener to remove
+     * Removes a service listener.
+     * @param listener the service listener to remove
      * @see org.apache.felix.ipojo.ServiceContext#removeServiceListener(org.osgi.framework.ServiceListener)
      */
     public void removeServiceListener(ServiceListener listener) {
@@ -277,9 +302,9 @@ public class PolicyServiceContext implements ServiceContext {
     }
 
     /**
-     * Unget the service reference.
-     * @param reference : the service reference to unget.
-     * @return true if the unget is successful.
+     * Ungets the service reference.
+     * @param reference the service reference to unget.
+     * @return <code>true</code> if the service release if the reference is no more used.
      * @see org.apache.felix.ipojo.ServiceContext#ungetService(org.osgi.framework.ServiceReference)
      */
     public boolean ungetService(ServiceReference reference) {
@@ -291,7 +316,7 @@ public class PolicyServiceContext implements ServiceContext {
     }
 
     /**
-     * Add a bundle listener.
+     * Adds a bundle listener.
      * Delegate on the global bundle context.
      * @param arg0 : bundle listener to add
      * @see org.osgi.framework.BundleContext#addBundleListener(org.osgi.framework.BundleListener)
@@ -301,8 +326,8 @@ public class PolicyServiceContext implements ServiceContext {
     }
 
     /**
-     * Add a framework listener.
-     * Delegate on the global bundle context.
+     * Adds a framework listener.
+     * Delegates on the global bundle context.
      * @param arg0 : framework listener to add.
      * @see org.osgi.framework.BundleContext#addFrameworkListener(org.osgi.framework.FrameworkListener)
      */
@@ -311,10 +336,10 @@ public class PolicyServiceContext implements ServiceContext {
     }
 
     /**
-     * Create a LDAP filter.
-     * @param arg0 : String-form of the filter
+     * Creates a LDAP filter.
+     * @param arg0 the String-form of the filter
      * @return the created filter object
-     * @throws InvalidSyntaxException : if the given argument is not a valid against the LDAP grammar.
+     * @throws InvalidSyntaxException if the given argument is not a valid against the LDAP grammar.
      * @see org.osgi.framework.BundleContext#createFilter(java.lang.String)
      */
     public Filter createFilter(String arg0) throws InvalidSyntaxException {
@@ -322,7 +347,7 @@ public class PolicyServiceContext implements ServiceContext {
     }
 
     /**
-     * Get the current bundle.
+     * Gets the current bundle.
      * @return the current bundle
      * @see org.osgi.framework.BundleContext#getBundle()
      */
@@ -331,8 +356,8 @@ public class PolicyServiceContext implements ServiceContext {
     }
 
     /**
-     * Get the bundle object with the given id.
-     * @param bundleId : bundle id
+     * Gets the bundle object with the given id.
+     * @param bundleId the bundle id
      * @return the bundle object
      * @see org.osgi.framework.BundleContext#getBundle(long)
      */
@@ -341,7 +366,7 @@ public class PolicyServiceContext implements ServiceContext {
     }
 
     /**
-     * Get installed bundles.
+     * Gets installed bundles.
      * @return the list of installed bundles
      * @see org.osgi.framework.BundleContext#getBundles()
      */
@@ -351,8 +376,8 @@ public class PolicyServiceContext implements ServiceContext {
 
 
     /**
-     * Get a data file.
-     * @param filename : File name.
+     * Gets a data file.
+     * @param filename the File name.
      * @return the File object
      * @see org.osgi.framework.BundleContext#getDataFile(java.lang.String)
      */
@@ -361,9 +386,10 @@ public class PolicyServiceContext implements ServiceContext {
     }
 
     /**
-     * Get a property value.
-     * @param key : key of the asked property
-     * @return the property value (object) or null if no property are associated with the given key
+     * Gets a property value.
+     * @param key the key of the asked property
+     * @return the property value (object) or <code>null</code> if no property
+     * are associated with the given key
      * @see org.osgi.framework.BundleContext#getProperty(java.lang.String)
      */
     public String getProperty(String key) {
@@ -371,10 +397,10 @@ public class PolicyServiceContext implements ServiceContext {
     }
 
     /**
-     * Install a bundle.
-     * @param location : URL of the bundle to install
+     * Installs a bundle.
+     * @param location the URL of the bundle to install
      * @return the installed bundle
-     * @throws BundleException : if the bundle cannot be installed correctly
+     * @throws BundleException if the bundle cannot be installed correctly
      * @see org.osgi.framework.BundleContext#installBundle(java.lang.String)
      */
     public Bundle installBundle(String location) throws BundleException {
@@ -382,11 +408,11 @@ public class PolicyServiceContext implements ServiceContext {
     }
 
     /**
-     * Install a bundle.
-     * @param location : URL of the bundle to install
-     * @param input : 
+     * Installs a bundle.
+     * @param location the URL of the bundle to install
+     * @param input the input stream to load the bundle content
      * @return the installed bundle
-     * @throws BundleException : if the bundle cannot be installed correctly
+     * @throws BundleException if the bundle cannot be installed correctly
      * @see org.osgi.framework.BundleContext#installBundle(java.lang.String, java.io.InputStream)
      */
     public Bundle installBundle(String location, InputStream input) throws BundleException {
@@ -394,8 +420,8 @@ public class PolicyServiceContext implements ServiceContext {
     }
 
     /**
-     * Remove a bundle listener.
-     * @param listener : the listener to remove
+     * Removes the bundle listener.
+     * @param listener the listener to remove
      * @see org.osgi.framework.BundleContext#removeBundleListener(org.osgi.framework.BundleListener)
      */
     public void removeBundleListener(BundleListener listener) {
@@ -403,8 +429,8 @@ public class PolicyServiceContext implements ServiceContext {
     }
 
     /**
-     * Remove a framework listener.
-     * @param listener : the listener to remove
+     * Removes a framework listener.
+     * @param listener the listener to remove
      * @see org.osgi.framework.BundleContext#removeFrameworkListener(org.osgi.framework.FrameworkListener)
      */
     public void removeFrameworkListener(FrameworkListener listener) {

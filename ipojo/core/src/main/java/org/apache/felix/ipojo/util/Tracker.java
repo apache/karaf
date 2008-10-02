@@ -41,55 +41,61 @@ import org.osgi.framework.ServiceReference;
 public class Tracker implements TrackerCustomizer {
 
     /**
-     * Bundle context against which this Tracker object is tracking.
+     * The bundle context against which this Tracker object is tracking.
      */
     protected BundleContext m_context;
 
     /**
-     * Filter specifying search criteria for the services to track.
+     * the filter specifying search criteria for the services to track.
      */
     protected Filter m_filter;
 
     /**
-     * TrackerCustomizer object for this tracker.
+     * The TrackerCustomizer object for this tracker.
      */
     protected TrackerCustomizer m_customizer;
 
     /**
-     * Filter string for use when adding the ServiceListener. If this field is set, then certain optimizations can be taken since we don't have a user supplied filter.
+     * The filter string for use when adding the ServiceListener.
+     * If this field is set, then certain optimizations can be taken since we don't have a user supplied filter.
      */
     protected String m_listenerFilter;
 
     /**
-     * Class name to be tracked. If this field is set, then we are tracking by class name.
+     * The class name to be tracked. If this field is set, then we are 
+     * tracking by class name.
      */
     private String m_trackClass;
 
     /**
-     * Reference to be tracked. If this field is set, then we are tracking a single ServiceReference.
+     * The reference to be tracked. If this field is set, then we are 
+     * tracking a single ServiceReference.
      */
     private ServiceReference m_trackReference;
 
     /**
-     * Tracked services: ServiceReference object -> customized. Object and ServiceListener object
+     * The tracked services: ServiceReference object -> customized. 
+     *Object and ServiceListener object
      */
     private Tracked m_tracked;
 
     /**
-     * Cached ServiceReference for getServiceReference. This field is volatile since it is accessed by multiple threads.
+     * The cached ServiceReference for getServiceReference. 
+     * This field is volatile since it is accessed by multiple threads.
      */
     private volatile ServiceReference m_cachedReference;
 
     /**
-     * Cached service object for getService. This field is volatile since it is accessed by multiple threads.
+     * The cached service object for getService. This field is volatile 
+     * since it is accessed by multiple threads.
      */
     private volatile Object m_cachedService;
 
     /**
-     * Create a Tracker object on the specified ServiceReference object.
+     * Creates a Tracker object on the specified ServiceReference object.
      * The service referenced by the specified ServiceReference object will be tracked by this Tracker.
-     * @param context BundleContext object against which the tracking is done.
-     * @param reference ServiceReference object for the service to be tracked.
+     * @param context The BundleContext object against which the tracking is done.
+     * @param reference The ServiceReference object for the service to be tracked.
      * @param customizer The customizer object to call when services are added, modified, or removed in this Tracker object. If customizer is null, then this Tracker object will be used as
      *            the TrackerCustomizer object and the Tracker object will call the TrackerCustomizer methods on itself.
      */
@@ -111,11 +117,11 @@ public class Tracker implements TrackerCustomizer {
     }
 
     /**
-     * Create a Tracker object on the specified class name.
+     * Creates a Tracker object on the specified class name.
      * Services registered under the specified class name will be tracked by this Tracker object.
-     * @param context BundleContext object against which the tracking is done.
-     * @param clazz Class name of the services to be tracked.
-     * @param customizer The customizer object to call when services are added, modified, or removed in this Tracker object. If customizer is null, then this Tracker object will be used as
+     * @param context the BundleContext object against which the tracking is done.
+     * @param clazz the Class name of the services to be tracked.
+     * @param customizer the customizer object to call when services are added, modified, or removed in this Tracker object. If customizer is null, then this Tracker object will be used as
      *            the TrackerCustomizer object and the Tracker object will call the TrackerCustomizer methods on itself.    
      */
     public Tracker(BundleContext context, String clazz, TrackerCustomizer customizer) {
@@ -138,11 +144,11 @@ public class Tracker implements TrackerCustomizer {
     }
 
     /**
-     * Create a Tracker object on the specified Filter object.
+     * Creates a Tracker object on the specified Filter object.
      * <p>
      * Services which match the specified Filter object will be tracked by this Tracker object.
-     * @param context BundleContext object against which the tracking is done.
-     * @param filter Filter object to select the services to be tracked.
+     * @param context the BundleContext object against which the tracking is done.
+     * @param filter the Filter object to select the services to be tracked.
      * @param customizer The customizer object to call when services are added, modified, or removed in this Tracker object. If customizer is null, then this Tracker object will be used as the
      *            TrackerCustomizer object and the Tracker object will call the TrackerCustomizer methods on itself.   
      */
@@ -163,7 +169,7 @@ public class Tracker implements TrackerCustomizer {
     }
 
     /**
-     * Open this Tracker object and begin tracking services.
+     * Opens this Tracker object and begin tracking services.
      * <p>
      * Services which match the search criteria specified when this Tracker object was created are now tracked by this Tracker object.
      */
@@ -208,7 +214,7 @@ public class Tracker implements TrackerCustomizer {
     }
 
     /**
-     * Close this Tracker object.
+     * Closes this Tracker object.
      * <p>
      * This method should be called when this Tracker object should end the tracking of services.
      */
@@ -240,7 +246,7 @@ public class Tracker implements TrackerCustomizer {
      * on the BundleContext object with which this Tracker object was created, passing the specified ServiceReference object.
      * <p>
      * This method can be overridden in a subclass to customize the service object to be tracked for the service being added. In that case, take care not to rely on the default implementation of removedService that will unget the service.
-     * @param reference Reference to service being added to this Tracker object.
+     * @param reference the Reference to service being added to this Tracker object.
      * @return The service object to be tracked for the service added to this Tracker object.
      * @see TrackerCustomizer
      */
@@ -250,7 +256,7 @@ public class Tracker implements TrackerCustomizer {
 
     /**
      * Default implementation of the TrackerCustomizer.addedService method.  
-     * @param reference added reference.
+     * @param reference the added reference.
      * @see org.apache.felix.ipojo.util.TrackerCustomizer#addedService(org.osgi.framework.ServiceReference)
      */
     public void addedService(ServiceReference reference) {
@@ -261,7 +267,7 @@ public class Tracker implements TrackerCustomizer {
      * Default implementation of the TrackerCustomizer.modifiedService method.
      * <p>
      * This method is only called when this Tracker object has been constructed with a null TrackerCustomizer argument. The default implementation does nothing.
-     * @param reference Reference to modified service.
+     * @param reference the Reference to modified service.
      * @param service The service object for the modified service.
      * @see TrackerCustomizer
      */
@@ -276,7 +282,7 @@ public class Tracker implements TrackerCustomizer {
      * BundleContext object with which this Tracker object was created, passing the specified ServiceReference object.
      * <p>
      * This method can be overridden in a subclass. If the default implementation of addingService method was used, this method must unget the service.
-     * @param reference Reference to removed service.
+     * @param reference the Reference to removed service.
      * @param service The service object for the removed service.
      * @see TrackerCustomizer
      */
@@ -285,10 +291,10 @@ public class Tracker implements TrackerCustomizer {
     }
 
     /**
-     * Wait for at least one service to be tracked by this Tracker object.
+     * Waits for at least one service to be tracked by this Tracker object.
      * <p>
      * It is strongly recommended that waitForService is not used during the calling of the BundleActivator methods. BundleActivator methods are expected to complete in a short period of time.
-     * @param timeout time interval in milliseconds to wait. If zero, the method will wait indefinately.
+     * @param timeout the time interval in milliseconds to wait. If zero, the method will wait indefinately.
      * @return Returns the result of getService().
      * @throws InterruptedException If another thread has interrupted the current thread.
      */
@@ -312,8 +318,8 @@ public class Tracker implements TrackerCustomizer {
     }
 
     /**
-     * Return an array of ServiceReference objects for all services being tracked by this Tracker object.
-     * @return Array of ServiceReference objects or null if no service are being tracked.
+     * Returns an array of ServiceReference objects for all services being tracked by this Tracker object.
+     * @return Array of ServiceReference objects or <code>null</code> if no service are being tracked.
      */
     public ServiceReference[] getServiceReferences() {
         Tracked tracked = this.m_tracked; // use local var since we are not synchronized
@@ -333,7 +339,7 @@ public class Tracker implements TrackerCustomizer {
     }
 
     /**
-     * Get the list of stored service reference.
+     * Gets the list of stored service reference.
      * @return the list containing used service reference
      */
     public List/*<ServiceReference>*/getServiceReferencesList() {
@@ -355,10 +361,10 @@ public class Tracker implements TrackerCustomizer {
     }
     
     /**
-     * Return the list of references used by the tracker.
+     * Returns the list of references used by the tracker.
      * A reference becomes used when the dependency has already
-     * call getService on this reference.
-     * @return : the list of used references.
+     * called getService on this reference.
+     * @return the list of used references.
      */
     public List/*<ServiceReference>*/getUsedServiceReferences() {
         Tracked tracked = this.m_tracked; // use local var since we are not synchronized
@@ -402,8 +408,8 @@ public class Tracker implements TrackerCustomizer {
 
     /**
      * Returns the service object for the specified ServiceReference object if the referenced service is being tracked by this Tracker object.
-     * @param reference Reference to the desired service.
-     * @return Service object or null if the service referenced by the specified ServiceReference object is not being tracked.
+     * @param reference the Reference to the desired service.
+     * @return the Service object or <code>null</code> if the service referenced by the specified ServiceReference object is not being tracked.
      */
     public Object getService(ServiceReference reference) {
         Tracked tracked = this.m_tracked; // use local var since we are not synchronized
@@ -428,8 +434,8 @@ public class Tracker implements TrackerCustomizer {
     }
 
     /**
-     * Unget the given service reference.
-     * @param reference : service reference to unget.
+     * Ungets the given service reference.
+     * @param reference the service reference to unget.
      */
     public void ungetService(ServiceReference reference) {
         Tracked tracked = this.m_tracked; // use local var since we are not synchronized
@@ -446,8 +452,8 @@ public class Tracker implements TrackerCustomizer {
     }
 
     /**
-     * Return an array of service objects for all services being tracked by this Tracker object.
-     * @return Array of service objects or null if no service are being tracked.
+     * Returns an array of service objects for all services being tracked by this Tracker object.
+     * @return Array of service objects or <code>null</code> if no service are being tracked.
      */
     public Object[] getServices() {
         Tracked tracked = this.m_tracked; // use local var since we are not synchronized
@@ -474,7 +480,7 @@ public class Tracker implements TrackerCustomizer {
      * Returns a service object for one of the services being tracked by this Tracker object.
      * <p>
      * If any services are being tracked, this method returns the result of calling getService(getServiceReference()).
-     * @return Service object or null if no service is being tracked.
+     * @return Service object or <code>null</code> if no service is being tracked.
      */
     public Object getService() {
         Object service = m_cachedService;
@@ -485,9 +491,9 @@ public class Tracker implements TrackerCustomizer {
     }
 
     /**
-     * Remove a service from this Tracker object. The specified service will be removed from this Tracker object. If the specified service was being tracked then the
+     * Removes a service from this Tracker object. The specified service will be removed from this Tracker object. If the specified service was being tracked then the
      * TrackerCustomizer.removedService method will be called for that service.
-     * @param reference Reference to the service to be removed.
+     * @param reference the Reference to the service to be removed.
      */
     public void remove(ServiceReference reference) {
         Tracked tracked = this.m_tracked; // use local var since we are not synchronized
@@ -498,8 +504,8 @@ public class Tracker implements TrackerCustomizer {
     }
 
     /**
-     * Return the number of services being tracked by this Tracker object.
-     * @return Number of services being tracked.
+     * Returns the number of services being tracked by this Tracker object.
+     * @return the Number of services being tracked.
      */
     public int size() {
         Tracked tracked = this.m_tracked; //use local var since we are not synchronized
@@ -521,19 +527,19 @@ public class Tracker implements TrackerCustomizer {
         static final long serialVersionUID = -7420065199791006079L;
 
         /**
-         * List of ServiceReferences in the process of being added. This is used to deal with nesting of ServiceEvents. Since ServiceEvents are synchronously delivered, ServiceEvents can be nested. For example, when processing the adding of a service
+         * The list of ServiceReferences in the process of being added. This is used to deal with nesting of ServiceEvents. Since ServiceEvents are synchronously delivered, ServiceEvents can be nested. For example, when processing the adding of a service
          * and the customizer causes the service to be unregistered, notification to the nested call to untrack that the service was unregistered can be made to the track method. Since the ArrayList implementation is not synchronized, all access to
          * this list must be protected by the same synchronized object for thread safety.
          */
         private List m_adding;
 
         /**
-         * true if the tracked object is closed. This field is volatile because it is set by one thread and read by another.
+         * <code>true</code> if the tracked object is closed. This field is volatile because it is set by one thread and read by another.
          */
         private volatile boolean m_closed;
 
         /**
-         * Initial list of ServiceReferences for the tracker. This is used to correctly process the initial services which could become unregistered before they are tracked. This is necessary since the initial set of tracked services are not
+         * The Initial list of ServiceReferences for the tracker. This is used to correctly process the initial services which could become unregistered before they are tracked. This is necessary since the initial set of tracked services are not
          * "announced" by ServiceEvents and therefore the ServiceEvent for unregistration could be delivered before we track the service. A service must not be in both the initial and adding lists at the same time. A service must be moved from the
          * initial list to the adding list "atomically" before we begin tracking it. Since the LinkedList implementation is not synchronized, all access to this list must be protected by the same synchronized object for thread safety.
          */
@@ -550,7 +556,7 @@ public class Tracker implements TrackerCustomizer {
         }
 
         /**
-         * Set initial list of services into tracker before ServiceEvents begin to be received. This method must be called from Tracker.open while synchronized on this object in the same synchronized block as the addServiceListener call.
+         * Sets initial list of services into tracker before ServiceEvents begin to be received. This method must be called from Tracker.open while synchronized on this object in the same synchronized block as the addServiceListener call.
          * @param references The initial list of services to be tracked.
          */
         protected void setInitialServices(ServiceReference[] references) {
@@ -562,7 +568,7 @@ public class Tracker implements TrackerCustomizer {
         }
 
         /**
-         * Track the initial list of services. This is called after ServiceEvents can begin to be received. This method must be called from Tracker.open while not synchronized on this object after the addServiceListener call.
+         * Tracks the initial list of services. This is called after ServiceEvents can begin to be received. This method must be called from Tracker.open while not synchronized on this object after the addServiceListener call.
          */
         protected void trackInitialServices() {
             while (true) {
@@ -597,7 +603,7 @@ public class Tracker implements TrackerCustomizer {
 
         /**
          * ServiceListener method for the Tracker class. This method must NOT be synchronized to avoid deadlock potential.
-         * @param event ServiceEvent object from the framework.
+         * @param event the ServiceEvent object from the framework.
          */
         public void serviceChanged(ServiceEvent event) {
             //Check if we had a delayed call (which could happen when we close).
@@ -633,8 +639,8 @@ public class Tracker implements TrackerCustomizer {
         }
 
         /**
-         * Begin to track the referenced service.
-         * @param reference Reference to a service to be tracked.
+         * Begins to track the referenced service.
+         * @param reference the Reference to a service to be tracked.
          */
         protected void track(ServiceReference reference) {
             Object object;
@@ -665,7 +671,7 @@ public class Tracker implements TrackerCustomizer {
 
         /**
          * Common logic to add a service to the tracker used by track and trackInitialServices. The specified reference must have been placed in the adding list before calling this method.
-         * @param reference Reference to a service to be tracked.
+         * @param reference the Reference to a service to be tracked.
          */
         private void trackAdding(ServiceReference reference) {
             boolean mustBeTracked = false;
@@ -704,8 +710,8 @@ public class Tracker implements TrackerCustomizer {
         }
 
         /**
-         * Discontinue tracking the referenced service.
-         * @param reference Reference to the tracked service.
+         * Discontinues tracking the referenced service.
+         * @param reference the Reference to the tracked service.
          */
         protected void untrack(ServiceReference reference) {
             Object object;

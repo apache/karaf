@@ -19,31 +19,31 @@
 package org.apache.felix.ipojo.metadata;
 
 /**
- * Attribute.
- * 
+ * An attribute is a key-value pair. It represents the attribute
+ * of XML elements.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class Attribute {
 
     /**
-     * Name of the attribute.
+     * The name of the attribute.
      */
     private String m_name;
 
     /**
-     * Value of the attribute.
+     * The value of the attribute.
      */
     private String m_value;
 
     /**
-     * Namespace of the attribute.
+     * The namespace of the attribute.
      */
     private String m_nameSpace;
 
     /**
-     * Constructor.
-     * @param name : name of the attribute.
-     * @param value : value of the attribute.
+     * Creates an attribute.
+     * @param name the name of the attribute.
+     * @param value the value of the attribute.
      */
     public Attribute(String name, String value) {
         m_name = name.toLowerCase();
@@ -51,10 +51,10 @@ public class Attribute {
     }
 
     /**
-     * Constructor.
-     * @param name : name of the attribute.
-     * @param value : value of the attribute.
-     * @param ns : namespace of the attribute.
+     * Creates an attribute.
+     * @param name the name of the attribute.
+     * @param value the value of the attribute.
+     * @param ns the namespace of the attribute.
      */
     public Attribute(String name, String ns, String value) {
         m_name = name.toLowerCase();
@@ -65,7 +65,7 @@ public class Attribute {
     }
 
     /**
-     * Get the attribute name.
+     * Gets the attribute name.
      * @return the name
      */
     public String getName() {
@@ -73,7 +73,7 @@ public class Attribute {
     }
 
     /**
-     * Get attribute value.
+     * Gets attribute value.
      * @return the value
      */
     public String getValue() {
@@ -81,7 +81,7 @@ public class Attribute {
     }
 
     /**
-     * Get attribute namespace.
+     * Gets attribute namespace.
      * @return the namespace
      */
     public String getNameSpace() {

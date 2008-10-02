@@ -23,31 +23,30 @@ import java.lang.reflect.Method;
 import org.apache.felix.ipojo.metadata.Element;
 
 /**
- * A Method Metadata represent a method from the implementation class.
- * This class allow to get information about a method : name, arguments, return type...
- * 
+ * A Method Metadata represents a method from the implementation class.
+ * This class allows getting information about a method : name, arguments, return type...
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class MethodMetadata {
 
     /**
-     * Name of the method.
+     * The name of the method.
      */
     private String m_name;
 
     /**
-     * Argument type array. 
+     * The argument type array. 
      */
     private String[] m_arguments = new String[0];
 
     /**
-     * Returned type. 
+     * The returned type. 
      */
     private String m_return = "void";
 
     /**
-     * Constructor.
-     * @param metadata : method manipulation element.
+     * Creates a Method Metadata.
+     * @param metadata the method manipulation element.
      */
     MethodMetadata(Element metadata) {
         m_name = metadata.getAttribute("name");
@@ -74,7 +73,9 @@ public class MethodMetadata {
     }
 
     /**
-     * Get the method unique identifier. For internal usage only.
+     * Gets the method unique identifier. For internal usage only.
+     * A method identifier is a unique string that can be a java field
+     * that identify the method.
      * @return the method identifier.
      */
     public String getMethodIdentifier() {
@@ -94,8 +95,8 @@ public class MethodMetadata {
     }
 
     /**
-     * Compute the method id for the given method. 
-     * @param method : Method object.
+     * Computes the method id for the given Method object. 
+     * @param method the Method object.
      * @return the method id.
      */
     public static String computeMethodId(Method method) {
