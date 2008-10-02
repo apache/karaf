@@ -73,6 +73,7 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     private Map<String, Feature> features;
     private Map<String, Set<Long>> installed = new HashMap<String, Set<Long>>();
     private String boot;
+    private boolean bootFeaturesInstalled;
 
     public BundleContext getBundleContext() {
         return bundleContext;
@@ -267,7 +268,7 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
             }
             saveState();
         }
-        if (boot != null) {
+        if (boot != null && !bootFeaturesInstalled) {
             new Thread() {
                 public void run() {
                     String[] list = boot.split(",");
@@ -280,6 +281,8 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
                             }
                         }
                     }
+                    bootFeaturesInstalled = true;
+                    saveState();
                 }
             }.start();
         }
@@ -322,6 +325,7 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
             Preferences prefs = preferences.getUserPreferences("FeaturesServiceState");
             saveSet(prefs.node("repositories"), repositories.keySet());
             saveMap(prefs.node("features"), installed);
+            prefs.putBoolean("bootFeaturesInstalled", bootFeaturesInstalled);
             prefs.flush();
         } catch (Exception e) {
             LOGGER.error("Error persisting FeaturesService state", e);
@@ -337,6 +341,7 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
                     internalAddRepository(repo);
                 }
                 installed = loadMap(prefs.node("features"));
+                bootFeaturesInstalled = prefs.getBoolean("bootFeaturesInstalled", false);
                 return true;
             }
         } catch (Exception e) {
