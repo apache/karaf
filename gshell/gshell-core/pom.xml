@@ -214,6 +214,18 @@
                                     <include>org.apache.geronimo.gshell:gshell-cli</include>
                                     <include>org.apache.geronimo.gshell:gshell-command-api</include>
                                     <include>org.apache.geronimo.gshell:gshell-core</include>
+                                    <include>org.apache.geronimo.gshell.support:gshell-plexus</include>
+                                    <include>org.apache.geronimo.gshell.support:gshell-common</include>
+                                    <include>org.apache.geronimo.gshell.support:gshell-ansi</include>
+                                    <include>org.apache.geronimo.gshell.support:gshell-i18n</include>
+                                    <include>org.apache.geronimo.gshell.support:gshell-clp</include>
+                                    <include>org.apache.geronimo.gshell.support:gshell-prefs</include>
+                                    <include>org.apache.geronimo.gshell:gshell-parser</include>
+                                    <include>org.apache.geronimo.gshell:gshell-model</include>
+                                    <include>org.apache.geronimo.gshell:gshell-whisper</include>
+                                    <include>org.apache.geronimo.gshell.remote:gshell-remote-client</include>
+                                    <include>org.apache.geronimo.gshell.remote:gshell-remote-common</include>
+                                    <include>org.apache.geronimo.gshell.remote:gshell-remote-server</include>
                                     <include>jline:jline</include>
                                     <include>${project.groupId}:${project.artifactId}</include>
                                 </includes>
@@ -233,6 +245,78 @@
                                 </filter>
                                 <filter>
                                     <artifact>org.apache.geronimo.gshell:gshell-core</artifact>
+                                    <excludes>
+                                        <exclude>org/apache/geronimo/gshell/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.apache.geronimo.gshell.support:gshell-plexus</artifact>
+                                    <excludes>
+                                        <exclude>org/apache/geronimo/gshell/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.apache.geronimo.gshell.support:gshell-common</artifact>
+                                    <excludes>
+                                        <exclude>org/apache/geronimo/gshell/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.apache.geronimo.gshell.support:gshell-ansi</artifact>
+                                    <excludes>
+                                        <exclude>org/apache/geronimo/gshell/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.apache.geronimo.gshell.support:gshell-i18n</artifact>
+                                    <excludes>
+                                        <exclude>org/apache/geronimo/gshell/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.apache.geronimo.gshell.support:gshell-clp</artifact>
+                                    <excludes>
+                                        <exclude>org/apache/geronimo/gshell/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.apache.geronimo.gshell.support:gshell-prefs</artifact>
+                                    <excludes>
+                                        <exclude>org/apache/geronimo/gshell/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.apache.geronimo.gshell:gshell-parser</artifact>
+                                    <excludes>
+                                        <exclude>org/apache/geronimo/gshell/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.apache.geronimo.gshell:gshell-model</artifact>
+                                    <excludes>
+                                        <exclude>org/apache/geronimo/gshell/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.apache.geronimo.gshell:gshell-whisper</artifact>
+                                    <excludes>
+                                        <exclude>org/apache/geronimo/gshell/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.apache.geronimo.gshell.remote:gshell-remote-client</artifact>
+                                    <excludes>
+                                        <exclude>org/apache/geronimo/gshell/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.apache.geronimo.gshell.remote:gshell-remote-common</artifact>
+                                    <excludes>
+                                        <exclude>org/apache/geronimo/gshell/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.apache.geronimo.gshell.remote:gshell-remote-server</artifact>
                                     <excludes>
                                         <exclude>org/apache/geronimo/gshell/**</exclude>
                                     </excludes>
