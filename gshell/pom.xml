@@ -41,6 +41,8 @@
         <module>gshell-wrapper</module>
         <module>gshell-features</module>
         <module>gshell-log</module>
+        <module>gshell-config</module>
+        <module>gshell-packages</module>
     </modules>
 
 </project>
