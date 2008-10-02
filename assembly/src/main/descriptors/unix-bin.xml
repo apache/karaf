@@ -193,6 +193,8 @@
                 <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.log</include>
                 <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.obr</include>
                 <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.features</include>
+                <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.config</include>
+                <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.packages</include>
             </includes>
         </dependencySet>
         <dependencySet>

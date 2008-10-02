@@ -75,6 +75,14 @@
             <artifactId>org.apache.servicemix.kernel.gshell.features</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.servicemix.kernel.gshell</groupId>
+            <artifactId>org.apache.servicemix.kernel.gshell.config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.kernel.gshell</groupId>
+            <artifactId>org.apache.servicemix.kernel.gshell.packages</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.servicemix.kernel.jaas</groupId>
             <artifactId>org.apache.servicemix.kernel.jaas.boot</artifactId>
         </dependency>
