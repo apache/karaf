@@ -188,6 +188,7 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
 
         if ((access & ACC_STATIC) == ACC_STATIC) { return super.visitMethod(access, name, desc, signature, exceptions); }
 
+        
         generateMethodHeader(access, name, desc, signature, exceptions);
         
         
@@ -299,6 +300,7 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
         GeneratorAdapter mv = new GeneratorAdapter(cv.visitMethod(access, name, desc, signature, exceptions), access, name, desc); 
         
         mv.visitCode();
+        
         Type returnType = Type.getReturnType(desc);
 
         // Compute result and exception stack location
@@ -581,7 +583,7 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
      * @param type : contained type (inside the array)
      */
     private void createArraySetter(String name, String desc, Type type) {
-        MethodVisitor mv = cv.visitMethod(ACC_PRIVATE, "__set" + name, desc, null, null);
+        MethodVisitor mv = cv.visitMethod(0, "__set" + name, desc, null, null);
         mv.visitCode();
 
         String internalType = desc.substring(1);
