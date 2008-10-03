@@ -36,7 +36,7 @@ import org.apache.geronimo.gshell.command.annotation.CommandComponent;
 import org.apache.geronimo.gshell.command.IO;
 import org.apache.geronimo.gshell.console.PromptReader;
 import org.apache.geronimo.gshell.remote.client.handler.ClientMessageHandler;
-import org.apache.geronimo.gshell.remote.client.proxy.RemoteShellProxy;
+import org.apache.geronimo.gshell.remote.client.proxy.SpringRemoteShellProxy;
 import org.apache.geronimo.gshell.remote.crypto.CryptoContext;
 import org.apache.geronimo.gshell.whisper.transport.TransportFactoryLocator;
 import org.apache.geronimo.gshell.whisper.stream.StreamFeeder;
@@ -132,7 +132,7 @@ public class SpringRshCommand extends OsgiCommandSupport {
             // client.echo("HELLO");
             // Thread.sleep(1 * 1000);
 
-            RemoteShellProxy shell = new RemoteShellProxy(client, io, terminal);
+            SpringRemoteShellProxy shell = new SpringRemoteShellProxy(client, io, terminal);
 
             Object rv = SUCCESS;
 
