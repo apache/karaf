@@ -26,7 +26,7 @@ public interface AdminServiceMBean {
 
     void changePort(String name, int port) throws Exception;
 
-    boolean isRunning(String name) throws Exception;
+    String getState(String name) throws Exception;
 
     void start(String name, String javaOpts) throws Exception;
 

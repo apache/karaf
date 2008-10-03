@@ -53,8 +53,8 @@ public class AdminServiceMBeanImpl implements AdminServiceMBean {
         getExistingInstance(name).changePort(port);
     }
 
-    public boolean isRunning(String name) throws Exception {
-        return getExistingInstance(name).isRunning();
+    public String getState(String name) throws Exception {
+        return getExistingInstance(name).getState();
     }
 
     public void start(String name, String javaOpts) throws Exception {

@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.Properties;
 import java.net.URI;
+import java.net.Socket;
 
 import org.apache.servicemix.jpm.Process;
 import org.apache.servicemix.jpm.ProcessBuilderFactory;
@@ -158,9 +159,21 @@ public class InstanceImpl implements Instance {
     }
 
 
-    public synchronized boolean isRunning() {
+    public synchronized String getState() {
         checkProcess();
-        return this.process != null;
+        if (this.process == null) {
+            return STOPPED;
+        } else {
+            try {
+                int port = getPort();
+                Socket s = new Socket("localhost", port);
+                s.close();
+                return STARTED;
+            } catch (Exception e) {
+                // ignore
+            }
+            return STARTING;
+        }
     }
 
     protected void checkProcess() {

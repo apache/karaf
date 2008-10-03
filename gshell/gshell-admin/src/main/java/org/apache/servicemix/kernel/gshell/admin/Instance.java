@@ -18,6 +18,10 @@ package org.apache.servicemix.kernel.gshell.admin;
 
 public interface Instance {
 
+    String STOPPED = "Stopped";
+    String STARTING = "Starting";
+    String STARTED = "Started";
+
     String getName();
 
     String getLocation();
@@ -34,6 +38,6 @@ public interface Instance {
 
     void destroy() throws Exception;
 
-    boolean isRunning() throws Exception;
+    String getState() throws Exception;
 
 }

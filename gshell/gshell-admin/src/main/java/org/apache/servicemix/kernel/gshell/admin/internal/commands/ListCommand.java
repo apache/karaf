@@ -45,7 +45,11 @@ public class ListCommand extends AdminCommandSupport {
             }
             sb.append(s);
             sb.append("] [");
-            sb.append(instance.isRunning() ? "Started" : "Stopped");
+            String state = instance.getState();
+            while (state.length() < "starting".length()) {
+                state += " ";
+            }
+            sb.append(state);
             sb.append("] [");
             s = Integer.toString(instance.getPid());
             for (int i = s.length(); i < 5; i++) {
