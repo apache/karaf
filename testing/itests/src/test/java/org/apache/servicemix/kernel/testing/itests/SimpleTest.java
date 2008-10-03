@@ -16,15 +16,11 @@
  */
 package org.apache.servicemix.kernel.testing.itests;
 
-import java.util.Properties;
-
 import javax.xml.stream.XMLInputFactory;
 
 import org.apache.servicemix.kernel.testing.support.AbstractIntegrationTest;
 
 public class SimpleTest extends AbstractIntegrationTest {
-
-    private Properties dependencies;
 
     /**
 	 * The manifest to use for the "virtual bundle" created
@@ -59,19 +55,22 @@ public class SimpleTest extends AbstractIntegrationTest {
 	}
 
     public void testWoodstox() throws Exception {
-        Thread.currentThread().setContextClassLoader(XMLInputFactory.class.getClassLoader());
-        System.err.println(XMLInputFactory.class.getClassLoader());
-        System.err.println(getClass().getClassLoader());
-        XMLInputFactory factory = null;
-        try {
-            factory = XMLInputFactory.newInstance();
-            fail("Factory should not have been found");
-        } catch (Throwable t) {
-            System.err.println(t.getMessage());
+        //JDK 1.6 and above ship with a StaX implementation 
+        if (System.getProperty("java.version").startsWith("1.5")) {
+            Thread.currentThread().setContextClassLoader(XMLInputFactory.class.getClassLoader());
+            System.err.println(XMLInputFactory.class.getClassLoader());
+            System.err.println(getClass().getClassLoader());
+            XMLInputFactory factory = null;
+            try {
+                factory = XMLInputFactory.newInstance();
+                fail("Factory should not have been found");
+            } catch (Throwable t) {
+                System.err.println(t.getMessage());
+            }
+            assertNull(factory);
+            installBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.woodstox", null, "jar");
+            assertNotNull(XMLInputFactory.newInstance());
         }
-        assertNull(factory);
-        installBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.woodstox", null, "jar");
-        assertNotNull(XMLInputFactory.newInstance());
     }
 
 }
