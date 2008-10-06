@@ -108,7 +108,7 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
             String methodName = configurables[i].getAttribute("method");
             
             if (fieldName == null && methodName == null) {
-                throw new ConfigurationException("Malformed property : The property need to contain at least a field or a method");
+                throw new ConfigurationException("Malformed property : The property needs to contain at least a field or a method");
             }
 
             String name = configurables[i].getAttribute("name");
@@ -131,21 +131,21 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
                 if (method.length == 0) {
                     type = configurables[i].getAttribute("type");
                     if (type == null) {
-                        throw new ConfigurationException("Malformed property : The type of the property cannot be discovered, please add a 'type' attribute");
+                        throw new ConfigurationException("Malformed property : The type of the property cannot be discovered, add a 'type' attribute");
                     }
                 } else {
                     if (method[0].getMethodArguments().length != 1) {
                         throw new ConfigurationException("Malformed property :  The method " + methodName + " does not have one argument");
                     }
                     if (type != null && !type.equals(method[0].getMethodArguments()[0])) {
-                        throw new ConfigurationException("Malformed property :   The field type (" + type + ") and the method type (" + method[0].getMethodArguments()[0] + ") are not the same.");
+                        throw new ConfigurationException("Malformed property :   The field type (" + type + ") and the type of the argument of the setter method (" + method[0].getMethodArguments()[0] + ") are not the same.");
                     }
                     type = method[0].getMethodArguments()[0];
                     configurables[i].addAttribute(new Attribute("type", type)); // Add the type to avoid configure checking
                 }
             } else {
                 FieldMetadata field = manipulation.getField(fieldName);
-                if (field == null) { throw new ConfigurationException("Malformed property : The field " + fieldName + " does not exist in the implementation"); }
+                if (field == null) { throw new ConfigurationException("Malformed property : The field " + fieldName + " does not exist in the implementation class"); }
                 type = field.getFieldType();
                 configurables[i].addAttribute(new Attribute("type", type)); // Add the type to avoid configure checking
             }

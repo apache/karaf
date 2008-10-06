@@ -59,6 +59,12 @@ public class Property implements FieldInterceptor {
      * The value of the property.
      */
     private Object m_value;
+    
+    /**
+     * Flag tracking is the method was 
+     * already called for the current value.
+     */
+    private boolean m_invoked;
 
     /**
      * The type of the property.
@@ -156,7 +162,7 @@ public class Property implements FieldInterceptor {
                 } catch (SecurityException e) {
                     throw new ConfigurationException("Security excption in setValue on " + type + " : " + e.getMessage());
                 } catch (IllegalArgumentException e) {
-                    throw new ConfigurationException("Argument problem to call the constructor of the type " + type);
+                    throw new ConfigurationException("Argument issue when calling the constructor of the type " + type);
                 }
             }
         }
@@ -207,9 +213,9 @@ public class Property implements FieldInterceptor {
         } catch (ClassNotFoundException e) {
             throw new ConfigurationException("Class not found exception in setValue on " + internalType);
         } catch (SecurityException e) {
-            throw new ConfigurationException("Secutiry Exception in setValue on " + internalType);
+            throw new ConfigurationException("Security Exception in setValue on " + internalType);
         } catch (IllegalArgumentException e) {
-            throw new ConfigurationException("Argument problem to call the constructor of the type " + internalType);
+            throw new ConfigurationException("Argument issue when calling the constructor of the type " + internalType);
         }
     }
 
@@ -271,9 +277,10 @@ public class Property implements FieldInterceptor {
                 } else {
                     // Error, the given property cannot be injected.
                     throw new ClassCastException("Incompatible type for the property " + m_name + " " + m_type.getName() + " expected, " 
-                                                 + value.getClass() + " received");
+                                                 + value.getClass() + " found");
                 }
             }
+            m_invoked = false;
         }
     }
 
@@ -330,17 +337,17 @@ public class Property implements FieldInterceptor {
             Constructor cst = type.getConstructor(new Class[] { String.class });
             return cst.newInstance(new Object[] { strValue });
         } catch (SecurityException e) {
-            throw new ConfigurationException("Security exception in create on " + type + " : " + e.getMessage());
+            throw new ConfigurationException("Security exception during the creation of " + type + " : " + e.getMessage());
         } catch (NoSuchMethodException e) {
-            throw new ConfigurationException("Constructor not found exception in create on " + type + " : " + e.getMessage());
+            throw new ConfigurationException("Constructor not found exception during the creation of " + type + " : " + e.getMessage());
         } catch (IllegalArgumentException e) {
-            throw new ConfigurationException("Argument problem to call the constructor of the type " + type);
+            throw new ConfigurationException("Argument issue when calling the constructor of the type " + type);
         } catch (InstantiationException e) {
             throw new ConfigurationException("Instantiation problem  " + type);
         } catch (IllegalAccessException e) {
             throw new ConfigurationException("Illegal Access " + type);
         } catch (InvocationTargetException e) {
-            throw new ConfigurationException("Invocation problem " + type + " : " + e.getTargetException().getMessage());
+            throw new ConfigurationException("Invocation problem during the creation of " + type + " : " + e.getTargetException().getMessage());
         }
 
     }
@@ -423,7 +430,7 @@ public class Property implements FieldInterceptor {
         } catch (NoSuchMethodException e) {
             throw new ConfigurationException("Constructor not found exception in setValue on " + interntype.getName());
         } catch (IllegalArgumentException e) {
-            throw new ConfigurationException("Argument problem to call the constructor of the type " + interntype.getName());
+            throw new ConfigurationException("Argument issue when calling the constructor of the type " + interntype.getName());
         } catch (InstantiationException e) {
             throw new ConfigurationException("Instantiation problem  " + interntype.getName());
         } catch (IllegalAccessException e) {
@@ -440,20 +447,26 @@ public class Property implements FieldInterceptor {
      * @see org.apache.felix.ipojo.Handler#onCreation(java.lang.Object)
      */
     public synchronized void invoke(Object instance) {
+        if (m_invoked) {
+            return; // Already called.
+        }
+        
         try {
             if (instance == null) {
                 m_method.call(new Object[] { m_value });
+                m_invoked = true;
             } else {
                 m_method.call(instance, new Object[] { m_value });
+                m_invoked = true;
             }
         } catch (NoSuchMethodException e) {
-            m_handler.error("The method " + m_method + " does not exist in the class " + m_manager.getClassName());
+            m_handler.error("The method " + m_method + " does not exist in the implementation class " + m_manager.getClassName());
             m_manager.stop();
         } catch (IllegalAccessException e) {
-            m_handler.error("The method " + m_method + " is not accessible in the class " + m_manager.getClassName());
+            m_handler.error("The method " + m_method + " is not accessible in the implementation class " + m_manager.getClassName());
             m_manager.stop();
         } catch (InvocationTargetException e) {
-            m_handler.error("The method " + m_method + " in the class " + m_manager.getClassName() + "throws an exception : " + e.getTargetException().getMessage(), e.getTargetException());
+            m_handler.error("The method " + m_method + " in the implementation class " + m_manager.getClassName() + "throws an exception : " + e.getTargetException().getMessage(), e.getTargetException());
             m_manager.setState(ComponentInstance.INVALID);
         }
     }

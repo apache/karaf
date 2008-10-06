@@ -174,18 +174,18 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
         DependencyCallback[] callbacks = dep.getCallbacks();
 
         if (callbacks == null && field == null) {
-            throw new ConfigurationException("A service requirement requires at least callbacks or a field");
+            throw new ConfigurationException("A service requirement requires at least binding methods or a field");
         }
 
         for (int i = 0; callbacks != null && i < callbacks.length; i++) {
             MethodMetadata[] mets = manipulation.getMethods(callbacks[i].getMethodName());
             if (mets.length == 0) {
-                info("A requirement callback " + callbacks[i].getMethodName() + " does not exist in the implementation, try the super classes");
+                info("A requirement callback " + callbacks[i].getMethodName() + " does not exist in the implementation class, will try the super classes");
             } else {
                 if (mets[0].getMethodArguments().length > 2) {
                     throw new ConfigurationException("Requirement Callback : A requirement callback "
                             + callbacks[i].getMethodName()
-                            + " must have 0 or 1 or 2 arguments");
+                            + " must have 0, 1 or 2 arguments");
                 }
 
                 callbacks[i].setArgument(mets[0].getMethodArguments());
@@ -272,11 +272,11 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
                             + "] are not the same");
                     } else {
                         // If the specification is different, warn that we will override it.
-                        warn("[DependencyHandler on "
+                        warn("["
                             + getInstanceManager().getInstanceName()
                             + "] The field type ["
                             + className
-                            + "] and the needed service interface ["
+                            + "] and the required service interface ["
                             + dep.getSpecification()
                             + "] are not the same");
                     }
@@ -367,7 +367,7 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
             if (from != null) {
                 String fromFilter = "(|(instance.name=" + from + ")(service.pid=" + from + "))";
                 if (aggregate) {
-                    warn("The 'from' attribute is incompatible with aggregate requirement : only one provider will match : " + fromFilter);
+                    warn("The 'from' attribute is incompatible with aggregate requirements: only one provider will match : " + fromFilter);
                 }
                 if (filter != null) {
                     filter = "(&" + fromFilter + filter + ")"; // Append the two filters
@@ -399,7 +399,7 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
             Element[] cbs = deps[i].getElements("Callback");
             for (int j = 0; cbs != null && j < cbs.length; j++) {
                 if (!cbs[j].containsAttribute("method") && cbs[j].containsAttribute("type")) {
-                    throw new ConfigurationException("Requirement Callback : a dependency callback must contain a method and a type attribute");
+                    throw new ConfigurationException("Requirement Callback : a dependency callback must contain a method and a type (bind or unbind) attribute");
                 }
                 String method = cbs[j].getAttribute("method");
                 String type = cbs[j].getAttribute("type");

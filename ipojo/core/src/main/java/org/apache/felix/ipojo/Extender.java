@@ -622,7 +622,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
                     startManagementFor(bundle);
                 } catch (Throwable e) {
                     // To be sure to not kill the thread, we catch all exceptions and errors
-                    m_logger.log(Logger.ERROR, "An errors occurs when analyzing the content or starting the management of " + bundle.getBundleId());
+                    m_logger.log(Logger.ERROR, "An error occurs when analyzing the content or starting the management of " + bundle.getBundleId(), e);
                 }
             }
         }

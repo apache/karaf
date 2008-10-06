@@ -336,8 +336,8 @@ public class ProvidedServiceHandler extends CompositeHandler implements Dependen
                     checkRequirement(imp, reqs[j]);
                 }
             } else {
-                error("[" + getCompositeManager().getInstanceName() + "] The specification field of the service specification " + svc.getSpecification() + " need to be a String");
-                throw new CompositionException("Service Specification checking failed : The specification field of the service specification " + svc.getSpecification() + " need to be a String");
+                error("[" + getCompositeManager().getInstanceName() + "] The specification field of the service specification " + svc.getSpecification() + " needs to be a String");
+                throw new CompositionException("Service Specification checking failed : The specification field of the service specification " + svc.getSpecification() + " needs to be a String");
             }
         } catch (NoSuchFieldException e) {
             return; // No specification field

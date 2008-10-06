@@ -62,7 +62,7 @@ public class LifecycleCallbackHandler extends PrimitiveHandler {
             }
         }
 
-        if (m_callbacks.length > 0) {
+        if (m_callbacks != null && m_callbacks.length > 0) { //TODO check here if we can improve the test
             LifecycleCallback[] newHk = new LifecycleCallback[m_callbacks.length + 1];
             System.arraycopy(m_callbacks, 0, newHk, 0, m_callbacks.length);
             newHk[m_callbacks.length] = callback;
@@ -70,7 +70,6 @@ public class LifecycleCallbackHandler extends PrimitiveHandler {
         } else {
             m_callbacks = new LifecycleCallback[] { callback };
         }
-
     }
 
     /**
@@ -92,7 +91,7 @@ public class LifecycleCallbackHandler extends PrimitiveHandler {
         for (int i = 0; hooksMetadata != null && i < hooksMetadata.length; i++) {
             String method = hooksMetadata[i].getAttribute("method");
             if (method == null) {
-                throw new ConfigurationException("Lifecycle callback : A callback needs to contains a method attribute");
+                throw new ConfigurationException("Lifecycle callback : A callback needs to contain a method attribute");
             }
             
             MethodMetadata met = meta.getMethod(method, new String[0]);
@@ -168,7 +167,7 @@ public class LifecycleCallbackHandler extends PrimitiveHandler {
                     error("[" + getInstanceManager().getInstanceName() + "] The callback method " + m_callbacks[i].getMethod() + " is not accessible");
                     throw new IllegalStateException(e.getMessage());
                 } catch (InvocationTargetException e) {
-                    error("[" + getInstanceManager().getInstanceName() + "] The callback method " + m_callbacks[i].getMethod() + " has throws an exception : " + e.getTargetException().getMessage(), e.getTargetException());
+                    error("[" + getInstanceManager().getInstanceName() + "] The callback method " + m_callbacks[i].getMethod() + " has thrown an exception : " + e.getTargetException().getMessage(), e.getTargetException());
                     getInstanceManager().setState(ComponentInstance.INVALID);
                 }
             }

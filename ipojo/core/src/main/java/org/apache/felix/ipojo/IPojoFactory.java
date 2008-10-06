@@ -604,7 +604,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
                 m_logger.log(Logger.ERROR, "The configuration is not acceptable : " + e.getMessage());
                 throw new org.osgi.service.cm.ConfigurationException(properties.toString(), e.getMessage());
             } catch (MissingHandlerException e) {
-                m_logger.log(Logger.ERROR, "The facotry is not valid, at least one handler is missing : " + e.getMessage());
+                m_logger.log(Logger.ERROR, "The factory is not valid, at least one handler is missing : " + e.getMessage());
                 throw new org.osgi.service.cm.ConfigurationException(properties.toString(), e.getMessage());
             }
         }

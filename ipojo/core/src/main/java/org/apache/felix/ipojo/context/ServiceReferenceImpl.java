@@ -101,7 +101,7 @@ public class ServiceReferenceImpl implements ServiceReference {
      * @see org.osgi.framework.ServiceReference#getUsingBundles()
      */
     public Bundle[] getUsingBundles() {
-        throw new UnsupportedOperationException("getUsingBundles is not supported in scope");
+        throw new UnsupportedOperationException("getUsingBundles is not supported in service context");
     }
 
     /**

@@ -139,8 +139,8 @@ public class ServiceDependencyHandler extends CompositeHandler implements Depend
 
         if (specification == null) { 
             // Malformed import
-            error("Malformed imports : the specification attribute is mandatory");
-            throw new ConfigurationException("Malformed imports : the specification attribute is mandatory");
+            error("Malformed import: the specification attribute is mandatory");
+            throw new ConfigurationException("Malformed import : the specification attribute is mandatory");
         } else {
             String opt = imp.getAttribute("optional");
             optional = opt != null && opt.equalsIgnoreCase("true");

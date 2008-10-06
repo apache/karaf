@@ -313,7 +313,7 @@ public class ProvidedService implements ServiceFactory {
                 prop = new Property(key, null, null, value.toString(), value.getClass().getName(), getInstanceManager(), m_handler);
                 addProperty(prop);
             } catch (ConfigurationException e) {
-                m_handler.error("The propagated property " + key + " cannot be pcreated correctly : " + e.getMessage());
+                m_handler.error("The propagated property " + key + " cannot be created correctly : " + e.getMessage());
             }
         }
     }

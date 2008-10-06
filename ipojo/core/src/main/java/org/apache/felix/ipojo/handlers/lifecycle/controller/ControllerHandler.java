@@ -123,13 +123,13 @@ public class ControllerHandler extends PrimitiveHandler {
         // Use only the first controller
         field = controller[0].getAttribute("field");
         if (field == null) {
-            throw new ConfigurationException("Lifecycle controller : the controller element needs to have a field attribute");
+            throw new ConfigurationException("Lifecycle controller : the controller element needs to contain a field attribute");
         }
         
         PojoMetadata method = getFactory().getPojoMetadata();
         FieldMetadata fieldMetadata = method.getField(field);
         if (fieldMetadata == null) {
-            throw new ConfigurationException("Lifecycle controller : The field " + field + " does not exist in the class");
+            throw new ConfigurationException("Lifecycle controller : The field " + field + " does not exist in the implementation class");
         }
         
         if (!fieldMetadata.getFieldType().equalsIgnoreCase("boolean")) {

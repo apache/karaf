@@ -605,7 +605,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
                                           Logger.ERROR,
                                           "["
                                                   + m_name
-                                                  + "] createInstance -> The Component Instance is not accessible (security reason) : "
+                                                  + "] createInstance -> The POJO constructor is not accessible (security reason) : "
                                                   + e.getMessage());
                 stop();
                 return null;
@@ -1014,7 +1014,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
                 return null;
             }
             // Cannot happen
-            m_factory.getLogger().log(Logger.ERROR, "A methodID cannot be associate with a POJO method : " + methodId);
+            m_factory.getLogger().log(Logger.ERROR, "A methodID cannot be associated with a method from the POJO class: " + methodId);
             return null;
         } else {
             return method;

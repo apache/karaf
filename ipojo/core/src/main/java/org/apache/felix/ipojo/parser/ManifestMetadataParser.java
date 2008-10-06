@@ -277,7 +277,7 @@ public class ManifestMetadataParser {
         String name = prop.getAttribute("name");
         String value = prop.getAttribute("value");
         if (name != null) {
-            throw new ParseException("Anonymous property expected in a list or in an array");
+            throw new ParseException("Anonymous property expected in a list or an array");
         }
         //case : the property element has no 'value' attribute
         if (value == null) {

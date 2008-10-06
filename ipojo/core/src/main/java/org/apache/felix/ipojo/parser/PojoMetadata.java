@@ -62,7 +62,7 @@ public class PojoMetadata {
     public PojoMetadata(Element metadata) throws ConfigurationException {
         Element[] elems = metadata.getElements("manipulation", "");
         if (elems == null) {
-            throw new ConfigurationException("The component " + metadata/*.getAttribute("classname")*/ + " has no manipulation metadata"); 
+            throw new ConfigurationException("The component " + metadata.getAttribute("classname") + " has no manipulation metadata"); 
         }
         Element manip = elems[0];
         m_super = manip.getAttribute("super");

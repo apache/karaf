@@ -274,13 +274,13 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
                 callback.callOnInstance(pojo, ref, getService(ref));
             }
         } catch (NoSuchMethodException e) {
-            m_handler.error("The method " + callback.getMethodName() + " does not exist in the class " + m_handler.getInstanceManager().getClassName());
+            m_handler.error("The method " + callback.getMethodName() + " does not exist in the implementation class " + m_handler.getInstanceManager().getClassName());
             m_handler.getInstanceManager().stop();
         } catch (IllegalAccessException e) {
-            m_handler.error("The method " + callback.getMethodName() + " is not accessible in the class " + m_handler.getInstanceManager().getClassName());
+            m_handler.error("The method " + callback.getMethodName() + " is not accessible in the implementation class " + m_handler.getInstanceManager().getClassName());
             m_handler.getInstanceManager().stop();
         } catch (InvocationTargetException e) {
-            m_handler.error("The method " + callback.getMethodName() + " in the class " + m_handler.getInstanceManager().getClassName() + " throws an exception : " + e.getTargetException().getMessage(), e.getTargetException());
+            m_handler.error("The method " + callback.getMethodName() + " in the implementation class " + m_handler.getInstanceManager().getClassName() + " throws an exception : " + e.getTargetException().getMessage(), e.getTargetException());
             m_handler.getInstanceManager().stop();
         }
 

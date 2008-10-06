@@ -68,7 +68,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
             if (m_providedServices[i] == svc) { return; }
         }
 
-        if (m_providedServices.length > 0) {
+        if (m_providedServices != null && m_providedServices.length > 0) { //TODO check here if we can avoid one test
             ProvidedService[] newPS = new ProvidedService[m_providedServices.length + 1];
             System.arraycopy(m_providedServices, 0, newPS, 0, m_providedServices.length);
             newPS[m_providedServices.length] = svc;
@@ -150,7 +150,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                     itfs.append(' ');
                     itfs.append(serviceSpecifications[j]);
                 }
-                throw new ConfigurationException("[" + getInstanceManager().getInstanceName() + "] The provided service" + itfs + " is not valid");                
+                throw new ConfigurationException("The provided service" + itfs + " is not valid");                
             }
 
         }
@@ -246,18 +246,18 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                         isDependencyCorrect(dep, deps[j]);
                     }
                 } else {
-                    throw new ConfigurationException("Provides  : The specification field of the service specification " + svc.getServiceSpecification()[i] + " need to be a String");
+                    throw new ConfigurationException("Service Providing: The specification field of the service specification " + svc.getServiceSpecification()[i] + " needs to be a String");
                 }
             } catch (NoSuchFieldException e) {
                 return true; // No specification field
             } catch (ClassNotFoundException e) {
-                throw new ConfigurationException("Provides  : The service specification " + svc.getServiceSpecification()[i] + " cannot be load");
+                throw new ConfigurationException("Service Providing: The service specification " + svc.getServiceSpecification()[i] + " cannot be load");
             } catch (IllegalArgumentException e) {
-                throw new ConfigurationException("Provides  : The field 'specification' of the service specification " + svc.getServiceSpecification()[i] + " is not accessible : " + e.getMessage());
+                throw new ConfigurationException("Service Providing: The field 'specification' of the service specification " + svc.getServiceSpecification()[i] + " is not accessible : " + e.getMessage());
             } catch (IllegalAccessException e) {
-                throw new ConfigurationException("Provides  : The field 'specification' of the service specification " + svc.getServiceSpecification()[i] + " is not accessible : " + e.getMessage());
+                throw new ConfigurationException("Service Providing: The field 'specification' of the service specification " + svc.getServiceSpecification()[i] + " is not accessible : " + e.getMessage());
             } catch (ParseException e) {
-                throw new ConfigurationException("Provides  :  The field 'specification' of the service specification " + svc.getServiceSpecification()[i] + " does not contain a valid String : " + e.getMessage());
+                throw new ConfigurationException("Service Providing: The field 'specification' of the service specification " + svc.getServiceSpecification()[i] + " does not contain a valid String : " + e.getMessage());
             }
         }
 
@@ -303,18 +303,18 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
         boolean agg = aggregate != null && aggregate.equalsIgnoreCase("true");
 
         if (dep == null && !opt) {
-            throw new ConfigurationException("Provides  :  The requirement " + elem.getAttribute("specification") + " is not present in the implementation and is declared as a mandatory service-level requirement");
+            throw new ConfigurationException("Service Providing: The requirement " + elem.getAttribute("specification") + " is not present in the implementation and is declared as a mandatory service-level requirement");
         }
 
         if (dep != null && dep.isAggregate() && !agg) {
-            throw new ConfigurationException("Provides  :  The requirement " + elem.getAttribute("specification") + " is aggregate in the implementation and is declared as a simple service-level requirement");
+            throw new ConfigurationException("Service Providing: The requirement " + elem.getAttribute("specification") + " is aggregate in the implementation and is declared as a simple service-level requirement");
         }
 
         String filter = elem.getAttribute("filter");
         if (dep != null && filter != null) {
             String filter2 = dep.getFilter();
             if (filter2 == null || !filter2.equalsIgnoreCase(filter)) {
-                throw new ConfigurationException("Provides  :  The specification requirement " + elem.getAttribute("specification") + " as not the same filter as declared in the service-level requirement");
+                throw new ConfigurationException("Service Providing: The specification requirement " + elem.getAttribute("specification") + " has not the same filter as declared in the service-level requirement");
             }
         }
     }
@@ -521,7 +521,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
             }
             
             if (all.isEmpty()) {
-                throw new ConfigurationException("Provides  : Cannot instantiate a provided service : no specifications found (no interfaces implemented by the pojo)");
+                throw new ConfigurationException("Service Providing: Cannot instantiate a provided service : no specifications found (no interfaces implemented by the pojo)");
             }
 
             StringBuffer specs = null;
@@ -561,7 +561,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                     }
                     FieldMetadata fieldMeta = manipulation.getField(field);
                     if (fieldMeta == null) {
-                        throw new ConfigurationException("A declared property was not found in the class : " + field);
+                        throw new ConfigurationException("A declared property was not found in the implementation class : " + field);
                     }
                     type = fieldMeta.getFieldType();
                     props[j].addAttribute(new Attribute("type", type));

@@ -246,13 +246,13 @@ public class SvcInstance extends DependencyModel {
             }
             
         } catch (UnacceptableConfiguration e) {
-            m_handler.error("A matching factory refuse the actual configuration : " + e.getMessage());
+            m_handler.error("A matching factory refuses the actual configuration : " + e.getMessage());
             m_handler.getCompositeManager().stop();
         } catch (MissingHandlerException e) {
             m_handler.error("A matching factory is no more valid : " + e.getMessage());
             m_handler.getCompositeManager().stop();
         } catch (ConfigurationException e) {
-            m_handler.error("A matching configuration is refuse by the instance : " + e.getMessage());
+            m_handler.error("A matching configuration is refused by the instance : " + e.getMessage());
             m_handler.getCompositeManager().stop();
         }
 
