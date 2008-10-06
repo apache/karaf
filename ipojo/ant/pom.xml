@@ -79,7 +79,9 @@
 							org.apache.xerces.parsers,
 							org.apache.xerces.xni*,
 							org.apache.xerces.impl*,
-							org.apache.xerces.util.*
+							org.apache.xerces.util.*,
+							org.apache.xerces.dom.*,
+							org.apache.xerces.dom3.*
 						</Private-Package>
 						<Export-Package>
 							org.apache.felix.ipojo.task
