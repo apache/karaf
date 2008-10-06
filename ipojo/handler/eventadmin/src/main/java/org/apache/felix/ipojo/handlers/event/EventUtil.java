@@ -26,12 +26,10 @@ package org.apache.felix.ipojo.handlers.event;
 public class EventUtil {
 
     /**
-     * Test that the given topic match with the given topic pattern.
+     * Tests that the given topic match with the given topic pattern.
      * 
-     * @param topic :
-     *            topic to test.
-     * @param topicPattern :
-     *            topic pattern
+     * @param topic the topic to test
+     * @param topicPattern the topic pattern
      * @return true if it matches.
      */
     public static boolean matches(String topic, String topicPattern) {
@@ -47,12 +45,10 @@ public class EventUtil {
     }
 
     /**
-     * Test that the given topic match with the given topic patterns.
+     * Tests that the given topic match with the given topic patterns.
      * 
-     * @param topic :
-     *            topic to test.
-     * @param topicPatterns :
-     *            topic patterns
+     * @param topic the topic to test
+     * @param topicPatterns the topic patterns
      * @return true if it matches.
      */
     public static boolean matches(String topic, String[] topicPatterns) {

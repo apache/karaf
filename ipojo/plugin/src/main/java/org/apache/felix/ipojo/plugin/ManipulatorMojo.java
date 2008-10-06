@@ -118,7 +118,7 @@ public class ManipulatorMojo extends AbstractMojo {
     public void execute() throws MojoExecutionException {
         // ignore project types not supported, useful when the plugin is configured in the parent pom
         if (!this.m_supportedProjectTypes.contains(this.getProject().getArtifact().getType())) {
-            this.getLog().debug("Ignoring project " + this.getProject().getArtifact() + " : type " + this.getProject().getArtifact().getType() + " is not supported by ipojo plugin, supported types are " + this.m_supportedProjectTypes);
+            this.getLog().debug("Ignoring project " + this.getProject().getArtifact() + " : type " + this.getProject().getArtifact().getType() + " is not supported by iPOJO plugin, supported types are " + this.m_supportedProjectTypes);
             return;
         }
 
@@ -133,14 +133,14 @@ public class ManipulatorMojo extends AbstractMojo {
             meta = new File(m_project.getBasedir() + File.separator + m_metadata);
         }
         
-        getLog().info("Metadata File : " + meta.getAbsolutePath());
+        getLog().info("Metadata file : " + meta.getAbsolutePath());
         if (!meta.exists()) {
             // Verify if annotations are ignored
             if (m_ignoreAnnotations) {
-                getLog().info("No metadata file found - ignore annotations");
+                getLog().info("No metadata file found - ignoring annotations");
                 return;
             } else {
-                getLog().info("No metadata file found - try to use only annotations");
+                getLog().info("No metadata file found - trying to use only annotations");
                 meta = null;
             }
         }
@@ -149,7 +149,7 @@ public class ManipulatorMojo extends AbstractMojo {
         File in = new File(m_buildDirectory + File.separator + m_jarName + ".jar");
         getLog().info("Input Bundle File : " + in.getAbsolutePath());
         if (!in.exists()) {
-            throw new MojoExecutionException("the specified bundle file does not exists");
+            throw new MojoExecutionException("the specified bundle file does not exist");
         }
 
         File out = new File(m_buildDirectory + File.separator + "_out.jar");

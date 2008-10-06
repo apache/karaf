@@ -42,27 +42,27 @@ import org.osgi.service.event.EventAdmin;
 public class EventAdminPublisherHandler extends PrimitiveHandler {
 
     /**
-     * Handler Namespace.
+     * The handler Namespace.
      */
     public static final String NAMESPACE = "org.apache.felix.ipojo.handlers.event.EventAdminHandler";
 
     /**
-     * Names of instance configuration properties.
+     * The names of instance configuration properties.
      */
     public static final String TOPICS_PROPERTY = "event.topics";
 
     /**
-     * Prefix for logged messages.
+     * The prefix for logged messages.
      */
     private static final String LOG_PREFIX = "EVENT ADMIN PUBLISHER HANDLER : ";
 
     /**
-     * The Instance Manager.
+     * The instance manager.
      */
     private InstanceManager m_manager;
 
     /**
-     * The current Event Admin service.
+     * The current EventAdmin service.
      */
     private EventAdmin m_ea;
 
@@ -72,14 +72,11 @@ public class EventAdminPublisherHandler extends PrimitiveHandler {
     private Map m_publishersByField = new Hashtable();
 
     /**
-     * Initialize the component type.
+     * Initializes the component type.
      * 
-     * @param cd :
-     *            component type description to populate.
-     * @param metadata :
-     *            component type metadata.
-     * @throws ConfigurationException :
-     *             metadata are incorrect.
+     * @param cd the component type description to populate
+     * @param metadata the component type metadata
+     * @throws ConfigurationException if the given metadata is incorrect.
      * @see org.apache.felix.ipojo.Handler#initializeComponentFactory(org.apache.felix.ipojo.architecture.ComponentDescription,
      *      org.apache.felix.ipojo.metadata.Element)
      */
@@ -109,7 +106,7 @@ public class EventAdminPublisherHandler extends PrimitiveHandler {
                 EventAdminPublisherMetadata publisherMetadata = new EventAdminPublisherMetadata(
                         publishers[i]);
                 String name = publisherMetadata.getName();
-                info(LOG_PREFIX + "checking publisher " + name);
+                info(LOG_PREFIX + "Checking publisher " + name);
 
                 // Check field existence and type
                 String field = publisherMetadata.getField();
@@ -135,19 +132,16 @@ public class EventAdminPublisherHandler extends PrimitiveHandler {
                 fieldSet.add(field);
             }
         } else {
-            info(LOG_PREFIX + "no publisher to check");
+            info(LOG_PREFIX + "No publisher to check");
         }
     }
 
     /**
      * Constructor.
      * 
-     * @param metadata :
-     *            component type metadata
-     * @param conf :
-     *            instance configuration
-     * @throws ConfigurationException :
-     *             one event publication is not correct
+     * @param metadata the component type metadata
+     * @param conf the instance configuration
+     * @throws ConfigurationException if one event publication is not correct
      * @see org.apache.felix.ipojo.Handler#configure(org.apache.felix.ipojo.InstanceManager,
      *      org.apache.felix.ipojo.metadata.Element, java.util.Dictionary)
      */
@@ -173,7 +167,7 @@ public class EventAdminPublisherHandler extends PrimitiveHandler {
                 EventAdminPublisherMetadata publisherMetadata = new EventAdminPublisherMetadata(
                         publishers[i]);
                 String name = publisherMetadata.getName();
-                info(LOG_PREFIX + "configuring publisher " + name);
+                info(LOG_PREFIX + "Configuring publisher " + name);
 
                 // Get the topic instance configuration if redefined
                 String topicsString = (instanceTopics != null) ? (String) instanceTopics
@@ -204,12 +198,12 @@ public class EventAdminPublisherHandler extends PrimitiveHandler {
                 m_manager.register(fieldMetadata, this);
             }
         } else {
-            info(LOG_PREFIX + "no publisher to configure");
+            info(LOG_PREFIX + "No publisher to configure");
         }
     }
 
     /**
-     * Start the handler instance.
+     * Starts the handler instance.
      * 
      * This method does nothing.
      */
@@ -218,7 +212,7 @@ public class EventAdminPublisherHandler extends PrimitiveHandler {
     }
 
     /**
-     * Stop the handler instance.
+     * Stops the handler instance.
      * 
      * This method does nothing.
      */
@@ -230,12 +224,9 @@ public class EventAdminPublisherHandler extends PrimitiveHandler {
      * Field interceptor callback. This method is called when the component
      * attempt to one of its Publisher field.
      * 
-     * @param pojo
-     *            the accessed field
-     * @param fieldName
-     *            the name of the accessed field
-     * @param value
-     *            the value of the field (useless here)
+     * @param pojo the accessed field
+     * @param fieldName the name of the accessed field
+     * @param value the value of the field (useless here)
      * 
      * @return the Publisher associated with the accessed field's name
      */

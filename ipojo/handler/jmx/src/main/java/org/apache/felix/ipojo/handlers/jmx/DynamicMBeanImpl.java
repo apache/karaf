@@ -54,37 +54,35 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
         DynamicMBean {
 
     /**
-     * InstanceManager: use to store the InstanceManager instance.
+     * The instance manager. Used to store the InstanceManager instance.
      */
     protected final InstanceManager m_instanceManager;
 
     /**
-     * JmxConfigDFieldMap : store the data extracted from metadata.xml.
+     * The JmxConfigDFieldMap. Stors the data extracted from metadata.xml.
      */
     private JmxConfigFieldMap m_configMap;
 
     /**
-     * MBeanInfo : class wich store the MBean Informations.
+     * The MBeanInfo. The class storing the MBean Informations.
      */
     private MBeanInfo m_mBeanInfo;
 
     /**
-     * String : constant which store the name of the class.
+     * The class name. Constant storing the name of the class.
      */
     private String m_className = this.getClass().getName();
 
     /**
-     * sequenceNumber : use to calculate unique id to notification.
+     * The sequence number. Used to calculate unique id to notification.
      */
     private int m_sequenceNumber = 0;
 
     /**
-     * DynamicMBeanImpl : constructor.
+     * Constructor.
      * 
-     * @param properties
-     *            : data extracted from metadat.xml file
-     * @param instanceManager
-     *            : InstanceManager instance
+     * @param properties the data extracted from metadat.xml file
+     * @param instanceManager the InstanceManager instance
      */
     public DynamicMBeanImpl(JmxConfigFieldMap properties,
             InstanceManager instanceManager) {
@@ -94,16 +92,12 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
     }
 
     /**
-     * getAttribute implements from JMX. get the value of the required attribute
+     * Gets the value of the required attribute.
      * 
-     * @param arg0
-     *            name of required attribute
-     * @throws AttributeNotFoundException
-     *             : if the attribute doesn't exist
-     * @throws MBeanException
-     *             :
-     * @throws ReflectionException
-     *             :
+     * @param arg0 the name of required attribute
+     * @throws AttributeNotFoundException if the attribute doesn't exist
+     * @throws MBeanException if something bad occures
+     * @throws ReflectionException if something bad occures
      * @return the object attribute
      */
     public Object getAttribute(String arg0) throws AttributeNotFoundException,
@@ -118,10 +112,9 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
     }
 
     /**
-     * getAttributes : implement from JMX. get values of reuqired attributes
+     * Gets values of required attributes.
      * 
-     * @param attributeNames
-     *            : names of the required attributes
+     * @param attributeNames the names of the required attributes
      * @return return the list of the attribute
      */
     public AttributeList getAttributes(String[] attributeNames) {
@@ -145,7 +138,7 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
     }
 
     /**
-     * getMBeanInfo : return the MBean Class builded.
+     * Returns the MBean Class builded.
      * 
      * @return return MBeanInfo class constructed by buildMBeanInfo
      */
@@ -154,19 +147,14 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
     }
 
     /**
-     * invoke : invoke the required method on the targeted POJO.
+     * Invokes the required method on the targeted POJO.
      * 
-     * @param operationName
-     *            : name of the method called
-     * @param params
-     *            : parameters given to the method
-     * @param signature
-     *            : determine which method called
-     * @return Object : the object return by the method
-     * @throws MBeanException
-     *             :
-     * @throws ReflectionException
-     *             :
+     * @param operationName the name of the method called
+     * @param params the parameters given to the method
+     * @param signature the determine which method called
+     * @return the object return by the method
+     * @throws MBeanException if something bad occures
+     * @throws ReflectionException if something bad occures
      */
     public Object invoke(String operationName, Object[] params,
             String[] signature) throws MBeanException, ReflectionException {
@@ -198,18 +186,13 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
     }
 
     /**
-     * setAttribute : change specified attribute value.
+     * Changes specified attribute value.
      * 
-     * @param attribute
-     *            : attribute with new value to be changed
-     * @throws AttributeNotFoundException
-     *             : if the requiered attribute was not found
-     * @throws InvalidAttributeValueException
-     *             : the value is inccorrect type
-     * @throws MBeanException
-     *             :
-     * @throws ReflectionException
-     *             :
+     * @param attribute the attribute with new value to be changed
+     * @throws AttributeNotFoundException if the required attribute was not found
+     * @throws InvalidAttributeValueException if the value is inccorrect type
+     * @throws MBeanException if something bad occures
+     * @throws ReflectionException if something bad occures
      */
     public void setAttribute(Attribute attribute)
         throws AttributeNotFoundException, InvalidAttributeValueException,
@@ -243,7 +226,7 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
         }
         if (!propertyField.isWritable()) {
             throw new InvalidAttributeValueException("Attribute " + name
-                    + " can not be setted");
+                    + " can not be set");
         }
 
         if (value == null) {
@@ -270,11 +253,10 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
     }
 
     /**
-     * setAttributes : change all the attributes value.
+     * Changes all the attributes value.
      * 
-     * @param attributes
-     *            : list of attribute value to be changed
-     * @return AttributeList : list of new attribute
+     * @param attributes the list of attribute value to be changed
+     * @return the list of new attribute
      */
     public AttributeList setAttributes(AttributeList attributes) {
 
@@ -308,8 +290,8 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
     }
 
     /**
-     * buildMBeanInfo : build the MBean information on initialization. this
-     * value don't change after
+     * Builds the MBean information on initialization. This
+     * value doesn't change further.
      */
     private void buildMBeanInfo() {
         String dDescription = m_configMap.getDecription();
@@ -379,10 +361,9 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
     }
 
     /**
-     * getNotificationInfo : get the notification informations (use by JMX).
+     * Gets the notification informations (use by JMX).
      * 
-     * @return MBeanNotificationInfo[] : structure which describe the
-     *         notifications
+     * @return the structure which describe the notifications
      */
     public MBeanNotificationInfo[] getNotificationInfo() {
         MBeanNotificationInfo[] dNotification = new MBeanNotificationInfo[0];
@@ -404,18 +385,13 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
     }
 
     /**
-     * sendNotification : send a notification to a subscriver.
+     * Sends a notification to a subscriber.
      * 
-     * @param msg
-     *            : msg to send
-     * @param attributeName
-     *            : name of the attribute
-     * @param attributeType
-     *            : type of the attribute
-     * @param oldValue
-     *            : oldvalue of the attribute
-     * @param newValue
-     *            : new value of the attribute
+     * @param msg the msg to send
+     * @param attributeName the name of the attribute
+     * @param attributeType the type of the attribute
+     * @param oldValue the old value of the attribute
+     * @param newValue the new value of the attribute
      */
     public void sendNotification(String msg, String attributeName,
             String attributeType, Object oldValue, Object newValue) {

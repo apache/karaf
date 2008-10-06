@@ -33,64 +33,61 @@ import java.util.Map;
 public class JmxConfigFieldMap {
 
     /**
-     * m_properties : use to store the attributes exposed.
+     * The exposed attributes.
      */
     private Map < String, PropertyField > m_properties = new HashMap < String, PropertyField >();
     /**
-     * m_methods : use to store the methods exposed.
+     * The exposed methods.
      */
     private Map < String, MethodField[] > m_methods = new HashMap < String, MethodField[] >();
     /**
-     * m_notification : use to store the notification allowed.
+     * The allowed notifications.
      */
     private Map < String, NotificationField > m_notifications = new HashMap < String, NotificationField >();
     /**
-     * m_description : description of the Mbean.
+     * The description of the Mbean.
      */
     private String m_description;
 
     /**
-     * JmxConfigFieldMap : constructor.
+     * Constructor.
      */
     public JmxConfigFieldMap() {
 
     }
 
     /**
-     * getDescription : get the descritpion of the MBean.
+     * Gets the description of the MBean.
      * 
-     * @return String : Decription of the MBean
+     * @return the description of the MBean
      */
     public String getDecription() {
         return m_description;
     }
 
     /**
-     * setDescription : set the descritpion of the MBean.
+     * Sets the description of the MBean.
      * 
-     * @param description
-     *            : String which describe the Mbean
+     * @param description a String which describes the Mbean
      */
     public void setDescription(String description) {
         this.m_description = description;
     }
 
     /**
-     * addPropertyFromName : add a new attribute exposed in the Mbean.
+     * Adds a new attribute exposed in the Mbean.
      * 
-     * @param name
-     *            : name of the new property
-     * @param propertyField
-     *            : Field which describe the property
+     * @param name the name of the new property
+     * @param propertyField the field which describes the property
      */
     public void addPropertyFromName(String name, PropertyField propertyField) {
         m_properties.put(name, propertyField);
     }
 
     /**
-     * getProperties : get all of the properties exposed.
+     * Gets all of the properties exposed.
      * 
-     * @return : collection of all properties
+     * @return the collection of all properties
      */
     public Collection < PropertyField > getProperties() {
         if (m_properties != null) {
@@ -101,11 +98,10 @@ public class JmxConfigFieldMap {
     }
 
     /**
-     * getPropertyFromName : get the property by the name.
+     * Gets the property by the name.
      * 
-     * @param name
-     *            : name of the requiered property
-     * @return PropertyField : the field requiered or null if is not found
+     * @param name the name of the required property
+     * @return the field required or null if is not found
      */
     public PropertyField getPropertyFromName(String name) {
         PropertyField prop = m_properties.get(name);
@@ -113,11 +109,10 @@ public class JmxConfigFieldMap {
     }
 
     /**
-     * getPropertyFromField : get the property by the field.
+     * Gets the property by the field.
      * 
-     * @param field
-     *            : the requiered field
-     * @return PropertyField :
+     * @param field the required field
+     * @return the property by the field
      */
     public PropertyField getPropertyFromField(String field) {
         PropertyField property = null;
@@ -126,7 +121,7 @@ public class JmxConfigFieldMap {
             PropertyField p = it.next();
             if (p.getField().compareTo(field) == 0) {
                 if (property != null) {
-                    System.err.println("a field already exist");
+                    System.err.println("a field already exists");
                 } else {
                     property = p;
                 }
@@ -136,12 +131,10 @@ public class JmxConfigFieldMap {
     }
 
     /**
-     * addMethodFromName : add a new method descriptor from its name.
+     * Adds a new method descriptor from its name.
      * 
-     * @param name
-     *            : name of the method
-     * @param methodField
-     *            : descritpion of the method
+     * @param name the name of the method
+     * @param methodField the description of the method
      */
     public void addMethodFromName(String name, MethodField methodField) {
         MethodField[] mf;
@@ -160,13 +153,10 @@ public class JmxConfigFieldMap {
     }
 
     /**
-     * addMethodFromName : add new methods descriptors from one name. (the
-     * method muste have the same name but different signature).
+     * Adds new methods descriptors from one name. (the method must have the same name but different signature).
      * 
-     * @param name
-     *            : name of the method
-     * @param methodsField
-     *            : descritpion of the methods
+     * @param name the name of the method
+     * @param methodsField the description of the methods
      */
     public void addMethodFromName(String name, MethodField[] methodsField) {
         MethodField[] mf;
@@ -186,12 +176,10 @@ public class JmxConfigFieldMap {
     }
 
     /**
-     * DynamicMBeanImpl : add methods from name and erase the older if exist.
+     * Adds a method from name and erases the older if exists.
      * 
-     * @param name
-     *            : name of the method
-     * @param methodField
-     *            : method to be added
+     * @param name the name of the method
+     * @param methodField the method to be added
      */
     public void overrideMethodFromName(String name, MethodField methodField) {
         MethodField[] mf = new MethodField[1];
@@ -200,23 +188,20 @@ public class JmxConfigFieldMap {
     }
 
     /**
-     * DynamicMBeanImpl : add methods from name and erase the older if exist.
+     * Add methods from name and erases the olders if exists.
      * 
-     * @param name
-     *            : name of the method
-     * @param methodsField
-     *            : array of methods to be added
+     * @param name the name of the method
+     * @param methodsField the array of methods to be added
      */
     public void overrideMethodFromName(String name, MethodField[] methodsField) {
         m_methods.put(name, methodsField);
     }
 
     /**
-     * getMethodFromName : return the metod(s) which are similar.
+     * Returns the method(s) with the given name.
      * 
-     * @param name
-     *            : name of requiered method
-     * @return MethodField[] : list of returned methods
+     * @param name the name of the methods
+     * @return the list of methods with the given name
      */
     public MethodField[] getMethodFromName(String name) {
         MethodField[] prop = m_methods.get(name);
@@ -224,14 +209,11 @@ public class JmxConfigFieldMap {
     }
 
     /**
-     * getMethodFromName : get the method which the good signature.
+     * Gets the method with the good signature.
      * 
-     * @param operationName
-     *            : name of the method requiered
-     * @param signature
-     *            : signature requiered
-     * @return MethodField : the method which the same signature or null if not
-     *         found
+     * @param operationName the name of the method requiered
+     * @param signature the required signature
+     * @return the method which the same signature or null if not found
      */
     public MethodField getMethodFromName(String operationName,
             String[] signature) {
@@ -245,13 +227,11 @@ public class JmxConfigFieldMap {
     }
 
     /**
-     * isSameSignature : compare two method signature.
+     * Compares two method signature.
      * 
-     * @param sig1
-     *            : first signature
-     * @param sig2
-     *            : second signature
-     * @return boolean : return true if the signature are similar fale else
+     * @param sig1 the first signature
+     * @param sig2 the second signature
+     * @return true if the signature are similar false otherwise
      */
     private boolean isSameSignature(String[] sig1, String[] sig2) {
         if (sig1.length != sig2.length) {
@@ -268,9 +248,9 @@ public class JmxConfigFieldMap {
     }
 
     /**
-     * getMethods : return all methods store.
+     * Returns all methods store.
      * 
-     * @return Collection : collection of methodField[]
+     * @return the collection of methodField[]
      */
     public Collection < MethodField[] > getMethods() {
         if (m_methods != null) {
@@ -281,12 +261,10 @@ public class JmxConfigFieldMap {
     }
 
     /**
-     * addNotificationFromName : add a notification .
+     * Adds a notification.
      * 
-     * @param name
-     *            :
-     * @param notificationField
-     *            :
+     * @param name the name of the notification
+     * @param notificationField the field involved with the notification.
      */
     public void addNotificationFromName(String name,
             NotificationField notificationField) {
@@ -294,11 +272,10 @@ public class JmxConfigFieldMap {
     }
 
     /**
-     * getNotificationFromName : return the notification with requiered name.
+     * Returns the notification with the given name.
      * 
-     * @param name
-     *            : name requiered
-     * @return NotificationField : return the notification if exist, null else
+     * @param name the name of the notification to return
+     * @return the notification if it exists, {@code null} otherwise
      */
     public NotificationField getNotificationFromName(String name) {
         NotificationField prop = m_notifications.get(name);
@@ -306,9 +283,9 @@ public class JmxConfigFieldMap {
     }
 
     /**
-     * getNotification : get all notifications define.
+     * Gets all notifications defined.
      * 
-     * @return Collection : return collection of NotificationField
+     * @return the collection of NotificationField
      */
     public Collection < NotificationField > getNotifications() {
         if (m_notifications != null) {

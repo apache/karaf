@@ -35,21 +35,21 @@ import org.apache.felix.ipojo.metadata.Element;
 public class ExtenderModelHandler extends PrimitiveHandler {
     
     /**
-     * Handler namespace.
+     * The handler namespace.
      */
     public static final String NAMESPACE = "org.apache.felix.ipojo.extender";
     
     /**
-     * Extension manager list.
+     * The extension manager list.
      * Immutable once set.
      */
     private List m_managers = new ArrayList(1);
 
     /**
-     * Configure method.
-     * @param elem : component type element.
-     * @param dict : instance configuration.
-     * @throws ConfigurationException : the configuration is not valid.
+     * Configures the handler.
+     * @param elem the component type element.
+     * @param dict the instance configuration.
+     * @throws ConfigurationException if the configuration is not valid.
      * @see org.apache.felix.ipojo.Handler#configure(org.apache.felix.ipojo.metadata.Element, java.util.Dictionary)
      */
     public void configure(Element elem, Dictionary dict) throws ConfigurationException {
@@ -63,7 +63,7 @@ public class ExtenderModelHandler extends PrimitiveHandler {
                 throw new ConfigurationException("The extender element requires an 'extender' attribute");
             }
             if (onArrival == null || onDeparture == null) {
-                throw new ConfigurationException("The extender element requires the onArrival and onDeparture attributes");
+                throw new ConfigurationException("The extender element requires the 'onArrival' and 'onDeparture' attributes");
             }
             
             ExtenderManager wbm = new ExtenderManager(this, extension, onArrival, onDeparture);
@@ -73,7 +73,7 @@ public class ExtenderModelHandler extends PrimitiveHandler {
     }
 
     /**
-     * Start the handler.
+     * Starts the handler.
      * @see org.apache.felix.ipojo.Handler#start()
      */
     public void start() {
@@ -83,7 +83,7 @@ public class ExtenderModelHandler extends PrimitiveHandler {
     }
 
     /**
-     * Stop the handler.
+     * Stops the handler.
      * @see org.apache.felix.ipojo.Handler#stop()
      */
     public void stop() {

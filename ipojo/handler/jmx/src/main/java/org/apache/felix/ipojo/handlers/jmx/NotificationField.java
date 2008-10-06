@@ -22,33 +22,30 @@ package org.apache.felix.ipojo.handlers.jmx;
 import javax.management.MBeanNotificationInfo;
 
 /**
- * this calss build the notification descritpion structure.
+ * This class builds the notification description structure.
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class NotificationField {
     /**
-     * m_name : name of the notification.
+     * The name of the notification.
      */
     private String m_name;
     /**
-     * m_description : description of the notification.
+     * The description of the notification.
      */
     private String m_description;
     /**
-     * m_description : field of the notification.
+     * The field of the notification.
      */
     private String m_field;
 
     /**
-     * NotificationField : constructor.
+     * Constructor.
      * 
-     * @param name
-     *            : name of the notification
-     * @param field
-     *            : field which send a notification when it is modified
-     * @param description
-     *            : descritpion which appears in jmx console
+     * @param name the name of the notification
+     * @param field the field which send a notification when it is modified
+     * @param description the description which appears in JMX console
      */
 
     public NotificationField(String name, String field, String description) {
@@ -58,9 +55,9 @@ public class NotificationField {
     }
 
     /**
-     * getNotificationInfo : return the MBeanNotificationInfo from this class.
+     * Returns the MBeanNotificationInfo from this class.
      * 
-     * @return : type of the field or null if it wasn't found
+     * @return the type of the field or {@code null} if it wasn't found
      */
     public MBeanNotificationInfo getNotificationInfo() {
         String[] notificationTypes = new String[1];

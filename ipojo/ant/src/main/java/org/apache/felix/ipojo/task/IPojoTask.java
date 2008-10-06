@@ -87,7 +87,7 @@ public class IPojoTask extends Task {
             throw new BuildException("The input bundle " + m_input.getAbsolutePath() + " does not exist");
         }
         
-        log("Input Bundle File : " + m_input.getAbsolutePath());
+        log("Input bundle file : " + m_input.getAbsolutePath());
         
         // Get metadata file
         if (m_metadata == null) {
@@ -95,21 +95,21 @@ public class IPojoTask extends Task {
             if (!m_metadata.exists()) {
              // Verify if annotations are ignored
                 if (m_ignoreAnnotations) {
-                    log("No metadata file found & ignore annotations : nothing to do");
+                    log("No metadata file found & annotations ignored : nothing to do");
                     return;
                 } else {
-                    log("No metadata file found - try to use only annotations");
+                    log("No metadata file found - trying to use only annotations");
                     m_metadata = null;
                 }
             } else {
-                log("Metadata File : " + m_metadata.getAbsolutePath());
+                log("Metadata file : " + m_metadata.getAbsolutePath());
             }
         } else {
             // Metadata file is specified, check existence
             if (!m_metadata.exists()) {
                 throw new BuildException("No metadata file found - the file " + m_metadata.getAbsolutePath() + " does not exist");
             } else {
-                log("Metadata File : " + m_metadata.getAbsolutePath());
+                log("Metadata file : " + m_metadata.getAbsolutePath());
             }
         }
 
@@ -144,7 +144,7 @@ public class IPojoTask extends Task {
         }
         
         log("Bundle manipulation - SUCCESS");
-        log("Output File : " + out);
+        log("Output file : " + out);
         
     }
     

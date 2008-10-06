@@ -35,20 +35,20 @@ import org.osgi.framework.InvalidSyntaxException;
 public class WhiteBoardPatternHandler extends PrimitiveHandler {
     
     /**
-     * Handler namespace.
+     * The handler namespace.
      */
     public static final String NAMESPACE = "org.apache.felix.ipojo.white-board-pattern";
     
     /**
-     * White board pattern to manage. By default just one. 
+     * The white board pattern to manage. By default just one. 
      */
     private List m_managers = new ArrayList(1);
 
     /**
-     * Configure method. It will parse metadata to analyze org.apache.felix.ipojo.white-board-pattern:wbp element. 
-     * @param elem : component type description
-     * @param dict : instance description
-     * @throws ConfigurationException : occurs when the description is not valid.
+     * Configure method. Parses the metadata to analyze white-board-pattern elements. 
+     * @param elem the component type description
+     * @param dict the instance description
+     * @throws ConfigurationException if the description is not valid.
      * @see org.apache.felix.ipojo.Handler#configure(org.apache.felix.ipojo.metadata.Element, java.util.Dictionary)
      */
     public void configure(Element elem, Dictionary dict) throws ConfigurationException {
@@ -77,7 +77,7 @@ public class WhiteBoardPatternHandler extends PrimitiveHandler {
     }
 
     /**
-     * Start method : start managers.
+     * Start method. Starts managers.
      * @see org.apache.felix.ipojo.Handler#start()
      */
     public void start() {
@@ -87,7 +87,7 @@ public class WhiteBoardPatternHandler extends PrimitiveHandler {
     }
 
     /**
-     * Stop method : stop managers.
+     * Stop method. Stops managers.
      * @see org.apache.felix.ipojo.Handler#stop()
      */
     public void stop() {

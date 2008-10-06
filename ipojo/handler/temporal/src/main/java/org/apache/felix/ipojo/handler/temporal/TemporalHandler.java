@@ -50,29 +50,29 @@ public class TemporalHandler extends PrimitiveHandler implements DependencyState
      */
     public static final int NO_POLICY = 0;
     /**
-     * Use a nullable object.
+     * Uses a nullable object.
      */
     public static final int NULLABLE = 1;
     /**
-     * Use a default-implementation object.
+     * Uses a default-implementation object.
      */
     public static final int DEFAULT_IMPLEMENTATION = 2;
     /**
-     * Use an empty array.
+     * Uses an empty array.
      */
     public static final int EMPTY_ARRAY = 3;
     /**
-     * Use null. 
+     * Uses {@code null}. 
      */
     public static final int NULL = 4;
     
     /**
-     * Handler namespace.
+     * The handler namespace.
      */
     public static final String NAMESPACE = "org.apache.felix.ipojo.handler.temporal";
     
     /**
-     * List of managed dependencies.
+     * The list of managed dependencies.
      */
     private List/*<deps>*/ m_dependencies = new ArrayList(1);
 
@@ -87,7 +87,7 @@ public class TemporalHandler extends PrimitiveHandler implements DependencyState
     }
     
     /**
-     * Stop  method. Stops managed dependencies.
+     * Stop method. Stops managed dependencies.
      * @see org.apache.felix.ipojo.Handler#stop()
      */
     public void stop() {
@@ -98,11 +98,10 @@ public class TemporalHandler extends PrimitiveHandler implements DependencyState
     }
 
     /**
-     * Configure method.
-     * Create managed dependencies.
-     * @param meta : component type metadata.
-     * @param dictionary : instance configuration.
-     * @throws ConfigurationException : the dependency is not configured correctly
+     * Configure method. Creates managed dependencies.
+     * @param meta the component type metadata.
+     * @param dictionary the instance configuration.
+     * @throws ConfigurationException if the dependency is not configured correctly
      * @see org.apache.felix.ipojo.Handler#configure(org.apache.felix.ipojo.metadata.Element, java.util.Dictionary)
      */
     public void configure(Element meta, Dictionary dictionary) throws ConfigurationException {
@@ -180,7 +179,7 @@ public class TemporalHandler extends PrimitiveHandler implements DependencyState
     /**
      * Nothing to do.
      * A temporal dependency is always valid.
-     * @param dependencymodel : dependency.
+     * @param dependencymodel dependency.
      * @see org.apache.felix.ipojo.util.DependencyStateListener#invalidate(org.apache.felix.ipojo.util.DependencyModel)
      */
     public void invalidate(DependencyModel dependencymodel) {    }
@@ -188,7 +187,7 @@ public class TemporalHandler extends PrimitiveHandler implements DependencyState
     /**
      * Nothing to do.
      * A temporal dependency is always valid.
-     * @param dependencymodel : dependency.
+     * @param dependencymodel dependency.
      * @see org.apache.felix.ipojo.util.DependencyStateListener#validate(org.apache.felix.ipojo.util.DependencyModel)
      */
     public void validate(DependencyModel dependencymodel) {    }

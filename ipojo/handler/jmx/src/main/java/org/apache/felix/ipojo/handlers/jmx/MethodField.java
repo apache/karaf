@@ -24,28 +24,26 @@ import javax.management.MBeanParameterInfo;
 import org.apache.felix.ipojo.parser.MethodMetadata;
 
 /**
- * this class build a method JMX description.
+ * This class builds a method JMX description.
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class MethodField {
 
     /**
-     * m_description : store the method descritpion.
+     * Stores the method description.
      */
     private String m_description;
     /**
-     * m_method : store the method properties.
+     * Stores the method properties.
      */
     private MethodMetadata m_method;
 
     /**
-     * MethodField : constructor.
+     * Constructor.
      * 
-     * @param method
-     *            : the metod properties
-     * @param description
-     *            : thes method description
+     * @param method the method properties
+     * @param description the method description
      */
     public MethodField(MethodMetadata method, String description) {
         this.m_method = method;
@@ -53,22 +51,34 @@ public class MethodField {
 
     }
 
+    /**
+     * Gets the method
+     * @return the method
+     */
     public MethodMetadata getMethod() {
         return m_method;
     }
 
+    /**
+     * Gets the description
+     * @return the description
+     */
     public String getDescription() {
         return m_description;
     }
 
+    /**
+     * Gets the name
+     * @return the name
+     */
     public String getName() {
         return m_method.getMethodName();
     }
 
     /**
-     * getParams : get the parameter in JMX format.
+     * Gets the parameter in JMX format.
      * 
-     * @return MBeanParameterInfo : return info on JMX format
+     * @return info on JMX format
      */
     public MBeanParameterInfo[] getParams() {
         MBeanParameterInfo[] mbean = new MBeanParameterInfo[m_method

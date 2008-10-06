@@ -64,7 +64,7 @@ public abstract class BundleTracker {
     /**
      * Constructs a bundle tracker object that will use the specified
      * bundle context.
-     * @param context The bundle context to use to track bundles.
+     * @param context the bundle context to use to track bundles.
      **/
     public BundleTracker(BundleContext context) {
         m_context = context;
@@ -91,7 +91,7 @@ public abstract class BundleTracker {
 
     /**
      * Returns the current set of active bundles.
-     * @return The current set of active bundles.
+     * @return the current set of active bundles.
      **/
     public synchronized Bundle[] getBundles() {
         return (Bundle[]) m_bundleSet.toArray(new Bundle[m_bundleSet.size()]);
@@ -139,7 +139,7 @@ public abstract class BundleTracker {
      * actions upon the activation of a bundle. Subclasses should keep
      * this method implementation as simple as possible and should not
      * cause the change in any bundle state to avoid concurrency issues.
-     * @param bundle The bundle being added to the active set.
+     * @param bundle the bundle being added to the active set.
      **/
     protected abstract void addedBundle(Bundle bundle);
 
@@ -148,7 +148,7 @@ public abstract class BundleTracker {
      * actions upon the deactivation of a bundle. Subclasses should keep
      * this method implementation as simple as possible and should not
      * cause the change in any bundle state to avoid concurrency issues.
-     * @param bundle The bundle being removed from the active set.
+     * @param bundle the bundle being removed from the active set.
      **/
     protected abstract void removedBundle(Bundle bundle);
 }

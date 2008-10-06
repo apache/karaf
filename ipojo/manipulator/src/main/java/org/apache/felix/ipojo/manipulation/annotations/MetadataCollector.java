@@ -172,7 +172,7 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
             } else {
                 Element ref = (Element) getIds().get(reference);
                 if (ref == null) {
-                    System.err.println("The element " + reference + " is not declared - skip the element " + current.toXMLString());
+                    System.err.println("The element " + reference + " is not declared - skipping the element " + current.toXMLString());
                 } else {
                     ref.addElement(current);
                 }

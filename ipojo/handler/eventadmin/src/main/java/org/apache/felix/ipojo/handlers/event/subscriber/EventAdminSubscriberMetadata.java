@@ -113,11 +113,9 @@ class EventAdminSubscriberMetadata {
     /**
      * Constructor.
      * 
-     * @param bundleContext : bundle context of the managed instance.
-     * @param subscriber : subscriber metadata.
-     * @throws ConfigurationException
-     *             if the configuration of the component or the instance is
-     *             invalid.
+     * @param bundleContext the bundle context of the managed instance.
+     * @param subscriber the subscriber metadata.
+     * @throws ConfigurationException if the configuration of the component or the instance is invalid.
      */
     public EventAdminSubscriberMetadata(BundleContext bundleContext,
             Element subscriber)
@@ -200,12 +198,10 @@ class EventAdminSubscriberMetadata {
     }
 
     /**
-     * Set the topics attribute of the subscriber.
+     * Sets the topics attribute of the subscriber.
      * 
-     * @param topicsString
-     *            the comma separated list of the topics to listen
-     * @throws ConfigurationException
-     *             the specified topic list is malformed
+     * @param topicsString the comma separated list of the topics to listen
+     * @throws ConfigurationException if  the specified topic list is malformed
      */
     public void setTopics(String topicsString)
         throws ConfigurationException {
@@ -223,11 +219,10 @@ class EventAdminSubscriberMetadata {
     }
 
     /**
-     * Set the filter attribute of the subscriber.
+     * Sets the filter attribute of the subscriber.
      * 
-     * @param filterString
-     *            the string representation of the event filter
-     * @throws ConfigurationException : the LDAP filter is malformed
+     * @param filterString the string representation of the event filter
+     * @throws ConfigurationException if the LDAP filter is malformed
      */
     public void setFilter(String filterString)
         throws ConfigurationException {
@@ -239,10 +234,9 @@ class EventAdminSubscriberMetadata {
     }
 
     /**
-     * Check that the required instance configurable attributes are all set.
+     * Checks that the required instance configurable attributes are all set.
      * 
-     * @throws ConfigurationException
-     *             if a required attribute is missing
+     * @throws ConfigurationException if a required attribute is missing
      */
     public void check()
         throws ConfigurationException {
@@ -254,7 +248,7 @@ class EventAdminSubscriberMetadata {
     }
 
     /**
-     * Get the name attribute of the subscriber.
+     * Gets the name attribute of the subscriber.
      * 
      * @return the name
      */
@@ -263,7 +257,7 @@ class EventAdminSubscriberMetadata {
     }
 
     /**
-     * Get the topics attribute of the subscriber.
+     * Gets the topics attribute of the subscriber.
      * 
      * @return the topics
      */
@@ -272,7 +266,7 @@ class EventAdminSubscriberMetadata {
     }
 
     /**
-     * Get the callback attribute of the subscriber.
+     * Gets the callback attribute of the subscriber.
      * 
      * @return the callback
      */
@@ -281,7 +275,7 @@ class EventAdminSubscriberMetadata {
     }
 
     /**
-     * Get the data key attribute of the subscriber.
+     * Gets the data key attribute of the subscriber.
      * 
      * @return the dataKey
      */
@@ -290,7 +284,7 @@ class EventAdminSubscriberMetadata {
     }
 
     /**
-     * Get the data type attribute of the subscriber.
+     * Gets the data type attribute of the subscriber.
      * 
      * @return the dataType
      */
@@ -299,7 +293,7 @@ class EventAdminSubscriberMetadata {
     }
 
     /**
-     * Get the filter attribute of the subscriber.
+     * Gets the filter attribute of the subscriber.
      * 
      * @return the filter
      */

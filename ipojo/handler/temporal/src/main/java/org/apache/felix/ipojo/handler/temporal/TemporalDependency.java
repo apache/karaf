@@ -40,28 +40,28 @@ public class TemporalDependency extends DependencyModel implements
         FieldInterceptor {
 
     /**
-     * Timeout.
+     * The timeout.
      */
     private long m_timeout;
 
     /**
-     * Default-Implementation.
+     * The default implementation.
      */
     private String m_di;
 
     /**
-     * Nullable object / Default-Implementation instance if used.
+     * The {@link Nullable} object or Default-Implementation instance if used.
      */
     private Object m_nullableObject;
 
     /**
-     * Handler managing this dependency.
+     * The handler managing this dependency.
      */
     private PrimitiveHandler m_handler;
 
     /**
-     * Timetout policy. Null inject null Nullable injects a nullable object or
-     * an array with a nullable object Default-Implementation inject an object
+     * The timeout policy. Null injects null, {@link Nullable} injects a nullable object or
+     * an array with a nullable object, Default-Implementation injects an object
      * created from the specified injected implementation or an array with it
      * Empty array inject an empty array (must be an aggregate dependency) No
      * policy (0) throw a runtime exception when the timeout occurs *
@@ -70,14 +70,14 @@ public class TemporalDependency extends DependencyModel implements
 
     /**
      * Constructor.
-     * @param spec : service specification
-     * @param agg : is the dependency aggregate ?
-     * @param filter : LDAP filter
-     * @param context : service context
-     * @param timeout : timeout
-     * @param handler : Handler managing this dependency
-     * @param defaultImpl : class used as default-implementation
-     * @param policy : onTimeout policy
+     * @param spec service specification
+     * @param agg is the dependency aggregate ?
+     * @param filter LDAP filter
+     * @param context service context
+     * @param timeout timeout
+     * @param handler Handler managing this dependency
+     * @param defaultImpl class used as default-implementation
+     * @param policy onTimeout policy
      */
     public TemporalDependency(Class spec, boolean agg, Filter filter,
             BundleContext context, long timeout, int policy,
@@ -92,8 +92,8 @@ public class TemporalDependency extends DependencyModel implements
 
     /**
      * The dependency has been reconfigured.
-     * @param arg0 : new service references
-     * @param arg1 : old service references
+     * @param arg0 new service references
+     * @param arg1 old service references
      * @see org.apache.felix.ipojo.util.DependencyModel#onDependencyReconfiguration(org.osgi.framework.ServiceReference[],
      *      org.osgi.framework.ServiceReference[])
      */
@@ -105,7 +105,7 @@ public class TemporalDependency extends DependencyModel implements
 
     /**
      * A provider arrives.
-     * @param arg0 : service reference of the new provider.
+     * @param arg0 service reference of the new provider.
      * @see org.apache.felix.ipojo.util.DependencyModel#onServiceArrival(org.osgi.framework.ServiceReference)
      */
     public void onServiceArrival(ServiceReference arg0) {
@@ -117,7 +117,7 @@ public class TemporalDependency extends DependencyModel implements
 
     /**
      * A provider leaves. Nothing to do.
-     * @param arg0 : leaving service references.
+     * @param arg0 leaving service references.
      * @see org.apache.felix.ipojo.util.DependencyModel#onServiceDeparture(org.osgi.framework.ServiceReference)
      */
     public synchronized void onServiceDeparture(ServiceReference arg0) {
@@ -128,12 +128,11 @@ public class TemporalDependency extends DependencyModel implements
      * available, the method return service object(s) immediately. Else, the
      * thread is blocked until an arrival. If no provider arrives during the
      * among of time specified, the method throws a Runtime Exception.
-     * @param arg0 : POJO instance asking for the service
-     * @param arg1 : field name
-     * @param arg2 : previous value
+     * @param arg0 POJO instance asking for the service
+     * @param arg1 field name
+     * @param arg2 previous value
      * @return the object to inject.
-     * @see org.apache.felix.ipojo.FieldInterceptor#onGet(java.lang.Object,
-     *      java.lang.String, java.lang.Object)
+     * @see org.apache.felix.ipojo.FieldInterceptor#onGet(java.lang.Object, java.lang.String, java.lang.Object)
      */
     public synchronized Object onGet(Object arg0, String arg1, Object arg2) {
         ServiceReference[] refs = getServiceReferences();
@@ -184,8 +183,7 @@ public class TemporalDependency extends DependencyModel implements
     }
 
     /**
-     * Start method.
-     * Initializes the nullable object.
+     * Start method. Initializes the nullable object.
      * @see org.apache.felix.ipojo.util.DependencyModel#start()
      */
     public void start() {
@@ -255,8 +253,7 @@ public class TemporalDependency extends DependencyModel implements
     }
 
     /**
-     * Stop method.
-     * Just release the reference on the nullable object.
+     * Stop method. Just releases the reference on the nullable object.
      * @see org.apache.felix.ipojo.util.DependencyModel#stop()
      */
     public void stop() {
@@ -266,11 +263,10 @@ public class TemporalDependency extends DependencyModel implements
 
     /**
      * The monitored field receives a value. Nothing to do.
-     * @param arg0 : POJO setting the value.
-     * @param arg1 : field name
-     * @param arg2 : received value
-     * @see org.apache.felix.ipojo.FieldInterceptor#onSet(java.lang.Object,
-     *      java.lang.String, java.lang.Object)
+     * @param arg0 POJO setting the value.
+     * @param arg1 field name
+     * @param arg2 received value
+     * @see org.apache.felix.ipojo.FieldInterceptor#onSet(java.lang.Object, java.lang.String, java.lang.Object)
      */
     public void onSet(Object arg0, String arg1, Object arg2) {
     }

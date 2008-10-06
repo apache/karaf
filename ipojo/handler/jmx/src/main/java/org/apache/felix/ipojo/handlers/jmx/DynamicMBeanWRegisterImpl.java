@@ -38,41 +38,35 @@ public class DynamicMBeanWRegisterImpl extends DynamicMBeanImpl implements
         MBeanRegistration {
 
     /**
-     * preRegister method of MBeanRegistration interface.
+     * The preRegister method of MBeanRegistration interface.
      */
     private MethodMetadata m_preRegisterMeth;
     /**
-     * postRegister method of MBeanRegistration interface.
+     * The postRegister method of MBeanRegistration interface.
      */
     private MethodMetadata m_postRegisterMeth;
     /**
-     * preDeregister method of MBeanRegistration interface.
+     * The preDeregister method of MBeanRegistration interface.
      */
     private MethodMetadata m_preDeregisterMeth;
     /**
-     * postDeregister method of MBeanRegistration interface.
+     * The postDeregister method of MBeanRegistration interface.
      */
     private MethodMetadata m_postDeregisterMeth;
     /**
-     * Effective name of the MBean.
+     * The effective name of the MBean.
      */
     private ObjectName m_objName;
 
     /**
      * Constructs a new DynamicMBeanWRegisterImpl.
      * 
-     * @param properties
-     *            data extracted from the metadata.xml
-     * @param instanceManager
-     *            the instance manager
-     * @param preRegisterMeth
-     *            the method to call before MBean registration
-     * @param postRegisterMeth
-     *            the method to call after MBean registration
-     * @param preDeregisterMeth
-     *            the method to call before MBean deregistration
-     * @param postDeregisterMeth
-     *            the method to call after MBean registration
+     * @param properties the data extracted from the metadata.xml
+     * @param instanceManager the instance manager
+     * @param preRegisterMeth the method to call before MBean registration
+     * @param postRegisterMeth the method to call after MBean registration
+     * @param preDeregisterMeth the method to call before MBean deregistration
+     * @param postDeregisterMeth the method to call after MBean registration
      */
     public DynamicMBeanWRegisterImpl(JmxConfigFieldMap properties,
             InstanceManager instanceManager, MethodMetadata preRegisterMeth,
@@ -87,7 +81,7 @@ public class DynamicMBeanWRegisterImpl extends DynamicMBeanImpl implements
     }
 
     /**
-     * Return the MBean name used to register it.
+     * Returns the MBean name used to register it.
      * 
      * @return the MBean name used to register it.
      */
@@ -98,13 +92,9 @@ public class DynamicMBeanWRegisterImpl extends DynamicMBeanImpl implements
     /**
      * This method is executed before the MBean registration.
      * 
-     * @param server
-     *            the server on which the MBean will be registered
-     * @param name
-     *            the name of the MBean to expose
-     * @throws Exception
-     *             This exception will be caught by the MBean server and
-     *             re-thrown as an MBeanRegistrationException.
+     * @param server the server on which the MBean will be registered
+     * @param name the name of the MBean to expose
+     * @throws Exception This exception will be caught by the MBean server and re-thrown as an MBeanRegistrationException.
      * @return the name with which the MBean will be registered
      */
     public ObjectName preRegister(MBeanServer server, ObjectName name)
@@ -117,9 +107,7 @@ public class DynamicMBeanWRegisterImpl extends DynamicMBeanImpl implements
     /**
      * This method is executed after the MBean registration.
      * 
-     * @param registrationDone
-     *            Indicates whether or not the MBean has been successfully
-     *            registered in the MBean server.
+     * @param registrationDone indicates whether or not the MBean has been successfully registered in the MBean server.
      */
     public void postRegister(Boolean registrationDone) {
         callMethod(m_postRegisterMeth, MBeanHandler.POST_REGISTER_METH_NAME,
@@ -129,9 +117,7 @@ public class DynamicMBeanWRegisterImpl extends DynamicMBeanImpl implements
     /**
      * This method is before after the MBean deregistration.
      * 
-     * @throws Exception
-     *             This exception will be caught by the MBean server and
-     *             re-thrown as an MBeanRegistrationException.
+     * @throws Exception This exception will be caught by the MBean server and re-thrown as an MBeanRegistrationException.
      */
     public void preDeregister() throws Exception {
         callMethod(m_preDeregisterMeth, MBeanHandler.PRE_DEREGISTER_METH_NAME,
@@ -149,14 +135,10 @@ public class DynamicMBeanWRegisterImpl extends DynamicMBeanImpl implements
     /**
      * Private method used to execute a given callback.
      * 
-     * @param methodMetadata
-     *            the metadata description of the callback
-     * @param methodName
-     *            the name of the callback
-     * @param params
-     *            the parameters of the callback
-     * @return the object eventually returned by the callback, or null if
-     *         nothing's returned
+     * @param methodMetadata  the metadata description of the callback
+     * @param methodName the name of the callback
+     * @param params the parameters of the callback
+     * @return the object eventually returned by the callback, or null if nothing's returned
      */
     private Object callMethod(MethodMetadata methodMetadata, String methodName,
             Object[] params) {
@@ -169,7 +151,7 @@ public class DynamicMBeanWRegisterImpl extends DynamicMBeanImpl implements
             }
         } catch (NoSuchMethodException e) {
             // should never happen : method exists
-            System.err.println("No such method!: " + methodName);
+            System.err.println("No such method : " + methodName);
             e.printStackTrace();
         } catch (IllegalAccessException e) {
             System.err.println("Illegal Access Exception");

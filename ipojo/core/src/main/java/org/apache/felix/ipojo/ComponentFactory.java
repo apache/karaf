@@ -95,7 +95,7 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
     }
 
     /**
-     * Create a instance manager factory.
+     * Creates a instance manager factory.
      * @param context the bundle context
      * @param element the metadata of the component to create
      * @throws ConfigurationException if element describing the factory is malformed.

@@ -34,42 +34,42 @@ import org.osgi.framework.ServiceReference;
 public class WhiteBoardManager implements TrackerCustomizer {
     
     /**
-     * monitored filter. 
+     * The monitored filter. 
      */
     private Filter m_filter;
     
     /**
-     * onArrival method. 
+     * The onArrival method. 
      */
     private Callback m_onArrival;
     
     /**
-     * onDeparture method. 
+     * The onDeparture method. 
      */
     private Callback m_onDeparture;
     
     /**
-     * onModify method. 
+     * The onModify method. 
      */
     private Callback m_onModification;
     
     /**
-     * Service Tracker. 
+     * The service tracker. 
      */
     private Tracker m_tracker;
     
     /**
-     * Attached handler. 
+     * The attached handler. 
      */
     private PrimitiveHandler m_handler;
     
     /**
      * Constructor.
-     * @param handler : attached handler
-     * @param filter : monitored filter
-     * @param bind : onArrival method
-     * @param unbind : onDeparture method
-     * @param modification : onModify method
+     * @param handler the attached handler
+     * @param filter the monitored filter
+     * @param bind the onArrival method
+     * @param unbind the onDeparture method
+     * @param modification the onModify method
      */
     public WhiteBoardManager(WhiteBoardPatternHandler handler, Filter filter, String bind, String unbind, String modification) {
         m_handler = handler;
@@ -83,14 +83,14 @@ public class WhiteBoardManager implements TrackerCustomizer {
     }
     
     /**
-     * Open the tracker.
+     * Opens the tracker.
      */
     public void start() {
         m_tracker.open();
     }
     
     /**
-     * Close the tracker.
+     * Closes the tracker.
      */
     public void stop() {
         m_tracker.close();
@@ -98,7 +98,7 @@ public class WhiteBoardManager implements TrackerCustomizer {
 
     /**
      * A new service was added to the tracker.
-     * @param arg0 : service reference.
+     * @param arg0 the service reference.
      * @see org.apache.felix.ipojo.util.TrackerCustomizer#addedService(org.osgi.framework.ServiceReference)
      */
     public void addedService(ServiceReference arg0) {
@@ -118,8 +118,8 @@ public class WhiteBoardManager implements TrackerCustomizer {
 
     /**
      * A new service is detected.
-     * @param arg0 : service reference
-     * @return true to add the service
+     * @param arg0 the service reference
+     * @return {@code true} to add the service.
      * @see org.apache.felix.ipojo.util.TrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
      */
     public boolean addingService(ServiceReference arg0) {
@@ -128,8 +128,8 @@ public class WhiteBoardManager implements TrackerCustomizer {
 
     /**
      * An existing service was modified.
-     * @param arg0 : service reference
-     * @param arg1 : service object (if already get)
+     * @param arg0 the service reference
+     * @param arg1 the service object (if already get)
      * @see org.apache.felix.ipojo.util.TrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
     public void modifiedService(ServiceReference arg0, Object arg1) {
@@ -151,8 +151,8 @@ public class WhiteBoardManager implements TrackerCustomizer {
 
     /**
      * A service disappears.
-     * @param arg0 : service reference
-     * @param arg1 : service object (if already get)
+     * @param arg0 the service reference
+     * @param arg1 the service object (if already get)
      * @see org.apache.felix.ipojo.util.TrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
     public void removedService(ServiceReference arg0, Object arg1) {

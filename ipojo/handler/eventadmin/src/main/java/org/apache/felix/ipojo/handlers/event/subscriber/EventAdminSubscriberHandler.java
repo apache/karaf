@@ -52,7 +52,7 @@ public class EventAdminSubscriberHandler extends PrimitiveHandler implements
         EventHandler {
 
     /**
-     * Handler Namespace.
+     * The handler namespace.
      */
     public static final String NAMESPACE = "org.apache.felix.ipojo.handlers.event.EventAdminHandler";
 
@@ -69,44 +69,41 @@ public class EventAdminSubscriberHandler extends PrimitiveHandler implements
     public static final String FILTER_PROPERTY = "event.filter";
 
     /**
-     * Prefix for logged messages.
+     * The prefix for logged messages.
      */
     private static final String LOG_PREFIX = "EVENT ADMIN SUBSCRIBER HANDLER : ";
 
     /**
-     * Instance Manager.
+     * The instance manager.
      */
     private InstanceManager m_manager;
 
     /**
-     * List of subscriber accessible by name.
+     * The list of subscriber accessible by name.
      */
     private Map m_subscribersByName = new HashMap();
 
     /**
-     * List of callbacks accessible by subscribers' names.
+     * The list of callbacks accessible by subscribers' names.
      */
     private Map m_callbacksByName = new Hashtable();
 
     /**
-     * iPOJO Properties representing all the topics.
+     * The iPOJO properties representing all the topics.
      */
     private String[] m_topics;
 
     /**
-     * Listen received events ?
+     * Listening to received events ?
      */
     private boolean m_isListening;
 
     /**
-     * Initialize the component type.
+     * Initializes the component type.
      * 
-     * @param cd :
-     *            component type description to populate.
-     * @param metadata :
-     *            component type metadata.
-     * @throws ConfigurationException :
-     *             metadata are incorrect.
+     * @param cd component type description to populate.
+     * @param metadata component type metadata.
+     * @throws ConfigurationException if the metadata are incorrect.
      * @see org.apache.felix.ipojo.Handler#initializeComponentFactory(org.apache.felix.ipojo.architecture.ComponentDescription,
      *      org.apache.felix.ipojo.metadata.Element)
      */
@@ -140,7 +137,7 @@ public class EventAdminSubscriberHandler extends PrimitiveHandler implements
                         getFactory().getBundleContext(), subscribers[i]);
 
                 String name = subscriberMetadata.getName();
-                info(LOG_PREFIX + "checking subscriber " + name);
+                info(LOG_PREFIX + "Checking subscriber " + name);
 
                 // Determine the event callback prototype
                 PojoMetadata pojoMetadata = getPojoMetadata();
@@ -179,19 +176,16 @@ public class EventAdminSubscriberHandler extends PrimitiveHandler implements
                 nameSet.add(name);
             }
         } else {
-            info(LOG_PREFIX + "no subscriber to check");
+            info(LOG_PREFIX + "No subscriber to check");
         }
     }
 
     /**
      * Constructor.
      * 
-     * @param metadata :
-     *            component type metadata
-     * @param conf :
-     *            instance configuration
-     * @throws ConfigurationException :
-     *             one event subscription is not correct
+     * @param metadata the omponent type metadata
+     * @param conf the instance configuration
+     * @throws ConfigurationException if one event subscription is not correct
      * @see org.apache.felix.ipojo.Handler#configure(org.apache.felix.ipojo.InstanceManager,
      *      org.apache.felix.ipojo.metadata.Element, java.util.Dictionary)
      */
@@ -221,7 +215,7 @@ public class EventAdminSubscriberHandler extends PrimitiveHandler implements
                 EventAdminSubscriberMetadata subscriberMetadata = new EventAdminSubscriberMetadata(
                         m_manager.getContext(), subscribers[i]);
                 String name = subscriberMetadata.getName();
-                info(LOG_PREFIX + "configuring subscriber " + name);
+                info(LOG_PREFIX + "Configuring subscriber " + name);
 
                 // Get the topics instance configuration if redefined
                 String topicsString = (instanceTopics != null) ? (String) instanceTopics
@@ -277,7 +271,7 @@ public class EventAdminSubscriberHandler extends PrimitiveHandler implements
             }
 
         } else {
-            info(LOG_PREFIX + "no subscriber to configure");
+            info(LOG_PREFIX + "No subscriber to configure");
         }
     }
 
@@ -306,10 +300,9 @@ public class EventAdminSubscriberHandler extends PrimitiveHandler implements
      **************************************************************************/
 
     /**
-     * Receive an event. The event is dispatch to attached subscribers.
+     * Receives an event. The event is dispatch to attached subscribers.
      * 
-     * @param event :
-     *            the received event.
+     * @param event the received event.
      * @see org.osgi.service.event.EventHandler#handleEvent(org.osgi.service.event.Event)
      */
     public void handleEvent(Event event) {

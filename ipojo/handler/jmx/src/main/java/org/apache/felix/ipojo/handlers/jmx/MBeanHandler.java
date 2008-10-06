@@ -28,6 +28,7 @@ import javax.management.MBeanServer;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 
+import org.apache.felix.ipojo.FieldInterceptor;
 import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.PrimitiveHandler;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
@@ -48,164 +49,156 @@ import org.osgi.framework.ServiceRegistration;
 public class MBeanHandler extends PrimitiveHandler {
 
     /**
-     * Name of the MBeanRegistration postDeregister method.
+     * The name of the MBeanRegistration postDeregister method.
      */
     public static final String POST_DEREGISTER_METH_NAME = "postDeregister";
 
     /**
-     * Name of the MBeanRegistration preDeregister method.
+     * The name of the MBeanRegistration preDeregister method.
      */
     public static final String PRE_DEREGISTER_METH_NAME = "preDeregister";
 
     /**
-     * Name of the MBeanRegistration postRegister method.
+     * The name of the MBeanRegistration postRegister method.
      */
     public static final String POST_REGISTER_METH_NAME = "postRegister";
 
     /**
-     * Name of the MBeanRegistration preRegister method.
+     * The name of the MBeanRegistration preRegister method.
      */
     public static final String PRE_REGISTER_METH_NAME = "preRegister";
 
     /**
-     * Name of the global configuration element.
+     * The name of the global configuration element.
      */
     private static final String JMX_CONFIG_ELT = "config";
 
     /**
-     * Name of the component object full name attribute.
+     * The name of the component object full name attribute.
      */
     private static final String JMX_OBJ_NAME_ELT = "objectName";
 
     /**
-     * Name of the component object name domain attribute.
+     * The name of the component object name domain attribute.
      */
     private static final String JMX_OBJ_NAME_DOMAIN_ELT = "domain";
 
     /**
-     * Name of the component object name attribute.
+     * The name of the component object name attribute.
      */
     private static final String JMX_OBJ_NAME_WO_DOMAIN_ELT = "name";
 
     /**
-     * Name of the attribute indicating if the handler uses MOSGi MBean server.
+     * The name of the attribute indicating if the handler uses MOSGi MBean server.
      */
     private static final String JMX_USES_MOSGI_ELT = "usesMOSGi";
 
     /**
-     * Name of a method element.
+     * The name of a method element.
      */
     private static final String JMX_METHOD_ELT = "method";
 
     /**
-     * Name of the property or method name attribute.
+     * The name of the property or method name attribute.
      */
     private static final String JMX_NAME_ELT = "name";
 
     /**
-     * Name of a method description attribute.
+     * The name of a method description attribute.
      */
     private static final String JMX_DESCRIPTION_ELT = "description";
 
     /**
-     * Name of a property element.
+     * The name of a property element.
      */
     private static final String JMX_PROPERTY_ELT = "property";
 
     /**
-     * Name of the field attribute.
+     * The name of the field attribute.
      */
     private static final String JMX_FIELD_ELT = "field";
 
     /**
-     * Name of the notification attribute.
+     * The name of the notification attribute.
      */
     private static final String JMX_NOTIFICATION_ELT = "notification";
 
     /**
-     * Name of the rights attribute.
+     * The name of the rights attribute.
      */
     private static final String JMX_RIGHTS_ELT = "rights";
 
     /**
-     * InstanceManager: use to store the InstanceManager instance.
+     * The instance manager. Used to store the InstanceManager instance.
      */
     private InstanceManager m_instanceManager;
     /**
-     * ServiceRegistration : use to register and unregister the Dynamic MBean.
+     * The service registration. Used to register and unregister the Dynamic MBean.
      */
     private ServiceRegistration m_serviceRegistration;
     /**
-     * JmxConfigFieldMap : use to store data when parsing metadata.xml.
+     * Stores data when parsing metadata.xml.
      */
     private JmxConfigFieldMap m_jmxConfigFieldMap;
     /**
-     * DynamicMBeanImpl : store the Dynamic MBean.
+     * Stores the Dynamic MBean.
      */
     private DynamicMBeanImpl m_MBean;
     /**
-     * String : constant which store the name of the class.
+     * Constant storing the name of the class.
      */
     private String m_namespace = "org.apache.felix.ipojo.handlers.jmx";
     /**
-     * Flag used to say if we use MOSGi framework.
+     * The flag used to inform if we use the MOSGi framework.
      */
     private boolean m_usesMOSGi = false;
     /**
-     * ObjectName used to register the MBean.
+     * The ObjectName used to register the MBean.
      */
     private ObjectName m_objectName;
     /**
-     * Flag used to say if the MBean is registered.
+     * The flag used to inform if the MBean is registered.
      */
     private boolean m_registered = false;
     /**
-     * object name specified in handler configuration. It can be null.
+     * The ObjectName specified in handler configuration. It can be null.
      */
     private String m_completeObjNameElt;
     /**
-     * object name without domain specified in handler configuration. It can be
-     * null.
+     * The ObjectName without domain specified in handler configuration. It can be null.
      */
     private String m_objNameWODomainElt;
     
     /**
-     * object name domain specified in handler configuration. It can be null.
+     * The ObjectName domain specified in handler configuration. It can be null.
      */
     private String m_domainElt;
     /**
-     * flag representing if the Pojo implements MBeanRegistration interface.
+     * The flag informing if the POJO implements the MBeanRegistration interface.
      */
     private boolean m_registerCallbacks;
     /**
-     * preRegister method of MBeanRegistration interface. It is null if pojo
-     * doesn't implement MBeanRegistration interface.
+     * The preRegister method of MBeanRegistration interface. It is null if POJO doesn't implement MBeanRegistration interface.
      */
     private MethodMetadata m_preRegisterMeth;
     /**
-     * postRegister method of MBeanRegistration interface. It is null if pojo
-     * doesn't implement MBeanRegistration interface.
+     * The postRegister method of MBeanRegistration interface. It is null if POJO doesn't implement MBeanRegistration interface.
      */
     private MethodMetadata m_postRegisterMeth;
     /**
-     * preDeregister method of MBeanRegistration interface. It is null if pojo
-     * doesn't implement MBeanRegistration interface.
+     * The preDeregister method of MBeanRegistration interface. It is null if POJO doesn't implement MBeanRegistration interface.
      */
     private MethodMetadata m_preDeregisterMeth;
     /**
-     * postDeregister method of MBeanRegistration interface. It is null if pojo
-     * doesn't implement MBeanRegistration interface.
+     * The postDeregister method of MBeanRegistration interface. It is null if POJO doesn't implement MBeanRegistration interface.
      */
     private MethodMetadata m_postDeregisterMeth;
 
     /**
-     * configure : construct the structure JmxConfigFieldMap.and the Dynamic
-     * Mbean.
+     * Constructs the structure JmxConfigFieldMap and the Dynamic Mbean.
      * 
-     * @param metadata
-     *            Element
-     * @param dict
-     *            Dictionary
+     * @param metadata the component metadata
+     * @param dict the instance configuration
      */
     public void configure(Element metadata, Dictionary dict) {
 
@@ -325,7 +318,7 @@ public class MBeanHandler extends PrimitiveHandler {
     }
 
     /**
-     * start : register the Dynamic Mbean.
+     * Registers the Dynamic Mbean.
      */
     public void start() {
         // create the corresponding MBean
@@ -383,7 +376,7 @@ public class MBeanHandler extends PrimitiveHandler {
     }
 
     /**
-     * Return the object name of the exposed component.
+     * Returns the object name of the exposed component.
      * 
      * @return the object name of the exposed component.
      */
@@ -415,10 +408,9 @@ public class MBeanHandler extends PrimitiveHandler {
     }
 
     /**
-     * Extract the package name from of given type.
+     * Extracts the package name from of given type.
      * 
-     * @param className
-     *            the type.
+     * @param className the type name.
      * @return the package name of the given type.
      */
     private String getPackageName(String className) {
@@ -433,7 +425,7 @@ public class MBeanHandler extends PrimitiveHandler {
     }
 
     /**
-     * stop : unregister the Dynamic Mbean.
+     * Unregisters the Dynamic Mbean.
      */
     public void stop() {
         if (m_usesMOSGi) {
@@ -457,14 +449,12 @@ public class MBeanHandler extends PrimitiveHandler {
     }
 
     /**
-     * setterCallback : call when a POJO member is modified externally.
+     * Called when a POJO member is modified externally.
      * 
-     * @param pojo
-     *            : the POJO object
-     * @param fieldName
-     *            : name of the modified field
-     * @param value
-     *            : new value of the field
+     * @param pojo the modified POJO object
+     * @param fieldName the name of the modified field
+     * @param value the new value of the field
+     * @see FieldInterceptor#onSet(Object, String, Object)
      */
     public void onSet(Object pojo, String fieldName, Object value) {
         // Check if the field is a configurable property
@@ -484,15 +474,13 @@ public class MBeanHandler extends PrimitiveHandler {
     }
 
     /**
-     * getterCallback : call when a POJO member is modified by the MBean.
+     * Called when a POJO member is read by the MBean.
      * 
-     * @param pojo
-     *            : pojo object.
-     * @param fieldName
-     *            : name of the modified field
-     * @param value
-     *            : old value of the field
-     * @return : new value of the field
+     * @param pojo the read POJO object.
+     * @param fieldName the name of the modified field
+     * @param value the old value of the field
+     * @return the (injected) value of the field
+     * @see FieldInterceptor#onGet(Object, String, Object)
      */
     public Object onGet(Object pojo, String fieldName, Object value) {
 
@@ -503,18 +491,15 @@ public class MBeanHandler extends PrimitiveHandler {
             m_instanceManager.onSet(pojo, fieldName, propertyField.getValue());
             return propertyField.getValue();
         }
-        // m_instanceManager.onSet(pojo, fieldName, value);
         return value;
     }
 
     /**
-     * getTypeFromAttributeField : get the type from a field name.
+     * Gets the type from a field name.
      * 
-     * @param fieldRequire
-     *            : name of the requiered field
-     * @param manipulation
-     *            : metadata extract from metadata.xml file
-     * @return : type of the field or null if it wasn't found
+     * @param fieldRequire the name of the required field
+     * @param manipulation the metadata extracted from metadata.xml file
+     * @return the type of the field or {@code null} if it wasn't found
      */
     private static String getTypeFromAttributeField(String fieldRequire,
             PojoMetadata manipulation) {
@@ -528,15 +513,12 @@ public class MBeanHandler extends PrimitiveHandler {
     }
 
     /**
-     * getMethodsFromName : get all the methods available which get this name.
+     * Gets all the methods available which get this name.
      * 
-     * @param methodName
-     *            : name of the requiered methods
-     * @param manipulation
-     *            : metadata extract from metadata.xml file
-     * @param description
-     *            : description which appears in jmx console
-     * @return : array of methods with the right name
+     * @param methodName the name of the required methods
+     * @param manipulation the metadata extract from metadata.xml file
+     * @param description the description which appears in JMX console
+     * @return the array of methods with the right name
      */
     private MethodField[] getMethodsFromName(String methodName,
             PojoMetadata manipulation, String description) {
@@ -560,9 +542,9 @@ public class MBeanHandler extends PrimitiveHandler {
     }
 
     /**
-     * Get the jmx handler description.
+     * Gets the JMX handler description.
      * 
-     * @return the jmx handler description.
+     * @return the JMX handler description.
      * @see org.apache.felix.ipojo.Handler#getDescription()
      */
     public HandlerDescription getDescription() {
@@ -570,8 +552,7 @@ public class MBeanHandler extends PrimitiveHandler {
     }
 
     /**
-     * Return the objectName used to register the MBean. If the MBean is not
-     * registered, return an empty string.
+     * Returns the objectName used to register the MBean. If the MBean is not registered, return an empty string.
      * 
      * @return the objectName used to register the MBean.
      * @see org.apache.felix.ipojo.Handler#getDescription()
@@ -585,7 +566,7 @@ public class MBeanHandler extends PrimitiveHandler {
     }
 
     /**
-     * Return true if the MBean is registered.
+     * Returns true if the MBean is registered.
      * 
      * @return true if the MBean is registered.
      */
@@ -594,20 +575,18 @@ public class MBeanHandler extends PrimitiveHandler {
     }
 
     /**
-     * Return true if the MBean must be registered thanks to whiteboard pattern
-     * of MOSGi.
+     * Returns true if the MBean must be registered thanks to white board pattern of MOSGi.
      * 
-     * @return true if the MBean must be registered thanks to whiteboard pattern
-     *         of MOSGi.
+     * @return {@code true} if the MBean must be registered thanks to white board pattern of MOSGi, false otherwise.
      */
     public boolean isUsesMOSGi() {
         return m_usesMOSGi;
     }
 
     /**
-     * Return true if the MOSGi framework is present on the OSGi plateforme.
+     * Returns true if the MOSGi framework is present on the OSGi platform.
      * 
-     * @return true if the MOSGi framework is present on the OSGi plateforme.
+     * @return {@code true} if the MOSGi framework is present on the OSGi platform, false otherwise.
      */
     public boolean isMOSGiExists() {
         for (Bundle bundle : m_instanceManager.getContext().getBundles()) {

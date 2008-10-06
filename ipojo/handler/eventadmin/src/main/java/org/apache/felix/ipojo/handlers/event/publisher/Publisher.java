@@ -30,18 +30,16 @@ import java.util.Dictionary;
 public interface Publisher {
 
     /**
-     * Send an event with the specified content.
+     * Sends an event with the specified content.
      * 
-     * @param content
-     *            the content of the event
+     * @param content the content of the event
      */
     void send(Dictionary content);
 
     /**
-     * Send a data event.
+     * Sends a data event.
      * 
-     * @param o
-     *            the data to send
+     * @param o the data to send
      */
     void sendData(Object o);
 }

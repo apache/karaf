@@ -125,7 +125,7 @@ public class MethodCollector extends EmptyVisitor {
      */
     private AnnotationVisitor processServiceProperty() {
         if (! m_collector.getIds().containsKey("provides")) {
-            System.err.println("the component does not provide services, skip ServiceProperty for " + m_name);
+            System.err.println("The component does not provide services, skipping ServiceProperty for " + m_name);
             return null;
         } else {
             Element provides = (Element) m_collector.getIds().get("provides");
@@ -314,7 +314,7 @@ public class MethodCollector extends EmptyVisitor {
                     if (itf == null) {
                         req.addAttribute(new Attribute("specification", m_specification));
                     } else if (! m_specification.equals(itf)) {
-                        System.err.println("The required specification is not the same than previouly : " + m_specification + " & " + itf);
+                        System.err.println("The required specification is not the same as previouly : " + m_specification + " & " + itf);
                         return;
                     }
                 }

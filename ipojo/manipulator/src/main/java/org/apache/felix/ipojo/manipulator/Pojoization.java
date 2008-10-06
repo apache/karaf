@@ -669,19 +669,19 @@ public class Pojoization {
             stream.close();
 
         } catch (MalformedURLException e) {
-            error("Malformed Metadata URL for " + path);
+            error("Malformed metadata URL for " + path);
             return null;
         } catch (IOException e) {
             error("Cannot open the file : " + path);
             return null;
         } catch (ParseException e) {
-            error("Parsing Error when parsing the XML file " + path + " : " + e.getMessage());
+            error("Parsing error when parsing the XML file " + path + " : " + e.getMessage());
             return null;
         } catch (SAXParseException e) {
             error("Error during metadata parsing at line " + e.getLineNumber() + " : " + e.getMessage());
             return null;
         } catch (SAXException e) {
-            error("Parsing Error when parsing (Sax Error) the XML file " + path + " : " + e.getMessage());
+            error("Parsing error when parsing (Sax Error) the XML file " + path + " : " + e.getMessage());
             return null;
         } catch (InstantiationException e) {
             error("Cannot instantiate the SAX parser for the XML file " + path + " : " + e.getMessage());
@@ -690,7 +690,7 @@ public class Pojoization {
             error("Cannot instantiate  the SAX parser (IllegalAccess) for the XML file " + path + " : " + e.getMessage());
             return null;
         } catch (ClassNotFoundException e) {
-            error("Cannot load the Sax Parser : " + e.getMessage());
+            error("Cannot load the SAX Parser : " + e.getMessage());
             return null;
         }
 

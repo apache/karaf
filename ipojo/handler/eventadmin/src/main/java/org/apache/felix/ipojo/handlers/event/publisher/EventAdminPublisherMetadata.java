@@ -98,13 +98,10 @@ class EventAdminPublisherMetadata {
     private final String m_dataKey;
 
     /**
-     * Construct a publisher from its metadata description.
+     * Constructs a publisher from its metadata description.
      * 
-     * @param publisher :
-     *            publisher metadata description.
-     * @throws ConfigurationException
-     *             if the configuration of the component or the instance is
-     *             invalid.
+     * @param publisher the publisher metadata description.
+     * @throws ConfigurationException if the configuration of the component or the instance is invalid.
      */
     public EventAdminPublisherMetadata(Element publisher)
         throws ConfigurationException {
@@ -174,13 +171,10 @@ class EventAdminPublisherMetadata {
     }
 
     /**
-     * Set the topics attribute of the publisher.
+     * Sets the topics attribute of the publisher.
      * 
-     * @param topicsString
-     *            the comma separated list of the topics on which events are
-     *            sent
-     * @throws ConfigurationException
-     *             the specified topic string is malformed
+     * @param topicsString the comma separated list of the topics on which events are sent
+     * @throws ConfigurationException the specified topic string is malformed
      */
     public void setTopics(String topicsString)
         throws ConfigurationException {
@@ -199,10 +193,9 @@ class EventAdminPublisherMetadata {
     }
 
     /**
-     * Check that the required instance configurable attributes are all set.
+     * Checks that the required instance configurable attributes are all set.
      * 
-     * @throws ConfigurationException
-     *             if a required attribute is missing
+     * @throws ConfigurationException if a required attribute is missing
      */
     public void check()
         throws ConfigurationException {
@@ -214,7 +207,7 @@ class EventAdminPublisherMetadata {
     }
 
     /**
-     * Get the name attribute of the publisher.
+     * Gets the name attribute of the publisher.
      * 
      * @return the name
      */
@@ -223,7 +216,7 @@ class EventAdminPublisherMetadata {
     }
 
     /**
-     * Get the field attribute of the publisher.
+     * Gets the field attribute of the publisher.
      * 
      * @return the field
      */
@@ -232,7 +225,7 @@ class EventAdminPublisherMetadata {
     }
 
     /**
-     * Get the topics attribute of the publisher.
+     * Gets the topics attribute of the publisher.
      * 
      * @return the topics
      */
@@ -241,18 +234,18 @@ class EventAdminPublisherMetadata {
     }
 
     /**
-     * Get the synchronous attribute of the publisher.
+     * Gets the synchronous attribute of the publisher.
      * 
-     * @return the synchronous
+     * @return the synchronous mode
      */
     public boolean isSynchronous() {
         return m_synchronous;
     }
 
     /**
-     * Get the dataKey attribute of the publisher.
+     * Gets the dataKey attribute of the publisher.
      * 
-     * @return the dataKey
+     * @return the data key
      */
     public String getDataKey() {
         return m_dataKey;

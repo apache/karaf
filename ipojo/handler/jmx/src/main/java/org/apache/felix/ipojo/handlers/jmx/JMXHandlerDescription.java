@@ -35,10 +35,9 @@ public class JMXHandlerDescription extends HandlerDescription {
     private MBeanHandler m_handler;
 
     /**
-     * Construct a new handler description for the given handler.
+     * Constructs a new handler description for the given handler.
      * 
-     * @param handler
-     *            the handler to describe
+     * @param handler the handler to describe
      */
     public JMXHandlerDescription(MBeanHandler handler) {
         super(handler);
@@ -46,7 +45,7 @@ public class JMXHandlerDescription extends HandlerDescription {
     }
 
     /**
-     * Get handler information.
+     * Gets handler information.
      * 
      * @return the handler information.
      */

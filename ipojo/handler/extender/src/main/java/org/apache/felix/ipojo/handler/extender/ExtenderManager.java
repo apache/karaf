@@ -60,10 +60,10 @@ public class ExtenderManager extends BundleTracker {
     
     /**
      * Constructor.
-     * @param handler : attached handler.
-     * @param extension : looked extension.
-     * @param bind : onArrival method
-     * @param unbind : onDeparture method.
+     * @param handler the attached handler.
+     * @param extension the looked extension.
+     * @param bind the onArrival method
+     * @param unbind the onDeparture method.
      */
     public ExtenderManager(ExtenderModelHandler handler, String extension, String bind, String unbind) {
         super(handler.getInstanceManager().getContext());
@@ -77,7 +77,7 @@ public class ExtenderManager extends BundleTracker {
     /**
      * A bundle arrives.
      * Checks if the bundle match with the looked extension, if so call the arrival callback.
-     * @param bundle : arriving bundle.
+     * @param bundle the arriving bundle.
      * @see org.apache.felix.ipojo.handler.extender.BundleTracker#addedBundle(org.osgi.framework.Bundle)
      */
     protected void addedBundle(Bundle bundle) {
@@ -105,7 +105,7 @@ public class ExtenderManager extends BundleTracker {
     /**
      * A bundle is stopping.
      * Check if the bundle was managed, if so call the remove departure callback.
-     * @param bundle : leaving bundle.
+     * @param bundle the leaving bundle.
      * @see org.apache.felix.ipojo.handler.extender.BundleTracker#removedBundle(org.osgi.framework.Bundle)
      */
     protected void removedBundle(Bundle bundle) {

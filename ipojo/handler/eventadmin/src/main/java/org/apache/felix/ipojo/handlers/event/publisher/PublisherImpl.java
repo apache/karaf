@@ -62,19 +62,14 @@ public class PublisherImpl implements Publisher {
     private final String m_instanceName;
 
     /**
-     * Construct an Publisher with given parameters.
+     * Constructs an Publisher with given parameters.
      * 
-     * @param handler
-     *            the handler that will manage this publisher
-     * @param topics
-     *            the topics on which events are sent
-     * @param synchronous
-     *            the sending mode of events
-     * @param dataKey
-     *            The key, in the content of the event, where user data are
+     * @param handler the handler that will manage this publisher
+     * @param topics the topics on which events are sent
+     * @param synchronous the sending mode of events
+     * @param dataKey The key, in the content of the event, where user data are
      *            stored (may be {@code null})
-     * @param instanceName
-     *            the name of the instance creating this publisher.
+     * @param instanceName the name of the instance creating this publisher.
      */
     public PublisherImpl(EventAdminPublisherHandler handler, String[] topics,
             boolean synchronous, String dataKey, String instanceName) {
@@ -88,10 +83,9 @@ public class PublisherImpl implements Publisher {
     }
 
     /**
-     * Send an event with the specified content.
+     * Sends an event with the specified content.
      * 
-     * @param content
-     *            the content of the event
+     * @param content the content of the event
      */
     public void send(Dictionary content) {
         // Add instance information in the event
@@ -110,10 +104,9 @@ public class PublisherImpl implements Publisher {
     }
 
     /**
-     * Send a data event.
+     * Sends a data event.
      * 
-     * @param object
-     *            the data to send
+     * @param object the data to send
      */
     public void sendData(Object object) {
         // Construct the content of the event with the given object
