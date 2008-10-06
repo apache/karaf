@@ -20,6 +20,7 @@ package org.apache.felix.ipojo.manipulation;
 
 import java.util.Set;
 
+import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -64,6 +65,26 @@ public class ConstructorCodeAdapter extends GeneratorAdapter implements Opcodes 
         m_owner = owner;
         m_superDetected = false;
         m_fields = fields;
+    }
+    
+    /**
+     * Visits an annotation.
+     * If the annotation is visible, the annotation is removed. In fact
+     * the annotation was already moved to the method replacing this one.
+     * If the annotation is not visible, this annotation is kept on this method.
+     * @param name the name of the annotation
+     * @param visible the annotation visibility
+     * @return the <code>null</code> if the annotation is visible, otherwise returns
+     * {@link GeneratorAdapter#visitAnnotation(String, boolean)}
+     * @see org.objectweb.asm.MethodAdapter#visitAnnotation(java.lang.String, boolean)
+     */
+    public AnnotationVisitor visitAnnotation(String name, boolean visible) {
+        // Annotations are moved to the injected constructor.
+        if (visible) {
+            return null;
+        } else {
+            return super.visitAnnotation(name, visible);
+        }
     }
 
 

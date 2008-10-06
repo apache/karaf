@@ -18,6 +18,10 @@
  */
 package org.apache.felix.ipojo.manipulation;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.felix.ipojo.manipulation.ClassChecker.AnnotationDescriptor;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 import org.objectweb.asm.Type;
@@ -42,6 +46,18 @@ public class MethodDescriptor {
      * Argument types.
      */
     private String[] m_arguments;
+    
+    /**
+     * The descriptor of the method.
+     */
+    private String m_desc;
+    
+    
+    /**
+     * The list of {@link AnnotationDescriptor} attached to this
+     * method. 
+     */
+    private List m_annotations;
 
     /**
      * Constructor.
@@ -50,6 +66,7 @@ public class MethodDescriptor {
      */
     public MethodDescriptor(String name, String desc) {
         m_name = name;
+        m_desc = desc;
         Type ret = Type.getReturnType(desc);
         Type[] args = Type.getArgumentTypes(desc);
 
@@ -58,6 +75,25 @@ public class MethodDescriptor {
         for (int i = 0; i < args.length; i++) {
             m_arguments[i] = getType(args[i]);
         }
+    }
+    
+    /**
+     * Add an annotation to the current method.
+     * @param ann annotation to add
+     */
+    public void addAnnotation(AnnotationDescriptor ann) {
+        if (m_annotations == null) {
+            m_annotations = new ArrayList();
+        }
+        m_annotations.add(ann);
+    }
+    
+    public List getAnnotations() {
+        return m_annotations;
+    }
+    
+    public String getDescriptor() {
+        return m_desc;
     }
 
     /**

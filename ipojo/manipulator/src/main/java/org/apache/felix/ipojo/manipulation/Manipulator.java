@@ -96,7 +96,7 @@ public class Manipulator {
             ClassReader cr0 = new ClassReader(is2);
             ClassWriter cw0 = new ClassWriter(ClassWriter.COMPUTE_MAXS);
             //CheckClassAdapter ch = new CheckClassAdapter(cw0);
-            MethodCreator preprocess = new MethodCreator(cw0, m_fields);
+            MethodCreator preprocess = new MethodCreator(cw0, m_fields, m_methods);
             cr0.accept(preprocess, ClassReader.SKIP_FRAMES);
             is2.close();
             finalWriter = cw0;

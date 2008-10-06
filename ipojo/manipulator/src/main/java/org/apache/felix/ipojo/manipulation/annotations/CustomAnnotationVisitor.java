@@ -31,6 +31,8 @@ import org.objectweb.asm.commons.EmptyVisitor;
  */
 public class CustomAnnotationVisitor extends EmptyVisitor implements AnnotationVisitor {
 
+    //TODO manage enum annotations.
+    
     /**
      * PArent element.
      */
@@ -96,7 +98,7 @@ public class CustomAnnotationVisitor extends EmptyVisitor implements AnnotationV
     }
 
     /**
-     * Visit an 'simple' annotation attribute.
+     * Visit a 'simple' annotation attribute.
      * This method is used for primitive arrays too. 
      * @param arg0 : attribute name
      * @param arg1 : attribute value

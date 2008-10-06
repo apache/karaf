@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.felix.ipojo.manipulation.ClassChecker.AnnotationDescriptor;
 import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
@@ -112,19 +113,28 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
      * This set contains field name generate from method id.
      */
     private List m_methodFlags = new ArrayList(); 
+    
+    /**
+     * The list of methods visited during the previous analysis.
+     * This list allows getting annotations to move to generated
+     * method.
+     */
+    private List m_visitedMethods = new ArrayList();
 
     /**
      * Constructor.
      * @param arg0 : class visitor.
      * @param fields : fields map detected during the previous class analysis.
+     * @param methods : the list of the detected method during the previous class analysis.
      */
-    public MethodCreator(ClassVisitor arg0, Map fields) {
+    public MethodCreator(ClassVisitor arg0, Map fields, List methods) {
         super(arg0);
         m_fields = fields.keySet();
+        m_visitedMethods = methods;
     }
 
     /**
-     * Vist method.
+     * Visit method.
      * This method store the current class name.
      * Moreover the POJO interface is added to the list of implemented interface.
      * Then the Instance manager field is added.
@@ -161,16 +171,16 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
         if (name.equals("<clinit>") || name.equals("class$")) { return super.visitMethod(access, name, desc, signature, exceptions); }
         // The constructor is manipulated separately
         if (name.equals("<init>")) {
-            
+            MethodDescriptor md = getMethodDescriptor("$init", desc);
             // 1) change the constructor descriptor (add a component manager arg as first argument)
             String newDesc = desc.substring(1);
             newDesc = "(Lorg/apache/felix/ipojo/InstanceManager;" + newDesc;
 
             Type[] args = Type.getArgumentTypes(desc);
             if (args.length == 0) {
-                generateEmptyConstructor(access, signature, exceptions);
+                generateEmptyConstructor(access, signature, exceptions, md.getAnnotations());
             } else if (args.length == 1 && args[0].getClassName().equals("org.osgi.framework.BundleContext")) {
-                generateBCConstructor(access, signature, exceptions);
+                generateBCConstructor(access, signature, exceptions, md.getAnnotations());
             } else {
                 // Do nothing, the constructor does not match.
                 return cv.visitMethod(access, name, desc, signature, exceptions);
@@ -188,9 +198,8 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
 
         if ((access & ACC_STATIC) == ACC_STATIC) { return super.visitMethod(access, name, desc, signature, exceptions); }
 
-        
-        generateMethodHeader(access, name, desc, signature, exceptions);
-        
+        MethodDescriptor md = getMethodDescriptor(name, desc);
+        generateMethodHeader(access, name, desc, signature, exceptions, md.getAnnotations());
         
         String id = generateMethodFlag(name, desc);
         if (! m_methodFlags.contains(id)) {
@@ -201,6 +210,24 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
 
         MethodVisitor mv = super.visitMethod(ACC_PRIVATE, PREFIX + name, desc, signature, exceptions);
         return new MethodCodeAdapter(mv, m_owner, ACC_PRIVATE, PREFIX + name, desc, m_fields);
+    }
+    
+    /**
+     * Gets the method descriptor for the specified name and descriptor.
+     * The method descriptor is looked inside the 
+     * {@link MethodCreator#m_visitedMethods}
+     * @param name the name of the method
+     * @param desc the descriptor of the method
+     * @return the method descriptor or <code>null</code> if not found.
+     */
+    private MethodDescriptor getMethodDescriptor(String name, String desc) {
+        for (int i = 0; i < m_visitedMethods.size(); i++) {
+            MethodDescriptor md = (MethodDescriptor) m_visitedMethods.get(i);
+            if (md.getName().equals(name) && md.getDescriptor().equals(desc)) {
+                return md;
+            }
+        }
+        return null;
     }
     
     /**
@@ -252,14 +279,26 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
      * @param access : access flag
      * @param signature : method signature
      * @param exceptions : declared exception
+     * @param annotations : the annotations to move to this constructor.
      */
-    private void generateEmptyConstructor(int access, String signature, String[] exceptions) {
+    private void generateEmptyConstructor(int access, String signature, String[] exceptions, List annotations) {
         MethodVisitor mv = cv.visitMethod(access, "<init>", "()V", signature, exceptions);
         mv.visitCode();
         mv.visitVarInsn(ALOAD, 0);
         mv.visitInsn(ACONST_NULL);
         mv.visitMethodInsn(INVOKESPECIAL, m_owner, "<init>", "(Lorg/apache/felix/ipojo/InstanceManager;)V");
         mv.visitInsn(RETURN);
+   
+        // Move annotations
+        if (annotations != null) {
+            for (int i = 0; i < annotations.size(); i++) {
+                AnnotationDescriptor ad = (AnnotationDescriptor) annotations.get(i);
+                ad.visit(mv);
+                System.out.println("Inject annotation : " + ad);
+            }
+        }
+        
+        
         mv.visitMaxs(0, 0);
         mv.visitEnd();
     }
@@ -271,8 +310,9 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
      * @param access : access flag
      * @param signature : method signature
      * @param exceptions : declared exception
+     * @param annotations : the annotations to move to this constructor.
      */
-    private void generateBCConstructor(int access, String signature, String[] exceptions) {
+    private void generateBCConstructor(int access, String signature, String[] exceptions, List annotations) {
         MethodVisitor mv = cv.visitMethod(access, "<init>", "(Lorg/osgi/framework/BundleContext;)V", signature, exceptions);
         mv.visitCode();
         Label l0 = new Label();
@@ -282,6 +322,15 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
         mv.visitVarInsn(ALOAD, 1);
         mv.visitMethodInsn(INVOKESPECIAL, m_owner, "<init>", "(Lorg/apache/felix/ipojo/InstanceManager;Lorg/osgi/framework/BundleContext;)V");
         mv.visitInsn(RETURN);
+        
+        // Move annotations
+        if (annotations != null) {
+            for (int i = 0; i < annotations.size(); i++) {
+                AnnotationDescriptor ad = (AnnotationDescriptor) annotations.get(i);
+                ad.visit(mv);
+            }
+        }
+        
         mv.visitMaxs(0, 0);
         mv.visitEnd();
     }
@@ -295,8 +344,9 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
      * @param desc : method descriptor.
      * @param signature : method signature.
      * @param exceptions : declared exceptions.
+     * @param annotations : the annotations to move to this method.
      */
-    private void generateMethodHeader(int access, String name, String desc, String signature, String[] exceptions) {
+    private void generateMethodHeader(int access, String name, String desc, String signature, String[] exceptions, List annotations) {
         GeneratorAdapter mv = new GeneratorAdapter(cv.visitMethod(access, name, desc, signature, exceptions), access, name, desc); 
         
         mv.visitCode();
@@ -385,6 +435,15 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
             mv.visitVarInsn(returnType.getOpcode(ILOAD), result);
         }
         mv.visitInsn(returnType.getOpcode(IRETURN));
+        
+        // Move annotations
+        if (annotations != null) {
+            for (int i = 0; i < annotations.size(); i++) {
+                AnnotationDescriptor ad = (AnnotationDescriptor) annotations.get(i);
+                ad.visit(mv);
+                System.out.println("Inject annotation : " + ad);
+            }
+        }
 
         mv.visitMaxs(0, 0);
         mv.visitEnd();

@@ -52,8 +52,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 
-import com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaValidator;
-
 /**
  * Pojoization allows creating an iPOJO bundle from a "normal" bundle.  
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>

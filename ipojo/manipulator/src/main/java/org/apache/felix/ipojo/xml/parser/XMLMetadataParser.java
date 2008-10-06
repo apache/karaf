@@ -246,6 +246,14 @@ public class XMLMetadataParser implements ContentHandler, ErrorHandler {
     }
 
 
+    /**
+     * An error occurs during the XML-Schema checking.
+     * This method propagates the error except if the error concerns
+     * no XML-Schemas are used   (<code>cvc-elt.1</code>).
+     * @param saxparseexception the checking error
+     * @throws SAXException the propagated exception
+     * @see org.xml.sax.ErrorHandler#error(org.xml.sax.SAXParseException)
+     */
     public void error(SAXParseException saxparseexception) throws SAXException {
         if (saxparseexception.getMessage().contains("cvc-elt.1")) {
             return; // Do not throw an exception when no schema defined.
@@ -254,13 +262,27 @@ public class XMLMetadataParser implements ContentHandler, ErrorHandler {
     }
 
 
+    /**
+     * A fatal error occurs during the XML-Schema checking.
+     * This method always propagates the error.
+     * @param saxparseexception the checking error
+     * @throws SAXException the propagated exception
+     * @see org.xml.sax.ErrorHandler#fatalError(SAXParseException)
+     */
     public void fatalError(SAXParseException saxparseexception)
             throws SAXException {
         System.err.println("Fatal error during XML-Schema parsing : " + saxparseexception);
         throw saxparseexception;
     }
 
-
+    /**
+     * A warning was detected during the XML-Schema checking.
+     * This method always propagate the warning message to
+     * {@link System#out}.
+     * @param saxparseexception the checking error
+     * @throws SAXException nothing.
+     * @see org.xml.sax.ErrorHandler#warning(SAXParseException)
+     */
     public void warning(SAXParseException saxparseexception)
             throws SAXException {
         System.err.println("Warning : an error was detected in the metadata file : " + saxparseexception);
