@@ -27,15 +27,9 @@ public class ManipulationTestSuite {
 
 	public static Test suite(BundleContext bc) {
 		OSGiTestSuite ots = new OSGiTestSuite("Manipulation Test Suite", bc);
-		ots.addTestSuite(ManipulationMetadata.class);
-		ots.addTestSuite(PrimitiveTypeTest.class);
-		ots.addTestSuite(PrimitiveTypeTest2.class);
 		ots.addTestSuite(GetComponentInstanceTest.class);
-        ots.addTestSuite(ManipulationMetadataAPI.class);
         ots.addTestSuite(ExceptionTest.class);
-        ots.addTestSuite(POJOCreation.class);
         ots.addTestSuite(NestedClassesTests.class);
-        ots.addTestSuite(DuplicateMethod.class);
 		return ots;
 	}
 

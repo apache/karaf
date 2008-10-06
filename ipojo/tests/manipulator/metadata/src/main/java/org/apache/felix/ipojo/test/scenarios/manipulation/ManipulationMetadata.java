@@ -42,12 +42,12 @@ public class ManipulationMetadata extends OSGiTestCase {
 		
 		assertNotNull("Check elem not null", elem);
 		
-		Element manip = getManipulationForComponent(elem, "Manipulation-FooProviderType-1");
+		Element manip = getManipulationForComponent(elem, "ManipulationMetadata-FooProviderType-1");
 		assertNotNull("Check manipulation metadata not null for " + "FooProviderType-1", manip);
 	}
 	
 	public void testInterface() {
-		String comp_name = "Manipulation-FooProviderType-1";
+		String comp_name = "ManipulationMetadata-FooProviderType-1";
 		Element manip = getManipulationForComponent(comp_name);
 		Element[] itf = manip.getElements("Interface");
 		assertEquals("Check interfaces number", itf.length, 1);
@@ -55,7 +55,7 @@ public class ManipulationMetadata extends OSGiTestCase {
 	}
 	
 	public void testInterfaces() {
-		String comp_name = "Manipulation-FooBarProviderType-1";
+		String comp_name = "ManipulationMetadata-FooBarProviderType-1";
 		Element manip = getManipulationForComponent(comp_name);
 		Element[] itf = manip.getElements("Interface");
 		assertEquals("Check interfaces number", itf.length, 2);
@@ -64,7 +64,7 @@ public class ManipulationMetadata extends OSGiTestCase {
 	}
 	
 	public void testFields() {
-		String comp_name = "Manipulation-FooProviderType-Dyn";
+		String comp_name = "ManipulationMetadata-FooProviderType-Dyn";
 		Element manip = getManipulationForComponent(comp_name);
 		Element[] fields = manip.getElements("field");
 		assertEquals("Check field count " + fields.length, fields.length, 5);
@@ -100,7 +100,7 @@ public class ManipulationMetadata extends OSGiTestCase {
 	}
 	
 	public void testPrimitivesFields() {
-		String comp_name = "Manipulation-PrimitiveManipulationTester";
+		String comp_name = "ManipulationMetadata-PrimitiveManipulationTester";
 		Element manip = getManipulationForComponent(comp_name);
 		Element[] fields = manip.getElements("Field");
 		assertEquals("Check field count", fields.length, 16);
@@ -160,7 +160,7 @@ public class ManipulationMetadata extends OSGiTestCase {
 	}
 	
 	public void testNoArgMethod() {
-		String comp_name = "Manipulation-SimpleMultipleCheckServiceProvider";
+		String comp_name = "ManipulationMetadata-SimpleMultipleCheckServiceProvider";
 		Element manip = getManipulationForComponent(comp_name);
 		Element method = getMethodFromName(manip, "check");
 		assertFalse("Check no args", method.containsAttribute("arguments"));
@@ -168,7 +168,7 @@ public class ManipulationMetadata extends OSGiTestCase {
 	}
 	
 	public void testOneArgsMethod() {
-		String comp_name = "Manipulation-SimpleMultipleCheckServiceProvider";
+		String comp_name = "ManipulationMetadata-SimpleMultipleCheckServiceProvider";
 		Element manip = getManipulationForComponent(comp_name);
 		Element method = getMethodFromName(manip, "refBind");
 		assertEquals("Check args", method.getAttribute("arguments"), "{org.osgi.framework.ServiceReference}");
@@ -177,7 +177,7 @@ public class ManipulationMetadata extends OSGiTestCase {
 	}
 	
 	public void testTwoArgsMethod() {
-		String comp_name = "Manipulation-SimpleMultipleCheckServiceProvider";
+		String comp_name = "ManipulationMetadata-SimpleMultipleCheckServiceProvider";
 		Element manip = getManipulationForComponent(comp_name);
 		Element method = getMethodFromName(manip, "doNothing");
 		assertEquals("Check args", method.getAttribute("arguments"), "{java.lang.Object,java.lang.String}");

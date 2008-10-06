@@ -1,0 +1,60 @@
+<ipojo
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/schemas/core.xsd"
+    xmlns="org.apache.felix.ipojo"
+>
+	<!-- Simple provider  used for manipulation analysis -->
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		name="ManipulationCreation-FooProviderType-1" architecture="true">
+		<provides />
+	</component>
+	
+	<!-- Non lazzy service provider, to check instantiation -->
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		name="ManipulationCreation-ImmediateFooProviderType" immediate="true"
+		architecture="true">
+		<provides />
+	</component>
+	
+	<!-- Type checking different creation policy -->
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		name="ManipulationCreation-FooProviderType-1-Sing" factory-method="singleton"
+		architecture="true">
+		<provides />
+	</component>
+	
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		name="ManipulationCreation-FooProviderType-1-Sev" factory-method="several"
+		architecture="true">
+		<provides />
+	</component>
+	
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		name="ManipulationCreation-FooProviderType-1-SingM" factory-method="singleton"
+		architecture="true">
+		<provides/>
+	</component>
+	
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		name="ManipulationCreation-FooProviderType-1-SevM" factory-method="several"
+		architecture="true">
+		<provides/>
+	</component>
+	
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		name="ManipulationCreation-ImmediateFooProviderTypeSingleton" immediate="true"
+		factory-method="singleton" architecture="true">
+		<provides />
+	</component>
+	
+	
+	<!-- Try calling super constructors -->
+	 <component classname="org.apache.felix.ipojo.test.scenarios.component.CallSuperConstructor" immediate="true"/>
+</ipojo>

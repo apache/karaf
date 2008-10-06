@@ -60,43 +60,43 @@ public class POJOCreation extends OSGiTestCase {
     private Architecture lazzyArchSevM;
 	
 	public void setUp() {
-		String factName = "Manipulation-FooProviderType-1";
+		String factName = "ManipulationCreation-FooProviderType-1";
 		String compName = "FooProvider-1";
 		Properties p = new Properties();
 		p.put("instance.name",compName);
 		ci_lazzy = Utils.getComponentInstance(context, factName ,p);
 		
-		String factName2 = "Manipulation-ImmediateFooProviderType";
+		String factName2 = "ManipulationCreation-ImmediateFooProviderType";
 		String compName2 = "FooProvider-2";
 		Properties p2 = new Properties();
 		p2.put("instance.name",compName2);
 		ci_immediate = Utils.getComponentInstance(context, factName2, p2);
 		
-		String factName3 = "Manipulation-ImmediateFooProviderTypeSingleton";
+		String factName3 = "ManipulationCreation-ImmediateFooProviderTypeSingleton";
         String compName3 = "FooProvider-3";
         Properties p3 = new Properties();
         p3.put("instance.name",compName3);
         ci_immediate_singleton = Utils.getComponentInstance(context, factName3, p3);
         
-        String factName4 = "Manipulation-FooProviderType-1-Sing";
+        String factName4 = "ManipulationCreation-FooProviderType-1-Sing";
         String compName4 = "FooProvider-1-Sing";
         Properties p4 = new Properties();
         p4.put("instance.name",compName4);
         ci_lazzy_sing = Utils.getComponentInstance(context, factName4 ,p4);
         
-        String factName5 = "Manipulation-FooProviderType-1-Sev";
+        String factName5 = "ManipulationCreation-FooProviderType-1-Sev";
         String compName5 = "FooProvider-1-Sev";
         Properties p5 = new Properties();
         p5.put("instance.name",compName5);
         ci_lazzy_sev = Utils.getComponentInstance(context, factName5 ,p5);
         
-        String factName6 = "Manipulation-FooProviderType-1-SingM";
+        String factName6 = "ManipulationCreation-FooProviderType-1-SingM";
         String compName6 = "FooProvider-1-SingM";
         Properties p6 = new Properties();
         p6.put("instance.name",compName6);
         ci_lazzy_singM = Utils.getComponentInstance(context, factName6 ,p6);
         
-        String factName7 = "Manipulation-FooProviderType-1-SevM";
+        String factName7 = "ManipulationCreation-FooProviderType-1-SevM";
         String compName7 = "FooProvider-1-SevM";
         Properties p7 = new Properties();
         p7.put("instance.name",compName7);

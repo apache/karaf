@@ -335,7 +335,7 @@ public class Utils {
                     // Interrupted
                 }
                 count++;
-                if (count == 10) {
+                if (count == 100) {
                     throw new RuntimeException("Timeout ... no services match with " + filter);
                 }
                 refs = getServiceReferences(context, itf, filter);

@@ -24,14 +24,16 @@ import org.apache.felix.ipojo.junit4osgi.OSGiTestSuite;
 import org.osgi.framework.BundleContext;
 
 public class ConfigurationTestSuite {
+    
+    public static long UPDATE_WAIT_TIME = 2000;
 
 	public static Test suite(BundleContext bc) {
 		OSGiTestSuite ots = new OSGiTestSuite("Configuration Admin Test Suite", bc);
-		ots.addTestSuite(ManagedServiceFactoryTestForServices.class);
+		  ots.addTestSuite(ManagedServiceFactoryTestForServices.class);
 	      ots.addTestSuite(ManagedServiceFactoryTestForImmediate.class);
 	      ots.addTestSuite(ManagedServiceTestForImmediate.class);
 	      ots.addTestSuite(ManagedServiceTestForService.class);
 		return ots;
 	}
-
+	
 }

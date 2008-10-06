@@ -97,7 +97,7 @@ public class ManagedServiceFactoryTestForServices extends OSGiTestCase {
         try {
             configuration.update(props);
             // Update the configuration ...
-            Thread.sleep(10);
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -114,7 +114,7 @@ public class ManagedServiceFactoryTestForServices extends OSGiTestCase {
         
         try {
             configuration.delete();
-            Thread.sleep(10);
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -144,7 +144,6 @@ public class ManagedServiceFactoryTestForServices extends OSGiTestCase {
         }
         
         String pid = configuration.getPid();
-        System.out.println("PID : " + pid);
         
         //  The instance should be created, wait for the architecture service
         Utils.waitForService(context, Architecture.class.getName(), "(architecture.instance="+pid+")");
@@ -156,7 +155,7 @@ public class ManagedServiceFactoryTestForServices extends OSGiTestCase {
         try {
             configuration.update(props);
             // Update the configuration ...
-            Thread.sleep(10);
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -178,7 +177,7 @@ public class ManagedServiceFactoryTestForServices extends OSGiTestCase {
                 
         try {
             configuration.delete();
-            Thread.sleep(10);
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -208,7 +207,6 @@ public class ManagedServiceFactoryTestForServices extends OSGiTestCase {
         }
         
         String pid = configuration.getPid();
-        System.out.println("PID : " + pid);
         
         assertNull("check no instance", Utils.getServiceObject(context, Architecture.class.getName(), "(architecture.instance="+pid+")"));
         
@@ -237,7 +235,7 @@ public class ManagedServiceFactoryTestForServices extends OSGiTestCase {
         try {
             configuration.update(props);
             // Update the configuration ...
-            Thread.sleep(10);
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -256,7 +254,7 @@ public class ManagedServiceFactoryTestForServices extends OSGiTestCase {
         
         try {
             configuration.delete();
-            Thread.sleep(10);
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -304,7 +302,7 @@ public class ManagedServiceFactoryTestForServices extends OSGiTestCase {
         try {
             configuration.update(props);
             // Update the configuration ...
-            Thread.sleep(10);
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -326,7 +324,7 @@ public class ManagedServiceFactoryTestForServices extends OSGiTestCase {
                 
         try {
             configuration.delete();
-            Thread.sleep(10);
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
         } catch (Exception e) {
             fail(e.getMessage());
         }

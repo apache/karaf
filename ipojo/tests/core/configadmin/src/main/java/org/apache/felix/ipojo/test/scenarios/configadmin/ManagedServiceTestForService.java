@@ -24,15 +24,19 @@ public class ManagedServiceTestForService extends OSGiTestCase {
     
     private ConfigurationAdmin admin;
     
+    ConfigurationMonitor listener;
+    
     
     public void setUp() {
         factSvc = (ComponentFactory) Utils.getFactoryByName(context, factNameSvc);
         admin = (ConfigurationAdmin) Utils.getServiceObject(context, ConfigurationAdmin.class.getName(), null);
         assertNotNull("Check configuration admin availability", admin);
         cleanConfigurationAdmin();
+        listener = new ConfigurationMonitor(context);
     }
     
     public void tearDown() {
+        listener.stop();
         cleanConfigurationAdmin();
         admin = null;
     }
@@ -85,7 +89,7 @@ public class ManagedServiceTestForService extends OSGiTestCase {
             }
             prc.put("message", "message2");
             configuration.update(prc);
-            Thread.sleep(5);
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -117,7 +121,7 @@ public class ManagedServiceTestForService extends OSGiTestCase {
             props.put("managed.service.pid", msp);
             props.put("message", "message");
             conf.update(props);
-            Thread.sleep(100); // Wait for the creation.
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME); // Wait for the creation.
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -148,7 +152,7 @@ public class ManagedServiceTestForService extends OSGiTestCase {
             }
             prc.put("message", "message2");
             configuration.update(prc);
-            Thread.sleep(5);
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -188,7 +192,7 @@ public class ManagedServiceTestForService extends OSGiTestCase {
             }
             prc.put("message", "message2");
             configuration.update(prc);
-            Thread.sleep(5);
+            listener.waitForEvent(msp, "1");
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -199,6 +203,7 @@ public class ManagedServiceTestForService extends OSGiTestCase {
         ComponentInstance instance  = null;
         try {
             instance =  factSvc.createComponentInstance(props);
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
         } catch (Exception e) {
            fail(e.getMessage());
         }
@@ -226,7 +231,7 @@ public class ManagedServiceTestForService extends OSGiTestCase {
             }
             prc.put("message", "message3");
             configuration.update(prc);
-            Thread.sleep(5);
+            listener.waitForEvent(msp, "2");
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -238,6 +243,7 @@ public class ManagedServiceTestForService extends OSGiTestCase {
         instance  = null;
         try {
             instance =  factSvc.createComponentInstance(props);
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
         } catch (Exception e) {
            fail(e.getMessage());
         }
@@ -272,7 +278,7 @@ public class ManagedServiceTestForService extends OSGiTestCase {
             }
             prc.put("message", "message2");
             configuration.update(prc);
-            Thread.sleep(5);
+            listener.waitForEvent(msp, "1");
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -283,6 +289,7 @@ public class ManagedServiceTestForService extends OSGiTestCase {
         ComponentInstance instance  = null;
         try {
             instance =  factSvc.createComponentInstance(props);
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
         } catch (Exception e) {
            fail(e.getMessage());
         }
@@ -308,7 +315,7 @@ public class ManagedServiceTestForService extends OSGiTestCase {
             }
             prc.put("message", "message3");
             configuration.update(prc);
-            Thread.sleep(5);
+            listener.waitForEvent(msp, "2");
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -322,6 +329,7 @@ public class ManagedServiceTestForService extends OSGiTestCase {
         instance  = null;
         try {
             instance =  factSvc.createComponentInstance(props);
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
         } catch (Exception e) {
            fail(e.getMessage());
         }

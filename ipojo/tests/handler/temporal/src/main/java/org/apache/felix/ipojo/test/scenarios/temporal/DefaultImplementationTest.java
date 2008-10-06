@@ -201,14 +201,16 @@ public class DefaultImplementationTest extends OSGiTestCase {
        ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
        assertNotNull("Check cs availability - 2", ref_cs);
        long begin = System.currentTimeMillis();
-       DelayedProvider dp = new DelayedProvider(provider1, 250);
+       DelayedProvider dp = new DelayedProvider(provider1, 1500);
        DelayedProvider dp2 = new DelayedProvider(provider2, 100);
        dp.start();
        dp2.start();
        cs = (CheckService) context.getService(ref_cs);
        assertTrue("Check invocation - 2", cs.check());
        long end = System.currentTimeMillis();
-       assertTrue("Assert delay", (end - begin) >= 100  && (end - begin) <= 250);
+       System.out.println("delay = " + (end - begin));
+       assertTrue("Assert min delay", (end - begin) >= 100);
+       assertTrue("Assert max delay", (end - begin) <= 1000);
        dp.stop();
        dp2.stop();
        

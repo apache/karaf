@@ -1,0 +1,48 @@
+<ipojo
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/schemas/core.xsd"
+    xmlns="org.apache.felix.ipojo"
+>
+	<!-- Simple provider  used for manipulation analysis -->
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		name="ManipulationMetadata-FooProviderType-1" architecture="true">
+		<provides />
+	</component>
+	
+	<!-- Provider providing 2 services -->
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
+		name="ManipulationMetadata-FooBarProviderType-1" architecture="true">
+		<provides />
+	</component>
+	
+	<!-- Provider with dynamic property -->
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn"
+		name="ManipulationMetadata-FooProviderType-Dyn" architecture="true">
+		<provides>
+			<property name="int" field="intProp" value="2" />
+			<property name="boolean" field="boolProp" value="false" />
+			<property name="string" field="strProp" value="foo" />
+			<property name="strAProp" field="strAProp"
+				value="[foo, bar]" />
+			<property name="intAProp" field="intAProp" value="[ 1,2,3]" />
+		</provides>
+	</component>
+	
+	<!-- Manipulation -->
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.Manipulation23Tester"
+		name="ManipulationMetadata-PrimitiveManipulationTester" architecture="true">
+		<provides />
+	</component>
+
+	
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+		name="ManipulationMetadata-SimpleMultipleCheckServiceProvider" architecture="true">
+		<requires field="fs" />
+		<provides />
+	</component>
+</ipojo>

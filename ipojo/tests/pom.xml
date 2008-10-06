@@ -26,6 +26,9 @@
   
   <modules>
     <module>manipulator/manipulation</module>
+    <module>manipulator/metadata</module>
+    <module>manipulator/primitives</module>
+    <module>manipulator/creation</module>
 	<module>core/factories</module>
 	<module>core/lifecycle-controller</module>
 	<module>core/service-providing</module>
@@ -54,6 +57,7 @@
 		</activation>
 		<modules>
 			<module>core/annotations</module>
+			<module>manipulator/manipulator-java5</module>
 		</modules>
 	</profile>
 	<profile>
@@ -63,6 +67,7 @@
 		</activation>
 		<modules>
 			<module>core/annotations</module>
+			<module>manipulator/manipulator-java5</module>
 		</modules>
 	</profile>
   </profiles>

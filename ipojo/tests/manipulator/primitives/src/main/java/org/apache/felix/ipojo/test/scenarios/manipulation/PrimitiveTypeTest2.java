@@ -41,7 +41,7 @@ public class PrimitiveTypeTest2 extends OSGiTestCase {
     public void setUp() {
         Properties p1 = new Properties();
         p1.put("instance.name","primitives");
-        instance = Utils.getComponentInstance(context, "Manipulation-PrimitiveManipulationTesterA", p1);
+        instance = Utils.getComponentInstance(context, "ManipulationPrimitives-PrimitiveManipulationTesterA", p1);
         assertTrue("check instance state", instance.getState() == ComponentInstance.VALID);
         prim_ref = Utils.getServiceReferenceByName(context, PrimitiveManipulationTestService.class.getName(), instance.getInstanceName());
         assertNotNull("Check prim availability", prim_ref);
@@ -85,20 +85,7 @@ public class PrimitiveTypeTest2 extends OSGiTestCase {
         assertEquals("Check - 2", prim.getLong(), 2);
     }
 
-    //TODO : how to tests these two Java 5 methods ...
-//    public void testLongFromObject() {
-//        assertEquals("Check - 1", prim.getLong(), 1);
-//        Long l = new Long(2);
-//        prim.setLong(l);
-//        assertEquals("Check - 2", prim.getLong(), 2);
-//    }
-//
-//    public void testLongFromObject2() {
-//        assertEquals("Check - 1", prim.getLong(), 1);
-//        Long l = new Long(2);
-//        prim.setLong(l, "ss");
-//        assertEquals("Check - 2", prim.getLong(), 2);
-//    }
+
 
     public void testFloat() {
         assertEquals("Check - 1", prim.getFloat(), 1.1f);

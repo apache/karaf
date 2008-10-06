@@ -34,19 +34,19 @@ public class ManipulationMetadataAPI extends OSGiTestCase {
     PojoMetadata FooProviderType1, FooBarProviderType1, FooProviderTypeDyn, PrimitiveManipulationTester, SimpleMultipleCheckServiceProvider;
 
 	public void setUp() {
-        String comp_name = "Manipulation-FooProviderType-1";
+        String comp_name = "ManipulationMetadata-FooProviderType-1";
         FooProviderType1 = getManipulationMetadataForComponent(comp_name);
         
-        comp_name = "Manipulation-FooBarProviderType-1";
+        comp_name = "ManipulationMetadata-FooBarProviderType-1";
         FooBarProviderType1 = getManipulationMetadataForComponent(comp_name);
         
-        comp_name = "Manipulation-FooProviderType-Dyn";
+        comp_name = "ManipulationMetadata-FooProviderType-Dyn";
         FooProviderTypeDyn = getManipulationMetadataForComponent(comp_name);
-        
-        comp_name = "Manipulation-PrimitiveManipulationTester";
+
+        comp_name = "ManipulationMetadata-PrimitiveManipulationTester";
         PrimitiveManipulationTester = getManipulationMetadataForComponent(comp_name);
         
-        comp_name = "Manipulation-SimpleMultipleCheckServiceProvider";
+        comp_name = "ManipulationMetadata-SimpleMultipleCheckServiceProvider";
         SimpleMultipleCheckServiceProvider = getManipulationMetadataForComponent(comp_name);
 	}
 	
@@ -61,7 +61,7 @@ public class ManipulationMetadataAPI extends OSGiTestCase {
 		
 		assertNotNull("Check elem not null", elem);
 		
-		Element manip = getMetadataForComponent(elem, "Manipulation-FooProviderType-1");
+		Element manip = getMetadataForComponent(elem, "ManipulationMetadata-FooProviderType-1");
         assertNotNull("Check manipulation metadata not null for " + "Manipulation-FooProviderType-1", manip);
         PojoMetadata mm;
         try {

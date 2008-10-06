@@ -75,7 +75,6 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
         }
         
         String pid = configuration.getPid();
-        System.out.println("PID : " + pid);
         
         //  The instance should be created, wait for the architecture service
         Utils.waitForService(context, Architecture.class.getName(), "(architecture.instance="+pid+")");
@@ -97,7 +96,7 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
         try {
             configuration.update(props);
             // Update the configuration ...
-            Thread.sleep(10);
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -114,7 +113,7 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
         
         try {
             configuration.delete();
-            Thread.sleep(10);
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -156,7 +155,7 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
         try {
             configuration.update(props);
             // Update the configuration ...
-            Thread.sleep(10);
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -178,7 +177,7 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
                 
         try {
             configuration.delete();
-            Thread.sleep(10);
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -208,7 +207,6 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
         }
         
         String pid = configuration.getPid();
-        System.out.println("PID : " + pid);
         
         assertNull("check no instance", Utils.getServiceObject(context, Architecture.class.getName(), "(architecture.instance="+pid+")"));
         
@@ -235,7 +233,7 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
         try {
             configuration.update(props);
             // Update the configuration ...
-            Thread.sleep(10);
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -253,7 +251,7 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
         
         try {
             configuration.delete();
-            Thread.sleep(10);
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -284,7 +282,6 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
         }
         
         String pid = configuration.getPid();
-        System.out.println("PID : " + pid);
         
         assertNull("check no instance", Utils.getServiceObject(context, Architecture.class.getName(), "(architecture.instance="+pid+")"));
         
@@ -301,7 +298,7 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
         try {
             configuration.update(props);
             // Update the configuration ...
-            Thread.sleep(10);
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
         } catch (Exception e) {
             fail(e.getMessage());
         }
@@ -318,12 +315,12 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
         architecture = (Architecture) Utils.getServiceObject(context, Architecture.class.getName(), "(architecture.instance="+pid+")");
         
         assertEquals("Assert Message", "message2", mes);
-        //assertEquals("Assert count", 2, count);
+        assertEquals("Assert count", 2, count);
         assertEquals("Check 1 object", 1, architecture.getInstanceDescription().getCreatedObjects().length);
                 
         try {
             configuration.delete();
-            Thread.sleep(10);
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
         } catch (Exception e) {
             fail(e.getMessage());
         }

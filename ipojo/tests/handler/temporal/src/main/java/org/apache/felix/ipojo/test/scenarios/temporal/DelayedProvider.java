@@ -22,8 +22,10 @@ import org.apache.felix.ipojo.ComponentInstance;
 
 public class DelayedProvider implements Runnable {
     
+    
+    public static final long DELAY = 1000;
     ComponentInstance instance;
-    long delay = 400;
+    long delay = DELAY;
     Thread thread;
     
     public DelayedProvider(ComponentInstance ci) {
@@ -48,8 +50,14 @@ public class DelayedProvider implements Runnable {
 
     public void run() {
             System.out.println("Start sleeping for " + delay);
+            long begin = System.currentTimeMillis();
             try {
                 Thread.sleep(delay);
+                long end = System.currentTimeMillis();
+                if (end - begin < delay) {
+                	// Wait for the remaining time
+                	Thread.sleep(delay - (end - begin));
+                }
             } catch (InterruptedException e) {
                 System.out.println("Interrupted ...");
                 return;
