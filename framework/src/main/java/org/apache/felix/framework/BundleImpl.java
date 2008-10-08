@@ -29,9 +29,9 @@ class BundleImpl extends FelixBundle
 {
     private final long m_id;
     private Felix m_felix = null;
-    private BundleInfo m_info = null;
+    private RegularBundleInfo m_info = null;
 
-    protected BundleImpl(Felix felix, BundleInfo info)
+    protected BundleImpl(Felix felix, RegularBundleInfo info)
     {
         m_felix = felix;
         m_info = info;
@@ -46,7 +46,7 @@ class BundleImpl extends FelixBundle
     /*
      * Only used when refreshing a bundle.
     **/
-    /* package private */ void setInfo(BundleInfo info)
+    /* package private */ void setInfo(RegularBundleInfo info)
     {
         m_info = info;
     }

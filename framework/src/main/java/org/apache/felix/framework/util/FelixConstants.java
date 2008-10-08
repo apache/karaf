@@ -43,8 +43,9 @@ public interface FelixConstants extends org.osgi.framework.Constants
 
     // Miscellaneous framework configuration property names.
     public static final String LOG_LEVEL_PROP = "felix.log.level";
-    public static final String EMBEDDED_EXECUTION_PROP = "felix.embedded.execution";
-    public static final String STRICT_OSGI_PROP = "felix.strict.osgi";
+    public static final String LOG_LOGGER_PROP = "felix.log.logger";
+    public static final String SYSTEMBUNDLE_ACTIVATORS_PROP
+        = "felix.systembundle.activators";
     public static final String FRAMEWORK_STARTLEVEL_PROP
         = "felix.startlevel.framework";
     public static final String BUNDLE_STARTLEVEL_PROP

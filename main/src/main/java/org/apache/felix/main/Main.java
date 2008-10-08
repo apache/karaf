@@ -26,6 +26,7 @@ import java.util.*;
 import org.apache.felix.framework.Felix;
 import org.apache.felix.framework.cache.BundleCache;
 import org.apache.felix.framework.util.StringMap;
+import org.osgi.framework.SystemBundle;
 
 /**
  * <p>
@@ -181,6 +182,9 @@ public class Main
 
         // See if the profile directory property was specified.
         String profileDirName = configProps.getProperty(BundleCache.CACHE_PROFILE_DIR_PROP);
+        profileDirName = (profileDirName == null)
+            ? configProps.getProperty(SystemBundle.FRAMEWORK_STORAGE_PROP)
+            : profileDirName;
 
         // Print welcome banner.
         System.out.println("\nWelcome to Felix.");
@@ -231,9 +235,12 @@ public class Main
             list.add(new AutoActivator(configProps));
             // Create a case-insensitive property map.
             Map configMap = new StringMap(configProps, false);
+            configMap.put("felix.systembundle.activators", list);
             // Create an instance of the framework.
-            m_felix = new Felix(configMap, list);
+            m_felix = new Felix(configMap);
             m_felix.start();
+            m_felix.waitForStop(0);
+            System.exit(0);
         }
         catch (Exception ex)
         {

@@ -23,6 +23,7 @@ import java.util.*;
 
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.SecureAction;
+import org.osgi.framework.SystemBundle;
 
 /**
  * <p>
@@ -301,6 +302,9 @@ public class BundleCache
 
         // See if the profile directory is specified.
         String profileDirStr = (String) m_configMap.get(CACHE_PROFILE_DIR_PROP);
+        profileDirStr = (profileDirStr == null)
+            ? (String) m_configMap.get(SystemBundle.FRAMEWORK_STORAGE_PROP)
+            : profileDirStr;
         if (profileDirStr != null)
         {
             m_profileDir = new File(profileDirStr);

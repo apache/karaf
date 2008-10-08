@@ -20,8 +20,6 @@ package org.apache.felix.framework.util;
 
 import java.io.*;
 import java.lang.reflect.*;
-import java.net.JarURLConnection;
-import java.net.MalformedURLException;
 import java.net.*;
 import java.security.*;
 import java.util.Hashtable;
@@ -614,28 +612,6 @@ public class SecureAction
         }
     }
 
-    public void exit(int code)
-    {
-        if (System.getSecurityManager() != null)
-        {
-            try
-            {
-                Actions actions = (Actions) m_actions.get();
-                actions.set(Actions.SYSTEM_EXIT_ACTION, new Integer(code));
-                AccessController.doPrivileged(actions, m_acc);
-            }
-            catch (PrivilegedActionException ex)
-            {
-                // We don't need to rethrow anything since System.exit throws
-                // runtime exceptions only
-            }
-        }
-        else
-        {
-            System.exit(code);
-        }
-    }
-
     public Policy getPolicy()
     {
         if (System.getSecurityManager() != null)
@@ -657,22 +633,22 @@ public class SecureAction
         }
     }
 
-    public void addURLToURLClassLoader(URL extension, ClassLoader loader) throws Exception 
+    public void addURLToURLClassLoader(URL extension, ClassLoader loader) throws Exception
     {
-        if (System.getSecurityManager() != null) 
+        if (System.getSecurityManager() != null)
         {
             Actions actions = (Actions) m_actions.get();
             actions.set(Actions.ADD_EXTENSION_URL, extension, loader);
-            try 
+            try
             {
                 AccessController.doPrivileged(actions, m_acc);
-            } 
-            catch (PrivilegedActionException e) 
+            }
+            catch (PrivilegedActionException e)
             {
                 throw e.getException();
             }
         }
-        else 
+        else
         {
             Method addURL =
                 URLClassLoader.class.getDeclaredMethod("addURL",
@@ -681,7 +657,7 @@ public class SecureAction
             addURL.invoke(loader, new Object[]{extension});
         }
     }
-    
+
     public Constructor getConstructor(Class target, Class[] types) throws Exception
     {
         if (System.getSecurityManager() != null)
@@ -702,7 +678,7 @@ public class SecureAction
             return target.getConstructor(types);
         }
     }
-    
+
     public Method getMethod(Class target, String method, Class[] types) throws Exception
     {
         if (System.getSecurityManager() != null)
@@ -723,7 +699,7 @@ public class SecureAction
             return target.getMethod(method, types);
         }
     }
-    
+
     public Method getDeclaredMethod(Class target, String method, Class[] types) throws Exception
     {
         if (System.getSecurityManager() != null)
@@ -744,7 +720,7 @@ public class SecureAction
             return target.getDeclaredMethod(method, types);
         }
     }
-    
+
     public Object invoke(Method method, Object target, Object[] params) throws Exception
     {
         if (System.getSecurityManager() != null)
@@ -766,7 +742,7 @@ public class SecureAction
             return method.invoke(target, params);
         }
     }
-    
+
     public Object invoke(Constructor constructor, Object[] params) throws Exception
     {
         if (System.getSecurityManager() != null)
@@ -789,7 +765,7 @@ public class SecureAction
         }
     }
 
-    public Object getDeclaredField(Class targetClass, String name, Object target) 
+    public Object getDeclaredField(Class targetClass, String name, Object target)
         throws Exception
     {
         if (System.getSecurityManager() != null)
@@ -809,18 +785,18 @@ public class SecureAction
         {
             Field field = targetClass.getDeclaredField(name);
             field.setAccessible(true);
-            
+
             return field.get(target);
         }
     }
 
-    public Object swapStaticFieldIfNotClass(Class targetClazz, 
+    public Object swapStaticFieldIfNotClass(Class targetClazz,
         Class targetType, Class condition, String lockName) throws Exception
     {
         if (System.getSecurityManager() != null)
         {
             Actions actions = (Actions) m_actions.get();
-            actions.set(Actions.SWAP_FIELD_ACTION, targetClazz, targetType, 
+            actions.set(Actions.SWAP_FIELD_ACTION, targetClazz, targetType,
                 condition, lockName);
             try
             {
@@ -833,25 +809,25 @@ public class SecureAction
         }
         else
         {
-            return _swapStaticFieldIfNotClass(targetClazz, targetType, 
+            return _swapStaticFieldIfNotClass(targetClazz, targetType,
                 condition, lockName);
         }
     }
-    
-    private static Object _swapStaticFieldIfNotClass(Class targetClazz, 
+
+    private static Object _swapStaticFieldIfNotClass(Class targetClazz,
         Class targetType, Class condition, String lockName) throws Exception
     {
         Object lock = null;
         if (lockName != null)
         {
-            try 
+            try
             {
-                Field lockField = 
-                    targetClazz.getDeclaredField(lockName); 
+                Field lockField =
+                    targetClazz.getDeclaredField(lockName);
                 lockField.setAccessible(true);
                 lock = lockField.get(null);
-            } 
-            catch (NoSuchFieldException ex) 
+            }
+            catch (NoSuchFieldException ex)
             {
             }
         }
@@ -866,13 +842,13 @@ public class SecureAction
             Object result = null;
             for (int i = 0; (i < fields.length) && (result == null); i++)
             {
-                if (Modifier.isStatic(fields[i].getModifiers()) && 
+                if (Modifier.isStatic(fields[i].getModifiers()) &&
                     (fields[i].getType() == targetType))
                 {
                     fields[i].setAccessible(true);
-                    
+
                     result = fields[i].get(null);
-                    
+
                     if (result != null)
                     {
                         if ((condition == null) ||
@@ -890,7 +866,7 @@ public class SecureAction
                     // reset cache
                     for (int i = 0; i < fields.length; i++)
                     {
-                        if (Modifier.isStatic(fields[i].getModifiers()) && 
+                        if (Modifier.isStatic(fields[i].getModifiers()) &&
                             (fields[i].getType() == Hashtable.class))
                         {
                             fields[i].setAccessible(true);
@@ -907,7 +883,7 @@ public class SecureAction
         }
         return null;
     }
-    
+
     private static class Actions implements PrivilegedExceptionAction
     {
         public static final int GET_PROPERTY_ACTION = 0;
@@ -1114,7 +1090,7 @@ public class SecureAction
                 {
                     return ((JarURLConnection) m_arg1).getJarFile();
                 }
-                else if (m_action == ADD_EXTENSION_URL) 
+                else if (m_action == ADD_EXTENSION_URL)
                 {
                     Method addURL =
                         URLClassLoader.class.getDeclaredMethod("addURL",
@@ -1142,7 +1118,7 @@ public class SecureAction
                 }
                 else if (m_action == SWAP_FIELD_ACTION)
                 {
-                    return _swapStaticFieldIfNotClass((Class) m_arg1, 
+                    return _swapStaticFieldIfNotClass((Class) m_arg1,
                         (Class) m_arg2, (Class) m_arg3, (String) m_arg4);
                 }
                 else if (m_action == GET_FIELD_ACTION)
@@ -1155,7 +1131,7 @@ public class SecureAction
                 {
                     return ((Class) m_arg1).getDeclaredMethod((String) m_arg2, (Class[]) m_arg3);
                 }
-                
+
                 return null;
             }
             finally

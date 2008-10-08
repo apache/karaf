@@ -19,7 +19,7 @@
 package org.apache.felix.framework;
 
 import java.io.IOException;
-import java.net.InetAddress; 
+import java.net.InetAddress;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
@@ -57,39 +57,39 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
 /**
- * The ExtensionManager class is used in several ways. 
+ * The ExtensionManager class is used in several ways.
  * <p>
- * First, a private instance is added (as URL with the instance as 
- * URLStreamHandler) to the classloader that loaded the class. 
- * It is assumed that this is an instance of URLClassloader (if not extension 
- * bundles will not work). Subsequently, extension bundles can be managed by 
- * instances of this class (their will be one instance per framework instance). 
+ * First, a private instance is added (as URL with the instance as
+ * URLStreamHandler) to the classloader that loaded the class.
+ * It is assumed that this is an instance of URLClassloader (if not extension
+ * bundles will not work). Subsequently, extension bundles can be managed by
+ * instances of this class (their will be one instance per framework instance).
  * </p>
  * <p>
  * Second, it is used as module definition of the systembundle. Added extension
- * bundles with exported packages will contribute their exports to the 
+ * bundles with exported packages will contribute their exports to the
  * systembundle export.
  * </p>
  * <p>
- * Third, it is used as content loader of the systembundle. Added extension 
+ * Third, it is used as content loader of the systembundle. Added extension
  * bundles exports will be available via this loader.
  * </p>
  */
-// The general approach is to have one private static instance that we register 
+// The general approach is to have one private static instance that we register
 // with the parent classloader and one instance per framework instance that
 // keeps track of extension bundles and systembundle exports for that framework
 // instance.
 class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IContentLoader, IContent
 {
     // The private instance that is added to Felix.class.getClassLoader() -
-    // will be null if extension bundles are not supported (i.e., we are not 
+    // will be null if extension bundles are not supported (i.e., we are not
     // loaded by an instance of URLClassLoader)
     static final ExtensionManager m_extensionManager;
-    
+
     static
     {
-        // We use the secure action of Felix to add a new instance to the parent 
-        // classloader. 
+        // We use the secure action of Felix to add a new instance to the parent
+        // classloader.
         ExtensionManager extensionManager = new ExtensionManager();
         try
         {
@@ -98,16 +98,16 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
                 "felix://extensions/", extensionManager),
                 Felix.class.getClassLoader());
         }
-        catch (Exception ex) 
+        catch (Exception ex)
         {
-            // extension bundles will not be supported. 
+            // extension bundles will not be supported.
             extensionManager = null;
         }
         m_extensionManager = extensionManager;
     }
 
     private Logger m_logger = null;
-    private BundleInfo m_systemBundleInfo = null;
+    private BundleInfo m_sbi = null;
     private ICapability[] m_capabilities = null;
     private Set m_exportNames = null;
     private ISearchPolicy m_searchPolicy = null;
@@ -128,28 +128,28 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
 
     /**
      * This constructor is used to create one instance per framework instance.
-     * The general approach is to have one private static instance that we register 
+     * The general approach is to have one private static instance that we register
      * with the parent classloader and one instance per framework instance that
      * keeps track of extension bundles and systembundle exports for that framework
      * instance.
-     * 
+     *
      * @param logger the logger to use.
      * @param config the configuration to read properties from.
      * @param systemBundleInfo the info to change if we need to add exports.
      */
-    ExtensionManager(Logger logger, Map configMap, BundleInfo systemBundleInfo)
+    ExtensionManager(Logger logger, Map configMap, BundleInfo sbi)
     {
         m_extensions = null;
         m_names = null;
         m_sourceToExtensions = null;
         m_logger = logger;
-        m_systemBundleInfo = systemBundleInfo;
+        m_sbi = sbi;
 
 // TODO: FRAMEWORK - Not all of this stuff really belongs here, probably only exports.
         // Populate system bundle header map.
         // Note: This is a reference to the actual header map,
         // so these changes are saved. Kind of hacky.
-        Map map = ((SystemBundleArchive) m_systemBundleInfo.getArchive()).getManifestHeader(0);
+        Map map = m_sbi.getCurrentHeader();
         // Initialize header map as a case insensitive map.
         map.put(FelixConstants.BUNDLE_VERSION,
             configMap.get(FelixConstants.FELIX_VERSION_PROPERTY));
@@ -249,19 +249,19 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
 
     /**
      * Add an extension bundle. The bundle will be added to the parent classloader
-     * and it's exported packages will be added to the module definition 
-     * exports of this instance. Subsequently, they are available form the 
+     * and it's exported packages will be added to the module definition
+     * exports of this instance. Subsequently, they are available form the
      * instance in it's role as content loader.
-     * 
+     *
      * @param felix the framework instance the given extension bundle comes from.
      * @param bundle the extension bundle to add.
      * @throws BundleException if extension bundles are not supported or this is
      *          not a framework extension.
-     * @throws SecurityException if the caller does not have the needed 
+     * @throws SecurityException if the caller does not have the needed
      *          AdminPermission.EXTENSIONLIFECYCLE and security is enabled.
      * @throws Exception in case something goes wrong.
      */
-    void addExtensionBundle(Felix felix, FelixBundle bundle) 
+    void addExtensionBundle(Felix felix, FelixBundle bundle)
         throws SecurityException, BundleException, Exception
     {
         Object sm = System.getSecurityManager();
@@ -311,7 +311,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
             }
 
             // Add the bundle as extension if we support extensions
-            if (m_extensionManager != null) 
+            if (m_extensionManager != null)
             {
                 // This needs to be the private instance.
                 m_extensionManager.addExtension(felix, bundle);
@@ -338,14 +338,14 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
         {
             felix.releaseBundleLock(felix);
         }
-    
+
         bundle.getInfo().setState(Bundle.RESOLVED);
     }
 
     /**
      * This is a Felix specific extension mechanism that allows extension bundles
      * to have activators and be started via this method.
-     * 
+     *
      * @param felix the framework instance the extension bundle is installed in.
      * @param bundle the extension bundle to start if it has a Felix specific activator.
      */
@@ -354,7 +354,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
         String activatorClass = (String)
         bundle.getInfo().getCurrentHeader().get(
             FelixConstants.FELIX_EXTENSION_ACTIVATOR);
-        
+
         if (activatorClass != null)
         {
             try
@@ -362,13 +362,14 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
                 BundleActivator activator = (BundleActivator)
                     felix.getClass().getClassLoader().loadClass(
                         activatorClass.trim()).newInstance();
-                
+
+// TODO: KARL - This is kind of hacky, can we improve it?
                 felix.m_activatorList.add(activator);
-                
-                BundleContext context = m_systemBundleInfo.getBundleContext();
-                
+
+                BundleContext context = m_sbi.getBundleContext();
+
                 bundle.getInfo().setBundleContext(context);
-                
+
                 if (felix.getInfo().getState() == Bundle.ACTIVE)
                 {
                     Felix.m_secureAction.startActivator(activator, context);
@@ -382,15 +383,15 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
             }
         }
     }
-    
+
     /**
      * Remove all extension registered by the given framework instance. Note, it
      * is not possible to unregister allready loaded classes form those extensions.
      * That is why the spec requires a JVM restart.
-     * 
-     * @param felix the framework instance whose extensions need to be unregistered. 
+     *
+     * @param felix the framework instance whose extensions need to be unregistered.
      */
-    void removeExtensions(Felix felix) 
+    void removeExtensions(Felix felix)
     {
         if (m_extensionManager != null)
         {
@@ -412,7 +413,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
 
         // Note: This is a reference to the actual header map,
         // so these changes are saved. Kind of hacky.
-        Map map = ((SystemBundleArchive) m_systemBundleInfo.getArchive()).getManifestHeader(0);
+        Map map = m_sbi.getCurrentHeader();
         map.put(Constants.EXPORT_PACKAGE, convertCapabilitiesToHeaders(map));
     }
 
@@ -461,11 +462,11 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
 
         return exportSB.toString();
     }
-    
+
     //
     // IContentLoader
     //
-    
+
     public void open()
     {
         // Nothing needed here.
@@ -560,7 +561,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
         // No native libs associated with the system bundle.
         return null;
     }
-    
+
     //
     // Classpath Extension
     //
@@ -591,10 +592,10 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
         throw new IOException("Resource not provided by any extension!");
     }
 
-    protected InetAddress getHostAddress(URL u) 
-    { 
-        // the extension URLs do not address real hosts 
-        return null; 
+    protected InetAddress getHostAddress(URL u)
+    {
+        // the extension URLs do not address real hosts
+        return null;
     }
 
     private synchronized void addExtension(Object source, Bundle extension)
@@ -642,16 +643,16 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
         }
     }
 
-    public Enumeration getEntries() 
+    public Enumeration getEntries()
     {
         return new Enumeration()
         {
-            public boolean hasMoreElements() 
+            public boolean hasMoreElements()
             {
                 return false;
             }
 
-            public Object nextElement() throws NoSuchElementException 
+            public Object nextElement() throws NoSuchElementException
             {
                 throw new NoSuchElementException();
             }
@@ -662,12 +663,12 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
         return false;
     }
 
-    public byte[] getEntryAsBytes(String name) 
+    public byte[] getEntryAsBytes(String name)
     {
         return null;
     }
 
-    public InputStream getEntryAsStream(String name) throws IOException 
+    public InputStream getEntryAsStream(String name) throws IOException
     {
         return null;
     }
