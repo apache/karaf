@@ -468,6 +468,7 @@ public class Main
             String key = (String) e.nextElement();
             if (key.startsWith("felix.") ||
                 key.equals("org.osgi.framework.system.packages") ||
+                key.equals("org.osgi.framework.storage") ||
                 key.equals("org.osgi.framework.bootdelegation"))
             {
                 configProps.setProperty(key, System.getProperty(key));
