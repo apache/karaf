@@ -73,17 +73,16 @@ import org.osgi.framework.SystemBundle;
 public class BundleCache
 {
     public static final String CACHE_BUFSIZE_PROP = "felix.cache.bufsize";
-    public static final String CACHE_DIR_PROP = "felix.cache.dir";
-    public static final String CACHE_PROFILE_DIR_PROP = "felix.cache.profiledir";
-    public static final String CACHE_PROFILE_PROP = "felix.cache.profile";
+    public static final String CACHE_ROOTDIR_PROP = "felix.cache.rootdir";
 
     protected static transient int BUFSIZE = 4096;
-    protected static transient final String CACHE_DIR_NAME = ".felix";
+    protected static transient final String CACHE_DIR_NAME = "felix-cache";
+    protected static transient final String CACHE_ROOTDIR_DEFAULT = ".";
     protected static transient final String BUNDLE_DIR_PREFIX = "bundle";
 
     private Map m_configMap = null;
     private Logger m_logger = null;
-    private File m_profileDir = null;
+    private File m_cacheDir = null;
     private BundleArchive[] m_archives = null;
 
     private static SecureAction m_secureAction = new SecureAction();
@@ -138,7 +137,7 @@ public class BundleCache
     {
         // Construct archive root directory.
         File archiveRootDir =
-            new File(m_profileDir, BUNDLE_DIR_PREFIX + Long.toString(id));
+            new File(m_cacheDir, BUNDLE_DIR_PREFIX + Long.toString(id));
 
         try
         {
@@ -203,7 +202,7 @@ public class BundleCache
     public synchronized File getSystemBundleDataFile(String fileName) throws Exception
     {
         // Make sure system bundle directory exists.
-        File sbDir = new File(m_profileDir, BUNDLE_DIR_PREFIX + Long.toString(0));
+        File sbDir = new File(m_cacheDir, BUNDLE_DIR_PREFIX + Long.toString(0));
 
         // If the system bundle directory exists, then we don't
         // need to initialize since it has already been done.
@@ -300,68 +299,46 @@ public class BundleCache
             // Use the default value.
         }
 
-        // See if the profile directory is specified.
-        String profileDirStr = (String) m_configMap.get(CACHE_PROFILE_DIR_PROP);
-        profileDirStr = (profileDirStr == null)
-            ? (String) m_configMap.get(SystemBundle.FRAMEWORK_STORAGE_PROP)
-            : profileDirStr;
-        if (profileDirStr != null)
+        // Check to see if the cache directory is specified in the storage
+        // configuration property.
+        String cacheDirStr = (String) m_configMap.get(SystemBundle.FRAMEWORK_STORAGE_PROP);
+        // Get the cache root directory for relative paths; the default is ".".
+        String rootDirStr = (String) m_configMap.get(CACHE_ROOTDIR_PROP);
+        rootDirStr = (rootDirStr == null) ? CACHE_ROOTDIR_DEFAULT : rootDirStr;
+        if (cacheDirStr != null)
         {
-            m_profileDir = new File(profileDirStr);
+            // If the specified cache directory is relative, then use the
+            // root directory to calculate the absolute path.
+            m_cacheDir = new File(cacheDirStr);
+            if (!m_cacheDir.isAbsolute())
+            {
+                m_cacheDir = new File(rootDirStr, cacheDirStr);
+            }
         }
         else
         {
-            // Since no profile directory was specified, then the profile
-            // directory will be a directory in the cache directory named
-            // after the profile.
-
-            // First, determine the location of the cache directory; it
-            // can either be specified or in the default location.
-            String cacheDirStr = (String) m_configMap.get(CACHE_DIR_PROP);
-            if (cacheDirStr == null)
-            {
-                // Since no cache directory was specified, put it
-                // ".felix" in the user's home by default.
-                cacheDirStr = System.getProperty("user.home");
-                cacheDirStr = cacheDirStr.endsWith(File.separator)
-                    ? cacheDirStr : cacheDirStr + File.separator;
-                cacheDirStr = cacheDirStr + CACHE_DIR_NAME;
-            }
-
-            // Now, get the profile name.
-            String profileName = (String) m_configMap.get(CACHE_PROFILE_PROP);
-            if (profileName == null)
-            {
-                throw new IllegalArgumentException(
-                    "No profile name or directory has been specified.");
-            }
-            // Profile name cannot contain the File.separator char.
-            else if (profileName.indexOf(File.separator) >= 0)
-            {
-                throw new IllegalArgumentException(
-                    "The profile name cannot contain the file separator character.");
-            }
-
-            m_profileDir = new File(cacheDirStr, profileName);
+            // If no cache directory was specified, then use the default name
+            // in the root directory.
+            m_cacheDir = new File(rootDirStr, CACHE_DIR_NAME);
         }
 
-        // Create profile directory, if it does not exist.
-        if (!getSecureAction().fileExists(m_profileDir))
+        // Create the cache directory, if it does not exist.
+        if (!getSecureAction().fileExists(m_cacheDir))
         {
-            if (!getSecureAction().mkdirs(m_profileDir))
+            if (!getSecureAction().mkdirs(m_cacheDir))
             {
                 m_logger.log(
                     Logger.LOG_ERROR,
-                    getClass().getName() + ": Unable to create directory: "
-                        + m_profileDir);
-                throw new RuntimeException("Unable to create profile directory.");
+                    getClass().getName() + ": Unable to create cache directory: "
+                        + m_cacheDir);
+                throw new RuntimeException("Unable to create cache directory.");
             }
         }
 
         // Create the existing bundle archives in the profile directory,
         // if any exist.
         List archiveList = new ArrayList();
-        File[] children = getSecureAction().listDirectory(m_profileDir);
+        File[] children = getSecureAction().listDirectory(m_cacheDir);
         for (int i = 0; (children != null) && (i < children.length); i++)
         {
             // Ignore directories that aren't bundle directories or

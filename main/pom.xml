@@ -88,6 +88,7 @@
   </dependencies>
   <properties>
     <property name="install.home" value="${basedir.absolutePath}" />
+    <dollar>$</dollar>
   </properties>
   <build>
     <plugins>
@@ -112,7 +113,6 @@
                  so that we only have to maintain one set of properties
                  and only for that reason. -->
             <_include>src/main/resources/config.properties</_include>
-            <dollar>$</dollar>
           </instructions>
         </configuration>
       </plugin>

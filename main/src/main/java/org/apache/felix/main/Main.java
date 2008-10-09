@@ -166,8 +166,16 @@ public class Main
      * @throws Exception If an error occurs.
     **/
 
-    public static void main(String[] argv) throws Exception
+    public static void main(String[] args) throws Exception
     {
+        // We support at most one argument, which is the bundle
+        // cache directory.
+        if (args.length > 1)
+        {
+            System.out.println("Usage: [<bundle-cache-dir>]");
+            System.exit(0);
+        }
+
         // Load system properties.
         Main.loadSystemProperties();
 
@@ -177,54 +185,16 @@ public class Main
         // Copy framework properties from the system properties.
         Main.copySystemProperties(configProps);
 
-        // See if the profile name property was specified.
-        String profileName = configProps.getProperty(BundleCache.CACHE_PROFILE_PROP);
-
-        // See if the profile directory property was specified.
-        String profileDirName = configProps.getProperty(BundleCache.CACHE_PROFILE_DIR_PROP);
-        profileDirName = (profileDirName == null)
-            ? configProps.getProperty(SystemBundle.FRAMEWORK_STORAGE_PROP)
-            : profileDirName;
+        // If there is a passed in bundle cache directory, then
+        // that overwrites anything in the config file.
+        if (args.length > 0)
+        {
+            configProps.setProperty(SystemBundle.FRAMEWORK_STORAGE_PROP, args[0]);
+        }
 
         // Print welcome banner.
         System.out.println("\nWelcome to Felix.");
         System.out.println("=================\n");
-
-        // If no profile or profile directory is specified in the
-        // properties, then ask for a profile name.
-        if ((profileName == null) && (profileDirName == null))
-        {
-            System.out.print("Enter profile name: ");
-            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-            try
-            {
-                profileName = in.readLine();
-            }
-            catch (IOException ex)
-            {
-                System.err.println("Could not read input.");
-                System.exit(-1);
-            }
-            System.out.println("");
-
-            // On some platforms readLine() can return null, such as when
-            // control-C is pressed, so check for that case.
-            if (profileName == null)
-            {
-                profileName = "";
-            }
-            else if (profileName.length() != 0)
-            {
-                configProps.setProperty(BundleCache.CACHE_PROFILE_PROP, profileName);
-            }
-        }
-
-        // A profile directory or name must be specified.
-        if ((profileDirName == null) && (profileName.length() == 0))
-        {
-            System.err.println("You must specify a profile name or directory.");
-            System.exit(-1);
-        }
 
         try
         {
