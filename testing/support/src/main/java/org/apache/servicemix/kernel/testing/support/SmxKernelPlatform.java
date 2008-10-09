@@ -275,6 +275,7 @@ public class SmxKernelPlatform implements OsgiPlatform {
     }
 
     public class GuardClassLoader extends URLClassLoader {
+        private Set<String> bootDelegationPackages = new HashSet<String>();
         private Set<String> packages = new HashSet<String>();
         private List<ClassLoader> parents = new ArrayList<ClassLoader>();
 
@@ -295,6 +296,15 @@ public class SmxKernelPlatform implements OsgiPlatform {
             if (additionalPackages != null) {
                 packages.addAll(additionalPackages);
             }
+            prop = props.getProperty("org.osgi.framework.bootdelegation");
+            ps = prop.split(",");
+            for (String p : ps) {
+                p = p.trim();
+                if (p.endsWith("*")) {
+                    p = p.substring(0, p.length() - 1);
+                }
+                bootDelegationPackages.add(p);
+            }
             ClassLoader cl = getParent();
             while (cl != null) {
                 parents.add(0, cl);
@@ -308,7 +318,16 @@ public class SmxKernelPlatform implements OsgiPlatform {
             Class c = findLoadedClass(name);
             if (c == null) {
                 String pkg = name.substring(0, name.lastIndexOf('.'));
-                if (name.startsWith("java.") || packages.contains(pkg)) {
+                boolean match = name.startsWith("java.") || packages.contains(pkg);
+                if (!match) {
+                    for (String p : bootDelegationPackages) {
+                        if (pkg.startsWith(p)) {
+                            match = true;
+                            break;
+                        }
+                    }
+                }
+                if (match) {
                     for (ClassLoader cl : parents) {
                         try {
                             c = cl.loadClass(name);
