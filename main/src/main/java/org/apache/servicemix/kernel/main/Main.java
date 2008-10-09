@@ -936,7 +936,7 @@ public class Main implements MainService, BundleActivator {
      * @throws IllegalArgumentException If there was a syntax error in the
      *                                  property placeholder syntax or a recursive variable reference.
      */
-    private static String substVars(String val, String currentKey,
+    public static String substVars(String val, String currentKey,
                                     Map<String, String> cycleMap, Properties configProps)
             throws IllegalArgumentException {
         // If there is currently no cycle map, then create

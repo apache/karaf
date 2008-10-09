@@ -28,6 +28,8 @@ import java.net.URLClassLoader;
 import java.net.MalformedURLException;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.FileNotFoundException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Constructor;
 import java.security.AccessController;
@@ -36,13 +38,16 @@ import java.security.PrivilegedAction;
 import org.springframework.osgi.test.platform.FelixPlatform;
 import org.springframework.osgi.test.platform.OsgiPlatform;
 import org.springframework.util.ClassUtils;
-import org.apache.felix.main.Main;
 import org.apache.felix.framework.Felix;
+import org.apache.felix.framework.util.CompoundEnumeration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.servicemix.kernel.main.Main;
+import org.apache.servicemix.kernel.main.spi.MainService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Bundle;
-import sun.misc.CompoundEnumeration;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.ServiceRegistration;
 
 public class SmxKernelPlatform implements OsgiPlatform {
 
@@ -142,10 +147,33 @@ public class SmxKernelPlatform implements OsgiPlatform {
         //System.out.println(jars);
         ClassLoader classLoader = new GuardClassLoader(toURLs(jars.toArray(new String[jars.size()])), additionalPackages);
 
+        BundleActivator activator = new BundleActivator() {
+            private ServiceRegistration registration;
+
+            public void start(BundleContext context) {
+                registration = context.registerService(MainService.class.getName(), new MainService() {
+                    public String[] getArgs() {
+                        return new String[0];
+                    }
+                    public int getExitCode() {
+                        return 0;
+                    }
+                    public void setExitCode(int exitCode) {
+                    }
+                }, null);
+            }
+
+            public void stop(BundleContext context) {
+                registration.unregister();
+            }
+        };
+        List<BundleActivator> activations = new ArrayList<BundleActivator>();
+        activations.add(activator);
+
         Thread.currentThread().setContextClassLoader(classLoader);
         Class cl = classLoader.loadClass(Felix.class.getName());
         Constructor cns = cl.getConstructor(Map.class, List.class);
-        platform = cns.newInstance(getConfigurationProperties(), null);
+        platform = cns.newInstance(getConfigurationProperties(), activations);
         platform.getClass().getMethod("start").invoke(platform);
 
         Bundle systemBundle = (Bundle) platform;
@@ -233,7 +261,33 @@ public class SmxKernelPlatform implements OsgiPlatform {
         System.getProperties().setProperty(FELIX_CONFIG_PROPERTY, url.toExternalForm());
 
         // load config.properties (use Felix's Main for resolving placeholders)
-        return Main.loadConfigProperties();
+        Properties props = new Properties();
+        InputStream is = null;
+        try {
+            is = url.openConnection().getInputStream();
+            props.load(is);
+            is.close();
+        }
+        catch (FileNotFoundException ex) {
+            // Ignore file not found.
+        }
+        catch (Exception ex) {
+            System.err.println("Main: Error loading system properties from " + url);
+            System.err.println("Main: " + ex);
+            try {
+                if (is != null) is.close();
+            }
+            catch (IOException ex2) {
+                // Nothing we can do.
+            }
+            return null;
+        }
+        // Perform variable substitution for system properties.
+        for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
+            String name = (String) e.nextElement();
+            props.setProperty(name, Main.substVars(props.getProperty(name), name, null, props));
+        }
+        return props;
     }
 
     /**

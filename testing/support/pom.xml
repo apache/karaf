@@ -35,20 +35,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.osgi.core</artifactId>
+            <groupId>org.apache.servicemix.kernel</groupId>
+            <artifactId>org.apache.servicemix.kernel.main</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.osgi.compendium</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.framework</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.main</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -100,7 +92,12 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-                        <Import-Package>org.apache.felix*;resolution:=optional,*</Import-Package>
+                        <Import-Package>
+                            org.apache.felix*;resolution:=optional,
+                            org.apache.servicemix.kernel.main;resolution:=optional,
+                            org.apache.servicemix.kernel.main.spi;resolution:=optional;version="1.0.0",
+                            *
+                        </Import-Package>
                         <Export-Package>${pom.artifactId}</Export-Package>
                     </instructions>
                 </configuration>
