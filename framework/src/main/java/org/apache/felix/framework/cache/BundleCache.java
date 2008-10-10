@@ -100,6 +100,19 @@ public class BundleCache
         return m_secureAction;
     }
 
+    public synchronized void flush() throws Exception
+    {
+        // Dispose of all existing archives.
+        for (int i = 0; (m_archives != null) && (i < m_archives.length); i++)
+        {
+            m_archives[i].dispose();
+        }
+        // Delete the cache directory.
+        deleteDirectoryTree(m_cacheDir);
+        // Reinitialize the cache.
+        initialize();
+    }
+
     public synchronized BundleArchive[] getArchives()
         throws Exception
     {

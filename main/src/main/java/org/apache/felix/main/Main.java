@@ -465,10 +465,7 @@ public class Main
              e.hasMoreElements(); )
         {
             String key = (String) e.nextElement();
-            if (key.startsWith("felix.") ||
-                key.equals("org.osgi.framework.system.packages") ||
-                key.equals("org.osgi.framework.storage") ||
-                key.equals("org.osgi.framework.bootdelegation"))
+            if (key.startsWith("felix.") || key.startsWith("org.osgi.framework."))
             {
                 configProps.setProperty(key, System.getProperty(key));
             }

@@ -685,6 +685,25 @@ public class Felix extends FelixBundle implements SystemBundle
                 throw new BundleException("Error creating bundle cache.", ex);
             }
 
+            // If this is the first time init is called, check to see if
+            // we need to flush the bundle cache.
+            if (state == Bundle.INSTALLED)
+            {
+                String flush = (String) m_configMap.get(Constants.FRAMEWORK_STORAGE_CLEAN);
+                if ((flush != null)
+                    && flush.equalsIgnoreCase(Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT))
+                {
+                    try
+                    {
+                        m_cache.flush();
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new BundleException("Unable to flush bundle cache.", ex);
+                    }
+                }
+            }
+
             // Initialize installed bundle data structures.
             m_installedBundleMap = new HashMap();
             m_installedBundleIndex = new TreeMap();
