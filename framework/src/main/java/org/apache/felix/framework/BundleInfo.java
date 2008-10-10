@@ -57,18 +57,6 @@ class BundleInfo
     private int m_lockCount = 0;
     private Thread m_lockThread = null;
 
-    protected BundleInfo(Logger logger, BundleArchive archive, IModule module)
-    {
-        m_logger = logger;
-        m_archive = archive;
-        m_modules = (module == null) ? new IModule[0] : new IModule[] { module };
-
-        m_state = Bundle.INSTALLED;
-        m_stale = false;
-        m_activator = null;
-        m_context = null;
-    }
-
     /**
      *  Returns the bundle archive associated with this bundle.
      * @return the bundle archive associated with this bundle.
