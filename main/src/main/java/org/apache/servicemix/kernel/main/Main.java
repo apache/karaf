@@ -128,9 +128,78 @@ public class Main implements MainService, BundleActivator {
     private final String[] args;
     private int exitCode;
     private Lock lock;
+    private CountDownLatch shutdown = new CountDownLatch(1);
 
     public Main(String[] args) {
         this.args = args;
+    }
+
+    public void launch() throws Exception {
+        servicemixHome = getServiceMixHome();
+        servicemixBase = getServiceMixBase(servicemixHome);
+
+        //System.out.println("ServiceMix Home: "+main.servicemixHome.getPath());
+        //System.out.println("ServiceMix Base: "+main.servicemixBase.getPath());
+
+        System.setProperty(PROP_SERVICEMIX_HOME, servicemixHome.getPath());
+        System.setProperty(PROP_SERVICEMIX_BASE, servicemixBase.getPath());
+
+        // Load system properties.
+        loadSystemProperties();
+
+        // Read configuration properties.
+        m_configProps = loadConfigProperties();
+
+        // Copy framework properties from the system properties.
+        Main.copySystemProperties(m_configProps);
+
+        String profileName = m_configProps.getProperty(BundleCache.CACHE_PROFILE_PROP);
+        String profileDirName = m_configProps.getProperty(BundleCache.CACHE_PROFILE_DIR_PROP);
+
+        // A profile directory or name must be specified.
+        if ((profileDirName == null) && (profileName == null || profileName.length() == 0)) {
+            setExitCode(-1);
+            throw new Exception("Invalid " + CONFIG_PROPERTIES_FILE_NAME + " configuration.  The profile directory was not specified.");
+        }
+
+        // Register the Main class so that other bundles can inspect the command line args.
+        BundleActivator activator = new BundleActivator() {
+            private ServiceRegistration registration;
+
+            public void start(BundleContext context) {
+                registration = context.registerService(MainService.class.getName(), Main.this, null);
+            }
+
+            public void stop(BundleContext context) {
+                registration.unregister();
+                shutdown.countDown();
+            }
+        };
+        List<BundleActivator> activations = new ArrayList<BundleActivator>();
+        activations.add(this);
+        activations.add(activator);
+
+        try {
+            lock(m_configProps);
+            // Start up the OSGI framework
+            m_felix = new Felix(new StringMap(m_configProps, false), activations);
+            m_felix.start();
+        }
+        catch (Exception ex) {
+            setExitCode(-1);
+            throw new Exception("Could not create framework", ex);
+        }
+    }
+
+    public void destroy(boolean await) throws Exception {
+        try {
+            if (await) {
+                shutdown.await();
+            }
+            m_felix.stopAndWait();
+        } finally {
+            unlock();
+        }
     }
 
     /**
@@ -231,75 +300,15 @@ public class Main implements MainService, BundleActivator {
      * @throws Exception If an error occurs.
      **/
     public static void main(String[] args) throws Exception {
-
         final Main main = new Main(args);
-        main.servicemixHome = getServiceMixHome();
-        main.servicemixBase = getServiceMixBase(main.servicemixHome);
-
-        //System.out.println("ServiceMix Home: "+main.servicemixHome.getPath());
-        //System.out.println("ServiceMix Base: "+main.servicemixBase.getPath());
-
-        System.setProperty(PROP_SERVICEMIX_HOME, main.servicemixHome.getPath());
-        System.setProperty(PROP_SERVICEMIX_BASE, main.servicemixBase.getPath());
-
-        // Load system properties.
-        main.loadSystemProperties();
-
-        // Read configuration properties.
-        m_configProps = main.loadConfigProperties();
-
-        // Copy framework properties from the system properties.
-        Main.copySystemProperties(m_configProps);
-
-        String profileName = m_configProps.getProperty(BundleCache.CACHE_PROFILE_PROP);
-        String profileDirName = m_configProps.getProperty(BundleCache.CACHE_PROFILE_DIR_PROP);
-
-        // A profile directory or name must be specified.
-        if ((profileDirName == null) && (profileName == null || profileName.length() == 0)) {
-            System.err.println("Invalid " + CONFIG_PROPERTIES_FILE_NAME + " configuration.  The profile directory was not specified.");
-            System.exit(-1);
-        }
-
-        // Register the Main class so that other bundles can inspect the command line args.
-        final CountDownLatch shutdown = new CountDownLatch(1);
-        BundleActivator activator = new BundleActivator() {
-            private ServiceRegistration registration;
-
-            public void start(BundleContext context) {
-                registration = context.registerService(MainService.class.getName(), main, null);
-            }
-
-            public void stop(BundleContext context) {
-                registration.unregister();
-                shutdown.countDown();
-            }
-        };
-        List<BundleActivator> activations = new ArrayList<BundleActivator>();
-        activations.add(activator);
-        activations.add(main);
-
         try {
-            main.lock(m_configProps);
-            // Start up the OSGI framework
-            m_felix = new Felix(new StringMap(m_configProps, false), activations);
-            m_felix.start();
-        }
-        catch (Exception ex) {
-            System.err.println("Could not create framework: " + ex);
-            ex.printStackTrace();
-            System.exit(-1);
-        }
-
-        // Wait for the system to get shutdown.
-        try {
-            shutdown.await();
-            m_felix.stopAndWait();
+            main.launch();
+            main.destroy(true);
         }
         catch (Exception ex) {
             System.err.println("Error occured shutting down framework: " + ex);
             ex.printStackTrace();
         } finally {
-            main.unlock();
             System.exit(main.getExitCode());
         }
     }
