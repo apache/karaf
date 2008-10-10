@@ -105,7 +105,7 @@
             <Bundle-Name>Apache Felix</Bundle-Name>
             <Bundle-Description>OSGi R4 framework.</Bundle-Description>
             <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
-            <Private-Package>org.apache.felix.main.*,org.apache.felix.moduleloader.*;-split-package:=merge-first,org.apache.felix.framework.*;-split-package:=merge-first,org.osgi.framework;-split-package:=merge-first,org.osgi.service.packageadmin;-split-package:=merge-first,org.osgi.service.startlevel;-split-package:=merge-first,org.osgi.service.url;-split-package:=merge-first,org.osgi.util.tracker;-split-package:=merge-first</Private-Package>
+            <Private-Package>org.apache.felix.main.*,org.apache.felix.moduleloader.*;org.apache.felix.framework.*;org.osgi.framework;org.osgi.framework.launch;org.osgi.service.packageadmin;org.osgi.service.startlevel;org.osgi.service.url;org.osgi.util.tracker;-split-package:=merge-first</Private-Package>
             <Import-Package>!*</Import-Package>
             <Include-Resource>META-INF/LICENSE=LICENSE,META-INF/NOTICE=NOTICE,{src/main/resources/}</Include-Resource>
             <!-- Include these properties here because we want them

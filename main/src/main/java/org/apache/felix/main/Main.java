@@ -24,9 +24,8 @@ import java.net.URL;
 import java.util.*;
 
 import org.apache.felix.framework.Felix;
-import org.apache.felix.framework.cache.BundleCache;
 import org.apache.felix.framework.util.StringMap;
-import org.osgi.framework.SystemBundle;
+import org.osgi.framework.Constants;
 
 /**
  * <p>
@@ -189,7 +188,7 @@ public class Main
         // that overwrites anything in the config file.
         if (args.length > 0)
         {
-            configProps.setProperty(SystemBundle.FRAMEWORK_STORAGE_PROP, args[0]);
+            configProps.setProperty(Constants.FRAMEWORK_STORAGE, args[0]);
         }
 
         // Print welcome banner.

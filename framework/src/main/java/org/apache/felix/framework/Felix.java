@@ -18,6 +18,7 @@
  */
 package org.apache.felix.framework;
 
+import org.osgi.framework.launch.SystemBundle;
 import java.io.*;
 import java.net.*;
 import java.security.*;
@@ -924,8 +925,14 @@ ex.printStackTrace();
      * @param timeout A timeout value.
      * @throws java.lang.InterruptedException If the thread was interrupted.
     **/
-    public void waitForStop(long timeout) throws InterruptedException
+    public FrameworkEvent waitForStop(long timeout) throws InterruptedException
     {
+        // Throw exception if timeout is negative.
+        if (timeout < 0)
+        {
+            throw new IllegalArgumentException("Timeout cannot be negative.");
+        }
+
         // If there is a gate, wait on it; otherwise, return immediately.
         ThreadGate gate;
         synchronized (this)
@@ -937,6 +944,11 @@ ex.printStackTrace();
         {
             gate.await(timeout);
         }
+
+        // TODO: RFC132 - We need to modify this to return the proper reason:
+        //       FrameEvent.STOPPED, FrameEvent.STOPPED_UPDATE,
+        //       FrameEvent.STOPPED_BOOTCLASSPATH_MODIFIED, FrameEvent.ERROR
+        return new FrameworkEvent(FrameworkEvent.STOPPED, this, null);
     }
 
     public void uninstall() throws BundleException

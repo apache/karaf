@@ -23,7 +23,7 @@ import java.util.*;
 
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.SecureAction;
-import org.osgi.framework.SystemBundle;
+import org.osgi.framework.Constants;
 
 /**
  * <p>
@@ -301,7 +301,7 @@ public class BundleCache
 
         // Check to see if the cache directory is specified in the storage
         // configuration property.
-        String cacheDirStr = (String) m_configMap.get(SystemBundle.FRAMEWORK_STORAGE_PROP);
+        String cacheDirStr = (String) m_configMap.get(Constants.FRAMEWORK_STORAGE);
         // Get the cache root directory for relative paths; the default is ".".
         String rootDirStr = (String) m_configMap.get(CACHE_ROOTDIR_PROP);
         rootDirStr = (rootDirStr == null) ? CACHE_ROOTDIR_DEFAULT : rootDirStr;
