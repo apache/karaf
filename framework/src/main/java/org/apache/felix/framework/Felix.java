@@ -1644,6 +1644,9 @@ ex.printStackTrace();
             ((BundleContextImpl) info.getBundleContext()).invalidate();
             info.setBundleContext(null);
 
+            // Clean up the bundle activator
+            info.setActivator(null);
+
             // Unregister any services offered by this bundle.
             m_registry.unregisterServices(bundle);
 
@@ -2033,6 +2036,9 @@ ex.printStackTrace();
             // Clean up the bundle context.
             ((BundleContextImpl) info.getBundleContext()).invalidate();
             info.setBundleContext(null);
+
+            // Clean up the bundle activator.
+            info.setActivator(null);
 
             // Unregister any services offered by this bundle.
             m_registry.unregisterServices(bundle);
