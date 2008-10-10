@@ -21,12 +21,18 @@ package org.apache.felix.framework;
 import java.util.Map;
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.StringMap;
+import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.Bundle;
 
 class SystemBundleInfo extends BundleInfo
 {
     private Map m_headerMap = new StringMap(false);
     private int m_startLevel = FelixConstants.SYSTEMBUNDLE_DEFAULT_STARTLEVEL;
+
+    SystemBundleInfo(Logger logger, IModule module)
+    {
+        super(logger, module);
+    }
 
     public String getSymbolicName()
     {

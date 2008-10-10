@@ -320,7 +320,7 @@ public class Felix extends FelixBundle implements SystemBundle
         m_policyCore.setModuleFactory(m_factory);
 
         // Create the system bundle info object, which will hold state info.
-        m_sbi = new SystemBundleInfo();
+        m_sbi = new SystemBundleInfo(m_logger, null);
         // Create the extension manager, which we will use as the module
         // definition for creating the system bundle module.
         m_extensionManager = new ExtensionManager(m_logger, m_configMap, m_sbi);
@@ -3279,7 +3279,7 @@ ex.printStackTrace();
             isExtension);
 
         // Finally, create an return the bundle info.
-        RegularBundleInfo info = new RegularBundleInfo(m_logger, archive, module);
+        RegularBundleInfo info = new RegularBundleInfo(m_logger, module, archive);
         info.setExtension(isExtension);
 
         return info;

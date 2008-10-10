@@ -23,24 +23,17 @@ import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.*;
 
-import org.apache.felix.framework.cache.BundleArchive;
-import org.apache.felix.framework.searchpolicy.ModuleDefinition;
-import org.apache.felix.framework.util.manifestparser.ManifestParser;
-import org.apache.felix.moduleloader.ICapability;
 import org.apache.felix.moduleloader.IContentLoader;
 import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.*;
 
-class BundleInfo
+abstract class BundleInfo
 {
     private Logger m_logger = null;
-    private BundleArchive m_archive = null;
     private IModule[] m_modules = null;
     private int m_state = 0;
     private BundleActivator m_activator = null;
     private BundleContext m_context = null;
-    private String m_cachedSymbolicName = null;
-    private long m_cachedSymbolicNameTimestamp;
     private Map m_cachedHeaders = new HashMap();
     private long m_cachedHeadersTimestamp;
 
@@ -57,13 +50,19 @@ class BundleInfo
     private int m_lockCount = 0;
     private Thread m_lockThread = null;
 
-    /**
-     *  Returns the bundle archive associated with this bundle.
-     * @return the bundle archive associated with this bundle.
-    **/
-    public BundleArchive getArchive()
+    public BundleInfo(Logger logger, IModule module)
     {
-        return m_archive;
+        m_logger = logger;
+        m_modules = (module == null) ? new IModule[0] : new IModule[] { module };
+        m_state = Bundle.INSTALLED;
+        m_stale = false;
+        m_activator = null;
+        m_context = null;
+    }
+
+    public Logger getLogger()
+    {
+        return m_logger;
     }
 
     /**
@@ -124,118 +123,17 @@ class BundleInfo
         m_modules = dest;
     }
 
-    public synchronized String getSymbolicName()
-    {
-        // If the bundle has been updated, clear the cached symbolic name.
-        if (getLastModified() > m_cachedSymbolicNameTimestamp)
-        {
-            m_cachedSymbolicName = null;
-            m_cachedSymbolicNameTimestamp = getLastModified();
-            try
-            {
-                // TODO: FRAMEWORK - Rather than reparsing every time, I wonder if
-                //       we should be caching this value some place.
-                final ICapability moduleCap = ManifestParser.parseBundleSymbolicName(getCurrentHeader());
-                if (moduleCap != null)
-                {
-                    m_cachedSymbolicName = (String) moduleCap.getProperties().get(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE);
-                }
-            }
-            catch (BundleException ex)
-            {
-                // Return null.
-            }
-        }
-        return m_cachedSymbolicName;
-    }
+    public abstract String getSymbolicName();
 
-    public long getBundleId()
-    {
-        try
-        {
-            return m_archive.getId();
-        }
-        catch (Exception ex)
-        {
-            m_logger.log(
-                Logger.LOG_ERROR,
-                "Error getting the identifier from bundle archive.",
-                ex);
-            return -1;
-        }
-    }
+    public abstract long getBundleId();
 
-    public String getLocation()
-    {
-        try
-        {
-            return m_archive.getLocation();
-        }
-        catch (Exception ex)
-        {
-            m_logger.log(
-                Logger.LOG_ERROR,
-                "Error getting location from bundle archive.",
-                ex);
-            return null;
-        }
-    }
+    public abstract String getLocation();
 
-    public int getStartLevel(int defaultLevel)
-    {
-        try
-        {
-            return m_archive.getStartLevel();
-        }
-        catch (Exception ex)
-        {
-            m_logger.log(
-                Logger.LOG_ERROR,
-                "Error reading start level from bundle archive.",
-                ex);
-            return defaultLevel;
-        }
-    }
+    public abstract int getStartLevel(int defaultLevel);
 
-    public void setStartLevel(int i)
-    {
-        try
-        {
-            m_archive.setStartLevel(i);
-        }
-        catch (Exception ex)
-        {
-            m_logger.log(
-                Logger.LOG_ERROR,
-                "Error writing start level to bundle archive.",
-                ex);
-        }
-    }
+    public abstract void setStartLevel(int i);
 
-    public Map getCurrentHeader()
-    {
-        Map headerMap = null;
-        // Special case the system bundle
-        if (getBundleId() == 0)
-        {
-            // TODO: REFACTOR - This is sort of a hack, we should just expose
-            //       the bundle symbolic name from our API.
-            try
-            {
-                headerMap = m_archive.getRevision(0).getManifestHeader();
-            }
-            catch (Exception ex)
-            {
-                // This should never happen.
-            }
-        }
-        else
-        {
-            headerMap = ((ModuleDefinition) getCurrentModule().getDefinition()).getHeaders();
-        }
-            
-        return headerMap;
-    }
+    public abstract Map getCurrentHeader();
 
     public Map getCurrentLocalizedHeader(String locale)
     {
@@ -372,96 +270,17 @@ class BundleInfo
         m_state = i;
     }
 
-    public long getLastModified()
-    {
-        try
-        {
-            return m_archive.getLastModified();
-        }
-        catch (Exception ex)
-        {
-            m_logger.log(
-                Logger.LOG_ERROR,
-                "Error reading last modification time from bundle archive.",
-                ex);
-            return 0;
-        }
-    }
+    public abstract long getLastModified();
 
-    public void setLastModified(long l)
-    {
-        try
-        {
-            m_archive.setLastModified(l);
-        }
-        catch (Exception ex)
-        {
-            m_logger.log(
-                Logger.LOG_ERROR,
-                "Error writing last modification time to bundle archive.",
-                ex);
-        }
-    }
+    public abstract void setLastModified(long l);
 
-    public int getPersistentState()
-    {
-        try
-        {
-            return m_archive.getPersistentState();
-        }
-        catch (Exception ex)
-        {
-            m_logger.log(
-                Logger.LOG_ERROR,
-                "Error reading persistent state from bundle archive.",
-                ex);
-            return Bundle.INSTALLED;
-        }
-    }
+    public abstract int getPersistentState();
 
-    public void setPersistentStateInactive()
-    {
-        try
-        {
-            m_archive.setPersistentState(Bundle.INSTALLED);
-        }
-        catch (Exception ex)
-        {
-            m_logger.log(Logger.LOG_ERROR,
-                "Error writing persistent state to bundle archive.",
-                ex);
-        }
-    }
+    public abstract void setPersistentStateInactive();
 
-    public void setPersistentStateActive()
-    {
-        try
-        {
-            m_archive.setPersistentState(Bundle.ACTIVE);
-        }
-        catch (Exception ex)
-        {
-            m_logger.log(
-                Logger.LOG_ERROR,
-                "Error writing persistent state to bundle archive.",
-                ex);
-        }
-    }
+    public abstract void setPersistentStateActive();
 
-    public void setPersistentStateUninstalled()
-    {
-        try
-        {
-            m_archive.setPersistentState(Bundle.UNINSTALLED);
-        }
-        catch (Exception ex)
-        {
-            m_logger.log(
-                Logger.LOG_ERROR,
-                "Error writing persistent state to bundle archive.",
-                ex);
-        }
-    }
+    public abstract void setPersistentStateUninstalled();
 
     public synchronized BundleContext getBundleContext()
     {
