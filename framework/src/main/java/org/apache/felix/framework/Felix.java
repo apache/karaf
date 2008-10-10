@@ -1568,7 +1568,7 @@ ex.printStackTrace();
             if (!record)
             {
                 throw new BundleException(
-                    "Cannot start the bundle because its start level is "
+                    "Cannot start bundle " + bundle + " because its start level is "
                     + info.getStartLevel(getInitialBundleStartLevel())
                     + ", which is greater than the framework's start level of "
                     + getStartLevel() + ".");
@@ -1583,7 +1583,8 @@ ex.printStackTrace();
                 throw new IllegalStateException("Cannot start an uninstalled bundle.");
             case Bundle.STARTING:
             case Bundle.STOPPING:
-                throw new BundleException("Starting a bundle that is starting or stopping is currently not supported.");
+                throw new BundleException(
+                    "Bundle " + bundle + " cannot be started, since it is either starting or stopping.");
             case Bundle.ACTIVE:
                 return;
             case Bundle.INSTALLED:
@@ -1650,7 +1651,7 @@ ex.printStackTrace();
             }
 
             // Rethrow all other exceptions as a BundleException.
-            throw new BundleException("Activator start error.", th);
+            throw new BundleException("Activator start error in bundle " + bundle + ".", th);
         }
     }
 
@@ -1930,7 +1931,7 @@ ex.printStackTrace();
                     throw (SecurityException) rethrow;
                 }
 
-                throw new BundleException("Update failed.", rethrow);
+                throw new BundleException("Update of bundle " + bundle + " failed.", rethrow);
             }
         }
         finally
@@ -2048,7 +2049,7 @@ ex.printStackTrace();
             }
 
             // Rethrow all other exceptions as a BundleException.
-            throw new BundleException("Activator stop error.", rethrow);
+            throw new BundleException("Activator stop error in bundle " + bundle + ".", rethrow);
         }
     }
 
@@ -2073,7 +2074,7 @@ ex.printStackTrace();
         BundleInfo info = bundle.getInfo();
         if (info.getState() == Bundle.UNINSTALLED)
         {
-            throw new IllegalStateException("The bundle is uninstalled.");
+            throw new IllegalStateException("Bundle " + bundle + " is uninstalled.");
         }
 
         // Extension Bundles are not removed until the framework is shutdown
@@ -3069,7 +3070,7 @@ ex.printStackTrace();
 
         // Get exporting bundle information.
         FelixBundle exporter = (FelixBundle)
-            ((ExportedPackage) ep).getExportingBundle();
+            (ep).getExportingBundle();
 
         // Search the dependents of the exporter's module revisions
         // for importers of the specific package.
@@ -3341,7 +3342,7 @@ ex.printStackTrace();
         {
             Version bundleVersion = mp.getBundleVersion();
             bundleVersion = (bundleVersion == null) ? Version.emptyVersion : bundleVersion;
-            String symName = (String) mp.getSymbolicName();
+            String symName = mp.getSymbolicName();
 
             Bundle[] bundles = getBundles();
             for (int i = 0; (bundles != null) && (i < bundles.length); i++)
@@ -3352,7 +3353,7 @@ ex.printStackTrace();
                     .getInfo().getCurrentHeader().get(Constants.BUNDLE_VERSION));
                 if (symName.equals(sym) && bundleVersion.equals(ver) && (targetId != id))
                 {
-                    throw new BundleException("Bundle symbolic name and version are not unique.");
+                    throw new BundleException("Bundle symbolic name and version are not unique: " + sym + ':' + ver);
                 }
             }
         }
