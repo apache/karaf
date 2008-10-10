@@ -28,8 +28,6 @@ public interface IModule
     public IContentLoader getContentLoader();
     public IWire[] getWires();
 
-    public boolean isRemovalPending();
-
     public Class getClass(String name) throws ClassNotFoundException;
     public URL getResource(String name);
     public Enumeration getResources(String name);

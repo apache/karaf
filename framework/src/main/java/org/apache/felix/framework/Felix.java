@@ -1899,9 +1899,8 @@ ex.printStackTrace();
 
                 fireBundleEvent(BundleEvent.UNRESOLVED, bundle);
 
-                // Mark previous the bundle's old module for removal.
-                ((ModuleImpl) info.getModules()[info.getModules().length - 2])
-                    .setRemovalPending(true);
+                // Mark the bundle as removal pending.
+                info.setRemovalPending(true);
 
                 fireBundleEvent(BundleEvent.UPDATED, bundle);
 
@@ -2137,9 +2136,8 @@ ex.printStackTrace();
             // Set the bundle's persistent state to uninstalled.
             target.getInfo().setPersistentStateUninstalled();
 
-            // Mark current module for removal since it can no longer
-            // be used to resolve other modules per the spec.
-            ((ModuleImpl) target.getInfo().getCurrentModule()).setRemovalPending(true);
+            // Mark the bundle as removal pending.
+            target.getInfo().setRemovalPending(true);
 
             // Put bundle in uninstalled bundle array.
             rememberUninstalledBundle(bundle);
@@ -2343,7 +2341,7 @@ ex.printStackTrace();
 
                 if (bundle != null)
                 {
-                    ((ModuleImpl) bundle.getInfo().getCurrentModule()).setRemovalPending(true);
+                    bundle.getInfo().setRemovalPending(true);
                 }
 
                 if ((System.getSecurityManager() != null) &&

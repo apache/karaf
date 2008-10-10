@@ -29,7 +29,6 @@ public class ModuleImpl implements IModule
 {
     private Logger m_logger = null;
     private String m_id = null;
-    private boolean m_removalPending = false;
     private IModuleDefinition m_md = null;
     private IContentLoader m_contentLoader = null;
     private IModule[] m_fragments = null;
@@ -160,16 +159,6 @@ public class ModuleImpl implements IModule
     public synchronized IModule[] getDependents()
     {
         return m_dependents;
-    }
-
-    public boolean isRemovalPending()
-    {
-        return m_removalPending;
-    }
-
-    public void setRemovalPending(boolean removalPending)
-    {
-        m_removalPending = removalPending;
     }
 
     public Class getClass(String name) throws ClassNotFoundException

@@ -88,7 +88,7 @@ class ExportedPackageImpl implements ExportedPackage
 
     public boolean isRemovalPending()
     {
-        return m_exportingModule.isRemovalPending();
+        return m_exportingBundle.getInfo().isRemovalPending();
     }
 
     public String toString()

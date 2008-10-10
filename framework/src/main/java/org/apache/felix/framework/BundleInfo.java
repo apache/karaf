@@ -30,6 +30,7 @@ import org.osgi.framework.*;
 abstract class BundleInfo
 {
     private Logger m_logger = null;
+    private boolean m_removalPending = false;
     private IModule[] m_modules = null;
     private int m_state = 0;
     private BundleActivator m_activator = null;
@@ -63,6 +64,16 @@ abstract class BundleInfo
     public Logger getLogger()
     {
         return m_logger;
+    }
+
+    public synchronized boolean isRemovalPending()
+    {
+        return m_removalPending;
+    }
+
+    public synchronized void setRemovalPending(boolean removalPending)
+    {
+        m_removalPending = removalPending;
     }
 
     /**
