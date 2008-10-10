@@ -18,16 +18,12 @@
  */
 package org.apache.felix.framework;
 
-import java.io.IOException;
-import java.net.URL;
-import java.security.ProtectionDomain;
 import java.util.*;
 
 import org.apache.felix.framework.cache.BundleArchive;
 import org.apache.felix.framework.searchpolicy.ModuleDefinition;
 import org.apache.felix.framework.util.manifestparser.ManifestParser;
 import org.apache.felix.moduleloader.ICapability;
-import org.apache.felix.moduleloader.IContentLoader;
 import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.*;
 
@@ -143,27 +139,7 @@ class RegularBundleInfo extends BundleInfo
 
     public Map getCurrentHeader()
     {
-        Map headerMap = null;
-        // Special case the system bundle
-        if (getBundleId() == 0)
-        {
-            // TODO: REFACTOR - This is sort of a hack, we should just expose
-            //       the bundle symbolic name from our API.
-            try
-            {
-                headerMap = m_archive.getRevision(0).getManifestHeader();
-            }
-            catch (Exception ex)
-            {
-                // This should never happen.
-            }
-        }
-        else
-        {
-            headerMap = ((ModuleDefinition) getCurrentModule().getDefinition()).getHeaders();
-        }
-
-        return headerMap;
+        return ((ModuleDefinition) getCurrentModule().getDefinition()).getHeaders();
     }
 
     public long getLastModified()
