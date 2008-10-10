@@ -27,6 +27,8 @@ public interface Repository {
 
     URI getURI();
 
+    URI[] getRepositories() throws Exception;
+
     Feature[] getFeatures() throws Exception;
 
 }

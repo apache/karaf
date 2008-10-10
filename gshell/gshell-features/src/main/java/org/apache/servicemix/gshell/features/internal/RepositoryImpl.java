@@ -19,6 +19,7 @@ package org.apache.servicemix.gshell.features.internal;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -44,6 +45,7 @@ public class RepositoryImpl implements Repository {
 
     private URI uri;
     private List<Feature> features;
+    private List<URI> repositories;
 
     public RepositoryImpl(URI uri) {
         this.uri = uri;
@@ -51,6 +53,13 @@ public class RepositoryImpl implements Repository {
 
     public URI getURI() {
         return uri;
+    }
+
+    public URI[] getRepositories() throws Exception {
+        if (repositories == null) {
+            load();
+        }
+        return repositories.toArray(new URI[repositories.size()]);
     }
 
     public Feature[] getFeatures() throws Exception {
@@ -62,52 +71,60 @@ public class RepositoryImpl implements Repository {
 
     public void load() throws IOException {
         try {
+            repositories = new ArrayList<URI>();
             features = new ArrayList<Feature>();
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             Document doc = factory.newDocumentBuilder().parse(uri.toURL().openStream());
             NodeList nodes = doc.getDocumentElement().getChildNodes();
             for (int i = 0; i < nodes.getLength(); i++) {
                 Node node = nodes.item(i);
-                if (!(node instanceof Element) || !"feature".equals(node.getNodeName())) {
+                if (!(node instanceof Element)) {
                     continue;
                 }
-                Element e = (Element) nodes.item(i);
-                String name = e.getAttribute("name");
-                FeatureImpl f = new FeatureImpl(name);
-                String version = e.getAttribute("version");
-                if (version != null && version.length() > 0) {
-                	f.setVersion(version);
-                }
-                
-                NodeList featureNodes = e.getElementsByTagName("feature");
-                for (int j = 0; j < featureNodes.getLength(); j++) {
-                    Element b = (Element) featureNodes.item(j);
-                    f.addDependency(b.getTextContent());
-                }
-                NodeList configNodes = e.getElementsByTagName("config");
-                for (int j = 0; j < configNodes.getLength(); j++) {
-                    Element c = (Element) configNodes.item(j);
-                    String cfgName = c.getAttribute("name");
-                    String data = c.getTextContent();
-                    Properties properties = new Properties();
-                    properties.load(new ByteArrayInputStream(data.getBytes()));
-                    Map<String, String> hashtable = new Hashtable<String, String>();
-                    for (Object key : properties.keySet()) {
-                        String n = key.toString();
-                        hashtable.put(n, properties.getProperty(n));
+                if ("repository".equals(node.getNodeName())) {
+                    Element e = (Element) nodes.item(i);
+                    repositories.add(new URI(e.getTextContent()));
+                } else if ("feature".equals(node.getNodeName())) {
+                    Element e = (Element) nodes.item(i);
+                    String name = e.getAttribute("name");
+                    FeatureImpl f = new FeatureImpl(name);
+                    String version = e.getAttribute("version");
+                    if (version != null && version.length() > 0) {
+                        f.setVersion(version);
                     }
-                    f.addConfig(cfgName, hashtable);
+
+                    NodeList featureNodes = e.getElementsByTagName("feature");
+                    for (int j = 0; j < featureNodes.getLength(); j++) {
+                        Element b = (Element) featureNodes.item(j);
+                        f.addDependency(b.getTextContent());
+                    }
+                    NodeList configNodes = e.getElementsByTagName("config");
+                    for (int j = 0; j < configNodes.getLength(); j++) {
+                        Element c = (Element) configNodes.item(j);
+                        String cfgName = c.getAttribute("name");
+                        String data = c.getTextContent();
+                        Properties properties = new Properties();
+                        properties.load(new ByteArrayInputStream(data.getBytes()));
+                        Map<String, String> hashtable = new Hashtable<String, String>();
+                        for (Object key : properties.keySet()) {
+                            String n = key.toString();
+                            hashtable.put(n, properties.getProperty(n));
+                        }
+                        f.addConfig(cfgName, hashtable);
+                    }
+                    NodeList bundleNodes = e.getElementsByTagName("bundle");
+                    for (int j = 0; j < bundleNodes.getLength(); j++) {
+                        Element b = (Element) bundleNodes.item(j);
+                        f.addBundle(b.getTextContent());
+                    }
+                    features.add(f);
                 }
-                NodeList bundleNodes = e.getElementsByTagName("bundle");
-                for (int j = 0; j < bundleNodes.getLength(); j++) {
-                    Element b = (Element) bundleNodes.item(j);
-                    f.addBundle(b.getTextContent());
-                }
-                features.add(f);
             }
         } catch (SAXException e) {
             throw (IOException) new IOException().initCause(e);
         } catch (ParserConfigurationException e) {
+            throw (IOException) new IOException().initCause(e);
+        } catch (URISyntaxException e) {
             throw (IOException) new IOException().initCause(e);
         }
     }

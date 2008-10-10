@@ -31,6 +31,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
@@ -112,8 +114,10 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     }
 
     public void addRepository(URI uri) throws Exception {
-        internalAddRepository(uri);
-        saveState();
+        if (!repositories.values().contains(uri)) {
+            internalAddRepository(uri);
+            saveState();
+        }
     }
 
     protected void internalAddRepository(URI uri) throws Exception {
@@ -123,8 +127,10 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     }
 
     public void removeRepository(URI uri) {
-        internalRemoveRepository(uri);
-        saveState();
+        if (repositories.values().contains(uri)) {
+            internalRemoveRepository(uri);
+            saveState();
+        }
     }
 
     public void internalRemoveRepository(URI uri) {
@@ -219,21 +225,19 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
 
     public String[] listFeatures() throws Exception {
         Collection<String> features = new ArrayList<String>();
-        for (Repository repo : repositories.values()) {
-            for (Feature f : repo.getFeatures()) {
-            	String installStatus = installed.containsKey(f.getName()) ? "installed  " : "uninstalled";
-            	String version = f.getVersion();
-            	switch (version.length()) {
-            	case 1: version = "       " + version;
-            	case 2: version = "      " + version;
-            	case 3: version = "     " + version;
-            	case 4: version = "    " + version;
-            	case 5: version = "   " + version;
-            	case 6: version = "  " + version;
-            	case 7: version = " " + version;
-            	}
-                features.add("[" + installStatus + "] " + " [" + version + "] " + f.getName());
+        for (Feature f : getFeatures().values()) {
+            String installStatus = installed.containsKey(f.getName()) ? "installed  " : "uninstalled";
+            String version = f.getVersion();
+            switch (version.length()) {
+            case 1: version = "       " + version;
+            case 2: version = "      " + version;
+            case 3: version = "     " + version;
+            case 4: version = "    " + version;
+            case 5: version = "   " + version;
+            case 6: version = "  " + version;
+            case 7: version = " " + version;
             }
+            features.add("[" + installStatus + "] " + " [" + version + "] " + f.getName());
         }
         return features.toArray(new String[features.size()]);
     }
@@ -249,6 +253,23 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     protected Map<String, Feature> getFeatures() throws Exception {
         if (features == null) {
             Map<String, Feature> map = new HashMap<String, Feature>();
+            // Two phase load:
+            // * first load dependent repositories
+            for (;;) {
+                boolean newRepo = false;
+                for (Repository repo : listRepositories()) {
+                    for (URI uri : repo.getRepositories()) {
+                        if (!repositories.keySet().contains(uri)) {
+                            internalAddRepository(uri);
+                            newRepo = true;
+                        }
+                    }
+                }
+                if (!newRepo) {
+                    break;
+                }
+            }
+            // * then load all features
             for (Repository repo : repositories.values()) {
                 for (Feature f : repo.getFeatures()) {
                     map.put(f.getName(), f);
