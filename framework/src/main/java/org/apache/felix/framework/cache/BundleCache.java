@@ -275,7 +275,23 @@ public class BundleCache
 
     protected static boolean deleteDirectoryTree(File target)
     {
-        if (!getSecureAction().fileExists(target))
+        if (!deleteDirectoryTreeRecursiv(target))
+        {
+            // We might be talking windows and native libs -- hence,
+            // try to trigger a gc and try again. The hope is that
+            // this releases the classloader that loaded the native
+            // lib and allows us to delete it because it then 
+            // would not be used anymore. 
+            System.gc();
+            System.gc();
+            return deleteDirectoryTreeRecursiv(target);
+        }
+        return true;
+    }
+
+    private static boolean deleteDirectoryTreeRecursiv(File target)
+    {
+    	if (!getSecureAction().fileExists(target))
         {
             return true;
         }
@@ -285,7 +301,7 @@ public class BundleCache
             File[] files = getSecureAction().listDirectory(target);
             for (int i = 0; i < files.length; i++)
             {
-                deleteDirectoryTree(files[i]);
+                deleteDirectoryTreeRecursiv(files[i]);
             }
         }
 

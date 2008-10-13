@@ -70,6 +70,10 @@ public class ContentLoaderImpl implements IContentLoader
         {
             m_fragmentContents[i].close();
         }
+        synchronized (this)
+        {
+            m_classLoader = null;
+        }
     }
 
     public IContent getContent()
