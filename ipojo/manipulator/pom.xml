@@ -75,7 +75,7 @@
 						</Private-Package>
 						<Include-Resource>
 							META-INF/LICENCE=LICENSE,
-							META-INF/LICENCE.asm=LICENCE.asm,
+							META-INF/LICENCE.asm=LICENSE.asm,
 							META-INF/NOTICE=NOTICE
 						</Include-Resource>
 					</instructions>
