@@ -43,8 +43,6 @@ import java.util.jar.Manifest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.tools.ant.Project;
-import org.apache.tools.ant.taskdefs.Jar;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -82,7 +80,6 @@ public class FileMonitor {
     private File deployDir;
     private File generateDir;
     private Scanner scanner = new Scanner();
-    private Project project = new Project();
     private long scanInterval = 500L;
     private boolean loggedConfigAdminWarning;
     private List<Bundle> bundlesToStart = new ArrayList<Bundle>();
@@ -201,14 +198,6 @@ public class FileMonitor {
 
     public void setGenerateDir(File generateDir) {
         this.generateDir = generateDir;
-    }
-
-    public Project getProject() {
-        return project;
-    }
-
-    public void setProject(Project project) {
-        this.project = project;
     }
 
     public long getScanInterval() {
@@ -613,20 +602,12 @@ public class FileMonitor {
     }
 
     protected File createBundleJar(File dir) throws BundleException, IOException {
-        Jar jar = new Jar();
-        jar.setProject(project);
         File destFile = new File(generateDir, dir.getName() + ".jar");
         if (destFile.exists()) {
             undeployBundle(destFile);
             destFile.delete();
         }
-        LOGGER.info("Creating jar:  " + destFile + " from dir: " + dir);
-        jar.setDestFile(destFile);
-        jar.setManifest(new File(new File(dir, "META-INF"), "MANIFEST.MF"));
-        jar.setBasedir(dir);
-
-        jar.init();
-        jar.perform();
+        JarUtil.jarDir(dir.getPath(), destFile.getPath());
         return destFile;
     }
 

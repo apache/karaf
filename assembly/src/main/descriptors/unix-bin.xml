@@ -167,7 +167,6 @@
             <unpack>false</unpack>
             <outputFileNameMapping>org/apache/servicemix/bundles/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
-                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.ant</include>
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.aopalliance</include>
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.cglib</include>
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.mina</include>

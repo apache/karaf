@@ -330,11 +330,6 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.ant</artifactId>
-                <version>${ant.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.mina</artifactId>
                 <version>${mina.version}</version>
             </dependency>
