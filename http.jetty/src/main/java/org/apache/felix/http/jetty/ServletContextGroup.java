@@ -122,7 +122,7 @@ public class ServletContextGroup implements ServletContext
     void addResource( String alias, String path )
     {
         String wAlias = aliasWildcard( alias );
-        ServletHolder holder = new OsgiResourceHolder( m_hdlr, path, this );
+        ServletHolder holder = new OsgiResourceHolder( m_hdlr, alias, path, this );
         m_hdlr.addOsgiServletHolder( wAlias, holder );
         Activator.debug( " adding resources for " + wAlias + " at: " + path );
     }

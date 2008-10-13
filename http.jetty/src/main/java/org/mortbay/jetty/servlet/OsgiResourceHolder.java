@@ -51,9 +51,10 @@ public class OsgiResourceHolder extends ServletHolder
     private ServletContextGroup m_servletContextGroup;
     private HttpContext m_osgiHttpContext;
     private AccessControlContext m_acc;
+    private String m_path;
 
 
-    public OsgiResourceHolder( ServletHandler handler, String name, ServletContextGroup servletContextGroup )
+    public OsgiResourceHolder( ServletHandler handler, String name, String path, ServletContextGroup servletContextGroup )
     {
         super();
 
@@ -62,7 +63,12 @@ public class OsgiResourceHolder extends ServletHolder
 
         m_servletContextGroup = servletContextGroup;
         m_osgiHttpContext = servletContextGroup.getOsgiHttpContext();
-
+        m_path = path;
+        if (m_path == null)
+        {
+            m_path = "";
+        }
+        
         if ( System.getSecurityManager() != null )
         {
             m_acc = AccessController.getContext();
@@ -91,11 +97,17 @@ public class OsgiResourceHolder extends ServletHolder
         // get the relative path (assume empty path if there is no path info)
         // (FELIX-503)
         String target = request.getPathInfo();
-        if (target == null) {
+        if (target == null) 
+        {
             target = "";
         }
+        
+        if (!target.startsWith("/"))
+        {
+            target += "/" + target;
+        }
 
-        Activator.debug( "handle for name:" + getName() + "(path=" + target + ")" );
+        Activator.debug( "handle for name:" + m_path + " (path=" + target + ")" );
 
         if ( !m_osgiHttpContext.handleSecurity( request, response ) )
         {
@@ -103,7 +115,7 @@ public class OsgiResourceHolder extends ServletHolder
         }
 
         // Create resource based name and see if we can resolve it
-        String resName = getName() + target;
+        String resName = m_path + target;
         Activator.debug( "** looking for: " + resName );
         URL url = m_osgiHttpContext.getResource( resName );
 
@@ -267,11 +279,14 @@ public class OsgiResourceHolder extends ServletHolder
     {
         long lastModified = 0;
         
+        System.out.println("url: " + resUrl);
+        
         try 
         {
             // Get last modified time
             URLConnection conn = resUrl.openConnection();
             lastModified = conn.getLastModified();
+            System.out.println("modified - " + lastModified);
         } 
         catch (Exception e) 
         {

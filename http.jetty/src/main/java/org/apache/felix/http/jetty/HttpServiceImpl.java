@@ -136,7 +136,12 @@ public class HttpServiceImpl implements HttpService
 
         if ( !aliasValid( alias ) )
         {
-            throw new IllegalArgumentException( "malformed alias" );
+            throw new IllegalArgumentException( "malformed alias: " + alias);
+        }
+        
+        if ( !nameValid( name ) )
+        {
+            throw new IllegalArgumentException( "malformed name: " + name);
         }
 
         // add alias with null details
@@ -238,7 +243,28 @@ public class HttpServiceImpl implements HttpService
 
     protected boolean aliasValid( String alias )
     {
-        if ( !alias.equals( "/" ) && ( !alias.startsWith( "/" ) || alias.endsWith( "/" ) ) )
+        if (alias == null)
+        {
+            return false;
+        }
+            
+        if (!alias.equals( "/" ) && ( !alias.startsWith( "/" ) || alias.endsWith( "/" ) ) )
+        {
+            return false;
+        }
+
+        return true;
+    }
+    
+    
+    protected boolean nameValid( String name )
+    {
+        if (name == null)
+        {
+            return false;
+        }
+            
+        if (name.endsWith( "/" ))
         {
             return false;
         }
