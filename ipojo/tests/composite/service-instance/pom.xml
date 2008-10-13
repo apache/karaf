@@ -73,8 +73,9 @@
 							${pom.artifactId}
 						</Bundle-SymbolicName>
 						<Private-Package>
-							org.apache.felix.ipojo.test.composite.instantiator*, org.apache.felix.ipojo.test.composite.instance
+							org.apache.felix.ipojo.test.composite.instantiator*, org.apache.felix.ipojo.test.composite.instance, org.apache.felix.ipojo.test.instance 
 						</Private-Package>
+						<Export-Package>org.apache.felix.ipojo.test.instance.service</Export-Package>
 						<Test-Suite>
 							org.apache.felix.ipojo.test.composite.instantiator.InstantiatorTestSuite
 						</Test-Suite>

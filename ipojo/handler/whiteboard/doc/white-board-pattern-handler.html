@@ -1,0 +1,165 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<HTML>
+  
+<!-- Mirrored Site: felix.apache.org. File: /site/white-board-pattern-handler.html. Date: Mon, 13 Oct 2008 06:52:59 GMT -->
+<HEAD>
+    <TITLE>Apache Felix - White Board Pattern Handler</TITLE>
+    <LINK rel="stylesheet" href="media.data/site.css" type="text/css" media="all">
+    <META http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  </HEAD>
+  <BODY>
+    <DIV class="title"><DIV class="logo"><A href="index.html"><IMG border="0" alt="Apache Felix" src="media.data/logo.png"></A></DIV><DIV class="header"><A href="http://www.apache.org/"><IMG border="0" alt="Apache" src="media.data/apache.png"></A></DIV></DIV>
+    <DIV class="menu">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <UL>
+	<LI><A href="news.html" title="news">news</A></LI>
+	<LI><A href="license.html" title="license">license</A></LI>
+	<LI><SPAN class="nobr"><A href="downloads.html" title="Visit page outside Confluence" rel="nofollow">downloads<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><A href="documentation.html" title="documentation">documentation</A></LI>
+	<LI><A href="mailinglists.html" title="mailinglists">mailing lists</A></LI>
+	<LI><A href="contributing.html" title="Contributing">contributing</A></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/" title="Visit page outside Confluence" rel="nofollow">asf<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/foundation/sponsorship.html" title="Visit page outside Confluence" rel="nofollow">sponsorship<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/foundation/thanks.html" title="Visit page outside Confluence" rel="nofollow">sponsors<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN>
+<!-- ApacheCon Ad -->
+<IFRAME src="http://www.apache.org/ads/button.html" style="border-width:0; float: left" frameborder="0" scrolling="no" width="135" height="135"></IFRAME>
+<P style="height: 100px">
+<!-- ApacheCon Ad --></LI>
+</UL>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </DIV>
+    <DIV class="main">
+<TABLE class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><TBODY><TR>
+<TD class="confluenceTd" valign="top" width="80%">
+<H1><A name="WhiteBoardPatternHandler-Thewhiteboardpatternhandler"></A>The white board pattern handler</H1>
+<P>The objective of this handler is to simplify the development of white-board architecture. This architecture-style is based is very close to the extender architecture style but use services instead of bundles.<BR>
+A whiteboard is based on two different roles:</P>
+<UL class="alternate" type="square">
+	<LI>A consumer looking to special services or a services published with a special mark</LI>
+	<LI>Looked services</LI>
+</UL>
+
+
+<P>More information on this pattern is available in this <SPAN class="nobr"><A href="http://www.osgi.org/wiki/uploads/Links/whiteboard.pdf" title="Visit page outside Confluence" rel="nofollow">document<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN><BR>
+Implementing a white board pattern could be complex as the extender needs to track these services dynamically. Indeed looked services can be highly dynamic; they can arrive, leave or be modified at runtime.<BR>
+Several services specified in the OSGi specification use white board pattern such as the Device Access Manager.</P>
+<H2><A name="WhiteBoardPatternHandler-Usingthehandler"></A>Using the handler</H2>
+<P>First of all, you need to configure the component type to use the handler such as:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml"><SPAN class="code-tag">&lt;ipojo <SPAN class="code-keyword">xmlns:wbp</SPAN>=<SPAN class="code-quote">&quot;org.apache.felix.ipojo.white-board-pattern&quot;</SPAN>&gt;</SPAN>
+     &lt;component 
+          className=<SPAN class="code-quote">&quot;org.apache.felix.ipojo.test.FooWhiteBoardPattern&quot;</SPAN>
+      &gt;
+        &lt;wbp:wbp 
+   	      filter=<SPAN class="code-quote">&quot;(my.property=1)&quot;</SPAN> 
+              onArrival=<SPAN class="code-quote">&quot;onArrival&quot;</SPAN> 
+              onDeparture=<SPAN class="code-quote">&quot;onDeparture&quot;</SPAN> 
+              onModification=<SPAN class="code-quote">&quot;onModification&quot;</SPAN>
+         /&gt;
+       
+         <SPAN class="code-tag">&lt;provides/&gt;</SPAN>
+      <SPAN class="code-tag">&lt;/component&gt;</SPAN></PRE>
+</DIV></DIV>
+<P>Notice that, this handler is an external handler. So, it uses the &quot;org.apache.felix.ipojo.white-board-patter&quot; namespace.<BR>
+Once described, you can implement your component. The methods specified methods will be called when a matching services arrives or leaves or are modified. The modification callback is optional. A matching service is detected by confronting the service reference against the specified filter.<BR>
+The filter can target specific service interface (with the objectclass property) or property values.<BR>
+In the previous example, these methods could be: </P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java"><SPAN class="code-keyword">public</SPAN> class FooWhiteBoardPattern <SPAN class="code-keyword">implements</SPAN> Observable {
+    List list = <SPAN class="code-keyword">new</SPAN> ArrayList();
+    <SPAN class="code-object">int</SPAN> modifications = 0;    
+    <SPAN class="code-keyword">public</SPAN> <SPAN class="code-keyword">synchronized</SPAN> void onArrival(ServiceReference ref) {
+        list.add(ref);
+    }    
+    <SPAN class="code-keyword">public</SPAN> <SPAN class="code-keyword">synchronized</SPAN> void onDeparture(ServiceReference ref) {
+        list.remove(ref);
+    }    
+    <SPAN class="code-keyword">public</SPAN> <SPAN class="code-keyword">synchronized</SPAN> void onModification(ServiceReference ref) {
+        modifications = modifications + 1;
+    }
+    <SPAN class="code-keyword">public</SPAN> <SPAN class="code-keyword">synchronized</SPAN> Map getObservations() {
+        Map map = <SPAN class="code-keyword">new</SPAN> HashMap();
+        map.put(<SPAN class="code-quote">&quot;list&quot;</SPAN>, list);
+        map.put(<SPAN class="code-quote">&quot;modifications&quot;</SPAN>, <SPAN class="code-keyword">new</SPAN> <SPAN class="code-object">Integer</SPAN>(modifications));
+        <SPAN class="code-keyword">return</SPAN> map;
+    }</PRE>
+</DIV></DIV>
+<P>All method received the arriving, leaving or modified service reference.</P>
+<H2><A name="WhiteBoardPatternHandler-Configuration"></A>Configuration</H2>
+<P>The handler has only three mandatory attributes:</P>
+<UL>
+	<LI>Filter: filter use to discover matching filter.</LI>
+	<LI>onArrival: declaring the method to invoke when a matching service arrives</LI>
+	<LI>onDeparture: declaring the method to invoke when a matching service leaves</LI>
+</UL>
+
+
+<P>The onModification attribute is optional. This method is called when an injected service reference is modified but stills valid against the filter.</P>
+<TABLE cellpadding="5" width="85%" cellspacing="8px" class="noteMacro" border="0" align="center"><COLGROUP><COL width="24"><COL></COLGROUP><TR><TD valign="top"><IMG src="../../cwiki.apache.org/confluence/images/icons/emoticons/warning.gif" width="16" height="16" align="absmiddle" alt="" border="0"></TD><TD>
+<P>The implementation will be notified of arrivals, modifications and departures, despite the instance is invalid. Indeed, the implementation must release all objects created from another bundle as soon it leaves.</P></TD></TR></TABLE>
+<H2><A name="WhiteBoardPatternHandler-Download"></A>Download</H2>
+<P>The handler is available on the <A href="download.html" title="Download">download</A> page.<BR>
+Sources are available on the Felix trunk at the following location: <SPAN class="nobr"><A href="http://svn.apache.org/repos/asf/felix/trunk/ipojo/handler/whiteboard" title="Visit page outside Confluence" rel="nofollow">http://svn.apache.org/repos/asf/felix/trunk/ipojo/handler/whiteboard<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></P></TD>
+<TD class="confluenceTd" valign="top" width="20%">
+<H6><A name="WhiteBoardPatternHandler-Overview"></A><B>Overview</B></H6>
+<UL>
+	<LI><A href="apache-felix-ipojo.html" title="Apache Felix iPOJO">Home Page</A></LI>
+	<LI><A href="apache-felix-ipojo-feature-overview.html" title="Apache Felix iPOJO Feature Overview">iPOJO Feature Overview</A></LI>
+	<LI><A href="download.html" title="Download">Download &amp; Install </A></LI>
+</UL>
+
+
+<H6><A name="WhiteBoardPatternHandler-GettingStarted"></A><B>Getting Started</B></H6>
+<UL>
+	<LI><A href="ipojo-in-10-minutes.html" title="iPOJO in 10 minutes">iPOJO in 10 minutes</A></LI>
+	<LI><A href="ipojo-hello-word-maven-based-tutorial.html" title="iPOJO Hello Word (Maven-Based) tutorial">iPOJO Hello Word &#40;Maven&#45;Based&#41; tutorial</A></LI>
+	<LI><A href="ipojo-advanced-tutorial.html" title="iPOJO Advanced Tutorial">iPOJO Advanced Tutorial</A></LI>
+</UL>
+
+
+<H6><A name="WhiteBoardPatternHandler-UserGuide"></A><B>User Guide</B></H6>
+<UL>
+	<LI><A href="describing-components.html" title="Describing components">Describing components (handler list) </A></LI>
+	<LI><A href="how-to-use-ipojo-annotations.html" title="How to use iPOJO Annotations">How to use iPOJO Annotations</A></LI>
+	<LI><A href="using-xml-schemas.html" title="Using XML Schemas">Using XML Schemas</A></LI>
+	<LI><A href="ipojo-advanced-topics.html" title="iPOJO Advanced Topics">Advanced Topics</A></LI>
+	<LI><A href="ipojo-faq.html" title="iPOJO FAQ">FAQ</A></LI>
+</UL>
+
+
+<H6><A name="WhiteBoardPatternHandler-Tools"></A><B>Tools</B></H6>
+<UL>
+	<LI><A href="ipojo-eclipse-plug-in.html" title="iPOJO Eclipse Plug-in">iPOJO Eclipse Plug&#45;in</A></LI>
+	<LI><A href="ipojo-ant-task.html" title="iPOJO Ant Task">iPOJO Ant Task</A></LI>
+	<LI><A href="ipojo-maven-plug-in.html" title="iPOJO Maven Plug-in">iPOJO Maven Plug&#45;in</A></LI>
+	<LI><A href="ipojo-concepts-overview.html" title="iPOJO Concepts Overview">iPOJO concepts overview</A></LI>
+</UL>
+
+
+<H6><A name="WhiteBoardPatternHandler-DeveloperGuide"></A><B>Developer Guide</B></H6>
+<UL>
+	<LI>API: <SPAN class="nobr"><A href="http://people.apache.org/~clement/ipojo/api/0.8/" title="Visit page outside Confluence" rel="nofollow">0.8<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><A href="how-to-write-your-own-handler.html" title="How to write your own handler">How to write your own handler</A></LI>
+	<LI><A href="how-to-use-ipojo-manipulation-metadata.html" title="How to use iPOJO Manipulation Metadata">How to use iPOJO Manipulation Metadata</A></LI>
+</UL>
+
+
+<H6><A name="WhiteBoardPatternHandler-Misc%26Contact"></A><B>Misc &amp; Contact</B></H6>
+<UL>
+	<LI><A href="apache-felix-ipojo-issuestracker.html" title="apache-felix-ipojo-issuestracker">Issues Tracker</A></LI>
+	<LI><A href="apache-felix-ipojo-supportedvms.html" title="apache-felix-ipojo-supportedVMs">Supported JVMs</A></LI>
+	<LI><A href="apache-felix-ipojo-supportedosgi.html" title="apache-felix-ipojo-supportedOSGi">Supported OSGi Implementations</A></LI>
+	<LI><A href="future-ideas.html" title="Future Ideas">Future Ideas</A></LI>
+	<LI><A href="contact.html" title="Contact">Contact</A></LI>
+	<LI><A href="related-works.html" title="Related Works">Related Works</A></LI>
+	<LI><A href="article-presentations.html" title="Article & Presentations">Article &amp; Presentations</A></LI>
+</UL>
+
+
+<HR>
+<DIV class="" align="center">
+<P><SPAN class="nobr"><A href="http://cwiki.apache.org/confluence/createrssfeed.action?types=blogpost&amp;statuses=created&amp;statuses=modified&amp;spaces=FELIX&amp;labelString=iPOJO&amp;rssType=atom&amp;maxResults=10&amp;timeSpan=5&amp;publicFeed=true&amp;title=iPOJO%20Atom%20Feed" title="Stay tuned!" rel="nofollow"><IMG src="../../cwiki.apache.org/confluence/images/icons/feed-icon-32x32.png" align="absmiddle" border="0"><SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></P></DIV></TD></TR></TBODY></TABLE>
+    </DIV>
+  </BODY>
+
+<!-- Mirrored Site: felix.apache.org. File: /site/white-board-pattern-handler.html. Date: Mon, 13 Oct 2008 06:52:59 GMT -->
+</HTML>

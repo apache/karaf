@@ -1,3 +1,10 @@
+Changes from 0.8.0 to 1.0.0
+---------------------------
+** Improvement
+    * [FELIX-673] - Provide OBR description to iPOJO bundles (2008-08-07)
+    * [FELIX-716] - Provide XML schemas for iPOJO descriptors (2008-09-09)
+
+    
 Version 0.8.0
 -------------
-* [2008-05-16] Initial release
+    * Initial release (2008-05-16) 

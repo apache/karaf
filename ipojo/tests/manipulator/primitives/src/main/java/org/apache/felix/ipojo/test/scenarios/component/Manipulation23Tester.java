@@ -114,7 +114,12 @@ public class Manipulation23Tester implements PrimitiveManipulationTestService {
 
  	public void setShort(short s) { this.s = s; }
 
-	public void setShorts(short[] ss) { this.ss = ss; }	
+	public void setShorts(short[] ss) {
+	    this.ss = new short[ss.length];
+	    for (int i = 0; i < ss.length; i++) {
+	        this.ss[i] = ss[i];
+	    }
+	}	
 	
 	// This method has been added to test an issue when autoboxing.
 	public void setLong(long l, String s) {

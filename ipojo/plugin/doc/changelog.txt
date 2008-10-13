@@ -1,3 +1,8 @@
+Changes from 0.8.0 to 1.0.0
+---------------------------
+** Improvement
+    * Embed the latest manipulator (2008-05-26)
+    
 Version 0.8.0
 -------------
-* [2008-05-16] Initial release
+    * Initial release (2008-05-16) 

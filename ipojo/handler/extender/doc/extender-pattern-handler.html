@@ -1,0 +1,162 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<HTML>
+  
+<!-- Mirrored Site: felix.apache.org. File: /site/extender-pattern-handler.html. Date: Mon, 13 Oct 2008 06:52:58 GMT -->
+<HEAD>
+    <TITLE>Apache Felix - Extender Pattern Handler</TITLE>
+    <LINK rel="stylesheet" href="media.data/site.css" type="text/css" media="all">
+    <META http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  </HEAD>
+  <BODY>
+    <DIV class="title"><DIV class="logo"><A href="index.html"><IMG border="0" alt="Apache Felix" src="media.data/logo.png"></A></DIV><DIV class="header"><A href="http://www.apache.org/"><IMG border="0" alt="Apache" src="media.data/apache.png"></A></DIV></DIV>
+    <DIV class="menu">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <UL>
+	<LI><A href="news.html" title="news">news</A></LI>
+	<LI><A href="license.html" title="license">license</A></LI>
+	<LI><SPAN class="nobr"><A href="downloads.html" title="Visit page outside Confluence" rel="nofollow">downloads<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><A href="documentation.html" title="documentation">documentation</A></LI>
+	<LI><A href="mailinglists.html" title="mailinglists">mailing lists</A></LI>
+	<LI><A href="contributing.html" title="Contributing">contributing</A></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/" title="Visit page outside Confluence" rel="nofollow">asf<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/foundation/sponsorship.html" title="Visit page outside Confluence" rel="nofollow">sponsorship<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/foundation/thanks.html" title="Visit page outside Confluence" rel="nofollow">sponsors<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN>
+<!-- ApacheCon Ad -->
+<IFRAME src="http://www.apache.org/ads/button.html" style="border-width:0; float: left" frameborder="0" scrolling="no" width="135" height="135"></IFRAME>
+<P style="height: 100px">
+<!-- ApacheCon Ad --></LI>
+</UL>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </DIV>
+    <DIV class="main">
+<TABLE class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><TBODY><TR>
+<TD class="confluenceTd" valign="top" width="80%">
+<H1><A name="ExtenderPatternHandler-Theextenderpatternhandler"></A>The extender pattern handler</H1>
+<P>The objective of this handler is to simplify the development of extender-based architecture. This architecture-style is based on two different roles:</P>
+<UL>
+	<LI>The extender</LI>
+	<LI>The extension</LI>
+</UL>
+
+
+<P><IMG src="extender-pattern-handler.data/extender.png" align="absmiddle" border="0"><BR>
+The relation is basically a 1..n relation. The extender tracks extensions. The particularity of this architecture-style is that extensions are packaged in different bundles. An extension is detected by analyzing the bundle. Indeed these bundles can have a special mark in their manifest of a special file...<BR>
+Implementing an extender pattern could be complex as the extender needs to track these marks dynamically. When a bundle starts, it needs to look at the mark. Then a bundle leave, the extender must release all object created from this bundle.<BR>
+This handler tracks bundle for you based on the specified required mark. At each time a matching bundle appears or disappears, a callback is invoked. The mark is currently a header in the bundle manifest.<BR>
+Nowadays, a lot of frameworks use this pattern such as iPOJO it-self (to find both bundles containing components and bundles adding a new implementation type), Spring-DM ...</P>
+
+<H2><A name="ExtenderPatternHandler-Usingthehandler"></A>Using the handler</H2>
+<P>First of all, you need to configure the component type to use the handler such as:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml"><SPAN class="code-tag">&lt;iPOJO <SPAN class="code-keyword">xmlns:extender</SPAN>=<SPAN class="code-quote">&quot;org.apache.felix.ipojo.extender&quot;</SPAN>&gt;</SPAN>
+	&lt;Component
+		className=<SPAN class="code-quote">&quot;org.apache.felix.ipojo.extender.myextender&quot;</SPAN>&gt;
+		
+                <SPAN class="code-tag">&lt;!&mdash;Extender Pattern handler configuration --&gt;</SPAN>
+		&lt;extender:extender 
+                  extension=<SPAN class="code-quote">&quot;My-Extension&quot;</SPAN>
+                  onArrival=<SPAN class="code-quote">&quot;onBundleArrival&quot;</SPAN> 
+                  onDeparture=<SPAN class="code-quote">&quot;onBundleDeparture&quot;</SPAN> 
+                /&gt;
+
+		<SPAN class="code-tag">&lt;callback transition=<SPAN class="code-quote">&quot;invalidate&quot;</SPAN> method=<SPAN class="code-quote">&quot;stopping&quot;</SPAN> /&gt;</SPAN>
+		<SPAN class="code-tag">&lt;callback transition=<SPAN class="code-quote">&quot;validate&quot;</SPAN> method=<SPAN class="code-quote">&quot;starting&quot;</SPAN> /&gt;</SPAN>
+		<SPAN class="code-tag">&lt;provides /&gt;</SPAN>
+	<SPAN class="code-tag">&lt;/Component&gt;</SPAN>
+<SPAN class="code-tag">&lt;/iPOJO&gt;</SPAN></PRE>
+</DIV></DIV>
+<P>Notice that, this handler is an external handler. So, it uses the &quot;org.apache.felix.ipojo.extender&quot; namespace.<BR>
+Once described, you can implement your component. The methods specified methods will be called when a matching bundle arrives or leaves.<BR>
+In the previous example, these methods could be: </P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java">void onBundleArrival(Bundle bundle, <SPAN class="code-object">String</SPAN> header) {
+<SPAN class="code-comment">// Do something
+</SPAN>}
+
+void onBundleDeparture(Bundle bundle) {
+        <SPAN class="code-comment">// Do something
+</SPAN>}</PRE>
+</DIV></DIV>
+<P>Notice the different signatures of the methods. The arrival method is called with the arriving bundle and the matching header value (i.e. the value of the My-Extension header of the bundle manifest). The departure method just receives the leaving bundle.</P>
+<H2><A name="ExtenderPatternHandler-Configuration"></A>Configuration</H2>
+<P>The handler has only three mandatory attributes:</P>
+<UL>
+	<LI>Extension: declaring the looked manifest header.</LI>
+	<LI>onArrival: declaring the method to invoke when a matching bundle arrives</LI>
+	<LI>onDeparture: declaring the method to invoke when a matching bundle leaves</LI>
+</UL>
+
+
+<TABLE cellpadding="5" width="85%" cellspacing="8px" class="noteMacro" border="0" align="center"><COLGROUP><COL width="24"><COL></COLGROUP><TR><TD valign="top"><IMG src="../../cwiki.apache.org/confluence/images/icons/emoticons/warning.gif" width="16" height="16" align="absmiddle" alt="" border="0"></TD><TD>
+<P>The implementation will be notified of arrivals and departures despite the instance is invalid. Indeed, the implementation must release all objects created from another bundle as soon it leaves.</P></TD></TR></TABLE>
+
+<H2><A name="ExtenderPatternHandler-Download"></A>Download</H2>
+<P>The handler is available on the <A href="download.html" title="Download">download</A> page.<BR>
+Sources are available on the Felix trunk at the following location: <SPAN class="nobr"><A href="http://svn.apache.org/repos/asf/felix/trunk/ipojo/handler/extender/" title="Visit page outside Confluence" rel="nofollow">http://svn.apache.org/repos/asf/felix/trunk/ipojo/handler/extender/<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></P>
+
+<H2><A name="ExtenderPatternHandler-Amorerealisticexample"></A>A more realistic example</H2>
+<P>The Junit4OSGi framework, available <SPAN class="nobr"><A href="https://svn.apache.org/repos/asf/felix/trunk/ipojo/examples/junit4osgi" title="Visit page outside Confluence" rel="nofollow">here<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN> , uses this handler to track Junit Test Suite offered by the installed bundles. The Junit4Osgi bundle has a component using this handler to be notified when a bundle with the &quot;Test-Suite&quot; header appears or leaves.</P>
+</TD>
+<TD class="confluenceTd" valign="top" width="20%">
+<H6><A name="ExtenderPatternHandler-Overview"></A><B>Overview</B></H6>
+<UL>
+	<LI><A href="apache-felix-ipojo.html" title="Apache Felix iPOJO">Home Page</A></LI>
+	<LI><A href="apache-felix-ipojo-feature-overview.html" title="Apache Felix iPOJO Feature Overview">iPOJO Feature Overview</A></LI>
+	<LI><A href="download.html" title="Download">Download &amp; Install </A></LI>
+</UL>
+
+
+<H6><A name="ExtenderPatternHandler-GettingStarted"></A><B>Getting Started</B></H6>
+<UL>
+	<LI><A href="ipojo-in-10-minutes.html" title="iPOJO in 10 minutes">iPOJO in 10 minutes</A></LI>
+	<LI><A href="ipojo-hello-word-maven-based-tutorial.html" title="iPOJO Hello Word (Maven-Based) tutorial">iPOJO Hello Word &#40;Maven&#45;Based&#41; tutorial</A></LI>
+	<LI><A href="ipojo-advanced-tutorial.html" title="iPOJO Advanced Tutorial">iPOJO Advanced Tutorial</A></LI>
+</UL>
+
+
+<H6><A name="ExtenderPatternHandler-UserGuide"></A><B>User Guide</B></H6>
+<UL>
+	<LI><A href="describing-components.html" title="Describing components">Describing components (handler list) </A></LI>
+	<LI><A href="how-to-use-ipojo-annotations.html" title="How to use iPOJO Annotations">How to use iPOJO Annotations</A></LI>
+	<LI><A href="using-xml-schemas.html" title="Using XML Schemas">Using XML Schemas</A></LI>
+	<LI><A href="ipojo-advanced-topics.html" title="iPOJO Advanced Topics">Advanced Topics</A></LI>
+	<LI><A href="ipojo-faq.html" title="iPOJO FAQ">FAQ</A></LI>
+</UL>
+
+
+<H6><A name="ExtenderPatternHandler-Tools"></A><B>Tools</B></H6>
+<UL>
+	<LI><A href="ipojo-eclipse-plug-in.html" title="iPOJO Eclipse Plug-in">iPOJO Eclipse Plug&#45;in</A></LI>
+	<LI><A href="ipojo-ant-task.html" title="iPOJO Ant Task">iPOJO Ant Task</A></LI>
+	<LI><A href="ipojo-maven-plug-in.html" title="iPOJO Maven Plug-in">iPOJO Maven Plug&#45;in</A></LI>
+	<LI><A href="ipojo-concepts-overview.html" title="iPOJO Concepts Overview">iPOJO concepts overview</A></LI>
+</UL>
+
+
+<H6><A name="ExtenderPatternHandler-DeveloperGuide"></A><B>Developer Guide</B></H6>
+<UL>
+	<LI>API: <SPAN class="nobr"><A href="http://people.apache.org/~clement/ipojo/api/0.8/" title="Visit page outside Confluence" rel="nofollow">0.8<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><A href="how-to-write-your-own-handler.html" title="How to write your own handler">How to write your own handler</A></LI>
+	<LI><A href="how-to-use-ipojo-manipulation-metadata.html" title="How to use iPOJO Manipulation Metadata">How to use iPOJO Manipulation Metadata</A></LI>
+</UL>
+
+
+<H6><A name="ExtenderPatternHandler-Misc%26Contact"></A><B>Misc &amp; Contact</B></H6>
+<UL>
+	<LI><A href="apache-felix-ipojo-issuestracker.html" title="apache-felix-ipojo-issuestracker">Issues Tracker</A></LI>
+	<LI><A href="apache-felix-ipojo-supportedvms.html" title="apache-felix-ipojo-supportedVMs">Supported JVMs</A></LI>
+	<LI><A href="apache-felix-ipojo-supportedosgi.html" title="apache-felix-ipojo-supportedOSGi">Supported OSGi Implementations</A></LI>
+	<LI><A href="future-ideas.html" title="Future Ideas">Future Ideas</A></LI>
+	<LI><A href="contact.html" title="Contact">Contact</A></LI>
+	<LI><A href="related-works.html" title="Related Works">Related Works</A></LI>
+	<LI><A href="article-presentations.html" title="Article & Presentations">Article &amp; Presentations</A></LI>
+</UL>
+
+
+<HR>
+<DIV class="" align="center">
+<P><SPAN class="nobr"><A href="http://cwiki.apache.org/confluence/createrssfeed.action?types=blogpost&amp;statuses=created&amp;statuses=modified&amp;spaces=FELIX&amp;labelString=iPOJO&amp;rssType=atom&amp;maxResults=10&amp;timeSpan=5&amp;publicFeed=true&amp;title=iPOJO%20Atom%20Feed" title="Stay tuned!" rel="nofollow"><IMG src="../../cwiki.apache.org/confluence/images/icons/feed-icon-32x32.png" align="absmiddle" border="0"><SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></P></DIV></TD></TR></TBODY></TABLE>
+    </DIV>
+  </BODY>
+
+<!-- Mirrored Site: felix.apache.org. File: /site/extender-pattern-handler.html. Date: Mon, 13 Oct 2008 06:52:58 GMT -->
+</HTML>

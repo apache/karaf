@@ -1,3 +1,11 @@
+Changes from 0.8.1 to 1.0.0
+---------------------------
+** Bug    
+    * Update contained Xerces packages to support XML-Schemas (2008-10-06)
+
+** Improvement
+    * Embed the latest manipulator (2008-07-03)
+    
 Version 0.8.1
 -------------
-* [2008-06-06] Initial release
+    * Initial release (2008-06-06) 

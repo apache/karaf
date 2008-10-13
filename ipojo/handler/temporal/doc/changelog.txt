@@ -1,3 +1,11 @@
+Changes from 0.8.1 to 1.0.0
+---------------------------
+** Improvement
+    * [FELIX-625] - Temporal Dependency improvements (onTimeout policies) (2008-07-07)
+    * [FELIX-673] - Provide OBR description to iPOJO bundles (2008-08-07
+    * [FELIX-716] - Provide XML schemas for iPOJO descriptors (2008-09-09)
+
+
 Version 0.8.1
 -------------
-* [2008-06-06] Initial release
+    * Initial release (2008-06-06) 

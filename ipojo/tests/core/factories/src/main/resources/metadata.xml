@@ -76,4 +76,14 @@
 		<controller field="m_controller"/>
 	</component>
 	<instance component="org.apache.felix.ipojo.test.scenarios.component.SimpleType" name="SimpleInstance"/>
+	
+	<!--  Check Banana[] injection -->
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.EmptyArrayTest">
+		<provides>
+			<property name="service.bananas" field="bananas" value="no-value"/>
+		</provides>
+		<properties>
+			<property name="ban" method="setBananas"/>
+		</properties>
+	</component>
 </ipojo>

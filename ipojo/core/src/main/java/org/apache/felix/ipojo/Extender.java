@@ -472,7 +472,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
     /**
      * Computes the bundle context from the bundle class by introspection.
      * @param bundle the bundle.
-     * @return the bundle context object or null if not found.
+     * @return the bundle context object or <code>null</code> if not found.
      */
     public BundleContext getBundleContext(Bundle bundle) {
         if (bundle == null) { return null; }

@@ -1,0 +1,343 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<HTML>
+  
+<!-- Mirrored Site: felix.apache.org. File: /site/ipojo-jmx-handler.html. Date: Mon, 13 Oct 2008 06:53:08 GMT -->
+<HEAD>
+    <TITLE>Apache Felix - iPOJO JMX Handler</TITLE>
+    <LINK rel="stylesheet" href="media.data/site.css" type="text/css" media="all">
+    <META http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  </HEAD>
+  <BODY>
+    <DIV class="title"><DIV class="logo"><A href="index.html"><IMG border="0" alt="Apache Felix" src="media.data/logo.png"></A></DIV><DIV class="header"><A href="http://www.apache.org/"><IMG border="0" alt="Apache" src="media.data/apache.png"></A></DIV></DIV>
+    <DIV class="menu">
+ 
+             
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+                                     
+                                                 
+            <UL>
+	<LI><A href="news.html" title="news">news</A></LI>
+	<LI><A href="license.html" title="license">license</A></LI>
+	<LI><SPAN class="nobr"><A href="downloads.html" title="Visit page outside Confluence" rel="nofollow">downloads<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><A href="documentation.html" title="documentation">documentation</A></LI>
+	<LI><A href="mailinglists.html" title="mailinglists">mailing lists</A></LI>
+	<LI><A href="contributing.html" title="Contributing">contributing</A></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/" title="Visit page outside Confluence" rel="nofollow">asf<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/foundation/sponsorship.html" title="Visit page outside Confluence" rel="nofollow">sponsorship<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/foundation/thanks.html" title="Visit page outside Confluence" rel="nofollow">sponsors<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN>
+<!-- ApacheCon Ad -->
+<IFRAME src="http://www.apache.org/ads/button.html" style="border-width:0; float: left" frameborder="0" scrolling="no" width="135" height="135"></IFRAME>
+<P style="height: 100px">
+<!-- ApacheCon Ad --></LI>
+</UL>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        </DIV>
+    <DIV class="main">
+<TABLE class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><TBODY><TR>
+<TD class="confluenceTd" valign="top" width="80%">
+
+<H1><A name="iPOJOJMXHandler-iPOJOJMXHandler"></A>iPOJO JMX Handler</H1>
+
+<P>This handler provides JMX management of component instance. It could be useful to manage instance remotely. As the handler exposes MBeans, you must have a MBean server running on your platform (as the platform MBean server or the MOSGi MBean Server).</P>
+
+<H2><A name="iPOJOJMXHandler-Features"></A>Features</H2>
+
+<P>The handler allows to:</P>
+<UL>
+	<LI>Expose attributes accessible via JMX (with rights management).</LI>
+	<LI>Expose methods to be called through JMX.</LI>
+	<LI>Get notifications when attributes are modified .</LI>
+</UL>
+
+
+<H2><A name="iPOJOJMXHandler-Prerequisites"></A>Prerequisites</H2>
+
+<P>To be functional this handler must register on an MBean Server,thus you obviously need it. Several servers are currently supported : the standard platform MBean server (included in the JDK), MOSGi (provided with Felix), ...<BR>
+To use MOSGi, you have to deploy at least the following three bundles of MOSGi:</P>
+<UL>
+	<LI>org.apache.felix.mosgi.jmx.agent</LI>
+	<LI>org.apache.felix.mosgi.jmx.registry</LI>
+	<LI>org.apache.felix.mosgi.jmx.rmiconnector</LI>
+</UL>
+
+
+<P>You can find MOSGi documentation on <SPAN class="nobr"><A href="http://cwiki.apache.org/FELIX/mosgi-managed-osgi-framework.html" title="Visit page outside Confluence" rel="nofollow">http://cwiki.apache.org/FELIX/mosgi-managed-osgi-framework.html<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></P>
+
+<H2><A name="iPOJOJMXHandler-Download"></A>Download</H2>
+
+<P>The JMX handler is available in the Felix trunk in the iPOJO project. See the <A href="download.html" title="Download">Download</A> page to download and compile these sources.</P>
+
+<H2><A name="iPOJOJMXHandler-Howtouseit"></A>How to use it</H2>
+
+<P>The handler needs to be added in the metadata.xml, you just add a namespace (e.g., jmx) :</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml"><SPAN class="code-tag">&lt;ipojo <SPAN class="code-keyword">xmlns:jmx</SPAN>=<SPAN class="code-quote">&quot;org.apache.felix.ipojo.handlers.jmx&quot;</SPAN>&gt;</SPAN>
+	...
+<SPAN class="code-tag">&lt;/ipojo&gt;</SPAN></PRE>
+</DIV></DIV>
+<P>So, you could now expose in JMX properties and methods of your component. They are surrounded by the &lt;jmx:config&gt;<BR>
+tag.</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml"><SPAN class="code-tag">&lt;jmx:config&gt;</SPAN>
+    <SPAN class="code-tag">&lt;property name=<SPAN class="code-quote">&quot;message&quot;</SPAN> field=<SPAN class="code-quote">&quot;m_msg&quot;</SPAN> rights=<SPAN class="code-quote">&quot;w&quot;</SPAN> notification=<SPAN class="code-quote">&quot;true&quot;</SPAN>/&gt;</SPAN>
+    <SPAN class="code-tag">&lt;method name=<SPAN class="code-quote">&quot;doSomethingBad&quot;</SPAN>/&gt;</SPAN>
+    <SPAN class="code-tag">&lt;method name=<SPAN class="code-quote">&quot;doSomethingGood&quot;</SPAN>/&gt;</SPAN>
+<SPAN class="code-tag">&lt;/jmx:config&gt;</SPAN></PRE>
+</DIV></DIV>
+<P><EM>Note:</EM> Be careful that the argument and return type of methods must be serializable. In case of several methods have the same name, each of them will be exposed.</P>
+
+<H2><A name="iPOJOJMXHandler-JMXHandleroptions"></A>JMX Handler options</H2>
+
+<P>Here you can find all configuration options of the JMX handler. There are two kinds of manageable elements : properties and methods. First is described the global configuration of the handler. Then elements can be configured, using several attributes, as described below.</P>
+
+<H2><A name="iPOJOJMXHandler-Globalhandlerattributes"></A>Global handler attributes</H2>
+<TABLE class="confluenceTable"><TBODY>
+<TR>
+<TH class="confluenceTh">Attribute name </TH>
+<TH class="confluenceTh"> Required </TH>
+<TH class="confluenceTh"> Description</TH>
+</TR>
+<TR>
+<TD class="confluenceTd">objectName</TD>
+<TD class="confluenceTd">NO</TD>
+<TD class="confluenceTd">The complete object name of the managed component. The syntax of this attribute must be compliant with the ObjectName syntax, detailed in the JMX specification.<BR>
+If neither domain nor name attributes are specified, the default value  is determined by the package, the type and the instance name of the component. This attribute overrides the domain and name attributes.<BR>
+<EM>Example:</EM> &quot;my.domain:type=myType,name=myName&quot;</TD>
+</TR>
+<TR>
+<TD class="confluenceTd">domain</TD>
+<TD class="confluenceTd">NO</TD>
+<TD class="confluenceTd">The domain of the managed object (i.e., the left part of the object name). This attribute must be compliant with the domain syntax, as described in the JMX specification.<BR>
+<EM>Example:</EM> &quot;my.domain&quot;</TD>
+</TR>
+<TR>
+<TD class="confluenceTd">name</TD>
+<TD class="confluenceTd">NO</TD>
+<TD class="confluenceTd">The name property of the managed object. The value of this attribute must comply with the ObjectName value syntax, as described in the JMX specification.</TD>
+</TR>
+<TR>
+<TD class="confluenceTd">usesMOSGi</TD>
+<TD class="confluenceTd">NO</TD>
+<TD class="confluenceTd">Determines if the component must be register on the MOSGi MBean server or not.</TD>
+</TR>
+<TR>
+<TD class="confluenceTd">preRegister <BR>
+postRegister <BR>
+preDeregister<BR>
+postDeregister</TD>
+<TD class="confluenceTd">NO</TD>
+<TD class="confluenceTd">These attributes allow to specify methods to carry out operations before and after being registered or unregistered from the MBean server.</TD>
+</TR>
+</TBODY></TABLE>
+
+<H2><A name="iPOJOJMXHandler-Propertiesattributes"></A>Properties attributes</H2>
+<TABLE class="confluenceTable"><TBODY>
+<TR>
+<TH class="confluenceTh">Attribute name</TH>
+<TH class="confluenceTh">Required</TH>
+<TH class="confluenceTh">Description</TH>
+</TR>
+<TR>
+<TD class="confluenceTd">field</TD>
+<TD class="confluenceTd">YES</TD>
+<TD class="confluenceTd">The name of the component's field to expose.</TD>
+</TR>
+<TR>
+<TD class="confluenceTd">name</TD>
+<TD class="confluenceTd">NO</TD>
+<TD class="confluenceTd">The name of the property as it will appear in JMX. If unspecified, the default value is the name of the exposed field.</TD>
+</TR>
+<TR>
+<TD class="confluenceTd">rights</TD>
+<TD class="confluenceTd">NO</TD>
+<TD class="confluenceTd">Specify the access permission of the exposed field. The accepted values are : 
+<UL>
+	<LI>&quot;r&quot; : read-only access, the default value.</LI>
+	<LI>&quot;w&quot; : read and write access.</LI>
+</UL>
+</TD>
+</TR>
+<TR>
+<TD class="confluenceTd">notification</TD>
+<TD class="confluenceTd">NO</TD>
+<TD class="confluenceTd">Enable or disable attribute change notification sending for this property. If set to &quot;true&quot;, a notification is sent each time the value of the field changes.</TD>
+</TR>
+</TBODY></TABLE>
+
+<H2><A name="iPOJOJMXHandler-Methodsattributes"></A>Methods attributes</H2>
+<TABLE class="confluenceTable"><TBODY>
+<TR>
+<TH class="confluenceTh">Attribute name</TH>
+<TH class="confluenceTh">Required</TH>
+<TH class="confluenceTh">Description</TH>
+</TR>
+<TR>
+<TD class="confluenceTd">name</TD>
+<TD class="confluenceTd">YES</TD>
+<TD class="confluenceTd">The name of the method to expose. If multiple methods have the same name, all of them are exposed.</TD>
+</TR>
+<TR>
+<TD class="confluenceTd">description</TD>
+<TD class="confluenceTd">NO</TD>
+<TD class="confluenceTd">The description of the exposed method, as it will appear in JMX.</TD>
+</TR>
+</TBODY></TABLE>
+
+
+<H2><A name="iPOJOJMXHandler-Examples"></A>Examples</H2>
+
+<P>In this part, we will give you a complete example of a component managed with JMX, using the JConsole provided by the SUN JDK.</P>
+
+<H3><A name="iPOJOJMXHandler-ExposingAttributes"></A>Exposing Attributes</H3>
+
+<P>In first time we create a simple component named MyComponent. We have add two fields named m_level (int) and m_message (String).</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java"><SPAN class="code-keyword">public</SPAN> class
+MyComponent ... {
+	<SPAN class="code-comment">// Exposed attributes
+</SPAN>	<SPAN class="code-keyword">private</SPAN> <SPAN class="code-object">String</SPAN> m_message;
+	<SPAN class="code-keyword">private</SPAN> <SPAN class="code-object">int</SPAN> m_level;
+}</PRE>
+</DIV></DIV>
+<P>We expose now the attributes in the jmx:config<BR>
+tag in the metadata :</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml"><SPAN class="code-tag">&lt;?xml version=<SPAN class="code-quote">&quot;1.0&quot;</SPAN> encoding=<SPAN class="code-quote">&quot;UTF-8&quot;</SPAN>?&gt;</SPAN>
+<SPAN class="code-tag">&lt;iPOJO <SPAN class="code-keyword">xmlns:jmx</SPAN>=<SPAN class="code-quote">&quot;org.apache.felix.ipojo.handlers.jmx&quot;</SPAN>&gt;</SPAN>
+    &lt;component className=<SPAN class="code-quote">&quot;...MyComponent&quot;</SPAN>
+      architecture=<SPAN class="code-quote">&quot;true&quot;</SPAN>
+      immediate=<SPAN class="code-quote">&quot;true&quot;</SPAN>&gt;
+
+      <SPAN class="code-tag">&lt;provides/&gt;</SPAN>
+      <SPAN class="code-tag">&lt;jmx:config&gt;</SPAN>
+	<SPAN class="code-tag"><SPAN class="code-comment">&lt;!-- Exposed properties --&gt;</SPAN></SPAN>
+	&lt;property field=<SPAN class="code-quote">&quot;m_level&quot;</SPAN>
+          name=<SPAN class="code-quote">&quot;The level&quot;</SPAN>
+          rights=<SPAN class="code-quote">&quot;r&quot;</SPAN>/&gt;
+	&lt;property field=<SPAN class="code-quote">&quot;m_message&quot;</SPAN>
+          name=<SPAN class="code-quote">&quot;The message&quot;</SPAN>
+          rights=<SPAN class="code-quote">&quot;w&quot;</SPAN>/&gt;
+      <SPAN class="code-tag">&lt;/jmx:config&gt;</SPAN>
+    <SPAN class="code-tag">&lt;/component&gt;</SPAN>
+    &lt;instance
+      component=<SPAN class="code-quote">&quot;...MyComponent&quot;</SPAN>/&gt;
+<SPAN class="code-tag">&lt;/iPOJO&gt;</SPAN></PRE>
+</DIV></DIV>
+<P>Now, we could get and write the properties in the JConsole :<BR>
+<IMG src="ipojo-jmx-handler.data/JMXHandler_1.png" align="absmiddle" border="0"></P>
+
+<H3><A name="iPOJOJMXHandler-ExposingMethods"></A>Exposing Methods</H3>
+
+<P>We could now add methods in the initial class :</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java">/**
+Do something good
+*/
+<SPAN class="code-keyword">public</SPAN> void doSomethingGood() {
+		...
+}
+
+/**
+Do something bad
+*/
+<SPAN class="code-keyword">public</SPAN> void doSomethingBad() {
+		...
+}
+
+/**
+Do nothing
+*/
+<SPAN class="code-keyword">public</SPAN> void doNothing() {
+		...
+}</PRE>
+</DIV></DIV>
+<P>We add corresponding tags in the metadata to expose these methods:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml"><SPAN class="code-tag"><SPAN class="code-comment">&lt;!-- Exposed methods --&gt;</SPAN></SPAN>
+&lt;method name=<SPAN class="code-quote">&quot;doSomethingGood&quot;</SPAN>
+      description=<SPAN class="code-quote">&quot;Do something good.&quot;</SPAN>/&gt;
+&lt;method name=<SPAN class="code-quote">&quot;doSomethingBad&quot;</SPAN>
+      description=<SPAN class="code-quote">&quot;Do something bad.&quot;</SPAN>/&gt;
+&lt;method name=<SPAN class="code-quote">&quot;doNothing&quot;</SPAN>
+      description=<SPAN class="code-quote">&quot;Do absolutely nothing.&quot;</SPAN>/&gt;</PRE>
+</DIV></DIV>
+<P>Now the three methods are exposed in the operations tab of the JConsole. We can invoked these methods :</P>
+
+<P><IMG src="ipojo-jmx-handler.data/JMXHandler_2.png" align="absmiddle" border="0"></P>
+
+<H3><A name="iPOJOJMXHandler-AttributeNotifications%3A"></A>Attribute Notifications:</H3>
+
+<P>You could subscribe to attribute notification by adding the notification attribute in property tag. In our example if we want to be notified when m_level is modified, we change the property line in the metatada like this:</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml">&lt;property field=<SPAN class="code-quote">&quot;m_level&quot;</SPAN>
+      name=<SPAN class="code-quote">&quot;The level&quot;</SPAN>
+      rights=<SPAN class="code-quote">&quot;r&quot;</SPAN>
+      notification=<SPAN class="code-quote">&quot;true&quot;</SPAN>/&gt;</PRE>
+</DIV></DIV>
+<P>So now if we change the string through JConsole or if the POJO is modified in other way, a notification will be sent to every listener. For example, we subscribe in the notification tab, and we get notification when the message changes :</P>
+
+<P><IMG src="ipojo-jmx-handler.data/JMXHandler_3.png" align="absmiddle" border="0"></P>
+</TD>
+<TD class="confluenceTd" valign="top" width="20%">
+<H6><A name="iPOJOJMXHandler-Overview"></A><B>Overview</B></H6>
+<UL>
+	<LI><A href="apache-felix-ipojo.html" title="Apache Felix iPOJO">Home Page</A></LI>
+	<LI><A href="apache-felix-ipojo-feature-overview.html" title="Apache Felix iPOJO Feature Overview">iPOJO Feature Overview</A></LI>
+	<LI><A href="download.html" title="Download">Download &amp; Install </A></LI>
+</UL>
+
+
+<H6><A name="iPOJOJMXHandler-GettingStarted"></A><B>Getting Started</B></H6>
+<UL>
+	<LI><A href="ipojo-in-10-minutes.html" title="iPOJO in 10 minutes">iPOJO in 10 minutes</A></LI>
+	<LI><A href="ipojo-hello-word-maven-based-tutorial.html" title="iPOJO Hello Word (Maven-Based) tutorial">iPOJO Hello Word &#40;Maven&#45;Based&#41; tutorial</A></LI>
+	<LI><A href="ipojo-advanced-tutorial.html" title="iPOJO Advanced Tutorial">iPOJO Advanced Tutorial</A></LI>
+</UL>
+
+
+<H6><A name="iPOJOJMXHandler-UserGuide"></A><B>User Guide</B></H6>
+<UL>
+	<LI><A href="describing-components.html" title="Describing components">Describing components (handler list) </A></LI>
+	<LI><A href="how-to-use-ipojo-annotations.html" title="How to use iPOJO Annotations">How to use iPOJO Annotations</A></LI>
+	<LI><A href="ipojo-advanced-topics.html" title="iPOJO Advanced Topics">Advanced Topics</A></LI>
+	<LI><A href="ipojo-faq.html" title="iPOJO FAQ">FAQ</A></LI>
+</UL>
+
+
+<H6><A name="iPOJOJMXHandler-Tools"></A><B>Tools</B></H6>
+<UL>
+	<LI><A href="ipojo-eclipse-plug-in.html" title="iPOJO Eclipse Plug-in">iPOJO Eclipse Plug&#45;in</A></LI>
+	<LI><A href="ipojo-ant-task.html" title="iPOJO Ant Task">iPOJO Ant Task</A></LI>
+	<LI><A href="ipojo-maven-plug-in.html" title="iPOJO Maven Plug-in">iPOJO Maven Plug&#45;in</A></LI>
+	<LI><A href="ipojo-concepts-overview.html" title="iPOJO Concepts Overview">iPOJO concepts overview</A></LI>
+</UL>
+
+
+<H6><A name="iPOJOJMXHandler-DeveloperGuide"></A><B>Developer Guide</B></H6>
+<UL>
+	<LI>API: <SPAN class="nobr"><A href="http://people.apache.org/~clement/ipojo/api/0.8/" title="Visit page outside Confluence" rel="nofollow">0.8<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><A href="how-to-write-your-own-handler.html" title="How to write your own handler">How to write your own handler</A></LI>
+	<LI><A href="how-to-use-ipojo-manipulation-metadata.html" title="How to use iPOJO Manipulation Metadata">How to use iPOJO Manipulation Metadata</A></LI>
+</UL>
+
+
+<H6><A name="iPOJOJMXHandler-Misc%26Contact"></A><B>Misc &amp; Contact</B></H6>
+<UL>
+	<LI><A href="apache-felix-ipojo-issuestracker.html" title="apache-felix-ipojo-issuestracker">Issues Tracker</A></LI>
+	<LI><A href="apache-felix-ipojo-supportedvms.html" title="apache-felix-ipojo-supportedVMs">Supported JVMs</A></LI>
+	<LI><A href="apache-felix-ipojo-supportedosgi.html" title="apache-felix-ipojo-supportedOSGi">Supported OSGi Implementations</A></LI>
+	<LI><A href="future-ideas.html" title="Future Ideas">Future Ideas</A></LI>
+	<LI><A href="contact.html" title="Contact">Contact</A></LI>
+	<LI><A href="related-works.html" title="Related Works">Related Works</A></LI>
+	<LI><A href="article-presentations.html" title="Article & Presentations">Article &amp; Presentations</A></LI>
+</UL>
+
+
+<HR>
+<DIV class="" align="center">
+<P><SPAN class="nobr"><A href="http://cwiki.apache.org/confluence/createrssfeed.action?types=blogpost&amp;statuses=created&amp;statuses=modified&amp;spaces=FELIX&amp;labelString=iPOJO&amp;rssType=atom&amp;maxResults=10&amp;timeSpan=5&amp;publicFeed=true&amp;title=iPOJO%20Atom%20Feed" title="Stay tuned!" rel="nofollow"><IMG src="../../cwiki.apache.org/confluence/images/icons/feed-icon-32x32.png" align="absmiddle" border="0"><SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></P></DIV></TD></TR></TBODY></TABLE>
+    </DIV>
+  </BODY>
+
+<!-- Mirrored Site: felix.apache.org. File: /site/ipojo-jmx-handler.html. Date: Mon, 13 Oct 2008 06:53:08 GMT -->
+</HTML>

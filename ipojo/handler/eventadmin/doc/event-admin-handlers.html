@@ -1,0 +1,365 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<HTML>
+  
+<!-- Mirrored Site: felix.apache.org. File: /site/event-admin-handlers.html. Date: Mon, 13 Oct 2008 06:53:08 GMT -->
+<HEAD>
+    <TITLE>Apache Felix - Event Admin Handlers</TITLE>
+    <LINK rel="stylesheet" href="media.data/site.css" type="text/css" media="all">
+    <META http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  </HEAD>
+  <BODY>
+    <DIV class="title"><DIV class="logo"><A href="index.html"><IMG border="0" alt="Apache Felix" src="media.data/logo.png"></A></DIV><DIV class="header"><A href="http://www.apache.org/"><IMG border="0" alt="Apache" src="media.data/apache.png"></A></DIV></DIV>
+    <DIV class="menu">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <UL>
+	<LI><A href="news.html" title="news">news</A></LI>
+	<LI><A href="license.html" title="license">license</A></LI>
+	<LI><SPAN class="nobr"><A href="downloads.html" title="Visit page outside Confluence" rel="nofollow">downloads<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><A href="documentation.html" title="documentation">documentation</A></LI>
+	<LI><A href="mailinglists.html" title="mailinglists">mailing lists</A></LI>
+	<LI><A href="contributing.html" title="Contributing">contributing</A></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/" title="Visit page outside Confluence" rel="nofollow">asf<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/foundation/sponsorship.html" title="Visit page outside Confluence" rel="nofollow">sponsorship<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><SPAN class="nobr"><A href="http://www.apache.org/foundation/thanks.html" title="Visit page outside Confluence" rel="nofollow">sponsors<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN>
+<!-- ApacheCon Ad -->
+<IFRAME src="http://www.apache.org/ads/button.html" style="border-width:0; float: left" frameborder="0" scrolling="no" width="135" height="135"></IFRAME>
+<P style="height: 100px">
+<!-- ApacheCon Ad --></LI>
+</UL>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            </DIV>
+    <DIV class="main">
+<TABLE class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><TBODY><TR>
+<TD class="confluenceTd" valign="top" width="80%">
+
+<H1><A name="EventAdminHandlers-EventAdminHandlers"></A>Event Admin Handlers</H1>
+
+<P>The goal of the Event Admin Handlers is to allow event communications between iPOJO component instances. The implementation of these handlers relies on an event admin services. It enables the iPOJO component to listen to a list of topics and to receive all related event. It also allows components to send events in an easy way.</P>
+
+<P>Hereafter is presented a small example of the metadata.xml file :</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml">&lt;ipojo
+    <SPAN class="code-keyword">xmlns:ev</SPAN>=<SPAN class="code-quote">&quot;org.apache.felix.ipojo.handlers.event.EventAdminHandler&quot;</SPAN>&gt;
+	<SPAN class="code-tag">&lt;component className=<SPAN class="code-quote">&quot;...MyComponent&quot;</SPAN>&gt;</SPAN>
+		&lt;ev:subscriber
+			name=<SPAN class="code-quote">&quot;mySubscriber&quot;</SPAN>
+			callback=<SPAN class="code-quote">&quot;receive&quot;</SPAN>
+			topics=<SPAN class="code-quote">&quot;foo&quot;</SPAN>/&gt;
+		&lt;ev:publisher
+			name=<SPAN class="code-quote">&quot;myPublisher&quot;</SPAN>
+			field=<SPAN class="code-quote">&quot;m_publisher&quot;</SPAN>
+			topics=<SPAN class="code-quote">&quot;bar,nuts&quot;</SPAN>/&gt;
+	<SPAN class="code-tag">&lt;/component&gt;</SPAN>
+	<SPAN class="code-tag">&lt;instance component=<SPAN class="code-quote">&quot;...MyComponent&quot;</SPAN>/&gt;</SPAN>
+<SPAN class="code-tag">&lt;/ipojo&gt;</SPAN></PRE>
+</DIV></DIV>
+<P>You need to specify the namespace of the Handler. You can find here one event subscriber (named mySubscriber) and one event publisher (named myPublisher). In these handler configurations, the name parameter is mandatory. The topics parameter is optional as it can be specified in the instance configuration. The callback parameter of the mySubscriber element is mandatory and indicates the method that handles received events. In this case, this method must have a single argument of type org.osgi.service.event.Event. The field parameter of the myPublisher element indicates the field (of type org.apache.felix.ipojo.handlers.event.publisher.Publisher) that is used by the POJO to send events on the specified topics. All type compliance will be checked by the handler at component instantiation time.</P>
+
+<P>Here is an example of the component implementation, compatible with the given description :</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java"><SPAN class="code-keyword">import</SPAN> org.apache.felix.ipojo.handlers.event.publisher.Publisher;
+<SPAN class="code-keyword">import</SPAN> org.osgi.service.event.Event;
+
+<SPAN class="code-keyword">public</SPAN> class MyComponent ... {
+    <SPAN class="code-keyword">private</SPAN> Publisher m_publisher;
+    <SPAN class="code-keyword">public</SPAN> void receive(Event e) {
+       <SPAN class="code-comment">// Event received
+</SPAN>       <SPAN class="code-comment">// Do something with the event}
+</SPAN>
+    <SPAN class="code-keyword">public</SPAN> void doSomething() {
+        Dictionary e = <SPAN class="code-keyword">new</SPAN> Properties();
+        <SPAN class="code-comment">//...
+</SPAN>        <SPAN class="code-comment">// Fill out the event
+</SPAN>
+        <SPAN class="code-comment">// Send event
+</SPAN>        m_publisher.send(e);
+    }
+}</PRE>
+</DIV></DIV>
+
+<H1><A name="EventAdminHandlers-Download"></A>Download</H1>
+
+<P>The event admin handlers (to send and receive events) are available in the Felix trunk in the iPOJO project. See the <A href="download.html" title="Download">Download</A> page to download and compile these sources.</P>
+
+<H1><A name="EventAdminHandlers-Howdoesitwork%3F"></A>How does it work?</H1>
+
+<P>The handler will parse the description provided in the metadata, and register for you the EventHandler in the OSGi Registry. On one hand, your POJO will receive each event through the handler. With this handler you can specify different callback methods for different topics. On the other side, the handler instantiates and injects configured Publisher references in your POJO, so you can send events transparently through these publishers.</P>
+
+<H1><A name="EventAdminHandlers-EventHandlerSpecification"></A>EventHandler Specification</H1>
+
+<P>Here you can find all configuration options of the EventAdmin handler. As seen before, the handler contains two components : the event subscriber and the event publisher. These components can be configured, using several attributes, as described below. Some of these attributes can be (re)defined in the instance configuration.</P>
+
+<P>Handler namespace : org.apache.felix.ipojo.handlers.event.EventAdminHandler</P>
+
+<H2><A name="EventAdminHandlers-Eventsubscriberattributes"></A>Event subscriber attributes</H2>
+
+<TABLE class="confluenceTable"><TBODY>
+<TR>
+<TH class="confluenceTh"> Attribute name </TH>
+<TH class="confluenceTh"> Required </TH>
+<TH class="confluenceTh"> Description </TH>
+</TR>
+<TR>
+<TD class="confluenceTd"> <EM>name</EM> </TD>
+<TD class="confluenceTd"> YES </TD>
+<TD class="confluenceTd"> The name of the event subscriber, acting as a unique 			identifier. </TD>
+</TR>
+<TR>
+<TD class="confluenceTd"> <EM>callback</EM> </TD>
+<TD class="confluenceTd"> YES </TD>
+<TD class="confluenceTd"> The name of the POJO's method that will be called each time an 			event is received. This method takes only one parameter, of typeorg.osgi.service.event.Eventby default, but this type can be overridden by defining the 			data-key and/or the data-type attributes. </TD>
+</TR>
+<TR>
+<TD class="confluenceTd"> <EM>topics</EM> </TD>
+<TD class="confluenceTd"> YES&#42; </TD>
+<TD class="confluenceTd"> The comma-separated-list of the topics that the handler will 			listen to. Each event sent on a topic present in this list will be 			sent to the specified callback method. </TD>
+</TR>
+<TR>
+<TD class="confluenceTd"> <EM>data-key</EM> </TD>
+<TD class="confluenceTd"> NO </TD>
+<TD class="confluenceTd"> The data key is used when you want to receive data events. This 			attribute's value is the key corresponding to the received data in 			the event's dictionary. <BR clear="all">
+If you use this attribute, the parameter passed to the callback 			method is the the value associated to this key, not the whole 			event. <BR clear="all">
+This attribute is generally used with the <EM>data-type</EM>attribute to specify the received object type. <BR clear="all">
+If an event is received and it does not contain such a key, it 			is ignored (with a warning message). </TD>
+</TR>
+<TR>
+<TD class="confluenceTd"> <EM>data-type</EM> </TD>
+<TD class="confluenceTd"> NO </TD>
+<TD class="confluenceTd"> This attribute is associated to the data-key attribute. It 			specifies the type of objects (java.lang.Objectby default) that the callback expects. It is used to determine the 			unique callback method (in case of multiple methods with the same 			name) and to check type compliance at event reception. <BR clear="all">
+Data events that are not corresponding to the specified type 			will be ignored (with a warning message). </TD>
+</TR>
+<TR>
+<TD class="confluenceTd"> <EM>filter</EM> </TD>
+<TD class="confluenceTd"> NO&#42; </TD>
+<TD class="confluenceTd"> The event filter is used to filter incoming events before 			sending them to the callback. The syntax of this field is 			described in the OSGi EventAdmin Specification. If you don't 			specify a filter, all events sent on the listened topics will be 			considered. </TD>
+</TR>
+</TBODY></TABLE>
+<P>&#42; These attributes can be (re)defined in the instance configuration.</P>
+
+<H2><A name="EventAdminHandlers-Eventpublisherattributes"></A>Event publisher attributes</H2>
+
+<TABLE class="confluenceTable"><TBODY>
+<TR>
+<TH class="confluenceTh"> Attribute name </TH>
+<TH class="confluenceTh"> Required </TH>
+<TH class="confluenceTh"> Description </TH>
+</TR>
+<TR>
+<TD class="confluenceTd"> <EM>name</EM> </TD>
+<TD class="confluenceTd"> YES </TD>
+<TD class="confluenceTd"> The name of the event publisher, acting as a unique identifier. </TD>
+</TR>
+<TR>
+<TD class="confluenceTd"> <EM>field</EM> </TD>
+<TD class="confluenceTd"> YES </TD>
+<TD class="confluenceTd"> The name of the POJO's field that will be used to send events. 			The field is initialized at component instantiation time. The type 			of the field must be : org.apache.felix.ipojo.handlers.event.publisher.Publisher. Despite it creates a dependency between the component code and the handler, this system allows hiding the 			whole complexity of event sending. </TD>
+</TR>
+<TR>
+<TD class="confluenceTd"> <EM>topics</EM> </TD>
+<TD class="confluenceTd"> YES&#42; </TD>
+<TD class="confluenceTd"> The comma-separated-list of the topics on which events will be 			sent. All subscribers that are listening to one of these topics 			will receive the events. </TD>
+</TR>
+<TR>
+<TD class="confluenceTd"> <EM>data-key</EM> </TD>
+<TD class="confluenceTd"> NO </TD>
+<TD class="confluenceTd"> The data key is used when you want to send data events. This 			attribute's value is the key, in the event's dictionary, in which 			sent data are stored. When you use the <EM>sendData</EM> method of 			the Publisher, the given object is placed in the event dictionary, 			associated with the specified data-key. <BR clear="all">
+The default value of this attribute is user.data. </TD>
+</TR>
+<TR>
+<TD class="confluenceTd"> <EM>synchronous</EM> </TD>
+<TD class="confluenceTd"> NO </TD>
+<TD class="confluenceTd"> Determines if event sending is synchronous or not. By default, 			events are sent asynchronously, but you can specify there the 			desired behaviour of the Publisher. <BR clear="all">
+The default value of this attribute is &quot;false&quot;. </TD>
+</TR>
+</TBODY></TABLE>
+<P>&#42; These attributes can be (re)defined in the instance configuration.</P>
+
+<H2><A name="EventAdminHandlers-Instanceconfiguration"></A>Instance configuration</H2>
+
+<P>Some of the described attributes can be (re)defined in the instance configuration section of your metadata file. Its permits to configure event management instance by instance. The following properties are used by the handler :</P>
+<UL>
+	<LI><EM>event.topics</EM> : overrides <EM>topics</EM> attribute, 	available for both subscribers and publishers configuration</LI>
+	<LI><EM>event.filter</EM> : overrides <EM>filter</EM> attribute, 	available for subscribers configuration only.</LI>
+</UL>
+
+
+<H2><A name="EventAdminHandlers-Publisherinterface"></A>Publisher interface</H2>
+
+<P>The Publisher interface is the link between the component code and the handler. It permits to publish events on the topics specified in the component's description (or instance configuration). The implemented methods are :</P>
+<UL>
+	<LI>public void send<FONT color="#000000">(Dictionary 	content);</FONT><BR>
+This method is used to send a 	standard event, with the specified content. Some specific properties 	may be added in the content to satisfy EventAdmin specification. 	(e.g., event.topic).</LI>
+	<LI>public void sendData<FONT color="#000000">(Object 	o);</FONT><BR>
+This method is the easier way to send 	data. The given object is placed in the event dictionary according 	to the <EM>data-key</EM> attribute (or its default value). Then, this 	dictionary is sent as a normal event.</LI>
+</UL>
+
+
+<H1><A name="EventAdminHandlers-HandlerArchitecture"></A>Handler Architecture</H1>
+
+<P>Here is shown the global architecture of the EventHandler : the interactions between the user components (i.e., POJO), the handler and the OSGi runtime environment.</P>
+
+<P><IMG src="event-admin-handlers.data/handler-arch.png" align="absmiddle" border="0"></P>
+
+<H1><A name="EventAdminHandlers-EventHandlerFeatures"></A>EventHandler Features</H1>
+
+<P>In this section, you will find some examples of the handler's features.</P>
+
+<H2><A name="EventAdminHandlers-Instancecustomization"></A>Instance customization</H2>
+
+<P>As described in the 'Instance configuration' section, you can (re)define some of the subscribers or publishers attributes. You can notice that required attributes that are not defined in the component description must be defined in the instance configuration section. Hereafter is an example of an instance configuration of this handler :</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml">&lt;ipojo
+    <SPAN class="code-keyword">xmlns:ev</SPAN>=<SPAN class="code-quote">&quot;org.apache.felix.ipojo.handlers.event.EventAdminHandler&quot;</SPAN>&gt;
+	<SPAN class="code-tag">&lt;component className=<SPAN class="code-quote">&quot;...MyComponent&quot;</SPAN>&gt;</SPAN>
+		&lt;ev:subscriber
+			name=<SPAN class="code-quote">&quot;mySubscriber&quot;</SPAN>
+			callback=<SPAN class="code-quote">&quot;handleEvent&quot;</SPAN>/&gt;
+		&lt;ev:publisher
+			name=<SPAN class="code-quote">&quot;myPublisher&quot;</SPAN>
+			field=<SPAN class="code-quote">&quot;m_publisher&quot;</SPAN>/&gt;
+	<SPAN class="code-tag">&lt;/component&gt;</SPAN>
+	<SPAN class="code-tag">&lt;instance component=<SPAN class="code-quote">&quot;...MyComponent&quot;</SPAN>&gt;</SPAN>
+		<SPAN class="code-tag">&lt;property name=<SPAN class="code-quote">&quot;event.topics&quot;</SPAN>&gt;</SPAN>
+			<SPAN class="code-tag">&lt;property name=<SPAN class="code-quote">&quot;mySubscriber&quot;</SPAN> value=<SPAN class="code-quote">&quot;foo&quot;</SPAN>/&gt;</SPAN>
+			<SPAN class="code-tag">&lt;property name=<SPAN class="code-quote">&quot;myPublisher&quot;</SPAN> value=<SPAN class="code-quote">&quot;bar,nuts&quot;</SPAN>/&gt;</SPAN>
+		<SPAN class="code-tag">&lt;/property&gt;</SPAN>
+		<SPAN class="code-tag">&lt;property name=<SPAN class="code-quote">&quot;event.filter&quot;</SPAN>&gt;</SPAN>
+			&lt;property name=<SPAN class="code-quote">&quot;mySubscriber&quot;</SPAN>
+				    value=<SPAN class="code-quote">&quot;|((arg=Minibar)(arg=Coconuts))&quot;</SPAN>/&gt;
+		<SPAN class="code-tag">&lt;/property&gt;</SPAN>
+	<SPAN class="code-tag">&lt;/instance&gt;</SPAN>
+<SPAN class="code-tag">&lt;/ipojo&gt;</SPAN></PRE>
+</DIV></DIV>
+
+<H2><A name="EventAdminHandlers-Dataevents"></A>Data events</H2>
+
+<P>One of the most important features of the EventHandler is the capability of sending and receiving data events. You may know that the OSGi EventAdmin Service allows bundles to send custom objects in events, inserting them in the event's dictionary. The EventHandler hides the dictionary manipulation and allows iPOJO components to receive custom objects at any time.</P>
+
+<P>First, you have define the <EM>data-key</EM> attribute in the publisher configuration. Sent objects will be contained in the event dictionary and are accessible with the &quot;user.data&quot; key.</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml">&lt;ipojo
+    <SPAN class="code-keyword">xmlns:ev</SPAN>=<SPAN class="code-quote">&quot;org.apache.felix.ipojo.handlers.event.EventAdminHandler&quot;</SPAN>&gt;
+    <SPAN class="code-tag">&lt;component className=<SPAN class="code-quote">&quot;...DataPublisher&quot;</SPAN>&gt;</SPAN>
+		&lt;ev:publisher
+			name=<SPAN class="code-quote">&quot;myPublisher&quot;</SPAN>
+			field=<SPAN class="code-quote">&quot;m_publisher&quot;</SPAN>
+			topics=<SPAN class="code-quote">&quot;myTopic&quot;</SPAN>
+			data-key=<SPAN class="code-quote">&quot;my.data&quot;</SPAN>/&gt;
+	<SPAN class="code-tag">&lt;/component&gt;</SPAN>
+	<SPAN class="code-tag">&lt;instance component=<SPAN class="code-quote">&quot;...DataPublisher&quot;</SPAN>/&gt;</SPAN>
+<SPAN class="code-tag">&lt;/ipojo&gt;</SPAN></PRE>
+</DIV></DIV>
+<P>Then you can use the <EM>sendData</EM> method of your configured publisher.</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java"><SPAN class="code-keyword">import</SPAN> org.apache.felix.ipojo.handlers.event.publisher.Publisher;
+<SPAN class="code-comment">//...
+</SPAN><SPAN class="code-keyword">public</SPAN> class DataPublisher ... {
+    <SPAN class="code-keyword">private</SPAN> Publisher m_publisher;
+
+    <SPAN class="code-keyword">public</SPAN> void doSomething() {
+      <SPAN class="code-comment">// MyFavoriteType <SPAN class="code-keyword">extends</SPAN> MyFavoriteInterface
+</SPAN>      MyFavoriteType data = <SPAN class="code-keyword">new</SPAN> MyFavoriteType(...);
+      <SPAN class="code-comment">//...
+</SPAN>      <SPAN class="code-comment">// Send a data event
+</SPAN>      m_publisher.sendData(data);
+    }
+}</PRE>
+</DIV></DIV>
+<P>The second step is to configure an event subscriber to receive such events. The <EM>data-key</EM> attribute's  value of the subscriber must be the same than the publisher's one. The <EM>data-type</EM>describe the type of received data events, and thus, must be compatible with the sent object's type (i.e., super-class or inherited interface). Then you can finally receive the sent object in the callback method. The parameter type of the callback must be the same than the data-type attribute value.</P>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-xml">&lt;ipojo
+   <SPAN class="code-keyword">xmlns:ev</SPAN>=<SPAN class="code-quote">&quot;org.apache.felix.ipojo.handlers.event.EventAdminHandler&quot;</SPAN>&gt;
+	<SPAN class="code-tag">&lt;component className=<SPAN class="code-quote">&quot;...DataEventSubscriber&quot;</SPAN>&gt;</SPAN>
+		&lt;ev:subscriber
+			name=<SPAN class="code-quote">&quot;mySubscriber&quot;</SPAN>
+			callback=<SPAN class="code-quote">&quot;handleData&quot;</SPAN>
+			topics=<SPAN class="code-quote">&quot;myTopic&quot;</SPAN>
+			data-key=<SPAN class="code-quote">&quot;my.data&quot;</SPAN>
+			data-type=<SPAN class="code-quote">&quot;my.package.MyFavoriteInterface&quot;</SPAN>/&gt;
+	<SPAN class="code-tag">&lt;/component&gt;</SPAN>
+	<SPAN class="code-tag">&lt;instance component=<SPAN class="code-quote">&quot;...DataEventSubscriber&quot;</SPAN>/&gt;</SPAN>
+<SPAN class="code-tag">&lt;/ipojo&gt;</SPAN></PRE>
+</DIV></DIV>
+<DIV class="code"><DIV class="codeContent">
+<PRE class="code-java"><SPAN class="code-keyword">import</SPAN> my.<SPAN class="code-keyword">package</SPAN>.MyFavoriteInterface;
+<SPAN class="code-comment">//...
+</SPAN><SPAN class="code-keyword">public</SPAN> class DataEventSubscriber ... {
+  <SPAN class="code-keyword">public</SPAN> void handleData(MyFavoriteInterface o) {
+     <SPAN class="code-comment">// <SPAN class="code-object">Object</SPAN> received
+</SPAN>     <SPAN class="code-comment">//...
+</SPAN>   }
+}</PRE>
+</DIV></DIV>
+
+<H2><A name="EventAdminHandlers-Noteonsynchronouseventsending"></A>Note on synchronous event sending</H2>
+
+<P>By default, events are sent using asynchronous sending (a.k.a.<EM>post</EM> in OSGi EventAdmin). You can use synchronous sending by defining the <EM>synchronous</EM> attribute of your publisher to true.</P>
+
+<P>The behaviour of synchronous event sending is particular when you specify several topics in the publisher description. The event is synchronously sent to each topic, one by one. So when you return from this function, you can be sure that the event has been delivered to each topic.</P>
+
+<H2><A name="EventAdminHandlers-Publisherinstanceinformation"></A>Publisher instance information</H2>
+
+<P>All events sent by a publisher contains the name of the component instance that sent them. Its enables to filter received events depending the sender instance. The instance name is accessible in the event dictionary by the key <EM>publisher.instance.name</EM>. Despite it goes against MOM principles, this property is useful to trace events and especially event sources.</P></TD>
+<TD class="confluenceTd" valign="top" width="20%">
+<H6><A name="EventAdminHandlers-Overview"></A><B>Overview</B></H6>
+<UL>
+	<LI><A href="apache-felix-ipojo.html" title="Apache Felix iPOJO">Home Page</A></LI>
+	<LI><A href="apache-felix-ipojo-feature-overview.html" title="Apache Felix iPOJO Feature Overview">iPOJO Feature Overview</A></LI>
+	<LI><A href="download.html" title="Download">Download &amp; Install </A></LI>
+</UL>
+
+
+<H6><A name="EventAdminHandlers-GettingStarted"></A><B>Getting Started</B></H6>
+<UL>
+	<LI><A href="ipojo-in-10-minutes.html" title="iPOJO in 10 minutes">iPOJO in 10 minutes</A></LI>
+	<LI><A href="ipojo-hello-word-maven-based-tutorial.html" title="iPOJO Hello Word (Maven-Based) tutorial">iPOJO Hello Word &#40;Maven&#45;Based&#41; tutorial</A></LI>
+	<LI><A href="ipojo-advanced-tutorial.html" title="iPOJO Advanced Tutorial">iPOJO Advanced Tutorial</A></LI>
+</UL>
+
+
+<H6><A name="EventAdminHandlers-UserGuide"></A><B>User Guide</B></H6>
+<UL>
+	<LI><A href="describing-components.html" title="Describing components">Describing components (handler list) </A></LI>
+	<LI><A href="how-to-use-ipojo-annotations.html" title="How to use iPOJO Annotations">How to use iPOJO Annotations</A></LI>
+	<LI><A href="using-xml-schemas.html" title="Using XML Schemas">Using XML Schemas</A></LI>
+	<LI><A href="ipojo-advanced-topics.html" title="iPOJO Advanced Topics">Advanced Topics</A></LI>
+	<LI><A href="ipojo-faq.html" title="iPOJO FAQ">FAQ</A></LI>
+</UL>
+
+
+<H6><A name="EventAdminHandlers-Tools"></A><B>Tools</B></H6>
+<UL>
+	<LI><A href="ipojo-eclipse-plug-in.html" title="iPOJO Eclipse Plug-in">iPOJO Eclipse Plug&#45;in</A></LI>
+	<LI><A href="ipojo-ant-task.html" title="iPOJO Ant Task">iPOJO Ant Task</A></LI>
+	<LI><A href="ipojo-maven-plug-in.html" title="iPOJO Maven Plug-in">iPOJO Maven Plug&#45;in</A></LI>
+	<LI><A href="ipojo-concepts-overview.html" title="iPOJO Concepts Overview">iPOJO concepts overview</A></LI>
+</UL>
+
+
+<H6><A name="EventAdminHandlers-DeveloperGuide"></A><B>Developer Guide</B></H6>
+<UL>
+	<LI>API: <SPAN class="nobr"><A href="http://people.apache.org/~clement/ipojo/api/0.8/" title="Visit page outside Confluence" rel="nofollow">0.8<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
+	<LI><A href="how-to-write-your-own-handler.html" title="How to write your own handler">How to write your own handler</A></LI>
+	<LI><A href="how-to-use-ipojo-manipulation-metadata.html" title="How to use iPOJO Manipulation Metadata">How to use iPOJO Manipulation Metadata</A></LI>
+</UL>
+
+
+<H6><A name="EventAdminHandlers-Misc%26Contact"></A><B>Misc &amp; Contact</B></H6>
+<UL>
+	<LI><A href="apache-felix-ipojo-issuestracker.html" title="apache-felix-ipojo-issuestracker">Issues Tracker</A></LI>
+	<LI><A href="apache-felix-ipojo-supportedvms.html" title="apache-felix-ipojo-supportedVMs">Supported JVMs</A></LI>
+	<LI><A href="apache-felix-ipojo-supportedosgi.html" title="apache-felix-ipojo-supportedOSGi">Supported OSGi Implementations</A></LI>
+	<LI><A href="future-ideas.html" title="Future Ideas">Future Ideas</A></LI>
+	<LI><A href="contact.html" title="Contact">Contact</A></LI>
+	<LI><A href="related-works.html" title="Related Works">Related Works</A></LI>
+	<LI><A href="article-presentations.html" title="Article & Presentations">Article &amp; Presentations</A></LI>
+</UL>
+
+
+<HR>
+<DIV class="" align="center">
+<P><SPAN class="nobr"><A href="http://cwiki.apache.org/confluence/createrssfeed.action?types=blogpost&amp;statuses=created&amp;statuses=modified&amp;spaces=FELIX&amp;labelString=iPOJO&amp;rssType=atom&amp;maxResults=10&amp;timeSpan=5&amp;publicFeed=true&amp;title=iPOJO%20Atom%20Feed" title="Stay tuned!" rel="nofollow"><IMG src="../../cwiki.apache.org/confluence/images/icons/feed-icon-32x32.png" align="absmiddle" border="0"><SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></P></DIV></TD></TR></TBODY></TABLE>
+    </DIV>
+  </BODY>
+
+<!-- Mirrored Site: felix.apache.org. File: /site/event-admin-handlers.html. Date: Mon, 13 Oct 2008 06:53:08 GMT -->
+</HTML>

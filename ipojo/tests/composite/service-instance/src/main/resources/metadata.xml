@@ -56,5 +56,20 @@
 			<property name="strAProp" value="{a,b,c}"/>
 		</instance>
 	</comp:composite>
-
+	
+	<!-- Scope test -->
+	<component name="SCOPE-provider" classname="org.apache.felix.ipojo.test.instance.ServiceProvider">
+		<provides/>
+	</component>
+	<component name="SCOPE-cons" classname="org.apache.felix.ipojo.test.instance.ServiceConsumer">
+		<provides/>
+		<requires field="service"/>
+	</component>
+	<comp:composite name="SCOPE-scope">
+		<instance component="SCOPE-provider"/>
+		<instance component="SCOPE-cons"/>
+	</comp:composite>
+	<comp:composite name="SCOPE-badscope">
+		<instance component="SCOPE-cons"/>
+	</comp:composite>
 </ipojo>

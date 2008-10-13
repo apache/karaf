@@ -39,33 +39,76 @@ import org.osgi.framework.ServiceListener;
  */
 public class EventDispatcher implements ServiceListener {
     
+    /**
+     * The internal event dispatcher.
+     * This dispatcher is a singleton.
+     */
+    private static EventDispatcher m_dispatcher;
+    
+    /**
+     * The list of listeners.
+     * Service interface -> List of {@link ServiceListener}
+     */
     private Map m_listeners;
+    /**
+     * The global bundle context.
+     */
     private BundleContext m_context;
     
-    private static EventDispatcher m_dispatcher;
-    public static EventDispatcher getDispatcher() {
-        return m_dispatcher;
-    }
-    
+    /**
+     * Creates the EventDispatcher.
+     * @param bc the bundle context used to register and unregister
+     * {@link ServiceListener}.
+     */
     public EventDispatcher(BundleContext bc) {
         m_context = bc;
         m_listeners = new HashMap();
     }
     
+    /**
+     * Gets the iPOJO event dispatcher.
+     * @return the event dispatcher or
+     * <code>null</code> if not created.
+     */
+    public static EventDispatcher getDispatcher() {
+        return m_dispatcher;
+    }
+    
+    /**
+     * Starts the event dispatcher.
+     * This method sets the {@link EventDispatcher#m_dispatcher}.
+     * This method also registers the iPOJO {@link ServiceListener}
+     * receiving events to dispatch them to iPOJO instances.
+     */
     public void start() {
         // Only one thread can call the start method.
         m_context.addServiceListener(this);
         m_dispatcher = this; // Set the dispatcher.
     }
     
+    /**
+     * Stops the event dispatcher.
+     * This method unregisters the {@link ServiceListener}.
+     * This methods must be called only when the iPOJO bundle
+     * stops.
+     */
     public void stop() {
-        synchronized(this) {
+        synchronized (this) {
             m_dispatcher = null; 
             m_context.removeServiceListener(this);
             m_listeners.clear();
         }
     }
 
+    /**
+     * Method called when a {@link ServiceEvent} is
+     * fired by the OSGi framework. 
+     * According to the event, this method dispatches
+     * to interested registered listers from
+     * the {@link EventDispatcher#m_listeners} map.
+     * @param event the service event
+     * @see org.osgi.framework.ServiceListener#serviceChanged(org.osgi.framework.ServiceEvent)
+     */
     public void serviceChanged(ServiceEvent event) {
         String[] itfs = (String[]) event.getServiceReference().getProperty(Constants.OBJECTCLASS);
         for (int s = 0; s < itfs.length; s++) {
@@ -84,6 +127,12 @@ public class EventDispatcher implements ServiceListener {
         }
     }
     
+    /**
+     * Adds a new service listener to the {@link EventDispatcher#m_listeners}
+     * map. This method specifies the listen service interface
+     * @param itf the service interface
+     * @param listener the service listener
+     */
     public void addListener(String itf, ServiceListener listener) {
         synchronized (this) {
             List list = (List) m_listeners.get(itf);
@@ -97,6 +146,12 @@ public class EventDispatcher implements ServiceListener {
         }
     }
     
+    /**
+     * Removes a service listener.
+     * @param listener the service listener to remove
+     * @return <code>true</code> if the listener is 
+     * successfully removed.
+     */
     public boolean removeListener(ServiceListener listener) {
         boolean removed = false;
         synchronized (this) {

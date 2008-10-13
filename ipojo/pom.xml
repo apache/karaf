@@ -88,6 +88,7 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <configuration>
           <aggregate>true</aggregate>
+          <show>private</show>
         </configuration>
       </plugin>
     </plugins>

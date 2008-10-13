@@ -1,3 +1,18 @@
+Changes from 0.8.0 to 1.0.0
+---------------------------
+** Bug
+    * [FELIX-649] - "Expecting to find object/array on stack" Error when asking for instance of an iPOJO component (2008-07-28)
+    * [FELIX-697] - Generation of a duplicated field when using generics (2008-10-07)
+    * [FELIX-739] - iPOJO and annotations support when manipulating (2008-10-06)
+    * [FELIX-751] - Wrong access for setter methods (2008-10-03)
+
+** Improvement
+    * [FELIX-655] - Add a 'from' attribute in the service dependencies (2008-08-01)
+    * [FELIX-678] - Improve missing fields detection during the packaging process (2008-08-11)
+    * [FELIX-687] - Support inner and nested classes (2008-08-20)
+    * [FELIX-716] - Provide XML schemas for iPOJO descriptors (2008-09-08)
+
+    
 Version 0.8.0
 -------------
-* [2008-05-16] Initial release
+    * Initial release (2008-05-16) 

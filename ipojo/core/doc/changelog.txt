@@ -1,3 +1,31 @@
+Changes from 0.8.0 to 1.0.0
+---------------------------
+** Bug  
+    * [FELIX-557] - Factories still living when a primitive component does not have its manipulation metadata (2008-05-14)
+    * [FELIX-632] - Component are set to immediate despite they are already immediate (2008-07-14)
+    * [FELIX-635] - Simplify factory name computation (2008-07-14)
+    * [FELIX-628] - Architecture service should not publish the instance.name property (2008-07-08)
+    * [FELIX-621] - Instances not disposed when instances creation failed (2008-07-03)
+    
+** Improvement
+    * [FELIX-552] - ClassCastException when using services as dynamic proxies (2008-05-14)
+    * [FELIX-555] - Error message in the iPOJO Extender could be more accurate when failing to get the bundle context (2008-05-13)
+    * [FELIX-558] - Non caught NoClassDefFoundError when the instantiation of a Nullable object failed (2008-05-15)
+    * [FELIX-603] - Improve iPOJO Arch service dependency description (2008-06-11)
+    * [FELIX-626] - Allow specifying instance configuration containing empty dictionaries (2008-08-07)
+    * [FELIX-629] - Allows instance configuration to declares complex properties (2008-07-10)
+    * [FELIX-631] - Immediate Component Detection (2008-07-11)
+    * [FELIX-633] - Factory creation should be done in another thread (2008-07-14)
+    * [FELIX-634] - Improve error handling (2008-07-14)
+    * [FELIX-655] - Add a 'from' attribute in the service dependencies (2008-08-01)
+    * [FELIX-673] - Provide OBR description to iPOJO bundles (2008-08-07)
+    * [FELIX-683] - Supporting lists and vectors in the service dependency management (2008-08-17)
+    * [FELIX-686] - Supporting collections and set in the service dependency management (2008-08-18)
+    * [FELIX-688] - Better error reporting when an instance creation failed (2008-08-20)
+    * [FELIX-689] - Instance 'name' property should become 'instance.name' (2008-08-20)
+    * [FELIX-716] - Provide XML schemas for iPOJO descriptors (2008-09-09)
+    * [FELIX-732] - Duplicate instance created of a managed service (2008-09-24)
+    
 Version 0.8.0
 -------------
-* [2008-05-16] Initial release
+    * Initial release (2008-05-16) 

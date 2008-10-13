@@ -21,6 +21,7 @@ package org.apache.felix.ipojo.test.composite.instantiator;
 import junit.framework.Test;
 
 import org.apache.felix.ipojo.junit4osgi.OSGiTestSuite;
+import org.apache.felix.ipojo.test.composite.instance.InstanceScopeTest;
 import org.apache.felix.ipojo.test.composite.instance.SimpleInstance;
 import org.osgi.framework.BundleContext;
 
@@ -34,6 +35,7 @@ public class InstantiatorTestSuite {
 		ots.addTestSuite(OptionalMultipleInstantiation.class);
 		ots.addTestSuite(ConfigurableInstantiation.class);
 		ots.addTestSuite(SimpleInstance.class);
+		ots.addTestSuite(InstanceScopeTest.class);
 		return ots;
 	}
 

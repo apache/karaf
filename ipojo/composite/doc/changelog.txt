@@ -1,3 +1,16 @@
+Changes from 0.8.1 to 1.0.0
+---------------------------
+** Bug    
+    * [FELIX-622] - iPOJO Composite Service Instance can use factories twice to create service instance (2008-07-03)
+    * [FELIX-628] - Architecture service should not publish the instance.name property (2008-07-08)
+    * [FELIX-637] - Composite service implementation does not support long argument (2008-07-17)
+    
+** Improvement
+    * [FELIX-673] - Provide OBR description to iPOJO bundles (2008-08-07)
+    * [FELIX-688] - Better error reporting when an instance creation failed (2008-08-20)
+    * [FELIX-689] - Instance 'name' property should become 'instance.name' (2008-08-20)
+    * [FELIX-716] - Provide XML schemas for iPOJO descriptors (2008-09-09)
+
 Version 0.8.1
 -------------
-* [2008-06-06] Initial release
+    * Initial release (2008-06-06) 
