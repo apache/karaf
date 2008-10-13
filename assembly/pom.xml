@@ -167,6 +167,10 @@
             <artifactId>pax-url-mvn</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.ops4j.pax.url</groupId>
+            <artifactId>pax-url-wrap</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.geronimo.specs</groupId>
             <artifactId>geronimo-servlet_2.5_spec</artifactId>
         </dependency>

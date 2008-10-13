@@ -566,6 +566,11 @@
                 <version>${pax.url.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.ops4j.pax.url</groupId>
+                <artifactId>pax-url-wrap</artifactId>
+                <version>${pax.url.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.geronimo.specs</groupId>
                 <artifactId>geronimo-servlet_2.5_spec</artifactId>
                 <version>${geronimo.servlet.version}</version>
