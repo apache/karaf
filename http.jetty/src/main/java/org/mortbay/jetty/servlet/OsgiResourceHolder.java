@@ -22,7 +22,9 @@ package org.mortbay.jetty.servlet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.File;
 import java.net.URL;
+import java.net.URLConnection;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
@@ -152,35 +154,47 @@ public class OsgiResourceHolder extends ServletHolder
         // errors if not included
         response.setContentType( encoding );
 
-        //TODO: check other http fields e.g. ranges, timestamps etc.
-
-        // make sure we access the resource inside the bundle's access control
-        // context if supplied
-        if ( m_acc != null )
+        long lastModified  = getLastModified(url);
+        
+        if (lastModified != 0)
         {
-            try
-            {
-                AccessController.doPrivileged( new PrivilegedExceptionAction()
-                {
-                    public Object run() throws Exception
-                    {
-                        copyResourceBytes( url, response );
-                        return null;
-                    }
-                }, m_acc );
-            }
-            catch ( PrivilegedActionException ex )
-            {
-                IOException ioe = ( IOException ) ex.getException();
-                throw ioe;
-            }
+            response.setDateHeader("Last-Modified", lastModified);
+        }
+
+        if (!resourceModified(lastModified, request.getDateHeader("If-Modified-Since")))
+        {
+            response.setStatus(response.SC_NOT_MODIFIED);
         }
         else
         {
-            copyResourceBytes( url, response );
+            // make sure we access the resource inside the bundle's access control
+            // context if supplied
+            if ( m_acc != null )
+            {
+                try
+                {
+                    AccessController.doPrivileged( new PrivilegedExceptionAction()
+                    {
+                        public Object run() throws Exception
+                        {
+                            copyResourceBytes( url, response );
+                            return null;
+                        }
+                    }, m_acc );
+                }
+                catch ( PrivilegedActionException ex )
+                {
+                    IOException ioe = ( IOException ) ex.getException();
+                    throw ioe;
+                }
+            }
+            else
+            {
+                copyResourceBytes( url, response );
+            }
+            
+            //TODO: set other http fields e.g. __LastModified, __ContentLength
         }
-
-        //TODO: set other http fields e.g. __LastModified, __ContentLength
     }
 
 
@@ -239,5 +253,66 @@ public class OsgiResourceHolder extends ServletHolder
     public void doStop()
     {
     }
+    
+    
+    /**
+     * Gets the last modified value for file modification detection.
+     * Aids in "conditional get" and intermediate proxy/node cacheing.
+     *
+     * Approach used follows that used by Sun for JNLP handling to workaround an 
+     * apparent issue where file URLs do not correctly return a last modified time.
+     * 
+     */
+    protected long getLastModified (URL resUrl)
+    {
+        long lastModified = 0;
+        
+        try 
+        {
+            // Get last modified time
+            URLConnection conn = resUrl.openConnection();
+            lastModified = conn.getLastModified();
+        } 
+        catch (Exception e) 
+        {
+            // do nothing
+        }
 
+        if (lastModified == 0) 
+        {
+            // Arguably a bug in the JRE will not set the lastModified for file URLs, and
+            // always return 0. This is a workaround for that problem.
+            String filepath = resUrl.getPath();
+            
+            if (filepath != null) 
+            {
+                File f = new File(filepath);
+                if (f.exists()) 
+                {
+                    lastModified = f.lastModified();
+                }
+            }
+        }
+        
+        return lastModified;
+    }
+    
+    
+    protected boolean resourceModified(long resTimestamp, long modSince)
+    {
+        boolean retval = false;
+        
+        // Have to normalise timestamps as HTTP times have last 3 digits as zero
+        modSince /= 1000;
+        resTimestamp /= 1000;
+        
+        // Timestamp check to see if modified
+        if (modSince == -1 || resTimestamp > modSince)
+        {
+            retval = true;
+        }
+        
+        return retval;
+    }
+    
 }
