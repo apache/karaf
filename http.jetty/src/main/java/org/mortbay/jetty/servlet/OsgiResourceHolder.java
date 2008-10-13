@@ -306,8 +306,9 @@ public class OsgiResourceHolder extends ServletHolder
         modSince /= 1000;
         resTimestamp /= 1000;
         
-        // Timestamp check to see if modified
-        if (modSince == -1 || resTimestamp > modSince)
+        // Timestamp check to see if modified - resTimestamp 0 check is for 
+        // safety in case we didn't manage to get a timestamp for the resource
+        if (resTimestamp == 0 || modSince == -1 || resTimestamp > modSince)
         {
             retval = true;
         }
