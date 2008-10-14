@@ -294,7 +294,6 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
             for (int i = 0; i < annotations.size(); i++) {
                 AnnotationDescriptor ad = (AnnotationDescriptor) annotations.get(i);
                 ad.visit(mv);
-                System.out.println("Inject annotation : " + ad);
             }
         }
         
@@ -441,7 +440,6 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
             for (int i = 0; i < annotations.size(); i++) {
                 AnnotationDescriptor ad = (AnnotationDescriptor) annotations.get(i);
                 ad.visit(mv);
-                System.out.println("Inject annotation : " + ad);
             }
         }
 

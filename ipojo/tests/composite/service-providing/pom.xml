@@ -22,27 +22,27 @@
 	<name>iPOJO Composite (Service Providing) Test Suite</name>
 	<artifactId>tests.composite.service.providing</artifactId>
 	<groupId>ipojo.tests</groupId>
-	<version>0.9.0-SNAPSHOT</version>
+	<version>1.1.0-SNAPSHOT</version>
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.ipojo</artifactId>
-			<version>0.9.0-SNAPSHOT</version>
+			<version>1.1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.ipojo.composite</artifactId>
-			<version>0.9.0-SNAPSHOT</version>
+			<version>1.1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.ipojo.metadata</artifactId>
-			<version>0.9.0-SNAPSHOT</version>
+			<version>1.1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.osgi.core</artifactId>
-			<version>1.0.0</version>
+			<version>1.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -52,12 +52,12 @@
 		<dependency>
 			<groupId>ipojo.examples</groupId>
 			<artifactId>org.apache.felix.ipojo.junit4osgi</artifactId>
-			<version>0.9.0-SNAPSHOT</version>
+			<version>1.1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ipojo.tests</groupId>
 			<artifactId>tests.composite</artifactId>
-			<version>0.9.0-SNAPSHOT</version>
+			<version>1.1.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -65,7 +65,7 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
-				<version>1.4.2</version>
+				<version>1.4.3</version>
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
@@ -84,7 +84,7 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-ipojo-plugin</artifactId>
-				<version>0.9.0-SNAPSHOT</version>
+				<version>1.1.0-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<goals>

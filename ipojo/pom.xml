@@ -28,7 +28,7 @@
   <artifactId>iPOJO</artifactId>
   <groupId>org.apache.felix</groupId>
   <name>Apache Felix iPOJO</name>
-  <version>0.9.0-SNAPSHOT</version>
+  <version>1.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   
   	<modules>

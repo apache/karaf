@@ -115,4 +115,17 @@ public class ServiceReferenceImpl implements ServiceReference {
         return true;
     }
 
+    /**
+     * Service Reference compare method.
+     * This method is not yet supported.
+     * @param arg0 the object
+     * @return this methods is not yet supported, and throws an {@link UnsupportedOperationException}.
+     * @see org.osgi.framework.ServiceReference#compareTo(java.lang.Object)
+     * TODO implements this method
+     */
+    public int compareTo(Object arg0) {
+        throw new UnsupportedOperationException("This feature has not yet been implemented.");
+
+    }
+
 }

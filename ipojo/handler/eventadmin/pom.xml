@@ -27,28 +27,28 @@
 	<packaging>bundle</packaging>
 	<name>Apache Felix iPOJO Event Admin Handler</name>
 	<artifactId>org.apache.felix.ipojo.handler.eventadmin</artifactId>
-	<version>1.0.0</version>
+	<version>1.1.0-SNAPSHOT</version>
 	
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.ipojo</artifactId>
-			<version>1.0.0</version>
+			<version>1.1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.ipojo.metadata</artifactId>
-			<version>1.0.0</version>
+			<version>1.1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.osgi.core</artifactId>
-			<version>1.0.0</version>
+			<version>1.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.osgi.compendium</artifactId>
-			<version>1.0.0</version>
+			<version>1.2.0</version>
 		</dependency>
 	</dependencies>
 	
@@ -57,7 +57,7 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
-				<version>1.4.2</version>
+				<version>1.4.3</version>
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
@@ -85,7 +85,7 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-ipojo-plugin</artifactId>
-				<version>1.0.0</version>
+				<version>1.1.0-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<goals>
@@ -100,9 +100,4 @@
 		</plugins>
 	</build>
 
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.ipojo.handler.eventadmin-1.0.0</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.ipojo.handler.eventadmin-1.0.0</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.ipojo.handler.eventadmin-1.0.0</url>
-  </scm>
 </project>
