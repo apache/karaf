@@ -279,14 +279,11 @@ public class OsgiResourceHolder extends ServletHolder
     {
         long lastModified = 0;
         
-        System.out.println("url: " + resUrl);
-        
         try 
         {
             // Get last modified time
             URLConnection conn = resUrl.openConnection();
             lastModified = conn.getLastModified();
-            System.out.println("modified - " + lastModified);
         } 
         catch (Exception e) 
         {
@@ -308,6 +305,8 @@ public class OsgiResourceHolder extends ServletHolder
                 }
             }
         }
+        
+        Activator.debug( "url: " + resUrl  + ", lastModified:" + lastModified);
         
         return lastModified;
     }
