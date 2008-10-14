@@ -981,163 +981,165 @@ public class SecureAction
 
         public Object run() throws Exception
         {
-            try
+            int action =  m_action;
+            Object arg1 = m_arg1;
+            Object arg2 = m_arg2;
+            Object arg3 = m_arg3;
+            Object arg4 = m_arg4;
+            Object arg5 = m_arg5;
+            
+            unset();
+            
+            if (action == GET_PROPERTY_ACTION)
             {
-                if (m_action == GET_PROPERTY_ACTION)
-                {
-                    return System.getProperty((String) m_arg1, (String) m_arg2);
-                }
-                else if (m_action == FOR_NAME_ACTION)
-                {
-                    return Class.forName((String) m_arg1);
-                }
-                else if (m_action == CREATE_URL_ACTION)
-                {
-                    return new URL((String) m_arg1, (String) m_arg2,
-                        ((Integer) m_arg3).intValue(), (String) m_arg4,
-                        (URLStreamHandler) m_arg5);
-                }
-                else if (m_action == CREATE_URL_WITH_CONTEXT_ACTION)
-                {
-                    return new URL((URL) m_arg1, (String) m_arg2,
-                        (URLStreamHandler) m_arg3);
-                }
-                else if (m_action == GET_ABSOLUTE_PATH_ACTION)
-                {
-                    return ((File) m_arg1).getAbsolutePath();
-                }
-                else if (m_action == FILE_EXISTS_ACTION)
-                {
-                    return ((File) m_arg1).exists() ? Boolean.TRUE : Boolean.FALSE;
-                }
-                else if (m_action == FILE_IS_DIRECTORY_ACTION)
-                {
-                    return ((File) m_arg1).isDirectory() ? Boolean.TRUE : Boolean.FALSE;
-                }
-                else if (m_action == MAKE_DIRECTORY_ACTION)
-                {
-                    return ((File) m_arg1).mkdir() ? Boolean.TRUE : Boolean.FALSE;
-                }
-                else if (m_action == MAKE_DIRECTORIES_ACTION)
-                {
-                    return ((File) m_arg1).mkdirs() ? Boolean.TRUE : Boolean.FALSE;
-                }
-                else if (m_action == LIST_DIRECTORY_ACTION)
-                {
-                    return ((File) m_arg1).listFiles();
-                }
-                else if (m_action == RENAME_FILE_ACTION)
-                {
-                    return ((File) m_arg1).renameTo((File) m_arg2) ? Boolean.TRUE : Boolean.FALSE;
-                }
-                else if (m_action == GET_FILE_INPUT_ACTION)
-                {
-                    return new FileInputStream((File) m_arg1);
-                }
-                else if (m_action == GET_FILE_OUTPUT_ACTION)
-                {
-                    return new FileOutputStream((File) m_arg1);
-                }
-                else if (m_action == DELETE_FILE_ACTION)
-                {
-                    return ((File) m_arg1).delete() ? Boolean.TRUE : Boolean.FALSE;
-                }
-                else if (m_action == OPEN_JARX_ACTION)
-                {
-                    return new JarFileX((File) m_arg1);
-                }
-                else if (m_action == OPEN_JAR_ACTION)
-                {
-                    return new JarFile((File) m_arg1, ((Boolean) m_arg2).booleanValue());
-                }
-                else if (m_action == GET_URL_INPUT_ACTION)
-                {
-                    return ((URLConnection) m_arg1).getInputStream();
-                }
-                else if (m_action == CREATE_CONTENTCLASSLOADER_ACTION)
-                {
-                    return new ContentClassLoader((ContentLoaderImpl) m_arg1,
-                        (ProtectionDomain) m_arg2);
-                }
-                else if (m_action == START_ACTIVATOR_ACTION)
-                {
-                    ((BundleActivator) m_arg1).start((BundleContext) m_arg2);
-                    return null;
-                }
-                else if (m_action == STOP_ACTIVATOR_ACTION)
-                {
-                    ((BundleActivator) m_arg1).stop((BundleContext) m_arg2);
-                    return null;
-                }
-                else if (m_action == SYSTEM_EXIT_ACTION)
-                {
-                    System.exit(((Integer) m_arg1).intValue());
-                }
-                else if (m_action == GET_POLICY_ACTION)
-                {
-                    return Policy.getPolicy();
-                }
-                else if (m_action == CREATE_TMPFILE_ACTION)
-                {
-                    return File.createTempFile((String) m_arg1, (String) m_arg2,
-                        (File) m_arg3);
-                }
-                else if (m_action == OPEN_URLCONNECTION_ACTION)
-                {
-                    return ((URL) m_arg1).openConnection();
-                }
-                else if (m_action == OPEN_JARURLCONNECTIONJAR_ACTION)
-                {
-                    return ((JarURLConnection) m_arg1).getJarFile();
-                }
-                else if (m_action == ADD_EXTENSION_URL)
-                {
-                    Method addURL =
-                        URLClassLoader.class.getDeclaredMethod("addURL",
-                        new Class[] {URL.class});
-                    addURL.setAccessible(true);
-                    addURL.invoke(m_arg2, new Object[]{m_arg1});
-                }
-                else if (m_action == GET_CONSTRUCTOR_ACTION)
-                {
-                    return ((Class) m_arg1).getConstructor((Class[]) m_arg2);
-                }
-                else if (m_action == GET_METHOD_ACTION)
-                {
-                    return ((Class) m_arg1).getMethod((String) m_arg2, (Class[]) m_arg3);
-                }
-                else if (m_action == INVOKE_METHOD_ACTION)
-                {
-                    ((Method) m_arg1).setAccessible(true);
-                    return ((Method) m_arg1).invoke(m_arg2, (Object[]) m_arg3);
-                }
-                else if (m_action == INVOKE_CONSTRUCTOR_ACTION)
-                {
-                    ((Constructor) m_arg1).setAccessible(true);
-                    return ((Constructor) m_arg1).newInstance((Object[]) m_arg2);
-                }
-                else if (m_action == SWAP_FIELD_ACTION)
-                {
-                    return _swapStaticFieldIfNotClass((Class) m_arg1,
-                        (Class) m_arg2, (Class) m_arg3, (String) m_arg4);
-                }
-                else if (m_action == GET_FIELD_ACTION)
-                {
-                    Field field = ((Class) m_arg1).getDeclaredField((String) m_arg2);
-                    field.setAccessible(true);
-                    return field.get(m_arg3);
-                }
-                else if (m_action == GET_DECLAREDMETHOD_ACTION)
-                {
-                    return ((Class) m_arg1).getDeclaredMethod((String) m_arg2, (Class[]) m_arg3);
-                }
-
+                return System.getProperty((String) arg1, (String) arg2);
+            }
+            else if (action == FOR_NAME_ACTION)
+            {
+                return Class.forName((String) arg1);
+            }
+            else if (action == CREATE_URL_ACTION)
+            {
+                return new URL((String) arg1, (String) arg2,
+                    ((Integer) arg3).intValue(), (String) arg4,
+                    (URLStreamHandler) arg5);
+            }
+            else if (action == CREATE_URL_WITH_CONTEXT_ACTION)
+            {
+                return new URL((URL) arg1, (String) arg2,
+                    (URLStreamHandler) arg3);
+            }
+            else if (action == GET_ABSOLUTE_PATH_ACTION)
+            {
+                return ((File) arg1).getAbsolutePath();
+            }
+            else if (action == FILE_EXISTS_ACTION)
+            {
+                return ((File) arg1).exists() ? Boolean.TRUE : Boolean.FALSE;
+            }
+            else if (action == FILE_IS_DIRECTORY_ACTION)
+            {
+                return ((File) arg1).isDirectory() ? Boolean.TRUE : Boolean.FALSE;
+            }
+            else if (action == MAKE_DIRECTORY_ACTION)
+            {
+                return ((File) arg1).mkdir() ? Boolean.TRUE : Boolean.FALSE;
+            }
+            else if (action == MAKE_DIRECTORIES_ACTION)
+            {
+                return ((File) arg1).mkdirs() ? Boolean.TRUE : Boolean.FALSE;
+            }
+            else if (action == LIST_DIRECTORY_ACTION)
+            {
+                return ((File) arg1).listFiles();
+            }
+            else if (action == RENAME_FILE_ACTION)
+            {
+                return ((File) arg1).renameTo((File) arg2) ? Boolean.TRUE : Boolean.FALSE;
+            }
+            else if (action == GET_FILE_INPUT_ACTION)
+            {
+                return new FileInputStream((File) arg1);
+            }
+            else if (action == GET_FILE_OUTPUT_ACTION)
+            {
+                return new FileOutputStream((File) arg1);
+            }
+            else if (action == DELETE_FILE_ACTION)
+            {
+                return ((File) arg1).delete() ? Boolean.TRUE : Boolean.FALSE;
+            }
+            else if (action == OPEN_JARX_ACTION)
+            {
+                return new JarFileX((File) arg1);
+            }
+            else if (action == OPEN_JAR_ACTION)
+            {
+                return new JarFile((File) arg1, ((Boolean) arg2).booleanValue());
+            }
+            else if (action == GET_URL_INPUT_ACTION)
+            {
+                return ((URLConnection) arg1).getInputStream();
+            }
+            else if (action == CREATE_CONTENTCLASSLOADER_ACTION)
+            {
+                return new ContentClassLoader((ContentLoaderImpl) arg1,
+                    (ProtectionDomain) arg2);
+            }
+            else if (action == START_ACTIVATOR_ACTION)
+            {
+                ((BundleActivator) arg1).start((BundleContext) arg2);
                 return null;
             }
-            finally
+            else if (action == STOP_ACTIVATOR_ACTION)
             {
-                unset();
+                ((BundleActivator) arg1).stop((BundleContext) arg2);
+                return null;
             }
+            else if (action == SYSTEM_EXIT_ACTION)
+            {
+                System.exit(((Integer) arg1).intValue());
+            }
+            else if (action == GET_POLICY_ACTION)
+            {
+                return Policy.getPolicy();
+            }
+            else if (action == CREATE_TMPFILE_ACTION)
+            {
+                return File.createTempFile((String) arg1, (String) arg2,
+                    (File) arg3);
+            }
+            else if (action == OPEN_URLCONNECTION_ACTION)
+            {
+                return ((URL) arg1).openConnection();
+            }
+            else if (action == OPEN_JARURLCONNECTIONJAR_ACTION)
+            {
+                return ((JarURLConnection) arg1).getJarFile();
+            }
+            else if (action == ADD_EXTENSION_URL)
+            {
+                Method addURL =
+                    URLClassLoader.class.getDeclaredMethod("addURL",
+                    new Class[] {URL.class});
+                addURL.setAccessible(true);
+                addURL.invoke(arg2, new Object[]{arg1});
+            }
+            else if (action == GET_CONSTRUCTOR_ACTION)
+            {
+                return ((Class) arg1).getConstructor((Class[]) arg2);
+            }
+            else if (action == GET_METHOD_ACTION)
+            {
+                return ((Class) arg1).getMethod((String) arg2, (Class[]) arg3);
+            }
+            else if (action == INVOKE_METHOD_ACTION)
+            {
+                ((Method) arg1).setAccessible(true);
+                return ((Method) arg1).invoke(arg2, (Object[]) arg3);
+            }
+            else if (action == INVOKE_CONSTRUCTOR_ACTION)
+            {
+                ((Constructor) arg1).setAccessible(true);
+                return ((Constructor) arg1).newInstance((Object[]) arg2);
+            }
+            else if (action == SWAP_FIELD_ACTION)
+            {
+                return _swapStaticFieldIfNotClass((Class) arg1,
+                    (Class) arg2, (Class) arg3, (String) arg4);
+            }
+            else if (action == GET_FIELD_ACTION)
+            {
+                Field field = ((Class) arg1).getDeclaredField((String) arg2);
+                field.setAccessible(true);
+                return field.get(arg3);
+            }
+            else if (action == GET_DECLAREDMETHOD_ACTION)
+            {
+                return ((Class) arg1).getDeclaredMethod((String) arg2, (Class[]) arg3);
+            }
+
+            return null;
         }
     }
 }
