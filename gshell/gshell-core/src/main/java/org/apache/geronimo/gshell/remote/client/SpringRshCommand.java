@@ -20,10 +20,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.io.FilterInputStream;
-import java.io.InputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.io.IOException;
 
 import jline.Terminal;
@@ -39,7 +35,6 @@ import org.apache.geronimo.gshell.remote.client.handler.ClientMessageHandler;
 import org.apache.geronimo.gshell.remote.client.proxy.SpringRemoteShellProxy;
 import org.apache.geronimo.gshell.remote.crypto.CryptoContext;
 import org.apache.geronimo.gshell.whisper.transport.TransportFactoryLocator;
-import org.apache.geronimo.gshell.whisper.stream.StreamFeeder;
 
 /**
  * Created by IntelliJ IDEA.
@@ -59,6 +54,9 @@ public class SpringRshCommand extends OsgiCommandSupport {
 
     @Option(name="-p", aliases={"--password"}, metaVar="PASSWORD", description="Remote user password")
     private String password;
+
+    @Option(name="-n", aliases={"--name"}, metaVar="NAME", description="Name of the instance to connect to")
+    private String name;
 
     @Argument(metaVar="URI", required=true, index=0, description="Connect to remote server at URI")
     private URI remote;
@@ -102,6 +100,10 @@ public class SpringRshCommand extends OsgiCommandSupport {
                     try {
                         ncis.close();
                     } catch (IOException e) {}
+                }
+
+                public String getInstanceName() {
+                    return SpringRshCommand.this.name;
                 }
             };
             client.initialize();

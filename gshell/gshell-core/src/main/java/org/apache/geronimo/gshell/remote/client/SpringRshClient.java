@@ -75,6 +75,8 @@ public class SpringRshClient extends RshClient
 
     private Session session;
 
+    private String userName;
+
     @Requirement(role=ClientMessageHandler.class)
     private List<ClientMessageHandler> handlers;
 
@@ -112,6 +114,14 @@ public class SpringRshClient extends RshClient
         return transport;
     }
 
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getInstanceName() {
+        return null;
+    }
+
     public void close() {
         transport.close();
     }
@@ -119,6 +129,7 @@ public class SpringRshClient extends RshClient
     public void login(final String username, final String password) throws Exception {
         doHandshake();
         doLogin(username, password);
+        this.userName = username;
     }
 
     private void doHandshake() throws Exception {

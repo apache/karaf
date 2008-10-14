@@ -30,6 +30,7 @@ import org.apache.geronimo.gshell.console.Console;
 import org.apache.geronimo.gshell.console.JLineConsole;
 import org.apache.geronimo.gshell.remote.RemoteShell;
 import org.apache.geronimo.gshell.remote.client.RshClient;
+import org.apache.geronimo.gshell.remote.client.SpringRshClient;
 import org.apache.geronimo.gshell.remote.client.proxy.RemoteBrandingProxy;
 import org.apache.geronimo.gshell.remote.client.proxy.RemoteShellInfoProxy;
 import org.apache.geronimo.gshell.remote.client.proxy.RemoteHistoryProxy;
@@ -51,7 +52,7 @@ public class SpringRemoteShellProxy
 {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private RshClient client;
+    private SpringRshClient client;
 
     private IO io;
 
@@ -63,13 +64,13 @@ public class SpringRemoteShellProxy
 
     private RemoteEnvironmentProxy env;
 
-    private RemoteShellInfoProxy shellInfo;
+    private SpringRemoteShellInfoProxy shellInfo;
 
     private RemoteHistoryProxy history;
 
     private RemoteBrandingProxy branding;
 
-    public SpringRemoteShellProxy(final RshClient client, final IO io, final Terminal terminal) throws Exception {
+    public SpringRemoteShellProxy(final SpringRshClient client, final IO io, final Terminal terminal) throws Exception {
         assert client != null;
         assert io != null;
         assert terminal != null;
@@ -87,7 +88,7 @@ public class SpringRemoteShellProxy
 
         // Setup other proxies
         env = new RemoteEnvironmentProxy(client);
-        shellInfo = new RemoteShellInfoProxy(client);
+        shellInfo = new SpringRemoteShellInfoProxy(client);
         history = new RemoteHistoryProxy(client);
         branding = new RemoteBrandingProxy(client);
 
@@ -214,8 +215,8 @@ public class SpringRemoteShellProxy
                 // TODO: Get the real details and use them...
                 //
 
-                String userName = "user"; // shellInfo.getUserName();
-                String hostName = "remote"; // shellInfo.getLocalHost().getHostName();
+                String userName = shellInfo.getUserName();
+                String hostName = shellInfo.getInstanceName() != null ? shellInfo.getInstanceName() : "unknown";
                 String path = "/";
 
                 return renderer.render("@|bold " + userName + "|@" + hostName + ":@|bold " + path + "|> ");
