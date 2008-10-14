@@ -33,7 +33,9 @@ public class ModuleImpl implements IModule
     private IContentLoader m_contentLoader = null;
     private IModule[] m_fragments = null;
     private IWire[] m_wires = null;
-    private IModule[] m_dependents = new IModule[0];
+    private IModule[] m_dependentHosts = new IModule[0];
+    private IModule[] m_dependentImporters = new IModule[0];
+    private IModule[] m_dependentRequirers = new IModule[0];
 
     ModuleImpl(Logger logger, String id, IModuleDefinition md)
     {
@@ -69,20 +71,21 @@ public class ModuleImpl implements IModule
         // dependencies when we are uninstalling the module.
         for (int i = 0; (m_fragments != null) && (i < m_fragments.length); i++)
         {
-            ((ModuleImpl) m_fragments[i]).removeDependent(this);
+            ((ModuleImpl) m_fragments[i]).removeDependentHost(this);
         }
 
         // Update the dependencies on the new fragments.
         m_fragments = fragments;
+
+        // We need to add ourself as a dependent of each fragment
+        // module. We also need to create an array of fragment contents
+        // to attach to our content loader.
         if (m_fragments != null)
         {
-            // We need to add ourself as a dependent of each fragment
-            // module. We also need to create an array of fragment contents
-            // to attach to our content loader.
             IContent[] fragmentContents = new IContent[m_fragments.length];
             for (int i = 0; (m_fragments != null) && (i < m_fragments.length); i++)
             {
-                ((ModuleImpl) m_fragments[i]).addDependent(this);
+                ((ModuleImpl) m_fragments[i]).addDependentHost(this);
                 fragmentContents[i] =
                     m_fragments[i].getContentLoader().getContent()
                         .getEntryAsContent(FelixConstants.CLASS_PATH_DOT);
@@ -99,66 +102,105 @@ public class ModuleImpl implements IModule
 
     public synchronized void setWires(IWire[] wires)
     {
-        // Remove module from old wire modules' dependencies.
+        // Remove module from old wire modules' dependencies,
+        // since we are no longer dependent on any the moduels
+        // from the old wires.
         for (int i = 0; (m_wires != null) && (i < m_wires.length); i++)
         {
-            ((ModuleImpl) m_wires[i].getExporter()).removeDependent(this);
+            if (m_wires[i].getCapability().getNamespace().equals(ICapability.MODULE_NAMESPACE))
+            {
+                ((ModuleImpl) m_wires[i].getExporter()).removeDependentRequirer(this);
+            }
+            else if (m_wires[i].getCapability().getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+            {
+                ((ModuleImpl) m_wires[i].getExporter()).removeDependentImporter(this);
+            }
         }
+
         m_wires = wires;
-        // Add module to new wire modules' dependencies.
-        for (int i = 0; (wires != null) && (i < wires.length); i++)
+
+        // Add ourself as a dependent to the new wires' modules.
+        for (int i = 0; (m_wires != null) && (i < m_wires.length); i++)
         {
-            ((ModuleImpl) m_wires[i].getExporter()).addDependent(this);
+            if (m_wires[i].getCapability().getNamespace().equals(ICapability.MODULE_NAMESPACE))
+            {
+                ((ModuleImpl) m_wires[i].getExporter()).addDependentRequirer(this);
+            }
+            else if (m_wires[i].getCapability().getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+            {
+                ((ModuleImpl) m_wires[i].getExporter()).addDependentImporter(this);
+            }
         }
     }
 
-    private synchronized void addDependent(IModule module)
+    public synchronized IModule[] getDependentHosts()
     {
-        // Make sure the dependent module is not already present.
-        for (int i = 0; i < m_dependents.length; i++)
-        {
-            if (m_dependents[i].equals(module))
-            {
-                return;
-            }
-        }
-        IModule[] tmp = new IModule[m_dependents.length + 1];
-        System.arraycopy(m_dependents, 0, tmp, 0, m_dependents.length);
-        tmp[m_dependents.length] = module;
-        m_dependents = tmp;
+        return m_dependentHosts;
     }
 
-    private synchronized void removeDependent(IModule module)
+    public synchronized void addDependentHost(IModule module)
     {
-        // Make sure the dependent module is not already present.
-        for (int i = 0; i < m_dependents.length; i++)
-        {
-            if (m_dependents[i].equals(module))
-            {
-                // If this is the module, then point to empty list.
-                if ((m_dependents.length - 1) == 0)
-                {
-                    m_dependents = new IModule[0];
-                }
-                // Otherwise, we need to do some array copying.
-                else
-                {
-                    IModule[] tmp = new IModule[m_dependents.length - 1];
-                    System.arraycopy(m_dependents, 0, tmp, 0, i);
-                    if (i < tmp.length)
-                    {
-                        System.arraycopy(
-                            m_dependents, i + 1, tmp, i, tmp.length - i);
-                    }
-                    m_dependents = tmp;
-                }
-            }
-        }
+        m_dependentHosts = addDependent(m_dependentHosts, module);
+    }
+
+    public synchronized void removeDependentHost(IModule module)
+    {
+        m_dependentHosts = removeDependent(m_dependentHosts, module);
+    }
+
+    public synchronized IModule[] getDependentImporters()
+    {
+        return m_dependentImporters;
+    }
+
+    public synchronized void addDependentImporter(IModule module)
+    {
+        m_dependentImporters = addDependent(m_dependentImporters, module);
+    }
+
+    public synchronized void removeDependentImporter(IModule module)
+    {
+        m_dependentImporters = removeDependent(m_dependentImporters, module);
+    }
+
+    public synchronized IModule[] getDependentRequirers()
+    {
+        return m_dependentRequirers;
+    }
+
+    public synchronized void addDependentRequirer(IModule module)
+    {
+        m_dependentRequirers = addDependent(m_dependentRequirers, module);
+    }
+
+    public synchronized void removeDependentRequirer(IModule module)
+    {
+        m_dependentRequirers = removeDependent(m_dependentRequirers, module);
     }
 
     public synchronized IModule[] getDependents()
     {
-        return m_dependents;
+        IModule[] dependents = new IModule[
+            m_dependentHosts.length + m_dependentImporters.length + m_dependentRequirers.length];
+        System.arraycopy(
+            m_dependentHosts,
+            0,
+            dependents,
+            0,
+            m_dependentHosts.length);
+        System.arraycopy(
+            m_dependentImporters,
+            0,
+            dependents,
+            m_dependentHosts.length,
+            m_dependentImporters.length);
+        System.arraycopy(
+            m_dependentRequirers,
+            0,
+            dependents,
+            m_dependentHosts.length + m_dependentImporters.length,
+            m_dependentRequirers.length);
+        return dependents;
     }
 
     public Class getClass(String name) throws ClassNotFoundException
@@ -212,5 +254,52 @@ public class ModuleImpl implements IModule
     public String toString()
     {
         return m_id;
+    }
+
+    private static IModule[] addDependent(IModule[] modules, IModule module)
+    {
+        // Make sure the dependent module is not already present.
+        for (int i = 0; i < modules.length; i++)
+        {
+            if (modules[i].equals(module))
+            {
+                return modules;
+            }
+        }
+        IModule[] tmp = new IModule[modules.length + 1];
+        System.arraycopy(modules, 0, tmp, 0, modules.length);
+        tmp[modules.length] = module;
+        return tmp;
+    }
+
+    private static IModule[] removeDependent(IModule[] modules, IModule module)
+    {
+        IModule[] tmp = modules;
+
+        // Make sure the dependent module is not already present.
+        for (int i = 0; i < modules.length; i++)
+        {
+            if (modules[i].equals(module))
+            {
+                // If this is the module, then point to empty list.
+                if ((modules.length - 1) == 0)
+                {
+                    tmp = new IModule[0];
+                }
+                // Otherwise, we need to do some array copying.
+                else
+                {
+                    tmp = new IModule[modules.length - 1];
+                    System.arraycopy(modules, 0, tmp, 0, i);
+                    if (i < tmp.length)
+                    {
+                        System.arraycopy(modules, i + 1, tmp, i, tmp.length - i);
+                    }
+                }
+                break;
+            }
+        }
+
+        return tmp;
     }
 }

@@ -3092,36 +3092,27 @@ ex.printStackTrace();
         List list = new ArrayList();
 
         // Get exporting bundle information.
-        FelixBundle exporter = (FelixBundle)
-            (ep).getExportingBundle();
+        FelixBundle exporter = (FelixBundle) ep.getExportingBundle();
 
-        // Search the dependents of the exporter's module revisions
-        // for importers of the specific package.
+        // Get all importers and requirers for all revisions of the bundle.
+        // The spec says that require-bundle should be returned with importers.
         IModule[] expModules = exporter.getInfo().getModules();
         for (int expIdx = 0; (expModules != null) && (expIdx < expModules.length); expIdx++)
         {
-            IModule[] depModules = ((ModuleImpl) expModules[expIdx]).getDependents();
-            for (int depIdx = 0; (depModules != null) && (depIdx < depModules.length); depIdx++)
+            IModule[] dependents = ((ModuleImpl) expModules[expIdx]).getDependentImporters();
+            for (int depIdx = 0; (dependents != null) && (depIdx < dependents.length); depIdx++)
             {
-                // ExportedPackage.getImportingBundles() does not expect bundles
-                // to depend on themselves, so we will filter that case here.
-                if (!expModules[expIdx].equals(depModules[depIdx]))
+                // ExportedPackage.getImportingBundles() does not expect a bundle to
+                // depend on itself, so ignore that case.
+                if (!expModules[expIdx].equals(dependents[depIdx]))
                 {
-                    // See if the dependent module has a wire for the specific
-                    // package. If so, see if the provider module is from the
-                    // exporter and record it if it is.
-                    IWire wire = Util.getWire(depModules[depIdx], ep.getName());
-                    if ((wire != null) && expModules[expIdx].equals(wire.getExporter()) &&
-                        wire.getRequirement().isSatisfied(
-                        new Capability(ICapability.PACKAGE_NAMESPACE, null, new R4Attribute[] {
-                            new R4Attribute(ICapability.PACKAGE_PROPERTY, ep.getName(), false),
-                            new R4Attribute(ICapability.VERSION_PROPERTY, ep.getVersion(), false)
-                        })))
-                    {
-                        // Add the bundle to the list of importers.
-                        list.add(getBundle(Util.getBundleIdFromModuleId(depModules[depIdx].getId())));
-                    }
+                    list.add(getBundle(Util.getBundleIdFromModuleId(dependents[depIdx].getId())));
                 }
+            }
+            dependents = ((ModuleImpl) expModules[expIdx]).getDependentRequirers();
+            for (int depIdx = 0; (dependents != null) && (depIdx < dependents.length); depIdx++)
+            {
+                list.add(getBundle(Util.getBundleIdFromModuleId(dependents[depIdx].getId())));
             }
         }
 
@@ -3266,23 +3257,23 @@ ex.printStackTrace();
         fireFrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, this, null);
     }
 
-    private void populateImportGraph(FelixBundle exporter, Map map)
+    private void populateDependentGraph(FelixBundle exporter, Map map)
     {
         // Get all dependent bundles of this bundle.
-        Bundle[] importers = getDependentBundles(exporter);
+        Bundle[] dependents = getDependentBundles(exporter);
 
-        for (int impIdx = 0;
-            (importers != null) && (impIdx < importers.length);
-            impIdx++)
+        for (int depIdx = 0;
+            (dependents != null) && (depIdx < dependents.length);
+            depIdx++)
         {
             // Avoid cycles if the bundle is already in map.
-            if (!map.containsKey(importers[impIdx]))
+            if (!map.containsKey(dependents[depIdx]))
             {
                 // Add each importing bundle to map.
-                map.put(importers[impIdx], importers[impIdx]);
+                map.put(dependents[depIdx], dependents[depIdx]);
                 // Now recurse into each bundle to get its importers.
-                populateImportGraph(
-                    (FelixBundle) importers[impIdx], map);
+                populateDependentGraph(
+                    (FelixBundle) dependents[depIdx], map);
             }
         }
     }
@@ -4295,7 +4286,7 @@ ex.printStackTrace();
                         FelixBundle target = (FelixBundle) newTargets[targetIdx];
                         map.put(target, target);
                         // Add all importing bundles to map.
-                        populateImportGraph(target, map);
+                        populateDependentGraph(target, map);
                     }
 
                     bundles = (FelixBundle[]) map.values().toArray(new FelixBundle[map.size()]);
