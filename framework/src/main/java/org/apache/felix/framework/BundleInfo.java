@@ -25,6 +25,7 @@ import java.util.*;
 
 import org.apache.felix.moduleloader.IContentLoader;
 import org.apache.felix.moduleloader.IModule;
+import org.apache.felix.moduleloader.ModuleImpl;
 import org.osgi.framework.*;
 
 abstract class BundleInfo
