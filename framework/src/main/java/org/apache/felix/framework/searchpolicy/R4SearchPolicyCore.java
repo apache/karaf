@@ -1060,14 +1060,6 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
                     getBundleSymbolicName(targetFragment),
                     new IModule[] { targetFragment });
             }
-for (Iterator iter = fragmentMap.entrySet().iterator(); iter.hasNext(); )
-{
-    Map.Entry entry = (Map.Entry) iter.next();
-    String symName = (String) entry.getKey();
-    IModule[] fragments = (IModule[]) entry.getValue();
-    m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: "
-        + rootModule + " -> " + symName + " -> " + fragments[0]);
-}
 
             // This variable maps an unresolved module to a list of candidate
             // sets, where there is one candidate set for each requirement that
@@ -1118,9 +1110,13 @@ for (Iterator iter = fragmentMap.entrySet().iterator(); iter.hasNext(); )
                 for (Iterator iter = fragmentMap.entrySet().iterator(); iter.hasNext(); )
                 {
                     Map.Entry entry = (Map.Entry) iter.next();
+                    String symName = (String) entry.getKey();
                     IModule[] fragments = (IModule[]) entry.getValue();
 // TODO: FRAGMENT - For now, just attach first candidate.
                     list.add(fragments[0]);
+                    setResolved(fragments[0], true);
+m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: "
+    + rootModule + " -> " + symName + " -> " + fragments[0]);
                 }
                 try
                 {
