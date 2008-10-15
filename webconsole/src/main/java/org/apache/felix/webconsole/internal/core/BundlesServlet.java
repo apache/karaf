@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.bundlerepository.*;
-import org.apache.felix.shell.impl.UpdateCommandImpl;
 import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.apache.felix.webconsole.internal.Util;
 import org.apache.felix.webconsole.internal.obr.DeployerThread;
@@ -286,16 +285,44 @@ public class BundlesServlet extends BaseWebConsolePlugin
         return null;
     }
 
+    private void renderBundleInfoCount(final PrintWriter pw, String msg, int count)
+    throws IOException {
+        pw.print("<td class='content'>" );
+        pw.print(msg);pw.print(" : ");pw.print(count);
+        pw.print(" Bundle"); if ( count != 1) pw.print('s');
+        pw.println("</td>");
+    }
 
     protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
         IOException
     {
+        Bundle bundle = getBundle( request.getPathInfo() );
+        Bundle[] bundles = ( bundle != null ) ? new Bundle[]
+            { bundle } : this.getBundles();
 
         PrintWriter pw = response.getWriter();
 
         String appRoot = ( String ) request.getAttribute( OsgiManager.ATTR_APP_ROOT );
         pw.println( "<script src='" + appRoot + "/res/ui/datatable.js' language='JavaScript'></script>" );
         pw.println( "<script src='" + appRoot + "/res/ui/bundles.js' language='JavaScript'></script>" );
+
+        if ( bundles != null ) {
+            pw.println("<table class='content' cellpadding='0' cellspacing='0' width='100%'><tbody>" );
+            pw.println("<tr class='content'>" );
+            renderBundleInfoCount(pw, "Available", bundles.length);
+            int active = 0, installed = 0, resolved = 0;
+            for(int i=0; i<bundles.length; i++) {
+                switch ( bundles[i].getState() ) {
+                    case Bundle.ACTIVE: active++; break;
+                    case Bundle.INSTALLED: installed++;break;
+                    case Bundle.RESOLVED: resolved++;break;
+                }
+            }
+            renderBundleInfoCount(pw, "Active", active);
+            renderBundleInfoCount(pw, "Resolved", resolved);
+            renderBundleInfoCount(pw, "Installed", installed);
+            pw.println("</tr></tbody></table>");
+        }
 
         Util.startScript( pw );
         pw.println( "var bundleListData = " );
@@ -310,9 +337,6 @@ public class BundlesServlet extends BaseWebConsolePlugin
             jw.key( "numActions" );
             jw.value( 4 );
 
-            Bundle bundle = getBundle( request.getPathInfo() );
-            Bundle[] bundles = ( bundle != null ) ? new Bundle[]
-                { bundle } : this.getBundles();
             boolean details = ( bundle != null );
 
             if ( bundles != null && bundles.length > 0 )
@@ -526,9 +550,9 @@ public class BundlesServlet extends BaseWebConsolePlugin
         keyVal( jw, "Description", headers.get( Constants.BUNDLE_DESCRIPTION ) );
 
         keyVal( jw, "Start Level", getStartLevel( bundle ) );
-        
+
         keyVal( jw, "Bundle Classpath", headers.get( Constants.BUNDLE_CLASSPATH ) );
-        
+
         if ( bundle.getState() == Bundle.INSTALLED )
         {
             listImportExportsUnresolved( jw, bundle );
@@ -889,7 +913,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
         else
         {
             val.append( " -- Cannot be resolved" );
-            
+
             if ( optional )
             {
                 val.append( " but is not required" );
@@ -905,7 +929,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
         {
             val.append( "</span>" );
         }
-        
+
         val.append( "<br />" );
     }
 
