@@ -1192,7 +1192,8 @@ for (Iterator iter = fragmentMap.entrySet().iterator(); iter.hasNext(); )
                 for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
                 {
                     if (caps[capIdx].getNamespace().equals(ICapability.HOST_NAMESPACE)
-                        && hostReq.isSatisfied(caps[capIdx]))
+                        && hostReq.isSatisfied(caps[capIdx])
+                        && !modules[modIdx].isStale())
                     {
                         hostList.add(modules[modIdx]);
                         break;
@@ -1235,7 +1236,8 @@ for (Iterator iter = fragmentMap.entrySet().iterator(); iter.hasNext(); )
                 for (int reqIdx = 0; (reqs != null) && (reqIdx < reqs.length); reqIdx++)
                 {
                     if (reqs[reqIdx].getNamespace().equals(ICapability.HOST_NAMESPACE)
-                        && reqs[reqIdx].isSatisfied(bundleCap))
+                        && reqs[reqIdx].isSatisfied(bundleCap)
+                        && !modules[modIdx].isStale())
                     {
                         indexFragment(fragmentMap, modules[modIdx]);
                         break;

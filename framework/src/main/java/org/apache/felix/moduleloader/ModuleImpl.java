@@ -36,6 +36,7 @@ public class ModuleImpl implements IModule
     private IModule[] m_dependentHosts = new IModule[0];
     private IModule[] m_dependentImporters = new IModule[0];
     private IModule[] m_dependentRequirers = new IModule[0];
+    private volatile boolean m_isStale = false;
 
     ModuleImpl(Logger logger, String id, IModuleDefinition md)
     {
@@ -249,6 +250,16 @@ public class ModuleImpl implements IModule
                 ex);
         }
         return null;
+    }
+
+    public boolean isStale()
+    {
+        return m_isStale;
+    }
+
+    public void setStale()
+    {
+        m_isStale = true;
     }
 
     public String toString()

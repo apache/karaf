@@ -2134,10 +2134,11 @@ ex.printStackTrace();
         if (target != null)
         {
             // Set the bundle's persistent state to uninstalled.
-            target.getInfo().setPersistentStateUninstalled();
+            info.setPersistentStateUninstalled();
 
             // Mark the bundle as removal pending.
-            target.getInfo().setRemovalPending(true);
+            info.setRemovalPending(true);
+            info.markModulesStale();
 
             // Put bundle in uninstalled bundle array.
             rememberUninstalledBundle(bundle);

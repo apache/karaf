@@ -134,6 +134,19 @@ abstract class BundleInfo
         m_modules = dest;
     }
 
+    /**
+     * This marks all modules as stale when the associated bundle has
+     * been uninstalled. This is necessary since uninstalled bundles
+     * should not be used for fragments or fragment hosts.
+    **/
+    public synchronized void markModulesStale()
+    {
+        for (int i = 0; i < m_modules.length; i++)
+        {
+            ((ModuleImpl) m_modules[i]).setStale();
+        }
+    }
+
     public abstract String getSymbolicName();
 
     public abstract long getBundleId();

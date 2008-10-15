@@ -31,4 +31,14 @@ public interface IModule
     public Class getClass(String name) throws ClassNotFoundException;
     public URL getResource(String name);
     public Enumeration getResources(String name);
+
+
+    /**
+     * Returns whether the module is associated with an uninstalled bundle.
+     * If so, then it should not be used when resolving fragments or fragment
+     * hosts. However, it still can be used for resolving imported packages.
+     * @return <tt>true</tt> if the module's bundle is uninstalled, otherwise
+     *         <tt>false</tt>.
+    **/
+    public boolean isStale();
 }
