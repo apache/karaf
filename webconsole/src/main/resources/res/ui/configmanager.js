@@ -332,8 +332,17 @@ var spanCounter = 0;
         {
             inputEl.setAttribute( "checked", true );
         }
+
+        var hiddenEl = createElement( "input", "input", {
+            type: "hidden",
+            name: prop,
+            value: false
+        });
         
-        return inputEl;
+        var divEl = createElement("div", "div");
+        divEl.appendChild(inputEl);
+        divEl.appendChild(hiddenEl);
+        return divEl;
         
     } else if (typeof(type) == "object") { // predefined values
     
