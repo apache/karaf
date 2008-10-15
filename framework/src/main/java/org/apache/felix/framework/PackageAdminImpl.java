@@ -20,7 +20,10 @@ package org.apache.felix.framework;
 
 import java.util.*;
 
+import org.apache.felix.framework.util.Util;
 import org.apache.felix.framework.util.VersionRange;
+import org.apache.felix.moduleloader.IModule;
+import org.apache.felix.moduleloader.ModuleImpl;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.*;
 
@@ -140,6 +143,11 @@ class PackageAdminImpl implements PackageAdmin, Runnable
 
     public int getBundleType(Bundle bundle)
     {
+        Map headerMap = ((FelixBundle) bundle).getInfo().getCurrentHeader();
+        if (headerMap.containsKey(Constants.FRAGMENT_HOST))
+        {
+            return PackageAdmin.BUNDLE_TYPE_FRAGMENT;
+        }
         return 0;
     }
 
@@ -184,6 +192,61 @@ class PackageAdminImpl implements PackageAdmin, Runnable
         return m_felix.getExportedPackages(bundle);
     }
 
+    public Bundle[] getFragments(Bundle bundle)
+    {
+        Bundle[] fragments = null;
+        // If the bundle is not a fragment, then return its fragments.
+        if ((getBundleType(bundle) & BUNDLE_TYPE_FRAGMENT) == 0)
+        {
+            // Get attached fragments.
+            IModule[] modules =
+                ((ModuleImpl)
+                    ((FelixBundle) bundle).getInfo().getCurrentModule()).getFragments();
+            // Convert fragment modules to bundles.
+            List list = new ArrayList();
+            for (int i = 0; (modules != null) && (i < modules.length); i++)
+            {
+                long id = Util.getBundleIdFromModuleId(modules[i].getId());
+                Bundle b = m_felix.getBundle(id);
+                if (b != null)
+                {
+                    list.add(b);
+                }
+            }
+            // Convert list to an array.
+            fragments = (list.size() == 0)
+                ? null
+                : (Bundle[]) list.toArray(new Bundle[list.size()]);
+        }
+        return fragments;
+    }
+
+    public Bundle[] getHosts(Bundle bundle)
+    {
+        if (getBundleType(bundle) == BUNDLE_TYPE_FRAGMENT)
+        {
+            return m_felix.getDependentBundles((FelixBundle) bundle);
+        }
+        return null;
+    }
+
+    public RequiredBundle[] getRequiredBundles(String symbolicName)
+    {
+        List list = new ArrayList();
+        Bundle[] bundles = m_felix.getBundles();
+        for (int i = 0; i < bundles.length; i++)
+        {
+            FelixBundle fb = (FelixBundle) bundles[i];
+            if ((symbolicName == null) || (symbolicName.equals(fb.getInfo().getSymbolicName())))
+            {
+                list.add(new RequiredBundleImpl(m_felix, fb));
+            }
+        }
+        return (list.size() == 0)
+            ? null
+            : (RequiredBundle[]) list.toArray(new RequiredBundle[list.size()]);
+    }
+
     /**
      * The OSGi specification states that refreshing packages is
      * asynchronous; this method simply notifies the package admin
@@ -216,6 +279,19 @@ class PackageAdminImpl implements PackageAdmin, Runnable
             m_reqBundles = newReqBundles;
         }
         notifyAll();
+    }
+
+    public boolean resolveBundles(Bundle[] bundles)
+    {
+        Object sm = System.getSecurityManager();
+        
+        if (sm != null)
+        {
+            ((SecurityManager) sm).checkPermission(
+                new AdminPermission(m_systemBundle, AdminPermission.RESOLVE));
+        }
+        
+        return m_felix.resolveBundles(bundles);
     }
 
     /**
@@ -273,36 +349,5 @@ class PackageAdminImpl implements PackageAdmin, Runnable
                 }
             }
         }
-    }
-
-    public boolean resolveBundles(Bundle[] bundles)
-    {
-        Object sm = System.getSecurityManager();
-        
-        if (sm != null)
-        {
-            ((SecurityManager) sm).checkPermission(
-                new AdminPermission(m_systemBundle, AdminPermission.RESOLVE));
-        }
-        
-        return m_felix.resolveBundles(bundles);
-    }
-
-    public RequiredBundle[] getRequiredBundles(String symbolicName)
-    {
-        // TODO: Implement PackageAdmin.getRequiredBundles()
-        return null;
-    }
-
-    public Bundle[] getFragments(Bundle bundle)
-    {
-        // TODO: Implement PackageAdmin.getFragments()
-        return null;
-    }
-
-    public Bundle[] getHosts(Bundle bundle)
-    {
-        // TODO: Implement PackageAdmin.getHosts()
-        return null;
     }
 }

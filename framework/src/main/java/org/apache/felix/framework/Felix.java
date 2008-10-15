@@ -2102,10 +2102,10 @@ ex.printStackTrace();
         }
 
         // Extension Bundles are not removed until the framework is shutdown
-        if (bundle.getInfo().isExtension())
+        if (info.isExtension())
         {
-            bundle.getInfo().setPersistentStateUninstalled();
-            bundle.getInfo().setState(Bundle.INSTALLED);
+            info.setPersistentStateUninstalled();
+            info.setState(Bundle.INSTALLED);
             return;
         }
 
@@ -2882,14 +2882,7 @@ ex.printStackTrace();
                 }
             }
         }
-        try
-        {
-            return (getInfo().getCurrentModule().getClass(clazz.getName()) == clazz) ? this : null;
-        }
-        catch(ClassNotFoundException ex)
-        {
-            return null;
-        }
+        return null;
     }
 
     /**
@@ -3056,7 +3049,7 @@ ex.printStackTrace();
         }
     }
 
-    protected Bundle[] getDependentBundles(FelixBundle exporter)
+    Bundle[] getDependentBundles(FelixBundle exporter)
     {
         // Get exporting bundle.
         BundleInfo exporterInfo = exporter.getInfo();

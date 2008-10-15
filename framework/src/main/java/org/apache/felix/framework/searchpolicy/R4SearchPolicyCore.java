@@ -36,7 +36,6 @@ import org.apache.felix.framework.util.CompoundEnumeration;
 import org.apache.felix.framework.util.SecurityManagerEx;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.framework.util.manifestparser.Capability;
-import org.apache.felix.framework.util.manifestparser.ManifestParser;
 import org.apache.felix.framework.util.manifestparser.R4Attribute;
 import org.apache.felix.framework.util.manifestparser.R4Directive;
 import org.apache.felix.framework.util.manifestparser.R4Library;
@@ -1148,13 +1147,12 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: "
         }
     }
 
-// TODO: FRAGMENT - Not very efficient.
     private boolean isFragment(IModule module)
     {
-        IRequirement[] reqs = module.getDefinition().getRequirements();
-        for (int reqIdx = 0; (reqs != null) && (reqIdx < reqs.length); reqIdx++)
+        if (module.getDefinition() instanceof ModuleDefinition)
         {
-            if (reqs[reqIdx].getNamespace().equals(ICapability.HOST_NAMESPACE))
+            Map headerMap = ((ModuleDefinition) module.getDefinition()).getHeaders();
+            if (headerMap.containsKey(Constants.FRAGMENT_HOST))
             {
                 return true;
             }

@@ -65,6 +65,11 @@ public class ModuleImpl implements IModule
         m_contentLoader = contentLoader;
     }
 
+    public synchronized IModule[] getFragments()
+    {
+        return m_fragments;
+    }
+
     public synchronized void attachFragments(IModule[] fragments) throws Exception
     {
         // Remove module from old fragment dependencies.
