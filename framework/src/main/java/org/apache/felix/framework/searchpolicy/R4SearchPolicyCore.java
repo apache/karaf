@@ -901,8 +901,8 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
         synchronized (m_factory)
         {
             PackageSource[] candidates = m_emptySources;
-            if (req.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
-                    (((Requirement) req).getPackageName() != null))
+            if (req.getNamespace().equals(ICapability.PACKAGE_NAMESPACE)
+                && (((Requirement) req).getPackageName() != null))
             {
                 String pkgName = ((Requirement) req).getPackageName();
                 IModule[] modules = (IModule[]) m_resolvedPkgIndexMap.get(pkgName);
@@ -3126,11 +3126,23 @@ for (int wireIdx = 0; (wires != null) && (wireIdx < wires.length); wireIdx++)
         {
             PackageSource ps = (PackageSource) o;
 
+            Version thisVersion = null;
+            Version version = null;
             if (m_capability.getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
             {
-                Version thisVersion = ((Capability) m_capability).getPackageVersion();
-                Version version = ((Capability) ps.m_capability).getPackageVersion();
+                thisVersion = ((Capability) m_capability).getPackageVersion();
+                version = ((Capability) ps.m_capability).getPackageVersion();
+            }
+            else if (m_capability.getNamespace().equals(ICapability.MODULE_NAMESPACE))
+            {
+                thisVersion = (Version)
+                    m_capability.getProperties().get(Constants.BUNDLE_VERSION_ATTRIBUTE);
+                version = (Version)
+                    ps.m_capability.getProperties().get(Constants.BUNDLE_VERSION_ATTRIBUTE);
+            }
 
+            if ((thisVersion != null) && (version != null))
+            {
                 // Sort in reverse version order.
                 int cmp = thisVersion.compareTo(version);
                 if (cmp < 0)
