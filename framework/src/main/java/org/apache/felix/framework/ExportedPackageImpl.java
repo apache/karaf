@@ -26,15 +26,14 @@ import org.osgi.service.packageadmin.ExportedPackage;
 
 class ExportedPackageImpl implements ExportedPackage
 {
-    private Felix m_felix = null;
-    private FelixBundle m_exportingBundle = null;
-    private IModule m_exportingModule = null;
-    private Capability m_export = null;
+    private final Felix m_felix;
+    private final FelixBundle m_exportingBundle;
+    private final IModule m_exportingModule;
+    private final Capability m_export;
     private String m_toString = null;
     private String m_versionString = null;
 
     public ExportedPackageImpl(
-        
         Felix felix, FelixBundle exporter, IModule module, Capability export)
     {
         m_felix = felix;
