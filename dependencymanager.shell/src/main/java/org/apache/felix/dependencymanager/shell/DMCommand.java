@@ -28,7 +28,9 @@ public class DMCommand implements Command {
                     public int compare(Object o1, Object o2) {
                         ServiceReference r1 = (ServiceReference) o1;
                         ServiceReference r2 = (ServiceReference) o2;
-                        return (int) Math.signum(r1.getBundle().getBundleId() - r2.getBundle().getBundleId());
+                        long id1 = r1.getBundle().getBundleId();
+                        long id2 = r2.getBundle().getBundleId();
+                        return id1 > id2 ? 1 : -1;
                     }});
                 for (int i = 0; i < references.length; i++) {
                     ServiceReference ref = references[i];
