@@ -109,11 +109,6 @@
             <Private-Package>org.apache.felix.main.*</Private-Package>
             <Import-Package>!*</Import-Package>
             <Include-Resource>META-INF/LICENSE=LICENSE,META-INF/NOTICE=NOTICE,{src/main/resources/}</Include-Resource>
-            <!-- Include these properties here because we want them
-                 substituted in the config.properties resource file
-                 so that we only have to maintain one set of properties
-                 and only for that reason. 
-            <_include>default.properties</_include> -->
           </instructions>
         </configuration>
       </plugin>
