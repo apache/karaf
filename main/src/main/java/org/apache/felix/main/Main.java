@@ -24,6 +24,7 @@ import java.net.URL;
 import java.util.*;
 import org.apache.felix.framework.Felix;
 import org.apache.felix.framework.util.FelixConstants;
+import org.apache.felix.framework.util.Util;
 import org.osgi.framework.Constants;
 
 /**
@@ -55,10 +56,6 @@ public class Main
      * The default name used for the configuration properties file.
     **/
     public static final String CONFIG_PROPERTIES_FILE_VALUE = "config.properties";
-    /**
-     * The default name used for the default configuration properties file.
-    **/
-    public static final String DEFAULT_PROPERTIES_FILE_VALUE = "default.properties";
 
     private static Felix m_felix = null;
 
@@ -322,7 +319,7 @@ public class Main
         {
             String name = (String) e.nextElement();
             System.setProperty(name,
-                substVars(props.getProperty(name), name, null, null));
+                Util.substVars(props.getProperty(name), name, null, null));
         }
     }
 
@@ -421,30 +418,7 @@ public class Main
                 // Nothing we can do.
             }
 
-            // If we cannot the configuration properties for any reason, then just
-            // attempt to load resource default.properties instead.
-            propURL = Main.class.getClassLoader().getResource(DEFAULT_PROPERTIES_FILE_VALUE);
-            try
-            {
-                is = propURL.openConnection().getInputStream();
-                props.load(is);
-                is.close();
-                System.err.println("\nUsing default configuration properties.");
-            }
-            catch (Exception ex2)
-            {
-                // Try to close input stream if we have one.
-                try
-                {
-                    if (is != null) is.close();
-                }
-                catch (IOException ex3)
-                {
-                    // Nothing we can do.
-                }
-                System.err.println("\nUnable to load any configuration properties.");
-                return null;
-            }
+            return null;
         }
 
         // Perform variable substitution for system properties.
@@ -452,7 +426,7 @@ public class Main
         {
             String name = (String) e.nextElement();
             props.setProperty(name,
-                substVars(props.getProperty(name), name, null, props));
+                Util.substVars(props.getProperty(name), name, null, props));
         }
 
         return props;
@@ -469,129 +443,5 @@ public class Main
                 configProps.setProperty(key, System.getProperty(key));
             }
         }
-    }
-
-    private static final String DELIM_START = "${";
-    private static final String DELIM_STOP  = "}";
-
-    /**
-     * <p>
-     * This method performs property variable substitution on the
-     * specified value. If the specified value contains the syntax
-     * <tt>${&lt;prop-name&gt;}</tt>, where <tt>&lt;prop-name&gt;</tt>
-     * refers to either a configuration property or a system property,
-     * then the corresponding property value is substituted for the variable
-     * placeholder. Multiple variable placeholders may exist in the
-     * specified value as well as nested variable placeholders, which
-     * are substituted from inner most to outer most. Configuration
-     * properties override system properties.
-     * </p>
-     * @param val The string on which to perform property substitution.
-     * @param currentKey The key of the property being evaluated used to
-     *        detect cycles.
-     * @param cycleMap Map of variable references used to detect nested cycles.
-     * @param configProps Set of configuration properties.
-     * @return The value of the specified string after system property substitution.
-     * @throws IllegalArgumentException If there was a syntax error in the
-     *         property placeholder syntax or a recursive variable reference.
-    **/
-    public static String substVars(String val, String currentKey,
-        Map cycleMap, Properties configProps)
-        throws IllegalArgumentException
-    {
-        // If there is currently no cycle map, then create
-        // one for detecting cycles for this invocation.
-        if (cycleMap == null)
-        {
-            cycleMap = new HashMap();
-        }
-
-        // Put the current key in the cycle map.
-        cycleMap.put(currentKey, currentKey);
-
-        // Assume we have a value that is something like:
-        // "leading ${foo.${bar}} middle ${baz} trailing"
-
-        // Find the first ending '}' variable delimiter, which
-        // will correspond to the first deepest nested variable
-        // placeholder.
-        int stopDelim = val.indexOf(DELIM_STOP);
-
-        // Find the matching starting "${" variable delimiter
-        // by looping until we find a start delimiter that is
-        // greater than the stop delimiter we have found.
-        int startDelim = val.indexOf(DELIM_START);
-        while (stopDelim >= 0)
-        {
-            int idx = val.indexOf(DELIM_START, startDelim + DELIM_START.length());
-            if ((idx < 0) || (idx > stopDelim))
-            {
-                break;
-            }
-            else if (idx < stopDelim)
-            {
-                startDelim = idx;
-            }
-        }
-
-        // If we do not have a start or stop delimiter, then just
-        // return the existing value.
-        if ((startDelim < 0) && (stopDelim < 0))
-        {
-            return val;
-        }
-        // At this point, we found a stop delimiter without a start,
-        // so throw an exception.
-        else if (((startDelim < 0) || (startDelim > stopDelim))
-            && (stopDelim >= 0))
-        {
-            throw new IllegalArgumentException(
-                "stop delimiter with no start delimiter: "
-                + val);
-        }
-
-        // At this point, we have found a variable placeholder so
-        // we must perform a variable substitution on it.
-        // Using the start and stop delimiter indices, extract
-        // the first, deepest nested variable placeholder.
-        String variable =
-            val.substring(startDelim + DELIM_START.length(), stopDelim);
-
-        // Verify that this is not a recursive variable reference.
-        if (cycleMap.get(variable) != null)
-        {
-            throw new IllegalArgumentException(
-                "recursive variable reference: " + variable);
-        }
-
-        // Get the value of the deepest nested variable placeholder.
-        // Try to configuration properties first.
-        String substValue = (configProps != null)
-            ? configProps.getProperty(variable, null)
-            : null;
-        if (substValue == null)
-        {
-            // Ignore unknown property values.
-            substValue = System.getProperty(variable, "");
-        }
-
-        // Remove the found variable from the cycle map, since
-        // it may appear more than once in the value and we don't
-        // want such situations to appear as a recursive reference.
-        cycleMap.remove(variable);
-
-        // Append the leading characters, the substituted value of
-        // the variable, and the trailing characters to get the new
-        // value.
-        val = val.substring(0, startDelim)
-            + substValue
-            + val.substring(stopDelim + DELIM_STOP.length(), val.length());
-
-        // Now perform substitution again, since there could still
-        // be substitutions to make.
-        val = substVars(val, currentKey, cycleMap, configProps);
-
-        // Return the value.
-        return val;
     }
 }

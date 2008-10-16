@@ -46,6 +46,9 @@
       </exclusions>
     </dependency>
   </dependencies>
+  <properties>
+    <dollar>$</dollar>
+  </properties>
   <build>
     <plugins>
       <plugin>

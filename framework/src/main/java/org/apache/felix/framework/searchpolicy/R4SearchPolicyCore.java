@@ -3528,7 +3528,7 @@ for (int wireIdx = 0; (wires != null) && (wireIdx < wires.length); wireIdx++)
             sb.append("' is available from the system class loader. There are two fixes: 1) Add package '");
             sb.append(pkgName);
             sb.append("' to the '");
-            sb.append(Constants.FRAMEWORK_SYSTEMPACKAGES);
+            sb.append(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA);
             sb.append("' property and modify bundle ");
             sb.append(impId);
             sb.append(" to import this package; this causes the system bundle to export class path packages. 2) Add package '");

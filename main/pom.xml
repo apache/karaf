@@ -105,14 +105,15 @@
             <Bundle-Name>Apache Felix</Bundle-Name>
             <Bundle-Description>OSGi R4 framework.</Bundle-Description>
             <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
-            <Private-Package>org.apache.felix.main.*,org.apache.felix.moduleloader.*;org.apache.felix.framework.*;org.osgi.framework;org.osgi.framework.launch;org.osgi.service.packageadmin;org.osgi.service.startlevel;org.osgi.service.url;org.osgi.util.tracker;-split-package:=merge-first</Private-Package>
+            <Embed-Dependency>*;artifactId=org.apache.felix.framework;inline=true</Embed-Dependency>
+            <Private-Package>org.apache.felix.main.*</Private-Package>
             <Import-Package>!*</Import-Package>
             <Include-Resource>META-INF/LICENSE=LICENSE,META-INF/NOTICE=NOTICE,{src/main/resources/}</Include-Resource>
             <!-- Include these properties here because we want them
-                 substituted in the default.properties resource file
+                 substituted in the config.properties resource file
                  so that we only have to maintain one set of properties
-                 and only for that reason. -->
-            <_include>src/main/resources/config.properties</_include>
+                 and only for that reason. 
+            <_include>default.properties</_include> -->
           </instructions>
         </configuration>
       </plugin>

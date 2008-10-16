@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.felix.framework.util.FelixConstants;
@@ -166,14 +167,19 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
         // The system bundle exports framework packages as well as
         // arbitrary user-defined packages from the system class path.
         // We must construct the system bundle's export metadata.
-        // Get system property that specifies which class path
+        // Get configuration property that specifies which class path
         // packages should be exported by the system bundle.
+        String syspkgs = (String) configMap.get(Constants.FRAMEWORK_SYSTEMPACKAGES);
+        // If no system packages were specified, load our default value.
+        syspkgs = (syspkgs == null) ? loadDefaultSystemPackages(m_logger) : syspkgs;
+        // If any extra packages are specified, then append them.
+        String extra = (String) configMap.get(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA);
+        syspkgs = (extra == null) ? syspkgs : syspkgs + "," + extra;
         try
         {
             setCapabilities(
                 addModuleCapability(map,
-                    ManifestParser.parseExportHeader(
-                        (String) configMap.get(Constants.FRAMEWORK_SYSTEMPACKAGES))));
+                    ManifestParser.parseExportHeader(syspkgs)));
         }
         catch (Exception ex)
         {
@@ -181,7 +187,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
             m_logger.log(
                 Logger.LOG_ERROR,
                 "Error parsing system bundle export statement: "
-                + configMap.get(Constants.FRAMEWORK_SYSTEMPACKAGES), ex);
+                + syspkgs, ex);
         }
     }
 
@@ -681,5 +687,56 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
     public String getEntryAsNativeLibrary(String name)
     {
         return null;
+    }
+
+    //
+    // Utility methods.
+    //
+
+    /**
+     * The default name used for the default configuration properties file.
+    **/
+    public static final String DEFAULT_PROPERTIES_FILE_VALUE = "default.properties";
+
+    static String loadDefaultSystemPackages(Logger logger)
+    {
+        // If we cannot get configuration properties for any reason, then just
+        // attempt to load resource default.properties instead.
+        URL propURL = ExtensionManager.class.getClassLoader()
+            .getResource(DEFAULT_PROPERTIES_FILE_VALUE);
+        InputStream is = null;
+        try
+        {
+            // Load properties from URL.
+            is = propURL.openConnection().getInputStream();
+            Properties props = new Properties();
+            props.load(is);
+            is.close();
+            // Perform variable substitution for system properties.
+            for (Enumeration e = props.propertyNames(); e.hasMoreElements(); )
+            {
+                String name = (String) e.nextElement();
+                props.setProperty(name,
+                    Util.substVars(props.getProperty(name), name, null, props));
+            }
+            // Return system packages property.
+            return props.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES);
+        }
+        catch (Exception ex)
+        {
+            // Try to close input stream if we have one.
+            try
+            {
+                if (is != null) is.close();
+            }
+            catch (IOException ex2)
+            {
+                // Nothing we can do.
+            }
+
+            logger.log(
+                Logger.LOG_ERROR, "Unable to load any configuration properties.", ex);
+            return "";
+        }
     }
 }
