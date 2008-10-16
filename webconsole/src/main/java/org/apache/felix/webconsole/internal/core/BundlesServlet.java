@@ -307,9 +307,6 @@ public class BundlesServlet extends BaseWebConsolePlugin
         pw.println( "<script src='" + appRoot + "/res/ui/bundles.js' language='JavaScript'></script>" );
 
         if ( bundles != null ) {
-            pw.println("<table class='content' cellpadding='0' cellspacing='0' width='100%'><tbody>" );
-            pw.println("<tr class='content'>" );
-            renderBundleInfoCount(pw, "Available", bundles.length);
             int active = 0, installed = 0, resolved = 0;
             for(int i=0; i<bundles.length; i++) {
                 switch ( bundles[i].getState() ) {
@@ -318,6 +315,10 @@ public class BundlesServlet extends BaseWebConsolePlugin
                     case Bundle.RESOLVED: resolved++;break;
                 }
             }
+
+            pw.println("<table class='content' cellpadding='0' cellspacing='0' width='100%'><tbody>" );
+            pw.println("<tr class='content'>" );
+            renderBundleInfoCount(pw, "Total", bundles.length);
             renderBundleInfoCount(pw, "Active", active);
             renderBundleInfoCount(pw, "Resolved", resolved);
             renderBundleInfoCount(pw, "Installed", installed);
