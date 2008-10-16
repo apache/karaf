@@ -556,7 +556,8 @@ public class ConfigurationRender extends BaseManagementPlugin implements Render
         if ( group != null )
         {
             StringBuffer info = new StringBuffer();
-            info.append( '[' );
+            info.append("ThreadGroup ").append(group.getName());
+            info.append( " [" );
             info.append( "maxprio=" ).append( group.getMaxPriority() );
 
             info.append( ", parent=" );
@@ -573,7 +574,7 @@ public class ConfigurationRender extends BaseManagementPlugin implements Render
             info.append( ", isDestroyed=" ).append( group.isDestroyed() );
             info.append( ']' );
 
-            infoLine( pw, null, group.getName(), info.toString() );
+            infoLine( pw, null, null, info.toString() );
 
             int numThreads = group.activeCount();
             Thread[] threads = new Thread[numThreads * 2];
@@ -593,7 +594,7 @@ public class ConfigurationRender extends BaseManagementPlugin implements Render
         if ( thread != null )
         {
             StringBuffer info = new StringBuffer();
-            info.append( thread.getName() );
+            info.append("Thread ").append( thread.getName() );
             info.append( " [" );
             info.append( "priority=" ).append( thread.getPriority() );
             info.append( ", alive=" ).append( thread.isAlive() );
@@ -602,7 +603,7 @@ public class ConfigurationRender extends BaseManagementPlugin implements Render
             info.append( ", loader=" ).append( thread.getContextClassLoader() );
             info.append( ']' );
 
-            infoLine( pw, "  ", String.valueOf( thread.getId() ), info.toString() );
+            infoLine( pw, "  ", null, info.toString() );
         }
     }
 }
