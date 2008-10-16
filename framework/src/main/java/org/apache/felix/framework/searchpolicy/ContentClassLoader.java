@@ -43,7 +43,16 @@ public class ContentClassLoader extends SecureClassLoader
         Method dexFileClassLoadClass = null;
         try
         {
-            Class dexFileClass =  Class.forName("android.dalvik.DexFile");
+            Class dexFileClass;
+            try
+            {
+                dexFileClass = Class.forName("dalvik.system.DexFile");
+            }
+            catch (Exception ex)
+            {
+                dexFileClass = Class.forName("android.dalvik.DexFile");
+            }
+            
             dexFileClassConstructor = dexFileClass.getConstructor(
                 new Class[] { java.io.File.class });
             dexFileClassLoadClass = dexFileClass.getMethod("loadClass",
