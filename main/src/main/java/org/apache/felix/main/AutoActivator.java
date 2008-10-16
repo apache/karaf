@@ -88,7 +88,7 @@ public class AutoActivator implements BundleActivator
         // level is assumed.
         for (Iterator i = m_configMap.keySet().iterator(); i.hasNext(); )
         {
-            String key = (String) i.next();
+            String key = ((String) i.next()).toLowerCase();
 
             // Ignore all keys that are not an auto property.
             if (!key.startsWith(AUTO_INSTALL_PROP) && !key.startsWith(AUTO_START_PROP))
@@ -131,7 +131,7 @@ public class AutoActivator implements BundleActivator
         // Now loop through the auto-start bundles and start them.
         for (Iterator i = m_configMap.keySet().iterator(); i.hasNext(); )
         {
-            String key = (String) i.next();
+            String key = ((String) i.next()).toLowerCase();
             if (key.startsWith(AUTO_START_PROP))
             {
                 StringTokenizer st = new StringTokenizer((String) m_configMap.get(key), "\" ", true);

@@ -22,9 +22,8 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
-
 import org.apache.felix.framework.Felix;
-import org.apache.felix.framework.util.StringMap;
+import org.apache.felix.framework.util.FelixConstants;
 import org.osgi.framework.Constants;
 
 /**
@@ -164,7 +163,6 @@ public class Main
      * @param argv An array of arguments, all of which are ignored.
      * @throws Exception If an error occurs.
     **/
-
     public static void main(String[] args) throws Exception
     {
         // We support at most one argument, which is the bundle
@@ -191,23 +189,24 @@ public class Main
             configProps.setProperty(Constants.FRAMEWORK_STORAGE, args[0]);
         }
 
+        // Create a list for custom framework activators and
+        // add an instance of the auto-activator it for processing
+        // auto-install and auto-start properties. Add this list
+        // to the configuration properties.
+        List list = new ArrayList();
+        list.add(new AutoActivator(configProps));
+        configProps.put(FelixConstants.SYSTEMBUNDLE_ACTIVATORS_PROP, list);
+
         // Print welcome banner.
         System.out.println("\nWelcome to Felix.");
         System.out.println("=================\n");
 
         try
         {
-            // Create a list for custom framework activators and
-            // add an instance of the auto-activator it for processing
-            // auto-install and auto-start properties.
-            List list = new ArrayList();
-            list.add(new AutoActivator(configProps));
-            // Create a case-insensitive property map.
-            Map configMap = new StringMap(configProps, false);
-            configMap.put("felix.systembundle.activators", list);
-            // Create an instance of the framework.
-            m_felix = new Felix(configMap);
+            // Create an instance and start the framework.
+            m_felix = new Felix(configProps);
             m_felix.start();
+            // Wait for framework to stop to exit the VM.
             m_felix.waitForStop(0);
             System.exit(0);
         }
