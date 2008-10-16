@@ -78,7 +78,7 @@ public class ComponentConfigurationPrinter extends AbstractScrPlugin implements 
                 TreeMap componentMap = new TreeMap();
                 for ( int i = 0; i < components.length; i++ )
                 {
-                    Component component = components[1];
+                    Component component = components[i];
                     componentMap.put( new Long( component.getId() ), component );
                 }
 
