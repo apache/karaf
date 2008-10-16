@@ -104,6 +104,7 @@ public class ConfigurationRender extends BaseManagementPlugin implements Render
         this.printServices( pw );
         this.printPreferences( pw );
         this.printConfigurations( pw );
+        this.printThreads( pw );
 
         for ( Iterator cpi = getConfigurationPrinters().iterator(); cpi.hasNext(); )
         {
@@ -524,4 +525,84 @@ public class ConfigurationRender extends BaseManagementPlugin implements Render
         return buf.toString();
     }
 
+
+    private void printThreads( PrintWriter pw )
+    {
+        // first get the root thread group
+        ThreadGroup rootGroup = Thread.currentThread().getThreadGroup();
+        while ( rootGroup.getParent() != null )
+        {
+            rootGroup = rootGroup.getParent();
+        }
+
+        pw.println( "*** Threads:" );
+
+        printThreadGroup( pw, rootGroup );
+        
+        int numGroups = rootGroup.activeGroupCount();
+        ThreadGroup[] groups = new ThreadGroup[2 * numGroups];
+        rootGroup.enumerate( groups );
+        for ( int i = 0; i < groups.length; i++ )
+        {
+            printThreadGroup( pw, groups[i] );
+        }
+
+        pw.println();
+    }
+
+
+    private void printThreadGroup( PrintWriter pw, ThreadGroup group )
+    {
+        if ( group != null )
+        {
+            StringBuffer info = new StringBuffer();
+            info.append( '[' );
+            info.append( "maxprio=" ).append( group.getMaxPriority() );
+
+            info.append( ", parent=" );
+            if ( group.getParent() != null )
+            {
+                info.append( group.getParent().getName() );
+            }
+            else
+            {
+                info.append( '-' );
+            }
+
+            info.append( ", isDaemon=" ).append( group.isDaemon() );
+            info.append( ", isDestroyed=" ).append( group.isDestroyed() );
+            info.append( ']' );
+
+            infoLine( pw, null, group.getName(), info.toString() );
+
+            int numThreads = group.activeCount();
+            Thread[] threads = new Thread[numThreads * 2];
+            group.enumerate( threads, false );
+            for ( int i = 0; i < threads.length; i++ )
+            {
+                printThread( pw, threads[i] );
+            }
+
+            pw.println();
+        }
+    }
+
+
+    private void printThread( PrintWriter pw, Thread thread )
+    {
+        if ( thread != null )
+        {
+            StringBuffer info = new StringBuffer();
+            info.append( thread.getName() );
+            info.append( " [" );
+            info.append( "priority=" ).append( thread.getPriority() );
+            info.append( ", alive=" ).append( thread.isAlive() );
+            info.append( ", daemon=" ).append( thread.isDaemon() );
+            info.append( ", interrupted=" ).append( thread.isInterrupted() );
+            info.append( ", loader=" ).append( thread.getContextClassLoader() );
+            info.append( ']' );
+
+            infoLine( pw, "  ", String.valueOf( thread.getId() ), info.toString() );
+        }
+    }
 }
