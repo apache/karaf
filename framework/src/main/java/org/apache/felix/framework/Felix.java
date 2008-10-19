@@ -1509,7 +1509,7 @@ ex.printStackTrace();
                 // The spec says we must fire a framework error.
                 fireFrameworkEvent(FrameworkEvent.ERROR, bundle, ex);
                 // Then throw a class not found exception.
-                throw new ClassNotFoundException(name);
+                throw new ClassNotFoundException(name, ex);
             }
         }
         return bundle.getInfo().getCurrentModule().getClass(name);
@@ -3560,6 +3560,15 @@ ex.printStackTrace();
         m_configMutableMap.put(
             FelixConstants.FRAMEWORK_OS_VERSION,
             System.getProperty("os.version"));
+        m_configMutableMap.put(
+            FelixConstants.SUPPORTS_FRAMEWORK_EXTENSION,
+            "true");
+        m_configMutableMap.put(
+            FelixConstants.SUPPORTS_FRAMEWORK_FRAGMENT,
+            "true");
+        m_configMutableMap.put(
+            FelixConstants.SUPPORTS_FRAMEWORK_REQUIREBUNDLE,
+            "true");
 
         String s = null;
         s = R4LibraryClause.normalizeOSName(System.getProperty("os.name"));
