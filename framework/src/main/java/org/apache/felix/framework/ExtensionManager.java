@@ -245,12 +245,8 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
      */
     boolean isExtensionBundle(Map headers)
     {
-        R4Directive dir = ManifestParser.parseExtensionBundleHeader((String)
-            headers.get(Constants.FRAGMENT_HOST));
-
-        return (dir != null) && (Constants.EXTENSION_FRAMEWORK.equals(
-            dir.getValue()) || Constants.EXTENSION_BOOTCLASSPATH.equals(
-            dir.getValue()));
+        return (ManifestParser.parseExtensionBundleHeader((String)
+                headers.get(Constants.FRAGMENT_HOST)) != null);
     }
 
     /**

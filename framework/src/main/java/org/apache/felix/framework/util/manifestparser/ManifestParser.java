@@ -252,7 +252,7 @@ public class ManifestParser
         //       fragment constants in FelixConstants when fragments are
         //       fully implemented.
         String fragmentHost = (String) headerMap.get(Constants.FRAGMENT_HOST);
-        if (fragmentHost != null)
+        if ((fragmentHost != null) && (parseExtensionBundleHeader(fragmentHost) == null))
         {
             if ((headerMap.get(Constants.IMPORT_PACKAGE) != null)
                 || (headerMap.get(Constants.EXPORT_PACKAGE) != null)
@@ -763,9 +763,17 @@ public class ManifestParser
             }
         }
 
-        if (parseExtensionBundleHeader((String)
-            m_headerMap.get(Constants.FRAGMENT_HOST)) != null)
+        R4Directive extension = parseExtensionBundleHeader((String)
+            m_headerMap.get(Constants.FRAGMENT_HOST));
+        
+        if (extension != null)
         {
+            if (!(Constants.EXTENSION_FRAMEWORK.equals(extension.getValue()) || 
+                Constants.EXTENSION_BOOTCLASSPATH.equals(extension.getValue())))
+            {
+                throw new BundleException(
+                    "Extension bundle must have either 'extension:=framework' or 'extension:=bootclasspath'");
+            }
             checkExtensionBundle();
         }
     }
