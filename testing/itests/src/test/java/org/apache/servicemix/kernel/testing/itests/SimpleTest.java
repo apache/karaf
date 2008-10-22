@@ -54,6 +54,18 @@ public class SimpleTest extends AbstractIntegrationTest {
 		};
 	}
 
+    public void testDocumentBuilderFactory() throws Exception {
+		assertNotNull(javax.xml.parsers.DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
+    }
+
+    public void testTransformerFactory() throws Exception {
+        assertNotNull(javax.xml.transform.TransformerFactory.newInstance().newTransformer());
+    }
+
+    public void testSchemaFactory() throws Exception {
+        assertNotNull(javax.xml.validation.SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema").newSchema());
+    }
+
     public void testWoodstox() throws Exception {
         //JDK 1.6 and above ship with a StaX implementation 
         if (System.getProperty("java.version").startsWith("1.5")) {

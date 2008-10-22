@@ -26,4 +26,7 @@ Import-Package: junit.framework,
  org.springframework.osgi.test,
  org.apache.servicemix.kernel.testing.support,
  org.springframework.osgi.util,
- javax.xml.stream
+ javax.xml.stream,
+ javax.xml.transform,
+ javax.xml.validation,
+ javax.xml.parsers
