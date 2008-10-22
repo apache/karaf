@@ -87,9 +87,17 @@
     </dependency>
   </dependencies>
   <properties>
-    <property name="install.home" value="${basedir.absolutePath}" />
+    <felix.log.level>4</felix.log.level>
     <dollar>$</dollar>
   </properties>
+  <profiles>
+    <profile>
+      <id>release</id>
+      <properties>
+        <felix.log.level>1</felix.log.level>
+      </properties>
+    </profile>
+  </profiles>
   <build>
     <plugins>
       <plugin>
