@@ -99,11 +99,11 @@ public class BeanContainerWrapper implements BeanContainer {
         return context.getBeanNamesForType(type);
     }
 
-    public BeanContainer createChild(String s, Collection<URL> urls) {
+    public BeanContainer createChild(Collection<URL> urls) {
         throw new UnsupportedOperationException();
     }
 
-    public BeanContainer createChild(String s) {
+    public BeanContainer createChild() {
         throw new UnsupportedOperationException();
     }
 }

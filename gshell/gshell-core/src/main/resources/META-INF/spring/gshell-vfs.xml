@@ -117,7 +117,9 @@
         </property>
     </bean>
 
-    <bean id="metaDataRegistry" class="org.apache.geronimo.gshell.vfs.provider.meta.data.MetaDataRegistryImpl"/>
+    <bean id="metaDataRegistry" class="org.apache.geronimo.gshell.vfs.provider.meta.data.MetaDataRegistryImpl">
+        <constructor-arg ref="eventManager" />
+    </bean>
 
     <bean id="metaFileProviderConfigurer" class="org.apache.geronimo.gshell.vfs.config.FileProviderConfigurer">
         <property name="fileSystemManager" ref="fileSystemManager"/>

@@ -16,15 +16,9 @@
  */
 package org.apache.servicemix.kernel.gshell.core;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Proxy;
-
 import org.apache.geronimo.gshell.application.ApplicationManager;
 import org.apache.geronimo.gshell.application.ApplicationConfiguration;
 import org.apache.geronimo.gshell.application.Application;
-import org.apache.geronimo.gshell.application.ApplicationSecurityManager;
 import org.apache.geronimo.gshell.shell.Shell;
 import org.apache.geronimo.gshell.wisdom.application.ShellCreatedEvent;
 import org.apache.geronimo.gshell.event.EventPublisher;
@@ -73,51 +67,9 @@ public class ApplicationManagerImpl implements ApplicationManager, ApplicationCo
 
         log.debug("Created shell instance: {}", shell);
 
-        InvocationHandler handler = new InvocationHandler()
-        {
-            //
-            // FIXME: Need to resolve how to handle the security manager for the application,
-            //        the SM is not thread-specific, but VM specific... so not sure this is
-            //        the right approache at all :-(
-            //
+        eventPublisher.publish(new ShellCreatedEvent(shell));
 
-            private final ApplicationSecurityManager sm = new ApplicationSecurityManager();
-
-            public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
-                assert proxy != null;
-                assert method != null;
-                // args may be null
-
-                if (method.getDeclaringClass() == Object.class) {
-                    return method.invoke(this, args);
-                }
-
-                //
-                // TODO: This would be a good place to inject the shell or the shell context into a thread holder
-                //
-
-                final SecurityManager prevSM = System.getSecurityManager();
-                System.setSecurityManager(sm);
-                try {
-                    return method.invoke(shell, args);
-                }
-                catch (InvocationTargetException e) {
-                    throw e.getTargetException();
-                }
-                finally {
-                    System.setSecurityManager(prevSM);
-                }
-            }
-        };
-
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        Shell proxy = (Shell) Proxy.newProxyInstance(cl, new Class[] { Shell.class }, handler);
-
-        log.debug("Create shell proxy: {}", proxy);
-
-        eventPublisher.publish(new ShellCreatedEvent(proxy));
-
-        return proxy;
+        return shell;
     }
 
 }
