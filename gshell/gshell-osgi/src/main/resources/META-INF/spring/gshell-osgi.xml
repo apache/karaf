@@ -21,109 +21,59 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:osgi="http://www.springframework.org/schema/osgi"
        xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:gshell="http://servicemix.apache.org/schema/servicemix-gshell"
        xsi:schemaLocation="
   http://www.springframework.org/schema/beans
   http://www.springframework.org/schema/beans/spring-beans.xsd
   http://www.springframework.org/schema/util
   http://www.springframework.org/schema/util/spring-util.xsd
   http://www.springframework.org/schema/osgi
-  http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+  http://www.springframework.org/schema/osgi/spring-osgi.xsd
+  http://servicemix.apache.org/schema/servicemix-gshell
+  http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
-    <!-- osgi commands -->
-    <bean id="bundle-level" class="org.apache.geronimo.gshell.osgi.BundleLevel" />
-    <bean id="headers" class="org.apache.geronimo.gshell.osgi.Headers" />
-    <bean id="install-bundle" class="org.apache.geronimo.gshell.osgi.InstallBundle" />
-    <bean id="list-bundles" class="org.apache.geronimo.gshell.osgi.ListBundles" />
-    <bean id="list-services" class="org.apache.geronimo.gshell.osgi.ListServices" />
-    <bean id="refresh-bundle" class="org.apache.geronimo.gshell.osgi.RefreshBundle" />
-    <bean id="resolve-bundle" class="org.apache.geronimo.gshell.osgi.ResolveBundle" />
-    <bean id="shutdown" class="org.apache.geronimo.gshell.osgi.Shutdown" />
-    <bean id="start-bundle" class="org.apache.geronimo.gshell.osgi.StartBundle"/>
-    <bean id="start-level" class="org.apache.geronimo.gshell.osgi.StartLevel" />
-    <bean id="stop-bundle" class="org.apache.geronimo.gshell.osgi.StopBundle" />
-    <bean id="uninstall-bundle" class="org.apache.geronimo.gshell.osgi.UninstallBundle" />
-    
-    <osgi:service ref="bundle-level" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="osgi"/>
-      	<entry key="name" value="bundle-level"/>
-      </osgi:service-properties>
-    </osgi:service>
+    <import resource="classpath:org/apache/servicemix/kernel/gshell/core/commands.xml" />
 
-    <osgi:service ref="headers" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-          <entry key="shell" value="osgi"/>
-      </osgi:service-properties>
-    </osgi:service>
-    
-    <osgi:service ref="install-bundle" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="osgi"/>
-      	<entry key="name" value="install"/>
-      </osgi:service-properties>
-    </osgi:service>
-    
-    <osgi:service ref="list-bundles" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="osgi"/>
-      	<entry key="name" value="list"/>
-      </osgi:service-properties>
-    </osgi:service>
-    
-    <osgi:service ref="list-services" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-          <entry key="shell" value="osgi"/>
-          <entry key="name" value="list-services"/>
-          <entry key="alias" value="ls"/>
-      </osgi:service-properties>
-    </osgi:service>
-    
-    <osgi:service ref="refresh-bundle" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="osgi"/>
-      	<entry key="name" value="refresh"/>
-      </osgi:service-properties>
-    </osgi:service>
-    
-    <osgi:service ref="resolve-bundle" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="osgi"/>
-      	<entry key="name" value="resolve"/>
-      </osgi:service-properties>
-    </osgi:service>
-    
-    <osgi:service ref="shutdown" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-          <entry key="shell" value="osgi"/>
-      </osgi:service-properties>
-    </osgi:service>
-    
-    <osgi:service ref="start-bundle" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="osgi"/>
-      	<entry key="name" value="start"/>
-      </osgi:service-properties>
-    </osgi:service>
-    
-    <osgi:service ref="start-level" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="osgi"/>
-      	<entry key="name" value="start-level"/>
-      </osgi:service-properties>
-    </osgi:service>
-    
-    <osgi:service ref="stop-bundle" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="osgi"/>
-      	<entry key="name" value="stop"/>
-      </osgi:service-properties>
-    </osgi:service>
-    
-    <osgi:service ref="uninstall-bundle" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="osgi"/>
-      	<entry key="name" value="uninstall"/>
-      </osgi:service-properties>
-    </osgi:service>
+    <gshell:command-bundle>
+        <gshell:command name="osgi/bundle-level">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.BundleLevel" />
+        </gshell:command>
+        <gshell:command name="osgi/headers">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.Headers" />
+        </gshell:command>
+        <gshell:command name="osgi/intall-bundle">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.InstallBundle" />
+        </gshell:command>
+        <gshell:command name="osgi/list-bundle">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.ListBundles" />
+        </gshell:command>
+        <gshell:command name="osgi/list-services">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.ListServices" />
+        </gshell:command>
+        <gshell:command name="osgi/list-services">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.ListServices" />
+        </gshell:command>
+        <gshell:command name="osgi/refresh-bundle">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.RefreshBundle" />
+        </gshell:command>
+        <gshell:command name="osgi/resolve-bundle">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.ResolveBundle" />
+        </gshell:command>
+        <gshell:command name="osgi/shutdown">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.Shutdown" />
+        </gshell:command>
+        <gshell:command name="osgi/start-bundle">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.StartBundle" />
+        </gshell:command>
+        <gshell:command name="osgi/start-level">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.StartLevel" />
+        </gshell:command>
+        <gshell:command name="osgi/stop-bundle">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.StopBundle" />
+        </gshell:command>
+        <gshell:command name="osgi/uninstall-bundle">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.UninstallBundle" />
+        </gshell:command>
+    </gshell:command-bundle>
 
 </beans>

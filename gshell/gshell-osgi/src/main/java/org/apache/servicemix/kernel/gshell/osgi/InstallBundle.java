@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.geronimo.gshell.osgi;
+package org.apache.servicemix.kernel.gshell.osgi;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -22,19 +22,10 @@ import java.util.List;
 
 import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.geronimo.gshell.clp.Option;
-import org.apache.geronimo.gshell.command.annotation.CommandComponent;
-import org.apache.geronimo.gshell.support.OsgiCommandSupport;
+import org.apache.servicemix.kernel.gshell.core.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
-/**
- * Created by IntelliJ IDEA.
- * User: gnodet
- * Date: Dec 5, 2007
- * Time: 3:32:15 PM
- * To change this template use File | Settings | File Templates.
- */
-@CommandComponent(id="osgi:install", description="Install bundle")
 public class InstallBundle extends OsgiCommandSupport {
 
     @Argument(required = true, multiValued = true, description = "Bundle URLs")
@@ -66,7 +57,7 @@ public class InstallBundle extends OsgiCommandSupport {
         } else if (sb.length() > 0) {
             io.out.println("Bundle ID: " + sb.toString());
         }
-        return null;
+        return Result.SUCCESS;
     }
 
     protected Bundle install(String location, PrintWriter out, PrintWriter err) {

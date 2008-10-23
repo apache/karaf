@@ -14,24 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.geronimo.gshell.osgi;
+package org.apache.servicemix.kernel.gshell.osgi;
 
 import org.apache.geronimo.gshell.clp.Option;
-import org.apache.geronimo.gshell.command.annotation.CommandComponent;
-import org.apache.geronimo.gshell.support.OsgiCommandSupport;
+import org.apache.servicemix.kernel.gshell.core.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.startlevel.StartLevel;
 
-/**
- * Created by IntelliJ IDEA.
- * User: gnodet
- * Date: Oct 3, 2007
- * Time: 9:44:20 AM
- * To change this template use File | Settings | File Templates.
- */
-@CommandComponent(id="osgi:list-bundles", description="List bundles")
 public class ListBundles extends OsgiCommandSupport {
 
     @Option(name = "-l", description = "Show locations")
@@ -119,7 +110,7 @@ public class ListBundles extends OsgiCommandSupport {
             else {
                 io.out.println("There are no installed bundles.");
             }
-            return SUCCESS;
+            return Result.SUCCESS;
         }
         finally {
             if (ref != null) {

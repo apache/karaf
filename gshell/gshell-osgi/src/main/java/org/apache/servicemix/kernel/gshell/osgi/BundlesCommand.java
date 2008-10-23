@@ -14,22 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.geronimo.gshell.osgi;
+package org.apache.servicemix.kernel.gshell.osgi;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.geronimo.gshell.clp.Argument;
-import org.apache.geronimo.gshell.support.OsgiCommandSupport;
+import org.apache.servicemix.kernel.gshell.core.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
 
-/**
- * Created by IntelliJ IDEA.
- * User: gnodet
- * Date: Oct 3, 2007
- * Time: 12:10:32 PM
- * To change this template use File | Settings | File Templates.
- */
 public abstract class BundlesCommand extends OsgiCommandSupport {
 
     @Argument(required = false, multiValued = true, description = "Bundle IDs")
@@ -48,7 +41,7 @@ public abstract class BundlesCommand extends OsgiCommandSupport {
             }
         }
         doExecute(bundles);
-        return SUCCESS;
+        return Result.SUCCESS;
     }
 
     protected abstract void doExecute(List<Bundle> bundles) throws Exception;

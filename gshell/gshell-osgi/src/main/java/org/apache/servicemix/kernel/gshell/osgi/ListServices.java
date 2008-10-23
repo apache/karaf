@@ -14,26 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.geronimo.gshell.osgi;
+package org.apache.servicemix.kernel.gshell.osgi;
 
 import java.util.List;
 
 import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.geronimo.gshell.clp.Option;
 import org.apache.geronimo.gshell.command.Command;
-import org.apache.geronimo.gshell.command.annotation.CommandComponent;
-import org.apache.geronimo.gshell.support.OsgiCommandSupport;
+import org.apache.servicemix.kernel.gshell.core.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 
-/**
- * Created by IntelliJ IDEA.
- * User: gnodet
- * Date: Oct 3, 2007
- * Time: 9:44:20 AM
- * To change this template use File | Settings | File Templates.
- */
-@CommandComponent(id = "osgi:list-services", description = "List services")
 public class ListServices extends OsgiCommandSupport {
 
     @Option(name = "-a", description = "Show all")
@@ -177,7 +168,7 @@ public class ListServices extends OsgiCommandSupport {
                 io.out.println("There are no registered services.");
             }
         }
-        return null;
+        return Result.SUCCESS;
     }
 
 }

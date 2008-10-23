@@ -29,45 +29,7 @@
   http://servicemix.apache.org/schema/servicemix-gshell
   http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
-    <!--
-    <bean id="clear" class="org.apache.geronimo.gshell.commands.builtins.ClearCommand">
-        <constructor-arg ref="terminal" />
-    </bean>
-
-    <bean id="echo" class="org.apache.geronimo.gshell.commands.builtins.EchoCommand" />
-
-    <bean id="exit" class="org.apache.geronimo.gshell.commands.builtins.ExitCommand" />
-
-    <bean id="help" class="org.apache.geronimo.gshell.commands.builtins.HelpCommand">
-        <constructor-arg ref="commandRegistry" />
-        <constructor-arg ref="commandRegistry" />
-        <constructor-arg ref="branding" />
-    </bean>
-
-    <bean id="history-cmd" class="org.apache.geronimo.gshell.commands.builtins.HistoryCommand">
-        <constructor-arg ref="history" />
-    </bean>
-
-    <bean id="info" class="org.apache.geronimo.gshell.commands.builtins.InfoCommand">
-        <constructor-arg ref="branding" />
-    </bean>
-
-    <bean id="set" class="org.apache.geronimo.gshell.commands.builtins.SetCommand" />
-
-    <bean id="source" class="org.apache.geronimo.gshell.commands.builtins.SourceCommand" />
-
-    <bean id="unset" class="org.apache.geronimo.gshell.commands.builtins.UnsetCommand" />
-
-    <bean id="grep" class="org.apache.geronimo.gshell.commands.utils.GrepCommand" />
-
-    <bean id="cat" class="org.apache.geronimo.gshell.commands.utils.CatCommand" />
-
-    <bean id="exec" class="org.apache.geronimo.gshell.commands.utils.ExecuteCommand" />
-
-    <bean id="java" class="org.apache.geronimo.gshell.commands.utils.JavaCommand" />
-
-    <bean id="sleep" class="org.apache.geronimo.gshell.commands.utils.SleepCommand" />
-    -->
+    <import resource="classpath:org/apache/servicemix/kernel/gshell/core/commands.xml" />
 
     <gshell:command-bundle>
         <gshell:command name="about">
@@ -149,5 +111,45 @@
             <gshell:action class="org.apache.servicemix.kernel.gshell.core.commands.InfoAction" />
         </gshell:command>
     </gshell:command-bundle>
+
+    <!--
+    <bean id="clear" class="org.apache.geronimo.gshell.commands.builtins.ClearCommand">
+        <constructor-arg ref="terminal" />
+    </bean>
+
+    <bean id="echo" class="org.apache.geronimo.gshell.commands.builtins.EchoCommand" />
+
+    <bean id="exit" class="org.apache.geronimo.gshell.commands.builtins.ExitCommand" />
+
+    <bean id="help" class="org.apache.geronimo.gshell.commands.builtins.HelpCommand">
+        <constructor-arg ref="commandRegistry" />
+        <constructor-arg ref="commandRegistry" />
+        <constructor-arg ref="branding" />
+    </bean>
+
+    <bean id="history-cmd" class="org.apache.geronimo.gshell.commands.builtins.HistoryCommand">
+        <constructor-arg ref="history" />
+    </bean>
+
+    <bean id="info" class="org.apache.geronimo.gshell.commands.builtins.InfoCommand">
+        <constructor-arg ref="branding" />
+    </bean>
+
+    <bean id="set" class="org.apache.geronimo.gshell.commands.builtins.SetCommand" />
+
+    <bean id="source" class="org.apache.geronimo.gshell.commands.builtins.SourceCommand" />
+
+    <bean id="unset" class="org.apache.geronimo.gshell.commands.builtins.UnsetCommand" />
+
+    <bean id="grep" class="org.apache.geronimo.gshell.commands.utils.GrepCommand" />
+
+    <bean id="cat" class="org.apache.geronimo.gshell.commands.utils.CatCommand" />
+
+    <bean id="exec" class="org.apache.geronimo.gshell.commands.utils.ExecuteCommand" />
+
+    <bean id="java" class="org.apache.geronimo.gshell.commands.utils.JavaCommand" />
+
+    <bean id="sleep" class="org.apache.geronimo.gshell.commands.utils.SleepCommand" />
+    -->
 
 </beans>

@@ -26,6 +26,8 @@
   http://www.springframework.org/schema/util
   http://www.springframework.org/schema/util/spring-util.xsd">
 
+    <bean class="org.apache.servicemix.kernel.gshell.core.BeanContainerAwareProcessor" />
+
     <bean id="statelessCommandTemplate" class="org.apache.geronimo.gshell.wisdom.command.StatelessCommand" abstract="true">
         <property name="documenter">
             <bean class="org.apache.geronimo.gshell.wisdom.command.MessageSourceCommandDocumenter"/>

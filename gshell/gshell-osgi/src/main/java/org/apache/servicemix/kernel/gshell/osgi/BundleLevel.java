@@ -14,22 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.geronimo.gshell.osgi;
+package org.apache.servicemix.kernel.gshell.osgi;
 
-import org.apache.geronimo.gshell.command.annotation.CommandComponent;
 import org.apache.geronimo.gshell.clp.Argument;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.packageadmin.PackageAdmin;
 
-/**
- * Created by IntelliJ IDEA.
- * User: gnodet
- * Date: Oct 3, 2007
- * Time: 12:37:30 PM
- * To change this template use File | Settings | File Templates.
- */
-@CommandComponent(id="osgi:bundle-level", description="Get or set the start level of a given bundle")
 public class BundleLevel extends BundleCommand {
 
     @Argument(required = false, index = 1)

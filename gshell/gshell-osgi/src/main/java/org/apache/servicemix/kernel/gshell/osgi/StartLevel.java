@@ -14,42 +14,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.geronimo.gshell.osgi;
+package org.apache.servicemix.kernel.gshell.osgi;
 
-import org.apache.geronimo.gshell.command.annotation.CommandComponent;
-import org.apache.geronimo.gshell.support.OsgiCommandSupport;
+import org.apache.geronimo.gshell.clp.Argument;
+import org.apache.servicemix.kernel.gshell.core.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
 
-/**
- * Created by IntelliJ IDEA.
- * User: gnodet
- * Date: Oct 3, 2007
- * Time: 12:37:30 PM
- * To change this template use File | Settings | File Templates.
- */
-@CommandComponent(id="osgi:resolve", description="Resolve bundle")
-public class ResolveBundle extends BundleCommand {
+public class StartLevel extends OsgiCommandSupport {
 
-    protected void doExecute(Bundle bundle) throws Exception {
+    @Argument(required = false, index = 0)
+    Integer level;
+
+    protected Object doExecute() throws Exception {
         // Get package admin service.
-        ServiceReference ref = getBundleContext().getServiceReference(PackageAdmin.class.getName());
+        ServiceReference ref = getBundleContext().getServiceReference(org.osgi.service.startlevel.StartLevel.class.getName());
         if (ref == null) {
-            io.out.println("PackageAdmin service is unavailable.");
-            return;
+            io.out.println("StartLevel service is unavailable.");
+            return null;
         }
         try {
-            PackageAdmin pa = (PackageAdmin) getBundleContext().getService(ref);
-            if (pa == null) {
-                io.out.println("PackageAdmin service is unavailable.");
-                return;
+            org.osgi.service.startlevel.StartLevel sl = (org.osgi.service.startlevel.StartLevel) getBundleContext().getService(ref);
+            if (sl == null) {
+                io.out.println("StartLevel service is unavailable.");
+                return null;
             }
-            pa.resolveBundles(new Bundle[] { bundle });
+
+            if (level == null) {
+                io.out.println("Level " + sl.getStartLevel());
+            }
+            else {
+                sl.setStartLevel(level);
+            }
         }
         finally {
             getBundleContext().ungetService(ref);
         }
+        return Result.SUCCESS;
     }
 
 }

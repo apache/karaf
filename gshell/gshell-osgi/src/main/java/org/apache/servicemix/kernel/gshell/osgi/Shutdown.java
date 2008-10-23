@@ -14,33 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.geronimo.gshell.osgi;
+package org.apache.servicemix.kernel.gshell.osgi;
 
-import org.apache.geronimo.gshell.clp.Argument;
-import org.apache.geronimo.gshell.support.OsgiCommandSupport;
+import org.apache.servicemix.kernel.gshell.core.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
 
 /**
- * Created by IntelliJ IDEA.
- * User: gnodet
- * Date: Oct 3, 2007
- * Time: 12:10:32 PM
- * To change this template use File | Settings | File Templates.
+ * Command to shut down ServiceMix Kernel
  */
-public abstract class BundleCommand extends OsgiCommandSupport {
-
-    @Argument(required = true, index = 0)
-    long id;
+public class Shutdown extends OsgiCommandSupport {
 
     protected Object doExecute() throws Exception {
-        Bundle bundle = getBundleContext().getBundle(id);
-        if (bundle == null) {
-            io.out.println("Bundle " + id + " not found");
-            return FAILURE;
-        }
-        doExecute(bundle);
-        return SUCCESS;
+        new Thread() {
+            public void run() {
+                try {
+                    Bundle bundle = getBundleContext().getBundle(0);
+                    bundle.stop();
+                } catch (Exception e) {
+                    log.error("Error when shutting down ServiceMix Kernel", e);
+                }
+            }
+        }.start();
+        return Result.SUCCESS;
     }
 
-    protected abstract void doExecute(Bundle bundle) throws Exception;
 }

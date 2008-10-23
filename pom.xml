@@ -39,9 +39,9 @@
         <module>filemonitor</module>
         <module>gshell</module>
         <module>spring</module>
-        <!--
         <module>testing</module>
         <module>jaas</module>
+        <!--
         <module>client</module>
         -->
         <module>assembly</module>

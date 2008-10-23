@@ -14,30 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.geronimo.gshell.osgi;
+package org.apache.servicemix.kernel.gshell.osgi;
 
-import org.apache.geronimo.gshell.command.annotation.CommandComponent;
-import org.apache.geronimo.gshell.support.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
 
-/**
- * Command to shut down ServiceMix Kernel
- */
-@CommandComponent(id="osgi:shutdown", description="Shutdown")
-public class Shutdown extends OsgiCommandSupport {
+public class StopBundle extends BundleCommand {
 
-    protected Object doExecute() throws Exception {
-        new Thread() {
-            public void run() {
-                try {
-                    Bundle bundle = getBundleContext().getBundle(0);
-                    bundle.stop();
-                } catch (Exception e) {
-                    log.error("Error when shutting down ServiceMix Kernel", e);
-                }
-            }
-        }.start();
-        return SUCCESS;
+    protected void doExecute(Bundle bundle) throws Exception {
+        bundle.stop();
     }
 
 }

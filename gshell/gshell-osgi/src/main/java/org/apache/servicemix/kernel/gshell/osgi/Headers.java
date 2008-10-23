@@ -14,27 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.geronimo.gshell.osgi;
+package org.apache.servicemix.kernel.gshell.osgi;
 
-import java.io.PrintWriter;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.List;
 
-import org.apache.geronimo.gshell.command.annotation.CommandComponent;
 import org.apache.geronimo.gshell.clp.Argument;
-import org.apache.geronimo.gshell.support.OsgiCommandSupport;
+import org.apache.servicemix.kernel.gshell.core.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
 
-/**
- * Created by IntelliJ IDEA.
- * User: gnodet
- * Date: Oct 3, 2007
- * Time: 12:10:15 PM
- * To change this template use File | Settings | File Templates.
- */
-@CommandComponent(id="osgi:headers", description="Display headers")
 public class Headers extends OsgiCommandSupport {
 
     @Argument(required = false, multiValued = true, description = "Bundles ids")
@@ -58,7 +47,7 @@ public class Headers extends OsgiCommandSupport {
                 printHeaders(bundles[i]);
             }
         }
-        return SUCCESS;
+        return Result.SUCCESS;
     }
 
     protected void printHeaders(Bundle bundle) throws Exception {

@@ -14,23 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.geronimo.gshell.osgi;
+package org.apache.servicemix.kernel.gshell.osgi;
 
 import org.osgi.framework.Bundle;
-import org.apache.geronimo.gshell.command.annotation.CommandComponent;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.packageadmin.PackageAdmin;
 
-/**
- * Created by IntelliJ IDEA.
- * User: gnodet
- * Date: Oct 3, 2007
- * Time: 12:10:15 PM
- * To change this template use File | Settings | File Templates.
- */
-@CommandComponent(id="osgi:stop", description="Stop bundle")
-public class StopBundle extends BundleCommand {
+public class ResolveBundle extends BundleCommand {
 
     protected void doExecute(Bundle bundle) throws Exception {
-        bundle.stop();
+        // Get package admin service.
+        ServiceReference ref = getBundleContext().getServiceReference(PackageAdmin.class.getName());
+        if (ref == null) {
+            io.out.println("PackageAdmin service is unavailable.");
+            return;
+        }
+        try {
+            PackageAdmin pa = (PackageAdmin) getBundleContext().getService(ref);
+            if (pa == null) {
+                io.out.println("PackageAdmin service is unavailable.");
+                return;
+            }
+            pa.resolveBundles(new Bundle[] { bundle });
+        }
+        finally {
+            getBundleContext().ungetService(ref);
+        }
     }
 
 }

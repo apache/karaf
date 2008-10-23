@@ -32,104 +32,13 @@
   http://www.springframework.org/schema/osgi-compendium
   http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd">
 
-    <!--
-    <osgi:list id="commands" interface="org.apache.geronimo.gshell.command.Command" cardinality="0..N">
-        <osgi:listener ref="commandRegistry" bind-method="register" unbind-method="unregister" />
+    <bean id="osgiCommandRegistry" class="org.apache.servicemix.kernel.gshell.core.OsgiCommandRegistry" />
+
+    <osgi:list id="osgiCommands" interface="org.apache.geronimo.gshell.command.Command" cardinality="0..N">
+        <osgi:listener ref="osgiCommandRegistry" bind-method="register" unbind-method="unregister" />
     </osgi:list>
 
-    <osgi:service ref="clear" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-          <entry key="alias" value="clear"/>
-      </osgi:service-properties>
-    </osgi:service>
-    
-    <osgi:service ref="exit" interface="org.apache.geronimo.gshell.command.Command">
-        <osgi:service-properties>
-            <entry key="alias" value="exit"/>
-        </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="help" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-      	<entry key="alias" value="help,?"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="history-cmd" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-      	<entry key="alias" value="history"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="info" interface="org.apache.geronimo.gshell.command.Command">
-    </osgi:service>
-
-    <osgi:service ref="set" interface="org.apache.geronimo.gshell.command.Command">
-        <osgi:service-properties>
-            <entry key="alias" value="set"/>
-        </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="unset" interface="org.apache.geronimo.gshell.command.Command">
-        <osgi:service-properties>
-            <entry key="alias" value="unset"/>
-        </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="source" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-      	<entry key="alias" value="source,."/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="echo" interface="org.apache.geronimo.gshell.command.Command">
-        <osgi:service-properties>
-            <entry key="alias" value="echo"/>
-        </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="rsh" interface="org.apache.geronimo.gshell.command.Command">
-        <osgi:service-properties>
-            <entry key="shell" value="remote"/>
-            <entry key="alias" value="rsh"/>
-        </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="grep" interface="org.apache.geronimo.gshell.command.Command">
-        <osgi:service-properties>
-            <entry key="shell" value="utils"/>
-        	<entry key="alias" value="grep"/>
-        </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="cat" interface="org.apache.geronimo.gshell.command.Command">
-        <osgi:service-properties>
-            <entry key="shell" value="utils"/>
-        	<entry key="alias" value="cat"/>
-        </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="java" interface="org.apache.geronimo.gshell.command.Command">
-        <osgi:service-properties>
-            <entry key="shell" value="utils"/>
-        	<entry key="alias" value="java"/>
-        </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="exec" interface="org.apache.geronimo.gshell.command.Command">
-        <osgi:service-properties>
-            <entry key="shell" value="utils"/>
-        	<entry key="alias" value="exec"/>
-        </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="sleep" interface="org.apache.geronimo.gshell.command.Command">
-        <osgi:service-properties>
-            <entry key="shell" value="utils"/>
-        	<entry key="alias" value="sleep"/>
-        </osgi:service-properties>
-    </osgi:service>
-
+    <!--
     <osgi:service ref="commandExecutor" interface="org.apache.geronimo.gshell.command.CommandExecutor">
     </osgi:service>
 

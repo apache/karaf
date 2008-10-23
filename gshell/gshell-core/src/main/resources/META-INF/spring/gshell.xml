@@ -28,17 +28,12 @@
   http://servicemix.apache.org/schema/servicemix-gshell
   http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
-    <import resource="classpath:org/apache/servicemix/kernel/gshell/core/commands.xml" />
-
     <bean class="org.springframework.context.annotation.CommonAnnotationBeanPostProcessor"/>
     <bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>
-    <bean class="org.apache.geronimo.gshell.spring.BeanContainerAwareProcessor">
-        <constructor-arg>
-            <bean class="org.apache.servicemix.kernel.gshell.core.SpringBeanContainerFactoryBean" />
-        </constructor-arg>
-    </bean>
 
-    <bean id="io" class="org.apache.geronimo.gshell.io.IO" />
+    <bean id="io" class="org.apache.geronimo.gshell.io.IO">
+        <property name="verbosity" value="DEBUG" />
+    </bean>
 
     <bean id="application" class="org.apache.servicemix.kernel.gshell.core.ApplicationImpl">
         <property name="id" value="servicemix" />
@@ -105,75 +100,6 @@
 
     <bean id="metaDataRegistry" class="org.apache.geronimo.gshell.vfs.provider.meta.data.MetaDataRegistryImpl"/>
 
-    <bean id="metaFileProviderConfigurer" class="org.apache.geronimo.gshell.vfs.config.FileProviderConfigurer">
-        <property name="scheme" value="meta"/>
-        <property name="provider">
-            <bean class="org.apache.geronimo.gshell.vfs.provider.meta.MetaFileProvider"/>
-        </property>
-    </bean>
-
-    <bean id="fileSystemAccess" class="org.apache.geronimo.gshell.vfs.FileSystemAccessImpl"/>
-
-    <bean id="fileObjectNameCompleter" class="org.apache.geronimo.gshell.vfs.FileObjectNameCompleter"/>
-
-    <bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
-        <property name="customEditors">
-            <map>
-                <entry key="org.apache.commons.vfs.CacheStrategy">
-                    <bean class="org.apache.geronimo.gshell.vfs.config.CacheStrategyEditor"/>
-                </entry>
-            </map>
-        </property>
-    </bean>
-
-    <!--
-    TODO: Set tempDir File arg in constructor to set the temporary location, may need 2 replicators?
-    -->
-    <bean id="defaultFileReplicator" class="org.apache.commons.vfs.impl.DefaultFileReplicator"/>
-
-    <bean id="fileSystemManager" class="org.apache.geronimo.gshell.vfs.config.FileSystemManagerFactoryBean">
-        <property name="filesCache">
-            <bean class="org.apache.commons.vfs.cache.SoftRefFilesCache"/>
-        </property>
-
-        <property name="cacheStrategy" value="ON_RESOLVE"/>
-
-        <property name="fileReplicator">
-            <bean class="org.apache.commons.vfs.impl.PrivilegedFileReplicator">
-                <constructor-arg ref="defaultFileReplicator"/>
-            </bean>
-        </property>
-
-        <!--
-        TODO: Try and root the temporary store under ${gshell.home}/tmp or something
-        -->
-        <property name="temporaryFileStore">
-            <ref bean="defaultFileReplicator"/>
-        </property>
-
-        <property name="fileContentInfoFactory">
-            <bean class="org.apache.commons.vfs.impl.FileContentInfoFilenameFactory"/>
-        </property>
-
-        <property name="defaultProvider">
-            <bean class="org.apache.commons.vfs.provider.url.UrlFileProvider"/>
-        </property>
-    </bean>
-
-    <bean class="org.apache.geronimo.gshell.vfs.config.FileProviderConfigurer">
-        <property name="scheme" value="tmp"/>
-        <property name="provider">
-            <bean class="org.apache.commons.vfs.provider.temp.TemporaryFileProvider"/>
-        </property>
-    </bean>
-
-    <bean class="org.apache.geronimo.gshell.vfs.config.FileProviderConfigurer">
-        <property name="scheme" value="ram"/>
-        <property name="provider">
-            <bean class="org.apache.commons.vfs.provider.ram.RamFileProvider"/>
-        </property>
-    </bean>
-    
     <bean id="applicationManager" class="org.apache.servicemix.kernel.gshell.core.ApplicationManagerImpl"/>
 
 </beans>

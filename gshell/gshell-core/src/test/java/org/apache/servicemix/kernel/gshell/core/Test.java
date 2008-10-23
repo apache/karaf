@@ -10,7 +10,9 @@ public class Test extends TestCase {
 
     public void test() throws Exception {
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
-                new String[] { "META-INF/spring/gshell.xml", "META-INF/spring/gshell-commands.xml" });
+                new String[] { "META-INF/spring/gshell.xml",
+                               "META-INF/spring/gshell-vfs.xml",
+                               "META-INF/spring/gshell-commands.xml" });
         ApplicationManager appMgr = (ApplicationManager) context.getBean("applicationManager");
         assertNotNull(appMgr);
         Shell shell = appMgr.create();
