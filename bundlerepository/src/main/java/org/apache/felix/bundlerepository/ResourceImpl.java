@@ -114,7 +114,9 @@ public class ResourceImpl implements Resource
 
     public Version getVersion()
     {
-        return (Version) m_map.get(VERSION);
+        Version v = (Version) m_map.get(VERSION);
+        v = (v == null) ? Version.emptyVersion : v;
+        return v;
     }
 
     public URL getURL()

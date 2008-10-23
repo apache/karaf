@@ -41,6 +41,7 @@ public class ObrCommandImpl implements Command
     private static final String JAVADOC_CMD = "javadoc";
 
     private static final String EXTRACT_SWITCH = "-x";
+    private static final String VERBOSE_SWITCH = "-v";
 
     private BundleContext m_context = null;
     private RepositoryAdmin m_repoAdmin = null;
@@ -186,77 +187,83 @@ public class ObrCommandImpl implements Command
 
     private void list(
         String commandLine, String command, PrintStream out, PrintStream err)
-        throws IOException
+        throws IOException, InvalidSyntaxException
     {
-        // Create a stream tokenizer for the command line string,
-        // since the syntax for install/start is more sophisticated.
-        StringReader sr = new StringReader(commandLine);
-        StreamTokenizer tokenizer = new StreamTokenizer(sr);
-        tokenizer.resetSyntax();
-        tokenizer.quoteChar('\'');
-        tokenizer.quoteChar('\"');
-        tokenizer.whitespaceChars('\u0000', '\u0020');
-        tokenizer.wordChars('A', 'Z');
-        tokenizer.wordChars('a', 'z');
-        tokenizer.wordChars('0', '9');
-        tokenizer.wordChars('\u00A0', '\u00FF');
-        tokenizer.wordChars('.', '.');
-        tokenizer.wordChars('-', '-');
-        tokenizer.wordChars('_', '_');
+        // Parse the command for an option switch and tokens.
+        ParsedCommand pc = parseList(commandLine);
 
-        // Ignore the invoking command name and the OBR command.
-        int type = tokenizer.nextToken();
-        type = tokenizer.nextToken();
-
-        String substr = null;
-    
-        for (type = tokenizer.nextToken();
-            type != StreamTokenizer.TT_EOF;
-            type = tokenizer.nextToken())
-        {
-            // Add a space in between tokens.
-            if (substr == null)
-            {
-                substr = "";
-            }
-            else
-            {
-                substr += " ";
-            }
-                        
-            if ((type == StreamTokenizer.TT_WORD) ||
-                (type == '\'') || (type == '"'))
-            {
-                substr += tokenizer.sval;
-            }
-        }
-
+        // Create a filter that will match presentation name or symbolic name.
         StringBuffer sb = new StringBuffer();
-        if ((substr == null) || (substr.length() == 0))
+        if ((pc.getTokens() == null) || (pc.getTokens().length() == 0))
         {
             sb.append("(|(presentationname=*)(symbolicname=*))");
         }
         else
         {
             sb.append("(|(presentationname=*");
-            sb.append(substr);
+            sb.append(pc.getTokens());
             sb.append("*)(symbolicname=*");
-            sb.append(substr);
+            sb.append(pc.getTokens());
             sb.append("*))");
         }
+        // Use filter to get matching resources.
         Resource[] resources = m_repoAdmin.discoverResources(sb.toString());
+
+        // Group the resources by symbolic name in descending version order,
+        // but keep them in overall sorted order by presentation name.
+        Map revisionMap = new TreeMap(new Comparator() {
+            public int compare(Object o1, Object o2)
+            {
+                Resource r1 = (Resource) o1;
+                Resource r2 = (Resource) o2;
+                // Assume if the symbolic name is equal, then the two are equal,
+                // since we are trying to aggregate by symbolic name.
+                int symCompare = r1.getSymbolicName().compareTo(r2.getSymbolicName());
+                if (symCompare == 0)
+                {
+                    return 0;
+                }
+                // Otherwise, compare the presentation name to keep them sorted
+                // by presentation name. If the presentation names are equal, then
+                // use the symbolic name to differentiate.
+                int compare = r1.getPresentationName().compareToIgnoreCase(r2.getPresentationName());
+                if (compare == 0)
+                {
+                    return symCompare;
+                }
+                return compare;
+            }
+        });
         for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++)
         {
-            String name = resources[resIdx].getPresentationName();
-            Version version = resources[resIdx].getVersion();
-            if (version != null)
+            Resource[] revisions = (Resource[]) revisionMap.get(resources[resIdx]);
+            revisionMap.put(resources[resIdx], addResourceByVersion(revisions, resources[resIdx]));
+        }
+
+        // Print any matching resources.
+        for (Iterator i = revisionMap.entrySet().iterator(); i.hasNext(); )
+        {
+            Map.Entry entry = (Map.Entry) i.next();
+            Resource[] revisions = (Resource[]) entry.getValue();
+            String name = revisions[0].getPresentationName();
+            name = (name == null) ? revisions[0].getSymbolicName() : name;
+            out.print(name + " (");
+            int revIdx = 0;
+            do
             {
-                out.println(name + " (" + version + ")");
+                if (revIdx > 0)
+                {
+                    out.print(", ");
+                }
+                out.print(revisions[revIdx].getVersion());
+                revIdx++;
             }
-            else
+            while (pc.isVerbose() && (revIdx < revisions.length));
+            if (!pc.isVerbose() && (revisions.length > 1))
             {
-                out.println(name);
+                out.print(", ...");
             }
+            out.println(")");
         }
     
         if (resources == null)
@@ -562,6 +569,101 @@ public class ObrCommandImpl implements Command
             out.print('-');
         }
         out.println("");
+    }
+
+    private ParsedCommand parseList(String commandLine)
+        throws IOException, InvalidSyntaxException
+    {
+        // The command line for list will be something like:
+        //    obr list -v token token
+
+        // Create a stream tokenizer for the command line string,
+        StringReader sr = new StringReader(commandLine);
+        StreamTokenizer tokenizer = new StreamTokenizer(sr);
+        tokenizer.resetSyntax();
+        tokenizer.quoteChar('\'');
+        tokenizer.quoteChar('\"');
+        tokenizer.whitespaceChars('\u0000', '\u0020');
+        tokenizer.wordChars('A', 'Z');
+        tokenizer.wordChars('a', 'z');
+        tokenizer.wordChars('0', '9');
+        tokenizer.wordChars('\u00A0', '\u00FF');
+        tokenizer.wordChars('.', '.');
+        tokenizer.wordChars('-', '-');
+        tokenizer.wordChars('_', '_');
+
+        // Ignore the invoking command name and the OBR command.
+        int type = tokenizer.nextToken();
+        type = tokenizer.nextToken();
+
+        int EOF = 1;
+        int SWITCH = 2;
+        int TOKEN = 4;
+
+        // Construct an install record.
+        ParsedCommand pc = new ParsedCommand();
+        String tokens = null;
+
+        // The state machine starts by expecting either a
+        // SWITCH or a DIRECTORY.
+        int expecting = (SWITCH | TOKEN | EOF);
+        while (true)
+        {
+            // Get the next token type.
+            type = tokenizer.nextToken();
+            switch (type)
+            {
+                // EOF received.
+                case StreamTokenizer.TT_EOF:
+                    // Error if we weren't expecting EOF.
+                    if ((expecting & EOF) == 0)
+                    {
+                        throw new InvalidSyntaxException(
+                            "Expecting more arguments.", null);
+                    }
+                    // Add current target if there is one.
+                    if (tokens != null)
+                    {
+                        pc.setTokens(tokens);
+                    }
+                    // Return cleanly.
+                    return pc;
+
+                // WORD or quoted WORD received.
+                case StreamTokenizer.TT_WORD:
+                case '\'':
+                case '\"':
+                    // If we are expecting a command SWITCH and the token
+                    // equals a command SWITCH, then record it.
+                    if (((expecting & SWITCH) > 0) && tokenizer.sval.equals(VERBOSE_SWITCH))
+                    {
+                        pc.setVerbose(true);
+                        expecting = (TOKEN | EOF);
+                    }
+                    // If we are expecting a target, the record it.
+                    else if ((expecting & TOKEN) > 0)
+                    {
+                        // Add a space in between tokens.
+                        if (tokens == null)
+                        {
+                            tokens = "";
+                        }
+                        else
+                        {
+                            tokens += " ";
+                        }
+                        // Append to the current token.
+                        tokens += tokenizer.sval;
+                        expecting = (EOF | TOKEN);
+                    }
+                    else
+                    {
+                        throw new InvalidSyntaxException(
+                            "Not expecting '" + tokenizer.sval + "'.", null);
+                    }
+                    break;
+            }
+        }
     }
 
     private ParsedCommand parseInfo(String commandLine)
@@ -928,13 +1030,16 @@ public class ObrCommandImpl implements Command
         else if (command.equals(LIST_CMD))
         {
             out.println("");
-            out.println("obr " + LIST_CMD + " [<string> ...]");
+            out.println("obr " + LIST_CMD
+                + " [" + VERBOSE_SWITCH + "] [<string> ...]");
             out.println("");
             out.println(
                 "This command lists bundles available in the bundle repository.\n" +
                 "If no arguments are specified, then all available bundles are\n" +
                 "listed, otherwise any arguments are concatenated with spaces\n" +
-                "and used as a substring filter on the bundle names.");
+                "and used as a substring filter on the bundle names. By default,\n" +
+                "only the most recent version of each artifact is shown. To list\n" +
+                "all available versions use the \"" + VERBOSE_SWITCH + "\" switch.");
             out.println("");
         }
         else if (command.equals(INFO_CMD))
@@ -1048,7 +1153,7 @@ public class ObrCommandImpl implements Command
             out.println("obr " + ADDURL_CMD + " [<repository-file-url> ...]");
             out.println("obr " + REMOVEURL_CMD + " [<repository-file-url> ...]");
             out.println("obr " + LISTURL_CMD);
-            out.println("obr " + LIST_CMD + " [<string> ...]");
+            out.println("obr " + LIST_CMD + " [" + VERBOSE_SWITCH + "] [<string> ...]");
             out.println("obr " + INFO_CMD
                 + " <bundle-name>|<bundle-symbolic-name>|<bundle-id>[;<version>] ...");
             out.println("obr " + DEPLOY_CMD
@@ -1064,6 +1169,48 @@ public class ObrCommandImpl implements Command
         }
     }
 
+    private static Resource[] addResourceByVersion(Resource[] revisions, Resource resource)
+    {
+        // We want to add the resource into the array of revisions
+        // in descending version sorted order (i.e., newest first)
+        Resource[] sorted = null;
+        if (revisions == null)
+        {
+            sorted = new Resource[] { resource };
+        }
+        else
+        {
+            Version version = resource.getVersion();
+            Version middleVersion = null;
+            int top = 0, bottom = revisions.length - 1, middle = 0;
+            while (top <= bottom)
+            {
+                middle = (bottom - top) / 2 + top;
+                middleVersion = revisions[middle].getVersion();
+                // Sort in reverse version order.
+                int cmp = middleVersion.compareTo(version);
+                if (cmp < 0)
+                {
+                    bottom = middle - 1;
+                }
+                else
+                {
+                    top = middle + 1;
+                }
+            }
+
+            // Ignore duplicates.
+            if ((top >= revisions.length) || (revisions[top] != resource))
+            {
+                sorted = new Resource[revisions.length + 1];
+                System.arraycopy(revisions, 0, sorted, 0, top);
+                System.arraycopy(revisions, top, sorted, top + 1, revisions.length - top);
+                sorted[top] = resource;
+            }
+        }
+        return sorted;
+    }
+
     private static class ParsedCommand
     {
         private static final int NAME_IDX = 0;
@@ -1072,6 +1219,8 @@ public class ObrCommandImpl implements Command
         private boolean m_isResolve = true;
         private boolean m_isCheck = false;
         private boolean m_isExtract = false;
+        private boolean m_isVerbose = false;
+        private String m_tokens = null;
         private String m_dir = null;
         private String[][] m_targets = new String[0][];
         
@@ -1099,10 +1248,30 @@ public class ObrCommandImpl implements Command
         {
             return m_isExtract;
         }
-        
+
         public void setExtract(boolean b)
         {
             m_isExtract = b;
+        }
+
+        public boolean isVerbose()
+        {
+            return m_isVerbose;
+        }
+
+        public void setVerbose(boolean b)
+        {
+            m_isVerbose = b;
+        }
+
+        public String getTokens()
+        {
+            return m_tokens;
+        }
+
+        public void setTokens(String s)
+        {
+            m_tokens = s;
         }
 
         public String getDirectory()
