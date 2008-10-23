@@ -84,6 +84,7 @@
                         <Import-Package>
                             org.apache.geronimo.gshell.wisdom.command,
                             org.apache.servicemix.kernel.gshell.core,
+                            org.apache.geronimo.gshell.wisdom.registry,
                             *
                         </Import-Package>
                         <Private-Package>!*</Private-Package>

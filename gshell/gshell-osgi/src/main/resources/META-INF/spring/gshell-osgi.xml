@@ -41,37 +41,34 @@
         <gshell:command name="osgi/headers">
             <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.Headers" />
         </gshell:command>
-        <gshell:command name="osgi/intall-bundle">
+        <gshell:command name="osgi/install">
             <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.InstallBundle" />
         </gshell:command>
-        <gshell:command name="osgi/list-bundle">
+        <gshell:command name="osgi/list">
             <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.ListBundles" />
         </gshell:command>
-        <gshell:command name="osgi/list-services">
+        <gshell:command name="osgi/ls">
             <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.ListServices" />
         </gshell:command>
-        <gshell:command name="osgi/list-services">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.ListServices" />
-        </gshell:command>
-        <gshell:command name="osgi/refresh-bundle">
+        <gshell:command name="osgi/refresh">
             <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.RefreshBundle" />
         </gshell:command>
-        <gshell:command name="osgi/resolve-bundle">
+        <gshell:command name="osgi/resolve">
             <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.ResolveBundle" />
         </gshell:command>
         <gshell:command name="osgi/shutdown">
             <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.Shutdown" />
         </gshell:command>
-        <gshell:command name="osgi/start-bundle">
+        <gshell:command name="osgi/start">
             <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.StartBundle" />
         </gshell:command>
         <gshell:command name="osgi/start-level">
             <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.StartLevel" />
         </gshell:command>
-        <gshell:command name="osgi/stop-bundle">
+        <gshell:command name="osgi/stop">
             <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.StopBundle" />
         </gshell:command>
-        <gshell:command name="osgi/uninstall-bundle">
+        <gshell:command name="osgi/uninstall">
             <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.UninstallBundle" />
         </gshell:command>
     </gshell:command-bundle>

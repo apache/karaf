@@ -97,4 +97,11 @@
         </property>
     </bean>
 
+    <bean class="org.apache.geronimo.gshell.vfs.config.FileProviderConfigurer">
+        <property name="scheme" value="mvn"/>
+        <property name="provider">
+            <bean class="org.apache.servicemix.kernel.gshell.core.vfs.mvn.MvnFileProvider"/>
+        </property>
+    </bean>
+
 </beans>

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.servicemix.kernel.gshell.features.internal.commands;
+package org.apache.servicemix.kernel.gshell.features.commands;
 
 import org.apache.servicemix.kernel.gshell.features.FeaturesService;
 import org.apache.servicemix.kernel.gshell.core.OsgiCommandSupport;

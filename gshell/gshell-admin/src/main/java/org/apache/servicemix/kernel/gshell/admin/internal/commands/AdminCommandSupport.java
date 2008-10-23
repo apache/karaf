@@ -19,15 +19,19 @@ package org.apache.servicemix.kernel.gshell.admin.internal.commands;
 import org.apache.servicemix.kernel.gshell.admin.AdminService;
 import org.apache.servicemix.kernel.gshell.admin.Instance;
 import org.apache.servicemix.kernel.gshell.core.OsgiCommandSupport;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.geronimo.gshell.command.CommandContext;
+import org.osgi.framework.ServiceReference;
 
 public abstract class AdminCommandSupport extends OsgiCommandSupport {
 
-    @Autowired
     private AdminService adminService;
 
-    protected AdminService getAdminService() {
+    public AdminService getAdminService() {
         return adminService;
+    }
+
+    public void setAdminService(AdminService adminService) {
+        this.adminService = adminService;
     }
 
     protected Instance getExistingInstance(String name) {

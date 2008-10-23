@@ -14,22 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.servicemix.kernel.gshell.features.internal.commands;
+package org.apache.servicemix.kernel.gshell.features.commands;
 
-import java.util.List;
-import java.net.URI;
-
-import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.servicemix.kernel.gshell.features.FeaturesService;
+import org.apache.servicemix.kernel.gshell.features.Repository;
 
-public class AddUrlCommand extends FeaturesCommandSupport {
-
-    @Argument(required = true, multiValued = true, description = "Repository URLs")
-    List<String> urls;
+public class ListUrlCommand extends FeaturesCommandSupport {
 
     protected void doExecute(FeaturesService admin) throws Exception {
-        for (String url : urls) {
-            admin.addRepository(new URI(url));
+        Repository[] repos = admin.listRepositories();
+        if ((repos != null) && (repos.length > 0)) {
+            for (int i = 0; i < repos.length; i++) {
+                io.out.println(repos[i].getURI());
+            }
+        } else {
+            io.out.println("No repository URLs are set.");
         }
     }
 }

@@ -14,13 +14,11 @@ public class OsgiCommandRegistry {
     private CommandRegistry commandRegistry;
 
     public void register(final Command command, Map<String, ?> properties) throws Exception {
-        String name = (String) properties.get(NAME);
-        commandRegistry.registerCommand(name, command);
+        commandRegistry.registerCommand(command);
     }
 
     public void unregister(final Command command, Map<String, ?> properties) throws Exception {
-        String name = (String) properties.get(NAME);
-        commandRegistry.removeCommand(name);
+        commandRegistry.removeCommand(command);
     }
 
 }

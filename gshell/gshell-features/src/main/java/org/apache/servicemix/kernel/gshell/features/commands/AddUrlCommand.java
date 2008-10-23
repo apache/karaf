@@ -14,35 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.servicemix.kernel.gshell.features.internal.commands;
+package org.apache.servicemix.kernel.gshell.features.commands;
 
+import java.util.List;
+import java.net.URI;
+
+import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.servicemix.kernel.gshell.features.FeaturesService;
-import org.apache.geronimo.gshell.clp.Option;
 
-public class ListFeaturesCommand extends FeaturesCommandSupport {
+public class AddUrlCommand extends FeaturesCommandSupport {
 
-    @Option(name = "-i", aliases={"--installed"}, description="Display the list of installed features")
-    boolean installed;
+    @Argument(required = true, multiValued = true, description = "Repository URLs")
+    List<String> urls;
 
     protected void doExecute(FeaturesService admin) throws Exception {
-        String[] features;
-        if (installed) {
-            features = admin.listInstalledFeatures();
-        } else {
-        	// Print column headers.
-        	io.out.println("  State          Version       Name");
-            features = admin.listFeatures();
-        }
-        if ((features != null) && (features.length > 0)) {
-            for (int i = 0; i < features.length; i++) {
-                io.out.println(features[i]);
-            }
-        } else {
-            if (installed) {
-                io.out.println("No features installed.");
-            } else {
-                io.out.println("No features available.");
-            }
+        for (String url : urls) {
+            admin.addRepository(new URI(url));
         }
     }
 }

@@ -14,20 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.servicemix.kernel.gshell.features.internal.commands;
+package org.apache.servicemix.kernel.gshell.features.commands;
 
 import java.util.List;
-import java.net.URL;
+import java.net.URI;
 
 import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.servicemix.kernel.gshell.features.FeaturesService;
 
-public class InstallFeatureCommand extends FeaturesCommandSupport {
+public class RemoveUrlCommand extends FeaturesCommandSupport {
 
-    @Argument(required = true, description = "The name of the feature")
-    String name;
+    @Argument(required = true, multiValued = true, description = "Repository URLs")
+    List<String> urls;
 
     protected void doExecute(FeaturesService admin) throws Exception {
-        admin.installFeature(name);
+        for (String url : urls) {
+            admin.removeRepository(new URI(url));
+        }
     }
 }

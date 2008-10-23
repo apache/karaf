@@ -14,32 +14,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.servicemix.kernel.gshell.features.internal.commands;
+package org.apache.servicemix.kernel.gshell.features.commands;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.servicemix.kernel.gshell.features.FeaturesService;
-import org.apache.servicemix.kernel.gshell.features.Repository;
+import org.apache.geronimo.gshell.clp.Option;
 
-public class RefreshUrlCommand extends FeaturesCommandSupport {
+public class ListFeaturesCommand extends FeaturesCommandSupport {
 
-    @Argument(required = false, multiValued = true, description = "Repository URLs (leave empty for all)")
-    List<String> urls;
+    @Option(name = "-i", aliases={"--installed"}, description="Display the list of installed features")
+    boolean installed;
 
     protected void doExecute(FeaturesService admin) throws Exception {
-        if (urls == null || urls.isEmpty()) {
-            urls = new ArrayList<String>();
-            for (Repository repo : admin.listRepositories()) {
-                urls.add(repo.getURI().toString());
-            }
+        String[] features;
+        if (installed) {
+            features = admin.listInstalledFeatures();
+        } else {
+        	// Print column headers.
+        	io.out.println("  State          Version       Name");
+            features = admin.listFeatures();
         }
-        for (String strUri : urls) {
-            URI uri = new URI(strUri);
-            admin.removeRepository(uri);
-            admin.addRepository(uri);
+        if ((features != null) && (features.length > 0)) {
+            for (int i = 0; i < features.length; i++) {
+                io.out.println(features[i]);
+            }
+        } else {
+            if (installed) {
+                io.out.println("No features installed.");
+            } else {
+                io.out.println("No features available.");
+            }
         }
     }
 }

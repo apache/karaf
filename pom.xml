@@ -65,6 +65,8 @@
         <aopalliance.version>1.0_1</aopalliance.version>
         <asm.version>2.2.3_1</asm.version>
         <cglib.version>2.1_3_1</cglib.version>
+        <commons.codec.version>1.2_1</commons.codec.version>
+        <commons.httpclient.version>3.1_1</commons.httpclient.version>
         <commons.io.version>1.3.2_1</commons.io.version>
         <commons.jexl.version>1.1_1-SNAPSHOT</commons.jexl.version>
         <commons.logging.version>1.1.1</commons.logging.version>
@@ -86,6 +88,7 @@
         <jline.version>0.9.94</jline.version>
         <log4j.version>1.2.14</log4j.version>
         <mina.version>1.1.6_1</mina.version>
+        <oro.version>2.0.8_1</oro.version>
         <pax.logging.version>1.1.1</pax.logging.version>
         <pax.url.version>0.3.2</pax.url.version>
         <servicemix.legal.version>1.0</servicemix.legal.version>
@@ -339,6 +342,11 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.oro</artifactId>
+                <version>${oro.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
                 <version>${aopalliance.version}</version>
             </dependency>
@@ -366,6 +374,16 @@
                 <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.commons-vfs</artifactId>
                 <version>${commons.vfs.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.commons-codec</artifactId>
+                <version>${commons.codec.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.commons-httpclient</artifactId>
+                <version>${commons.httpclient.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jmock</groupId>

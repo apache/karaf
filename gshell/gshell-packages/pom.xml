@@ -74,8 +74,8 @@
                         </Export-Package>
                         <Import-Package>
                             org.apache.geronimo.gshell.wisdom.command,
+                            org.apache.geronimo.gshell.wisdom.registry,
                             org.apache.servicemix.kernel.gshell.core,
-                            org.ops4j.pax.logging,
                             *
                         </Import-Package>
                         <Private-Package>!*</Private-Package>

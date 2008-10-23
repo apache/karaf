@@ -39,25 +39,25 @@
 
     <gshell:command-bundle>
         <gshell:command name="features/addUrl">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.features.internal.commands.AddUrlCommand" />
+            <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.AddUrlCommand" />
         </gshell:command>
         <gshell:command name="features/listUrl">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.features.internal.commands.ListUrlCommand" />
+            <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.ListUrlCommand" />
         </gshell:command>
         <gshell:command name="features/remoteUrl">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.features.internal.commands.RemoveUrlCommand" />
+            <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.RemoveUrlCommand" />
         </gshell:command>
         <gshell:command name="features/refreshUrl">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.features.internal.commands.RefreshUrlCommand" />
+            <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.RefreshUrlCommand" />
         </gshell:command>
         <gshell:command name="features/install">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.features.internal.commands.InstallFeatureCommand" />
+            <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.InstallFeatureCommand" />
         </gshell:command>
         <gshell:command name="features/uninstall">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.features.internal.commands.UninstallFeatureCommand" />
+            <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.UninstallFeatureCommand" />
         </gshell:command>
         <gshell:command name="features/listFeatures">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.features.internal.commands.ListFeaturesCommand" />
+            <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.ListFeaturesCommand" />
         </gshell:command>
     </gshell:command-bundle>
 

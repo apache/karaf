@@ -31,7 +31,7 @@ public class CommandBundle implements BundleContextAware, InitializingBean, Disp
 
     private BundleContext bundleContext;
 
-    private Map<String,Command> commands;
+    private List<Command> commands;
 
     private Map<String,String> aliases;
 
@@ -40,11 +40,11 @@ public class CommandBundle implements BundleContextAware, InitializingBean, Disp
     public CommandBundle() {
     }
 
-    public Map<String, Command> getCommands() {
+    public List<Command> getCommands() {
         return commands;
     }
 
-    public void setCommands(final Map<String, Command> commands) {
+    public void setCommands(final List<Command> commands) {
         assert commands != null;
 
         this.commands = commands;
@@ -68,9 +68,9 @@ public class CommandBundle implements BundleContextAware, InitializingBean, Disp
         log.debug("Initializing command bundle");
         if (commandRegistry != null && aliasRegistry != null) {
             log.debug("Command bundle is using the auto wired command/alias registry");
-            for (String name : commands.keySet()) {
-                log.debug("Registering command: {}", name);
-                commandRegistry.registerCommand(name, commands.get(name));
+            for (Command command : commands) {
+                log.debug("Registering command: {}", command.getLocation());
+                commandRegistry.registerCommand(command);
             }
             for (String name : aliases.keySet()) {
                 log.debug("Registering alias: {}", name);
@@ -81,11 +81,11 @@ public class CommandBundle implements BundleContextAware, InitializingBean, Disp
                 throw new Exception("Aliases are not supported in OSGi");
             }
             log.debug("Command bundle is using the OSGi registry");
-            for (String name : commands.keySet()) {
-                log.debug("Registering command: {}", name);
+            for (Command command : commands) {
+                log.debug("Registering command: {}", command.getLocation());
                 Dictionary props = new Properties();
-                props.put(OsgiCommandRegistry.NAME, name);
-                registrations.add(bundleContext.registerService(Command.class.getName(), commands.get(name), props));
+                props.put(OsgiCommandRegistry.NAME, command.getLocation().getFullPath());
+                registrations.add(bundleContext.registerService(Command.class.getName(), command, props));
             }
         } else {
             throw new Exception("Command bundle should be wired to the command/alias registry or be used in an OSGi context");

@@ -90,6 +90,16 @@
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell.commands</groupId>
+            <artifactId>gshell-optional</artifactId>
+            <version>${gshell.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.gshell.commands</groupId>
+            <artifactId>gshell-vfs</artifactId>
+            <version>${gshell.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.gshell.commands</groupId>
             <artifactId>gshell-remote</artifactId>
             <version>${gshell.version}</version>
         </dependency>
@@ -129,6 +139,10 @@
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.mina</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.commons-httpclient</artifactId>
         </dependency>
         <dependency>
             <groupId>com.thoughtworks.xstream</groupId>

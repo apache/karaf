@@ -14,22 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.servicemix.kernel.gshell.features.internal.commands;
+package org.apache.servicemix.kernel.gshell.features.commands;
 
-import java.util.List;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.servicemix.kernel.gshell.features.FeaturesService;
+import org.apache.servicemix.kernel.gshell.features.Repository;
 
-public class RemoveUrlCommand extends FeaturesCommandSupport {
+public class RefreshUrlCommand extends FeaturesCommandSupport {
 
-    @Argument(required = true, multiValued = true, description = "Repository URLs")
+    @Argument(required = false, multiValued = true, description = "Repository URLs (leave empty for all)")
     List<String> urls;
 
     protected void doExecute(FeaturesService admin) throws Exception {
-        for (String url : urls) {
-            admin.removeRepository(new URI(url));
+        if (urls == null || urls.isEmpty()) {
+            urls = new ArrayList<String>();
+            for (Repository repo : admin.listRepositories()) {
+                urls.add(repo.getURI().toString());
+            }
+        }
+        for (String strUri : urls) {
+            URI uri = new URI(strUri);
+            admin.removeRepository(uri);
+            admin.addRepository(uri);
         }
     }
 }

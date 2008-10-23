@@ -39,7 +39,7 @@
             <list>
                 <bean class="org.apache.geronimo.gshell.remote.server.handler.ConnectHandler"/>
                 <bean class="org.apache.geronimo.gshell.remote.server.handler.LoginHandler"/>
-                <bean class="org.apache.geronimo.gshell.remote.server.handler.OpenShellHandler"/>
+                <bean class="org.apache.servicemix.kernel.gshell.core.remote.OpenShellHandler"/>
                 <bean class="org.apache.geronimo.gshell.remote.server.handler.ExecuteHandler"/>
                 <bean class="org.apache.geronimo.gshell.remote.server.handler.CloseShellHandler"/>
                 <bean class="org.apache.geronimo.gshell.remote.server.handler.EchoHandler"/>
@@ -125,93 +125,5 @@
         <property name="transformation" value="RSA"/>
         <property name="provider" value="default"/>
     </bean>
-
-    <!--
-    <bean id="rshServer" class="org.apache.geronimo.gshell.remote.server.RshServer" destroy-method="close">
-        <constructor-arg ref="timeoutManager" />
-        <constructor-arg ref="transportFactoryLocator" />
-        <constructor-arg>
-            <list>
-                <bean class="org.apache.geronimo.gshell.remote.server.handler.SpringCloseShellHandler" />
-                <bean class="org.apache.geronimo.gshell.remote.server.handler.ConnectHandler">
-                    <constructor-arg ref="cryptoContext" />
-                    <constructor-arg ref="timeoutManager" />
-                </bean>
-                <bean class="org.apache.geronimo.gshell.remote.server.handler.EchoHandler" />
-                <bean class="org.apache.geronimo.gshell.remote.server.handler.SpringExecuteHandler" />
-                <bean class="org.apache.geronimo.gshell.remote.server.handler.SpringLoginHandler" init-method="initialize">
-                    <constructor-arg ref="timeoutManager" />
-                    <constructor-arg value="RshServer" />
-                </bean>
-                <bean class="org.apache.geronimo.gshell.remote.server.handler.SpringOpenShellHandler">
-                    <constructor-arg ref="shellInfo" />
-                    <constructor-arg ref="commandExecutor" />
-                </bean>
-            </list>
-        </constructor-arg>
-    </bean>
-
-    <bean id="timeoutManager" class="org.apache.geronimo.gshell.remote.server.timeout.DefaultTimeoutManager" init-method="initialize"/>
-
-    <bean id="transportFactoryLocator" class="org.apache.geronimo.gshell.whisper.transport.SpringTransportFactoryLocator">
-        <property name="factories">
-            <list>
-                <ref local="tcpTransportFactory" />
-                <ref local="sslTransportFactory" />
-                <ref local="vmTransportFactory" />
-            </list>
-        </property>
-    </bean>
-
-    <bean id="sslContextFactory" class="org.apache.geronimo.gshell.whisper.transport.ssl.KeystoreSSLContextFactory">
-        <property name="keystoreManager" ref="keystoreManager" />
-        <property name="clientKeystore" value="${clientKeystore}" />
-        <property name="clientKeyAlias" value="${clientKeyAlias}" />
-        <property name="clientTruststore" value="${clientTruststore}" />
-        <property name="serverKeystore" value="${serverKeystore}" />
-        <property name="serverKeyAlias" value="${serverKeyAlias}" />
-        <property name="serverTruststore" value="${serverTruststore}" />
-     </bean>
-
-    <bean id="sslTransportFactory" class="org.apache.geronimo.gshell.whisper.transport.ssl.SpringSslTransportFactory">
-        <property name="contextFactory" ref="sslContextFactory" />
-    </bean>
-
-    <bean id="tcpTransportFactory" class="org.apache.geronimo.gshell.whisper.transport.tcp.SpringTcpTransportFactory" />
-
-    <bean id="vmTransportFactory" class="org.apache.geronimo.gshell.whisper.transport.vm.SpringVmTransportFactory" />
-
-    <bean id="cryptoContext" class="org.apache.geronimo.gshell.remote.crypto.CryptoContext">
-        <constructor-arg value="RSA" />
-        <constructor-arg><null /></constructor-arg>
-    </bean>
-
-    <bean id="remoteShell" class="org.apache.geronimo.gshell.spring.SpringRshServer" init-method="start" destroy-method="stop">
-        <property name="server" ref="rshServer" />
-        <property name="start" value="${startRemoteShell}" />
-        <property name="location" value="${remoteShellLocation}" />
-    </bean>
-
-    <bean id="rsh" class="org.apache.geronimo.gshell.remote.client.SpringRshCommand">
-        <constructor-arg ref="terminal" />
-        <constructor-arg ref="cryptoContext" />
-        <constructor-arg ref="transportFactoryLocator" />
-        <constructor-arg>
-            <list>
-                <bean class="org.apache.geronimo.gshell.remote.client.handler.EchoHandler" />
-            </list>
-        </constructor-arg>
-    </bean>
-
-    <osgi:reference id="keystoreManager" interface="org.apache.servicemix.kernel.jaas.config.KeystoreManager" cardinality="1..1" />
-
-    <jaas:config id="RshClient">
-        <jaas:module className="org.apache.geronimo.gshell.remote.client.auth.RemoteLoginModule" flags="required" />
-    </jaas:config>
-
-    <jaas:config id="RshServer" rank="-1">
-        <jaas:module className="org.apache.geronimo.gshell.remote.server.auth.BogusLoginModule" flags="required" />
-    </jaas:config>
-    -->
 
 </beans>

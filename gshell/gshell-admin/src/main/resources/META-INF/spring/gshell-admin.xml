@@ -37,27 +37,38 @@
 
     <import resource="classpath:org/apache/servicemix/kernel/gshell/core/commands.xml" />
 
+    <bean id="adminCommandBundleSupport" scope="prototype">
+        <property name="adminService" ref="adminService" />
+    </bean>
+
     <gshell:command-bundle>
         <gshell:command name="admin/create">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.CreateCommand" />
+            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.CreateCommand"
+                           parent="adminCommandBundleSupport" />
         </gshell:command>
         <gshell:command name="admin/connect">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.ConnectCommand" />
+            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.ConnectCommand"
+                           parent="adminCommandBundleSupport" />
         </gshell:command>
         <gshell:command name="admin/list">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.ListCommand" />
+            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.ListCommand"
+                           parent="adminCommandBundleSupport" />
         </gshell:command>
         <gshell:command name="admin/start">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.StartCommand" />
+            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.StartCommand"
+                           parent="adminCommandBundleSupport" />
         </gshell:command>
         <gshell:command name="admin/stop">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.StopCommand" />
+            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.StopCommand"
+                           parent="adminCommandBundleSupport" />
         </gshell:command>
         <gshell:command name="admin/destroy">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.DestroyCommand" />
+            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.DestroyCommand"
+                           parent="adminCommandBundleSupport" />
         </gshell:command>
         <gshell:command name="admin/change-port">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.ChangePortCommand" />
+            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.ChangePortCommand"
+                           parent="adminCommandBundleSupport" />
         </gshell:command>
     </gshell:command-bundle>
 

@@ -14,20 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.servicemix.kernel.gshell.features.internal.commands;
-
-import java.util.List;
-import java.net.URL;
+package org.apache.servicemix.kernel.gshell.features.commands;
 
 import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.servicemix.kernel.gshell.features.FeaturesService;
 
-public class UninstallFeatureCommand extends FeaturesCommandSupport {
+public class InstallFeatureCommand extends FeaturesCommandSupport {
 
     @Argument(required = true, description = "The name of the feature")
     String name;
 
     protected void doExecute(FeaturesService admin) throws Exception {
-        admin.uninstallFeature(name);
+        admin.installFeature(name);
     }
 }

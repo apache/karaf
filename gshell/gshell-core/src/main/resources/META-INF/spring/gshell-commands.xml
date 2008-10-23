@@ -124,44 +124,115 @@
         <gshell:link name="remote/rshd" target="remote/rsh-server"/>
     </gshell:command-bundle>
 
-    <!--
-    <bean id="clear" class="org.apache.geronimo.gshell.commands.builtins.ClearCommand">
-        <constructor-arg ref="terminal" />
-    </bean>
+    <gshell:command-bundle>
+        <gshell:command name="optional/exec">
+            <gshell:action class="org.apache.geronimo.gshell.commands.optional.ExecuteAction"/>
+        </gshell:command>
 
-    <bean id="echo" class="org.apache.geronimo.gshell.commands.builtins.EchoCommand" />
+        <gshell:command name="optional/java">
+            <gshell:action class="org.apache.geronimo.gshell.commands.optional.JavaAction"/>
+        </gshell:command>
 
-    <bean id="exit" class="org.apache.geronimo.gshell.commands.builtins.ExitCommand" />
+        <gshell:command name="optional/sleep">
+            <gshell:action class="org.apache.geronimo.gshell.commands.optional.SleepAction"/>
+        </gshell:command>
 
-    <bean id="help" class="org.apache.geronimo.gshell.commands.builtins.HelpCommand">
-        <constructor-arg ref="commandRegistry" />
-        <constructor-arg ref="commandRegistry" />
-        <constructor-arg ref="branding" />
-    </bean>
+        <gshell:command name="optional/date">
+            <gshell:action class="org.apache.geronimo.gshell.commands.optional.DateAction"/>
+        </gshell:command>
 
-    <bean id="history-cmd" class="org.apache.geronimo.gshell.commands.builtins.HistoryCommand">
-        <constructor-arg ref="history" />
-    </bean>
+        <gshell:command name="optional/hostname">
+            <gshell:action class="org.apache.geronimo.gshell.commands.optional.HostnameAction"/>
+        </gshell:command>
+    </gshell:command-bundle>
 
-    <bean id="info" class="org.apache.geronimo.gshell.commands.builtins.InfoCommand">
-        <constructor-arg ref="branding" />
-    </bean>
+    <gshell:command-bundle>
+        <gshell:command name="vfs/cd">
+            <gshell:action class="org.apache.geronimo.gshell.commands.vfs.ChangeDirectoryAction"/>
+            <gshell:completers>
+                <ref bean="fileObjectNameCompleter"/>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
 
-    <bean id="set" class="org.apache.geronimo.gshell.commands.builtins.SetCommand" />
+        <gshell:command name="vfs/pwd" type="stateless">
+            <gshell:action class="org.apache.geronimo.gshell.commands.vfs.CurrentDirectoryAction"/>
+        </gshell:command>
 
-    <bean id="source" class="org.apache.geronimo.gshell.commands.builtins.SourceCommand" />
+        <gshell:command name="vfs/ls">
+            <gshell:action class="org.apache.geronimo.gshell.commands.vfs.ListDirectoryAction"/>
+            <gshell:completers>
+                <ref bean="fileObjectNameCompleter"/>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
 
-    <bean id="unset" class="org.apache.geronimo.gshell.commands.builtins.UnsetCommand" />
+        <gshell:link name="vfs/dir" target="vfs/ls"/>
 
-    <bean id="grep" class="org.apache.geronimo.gshell.commands.utils.GrepCommand" />
+        <gshell:command name="vfs/cp">
+            <gshell:action class="org.apache.geronimo.gshell.commands.vfs.CopyAction"/>
+            <gshell:completers>
+                <ref bean="fileObjectNameCompleter"/>
+                <ref bean="fileObjectNameCompleter"/>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
 
-    <bean id="cat" class="org.apache.geronimo.gshell.commands.utils.CatCommand" />
+        <gshell:link name="vfs/copy" target="vfs/cp"/>
 
-    <bean id="exec" class="org.apache.geronimo.gshell.commands.utils.ExecuteCommand" />
+        <gshell:command name="vfs/rm">
+            <gshell:action class="org.apache.geronimo.gshell.commands.vfs.RemoveAction"/>
+            <gshell:completers>
+                <ref bean="fileObjectNameCompleter"/>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
 
-    <bean id="java" class="org.apache.geronimo.gshell.commands.utils.JavaCommand" />
+        <gshell:link name="vfs/del" target="vfs/rm"/>
 
-    <bean id="sleep" class="org.apache.geronimo.gshell.commands.utils.SleepCommand" />
-    -->
+        <gshell:command name="vfs/cat">
+            <gshell:action class="org.apache.geronimo.gshell.commands.vfs.CatAction"/>
+            <gshell:completers>
+                <ref bean="fileObjectNameCompleter"/>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+
+        <gshell:command name="vfs/edit">
+            <gshell:action class="org.apache.geronimo.gshell.commands.vfs.EditAction"/>
+            <gshell:completers>
+                <ref bean="fileObjectNameCompleter"/>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+
+        <gshell:command name="vfs/touch">
+            <gshell:action class="org.apache.geronimo.gshell.commands.vfs.TouchAction"/>
+            <gshell:completers>
+                <ref bean="fileObjectNameCompleter"/>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+
+        <gshell:command name="vfs/fileinfo">
+            <gshell:action class="org.apache.geronimo.gshell.commands.vfs.FileInfoAction"/>
+            <gshell:completers>
+                <ref bean="fileObjectNameCompleter"/>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+
+        <gshell:command name="vfs/find">
+            <gshell:action class="org.apache.geronimo.gshell.commands.vfs.FindAction"/>
+            <gshell:completers>
+                <ref bean="fileObjectNameCompleter"/>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+
+        <gshell:command name="vfs/grep">
+            <gshell:action class="org.apache.geronimo.gshell.commands.vfs.GrepAction"/>
+        </gshell:command>
+    </gshell:command-bundle>
 
 </beans>
