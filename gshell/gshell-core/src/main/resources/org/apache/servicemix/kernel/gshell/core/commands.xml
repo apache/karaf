@@ -33,10 +33,6 @@
             <bean class="org.apache.geronimo.gshell.wisdom.command.MessageSourceCommandDocumenter"/>
         </property>
 
-        <property name="completer">
-            <bean class="org.apache.geronimo.gshell.wisdom.command.NullCommandCompleter"/>
-        </property>
-
         <property name="messages">
             <bean class="org.apache.geronimo.gshell.wisdom.command.CommandMessageSource"/>
         </property>
@@ -45,10 +41,6 @@
     <bean id="statefulCommandTemplate" class="org.apache.geronimo.gshell.wisdom.command.StatefulCommand" abstract="true">
         <property name="documenter">
             <bean class="org.apache.geronimo.gshell.wisdom.command.MessageSourceCommandDocumenter"/>
-        </property>
-
-        <property name="completer">
-            <bean class="org.apache.geronimo.gshell.wisdom.command.NullCommandCompleter"/>
         </property>
 
         <property name="messages">

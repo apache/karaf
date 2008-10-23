@@ -19,9 +19,9 @@ package org.apache.servicemix.kernel.gshell.core;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import org.apache.geronimo.gshell.ansi.Buffer;
-import org.apache.geronimo.gshell.ansi.Code;
-import org.apache.geronimo.gshell.ansi.RenderWriter;
+import org.apache.geronimo.gshell.ansi.AnsiBuffer;
+import org.apache.geronimo.gshell.ansi.AnsiCode;
+import org.apache.geronimo.gshell.ansi.AnsiRenderWriter;
 import org.apache.geronimo.gshell.application.model.Branding;
 
 public class ServiceMixBranding extends Branding {
@@ -48,7 +48,7 @@ public class ServiceMixBranding extends Branding {
 
     public String getAboutMessage() {
         StringWriter writer = new StringWriter();
-        PrintWriter out = new RenderWriter(writer);
+        PrintWriter out = new AnsiRenderWriter(writer);
 
         out.println("For information about @|cyan ServiceMix|, visit:");
         out.println("    @|bold http://servicemix.apache.org| ");
@@ -59,11 +59,11 @@ public class ServiceMixBranding extends Branding {
 
     public String getWelcomeMessage() {
         StringWriter writer = new StringWriter();
-        PrintWriter out = new RenderWriter(writer);
-        Buffer buff = new Buffer();
+        PrintWriter out = new AnsiRenderWriter(writer);
+        AnsiBuffer buff = new AnsiBuffer();
 
         for (String line : BANNER) {
-            buff.attrib(line, Code.CYAN);
+            buff.attrib(line, AnsiCode.CYAN);
             out.println(buff);
         }
 

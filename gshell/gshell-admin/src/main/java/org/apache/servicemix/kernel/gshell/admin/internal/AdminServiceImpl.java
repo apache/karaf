@@ -31,7 +31,8 @@ import org.apache.servicemix.kernel.gshell.admin.AdminService;
 import org.apache.servicemix.kernel.gshell.admin.Instance;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.geronimo.gshell.io.IO;
+import org.apache.geronimo.gshell.shell.ShellContextHolder;
+import org.apache.geronimo.gshell.shell.ShellContext;
 import org.osgi.service.prefs.PreferencesService;
 import org.osgi.service.prefs.Preferences;
 import org.osgi.service.prefs.BackingStoreException;
@@ -204,12 +205,12 @@ public class AdminServiceImpl implements AdminService, InitializingBean {
     }
 
     private void println(String st) {
-        //IO io = ProxyIO.getIO();
-        //if (io != null) {
-        //    io.out.println(st);
-        //} else {
+        ShellContext ctx = ShellContextHolder.get(true);
+        if (ctx != null) {
+            ctx.getIo().out.println(st);
+        } else {
             System.out.println(st);
-        //}
+        }
     }
 
     private void copyFilteredResourceToDir(File target, String resource, HashMap<String, String> props) throws Exception {

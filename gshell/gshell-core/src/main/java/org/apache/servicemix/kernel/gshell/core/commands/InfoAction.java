@@ -15,8 +15,8 @@ import java.util.Locale;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.geronimo.gshell.ansi.Renderer;
-import org.apache.geronimo.gshell.ansi.Code;
+import org.apache.geronimo.gshell.ansi.AnsiRenderer;
+import org.apache.geronimo.gshell.ansi.AnsiCode;
 import org.apache.geronimo.gshell.application.model.Branding;
 import org.apache.geronimo.gshell.command.CommandAction;
 import org.apache.geronimo.gshell.command.CommandContext;
@@ -30,7 +30,7 @@ public class InfoAction implements CommandAction {
 
     private IO io;
 
-    private Renderer renderer = new Renderer();
+    private AnsiRenderer renderer = new AnsiRenderer();
     private NumberFormat fmtI = new DecimalFormat("###,###", new DecimalFormatSymbols(Locale.ENGLISH));
     private NumberFormat fmtD = new DecimalFormat("###,##0.000", new DecimalFormatSymbols(Locale.ENGLISH));
 
@@ -152,7 +152,7 @@ public class InfoAction implements CommandAction {
     }
 
     void printValue(String name, int pad, String value) {
-        io.out.println("  " + renderer.render(Renderer.encode(StringUtils.rightPad(name, pad), Code.BOLD)) + "   " + value);
+        io.out.println("  " + renderer.render(AnsiRenderer.encode(StringUtils.rightPad(name, pad), AnsiCode.BOLD)) + "   " + value);
     }
 
 }

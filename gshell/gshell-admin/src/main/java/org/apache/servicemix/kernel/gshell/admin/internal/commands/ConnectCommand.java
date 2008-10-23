@@ -48,7 +48,7 @@ public class ConnectCommand extends AdminCommandSupport {
                 return null;
             }
 
-            exec.execute("remote rsh -u " + username + " -p " + password + " -n " + instance + " tcp://localhost:" + port);
+            exec.execute("remote/rsh -u " + username + " -p " + password + " -n " + instance + " tcp://localhost:" + port);
         }
         finally {
             getBundleContext().ungetService(ref);

@@ -101,7 +101,7 @@
         <property name="fileSystemManager" ref="fileSystemManager"/>
         <property name="scheme" value="file"/>
         <property name="provider">
-            <bean class="org.apache.geronimo.gshell.vfs.provider.local.LocalFileProvider"/>
+            <bean class="org.apache.commons.vfs.provider.local.DefaultLocalFileProvider"/>
         </property>
     </bean>
 

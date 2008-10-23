@@ -31,8 +31,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
