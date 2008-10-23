@@ -110,11 +110,12 @@ public class AbstractIntegrationTest extends AbstractConfigurableBundleCreatorTe
 		};
     }
 
-    protected void installBundle(String groupId, String artifactId, String classifier, String type) throws Exception {
+    protected Bundle installBundle(String groupId, String artifactId, String classifier, String type) throws Exception {
         String version = getBundleVersion(groupId, artifactId);
         File loc = localMavenBundle(groupId, artifactId, version, classifier, type);
         Bundle bundle = bundleContext.installBundle(loc.toURI().toString());
         bundle.start();
+        return bundle;
     }
 
     protected Resource locateBundle(String bundleId) {

@@ -17,10 +17,19 @@
 package org.apache.servicemix.kernel.testing.itests;
 
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.validation.SchemaFactory;
 
 import org.apache.servicemix.kernel.testing.support.AbstractIntegrationTest;
+import org.osgi.framework.Bundle;
 
 public class SimpleTest extends AbstractIntegrationTest {
+
+    static {
+        System.setProperty("jaxp.debug", "true");
+        System.setProperty("org.apache.servicemix.specs.debug", "true");
+    }
 
     /**
 	 * The manifest to use for the "virtual bundle" created
@@ -51,38 +60,55 @@ public class SimpleTest extends AbstractIntegrationTest {
 	protected String[] getTestBundlesNames() {
         return new String[] {
             getBundle("org.apache.servicemix.specs", "org.apache.servicemix.specs.stax-api-1.0"),
+            getBundle("org.apache.servicemix.specs", "org.apache.servicemix.specs.jaxp-api-1.3"),
 		};
 	}
 
     public void testDocumentBuilderFactory() throws Exception {
-		assertNotNull(javax.xml.parsers.DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
+        try {
+            DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+            fail("Implementation should not have been found");
+        } catch (Throwable t) {
+        }
+        Bundle b = installBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.jaxp-ri", null, "jar");
+        Thread.sleep(100);
+		assertNotNull(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
+        b.uninstall();
     }
 
     public void testTransformerFactory() throws Exception {
-        assertNotNull(javax.xml.transform.TransformerFactory.newInstance().newTransformer());
+        try {
+            TransformerFactory.newInstance().newTransformer();
+            fail("Implementation should not have been found");
+        } catch (Throwable t) {
+        }
+        Bundle b = installBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.jaxp-ri", null, "jar");
+        Thread.sleep(100);
+        assertNotNull(TransformerFactory.newInstance().newTransformer());
+        b.uninstall();
     }
 
     public void testSchemaFactory() throws Exception {
-        assertNotNull(javax.xml.validation.SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema").newSchema());
+        try {
+            SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema").newSchema();
+            fail("Implementation should not have been found");
+        } catch (Throwable t) {
+        }
+        Bundle b = installBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.jaxp-ri", null, "jar");
+        Thread.sleep(100);
+        assertNotNull(SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema").newSchema());
+        b.uninstall();
     }
 
     public void testWoodstox() throws Exception {
-        //JDK 1.6 and above ship with a StaX implementation 
-        if (System.getProperty("java.version").startsWith("1.5")) {
-            Thread.currentThread().setContextClassLoader(XMLInputFactory.class.getClassLoader());
-            System.err.println(XMLInputFactory.class.getClassLoader());
-            System.err.println(getClass().getClassLoader());
-            XMLInputFactory factory = null;
-            try {
-                factory = XMLInputFactory.newInstance();
-                fail("Factory should not have been found");
-            } catch (Throwable t) {
-                System.err.println(t.getMessage());
-            }
-            assertNull(factory);
-            installBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.woodstox", null, "jar");
-            assertNotNull(XMLInputFactory.newInstance());
+        try {
+            XMLInputFactory.newInstance();
+            fail("Implementation should not have been found");
+        } catch (Throwable t) {
         }
+        Bundle b = installBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.jaxp-ri", null, "jar");
+        assertNotNull(XMLInputFactory.newInstance());
+        b.uninstall();
     }
 
 }
