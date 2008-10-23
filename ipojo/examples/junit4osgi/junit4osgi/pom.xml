@@ -65,7 +65,8 @@
 						</Bundle-SymbolicName>
 						<Private-Package>
 							org.apache.felix.ipojo.junit4osgi.impl,
-							org.apache.felix.ipojo.junit4osgi.test
+							org.apache.felix.ipojo.junit4osgi.test,
+							org.apache.felix.ipojo.junit4osgi.helpers
 						</Private-Package>
 						<Export-Package>
 							org.apache.felix.ipojo.junit4osgi, junit.*
