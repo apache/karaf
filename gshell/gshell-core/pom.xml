@@ -89,6 +89,11 @@
             <version>${gshell.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.geronimo.gshell.commands</groupId>
+            <artifactId>gshell-remote</artifactId>
+            <version>${gshell.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.geronimo.gshell.wisdom</groupId>
             <artifactId>gshell-wisdom-core</artifactId>
             <version>${gshell.version}</version>

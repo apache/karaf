@@ -32,6 +32,100 @@
   http://servicemix.apache.org/jaas
   http://servicemix.apache.org/schema/servicemix-jaas.xsd">
 
+    <bean id="timeoutManager" class="org.apache.geronimo.gshell.remote.server.timeout.TimeoutManagerImpl" lazy-init="true"/>
+
+    <bean id="rshServer" class="org.apache.geronimo.gshell.remote.server.RshServer" scope="prototype">
+        <constructor-arg>
+            <list>
+                <bean class="org.apache.geronimo.gshell.remote.server.handler.ConnectHandler"/>
+                <bean class="org.apache.geronimo.gshell.remote.server.handler.LoginHandler"/>
+                <bean class="org.apache.geronimo.gshell.remote.server.handler.OpenShellHandler"/>
+                <bean class="org.apache.geronimo.gshell.remote.server.handler.ExecuteHandler"/>
+                <bean class="org.apache.geronimo.gshell.remote.server.handler.CloseShellHandler"/>
+                <bean class="org.apache.geronimo.gshell.remote.server.handler.EchoHandler"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="remoteShell" class="org.apache.geronimo.gshell.remote.server.RemoteShellImpl" scope="prototype"/>
+
+    <bean class="org.apache.geronimo.gshell.remote.client.RshClient" scope="prototype">
+        <constructor-arg>
+            <list>
+                <bean class="org.apache.geronimo.gshell.remote.client.handler.EchoHandler"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="transportFactoryLocator" class="org.apache.geronimo.gshell.whisper.transport.TransportFactoryLocatorImpl" lazy-init="true">
+        <property name="factories">
+            <set>
+                <ref bean="vmTransportFactory"/>
+                <ref bean="tcpTransportFactory"/>
+                <ref bean="sslTransportFactory"/>
+            </set>
+        </property>
+    </bean>
+
+    <!-- vm:// -->
+
+    <bean id="vmTransportFactory" class="org.apache.geronimo.gshell.whisper.transport.vm.VmTransportFactory" lazy-init="true"/>
+
+    <bean id="vmTransport" class="org.apache.geronimo.gshell.whisper.transport.vm.VmTransport" scope="prototype"/>
+
+    <bean id="vmTransportServer" class="org.apache.geronimo.gshell.whisper.transport.vm.VmTransportServer" scope="prototype"/>
+
+    <!-- tcp:// -->
+
+    <bean id="tcpTransportFactory" class="org.apache.geronimo.gshell.whisper.transport.tcp.TcpTransportFactory" lazy-init="true"/>
+
+    <bean id="tcpTransport" class="org.apache.geronimo.gshell.whisper.transport.tcp.TcpTransport" scope="prototype"/>
+
+    <bean id="tcpTransportServer" class="org.apache.geronimo.gshell.whisper.transport.tcp.TcpTransportServer" scope="prototype"/>
+
+    <!-- ssl:// -->
+
+    <bean id="sslTransportFactory" class="org.apache.geronimo.gshell.whisper.transport.ssl.SslTransportFactory" lazy-init="true"/>
+
+    <bean id="sslContextFactory" class="org.apache.servicemix.kernel.gshell.core.remote.KeystoreSSLContextFactory" lazy-init="true">
+        <property name="keystoreManager" ref="keystoreManager" />
+        <property name="clientKeystore" value="${clientKeystore}" />
+        <property name="clientKeyAlias" value="${clientKeyAlias}" />
+        <property name="clientTruststore" value="${clientTruststore}" />
+        <property name="serverKeystore" value="${serverKeystore}" />
+        <property name="serverKeyAlias" value="${serverKeyAlias}" />
+        <property name="serverTruststore" value="${serverTruststore}" />
+     </bean>
+
+    <bean id="sslTransport" class="org.apache.geronimo.gshell.whisper.transport.ssl.SslTransport" scope="prototype">
+        <property name="sslContextFactory" ref="sslContextFactory"/>
+    </bean>
+
+    <bean id="sslTransportServer" class="org.apache.geronimo.gshell.whisper.transport.ssl.SslTransportServer" scope="prototype">
+        <property name="sslContextFactory" ref="sslContextFactory"/>
+    </bean>
+
+
+    <bean id="rshServerFactory" class="org.apache.servicemix.kernel.gshell.core.remote.RshServerFactory">
+        <property name="location" value="${remoteShellLocation}" />
+        <property name="start" value="${startRemoteShell}" />
+    </bean>
+
+    <osgi:reference id="keystoreManager" interface="org.apache.servicemix.kernel.jaas.config.KeystoreManager" cardinality="1..1" />
+
+    <jaas:config id="RshClient">
+        <jaas:module className="org.apache.geronimo.gshell.remote.client.auth.RemoteLoginModule" flags="required" />
+    </jaas:config>
+
+    <jaas:config id="RshServer" rank="-1">
+        <jaas:module className="org.apache.geronimo.gshell.remote.server.auth.BogusLoginModule" flags="required" />
+    </jaas:config>
+
+    <bean id="cryptoContext" class="org.apache.geronimo.gshell.security.crypto.CryptoContextImpl" lazy-init="true">
+        <property name="transformation" value="RSA"/>
+        <property name="provider" value="default"/>
+    </bean>
+
     <!--
     <bean id="rshServer" class="org.apache.geronimo.gshell.remote.server.RshServer" destroy-method="close">
         <constructor-arg ref="timeoutManager" />

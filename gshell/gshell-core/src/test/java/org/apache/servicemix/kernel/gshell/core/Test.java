@@ -9,10 +9,14 @@ import org.apache.geronimo.gshell.io.SystemOutputHijacker;
 public class Test extends TestCase {
 
     public void test() throws Exception {
+
+        System.setProperty("startLocalConsole", "true");
+
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
                 new String[] { "META-INF/spring/gshell.xml",
                                "META-INF/spring/gshell-vfs.xml",
-                               "META-INF/spring/gshell-commands.xml" });
+                               "META-INF/spring/gshell-commands.xml",
+                               "org/apache/servicemix/kernel/gshell/core/gshell-test.xml" });
         ApplicationManager appMgr = (ApplicationManager) context.getBean("applicationManager");
         assertNotNull(appMgr);
         Shell shell = appMgr.create();

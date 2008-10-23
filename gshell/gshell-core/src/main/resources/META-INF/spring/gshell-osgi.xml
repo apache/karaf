@@ -41,6 +41,7 @@
     <!--
     <osgi:service ref="commandExecutor" interface="org.apache.geronimo.gshell.command.CommandExecutor">
     </osgi:service>
+    -->
 
     <osgix:property-placeholder persistent-id="org.apache.servicemix.shell">
         <osgix:default-properties>
@@ -55,6 +56,5 @@
             <prop key="serverTruststore">RshTruststore</prop>
         </osgix:default-properties>
     </osgix:property-placeholder>
-    -->
     
 </beans>

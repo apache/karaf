@@ -100,6 +100,8 @@
 
     <bean id="metaDataRegistry" class="org.apache.geronimo.gshell.vfs.provider.meta.data.MetaDataRegistryImpl"/>
 
-    <bean id="applicationManager" class="org.apache.servicemix.kernel.gshell.core.ApplicationManagerImpl"/>
+    <bean id="applicationManager" class="org.apache.servicemix.kernel.gshell.core.ApplicationManagerImpl">
+        <property name="createLocalShell" value="${startLocalConsole}" />
+    </bean>
 
 </beans>

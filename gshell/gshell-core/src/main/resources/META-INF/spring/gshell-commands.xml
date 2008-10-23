@@ -112,6 +112,18 @@
         </gshell:command>
     </gshell:command-bundle>
 
+    <gshell:command-bundle>
+        <gshell:command name="remote/rsh">
+            <gshell:action class="org.apache.geronimo.gshell.commands.remote.RshAction"/>
+        </gshell:command>
+
+        <gshell:command name="remote/rsh-server">
+            <gshell:action class="org.apache.geronimo.gshell.commands.remote.RshServerAction"/>
+        </gshell:command>
+
+        <gshell:link name="remote/rshd" target="remote/rsh-server"/>
+    </gshell:command-bundle>
+
     <!--
     <bean id="clear" class="org.apache.geronimo.gshell.commands.builtins.ClearCommand">
         <constructor-arg ref="terminal" />

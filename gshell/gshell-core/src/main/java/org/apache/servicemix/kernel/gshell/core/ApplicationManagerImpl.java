@@ -55,6 +55,14 @@ public class ApplicationManagerImpl implements ApplicationManager, ApplicationCo
 
     private boolean createLocalShell = true;
 
+    public boolean isCreateLocalShell() {
+        return createLocalShell;
+    }
+
+    public void setCreateLocalShell(boolean createLocalShell) {
+        this.createLocalShell = createLocalShell;
+    }
+
     @PostConstruct
     public void init() throws Exception {
         if (!SystemOutputHijacker.isInstalled()) {
@@ -93,7 +101,7 @@ public class ApplicationManagerImpl implements ApplicationManager, ApplicationCo
     }
 
     public Shell create() throws Exception {
-        final Shell shell = (Shell) getBean(Shell.class);
+        final Shell shell = (Shell) applicationContext.getBean("shell");
 
         log.debug("Created shell instance: {}", shell);
 
@@ -142,32 +150,6 @@ public class ApplicationManagerImpl implements ApplicationManager, ApplicationCo
         eventPublisher.publish(new ShellCreatedEvent(proxy));
 
         return proxy;
-    }
-
-    public <T> T getBean(Class<T> type) {
-        assert type != null;
-
-        log.trace("Getting bean of type: {}", type);
-
-        String[] names = applicationContext.getBeanNamesForType(type);
-
-        if (names.length == 0) {
-            throw new NoSuchBeanDefinitionException(type, "No bean defined for type: " + type);
-        }
-        if (names.length > 1) {
-            throw new NoSuchBeanDefinitionException(type, "No unique bean defined for type: " + type + ", found matches: " + Arrays.asList(names));
-        }
-
-        return getBean(names[0], type);
-    }
-
-    public <T> T getBean(String name, Class<T> requiredType) {
-        assert name != null;
-        assert requiredType != null;
-
-        log.trace("Getting bean named '{}' of type: {}", name, requiredType);
-
-        return (T) applicationContext.getBean(name, requiredType);
     }
 
 }
