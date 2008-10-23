@@ -54,6 +54,7 @@
             <groupId>org.apache.servicemix.kernel.gshell</groupId>
             <artifactId>org.apache.servicemix.kernel.gshell.core</artifactId>
         </dependency>
+        <!--
         <dependency>
             <groupId>org.apache.servicemix.kernel.gshell</groupId>
             <artifactId>org.apache.servicemix.kernel.gshell.admin</artifactId>
@@ -94,6 +95,7 @@
             <groupId>org.apache.servicemix.kernel.jaas</groupId>
             <artifactId>org.apache.servicemix.kernel.jaas.keystore</artifactId>
         </dependency>
+        -->
         <dependency>
             <groupId>org.springframework.osgi</groupId>
             <artifactId>spring-osgi-extender</artifactId>
@@ -155,6 +157,14 @@
             <artifactId>org.apache.servicemix.bundles.cglib</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.commons-jexl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.commons-vfs</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.osgi.compendium</artifactId>
         </dependency>
@@ -185,6 +195,10 @@
         <dependency>
             <groupId>org.apache.geronimo.specs</groupId>
             <artifactId>geronimo-servlet_2.5_spec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-annotation_1.0_spec</artifactId>
         </dependency>
     </dependencies>
     <build>

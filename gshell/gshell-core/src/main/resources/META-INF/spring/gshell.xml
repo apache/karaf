@@ -24,71 +24,156 @@
   http://www.springframework.org/schema/beans
   http://www.springframework.org/schema/beans/spring-beans.xsd
   http://www.springframework.org/schema/util
-  http://www.springframework.org/schema/util/spring-util.xsd">
+  http://www.springframework.org/schema/util/spring-util.xsd
+  http://servicemix.apache.org/schema/servicemix-gshell
+  http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
-    <bean id="branding" class="org.apache.geronimo.gshell.branding.ServiceMixBranding">
-        <constructor-arg ref="versionLoader" />
-        <constructor-arg ref="terminal" />
+    <import resource="classpath:org/apache/servicemix/kernel/gshell/core/commands.xml" />
+
+    <bean class="org.springframework.context.annotation.CommonAnnotationBeanPostProcessor"/>
+    <bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>
+    <bean class="org.apache.geronimo.gshell.spring.BeanContainerAwareProcessor">
+        <constructor-arg>
+            <bean class="org.apache.servicemix.kernel.gshell.core.SpringBeanContainerFactoryBean" />
+        </constructor-arg>
     </bean>
 
-    <bean id="versionLoader" class="org.apache.geronimo.gshell.branding.PropertiesVersionLoader">
-        <constructor-arg value="servicemix-version.properties" />
+    <bean id="io" class="org.apache.geronimo.gshell.io.IO" />
+
+    <bean id="application" class="org.apache.servicemix.kernel.gshell.core.ApplicationImpl">
+        <property name="id" value="servicemix" />
+        <property name="io" ref="io" />
+        <property name="model">
+            <bean class="org.apache.geronimo.gshell.model.application.ApplicationModel">
+                <!-- TODO: fix version -->
+                <property name="version" value="1.0.0" />
+                <property name="branding" ref="branding" />
+            </bean>
+        </property>
+        <property name="variables">
+            <bean class="org.apache.geronimo.gshell.command.Variables" />
+        </property>
     </bean>
 
-    <bean id="terminal" class="org.apache.geronimo.gshell.spring.TerminalFactoryBean" />
+    <bean id="branding" class="org.apache.servicemix.kernel.gshell.core.ServiceMixBranding" />
 
-    <bean id="promptReader" class="org.apache.geronimo.gshell.console.PromptReader" init-method="initialize">
-        <constructor-arg ref="terminal" />
-        <constructor-arg ref="io" />
+    <bean id="eventManager" class="org.apache.geronimo.gshell.event.EventManagerImpl"/>
+
+    <bean id="commandLineParser" class="org.apache.geronimo.gshell.parser.CommandLineParser"/>
+
+    <bean id="aliasRegistry" class="org.apache.geronimo.gshell.wisdom.registry.AliasRegistryImpl"/>
+
+    <bean id="aliasMetaMapper" class="org.apache.geronimo.gshell.wisdom.registry.AliasMetaMapper"/>
+
+    <bean id="commandRegistry" class="org.apache.geronimo.gshell.wisdom.registry.CommandRegistryImpl"/>
+
+    <bean id="commandMetaMapper" class="org.apache.geronimo.gshell.wisdom.registry.CommandMetaMapper"/>
+
+    <bean id="commandResolver" class="org.apache.geronimo.gshell.wisdom.registry.CommandResolverImpl"/>
+
+    <bean class="org.apache.geronimo.gshell.wisdom.command.AliasCommand" scope="prototype"/>
+
+    <bean class="org.apache.geronimo.gshell.wisdom.command.GroupCommand" scope="prototype"/>
+
+    <bean id="commandLineBuilder" class="org.apache.geronimo.gshell.wisdom.shell.CommandLineBuilderImpl"/>
+
+    <bean id="commandLineExecutor" class="org.apache.geronimo.gshell.wisdom.shell.CommandLineExecutorImpl"/>
+
+    <bean id="shell" class="org.apache.geronimo.gshell.wisdom.shell.ShellImpl" scope="prototype">
+        <property name="completers">
+            <list>
+                <ref bean="commandsCompleter"/>
+                <ref bean="aliasNameCompleter"/>
+            </list>
+        </property>
+        <property name="prompter">
+            <bean class="org.apache.geronimo.gshell.wisdom.shell.ConsolePrompterImpl"/>
+        </property>
+        <property name="errorHandler">
+            <bean class="org.apache.geronimo.gshell.wisdom.shell.ConsoleErrorHandlerImpl"/>
+        </property>
+        <property name="history">
+            <bean class="org.apache.geronimo.gshell.wisdom.shell.HistoryImpl"/>
+        </property>
     </bean>
 
-    <bean id="commandExecutor" class="org.apache.geronimo.gshell.spring.SpringCommandExecutor" init-method="init">
-        <property name="commandLineBuilder" ref="commandLineBuilder" />
-        <property name="commandRegistry" ref="commandRegistry" />
-        <property name="env" ref="environment" />
-        <property name="layoutManager" ref="commandRegistry" />
+    <bean id="commandNameCompleter" class="org.apache.geronimo.gshell.wisdom.completer.CommandNameCompleter"/>
+
+    <bean id="aliasNameCompleter" class="org.apache.geronimo.gshell.wisdom.completer.AliasNameCompleter"/>
+
+    <bean id="commandsCompleter" class="org.apache.geronimo.gshell.wisdom.completer.CommandsCompleter"/>
+
+    <bean id="metaDataRegistry" class="org.apache.geronimo.gshell.vfs.provider.meta.data.MetaDataRegistryImpl"/>
+
+    <bean id="metaFileProviderConfigurer" class="org.apache.geronimo.gshell.vfs.config.FileProviderConfigurer">
+        <property name="scheme" value="meta"/>
+        <property name="provider">
+            <bean class="org.apache.geronimo.gshell.vfs.provider.meta.MetaFileProvider"/>
+        </property>
     </bean>
 
-    <bean id="interactiveShell" class="org.apache.geronimo.gshell.DefaultShell">
-        <constructor-arg ref="shellInfo" />
-        <constructor-arg ref="branding" />
-        <constructor-arg ref="commandExecutor" />
-        <constructor-arg ref="terminal" />
-        <constructor-arg ref="environment" />
-        <constructor-arg ref="io" />
-        <constructor-arg ref="history" />
-        <property name="prompter" ref="prompter" />
+    <bean id="fileSystemAccess" class="org.apache.geronimo.gshell.vfs.FileSystemAccessImpl"/>
+
+    <bean id="fileObjectNameCompleter" class="org.apache.geronimo.gshell.vfs.FileObjectNameCompleter"/>
+
+    <bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
+        <property name="customEditors">
+            <map>
+                <entry key="org.apache.commons.vfs.CacheStrategy">
+                    <bean class="org.apache.geronimo.gshell.vfs.config.CacheStrategyEditor"/>
+                </entry>
+            </map>
+        </property>
     </bean>
 
-    <bean id="shellInfo" class="org.apache.geronimo.gshell.DefaultShellInfo" init-method="initialize">
-        <constructor-arg ref="branding" />
+    <!--
+    TODO: Set tempDir File arg in constructor to set the temporary location, may need 2 replicators?
+    -->
+    <bean id="defaultFileReplicator" class="org.apache.commons.vfs.impl.DefaultFileReplicator"/>
+
+    <bean id="fileSystemManager" class="org.apache.geronimo.gshell.vfs.config.FileSystemManagerFactoryBean">
+        <property name="filesCache">
+            <bean class="org.apache.commons.vfs.cache.SoftRefFilesCache"/>
+        </property>
+
+        <property name="cacheStrategy" value="ON_RESOLVE"/>
+
+        <property name="fileReplicator">
+            <bean class="org.apache.commons.vfs.impl.PrivilegedFileReplicator">
+                <constructor-arg ref="defaultFileReplicator"/>
+            </bean>
+        </property>
+
+        <!--
+        TODO: Try and root the temporary store under ${gshell.home}/tmp or something
+        -->
+        <property name="temporaryFileStore">
+            <ref bean="defaultFileReplicator"/>
+        </property>
+
+        <property name="fileContentInfoFactory">
+            <bean class="org.apache.commons.vfs.impl.FileContentInfoFilenameFactory"/>
+        </property>
+
+        <property name="defaultProvider">
+            <bean class="org.apache.commons.vfs.provider.url.UrlFileProvider"/>
+        </property>
     </bean>
 
-    <bean id="commandRegistry" class="org.apache.geronimo.gshell.spring.SpringCommandRegistry">
-        <constructor-arg ref="environment" />
+    <bean class="org.apache.geronimo.gshell.vfs.config.FileProviderConfigurer">
+        <property name="scheme" value="tmp"/>
+        <property name="provider">
+            <bean class="org.apache.commons.vfs.provider.temp.TemporaryFileProvider"/>
+        </property>
     </bean>
 
-    <bean id="commandLineBuilder" class="org.apache.geronimo.gshell.spring.SpringCommandLineBuilder">
-        <property name="environment" ref="environment" />
-        <property name="executor" ref="commandExecutor" />
+    <bean class="org.apache.geronimo.gshell.vfs.config.FileProviderConfigurer">
+        <property name="scheme" value="ram"/>
+        <property name="provider">
+            <bean class="org.apache.commons.vfs.provider.ram.RamFileProvider"/>
+        </property>
     </bean>
-
-    <bean id="environment" class="org.springframework.aop.framework.ProxyFactoryBean">
-      <property name="targetSource">
-          <bean class="org.apache.geronimo.gshell.spring.EnvironmentTargetSource" />
-      </property>
-    </bean>
-
-    <bean id="io" class="org.apache.geronimo.gshell.spring.ProxyIO" />
-
-    <bean id="history" class="org.apache.geronimo.gshell.console.FileHistory">
-        <constructor-arg ref="branding" />
-    </bean>
-
-    <bean id="prompter" class="org.apache.geronimo.gshell.spring.Prompter">
-        <constructor-arg ref="shellInfo" />
-        <constructor-arg ref="environment" />
-        <property name="branding" ref="branding" />
-    </bean>
+    
+    <bean id="applicationManager" class="org.apache.servicemix.kernel.gshell.core.ApplicationManagerImpl"/>
 
 </beans>

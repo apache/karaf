@@ -32,6 +32,7 @@
   http://servicemix.apache.org/jaas
   http://servicemix.apache.org/schema/servicemix-jaas.xsd">
 
+    <!--
     <bean id="rshServer" class="org.apache.geronimo.gshell.remote.server.RshServer" destroy-method="close">
         <constructor-arg ref="timeoutManager" />
         <constructor-arg ref="transportFactoryLocator" />
@@ -117,5 +118,6 @@
     <jaas:config id="RshServer" rank="-1">
         <jaas:module className="org.apache.geronimo.gshell.remote.server.auth.BogusLoginModule" flags="required" />
     </jaas:config>
+    -->
 
 </beans>

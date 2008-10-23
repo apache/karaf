@@ -161,6 +161,7 @@
             <outputFileNameMapping>org/apache/geronimo/specs/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
                 <include>org.apache.geronimo.specs:geronimo-servlet_2.5_spec</include>
+                <include>org.apache.geronimo.specs:geronimo-annotation_1.0_spec</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -172,6 +173,8 @@
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.cglib</include>
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.mina</include>
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.jaxp-ri</include>
+                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.commons-jexl</include>
+                <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.commons-vfs</include>
             </includes>
         </dependencySet>
         <dependencySet>

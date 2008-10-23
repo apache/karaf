@@ -40,7 +40,11 @@
     <properties>
         <gshell.osgi.import>
             org.springframework.aop.framework,
+            org.springframework.beans.factory.annotation,
+            org.springframework.context.annotation,
             org.aopalliance.aop,
+            org.apache.commons.vfs.provider.temp,
+            org.apache.commons.vfs.provider.ram,
             org.apache.servicemix.kernel.jaas.config;resolution:=optional,
             org.apache.servicemix.kernel.main.spi;resolution:=optional;version="1.0.0",
             com.thoughtworks.xstream*;resolution:=optional,
@@ -50,14 +54,15 @@
             org.apache.mina*;resolution:=optional,
             *
         </gshell.osgi.import>
+        <!-- TODO: remove plexus util package -->
         <gshell.osgi.export>
-            org.apache.geronimo.gshell*;-split-package:=merge-first,
+            org.apache.geronimo.gshell*;version="1.0.0.alpha-2-SNAPSHOT";-split-package:=merge-first,
+            org.apache.servicemix.kernel.gshell.core*,
+            org.codehaus.plexus.interpolation*,
+            org.codehaus.plexus.util
         </gshell.osgi.export>
         <gshell.osgi.private>
             jline*,
-            org.apache.commons.jexl*,
-            org.codehaus.plexus.personality.plexus.lifecycle.phase*;-split-package:=merge-first,
-            org.codehaus.plexus.util*,
         </gshell.osgi.private>
     </properties>
 
@@ -79,48 +84,14 @@
             <artifactId>spring-osgi-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.geronimo.gshell</groupId>
-            <artifactId>gshell-core</artifactId>
+            <groupId>org.apache.geronimo.gshell.commands</groupId>
+            <artifactId>gshell-builtins</artifactId>
+            <version>${gshell.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.geronimo.gshell</groupId>
-            <artifactId>gshell-command-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.gshell.support</groupId>
-            <artifactId>gshell-common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.gshell.support</groupId>
-            <artifactId>gshell-ansi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.gshell.support</groupId>
-            <artifactId>gshell-i18n</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.gshell.support</groupId>
-            <artifactId>gshell-clp</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.gshell</groupId>
-            <artifactId>gshell-parser</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.gshell</groupId>
-            <artifactId>gshell-whisper</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.gshell.remote</groupId>
-            <artifactId>gshell-remote-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.gshell.remote</groupId>
-            <artifactId>gshell-remote-common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.gshell.remote</groupId>
-            <artifactId>gshell-remote-server</artifactId>
+            <groupId>org.apache.geronimo.gshell.wisdom</groupId>
+            <artifactId>gshell-wisdom-core</artifactId>
+            <version>${gshell.version}</version>
         </dependency>
         <dependency>
             <groupId>jline</groupId>

@@ -20,12 +20,16 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:gshell="http://servicemix.apache.org/schema/servicemix-gshell"
        xsi:schemaLocation="
   http://www.springframework.org/schema/beans
   http://www.springframework.org/schema/beans/spring-beans.xsd
   http://www.springframework.org/schema/util
-  http://www.springframework.org/schema/util/spring-util.xsd">
+  http://www.springframework.org/schema/util/spring-util.xsd
+  http://servicemix.apache.org/schema/servicemix-gshell
+  http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
+    <!--
     <bean id="clear" class="org.apache.geronimo.gshell.commands.builtins.ClearCommand">
         <constructor-arg ref="terminal" />
     </bean>
@@ -63,5 +67,87 @@
     <bean id="java" class="org.apache.geronimo.gshell.commands.utils.JavaCommand" />
 
     <bean id="sleep" class="org.apache.geronimo.gshell.commands.utils.SleepCommand" />
+    -->
+
+    <gshell:command-bundle>
+        <gshell:command name="about">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.AboutAction"/>
+        </gshell:command>
+
+        <gshell:command name="help">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.HelpAction"/>
+            <gshell:completers>
+                <bean class="org.apache.geronimo.gshell.console.completer.AggregateCompleter">
+                    <constructor-arg>
+                        <list>
+                            <ref bean="aliasNameCompleter"/>
+                            <ref bean="commandNameCompleter"/>
+                        </list>
+                    </constructor-arg>
+                </bean>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+
+        <gshell:command name="exit">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.ExitAction"/>
+        </gshell:command>
+
+        <gshell:link name="quit" target="exit"/>
+
+        <gshell:command name="echo">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.EchoAction"/>
+        </gshell:command>
+
+        <gshell:link name="print" target="echo"/>
+
+        <gshell:command name="printf">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.PrintfAction"/>
+        </gshell:command>
+
+        <gshell:command name="clear" type="stateless">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.ClearAction"/>
+        </gshell:command>
+
+        <gshell:command name="source">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.SourceAction"/>
+            <gshell:completers>
+                <ref bean="fileObjectNameCompleter"/>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+
+        <gshell:command name="set">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.SetAction"/>
+        </gshell:command>
+
+        <gshell:command name="unset">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.UnsetAction"/>
+            <gshell:completers>
+                <bean class="org.apache.geronimo.gshell.wisdom.completer.VariableNameCompleter"/>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+
+        <gshell:command name="alias">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.AliasAction"/>
+        </gshell:command>
+
+        <gshell:command name="unalias">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.UnaliasAction"/>
+            <gshell:completers>
+                <ref bean="aliasNameCompleter"/>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+
+        <gshell:command name="history">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.HistoryAction"/>
+        </gshell:command>
+
+        <gshell:command name="info">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.core.commands.InfoAction" />
+        </gshell:command>
+    </gshell:command-bundle>
 
 </beans>

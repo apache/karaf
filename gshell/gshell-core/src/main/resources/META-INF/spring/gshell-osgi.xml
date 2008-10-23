@@ -32,6 +32,7 @@
   http://www.springframework.org/schema/osgi-compendium
   http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd">
 
+    <!--
     <osgi:list id="commands" interface="org.apache.geronimo.gshell.command.Command" cardinality="0..N">
         <osgi:listener ref="commandRegistry" bind-method="register" unbind-method="unregister" />
     </osgi:list>
@@ -145,5 +146,6 @@
             <prop key="serverTruststore">RshTruststore</prop>
         </osgix:default-properties>
     </osgix:property-placeholder>
+    -->
     
 </beans>

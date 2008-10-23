@@ -35,6 +35,7 @@
 
     <modules>
         <module>gshell-core</module>
+        <!--
         <module>gshell-admin</module>
         <module>gshell-osgi</module>
         <module>gshell-obr</module>
@@ -43,6 +44,7 @@
         <module>gshell-log</module>
         <module>gshell-config</module>
         <module>gshell-packages</module>
+        -->
     </modules>
 
 </project>
