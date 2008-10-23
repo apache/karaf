@@ -22,7 +22,7 @@ import java.io.StringWriter;
 import org.apache.geronimo.gshell.ansi.Buffer;
 import org.apache.geronimo.gshell.ansi.Code;
 import org.apache.geronimo.gshell.ansi.RenderWriter;
-import org.apache.geronimo.gshell.model.application.Branding;
+import org.apache.geronimo.gshell.application.model.Branding;
 
 public class ServiceMixBranding extends Branding {
 

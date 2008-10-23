@@ -15,18 +15,17 @@ import java.util.Locale;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.geronimo.gshell.command.CommandAction;
-import org.apache.geronimo.gshell.command.CommandContext;
 import org.apache.geronimo.gshell.ansi.Renderer;
 import org.apache.geronimo.gshell.ansi.Code;
-import org.apache.geronimo.gshell.model.application.Branding;
+import org.apache.geronimo.gshell.application.model.Branding;
+import org.apache.geronimo.gshell.command.CommandAction;
+import org.apache.geronimo.gshell.command.CommandContext;
 import org.apache.geronimo.gshell.io.IO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.codehaus.plexus.util.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class InfoAction implements CommandAction {
 
-    @Autowired
     private Branding branding;
 
     private IO io;
@@ -35,10 +34,12 @@ public class InfoAction implements CommandAction {
     private NumberFormat fmtI = new DecimalFormat("###,###", new DecimalFormatSymbols(Locale.ENGLISH));
     private NumberFormat fmtD = new DecimalFormat("###,##0.000", new DecimalFormatSymbols(Locale.ENGLISH));
 
+    public InfoAction(Branding branding) {
+        this.branding = branding;
+    }
+
     public Object execute(CommandContext context) throws Exception {
         int maxNameLen;
-        String name;
-        Map<String, String> props = new HashMap<String, String>();
 
         RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
         OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();

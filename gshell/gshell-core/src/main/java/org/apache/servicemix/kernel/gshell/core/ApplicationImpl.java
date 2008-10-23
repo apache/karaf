@@ -24,7 +24,7 @@ import org.apache.geronimo.gshell.application.Application;
 import org.apache.geronimo.gshell.application.ClassPath;
 import org.apache.geronimo.gshell.io.IO;
 import org.apache.geronimo.gshell.command.Variables;
-import org.apache.geronimo.gshell.model.application.ApplicationModel;
+import org.apache.geronimo.gshell.application.model.ApplicationModel;
 
 public class ApplicationImpl implements Application {
 

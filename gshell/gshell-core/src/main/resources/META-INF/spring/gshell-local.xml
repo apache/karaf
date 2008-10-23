@@ -29,16 +29,14 @@
   http://www.springframework.org/schema/osgi
   http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
+    <bean id="localShell" factory-bean="applicationManager" factory-method="create"/>
 
-    <!--
-    <osgi:reference id="mainService" interface="org.apache.servicemix.kernel.main.spi.MainService" />
+    <osgi:reference id="mainService" interface="org.apache.servicemix.kernel.main.spi.MainService"/>
 
-    <bean id="gshell" class="org.apache.geronimo.gshell.spring.GShell"
-                      init-method="start" destroy-method="stop">
-        <constructor-arg ref="interactiveShell" />
-        <property name="start" value="${startLocalConsole}" />
+    <bean id="localConsole" class="org.apache.servicemix.kernel.gshell.core.LocalConsole">
+        <property name="createLocalShell" value="${startLocalConsole}"/>
+        <property name="shell" ref="localShell"/>
         <property name="mainService" ref="mainService" />
     </bean>
-    -->
 
 </beans>

@@ -19,62 +19,91 @@
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:util="http://www.springframework.org/schema/util"
-       xsi:schemaLocation="
-  http://www.springframework.org/schema/beans
+       xmlns:util="http://www.springframework.org/schema/util" xmlns:osgi="http://www.springframework.org/schema/osgi"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
   http://www.springframework.org/schema/beans/spring-beans.xsd
   http://www.springframework.org/schema/util
   http://www.springframework.org/schema/util/spring-util.xsd
   http://servicemix.apache.org/schema/servicemix-gshell
-  http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
+  http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd
+  http://www.springframework.org/schema/osgi
+  http://www.springframework.org/schema/osgi/spring-osgi-1.0.xsd">
 
     <bean class="org.springframework.context.annotation.CommonAnnotationBeanPostProcessor"/>
-    <bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>
 
     <bean id="io" class="org.apache.geronimo.gshell.io.IO">
-        <property name="verbosity" value="DEBUG" />
+        <property name="verbosity" value="DEBUG"/>
     </bean>
 
+    <bean id="branding" class="org.apache.servicemix.kernel.gshell.core.ServiceMixBranding"/>
+
     <bean id="application" class="org.apache.servicemix.kernel.gshell.core.ApplicationImpl">
-        <property name="id" value="servicemix" />
-        <property name="io" ref="io" />
+        <property name="id" value="servicemix"/>
+        <property name="io" ref="io"/>
         <property name="model">
-            <bean class="org.apache.geronimo.gshell.model.application.ApplicationModel">
+            <bean class="org.apache.geronimo.gshell.application.model.ApplicationModel">
                 <!-- TODO: fix version -->
-                <property name="version" value="1.0.0" />
-                <property name="branding" ref="branding" />
+                <property name="version" value="1.0.0"/>
+                <property name="branding" ref="branding"/>
             </bean>
         </property>
         <property name="variables">
-            <bean class="org.apache.geronimo.gshell.command.Variables" />
+            <bean class="org.apache.geronimo.gshell.command.Variables"/>
         </property>
     </bean>
 
-    <bean id="branding" class="org.apache.servicemix.kernel.gshell.core.ServiceMixBranding" />
-
     <bean id="eventManager" class="org.apache.geronimo.gshell.event.EventManagerImpl"/>
+
+    <bean id="applicationManager" class="org.apache.servicemix.kernel.gshell.core.ApplicationManagerImpl">
+        <constructor-arg ref="eventManager" />
+        <constructor-arg ref="application" />
+    </bean>
 
     <bean id="commandLineParser" class="org.apache.geronimo.gshell.parser.CommandLineParser"/>
 
-    <bean id="aliasRegistry" class="org.apache.geronimo.gshell.wisdom.registry.AliasRegistryImpl"/>
+    <bean id="aliasRegistry" class="org.apache.geronimo.gshell.wisdom.registry.AliasRegistryImpl">
+        <constructor-arg ref="eventManager"/>
+    </bean>
 
-    <bean id="aliasMetaMapper" class="org.apache.geronimo.gshell.wisdom.registry.AliasMetaMapper"/>
+    <bean id="aliasMetaMapper" class="org.apache.geronimo.gshell.wisdom.registry.AliasMetaMapper">
+        <constructor-arg ref="eventManager"/>
+        <constructor-arg ref="metaDataRegistry"/>
+        <constructor-arg ref="aliasRegistry"/>
+    </bean>
 
-    <bean id="commandRegistry" class="org.apache.geronimo.gshell.wisdom.registry.CommandRegistryImpl"/>
+    <bean id="commandRegistry" class="org.apache.geronimo.gshell.wisdom.registry.CommandRegistryImpl">
+        <constructor-arg ref="eventManager"/>
+    </bean>
 
-    <bean id="commandMetaMapper" class="org.apache.geronimo.gshell.wisdom.registry.CommandMetaMapper"/>
+    <bean id="commandMetaMapper" class="org.apache.geronimo.gshell.wisdom.registry.CommandMetaMapper">
+        <constructor-arg ref="eventManager"/>
+        <constructor-arg ref="metaDataRegistry"/>
+        <constructor-arg ref="commandRegistry"/>
+    </bean>
 
-    <bean id="commandResolver" class="org.apache.geronimo.gshell.wisdom.registry.CommandResolverImpl"/>
+    <bean id="commandResolver" class="org.apache.geronimo.gshell.wisdom.registry.CommandResolverImpl">
+        <constructor-arg ref="fileSystemAccess"/>
+    </bean>
 
-    <bean class="org.apache.geronimo.gshell.wisdom.command.AliasCommand" scope="prototype"/>
+    <bean class="org.apache.geronimo.gshell.wisdom.command.AliasCommand" scope="prototype">
+        <constructor-arg ref="commandLineExecutor"/>
+    </bean>
 
     <bean class="org.apache.geronimo.gshell.wisdom.command.GroupCommand" scope="prototype"/>
 
-    <bean id="commandLineBuilder" class="org.apache.geronimo.gshell.wisdom.shell.CommandLineBuilderImpl"/>
+    <bean id="commandLineBuilder" class="org.apache.geronimo.gshell.wisdom.shell.CommandLineBuilderImpl">
+        <constructor-arg ref="commandLineParser"/>
+    </bean>
 
-    <bean id="commandLineExecutor" class="org.apache.geronimo.gshell.wisdom.shell.CommandLineExecutorImpl"/>
+    <bean id="commandLineExecutor" class="org.apache.geronimo.gshell.wisdom.shell.CommandLineExecutorImpl">
+        <constructor-arg ref="commandResolver"/>
+        <constructor-arg ref="commandLineBuilder"/>
+    </bean>
 
     <bean id="shell" class="org.apache.geronimo.gshell.wisdom.shell.ShellImpl" scope="prototype">
+        <constructor-arg ref="application"/>
+        <constructor-arg ref="commandLineExecutor"/>
+
         <property name="completers">
             <list>
                 <ref bean="commandsCompleter"/>
@@ -82,31 +111,45 @@
             </list>
         </property>
         <property name="prompter">
-            <bean class="org.apache.geronimo.gshell.wisdom.shell.ConsolePrompterImpl"/>
+            <bean class="org.apache.geronimo.gshell.wisdom.shell.ConsolePrompterImpl">
+                <constructor-arg ref="application"/>
+            </bean>
         </property>
         <property name="errorHandler">
-            <bean class="org.apache.geronimo.gshell.wisdom.shell.ConsoleErrorHandlerImpl"/>
+            <bean class="org.apache.geronimo.gshell.wisdom.shell.ConsoleErrorHandlerImpl">
+                <constructor-arg ref="eventManager"/>
+                <constructor-arg ref="application"/>
+            </bean>
         </property>
         <property name="history">
-            <bean class="org.apache.geronimo.gshell.wisdom.shell.HistoryImpl"/>
+            <bean class="org.apache.geronimo.gshell.wisdom.shell.HistoryImpl">
+                <constructor-arg ref="application"/>
+            </bean>
         </property>
     </bean>
 
-    <bean id="commandNameCompleter" class="org.apache.geronimo.gshell.wisdom.completer.CommandNameCompleter"/>
+    <bean id="commandNameCompleter" class="org.apache.geronimo.gshell.wisdom.completer.CommandNameCompleter"
+          lazy-init="true">
+        <constructor-arg ref="eventManager"/>
+        <constructor-arg ref="commandRegistry"/>
+    </bean>
 
-    <bean id="aliasNameCompleter" class="org.apache.geronimo.gshell.wisdom.completer.AliasNameCompleter"/>
+    <bean id="aliasNameCompleter" class="org.apache.geronimo.gshell.wisdom.completer.AliasNameCompleter"
+          lazy-init="true">
+        <constructor-arg ref="eventManager"/>
+        <constructor-arg ref="aliasRegistry"/>
+    </bean>
 
-    <bean id="commandsCompleter" class="org.apache.geronimo.gshell.wisdom.completer.CommandsCompleter"/>
+    <bean id="commandsCompleter" class="org.apache.geronimo.gshell.wisdom.completer.CommandsCompleter" lazy-init="true">
+        <constructor-arg ref="eventManager"/>
+        <constructor-arg ref="commandRegistry"/>
+    </bean>
+
+    <bean id="variableNameCompleter" class="org.apache.geronimo.gshell.wisdom.completer.VariableNameCompleter"
+          lazy-init="true">
+        <constructor-arg ref="applicationManager"/>
+    </bean>
 
     <bean id="metaDataRegistry" class="org.apache.geronimo.gshell.vfs.provider.meta.data.MetaDataRegistryImpl"/>
-
-    <bean id="applicationManager" class="org.apache.servicemix.kernel.gshell.core.ApplicationManagerImpl" />
-
-    <bean id="localShell" factory-bean="applicationManager" factory-method="create" />
-
-    <bean id="localConsole" class="org.apache.servicemix.kernel.gshell.core.LocalConsole">
-        <property name="createLocalShell" value="${startLocalConsole}" />
-        <property name="shell" ref="localShell" />
-    </bean>
 
 </beans>

@@ -32,7 +32,9 @@
   http://www.springframework.org/schema/osgi-compendium
   http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd">
 
-    <bean id="osgiCommandRegistry" class="org.apache.servicemix.kernel.gshell.core.OsgiCommandRegistry" />
+    <bean id="osgiCommandRegistry" class="org.apache.servicemix.kernel.gshell.core.OsgiCommandRegistry">
+        <constructor-arg ref="commandRegistry" />
+    </bean>
 
     <osgi:list id="osgiCommands" interface="org.apache.geronimo.gshell.command.Command" cardinality="0..N">
         <osgi:listener ref="osgiCommandRegistry" bind-method="register" unbind-method="unregister" />

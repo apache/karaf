@@ -33,11 +33,15 @@
 
     <gshell:command-bundle>
         <gshell:command name="about">
-            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.AboutAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.AboutAction">
+                <constructor-arg ref="applicationManager"/>
+            </gshell:action>
         </gshell:command>
 
         <gshell:command name="help">
-            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.HelpAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.HelpAction">
+                <constructor-arg ref="commandResolver"/>
+            </gshell:action>
             <gshell:completers>
                 <bean class="org.apache.geronimo.gshell.console.completer.AggregateCompleter">
                     <constructor-arg>
@@ -72,7 +76,10 @@
         </gshell:command>
 
         <gshell:command name="source">
-            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.SourceAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.SourceAction">
+                <constructor-arg ref="commandLineExecutor"/>
+                <constructor-arg ref="fileSystemAccess"/>
+            </gshell:action>
             <gshell:completers>
                 <ref bean="fileObjectNameCompleter"/>
                 <null/>
@@ -86,17 +93,21 @@
         <gshell:command name="unset">
             <gshell:action class="org.apache.geronimo.gshell.commands.builtins.UnsetAction"/>
             <gshell:completers>
-                <bean class="org.apache.geronimo.gshell.wisdom.completer.VariableNameCompleter"/>
+                <ref bean="variableNameCompleter"/>
                 <null/>
             </gshell:completers>
         </gshell:command>
 
         <gshell:command name="alias">
-            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.AliasAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.AliasAction">
+                <constructor-arg ref="aliasRegistry"/>
+            </gshell:action>
         </gshell:command>
 
         <gshell:command name="unalias">
-            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.UnaliasAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.UnaliasAction">
+                <constructor-arg ref="aliasRegistry"/>
+            </gshell:action>
             <gshell:completers>
                 <ref bean="aliasNameCompleter"/>
                 <null/>
@@ -108,7 +119,9 @@
         </gshell:command>
 
         <gshell:command name="info">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.core.commands.InfoAction" />
+            <gshell:action class="org.apache.servicemix.kernel.gshell.core.commands.InfoAction">
+                <constructor-arg ref="branding" />
+            </gshell:action>
         </gshell:command>
     </gshell:command-bundle>
 

@@ -45,13 +45,16 @@ public class ApplicationManagerImpl implements ApplicationManager, ApplicationCo
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Autowired
     private EventPublisher eventPublisher;
 
-    @Autowired
     private Application application;
 
     private ApplicationContext applicationContext;
+
+    public ApplicationManagerImpl(EventPublisher eventPublisher, Application application) {
+        this.eventPublisher = eventPublisher;
+        this.application = application;
+    }
 
     @PostConstruct
     public void init() throws Exception {

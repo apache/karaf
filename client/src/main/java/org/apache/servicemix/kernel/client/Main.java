@@ -29,7 +29,9 @@ import org.apache.geronimo.gshell.remote.client.handler.ClientMessageHandler;
 import org.apache.geronimo.gshell.whisper.transport.TransportException;
 import org.apache.geronimo.gshell.whisper.transport.TransportFactory;
 import org.apache.geronimo.gshell.whisper.transport.TransportFactoryLocator;
+import org.apache.geronimo.gshell.whisper.transport.Transport;
 import org.apache.geronimo.gshell.whisper.transport.tcp.TcpTransportFactory;
+import org.apache.geronimo.gshell.whisper.transport.tcp.TcpTransport;
 import org.apache.geronimo.gshell.whisper.stream.StreamFeeder;
 import org.apache.geronimo.gshell.notification.ExitNotification;
 import org.apache.geronimo.gshell.security.crypto.CryptoContextImpl;
@@ -126,11 +128,15 @@ public class Main {
     }
 
     private static class Locator implements TransportFactoryLocator {
-        TcpTransportFactory factory = new TcpTransportFactory();
-
-        public TransportFactory locate(URI arg0) throws TransportException {
-            return factory;
+        public TransportFactory locate(URI uri) throws TransportException {
+            return new SimpleTcpTransportFactory();
         }
 
+    }
+
+    private static class SimpleTcpTransportFactory extends TcpTransportFactory {
+        protected TcpTransport createTransport() {
+            return new TcpTransport();
+        }
     }
 }

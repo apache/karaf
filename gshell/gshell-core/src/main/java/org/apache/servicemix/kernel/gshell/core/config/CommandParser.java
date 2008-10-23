@@ -420,6 +420,7 @@ public class CommandParser extends AbstractBeanDefinitionParser {
 
             for (Element child : children) {
                 BeanDefinitionBuilder link = BeanDefinitionBuilder.rootBeanDefinition(LinkCommand.class);
+                link.addConstructorArgReference("commandRegistry");
                 link.addConstructorArgValue(child.getAttribute(TARGET));
 
                 String name = child.getAttribute(NAME);

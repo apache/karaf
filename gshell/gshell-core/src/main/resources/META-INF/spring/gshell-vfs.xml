@@ -28,16 +28,14 @@
   http://servicemix.apache.org/schema/servicemix-gshell
   http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
-    <bean id="metaFileProviderConfigurer" class="org.apache.geronimo.gshell.vfs.config.FileProviderConfigurer">
-        <property name="scheme" value="meta"/>
-        <property name="provider">
-            <bean class="org.apache.geronimo.gshell.vfs.provider.meta.MetaFileProvider"/>
-        </property>
+    <bean id="fileSystemAccess" class="org.apache.geronimo.gshell.vfs.FileSystemAccessImpl">
+        <constructor-arg ref="applicationManager"/>
+        <constructor-arg ref="fileSystemManager"/>
     </bean>
 
-    <bean id="fileSystemAccess" class="org.apache.geronimo.gshell.vfs.FileSystemAccessImpl"/>
-
-    <bean id="fileObjectNameCompleter" class="org.apache.geronimo.gshell.vfs.FileObjectNameCompleter"/>
+    <bean id="fileObjectNameCompleter" class="org.apache.geronimo.gshell.vfs.FileObjectNameCompleter">
+        <constructor-arg ref="fileSystemAccess"/>
+    </bean>
 
     <bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
         <property name="customEditors">
@@ -84,6 +82,7 @@
     </bean>
 
     <bean class="org.apache.geronimo.gshell.vfs.config.FileProviderConfigurer">
+        <property name="fileSystemManager" ref="fileSystemManager"/>
         <property name="scheme" value="tmp"/>
         <property name="provider">
             <bean class="org.apache.commons.vfs.provider.temp.TemporaryFileProvider"/>
@@ -91,6 +90,7 @@
     </bean>
 
     <bean class="org.apache.geronimo.gshell.vfs.config.FileProviderConfigurer">
+        <property name="fileSystemManager" ref="fileSystemManager"/>
         <property name="scheme" value="ram"/>
         <property name="provider">
             <bean class="org.apache.commons.vfs.provider.ram.RamFileProvider"/>
@@ -98,9 +98,30 @@
     </bean>
 
     <bean class="org.apache.geronimo.gshell.vfs.config.FileProviderConfigurer">
+        <property name="fileSystemManager" ref="fileSystemManager"/>
+        <property name="scheme" value="file"/>
+        <property name="provider">
+            <bean class="org.apache.geronimo.gshell.vfs.provider.local.LocalFileProvider"/>
+        </property>
+    </bean>
+
+    <bean class="org.apache.geronimo.gshell.vfs.config.FileProviderConfigurer">
+        <property name="fileSystemManager" ref="fileSystemManager"/>
         <property name="scheme" value="mvn"/>
         <property name="provider">
             <bean class="org.apache.servicemix.kernel.gshell.core.vfs.mvn.MvnFileProvider"/>
+        </property>
+    </bean>
+
+    <bean id="metaDataRegistry" class="org.apache.geronimo.gshell.vfs.provider.meta.data.MetaDataRegistryImpl"/>
+
+    <bean id="metaFileProviderConfigurer" class="org.apache.geronimo.gshell.vfs.config.FileProviderConfigurer">
+        <property name="fileSystemManager" ref="fileSystemManager"/>
+        <property name="scheme" value="meta"/>
+        <property name="provider">
+            <bean class="org.apache.geronimo.gshell.vfs.provider.meta.MetaFileProvider">
+                <constructor-arg ref="metaDataRegistry"/>
+            </bean>
         </property>
     </bean>
 

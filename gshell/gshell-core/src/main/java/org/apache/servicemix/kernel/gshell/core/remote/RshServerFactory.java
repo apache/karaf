@@ -10,12 +10,15 @@ import org.apache.geronimo.gshell.remote.server.RshServer;
 
 public class RshServerFactory {
 
-    @Autowired
     private RshServer server;
 
     private String location;
 
     private boolean start;
+
+    public RshServerFactory(RshServer server) {
+        this.server = server;
+    }
 
     public String getLocation() {
         return location;
