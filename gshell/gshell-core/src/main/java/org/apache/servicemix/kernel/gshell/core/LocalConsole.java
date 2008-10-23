@@ -4,17 +4,12 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.Arrays;
 
-import javax.annotation.PreDestroy;
-import javax.annotation.PostConstruct;
-
 import org.apache.geronimo.gshell.shell.Shell;
 import org.apache.geronimo.gshell.notification.ExitNotification;
 import org.apache.servicemix.kernel.main.spi.MainService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.osgi.context.BundleContextAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkListener;
@@ -66,7 +61,6 @@ public class LocalConsole implements Runnable, BundleContextAware {
         this.createLocalShell = createLocalShell;
     }
 
-    @PostConstruct
     public void init() {
         frameworkStarted = new CountDownLatch(1);
 		getBundleContext().addFrameworkListener(new FrameworkListener(){
@@ -82,7 +76,6 @@ public class LocalConsole implements Runnable, BundleContextAware {
         }
     }
 
-    @PreDestroy
     public void destroy() {
         if (createLocalShell) {
             shell.close();

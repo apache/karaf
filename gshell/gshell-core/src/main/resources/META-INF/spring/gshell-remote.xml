@@ -30,7 +30,11 @@
   http://www.springframework.org/schema/osgi
   http://www.springframework.org/schema/osgi/spring-osgi.xsd
   http://servicemix.apache.org/jaas
-  http://servicemix.apache.org/schema/servicemix-jaas.xsd">
+  http://servicemix.apache.org/schema/servicemix-jaas.xsd"
+       default-autowire="no"
+       default-dependency-check="none"
+       default-init-method="init"
+       default-destroy-method="destroy">
 
     <bean id="timeoutManager" class="org.apache.geronimo.gshell.remote.server.timeout.TimeoutManagerImpl" lazy-init="true"/>
 
@@ -117,7 +121,8 @@
     </bean>
 
 
-    <bean id="rshServerFactory" class="org.apache.servicemix.kernel.gshell.core.remote.RshServerFactory">
+    <bean id="rshServerFactory" class="org.apache.servicemix.kernel.gshell.core.remote.RshServerFactory"
+                                init-method="start" destroy-method="stop">
         <constructor-arg ref="rshServer" />
         <property name="location" value="${remoteShellLocation}" />
         <property name="start" value="${startRemoteShell}" />

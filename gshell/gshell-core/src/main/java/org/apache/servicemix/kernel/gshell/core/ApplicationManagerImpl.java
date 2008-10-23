@@ -20,22 +20,15 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
-import java.util.Arrays;
-
-import javax.annotation.PostConstruct;
 
 import org.apache.geronimo.gshell.application.ApplicationManager;
 import org.apache.geronimo.gshell.application.ApplicationConfiguration;
 import org.apache.geronimo.gshell.application.Application;
 import org.apache.geronimo.gshell.application.ApplicationSecurityManager;
 import org.apache.geronimo.gshell.shell.Shell;
-import org.apache.geronimo.gshell.spring.BeanContainerAware;
-import org.apache.geronimo.gshell.spring.BeanContainer;
 import org.apache.geronimo.gshell.wisdom.application.ShellCreatedEvent;
 import org.apache.geronimo.gshell.event.EventPublisher;
 import org.apache.geronimo.gshell.io.SystemOutputHijacker;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.slf4j.Logger;
@@ -56,7 +49,6 @@ public class ApplicationManagerImpl implements ApplicationManager, ApplicationCo
         this.application = application;
     }
 
-    @PostConstruct
     public void init() throws Exception {
         if (!SystemOutputHijacker.isInstalled()) {
             SystemOutputHijacker.install();

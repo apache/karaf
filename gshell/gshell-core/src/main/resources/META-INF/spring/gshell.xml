@@ -27,9 +27,11 @@
   http://servicemix.apache.org/schema/servicemix-gshell
   http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd
   http://www.springframework.org/schema/osgi
-  http://www.springframework.org/schema/osgi/spring-osgi-1.0.xsd">
-
-    <bean class="org.springframework.context.annotation.CommonAnnotationBeanPostProcessor"/>
+  http://www.springframework.org/schema/osgi/spring-osgi-1.0.xsd"
+       default-autowire="no"
+       default-dependency-check="none"
+       default-init-method="init"
+       default-destroy-method="destroy">
 
     <bean id="io" class="org.apache.geronimo.gshell.io.IO">
         <property name="verbosity" value="DEBUG"/>
@@ -128,7 +130,7 @@
         </property>
     </bean>
 
-    <bean id="commandNameCompleter" class="org.apache.geronimo.gshell.wisdom.completer.CommandNameCompleter"
+    <bean id="commandNameCompleter" class="org.apache.geronimo.gshell.wisdom.completer.Comman       dNameCompleter"
           lazy-init="true">
         <constructor-arg ref="eventManager"/>
         <constructor-arg ref="commandRegistry"/>
@@ -143,11 +145,12 @@
     <bean id="commandsCompleter" class="org.apache.geronimo.gshell.wisdom.completer.CommandsCompleter" lazy-init="true">
         <constructor-arg ref="eventManager"/>
         <constructor-arg ref="commandRegistry"/>
+        <constructor-arg ref="fileSystemAccess" />
     </bean>
 
     <bean id="variableNameCompleter" class="org.apache.geronimo.gshell.wisdom.completer.VariableNameCompleter"
           lazy-init="true">
-        <constructor-arg ref="applicationManager"/>
+        <constructor-arg ref="applicationManager"/>                             
     </bean>
 
     <bean id="metaDataRegistry" class="org.apache.geronimo.gshell.vfs.provider.meta.data.MetaDataRegistryImpl"/>

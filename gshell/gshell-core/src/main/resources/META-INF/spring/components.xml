@@ -27,7 +27,11 @@
   http://www.springframework.org/schema/util
   http://www.springframework.org/schema/util/spring-util.xsd
   http://www.springframework.org/schema/osgi
-  http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+  http://www.springframework.org/schema/osgi/spring-osgi.xsd"
+       default-autowire="no"
+       default-dependency-check="none"
+       default-init-method="init"
+       default-destroy-method="destroy">
 
 
     <!--

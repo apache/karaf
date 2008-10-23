@@ -27,7 +27,11 @@
   http://www.springframework.org/schema/util
   http://www.springframework.org/schema/util/spring-util.xsd
   http://servicemix.apache.org/schema/servicemix-gshell
-  http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
+  http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd"
+       default-autowire="no"
+       default-dependency-check="none"
+       default-init-method="init"
+       default-destroy-method="destroy">
 
     <import resource="classpath:org/apache/servicemix/kernel/gshell/core/commands.xml" />
 

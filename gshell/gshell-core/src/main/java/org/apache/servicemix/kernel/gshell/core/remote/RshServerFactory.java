@@ -2,10 +2,6 @@ package org.apache.servicemix.kernel.gshell.core.remote;
 
 import java.net.URI;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.apache.geronimo.gshell.remote.server.RshServer;
 
 public class RshServerFactory {
@@ -36,7 +32,6 @@ public class RshServerFactory {
         this.start = start;
     }
 
-    @PostConstruct
     public void start() throws Exception {
         if (start) {
             try {
@@ -48,7 +43,6 @@ public class RshServerFactory {
         }
     }
 
-    @PreDestroy
     public void stop() throws Exception {
         if (start) {
             server.close();
