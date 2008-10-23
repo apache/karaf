@@ -48,7 +48,9 @@ public class ConnectCommand extends AdminCommandSupport {
                 return null;
             }
 
-            exec.execute("remote/rsh -u " + username + " -p " + password + " -n " + instance + " tcp://localhost:" + port);
+            // TODO: -n option does not exist in smx
+            //exec.execute("remote/rsh -u " + username + " -p " + password + " -n " + instance + " tcp://localhost:" + port);
+            exec.execute("remote/rsh -u " + username + " -p " + password + " tcp://localhost:" + port);
         }
         finally {
             getBundleContext().ungetService(ref);

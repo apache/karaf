@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.servicemix.kernel.gshell.core.remote;
 
 import org.apache.geronimo.gshell.command.Variables;

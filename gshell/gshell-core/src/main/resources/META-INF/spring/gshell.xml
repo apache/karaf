@@ -130,7 +130,7 @@
         </property>
     </bean>
 
-    <bean id="commandNameCompleter" class="org.apache.geronimo.gshell.wisdom.completer.Comman       dNameCompleter"
+    <bean id="commandNameCompleter" class="org.apache.geronimo.gshell.wisdom.completer.CommandNameCompleter"
           lazy-init="true">
         <constructor-arg ref="eventManager"/>
         <constructor-arg ref="commandRegistry"/>

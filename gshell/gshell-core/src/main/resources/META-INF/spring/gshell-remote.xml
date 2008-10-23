@@ -47,8 +47,9 @@
                     <constructor-arg ref="cryptoContext"/>
                     <constructor-arg ref="timeoutManager"/>
                 </bean>
-                <bean class="org.apache.geronimo.gshell.remote.server.handler.LoginHandler">
+                <bean class="org.apache.servicemix.kernel.gshell.core.remote.LoginHandler">
                     <constructor-arg ref="timeoutManager"/>
+                    <constructor-arg value="RshServer" />
                 </bean>
                 <bean class="org.apache.servicemix.kernel.gshell.core.remote.OpenShellHandler"/>
                 <bean class="org.apache.geronimo.gshell.remote.server.handler.ExecuteHandler"/>
