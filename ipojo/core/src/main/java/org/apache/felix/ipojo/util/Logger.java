@@ -133,35 +133,40 @@ public class Logger {
         String message = null;
         switch (level) {
             case DEBUG:
-                message = "[" + m_name + "] DEBUG: " + msg;
+                message = "[DEBUG] " + m_name + " : " + msg;
                 if (log != null) {
                     log.log(LogService.LOG_DEBUG, message);
+                } else {
+                    System.err.println(message);
                 }
-                System.err.println(message); // NOPMD
                 break;
             case ERROR:
-                message = "[" + m_name + "] ERROR: " + msg;
+                message = "[ERROR] " + m_name + " : " + msg;
                 if (log != null) {
                     log.log(LogService.LOG_ERROR, message);
+                } else {
+                    System.err.println(message);
                 }
-                System.err.println(message); //NOPMD
                 break;
             case INFO:
-                message = "[" + m_name + "] INFO: " + msg;
+                message = "[INFO] " + m_name + " : " + msg;
                 if (log != null) {
                     log.log(LogService.LOG_INFO, message);
+                } else {
+                    System.err.println(message);
                 }
-                System.err.println(message); // NOPMD
                 break;
             case WARNING:
-                message = "[" + m_name + "] WARNING: " + msg;
+                message = "[WARNING] " + m_name + " : " + msg;
                 if (log != null) {
                     log.log(LogService.LOG_WARNING, message);
+                } else {
+                    System.err.println(message);
                 }
-                System.err.println(message); // NOPMD
                 break;
             default:
-                System.err.println("[" + m_name + "] UNKNOWN[" + level + "]: " + msg); // NOPMD
+                message = "[UNKNOWN] " + m_name + " : " + msg;
+                System.err.println(message);
                 break;
         }
         
@@ -187,40 +192,45 @@ public class Logger {
         String message = null;
         switch (level) {
             case DEBUG:
-                message = "[" + m_name + "] DEBUG: " + msg;
+                message = "[DEBUG] " + m_name + " : " + msg;
                 if (log != null) {
                     log.log(LogService.LOG_DEBUG, message, exception);
+                } else {
+                    System.err.println(message);
+                    exception.printStackTrace();
                 }
-                System.err.println(message); // NOPMD
-                exception.printStackTrace(); // NOPMD
                 break;
             case ERROR:
-                message = "[" + m_name + "] ERROR: " + msg;
+                message = "[ERROR] " + m_name + " : " + msg;
                 if (log != null) {
                     log.log(LogService.LOG_ERROR, message, exception);
+                } else {
+                    System.err.println(message);
+                    exception.printStackTrace();
                 }
-                System.err.println(message); // NOPMD
-                exception.printStackTrace(System.err); // NOPMD
                 break;
             case INFO:
-                message = "[" + m_name + "] INFO: " + msg;
+                message = "[INFO] " + m_name + " : " + msg;
                 if (log != null) {
                     log.log(LogService.LOG_INFO, message, exception);
+                } else {
+                    System.err.println(message);
+                    exception.printStackTrace();
                 }
-                System.err.println(message); // NOPMD
-                exception.printStackTrace(System.err); // NOPMD
                 break;
             case WARNING:
-                message = "[" + m_name + "] WARNING: " + msg;
+                message = "[WARNING] " + m_name + " : " + msg;
                 if (log != null) {
                     log.log(LogService.LOG_WARNING, message, exception);
+                } else {
+                    System.err.println(message);
+                    exception.printStackTrace();
                 }
-                System.err.println(message); // NOPMD
-                exception.printStackTrace(System.err); // NOPMD
                 break;
             default:
-                System.err.println("[" + m_name + "] UNKNOWN[" + level + "]: " + msg); // NOPMD
-                exception.printStackTrace(); // NOPMD
+                message = "[UNKNOWN] " + m_name + " : " + msg;
+                System.err.println(message);
+                exception.printStackTrace();
                 break;
         }
         

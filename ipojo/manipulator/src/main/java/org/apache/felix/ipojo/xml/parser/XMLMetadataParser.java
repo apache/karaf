@@ -255,7 +255,7 @@ public class XMLMetadataParser implements ContentHandler, ErrorHandler {
      * @see org.xml.sax.ErrorHandler#error(org.xml.sax.SAXParseException)
      */
     public void error(SAXParseException saxparseexception) throws SAXException {
-        if (saxparseexception.getMessage().contains("cvc-elt.1")) {
+        if (saxparseexception.getMessage().indexOf("cvc-elt.1") != -1) {
             return; // Do not throw an exception when no schema defined.
         }
         throw saxparseexception;
