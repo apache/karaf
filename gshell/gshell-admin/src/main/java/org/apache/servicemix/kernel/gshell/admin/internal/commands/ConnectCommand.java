@@ -18,33 +18,31 @@
  */
 package org.apache.servicemix.kernel.gshell.admin.internal.commands;
 
-import org.apache.geronimo.gshell.command.annotation.CommandComponent;
-import org.apache.geronimo.gshell.command.CommandExecutor;
 import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.geronimo.gshell.clp.Option;
+import org.apache.geronimo.gshell.shell.Shell;
 import org.osgi.framework.ServiceReference;
 
-@CommandComponent(id="admin:connect", description="Connect to the given instance")
 public class ConnectCommand extends AdminCommandSupport {
 
     @Argument(index=0, required=true, description="The instance name")
     private String instance = null;
 
-    @Option(name="-u", aliases={"--username"}, metaVar="USERNAME", description="Remote user name")
+    @Option(name="-u", aliases={"--username"}, token="USERNAME", description="Remote user name")
     private String username = "smx";
 
-    @Option(name="-p", aliases={"--password"}, metaVar="PASSWORD", description="Remote user password")
+    @Option(name="-p", aliases={"--password"}, token="PASSWORD", description="Remote user password")
     private String password = "smx";
 
     protected Object doExecute() throws Exception {
         int port = getExistingInstance(instance).getPort();
-        ServiceReference ref = getBundleContext().getServiceReference(org.apache.geronimo.gshell.command.CommandExecutor.class.getName());
+        ServiceReference ref = getBundleContext().getServiceReference(Shell.class.getName());
         if (ref == null) {
             io.out.println("CommandExecutor service is unavailable.");
             return null;
         }
         try {
-            CommandExecutor exec = (CommandExecutor) getBundleContext().getService(ref);
+            Shell exec = (Shell) getBundleContext().getService(ref);
             if (exec == null) {
                 io.out.println("CommandExecutor service is unavailable.");
                 return null;
@@ -56,6 +54,6 @@ public class ConnectCommand extends AdminCommandSupport {
             getBundleContext().ungetService(ref);
         }
 
-        return SUCCESS;
+        return Result.SUCCESS;
     }
 }

@@ -20,9 +20,7 @@ import java.util.Dictionary;
 
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.Configuration;
-import org.apache.geronimo.gshell.command.annotation.CommandComponent;
 
-@CommandComponent(id="config:update", description="Update the edited configuration")
 public class UpdateCommand extends ConfigCommandSupport {
 
     protected void doExecute(ConfigurationAdmin admin) throws Exception {

@@ -20,9 +20,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.apache.geronimo.gshell.command.annotation.CommandComponent;
 
-@CommandComponent(id="config:proplist", description="List the edited configuration")
 public class PropListCommand extends ConfigCommandSupport {
 
     protected void doExecute(ConfigurationAdmin admin) throws Exception {

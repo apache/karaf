@@ -20,9 +20,7 @@ import java.util.Dictionary;
 
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.apache.geronimo.gshell.clp.Argument;
-import org.apache.geronimo.gshell.command.annotation.CommandComponent;
 
-@CommandComponent(id="config:propset", description="Set a property on the edited configuration")
 public class PropSetCommand extends ConfigCommandSupport {
 
     @Argument(index = 0, required = true, description = "the property to set")

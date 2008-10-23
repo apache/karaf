@@ -69,7 +69,11 @@
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
                         <Export-Package>org.apache.geronimo.gshell.obr*;version=${project.version}</Export-Package>
-                        <Import-Package>*</Import-Package>
+                        <Import-Package>
+                            org.apache.geronimo.gshell.wisdom.command,
+                            org.apache.servicemix.kernel.gshell.core,
+                            *
+                        </Import-Package>
                         <Private-Package>!*</Private-Package>
                         <Spring-Context>*;publish-context:=false;create-asynchronously:=false</Spring-Context>
                     </instructions>

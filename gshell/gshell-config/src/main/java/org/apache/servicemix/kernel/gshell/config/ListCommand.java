@@ -22,9 +22,7 @@ import java.util.Dictionary;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.Configuration;
 import org.apache.geronimo.gshell.clp.Argument;
-import org.apache.geronimo.gshell.command.annotation.CommandComponent;
 
-@CommandComponent(id="config:list", description="List existing configurations")
 public class ListCommand extends ConfigCommandSupport {
 
     @Argument(required = false, description = "LDAP query")

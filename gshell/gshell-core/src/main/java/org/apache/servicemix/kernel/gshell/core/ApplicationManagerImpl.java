@@ -53,39 +53,12 @@ public class ApplicationManagerImpl implements ApplicationManager, ApplicationCo
 
     private ApplicationContext applicationContext;
 
-    private boolean createLocalShell = true;
-
-    public boolean isCreateLocalShell() {
-        return createLocalShell;
-    }
-
-    public void setCreateLocalShell(boolean createLocalShell) {
-        this.createLocalShell = createLocalShell;
-    }
-
     @PostConstruct
     public void init() throws Exception {
         if (!SystemOutputHijacker.isInstalled()) {
             SystemOutputHijacker.install();
         }
         SystemOutputHijacker.register(application.getIo().outputStream, application.getIo().errorStream);
-        if (createLocalShell) {
-            new Thread("localShell") {
-                public void run() {
-                    Shell shell;
-                    try {
-                        shell = create();
-                        try {
-                            shell.run();
-                        } catch (Exception e2) {
-                            log.error("Error running shell", e2);
-                        }
-                    } catch (Exception e1) {
-                        log.error("Error creating shell", e1);
-                    }
-                }
-            }.start();
-        }
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) {

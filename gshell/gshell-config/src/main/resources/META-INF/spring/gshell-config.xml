@@ -20,80 +20,45 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:osgi="http://www.springframework.org/schema/osgi"
+       xmlns:osgix="http://www.springframework.org/schema/osgi-compendium"
        xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:gshell="http://servicemix.apache.org/schema/servicemix-gshell"
        xsi:schemaLocation="
   http://www.springframework.org/schema/beans
   http://www.springframework.org/schema/beans/spring-beans.xsd
+  http://www.springframework.org/schema/osgi
+  http://www.springframework.org/schema/osgi/spring-osgi.xsd
+  http://www.springframework.org/schema/osgi-compendium
+  http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd
   http://www.springframework.org/schema/util
   http://www.springframework.org/schema/util/spring-util.xsd
-  http://www.springframework.org/schema/osgi
-  http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+  http://servicemix.apache.org/schema/servicemix-gshell
+  http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
-    <!-- osgi commands -->
-    <bean id="cancel" class="org.apache.servicemix.kernel.gshell.config.CancelCommand" />
+    <import resource="classpath:org/apache/servicemix/kernel/gshell/core/commands.xml" />
 
-    <bean id="edit" class="org.apache.servicemix.kernel.gshell.config.EditCommand" />
-
-    <bean id="list" class="org.apache.servicemix.kernel.gshell.config.ListCommand" />
-
-    <bean id="propdel" class="org.apache.servicemix.kernel.gshell.config.PropDelCommand" />
-
-    <bean id="proplist" class="org.apache.servicemix.kernel.gshell.config.PropListCommand" />
-
-    <bean id="propset" class="org.apache.servicemix.kernel.gshell.config.PropSetCommand" />
-
-    <bean id="update" class="org.apache.servicemix.kernel.gshell.config.UpdateCommand" />
-
-    <osgi:service ref="cancel" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="config"/>
-      	<entry key="name" value="cancel"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="edit" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="config"/>
-      	<entry key="name" value="edit"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="list" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="config"/>
-      	<entry key="name" value="list"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="propdel" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="config"/>
-        <entry key="name" value="propdel"/>
-        <entry key="alias" value="pd"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="proplist" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="config"/>
-        <entry key="name" value="proplist"/>
-        <entry key="alias" value="pl"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="propset" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="config"/>
-        <entry key="name" value="propset"/>
-        <entry key="alias" value="ps"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="update" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="config"/>
-        <entry key="name" value="update"/>
-      </osgi:service-properties>
-    </osgi:service>
+    <gshell:command-bundle>
+        <gshell:command name="config/cancel">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.config.CancelCommand" />
+        </gshell:command>
+        <gshell:command name="config/edit">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.config.EditCommand" />
+        </gshell:command>
+        <gshell:command name="config/list">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.config.ListCommand" />
+        </gshell:command>
+        <gshell:command name="config/propdel">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.config.PropDelCommand" />
+        </gshell:command>
+        <gshell:command name="config/proplist">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.config.PropListCommand" />
+        </gshell:command>
+        <gshell:command name="config/propset">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.config.PropSetCommand" />
+        </gshell:command>
+        <gshell:command name="config/update">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.config.Update" />
+        </gshell:command>
+    </gshell:command-bundle>
 
 </beans>

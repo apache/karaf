@@ -16,10 +16,8 @@
  */
 package org.apache.servicemix.kernel.gshell.admin.internal.commands;
 
-import org.apache.geronimo.gshell.command.annotation.CommandComponent;
 import org.apache.geronimo.gshell.clp.Argument;
 
-@CommandComponent(id="admin:stop", description="Stop an instance")
 public class StopCommand extends AdminCommandSupport {
 
     @Argument(index=0, required=true, description="The instance name")
@@ -27,6 +25,6 @@ public class StopCommand extends AdminCommandSupport {
 
     protected Object doExecute() throws Exception {
         getExistingInstance(instance).stop();
-        return SUCCESS;
+        return Result.SUCCESS;
     }
 }

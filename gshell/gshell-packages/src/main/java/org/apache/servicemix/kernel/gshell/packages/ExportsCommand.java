@@ -23,11 +23,9 @@ import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
-import org.apache.geronimo.gshell.command.annotation.CommandComponent;
 import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.geronimo.gshell.clp.Option;
 
-@CommandComponent(id="package:exports", description="List exported packages")
 public class ExportsCommand extends PackageCommandSupport {
 
     @Option(name = "-i", aliases = { "--imports"}, description = "List bundles importing the packages")

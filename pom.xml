@@ -41,9 +41,7 @@
         <module>spring</module>
         <module>testing</module>
         <module>jaas</module>
-        <!--
         <module>client</module>
-        -->
         <module>assembly</module>
     </modules>
 

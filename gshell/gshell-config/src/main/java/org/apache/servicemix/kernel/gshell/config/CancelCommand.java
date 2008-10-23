@@ -16,10 +16,8 @@
  */
 package org.apache.servicemix.kernel.gshell.config;
 
-import org.apache.geronimo.gshell.command.annotation.CommandComponent;
 import org.osgi.service.cm.ConfigurationAdmin;
 
-@CommandComponent(id="config:cancel", description="Abort the edition of the configuration")
 public class CancelCommand extends ConfigCommandSupport {
 
     protected void doExecute(ConfigurationAdmin admin) throws Exception {

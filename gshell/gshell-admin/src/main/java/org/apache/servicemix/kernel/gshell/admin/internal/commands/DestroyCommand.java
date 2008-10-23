@@ -18,14 +18,12 @@ package org.apache.servicemix.kernel.gshell.admin.internal.commands;
 
 import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.geronimo.gshell.clp.Option;
-import org.apache.geronimo.gshell.command.annotation.CommandComponent;
 
 /**
  * Creates a new servicemix instance
  *
  * @version $Rev: 679826 $ $Date: 2008-07-25 17:00:12 +0200 (Fri, 25 Jul 2008) $
  */
-@CommandComponent(id="admin:destroy", description="Destroy a new ServiceMix instance")
 public class DestroyCommand extends AdminCommandSupport
 {
     @Argument(index=0, required=true, description="The name of the ServiceMix instance to destroy")
@@ -33,7 +31,7 @@ public class DestroyCommand extends AdminCommandSupport
 
     protected Object doExecute() throws Exception {
         getExistingInstance(instance).destroy();
-        return SUCCESS;
+        return Result.SUCCESS;
     }
 
 }

@@ -20,97 +20,51 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:osgi="http://www.springframework.org/schema/osgi"
+       xmlns:osgix="http://www.springframework.org/schema/osgi-compendium"
        xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:gshell="http://servicemix.apache.org/schema/servicemix-gshell"
        xsi:schemaLocation="
   http://www.springframework.org/schema/beans
   http://www.springframework.org/schema/beans/spring-beans.xsd
+  http://www.springframework.org/schema/osgi
+  http://www.springframework.org/schema/osgi/spring-osgi.xsd
+  http://www.springframework.org/schema/osgi-compendium
+  http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd
   http://www.springframework.org/schema/util
   http://www.springframework.org/schema/util/spring-util.xsd
-  http://www.springframework.org/schema/osgi
-  http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+  http://servicemix.apache.org/schema/servicemix-gshell
+  http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
+
+    <import resource="classpath:org/apache/servicemix/kernel/gshell/core/commands.xml" />
+
+    <gshell:command-bundle>
+        <gshell:command name="admin/create">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.CreateCommand" />
+        </gshell:command>
+        <gshell:command name="admin/connect">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.ConnectCommand" />
+        </gshell:command>
+        <gshell:command name="admin/list">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.ListCommand" />
+        </gshell:command>
+        <gshell:command name="admin/start">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.StartCommand" />
+        </gshell:command>
+        <gshell:command name="admin/stop">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.StopCommand" />
+        </gshell:command>
+        <gshell:command name="admin/destroy">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.DestroyCommand" />
+        </gshell:command>
+        <gshell:command name="admin/change-port">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.ChangePortCommand" />
+        </gshell:command>
+    </gshell:command-bundle>
 
     <osgi:reference id="preferences" interface="org.osgi.service.prefs.PreferencesService" cardinality="0..1" />
 
     <bean id="adminService" class="org.apache.servicemix.kernel.gshell.admin.internal.AdminServiceImpl">
         <property name="preferences" ref="preferences" />
     </bean>
-
-    <!-- osgi commands -->
-    <bean id="create" class="org.apache.servicemix.kernel.gshell.admin.internal.commands.CreateCommand">
-        <property name="adminService" ref="adminService" />
-    </bean>
-
-    <bean id="connect" class="org.apache.servicemix.kernel.gshell.admin.internal.commands.ConnectCommand">
-        <property name="adminService" ref="adminService" />
-    </bean>
-
-    <bean id="list" class="org.apache.servicemix.kernel.gshell.admin.internal.commands.ListCommand">
-        <property name="adminService" ref="adminService" />
-    </bean>
-
-    <bean id="start" class="org.apache.servicemix.kernel.gshell.admin.internal.commands.StartCommand">
-        <property name="adminService" ref="adminService" />
-    </bean>
-
-    <bean id="stop" class="org.apache.servicemix.kernel.gshell.admin.internal.commands.StopCommand">
-        <property name="adminService" ref="adminService" />
-    </bean>
-
-    <bean id="destroy" class="org.apache.servicemix.kernel.gshell.admin.internal.commands.DestroyCommand">
-        <property name="adminService" ref="adminService" />
-    </bean>
-
-    <bean id="change-port" class="org.apache.servicemix.kernel.gshell.admin.internal.commands.ChangePortCommand">
-        <property name="adminService" ref="adminService" />
-    </bean>
-
-    <osgi:service ref="create" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="admin"/>
-      	<entry key="name" value="create"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="connect" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="admin"/>
-      	<entry key="name" value="connect"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="list" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="admin"/>
-      	<entry key="name" value="list"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="start" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="admin"/>
-      	<entry key="name" value="start"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="stop" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="admin"/>
-      	<entry key="name" value="stop"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="destroy" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="admin"/>
-      	<entry key="name" value="destroy"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="change-port" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="admin"/>
-      	<entry key="name" value="change-port"/>
-      </osgi:service-properties>
-    </osgi:service>
 
 </beans>

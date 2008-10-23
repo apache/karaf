@@ -113,7 +113,11 @@
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
                         <Export-Package>org.apache.servicemix.kernel.gshell.admin.*;version=${project.version}
                         </Export-Package>
-                        <Import-Package>*</Import-Package>
+                        <Import-Package>
+                            org.apache.geronimo.gshell.wisdom.command,
+                            org.apache.servicemix.kernel.gshell.core,
+                            *
+                        </Import-Package>
                         <Private-Package>org.apache.servicemix.jpm.*</Private-Package>
                         <Spring-Context>*;publish-context:=false;create-asynchronously:=false</Spring-Context>
                     </instructions>

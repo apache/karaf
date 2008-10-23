@@ -21,31 +21,26 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:osgi="http://www.springframework.org/schema/osgi"
        xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:gshell="http://servicemix.apache.org/schema/servicemix-gshell"
        xsi:schemaLocation="
   http://www.springframework.org/schema/beans
   http://www.springframework.org/schema/beans/spring-beans.xsd
   http://www.springframework.org/schema/util
   http://www.springframework.org/schema/util/spring-util.xsd
   http://www.springframework.org/schema/osgi
-  http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+  http://www.springframework.org/schema/osgi/spring-osgi.xsd
+  http://servicemix.apache.org/schema/servicemix-gshell
+  http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
-    <!-- osgi commands -->
-    <bean id="exports" class="org.apache.servicemix.kernel.gshell.packages.ExportsCommand" />
+    <import resource="classpath:org/apache/servicemix/kernel/gshell/core/commands.xml" />
 
-    <bean id="imports" class="org.apache.servicemix.kernel.gshell.packages.ImportsCommand" />
-
-    <osgi:service ref="exports" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="packages"/>
-      	<entry key="name" value="exports"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="imports" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="packages"/>
-      	<entry key="name" value="imports"/>
-      </osgi:service-properties>
-    </osgi:service>
+    <gshell:command-bundle>
+        <gshell:command name="packages/exports">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.packages.ExportsCommand" />
+        </gshell:command>
+        <gshell:command name="packages/imports">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.packages.ImportsCommand" />
+        </gshell:command>
+    </gshell:command-bundle>
 
 </beans>

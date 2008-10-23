@@ -17,22 +17,23 @@
 package org.apache.servicemix.kernel.client;
 
 import java.net.URI;
-import java.net.URL;
 import java.util.List;
 import java.util.LinkedList;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 
-import org.apache.geronimo.gshell.remote.crypto.CryptoContext;
 import org.apache.geronimo.gshell.remote.client.RemoteExecuteException;
+import org.apache.geronimo.gshell.remote.client.RshClient;
 import org.apache.geronimo.gshell.remote.client.handler.EchoHandler;
 import org.apache.geronimo.gshell.remote.client.handler.ClientMessageHandler;
 import org.apache.geronimo.gshell.whisper.transport.TransportException;
 import org.apache.geronimo.gshell.whisper.transport.TransportFactory;
 import org.apache.geronimo.gshell.whisper.transport.TransportFactoryLocator;
-import org.apache.geronimo.gshell.whisper.transport.tcp.SpringTcpTransportFactory;
+import org.apache.geronimo.gshell.whisper.transport.tcp.TcpTransportFactory;
 import org.apache.geronimo.gshell.whisper.stream.StreamFeeder;
-import org.apache.geronimo.gshell.ExitNotification;
+import org.apache.geronimo.gshell.notification.ExitNotification;
+import org.apache.geronimo.gshell.security.crypto.CryptoContextImpl;
+import org.apache.geronimo.gshell.security.crypto.CryptoContext;
 
 /**
  * A very simple
@@ -75,7 +76,7 @@ public class Main {
         }
         RshClient client = null;
         try {
-            CryptoContext context = new CryptoContext("RSA", null);
+            CryptoContext context = new CryptoContextImpl();
             List<ClientMessageHandler> handlers = new LinkedList<ClientMessageHandler>();
             handlers.add(new EchoHandler());
             client = new RshClient(context, new Locator(), handlers) {
@@ -84,7 +85,6 @@ public class Main {
                 }
             };
 
-            client.initialize();
             client.connect(address, new URI("tcp://0.0.0.0:0"));
             client.login(user, password);
             StreamFeeder outputFeeder = new StreamFeeder(client.getInputStream(), System.out);
@@ -126,7 +126,7 @@ public class Main {
     }
 
     private static class Locator implements TransportFactoryLocator {
-        SpringTcpTransportFactory factory = new SpringTcpTransportFactory();
+        TcpTransportFactory factory = new TcpTransportFactory();
 
         public TransportFactory locate(URI arg0) throws TransportException {
             return factory;

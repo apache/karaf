@@ -38,10 +38,9 @@
         <osgi:listener ref="osgiCommandRegistry" bind-method="register" unbind-method="unregister" />
     </osgi:list>
 
-    <!--
-    <osgi:service ref="commandExecutor" interface="org.apache.geronimo.gshell.command.CommandExecutor">
+
+    <osgi:service ref="localShell" interface="org.apache.geronimo.gshell.shell.Shell">
     </osgi:service>
-    -->
 
     <osgix:property-placeholder persistent-id="org.apache.servicemix.shell">
         <osgix:default-properties>

@@ -27,18 +27,15 @@ import java.util.Map;
 import java.util.Scanner;
 
 import org.apache.geronimo.gshell.clp.Option;
-import org.apache.geronimo.gshell.command.annotation.CommandComponent;
-import org.apache.geronimo.gshell.common.io.PumpStreamHandler;
-import org.apache.geronimo.gshell.support.OsgiCommandSupport;
+import org.apache.geronimo.gshell.io.PumpStreamHandler;
+import org.apache.servicemix.kernel.gshell.core.OsgiCommandSupport;
 
 /**
  * Installs this ServiceMix instance as a service in your operating systems. 
  *
  * @version $Rev: 603634 $ $Date: 2007-12-12 16:07:16 +0100 (Wed, 12 Dec 2007) $
  */
-@CommandComponent(id="wrapper:install", description="Installs this ServiceMix instance as a service in your operating systems.")
-public class InstallCommand
-    extends OsgiCommandSupport
+public class InstallCommand extends OsgiCommandSupport
 {
 	
     @Option(name="-n", aliases={"--name"}, description="The service name that will be used when installing the service.")

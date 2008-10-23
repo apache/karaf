@@ -16,7 +16,7 @@
  */
 package org.apache.servicemix.kernel.gshell.packages;
 
-import org.apache.geronimo.gshell.support.OsgiCommandSupport;
+import org.apache.servicemix.kernel.gshell.core.OsgiCommandSupport;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
 

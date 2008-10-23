@@ -38,12 +38,10 @@
             <groupId>org.apache.servicemix.kernel</groupId>
             <artifactId>org.apache.servicemix.kernel.main</artifactId>
         </dependency>
-        <!--
         <dependency>
             <groupId>org.apache.servicemix.kernel</groupId>
             <artifactId>org.apache.servicemix.kernel.client</artifactId>
         </dependency>
-        -->
         <dependency>
             <groupId>org.apache.servicemix.kernel</groupId>
             <artifactId>org.apache.servicemix.kernel.filemonitor</artifactId>
@@ -56,7 +54,6 @@
             <groupId>org.apache.servicemix.kernel.gshell</groupId>
             <artifactId>org.apache.servicemix.kernel.gshell.core</artifactId>
         </dependency>
-        <!--
         <dependency>
             <groupId>org.apache.servicemix.kernel.gshell</groupId>
             <artifactId>org.apache.servicemix.kernel.gshell.admin</artifactId>
@@ -65,12 +62,10 @@
             <groupId>org.apache.servicemix.kernel.gshell</groupId>
             <artifactId>org.apache.servicemix.kernel.gshell.obr</artifactId>
         </dependency>
-        -->
         <dependency>
             <groupId>org.apache.servicemix.kernel.gshell</groupId>
             <artifactId>org.apache.servicemix.kernel.gshell.osgi</artifactId>
         </dependency>
-        <!--
         <dependency>
             <groupId>org.apache.servicemix.kernel.gshell</groupId>
             <artifactId>org.apache.servicemix.kernel.gshell.log</artifactId>
@@ -99,7 +94,6 @@
             <groupId>org.apache.servicemix.kernel.jaas</groupId>
             <artifactId>org.apache.servicemix.kernel.jaas.keystore</artifactId>
         </dependency>
-        -->
         <dependency>
             <groupId>org.springframework.osgi</groupId>
             <artifactId>spring-osgi-extender</artifactId>
@@ -248,7 +242,6 @@
                                     <outputDirectory>target/dependencies</outputDirectory>
                                     <destFileName>servicemix.jar</destFileName>
                                 </artifactItem>
-                                <!--
                                 <artifactItem>
                                     <groupId>org.apache.servicemix.kernel</groupId>
                                     <artifactId>org.apache.servicemix.kernel.client</artifactId>
@@ -256,7 +249,6 @@
                                     <outputDirectory>target/dependencies</outputDirectory>
                                     <destFileName>servicemix-client.jar</destFileName>
                                 </artifactItem>
-                                -->
                                 <artifactItem>
                                     <groupId>org.apache.servicemix.kernel.jaas</groupId>
                                     <artifactId>org.apache.servicemix.kernel.jaas.boot</artifactId>

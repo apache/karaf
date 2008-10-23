@@ -19,11 +19,9 @@ package org.apache.servicemix.kernel.gshell.config;
 import java.util.Dictionary;
 
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.apache.geronimo.gshell.command.annotation.CommandComponent;
 import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.geronimo.gshell.clp.Option;
 
-@CommandComponent(id="config:edit", description="Create or edit a configurations")
 public class EditCommand extends ConfigCommandSupport {
 
     @Argument(required = true, description = "PID of the configuration")

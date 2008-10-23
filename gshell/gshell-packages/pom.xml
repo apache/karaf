@@ -72,7 +72,12 @@
                         <Export-Package>
                             org.apache.servicemix.kernel.gshell.packages*;version=${project.version};-split-package:=merge-first
                         </Export-Package>
-                        <Import-Package>*</Import-Package>
+                        <Import-Package>
+                            org.apache.geronimo.gshell.wisdom.command,
+                            org.apache.servicemix.kernel.gshell.core,
+                            org.ops4j.pax.logging,
+                            *
+                        </Import-Package>
                         <Private-Package>!*</Private-Package>
                         <Spring-Context>*;publish-context:=false;create-asynchronously:=false</Spring-Context>
                     </instructions>

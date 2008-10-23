@@ -22,65 +22,48 @@
        xmlns:osgi="http://www.springframework.org/schema/osgi"
        xmlns:osgix="http://www.springframework.org/schema/osgi-compendium"
        xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:gshell="http://servicemix.apache.org/schema/servicemix-gshell"
        xsi:schemaLocation="
   http://www.springframework.org/schema/beans
   http://www.springframework.org/schema/beans/spring-beans.xsd
-  http://www.springframework.org/schema/util
-  http://www.springframework.org/schema/util/spring-util.xsd
   http://www.springframework.org/schema/osgi
   http://www.springframework.org/schema/osgi/spring-osgi.xsd
   http://www.springframework.org/schema/osgi-compendium
-  http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd">
+  http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd
+  http://www.springframework.org/schema/util
+  http://www.springframework.org/schema/util/spring-util.xsd
+  http://servicemix.apache.org/schema/servicemix-gshell
+  http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
-    <bean id="display-log" class="org.apache.servicemix.gshell.log.DisplayLog">
+    <import resource="classpath:org/apache/servicemix/kernel/gshell/core/commands.xml" />
+
+    <gshell:command-bundle>
+        <gshell:command name="log/d">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.log.DisplayLog">
+                <property name="events" ref="events" />
+                <property name="pattern" value="${pattern}" />
+            </gshell:action>
+        </gshell:command>
+        <gshell:command name="log/de">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.log.DisplayException">
+                <property name="events" ref="events" />
+            </gshell:action>
+        </gshell:command>
+        <gshell:command name="log/get">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.log.GetLogLevel" />
+        </gshell:command>
+        <gshell:command name="log/set">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.log.SetLogLevel" />
+        </gshell:command>
+    </gshell:command-bundle>
+
+    <bean id="vmLogAppender" class="org.apache.servicemix.kernel.gshell.log.VmLogAppender">
         <property name="events" ref="events" />
-        <property name="pattern" value="${pattern}" />
     </bean>
 
-    <bean id="display-exception" class="org.apache.servicemix.gshell.log.DisplayException">
-        <property name="events" ref="events" />
-    </bean>
-
-    <bean id="get-log-level" class="org.apache.servicemix.gshell.log.GetLogLevel" />
-
-    <bean id="set-log-level" class="org.apache.servicemix.gshell.log.SetLogLevel" />
-
-    <bean id="vmLogAppender" class="org.apache.servicemix.gshell.log.VmLogAppender">
-        <property name="events" ref="events" />
-    </bean>
-
-    <bean id="events" class="org.apache.servicemix.gshell.log.LruList">
+    <bean id="events" class="org.apache.servicemix.kernel.gshell.log.LruList">
         <constructor-arg value="${size}" />
     </bean>
-
-    <osgi:service ref="display-log" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="log"/>
-        <entry key="alias" value="display"/>
-        <entry key="alias" value="d"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="display-exception" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="log"/>
-        <entry key="alias" value="de"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="get-log-level" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="log"/>
-        <entry key="alias" value="get"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="set-log-level" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="log"/>
-        <entry key="alias" value="set"/>
-      </osgi:service-properties>
-    </osgi:service>
 
     <osgi:service ref="vmLogAppender" interface="org.ops4j.pax.logging.spi.PaxAppender">
         <osgi:service-properties>

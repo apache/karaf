@@ -20,94 +20,51 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:osgi="http://www.springframework.org/schema/osgi"
+       xmlns:osgix="http://www.springframework.org/schema/osgi-compendium"
        xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:gshell="http://servicemix.apache.org/schema/servicemix-gshell"
        xsi:schemaLocation="
   http://www.springframework.org/schema/beans
   http://www.springframework.org/schema/beans/spring-beans.xsd
+  http://www.springframework.org/schema/osgi
+  http://www.springframework.org/schema/osgi/spring-osgi.xsd
+  http://www.springframework.org/schema/osgi-compendium
+  http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd
   http://www.springframework.org/schema/util
   http://www.springframework.org/schema/util/spring-util.xsd
-  http://www.springframework.org/schema/osgi
-  http://www.springframework.org/schema/osgi/spring-osgi.xsd">
+  http://servicemix.apache.org/schema/servicemix-gshell
+  http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
-    <bean id="addUrl" class="org.apache.geronimo.gshell.obr.AddUrlCommand" />
+    <import resource="classpath:org/apache/servicemix/kernel/gshell/core/commands.xml" />
 
-    <bean id="deploy" class="org.apache.geronimo.gshell.obr.DeployCommand" />
-
-    <bean id="info" class="org.apache.geronimo.gshell.obr.InfoCommand" />
-
-    <bean id="list" class="org.apache.geronimo.gshell.obr.ListCommand" />
-
-    <bean id="listUrl" class="org.apache.geronimo.gshell.obr.ListUrlCommand" />
-
-    <bean id="removeUrl" class="org.apache.geronimo.gshell.obr.RemoveUrlCommand" />
-
-    <bean id="refreshUrl" class="org.apache.geronimo.gshell.obr.RefreshUrlCommand" />
-
-    <bean id="source" class="org.apache.geronimo.gshell.obr.SourceCommand" />
-
-    <bean id="start" class="org.apache.geronimo.gshell.obr.StartCommand" />
-
-    <osgi:service ref="addUrl" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="obr"/>
-        <entry key="alias" value="addUrl"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="deploy" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="obr"/>
-        <entry key="alias" value="deploy"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="info" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="obr"/>
-        <entry key="alias" value="info"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="list" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="obr"/>
-        <entry key="alias" value="list"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="listUrl" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="obr"/>
-        <entry key="alias" value="listUrl"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="removeUrl" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="obr"/>
-        <entry key="alias" value="removeUrl"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="refreshUrl" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="obr"/>
-        <entry key="alias" value="refreshUrl"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="source" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="obr"/>
-        <entry key="alias" value="source"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="start" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="obr"/>
-        <entry key="alias" value="start"/>
-      </osgi:service-properties>
-    </osgi:service>
+    <gshell:command-bundle>
+        <gshell:command name="obr/addUrl">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.obr.AddUrlCommand" />
+        </gshell:command>
+        <gshell:command name="obr/deploy">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.obr.DeployCommand" />
+        </gshell:command>
+        <gshell:command name="obr/info">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.obr.InfoCommand" />
+        </gshell:command>
+        <gshell:command name="obr/list">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.obr.ListCommand" />
+        </gshell:command>
+        <gshell:command name="obr/listUrl">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.obr.ListUrlCommand" />
+        </gshell:command>
+        <gshell:command name="obr/removeUrl">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.obr.RemoveUrlCommand" />
+        </gshell:command>
+        <gshell:command name="obr/refreshUrl">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.obr.RefreshUrlCommand" />
+        </gshell:command>
+        <gshell:command name="obr/source">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.obr.SourceCommand" />
+        </gshell:command>
+        <gshell:command name="obr/start">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.obr.StartCommand" />
+        </gshell:command>
+    </gshell:command-bundle>
 
 </beans>

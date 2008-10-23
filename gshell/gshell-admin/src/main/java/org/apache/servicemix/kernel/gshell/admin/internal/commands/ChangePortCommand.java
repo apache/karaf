@@ -16,10 +16,8 @@
  */
 package org.apache.servicemix.kernel.gshell.admin.internal.commands;
 
-import org.apache.geronimo.gshell.command.annotation.CommandComponent;
 import org.apache.geronimo.gshell.clp.Argument;
 
-@CommandComponent(id="admin:change-port", description="Change the port of an instance")
 public class ChangePortCommand extends AdminCommandSupport {
 
     @Argument(index=0, required=true, description="The instance name")
@@ -30,6 +28,6 @@ public class ChangePortCommand extends AdminCommandSupport {
 
     protected Object doExecute() throws Exception {
         getExistingInstance(instance).changePort(port);
-        return SUCCESS;
+        return Result.SUCCESS;
     }
 }

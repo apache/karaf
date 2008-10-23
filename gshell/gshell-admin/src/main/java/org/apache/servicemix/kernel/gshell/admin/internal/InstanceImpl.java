@@ -19,9 +19,6 @@ package org.apache.servicemix.kernel.gshell.admin.internal;
 import java.io.InputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.Serializable;
 import java.io.IOException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -33,10 +30,6 @@ import org.apache.servicemix.jpm.Process;
 import org.apache.servicemix.jpm.ProcessBuilderFactory;
 import org.apache.servicemix.jpm.impl.ScriptUtils;
 import org.apache.servicemix.kernel.gshell.admin.Instance;
-import org.apache.geronimo.gshell.common.io.PumpStreamHandler;
-import org.apache.geronimo.gshell.command.IO;
-import org.apache.geronimo.gshell.spring.ProxyIO;
-import org.osgi.service.prefs.BackingStoreException;
 
 public class InstanceImpl implements Instance {
 
@@ -44,7 +37,6 @@ public class InstanceImpl implements Instance {
     private String name;
     private String location;
     private Process process;
-    //private PumpStreamHandler handler;
 
     public InstanceImpl(AdminServiceImpl service, String name, String location) {
         this.service = service;
@@ -178,17 +170,6 @@ public class InstanceImpl implements Instance {
 
     protected void checkProcess() {
         if (this.process != null) {
-            /*
-            try {
-                this.process.exitValue();
-                this.process = null;
-                if (this.handler != null) {
-                    this.handler.stop();
-                    this.handler = null;
-                }
-            } catch (IllegalThreadStateException e) {
-            }
-            */
             try {
                 if (!this.process.isRunning()) {
                     this.process = null;

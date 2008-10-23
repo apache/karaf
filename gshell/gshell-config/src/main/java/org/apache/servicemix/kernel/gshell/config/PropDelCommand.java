@@ -20,9 +20,7 @@ import java.util.Dictionary;
 
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.apache.geronimo.gshell.clp.Argument;
-import org.apache.geronimo.gshell.command.annotation.CommandComponent;
 
-@CommandComponent(id="config:propdel", description="Delete a property from the edited configuration")
 public class PropDelCommand extends ConfigCommandSupport {
 
     @Argument(index = 0, required = true, description = "the property to delete")

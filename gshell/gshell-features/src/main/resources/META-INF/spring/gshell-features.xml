@@ -22,31 +22,46 @@
        xmlns:osgi="http://www.springframework.org/schema/osgi"
        xmlns:osgix="http://www.springframework.org/schema/osgi-compendium"
        xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:gshell="http://servicemix.apache.org/schema/servicemix-gshell"
        xsi:schemaLocation="
   http://www.springframework.org/schema/beans
   http://www.springframework.org/schema/beans/spring-beans.xsd
-  http://www.springframework.org/schema/util
-  http://www.springframework.org/schema/util/spring-util.xsd
   http://www.springframework.org/schema/osgi
   http://www.springframework.org/schema/osgi/spring-osgi.xsd
   http://www.springframework.org/schema/osgi-compendium
-  http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd">
+  http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd
+  http://www.springframework.org/schema/util
+  http://www.springframework.org/schema/util/spring-util.xsd
+  http://servicemix.apache.org/schema/servicemix-gshell
+  http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
-    <bean id="addUrl" class="org.apache.servicemix.gshell.features.internal.commands.AddUrlCommand" />
+    <import resource="classpath:org/apache/servicemix/kernel/gshell/core/commands.xml" />
 
-    <bean id="listUrl" class="org.apache.servicemix.gshell.features.internal.commands.ListUrlCommand" />
+    <gshell:command-bundle>
+        <gshell:command name="features/addUrl">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.features.internal.commands.AddUrlCommand" />
+        </gshell:command>
+        <gshell:command name="features/listUrl">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.features.internal.commands.ListUrlCommand" />
+        </gshell:command>
+        <gshell:command name="features/remoteUrl">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.features.internal.commands.RemoveUrlCommand" />
+        </gshell:command>
+        <gshell:command name="features/refreshUrl">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.features.internal.commands.RefreshUrlCommand" />
+        </gshell:command>
+        <gshell:command name="features/install">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.features.internal.commands.InstallFeatureCommand" />
+        </gshell:command>
+        <gshell:command name="features/uninstall">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.features.internal.commands.UninstallFeatureCommand" />
+        </gshell:command>
+        <gshell:command name="features/listFeatures">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.features.internal.commands.ListFeaturesCommand" />
+        </gshell:command>
+    </gshell:command-bundle>
 
-    <bean id="removeUrl" class="org.apache.servicemix.gshell.features.internal.commands.RemoveUrlCommand" />
-
-    <bean id="refreshUrl" class="org.apache.servicemix.gshell.features.internal.commands.RefreshUrlCommand" />
-
-    <bean id="installFeature" class="org.apache.servicemix.gshell.features.internal.commands.InstallFeatureCommand" />
-
-    <bean id="uninstallFeature" class="org.apache.servicemix.gshell.features.internal.commands.UninstallFeatureCommand" />
-
-    <bean id="listFeatures" class="org.apache.servicemix.gshell.features.internal.commands.ListFeaturesCommand" />
-
-    <bean id="featuresService" class="org.apache.servicemix.gshell.features.internal.FeaturesServiceImpl" init-method="start" destroy-method="stop">
+    <bean id="featuresService" class="org.apache.servicemix.kernel.gshell.features.internal.FeaturesServiceImpl" init-method="start" destroy-method="stop">
         <property name="urls" value="${featuresRepositories}" />
         <property name="boot" value="${featuresBoot}" />
         <property name="configAdmin" ref="configAdmin" />
@@ -57,56 +72,7 @@
 
     <osgi:reference id="preferences" interface="org.osgi.service.prefs.PreferencesService" cardinality="0..1" />
 
-    <osgi:service ref="addUrl" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="features"/>
-        <entry key="alias" value="addUrl"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="listUrl" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="features"/>
-        <entry key="alias" value="listUrl"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="removeUrl" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="features"/>
-        <entry key="alias" value="removeUrl"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="refreshUrl" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="features"/>
-        <entry key="alias" value="refreshUrl"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="installFeature" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="features"/>
-        <entry key="alias" value="installFeature"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="uninstallFeature" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="features"/>
-        <entry key="alias" value="uninstallFeature"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="listFeatures" interface="org.apache.geronimo.gshell.command.Command">
-      <osgi:service-properties>
-        <entry key="shell" value="features"/>
-        <entry key="alias" value="listFeatures"/>
-      </osgi:service-properties>
-    </osgi:service>
-
-    <osgi:service ref="featuresService" interface="org.apache.servicemix.gshell.features.FeaturesService" />
+    <osgi:service ref="featuresService" interface="org.apache.servicemix.kernel.gshell.features.FeaturesService" />
 
     <osgix:property-placeholder persistent-id="org.apache.servicemix.features">
         <osgix:default-properties>

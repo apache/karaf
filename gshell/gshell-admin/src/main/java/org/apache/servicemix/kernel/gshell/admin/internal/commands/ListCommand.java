@@ -16,14 +16,12 @@
  */
 package org.apache.servicemix.kernel.gshell.admin.internal.commands;
 
-import org.apache.geronimo.gshell.command.annotation.CommandComponent;
 import org.apache.geronimo.gshell.clp.Option;
 import org.apache.servicemix.kernel.gshell.admin.Instance;
 
 /**
  * List available instances
  */
-@CommandComponent(id="admin:list", description="List existing ServiceMix instances")
 public class ListCommand extends AdminCommandSupport {
 
     @Option(name = "-l", aliases = { "--location" }, description = "Display instances location")
@@ -64,7 +62,7 @@ public class ListCommand extends AdminCommandSupport {
             }
             io.out.println(sb.toString());
         }
-        return SUCCESS;
+        return Result.SUCCESS;
     }
 
 }

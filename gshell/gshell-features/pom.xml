@@ -79,9 +79,13 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
-                        <Export-Package>org.apache.servicemix.gshell.features*;version=${project.version}
+                        <Export-Package>org.apache.servicemix.kernel.gshell.features*;version=${project.version}
                         </Export-Package>
-                        <Import-Package>*</Import-Package>
+                        <Import-Package>
+                            org.apache.geronimo.gshell.wisdom.command,
+                            org.apache.servicemix.kernel.gshell.core,
+                            *
+                        </Import-Package>
                         <Private-Package>!*</Private-Package>
                         <Spring-Context>*;publish-context:=false;create-asynchronously:=false</Spring-Context>
                     </instructions>
