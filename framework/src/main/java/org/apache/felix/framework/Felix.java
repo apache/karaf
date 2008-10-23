@@ -18,7 +18,7 @@
  */
 package org.apache.felix.framework;
 
-import org.osgi.framework.launch.SystemBundle;
+import org.osgi.framework.launch.Framework;
 import java.io.*;
 import java.net.*;
 import java.security.*;
@@ -34,7 +34,7 @@ import org.osgi.framework.*;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.startlevel.StartLevel;
 
-public class Felix extends FelixBundle implements SystemBundle
+public class Felix extends FelixBundle implements Framework
 {
     // The secure action used to do privileged calls
     static SecureAction m_secureAction = new SecureAction();

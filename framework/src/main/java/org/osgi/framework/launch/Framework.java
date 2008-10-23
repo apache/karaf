@@ -58,7 +58,7 @@ import org.osgi.framework.FrameworkEvent;
  * @ThreadSafe
  * @version $Revision: 5686 $
  */
-public interface SystemBundle extends Bundle {
+public interface Framework extends Bundle {
 
 	/**
 	 * Initialize this System Bundle. After calling this method, this System

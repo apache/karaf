@@ -26,6 +26,7 @@ import org.apache.felix.framework.Felix;
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.Util;
 import org.osgi.framework.Constants;
+import org.osgi.framework.launch.Framework;
 
 /**
  * <p>
@@ -57,7 +58,7 @@ public class Main
     **/
     public static final String CONFIG_PROPERTIES_FILE_VALUE = "config.properties";
 
-    private static Felix m_felix = null;
+    private static Framework m_felix = null;
 
     /**
      * <p>
