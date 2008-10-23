@@ -150,7 +150,7 @@ public class OSGiTestCase extends TestCase {
 	 */
 	public static void assertEquals(String message, double expected,
 			double actual) {
-		if (Double.compare(expected, actual) != 0) {
+		if (expected != actual) {
 			fail(formatEqualsMessage(message, new Double(expected), new Double(
 					actual)));
 		}
@@ -420,7 +420,7 @@ public class OSGiTestCase extends TestCase {
 			refs = bundle.getBundleContext().getServiceReferences(itf, filter);
 		} catch (InvalidSyntaxException e) {
 			throw new IllegalArgumentException(
-					"Cannot get service references.", e);
+					"Cannot get service references: " + e.getMessage());
 		}
 		if (refs == null) {
 			return new ServiceReference[0];

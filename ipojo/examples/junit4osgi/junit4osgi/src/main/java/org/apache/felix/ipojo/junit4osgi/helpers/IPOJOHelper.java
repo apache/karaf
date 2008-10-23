@@ -100,8 +100,8 @@ public class IPOJOHelper {
             return fact.createComponentInstance(configuration);
         } catch (Exception e) {
             throw new IllegalArgumentException(
-                    "Cannot create the component instance with the given configuration.",
-                    e);
+                    "Cannot create the component instance with the given configuration:" +
+                    e.getMessage());
         }
     }
 
@@ -187,8 +187,8 @@ public class IPOJOHelper {
             return fact.createComponentInstance(configuration);
         } catch (Exception e) {
             throw new IllegalArgumentException(
-                    "Cannot create the component instance with the given configuration.",
-                    e);
+                    "Cannot create the component instance with the given configuration: " +
+                    e.getMessage());
         }
     }
 
@@ -335,7 +335,7 @@ public class IPOJOHelper {
 
         } catch (InvalidSyntaxException e) {
             throw new IllegalArgumentException(
-                    "Cannot get the component factory services.", e);
+                    "Cannot get the component factory services: " + e.getMessage());
         }
     }
 
@@ -398,7 +398,7 @@ public class IPOJOHelper {
             return null;
         } catch (InvalidSyntaxException e) {
             throw new IllegalArgumentException(
-                    "Cannot get the handler factory services.", e);
+                    "Cannot get the handler factory services: " + e.getMessage());
         }
     }
 
@@ -446,7 +446,7 @@ public class IPOJOHelper {
         } catch (ParseException e) {
             throw new IllegalStateException(
                     "Cannot parse the components from specified bundle ("
-                            + bundle.getSymbolicName() + ").", e);
+                            + bundle.getSymbolicName() + "): " + e.getMessage());
         }
     }
     
@@ -584,7 +584,7 @@ public class IPOJOHelper {
             refs = serviceContext.getServiceReferences(itf, filter);
         } catch (InvalidSyntaxException e) {
             throw new IllegalArgumentException(
-                    "Cannot get service references.", e);
+                    "Cannot get service references: " + e.getMessage());
         }
         if (refs == null) {
             return new ServiceReference[0];
