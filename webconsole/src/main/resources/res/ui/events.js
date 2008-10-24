@@ -24,7 +24,8 @@ function header( /* int */ columns )
     document.write( "</tr>" );
 
     document.write( "<tr class='content'>" );
-    document.write( "<th class='content' width='20%'>Topic</th>" );
+    document.write( "<th class='content'>Received</th>" );
+    document.write( "<th class='content'>Topic</th>" );
     document.write( "<th class='content'>Properties</th>" );
     document.write( "</tr>" );
 
@@ -81,7 +82,8 @@ function entryInternal( /* Element */ parent, /* Object */ dataEntry, /* boolean
     var topic = dataEntry.topic;
     var properties = dataEntry.properties;
 
-    parent.appendChild( td( "content", { width: "20%"}, [ text( topic ) ] ) );
+    parent.appendChild( td( "content", null, [ text( new Date(dataEntry.received) ) ] ) );
+    parent.appendChild( td( "content", { "width": "20%", [ text( topic ) ] ) );
 
     var tableE = createElement("table");
     var bodyE = createElement("tbody");
@@ -100,8 +102,8 @@ function entryInternal( /* Element */ parent, /* Object */ dataEntry, /* boolean
 function renderEvents( /* Array of Data Objects */ bundleData )
 {
 
-    // topic and properties
-    var columns = 2;
+    // date, topic and properties
+    var columns = 3;
     
     header( columns );
 

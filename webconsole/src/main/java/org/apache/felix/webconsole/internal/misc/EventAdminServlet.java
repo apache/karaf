@@ -98,7 +98,7 @@ implements EventHandler
         {
             synchronized ( this.events )
             {
-                this.events.add(event);
+                this.events.add(new EventInfo(event));
                 if ( events.size() > this.maxSize )
                 {
                     events.remove(0);
@@ -141,8 +141,7 @@ implements EventHandler
             // display list in reverse order
             for(int index = copiedEvents.size() -1; index >= 0; index--)
             {
-                eventJson( jw, (Event)copiedEvents.get(index), index );
-                index++;
+                eventJson( jw, (EventInfo)copiedEvents.get(index), index );
             }
 
             jw.endArray();
@@ -160,12 +159,15 @@ implements EventHandler
         Util.endScript( pw );
     }
 
-    private void eventJson( JSONWriter jw, Event e, int index)
+    private void eventJson( JSONWriter jw, EventInfo info, int index)
     throws JSONException
     {
+        final Event e = info.event;
         jw.object();
         jw.key( "id" );
         jw.value( String.valueOf(index) );
+        jw.key( "received");
+        jw.value( info.received );
         jw.key( "topic" );
         jw.value( e.getTopic());
         jw.key( "properties" );
@@ -184,4 +186,16 @@ implements EventHandler
         jw.endObject();
     }
 
+    private static final class EventInfo
+    {
+
+        public final Event event;
+        public final long  received;
+
+        public EventInfo(final Event e)
+        {
+            this.event = e;
+            this.received = System.currentTimeMillis();
+        }
+    }
 }
