@@ -19,7 +19,8 @@ package org.apache.felix.webconsole.internal.misc;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -100,7 +101,7 @@ implements EventHandler
                 this.events.add(event);
                 if ( events.size() > this.maxSize )
                 {
-                    events.remove(1);
+                    events.remove(0);
                 }
             }
         }
@@ -137,11 +138,10 @@ implements EventHandler
             {
                 copiedEvents = new ArrayList(this.events);
             }
-            int index = 0;
-            final Iterator i = copiedEvents.iterator();
-            while ( i.hasNext() )
+            // display list in reverse order
+            for(int index = copiedEvents.size() -1; index >= 0; index--)
             {
-                eventJson( jw, (Event)i.next(), index );
+                eventJson( jw, (Event)copiedEvents.get(index), index );
                 index++;
             }
 

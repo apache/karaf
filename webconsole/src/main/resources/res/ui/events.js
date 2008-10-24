@@ -24,7 +24,7 @@ function header( /* int */ columns )
     document.write( "</tr>" );
 
     document.write( "<tr class='content'>" );
-    document.write( "<th class='content'>Topic</th>" );
+    document.write( "<th class='content' width='20%'>Topic</th>" );
     document.write( "<th class='content'>Properties</th>" );
     document.write( "</tr>" );
 
