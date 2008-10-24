@@ -303,6 +303,16 @@ public class POJOCreation extends OSGiTestCase {
         }
     }
     
+    public void testSuperCallWithBC() {
+        try {
+            Factory fact = Utils.getFactoryByName(context, "org.apache.felix.ipojo.test.scenarios.component.CallSuperConstructorWithBC");
+            ComponentInstance ci = fact.createComponentInstance(null);
+            ci.dispose();
+        } catch (Throwable e) {
+            fail(e.getMessage());
+        }
+    }
+    
     
 
 }
