@@ -33,7 +33,7 @@
        default-init-method="init"
        default-destroy-method="destroy">
 
-    <bean id="localShell" factory-bean="applicationManager" factory-method="create"/>
+    <bean id="localShell" parent="shell" init-method="init" destroy-method="close"/>
 
     <osgi:reference id="mainService" interface="org.apache.servicemix.kernel.main.spi.MainService"/>
 

@@ -57,7 +57,7 @@
             <gshell:action class="org.apache.servicemix.kernel.gshell.config.PropSetCommand" />
         </gshell:command>
         <gshell:command name="config/update">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.config.Update" />
+            <gshell:action class="org.apache.servicemix.kernel.gshell.config.UpdateCommand" />
         </gshell:command>
     </gshell:command-bundle>
 

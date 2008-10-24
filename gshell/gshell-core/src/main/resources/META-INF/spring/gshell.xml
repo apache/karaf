@@ -102,7 +102,7 @@
         <constructor-arg ref="commandLineBuilder"/>
     </bean>
 
-    <bean id="shell" class="org.apache.geronimo.gshell.wisdom.shell.ShellImpl" scope="prototype">
+    <bean id="shell" class="org.apache.geronimo.gshell.wisdom.shell.ShellImpl" scope="prototype" init-method="init" destroy-method="close">
         <constructor-arg ref="application"/>
         <constructor-arg ref="commandLineExecutor"/>
 
@@ -152,7 +152,5 @@
           lazy-init="true">
         <constructor-arg ref="applicationManager"/>                             
     </bean>
-
-    <bean id="metaDataRegistry" class="org.apache.geronimo.gshell.vfs.provider.meta.data.MetaDataRegistryImpl"/>
 
 </beans>
