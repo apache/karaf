@@ -15,26 +15,6 @@
  * limitations under the License.
  */
 
-function renderDataTable( /* Array of Data Objects */ components )
-{
-    // number of actions plus 3 -- id, name and state
-    var columns = components.numActions + 3;
-    
-    header( columns );
-
-    if (components.error)
-    {
-        error( columns, components.error );
-    }
-    else
-    {
-        data ( components.data );
-    }
-
-    footer( columns );
-}
-
-
 function header( /* int */ columns )
 {
     document.write( "<table class='content' cellpadding='0' cellspacing='0' width='100%'>" );
