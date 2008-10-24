@@ -19,8 +19,7 @@ package org.apache.felix.webconsole.internal.misc;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -96,10 +95,13 @@ implements EventHandler
         // we add everything which is not a log event
         if ( !event.getTopic().startsWith("org/osgi/service/log") )
         {
-            this.events.add(event);
-            if ( events.size() > this.maxSize )
+            synchronized ( this.events )
             {
-                events.remove(1);
+                this.events.add(event);
+                if ( events.size() > this.maxSize )
+                {
+                    events.remove(1);
+                }
             }
         }
     }
@@ -130,9 +132,17 @@ implements EventHandler
 
             jw.array();
 
-            for(int i=0; i<events.size(); i++)
+            List copiedEvents;
+            synchronized ( this.events )
             {
-                eventJson( jw, (Event)events.get(i), i );
+                copiedEvents = new ArrayList(this.events);
+            }
+            int index = 0;
+            final Iterator i = copiedEvents.iterator();
+            while ( i.hasNext() )
+            {
+                eventJson( jw, (Event)i.next(), index );
+                index++;
             }
 
             jw.endArray();
@@ -161,8 +171,10 @@ implements EventHandler
         jw.key( "properties" );
         jw.object();
         final String[] names = e.getPropertyNames();
-        if ( names != null && names.length > 0 ) {
-            for(int i=0;i<names.length;i++) {
+        if ( names != null && names.length > 0 )
+        {
+            for(int i=0;i<names.length;i++)
+            {
                 jw.key(names[i]);
                 jw.value(e.getProperty(names[i]).toString());
             }
