@@ -62,7 +62,7 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
     private static final  String FIELD_FLAG_PREFIX = "__F";
 
     /**
-     * MEthof flag prefix.
+     * Method flag prefix.
      */
     private static final  String METHOD_FLAG_PREFIX = "__M";
 
