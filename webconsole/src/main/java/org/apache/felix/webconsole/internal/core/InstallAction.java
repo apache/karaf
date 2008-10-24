@@ -249,7 +249,7 @@ public class InstallAction extends BundleAction
         Thread t = new InstallHelper( this, "Background Install " + bundleFile, bundleFile, refreshPackages )
         {
 
-            protected void doRun( InputStream bundleStream ) throws BundleException
+            protected Bundle doRun( InputStream bundleStream ) throws BundleException
             {
                 Bundle bundle = getBundleContext().installBundle( location, bundleStream );
 
@@ -266,6 +266,8 @@ public class InstallAction extends BundleAction
                 {
                     bundle.start();
                 }
+                
+                return bundle;
             }
         };
 
@@ -279,9 +281,10 @@ public class InstallAction extends BundleAction
             + bundle.getBundleId() + ")", bundleFile, refreshPackages )
         {
 
-            protected void doRun( InputStream bundleStream ) throws BundleException
+            protected Bundle doRun( InputStream bundleStream ) throws BundleException
             {
                 bundle.update( bundleStream );
+                return bundle;
             }
         };
 
@@ -309,7 +312,7 @@ public class InstallAction extends BundleAction
         }
 
 
-        protected abstract void doRun( InputStream bundleStream ) throws BundleException;
+        protected abstract Bundle doRun( InputStream bundleStream ) throws BundleException;
 
 
         public void run()
@@ -321,28 +324,22 @@ public class InstallAction extends BundleAction
             InputStream bundleStream = null;
             try
             {
-                bundleStream = new FileInputStream( bundleFile );
-                doRun( bundleStream );
+                // we need the package admin before we call the bundle
+                // installation or update, since we might be updating
+                // our selves in which case the bundle context will be
+                // invalid by the time we want to call the update
+                PackageAdmin pa = ( refreshPackages ) ? installAction.getPackageAdmin() : null;
 
-                if ( refreshPackages )
+                bundleStream = new FileInputStream( bundleFile );
+                Bundle bundle = doRun( bundleStream );
+
+                if ( pa != null )
                 {
                     // wait for asynchronous bundle start tasks to finish
                     sleepSilently( 2000L );
 
-                    try
-                    {
-                        PackageAdmin pa = installAction.getPackageAdmin();
-                        if ( pa != null )
-                        {
-                            pa.refreshPackages( null );
-                        }
-                    }
-                    catch ( IllegalStateException ise )
-                    {
-                        // This exception is expected if the webconsole bundle
-                        // itself has just been updated. For now, we just
-                        // ignore this exception
-                    }
+                    pa.refreshPackages( new Bundle[]
+                        { bundle } );
                 }
             }
             catch ( IOException ioe )
