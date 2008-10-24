@@ -107,6 +107,22 @@ implements EventHandler
         }
     }
 
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException
+    {
+        // for now we only have the clear action
+        if ( getParameter(req, "clear") != null )
+        {
+            synchronized ( this.events )
+            {
+                this.events.clear();
+            }
+        }
+        final String uri = req.getRequestURI();
+        resp.sendRedirect( uri );
+        return;
+    }
+
     protected void renderContent( HttpServletRequest request, HttpServletResponse response )
     throws ServletException, IOException
     {

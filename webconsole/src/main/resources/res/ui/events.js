@@ -83,7 +83,7 @@ function entryInternal( /* Element */ parent, /* Object */ dataEntry, /* boolean
     var properties = dataEntry.properties;
 
     parent.appendChild( td( "content", null, [ text( new Date(dataEntry.received) ) ] ) );
-    parent.appendChild( td( "content", { "width": "20%", [ text( topic ) ] ) );
+    parent.appendChild( td( "content", { "width": "20%"}, [ text( topic ) ] ) );
 
     var tableE = createElement("table");
     var bodyE = createElement("tbody");
@@ -97,6 +97,18 @@ function entryInternal( /* Element */ parent, /* Object */ dataEntry, /* boolean
     parent.appendChild( td( "content", null, [tableE] ) );
 }
 
+function installForm( )
+{
+    document.write( "<tr class='content'>" );
+    document.write( "<td class='content'>&nbsp;</td>" );
+    document.write( "<td class='content'>&nbsp;</td>" );
+    document.write( "<td class='content' align='right' noWrap>" );
+    document.write( "<form method='post' enctype='multipart/form-data'>" );
+    document.write( "<input class='submit' style='width:auto' type='submit' name='clear' value='Clear List'>" );
+    document.write( "</form>" );
+    document.write( "</td>" );
+    document.write( "</tr>" );
+}
 
 
 function renderEvents( /* Array of Data Objects */ bundleData )
@@ -107,6 +119,8 @@ function renderEvents( /* Array of Data Objects */ bundleData )
     
     header( columns );
 
+    installForm();
+    
     if (bundleData.error)
     {
         error( columns, bundleData.error );
@@ -115,6 +129,8 @@ function renderEvents( /* Array of Data Objects */ bundleData )
     {
         data ( bundleData.data );
     }
+
+    installForm();
 
     footer( columns );
 }
