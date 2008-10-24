@@ -30,6 +30,14 @@ class ResourceComparator implements Comparator
         Resource r2 = (Resource) o2;
         String name1 = (String) r1.getPresentationName();
         String name2 = (String) r2.getPresentationName();
+        if (name1 == null)
+        {
+            return -1;
+        }
+        else if (name2 == null)
+        {
+            return 1;
+        }
         return name1.compareToIgnoreCase(name2);
     }
 }
