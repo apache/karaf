@@ -872,7 +872,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
         boolean bootDel = isBootDelegated( name );
         if ( bootDel )
         {
-            val.append( "<span style=\"color: red\">!! " );
+            val.append( "!! " );
         }
 
         val.append( name );
@@ -881,7 +881,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
 
         if ( bootDel )
         {
-            val.append( " -- Overwritten by Boot Delegation</span>" );
+            val.append( " -- Overwritten by Boot Delegation" );
         }
 
         val.append( "<br />" );
@@ -895,7 +895,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
 
         if ( isSpan )
         {
-            val.append( "<span style=\"color: red\">!! " );
+            val.append( "!! " );
         }
 
         val.append( name );
@@ -924,11 +924,6 @@ public class BundlesServlet extends BaseWebConsolePlugin
             {
                 val.append( " and overwritten by Boot Delegation" );
             }
-        }
-
-        if ( isSpan )
-        {
-            val.append( "</span>" );
         }
 
         val.append( "<br />" );

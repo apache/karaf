@@ -187,13 +187,22 @@ function getDataEntryDetails( /* Element */ parent, /* Array of Object */ detail
         var proptd = td( "aligntop" );
         trEl.appendChild( proptd );
         
-        if (prop.value )
+        if (prop.value)
         {
             var values = new String( prop.value ).split( "<br />" );
             for (var i=0; i < values.length; i++)
             {
                 if (i > 0) { proptd.appendChild( createElement( "br" ) ); }
-                addText( proptd, values[i] );
+                
+                var span;
+                if (values[i].substring(0, 2) == "!!") {
+                    span = createElement( "span", null, { style: { color: "red" } } );
+                    proptd.appendChild( span );
+                } else {
+                    span = proptd;
+                }
+                
+                addText( span, values[i] );
             }
         }
         else
