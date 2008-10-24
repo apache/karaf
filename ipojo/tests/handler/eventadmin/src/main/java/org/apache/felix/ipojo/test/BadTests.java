@@ -34,6 +34,7 @@ import org.apache.felix.ipojo.parser.ParseException;
 import org.apache.felix.ipojo.test.donut.Donut;
 import org.apache.felix.ipojo.test.donut.DonutConsumer;
 import org.apache.felix.ipojo.test.donut.DonutProvider;
+import org.apache.felix.ipojo.test.util.EahTestUtils;
 import org.apache.felix.ipojo.test.util.IPojoTestUtils;
 import org.osgi.framework.ServiceReference;
 
@@ -43,6 +44,11 @@ import org.osgi.framework.ServiceReference;
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class BadTests extends OSGiTestCase {
+	
+	 /**
+     * The utility class instance.
+     */
+    public EahTestUtils m_utils;
 
     /**
      * The namespace of the Event admin handler.
@@ -141,7 +147,7 @@ public class BadTests extends OSGiTestCase {
      * 
      */
     public void setUp() {
-
+    	m_utils = new EahTestUtils(context);
         /**
          * Get the list of available components.
          */
@@ -530,6 +536,43 @@ public class BadTests extends OSGiTestCase {
             m_publisher.addAttribute(m_publisherTopics);
         }
     }
+    
+    /**
+     * Try to create a publisher with a pattern topic (ending with '*') instead of a fixed topic.
+     * 
+     * @throws ConfigurationException
+     *             something bad happened
+     * @throws MissingHandlerException
+     *             something bad happened
+     * @throws UnacceptableConfiguration
+     *             something bad happened
+     */
+    public void testPublisherWithPatternTopic()
+        throws ConfigurationException, MissingHandlerException,
+        UnacceptableConfiguration {
+
+        // Remove the topics attribute of the publisher and replace with a
+        // malformed one
+        m_publisher.removeAttribute(m_publisherTopics);
+        Attribute malformedTopics = new Attribute("topics",
+                "a/pattern/topic/*");
+        m_publisher.addAttribute(malformedTopics);
+
+        // Create and try to start the factory
+        ComponentFactory fact = new ComponentFactory(context, m_provider);
+        try {
+            fact.start();
+            // Should not be executed
+            fact.stop();
+            fail("The factory must not start when invalid topics are specified.");
+        } catch (IllegalStateException e) {
+            // OK
+        } finally {
+            // Restore the original state of the publisher
+            m_publisher.removeAttribute(malformedTopics);
+            m_publisher.addAttribute(m_publisherTopics);
+        }
+    }
 
     /**
      * Try to create a publisher with malformed instance topics.
@@ -871,6 +914,51 @@ public class BadTests extends OSGiTestCase {
         }
         sb.append("</" + element.getName() + ">\n");
         return sb.toString();
+    }
+    
+    /**
+     * Creates a subscriber listening on a pattern topic (ending with '*').
+     * @throws ConfigurationException something bad happened.
+     * @throws MissingHandlerException something bad happened.
+     * @throws UnacceptableConfiguration something bad happened.
+     */
+    public void testSubscriberWithPatternTopic() throws UnacceptableConfiguration, MissingHandlerException, ConfigurationException {
+    	Dictionary properties = new Hashtable();
+    	Dictionary topics = new Hashtable();
+
+        // Create the donut consumer instance, listening on a pattern topic
+        properties.put("instance.name","subscriber with pattern topic");
+        topics.put("donut-subscriber", "a/pattern/topic/*rf");
+        properties.put("event.topics", topics);
+        ComponentInstance instance = null;
+        try {
+        	instance = m_utils.getDonutConsumerFactory()
+            .createComponentInstance(properties);
+        	
+        	// Should not been executed
+        	instance.dispose();
+        	 fail("An invalid topic scope was accepted)");
+        	 
+        } catch (ConfigurationException e) {
+        	// Nothing to do
+        }
+        
+    	properties = new Hashtable();
+    	topics = new Hashtable();
+
+        // Create the donut consumer instance, listening on a pattern topic
+        properties.put("instance.name","subscriber with pattern topic");
+        topics.put("donut-subscriber", "a/pattern/*topic/rf");
+        properties.put("event.topics", topics);
+        
+        try {
+        	instance = m_utils.getDonutConsumerFactory()
+            .createComponentInstance(properties);
+        	instance.dispose();
+        	fail("An invalid topic scope was accepted (2)");
+        } catch (ConfigurationException e) {
+        	// Nothing to do
+        }
     }
 
 }

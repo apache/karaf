@@ -24,7 +24,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.apache.felix.ipojo.ConfigurationException;
-import org.apache.felix.ipojo.ServiceContext;
 import org.apache.felix.ipojo.context.ServiceReferenceImpl;
 import org.apache.felix.ipojo.metadata.Element;
 import org.osgi.framework.BundleContext;

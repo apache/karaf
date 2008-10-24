@@ -18,16 +18,13 @@
  */
 package org.apache.felix.ipojo.handlers.event.subscriber;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-
 import org.apache.felix.ipojo.ConfigurationException;
+import org.apache.felix.ipojo.handlers.event.EventUtil;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.ParseUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.service.event.Event;
 
 /**
  * Represent an subscriber.
@@ -36,269 +33,255 @@ import org.osgi.service.event.Event;
  */
 class EventAdminSubscriberMetadata {
 
-    // Names of metadata attributes
+	// Names of metadata attributes
 
-    /**
-     * The name attribute in the component metadata.
-     */
-    public static final String NAME_ATTRIBUTE = "name";
+	/**
+	 * The name attribute in the component metadata.
+	 */
+	public static final String NAME_ATTRIBUTE = "name";
 
-    /**
-     * The callback attribute in the component metadata.
-     */
-    public static final String CALLBACK_ATTRIBUTE = "callback";
+	/**
+	 * The callback attribute in the component metadata.
+	 */
+	public static final String CALLBACK_ATTRIBUTE = "callback";
 
-    /**
-     * The topics attribute in the component metadata.
-     */
-    public static final String TOPICS_ATTRIBUTE = "topics";
+	/**
+	 * The topics attribute in the component metadata.
+	 */
+	public static final String TOPICS_ATTRIBUTE = "topics";
 
-    /**
-     * The data key attribute in the component metadata.
-     */
-    public static final String DATA_KEY_ATTRIBUTE = "data-key";
+	/**
+	 * The data key attribute in the component metadata.
+	 */
+	public static final String DATA_KEY_ATTRIBUTE = "data-key";
 
-    /**
-     * The data type attribute in the component metadata.
-     */
-    public static final String DATA_TYPE_ATTRIBUTE = "data-type";
+	/**
+	 * The data type attribute in the component metadata.
+	 */
+	public static final String DATA_TYPE_ATTRIBUTE = "data-type";
 
-    /**
-     * The filter attribute in the component metadata.
-     */
-    public static final String FILTER_ATTRIBUTE = "filter";
+	/**
+	 * The filter attribute in the component metadata.
+	 */
+	public static final String FILTER_ATTRIBUTE = "filter";
 
-    // Default values
+	// Default values
 
-    /**
-     * The data type atttribute's default value.
-     */
-    public static final Class DEFAULT_DATA_TYPE_VALUE = java.lang.Object.class;
+	/**
+	 * The data type atttribute's default value.
+	 */
+	public static final Class DEFAULT_DATA_TYPE_VALUE = java.lang.Object.class;
 
-    /**
-     * The name which acts as an identifier.
-     */
-    private final String m_name;
+	/**
+	 * The name which acts as an identifier.
+	 */
+	private final String m_name;
 
-    /**
-     * Name of the callback method.
-     */
-    private final String m_callback;
+	/**
+	 * Name of the callback method.
+	 */
+	private final String m_callback;
 
-    /**
-     * Listened topics.
-     */
-    private String[] m_topics;
+	/**
+	 * Listened topics.
+	 */
+	private String[] m_topics;
 
-    /**
-     * The key where user data are stored in the event dictionary.
-     */
-    private final String m_dataKey;
+	/**
+	 * The key where user data are stored in the event dictionary.
+	 */
+	private final String m_dataKey;
 
-    /**
-     * The type of received data.
-     */
-    private final Class m_dataType;
+	/**
+	 * The type of received data.
+	 */
+	private final Class m_dataType;
 
-    /**
-     * Event filter.
-     */
-    private Filter m_filter;
+	/**
+	 * Event filter.
+	 */
+	private Filter m_filter;
 
-    /**
-     * The context of the bundle.
-     */
-    private final BundleContext m_bundleContext;
+	/**
+	 * The context of the bundle.
+	 */
+	private final BundleContext m_bundleContext;
 
-    /**
-     * Constructor.
-     * 
-     * @param bundleContext the bundle context of the managed instance.
-     * @param subscriber the subscriber metadata.
-     * @throws ConfigurationException if the configuration of the component or the instance is invalid.
-     */
-    public EventAdminSubscriberMetadata(BundleContext bundleContext,
-            Element subscriber)
-        throws ConfigurationException {
+	/**
+	 * Constructor.
+	 * 
+	 * @param bundleContext
+	 *            the bundle context of the managed instance.
+	 * @param subscriber
+	 *            the subscriber metadata.
+	 * @throws ConfigurationException
+	 *             if the configuration of the component or the instance is
+	 *             invalid.
+	 */
+	public EventAdminSubscriberMetadata(BundleContext bundleContext,
+			Element subscriber) throws ConfigurationException {
+		m_bundleContext = bundleContext;
 
-        m_bundleContext = bundleContext;
+		/**
+		 * Setup required attributes
+		 */
 
-        /**
-         * Setup required attributes
-         */
+		// NAME_ATTRIBUTE
+		if (subscriber.containsAttribute(NAME_ATTRIBUTE)) {
+			m_name = subscriber.getAttribute(NAME_ATTRIBUTE);
+		} else {
+			throw new ConfigurationException(
+					"Missing required attribute in component configuration : "
+							+ NAME_ATTRIBUTE);
+		}
 
-        // NAME_ATTRIBUTE
-        if (subscriber.containsAttribute(NAME_ATTRIBUTE)) {
-            m_name = subscriber.getAttribute(NAME_ATTRIBUTE);
-        } else {
-            throw new ConfigurationException(
-                    "Missing required attribute in component configuration : "
-                            + NAME_ATTRIBUTE);
-        }
+		// CALLBACK_ATTRIBUTE
+		if (subscriber.containsAttribute(CALLBACK_ATTRIBUTE)) {
+			m_callback = subscriber.getAttribute(CALLBACK_ATTRIBUTE);
+		} else {
+			throw new ConfigurationException(
+					"Missing required attribute in component configuration : "
+							+ CALLBACK_ATTRIBUTE);
+		}
 
-        // CALLBACK_ATTRIBUTE
-        if (subscriber.containsAttribute(CALLBACK_ATTRIBUTE)) {
-            m_callback = subscriber.getAttribute(CALLBACK_ATTRIBUTE);
-        } else {
-            throw new ConfigurationException(
-                    "Missing required attribute in component configuration : "
-                            + CALLBACK_ATTRIBUTE);
-        }
+		// TOPICS_ATTRIBUTE
+		if (subscriber.containsAttribute(TOPICS_ATTRIBUTE)) {
+			setTopics(subscriber.getAttribute(TOPICS_ATTRIBUTE));
+		} else {
+			m_topics = null;
+			// Nothing to do if TOPICS_ATTRIBUTE is not present as it can be
+			// overridden in the instance configuration.
+		}
 
-        // TOPICS_ATTRIBUTE
-        if (subscriber.containsAttribute(TOPICS_ATTRIBUTE)) {
-            m_topics = ParseUtils.split(subscriber
-                    .getAttribute(TOPICS_ATTRIBUTE), ",");
-            // Check each topic is valid
-            Dictionary empty = new Hashtable();
-            for (int i = 0; i < m_topics.length; i++) {
-                String topic = m_topics[i];
-                try {
-                    new Event(topic, empty);
-                } catch (IllegalArgumentException e) {
-                    throw new ConfigurationException("Malformed topic : "
-                            + topic);
-                }
-            }
-        } else {
-            m_topics = null;
-            // Nothing to do if TOPICS_ATTRIBUTE is not present as it can be
-            // overridden in the instance configuration.
-        }
+		/**
+		 * Setup optional attributes
+		 */
 
-        /**
-         * Setup optional attributes
-         */
+		// DATA_KEY_ATTRIBUTE
+		m_dataKey = subscriber.getAttribute(DATA_KEY_ATTRIBUTE);
+		if (subscriber.containsAttribute(DATA_TYPE_ATTRIBUTE)) {
+			Class type;
+			String typeName = subscriber.getAttribute(DATA_TYPE_ATTRIBUTE);
+			try {
+				type = m_bundleContext.getBundle().loadClass(typeName);
+			} catch (ClassNotFoundException e) {
+				throw new ConfigurationException("Data type class not found : "
+						+ typeName);
+			}
+			m_dataType = type;
+		} else {
+			m_dataType = DEFAULT_DATA_TYPE_VALUE;
+		}
 
-        // DATA_KEY_ATTRIBUTE
-        m_dataKey = subscriber.getAttribute(DATA_KEY_ATTRIBUTE);
-        if (subscriber.containsAttribute(DATA_TYPE_ATTRIBUTE)) {
-            Class type;
-            String typeName = subscriber.getAttribute(DATA_TYPE_ATTRIBUTE);
-            try {
-                type = m_bundleContext.getBundle().loadClass(typeName);
-            } catch (ClassNotFoundException e) {
-                throw new ConfigurationException("Data type class not found : "
-                        + typeName);
-            }
-            m_dataType = type;
-        } else {
-            m_dataType = DEFAULT_DATA_TYPE_VALUE;
-        }
+		// FILTER_ATTRIBUTE
+		if (subscriber.containsAttribute(FILTER_ATTRIBUTE)) {
+			setFilter(subscriber.getAttribute(FILTER_ATTRIBUTE));
+		}
+	}
 
-        // FILTER_ATTRIBUTE
-        if (subscriber.containsAttribute(FILTER_ATTRIBUTE)) {
-            try {
-                m_filter = m_bundleContext.createFilter(subscriber
-                        .getAttribute(FILTER_ATTRIBUTE));
-            } catch (InvalidSyntaxException e) {
-                throw new ConfigurationException("Invalid filter syntax");
-            }
-        }
-    }
+	/**
+	 * Sets the topics attribute of the subscriber.
+	 * 
+	 * @param topicsString
+	 *            the comma separated list of the topics to listen
+	 * @throws ConfigurationException
+	 *             if the specified topic list is malformed
+	 */
+	public void setTopics(String topicsString) throws ConfigurationException {
+		String[] newTopics = ParseUtils.split(topicsString,
+				EventUtil.TOPIC_SEPARATOR);
+		// Check each topic is valid
+		for (int i = 0; i < newTopics.length; i++) {
+			String topicScope = newTopics[i];
+			if (!EventUtil.isValidTopicScope(topicScope)) {
+				throw new ConfigurationException("Invalid topic scope : \""
+						+ topicScope + "\".");
+			}
+		}
+		m_topics = newTopics;
+	}
 
-    /**
-     * Sets the topics attribute of the subscriber.
-     * 
-     * @param topicsString the comma separated list of the topics to listen
-     * @throws ConfigurationException if  the specified topic list is malformed
-     */
-    public void setTopics(String topicsString)
-        throws ConfigurationException {
-        m_topics = ParseUtils.split(topicsString, ",");
-        // Check each topic is valid
-        Dictionary empty = new Hashtable();
-        for (int i = 0; i < m_topics.length; i++) {
-            String topic = m_topics[i];
-            try {
-                new Event(topic, empty);
-            } catch (IllegalArgumentException e) {
-                throw new ConfigurationException("Malformed topic : " + topic);
-            }
-        }
-    }
+	/**
+	 * Sets the filter attribute of the subscriber.
+	 * 
+	 * @param filterString
+	 *            the string representation of the event filter
+	 * @throws ConfigurationException
+	 *             if the LDAP filter is malformed
+	 */
+	public void setFilter(String filterString) throws ConfigurationException {
+		try {
+			m_filter = m_bundleContext.createFilter(filterString);
+		} catch (InvalidSyntaxException e) {
+			throw new ConfigurationException("Invalid filter syntax");
+		}
+	}
 
-    /**
-     * Sets the filter attribute of the subscriber.
-     * 
-     * @param filterString the string representation of the event filter
-     * @throws ConfigurationException if the LDAP filter is malformed
-     */
-    public void setFilter(String filterString)
-        throws ConfigurationException {
-        try {
-            m_filter = m_bundleContext.createFilter(filterString);
-        } catch (InvalidSyntaxException e) {
-            throw new ConfigurationException("Invalid filter syntax");
-        }
-    }
+	/**
+	 * Checks that the required instance configurable attributes are all set.
+	 * 
+	 * @throws ConfigurationException
+	 *             if a required attribute is missing
+	 */
+	public void check() throws ConfigurationException {
+		if (m_topics == null || m_topics.length == 0) {
+			throw new ConfigurationException(
+					"Missing required attribute in component or instance configuration : "
+							+ TOPICS_ATTRIBUTE);
+		}
+	}
 
-    /**
-     * Checks that the required instance configurable attributes are all set.
-     * 
-     * @throws ConfigurationException if a required attribute is missing
-     */
-    public void check()
-        throws ConfigurationException {
-        if (m_topics == null || m_topics.length == 0) {
-            throw new ConfigurationException(
-                    "Missing required attribute in component or instance configuration : "
-                            + TOPICS_ATTRIBUTE);
-        }
-    }
+	/**
+	 * Gets the name attribute of the subscriber.
+	 * 
+	 * @return the name
+	 */
+	public String getName() {
+		return m_name;
+	}
 
-    /**
-     * Gets the name attribute of the subscriber.
-     * 
-     * @return the name
-     */
-    public String getName() {
-        return m_name;
-    }
+	/**
+	 * Gets the topics attribute of the subscriber.
+	 * 
+	 * @return the topics
+	 */
+	public String[] getTopics() {
+		return m_topics;
+	}
 
-    /**
-     * Gets the topics attribute of the subscriber.
-     * 
-     * @return the topics
-     */
-    public String[] getTopics() {
-        return m_topics;
-    }
+	/**
+	 * Gets the callback attribute of the subscriber.
+	 * 
+	 * @return the callback
+	 */
+	public String getCallback() {
+		return m_callback;
+	}
 
-    /**
-     * Gets the callback attribute of the subscriber.
-     * 
-     * @return the callback
-     */
-    public String getCallback() {
-        return m_callback;
-    }
+	/**
+	 * Gets the data key attribute of the subscriber.
+	 * 
+	 * @return the dataKey
+	 */
+	public String getDataKey() {
+		return m_dataKey;
+	}
 
-    /**
-     * Gets the data key attribute of the subscriber.
-     * 
-     * @return the dataKey
-     */
-    public String getDataKey() {
-        return m_dataKey;
-    }
+	/**
+	 * Gets the data type attribute of the subscriber.
+	 * 
+	 * @return the dataType
+	 */
+	public Class getDataType() {
+		return m_dataType;
+	}
 
-    /**
-     * Gets the data type attribute of the subscriber.
-     * 
-     * @return the dataType
-     */
-    public Class getDataType() {
-        return m_dataType;
-    }
-
-    /**
-     * Gets the filter attribute of the subscriber.
-     * 
-     * @return the filter
-     */
-    public Filter getFilter() {
-        return m_filter;
-    }
-
+	/**
+	 * Gets the filter attribute of the subscriber.
+	 * 
+	 * @return the filter
+	 */
+	public Filter getFilter() {
+		return m_filter;
+	}
 }

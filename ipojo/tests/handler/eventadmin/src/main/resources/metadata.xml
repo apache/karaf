@@ -132,10 +132,10 @@
 	
 	<!-- Example instances -->
 	<instance component="donut-provider" name="zeifhgbzre">
-		<property name="name" value="zeifhgbzre donuts"/>
+		<property name="name" value="Zeifhgbzre donuts"/>
 	</instance>
 	<instance component="donut-consumer" name="zeifhgbzre simpson">
-		<property name="name" value="zeifhgbzre simpson"/>
+		<property name="name" value="Zeifhgbzre simpson"/>
 		<property name="slow" value="false"/>
 	</instance>
 	

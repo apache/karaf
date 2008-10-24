@@ -500,6 +500,26 @@ public class GoodTests extends OSGiTestCase {
         m_fooBarNutConsumer = m_topicsConsumers[6];
 
     }
+    
+    /**
+     * Creates a subscriber listening on a pattern topic (ending with '*').
+     * @throws ConfigurationException something bad happened.
+     * @throws MissingHandlerException something bad happened.
+     * @throws UnacceptableConfiguration something bad happened.
+     */
+    public void testSubscriberWithPatternTopic() throws UnacceptableConfiguration, MissingHandlerException, ConfigurationException {
+    	Dictionary properties = new Hashtable();
+    	Dictionary topics = new Hashtable();
+
+        // Create the donut consumer instance, listening on a pattern topic
+        properties.put("instance.name","subscriber with pattern topic");
+        topics.put("donut-subscriber", "a/pattern/topic/*");
+        properties.put("event.topics", topics);
+        
+        ComponentInstance instance = m_utils.getDonutConsumerFactory()
+                .createComponentInstance(properties);
+        instance.dispose();
+    }
 
     /**
      * Test the event handler reliability by sending events with all kinds of
