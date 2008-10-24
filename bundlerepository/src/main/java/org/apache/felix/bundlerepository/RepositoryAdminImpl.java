@@ -47,7 +47,6 @@ public class RepositoryAdminImpl implements RepositoryAdmin
     // Reusable comparator for sorting resources by name.
     private Comparator m_nameComparator = new ResourceComparator();
 
-    private static final String DEFAULT_REPOSITORY_URL = "http://oscar-osgi.sourceforge.net/obr2/repository.xml";
     public static final String REPOSITORY_URL_PROP = "obr.repository.url";
     public static final String EXTERN_REPOSITORY_TAG = "extern-repositories";
 
@@ -181,22 +180,6 @@ public class RepositoryAdminImpl implements RepositoryAdmin
                                 ex);
                         }
                     }
-                }
-            }
-
-            // If no repository URLs are specified, then use the default one.
-            if (m_urlList.size() == 0)
-            {
-                try
-                {
-                    m_urlList.add(new URL(DEFAULT_REPOSITORY_URL));
-                }
-                catch (MalformedURLException ex)
-                {
-                    m_logger.log(
-                        Logger.LOG_WARNING,
-                        "Default repository url " + DEFAULT_REPOSITORY_URL + " cannot be used. Skipped.",
-                        ex);
                 }
             }
         }
