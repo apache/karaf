@@ -126,7 +126,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         Dictionary headers = bundleContext.getBundle().getHeaders();
 
         adminTitle = ( String ) headers.get( Constants.BUNDLE_NAME ); // "OSGi Management Console";
-        adminVersion = ( String ) headers.get( Constants.BUNDLE_NAME ); // "1.0.0-SNAPSHOT";
+        adminVersion = ( String ) headers.get( Constants.BUNDLE_VERSION ); // "1.0.0-SNAPSHOT";
         productName = "Apache Felix";
         productWeb = ( String ) headers.get( Constants.BUNDLE_DOCURL );
         vendorName = ( String ) headers.get( Constants.BUNDLE_VENDOR );
