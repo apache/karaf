@@ -266,7 +266,7 @@ public class ObrCommandImpl implements Command
             out.println(")");
         }
     
-        if (resources == null)
+        if ((resources == null) || (resources.length == 0))
         {
             out.println("No matching bundles.");
         }
