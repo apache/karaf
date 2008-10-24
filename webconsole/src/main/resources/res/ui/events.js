@@ -88,7 +88,8 @@ function entryInternal( /* Element */ parent, /* Object */ dataEntry, /* boolean
     tableE.appendChild(bodyE);
 
     for( var p in dataEntry.properties ) {
-    	bodyE.appendChild(tr(null, null, [td(null, null, [text(p + " = " + dataEntry.properties[p])] )]));
+    	bodyE.appendChild(tr(null, null, [td(null, null, [text(p)] ),
+    	                                  td(null, null, [text(dataEntry.properties[p])])]));
     }
     
     parent.appendChild( td( "content", null, [tableE] ) );
