@@ -68,7 +68,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
-                        <Export-Package>org.apache.geronimo.gshell.obr*;version=${project.version}</Export-Package>
+                        <Export-Package>org.apache.servicemix.kernel.gshell.obr*;version=${project.version}</Export-Package>
                         <Import-Package>
                             org.apache.geronimo.gshell.wisdom.command,
                             org.apache.geronimo.gshell.wisdom.registry,
