@@ -58,11 +58,40 @@ public class SimpleTest extends AbstractIntegrationTest {
 	 * to be specified here.
 	 */
 	protected String[] getTestBundlesNames() {
-        return new String[] {
-            getBundle("org.apache.servicemix.specs", "org.apache.servicemix.specs.stax-api-1.0"),
-            getBundle("org.apache.servicemix.specs", "org.apache.servicemix.specs.jaxp-api-1.3"),
-		};
+        return new String[0];
 	}
+
+    /**
+     * Do not include the jaxp-ri bundle by default, as we want to test it
+     * @return
+     */
+    @Override
+    protected String[] getTestFrameworkBundlesNames() {
+        return new String[] {
+            getBundle("org.apache.geronimo.specs", "geronimo-servlet_2.5_spec"),
+            getBundle("org.apache.felix", "org.osgi.compendium"),
+            getBundle("org.apache.felix", "org.apache.felix.configadmin"),
+            getBundle("org.ops4j.pax.logging", "pax-logging-api"),
+            getBundle("org.ops4j.pax.logging", "pax-logging-service"),
+            //getBundle("org.apache.servicemix.specs", "org.apache.servicemix.specs.jaxp-api-1.3"),
+            //getBundle("org.apache.servicemix.specs", "org.apache.servicemix.specs.stax-api-1.0"),
+            getBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.jaxp-ri"),
+            getBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.aopalliance"),
+            getBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.asm"),
+            getBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.junit"),
+            getBundle("org.springframework", "spring-beans"),
+            getBundle("org.springframework", "spring-core"),
+            getBundle("org.springframework", "spring-context"),
+            getBundle("org.springframework", "spring-aop"),
+            getBundle("org.springframework", "spring-test"),
+            getBundle("org.springframework.osgi", "spring-osgi-core"),
+            getBundle("org.springframework.osgi", "spring-osgi-io"),
+            getBundle("org.springframework.osgi", "spring-osgi-extender"),
+            getBundle("org.springframework.osgi", "spring-osgi-test"),
+            getBundle("org.springframework.osgi", "spring-osgi-annotation"),
+            getBundle("org.apache.servicemix.kernel.testing", "org.apache.servicemix.kernel.testing.support"),
+		};
+    }
 
     public void testDocumentBuilderFactory() throws Exception {
         try {
@@ -100,7 +129,7 @@ public class SimpleTest extends AbstractIntegrationTest {
         b.uninstall();
     }
 
-    public void testWoodstox() throws Exception {
+    public void testStax() throws Exception {
         try {
             XMLInputFactory.newInstance();
             fail("Implementation should not have been found");
