@@ -145,7 +145,6 @@
     <bean id="commandsCompleter" class="org.apache.geronimo.gshell.wisdom.completer.CommandsCompleter" lazy-init="true">
         <constructor-arg ref="eventManager"/>
         <constructor-arg ref="commandRegistry"/>
-        <constructor-arg ref="fileSystemAccess" />
     </bean>
 
     <bean id="variableNameCompleter" class="org.apache.geronimo.gshell.wisdom.completer.VariableNameCompleter"
