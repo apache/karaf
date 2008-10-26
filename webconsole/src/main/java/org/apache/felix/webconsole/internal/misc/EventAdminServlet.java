@@ -19,8 +19,7 @@ package org.apache.felix.webconsole.internal.misc;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -110,50 +109,61 @@ implements EventHandler
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
     throws ServletException, IOException
     {
+        final String action = getParameter(req, "action");
         // for now we only have the clear action
-        if ( getParameter(req, "clear") != null )
+        if ( "clear".equals(action) )
         {
             synchronized ( this.events )
             {
                 this.events.clear();
             }
         }
-        final String uri = req.getRequestURI();
-        resp.sendRedirect( uri );
-        return;
+        // we always send back the json data
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("utf-8");
+
+        renderJSON(resp.getWriter());
     }
 
-    protected void renderContent( HttpServletRequest request, HttpServletResponse response )
-    throws ServletException, IOException
+    private void renderJSON(final PrintWriter pw)
+    throws IOException
     {
-
-        PrintWriter pw = response.getWriter();
-
-        String appRoot = ( String ) request.getAttribute( OsgiManager.ATTR_APP_ROOT );
-        pw.println( "<script src='" + appRoot + "/res/ui/events.js' language='JavaScript'></script>" );
-
-        pw.println("<h1>Events</h1>");
-        final EventAdmin admin = (EventAdmin) this.getService(EventAdmin.class.getName());
-        if ( admin == null ) {
-            pw.println("<p><em>Event Admin is not installed.</em></p>");
+        List copiedEvents;
+        synchronized ( this.events )
+        {
+            copiedEvents = new ArrayList(this.events);
         }
+        // create status line
+        final EventAdmin admin = (EventAdmin) this.getService(EventAdmin.class.getName());
+        StringBuffer statusLine = new StringBuffer();
+        if ( admin == null ) {
+            statusLine.append("Event Admin is not installed/running.");
+        } else {
+            statusLine.append("Event Admin is running.");
+        }
+        statusLine.append(" ");
+        statusLine.append(copiedEvents.size());
+        statusLine.append(" Events received");
+        if ( !copiedEvents.isEmpty() ) {
+            statusLine.append(" since ");
+            Date d = new Date();
+            d.setTime(((EventInfo)copiedEvents.get(0)).received);
+            statusLine.append(d);
+        }
+        statusLine.append(".");
 
-        Util.startScript( pw );
-        pw.println( "var eventListData = " );
         JSONWriter jw = new JSONWriter( pw );
         try
         {
             jw.object();
 
+            jw.key( "status" );
+            jw.value ( statusLine );
+
             jw.key( "data" );
 
             jw.array();
 
-            List copiedEvents;
-            synchronized ( this.events )
-            {
-                copiedEvents = new ArrayList(this.events);
-            }
             // display list in reverse order
             for(int index = copiedEvents.size() -1; index >= 0; index--)
             {
@@ -170,8 +180,40 @@ implements EventHandler
             throw new IOException( je.toString() );
         }
 
-        pw.println( ";" );
-        pw.println( "renderEvents( eventListData );" );
+    }
+
+    protected void doGet( HttpServletRequest request, HttpServletResponse response )
+    throws ServletException, IOException
+    {
+
+        final String info = request.getPathInfo();
+        if ( info.endsWith( ".json" ) )
+        {
+            response.setContentType( "text/javascript" );
+            response.setCharacterEncoding( "UTF-8" );
+
+            PrintWriter pw = response.getWriter();
+            this.renderJSON(pw);
+
+            // nothing more to do
+            return;
+        }
+
+        super.doGet( request, response );
+    }
+
+    protected void renderContent( HttpServletRequest request, HttpServletResponse response )
+    throws ServletException, IOException
+    {
+        final PrintWriter pw = response.getWriter();
+
+        String appRoot = ( String ) request.getAttribute( OsgiManager.ATTR_APP_ROOT );
+        pw.println( "<script src='" + appRoot + "/res/ui/jquery-1.2.6.min.js' language='JavaScript'></script>" );
+        pw.println( "<script src='" + appRoot + "/res/ui/jquery.tablesorter-2.0.3.min.js' language='JavaScript'></script>" );
+        pw.println( "<script src='" + appRoot + "/res/ui/events.js' language='JavaScript'></script>" );
+
+        Util.startScript( pw );
+        pw.println( "renderEvents( );" );
         Util.endScript( pw );
     }
 

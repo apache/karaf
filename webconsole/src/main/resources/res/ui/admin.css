@@ -557,3 +557,74 @@ textarea {
     margin-top: 4px;
     border: 0px solid #999999;
 }
+
+div.buttons {
+    margin-top: 10px;
+    height: 30px;
+}
+div.button {
+	float:right;
+    margin-top: 5px;
+	margin-right: 10px;
+}
+div.fullwidth {
+	margin-top: 10px;
+    width: 100%;
+}
+div.statusline {
+    background-color: #F5F5F5;
+    margin-left: 10px;
+    margin-right: 10px;
+    padding-left: 10px;
+    border: 1px solid #CCCCCC;
+    font-size: 13px;
+    color: #222222;
+    line-height: 19px;
+}
+div.table {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+div.tablelayout {
+    background-color: #E0FFFF;
+}
+
+/* tables */
+table.tablelayout {
+    font-family:arial;
+    background-color: #CDCDCD;
+    font-size: 8pt;
+    width: 100%;
+    text-align: left;
+    border-spacing: 0;
+}
+table.tablelayout thead tr th, table.tablelayout tfoot tr th {
+    background-color: #e6EEEE;
+    border: 1px solid #FFF;
+    font-size: 8pt;
+    padding: 4px;
+}
+table.tablelayout thead tr .header {
+    background-image: url(../imgs/bg.gif);
+    background-repeat: no-repeat;
+    background-position: center right;
+    cursor: pointer;
+}
+table.tablelayout tbody td {
+    color: #3D3D3D;
+    padding: 4px;
+    background-color: #FFF;
+    vertical-align: top;
+}
+table.tablelayout tbody tr.odd td {
+    background-color:#F0F0F6;
+}
+table.tablelayout thead tr .headerSortUp {
+    background-image: url(../imgs/asc.gif);
+}
+table.tablelayout thead tr .headerSortDown {
+    background-image: url(../imgs/desc.gif);
+}
+table.tablelayout thead tr .headerSortDown, table.tablelayout thead tr .headerSortUp {
+background-color: #8dbdd8;
+}
