@@ -83,8 +83,13 @@
         <constructor-arg ref="commandRegistry"/>
     </bean>
 
+    <bean id="groupDirResolver" class="org.apache.geronimo.gshell.wisdom.registry.GroupDirectoryResolver">
+        <constructor-arg ref="fileSystemAccess"/>
+    </bean>
+
     <bean id="commandResolver" class="org.apache.geronimo.gshell.wisdom.registry.CommandResolverImpl">
         <constructor-arg ref="fileSystemAccess"/>
+        <constructor-arg ref="groupDirResolver"/>
     </bean>
 
     <bean class="org.apache.geronimo.gshell.wisdom.command.AliasCommand" scope="prototype">
