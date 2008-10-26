@@ -43,6 +43,7 @@
         <module>gshell-log</module>
         <module>gshell-config</module>
         <module>gshell-packages</module>
+        <module>itests</module>
     </modules>
 
 </project>
