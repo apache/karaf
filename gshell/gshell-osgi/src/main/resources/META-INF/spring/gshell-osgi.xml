@@ -53,6 +53,9 @@
         <gshell:command name="osgi/refresh">
             <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.RefreshBundle" />
         </gshell:command>
+        <gshell:command name="osgi/update">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.UpdateBundle" />
+        </gshell:command>
         <gshell:command name="osgi/resolve">
             <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.ResolveBundle" />
         </gshell:command>
