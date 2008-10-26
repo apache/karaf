@@ -17,7 +17,11 @@
       limitations under the License.
 -->
 <features>
-    <feature name="wrapper">
+    <feature name="wrapper" version="${version}">
         <bundle>mvn:org.apache.servicemix.kernel.gshell/org.apache.servicemix.kernel.gshell.wrapper/${version}</bundle>
+    </feature>
+    <feature name="obr" version="${version}">
+        <bundle>mvn:org.apache.felix/org.apache.felix.bundlerepository/${felix.bundlerepository.version}</bundle>
+        <bundle>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.obr/${version}</bundle>
     </feature>
 </features>
