@@ -40,7 +40,7 @@ public class SimpleTest extends AbstractIntegrationTest {
 	 * point for such use cases that doesn't require duplication
 	 * of the entire manifest...
 	 */
-	protected String getManifestLocation() {
+	protected String getManifestLocation() {                            
 		return "classpath:org/apache/servicemix/MANIFEST.MF";
 	}
 
@@ -69,12 +69,12 @@ public class SimpleTest extends AbstractIntegrationTest {
     protected String[] getTestFrameworkBundlesNames() {
         return new String[] {
             getBundle("org.apache.geronimo.specs", "geronimo-servlet_2.5_spec"),
+            getBundle("org.apache.servicemix.specs", "org.apache.servicemix.specs.jaxp-api-1.3"),
+            getBundle("org.apache.servicemix.specs", "org.apache.servicemix.specs.stax-api-1.0"),
             getBundle("org.apache.felix", "org.osgi.compendium"),
             getBundle("org.apache.felix", "org.apache.felix.configadmin"),
             getBundle("org.ops4j.pax.logging", "pax-logging-api"),
             getBundle("org.ops4j.pax.logging", "pax-logging-service"),
-            //getBundle("org.apache.servicemix.specs", "org.apache.servicemix.specs.jaxp-api-1.3"),
-            //getBundle("org.apache.servicemix.specs", "org.apache.servicemix.specs.stax-api-1.0"),
             getBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.jaxp-ri"),
             getBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.aopalliance"),
             getBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.asm"),
@@ -100,9 +100,11 @@ public class SimpleTest extends AbstractIntegrationTest {
         } catch (Throwable t) {
         }
         Bundle b = installBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.jaxp-ri", null, "jar");
-        Thread.sleep(100);
-		assertNotNull(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        b.uninstall();
+        try {
+		    assertNotNull(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
+        } finally {
+            b.uninstall();
+        }
     }
 
     public void testTransformerFactory() throws Exception {
@@ -112,9 +114,11 @@ public class SimpleTest extends AbstractIntegrationTest {
         } catch (Throwable t) {
         }
         Bundle b = installBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.jaxp-ri", null, "jar");
-        Thread.sleep(100);
-        assertNotNull(TransformerFactory.newInstance().newTransformer());
-        b.uninstall();
+        try {
+            assertNotNull(TransformerFactory.newInstance().newTransformer());
+        } finally {
+            b.uninstall();
+        }
     }
 
     public void testSchemaFactory() throws Exception {
@@ -124,9 +128,11 @@ public class SimpleTest extends AbstractIntegrationTest {
         } catch (Throwable t) {
         }
         Bundle b = installBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.jaxp-ri", null, "jar");
-        Thread.sleep(100);
-        assertNotNull(SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema").newSchema());
-        b.uninstall();
+        try {
+            assertNotNull(SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema").newSchema());
+        } finally {
+            b.uninstall();
+        }
     }
 
     public void testStax() throws Exception {
@@ -136,8 +142,11 @@ public class SimpleTest extends AbstractIntegrationTest {
         } catch (Throwable t) {
         }
         Bundle b = installBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.jaxp-ri", null, "jar");
-        assertNotNull(XMLInputFactory.newInstance());
-        b.uninstall();
+        try {
+            assertNotNull(XMLInputFactory.newInstance());
+        } finally {
+            b.uninstall();
+        }
     }
 
 }
