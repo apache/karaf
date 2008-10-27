@@ -44,7 +44,7 @@
         <gshell:command name="features/listUrl">
             <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.ListUrlCommand" />
         </gshell:command>
-        <gshell:command name="features/remoteUrl">
+        <gshell:command name="features/removeUrl">
             <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.RemoveUrlCommand" />
         </gshell:command>
         <gshell:command name="features/refreshUrl">
@@ -56,7 +56,7 @@
         <gshell:command name="features/uninstall">
             <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.UninstallFeatureCommand" />
         </gshell:command>
-        <gshell:command name="features/listFeatures">
+        <gshell:command name="features/list">
             <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.ListFeaturesCommand" />
         </gshell:command>
     </gshell:command-bundle>
