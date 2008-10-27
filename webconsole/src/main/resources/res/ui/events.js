@@ -75,16 +75,22 @@ function entryInternal( /* Element */ parent, /* Object */ dataEntry ) {
     parent.appendChild( td( null, null, [ text( new Date(dataEntry.received) ) ] ) );
     parent.appendChild( td( null, null, [ text( topic ) ] ) );
 
-    var tableE = createElement("table");
-    var bodyE = createElement("tbody");
-    tableE.appendChild(bodyE);
-
-    for( var p in dataEntry.properties ) {
-    	bodyE.appendChild(tr(null, null, [td(null, null, [text(p)] ),
-    	                                  td(null, null, [text(dataEntry.properties[p])])]));
+    var propE;
+    if ( dataEntry.info ) {
+    	propE = text(dataEntry.info);
+    } else {
+	    var tableE = createElement("table");
+	    var bodyE = createElement("tbody");
+	    tableE.appendChild(bodyE);
+	
+	    for( var p in dataEntry.properties ) {
+	    	bodyE.appendChild(tr(null, null, [td(null, null, [text(p)] ),
+	    	                                  td(null, null, [text(dataEntry.properties[p])])]));
+	    }
+	    propE = tableE;
     }
     
-    parent.appendChild( td( null, null, [tableE] ) );
+    parent.appendChild( td( null, null, [propE] ) );
 }
 
 function loadData() {

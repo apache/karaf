@@ -30,6 +30,7 @@ import org.apache.felix.webconsole.internal.Util;
 import org.apache.felix.webconsole.internal.servlet.OsgiManager;
 import org.json.JSONException;
 import org.json.JSONWriter;
+import org.osgi.framework.*;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.*;
 
@@ -53,7 +54,16 @@ implements EventHandler
     /** Number of events to be displayed. */
     private int maxSize = 50;
 
-    protected final List events = new ArrayList();
+    private final List events = new ArrayList();
+
+    /** Custom event renderers hashed by topic. */
+    private final Map eventRenderers = new HashMap();
+
+    public EventAdminServlet()
+    {
+        eventRenderers.put(ServiceEvent.class.getName().replace('.', '/') + "/", new ServiceEventInfoProvider());
+        eventRenderers.put(BundleEvent.class.getName().replace('.', '/') + "/", new BundleEventInfoProvider());
+    }
 
     public String getLabel()
     {
@@ -221,6 +231,19 @@ implements EventHandler
     throws JSONException
     {
         final Event e = info.event;
+
+        // check if we have an info provider
+        final Iterator iter = this.eventRenderers.entrySet().iterator();
+        String infoText = null;
+        while ( infoText == null && iter.hasNext() )
+        {
+            final Map.Entry entry = (Map.Entry) iter.next();
+            if ( e.getTopic().startsWith(entry.getKey().toString()) )
+            {
+                infoText = ((EventInfoProvider)entry.getValue()).getInfo(e);
+            }
+        }
+
         jw.object();
         jw.key( "id" );
         jw.value( String.valueOf(index) );
@@ -228,6 +251,11 @@ implements EventHandler
         jw.value( info.received );
         jw.key( "topic" );
         jw.value( e.getTopic());
+        if ( infoText != null )
+        {
+            jw.key( "info" );
+            jw.value( infoText );
+        }
         jw.key( "properties" );
         jw.object();
         final String[] names = e.getPropertyNames();
@@ -254,6 +282,99 @@ implements EventHandler
         {
             this.event = e;
             this.received = System.currentTimeMillis();
+        }
+    }
+
+    private static interface EventInfoProvider
+    {
+        String getInfo(Event event);
+    }
+
+    private static final class ServiceEventInfoProvider implements EventInfoProvider
+    {
+
+        /**
+         * @see org.apache.felix.webconsole.internal.misc.EventAdminServlet.EventInfoProvider#getInfo(org.osgi.service.event.Event)
+         */
+        public String getInfo(Event event)
+        {
+            final ServiceEvent serviceEvent = (ServiceEvent) event.getProperty(EventConstants.EVENT);
+            if ( serviceEvent == null )
+            {
+                return null;
+            }
+            final StringBuffer buffer = new StringBuffer("Service ");
+            buffer.append(serviceEvent.getServiceReference().getProperty(Constants.SERVICE_ID));
+            buffer.append(' ');
+            switch (serviceEvent.getType())
+            {
+                case ServiceEvent.REGISTERED:
+                    buffer.append("registered");
+                    break;
+                case ServiceEvent.MODIFIED:
+                    buffer.append("modified");
+                    break;
+                case ServiceEvent.UNREGISTERING:
+                    buffer.append("unregistering");
+                    break;
+                default:
+                    return null; // IGNOREE
+            }
+
+            return buffer.toString();
+        }
+    }
+
+    private static final class BundleEventInfoProvider implements EventInfoProvider
+    {
+
+        /**
+         * @see org.apache.felix.webconsole.internal.misc.EventAdminServlet.EventInfoProvider#getInfo(org.osgi.service.event.Event)
+         */
+        public String getInfo(Event event)
+        {
+            final BundleEvent bundleEvent = (BundleEvent) event.getProperty(EventConstants.EVENT);
+            if ( bundleEvent == null )
+            {
+                return null;
+            }
+            final StringBuffer buffer = new StringBuffer("Bundle ");
+            buffer.append(bundleEvent.getBundle().getSymbolicName());
+            buffer.append(' ');
+            switch (bundleEvent.getType())
+            {
+                case BundleEvent.INSTALLED:
+                    buffer.append("installed");
+                    break;
+                case BundleEvent.RESOLVED:
+                    buffer.append("resolved");
+                    break;
+                case BundleEvent.STARTED:
+                    buffer.append("started");
+                    break;
+                case BundleEvent.STARTING:
+                    buffer.append("starting");
+                    break;
+                case BundleEvent.STOPPED:
+                    buffer.append("stopped");
+                    break;
+                case BundleEvent.STOPPING:
+                    buffer.append("stopping");
+                    break;
+                case BundleEvent.UNINSTALLED:
+                    buffer.append("uninstalled");
+                    break;
+                case BundleEvent.UNRESOLVED:
+                    buffer.append("unresolved");
+                    break;
+                case BundleEvent.UPDATED:
+                    buffer.append("updated");
+                    break;
+                default:
+                    return null; // IGNOREE
+            }
+
+            return buffer.toString();
         }
     }
 }
