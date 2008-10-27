@@ -42,7 +42,6 @@ import org.springframework.util.xml.DomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.geronimo.gshell.wisdom.command.ConfigurableCommandCompleter;
-import org.apache.geronimo.gshell.wisdom.command.LinkCommand;
 import org.apache.geronimo.gshell.wisdom.registry.CommandLocationImpl;
 import org.apache.servicemix.kernel.gshell.core.CommandBundle;
 
@@ -95,6 +94,8 @@ public class CommandParser extends AbstractBeanDefinitionParser {
     public static final String ALIASES = "aliases";
 
     public static final String LINK = "link";
+
+    public static final String LINKS = "links";
 
     public static final String TARGET = "target";
 
@@ -277,14 +278,15 @@ public class CommandParser extends AbstractBeanDefinitionParser {
             //
 
             ManagedList commands = new ManagedList();
-            // noinspection unchecked
+
             commands.addAll(parseCommands(element));
-            // noinspection unchecked
-            commands.addAll(parseLinks(element));
             bundle.addPropertyValue(COMMANDS, commands);
 
+            ManagedMap links = new ManagedMap();
+            links.putAll(parseLinks(element));
+            bundle.addPropertyValue(LINKS, links);
+
             ManagedMap aliases = new ManagedMap();
-            // noinspection unchecked
             aliases.putAll(parseAliases(element));
             bundle.addPropertyValue(ALIASES, aliases);
 
@@ -427,27 +429,20 @@ public class CommandParser extends AbstractBeanDefinitionParser {
         // <gshell:link>
         //
 
-        private List<BeanDefinition> parseLinks(final Element element) {
+        private Map<String,String> parseLinks(final Element element) {
             assert element != null;
 
             log.trace("Parse links; element; {}", element);
 
-            List<BeanDefinition> links = new ArrayList<BeanDefinition>();
+            Map<String,String> links = new LinkedHashMap<String,String>();
 
             List<Element> children = getChildElements(element, LINK);
 
             for (Element child : children) {
-                BeanDefinitionBuilder link = BeanDefinitionBuilder.rootBeanDefinition(LinkCommand.class);
-                link.addConstructorArgReference("commandRegistry");
-                link.addConstructorArgValue(child.getAttribute(TARGET));
-
                 String name = child.getAttribute(NAME);
-                BeanDefinition def = new GenericBeanDefinition();
-                def.setBeanClassName(CommandLocationImpl.class.getName());
-                def.getConstructorArgumentValues().addGenericArgumentValue(name);
-                link.addPropertyValue(LOCATION, def);
+                String target = child.getAttribute(TARGET);
 
-                links.add(link.getBeanDefinition());
+                links.put(name, target);
             }
 
             return links;

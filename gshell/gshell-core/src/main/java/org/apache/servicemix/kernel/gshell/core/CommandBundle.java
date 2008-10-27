@@ -36,6 +36,10 @@ import org.apache.geronimo.gshell.command.Command;
 import org.apache.geronimo.gshell.registry.CommandRegistry;
 import org.apache.geronimo.gshell.registry.AliasRegistry;
 import org.apache.geronimo.gshell.wisdom.command.CommandSupport;
+import org.apache.geronimo.gshell.wisdom.command.LinkCommand;
+import org.apache.geronimo.gshell.wisdom.registry.CommandLocationImpl;
+import org.apache.geronimo.gshell.spring.BeanContainerAware;
+import org.apache.geronimo.gshell.spring.BeanContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +54,8 @@ public class CommandBundle implements BundleContextAware, InitializingBean, Disp
     private BundleContext bundleContext;
 
     private List<Command> commands;
+
+    private Map<String,String> links;
 
     private Map<String,String> aliases;
 
@@ -72,6 +78,14 @@ public class CommandBundle implements BundleContextAware, InitializingBean, Disp
         assert commands != null;
 
         this.commands = commands;
+    }
+
+    public Map<String, String> getLinks() {
+        return links;
+    }
+
+    public void setLinks(Map<String, String> links) {
+        this.links = links;
     }
 
     public Map<String, String> getAliases() {
@@ -104,24 +118,53 @@ public class CommandBundle implements BundleContextAware, InitializingBean, Disp
         }
         if (commandRegistry != null && aliasRegistry != null) {
             log.debug("Command bundle is using the auto wired command/alias registry");
-            for (Command command : commands) {
-                log.debug("Registering command: {}", command.getLocation());
-                commandRegistry.registerCommand(command);
+            if (commands != null) {
+                for (Command command : commands) {
+                    log.debug("Registering command: {}", command.getLocation());
+                    commandRegistry.registerCommand(command);
+                }
             }
-            for (String name : aliases.keySet()) {
-                log.debug("Registering alias: {}", name);
-                aliasRegistry.registerAlias(name, aliases.get(name));
+            if (links != null) {
+                for (String name : links.keySet()) {
+                    log.debug("Registering link: {}", name);
+                    LinkCommand link = new LinkCommand(commandRegistry, links.get(name));
+                    link.setLocation(new CommandLocationImpl(name));
+                    commandRegistry.registerCommand(link);
+                }
+            }
+            if (aliases != null) {
+                for (String name : aliases.keySet()) {
+                    log.debug("Registering alias: {}", name);
+                    aliasRegistry.registerAlias(name, aliases.get(name));
+                }
             }
         } else if (bundleContext != null) {
-            if (aliases != null && aliases.size() > 0) {
-                throw new Exception("Aliases are not supported in OSGi");
-            }
             log.debug("Command bundle is using the OSGi registry");
-            for (Command command : commands) {
-                log.debug("Registering command: {}", command.getLocation());
-                Dictionary props = new Properties();
-                props.put(OsgiCommandRegistry.NAME, command.getLocation().getFullPath());
-                registrations.add(bundleContext.registerService(Command.class.getName(), command, props));
+            if (commands != null) {
+                for (Command command : commands) {
+                    log.debug("Registering command: {}", command.getLocation());
+                    Dictionary props = new Properties();
+                    props.put(OsgiCommandRegistry.NAME, command.getLocation().getFullPath());
+                    registrations.add(bundleContext.registerService(Command.class.getName(), command, props));
+                }
+            }
+            if (links != null) {
+                for (String name : links.keySet()) {
+                    log.debug("Registering link: {}", name);
+                    Dictionary props = new Properties();
+                    props.put(OsgiCommandRegistry.NAME, name);
+                    props.put(OsgiCommandRegistry.TARGET, links.get(name));
+                    registrations.add(bundleContext.registerService(Link.class.getName(), new Link() {}, props));
+                }
+            }
+            if (aliases != null) {
+                for (String name : aliases.keySet()) {
+                    log.debug("Registering alias: {}", name);
+                    Dictionary props = new Properties();
+                    props.put(OsgiAliasRegistry.NAME, name);
+                    props.put(OsgiAliasRegistry.ALIAS, aliases.get(name));
+                    registrations.add(bundleContext.registerService(Alias.class.getName(), new Alias() {}, props));
+                }
             }
         } else {
             throw new Exception("Command bundle should be wired to the command/alias registry or be used in an OSGi context");

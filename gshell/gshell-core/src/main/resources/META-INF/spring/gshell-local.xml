@@ -33,7 +33,11 @@
        default-init-method="init"
        default-destroy-method="destroy">
 
-    <bean id="localShell" parent="shell" init-method="init" destroy-method="close"/>
+    <bean id="localShellWrapped" parent="shell" init-method="init" destroy-method="close"/>
+
+    <bean id="localShell" class="org.apache.servicemix.kernel.gshell.core.ShellWrapper">
+        <constructor-arg ref="localShellWrapped" />
+    </bean>
 
     <osgi:reference id="mainService" interface="org.apache.servicemix.kernel.main.spi.MainService"/>
 
