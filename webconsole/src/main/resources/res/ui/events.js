@@ -14,58 +14,60 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+function render() {
+    renderStatusLine();
+    renderTable( ["Received", "Topic", "Properties"] );
+    renderStatusLine();	
+}
 
-function header( /* int */ columns )
-{
+function renderStatusLine() {
+	document.write( "<div class='fullwidth'>");
+    document.write( "<div class='statusline'></div>" );
+    document.write( "</div>" );
+}
+
+function renderTable( /* Array of String */ columns ) {
 	document.write( "<div class='fullwidth tablelayout'>");
     renderButtons();
 	document.write( "<div class='table'>");
     document.write( "<table id='events' class='tablelayout'>" );
 
     document.write( "<thead><tr>" );
-    document.write( "<th>Received</th>" );
-    document.write( "<th>Topic</th>" );
-    document.write( "<th>Properties</th>" );
-    document.write( "</tr></thead><tbody>" );
-
-}
-
-function renderData( eventData ) 
-{
-	$(".statusline").empty().append(eventData.status);
-    data ( eventData.data );
-}
-
-function data( /* Array of Object */ dataArray )
-{
-	$("#events > tbody > tr").remove();	
-    for ( var idx in dataArray )
-    {
-        entry( dataArray[idx] );
+    for ( var name in columns ) {
+        document.write( "<th>" + columns[name] + "</th>" );
     }
-}
-
-
-function footer( /* int */ columns )
-{
+    document.write( "</tr></thead><tbody>" );
     document.write( "</tbody></table>" );
     document.write( "</div>");
     renderButtons();
     document.write( "</div>");
 }
 
+function renderButtons( ) {
+	document.write( "<div class='fullwidth'>");
+    document.write( "<div class='buttons'>" );
+    document.write( "<div class='button'><button id='reloadButton' type='button' name='reload'>Reload</button></div>" );
+    document.write( "<div class='button'><button id='clearButton' type='button' name='clear'>Clear List</button></div>" );
+    document.write( "</div>" );
+    document.write( "</div>" );
+}
 
-function entry( /* Object */ dataEntry )
-{
+function renderData( eventData )  {
+	$(".statusline").empty().append(eventData.status);
+	$("#events > tbody > tr").remove();	
+    for ( var idx in eventData.data ) {
+        entry( eventData.data[idx] );
+    }
+}
+
+function entry( /* Object */ dataEntry ) {
     var trElement = tr( null, { id: "entry" + dataEntry.id } );
     entryInternal( trElement,  dataEntry );
 	$("#events > tbody").append(trElement);	
 }
 
 
-function entryInternal( /* Element */ parent, /* Object */ dataEntry )
-{
-
+function entryInternal( /* Element */ parent, /* Object */ dataEntry ) {
     var id = dataEntry.id;
     var topic = dataEntry.topic;
     var properties = dataEntry.properties;
@@ -85,44 +87,15 @@ function entryInternal( /* Element */ parent, /* Object */ dataEntry )
     parent.appendChild( td( null, null, [tableE] ) );
 }
 
-function renderStatusLine() {
-	document.write( "<div class='fullwidth'>");
-    document.write( "<div class='statusline'>" );
-    document.write( "</div>" );
-    document.write( "</div>" );
-}
-
-function renderButtons( )
-{
-	document.write( "<div class='fullwidth'>");
-    document.write( "<div class='buttons'>" );
-    document.write( "<div class='button'><button id='reloadButton' type='button' name='reload'>Reload</button></div>" );
-    document.write( "<div class='button'><button id='clearButton' type='button' name='clear'>Clear List</button></div>" );
-    document.write( "</div>" );
-    document.write( "</div>" );
-}
-
-function loadData() 
-{
+function loadData() {
 	$.get(pluginRoot + "/data.json", null, function(data) {
 	    renderData(data);
 	}, "json");	
 }
 
-function renderEvents( )
-{
-
-    // date, topic and properties
-    var columns = 3;
-    
-    renderStatusLine();
-
-    header( columns );
-
-    footer( columns );
-
-    renderStatusLine();
-
+function renderEvents() {
+	render();
+	
     loadData();
     
     $("#events").tablesorter();
