@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.servicemix</groupId>
         <artifactId>servicemix-pom</artifactId>
-        <version>1.0</version>
+        <version>2-SNAPSHOT</version>
     </parent>
 
     <groupId>org.apache.servicemix.kernel</groupId>
