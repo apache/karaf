@@ -1,0 +1,5 @@
+<features>
+    <feature name="f1">
+        <bundle>http://repo1.maven.org/maven2/org/apache/geronimo/specs/geronimo-stax-api_1.0_spec/1.0.1/geronimo-stax-api_1.0_spec-1.0.1.jar</bundle>
+    </feature>
+</features>

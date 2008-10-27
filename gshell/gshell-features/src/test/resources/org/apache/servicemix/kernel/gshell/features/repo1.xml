@@ -1,0 +1,14 @@
+<features>
+    <repository>urn:r1</repository>
+    <feature name="f1">
+        <config name="c1">
+            k=v
+        </config>
+        <bundle>b1</bundle>
+        <bundle>b2</bundle>
+    </feature>
+    <feature name="f2">
+        <feature>f1</feature>
+        <bundle>b3</bundle>
+    </feature>
+</features>
