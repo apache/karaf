@@ -30,6 +30,7 @@ public class ManipulationTestSuite {
         ots.addTestSuite(DuplicateMethod.class);
         ots.addTestSuite(Boxing.class);
         ots.addTestSuite(Annotation.class);
+        ots.addTestSuite(TypedList.class);
 		return ots;
 	}
 

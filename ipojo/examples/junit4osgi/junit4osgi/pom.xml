@@ -66,10 +66,11 @@
 						<Private-Package>
 							org.apache.felix.ipojo.junit4osgi.impl,
 							org.apache.felix.ipojo.junit4osgi.test,
-							org.apache.felix.ipojo.junit4osgi.helpers
 						</Private-Package>
 						<Export-Package>
-							org.apache.felix.ipojo.junit4osgi, junit.*
+							org.apache.felix.ipojo.junit4osgi, 
+							org.apache.felix.ipojo.junit4osgi.helpers,
+							junit.*
 						</Export-Package>
 						<Import-Package>!javax.swing*, *</Import-Package>
 						<Test-Suite>
