@@ -37,7 +37,7 @@ import org.osgi.framework.ServiceListener;
  * @see Extender
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class EventDispatcher implements ServiceListener {
+public final class EventDispatcher implements ServiceListener {
     
     /**
      * The internal event dispatcher.
@@ -60,10 +60,33 @@ public class EventDispatcher implements ServiceListener {
      * @param bc the bundle context used to register and unregister
      * {@link ServiceListener}.
      */
-    public EventDispatcher(BundleContext bc) {
+    private EventDispatcher(BundleContext bc) {
         m_context = bc;
         m_listeners = new HashMap();
+        // Only one thread can call the start method.
+        m_context.addServiceListener(this);
     }
+    
+    /**
+     * Creates the internal event
+     * dispatcher.
+     * @param bc the iPOJO bundle context to send to the 
+     * internal event dispatcher.
+     */
+    public static void create(BundleContext bc) {
+        m_dispatcher = new EventDispatcher(bc);
+    }
+    
+    /**
+     * Stops and delete the internal event dispatcher.
+     * This method must be call only
+     * if iPOJO is stopping.
+     */
+    public static void dispose() {
+        m_dispatcher.stop();
+        m_dispatcher = null;
+    }
+    
     
     /**
      * Gets the iPOJO event dispatcher.
@@ -74,17 +97,6 @@ public class EventDispatcher implements ServiceListener {
         return m_dispatcher;
     }
     
-    /**
-     * Starts the event dispatcher.
-     * This method sets the {@link EventDispatcher#m_dispatcher}.
-     * This method also registers the iPOJO {@link ServiceListener}
-     * receiving events to dispatch them to iPOJO instances.
-     */
-    public void start() {
-        // Only one thread can call the start method.
-        m_context.addServiceListener(this);
-        m_dispatcher = this; // Set the dispatcher.
-    }
     
     /**
      * Stops the event dispatcher.
@@ -92,9 +104,8 @@ public class EventDispatcher implements ServiceListener {
      * This methods must be called only when the iPOJO bundle
      * stops.
      */
-    public void stop() {
+    private void stop() {
         synchronized (this) {
-            m_dispatcher = null; 
             m_context.removeServiceListener(this);
             m_listeners.clear();
         }

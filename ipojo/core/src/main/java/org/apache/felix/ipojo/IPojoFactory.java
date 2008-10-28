@@ -54,7 +54,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
      * This list is shared by all factories and is
      * used to assert name unicity.
      */
-    protected static List m_instancesName = new ArrayList();
+    protected static final List INSTANCE_NAME = new ArrayList();
 
     /**
      * The component type description exposed by the {@link Factory} service.
@@ -267,7 +267,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
                 getLogger().log(Logger.WARNING, "The 'name' (" + name + ") attribute, used as the instance name, is deprecated, please use the 'instance.name' attribute");
                 configuration.put("instance.name", name);
             }
-            if (m_instancesName.contains(name)) {
+            if (INSTANCE_NAME.contains(name)) {
                 m_logger.log(Logger.ERROR, "The configuration is not acceptable : Name already used");
                 throw new UnacceptableConfiguration(getFactoryName() + " : Name already used : " + name);
             }
@@ -281,7 +281,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
 
         try {
             ComponentInstance instance = createInstance(configuration, context, handlers); // This method is called with the lock.
-            m_instancesName.add(name);
+            INSTANCE_NAME.add(name);
             m_componentInstances.put(name, instance);
             return instance;
         } catch (ConfigurationException e) {
@@ -616,7 +616,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
      * @see org.osgi.service.cm.ManagedServiceFactory#deleted(java.lang.String)
      */
     public synchronized void deleted(String name) {
-        m_instancesName.remove(name);
+        INSTANCE_NAME.remove(name);
         ComponentInstance instance = (ComponentInstance) m_componentInstances.remove(name);
         if (instance != null) {
             instance.dispose();
@@ -630,7 +630,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
     public void disposed(ComponentInstance instance) {
         String name = instance.getInstanceName();
         synchronized (this) {
-            m_instancesName.remove(name);
+            INSTANCE_NAME.remove(name);
             m_componentInstances.remove(name);
         }
     }
@@ -712,7 +712,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
                     if (instance.getState() != ComponentInstance.DISPOSED) {
                         instance.dispose();
                     }
-                    m_instancesName.remove(instance.getInstanceName());
+                    INSTANCE_NAME.remove(instance.getInstanceName());
                 }
 
                 m_componentInstances.clear();
@@ -781,7 +781,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
      */
     protected String generateName() {
         String name = m_factoryName + "-" + m_index;
-        while (m_instancesName.contains(name)) {
+        while (INSTANCE_NAME.contains(name)) {
             m_index = m_index + 1;
             name = m_factoryName + "-" + m_index;
         }
@@ -848,6 +848,16 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
                 return false;
             }
 
+        }
+        
+        /**
+         * Hashcode method.
+         * This method delegates to the {@link Object#hashCode()}.
+         * @return the object hashcode.
+         * @see java.lang.Object#hashCode()
+         */
+        public int hashCode() {
+            return super.hashCode();
         }
 
         /**

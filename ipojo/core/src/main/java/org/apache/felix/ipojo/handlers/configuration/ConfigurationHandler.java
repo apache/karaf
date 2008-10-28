@@ -18,8 +18,10 @@
  */
 package org.apache.felix.ipojo.handlers.configuration;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.felix.ipojo.ConfigurationException;
@@ -47,7 +49,7 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
     /**
      * List of the configurable fields.
      */
-    private Property[] m_configurableProperties = new Property[0];
+    private List/*<Property>*/ m_configurableProperties = new ArrayList(1);
 
     /**
      * ProvidedServiceHandler of the component. It is useful to propagate
@@ -137,9 +139,6 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
                     if (method[0].getMethodArguments().length != 1) {
                         throw new ConfigurationException("Malformed property :  The method " + methodName + " does not have one argument");
                     }
-                    if (type != null && !type.equals(method[0].getMethodArguments()[0])) {
-                        throw new ConfigurationException("Malformed property :   The field type (" + type + ") and the type of the argument of the setter method (" + method[0].getMethodArguments()[0] + ") are not the same.");
-                    }
                     type = method[0].getMethodArguments()[0];
                     configurables[i].addAttribute(new Attribute("type", type)); // Add the type to avoid configure checking
                 }
@@ -166,18 +165,16 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
     }
 
     /**
-     * Configure the handler.
-     * 
-     * @param metadata : the metadata of the component
-     * @param configuration : the instance configuration
-     * @throws ConfigurationException : one property metadata is not correct 
+     * Configures the handler.
+     * Access to field does not require synchronization as this method is executed
+     * before any thread access to this object.
+     * @param metadata the metadata of the component
+     * @param configuration the instance configuration
+     * @throws ConfigurationException one property metadata is not correct 
      * @see org.apache.felix.ipojo.Handler#configure(org.apache.felix.ipojo.InstanceManager,
      * org.apache.felix.ipojo.metadata.Element)
      */
     public void configure(Element metadata, Dictionary configuration) throws ConfigurationException {
-        // Store the component manager
-        m_configurableProperties = new Property[0];
-
         // Build the map
         Element[] confs = metadata.getElements("Properties", "");
         Element[] configurables = confs[0].getElements("Property");
@@ -251,8 +248,9 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
 
         // Propagation
         if (m_mustPropagate) {
-            for (int i = 0; i < m_configurableProperties.length; i++) {
-                m_toPropagate.put(m_configurableProperties[i].getName(), m_configurableProperties[i].getValue());
+            for (int i = 0; i < m_configurableProperties.size(); i++) {
+                Property prop = (Property) m_configurableProperties.get(i);
+                m_toPropagate.put(prop.getName(), prop.getValue());
             }
             reconfigure(m_toPropagate);
         }
@@ -283,34 +281,23 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
 //    }
 
     /**
-     * Add the given property metadata to the property metadata list.
+     * Adds the given property metadata to the property metadata list.
      * 
      * @param prop : property metadata to add
      */
     protected void addProperty(Property prop) {
-        for (int i = 0; (m_configurableProperties != null) && (i < m_configurableProperties.length); i++) {
-            if (m_configurableProperties[i].getName().equals(prop.getName())) { return; }
-        }
-
-        if (m_configurableProperties.length > 0) {
-            Property[] newProp = new Property[m_configurableProperties.length + 1];
-            System.arraycopy(m_configurableProperties, 0, newProp, 0, m_configurableProperties.length);
-            newProp[m_configurableProperties.length] = prop;
-            m_configurableProperties = newProp;
-        } else {
-            m_configurableProperties = new Property[] { prop };
-        }
+        m_configurableProperties.add(prop);
     }
 
     /**
-     * Check if the list contains the property.
+     * Checks if the list contains the property.
      * 
      * @param name : name of the property
      * @return true if the property exist in the list
      */
     protected boolean containsProperty(String name) {
-        for (int i = 0; (m_configurableProperties != null) && (i < m_configurableProperties.length); i++) {
-            if (m_configurableProperties[i].getName().equals(name)) { return true; }
+        for (int i = 0; i < m_configurableProperties.size(); i++) {
+            if (((Property) m_configurableProperties.get(i)).getName().equals(name)) { return true; }
         }
         return false;
     }
@@ -342,36 +329,44 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
             Object value = configuration.get(name);
             boolean found = false;
             // Check if the name is a configurable property
-            for (int i = 0; i < m_configurableProperties.length; i++) {
-                if (m_configurableProperties[i].getName().equals(name)) {
-                    if (m_configurableProperties[i].hasField()) {
-                        if (m_configurableProperties[i].getValue() == null || ! m_configurableProperties[i].getValue().equals(value)) {
-                            m_configurableProperties[i].setValue(value);
-                            getInstanceManager().onSet(null, m_configurableProperties[i].getField(), m_configurableProperties[i].getValue()); // Notify other handler of the field value change.
-                            if (m_configurableProperties[i].hasMethod()) {
-                                if (getInstanceManager().getPojoObjects() != null) {
-                                    m_configurableProperties[i].invoke(null); // Call on all created pojo objects.
-                                }
-                            }
-                        }
-                    } else if (m_configurableProperties[i].hasMethod()) { // Method but no field
-                        m_configurableProperties[i].setValue(value);
-                        if (getInstanceManager().getPojoObjects() != null) {
-                            m_configurableProperties[i].invoke(null); // Call on all created pojo objects.
-                        }
-                    }
+            for (int i = 0; i < m_configurableProperties.size(); i++) {
+                Property prop = (Property) m_configurableProperties.get(i);
+                if (prop.getName().equals(name)) {
+                    reconfigureProperty(prop, value);
                     found = true;
-                    break;
+                    break; // Exit the search loop
                 }
             }
             if (!found) { 
-                // The property is not a configurable property, at it to the toPropagate list.
+                // The property is not a configurable property, aadd it to the toPropagate list.
                 toPropagate.put(name, value);
             }
         }
 
         return toPropagate;
 
+    }
+
+    /**
+     * Reconfigures the given property with the given value.
+     * This methods handles {@link InstanceManager#onSet(Object, String, Object)}
+     * call and the callback invocation.
+     * The reconfiguration occurs only if the value changes.
+     * @param prop the property object to reconfigure
+     * @param value the new value.
+     */
+    private void reconfigureProperty(Property prop, Object value) {
+        if (prop.getValue() == null || ! prop.getValue().equals(value)) {
+            prop.setValue(value);
+            if (prop.hasField()) {
+                getInstanceManager().onSet(null, prop.getField(), prop.getValue()); // Notify other handler of the field value change.
+            }
+            if (prop.hasMethod()) {
+                if (getInstanceManager().getPojoObjects() != null) {
+                    prop.invoke(null); // Call on all created pojo objects.
+                }
+            }
+        }
     }
     
     /**
@@ -403,9 +398,10 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
      * @see org.apache.felix.ipojo.Handler#onCreation(java.lang.Object)
      */
     public void onCreation(Object instance) {
-        for (int i = 0; i < m_configurableProperties.length; i++) {
-            if (m_configurableProperties[i].hasMethod()) {
-                m_configurableProperties[i].invoke(instance);
+        for (int i = 0; i < m_configurableProperties.size(); i++) {
+            Property prop = (Property) m_configurableProperties.get(i);
+            if (prop.hasMethod()) {
+                prop.invoke(instance);
             }
         }
     }
@@ -426,7 +422,7 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
             propagate(props, m_propagatedFromCA);
             m_propagatedFromCA = props;
             m_configurationAlreadyPushed = true;
-        } else if (conf == null && m_configurationAlreadyPushed) { // Configuration deletion
+        } else if (m_configurationAlreadyPushed) { // Configuration deletion
             propagate(null, m_propagatedFromCA);
             m_propagatedFromCA = null;
             m_configurationAlreadyPushed = false;

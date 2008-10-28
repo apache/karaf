@@ -108,7 +108,7 @@ public class ProvidedServiceHandlerDescription extends HandlerDescription {
                 Element prop = new Element("property", null);
                 String name = (String) iterator.next();
                 prop.addAttribute(new Attribute("name", name));
-                prop.addAttribute(new Attribute("value", m_providedServices[i].getProperties().getProperty(name).toString()));
+                prop.addAttribute(new Attribute("value", m_providedServices[i].getProperties().getProperty(name)));
                 service.addElement(prop);
             }
             services.addElement(service);

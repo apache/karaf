@@ -71,7 +71,7 @@ public class PropertyField {
     }
 
     /**
-     * Returns the field
+     * Returns the field.
      * @return the field
      */
     public String getField() {
@@ -79,7 +79,7 @@ public class PropertyField {
     }
 
     /**
-     * Modify the field
+     * Modifies the field.
      * @param field the new field
      */
     public void setField(String field) {
@@ -87,7 +87,7 @@ public class PropertyField {
     }
 
     /**
-     * Returns the name
+     * Returns the name.
      * @return the name
      */
     public String getName() {
@@ -95,7 +95,7 @@ public class PropertyField {
     }
 
     /**
-     * Modify the name
+     * Modifies the name.
      * @param name the new name
      */
     public void setName(String name) {
@@ -103,7 +103,7 @@ public class PropertyField {
     }
 
     /**
-     * Returns the rights
+     * Returns the rights.
      * @return the rights
      */
     public String getRights() {
@@ -111,7 +111,7 @@ public class PropertyField {
     }
 
     /**
-     * Modify the rights
+     * Modifies the rights.
      * @param rights the new rights
      */
     public void setRights(String rights) {
@@ -119,7 +119,7 @@ public class PropertyField {
     }
 
     /**
-     * Returns the value
+     * Returns the value.
      * @return the value
      */
     public Object getValue() {
@@ -127,7 +127,7 @@ public class PropertyField {
     }
 
     /**
-     * Modify the value
+     * Modifies the value.
      * @param value the new value
      */
     public void setValue(Object value) {
@@ -135,7 +135,7 @@ public class PropertyField {
     }
 
     /**
-     * Returns the type
+     * Returns the type.
      * @return the type
      */
     public String getType() {
@@ -143,11 +143,11 @@ public class PropertyField {
     }
 
     /**
-     * Returns the description
+     * Returns the description.
      * @return the description
      */
     public String getDescription() {
-        // TODO Auto-generated method stub
+        //TODO Implement this method.
         return null;
     }
 

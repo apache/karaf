@@ -740,7 +740,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
         }
     }
 
-    public boolean isAggregate() {
+    public synchronized boolean isAggregate() {
         return m_aggregate;
     }
 
@@ -787,7 +787,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
      * <code>Null</code> if no comparator (i.e. the OSGi one is used).
      * @return the comparator class name or <code>null</code> if the dependency doesn't use a comparator.
      */
-    public String getComparator() {
+    public synchronized String getComparator() {
         if (m_comparator != null) {
             return m_comparator.getClass().getName();
         } else {

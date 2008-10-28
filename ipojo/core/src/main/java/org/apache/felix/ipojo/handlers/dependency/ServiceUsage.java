@@ -29,7 +29,7 @@ public class ServiceUsage extends ThreadLocal {
     /**
      * Structure contained in the Thread Local.
      */
-    public class Usage {
+    public static class Usage {
         
         /**
          * Stack Size.

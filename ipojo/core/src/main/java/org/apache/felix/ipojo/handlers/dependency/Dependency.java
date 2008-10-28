@@ -195,14 +195,6 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
         super.stop();
     }
 
-    /**
-     * Get the string form of the filter.
-     * @return : the string form of the filter.
-     */
-    public String getStringFilter() {
-        return getFilter().toString();
-    }
-
     public DependencyHandler getHandler() {
         return m_handler;
     }

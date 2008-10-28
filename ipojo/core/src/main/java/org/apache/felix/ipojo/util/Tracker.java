@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.felix.ipojo.context.ServiceReferenceImpl;
 import org.osgi.framework.BundleContext;
@@ -374,10 +375,11 @@ public class Tracker implements TrackerCustomizer {
         synchronized (tracked) {
             int length = tracked.size();
             List references = new ArrayList();
-            Iterator keys = tracked.keySet().iterator();
+            Iterator keys = tracked.entrySet().iterator();
             for (int i = 0; i < length; i++) {
-                Object key = keys.next(); 
-                if (tracked.get(key) != null) {
+                Map.Entry entry = (Map.Entry) keys.next();
+                Object key = entry.getKey();
+                if (entry.getValue() != null) {
                     references.add(key);
                 }
             }

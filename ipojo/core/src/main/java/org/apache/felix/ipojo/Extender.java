@@ -56,7 +56,13 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
      * This internal dispatcher helps the OSGi framework to support large
      * scale applications. The internal dispatcher is disabled by default.
      */
-    protected static final boolean DISPATCHER_ENABLED = false;
+    protected static boolean DISPATCHER_ENABLED = true;
+    
+    /**
+     * Property allowing to set if the internal dispatcher is enabled or disabled.
+     * Possible value are either <code>true</code> or <code>false</code>.
+     */
+    private static final String ENABLING_DISPATCHER = "ipojo.internal.dispatcher";
     
     /**
      * iPOJO Component Type and Instance declaration header.
@@ -104,11 +110,6 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
      * The thread analyzing arriving bundles and creating iPOJO contributions.
      */
     private final CreatorThread m_thread = new CreatorThread();
-    
-    /**
-     * The internal iPOJO dispatcher.
-     */
-    private EventDispatcher m_dispatcher;
 
     /**
      * Bundle Listener Notification.
@@ -281,9 +282,13 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
 
         m_logger = new Logger(m_context, "IPOJO-Extender");
         
-        m_dispatcher = new EventDispatcher(context);
-        m_dispatcher.start();
-
+        enablingDispatcher(context, m_logger);
+        
+        // Create the dispatcher only if required.
+        if (DISPATCHER_ENABLED) {
+            EventDispatcher.create(context);
+        }
+        
         // Begin by initializing core handlers
         startManagementFor(m_bundle);
         
@@ -309,7 +314,10 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
     public void stop(BundleContext context) {
         m_thread.stop(); // Stop the thread processing bundles.
         m_context.removeBundleListener(this);
-        m_dispatcher.stop();
+        
+        if (DISPATCHER_ENABLED) {
+            EventDispatcher.dispose();
+        }
 
         for (int k = 0; k < m_factoryTypes.size(); k++) {
             ManagedAbstractFactoryType mft = (ManagedAbstractFactoryType) m_factoryTypes.get(k);
@@ -330,6 +338,41 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
 
         m_factoryTypes = null;
         m_creator = null;
+    }
+    
+    /**
+     * Enables or disables the internal dispatcher, so sets the
+     * {@link Extender#DISPATCHER_ENABLED} flag.
+     * This method checks if the {@link Extender#ENABLING_DISPATCHER}
+     * property is set to <code>true</code>. Otherwise, the internal
+     * dispatcher is disabled. The property can be set as a system
+     * property (<code>ipojo.internal.dispatcher</code>) or inside the
+     * iPOJO bundle manifest (<code>ipojo-internal-dispatcher</code>).
+     * @param context the bundle context.
+     * @param logger the logger to indicates if the internal dispatcher is set.
+     */
+    private static void enablingDispatcher(BundleContext context, Logger logger) {
+        // First check in the framework and in the system properties
+        String flag = context.getProperty(ENABLING_DISPATCHER);
+        
+        // If null, look in bundle manifest
+        if (flag == null) {
+            String key = ENABLING_DISPATCHER.replace('.', '-');
+            flag = (String) context.getBundle().getHeaders().get(key);
+        }
+        
+        if (flag != null) {
+            if (flag.equalsIgnoreCase("true")) {
+                Extender.DISPATCHER_ENABLED = true;
+                logger.log(Logger.INFO, "iPOJO Internal Event Dispatcher enables");
+                return;
+            }
+        }
+        
+        // Either l is null, or the specified value was false
+        Extender.DISPATCHER_ENABLED = false;
+        logger.log(Logger.INFO, "iPOJO Internal Event Dispatcher disables");
+        
     }
 
     /**
@@ -402,7 +445,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
     /**
      * Structure storing an iPOJO extension.
      */
-    private final class ManagedAbstractFactoryType {
+    private static final class ManagedAbstractFactoryType {
         /**
          * The type (i.e.) name of the extension.
          */
@@ -440,7 +483,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
      * Structure storing unbound component type declarations.
      * Unbound means that there is no extension able to manage the extension.
      */
-    private final class UnboundComponentType {
+    private static final class UnboundComponentType {
         /**
          * The component type description.
          */
@@ -594,7 +637,11 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
          */
         public void run() {
             m_logger.log(Logger.INFO, "Creator thread is starting");
-            while (m_started) {
+            boolean started;
+            synchronized (this) {
+                started = m_started;
+            }
+            while (started) {
                 Bundle bundle;
                 synchronized (this) {
                     while (m_started && m_bundles.isEmpty()) {
@@ -623,6 +670,9 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
                 } catch (Throwable e) {
                     // To be sure to not kill the thread, we catch all exceptions and errors
                     m_logger.log(Logger.ERROR, "An error occurs when analyzing the content or starting the management of " + bundle.getBundleId(), e);
+                }
+                synchronized (this) {
+                    started = m_started;
                 }
             }
         }

@@ -283,7 +283,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
         // If not found or no id, look for a dependency with the same specification
         String requirement = element.getAttribute("specification");
         for (int i = 0; i < handler.getDependencies().length; i++) {
-            if (handler.getDependencies()[i].getSpecification().equals(requirement)) { return handler.getDependencies()[i]; }
+            if ((handler.getDependencies()[i].getSpecification().getName()).equals(requirement)) { return handler.getDependencies()[i]; }
         }
 
         return null;
@@ -514,7 +514,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                 List itfs = ParseUtils.parseArraysAsList(serviceSpecificationStr);
                 for (int j = 0; j < itfs.size(); j++) {
                     if (! all.contains(itfs.get(j))) {
-                        throw new ConfigurationException("The specification " + itfs.get(j) + " is not implemented by " + desc.getClassName());
+                        throw new ConfigurationException("The specification " + itfs.get(j) + " is not implemented by " + metadata.getAttribute("classname"));
                     }
                 }
                 all = new HashSet(itfs);

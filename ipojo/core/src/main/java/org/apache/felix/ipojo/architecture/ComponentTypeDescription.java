@@ -70,6 +70,7 @@ public class ComponentTypeDescription {
     /**
      * Gets the implementation class of this component type.
      * @return the component type implementation class name.
+     * @deprecated
      */
     public String getClassName() {
         return m_factory.getClassName();

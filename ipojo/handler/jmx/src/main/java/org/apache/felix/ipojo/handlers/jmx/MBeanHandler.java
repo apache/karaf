@@ -28,7 +28,6 @@ import javax.management.MBeanServer;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 
-import org.apache.felix.ipojo.FieldInterceptor;
 import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.PrimitiveHandler;
 import org.apache.felix.ipojo.architecture.HandlerDescription;

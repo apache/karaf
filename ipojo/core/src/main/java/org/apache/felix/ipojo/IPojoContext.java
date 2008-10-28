@@ -55,13 +55,6 @@ public class IPojoContext implements BundleContext, ServiceContext {
      * The service context used to access to the service registry.
      */
     private ServiceContext m_serviceContext;
-    
-    /**
-     * The internal event dispatcher used to avoid the multiplication
-     * of service listeners. The dispatcher is only used when the service context is
-     * not specified and if the internal dispatching is enabled ({@link Extender#DISPATCHER_ENABLED}
-     */
-    private EventDispatcher m_dispatcher;
 
     /**
      * Creates an iPOJO Context.
@@ -72,7 +65,6 @@ public class IPojoContext implements BundleContext, ServiceContext {
      */
     public IPojoContext(BundleContext context) {
         m_bundleContext = context;
-        m_dispatcher = EventDispatcher.getDispatcher();
     }
 
     /**
@@ -86,7 +78,6 @@ public class IPojoContext implements BundleContext, ServiceContext {
     public IPojoContext(BundleContext bundleContext, ServiceContext serviceContext) {
         m_bundleContext = bundleContext;
         m_serviceContext = serviceContext;
-        m_dispatcher = EventDispatcher.getDispatcher();
     }
 
     /**
@@ -122,10 +113,11 @@ public class IPojoContext implements BundleContext, ServiceContext {
      */
     public void addServiceListener(ServiceListener listener, String filter) throws InvalidSyntaxException {
         if (m_serviceContext == null) {
-            if (Extender.DISPATCHER_ENABLED) {
+            EventDispatcher dispatcher = EventDispatcher.getDispatcher();
+            if (dispatcher != null) { // getDispatcher returns null if not enable.
                 String itf = match(filter);
                 if (itf != null) {
-                    m_dispatcher.addListener(itf, listener);
+                    dispatcher.addListener(itf, listener);
                 } else {
                     m_bundleContext.addServiceListener(listener, filter);
                 }
@@ -394,7 +386,8 @@ public class IPojoContext implements BundleContext, ServiceContext {
      */
     public void removeServiceListener(ServiceListener listener) {
         if (m_serviceContext == null) {
-            if (! Extender.DISPATCHER_ENABLED || ! m_dispatcher.removeListener(listener)) {
+            EventDispatcher dispatcher = EventDispatcher.getDispatcher();
+            if (dispatcher == null || ! dispatcher.removeListener(listener)) {
                 m_bundleContext.removeServiceListener(listener);
             }
         } else {

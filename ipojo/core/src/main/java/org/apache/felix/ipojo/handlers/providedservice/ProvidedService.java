@@ -18,8 +18,10 @@
  */
 package org.apache.felix.ipojo.handlers.providedservice;
 
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.felix.ipojo.ConfigurationException;
@@ -204,7 +206,8 @@ public class ProvidedService implements ServiceFactory {
                 svc = m_handler.getInstanceManager().createPojoObject();
                 break;
             default:
-                m_handler.error("[" + m_handler.getInstanceManager().getClassName() + "] Unknown factory policy for " + m_serviceSpecification + " : " + m_factoryPolicy);
+                List specs = Arrays.asList(m_serviceSpecification);
+                m_handler.error("[" + m_handler.getInstanceManager().getClassName() + "] Unknown factory policy for " + specs + " : " + m_factoryPolicy);
                 getInstanceManager().stop();
                 break;
         }

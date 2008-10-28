@@ -123,7 +123,7 @@ public class ArchCommandImpl implements Command {
      */
     private void printStats(PrintStream out) {
         try {
-            Field field = IPojoFactory.class.getDeclaredField("m_instancesName");
+            Field field = IPojoFactory.class.getDeclaredField("INSTANCE_NAME");
             field.setAccessible(true); // The field is not accessible.
             List names = (List) field.get(null);
             out.println("Number of living instances : " + names.size());

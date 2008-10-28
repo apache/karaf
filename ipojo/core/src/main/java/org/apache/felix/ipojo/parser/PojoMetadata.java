@@ -198,12 +198,6 @@ public class PojoMetadata {
      * @param method the Method Metadata to add.
      */
     private void addMethod(MethodMetadata method) {
-        for (int i = 0; (m_methods != null) && (i < m_methods.length); i++) {
-            if (m_methods[i] == method) {
-                return;
-            }
-        }
-
         if (m_methods.length > 0) {
             MethodMetadata[] newInstances = new MethodMetadata[m_methods.length + 1];
             System.arraycopy(m_methods, 0, newInstances, 0, m_methods.length);
@@ -221,12 +215,6 @@ public class PojoMetadata {
      * @param field the Field Metadata to add.
      */
     private void addField(FieldMetadata field) {
-        for (int i = 0; (m_fields != null) && (i < m_fields.length); i++) {
-            if (m_fields[i] == field) {
-                return;
-            }
-        }
-
         if (m_fields.length > 0) {
             FieldMetadata[] newInstances = new FieldMetadata[m_fields.length + 1];
             System.arraycopy(m_fields, 0, newInstances, 0, m_fields.length);
@@ -244,12 +232,6 @@ public class PojoMetadata {
      * @param itf the interface name to add.
      */
     private void addInterface(String itf) {
-        for (int i = 0; (m_interfaces != null) && (i < m_interfaces.length); i++) {
-            if (m_interfaces[i] == itf) {
-                return;
-            }
-        }
-
         if (m_interfaces.length > 0) {
             String[] newInstances = new String[m_interfaces.length + 1];
             System.arraycopy(m_interfaces, 0, newInstances, 0, m_interfaces.length);

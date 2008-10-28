@@ -52,7 +52,7 @@ public class MethodField {
     }
 
     /**
-     * Gets the method
+     * Gets the method.
      * @return the method
      */
     public MethodMetadata getMethod() {
@@ -60,7 +60,7 @@ public class MethodField {
     }
 
     /**
-     * Gets the description
+     * Gets the description.
      * @return the description
      */
     public String getDescription() {
@@ -68,7 +68,7 @@ public class MethodField {
     }
 
     /**
-     * Gets the name
+     * Gets the name.
      * @return the name
      */
     public String getName() {

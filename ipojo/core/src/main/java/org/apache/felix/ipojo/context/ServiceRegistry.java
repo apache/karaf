@@ -68,7 +68,7 @@ public class ServiceRegistry {
     /**
      * Listener info structure.
      */
-    private class ListenerInfo {
+    private static class ListenerInfo {
         /**
          * Listener object.
          */

@@ -294,7 +294,6 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
      * value doesn't change further.
      */
     private void buildMBeanInfo() {
-        String dDescription = m_configMap.getDecription();
 
         // generate infos for attributes
         MBeanAttributeInfo[] dAttributes = null;
@@ -302,6 +301,8 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
         if (m_configMap == null) {
             return;
         }
+        
+        String dDescription = m_configMap.getDecription();
 
         if (m_configMap.getProperties() != null) {
             List < MBeanAttributeInfo > lAttributes = null;

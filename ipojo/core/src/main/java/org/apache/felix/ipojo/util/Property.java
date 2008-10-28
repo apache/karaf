@@ -490,7 +490,7 @@ public class Property implements FieldInterceptor {
      * @param value the new value
      * @see org.apache.felix.ipojo.FieldInterceptor#onSet(java.lang.Object, java.lang.String, java.lang.Object)
      */
-    public void onSet(Object pojo, String fieldName, Object value) {
+    public synchronized void onSet(Object pojo, String fieldName, Object value) {
         if (m_value == null || ! m_value.equals(value)) {
             setValue(value);
         }
