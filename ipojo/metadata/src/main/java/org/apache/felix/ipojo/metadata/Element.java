@@ -295,46 +295,48 @@ public class Element {
      * @return the XML snippet representing this element.
      */
     private String toXMLString(int indent) {
-        String xml = "";
+        StringBuffer xml = new StringBuffer();
 
-        String tabs = "";
+        StringBuffer tabs = new StringBuffer();
         for (int j = 0; j < indent; j++) {
-            tabs += "\t";
+            tabs.append("\t");
         }
 
+        xml.append(tabs);
         if (m_nameSpace == null) {
-            xml = tabs + "<" + m_name;
+            xml.append("<" + m_name);
         } else {
-            xml = tabs + "<" + m_nameSpace + ":" + m_name;
+            xml.append("<" + m_nameSpace + ":" + m_name);
         }
-
+        
         Set keys = m_attributes.keySet();
         Iterator it = keys.iterator();
         while (it.hasNext()) {
             Attribute current = (Attribute) m_attributes.get(it.next());
             if (current.getNameSpace() == null) {
-                xml += " " + current.getName() + "=\"" + current.getValue() + "\"";
+                xml.append(" " + current.getName() + "=\"" + current.getValue() + "\"");
             } else {
-                xml += " " + current.getNameSpace() + ":" + current.getName() + "=\"" + current.getValue() + "\"";
+                xml.append(" " + current.getNameSpace() + ":" + current.getName() + "=\"" + current.getValue() + "\"");
             }
         }
 
+
         if (m_elements.size() == 0) {
-            xml += "/>";
-            return xml;
+            xml.append("/>");
+            return xml.toString();
         } else {
-            xml += ">";
+            xml.append(">");
             keys = m_elements.keySet();
             it = keys.iterator();
             while (it.hasNext()) {
                 Element[] e = (Element[]) m_elements.get(it.next());
                 for (int i = 0; i < e.length; i++) {
-                    xml += "\n";
-                    xml += e[i].toXMLString(indent + 1);
+                    xml.append("\n");
+                    xml.append(e[i].toXMLString(indent + 1));
                 }
             }
-            xml += "\n" + tabs + "</" + m_name + ">";
-            return xml;
+            xml.append("\n" + tabs + "</" + m_name + ">");
+            return xml.toString();
         }
     }
 
@@ -353,17 +355,18 @@ public class Element {
      * @return the String form of this element.
      */
     private String toString(int indent) {
-        String xml = "";
+        StringBuffer xml = new StringBuffer();
 
-        String tabs = "";
+        StringBuffer tabs = new StringBuffer();
         for (int j = 0; j < indent; j++) {
-            tabs += "\t";
+            tabs.append("\t");
         }
 
+        xml.append(tabs);
         if (m_nameSpace == null) {
-            xml = tabs + m_name;
+            xml.append(m_name);
         } else {
-            xml = tabs + m_nameSpace + ":" + m_name;
+            xml.append(m_nameSpace + ":" + m_name);
         }
 
         Set keys = m_attributes.keySet();
@@ -371,25 +374,25 @@ public class Element {
         while (it.hasNext()) {
             Attribute current = (Attribute) m_attributes.get(it.next());
             if (current.getNameSpace() == null) {
-                xml += " " + current.getName() + "=\"" + current.getValue() + "\"";
+                xml.append(" " + current.getName() + "=\"" + current.getValue() + "\"");
             } else {
-                xml += " " + current.getNameSpace() + ":" + current.getName() + "=\"" + current.getValue() + "\"";
+                xml.append(" " + current.getNameSpace() + ":" + current.getName() + "=\"" + current.getValue() + "\"");
             }
         }
 
         if (m_elements.size() == 0) {
-            return xml;
+            return xml.toString();
         } else {
             keys = m_elements.keySet();
             it = keys.iterator();
             while (it.hasNext()) {
                 Element[] e = (Element[]) m_elements.get(it.next());
                 for (int i = 0; i < e.length; i++) {
-                    xml += "\n";
-                    xml += e[i].toString(indent + 1);
+                    xml.append("\n");
+                    xml.append(e[i].toString(indent + 1));
                 }
             }
-            return xml;
+            return xml.toString();
         }
     }
 

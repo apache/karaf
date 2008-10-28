@@ -466,21 +466,21 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
      * @return  method ID
      */
     private String generateMethodId(String name, String desc) {
-        String id = name;
+        StringBuffer id = new StringBuffer(name);
         Type[] args = Type.getArgumentTypes(desc);
         for (int i = 0; i < args.length; i++) {
             String arg = args[i].getClassName();
             if (arg.endsWith("[]")) {
                 arg = arg.substring(0, arg.length() - 2);
-                id += "$" + arg.replace('.', '_') + "__";
+                id.append("$" + arg.replace('.', '_') + "__");
             } else {
-                id += "$" + arg.replace('.', '_');
+                id.append("$" + arg.replace('.', '_'));
             }
         }
-        if (!m_methods.contains(id)) {
-            m_methods.add(id);
+        if (!m_methods.contains(id.toString())) {
+            m_methods.add(id.toString());
         }
-        return id;
+        return id.toString();
     }
 
     /**
@@ -519,11 +519,6 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
             itfs[interfaces.length] = POJO;
         } else {
             itfs = interfaces;
-        }
-
-        String str = "";
-        for (int i = 0; i < itfs.length; i++) {
-            str += itfs[i] + " ";
         }
 
         cv.visit(version, access, name, signature, superName, itfs);

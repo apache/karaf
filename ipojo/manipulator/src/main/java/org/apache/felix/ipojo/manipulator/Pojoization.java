@@ -121,12 +121,12 @@ public class Pojoization {
     }
 
     /**
-     * Manipulate a normal bundle.
-     * It will create an iPOJO bundle based on the given metadata file.
-     * The original and final bundle must be different.
-     * @param in : original bundle.
-     * @param out : final bundle.
-     * @param metadataFile : iPOJO metadata file (XML). 
+     * Manipulates an input bundle.
+     * This method creates an iPOJO bundle based on the given metadata file.
+     * The original and final bundles must be different.
+     * @param in the original bundle.
+     * @param out the final bundle.
+     * @param metadataFile the iPOJO metadata file (XML). 
      */
     public void pojoization(File in, File out, File metadataFile) {
         // Get the metadata.xml location if not null
@@ -136,9 +136,12 @@ public class Pojoization {
                 path = "/" + path;
             }
             m_metadata = parseXMLMetadata(path);
-            if (m_metadata == null) {
+            if (m_metadata == null) { // An error occurs during the parsing.
                 return;
             }
+            // m_metadata can be either an empty array or an Element
+            // array with component type description. It also can be null
+            // if no metadata file is given.
         }
         
         JarFile inputJar;
@@ -182,7 +185,8 @@ public class Pojoization {
                 }
             }
             if (!toskip) {
-                if (m_metadata != null || m_metadata.length != 0) {
+                // if no metadata or empty one, create a new array.
+                if (m_metadata != null && m_metadata.length > 0) {
                     Element[] newElementsList = new Element[m_metadata.length + 1];
                     System.arraycopy(m_metadata, 0, newElementsList, 0, m_metadata.length);
                     newElementsList[m_metadata.length] = xml.getElem();
@@ -365,7 +369,9 @@ public class Pojoization {
         try {
             mf = initial.getManifest(); // Get the initial manifest
         } catch (IOException e) {
-            e.printStackTrace();
+            // Could not happen, the input bundle is a bundle so must have a manifest.
+            error("Cannot get the manifest from the input bundle : " + e.getMessage());
+            return null;
         }
         Attributes att = mf.getMainAttributes();
         setImports(att); // Set the imports (add ipojo and handler namespaces
@@ -543,12 +549,12 @@ public class Pojoization {
      * @param att : the manifest attribute list to modify.
      */
     private void setPOJOMetadata(Attributes att) {
-        String meta = "";
+        StringBuffer meta = new StringBuffer();
         for (int i = 0; i < m_metadata.length; i++) {
-            meta += buildManifestMetadata(m_metadata[i], "");
+            meta.append(buildManifestMetadata(m_metadata[i], new StringBuffer()));
         }
-        if (!meta.equals("")) { 
-            att.putValue("iPOJO-Components", meta);
+        if (meta.length() != 0) { 
+            att.putValue("iPOJO-Components", meta.toString());
         }
     }
 
@@ -604,21 +610,24 @@ public class Pojoization {
     public String printClauses(Map exports, String allowedDirectives) {
         StringBuffer sb = new StringBuffer();
         String del = "";
-        for (Iterator i = exports.keySet().iterator(); i.hasNext();) {
-            String name = (String) i.next();
-            Map map = (Map) exports.get(name);
+        
+        for (Iterator i = exports.entrySet().iterator(); i.hasNext();) {
+            Map.Entry entry = (Map.Entry) i.next();
+            String name = (String) entry.getKey();
+            Map map = (Map) entry.getValue();
             sb.append(del);
             sb.append(name);
 
-            for (Iterator j = map.keySet().iterator(); j.hasNext();) {
-                String key = (String) j.next();
+            for (Iterator j = map.entrySet().iterator(); j.hasNext();) {
+                Map.Entry entry2 = (Map.Entry) j.next();
+                String key = (String) entry2.getKey();
 
                 // Skip directives we do not recognize
                 if (key.endsWith(":") && allowedDirectives.indexOf(key) < 0) {
                     continue;
                 }
 
-                String value = (String) map.get(key);
+                String value = (String) entry2.getValue();
                 sb.append(";");
                 sb.append(key);
                 sb.append("=");
@@ -730,21 +739,21 @@ public class Pojoization {
      * @param actual : actual manipulation metadata.
      * @return : given manipulation metadata + manipulation metadata of the given element.
      */
-    private String buildManifestMetadata(Element element, String actual) {
-        String result = "";
+    private StringBuffer buildManifestMetadata(Element element, StringBuffer actual) {
+        StringBuffer result = new StringBuffer();
         if (element.getNameSpace() == null) {
-            result = actual + element.getName() + " { ";
+            result.append(actual + element.getName() + " { ");
         } else {
-            result = actual + element.getNameSpace() + ":" + element.getName() + " { ";
+            result.append(actual + element.getNameSpace() + ":" + element.getName() + " { ");
         }
 
         Attribute[] atts = element.getAttributes();
         for (int i = 0; i < atts.length; i++) {
             Attribute current = (Attribute) atts[i];
             if (current.getNameSpace() == null) {
-                result = result + "$" + current.getName() + "=\"" + current.getValue() + "\" ";
+                result.append("$" + current.getName() + "=\"" + current.getValue() + "\" ");
             } else {
-                result = result + "$" + current.getNameSpace() + ":" + current.getName() + "=\"" + current.getValue() + "\" ";
+                result.append("$" + current.getNameSpace() + ":" + current.getName() + "=\"" + current.getValue() + "\" ");
             }
         }
 
@@ -753,7 +762,8 @@ public class Pojoization {
             result = buildManifestMetadata(elems[i], result);
         }
 
-        return result + "}";
+        result.append("}");
+        return result;
     }
 
     public List getWarnings() {

@@ -122,11 +122,6 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
         private String m_optional;
         
         /**
-         * Is the dependency aggregate ?
-         */
-        private String m_aggregate;
-        
-        /**
          * Dependency specification.
          */
         private String m_specification;
@@ -237,9 +232,6 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
             if (m_specification != null) {
                 req.addAttribute(new Attribute("interface", m_specification));
             }
-            if (m_aggregate != null) {
-                req.addAttribute(new Attribute("aggregate", m_aggregate));
-            }
             if (m_filter != null) {
                 req.addAttribute(new Attribute("filter", m_filter));
             }
@@ -278,9 +270,9 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
     }
     
     /**
-     * Parse a @property annotation.
+     * Parses a Property annotation.
      */
-    private final class PropertyAnnotationParser extends EmptyVisitor implements AnnotationVisitor {
+    private static final class PropertyAnnotationParser extends EmptyVisitor implements AnnotationVisitor {
         
         /**
          * Parent element element.

@@ -59,7 +59,7 @@ public class ManipulationProperty {
     /**
      * Helper array for byte code manipulation of primitive type.
      */
-    protected static final String[][] PRIMITIVE_BOXING_INFORMATION = new String[][] { 
+    static final String[][] PRIMITIVE_BOXING_INFORMATION = new String[][] { 
         {"V", "ILLEGAL", "ILLEGAL"}, 
         {"Z", "java/lang/Boolean", "booleanValue"},
         {"C", "java/lang/Character", "charValue"}, 

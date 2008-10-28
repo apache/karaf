@@ -168,8 +168,13 @@ public class ManipulatorMojo extends AbstractMojo {
             m_helper.attachArtifact(m_project, "jar", m_classifier, out);
         } else {
             // Usual behavior
-            in.delete();
-            out.renameTo(in);
+            if (in.delete()) {
+                if (! out.renameTo(in)) {
+                    getLog().warn("Cannot rename the manipulated jar file");
+                }
+            } else {
+                getLog().warn("Cannot delete the input jar file");
+            }
         }
         getLog().info("Bundle manipulation - SUCCESS");
     }

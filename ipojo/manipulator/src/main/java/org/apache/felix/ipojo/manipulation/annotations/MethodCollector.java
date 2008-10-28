@@ -385,7 +385,7 @@ public class MethodCollector extends EmptyVisitor {
         }
     }
 
-    private final class PropertyAnnotationParser extends EmptyVisitor implements AnnotationVisitor {
+    private static final class PropertyAnnotationParser extends EmptyVisitor implements AnnotationVisitor {
 
         /**
          * Parent element.

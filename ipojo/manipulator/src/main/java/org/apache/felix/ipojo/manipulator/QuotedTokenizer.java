@@ -45,12 +45,7 @@ public class QuotedTokenizer {
      * Does the tokenizer returns token.
      */
     boolean m_returnTokens;
-
-    /**
-     * Does the tokenizer should ignore white space.
-     */
-    boolean m_ignoreWhiteSpace = true;
-
+    
     /**
      * Peek.
      */

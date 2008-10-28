@@ -22,6 +22,7 @@ import java.io.File;
 
 import org.apache.felix.ipojo.manipulator.Pojoization;
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
 /**
@@ -130,14 +131,19 @@ public class IPojoTask extends Task {
         }
         pojo.pojoization(m_input, m_output, m_metadata);
         for (int i = 0; i < pojo.getWarnings().size(); i++) {
-            log((String) pojo.getWarnings().get(i));
+            log((String) pojo.getWarnings().get(i), Project.MSG_WARN);
         }
         if (pojo.getErrors().size() > 0) { throw new BuildException((String) pojo.getErrors().get(0)); }
         
         String out;
         if (m_output.getName().equals("_out.jar")) {
-            m_input.delete();
-            m_output.renameTo(m_input);
+            if (m_input.delete()) {
+                if (! m_output.renameTo(m_input)) {
+                    log("Cannot rename the output jar to " + m_input.getAbsolutePath(), Project.MSG_WARN);
+                }   
+            } else {
+                log("Cannot delete the input file : " + m_input.getAbsolutePath(), Project.MSG_WARN);
+            }
             out = m_input.getAbsolutePath();
         } else {
             out = m_output.getAbsolutePath();

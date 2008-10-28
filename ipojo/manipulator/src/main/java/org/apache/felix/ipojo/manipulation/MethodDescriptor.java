@@ -111,13 +111,13 @@ public class MethodDescriptor {
 
         // Add arguments
         if (m_arguments.length > 0) {
-            String args = "{";
-            args += m_arguments[0];
+            StringBuffer args = new StringBuffer("{");
+            args.append(m_arguments[0]);
             for (int i = 1; i < m_arguments.length; i++) {
-                args += "," + m_arguments[i];
+                args.append("," + m_arguments[i]);
             }
-            args += "}";
-            method.addAttribute(new Attribute("arguments", args));
+            args.append("}");
+            method.addAttribute(new Attribute("arguments", args.toString()));
         }
 
         return method;

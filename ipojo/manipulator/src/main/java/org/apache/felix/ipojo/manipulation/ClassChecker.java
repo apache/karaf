@@ -578,7 +578,7 @@ public class ClassChecker extends EmptyVisitor implements ClassVisitor, Opcodes 
      * recreate this attribute on another annotation.
      * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
      */
-    public final class SimpleAttribute {
+    public static final class SimpleAttribute {
         /**
          * The name of the attribute.
          */
@@ -615,7 +615,7 @@ public class ClassChecker extends EmptyVisitor implements ClassVisitor, Opcodes 
      * recreate this attribute on another annotation.
      * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
      */
-    public final class EnumAttribute {
+    public static final class EnumAttribute {
         /**
          * The name of the attribute.
          */
