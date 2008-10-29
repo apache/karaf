@@ -235,8 +235,8 @@ public class InstanceDescription {
             Element inst = new Element("ContainedInstances", "");
             for (int i = 0; i < m_containedInstances.length; i++) {
                 inst.addElement(m_containedInstances[i].getDescription());
-                instance.addElement(inst);
             }
+            instance.addElement(inst);
         }
         return instance;
 

@@ -80,7 +80,8 @@ public class InstanceHandlerDescription extends HandlerDescription {
                         break;
                 }
                 instance.addAttribute(new Attribute("State", state));
-                instance.addElement(inst.getInstance().getInstanceDescription().getDescription());
+                // The instance description is already contained inside parent instance description.
+                //instance.addElement(inst.getInstance().getInstanceDescription().getDescription());
             }
             instances.addElement(instance);
         }
