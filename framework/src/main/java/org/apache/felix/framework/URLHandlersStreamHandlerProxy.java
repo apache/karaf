@@ -233,7 +233,6 @@ public class URLHandlersStreamHandlerProxy extends URLStreamHandler
 
     protected void parseURL(URL url, String spec, int start, int limit)
     {
-        System.out.println("parse");
         Object svc = getStreamHandlerService();
         if (svc == null)
         {
