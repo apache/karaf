@@ -20,9 +20,11 @@ package org.apache.felix.framework;
 
 import java.io.IOException;
 import java.net.ContentHandler;
+import java.net.ContentHandlerFactory;
 import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.apache.felix.framework.util.SecureAction;
 import org.osgi.service.url.URLConstants;
@@ -51,21 +53,29 @@ import org.osgi.service.url.URLConstants;
 **/
 class URLHandlersContentHandlerProxy extends ContentHandler
 {
+    private static final String CONTENT_HANDLER_PACKAGE_PROP = "java.content.handler.pkgs";
+    private static final String DEFAULT_CONTENT_HANDLER_PACKAGE = "sun.net.www.content|com.ibm.oti.net.www.content|gnu.java.net.content|org.apache.harmony.luni.internal.net.www.content|COM.newmonics.www.content";
+
+    private static final Map m_builtIn = new HashMap();
+    private final ContentHandlerFactory m_factory;
+
     private final Map m_trackerMap = new HashMap();
     private final String m_mimeType;
     private final SecureAction m_action;
 
-    public URLHandlersContentHandlerProxy(String mimeType, SecureAction action)
+    public URLHandlersContentHandlerProxy(String mimeType, SecureAction action, 
+        ContentHandlerFactory factory)
     {
         m_mimeType = mimeType;
         m_action = action;
+        m_factory = factory;
     }
 
     //
     // ContentHandler interface method.
     //
 
-    public synchronized Object getContent(URLConnection urlc) throws IOException
+    public Object getContent(URLConnection urlc) throws IOException
     {
         ContentHandler svc = getContentHandlerService();
         if (svc == null)
@@ -91,15 +101,17 @@ class URLHandlersContentHandlerProxy extends ContentHandler
         // Get the framework instance associated with call stack.
         Object framework = URLHandlers.getFrameworkFromContext();
 
-        // If the framework has disabled the URL Handlers service,
-        // then it will not be found so just return null.
         if (framework == null)
         {
-            return null;
+            return getBuiltIn();
         }
 
         // Get the service tracker for the framework instance or create one.
-        Object tracker = m_trackerMap.get(framework);
+        Object tracker;
+        synchronized (m_trackerMap)
+        {
+            tracker = m_trackerMap.get(framework);
+        }
         try
         {
             if (tracker == null)
@@ -120,11 +132,26 @@ class URLHandlersContentHandlerProxy extends ContentHandler
                     new Class[]{framework.getClass(), String.class}), 
                     new Object[]{framework, filter});
                 // Cache the simple service tracker.
-                m_trackerMap.put(framework, tracker);
+                synchronized (m_trackerMap) 
+                {
+                    if (!m_trackerMap.containsKey(framework))
+                    {
+                        m_trackerMap.put(framework, tracker);
+                    }
+                    else
+                    {
+                        tracker = m_trackerMap.get(framework);
+                    }
+                }
             }
-            return (ContentHandler) m_action.invoke(
+            ContentHandler result = (ContentHandler) m_action.invoke(
                 m_action.getMethod(tracker.getClass(), "getService", null), 
                 tracker, null);
+            if (result == null)
+            {
+                return getBuiltIn();
+            }
+            return result;
         }
         catch (Exception ex)
         {
@@ -132,5 +159,67 @@ class URLHandlersContentHandlerProxy extends ContentHandler
             ex.printStackTrace();
             return null;
         }
+    }
+
+    private ContentHandler getBuiltIn()
+    {
+        synchronized (m_builtIn)
+        {
+            if (m_builtIn.containsKey(m_mimeType))
+            {
+                return (ContentHandler) m_builtIn.get(m_mimeType);
+            }
+        }
+        if (m_factory != null)
+        {
+            ContentHandler result = m_factory.createContentHandler(m_mimeType);
+            if (result != null)
+            {
+                return addToCache(m_mimeType, result);
+            }
+        }
+        // Check for built-in handlers for the mime type.
+        String pkgs = m_action.getSystemProperty(CONTENT_HANDLER_PACKAGE_PROP, "");
+        pkgs = (pkgs.equals(""))
+            ? DEFAULT_CONTENT_HANDLER_PACKAGE
+            : pkgs + "|" + DEFAULT_CONTENT_HANDLER_PACKAGE;
+
+        // Remove periods, slashes, and dashes from mime type.
+        String fixedType = m_mimeType.replace('.', '_').replace('/', '.').replace('-', '_');
+
+        // Iterate over built-in packages.
+        StringTokenizer pkgTok = new StringTokenizer(pkgs, "| ");
+        while (pkgTok.hasMoreTokens())
+        {
+            String pkg = pkgTok.nextToken().trim();
+            String className = pkg + "." + fixedType;
+            try
+            {
+                // If a built-in handler is found then cache and return it
+                Class handler = m_action.forName(className); 
+                if (handler != null)
+                {
+                    return addToCache(m_mimeType, 
+                        (ContentHandler) handler.newInstance());
+                }
+            }
+            catch (Exception ex)
+            {
+                // This could be a class not found exception or an
+                // instantiation exception, not much we can do in either
+                // case other than ignore it.
+            }
+        }
+        return addToCache(m_mimeType, null);
+    }
+
+    private synchronized ContentHandler addToCache(String mimeType, ContentHandler handler)
+    {
+        if (!m_builtIn.containsKey(mimeType))
+        {
+            m_builtIn.put(mimeType, handler);
+            return handler;
+        }
+        return (ContentHandler) m_builtIn.get(mimeType);
     }
 }

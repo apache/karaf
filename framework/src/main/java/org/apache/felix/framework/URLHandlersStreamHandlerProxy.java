@@ -25,6 +25,7 @@ import java.lang.reflect.Proxy;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.apache.felix.framework.util.SecureAction;
 import org.osgi.service.url.URLConstants;
@@ -56,16 +57,24 @@ import org.osgi.service.url.URLStreamHandlerSetter;
 public class URLHandlersStreamHandlerProxy extends URLStreamHandler
     implements URLStreamHandlerSetter, InvocationHandler
 {
+    private static final String STREAM_HANDLER_PACKAGE_PROP = "java.protocol.handler.pkgs";
+    private static final String DEFAULT_STREAM_HANDLER_PACKAGE = "sun.net.www.protocol|com.ibm.oti.net.www.protocol|gnu.java.net.protocol|wonka.net|com.acunia.wonka.net|org.apache.harmony.luni.internal.net.www.protocol|weblogic.utils|weblogic.net|javax.net.ssl|COM.newmonics.www.protocols";
+
+    private static final Map m_builtIn = new HashMap();
+    private final URLStreamHandlerFactory m_factory;
+    
     private final Map m_trackerMap = new HashMap();
     private final String m_protocol;
     private final Object m_service;
     private final SecureAction m_action;
 
-    public URLHandlersStreamHandlerProxy(String protocol, SecureAction action)
+    public URLHandlersStreamHandlerProxy(String protocol, SecureAction action, 
+        URLStreamHandlerFactory factory)
     {
         m_protocol = protocol;
         m_service = null;
         m_action = action;
+        m_factory = factory;
     }
     
     private URLHandlersStreamHandlerProxy(Object service, SecureAction action)
@@ -73,96 +82,211 @@ public class URLHandlersStreamHandlerProxy extends URLStreamHandler
         m_protocol = null;
         m_service = service;
         m_action = action;
+        m_factory = null;
     }
 
     //
     // URLStreamHandler interface methods.
     //
 
-    protected synchronized boolean equals(URL url1, URL url2)
+    protected boolean equals(URL url1, URL url2)
     {
-        URLStreamHandlerService svc = getStreamHandlerService();
+        Object svc = getStreamHandlerService();
         if (svc == null)
         {
             throw new IllegalStateException(
                 "Unknown protocol: " + url1.getProtocol());
         }
-        return svc.equals(url1, url2);
+        if (svc instanceof URLStreamHandlerService)
+        {
+            return ((URLStreamHandlerService) svc).equals(url1, url2);
+        }
+        try 
+        {
+            return ((Boolean) m_action.invoke(m_action.getDeclaredMethod(URLStreamHandler.class, "equals", 
+                new Class[]{URL.class, URL.class}), svc, new Object[]{url1, url2})).booleanValue();
+        } 
+        catch (Exception ex)  
+        {
+            ex.printStackTrace();
+            throw new IllegalStateException("Stream handler unavailable due to: " + ex.getMessage());
+        }
     }
 
-    protected synchronized int getDefaultPort()
+    protected int getDefaultPort()
     {
-        URLStreamHandlerService svc = getStreamHandlerService();
+        Object svc = getStreamHandlerService();
         if (svc == null)
         {
             throw new IllegalStateException("Stream handler unavailable.");
         }
-        return svc.getDefaultPort();
+        if (svc instanceof URLStreamHandlerService)
+        {
+            return ((URLStreamHandlerService) svc).getDefaultPort();
+        }
+        try 
+        {
+            return ((Integer) m_action.invoke(m_action.getDeclaredMethod(URLStreamHandler.class, 
+                "getDefaultPort", null), svc, null)).intValue();
+        } 
+        catch (Exception ex)  
+        {
+            ex.printStackTrace();
+            throw new IllegalStateException("Stream handler unavailable due to: " + ex.getMessage());
+        }
     }
 
-    protected synchronized InetAddress getHostAddress(URL url)
+    protected InetAddress getHostAddress(URL url)
     {
-        URLStreamHandlerService svc = getStreamHandlerService();
+        Object svc = getStreamHandlerService();
         if (svc == null)
         {
             throw new IllegalStateException(
                 "Unknown protocol: " + url.getProtocol());
         }
-        return svc.getHostAddress(url);
+        if (svc instanceof URLStreamHandlerService)
+        {
+            return ((URLStreamHandlerService) svc).getHostAddress(url);
+        }
+        try 
+        {
+            return (InetAddress) m_action.invoke(m_action.getDeclaredMethod(URLStreamHandler.class, 
+                "getHostAddress", new Class[]{URL.class}), svc, new Object[]{url});
+        } 
+        catch (Exception ex)  
+        {
+            ex.printStackTrace();
+            throw new IllegalStateException("Stream handler unavailable due to: " + ex.getMessage());
+        }
     }
 
-    protected synchronized int hashCode(URL url)
+    protected int hashCode(URL url)
     {
-        URLStreamHandlerService svc = getStreamHandlerService();
+        Object svc = getStreamHandlerService();
         if (svc == null)
         {
             throw new IllegalStateException(
                 "Unknown protocol: " + url.getProtocol());
         }
-        return svc.hashCode(url);
+        if (svc instanceof URLStreamHandlerService)
+        {
+            return ((URLStreamHandlerService) svc).hashCode(url);
+        }
+        try 
+        {
+            return ((Integer) m_action.invoke(m_action.getDeclaredMethod(URLStreamHandler.class, 
+                "hashCode", new Class[]{URL.class}), svc, new Object[]{url})).intValue();
+        } 
+        catch (Exception ex)  
+        {
+            ex.printStackTrace();
+            throw new IllegalStateException("Stream handler unavailable due to: " + ex.getMessage());
+        }
     }
 
-    protected synchronized boolean hostsEqual(URL url1, URL url2)
+    protected boolean hostsEqual(URL url1, URL url2)
     {
-        URLStreamHandlerService svc = getStreamHandlerService();
+        Object svc = getStreamHandlerService();
         if (svc == null)
         {
             throw new IllegalStateException(
                 "Unknown protocol: " + url1.getProtocol());
         }
-        return svc.hostsEqual(url1, url2);
+        if (svc instanceof URLStreamHandlerService)
+        {
+            return ((URLStreamHandlerService) svc).hostsEqual(url1, url2);
+        }
+        try 
+        {
+            return ((Boolean) m_action.invoke(m_action.getDeclaredMethod(URLStreamHandler.class, 
+                "hostsEqual", new Class[]{URL.class, URL.class}), svc, new Object[]{url1, url2})).booleanValue();
+        } 
+        catch (Exception ex)  
+        {
+            ex.printStackTrace();
+            throw new IllegalStateException("Stream handler unavailable due to: " + ex.getMessage());
+        }
     }
 
-    protected synchronized URLConnection openConnection(URL url) throws IOException
+    protected URLConnection openConnection(URL url) throws IOException
     {
-        URLStreamHandlerService svc = getStreamHandlerService();
+        Object svc = getStreamHandlerService();
         if (svc == null)
         {
             throw new MalformedURLException("Unknown protocol: " + url.toString());
         }
-        return svc.openConnection(url);
+        if (svc instanceof URLStreamHandlerService)
+        {
+            return ((URLStreamHandlerService) svc).openConnection(url);
+        }
+        try 
+        {
+            return (URLConnection) m_action.invoke(m_action.getDeclaredMethod(URLStreamHandler.class, 
+                "openConnection", new Class[]{URL.class}), svc, new Object[]{url});
+        } 
+        catch (Exception ex)  
+        {
+            ex.printStackTrace();
+            throw new IllegalStateException("Stream handler unavailable due to: " + ex.getMessage());
+        }
     }
 
-    protected synchronized void parseURL(URL url, String spec, int start, int limit)
+    protected void parseURL(URL url, String spec, int start, int limit)
     {
-        URLStreamHandlerService svc = getStreamHandlerService();
+        System.out.println("parse");
+        Object svc = getStreamHandlerService();
         if (svc == null)
         {
             throw new IllegalStateException(
                 "Unknown protocol: " + url.getProtocol());
         }
-        svc.parseURL(this, url, spec, start, limit);
+        if (svc instanceof URLStreamHandlerService)
+        {
+            ((URLStreamHandlerService) svc).parseURL(this, url, spec, start, limit);
+        }
+        else
+        {
+            try 
+            {
+                URL test = new URL(null, url.toExternalForm(), (URLStreamHandler) svc);
+                
+                m_action.invoke(m_action.getDeclaredMethod(URLStreamHandler.class, 
+                    "parseURL", new Class[]{URL.class, String.class, Integer.TYPE, Integer.TYPE}), 
+                    svc, new Object[]{test, spec, new Integer(start), new Integer(limit)});
+                super.setURL(url, test.getProtocol(), test.getHost(), test.getPort(),test.getAuthority(), 
+                        test.getUserInfo(), test.getPath(), test.getQuery(), test.getRef());
+            } 
+            catch (Exception ex)  
+            {
+                ex.printStackTrace();
+                throw new IllegalStateException("Stream handler unavailable due to: " + ex.getMessage());
+            }
+        }
     }
 
-    protected synchronized boolean sameFile(URL url1, URL url2)
+    protected boolean sameFile(URL url1, URL url2)
     {
-        URLStreamHandlerService svc = getStreamHandlerService();
+        Object svc = getStreamHandlerService();
         if (svc == null)
         {
             throw new IllegalStateException(
                 "Unknown protocol: " + url1.getProtocol());
         }
-        return svc.sameFile(url1, url2);
+        if (svc instanceof URLStreamHandlerService)
+        {
+            return ((URLStreamHandlerService) svc).sameFile(url1, url2);
+        }
+        try 
+        {
+            return ((Boolean) m_action.invoke(m_action.getDeclaredMethod(URLStreamHandler.class, 
+                "sameFile", new Class[]{URL.class, URL.class}), 
+                svc, new Object[]{url1, url2})).booleanValue();
+        } 
+        catch (Exception ex)  
+        {
+            ex.printStackTrace();
+            throw new IllegalStateException("Stream handler unavailable due to: " + ex.getMessage());
+        }
     }
 
     public void setURL(
@@ -178,15 +302,29 @@ public class URLHandlersStreamHandlerProxy extends URLStreamHandler
         super.setURL(url, protocol, host, port, null, null, file, null, ref);
     }
 
-    protected synchronized String toExternalForm(URL url)
+    protected String toExternalForm(URL url)
     {
-        URLStreamHandlerService svc = getStreamHandlerService();
+        Object svc = getStreamHandlerService();
         if (svc == null)
         {
             throw new IllegalStateException(
                 "Unknown protocol: " + url.getProtocol());
         }
-        return svc.toExternalForm(url);
+        if (svc instanceof URLStreamHandlerService)
+        {
+            return ((URLStreamHandlerService) svc).toExternalForm(url);
+        }
+        try 
+        {
+            return (String) m_action.invoke(m_action.getDeclaredMethod(URLStreamHandler.class, 
+                "toExternalForm", new Class[]{URL.class}), 
+                svc, new Object[]{url});
+        } 
+        catch (Exception ex)  
+        {
+            ex.printStackTrace();
+            throw new IllegalStateException("Stream handler unavailable due to: " + ex.getMessage());
+        }
     }
 
     /**
@@ -200,20 +338,22 @@ public class URLHandlersStreamHandlerProxy extends URLStreamHandler
      *         associated with the current call stack or <tt>null</tt>
      *         is no service is available.
     **/
-    private URLStreamHandlerService getStreamHandlerService()
+    private Object getStreamHandlerService()
     {
         // Get the framework instance associated with call stack.
         Object framework = URLHandlers.getFrameworkFromContext();
 
-        // If the framework has disabled the URL Handlers service,
-        // then it will not be found so just return null.
         if (framework == null)
         {
-            return null;
+            return getBuiltIn();
         }
 
         // Get the service tracker for the framework instance or create one.
-        Object tracker = m_trackerMap.get(framework);
+        Object tracker;
+        synchronized (m_trackerMap)
+        {
+            tracker = m_trackerMap.get(framework);
+        }
         try
         {
             if (tracker == null)
@@ -235,13 +375,23 @@ public class URLHandlersStreamHandlerProxy extends URLStreamHandler
                     new Object[]{framework, filter});
 
                 // Cache the simple service tracker.
-                m_trackerMap.put(framework, tracker);
+                synchronized (m_trackerMap) 
+                {
+                    if (!m_trackerMap.containsKey(framework))
+                    {
+                        m_trackerMap.put(framework, tracker);
+                    }
+                    else
+                    {
+                        tracker = m_trackerMap.get(framework);
+                    }
+                }
             }
             Object service = m_action.invoke(m_action.getMethod(
                 tracker.getClass(), "getService", null), tracker, null);
             if (service == null)
             {
-                return null;
+                return getBuiltIn();
             }
             if (service instanceof URLStreamHandlerService)
             {
@@ -258,6 +408,65 @@ public class URLHandlersStreamHandlerProxy extends URLStreamHandler
             ex.printStackTrace();
             return null;
         }
+    }
+    
+    private URLStreamHandler getBuiltIn()
+    {
+        synchronized (m_builtIn)
+        {
+            if (m_builtIn.containsKey(m_protocol))
+            {
+                return (URLStreamHandler) m_builtIn.get(m_protocol);
+            }
+        }
+        if (m_factory != null)
+        {
+            URLStreamHandler result = m_factory.createURLStreamHandler(m_protocol);
+            if (result != null)
+            {
+                return addToCache(m_protocol, result);
+            }
+        }
+        // Check for built-in handlers for the mime type.
+        String pkgs = m_action.getSystemProperty(STREAM_HANDLER_PACKAGE_PROP, "");
+        pkgs = (pkgs.equals(""))
+            ? DEFAULT_STREAM_HANDLER_PACKAGE
+            : pkgs + "|" + DEFAULT_STREAM_HANDLER_PACKAGE;
+
+        // Iterate over built-in packages.
+        StringTokenizer pkgTok = new StringTokenizer(pkgs, "| ");
+        while (pkgTok.hasMoreTokens())
+        {
+            String pkg = pkgTok.nextToken().trim();
+            String className = pkg + "." + m_protocol + ".Handler";
+            try
+            {
+                // If a built-in handler is found then cache and return it
+                Class handler = m_action.forName(className); 
+                if (handler != null)
+                {
+                    return addToCache(m_protocol, 
+                        (URLStreamHandler) handler.newInstance());
+                }
+            }
+            catch (Exception ex)
+            {
+                // This could be a class not found exception or an
+                // instantiation exception, not much we can do in either
+                // case other than ignore it.
+            }
+        }
+        return addToCache(m_protocol, null);
+    }
+
+    private synchronized URLStreamHandler addToCache(String protocol, URLStreamHandler result)
+    {
+        if (!m_builtIn.containsKey(protocol))
+        {
+            m_builtIn.put(protocol, result);
+            return result;
+        }
+        return (URLStreamHandler) m_builtIn.get(protocol);
     }
 
     public Object invoke(Object obj, Method method, Object[] params)
