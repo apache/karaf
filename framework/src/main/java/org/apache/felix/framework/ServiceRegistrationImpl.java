@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -41,7 +41,7 @@ class ServiceRegistrationImpl implements ServiceRegistration
     // Service factory interface.
     private ServiceFactory m_factory = null;
     // Associated property dictionary.
-    private Map m_propMap =  new StringMap(false);
+    private volatile Map m_propMap = new StringMap(false);
     // Re-usable service reference.
     private ServiceReferenceImpl m_ref = null;
     // Flag indicating that we are unregistering.
@@ -82,6 +82,12 @@ class ServiceRegistrationImpl implements ServiceRegistration
 
     public ServiceReference getReference()
     {
+        // Make sure registration is valid.
+        if (!isValid())
+        {
+            throw new IllegalStateException(
+                "The service registration is no longer valid.");
+        }
         return m_ref;
     }
 
@@ -150,21 +156,10 @@ class ServiceRegistrationImpl implements ServiceRegistration
         return m_propMap.get(key);
     }
 
-    private transient ArrayList m_list = new ArrayList();
-
     protected String[] getPropertyKeys()
     {
-        synchronized (m_propMap)
-        {
-            m_list.clear();
-            Iterator i = m_propMap.entrySet().iterator();
-            while (i.hasNext())
-            {
-                Map.Entry entry = (Map.Entry) i.next();
-                m_list.add(entry.getKey());
-            }
-            return (String[]) m_list.toArray(new String[m_list.size()]);
-        }
+        Set s = m_propMap.keySet();
+        return (String[]) s.toArray(new String[s.size()]);
     }
 
     protected Bundle[] getUsingBundles()
@@ -193,7 +188,8 @@ class ServiceRegistrationImpl implements ServiceRegistration
             catch (Exception ex)
             {
                 m_registry.getLogger().log(
-                    Logger.LOG_ERROR, "ServiceRegistrationImpl: Error getting service.", ex);
+                    Logger.LOG_ERROR,
+                    "ServiceRegistrationImpl: Error getting service.", ex);
                 return null;
             }
         }
@@ -231,24 +227,33 @@ class ServiceRegistrationImpl implements ServiceRegistration
 
     private void initializeProperties(Dictionary dict)
     {
-        synchronized (m_propMap)
+        // Create a case-insensitive map for the properties.
+        Map props = new StringMap(false);
+
+        if (dict != null)
         {
-            m_propMap.clear();
-    
-            if (dict != null)
+            // Make sure there are no duplicate keys.
+            Enumeration keys = dict.keys();
+            while (keys.hasMoreElements())
             {
-                Enumeration keys = dict.keys();
-                while (keys.hasMoreElements())
+                Object key = keys.nextElement();
+                if (props.get(key) == null)
                 {
-                    Object key = keys.nextElement();
-                    m_propMap.put(key, dict.get(key));
+                    props.put(key, dict.get(key));
+                }
+                else
+                {
+                    throw new IllegalArgumentException("Duplicate service property: " + key);
                 }
             }
-    
-            // Add the framework assigned properties.
-            m_propMap.put(Constants.OBJECTCLASS, m_classes);
-            m_propMap.put(Constants.SERVICE_ID, m_serviceId);
         }
+
+        // Add the framework assigned properties.
+        props.put(Constants.OBJECTCLASS, m_classes);
+        props.put(Constants.SERVICE_ID, m_serviceId);
+
+        // Update the service property map.
+        m_propMap = props;
     }
 
     private Object getFactoryUnchecked(Bundle bundle)
