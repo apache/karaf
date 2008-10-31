@@ -541,7 +541,7 @@ loop:   for (;;)
     // Exclusive inner classes
     private static final class AndOperator extends Operator
     {
-        private int operandCount;
+        private final int operandCount;
 
         public AndOperator(int opcnt)
         {
@@ -610,7 +610,7 @@ loop:   for (;;)
 
     private static final class OrOperator extends Operator
     {
-        private int operandCount;
+        private final int operandCount;
 
         public OrOperator(int opcnt)
         {
@@ -1016,7 +1016,7 @@ loop:   for (;;)
 
     private static final class PresentOperator extends Operator
     {
-        String attribute;
+        final String attribute;
 
         public PresentOperator(String attribute)
         {
@@ -1050,7 +1050,7 @@ loop:   for (;;)
 
     private static final class PushOperator extends Operator
     {
-        String attribute;
+        final String attribute;
 
         public PushOperator(String attribute)
         {
@@ -1093,7 +1093,7 @@ loop:   for (;;)
 
     private static final class ConstOperator extends Operator
     {
-        Object val;
+        final Object val;
 
         public ConstOperator(Object val)
         {
@@ -1130,7 +1130,7 @@ loop:   for (;;)
     private static final class SubStringOperator extends Operator
         implements OperatorConstants
     {
-        String[] pieces;
+        final String[] pieces;
 
         public SubStringOperator(String[] pieces)
         {
