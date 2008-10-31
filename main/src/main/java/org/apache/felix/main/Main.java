@@ -57,6 +57,10 @@ public class Main
      * The default name used for the configuration properties file.
     **/
     public static final String CONFIG_PROPERTIES_FILE_VALUE = "config.properties";
+    /**
+     * Name of the configuration directory.
+     */
+    public static final String CONFIG_DIRECTORY = "conf";
 
     private static Framework m_felix = null;
 
@@ -176,6 +180,13 @@ public class Main
 
         // Read configuration properties.
         Properties configProps = Main.loadConfigProperties();
+        // If no configuration properties were found, then create
+        // an empty properties object.
+        if (configProps == null)
+        {
+            System.err.println("No " + CONFIG_PROPERTIES_FILE_VALUE + " found.");
+            configProps = new Properties();
+        }
 
         // Copy framework properties from the system properties.
         Main.copySystemProperties(configProps);
@@ -267,12 +278,12 @@ public class Main
                 // directory of the felix.jar directory.
                 confDir = new File(
                     new File(new File(jarLocation).getAbsolutePath()).getParent(),
-                    "conf");
+                    CONFIG_DIRECTORY);
             }
             else
             {
                 // Can't figure it out so use the current directory as default.
-                confDir = new File(System.getProperty("user.dir"));
+                confDir = new File(System.getProperty("user.dir"), CONFIG_DIRECTORY);
             }
 
             try
@@ -378,12 +389,12 @@ public class Main
                 // directory of the felix.jar directory.
                 confDir = new File(
                     new File(new File(jarLocation).getAbsolutePath()).getParent(),
-                    "conf");
+                    CONFIG_DIRECTORY);
             }
             else
             {
                 // Can't figure it out so use the current directory as default.
-                confDir = new File(System.getProperty("user.dir"));
+                confDir = new File(System.getProperty("user.dir"), CONFIG_DIRECTORY);
             }
 
             try
