@@ -69,8 +69,7 @@ public class SimpleTest extends AbstractIntegrationTest {
     protected String[] getTestFrameworkBundlesNames() {
         return new String[] {
             getBundle("org.apache.geronimo.specs", "geronimo-servlet_2.5_spec"),
-            getBundle("org.apache.servicemix.specs", "org.apache.servicemix.specs.jaxp-api-1.3"),
-            getBundle("org.apache.servicemix.specs", "org.apache.servicemix.specs.stax-api-1.0"),
+            getBundle("org.apache.servicemix.specs", "org.apache.servicemix.specs.jaxp-api-1.4"),
             getBundle("org.apache.felix", "org.osgi.compendium"),
             getBundle("org.apache.felix", "org.apache.felix.configadmin"),
             getBundle("org.ops4j.pax.logging", "pax-logging-api"),
