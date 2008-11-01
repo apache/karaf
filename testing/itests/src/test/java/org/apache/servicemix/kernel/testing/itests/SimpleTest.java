@@ -74,7 +74,6 @@ public class SimpleTest extends AbstractIntegrationTest {
             getBundle("org.apache.felix", "org.apache.felix.configadmin"),
             getBundle("org.ops4j.pax.logging", "pax-logging-api"),
             getBundle("org.ops4j.pax.logging", "pax-logging-service"),
-            getBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.jaxp-ri"),
             getBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.aopalliance"),
             getBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.asm"),
             getBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.junit"),

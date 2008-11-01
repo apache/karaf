@@ -93,59 +93,19 @@ public class SmxKernelPlatform implements OsgiPlatform {
             String name = cl.getName().replace('.', '/') + ".class";
             URL url = (cl.getClassLoader() != null ? cl.getClassLoader() : getClass().getClassLoader()).getResource(name);
             String path = url.toString();
-            path = path.substring(0, path.indexOf('!'));
+            if (path.startsWith("jar:")) {
+                path = path.substring(0, path.indexOf('!'));
+            } else {
+                path = path.substring(0, path.indexOf(name));
+            }
             jars.add(path);
         }
         return jars;
     }
 
     public void start() throws Exception {
-        // Check environment.
-        // If the classloader contains JAXP providers, the META-INF infos will certainly be found
-        // by OSGi, but classes won't be found, leading to errors.
-        ClassLoader cll = Thread.currentThread().getContextClassLoader();
-        if (cll == null) {
-            cll = getClass().getClassLoader();
-        }
-        URL url1 = cll.getSystemResource("META-INF/services/javax.xml.transform.TransformerFactory");
-        URL url2 = cll.getSystemResource("META-INF/services/javax.xml.parsers.DocumentBuilderFactory");
-        List<String> additionalPackages = new ArrayList<String>();
-        /*
-        if (url1 != null) {
-            String line = new BufferedReader(new InputStreamReader(url1.openStream())).readLine();
-            line = line.substring(0, line.lastIndexOf('.'));
-            System.err.println(line);
-            additionalPackages.add(line);
-        }
-        if (url2 != null) {
-            String line = new BufferedReader(new InputStreamReader(url2.openStream())).readLine();
-            line = line.substring(0, line.lastIndexOf('.'));
-            System.err.println(line);
-            additionalPackages.add(line);
-        }
-        */
-        if (url1 != null || url2 != null) {
-            String s1 = null;
-            if (url1 != null) {
-                s1 = url1.toString();
-                s1 = s1.substring(s1.lastIndexOf(':') + 1, s1.indexOf('!'));
-            }
-            String s2 = null;
-            if (url2 != null) {
-                s2 = url2.toString();
-                s2 = s2.substring(s2.lastIndexOf(':') + 1, s2.indexOf('!'));
-            }
-            throw new Exception("An xml parser or xslt engine has been found in the classpath.\n" +
-                    "It is probably included as a transitive dependencies by Maven.\n" +
-                    "Check by running 'mvn dependency:tree' and exclude the jars from dependencies.\n" +
-                    "Offending resources:\n" +
-                    (s1 != null ? "\t" + s1 + "\n" : "") +
-                    (s2 != null ? "\t" + s2 + "\n" : ""));
-        }
-
         Set<String> jars = getJars(Felix.class);
-        //System.out.println(jars);
-        ClassLoader classLoader = new GuardClassLoader(toURLs(jars.toArray(new String[jars.size()])), additionalPackages);
+        ClassLoader classLoader = new GuardClassLoader(toURLs(jars.toArray(new String[jars.size()])), null);
 
         BundleActivator activator = new BundleActivator() {
             private ServiceRegistration registration;
