@@ -19,23 +19,21 @@ package org.apache.servicemix.kernel.client;
 import java.net.URI;
 import java.util.List;
 import java.util.LinkedList;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
 
-import org.apache.geronimo.gshell.remote.client.RemoteExecuteException;
 import org.apache.geronimo.gshell.remote.client.RshClient;
 import org.apache.geronimo.gshell.remote.client.handler.EchoHandler;
 import org.apache.geronimo.gshell.remote.client.handler.ClientMessageHandler;
 import org.apache.geronimo.gshell.whisper.transport.TransportException;
 import org.apache.geronimo.gshell.whisper.transport.TransportFactory;
 import org.apache.geronimo.gshell.whisper.transport.TransportFactoryLocator;
-import org.apache.geronimo.gshell.whisper.transport.Transport;
 import org.apache.geronimo.gshell.whisper.transport.tcp.TcpTransportFactory;
 import org.apache.geronimo.gshell.whisper.transport.tcp.TcpTransport;
 import org.apache.geronimo.gshell.whisper.stream.StreamFeeder;
 import org.apache.geronimo.gshell.notification.ExitNotification;
 import org.apache.geronimo.gshell.security.crypto.CryptoContextImpl;
 import org.apache.geronimo.gshell.security.crypto.CryptoContext;
+import org.apache.geronimo.gshell.io.IO;
+import org.apache.servicemix.kernel.gshell.core.remote.RemoteShellProxy;
 
 /**
  * A very simple
@@ -78,6 +76,7 @@ public class Main {
         }
         RshClient client = null;
         try {
+            IO io = new IO();
             CryptoContext context = new CryptoContextImpl();
             List<ClientMessageHandler> handlers = new LinkedList<ClientMessageHandler>();
             handlers.add(new EchoHandler());
@@ -89,29 +88,17 @@ public class Main {
 
             client.connect(address, new URI("tcp://0.0.0.0:0"));
             client.login(user, password);
-            StreamFeeder outputFeeder = new StreamFeeder(client.getInputStream(), System.out);
+            StreamFeeder outputFeeder = new StreamFeeder(client.getInputStream(), io.outputStream);
             outputFeeder.createThread().start();
             client.openShell();
-            System.out.println("Connected");
+            io.out.println("Connected");
 
             String commandLine = sb.toString().trim();
             if (commandLine.length() > 0) {
                 client.execute(commandLine);
             } else {
-                BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
-                for (;;) {
-                    System.out.print("> ");
-                    String s = r.readLine().trim();
-                    if (s.length() > 0) {
-                        try {
-                            client.execute(s);
-                        } catch (RemoteExecuteException e) {
-                            String name = e.getCause().getClass().getName();
-                            name = name.substring(name.lastIndexOf('.') + 1);
-                            System.err.println(name + ": " + e.getCause().getMessage());
-                        }
-                    }
-                }
+                RemoteShellProxy shell = new RemoteShellProxy(client, io, "localhost", user);
+                shell.run();
             }
         } catch (ExitNotification e) {
             System.exit(0);

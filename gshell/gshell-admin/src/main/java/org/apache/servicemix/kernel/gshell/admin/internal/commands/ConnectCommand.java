@@ -21,6 +21,7 @@ package org.apache.servicemix.kernel.gshell.admin.internal.commands;
 import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.geronimo.gshell.clp.Option;
 import org.apache.geronimo.gshell.shell.Shell;
+import org.apache.geronimo.gshell.shell.ShellContextHolder;
 import org.osgi.framework.ServiceReference;
 
 public class ConnectCommand extends AdminCommandSupport {
@@ -36,26 +37,7 @@ public class ConnectCommand extends AdminCommandSupport {
 
     protected Object doExecute() throws Exception {
         int port = getExistingInstance(instance).getPort();
-        ServiceReference ref = getBundleContext().getServiceReference(Shell.class.getName());
-        if (ref == null) {
-            io.out.println("CommandExecutor service is unavailable.");
-            return null;
-        }
-        try {
-            Shell exec = (Shell) getBundleContext().getService(ref);
-            if (exec == null) {
-                io.out.println("CommandExecutor service is unavailable.");
-                return null;
-            }
-
-            // TODO: -n option does not exist in smx
-            //exec.execute("remote/rsh -u " + username + " -p " + password + " -n " + instance + " tcp://localhost:" + port);
-            exec.execute("remote/rsh -u " + username + " -p " + password + " tcp://localhost:" + port);
-        }
-        finally {
-            getBundleContext().ungetService(ref);
-        }
-
+        ShellContextHolder.get().getShell().execute("remote/rsh -u " + username + " -p " + password + " -n " + instance + " tcp://localhost:" + port);
         return Result.SUCCESS;
     }
 }

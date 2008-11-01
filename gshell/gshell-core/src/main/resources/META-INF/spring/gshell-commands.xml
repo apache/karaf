@@ -131,7 +131,7 @@
 
     <gshell:command-bundle>
         <gshell:command name="remote/rsh">
-            <gshell:action class="org.apache.geronimo.gshell.commands.remote.RshAction"/>
+            <gshell:action class="org.apache.servicemix.kernel.gshell.core.remote.RshAction"/>
         </gshell:command>
 
         <gshell:command name="remote/rsh-server">

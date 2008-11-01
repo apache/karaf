@@ -23,6 +23,7 @@ import org.apache.geronimo.gshell.remote.server.timeout.TimeoutManager;
 import org.apache.geronimo.gshell.remote.server.handler.ServerSessionContext;
 import org.apache.geronimo.gshell.remote.server.handler.ServerMessageHandlerSupport;
 import org.apache.geronimo.gshell.whisper.transport.Session;
+import org.apache.geronimo.gshell.command.Variables;
 
 import java.util.UUID;
 
@@ -86,6 +87,10 @@ public class LoginHandler
                 session.send(reply);
             }
             else {
+                if (context.variables == null) {
+                    context.variables = new Variables();
+                }
+                context.variables.set("gshell.user", username);
                 UUID identity = UUID.randomUUID();
                 LoginMessage.Success reply = new LoginMessage.Success(identity);
                 reply.setCorrelationId(message.getId());

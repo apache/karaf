@@ -60,8 +60,12 @@ public class OpenShellHandler
         context.container = container;
 
         // Setup the shell context and related components
-        context.io = new RemoteIO(session);
-        context.variables = new Variables();
+        if (context.io == null) {
+            context.io = new RemoteIO(session);
+        }
+        if (context.variables == null) {
+            context.variables = new Variables();
+        }
 
         // Create a new shell instance
         context.shell = context.container.getBean("remoteShell", Shell.class);

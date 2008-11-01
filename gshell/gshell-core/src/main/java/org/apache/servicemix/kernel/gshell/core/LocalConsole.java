@@ -80,6 +80,9 @@ public class LocalConsole implements Runnable, BundleContextAware {
     }
 
     public void init() {
+        shell.getContext().getVariables().set("gshell.prompt",
+                                              "@|bold %{gshell.user}|@%{application.localHost.hostName}:@|bold %{gshell.group.name}|> ");
+        shell.getContext().getVariables().set("gshell.user", "smx");
         frameworkStarted = new CountDownLatch(1);
 		getBundleContext().addFrameworkListener(new FrameworkListener(){
 			public void frameworkEvent(FrameworkEvent event) {

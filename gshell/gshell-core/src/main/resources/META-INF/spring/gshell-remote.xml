@@ -55,12 +55,20 @@
                 <bean class="org.apache.geronimo.gshell.remote.server.handler.ExecuteHandler"/>
                 <bean class="org.apache.geronimo.gshell.remote.server.handler.CloseShellHandler"/>
                 <bean class="org.apache.geronimo.gshell.remote.server.handler.EchoHandler"/>
+                <bean class="org.apache.geronimo.gshell.remote.server.handler.CompleteHandler" />
             </list>
         </constructor-arg>
     </bean>
 
     <bean id="remoteShell" class="org.apache.geronimo.gshell.remote.server.RemoteShellImpl" scope="prototype">
         <constructor-arg ref="commandLineExecutor"/>
+
+        <property name="completers">
+            <list>
+                <ref bean="commandsCompleter"/>
+                <ref bean="aliasNameCompleter"/>
+            </list>
+        </property>
     </bean>
 
     <bean class="org.apache.geronimo.gshell.remote.client.RshClient" scope="prototype">

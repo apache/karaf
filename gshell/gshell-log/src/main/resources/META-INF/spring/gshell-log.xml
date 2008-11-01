@@ -38,23 +38,28 @@
     <import resource="classpath:org/apache/servicemix/kernel/gshell/core/commands.xml" />
 
     <gshell:command-bundle>
-        <gshell:command name="log/d">
+        <gshell:command name="log/display">
             <gshell:action class="org.apache.servicemix.kernel.gshell.log.DisplayLog">
                 <property name="events" ref="events" />
                 <property name="pattern" value="${pattern}" />
             </gshell:action>
         </gshell:command>
-        <gshell:command name="log/de">
+        <gshell:link name="log/d" target="log/display" />
+        <gshell:command name="log/display-exception">
             <gshell:action class="org.apache.servicemix.kernel.gshell.log.DisplayException">
                 <property name="events" ref="events" />
             </gshell:action>
         </gshell:command>
+        <gshell:link name="log/de" target="log/display-exception" />
         <gshell:command name="log/get">
             <gshell:action class="org.apache.servicemix.kernel.gshell.log.GetLogLevel" />
         </gshell:command>
         <gshell:command name="log/set">
             <gshell:action class="org.apache.servicemix.kernel.gshell.log.SetLogLevel" />
         </gshell:command>
+
+        <gshell:alias name="ld" alias="log/d" />
+        <gshell:alias name="lde" alias="log/de" />
     </gshell:command-bundle>
 
     <bean id="vmLogAppender" class="org.apache.servicemix.kernel.gshell.log.VmLogAppender">
