@@ -124,21 +124,71 @@ public class Felix extends FelixBundle implements Framework
      * <tt>String</tt>s.
      * </p>
      * <p>
-     * Configuration properties are the sole means to configure the framework's
-     * default behavior; the framework does not refer to any system properties for
-     * configuration information. If a <tt>Map</tt> is supplied to this method
-     * for configuration properties, then the framework will consult the
-     * <tt>Map</tt> instance for any and all configuration properties. It is
-     * possible to specify a <tt>null</tt> for the configuration property map,
-     * in which case the framework will use its default behavior in all cases.
+     * Configuration properties are generally the sole means to configure the
+     * framework's default behavior; the framework does not typically refer to
+     * any system properties for configuration information. If a <tt>Map</tt> is
+     * supplied to this method for configuration properties, then the framework
+     * will consult the <tt>Map</tt> instance for any and all configuration
+     * properties. It is possible to specify a <tt>null</tt> for the configuration
+     * property map, in which case the framework will use its default behavior
+     * in all cases.
      * </p>
      * <p>
-     * The following configuration properties can be specified:
+     * The following configuration properties can be specified (properties starting
+     * with "<tt>felix</tt>" are specific to Felix, while those starting with
+     * "<tt>org.osgi</tt>" are standard OSGi properties):
      * </p>
      * <ul>
+     *   <li><tt>org.osgi.framework.storage</tt> - Sets the directory to use as
+     *       the bundle cache; by default bundle cache directory is
+     *       <tt>felix-cache</tt> in the current working directory. The value
+     *       should be a valid file name. The file name can be either absolute
+     *       or relative. Relative file names are relative to the current working
+     *       directory. If the specified directory will be created if it does
+     *       not exist.
+     *   </li>
+     *   <li><tt>org.osgi.framework.storage.clean</tt> - Determines whether the
+     *       bundle cache is flushed. The value can either be "<tt>none</tt>"
+     *       or "<tt>onFirstInit</tt>", where "<tt>none</tt>" does not flush
+     *       the bundle cache and "<tt>onFirstInit</tt>" flushes the bundle
+     *       cache when the framework instance is first initialized. The default
+     *       value is "<tt>none</tt>".
+     *   </li>
+     *   <li><tt>felix.cache.rootdir</tt> - Sets the root directory to use to
+     *       calculate the bundle cache directory for relative file names. If
+     *       <tt>org.osgi.framework.storage</tt> is set to a relative name, by
+     *       default it is relative to the current working directory. If this
+     *       property is set, then it will be calculated as being relative to
+     *       the specified root directory.
+     *   </li>
+     *   <li><tt>felix.cache.bufsize</tt> - Sets the buffer size to be used by
+     *       the cache; the default value is 4096. The integer value of this
+     *       string provides control over the size of the internal buffer of the
+     *       disk cache for performance reasons.
+     *   </li>
+     *   <li><tt>org.osgi.framework.system.packages</tt> - Specifies a
+     *       comma-delimited list of packages that should be exported via the
+     *       System Bundle from the parent class loader. The framework will set
+     *       this to a reasonable default. If the value is specified, it
+     *       replaces any default value.
+     *   </li>
+     *   <li><tt>org.osgi.framework.system.packages.extra</tt> - Specifies a
+     *       comma-delimited list of packages that should be exported via the
+     *       System Bundle from the parent class loader in addition to the
+     *       packages in <tt>org.osgi.framework.system.packages</tt>. The default
+     *       value is empty. If a value is specified, it is appended to the list
+     *       of default or specified packages in
+     *       <tt>org.osgi.framework.system.packages</tt>.
+     *   </li>
+     *   <li><tt>org.osgi.framework.bootdelegation</tt> - Specifies a
+     *       comma-delimited list of packages that should be made implicitly
+     *       available to all bundles from the parent class loader. It is
+     *       recommended not to use this property since it breaks modularity.
+     *       The default value is empty.
+     *   </li>
      *   <li><tt>felix.systembundle.activators</tt> - A <tt>List</tt> of
      *       <tt>BundleActivator</tt> instances that are started/stopped when
-     *       the System Bundle is started/stopped; the specified instances will
+     *       the System Bundle is started/stopped. The specified instances will
      *       receive the System Bundle's <tt>BundleContext</tt> when invoked.
      *   </li>
      *   <li><tt>felix.log.logger</tt> - An instance of <tt>Logger</tt> that the
@@ -151,48 +201,23 @@ public class Felix extends FelixBundle implements Framework
      *       OSGi Log Service (i.e., 1 = error, 2 = warning, 3 = information,
      *       and 4 = debug). The default value is 1.
      *   </li>
-     *   <li><tt>felix.startlevel.framework</tt> - The initial start level
+     *   <li><tt>org.osgi.framework.startlevel</tt> - The initial start level
      *       of the framework once it starts execution; the default
      *       value is 1.
      *   </li>
      *   <li><tt>felix.startlevel.bundle</tt> - The default start level for
      *       newly installed bundles; the default value is 1.
      *   </li>
-     *   <li><tt>framework.service.urlhandlers</tt> - Flag to indicate whether
+     *   <li><tt>felix.service.urlhandlers</tt> - Flag to indicate whether
      *       to activate the URL Handlers service for the framework instance;
      *       the default value is "<tt>true</tt>". Activating the URL Handlers
      *       service will result in the <tt>URL.setURLStreamHandlerFactory()</tt>
      *       and <tt>URLConnection.setContentHandlerFactory()</tt> being called.
      *   </li>
-     *   <li><tt>felix.cache.bufsize</tt> - Sets the buffer size to be used by
-     *       the cache; the default value is 4096. The integer
-     *       value of this string provides control over the size of the
-     *       internal buffer of the disk cache for performance reasons.
-     *   </li>
-     *   <li><tt>felix.cache.dir</tt> - Sets the directory to be used by the
-     *       cache as its cache directory. The cache directory is where all
-     *       profile directories are stored and a profile directory is where a
-     *       set of installed bundles are stored. By default, the cache
-     *       directory is <tt>.felix</tt> in the user's home directory. If
-     *       this property is specified, then its value will be used as the cache
-     *       directory instead of <tt>.felix</tt>. This directory will be created
-     *       if it does not exist.
-     *   </li>
-     *   <li><tt>felix.cache.profile</tt> - Sets the profile name that will be
-     *       used to create a profile directory inside of the cache directory.
-     *       The created directory will contained all installed bundles associated
-     *       with the profile.
-     *   </li>
-     *   <li><tt>felix.cache.profiledir</tt> - Sets the directory to use as the
-     *       profile directory for the bundle cache; by default the profile
-     *       name is used to create a directory in the <tt>.felix</tt> cache
-     *       directory. If this property is specified, then the cache directory
-     *       and profile name properties are ignored. The specified value of this
-     *       property is used directly as the directory to contain all cached
-     *       bundles. If this property is set, it is not necessary to set the
-     *       cache directory or profile name properties. This directory will be
-     *       created if it does not exist.
-     *   </li>
+     *   <li><tt>felix.fragment.validation</tt> - Determines if installing
+     *       unsupported fragment bundles throws an exception or logs a warning.
+     *       Possible values are "<tt>exception</tt>" or "<tt>warning</tt>". The
+     *       default value is "<tt>exception</tt>".
      * </ul>
      * <p>
      * The <a href="Main.html"><tt>Main</tt></a> class implements some

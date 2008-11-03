@@ -47,7 +47,7 @@ public interface FelixConstants extends org.osgi.framework.Constants
     public static final String SYSTEMBUNDLE_ACTIVATORS_PROP
         = "felix.systembundle.activators";
     public static final String FRAMEWORK_STARTLEVEL_PROP
-        = "felix.startlevel.framework";
+        = "org.osgi.framework.startlevel";
     public static final String BUNDLE_STARTLEVEL_PROP
         = "felix.startlevel.bundle";
     public static final String SERVICE_URLHANDLERS_PROP = "felix.service.urlhandlers";

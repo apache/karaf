@@ -100,42 +100,37 @@ public class Main
      *       the desired URL using the <tt>felix.config.properties</tt>
      *       system property; this should be set using the <tt>-D</tt> syntax
      *       when executing the JVM. If the <tt>config.properties</tt> file
-     *       cannot be found, then the bare-bones <tt>default.properties</tt>
-     *       configuration file will be used to set the configuration properties;
-     *       this file is embedded in the launcher JAR file. Refer to the
-     *       <a href="Felix.html#Felix(java.util.Map, java.util.List)">
-     *       <tt>Felix</tt></a> constructor documentation for more
-     *       information on the framework configuration options.
+     *       cannot be found, then default values are used for all configuration
+     *       properties. Refer to the
+     *       <a href="Felix.html#Felix(java.util.Map)"><tt>Felix</tt></a>
+     *       constructor documentation for more information on framework
+     *       configuration properties.
      *   </li>
      *   <li><i><b>Perform system property variable substitution on configuration
      *       properties.</b></i> Any configuration properties whose value adheres to
      *       <tt>${&lt;system-prop-name&gt;}</tt> syntax will have their value
      *       substituted with the appropriate system property value.
      *   </li>
-     *   <li><i><b>Ensure the default bundle cache has sufficient information to
-     *       initialize.</b></i> The default implementation of the bundle cache
-     *       requires either a profile name or a profile directory in order to
-     *       start. The configuration properties are checked for at least one
-     *       of the <tt>felix.cache.profile</tt> or <tt>felix.cache.profiledir</tt>
-     *       properties. If neither is found, the user is asked to supply a profile
-     *       name that is added to the configuration property set. See the
-     *       <a href="cache/DefaultBundleCache.html"><tt>DefaultBundleCache</tt></a>
-     *       documentation for more details its configuration options.
+     *   <li><i><b>Copy configuration properties specified as system properties
+     *       into the set of configuration properties.</b></i> Even though the
+     *       Felix framework does not consult system properties for configuration
+     *       information, sometimes it is convenient to specify them on the command
+     *       line when launching Felix. To make this possible, the Felix launcher
+     *       copies any configuration properties specified as system properties
+     *       into the set of configuration properties passed into Felix.
      *   </li>
-     *   <li><i><b>Creates and starts a framework instance.</b></i> A
-     *       case insensitive
-     *       <a href="util/StringMap.html"><tt>StringMap</tt></a>
-     *       is created for the configuration property file and is passed
-     *       into the framework.
+     *   <li><i><b>Creates and starts a framework instance.</b></i> The configuration
+     *       properties are passed into the Felix constructor and the {{Felix.start()}}
+     *       method is called to start the framework.
      *   </li>
      * </ol>
      * <p>
-     * It should be noted that simply starting an instance of the framework is not enough
-     * to create an interactive session with it. It is necessary to install
+     * It should be noted that simply starting an instance of the framework is not
+     * enough to create an interactive session with it. It is necessary to install
      * and start bundles that provide a some means to interact with the framework;
      * this is generally done by specifying an "auto-start" property in the
-     * framework configuration property file. If no bundles providing a means to
-     * interact with the framework are installed or if the configuration property
+     * configuration property file. If no bundles providing a means to interact
+     * with the framework are installed or if the configuration property
      * file cannot be found, the framework will appear to be hung or deadlocked.
      * This is not the case, it is executing correctly, there is just no way to
      * interact with it. The default launcher provides two configuration properties
@@ -162,7 +157,8 @@ public class Main
      * so that they can be processed by the launcher during the framework
      * startup process.
      * </p>
-     * @param argv An array of arguments, all of which are ignored.
+     * @param argv Accepts a single argument, which is the path to use as the
+     *        framework's bundle cache.
      * @throws Exception If an error occurs.
     **/
     public static void main(String[] args) throws Exception
