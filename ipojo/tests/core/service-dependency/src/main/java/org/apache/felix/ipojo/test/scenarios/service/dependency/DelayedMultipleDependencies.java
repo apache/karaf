@@ -31,7 +31,7 @@ import org.apache.felix.ipojo.test.scenarios.service.dependency.service.CheckSer
 
 public class DelayedMultipleDependencies extends OSGiTestCase {
 
-	ComponentInstance instance1, instance2, instance3, instance4, instance5;
+	ComponentInstance instance1, instance2, instance3, instance4, instance5, instance6, instance7;
 	ComponentInstance fooProvider1, fooProvider2;
 	
 	public void setUp() {
@@ -57,9 +57,19 @@ public class DelayedMultipleDependencies extends OSGiTestCase {
 			instance4.stop();
 			
 	         Properties i5 = new Properties();
-	            i5.put("instance.name","Both");
-	            instance5 = Utils.getFactoryByName(context, "BothMultipleCheckServiceProvider").createComponentInstance(i5);
-	            instance5.stop();
+	         i5.put("instance.name","Both");
+	         instance5 = Utils.getFactoryByName(context, "BothMultipleCheckServiceProvider").createComponentInstance(i5);
+	         instance5.stop();
+	         
+	         Properties i6 = new Properties();
+             i6.put("instance.name","Map");
+             instance6 = Utils.getFactoryByName(context, "MapMultipleCheckServiceProvider").createComponentInstance(i6);
+             instance6.stop();
+             
+             Properties i7 = new Properties();
+             i7.put("instance.name","Dict");
+             instance7 = Utils.getFactoryByName(context, "DictMultipleCheckServiceProvider").createComponentInstance(i7);
+             instance7.stop();
 		
 			Properties prov = new Properties();
 			prov.put("instance.name","FooProvider1");
@@ -77,6 +87,8 @@ public class DelayedMultipleDependencies extends OSGiTestCase {
 		instance3.dispose();
 		instance4.dispose();
 		instance5.dispose();
+		instance6.dispose();
+		instance7.dispose();
 		fooProvider1.dispose();
 		fooProvider2.dispose();
 		instance1 = null;
@@ -84,6 +96,8 @@ public class DelayedMultipleDependencies extends OSGiTestCase {
 		instance3 = null;
 		instance4 = null;
 		instance5 = null;
+		instance6 = null;
+		instance7 = null;
 		fooProvider1 = null;
 		fooProvider2 = null;
 	}
@@ -330,6 +344,11 @@ public class DelayedMultipleDependencies extends OSGiTestCase {
         assertEquals("check object unbind callback invocation - 1", ((Integer)props.get("objectU")).intValue(), 0);
         assertEquals("check both bind callback invocation - 1", ((Integer)props.get("bothB")).intValue(), 2);
         assertEquals("check both unbind callback invocation - 1", ((Integer)props.get("bothU")).intValue(), 0);
+        assertEquals("check map bind callback invocation - 1", ((Integer)props.get("mapB")).intValue(), 0);
+        assertEquals("check map unbind callback invocation - 1", ((Integer)props.get("mapU")).intValue(), 0);
+        assertEquals("check dict bind callback invocation - 1", ((Integer)props.get("dictB")).intValue(), 0);
+        assertEquals("check dict unbind callback invocation - 1", ((Integer)props.get("dictU")).intValue(), 0);
+        
         assertEquals("Check FS invocation (int) - 1", ((Integer)props.get("int")).intValue(), 2);
         assertEquals("Check FS invocation (long) - 1", ((Long)props.get("long")).longValue(), 2);
         assertEquals("Check FS invocation (double) - 1", ((Double)props.get("double")).doubleValue(), 2.0, 0);
@@ -349,6 +368,10 @@ public class DelayedMultipleDependencies extends OSGiTestCase {
         assertEquals("check object unbind callback invocation - 3", ((Integer)props.get("objectU")).intValue(), 0);
         assertEquals("check both bind callback invocation - 3", ((Integer)props.get("bothB")).intValue(), 2);
         assertEquals("check both unbind callback invocation - 3", ((Integer)props.get("bothU")).intValue(), 1);
+        assertEquals("check map bind callback invocation - 1", ((Integer)props.get("mapB")).intValue(), 0);
+        assertEquals("check map unbind callback invocation - 1", ((Integer)props.get("mapU")).intValue(), 0);
+        assertEquals("check dict bind callback invocation - 1", ((Integer)props.get("dictB")).intValue(), 0);
+        assertEquals("check dict unbind callback invocation - 1", ((Integer)props.get("dictU")).intValue(), 0);
         assertEquals("Check FS invocation (int) - 3", ((Integer)props.get("int")).intValue(), 1);
         assertEquals("Check FS invocation (long) - 3", ((Long)props.get("long")).longValue(), 1);
         assertEquals("Check FS invocation (double) - 3", ((Double)props.get("double")).doubleValue(), 1.0, 0);
@@ -364,6 +387,132 @@ public class DelayedMultipleDependencies extends OSGiTestCase {
         instance5.stop();
         context.ungetService(cs_ref);
     }
+	
+	public void testMap() {
+	        instance6.start();
+	        ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance6.getInstanceName());
+	        assertNotNull("Check architecture availability", arch_ref);
+	        InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+	        assertTrue("Check instance invalidity - 1", id.getState() == ComponentInstance.VALID);
+	        
+	        ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance6.getInstanceName());
+	        assertNotNull("Check CheckService availability", cs_ref);
+	        CheckService cs = (CheckService) context.getService(cs_ref);
+	        Properties props = cs.getProps();
+	        //Check properties
+	        assertTrue("check CheckService invocation - 1", ((Boolean)props.get("result")).booleanValue()); // True, a provider is here
+	        assertEquals("check void bind invocation - 1", ((Integer)props.get("voidB")).intValue(), 0);
+	        assertEquals("check void unbind callback invocation - 1", ((Integer)props.get("voidU")).intValue(), 0);
+	        assertEquals("check object bind callback invocation - 1", ((Integer)props.get("objectB")).intValue(), 0);
+	        assertEquals("check object unbind callback invocation - 1", ((Integer)props.get("objectU")).intValue(), 0);
+	        assertEquals("check both bind callback invocation - 1", ((Integer)props.get("bothB")).intValue(), 0);
+	        assertEquals("check both unbind callback invocation - 1", ((Integer)props.get("bothU")).intValue(), 0);
+	        assertEquals("check map bind callback invocation - 1", ((Integer)props.get("mapB")).intValue(), 2);
+	        assertEquals("check map unbind callback invocation - 1", ((Integer)props.get("mapU")).intValue(), 0);
+	        assertEquals("check dict bind callback invocation - 1", ((Integer)props.get("dictB")).intValue(), 0);
+	        assertEquals("check dict unbind callback invocation - 1", ((Integer)props.get("dictU")).intValue(), 0);
+	        
+	        assertEquals("Check FS invocation (int) - 1", ((Integer)props.get("int")).intValue(), 2);
+	        assertEquals("Check FS invocation (long) - 1", ((Long)props.get("long")).longValue(), 2);
+	        assertEquals("Check FS invocation (double) - 1", ((Double)props.get("double")).doubleValue(), 2.0, 0);
+	        
+	        fooProvider1.stop();
+	        
+	        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+	        assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
+	        
+	        cs = (CheckService) context.getService(cs_ref);
+	        props = cs.getProps();
+	        //Check properties
+	        assertTrue("check CheckService invocation - 3", ((Boolean)props.get("result")).booleanValue()); // True, two providers are here
+	        assertEquals("check void bind invocation - 3", ((Integer)props.get("voidB")).intValue(), 0);
+	        assertEquals("check void unbind callback invocation - 3", ((Integer)props.get("voidU")).intValue(), 0);
+	        assertEquals("check object bind callback invocation - 3", ((Integer)props.get("objectB")).intValue(), 0);
+	        assertEquals("check object unbind callback invocation - 3", ((Integer)props.get("objectU")).intValue(), 0);
+	        assertEquals("check both bind callback invocation - 3", ((Integer)props.get("bothB")).intValue(), 0);
+	        assertEquals("check both unbind callback invocation - 3", ((Integer)props.get("bothU")).intValue(), 0);
+	        assertEquals("check map bind callback invocation - 1", ((Integer)props.get("mapB")).intValue(), 2);
+	        assertEquals("check map unbind callback invocation - 1", ((Integer)props.get("mapU")).intValue(), 1);
+	        assertEquals("check dict bind callback invocation - 1", ((Integer)props.get("dictB")).intValue(), 0);
+	        assertEquals("check dict unbind callback invocation - 1", ((Integer)props.get("dictU")).intValue(), 0);
+	        assertEquals("Check FS invocation (int) - 3", ((Integer)props.get("int")).intValue(), 1);
+	        assertEquals("Check FS invocation (long) - 3", ((Long)props.get("long")).longValue(), 1);
+	        assertEquals("Check FS invocation (double) - 3", ((Double)props.get("double")).doubleValue(), 1.0, 0);
+	        
+	        fooProvider2.stop();
+	        
+	        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+	        assertTrue("Check instance validity - 4", id.getState() == ComponentInstance.INVALID);
+	        
+	        id = null;
+	        cs = null;
+	        context.ungetService(arch_ref);
+	        instance6.stop();
+	        context.ungetService(cs_ref);
+	}
+	
+	public void testDict() {
+        instance7.start();
+        ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance7.getInstanceName());
+        assertNotNull("Check architecture availability", arch_ref);
+        InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        assertTrue("Check instance invalidity - 1", id.getState() == ComponentInstance.VALID);
+        
+        ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance7.getInstanceName());
+        assertNotNull("Check CheckService availability", cs_ref);
+        CheckService cs = (CheckService) context.getService(cs_ref);
+        Properties props = cs.getProps();
+        //Check properties
+        assertTrue("check CheckService invocation - 1", ((Boolean)props.get("result")).booleanValue()); // True, a provider is here
+        assertEquals("check void bind invocation - 1", ((Integer)props.get("voidB")).intValue(), 0);
+        assertEquals("check void unbind callback invocation - 1", ((Integer)props.get("voidU")).intValue(), 0);
+        assertEquals("check object bind callback invocation - 1", ((Integer)props.get("objectB")).intValue(), 0);
+        assertEquals("check object unbind callback invocation - 1", ((Integer)props.get("objectU")).intValue(), 0);
+        assertEquals("check both bind callback invocation - 1", ((Integer)props.get("bothB")).intValue(), 0);
+        assertEquals("check both unbind callback invocation - 1", ((Integer)props.get("bothU")).intValue(), 0);
+        assertEquals("check map bind callback invocation - 1", ((Integer)props.get("mapB")).intValue(), 0);
+        assertEquals("check map unbind callback invocation - 1", ((Integer)props.get("mapU")).intValue(), 0);
+        assertEquals("check dict bind callback invocation - 1", ((Integer)props.get("dictB")).intValue(), 2);
+        assertEquals("check dict unbind callback invocation - 1", ((Integer)props.get("dictU")).intValue(), 0);
+        
+        assertEquals("Check FS invocation (int) - 1", ((Integer)props.get("int")).intValue(), 2);
+        assertEquals("Check FS invocation (long) - 1", ((Long)props.get("long")).longValue(), 2);
+        assertEquals("Check FS invocation (double) - 1", ((Double)props.get("double")).doubleValue(), 2.0, 0);
+        
+        fooProvider1.stop();
+        
+        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
+        
+        cs = (CheckService) context.getService(cs_ref);
+        props = cs.getProps();
+        //Check properties
+        assertTrue("check CheckService invocation - 3", ((Boolean)props.get("result")).booleanValue()); // True, two providers are here
+        assertEquals("check void bind invocation - 3", ((Integer)props.get("voidB")).intValue(), 0);
+        assertEquals("check void unbind callback invocation - 3", ((Integer)props.get("voidU")).intValue(), 0);
+        assertEquals("check object bind callback invocation - 3", ((Integer)props.get("objectB")).intValue(), 0);
+        assertEquals("check object unbind callback invocation - 3", ((Integer)props.get("objectU")).intValue(), 0);
+        assertEquals("check both bind callback invocation - 3", ((Integer)props.get("bothB")).intValue(), 0);
+        assertEquals("check both unbind callback invocation - 3", ((Integer)props.get("bothU")).intValue(), 0);
+        assertEquals("check map bind callback invocation - 1", ((Integer)props.get("mapB")).intValue(), 0);
+        assertEquals("check map unbind callback invocation - 1", ((Integer)props.get("mapU")).intValue(), 0);
+        assertEquals("check dict bind callback invocation - 1", ((Integer)props.get("dictB")).intValue(), 2);
+        assertEquals("check dict unbind callback invocation - 1", ((Integer)props.get("dictU")).intValue(), 1);
+        assertEquals("Check FS invocation (int) - 3", ((Integer)props.get("int")).intValue(), 1);
+        assertEquals("Check FS invocation (long) - 3", ((Long)props.get("long")).longValue(), 1);
+        assertEquals("Check FS invocation (double) - 3", ((Double)props.get("double")).doubleValue(), 1.0, 0);
+        
+        fooProvider2.stop();
+        
+        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        assertTrue("Check instance validity - 4", id.getState() == ComponentInstance.INVALID);
+        
+        id = null;
+        cs = null;
+        context.ungetService(arch_ref);
+        instance7.stop();
+        context.ungetService(cs_ref);
+	}
 
 	
 }

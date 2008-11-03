@@ -18,6 +18,8 @@
  */
 package org.apache.felix.ipojo.test.scenarios.component;
 
+import java.util.Dictionary;
+import java.util.Map;
 import java.util.Properties;
 
 import org.osgi.framework.ServiceReference;
@@ -44,6 +46,9 @@ public class MultipleCheckService implements CheckService {
     int refU = 0;
 
     int bothU = 0;
+    
+    int mapB, mapU, dictB, dictU;
+
 
     public boolean check() {
         boolean r = fs.length != 0;
@@ -108,6 +113,11 @@ public class MultipleCheckService implements CheckService {
         props.put("int", new Integer(getInt()));
         props.put("long", new Long(getLong()));
         props.put("double", new Double(getDouble()));
+        
+        props.put("mapB", new Integer(mapB));
+        props.put("mapU", new Integer(mapU));
+        props.put("dictB", new Integer(dictB));
+        props.put("dictU", new Integer(dictU));
 
         return props;
     }
@@ -155,5 +165,20 @@ public class MultipleCheckService implements CheckService {
             bothU++;
         }
     }
+    
+    protected void propertiesMapBind(FooService o, Map props) {
+        if(props != null && o != null && o instanceof FooService && props.size() > 0) { mapB++; }
+    }   
+    protected void propertiesMapUnbind(FooService o, Map props) {
+         if(props != null && o != null && o instanceof FooService && props.size() > 0) { mapU++; }
+    }
+    
+    protected void propertiesDictionaryBind(FooService o, Dictionary props) {
+        if(props != null && o != null && o instanceof FooService && props.size() > 0) { dictB++; }
+    }   
+    protected void propertiesDictionaryUnbind(FooService o, Dictionary props) {
+        if(props != null && o != null && o instanceof FooService && props.size() > 0) { dictU++; }
+    }
+
 
 }

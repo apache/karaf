@@ -18,13 +18,14 @@
  */
 package org.apache.felix.ipojo.test.scenarios.component;
 
+import java.util.Dictionary;
+import java.util.Map;
 import java.util.Properties;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 
 import org.apache.felix.ipojo.test.scenarios.service.dependency.service.CheckService;
 import org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 public class MethodCheckServiceProvider implements CheckService {
 	
@@ -36,10 +37,14 @@ public class MethodCheckServiceProvider implements CheckService {
 	int objectB = 0;
 	int refB = 0;
 	int bothB = 0;
+	int mapB = 0;
+	int dictB = 0;
 	int simpleU = 0;
 	int objectU = 0;
 	int refU = 0;
 	int bothU = 0;
+	int mapU = 0;
+	int dictU = 0;
 	
     
     public MethodCheckServiceProvider(BundleContext bc) {
@@ -65,10 +70,14 @@ public class MethodCheckServiceProvider implements CheckService {
 		props.put("objectB", new Integer(objectB));
 		props.put("refB", new Integer(refB));
 		props.put("bothB", new Integer(bothB));
+	    props.put("mapB", new Integer(mapB));
+	    props.put("dictB", new Integer(dictB));
 		props.put("voidU", new Integer(simpleU));
 		props.put("objectU", new Integer(objectU));
 		props.put("refU", new Integer(refU));
 		props.put("bothU", new Integer(bothU));
+		props.put("mapU", new Integer(mapU));
+		props.put("dictU", new Integer(dictU));
 		
 		if(fs != null) {
 		    if(fs.getObject() != null) { props.put("object", fs.getObject()); }
@@ -104,4 +113,22 @@ public class MethodCheckServiceProvider implements CheckService {
 	     if(ref != null && o != null && o instanceof FooService) { bothU++; }
 	     fs = null;
 	}
+    
+    protected void propertiesMapBind(FooService o, Map props) {
+        if(props != null && o != null && o instanceof FooService && props.size() > 0) { mapB++; }
+        fs = o;
+    }   
+    protected void propertiesMapUnbind(FooService o, Map props) {
+         if(props != null && o != null && o instanceof FooService && props.size() > 0) { mapU++; }
+         fs = null;
+    }
+    
+    protected void propertiesDictionaryBind(FooService o, Dictionary props) {
+        if(props != null && o != null && o instanceof FooService && props.size() > 0) { dictB++; }
+        fs = o;
+    }   
+    protected void propertiesDictionaryUnbind(FooService o, Dictionary props) {
+         if(props != null && o != null && o instanceof FooService && props.size() > 0) { dictU++; }
+         fs = null;
+    }
 }

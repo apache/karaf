@@ -50,6 +50,25 @@
 		</requires>
 		<provides />
 	</component>
+		<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		name="MapCheckServiceProvider" architecture="true">
+		<requires field="fs">
+			<callback type="bind" method="propertiesMapBind" />
+			<callback type="unbind" method="propertiesMapUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		name="DictCheckServiceProvider" architecture="true">
+		<requires field="fs">
+			<callback type="bind" method="propertiesDictionaryBind" />
+			<callback type="unbind" method="propertiesDictionaryUnbind" />
+		</requires>
+		<provides />
+	</component>
+
 	<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
 		name="DoubleCheckServiceProvider" architecture="true">
@@ -89,12 +108,30 @@
 		</requires>
 		<provides />
 	</component>
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
+		name="MMapCheckServiceProvider" architecture="true">
+		<requires>
+			<callback type="bind" method="propertiesMapBind" />
+			<callback type="unbind" method="propertiesMapUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
+		name="MDictCheckServiceProvider" architecture="true">
+		<requires>
+			<callback type="bind" method="propertiesDictionaryBind" />
+			<callback type="unbind" method="propertiesDictionaryUnbind" />
+		</requires>
+		<provides />
+	</component>
 
 	<!-- Simple & Optional Dependencies -->
 	<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
 		name="SimpleOptionalCheckServiceProvider" architecture="true">
-		<requires field="fs" optional="true" />
+		<requires field="fs" optional="true" id="FooService"/>
 		<provides />
 	</component>
 	<component
@@ -168,10 +205,47 @@
 	</component>
 	<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		name="MapOptionalCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true">
+			<callback type="bind" method="propertiesMapBind" />
+			<callback type="unbind" method="propertiesMapUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		name="DictOptionalCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true">
+			<callback type="bind" method="propertiesDictionaryBind" />
+			<callback type="unbind" method="propertiesDictionaryUnbind" />
+		</requires>
+		<provides />
+	</component>	
+	
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
 		name="BothOptionalNoNullableCheckServiceProvider" architecture="true">
 		<requires field="fs" optional="true" nullable="false">
 			<callback type="bind" method="bothBind" />
 			<callback type="unbind" method="bothUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		name="MapOptionalNoNullableCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true" nullable="false">
+			<callback type="bind" method="propertiesMapBind" />
+			<callback type="unbind" method="propertiesMapUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		name="DictOptionalNoNullableCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true" nullable="false">
+			<callback type="bind" method="propertiesDictionaryBind" />
+			<callback type="unbind" method="propertiesDictionaryUnbind" />
 		</requires>
 		<provides />
 	</component>
@@ -207,6 +281,29 @@
 		</requires>
 		<provides />
 	</component>
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
+		name="MMapOptionalCheckServiceProvider" architecture="true">
+		<requires
+			specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
+			optional="true">
+			<callback type="bind" method="propertiesMapBind" />
+			<callback type="unbind" method="propertiesMapUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
+		name="MDictOptionalCheckServiceProvider" architecture="true">
+		<requires
+			specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
+			optional="true">
+			<callback type="bind" method="propertiesDictionaryBind" />
+			<callback type="unbind" method="propertiesDictionaryUnbind" />
+		</requires>
+		<provides />
+	</component>
+
 
 	<!-- Simple & Optional Dependencies with default-implementation -->
 	<component
@@ -256,6 +353,26 @@
 		</requires>
 		<provides />
 	</component>
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		name="DIMapOptionalCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true"
+			default-implementation="org.apache.felix.ipojo.test.scenarios.component.FooServiceDefaultImpl">
+			<callback type="bind" method="propertiesMapBind" />
+			<callback type="unbind" method="propertiesMapUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider"
+		name="DIDictOptionalCheckServiceProvider" architecture="true">
+		<requires field="fs" optional="true"
+			default-implementation="org.apache.felix.ipojo.test.scenarios.component.FooServiceDefaultImpl">
+			<callback type="bind" method="propertiesDictionaryBind" />
+			<callback type="unbind" method="propertiesDictionaryUnbind" />
+		</requires>
+		<provides />
+	</component>
 
 	<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
@@ -288,6 +405,30 @@
 			default-implementation="org.apache.felix.ipojo.test.scenarios.component.FooServiceDefaultImpl">
 			<callback type="bind" method="bothBind" />
 			<callback type="unbind" method="bothUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
+		name="DIMMapOptionalCheckServiceProvider" architecture="true">
+		<requires
+			specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
+			optional="true"
+			default-implementation="org.apache.felix.ipojo.test.scenarios.component.FooServiceDefaultImpl">
+			<callback type="bind" method="propertiesMapBind" />
+			<callback type="unbind" method="propertiesMapUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.MethodCheckServiceProvider"
+		name="DIMDictOptionalCheckServiceProvider" architecture="true">
+		<requires
+			specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
+			optional="true"
+			default-implementation="org.apache.felix.ipojo.test.scenarios.component.FooServiceDefaultImpl">
+			<callback type="bind" method="propertiesDictionaryBind" />
+			<callback type="unbind" method="propertiesDictionaryUnbind" />
 		</requires>
 		<provides />
 	</component>
@@ -336,6 +477,25 @@
 		<provides />
 	</component>
 	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+		name="MapMultipleCheckServiceProvider" architecture="true">
+		<requires field="fs">
+			<callback type="bind" method="propertiesMapBind" />
+			<callback type="unbind" method="propertiesMapUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckService"
+		name="DictMultipleCheckServiceProvider" architecture="true">
+		<requires field="fs">
+			<callback type="bind" method="propertiesDictionaryBind" />
+			<callback type="unbind" method="propertiesDictionaryUnbind" />
+		</requires>
+		<provides />
+	</component>
+	
+	<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.MethodMultipleCheckService"
 		name="MObjectMultipleCheckServiceProvider" architecture="true">
 		<requires aggregate="true">
@@ -361,6 +521,24 @@
 		<requires aggregate="true">
 			<callback type="bind" method="bothBind" />
 			<callback type="unbind" method="bothUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.MethodMultipleCheckService"
+		name="MMapMultipleCheckServiceProvider" architecture="true">
+		<requires aggregate="true">
+			<callback type="bind" method="propertiesMapBind" />
+			<callback type="unbind" method="propertiesMapUnbind" />
+		</requires>
+		<provides />
+	</component>
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.MethodMultipleCheckService"
+		name="MDictMultipleCheckServiceProvider" architecture="true">
+		<requires aggregate="true">
+			<callback type="bind" method="propertiesDictionaryBind" />
+			<callback type="unbind" method="propertiesDictionaryUnbind" />
 		</requires>
 		<provides />
 	</component>
@@ -441,7 +619,7 @@
 		<provides />
 	</component>
 	
-		<!-- Aggregate dependency as Vector -->
+	<!-- Aggregate dependency as Vector -->
 	<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.VectorCheckService"
 		name="SimpleVectorCheckServiceProvider" architecture="true">

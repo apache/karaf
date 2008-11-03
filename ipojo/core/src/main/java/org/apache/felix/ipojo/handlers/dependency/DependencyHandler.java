@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -197,9 +198,11 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
                     }
                 } else if (mets[0].getMethodArguments().length == 2) {
                     // The callback receives service object, service reference. Check that the second argument is a service reference
-                    if (!mets[0].getMethodArguments()[1].equals(ServiceReference.class.getName())) {
+                    if (!(mets[0].getMethodArguments()[1].equals(ServiceReference.class.getName()) // callback with (service object, service reference)
+                           || mets[0].getMethodArguments()[1].equals(Dictionary.class.getName()) // callback with (service object, service properties in a dictionary)
+                           || mets[0].getMethodArguments()[1].equals(Map.class.getName()))) { // callback with (service object, service properties in a map)
                         String message =
-                                "The requirement callback " + callbacks[i].getMethodName() + " must have a ServiceReference as the second argument";
+                                "The requirement callback " + callbacks[i].getMethodName() + " must have a ServiceReference, a Dictionary or a Map as the second argument";
                         throw new ConfigurationException(message);
                     }
                     setSpecification(dep, mets[0].getMethodArguments()[0], false); // Just warn if a mismatch is discovered.

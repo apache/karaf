@@ -52,6 +52,7 @@ public class MethodOptionalMultipleDependencies extends OSGiTestCase {
 			Properties i4 = new Properties();
 			i4.put("instance.name","Ref");
 			instance4 = Utils.getFactoryByName(context, "MRefOptionalMultipleCheckServiceProvider").createComponentInstance(i4);
+			
 		} catch(Exception e) { fail(e.getMessage()); }
 		
 	}

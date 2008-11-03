@@ -19,7 +19,9 @@
 package org.apache.felix.ipojo.test.scenarios.component;
 
 import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.osgi.framework.BundleContext;
@@ -48,6 +50,10 @@ public class MethodMultipleCheckService implements CheckService {
     int refU = 0;
 
     int bothU = 0;
+    
+    int mapB = 0;
+    int mapU = 0;
+    int dictB = 0, dictU=0;
     
     public MethodMultipleCheckService(BundleContext bc) {
         context = bc;
@@ -110,6 +116,10 @@ public class MethodMultipleCheckService implements CheckService {
         props.put("objectU", new Integer(objectU));
         props.put("refU", new Integer(refU));
         props.put("bothU", new Integer(bothU));
+        props.put("mapU", new Integer(mapU));
+        props.put("mapB", new Integer(mapB));
+        props.put("dictU", new Integer(dictU));
+        props.put("dictB", new Integer(dictB));
 		props.put("boolean", new Boolean(getBoolean()));
 		props.put("int", new Integer(getInt()));
 		props.put("long", new Long(getLong()));
@@ -149,6 +159,24 @@ public class MethodMultipleCheckService implements CheckService {
             fs.remove(o);
             bothU++;
         }
+    }
+    
+    protected void propertiesMapBind(FooService o, Map props) {
+        if(props != null && o != null && o instanceof FooService && props.size() > 0) { mapB++; }
+        fs.add(o);
+    }   
+    protected void propertiesMapUnbind(FooService o, Map props) {
+         if(props != null && o != null && o instanceof FooService && props.size() > 0) { mapU++; }
+         fs.remove(o);
+    }
+    
+    protected void propertiesDictionaryBind(FooService o, Dictionary props) {
+        if(props != null && o != null && o instanceof FooService && props.size() > 0) { dictB++; }
+        fs.add(o);
+    }   
+    protected void propertiesDictionaryUnbind(FooService o, Dictionary props) {
+         if(props != null && o != null && o instanceof FooService && props.size() > 0) { dictU++; }
+         fs.remove(o);
     }
 	
 }

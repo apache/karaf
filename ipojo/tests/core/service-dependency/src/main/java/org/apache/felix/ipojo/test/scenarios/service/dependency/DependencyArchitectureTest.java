@@ -117,6 +117,7 @@ public class DependencyArchitectureTest extends OSGiTestCase {
 		
 		// Check dependency metadata
 		assertEquals("Check dependency interface", dhd.getDependencies()[0].getInterface(), FooService.class.getName());
+		assertEquals("Check dependency id", dhd.getDependencies()[0].getId(), FooService.class.getName());
 		assertFalse("Check dependency cardinality", dhd.getDependencies()[0].isMultiple());
 		assertFalse("Check dependency optionality", dhd.getDependencies()[0].isOptional());
 		assertNull("Check dependency ref -1", dhd.getDependencies()[0].getServiceReferences());
@@ -207,6 +208,7 @@ public class DependencyArchitectureTest extends OSGiTestCase {
 		
 		// Check dependency metadata
 		assertEquals("Check dependency interface", dhd.getDependencies()[0].getInterface(), FooService.class.getName());
+	    assertEquals("Check dependency id", dhd.getDependencies()[0].getId(), "FooService");
 		assertFalse("Check dependency cardinality", dhd.getDependencies()[0].isMultiple());
 		assertTrue("Check dependency optionality", dhd.getDependencies()[0].isOptional());
 		assertNull("Check dependency ref -1", dhd.getDependencies()[0].getServiceReferences());

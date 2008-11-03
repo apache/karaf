@@ -20,6 +20,10 @@ package org.apache.felix.ipojo.handlers.dependency;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 import org.apache.felix.ipojo.util.Callback;
 import org.osgi.framework.ServiceReference;
@@ -161,12 +165,14 @@ public class DependencyCallback extends Callback {
                         m_argument = new String[0];
                         return;
                     case 1:
+                        // The callback receives a ServiceReference
                         if (clazzes[0].getName().equals(ServiceReference.class.getName())) {
                             // Callback with a service reference.
                             m_methodObj = methods[i];
                             m_argument = new String[] { ServiceReference.class.getName() };
                             return;
                         }
+                        // The callback receives a Service object
                         if (clazzes[0].getName().equals(m_dependency.getSpecification().getName())) {
                             // Callback with the service object.
                             m_methodObj = methods[i];
@@ -175,10 +181,25 @@ public class DependencyCallback extends Callback {
                         }
                         break;
                     case 2:
+                        // The callback receives the service object and the service reference
                         if (clazzes[0].getName().equals(m_dependency.getSpecification().getName()) && clazzes[1].getName().equals(ServiceReference.class.getName())) {
                             // Callback with two arguments.
                             m_methodObj = methods[i];
                             m_argument = new String[] { m_dependency.getSpecification().getName(), ServiceReference.class.getName() };
+                            return;
+                        }
+                        // The callback receives the service object and the service properties (in a Map)
+                        if (clazzes[0].getName().equals(m_dependency.getSpecification().getName()) && clazzes[1].getName().equals(Map.class.getName())) {
+                            // Callback with two arguments.
+                            m_methodObj = methods[i];
+                            m_argument = new String[] { m_dependency.getSpecification().getName(), Map.class.getName() };
+                            return;
+                        }
+                        // The callback receives the service object and the service properties (in a Dictionary)
+                        if (clazzes[0].getName().equals(m_dependency.getSpecification().getName()) && clazzes[1].getName().equals(Dictionary.class.getName())) {
+                            // Callback with two arguments.
+                            m_methodObj = methods[i];
+                            m_argument = new String[] { m_dependency.getSpecification().getName(), Dictionary.class.getName() };
                             return;
                         }
                         break;
@@ -214,12 +235,49 @@ public class DependencyCallback extends Callback {
                 }
                 break;
             case 2 :
-                call(new Object[] {obj, ref});
+                if (m_argument[1].equals(ServiceReference.class.getName())) {
+                    call(new Object[] {obj, ref});
+                } else if (m_argument[1].equals(Dictionary.class.getName())) {
+                    call(new Object[] {obj, getPropertiesInDictionary(ref)});
+                } else {
+                    call(new Object[] {obj, getPropertiesInMap(ref)});
+                }
                 break;
             default : 
                 break;
         }
     }
+
+    /**
+     * Creates a {@link Dictionary} containing service properties of the
+     * given service reference.
+     * @param ref the service reference
+     * @return a {@link Dictionary} containing the service properties.
+     */
+    private Dictionary getPropertiesInDictionary(ServiceReference ref) {
+        String[] keys = ref.getPropertyKeys(); // Can't be null
+        Dictionary dict = new Properties();
+        for (int i = 0; i < keys.length; i++) {
+            dict.put(keys[i], ref.getProperty(keys[i]));
+        }
+        return dict;
+    }
+    
+    /**
+     * Creates a {@link Map} containing service properties of the
+     * given service reference.
+     * @param ref the service reference
+     * @return a {@link Map} containing the service properties.
+     */
+    private Map getPropertiesInMap(ServiceReference ref) {
+        String[] keys = ref.getPropertyKeys(); // Can't be null
+        Map map = new HashMap();
+        for (int i = 0; i < keys.length; i++) {
+            map.put(keys[i], ref.getProperty(keys[i]));
+        }
+        return map;
+    }
+
 
     /**
      * Call the callback on the given instance with the given argument.
@@ -247,7 +305,13 @@ public class DependencyCallback extends Callback {
                 }
                 break;
             case 2 :
-                call(instance, new Object[] {obj, ref});
+                if (m_argument[1].equals(ServiceReference.class.getName())) {
+                    call(instance, new Object[] {obj, ref});
+                } else if (m_argument[1].equals(Dictionary.class.getName())) {
+                    call(instance, new Object[] {obj, getPropertiesInDictionary(ref)});
+                } else {
+                    call(instance, new Object[] {obj, getPropertiesInMap(ref)});
+                }
                 break;
             default : 
                 break;

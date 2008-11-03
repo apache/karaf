@@ -18,6 +18,8 @@
  */
 package org.apache.felix.ipojo.test.scenarios.component;
 
+import java.util.Dictionary;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.felix.ipojo.test.scenarios.service.dependency.service.CheckService;
@@ -32,6 +34,8 @@ public class CheckServiceProvider extends CheckProviderParentClass implements Ch
 	int objectB = 0;
 	int refB = 0;
 	int bothB = 0;
+	int mapB = 0;
+	int dictB = 0;
 
 	public boolean check() {
 		return fs.foo();
@@ -47,6 +51,10 @@ public class CheckServiceProvider extends CheckProviderParentClass implements Ch
 		props.put("objectU", new Integer(objectU));
 		props.put("refU", new Integer(refU));
 		props.put("bothU", new Integer(bothU));
+		props.put("mapB", new Integer(mapB));
+		props.put("dictB", new Integer(dictB));
+		props.put("mapU", new Integer(mapU));
+		props.put("dictU", new Integer(dictU));
 		if (fs != null) {
 		    props.put("result", new Boolean(fs.foo()));
 		    props.put("boolean", new Boolean(fs.getBoolean()));
@@ -79,5 +87,15 @@ public class CheckServiceProvider extends CheckProviderParentClass implements Ch
     public void bothBind(FooService o, ServiceReference sr) {
 	    if(sr != null && o != null && o instanceof FooService) { bothB++; }
 	}
+    
+    protected void propertiesDictionaryBind(FooService o, Dictionary props) {
+        if(props != null && o != null && o instanceof FooService && props.size() > 0) { dictB++; }
+        fs = o;
+    }   
+    
+    protected void propertiesMapBind(FooService o, Map props) {
+        if(props != null && o != null && o instanceof FooService && props.size() > 0) { mapB++; }
+        fs = o;
+    }   
 
 }

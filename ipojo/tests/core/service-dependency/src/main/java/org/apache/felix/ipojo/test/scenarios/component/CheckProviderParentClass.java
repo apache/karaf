@@ -18,6 +18,9 @@
  */
 package org.apache.felix.ipojo.test.scenarios.component;
 
+import java.util.Dictionary;
+import java.util.Map;
+
 import org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService;
 import org.osgi.framework.ServiceReference;
 
@@ -27,11 +30,22 @@ public abstract class CheckProviderParentClass {
     int objectU = 0;
     int refU = 0;
     int bothU = 0;
+    int mapU = 0;
+    int dictU = 0;
     
     
     public void bothUnbind(FooService o, ServiceReference sr) {
         if(sr != null && o != null && o instanceof FooService) { bothU++; }
     }
+    
+   public void propertiesDictionaryUnbind(FooService o, Dictionary props) {
+        if (props != null && o != null && o instanceof FooService && props.size() > 0) { dictU++; }
+   }
+    
+   public void propertiesMapUnbind(FooService o, Map props) {
+        if(props != null && o != null && o instanceof FooService && props.size() > 0) { mapU++; }
+   }
+   
     
     public void refUnbind(ServiceReference sr) {
         if(sr != null) { refU++; }
