@@ -62,13 +62,15 @@ class URLHandlersContentHandlerProxy extends ContentHandler
     private final Map m_trackerMap = new HashMap();
     private final String m_mimeType;
     private final SecureAction m_action;
+    private final boolean m_override;
 
     public URLHandlersContentHandlerProxy(String mimeType, SecureAction action, 
-        ContentHandlerFactory factory)
+        ContentHandlerFactory factory, boolean override)
     {
         m_mimeType = mimeType;
         m_action = action;
         m_factory = factory;
+        m_override = override;
     }
 
     //
@@ -101,9 +103,9 @@ class URLHandlersContentHandlerProxy extends ContentHandler
         // Get the framework instance associated with call stack.
         Object framework = URLHandlers.getFrameworkFromContext();
 
-        if (framework == null)
+        if (framework == null) 
         {
-            return getBuiltIn();
+            return m_override ? getBuiltIn() : null;
         }
 
         // Get the service tracker for the framework instance or create one.
@@ -129,7 +131,8 @@ class URLHandlersContentHandlerProxy extends ContentHandler
                 tracker = m_action.invoke(m_action.getConstructor(
                     framework.getClass().getClassLoader().loadClass(
                     URLHandlersServiceTracker.class.getName()),
-                    new Class[]{framework.getClass(), String.class}), 
+                    new Class[]{framework.getClass().getClassLoader().loadClass(
+                    Felix.class.getName()), String.class}), 
                     new Object[]{framework, filter});
                 // Cache the simple service tracker.
                 synchronized (m_trackerMap) 
@@ -144,12 +147,21 @@ class URLHandlersContentHandlerProxy extends ContentHandler
                     }
                 }
             }
-            ContentHandler result = (ContentHandler) m_action.invoke(
-                m_action.getMethod(tracker.getClass(), "getService", null), 
-                tracker, null);
-            if (result == null)
+            ContentHandler result;
+            if (tracker instanceof URLHandlersServiceTracker)
             {
-                return getBuiltIn();
+                result = (ContentHandler) 
+                    ((URLHandlersServiceTracker) tracker).getService();
+            }
+            else
+            {
+                result = (ContentHandler) m_action.invoke(
+                    m_action.getMethod(tracker.getClass(), "getService", null), 
+                    tracker, null);
+            }
+            if ((result == null) && m_override)
+            {
+                result = getBuiltIn();
             }
             return result;
         }

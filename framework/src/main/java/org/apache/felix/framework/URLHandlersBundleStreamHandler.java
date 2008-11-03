@@ -51,15 +51,18 @@ class URLHandlersBundleStreamHandler extends URLStreamHandler
         
         if (framework != null)
         {
-            // TODO: optimize this to not use reflection if not needed
+            if (framework instanceof Felix)
+            {
+                return new URLHandlersBundleURLConnection(url, (Felix) framework);
+            }
             try
             {
                 Class targetClass = framework.getClass().getClassLoader().loadClass(
                     URLHandlersBundleURLConnection.class.getName());
                 
                 return (URLConnection) m_action.invoke(m_action.getConstructor(targetClass, 
-                    new Class[]{URL.class, framework.getClass()}),
-                    new Object[]{url, framework});
+                    new Class[]{URL.class, framework.getClass().getClassLoader().loadClass(
+                    Felix.class.getName())}), new Object[]{url, framework});
             }
             catch (Exception ex)
             {

@@ -66,7 +66,15 @@ import org.apache.felix.framework.util.*;
 **/
 class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
 {
+    private static final String STREAM_HANDLER_PACKAGE_PROP = "java.protocol.handler.pkgs";
+    private static final String DEFAULT_STREAM_HANDLER_PACKAGE = "sun.net.www.protocol|com.ibm.oti.net.www.protocol|gnu.java.net.protocol|wonka.net|com.acunia.wonka.net|org.apache.harmony.luni.internal.net.www.protocol|weblogic.utils|weblogic.net|javax.net.ssl|COM.newmonics.www.protocols";
+    
+    private static final String CONTENT_HANDLER_PACKAGE_PROP = "java.content.handler.pkgs";
+    private static final String DEFAULT_CONTENT_HANDLER_PACKAGE = "sun.net.www.content|com.ibm.oti.net.www.content|gnu.java.net.content|org.apache.harmony.luni.internal.net.www.content|COM.newmonics.www.content";
+
     private static final SecureAction m_secureAction = new SecureAction();
+    private static final boolean OVERRIDE = m_secureAction.getSystemProperty(
+        "felix.service.urlhandlers.override", "false").equalsIgnoreCase("true");
 
     private static volatile SecurityManagerEx m_sm = null;
     private static volatile URLHandlers m_handler = null;
@@ -77,6 +85,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
 
     // The list to hold all enabled frameworks registered with this handlers 
     private static final List m_frameworks = new ArrayList();
+    private static int m_counter = 0;
 
     private static Map m_contentHandlerCache = null;
     private static Map m_streamHandlerCache = null;
@@ -252,7 +261,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
      * @param protocol the protocol for which a stream handler should be returned.
      * @return a stream handler proxy for the specified protocol.
     **/
-    public synchronized URLStreamHandler createURLStreamHandler(String protocol)
+    public URLStreamHandler createURLStreamHandler(String protocol)
     {
         // See if there is a cached stream handler.
         // IMPLEMENTATION NOTE: Caching is not strictly necessary for
@@ -260,13 +269,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
         // performed for code consistency between stream and content
         // handlers and also because caching behavior may not be guaranteed
         // across different JRE implementations.
-        if (m_streamHandlerCache == null)
-        {
-            m_streamHandlerCache = new HashMap();
-        }
-        
-        URLStreamHandler handler = (URLStreamHandler) 
-            m_streamHandlerCache.get(protocol);
+        URLStreamHandler handler = getFromStreamCache(protocol);
         
         if (handler != null)
         {
@@ -277,9 +280,8 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
         // allowed to deal with it.
         if (protocol.equals(FelixConstants.BUNDLE_URL_PROTOCOL))
         {
-            handler = new URLHandlersBundleStreamHandler(m_secureAction);
-            m_streamHandlerCache.put(protocol, handler);
-            return handler;
+            return addToStreamCache(protocol, 
+                new URLHandlersBundleStreamHandler(m_secureAction));
         }
     
         // If this is the framework's "felix:" extension protocol, then
@@ -289,7 +291,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
         // URLClassloader.
         if (protocol.equals("felix"))
         {
-            handler = new URLStreamHandler()
+            return addToStreamCache(protocol, new URLStreamHandler()
             {
                 protected URLConnection openConnection(URL url)
                     throws IOException
@@ -311,16 +313,54 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
                         throw new IOException(ex.getMessage());
                     }
                 }
-            };
-            m_streamHandlerCache.put(protocol, handler);
-            return handler;
+            });
         }
 
-        // If built-in or unknown content handler, then create a proxy handler.
-        handler = new URLHandlersStreamHandlerProxy(protocol, m_secureAction, 
-            (m_streamHandlerFactory != this) ? m_streamHandlerFactory : null);
-        m_streamHandlerCache.put(protocol, handler);
-        return handler;
+        if (!OVERRIDE)
+        {
+            // If there was a custom factory then try to get the handler form it
+            if (m_streamHandlerFactory != this)
+            {
+                handler = 
+                    addToStreamCache(protocol, m_streamHandlerFactory.createURLStreamHandler(protocol));
+    
+                if (handler != null)
+                {
+                    return handler;
+                }
+            }
+            // Check for built-in handlers for the protocol.
+            String pkgs = m_secureAction.getSystemProperty(STREAM_HANDLER_PACKAGE_PROP, "");
+            pkgs = (pkgs.equals(""))
+                ? DEFAULT_STREAM_HANDLER_PACKAGE
+                : pkgs + "|" + DEFAULT_STREAM_HANDLER_PACKAGE;
+    
+            // Iterate over built-in packages.
+            StringTokenizer pkgTok = new StringTokenizer(pkgs, "| ");
+            while (pkgTok.hasMoreTokens())
+            {
+                String pkg = pkgTok.nextToken().trim();
+                String className = pkg + "." + protocol + ".Handler";
+                try
+                {
+                    // If a built-in handler is found then let the
+                    // JRE handle it.
+                    if (m_secureAction.forName(className) != null)
+                    {
+                        return null;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // This could be a class not found exception or an
+                    // instantiation exception, not much we can do in either
+                    // case other than ignore it.
+                }
+            }
+        }
+        // If built-in content handler, then create a proxy handler.
+        return addToStreamCache(protocol, new URLHandlersStreamHandlerProxy(protocol, m_secureAction, 
+            (m_streamHandlerFactory != this) ? m_streamHandlerFactory : null, OVERRIDE));
     }
 
     /**
@@ -333,19 +373,116 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
      * @param mimeType the mime type for which a content handler should be returned.
      * @return a content handler proxy for the specified mime type.
     **/
-    public synchronized ContentHandler createContentHandler(String mimeType)
+    public ContentHandler createContentHandler(String mimeType)
+    {
+        // See if there is a cached stream handler.
+        // IMPLEMENTATION NOTE: Caching is not strictly necessary for
+        // stream handlers since the Java runtime caches them. Caching is
+        // performed for code consistency between stream and content
+        // handlers and also because caching behavior may not be guaranteed
+        // across different JRE implementations.
+        ContentHandler handler = getFromContentCache(mimeType);
+        
+        if (handler != null)
+        {
+            return handler;
+        }
+        if (!OVERRIDE)
+        {
+            // If there was a custom factory then try to get the handler form it
+            if (m_contentHandlerFactory != this)
+            {
+                handler = addToContentCache(mimeType, 
+                    m_contentHandlerFactory.createContentHandler(mimeType));
+                
+                if (handler != null)
+                {
+                    return handler;
+                }
+            }
+    
+            // Check for built-in handlers for the mime type.
+            String pkgs = m_secureAction.getSystemProperty(CONTENT_HANDLER_PACKAGE_PROP, "");
+            pkgs = (pkgs.equals(""))
+                ? DEFAULT_CONTENT_HANDLER_PACKAGE
+                : pkgs + "|" + DEFAULT_CONTENT_HANDLER_PACKAGE;
+    
+            // Remove periods, slashes, and dashes from mime type.
+            String fixedType = mimeType.replace('.', '_').replace('/', '.').replace('-', '_');
+    
+            // Iterate over built-in packages.
+            StringTokenizer pkgTok = new StringTokenizer(pkgs, "| ");
+            while (pkgTok.hasMoreTokens())
+            {
+                String pkg = pkgTok.nextToken().trim();
+                String className = pkg + "." + fixedType;
+                try
+                {
+                    // If a built-in handler is found then let the
+                    // JRE handle it.
+                    if (m_secureAction.forName(className) != null)
+                    {
+                        return null;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // This could be a class not found exception or an
+                    // instantiation exception, not much we can do in either
+                    // case other than ignore it.
+                }
+            }
+        }
+            
+        return addToContentCache(mimeType, 
+            new URLHandlersContentHandlerProxy(mimeType, m_secureAction, 
+            (m_contentHandlerFactory != this) ? m_contentHandlerFactory : null, OVERRIDE));
+    }
+
+    private synchronized ContentHandler addToContentCache(String mimeType, ContentHandler handler)
     {
         if (m_contentHandlerCache == null)
         {
             m_contentHandlerCache = new HashMap();
         }
-        if (m_contentHandlerCache.containsKey(mimeType))
+        return (ContentHandler) addToCache(m_contentHandlerCache, mimeType, handler);
+    }
+    
+    private synchronized ContentHandler getFromContentCache(String mimeType)
+    {
+        return (ContentHandler) ((m_contentHandlerCache != null) ? 
+            m_contentHandlerCache.get(mimeType) : null);
+    }
+
+    private synchronized URLStreamHandler addToStreamCache(String protocol, URLStreamHandler handler)
+    {
+        if (m_streamHandlerCache == null)
         {
-            return (ContentHandler) m_contentHandlerCache.get(mimeType);
+            m_streamHandlerCache = new HashMap();
         }
-        ContentHandler result = new URLHandlersContentHandlerProxy(mimeType, m_secureAction,
-            (m_contentHandlerFactory != this) ? m_contentHandlerFactory : null);
-        m_contentHandlerCache.put(mimeType, result);
+        return (URLStreamHandler) addToCache(m_streamHandlerCache, protocol, handler);
+    }
+    
+    private synchronized URLStreamHandler getFromStreamCache(String protocol)
+    {
+        return (URLStreamHandler) ((m_streamHandlerCache != null) ? 
+            m_streamHandlerCache.get(protocol) : null);
+    }
+    
+    private Object addToCache(Map cache, String key, Object value)
+    {
+        if (value == null)
+        {
+            return null;
+        }
+        
+        Object result = cache.get(key);
+            
+        if (result == null)
+        {
+            cache.put(key, value);
+            result = value;
+        }
         return result;
     }
 
@@ -376,6 +513,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
                 }
                 m_frameworks.add(framework);
             }
+            m_counter++;
         }
     }
 
@@ -391,6 +529,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
     {
         synchronized (m_frameworks)
         {
+            m_counter--;
             if (m_frameworks.remove(framework) && m_frameworks.isEmpty())
             {
                 if (m_handler.m_streamHandlerFactory.getClass().getName().equals(
@@ -429,6 +568,20 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
     **/
     public static Object getFrameworkFromContext()
     {
+        // This is a hack. The idea is to return the only registered framework
+        synchronized (m_classloaderToFrameworkLists)
+        {
+            if (m_classloaderToFrameworkLists.isEmpty())
+            {
+                synchronized (m_frameworks)
+                {
+                    if ((m_counter == 1) && (m_frameworks.size() == 1))
+                    {
+                        return m_frameworks.get(0);
+                    }
+                }
+            }
+        }
         // get the current class call stack.
         Class[] stack = m_sm.getClassContext();
         // Find the first class that is loaded from a bundle.

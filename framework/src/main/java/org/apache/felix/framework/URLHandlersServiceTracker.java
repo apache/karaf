@@ -32,10 +32,10 @@ import org.osgi.framework.*;
 **/
 class URLHandlersServiceTracker
 {
-    private BundleContext m_context = null;
-    private String m_filter = null;
+    private final BundleContext m_context;
+    private final String m_filter;
     private ServiceReference m_ref = null;
-    private Object m_svcObj = null;
+    private volatile Object m_svcObj = null;
     private long m_id = -1;
     private int m_rank = -1;
 
@@ -126,7 +126,7 @@ class URLHandlersServiceTracker
      * service before selecting the best available service.
      * </p>
     **/
-    private void selectBestService()
+    private synchronized void selectBestService()
     {
         // If there is an existing service, then unget it.
         if (m_ref != null)

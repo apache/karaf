@@ -52,7 +52,11 @@ class URLHandlersBundleURLConnection extends URLConnection
         // one from the call context.
         if (m_framework == null)
         {
-            m_framework = (Felix) URLHandlers.getFrameworkFromContext();
+            Object tmp = URLHandlers.getFrameworkFromContext();
+            if (tmp instanceof Felix)
+            {
+                m_framework = (Felix) framework;
+            }
         }
 
         // If there is still no framework, then error.
