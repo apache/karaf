@@ -94,6 +94,7 @@ public class DependencyHandlerDescription extends HandlerDescription {
             }
             Element dep = new Element("Requires", "");
             dep.addAttribute(new Attribute("Specification", m_dependencies[i].getInterface()));
+            dep.addAttribute(new Attribute("Id", m_dependencies[i].getId()));
             
             if (m_dependencies[i].getFilter() != null) {
                 dep.addAttribute(new Attribute("Filter", m_dependencies[i].getFilter()));

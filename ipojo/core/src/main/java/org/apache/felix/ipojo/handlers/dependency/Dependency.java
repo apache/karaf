@@ -40,6 +40,7 @@ import org.apache.felix.ipojo.util.DependencyModel;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.SynchronousBundleListener;
 
 /**
  * Represent a service dependency of the component instance.
@@ -336,12 +337,16 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
         }
 
         super.start();
+        // Once the dependency is started, access to fields must be synchronized.
+        synchronized (this) {
+            if (getBindingPolicy() == STATIC_BINDING_POLICY && m_handler.getInstanceManager().getPojoObjects() != null) {
+                m_isFrozen = true;
+            }
 
-        if (getBindingPolicy() == STATIC_BINDING_POLICY && m_handler.getInstanceManager().getPojoObjects() != null) {
-            m_isFrozen = true;
+            m_isStarted = true;
         }
-
-        m_isStarted = true;
+        
+        
     }
 
     protected DependencyCallback[] getCallbacks() {

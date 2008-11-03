@@ -32,6 +32,11 @@ public class DependencyDescription {
      * Required Service Interface.
      */
     private String m_interface;
+    
+    /**
+     * Dependency Id.
+     */
+    private String m_id;
 
     /**
      * Is the dependency aggregate?
@@ -90,21 +95,23 @@ public class DependencyDescription {
     private List m_serviceReferences;
 
     /**
-     * Constructor.
-     * @param itf : the needed interface
-     * @param multiple : is the dependency a multiple dependency ?
-     * @param optional : is the dependency optional ?
-     * @param filter : the filter
-     * @param policy : binding policy
-     * @param nullable : does the dependency support nullable object
-     * @param defaultImpl : does the dependency use a default implementation
-     * @param comparator : does the dependency use a special comparator
-     * @param frozen : is the provider set frozen
-     * @param state : the state
+     * Creates a dependency description.
+     * @param itf the needed interface
+     * @param id the dependency id.
+     * @param multiple is the dependency a multiple dependency ?
+     * @param optional is the dependency optional ?
+     * @param filter the filter
+     * @param policy binding policy
+     * @param nullable does the dependency support nullable object
+     * @param defaultImpl does the dependency use a default implementation
+     * @param comparator does the dependency use a special comparator
+     * @param frozen is the provider set frozen
+     * @param state the state
      */
-    public DependencyDescription(String itf, boolean multiple, boolean optional, String filter, int policy, boolean nullable, String defaultImpl, String comparator, boolean frozen, int state) {
+    public DependencyDescription(String itf, String id, boolean multiple, boolean optional, String filter, int policy, boolean nullable, String defaultImpl, String comparator, boolean frozen, int state) {
         super();
         m_interface = itf;
+        m_id = id;
         m_aggregate = multiple;
         m_optional = optional;
         m_filter = filter;
@@ -125,6 +132,8 @@ public class DependencyDescription {
     public String getInterface() { return m_interface; }
 
     public int getState() { return m_state; }
+    
+    public String getId() { return m_id; }
     
     /**
      * Gets true if the dependency uses Nullable objects.

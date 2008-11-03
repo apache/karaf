@@ -59,7 +59,7 @@ public class ArchitectureHandler extends PrimitiveHandler implements Architectur
      * @see org.apache.felix.ipojo.Handler#start()
      */
     public void start() {
-        info("Start architecture handler with " + m_name + " name");
+        debug("Start architecture handler with " + m_name + " name");
     }
 
     /**

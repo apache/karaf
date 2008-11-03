@@ -103,6 +103,15 @@ public abstract class Handler {
     public final void info(String message) {
         getLogger().log(Logger.INFO, message);
     }
+    
+    /**
+     * Log method (debug).     
+     * Log a debug message to the handler logger.
+     * @param message the message to log
+     */
+    public final void debug(String message) {
+        getLogger().log(Logger.DEBUG, message);
+    }
 
     /**
      * Log method (warning).

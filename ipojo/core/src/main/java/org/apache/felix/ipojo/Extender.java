@@ -234,7 +234,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
             }
             ManagedAbstractFactoryType mft = new ManagedAbstractFactoryType(clazz, type, bundle);
             m_factoryTypes.add(mft);
-            m_logger.log(Logger.INFO, "New factory type available: " + type);
+            m_logger.log(Logger.DEBUG, "New factory type available: " + type);
 
             for (int j = m_unboundTypes.size() - 1; j >= 0; j--) {
                 UnboundComponentType unbound = (UnboundComponentType) m_unboundTypes.get(j);
@@ -393,7 +393,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
 
         // If not found, return. It will wait for a new component type factory.
         if (factoryType == null) {
-            m_logger.log(Logger.WARNING, "Type of component not yet recognized : " + metadata.getName());
+            m_logger.log(Logger.WARNING, "Type of component not available: " + metadata.getName());
             m_unboundTypes.add(new UnboundComponentType(metadata.getName(), metadata, bundle));
             return;
         }
@@ -606,7 +606,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
         public synchronized void addBundle(Bundle bundle) {
             m_bundles.add(bundle);
             notifyAll(); // Notify the thread to force the process.
-            m_logger.log(Logger.INFO, "Creator thread is going to analyze the bundle " + bundle.getBundleId() + " List : " + m_bundles);
+            m_logger.log(Logger.DEBUG, "Creator thread is going to analyze the bundle " + bundle.getBundleId() + " List : " + m_bundles);
         }
         
         /**
@@ -636,7 +636,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
          * @see java.lang.Runnable#run()
          */
         public void run() {
-            m_logger.log(Logger.INFO, "Creator thread is starting");
+            m_logger.log(Logger.DEBUG, "Creator thread is starting");
             boolean started;
             synchronized (this) {
                 started = m_started;
@@ -646,14 +646,14 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
                 synchronized (this) {
                     while (m_started && m_bundles.isEmpty()) {
                         try {
-                            m_logger.log(Logger.INFO, "Creator thread is waiting - Nothing to do");
+                            m_logger.log(Logger.DEBUG, "Creator thread is waiting - Nothing to do");
                             wait();
                         } catch (InterruptedException e) {
                             // Interruption, re-check the condition
                         }
                     }
                     if (!m_started) {
-                        m_logger.log(Logger.INFO, "Creator thread is stopping");
+                        m_logger.log(Logger.DEBUG, "Creator thread is stopping");
                         return; // The thread must be stopped immediately.
                     } else {
                         // The bundle list is not empty, get the bundle.
@@ -664,7 +664,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
                     }
                 }
                 // Process ...
-                m_logger.log(Logger.INFO, "Creator thread is processing " + bundle.getBundleId());
+                m_logger.log(Logger.DEBUG, "Creator thread is processing " + bundle.getBundleId());
                 try {
                     startManagementFor(bundle);
                 } catch (Throwable e) {

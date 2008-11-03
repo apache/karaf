@@ -301,8 +301,8 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
             String imm = m_componentMetadata.getAttribute("immediate");
             if (imm == null) { // immediate not specified, set the immediate attribute to true
                 getLogger().log(
-                        Logger.WARNING,
-                        "The component " + getFactoryName()
+                        Logger.INFO,
+                        "The component type " + getFactoryName()
                                 + " becomes immediate");
                 m_componentMetadata.addAttribute(new Attribute("immediate",
                         "true"));

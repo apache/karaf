@@ -180,7 +180,7 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
         for (int i = 0; callbacks != null && i < callbacks.length; i++) {
             MethodMetadata[] mets = manipulation.getMethods(callbacks[i].getMethodName());
             if (mets.length == 0) {
-                info("A requirement callback " + callbacks[i].getMethodName() + " does not exist in the implementation class, will try the super classes");
+                debug("A requirement callback " + callbacks[i].getMethodName() + " does not exist in the implementation class, will try the super classes");
             } else {
                 if (mets[0].getMethodArguments().length > 2) {
                     throw new ConfigurationException("Requirement Callback : A requirement callback "
@@ -258,7 +258,7 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
                     throw new ConfigurationException("Cannot discover the required specification for " + dep.getField());
                 } else {
                     // If the specification is different, warn that we will override it.
-                    warn("Cannot discover the required specification for " + dep.getField());
+                    info("Cannot discover the required specification for " + dep.getField());
                 }
             }
         } else { // In all other case, className is not null.
@@ -483,7 +483,7 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
             Dependency dep = getDependencies()[j];
             // Create & add the dependency description
             DependencyDescription desc =
-                    new DependencyDescription(dep.getSpecification().getName(), dep.isAggregate(), dep.isOptional(), dep.getFilter(), dep.getBindingPolicy(), dep.supportsNullable(), dep.getDefaultImplementation(), dep.getComparator(), dep.isFrozen(), dep.getState());
+                    new DependencyDescription(dep.getSpecification().getName(), dep.getId(), dep.isAggregate(), dep.isOptional(), dep.getFilter(), dep.getBindingPolicy(), dep.supportsNullable(), dep.getDefaultImplementation(), dep.getComparator(), dep.isFrozen(), dep.getState());
             desc.setServiceReferences(dep.getServiceReferencesAsList());
             desc.setUsedServices(dep.getUsedServiceReferences());
             dhd.addDependency(desc);
