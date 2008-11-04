@@ -282,70 +282,12 @@ class BundleContextImpl implements FelixBundleContext
 
         // Loop through all service references and return
         // the "best" one according to its rank and ID.
-        ServiceReference bestRef = null;
-        Integer bestRank = null;
-        Long bestId = null;
-        for (int i = 0; i < refs.length; i++)
+        ServiceReference bestRef = refs[0];
+        for (int i = 1; i < refs.length; i++)
         {
-            ServiceReference ref = refs[i];
-
-            // The first time through the loop just
-            // assume that the first reference is best.
-            if (bestRef == null)
+            if (bestRef.compareTo(refs[i]) < 0)
             {
-                bestRef = ref;
-                bestRank = (Integer) bestRef.getProperty("service.ranking");
-                // The spec says no ranking defaults to zero.
-                if (bestRank == null)
-                {
-                    bestRank = new Integer(0);
-                }
-                bestId = (Long) bestRef.getProperty("service.id");
-            }
-
-            // Compare current and best references to see if
-            // the current reference is a better choice.
-            Integer rank = (Integer) ref.getProperty("service.ranking");
-
-            // The spec says no ranking defaults to zero.
-            if (rank == null)
-            {
-                rank = new Integer(0);
-            }
-
-            // If the current reference ranking is greater than the
-            // best ranking, then keep the current reference.
-            if (bestRank.compareTo(rank) < 0)
-            {
-                bestRef = ref;
-                bestRank = rank;
-                bestId = (Long) bestRef.getProperty("service.id");
-            }
-            // If rankings are equal, then compare IDs and
-            // keep the smallest.
-            else if (bestRank.compareTo(rank) == 0)
-            {
-                Long id = (Long) ref.getProperty("service.id");
-                // If either reference has a null ID, then keep
-                // the one with a non-null ID.
-                if ((bestId == null) || (id == null))
-                {
-                    bestRef = (bestId == null) ? ref : bestRef;
-                    // bestRank = bestRank; // No need to update since they are equal.
-                    bestId = (Long) bestRef.getProperty("service.id");
-                }
-                // Otherwise compare IDs.
-                else
-                {
-                    // If the current reference ID is less than the
-                    // best ID, then keep the current reference.
-                    if (bestId.compareTo(id) > 0)
-                    {
-                        bestRef = ref;
-                        // bestRank = bestRank; // No need to update since they are equal.
-                        bestId = (Long) bestRef.getProperty("service.id");
-                    }
-                }
+                bestRef = refs[i];
             }
         }
 

@@ -22,6 +22,7 @@ import org.apache.felix.framework.util.Util;
 import org.apache.felix.moduleloader.IModule;
 import org.apache.felix.moduleloader.IWire;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
 class ServiceReferenceImpl implements ServiceReference
@@ -195,6 +196,34 @@ class ServiceReferenceImpl implements ServiceReference
 
     public int compareTo(Object reference)
     {
-        throw new UnsupportedOperationException("This feature has not yet been implemented.");
+        ServiceReference other = (ServiceReference) reference;
+
+        Long id = (Long) getProperty(Constants.SERVICE_ID);
+        Long otherId = (Long) other.getProperty(Constants.SERVICE_ID);
+
+        if (id.equals(otherId))
+        {
+            return 0; // same service
+        }
+
+        Integer rank = (Integer) getProperty(Constants.SERVICE_RANKING);
+        Integer otherRank = (Integer) other.getProperty(Constants.SERVICE_RANKING);
+
+        // If no rank, then spec says it defaults to zero.
+        rank = (rank == null) ? new Integer(0) : rank;
+        otherRank = (otherRank == null) ? new Integer(0) : otherRank;
+
+        // Sort by rank in ascending order.
+        if (rank.compareTo(otherRank) < 0)
+        {
+            return -1; // lower rank
+        }
+        else if (rank.compareTo(otherRank) > 0)
+        {
+            return 1; // higher rank
+        }
+
+        // If ranks are equal, then sort by service id in descending order.
+        return (id.compareTo(otherId) < 0) ? 1 : -1;
     }
 }
