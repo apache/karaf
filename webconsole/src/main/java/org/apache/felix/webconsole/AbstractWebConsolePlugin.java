@@ -20,10 +20,18 @@ package org.apache.felix.webconsole;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -49,41 +57,37 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         + "<html xmlns=\"http://www.w3.org/1999/xhtml\">"
         + "<head>"
         + "<meta http-equiv=\"Content-Type\" content=\"text/html; utf-8\">"
-        + "<link rel=\"icon\" href=\"{15}/res/imgs/favicon.ico\">"
-        + "<title>{0} - {12}</title>"
-        + "<script src=\"{15}/res/ui/admin.js\" language=\"JavaScript\"></script>"
-        + "<script src=\"{15}/res/ui/ui.js\" language=\"JavaScript\"></script>"
+        + "<link rel=\"icon\" href=\"{6}/res/imgs/favicon.ico\">"
+        + "<title>{0} - {2}</title>"
+        + "<script src=\"{5}/res/ui/admin.js\" language=\"JavaScript\"></script>"
+        + "<script src=\"{5}/res/ui/ui.js\" language=\"JavaScript\"></script>"
         + "<script language=\"JavaScript\">"
-        + "ABOUT_VERSION=''{1}'';"
-        + "ABOUT_JVERSION=''{2}'';"
-        + "ABOUT_JRT=''{3} (build {2})'';"
-        + "ABOUT_JVM=''{4} (build {5}, {6})'';"
-        + "ABOUT_MEM=\"{7} KB\";"
-        + "ABOUT_USED=\"{8} KB\";"
-        + "ABOUT_FREE=\"{9} KB\";"
-        + "appRoot = \"{15}\";"
-        + "pluginRoot = appRoot + \"/{16}\";"
+        + "appRoot = \"{5}\";"
+        + "pluginRoot = appRoot + \"/{6}\";"
         + "</script>"
-        + "<link href=\"{15}/res/ui/admin.css\" rel=\"stylesheet\" type=\"text/css\">"
+        + "<link href=\"{5}/res/ui/admin.css\" rel=\"stylesheet\" type=\"text/css\">"
         + "</head>"
         + "<body>"
         + "<div id=\"main\">"
         + "<div id=\"lead\">"
         + "<h1>"
-        + "{0}<br>{12}"
+        + "{0}<br>{2}"
         + "</h1>"
         + "<p>"
-        + "<a target=\"_blank\" href=\"{13}\" title=\"{11}\"><img src=\"{15}/res/imgs/logo.png\" width=\"165\" height=\"63\" border=\"0\"></a>"
+        + "<a target=\"_blank\" href=\"{3}\" title=\"{1}\"><img src=\"{5}/res/imgs/logo.png\" width=\"165\" height=\"63\" border=\"0\"></a>"
         + "</p>" + "</div>";
 
+    /**
+    String header = MessageFormat.format( HEADER, new Object[]
+         { adminTitle, productName, getTitle(), productWeb, vendorName,
+                 ( String ) request.getAttribute( OsgiManager.ATTR_APP_ROOT ), getLabel() } );
+    */
     private BundleContext bundleContext;
 
     private String adminTitle;
-    private String adminVersion;
     private String productName;
     private String productWeb;
     private String vendorName;
-    private String vendorWeb;
 
 
     //---------- HttpServlet Overwrites ----------------------------------------
@@ -126,11 +130,9 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         Dictionary headers = bundleContext.getBundle().getHeaders();
 
         adminTitle = ( String ) headers.get( Constants.BUNDLE_NAME ); // "OSGi Management Console";
-        adminVersion = ( String ) headers.get( Constants.BUNDLE_VERSION ); // "1.0.0-SNAPSHOT";
         productName = "Apache Felix";
         productWeb = ( String ) headers.get( Constants.BUNDLE_DOCURL );
         vendorName = ( String ) headers.get( Constants.BUNDLE_VENDOR );
-        vendorWeb = "http://www.apache.org";
     }
 
 
@@ -163,15 +165,8 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
 
         PrintWriter pw = response.getWriter();
 
-        long freeMem = Runtime.getRuntime().freeMemory() / 1024;
-        long totalMem = Runtime.getRuntime().totalMemory() / 1024;
-        long usedMem = totalMem - freeMem;
-
         String header = MessageFormat.format( HEADER, new Object[]
-            { adminTitle, adminVersion, System.getProperty( "java.runtime.version" ),
-                System.getProperty( "java.runtime.name" ), System.getProperty( "java.vm.name" ),
-                System.getProperty( "java.vm.version" ), System.getProperty( "java.vm.info" ), new Long( totalMem ),
-                new Long( usedMem ), new Long( freeMem ), vendorWeb, productName, getTitle(), productWeb, vendorName,
+            { adminTitle, productName, getTitle(), productWeb, vendorName,
                 ( String ) request.getAttribute( OsgiManager.ATTR_APP_ROOT ), getLabel() } );
         pw.println( header );
 
@@ -229,8 +224,8 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
 
             for ( Iterator li = map.values().iterator(); li.hasNext(); )
             {
-                pw.print  ( "<nobr>" );
-                pw.print  ( li.next() );
+                pw.print( "<nobr>" );
+                pw.print( li.next() );
                 pw.println( "</nobr>" );
             }
 

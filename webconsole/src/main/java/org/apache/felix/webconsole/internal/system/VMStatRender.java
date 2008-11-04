@@ -150,11 +150,17 @@ public class VMStatRender extends BaseManagementPlugin implements Render
         pw.println( "<th colspan='2' class='content container'>Java Information:</th>" );
         pw.println( "</tr>" );
 
-        this.infoLine( pw, "Java Runtime", "ABOUT_JRT" );
-        this.infoLine( pw, "Java Virtual Machine", "ABOUT_JVM" );
-        this.infoLine( pw, "Total Memory", "ABOUT_MEM" );
-        this.infoLine( pw, "Used Memory", "ABOUT_USED" );
-        this.infoLine( pw, "Free Memory", "ABOUT_FREE" );
+        long freeMem = Runtime.getRuntime().freeMemory() / 1024;
+        long totalMem = Runtime.getRuntime().totalMemory() / 1024;
+        long usedMem = totalMem - freeMem;
+
+        this.infoLine( pw, "Java Runtime", System.getProperty( "java.runtime.name" ) + "(build "
+            + System.getProperty( "java.runtime.version" ) + ")" );
+        this.infoLine( pw, "Java Virtual Machine", System.getProperty( "java.vm.name" ) + "(build "
+            + System.getProperty( "java.vm.version" ) + ", " + System.getProperty( "java.vm.info" ) + ")" );
+        this.infoLine( pw, "Total Memory", totalMem + " KB" );
+        this.infoLine( pw, "Used Memory", usedMem + " KB" );
+        this.infoLine( pw, "Free Memory", freeMem + " KB" );
 
         pw.println( "<tr class='content'>" );
         pw.println( "<form method='post'>" );
@@ -168,12 +174,12 @@ public class VMStatRender extends BaseManagementPlugin implements Render
     }
 
 
-    private void infoLine( PrintWriter pw, String label, String jsName )
+    private void infoLine( PrintWriter pw, String label, String value )
     {
         pw.println( "<tr class='content'>" );
         pw.println( "<td class='content'>" + label + "</td>" );
         pw.println( "<td class='content'>" );
-        pw.println( "<script> document.write(" + jsName + "); </script>" );
+        pw.println( value );
         pw.println( "</td></tr>" );
     }
 

@@ -70,17 +70,6 @@ function localDate(time) {
     document.write(date.toLocaleString());
 }
 
-/* shows the about screen  */
-function showAbout() {
-// Temporarily disabled, as thee is no about.html page (fmeschbe, 20070330)
-//    var arguments = ABOUT_VERSION+";"+ABOUT_JVERSION+";"+ABOUT_MEM+";"+ABOUT_USED+";"+ABOUT_FREE;
-//    if (window.showModalDialog) {
-//        window.showModalDialog("about.html", arguments, "help: no; status: no; resizable: no; center: yes; scroll: no");
-//    } else {
-//        aboutWin = window.open("about.html?a="+arguments, "about", "width=500,height=420,modal,status=no,toolbar=no,menubar=no,personalbar=no");
-//    }
-}
-
 //-----------------------------------------------------------------------------
 // Ajax Support
 
