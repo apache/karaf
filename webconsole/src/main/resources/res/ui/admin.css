@@ -559,7 +559,7 @@ textarea {
 }
 
 div.buttons {
-    margin-top: 10px;
+    background-color: #6181A9;
     height: 30px;
 }
 div.button {
@@ -568,39 +568,46 @@ div.button {
 	margin-right: 10px;
 }
 div.fullwidth {
-	margin-top: 10px;
     width: 100%;
 }
 div.statusline {
+    margin-top: 10px;
     background-color: #F5F5F5;
-    margin-left: 10px;
-    margin-right: 10px;
     padding-left: 10px;
     border: 1px solid #CCCCCC;
     font-size: 13px;
     color: #222222;
     line-height: 19px;
+    margin-bottom: 10px;
 }
 div.table {
-    margin-left: 10px;
-    margin-right: 10px;
+	margin-left: 1px;
 }
 div.tablelayout {
-    background-color: #E0FFFF;
 }
 
 /* tables */
 table.tablelayout {
-    font-family:arial;
+	border-left: 1px solid #6181A9;
+    border-right: 1px solid #6181A9;
+    border-collapse: collapse;
+	font-family:arial;
     background-color: #CDCDCD;
     font-size: 8pt;
     width: 100%;
     text-align: left;
-    border-spacing: 0;
 }
+table.tablelayout tbody tr {
+    border-left: 1px solid #6181A9;
+    border-right: 1px solid #6181A9;
+}
+
 table.tablelayout thead tr th, table.tablelayout tfoot tr th {
     background-color: #e6EEEE;
-    border: 1px solid #FFF;
+    border-left: 1px solid #6181A9;
+    border-right: 1px solid #6181A9;
+    border-top: 1px solid #FFF;
+    border-bottom: 1px solid #FFF;
     font-size: 8pt;
     padding: 4px;
 }
@@ -612,6 +619,8 @@ table.tablelayout thead tr .header {
 }
 table.tablelayout tbody td {
     color: #3D3D3D;
+    border-top: 1px solid #6181A9;
+    border-bottom: 1px solid #6181A9;
     padding: 4px;
     background-color: #FFF;
     vertical-align: top;

@@ -27,7 +27,6 @@ function renderStatusLine() {
 }
 
 function renderTable( /* Array of String */ columns ) {
-	document.write( "<div class='fullwidth tablelayout'>");
     renderButtons();
 	document.write( "<div class='table'>");
     document.write( "<table id='events' class='tablelayout'>" );
@@ -40,7 +39,6 @@ function renderTable( /* Array of String */ columns ) {
     document.write( "</tbody></table>" );
     document.write( "</div>");
     renderButtons();
-    document.write( "</div>");
 }
 
 function renderButtons( ) {
