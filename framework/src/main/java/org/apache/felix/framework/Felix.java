@@ -142,9 +142,9 @@ public class Felix extends FelixBundle implements Framework
      *   <li><tt>org.osgi.framework.storage</tt> - Sets the directory to use as
      *       the bundle cache; by default bundle cache directory is
      *       <tt>felix-cache</tt> in the current working directory. The value
-     *       should be a valid file name. The file name can be either absolute
-     *       or relative. Relative file names are relative to the current working
-     *       directory. If the specified directory will be created if it does
+     *       should be a valid directory name. The directory name can be either absolute
+     *       or relative. Relative directory names are relative to the current working
+     *       directory. The specified directory will be created if it does
      *       not exist.
      *   </li>
      *   <li><tt>org.osgi.framework.storage.clean</tt> - Determines whether the
@@ -155,7 +155,7 @@ public class Felix extends FelixBundle implements Framework
      *       value is "<tt>none</tt>".
      *   </li>
      *   <li><tt>felix.cache.rootdir</tt> - Sets the root directory to use to
-     *       calculate the bundle cache directory for relative file names. If
+     *       calculate the bundle cache directory for relative directory names. If
      *       <tt>org.osgi.framework.storage</tt> is set to a relative name, by
      *       default it is relative to the current working directory. If this
      *       property is set, then it will be calculated as being relative to
