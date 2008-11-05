@@ -123,13 +123,17 @@ public class Logger {
      * @param msg the message to log
      */
     private void dispatch(int level, String msg) {
-        
-        ServiceReference ref = m_context.getServiceReference(LogService.class.getName());
         LogService log = null;
-        if (ref != null) {
-            log = (LogService) m_context.getService(ref);
+        ServiceReference ref = null;
+        try {
+            ref = m_context.getServiceReference(LogService.class.getName());
+            if (ref != null) {
+                log = (LogService) m_context.getService(ref);
+            }
+        } catch (IllegalStateException e) {
+            // Handle the case where the iPOJO bundle is stopping
         }
-        
+
         String message = null;
         switch (level) {
             case DEBUG:
@@ -182,11 +186,15 @@ public class Logger {
      * @param exception the exception attached to the message
      */
     private void dispatch(int level, String msg, Throwable exception) {
-        
-        ServiceReference ref = m_context.getServiceReference(LogService.class.getName());
         LogService log = null;
-        if (ref != null) {
-            log = (LogService) m_context.getService(ref);
+        ServiceReference ref = null;
+        try {
+            ref = m_context.getServiceReference(LogService.class.getName());
+            if (ref != null) {
+                log = (LogService) m_context.getService(ref);
+            }
+        } catch (IllegalStateException e) {
+            // Handle the case where the iPOJO bundle is stopping
         }
         
         String message = null;

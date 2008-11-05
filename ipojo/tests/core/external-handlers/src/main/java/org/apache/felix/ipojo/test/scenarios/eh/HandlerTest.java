@@ -21,7 +21,6 @@ package org.apache.felix.ipojo.test.scenarios.eh;
 import java.util.Properties;
 
 import org.apache.felix.ipojo.ComponentInstance;
-import org.apache.felix.ipojo.HandlerFactory;
 import org.apache.felix.ipojo.HandlerManagerFactory;
 import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;

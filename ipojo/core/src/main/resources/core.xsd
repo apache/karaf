@@ -218,12 +218,12 @@ The 'instance.name' property has a special semantic as it will be used as the in
 				</xs:sequence>
 				
 				<xs:attribute name="interface" type="xs:string"
-				    use="optional">
+				    use="prohibited">
                     <xs:annotation>
-                    	<xs:documentation>The interface describing the required service type. This attribute is needed only when using aggregate dependencies with field injection and when the type of this field is a list, vector, collection and set. This attribute is deprecated.</xs:documentation>
+                    	<xs:documentation>The interface describing the required service type. This attribute is needed only when using aggregate dependencies with field injection and when the type of this field is a list, vector, collection and set. This attribute is deprecated, use 'specification'.</xs:documentation>
                     </xs:annotation>
 				</xs:attribute>
-
+				
 				<xs:attribute name="field" type="xs:string"
 					use="optional">
                     <xs:annotation>

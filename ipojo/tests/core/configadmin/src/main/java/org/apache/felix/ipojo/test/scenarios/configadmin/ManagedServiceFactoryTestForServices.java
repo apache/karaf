@@ -249,7 +249,7 @@ public class ManagedServiceFactoryTestForServices extends OSGiTestCase {
         architecture = (Architecture) Utils.getServiceObject(context, Architecture.class.getName(), "(architecture.instance="+pid+")");
         
         assertEquals("Assert Message", "message2", mes);
-       // assertEquals("Assert count", 2, count);
+        assertEquals("Assert count", 2, count);
         assertEquals("Check 1 object", 1, architecture.getInstanceDescription().getCreatedObjects().length);
         
         try {

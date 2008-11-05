@@ -60,7 +60,7 @@
 		classname="org.apache.felix.ipojo.test.scenarios.service.dependency.policies.MethodCheckServiceProvider"
 		name="StaticMRefCheckServiceProvider" architecture="true">
 		<requires
-			interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
+			specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
 			policy="static">
 			<callback type="bind" method="refBind" />
 			<callback type="unbind" method="refUnbind" />
@@ -139,7 +139,7 @@
 		name="StaticMRefOptionalCheckServiceProvider"
 		architecture="true">
 		<requires
-			interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
+			specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
 			optional="true" policy="static">
 			<callback type="bind" method="refBind" />
 			<callback type="unbind" method="refUnbind" />
@@ -151,7 +151,7 @@
 		name="StaticMBothOptionalCheckServiceProvider"
 		architecture="true">
 		<requires
-			interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
+			specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
 			optional="true" policy="static">
 			<callback type="bind" method="bothBind" />
 			<callback type="unbind" method="bothUnbind" />
@@ -220,7 +220,7 @@
 		name="StaticMRefMultipleCheckServiceProvider"
 		architecture="true">
 		<requires
-			interface="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
+			specification="org.apache.felix.ipojo.test.scenarios.service.dependency.service.FooService"
 			aggregate="true" policy="static">
 			<callback type="bind" method="refBind" />
 			<callback type="unbind" method="refUnbind" />

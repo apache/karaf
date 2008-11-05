@@ -217,10 +217,11 @@ public class ManagedServiceTestForImmediate extends OSGiTestCase {
         FooService fs = (FooService) context.getService(ref);
         Properties p = fs.fooProps();
         String mes = p.getProperty("message");
-        //int count = ((Integer) p.get("count")).intValue();
+      //  int count1 = ((Integer) p.get("count")).intValue();
         assertEquals("Check 1 object", 1, instance.getInstanceDescription().getCreatedObjects().length);
         assertEquals("Check message - 1 (" + mes +")", "message2", mes); // Already reconfigured.
-       // assertEquals("Check count", 2, count); // Two : 1) "message" on immediate, "message2" on the reconfiguration
+       // assertEquals("Check count", 2, count); // Two : 1) "message" on immediate, "message2" on the reconfiguration, 
+                                                // not necessary as the property can be set before the immediate instance creation
         
         instance.dispose();
         
@@ -256,10 +257,10 @@ public class ManagedServiceTestForImmediate extends OSGiTestCase {
         fs = (FooService) context.getService(ref);
         p = fs.fooProps();
         mes = p.getProperty("message");
-        //count = ((Integer) p.get("count")).intValue();
+       // int count = ((Integer) p.get("count")).intValue();
         assertEquals("Check 1 object", 1, instance.getInstanceDescription().getCreatedObjects().length);
         assertEquals("Check message already reconfigured", "message3", mes); // Already reconfigured.
-        //assertEquals("Check count", 2, count); // message before the reconfiguration, message3 after the reconfiguration
+        //assertEquals("Check count", count1 + 1, count); // message before the reconfiguration, message3 after the reconfiguration
         
         instance.dispose();
         

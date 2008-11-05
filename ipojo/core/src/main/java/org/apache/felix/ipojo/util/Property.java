@@ -454,11 +454,10 @@ public class Property implements FieldInterceptor {
         try {
             if (instance == null) {
                 m_method.call(new Object[] { m_value });
-                m_invoked = true;
             } else {
                 m_method.call(instance, new Object[] { m_value });
-                m_invoked = true;
             }
+            m_invoked = true;
         } catch (NoSuchMethodException e) {
             m_handler.error("The method " + m_method + " does not exist in the implementation class " + m_manager.getClassName());
             m_manager.stop();
