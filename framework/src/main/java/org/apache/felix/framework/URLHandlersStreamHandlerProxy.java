@@ -105,16 +105,14 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
     private final String m_protocol;
     private final Object m_service;
     private final SecureAction m_action;
-    private final boolean m_override;
 
     public URLHandlersStreamHandlerProxy(String protocol, SecureAction action, 
-        URLStreamHandlerFactory factory, boolean override)
+        URLStreamHandlerFactory factory)
     {
         m_protocol = protocol;
         m_service = null;
         m_action = action;
         m_factory = factory;
-        m_override = override;
     }
     
     private URLHandlersStreamHandlerProxy(Object service, SecureAction action)
@@ -123,7 +121,6 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
         m_service = service;
         m_action = action;
         m_factory = null;
-        m_override = false;
     }
 
     //
@@ -377,7 +374,7 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
 
         if (framework == null) 
         {
-            return m_override ? getBuiltIn() : null;
+            return getBuiltIn();
         }
 
         // Get the service tracker for the framework instance or create one.
@@ -432,7 +429,7 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
             }
             if (service == null) 
             {
-                return m_override ? getBuiltIn() : null;
+                return getBuiltIn();
             }
             if (service instanceof URLStreamHandlerService)
             {

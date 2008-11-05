@@ -62,15 +62,13 @@ class URLHandlersContentHandlerProxy extends ContentHandler
     private final Map m_trackerMap = new HashMap();
     private final String m_mimeType;
     private final SecureAction m_action;
-    private final boolean m_override;
 
     public URLHandlersContentHandlerProxy(String mimeType, SecureAction action, 
-        ContentHandlerFactory factory, boolean override)
+        ContentHandlerFactory factory)
     {
         m_mimeType = mimeType;
         m_action = action;
         m_factory = factory;
-        m_override = override;
     }
 
     //
@@ -105,7 +103,7 @@ class URLHandlersContentHandlerProxy extends ContentHandler
 
         if (framework == null) 
         {
-            return m_override ? getBuiltIn() : null;
+            return getBuiltIn();
         }
 
         // Get the service tracker for the framework instance or create one.
@@ -159,7 +157,7 @@ class URLHandlersContentHandlerProxy extends ContentHandler
                     m_action.getMethod(tracker.getClass(), "getService", null), 
                     tracker, null);
             }
-            if ((result == null) && m_override)
+            if (result == null)
             {
                 result = getBuiltIn();
             }

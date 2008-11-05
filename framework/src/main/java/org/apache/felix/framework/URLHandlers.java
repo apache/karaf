@@ -66,15 +66,7 @@ import org.apache.felix.framework.util.*;
 **/
 class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
 {
-    private static final String STREAM_HANDLER_PACKAGE_PROP = "java.protocol.handler.pkgs";
-    private static final String DEFAULT_STREAM_HANDLER_PACKAGE = "sun.net.www.protocol|com.ibm.oti.net.www.protocol|gnu.java.net.protocol|wonka.net|com.acunia.wonka.net|org.apache.harmony.luni.internal.net.www.protocol|weblogic.utils|weblogic.net|javax.net.ssl|COM.newmonics.www.protocols";
-    
-    private static final String CONTENT_HANDLER_PACKAGE_PROP = "java.content.handler.pkgs";
-    private static final String DEFAULT_CONTENT_HANDLER_PACKAGE = "sun.net.www.content|com.ibm.oti.net.www.content|gnu.java.net.content|org.apache.harmony.luni.internal.net.www.content|COM.newmonics.www.content";
-
     private static final SecureAction m_secureAction = new SecureAction();
-    private static final boolean OVERRIDE = m_secureAction.getSystemProperty(
-        "felix.service.urlhandlers.override", "false").equalsIgnoreCase("true");
 
     private static volatile SecurityManagerEx m_sm = null;
     private static volatile URLHandlers m_handler = null;
@@ -316,51 +308,9 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
             });
         }
 
-        if (!OVERRIDE)
-        {
-            // If there was a custom factory then try to get the handler form it
-            if (m_streamHandlerFactory != this)
-            {
-                handler = 
-                    addToStreamCache(protocol, m_streamHandlerFactory.createURLStreamHandler(protocol));
-    
-                if (handler != null)
-                {
-                    return handler;
-                }
-            }
-            // Check for built-in handlers for the protocol.
-            String pkgs = m_secureAction.getSystemProperty(STREAM_HANDLER_PACKAGE_PROP, "");
-            pkgs = (pkgs.equals(""))
-                ? DEFAULT_STREAM_HANDLER_PACKAGE
-                : pkgs + "|" + DEFAULT_STREAM_HANDLER_PACKAGE;
-    
-            // Iterate over built-in packages.
-            StringTokenizer pkgTok = new StringTokenizer(pkgs, "| ");
-            while (pkgTok.hasMoreTokens())
-            {
-                String pkg = pkgTok.nextToken().trim();
-                String className = pkg + "." + protocol + ".Handler";
-                try
-                {
-                    // If a built-in handler is found then let the
-                    // JRE handle it.
-                    if (m_secureAction.forName(className) != null)
-                    {
-                        return null;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // This could be a class not found exception or an
-                    // instantiation exception, not much we can do in either
-                    // case other than ignore it.
-                }
-            }
-        }
         // If built-in content handler, then create a proxy handler.
         return addToStreamCache(protocol, new URLHandlersStreamHandlerProxy(protocol, m_secureAction, 
-            (m_streamHandlerFactory != this) ? m_streamHandlerFactory : null, OVERRIDE));
+            (m_streamHandlerFactory != this) ? m_streamHandlerFactory : null));
     }
 
     /**
@@ -387,56 +337,10 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
         {
             return handler;
         }
-        if (!OVERRIDE)
-        {
-            // If there was a custom factory then try to get the handler form it
-            if (m_contentHandlerFactory != this)
-            {
-                handler = addToContentCache(mimeType, 
-                    m_contentHandlerFactory.createContentHandler(mimeType));
-                
-                if (handler != null)
-                {
-                    return handler;
-                }
-            }
-    
-            // Check for built-in handlers for the mime type.
-            String pkgs = m_secureAction.getSystemProperty(CONTENT_HANDLER_PACKAGE_PROP, "");
-            pkgs = (pkgs.equals(""))
-                ? DEFAULT_CONTENT_HANDLER_PACKAGE
-                : pkgs + "|" + DEFAULT_CONTENT_HANDLER_PACKAGE;
-    
-            // Remove periods, slashes, and dashes from mime type.
-            String fixedType = mimeType.replace('.', '_').replace('/', '.').replace('-', '_');
-    
-            // Iterate over built-in packages.
-            StringTokenizer pkgTok = new StringTokenizer(pkgs, "| ");
-            while (pkgTok.hasMoreTokens())
-            {
-                String pkg = pkgTok.nextToken().trim();
-                String className = pkg + "." + fixedType;
-                try
-                {
-                    // If a built-in handler is found then let the
-                    // JRE handle it.
-                    if (m_secureAction.forName(className) != null)
-                    {
-                        return null;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // This could be a class not found exception or an
-                    // instantiation exception, not much we can do in either
-                    // case other than ignore it.
-                }
-            }
-        }
-            
+
         return addToContentCache(mimeType, 
             new URLHandlersContentHandlerProxy(mimeType, m_secureAction, 
-            (m_contentHandlerFactory != this) ? m_contentHandlerFactory : null, OVERRIDE));
+            (m_contentHandlerFactory != this) ? m_contentHandlerFactory : null));
     }
 
     private synchronized ContentHandler addToContentCache(String mimeType, ContentHandler handler)
