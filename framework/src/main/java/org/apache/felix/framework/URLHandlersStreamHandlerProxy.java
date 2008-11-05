@@ -281,10 +281,8 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
         {
             try 
             {
-                URL test = new URL(null, toExternalForm(url, svc), (URLStreamHandler) svc);
+                URL test = new URL(url, spec, (URLStreamHandler) svc);
                 
-                m_action.invoke(PARSE_URL, 
-                    svc, new Object[]{test, spec, new Integer(start), new Integer(limit)});
                 super.setURL(url, test.getProtocol(), test.getHost(), test.getPort(),test.getAuthority(), 
                         test.getUserInfo(), test.getPath(), test.getQuery(), test.getRef());
             } 
