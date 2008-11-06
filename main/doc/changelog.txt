@@ -1,3 +1,27 @@
+Changes from 1.2.2 to 1.4.0
+---------------------------
+* [2008-10-31] Fixed a possible NPE when no configuration file is found.
+* [2008-10-23] Change the name of the SystemBundle interface to be Framework. 
+  (FELIX-753)
+* [2008-10-22] Hide wire messages in felix releases. (FELIX-707)
+* [2008-10-16] Modified framework to have default values for the system packages 
+  property. Now it is really possible to start Felix with no configuration 
+  properties. (FELIX-753)
+* [2008-10-10] Implements support for flushing the cache on framework 
+  initialization. (FELIX-755)
+* [2008-10-09] Modified the bundle cache to no longer have profiles. (FELIX-754)
+* [2008-10-08] Modified the Felix API to aligned with the proposed standard OSGi 
+  framework API. (FELIX-753)
+* [2008-09-23] Added symbolic names to framework and main.
+* [2008-09-12] Added a configuration property to determine whether installing a 
+  fragment that uses unimplemented features throws an exception or logs a 
+  warning. (FELIX-725)
+
+Changes form 1.2.1 to 1.2.2
+---------------------------
+
+* [2008-10-14] Update to latest framework version 1.2.2.
+
 Changes from 1.2.0 to 1.2.1
 ---------------------------
 
