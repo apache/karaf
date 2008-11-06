@@ -1,3 +1,15 @@
+Changes from 1.2.0 to 1.2.1
+---------------------------
+* [2008-10-24] Fixed potential NPE when comparing resources. (FELIX-789)
+* [2008-10-24] Removed the default repository URL from OBR, so now it must 
+  be configured to have a repository. (FELIX-481)
+* [2008-10-24] Print message if there are no matching bundles. (FELIX-785)
+* [2008-10-23] Modified the OBR shell command to hide multiple versions of 
+  available artifacts to cut down on noise. It is still possible to list 
+  all versions by using a new "-v" switch.
+* [2008-09-29] Adapt Bundle-DocURL header to modified URL
+
+
 Changes from 1.0.3 to 1.2.0
 ---------------------------
 
