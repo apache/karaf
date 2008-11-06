@@ -1,3 +1,77 @@
+Changes from 1.2.2 to 1.4.0
+---------------------------
+* [2008-11-05] URLStreamHandlerService and ContentHandlerService override
+  built-in handlers and make it possible to use URLHandlers when extending the 
+  Felix class. (FELIX-756, FELIX-800)
+* [2008-11-04] Implement ServiceReference.compareTo() method. (FELIX-799)
+* [2008-10-31] Fix some visibility issues in the LDAP operators which could
+  result in incorrect toString values. (FELIX-765)
+* [2008-10-31] Fixed spec compliance issues around getting a service reference 
+  from an invalid registration and throwing an exception when there are
+  duplicate property keys. (FELIX-798)
+* [2008-10-21] Fixed an issue with extension bundles which would be installed
+  as fragments and fail to install extension bundles if they have incomplete 
+  metadata. (FELIX-770)
+* [2008-10-21] Fix a possible deadlock in URLHandlers. (FELIX-748)
+* [2008-10-16] Modified framework to have default values for the system
+  packages property, which also required modifying main to no longer expect to
+  set it. Now it is possible to start Felix with no configuration properties.
+  (FELIX-753)
+* [2008-10-16] Update felix to work with the 1.0.0-rc1 version of the android
+  sdk.
+* [2008-10-15] Implemented remaining PackageAdmin methods from R4. (FELIX-35)
+* [2008-10-15] Modified resolver to correctly mark fragment modules as resolved.
+  (FELIX-777)
+* [2008-10-15] Modified the resolver to longer consider uninstalled fragments
+  and hosts when resolving dependencies; this required a new "stale" flag on 
+  modules that gets set when their associated bundle is uninstalled. (FELIX-776)
+* [2008-10-15] Modified the resolver to sort candidates when resolving 
+  Require-Bundle dependencies. (FELIX-775)
+* [2008-10-14] Modified ExportedPackage.getImportingBundles() to include
+  bundles requiring the exporting bundle, in addition to those bundles
+  importing the package. Also tried to simplify dependency management code
+  by separating it out. (FELIX-764) 
+* [2008-10-14] Fix a NullPointerException in SecureAction when a
+  SecurityManager is used by keeping pointers on the local stack. (FELIX-766)
+* [2008-10-13] Use System.gc to allow to update and uninstall bundles with 
+  native libs on Windows. (FELIX-733)
+* [2008-10-10] Set the activator to null on Bundle.stop() to allow for earlier 
+  garbage collection. (FELIX-762)
+* [2008-10-10] Implements support for flushing the cache on framework 
+  initialization. (FELIX-755)
+* [2008-10-10] Improve exception messages. (FELIX-750)
+* [2008-10-09] Modified the bundle cache to no longer have profiles. (FELIX-754)
+* [2008-10-08] Modified the Felix API to aligned with the proposed standard 
+  OSGi framework API. The framework instance can now be stopped and restarted. 
+  (FELIX-753)
+* [2008-09-29] Support transiently starting/stopping bundles. (FELIX-713) 
+* [2008-09-25] Correctly discard exported packages when a bundle is chosen to
+  import a package it exports. (FELIX-736)
+* [2008-09-24] Clearly distinguish between "resolved" and "unresolved" 
+  capabilities, which is necessary since "resolved" capabilities have higher 
+  priority than "unresolved" ones. (FELIX-730)
+* [2008-09-24] Do not bootdelegate in the case where Bundle.loadClass() has
+  been used. (FELIX-712)
+* [2008-09-23] Improve decoding of reference URLs. (FELIX-731)
+* [2008-09-23] For completeness, added symbolic names to framework and main.
+* [2008-09-17] Improve gc by fixing an issue with StartLevel and PackageAdmin.
+  (FELIX-728)
+* [2008-09-15] Fix an issue with Require-Bundle not aggregating packages 
+  correctly. (FELIX-722)
+* [2008-09-15] Fixed a bug where class loader delegation for dynamic imports 
+  was happening when it shouldn't. (FELIX-724)
+* [2008-09-12] Added a configuration property to determine whether installing a 
+  fragment that uses unimplemented features throws an exception or logs a 
+  warning. (FELIX-725)
+* [2008-09-12] Removed some experimental code for "implicit requirements",
+  since it was no longer needed.
+* [2008-09-12] Fix some visibility issues within the LDAP filter. (FELIX-721)
+
+Changes from 1.2.1 to 1.2.2
+---------------------------
+* [2008-10-14] Fixed a NullPointer exception that could happen when 
+  running with a SecurityManager as a backport of FELIX-766.
+
 Changes from 1.2.0 to 1.2.1
 ---------------------------
 
