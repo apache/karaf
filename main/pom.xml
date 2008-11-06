@@ -27,7 +27,7 @@
   <packaging>bundle</packaging>
   <name>Apache Felix Main</name>
   <artifactId>org.apache.felix.main</artifactId>
-  <version>1.5.0-SNAPSHOT</version>
+  <version>1.3.0-SNAPSHOT</version>
   <dependencies>
     <dependency>
       <groupId>${pom.groupId}</groupId>
