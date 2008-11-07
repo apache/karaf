@@ -87,14 +87,14 @@
     </dependency>
   </dependencies>
   <properties>
-    <felix.log.level>4</felix.log.level>
+    <log.level>4</log.level>
     <dollar>$</dollar>
   </properties>
   <profiles>
     <profile>
       <id>release</id>
       <properties>
-        <felix.log.level>1</felix.log.level>
+        <log.level>1</log.level>
       </properties>
     </profile>
   </profiles>
