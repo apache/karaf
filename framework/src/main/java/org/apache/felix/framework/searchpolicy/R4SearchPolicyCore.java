@@ -605,7 +605,10 @@ public class R4SearchPolicyCore implements ModuleListener
                 {
                     try
                     {
-                        return this.getClass().getClassLoader().loadClass(name);
+                        // Return the class or resource from the parent class loader.
+                        return (isClass)
+                            ? (Object) this.getClass().getClassLoader().loadClass(name)
+                            : (Object) this.getClass().getClassLoader().getResource(name);
                     }
                     catch (NoClassDefFoundError ex)
                     {
