@@ -45,6 +45,7 @@ import org.apache.felix.ipojo.manipulation.annotations.MetadataCollector;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.xml.parser.ParseException;
+import org.apache.felix.ipojo.xml.parser.SchemaResolver;
 import org.apache.felix.ipojo.xml.parser.XMLMetadataParser;
 import org.objectweb.asm.ClassReader;
 import org.xml.sax.InputSource;
@@ -89,9 +90,16 @@ public class Pojoization {
     private List m_referredPackages;
 
     /**
-     * Flag describing if we need of not compute annotations.
+     * Flag describing if we need or not compute annotations.
      */
     private boolean m_ignoreAnnotations;
+    
+    /**
+     * Flag describing if we need or not use local XSD files
+     * (i.e. use the {@link SchemaResolver} or not).
+     * If <code>true</code> the local XSD are not used.
+     */
+    private boolean m_ignoreLocalXSD;
 
     /**
      * Add an error in the error list.
@@ -114,10 +122,18 @@ public class Pojoization {
     }
     
     /**
-     * Activate annotation processing.
+     * Activates annotation processing.
      */
     public void setAnnotationProcessing() {
         m_ignoreAnnotations = false;
+    }
+    
+    /**
+     * Activates the entity resolver loading
+     * XSD files from the classloader.
+     */
+    public void setUseLocalXSD() {
+        m_ignoreLocalXSD = false;
     }
 
     /**
@@ -669,8 +685,23 @@ public class Pojoization {
                     true); 
             parser.setFeature("http://apache.org/xml/features/validation/schema", 
                     true);
+            
+            
            
+            
+//            parser
+//                    .setProperty(
+//                            "http://apache.org/xml/properties/schema/external-noNamespaceSchemaLocation",
+//                            xsd.toString());
+//
+//            
+            
+            
             parser.setErrorHandler(handler);
+            
+            if (! m_ignoreLocalXSD) {
+                parser.setEntityResolver(new SchemaResolver());
+            }
             
             InputSource is = new InputSource(stream);
             parser.parse(is);

@@ -1,0 +1,90 @@
+<!--
+	Licensed to the Apache Software Foundation (ASF) under one
+	or more contributor license agreements.  See the NOTICE file
+	distributed with this work for additional information
+	regarding copyright ownership.  The ASF licenses this file
+	to you under the Apache License, Version 2.0 (the
+	"License"); you may not use this file except in compliance
+	with the License.  You may obtain a copy of the License at
+	
+	http://www.apache.org/licenses/LICENSE-2.0
+	
+	Unless required by applicable law or agreed to in writing,
+	software distributed under the License is distributed on an
+	"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	KIND, either express or implied.  See the License for the
+	specific language governing permissions and limitations
+	under the License.
+-->
+<xs:schema targetNamespace="org.apache.felix.ipojo.handlers.event.EventAdminHandler"
+	xmlns="org.apache.felix.ipojo.handlers.event.EventAdminHandler"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	elementFormDefault="qualified">	
+
+    <xs:complexType name="PublisherType">
+        <xs:annotation>
+        	<xs:documentation>Description of an event publisher.</xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="name" type="xs:string" use="required">
+        	<xs:annotation>
+        		<xs:documentation>The name of the event publisher, acting as a unique identifier.
+The name of the POJO's field that will be used to send events. The field is initialized at component instantiation time. The type of the field must be "org.apache.felix.ipojo.handlers.event.publisher.Publisher".</xs:documentation>
+        	</xs:annotation></xs:attribute>
+    	<xs:attribute name="field" type="xs:string" use="required">
+    		<xs:annotation>
+    			<xs:documentation>The name of the POJO field associated to this event publisher.
+Despite it creates a dependency between the component code and the handler, this system allows hiding the whole complexity of event sending.</xs:documentation>
+    		</xs:annotation></xs:attribute>
+    	<xs:attribute name="topics" type="xs:string" use="optional">
+    		<xs:annotation>
+    			<xs:documentation>The comma-separated-list of the topics on which events will be sent. All subscribers that are listening to one of these topics will receive the events.</xs:documentation></xs:annotation></xs:attribute>
+    	<xs:attribute name="synchronous" type="xs:boolean" use="optional">
+    		<xs:annotation>
+    			<xs:documentation>Determines if event sending is synchronous or not. By default, events are sent asynchronously, but you can specify there the desired behaviour of the Publisher.
+The default value of this attribute is "false".</xs:documentation>
+    		</xs:annotation></xs:attribute>
+    	<xs:attribute name="data-key" type="xs:string" use="optional">
+    		<xs:annotation>
+    			<xs:documentation>The data key is used when you want to send data events. This attribute's value is the key, in the event's dictionary, in which sent data are stored. When you use the sendData method of the Publisher, the given object is placed in the event dictionary, associated with the specified data-key.
+The default value of this attribute is user.data.</xs:documentation></xs:annotation></xs:attribute>
+    </xs:complexType>
+    
+    <xs:complexType name="SubscriberType">
+        <xs:annotation>
+        	<xs:documentation>Description of an event subscriber.</xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="name" type="xs:string" use="required">
+        	<xs:annotation>
+        		<xs:documentation>The name of the event subscriber, acting as a unique identifier.</xs:documentation></xs:annotation></xs:attribute>
+    	<xs:attribute name="callback" type="xs:string" use="required">
+    		<xs:annotation>
+    			<xs:documentation>The name of the POJO's method that will be called each time an event is received.
+This method takes only one parameter, of typeorg.osgi.service.event.Eventby default, but this type can be overridden by defining the data-key and/or the data-type attributes.</xs:documentation>
+    		</xs:annotation></xs:attribute>
+    	<xs:attribute name="topics" type="xs:string" use="optional">
+    		<xs:annotation>
+    			<xs:documentation>The comma-separated-list of the topics that the handler will listen to. Each event sent on a topic present in this list will be sent to the specified callback method.</xs:documentation></xs:annotation></xs:attribute>
+    	<xs:attribute name="filter" type="xs:string" use="optional">
+    		<xs:annotation>
+    			<xs:documentation>The event filter is used to filter incoming events before sending them to the callback.
+The syntax of this field is described in the OSGi EventAdmin Specification. If you don't specify a filter, all events sent on the listened topics will be considered.</xs:documentation>
+    		</xs:annotation></xs:attribute>
+    	<xs:attribute name="data-key" type="xs:string" use="optional">
+    		<xs:annotation>
+    			<xs:documentation>The data key is used when you want to receive data events. This attribute's value is the key corresponding to the received data in the event's dictionary.
+If you use this attribute, the parameter passed to the callback method is the the value associated to this key, not the whole event.
+This attribute is generally used with the data-typeattribute to specify the received object type.
+If an event is received and it does not contain such a key, it is ignored (with a warning message).</xs:documentation>
+    		</xs:annotation></xs:attribute>
+    	<xs:attribute name="data-type" type="xs:string" use="optional">
+    		<xs:annotation>
+    			<xs:documentation>This attribute is associated to the data-key attribute. It specifies the type of objects (java.lang.Object by default) that the callback expects.
+It is used to determine the unique callback method (in case of multiple methods with the same name) and to check type compliance at event reception.
+Data events that are not corresponding to the specified type will be ignored (with a warning message).</xs:documentation>
+    		</xs:annotation></xs:attribute>
+    </xs:complexType>
+    
+    <xs:element name="publisher" type="PublisherType"></xs:element>
+    <xs:element name="subscriber" type="SubscriberType"></xs:element>
+    
+</xs:schema>

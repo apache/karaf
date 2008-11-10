@@ -106,6 +106,12 @@ public class ManipulatorMojo extends AbstractMojo {
      */
     private boolean m_ignoreAnnotations;
 
+    /**
+     * Ignore embedded XSD parameter.
+     * @parameter alias="IgnoreEmbeddedSchemas" default-value="false"
+     */
+    private boolean m_ignoreEmbeddedXSD;
+
     protected MavenProject getProject() {
         return this.m_project;
     }
@@ -156,6 +162,7 @@ public class ManipulatorMojo extends AbstractMojo {
 
         Pojoization pojo = new Pojoization();
         if (!m_ignoreAnnotations) { pojo.setAnnotationProcessing(); }
+        if (!m_ignoreEmbeddedXSD) { pojo.setUseLocalXSD(); }
         pojo.pojoization(in, out, meta);
         for (int i = 0; i < pojo.getWarnings().size(); i++) {
             getLog().warn((String) pojo.getWarnings().get(i));

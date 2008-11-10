@@ -1,0 +1,45 @@
+<!--
+	Licensed to the Apache Software Foundation (ASF) under one
+	or more contributor license agreements.  See the NOTICE file
+	distributed with this work for additional information
+	regarding copyright ownership.  The ASF licenses this file
+	to you under the Apache License, Version 2.0 (the
+	"License"); you may not use this file except in compliance
+	with the License.  You may obtain a copy of the License at
+	
+	http://www.apache.org/licenses/LICENSE-2.0
+	
+	Unless required by applicable law or agreed to in writing,
+	software distributed under the License is distributed on an
+	"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	KIND, either express or implied.  See the License for the
+	specific language governing permissions and limitations
+	under the License.
+-->
+<xs:schema targetNamespace="org.apache.felix.ipojo.white-board-pattern"
+	xmlns="org.apache.felix.ipojo.white-board-pattern"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	elementFormDefault="qualified">
+	<xs:element name="wbp" type="WBPType"></xs:element>
+	<xs:complexType name="WBPType">
+        <xs:annotation>
+        	<xs:documentation>Description of the white-board architecture.</xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="onArrival" type="xs:string" use="required">
+        	<xs:annotation>
+        		<xs:documentation>Declaring the method to invoke when a matching service arrives.</xs:documentation>
+        	</xs:annotation></xs:attribute>
+		<xs:attribute name="onDeparture" type="xs:string" use="required">
+			<xs:annotation>
+				<xs:documentation>Declaring the method to invoke when a matching service leaves.</xs:documentation>
+			</xs:annotation></xs:attribute>
+		<xs:attribute name="onModification" type="xs:string" use="optional">
+			<xs:annotation>
+				<xs:documentation>Method called when an injected service reference is modified but stills valid against the filter.</xs:documentation>
+			</xs:annotation></xs:attribute>
+		<xs:attribute name="filter" type="xs:string" use="required">
+			<xs:annotation>
+				<xs:documentation>Filter use to discover matching filter.</xs:documentation>
+			</xs:annotation></xs:attribute>
+	</xs:complexType>	
+</xs:schema>

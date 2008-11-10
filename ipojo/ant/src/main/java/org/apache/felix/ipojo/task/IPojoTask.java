@@ -21,6 +21,7 @@ package org.apache.felix.ipojo.task;
 import java.io.File;
 
 import org.apache.felix.ipojo.manipulator.Pojoization;
+import org.apache.felix.ipojo.xml.parser.SchemaResolver;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
@@ -42,6 +43,13 @@ public class IPojoTask extends Task {
 
     /** Flag describing if we need to ignore annotation of not. */
     private boolean m_ignoreAnnotations = false;
+    
+    /**
+     * Flag describing if we need or not use local XSD files
+     * (i.e. use the {@link SchemaResolver} or not).
+     * If <code>true</code> the local XSD are not used.
+     */
+    private boolean m_ignoreLocalXSD = false;
     
     /**
      * Set the metadata file.
@@ -73,6 +81,14 @@ public class IPojoTask extends Task {
      */
     public void setIgnoreAnnotations(boolean flag) {
         m_ignoreAnnotations = flag;
+    }
+    
+    /**
+     * Set if we need to use embedded XSD files or not.
+     * @param flag : true if we need to ignore embedded XSD files.
+     */
+    public void setIgnoreEmbeddedSchemas(boolean flag) {
+        m_ignoreLocalXSD = flag;
     }
     
     /**
@@ -128,6 +144,9 @@ public class IPojoTask extends Task {
         Pojoization pojo = new Pojoization();
         if (! m_ignoreAnnotations) {
             pojo.setAnnotationProcessing();
+        }
+        if (! m_ignoreLocalXSD) {
+            pojo.setUseLocalXSD();
         }
         pojo.pojoization(m_input, m_output, m_metadata);
         for (int i = 0; i < pojo.getWarnings().size(); i++) {

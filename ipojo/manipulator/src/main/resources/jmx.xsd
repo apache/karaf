@@ -1,0 +1,177 @@
+<!--
+	Licensed to the Apache Software Foundation (ASF) under one
+	or more contributor license agreements.  See the NOTICE file
+	distributed with this work for additional information
+	regarding copyright ownership.  The ASF licenses this file
+	to you under the Apache License, Version 2.0 (the
+	"License"); you may not use this file except in compliance
+	with the License.  You may obtain a copy of the License at
+	
+	http://www.apache.org/licenses/LICENSE-2.0
+	
+	Unless required by applicable law or agreed to in writing,
+	software distributed under the License is distributed on an
+	"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	KIND, either express or implied.  See the License for the
+	specific language governing permissions and limitations
+	under the License.
+-->
+<xs:schema targetNamespace="org.apache.felix.ipojo.handlers.jmx"
+	xmlns="org.apache.felix.ipojo.handlers.jmx"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	elementFormDefault="qualified">
+	<xs:element name="config" type="JMXType"></xs:element>
+
+	<xs:complexType name="JMXType">
+
+		<xs:annotation>
+			<xs:documentation>
+				Description of a JMX managed component.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="method" type="JMXMethod">
+				<xs:annotation>
+					<xs:documentation>
+						The list of methods to expose.
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="property" type="JMXProperty">
+				<xs:annotation>
+					<xs:documentation>
+						The list of attributes to expose.
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:choice>
+		<xs:attribute name="usesMOSGi" type="xs:boolean"
+			use="optional">
+			<xs:annotation>
+				<xs:documentation>
+					Determines if the component must be register on the
+					MOSGi MBean server or not.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="objectName" type="xs:string"
+			use="optional">
+			<xs:annotation>
+				<xs:documentation>
+					The complete object name of the managed component.
+					The syntax of this attribute must be compliant with
+					the ObjectName syntax, detailed in the JMX
+					specification. If neither domain nor name attributes
+					are specified, the default value is determined by
+					the package, the type and the instance name of the
+					component. This attribute overrides the domain and
+					name attributes.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="domain" type="xs:string" use="optional">
+			<xs:annotation>
+				<xs:documentation>
+					The domain of the managed object (i.e., the left
+					part of the object name). This attribute must be
+					compliant with the domain syntax, as described in
+					the JMX specification.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="name" type="xs:string" use="optional">
+			<xs:annotation>
+				<xs:documentation>
+					The name property of the managed object. The value
+					of this attribute must comply with the ObjectName
+					value syntax, as described in the JMX specification.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+
+		<xs:attribute name="preRegister" type="xs:string"
+			use="optional">
+			<xs:annotation>
+				<xs:documentation>
+					Specifies method to carry out operations before
+					beeing registered from the MBean server. The
+					signature of the specified method must be :
+					"ObjectName preRegister(MBeanServer server,
+					ObjectName name) throws Exception".
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="postRegister" type="xs:string"
+			use="optional">
+			<xs:annotation>
+				<xs:documentation>
+					Specifies method to carry out operations after
+					beeing registered from the MBean server. The
+					signature of the specified method must be : "void
+					postRegister(Boolean registrationDone)".
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="preDeregister" type="xs:string"
+			use="optional">
+			<xs:annotation>
+				<xs:documentation>
+					Specifies method to carry out operations before
+					beeing unregistered from the MBean server. The
+					signature of the specified method must be : "void
+					preDeregister() throws Exception".
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="postDeregister" type="xs:string" use="optional">
+			<xs:annotation>
+				<xs:documentation>
+					Specifies method to carry out operations after
+					beeing unregistered from the MBean server. The
+					signature of the specified method must be : 
+					"void postDeregister()".</xs:documentation>
+			</xs:annotation></xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="JMXProperty">
+        <xs:annotation>
+        	<xs:documentation>Description of an attribute to expose.</xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="field" type="xs:string" use="required">
+        	<xs:annotation>
+        		<xs:documentation>The name of the component's field to expose.</xs:documentation></xs:annotation></xs:attribute>
+		<xs:attribute name="name" type="xs:string" use="optional">
+			<xs:annotation>
+				<xs:documentation>The name of the property as it will appear in JMX. If unspecified, the default value is the name of the exposed field.</xs:documentation></xs:annotation></xs:attribute>
+		<xs:attribute name="rights" use="optional">
+            <xs:annotation>
+            	<xs:documentation>Specify the access permission of the exposed field.</xs:documentation>
+            </xs:annotation>
+            <xs:simpleType>
+                <xs:annotation>
+                	<xs:documentation>Access permission of an exposed field. Accepted values are "r" (read-only access, the default value) and "w" (read and write access).</xs:documentation>
+                </xs:annotation>
+                <xs:restriction base="xs:string">
+					<xs:enumeration value="r"></xs:enumeration>
+					<xs:enumeration value="w"></xs:enumeration>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="notification" type="xs:boolean" use="optional">
+			<xs:annotation>
+				<xs:documentation>Enable or disable attribute change notification sending for this property. If set to &quot;true&quot;, a notification is sent each time the value of the field changes.</xs:documentation></xs:annotation></xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="JMXMethod">
+        <xs:annotation>
+        	<xs:documentation>Description of a method to expose.</xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="name" type="xs:string" use="required">
+        	<xs:annotation>
+        		<xs:documentation>The name of the method to expose. If multiple methods have the same name, all of them are exposed.</xs:documentation>
+        	</xs:annotation></xs:attribute>
+		<xs:attribute name="description" type="xs:string" use="optional">
+			<xs:annotation>
+				<xs:documentation>The description of the exposed method, as it will appear in JMX.</xs:documentation></xs:annotation></xs:attribute>
+	</xs:complexType>
+</xs:schema>
