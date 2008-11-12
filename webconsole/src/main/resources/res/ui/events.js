@@ -14,20 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-function render() {
-    renderStatusLine();
-    renderTable( ["Received", "Topic", "Properties"] );
-    renderStatusLine();	
-}
-
 function renderStatusLine() {
-	document.write( "<div class='fullwidth'>");
+    document.write( "<div class='fullwidth'>");
     document.write( "<div class='statusline'></div>" );
     document.write( "</div>" );
 }
 
-function renderTable( /* Array of String */ columns ) {
-    renderButtons();
+function renderView( /* Array of String */ columns, /* Array of String */ buttons ) {
+    renderStatusLine();
+    renderButtons(buttons);
 	document.write( "<div class='table'>");
     document.write( "<table id='events' class='tablelayout'>" );
 
@@ -38,14 +33,18 @@ function renderTable( /* Array of String */ columns ) {
     document.write( "</tr></thead><tbody>" );
     document.write( "</tbody></table>" );
     document.write( "</div>");
-    renderButtons();
+    renderButtons(buttons);
+    renderStatusLine();	
 }
 
-function renderButtons( ) {
+function renderButtons( buttons ) {
 	document.write( "<div class='fullwidth'>");
     document.write( "<div class='buttons'>" );
-    document.write( "<div class='button'><button id='reloadButton' type='button' name='reload'>Reload</button></div>" );
-    document.write( "<div class='button'><button id='clearButton' type='button' name='clear'>Clear List</button></div>" );
+    for( var b in buttons ) {
+    	document.write( "<div class='button'>");
+    	document.write(buttons[b]);
+    	document.write( "</div>");
+    }
     document.write( "</div>" );
     document.write( "</div>" );
 }
@@ -70,7 +69,7 @@ function entryInternal( /* Element */ parent, /* Object */ dataEntry ) {
     var topic = dataEntry.topic;
     var properties = dataEntry.properties;
 
-    parent.appendChild( td( null, null, [ text( new Date(dataEntry.received) ) ] ) );
+    parent.appendChild( td( null, null, [ text( printDate(dataEntry.received) ) ] ) );
     parent.appendChild( td( null, null, [ text( topic ) ] ) );
 
     var propE;
@@ -91,6 +90,12 @@ function entryInternal( /* Element */ parent, /* Object */ dataEntry ) {
     parent.appendChild( td( null, null, [propE] ) );
 }
 
+/* displays a date in the user's local timezone */
+function printDate(time) {
+    var date = time ? new Date(time) : new Date();
+    return date.toLocaleString();
+}
+
 function loadData() {
 	$.get(pluginRoot + "/data.json", null, function(data) {
 	    renderData(data);
@@ -98,7 +103,9 @@ function loadData() {
 }
 
 function renderEvents() {
-	render();
+    renderView( ["Received", "Topic", "Properties"],
+    		["<button id='reloadButton' type='button' name='reload'>Reload</button>",
+    		 "<button id='clearButton' type='button' name='clear'>Clear List</button>"]);
 	
     loadData();
     
