@@ -167,6 +167,17 @@ class ServiceRegistrationImpl implements ServiceRegistration
         return m_registry.getUsingBundles(m_ref);
     }
 
+    /**
+     * This method provides direct access to the associated service object;
+     * it generally should not be used by anyone other than the service registry
+     * itself.
+     * @return The service object associated with the registration.
+    **/
+    Object getService()
+    {
+        return m_svcObj;
+    }
+
     protected Object getService(Bundle acqBundle)
     {
         // If the service object is a service factory, then

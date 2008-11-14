@@ -21,9 +21,11 @@ package org.apache.felix.framework.util;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EventListener;
 import java.util.EventObject;
 
+import java.util.List;
 import org.apache.felix.framework.Logger;
 import org.osgi.framework.AllServiceListener;
 import org.osgi.framework.Bundle;
@@ -38,6 +40,7 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServicePermission;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.SynchronousBundleListener;
+import org.osgi.framework.hooks.service.ListenerHook;
 
 public class EventDispatcher
 {
@@ -93,9 +96,9 @@ public class EventDispatcher
                         {
                             EventDispatcher.run();
                         }
-                        finally 
+                        finally
                         {
-                             // Ensure we update state even if stopped by external cause
+                            // Ensure we update state even if stopped by external cause
                             // e.g. an Applet VM forceably killing threads
                             synchronized (m_threadLock)
                             {
@@ -265,8 +268,11 @@ public class EventDispatcher
         }
     }
 
-    public void removeListener(Bundle bundle, Class clazz, EventListener l)
+    public ListenerHook.ListenerInfo removeListener(
+        Bundle bundle, Class clazz, EventListener l)
     {
+        ListenerHook.ListenerInfo listenerInfo = null;
+
         // Verify listener.
         if (l == null)
         {
@@ -315,6 +321,12 @@ public class EventDispatcher
                     (listeners[i + LISTENER_CLASS_OFFSET] == clazz) &&
                     (listeners[i + LISTENER_OBJECT_OFFSET] == l))
                 {
+                    // For service listeners, we must return some info about
+                    // the listener for the ListenerHook callback.
+                    if (ServiceListener.class == clazz)
+                    {
+                        listenerInfo = wrapListener(listeners, i);
+                    }
                     idx = i;
                     break;
                 }
@@ -367,6 +379,10 @@ public class EventDispatcher
                 m_serviceListeners = listeners;
             }
         }
+
+        // Return information about the listener; this is null
+        // for everything but service listeners.
+        return listenerInfo;
     }
 
     public void removeListeners(Bundle bundle)
@@ -502,6 +518,45 @@ public class EventDispatcher
         }
 
         return false;
+    }
+
+    /**
+     * Returns all existing service listener information into a collection of
+     * ListenerHook.ListenerInfo objects. This is used the first time a listener
+     * hook is registered to synchronize it with the existing set of listeners.
+     * @return Returns all existing service listener information into a collection of
+     *         ListenerHook.ListenerInfo objects
+    **/
+    public Collection /* <? extends ListenerHook.ListenerInfo> */ wrapAllServiceListeners()
+    {
+        Object[] listeners = null;
+        synchronized (this)
+        {
+            listeners = m_serviceListeners;
+        }
+
+        List existingListeners = new ArrayList();
+        for (int i = 0, j = 0; i < listeners.length; i += LISTENER_ARRAY_INCREMENT, j++)
+        {
+            existingListeners.add(wrapListener(listeners, i));
+        }
+        return existingListeners;
+    }
+
+    /**
+     * Wraps the information about a given listener in a ListenerHook.ListenerInfo
+     * object.
+     * @param listeners The array of listeners.
+     * @param offset The offset into the array of the listener to wrap.
+     * @return A ListenerHook.ListenerInfo object for the specified listener.
+     */
+    private static ListenerHook.ListenerInfo wrapListener(Object[] listeners, int offset)
+    {
+        Filter filter = ((Filter)listeners[offset + LISTENER_FILTER_OFFSET]);
+
+        return new ListenerHookInfoImpl(
+            ((Bundle)listeners[offset + LISTENER_BUNDLE_OFFSET]).getBundleContext(),
+            filter == null ? null : filter.toString());
     }
 
     public void fireFrameworkEvent(FrameworkEvent event)

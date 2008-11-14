@@ -31,6 +31,7 @@ import org.apache.felix.framework.util.*;
 import org.apache.felix.framework.util.manifestparser.*;
 import org.apache.felix.moduleloader.*;
 import org.osgi.framework.*;
+import org.osgi.framework.hooks.service.ListenerHook;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.startlevel.StartLevel;
 
@@ -2625,6 +2626,14 @@ ex.printStackTrace();
     {
         m_dispatcher.addListener(
             bundle, ServiceListener.class, l, (f == null) ? null : new FilterImpl(m_logger, f));
+
+        // Invoke the ListenerHook.added() on all hooks.
+        ListenerHook[] hooks = m_registry.getListenerHooks();
+        Collection c = Collections.singleton(new ListenerHookInfoImpl(bundle.getBundleContext(), f));
+        for (int i = 0; i < hooks.length; i++)
+        {
+            hooks[i].added(c);
+        }
     }
 
     /**
@@ -2636,7 +2645,19 @@ ex.printStackTrace();
     **/
     protected void removeServiceListener(Bundle bundle, ServiceListener l)
     {
-        m_dispatcher.removeListener(bundle, ServiceListener.class, l);
+        ListenerHook.ListenerInfo listener =
+            m_dispatcher.removeListener(bundle, ServiceListener.class, l);
+
+        if (listener != null)
+        {
+            // Invoke the ListenerHook.removed() on all hooks.
+            ListenerHook[] hooks = m_registry.getListenerHooks();
+            Collection c = Collections.singleton(listener);
+            for (int i = 0; i < hooks.length; i++)
+            {
+                hooks[i].removed(c);
+            }
+        }
     }
 
     protected void addFrameworkListener(Bundle bundle, FrameworkListener l)
@@ -2716,6 +2737,14 @@ ex.printStackTrace();
         {
             // Always release bundle lock.
             releaseBundleLock(bundle);
+        }
+
+        // Check to see if this a listener hook; if so, then we need
+        // to invoke the callback with all existing service listeners.
+        if (m_registry.isHook(classNames, ListenerHook.class, svcObj))
+        {
+            ListenerHook lHook = (ListenerHook) svcObj;
+            lHook.added(m_dispatcher.wrapAllServiceListeners());
         }
 
         // TODO: CONCURRENCY - Reconsider firing event here, outside of the

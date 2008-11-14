@@ -110,17 +110,14 @@ public class Activator implements BundleActivator
         if (m_runnable != null)
         {
             m_runnable.stop();
-            m_thread.interrupt();
         }
     }
 
     private class ShellTuiRunnable implements Runnable
     {
-        private volatile boolean stop = false;
-
         public void stop()
         {
-            stop = true;
+            m_thread.interrupt();
         }
 
         public void run()
@@ -128,13 +125,23 @@ public class Activator implements BundleActivator
             String line = null;
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
-            while (!stop)
+            while (true)
             {
                 System.out.print("-> ");
 
                 try
                 {
+                    while (System.in.available() == 0)
+                    {
+                        Thread.sleep(100);
+                    }
+
                     line = in.readLine();
+                }
+                catch (InterruptedException ex)
+                {
+                    // Silently exit, since this signifies that the bundle was stopped.
+                    break;
                 }
                 catch (IOException ex)
                 {

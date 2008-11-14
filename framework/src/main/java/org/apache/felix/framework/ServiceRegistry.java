@@ -22,6 +22,7 @@ import java.util.*;
 
 import org.apache.felix.framework.util.FelixConstants;
 import org.osgi.framework.*;
+import org.osgi.framework.hooks.service.ListenerHook;
 
 public class ServiceRegistry
 {
@@ -37,6 +38,8 @@ public class ServiceRegistry
     private Map m_inUseMap = new HashMap();
 
     private ServiceListener m_serviceListener = null;
+
+    private final List m_listenerHooks = new ArrayList();
 
     public ServiceRegistry(Logger logger)
     {
@@ -65,6 +68,9 @@ public class ServiceRegistry
 
         synchronized (this)
         {
+            // Keep track of registered hooks.
+            addHooks(classNames, svcObj);
+
             // Create the service registration.
             reg = new ServiceRegistrationImpl(
                 this, bundle, classNames, new Long(m_currentServiceId++), svcObj, dict);
@@ -78,6 +84,9 @@ public class ServiceRegistry
 
     public void unregisterService(Bundle bundle, ServiceRegistration reg)
     {
+        // If this is a hook, it should be removed.
+        removeHook(((ServiceRegistrationImpl) reg).getService());
+
         synchronized (this)
         {
             // Note that we don't lock the service registration here using
@@ -426,7 +435,7 @@ public class ServiceRegistry
         {
             usages = (UsageCount[]) m_inUseMap.get(bundle);
         }
-        
+
         if (usages == null)
         {
             return;
@@ -711,6 +720,53 @@ public class ServiceRegistry
         else
         {
             m_inUseMap.remove(bundle);
+        }
+    }
+
+    private void addHooks(String[] classNames, Object svcObj)
+    {
+        if (isHook(classNames, ListenerHook.class, svcObj))
+        {
+            synchronized (m_listenerHooks)
+            {
+                m_listenerHooks.add(svcObj);
+            }
+        }
+    }
+
+    boolean isHook(String[] classNames, Class hookClass, Object svcObj)
+    {
+        if (hookClass.isAssignableFrom(svcObj.getClass()))
+        {
+            String hookName = hookClass.getName();
+            for (int i = 0; i < classNames.length; i++)
+            {
+                if (classNames[i].equals(hookName))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void removeHook(Object svcObj)
+    {
+        if (svcObj instanceof ListenerHook)
+        {
+            synchronized (m_listenerHooks)
+            {
+                m_listenerHooks.remove(svcObj);
+            }
+        }
+    }
+
+    ListenerHook[] getListenerHooks()
+    {
+        synchronized (m_listenerHooks)
+        {
+            return (ListenerHook[])
+                m_listenerHooks.toArray(new ListenerHook[m_listenerHooks.size()]);
         }
     }
 
