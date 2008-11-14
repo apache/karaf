@@ -40,7 +40,6 @@ import org.apache.felix.ipojo.util.DependencyModel;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.SynchronousBundleListener;
 
 /**
  * Represent a service dependency of the component instance.

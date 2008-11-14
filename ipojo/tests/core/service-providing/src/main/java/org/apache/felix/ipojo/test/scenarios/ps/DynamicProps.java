@@ -31,6 +31,7 @@ public class DynamicProps extends OSGiTestCase {
 	ComponentInstance fooProvider1;
 	ComponentInstance fooProvider2;
 	ComponentInstance fooProvider3;
+	ComponentInstance fooProvider4;
 
 	public void setUp() {
 		String type = "PS-FooProviderType-Dyn";
@@ -58,6 +59,10 @@ public class DynamicProps extends OSGiTestCase {
 		p3.put("intAProp", new int[0]);
 		fooProvider3 = Utils.getComponentInstance(context, type2, p3);
 		
+        Properties p4 = new Properties();
+        p4.put("instance.name","FooProvider-4");
+        fooProvider4 = Utils.getComponentInstance(context, type2, p4);
+		
 	}
 	
 	public void tearDown() {
@@ -67,6 +72,8 @@ public class DynamicProps extends OSGiTestCase {
 		fooProvider2 = null;
 		fooProvider3.dispose();
 		fooProvider3 = null;
+		fooProvider4.dispose();
+		fooProvider4 = null;
 	}
 	
 	public void testProperties1() {
@@ -227,5 +234,53 @@ public class DynamicProps extends OSGiTestCase {
 		context.ungetService(sr);	
 
 	}
+
+    public void testProperties4() {
+    	ServiceReference sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-4");
+    	assertNotNull("Check the availability of the FS service", sr);
+    	
+    	// Check service properties
+    	Integer intProp = (Integer) sr.getProperty("int");
+    	Object boolProp = sr.getProperty("boolean");
+    	Object strProp = sr.getProperty("string");
+    	Object strAProp = sr.getProperty("strAProp");
+    	int[] intAProp = (int[]) sr.getProperty("intAProp");
+    	
+    	assertEquals("Check intProp equality", intProp, new Integer(4)); // Set by the component type.
+    	assertEquals("Check boolProp equality", boolProp, null);
+    	assertEquals("Check strProp equality", strProp, null);
+    	assertNull("Check strAProp  nullity", strAProp);
+    	assertNotNull("Check intAProp not nullity", intAProp); // Set by the component type.
+    	assertNotNull("Check intAProp not nullity", intAProp);
+        int[] v2 = new int[] {1, 2, 3};
+        for (int i = 0; i < intAProp.length; i++) {
+            if(intAProp[i] != v2[i]) { fail("Check the intAProp Equality"); }
+        }
+    	
+    	// Invoke
+    	FooService fs = (FooService) context.getService(sr);
+    	assertTrue("invoke fs", fs.foo());
+    	
+    	// Re-check the property (change)
+    	intProp = (Integer) sr.getProperty("int");
+    	boolProp = (Boolean) sr.getProperty("boolean");
+    	strProp = (String) sr.getProperty("string");
+    	strAProp = (String[]) sr.getProperty("strAProp");
+    	intAProp = (int[]) sr.getProperty("intAProp");
+    	
+    	assertEquals("Check intProp equality", intProp, new Integer(2));
+    	assertEquals("Check longProp equality", boolProp, new Boolean(true));
+    	assertEquals("Check strProp equality", strProp, new String("foo"));
+    	assertNotNull("Check strAProp not nullity", strAProp);
+    	String[] v = new String[] {"foo", "bar"};
+    	for (int i = 0; i < ((String[]) strAProp).length; i++) {
+    		if(! ((String[]) strAProp)[i].equals(v[i])) { fail("Check the strAProp Equality"); }
+    	}
+    	assertNull("Check intAProp hidding (no value)", intAProp);
+    	
+    	fs = null;
+    	context.ungetService(sr);	
+    
+    }
 
 }

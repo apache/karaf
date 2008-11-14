@@ -454,7 +454,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
             Properties props = new Properties();
             for (int k = 0; k < svc.getProperties().length; k++) {
                 Property prop = svc.getProperties()[k];
-                if (prop.getValue() != null) {
+                if (prop.getValue() != null  && prop.getValue() != Property.NO_VALUE) {
                     props.put(prop.getName(), prop.getValue().toString());
                 }
             }
@@ -548,6 +548,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                 String value = props[j].getAttribute("value");
                 String type = props[j].getAttribute("type");
                 String field = props[j].getAttribute("field");
+                
 
                 // Get property name :
                 if (field != null && name == null) {
@@ -573,8 +574,14 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                 if (imm != null && imm.equalsIgnoreCase("true")) {
                     immutable = true;
                 }
-
-                desc.addProperty(new PropertyDescription(name, type, value, immutable));
+                
+                PropertyDescription pd = new PropertyDescription(name, type, value, immutable);
+                desc.addProperty(pd);
+                
+                String man = props[j].getAttribute("mandatory");
+                if (man != null && man.equalsIgnoreCase("true")) {
+                    pd.setMandatory();
+                }
             }
         }
     }

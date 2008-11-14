@@ -30,6 +30,8 @@ public class Properties extends OSGiTestCase {
         assertEquals("Check baa field", "m_baa", baa.getAttribute("field"));
         assertEquals("Check baa name", "baa", baa.getAttribute("name"));
         assertEquals("Check baa method", "setbaa", baa.getAttribute("method"));
+        assertEquals("Check mandatory", "true", baa.getAttribute("mandatory"));
+
         
         //Bar
         Element baz = getPropertyByName(props, "baz");

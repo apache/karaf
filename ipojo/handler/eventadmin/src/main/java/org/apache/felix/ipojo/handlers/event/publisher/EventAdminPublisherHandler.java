@@ -87,8 +87,9 @@ public class EventAdminPublisherHandler extends PrimitiveHandler {
 
         // Update the current component description
         Dictionary dict = new Properties();
-        cd.addProperty(new PropertyDescription(TOPICS_PROPERTY,
-                Dictionary.class.getName(), dict.toString()));
+        PropertyDescription pd = new PropertyDescription(TOPICS_PROPERTY,
+                Dictionary.class.getName(), dict.toString());
+        cd.addProperty(pd);
 
         // Get Metadata publishers
         Element[] publishers = metadata.getElements("publisher", NAMESPACE);

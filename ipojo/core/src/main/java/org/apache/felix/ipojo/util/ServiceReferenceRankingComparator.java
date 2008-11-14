@@ -18,6 +18,7 @@
  */
 package org.apache.felix.ipojo.util;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 import org.osgi.framework.Constants;
@@ -28,7 +29,12 @@ import org.osgi.framework.ServiceReference;
  * This comparator follows OSGi Ranking policy.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class ServiceReferenceRankingComparator implements Comparator {
+public class ServiceReferenceRankingComparator implements Comparator, Serializable {
+
+    /**
+     * Id.
+     */
+    private static final long serialVersionUID = 1L;
 
     /**
      * Compares two service reference.

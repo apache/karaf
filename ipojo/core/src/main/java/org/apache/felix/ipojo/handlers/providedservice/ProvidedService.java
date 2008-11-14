@@ -273,11 +273,12 @@ public class ProvidedService implements ServiceFactory {
      * @return the properties attached to the provided service.
      */
     private Properties getServiceProperties() {
-        // Contruct the service properties list
+        // Build the service properties list
         Properties serviceProperties = new Properties();
         for (int i = 0; i < m_properties.length; i++) {
-            if (m_properties[i].getValue() != null) {
-                serviceProperties.put(m_properties[i].getName(), m_properties[i].getValue());
+            Object value = m_properties[i].getValue();
+            if (value != null && value != Property.NO_VALUE) {
+                serviceProperties.put(m_properties[i].getName(), value);
             }
         }
         return serviceProperties;

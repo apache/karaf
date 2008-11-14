@@ -329,30 +329,52 @@ The 'instance.name' property has a special semantic as it will be used as the in
 			</xs:annotation></xs:attribute>
 	</xs:complexType>
 	<xs:complexType name="PropertyType">
-        <xs:annotation>
-        	<xs:documentation>Defines a component property.</xs:documentation>
-        </xs:annotation>
-        <xs:attribute name="field" type="xs:string" use="optional">
-        	<xs:annotation>
-        		<xs:documentation>Field of the property</xs:documentation>
-        	</xs:annotation></xs:attribute>
-        <xs:attribute name="method" type="xs:string" use="optional">
+		<xs:annotation>
+			<xs:documentation>
+				Defines a component property.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="field" type="xs:string" use="optional">
 			<xs:annotation>
-				<xs:documentation>Setter method of the property. This method is called to inject property value.</xs:documentation>
-			</xs:annotation></xs:attribute>
+				<xs:documentation>
+					Field of the property
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="method" type="xs:string" use="optional">
+			<xs:annotation>
+				<xs:documentation>
+					Setter method of the property. This method is called
+					to inject property value.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="name" type="xs:string" use="optional">
 			<xs:annotation>
-				<xs:documentation>Name of the property.</xs:documentation>
-			</xs:annotation></xs:attribute>
+				<xs:documentation>
+					Name of the property.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="value" type="xs:string" use="optional">
 			<xs:annotation>
-				<xs:documentation>Default value of the property.</xs:documentation>
-			</xs:annotation></xs:attribute>
+				<xs:documentation>
+					Default value of the property.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 		<xs:attribute name="type" type="xs:string" use="optional">
 			<xs:annotation>
-				<xs:documentation>Type of the property.</xs:documentation>
-			</xs:annotation></xs:attribute>
-	</xs:complexType>
+				<xs:documentation>
+					Type of the property.
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+        <xs:attribute name="mandatory" type="xs:boolean" use="optional" default="false">
+        	<xs:annotation>
+        		<xs:documentation>Set the property as mandatory. A mandatory property MUST receive a value either in the component type description or in the instance configuration. Properties are optional by default.</xs:documentation>
+        	</xs:annotation></xs:attribute>
+    </xs:complexType>
 	<xs:element name="callback" type="CallbackType" id="callback"></xs:element>
 	<xs:element name="controller" type="ControllerType" id="controller">
 		<xs:annotation>

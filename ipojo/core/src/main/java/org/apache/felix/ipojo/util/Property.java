@@ -36,6 +36,8 @@ import org.osgi.framework.BundleContext;
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class Property implements FieldInterceptor {
+    
+    public static final Object NO_VALUE = new Object();
 
     /**
      * The name of the property (field name if not set).
@@ -58,7 +60,7 @@ public class Property implements FieldInterceptor {
     /**
      * The value of the property.
      */
-    private Object m_value;
+    private Object m_value = NO_VALUE;
     
     /**
      * Flag tracking is the method was 
@@ -160,7 +162,7 @@ public class Property implements FieldInterceptor {
                 } catch (ClassNotFoundException e) {
                     throw new ConfigurationException("Class not found exception in setValue on " + type + " : " + e.getMessage());
                 } catch (SecurityException e) {
-                    throw new ConfigurationException("Security excption in setValue on " + type + " : " + e.getMessage());
+                    throw new ConfigurationException("Security execption in setValue on " + type + " : " + e.getMessage());
                 } catch (IllegalArgumentException e) {
                     throw new ConfigurationException("Argument issue when calling the constructor of the type " + type);
                 }
@@ -252,11 +254,32 @@ public class Property implements FieldInterceptor {
     public boolean hasField() {
         return m_field != null;
     }
-
+    
     public synchronized Object getValue() {
         return m_value;
     }
 
+    
+    /**
+     * Gets the NO VALUE Object.
+     * This method returns the object to inject when the property
+     * was not assigned to a value.
+     * @param type the type of the value.
+     * @return the object to inject when the property has no value.
+     */
+    private static Object getNoValue(Class type) {
+        if (Boolean.TYPE.equals(type)) { return new Boolean(false); }
+        if (Byte.TYPE.equals(type)) { return new Byte((byte) 0); }
+        if (Short.TYPE.equals(type)) { return new Short((short) 0); }
+        if (Integer.TYPE.equals(type)) { return new Integer(0); }
+        if (Long.TYPE.equals(type)) { return new Long(0); }
+        if (Float.TYPE.equals(type)) { return new Float(0); }
+        if (Double.TYPE.equals(type)) { return new Double(0); }
+        if (Character.TYPE.equals(type)) { return new Character((char) 0); }
+        // If all other case, return null.
+        return null;
+    }
+    
     /**
      * Sets the value of the property.
      * @param value the new value.
@@ -451,6 +474,11 @@ public class Property implements FieldInterceptor {
             return; // Already called.
         }
         
+        if (m_value == NO_VALUE) {
+            // Don't call method if no value
+            return;
+        }
+        
         try {
             if (instance == null) {
                 m_method.call(new Object[] { m_value });
@@ -478,8 +506,11 @@ public class Property implements FieldInterceptor {
      * @return the value if the handler want to inject this value.
      * @see org.apache.felix.ipojo.FieldInterceptor#onGet(java.lang.Object, java.lang.String, java.lang.Object)
      */
-    public Object onGet(Object pojo, String fieldName, Object value) {
-        return getValue();
+    public synchronized Object onGet(Object pojo, String fieldName, Object value) {
+        if (m_value  == NO_VALUE) {
+            return getNoValue(m_type);
+        }
+        return m_value;
     }
 
     /**

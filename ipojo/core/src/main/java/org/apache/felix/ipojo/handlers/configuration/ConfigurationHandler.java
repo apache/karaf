@@ -152,15 +152,24 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
             // Is the property set to immutable
             boolean immutable = false;
             String imm = configurables[i].getAttribute("immutable");
-            if (imm != null && imm.equalsIgnoreCase("true")) {
-                immutable = true;
+            immutable = imm != null && imm.equalsIgnoreCase("true");
+            
+            boolean mandatory = false;
+            String man = configurables[i].getAttribute("mandatory");
+            mandatory =  man != null && man.equalsIgnoreCase("true");
+            
+            PropertyDescription pd = null;
+            if (value == null) {
+                pd = new PropertyDescription(name, type, null, false); // Cannot be immutable if we have no value.
+            } else {
+                pd = new PropertyDescription(name, type, value, immutable);
             }
             
-            if (value == null) {
-                desc.addProperty(new PropertyDescription(name, type, null, false)); // Cannot be immutable if we have no value.
-            } else {
-                desc.addProperty(new PropertyDescription(name, type, value, immutable));
+            if (mandatory) {
+                pd.setMandatory();
             }
+            
+            desc.addProperty(pd);
         }
     }
 
@@ -194,7 +203,6 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
             m_managedServicePID = instanceMSPID;
         }
         
-
         for (int i = 0; configurables != null && i < configurables.length; i++) {
             String fieldName = configurables[i].getAttribute("field");
             String methodName = configurables[i].getAttribute("method");
@@ -250,7 +258,9 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
         if (m_mustPropagate) {
             for (int i = 0; i < m_configurableProperties.size(); i++) {
                 Property prop = (Property) m_configurableProperties.get(i);
-                m_toPropagate.put(prop.getName(), prop.getValue());
+                if (prop.getValue() != Property.NO_VALUE && prop.getValue() != null) { // No injected value, or null
+                    m_toPropagate.put(prop.getName(), prop.getValue());
+                }
             }
             reconfigure(m_toPropagate);
         }

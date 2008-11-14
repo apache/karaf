@@ -40,6 +40,11 @@ public class ManagedServiceConfigurableProperties extends OSGiTestCase {
      */
 	ComponentInstance instance2;
 	
+	/**
+     * Instance without configuration. 
+     */
+    ComponentInstance instance3;
+	
 	public void setUp() {
 	    String type = "CONFIG-FooProviderType-4";
         Properties p = new Properties();
@@ -58,13 +63,21 @@ public class ManagedServiceConfigurableProperties extends OSGiTestCase {
 		p1.put("baz", "baz");
 		p1.put("managed.service.pid", "instance");
 		instance2 = Utils.getComponentInstance(context, type, p1);
+		
+		type = "CONFIG-FooProviderType-3";
+        Properties p2 = new Properties();
+        p2.put("instance.name","instance-3");
+        p2.put("managed.service.pid", "instance-3");
+        instance3 = Utils.getComponentInstance(context, type, p2);
 	}
 	
 	public void tearDown() {
 		instance1.dispose();
 		instance2.dispose();
+		instance3.dispose();
 		instance1 = null;
 		instance2 = null;
+		instance3 = null;
 	}
 	
 	public void testStaticInstance1() {
@@ -127,6 +140,43 @@ public class ManagedServiceConfigurableProperties extends OSGiTestCase {
         
         // Recheck props
         fooRef = Utils.getServiceReferenceByName(context, FooService.class.getName(), instance2.getInstanceName());
+        fooP = (String) fooRef.getProperty("foo");
+        barP = (Integer) fooRef.getProperty("bar");
+        bazP = (String) fooRef.getProperty("baz");
+        assertEquals("Check foo equality -2", fooP, "foo");
+        assertEquals("Check bar equality -2", barP, new Integer(2));
+        assertEquals("Check baz equality -2", bazP, "zab");
+        context.ungetService(fooRef);
+        context.ungetService(msRef);
+    }
+	
+	public void testStaticInstance3() {
+        ServiceReference fooRef = Utils.getServiceReferenceByName(context, FooService.class.getName(), instance3.getInstanceName());
+        assertNotNull("Check FS availability", fooRef);
+        Object fooP = fooRef.getProperty("foo");
+        Object barP =  fooRef.getProperty("bar");
+        Object bazP =  fooRef.getProperty("baz");
+        // No values ... no properties.
+        assertEquals("Check foo equality -1", fooP, null);
+        assertEquals("Check bar equality -1", barP, null);
+        assertEquals("Check baz equality -1", bazP, null);
+        
+        ServiceReference msRef = Utils.getServiceReferenceByPID(context, ManagedService.class.getName(), "instance-3");
+        assertNotNull("Check ManagedService availability", msRef);
+        
+        
+        // Configuration of baz
+        Properties conf = new Properties();
+        conf.put("baz", "zab");
+        conf.put("bar", new Integer(2));
+        conf.put("foo", "foo");
+        ManagedService ms = (ManagedService) context.getService(msRef);
+        try {
+            ms.updated(conf);
+        } catch (ConfigurationException e) { fail("Configuration Exception : " + e); }
+        
+        // Recheck props
+        fooRef = Utils.getServiceReferenceByName(context, FooService.class.getName(), instance3.getInstanceName());
         fooP = (String) fooRef.getProperty("foo");
         barP = (Integer) fooRef.getProperty("bar");
         bazP = (String) fooRef.getProperty("baz");
@@ -212,6 +262,54 @@ public class ManagedServiceConfigurableProperties extends OSGiTestCase {
         
         // Recheck props
         fooRef = Utils.getServiceReferenceByName(context, FooService.class.getName(), instance2.getInstanceName());
+        fooP = (String) fooRef.getProperty("foo");
+        barP = (Integer) fooRef.getProperty("bar");
+        bazP = (String) fooRef.getProperty("baz");
+        
+        assertEquals("Check foo equality", fooP, "oof");
+        assertEquals("Check bar equality", barP, new Integer(0));
+        assertEquals("Check baz equality", bazP, "zab");
+        
+        // Check field value
+        FooService fs = (FooService) context.getService(fooRef);
+        Properties p = fs.fooProps();
+        fooP = (String) p.get("foo");
+        barP = (Integer) p.get("bar");
+        
+        assertEquals("Check foo field equality", fooP, "oof");
+        assertEquals("Check bar field equality", barP, new Integer(0));
+        
+        context.ungetService(fooRef);
+        context.ungetService(msRef);
+    }
+	
+	public void testDynamicInstance3() {
+        ServiceReference fooRef = Utils.getServiceReferenceByName(context, FooService.class.getName(), instance3.getInstanceName());
+        assertNotNull("Check FS availability", fooRef);
+        
+        Object fooP = fooRef.getProperty("foo");
+        Object barP =  fooRef.getProperty("bar");
+        Object bazP =  fooRef.getProperty("baz");
+     // No values ... no properties.
+        assertEquals("Check foo equality", fooP, null);
+        assertEquals("Check bar equality", barP, null);
+        assertEquals("Check baz equality", bazP, null);
+        
+        ServiceReference msRef = Utils.getServiceReferenceByPID(context, ManagedService.class.getName(), "instance-3");
+        assertNotNull("Check ManagedServiceFactory availability", msRef);
+        
+        // Configuration of baz
+        Properties conf = new Properties();
+        conf.put("baz", "zab");
+        conf.put("foo", "oof");
+        conf.put("bar", new Integer(0));
+        ManagedService ms = (ManagedService) context.getService(msRef);
+        try {
+            ms.updated(conf);
+        } catch (ConfigurationException e) { fail("Configuration Exception : " + e); }
+        
+        // Recheck props
+        fooRef = Utils.getServiceReferenceByName(context, FooService.class.getName(), instance3.getInstanceName());
         fooP = (String) fooRef.getProperty("foo");
         barP = (Integer) fooRef.getProperty("bar");
         bazP = (String) fooRef.getProperty("baz");
@@ -411,6 +509,52 @@ public class ManagedServiceConfigurableProperties extends OSGiTestCase {
         
         // Recheck props
         fooRef = Utils.getServiceReferenceByName(context, FooService.class.getName(), instance2.getInstanceName());
+        fooP = (String) fooRef.getProperty("foo");
+        barP = (Integer) fooRef.getProperty("bar");
+        bazP = (String) fooRef.getProperty("baz");
+        assertNotNull("Check the propagated1 existency", fooRef.getProperty("propagated1"));
+        String prop1 = (String) fooRef.getProperty("propagated1");
+        assertNotNull("Check the propagated2 existency", fooRef.getProperty("propagated2"));
+        Integer prop2 = (Integer) fooRef.getProperty("propagated2");
+        
+        assertEquals("Check foo equality", fooP, "foo");
+        assertEquals("Check bar equality", barP, new Integer(2));
+        assertEquals("Check baz equality", bazP, "zab");
+        assertEquals("Check propagated1 equality", prop1, "propagated");
+        assertEquals("Check propagated2 equality", prop2, new Integer(1));
+        
+        context.ungetService(msRef);
+    }
+	
+	public void testPropagationInstance3() {
+        ServiceReference fooRef = Utils.getServiceReferenceByName(context, FooService.class.getName(), instance3.getInstanceName());
+        assertNotNull("Check FS availability", fooRef);
+        
+        Object fooP = fooRef.getProperty("foo");
+        Object barP =  fooRef.getProperty("bar");
+        Object bazP =  fooRef.getProperty("baz");
+        
+        assertEquals("Check foo equality", fooP, null);
+        assertEquals("Check bar equality", barP, null);
+        assertEquals("Check baz equality", bazP, null);
+        
+        ServiceReference msRef = Utils.getServiceReferenceByPID(context, ManagedService.class.getName(), "instance-3");
+        assertNotNull("Check ManagedService availability", msRef);
+        
+        // Configuration of baz
+        Properties conf = new Properties();
+        conf.put("baz", "zab");
+        conf.put("foo", "foo");
+        conf.put("bar", new Integer(2));
+        conf.put("propagated1", "propagated");
+        conf.put("propagated2", new Integer(1));
+        ManagedService ms = (ManagedService) context.getService(msRef);
+        try {
+            ms.updated(conf);
+        } catch (ConfigurationException e) { fail("Configuration Exception : " + e); }
+        
+        // Recheck props
+        fooRef = Utils.getServiceReferenceByName(context, FooService.class.getName(), instance3.getInstanceName());
         fooP = (String) fooRef.getProperty("foo");
         barP = (Integer) fooRef.getProperty("bar");
         bazP = (String) fooRef.getProperty("baz");

@@ -30,6 +30,7 @@ public class SimpleProperties extends OSGiTestCase {
 	
 	ComponentInstance fooProvider1;
 	ComponentInstance fooProvider2;
+	ComponentInstance fooProvider3;
 	
 	public void setUp() {
 		String type = "CONFIG-FooProviderType-Conf";
@@ -46,13 +47,19 @@ public class SimpleProperties extends OSGiTestCase {
 		p2.put("strAProp", new String[] {"bar", "foo"});
 		p2.put("intAProp", new int[] {1, 2, 3});
 		fooProvider2 = Utils.getComponentInstance(context, type, p2);
+		
+		Properties p3 = new Properties();
+        p3.put("instance.name","FooProvider-3");
+        fooProvider3 = Utils.getComponentInstance(context, "CONFIG-FooProviderType-ConfNoValue", p3);
 	}
 	
 	public void tearDown() {
 		fooProvider1.dispose();
 		fooProvider2.dispose();
+		fooProvider3.dispose();
 		fooProvider1 = null;
 		fooProvider2 = null;
+		fooProvider3 = null;
 	}
 	
 	public void testComponentTypeConfiguration() {
@@ -167,5 +174,53 @@ public class SimpleProperties extends OSGiTestCase {
 		fs = null;
 		context.ungetService(sr);	
 	}
+	
+	public void testNoValue() {
+        ServiceReference sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-3");
+        assertNotNull("Check the availability of the FS service", sr);
+        
+        FooService fs = (FooService) context.getService(sr);
+        Properties toCheck = fs.fooProps();
+        
+        // Check service properties
+        Integer intProp = (Integer) toCheck.get("intProp");
+        Boolean boolProp = (Boolean) toCheck.get("boolProp");
+        String strProp = (String) toCheck.get("strProp");
+        String[] strAProp = (String[]) toCheck.get("strAProp");
+        int[] intAProp = (int[]) toCheck.get("intAProp");
+        
+        assertEquals("Check intProp equality", intProp, new Integer(0));
+        assertEquals("Check longProp equality", boolProp, new Boolean(false));
+        assertEquals("Check strProp equality", strProp, null);
+        assertNull("Check strAProp nullity", strAProp);
+        assertNull("Check intAProp  nullity", intAProp);
+       
+        assertTrue("invoke fs", fs.foo());
+        toCheck = fs.fooProps();
+        
+        // Re-check the property (change)
+        intProp = (Integer) toCheck.get("intProp");
+        boolProp = (Boolean) toCheck.get("boolProp");
+        strProp = (String) toCheck.get("strProp");
+        strAProp = (String[]) toCheck.get("strAProp");
+        intAProp = (int[]) toCheck.get("intAProp");
+        
+        assertEquals("Check intProp equality", intProp, new Integer(3));
+        assertEquals("Check longProp equality", boolProp, new Boolean(true));
+        assertEquals("Check strProp equality", strProp, new String("bar"));
+        assertNotNull("Check strAProp not nullity", strAProp);
+        String[] v = new String[] {"foo", "bar", "baz"};
+        for (int i = 0; i < strAProp.length; i++) {
+            if(!strAProp[i].equals(v[i])) { fail("Check the strAProp Equality"); }
+        }
+        assertNotNull("Check intAProp not nullity", intAProp);
+        int[] v2 = new int[] {3, 2, 1};
+        for (int i = 0; i < intAProp.length; i++) {
+            if(intAProp[i] != v2[i]) { fail("Check the intAProp Equality"); }
+        }
+        
+        fs = null;
+        context.ungetService(sr);   
+    }
 
 }

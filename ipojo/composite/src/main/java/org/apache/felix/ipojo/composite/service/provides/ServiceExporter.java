@@ -110,7 +110,12 @@ public class ServiceExporter extends DependencyModel {
         while (iterator.hasNext()) {
             ServiceReference ref = (ServiceReference) iterator.next();
             ServiceRegistration reg = (ServiceRegistration) m_registrations.get(ref);
-            reg.unregister();
+            try {
+                reg.unregister();
+            } catch (IllegalStateException e) {
+                // The service is already unregistered
+                // Do nothing silently
+            }
         }
         m_registrations.clear();
     }

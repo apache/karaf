@@ -30,7 +30,7 @@ import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedServiceFactory;
 
 public class DynamicPropsReconfiguration extends OSGiTestCase {
-	ComponentInstance fooProvider3;
+	ComponentInstance fooProvider3, fooProvider4;
 	
 	public void setUp() {		
 		String type2 = "PS-FooProviderType-Dyn2";
@@ -42,11 +42,17 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
 		p3.put("strAProp", new String[0]);
 		p3.put("intAProp", new int[0]);
 		fooProvider3 = Utils.getComponentInstance(context, type2, p3);
+		
+		Properties p4 = new Properties();
+        p4.put("instance.name","FooProvider-4");
+        fooProvider4 = Utils.getComponentInstance(context, type2, p4);
 	}
 	
 	public void tearDown() {
 		fooProvider3.dispose();
 		fooProvider3 = null;
+	    fooProvider4.dispose();
+	    fooProvider4 = null;
 	}
 	
 	public void testFactoryReconf() {
@@ -572,6 +578,134 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
     	fs = null;
     	context.ungetService(sr);	
     }
-	
+
+    public void testFactoryReconfNoValue() {
+    	ServiceReference sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-4");
+    	assertNotNull("Check the availability of the FS service", sr);
+    	
+    	// Check service properties
+    	Integer intProp = (Integer) sr.getProperty("int");
+    	Object boolProp = sr.getProperty("boolean");
+    	Object strProp = sr.getProperty("string");
+    	Object strAProp = sr.getProperty("strAProp");
+    	int[] intAProp = (int[]) sr.getProperty("intAProp");
+    	
+    	assertEquals("Check intProp equality", intProp, new Integer(4));
+    	assertEquals("Check longProp equality", boolProp, null);
+    	assertEquals("Check strProp equality", strProp, null);
+    	assertNull("Check strAProp nullity", strAProp);
+    	
+    	assertNotNull("Check intAProp not nullity", intAProp);
+        int[] v2 = new int[] {1, 2, 3};
+        for (int i = 0; i < intAProp.length; i++) {
+            if(intAProp[i] != v2[i]) { fail("Check the intAProp Equality"); }
+        }
+    	
+    	// Reconfiguration
+    	ServiceReference fact_ref = Utils.getServiceReferenceByName(context, Factory.class.getName() , "PS-FooProviderType-Dyn2");
+    	Factory fact = (Factory) context.getService(fact_ref);
+    	Properties p3 = new Properties();
+    	p3.put("instance.name","FooProvider-4");
+    	p3.put("int", new Integer(1));
+    	p3.put("boolean", new Boolean(true));
+    	p3.put("string", new String("foo"));
+    	p3.put("strAProp", new String[] {"foo", "bar", "baz"});
+    	p3.put("intAProp", new int[] { 1, 2, 3});
+    	try {
+    		fact.reconfigure(p3);
+    	} catch(Exception e) {
+    		fail("Unable to reconfigure the instance with : " + p3);
+    	}
+    	
+    	sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-4");
+    	assertNotNull("Check the availability of the FS service", sr);
+    	
+    	// Check service properties
+    	intProp = (Integer) sr.getProperty("int");
+    	boolProp = (Boolean) sr.getProperty("boolean");
+    	strProp = (String) sr.getProperty("string");
+    	strAProp = (String[]) sr.getProperty("strAProp");
+    	intAProp = (int[]) sr.getProperty("intAProp");
+    	
+    	assertEquals("Check intProp equality", intProp, new Integer(1));
+    	assertEquals("Check longProp equality", boolProp, new Boolean(true));
+    	assertEquals("Check strProp equality", strProp, new String("foo"));
+    	assertNotNull("Check strAProp not nullity", strAProp);
+    	String[] v = new String[] {"foo", "bar", "baz"};
+    	for (int i = 0; i < ((String[]) strAProp).length; i++) {
+    		if(! ((String[])strAProp)[i].equals(v[i])) { fail("Check the strAProp Equality"); }
+    	}
+    	assertNotNull("Check intAProp not nullity", intAProp);
+    	v2 = new int[] { 1, 2, 3};
+    	for (int i = 0; i < intAProp.length; i++) {
+    		if(intAProp[i] != v2[i]) { fail("Check the intAProp Equality"); }
+    	}	
+    	
+    	// Invoke
+    	FooService fs = (FooService) context.getService(sr);
+    	assertTrue("invoke fs", fs.foo());
+    	
+    	// Re-check the property (change)
+    	intProp = (Integer) sr.getProperty("int");
+    	boolProp = (Boolean) sr.getProperty("boolean");
+    	strProp = (String) sr.getProperty("string");
+    	strAProp = (String[]) sr.getProperty("strAProp");
+    	intAProp = (int[]) sr.getProperty("intAProp");
+    	
+    	assertEquals("Check intProp equality", intProp, new Integer(2));
+    	assertEquals("Check longProp equality", boolProp, new Boolean(true));
+    	assertEquals("Check strProp equality", strProp, new String("foo"));
+    	assertNotNull("Check strAProp not nullity", strAProp);
+    	v = new String[] {"foo", "bar"};
+    	for (int i = 0; i < ((String[]) strAProp).length; i++) {
+    		if(!((String[]) strAProp)[i].equals(v[i])) { fail("Check the strAProp Equality"); }
+    	}
+    	assertNull("Check intAProp hidding (no value)", intAProp);
+    	
+    	//	Reconfiguration
+    	fact_ref = Utils.getServiceReferenceByName(context, Factory.class.getName() , "PS-FooProviderType-Dyn2");
+    	fact = (Factory) context.getService(fact_ref);
+    	p3 = new Properties();
+    	p3.put("instance.name","FooProvider-3");
+    	p3.put("int", new Integer(1));
+    	p3.put("boolean", new Boolean(true));
+    	p3.put("string", new String("foo"));
+    	p3.put("strAProp", new String[] {"foo", "bar", "baz"});
+    	p3.put("intAProp", new int[] { 1, 2, 3});
+    	try {
+    		fact.reconfigure(p3);
+    	} catch(Exception e) {
+    		fail("Unable to reconfigure the instance with : " + p3);
+    	}
+    	
+    	sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-3");
+    	assertNotNull("Check the availability of the FS service", sr);
+    	
+    	// Check service properties
+    	intProp = (Integer) sr.getProperty("int");
+    	boolProp = (Boolean) sr.getProperty("boolean");
+    	strProp = (String) sr.getProperty("string");
+    	strAProp = (String[]) sr.getProperty("strAProp");
+    	intAProp = (int[]) sr.getProperty("intAProp");
+    	
+    	assertEquals("Check intProp equality", intProp, new Integer(1));
+    	assertEquals("Check longProp equality", boolProp, new Boolean(true));
+    	assertEquals("Check strProp equality", strProp, new String("foo"));
+    	assertNotNull("Check strAProp not nullity", strAProp);
+    	v = new String[] {"foo", "bar", "baz"};
+    	for (int i = 0; i < ((String[])strAProp).length; i++) {
+    		if(!((String[]) strAProp)[i].equals(v[i])) { fail("Check the strAProp Equality"); }
+    	}
+    	assertNotNull("Check intAProp not nullity", intAProp);
+    	v2 = new int[] { 1, 2, 3};
+    	for (int i = 0; i < intAProp.length; i++) {
+    		if(intAProp[i] != v2[i]) { fail("Check the intAProp Equality"); }
+    	}	
+    	
+    	fact = null;
+    	context.ungetService(fact_ref);
+    	fs = null;
+    	context.ungetService(sr);	
+    }
 
 }

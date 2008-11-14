@@ -22,7 +22,7 @@
 		name="subscriber"
 		namespace="org.apache.felix.ipojo.handlers.event.EventAdminHandler">
 		<provides>
-			<property field="m_topics" name="event.topics" value=""/>
+			<property field="m_topics" name="event.topics"/>
 		</provides>
 	</handler>
 	

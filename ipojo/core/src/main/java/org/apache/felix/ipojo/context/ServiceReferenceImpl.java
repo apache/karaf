@@ -22,6 +22,7 @@ import java.util.Dictionary;
 
 import org.apache.felix.ipojo.ComponentInstance;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -117,15 +118,39 @@ public class ServiceReferenceImpl implements ServiceReference {
 
     /**
      * Service Reference compare method.
-     * This method is not yet supported.
-     * @param arg0 the object
-     * @return this methods is not yet supported, and throws an {@link UnsupportedOperationException}.
+     * @param reference the service reference
+     * @return this methods is not yet supported, and throws an
+     *         {@link UnsupportedOperationException}.
      * @see org.osgi.framework.ServiceReference#compareTo(java.lang.Object)
-     * TODO implements this method
      */
-    public int compareTo(Object arg0) {
-        throw new UnsupportedOperationException("This feature has not yet been implemented.");
+    public int compareTo(Object reference) {
 
+        ServiceReference other = (ServiceReference) reference;
+
+        Long id = (Long) getProperty(Constants.SERVICE_ID);
+        Long otherId = (Long) other.getProperty(Constants.SERVICE_ID);
+
+        if (id.equals(otherId)) {
+            return 0; // same service
+        }
+
+        Integer rank = (Integer) getProperty(Constants.SERVICE_RANKING);
+        Integer otherRank = (Integer) other
+                .getProperty(Constants.SERVICE_RANKING);
+
+        // If no rank, then spec says it defaults to zero.
+        rank = (rank == null) ? new Integer(0) : rank;
+        otherRank = (otherRank == null) ? new Integer(0) : otherRank;
+
+        // Sort by rank in ascending order.
+        if (rank.compareTo(otherRank) < 0) {
+            return -1; // lower rank
+        } else if (rank.compareTo(otherRank) > 0) {
+            return 1; // higher rank
+        }
+
+        // If ranks are equal, then sort by service id in descending order.
+        return (id.compareTo(otherId) < 0) ? 1 : -1;
     }
 
 }

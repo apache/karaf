@@ -41,7 +41,7 @@
 		classname="org.apache.felix.ipojo.handlers.architecture.ArchitectureHandler"
 		name="architecture" architecture="false">
 		<provides interface="org.apache.felix.ipojo.architecture.Architecture">
-			<property field="m_name" name="architecture.instance" value="" />
+			<property field="m_name" name="architecture.instance"/>
 		</provides>
 	</handler>
 </ipojo>

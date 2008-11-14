@@ -61,6 +61,7 @@ public class ServiceProdiving extends OSGiTestCase {
         Element bar = getPropertyByName(props, "bar");
         assertEquals("Check bar field", "bar", bar.getAttribute("field"));
         assertEquals("Check bar value", "4", bar.getAttribute("value"));
+        assertEquals("Check mandatory value", "true", bar.getAttribute("mandatory"));
         //Boo
         Element boo = getPropertyByName(props, "boo");
         assertEquals("Check boo field", "boo", boo.getAttribute("field"));

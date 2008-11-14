@@ -30,7 +30,7 @@ public class Properties implements FooService, BarService {
     @Property(name="baa")
     public int m_baa;
     
-    @Property(value="5")
+    @Property(value="5", mandatory=true)
     public void setbaa(int baa) {
         
     }

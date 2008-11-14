@@ -40,5 +40,11 @@ public @interface ServiceProperty {
      * Default : empty
      */
     String value() default "";
+    
+    /**
+     * Is the property mandatory?
+     * Default: false
+     */
+    boolean mandatory() default false;
 
 }

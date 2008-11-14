@@ -15,7 +15,7 @@ public class ProvidesProperties implements FooService, BarService {
     @ServiceProperty(name = "foo")
     public int m_foo = 0;
     
-    @ServiceProperty(value = "4")
+    @ServiceProperty(value = "4", mandatory=true)
     public int bar;
     
     @ServiceProperty

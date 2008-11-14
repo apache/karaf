@@ -1,8 +1,5 @@
-<ipojo
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/schemas/core.xsd"
-    xmlns="org.apache.felix.ipojo"
-    >
+<ipojo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/schemas/core.xsd" xmlns="org.apache.felix.ipojo">
 	<!-- Simple provider  -->
 	<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
@@ -22,12 +19,25 @@
 		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn"
 		name="Factories-FooProviderType-Dyn" architecture="true">
 		<provides>
-			<property name="int" field="intProp" value="2" />
-			<property name="boolean" field="boolProp" value="false" />
-			<property name="string" field="strProp" value="foo" />
+			<property name="int" field="intProp" value="2" mandatory="true"/>
+			<property name="boolean" field="boolProp" value="false" mandatory="true"/>
+			<property name="string" field="strProp" value="foo" mandatory="true"/>
 			<property name="strAProp" field="strAProp"
-				value="{foo, bar}" />
-			<property name="intAProp" field="intAProp" value="{ 1,2,3}" />
+				value="{foo, bar}" mandatory="true"/>
+			<property name="intAProp" field="intAProp" value="{ 1,2,3}" mandatory="true"/>
+		</provides>
+	</component>
+	
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn"
+		name="Factories-FooProviderType-Dynopt" architecture="true">
+		<provides>
+			<property name="int" field="intProp" value="2"/>
+			<property name="boolean" field="boolProp" value="false"/>
+			<property name="string" field="strProp" value="foo"/>
+			<property name="strAProp" field="strAProp"
+				value="{foo, bar}"/>
+			<property name="intAProp" field="intAProp" value="{ 1,2,3}"/>
 		</provides>
 	</component>
 	
@@ -35,12 +45,25 @@
 		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="Factories-FooProviderType-2" architecture="true">
 		<provides>
-			<property name="int" type="int" value="2" />
-			<property name="long" type="long" value="40" />
-			<property name="string" type="java.lang.String" value="foo" />
+			<property name="int" type="int" value="2" mandatory="true" />
+			<property name="long" type="long" value="40" mandatory="true"/>
+			<property name="string" type="java.lang.String" value="foo" mandatory="true"/>
+			<property name="strAProp" type="java.lang.String[]"
+				value="{foo, bar}" mandatory="true" />
+			<property name="intAProp" type="int[]" value="{1,2,3}" mandatory="true"/>
+		</provides>
+	</component>
+	
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		name="Factories-FooProviderType-2opt" architecture="true">
+		<provides>
+			<property name="int" type="int" value="2"/>
+			<property name="long" type="long" value="40"/>
+			<property name="string" type="java.lang.String" value="foo"/>
 			<property name="strAProp" type="java.lang.String[]"
 				value="{foo, bar}" />
-			<property name="intAProp" type="int[]" value="{1,2,3}" />
+			<property name="intAProp" type="int[]" value="{1,2,3}"/>
 		</provides>
 	</component>
 	
@@ -48,12 +71,25 @@
 		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn2"
 		name="Factories-FooProviderType-Dyn2" architecture="true">
 		<provides>
-			<property name="int" field="intProp" value="4" />
-			<property name="boolean" field="boolProp" />
-			<property name="string" field="strProp" />
-			<property name="strAProp" field="strAProp" />
+			<property name="int" field="intProp" value="4" mandatory="true"/>
+			<property name="boolean" field="boolProp" mandatory="true"/>
+			<property name="string" field="strProp" mandatory="true"/>
+			<property name="strAProp" field="strAProp" mandatory="true"/>
 			<property name="intAProp" field="intAProp"
-				value="{1, 2,3 }" />
+				value="{1, 2,3 }" mandatory="true"/>
+		</provides>
+	</component>
+	
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn2"
+		name="Factories-FooProviderType-Dyn2opt" architecture="true">
+		<provides>
+			<property name="int" field="intProp" value="4" />
+			<property name="boolean" field="boolProp"/>
+			<property name="string" field="strProp"/>
+			<property name="strAProp" field="strAProp"/>
+			<property name="intAProp" field="intAProp"
+				value="{1, 2,3 }"/>
 		</provides>
 	</component>
 	
@@ -61,13 +97,27 @@
 		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="Factories-FooProviderType-3" architecture="true">
 		<provides>
-			<property name="foo" field="m_foo" />
-			<property name="bar" field="m_bar" />
-			<property name="baz" type="java.lang.String" />
+			<property name="foo" field="m_foo" mandatory="true"/>
+			<property name="bar" field="m_bar" mandatory="true"/>
+			<property name="baz" type="java.lang.String" mandatory="true"/>
 		</provides>
 		<properties propagation="true">
-			<property name="foo" field="m_foo" />
-			<property name="bar" field="m_bar" />
+			<property name="foo" field="m_foo" mandatory="true"/>
+			<property name="bar" field="m_bar" mandatory="true"/>
+		</properties>
+	</component>
+	
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		name="Factories-FooProviderType-3opt" architecture="true">
+		<provides>
+			<property name="foo" field="m_foo"/>
+			<property name="bar" field="m_bar"/>
+			<property name="baz" type="java.lang.String"/>
+		</provides>
+		<properties propagation="true">
+			<property name="foo" field="m_foo"/>
+			<property name="bar" field="m_bar"/>
 		</properties>
 	</component>
 	

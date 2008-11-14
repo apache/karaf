@@ -74,14 +74,30 @@ public class ConfigurableCheckServiceProvider implements CheckService {
         props.put("c", new Character(c));
         props.put("bool", new Boolean(bool));
         
-        props.put("bs", bs);
-        props.put("ss", ss);
-        props.put("is", is);
-        props.put("ls", ls);
-        props.put("ds", ds);
-        props.put("fs", fs);
-        props.put("cs", cs);
-        props.put("bools", bools);
+        if (bs != null) {
+            props.put("bs", bs);
+        }
+        if (ss != null) {
+            props.put("ss", ss);
+        }
+        if (is != null) {
+            props.put("is", is);
+        }
+        if (ls != null) {
+            props.put("ls", ls);
+        }
+        if (ds != null) {
+            props.put("ds", ds);
+        }
+        if (fs != null) {
+            props.put("fs", fs);
+        }
+        if (cs != null) {
+            props.put("cs", cs);
+        }
+        if (bools != null) {
+            props.put("bools", bools);
+        }
         
         props.put("upb", new Integer(upB));
         props.put("ups", new Integer(upS));
@@ -101,8 +117,13 @@ public class ConfigurableCheckServiceProvider implements CheckService {
         props.put("upcs", new Integer(upCs));
         props.put("upbools", new Integer(upBools));
         
-        props.put("string", string);
-        props.put("strings", strings);
+        if (string != null) {
+            props.put("string", string);
+        }
+        if (string != null) {
+            props.put("strings", strings);
+        }
+       
         props.put("upstring", new Integer(upString));
         props.put("upstrings", new Integer(upStrings));
         

@@ -294,6 +294,11 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
          */
         private String m_value;
         
+        /**
+         * Property mandatory aspect.
+         */
+        private String m_mandatory;
+        
         
         /**
          * Constructor.
@@ -318,6 +323,10 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
             }
             if (arg0.equals("value")) {
                 m_value = arg1.toString();
+                return;
+            }
+            if (arg0.equals("mandatory")) {
+                m_mandatory = arg1.toString();
                 return;
             }
         }
@@ -352,6 +361,9 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
             prop.addAttribute(new Attribute("field", m_field));
             if (m_value != null) {
                 prop.addAttribute(new Attribute("value", m_value));
+            }
+            if (m_mandatory != null) {
+                prop.addAttribute(new Attribute("mandatory", m_mandatory));
             }
             
         }

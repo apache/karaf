@@ -32,6 +32,8 @@ public class TestMethodProperties extends OSGiTestCase {
     ComponentInstance instance;
     
     ComponentInstance instance2;
+    
+    ComponentInstance instance3;
 
     public void setUp() {
         Factory fact = Utils.getFactoryByName(context, "CONFIG-MethodConfigurableCheckService");
@@ -90,14 +92,23 @@ public class TestMethodProperties extends OSGiTestCase {
            fail("Cannot create the under-test instance 2 : " + e.getMessage());
         }
         
+        try {
+            instance3 = fact.createComponentInstance(null);
+        } catch(Exception e) {
+           e.printStackTrace();
+           fail("Cannot create the under-test instance 3 : " + e.getMessage());
+        }
+        
         
     }
     
     public void tearDown() {
         instance.dispose();
         instance2.dispose();
+        instance3.dispose();
         instance = null;
         instance2 = null;
+        instance3 = null;
     }
     
     public void testConfigurationPrimitive() {
@@ -1139,5 +1150,469 @@ public class TestMethodProperties extends OSGiTestCase {
         
         ci.reconfigure(props2);
     }
+
+    public void testConfigurationPrimitiveNoValue() {
+            ServiceReference ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+            assertNotNull("Test check service availability", ref);
+            CheckService check = (CheckService) context.getService(ref);
+            Properties props = check.getProps();
+            
+            Byte b = (Byte) props.get("b");
+            Short s = (Short) props.get("s");
+            Integer i = (Integer) props.get("i");
+            Long l = (Long) props.get("l");
+            Double d = (Double) props.get("d");
+            Float f = (Float) props.get("f");
+            Character c = (Character) props.get("c");
+            Boolean bool = (Boolean) props.get("bool");
+                    
+            assertEquals("Check b", b, new Byte("0"));
+            assertEquals("Check s", s, new Short("0"));
+            assertEquals("Check i", i, new Integer("0"));
+            assertEquals("Check l", l, new Long("0"));
+            assertEquals("Check d", d, new Double("0"));
+            assertEquals("Check f", f, new Float("0"));
+            assertEquals("Check c", c, new Character((char) 0));
+            assertEquals("Check bool", bool, new Boolean("false"));
+            
+            Integer upb = (Integer) props.get("upb");
+            Integer ups = (Integer) props.get("ups");
+            Integer upi = (Integer) props.get("upi");
+            Integer upl = (Integer) props.get("upl");
+            Integer upd = (Integer) props.get("upd");
+            Integer upf = (Integer) props.get("upf");
+            Integer upc = (Integer) props.get("upc");
+            Integer upbool = (Integer) props.get("upbool");
+            
+            assertEquals("Check upb", upb, new Integer(0));
+            assertEquals("Check ups", ups, new Integer(0));
+            assertEquals("Check upi", upi, new Integer(0));
+            assertEquals("Check upl", upl, new Integer(0));
+            assertEquals("Check upd", upd, new Integer(0));
+            assertEquals("Check upf", upf, new Integer(0));
+            assertEquals("Check upc", upc, new Integer(0));
+            assertEquals("Check upbool", upbool, new Integer(0));
+            
+            reconfigure(instance3);
+            
+            ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+            assertNotNull("Test check service availability", ref);
+            check = (CheckService) context.getService(ref);
+            props = check.getProps();
+            
+            b = (Byte) props.get("b");
+            s = (Short) props.get("s");
+            i = (Integer) props.get("i");
+            l = (Long) props.get("l");
+            d = (Double) props.get("d");
+            f = (Float) props.get("f");
+            c = (Character) props.get("c");
+            bool = (Boolean) props.get("bool");
+            
+            assertEquals("2) Check b ("+b+")", b, new Byte("2"));
+            assertEquals("2) Check s", s, new Short("2"));
+            assertEquals("2) Check i", i, new Integer("2"));
+            assertEquals("2) Check l", l, new Long("2"));
+            assertEquals("2) Check d", d, new Double("2"));
+            assertEquals("2) Check f", f, new Float("2"));
+            assertEquals("2) Check c", c, new Character('b'));
+            assertEquals("2) Check bool", bool, new Boolean("false"));
+            
+            upb = (Integer) props.get("upb");
+            ups = (Integer) props.get("ups");
+            upi = (Integer) props.get("upi");
+            upl = (Integer) props.get("upl");
+            upd = (Integer) props.get("upd");
+            upf = (Integer) props.get("upf");
+            upc = (Integer) props.get("upc");
+            upbool = (Integer) props.get("upbool");
+            
+            assertEquals("2) Check upb", upb, new Integer(1));
+            assertEquals("2) Check ups", ups, new Integer(1));
+            assertEquals("2) Check upi", upi, new Integer(1));
+            assertEquals("2) Check upl", upl, new Integer(1));
+            assertEquals("2) Check upd", upd, new Integer(1));
+            assertEquals("2) Check upf", upf, new Integer(1));
+            assertEquals("2) Check upc", upc, new Integer(1));
+            assertEquals("2) Check upbool", upbool, new Integer(1));
+            
+        }
+
+    public void testConfigurationPrimitiveStringNoValue() {
+            ServiceReference ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+            assertNotNull("Test check service availability", ref);
+            CheckService check = (CheckService) context.getService(ref);
+            Properties props = check.getProps();
+            
+            Byte b = (Byte) props.get("b");
+            Short s = (Short) props.get("s");
+            Integer i = (Integer) props.get("i");
+            Long l = (Long) props.get("l");
+            Double d = (Double) props.get("d");
+            Float f = (Float) props.get("f");
+            Character c = (Character) props.get("c");
+            Boolean bool = (Boolean) props.get("bool");
+                    
+            assertEquals("Check b", b, new Byte("0"));
+            assertEquals("Check s", s, new Short("0"));
+            assertEquals("Check i", i, new Integer("0"));
+            assertEquals("Check l", l, new Long("0"));
+            assertEquals("Check d", d, new Double("0"));
+            assertEquals("Check f", f, new Float("0"));
+            assertEquals("Check c", c, new Character((char) 0));
+            assertEquals("Check bool", bool, new Boolean("false"));
+            
+            Integer upb = (Integer) props.get("upb");
+            Integer ups = (Integer) props.get("ups");
+            Integer upi = (Integer) props.get("upi");
+            Integer upl = (Integer) props.get("upl");
+            Integer upd = (Integer) props.get("upd");
+            Integer upf = (Integer) props.get("upf");
+            Integer upc = (Integer) props.get("upc");
+            Integer upbool = (Integer) props.get("upbool");
+            
+            assertEquals("Check upb", upb, new Integer(0));
+            assertEquals("Check ups", ups, new Integer(0));
+            assertEquals("Check upi", upi, new Integer(0));
+            assertEquals("Check upl", upl, new Integer(0));
+            assertEquals("Check upd", upd, new Integer(0));
+            assertEquals("Check upf", upf, new Integer(0));
+            assertEquals("Check upc", upc, new Integer(0));
+            assertEquals("Check upbool", upbool, new Integer(0));
+            
+            reconfigureString(instance3);
+            
+            ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+            assertNotNull("Test check service availability", ref);
+            check = (CheckService) context.getService(ref);
+            props = check.getProps();
+            
+            b = (Byte) props.get("b");
+            s = (Short) props.get("s");
+            i = (Integer) props.get("i");
+            l = (Long) props.get("l");
+            d = (Double) props.get("d");
+            f = (Float) props.get("f");
+            c = (Character) props.get("c");
+            bool = (Boolean) props.get("bool");
+            
+            assertEquals("2) Check b ("+b+")", b, new Byte("2"));
+            assertEquals("2) Check s", s, new Short("2"));
+            assertEquals("2) Check i", i, new Integer("2"));
+            assertEquals("2) Check l", l, new Long("2"));
+            assertEquals("2) Check d", d, new Double("2"));
+            assertEquals("2) Check f", f, new Float("2"));
+            assertEquals("2) Check c", c, new Character('b'));
+            assertEquals("2) Check bool", bool, new Boolean("false"));
+            
+            upb = (Integer) props.get("upb");
+            ups = (Integer) props.get("ups");
+            upi = (Integer) props.get("upi");
+            upl = (Integer) props.get("upl");
+            upd = (Integer) props.get("upd");
+            upf = (Integer) props.get("upf");
+            upc = (Integer) props.get("upc");
+            upbool = (Integer) props.get("upbool");
+            
+            assertEquals("2) Check upb", upb, new Integer(1));
+            assertEquals("2) Check ups", ups, new Integer(1));
+            assertEquals("2) Check upi", upi, new Integer(1));
+            assertEquals("2) Check upl", upl, new Integer(1));
+            assertEquals("2) Check upd", upd, new Integer(1));
+            assertEquals("2) Check upf", upf, new Integer(1));
+            assertEquals("2) Check upc", upc, new Integer(1));
+            assertEquals("2) Check upbool", upbool, new Integer(1));
+            
+        }
+
+    public void testConfigurationPrimitiveArraysNoValue() {
+            ServiceReference ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+            assertNotNull("Test check service availability", ref);
+            CheckService check = (CheckService) context.getService(ref);
+            Properties props = check.getProps();
+ 
+                    
+            byte[] b = (byte[]) props.get("bs");
+            short[] s = (short[]) props.get("ss");
+            int[] i = (int[]) props.get("is");
+            long[] l = (long[]) props.get("ls");
+            double[] d = (double[]) props.get("ds");
+            float[] f = (float[]) props.get("fs");
+            char[] c = (char[]) props.get("cs");
+            boolean[] bool = (boolean[]) props.get("bools");
+                    
+            assertNull("Check b nullity", b);
+            assertNull("Check s nullity", s);
+            assertNull("Check i nullity", i);
+            assertNull("Check l nullity", l);
+            assertNull("Check d nullity", d);
+            assertNull("Check f nullity", f);
+            assertNull("Check c nullity", c);
+            assertNull("Check bool nullity", bool);
+            
+            Integer upb = (Integer) props.get("upbs");
+            Integer ups = (Integer) props.get("upss");
+            Integer upi = (Integer) props.get("upis");
+            Integer upl = (Integer) props.get("upls");
+            Integer upd = (Integer) props.get("upds");
+            Integer upf = (Integer) props.get("upfs");
+            Integer upc = (Integer) props.get("upcs");
+            Integer upbool = (Integer) props.get("upbools");
+            
+            assertEquals("Check upb", upb, new Integer(0));
+            assertEquals("Check ups", ups, new Integer(0));
+            assertEquals("Check upi", upi, new Integer(0));
+            assertEquals("Check upl", upl, new Integer(0));
+            assertEquals("Check upd", upd, new Integer(0));
+            assertEquals("Check upf", upf, new Integer(0));
+            assertEquals("Check upc", upc, new Integer(0));
+            assertEquals("Check upbool", upbool, new Integer(0));
+            
+            reconfigure(instance3);
+            
+            ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+            assertNotNull("Test check service availability", ref);
+            check = (CheckService) context.getService(ref);
+            props = check.getProps();
+            
+            b = (byte[]) props.get("bs");
+            s = (short[]) props.get("ss");
+            i = (int[]) props.get("is");
+            l = (long[]) props.get("ls");
+            d = (double[]) props.get("ds");
+            f = (float[]) props.get("fs");
+            c = (char[]) props.get("cs");
+            bool = (boolean[]) props.get("bools");
+            
+            assertEquals("2) Check b 0", b[0], 3);
+            assertEquals("2) Check b 1", b[1], 2);
+            assertEquals("2) Check b 2", b[2], 1);
+            assertEquals("2) Check s 0", s[0], 3);
+            assertEquals("2) Check s 1", s[1], 2);
+            assertEquals("2) Check s 2", s[2], 1);
+            assertEquals("2) Check i 0", i[0], 3);
+            assertEquals("2) Check i 1", i[1], 2);
+            assertEquals("2) Check i 2", i[2], 1);
+            assertEquals("2) Check l 0", l[0], 3);
+            assertEquals("2) Check l 1", l[1], 2);
+            assertEquals("2) Check l 2", l[2], 1);
+            assertEquals("2) Check d 0", d[0], 3);
+            assertEquals("2) Check d 1", d[1], 2);
+            assertEquals("2) Check d 2", d[2], 1);
+            assertEquals("2) Check f 0", f[0], 3);
+            assertEquals("2) Check f 1", f[1], 2);
+            assertEquals("2) Check f 2", f[2], 1);
+            assertEquals("2) Check c 0", c[0], 'c');
+            assertEquals("2) Check c 1", c[1], 'b');
+            assertEquals("2) Check c 2", c[2], 'a');
+            assertFalse("2) Check bool 0", bool[0]);
+            assertFalse("2) Check bool 1", bool[0]);
+            assertFalse("2) Check bool 2", bool[0]);
+            
+            upb = (Integer) props.get("upbs");
+            ups = (Integer) props.get("upss");
+            upi = (Integer) props.get("upis");
+            upl = (Integer) props.get("upls");
+            upd = (Integer) props.get("upds");
+            upf = (Integer) props.get("upfs");
+            upc = (Integer) props.get("upcs");
+            upbool = (Integer) props.get("upbools");
+            
+            assertEquals("2) Check upb", upb, new Integer(1));
+            assertEquals("2) Check ups", ups, new Integer(1));
+            assertEquals("2) Check upi", upi, new Integer(1));
+            assertEquals("2) Check upl", upl, new Integer(1));
+            assertEquals("2) Check upd", upd, new Integer(1));
+            assertEquals("2) Check upf", upf, new Integer(1));
+            assertEquals("2) Check upc", upc, new Integer(1));
+            assertEquals("2) Check upbool", upbool, new Integer(1));
+            
+        }
+
+    public void testConfigurationPrimitiveArraysStringNoValue() {
+            ServiceReference ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+            assertNotNull("Test check service availability", ref);
+            CheckService check = (CheckService) context.getService(ref);
+            Properties props = check.getProps();
+            
+            byte[] b = (byte[]) props.get("bs");
+            short[] s = (short[]) props.get("ss");
+            int[] i = (int[]) props.get("is");
+            long[] l = (long[]) props.get("ls");
+            double[] d = (double[]) props.get("ds");
+            float[] f = (float[]) props.get("fs");
+            char[] c = (char[]) props.get("cs");
+            boolean[] bool = (boolean[]) props.get("bools");
+            
+            assertNull("Check b nullity", b);
+            assertNull("Check s nullity", s);
+            assertNull("Check i nullity", i);
+            assertNull("Check l nullity", l);
+            assertNull("Check d nullity", d);
+            assertNull("Check f nullity", f);
+            assertNull("Check c nullity", c);
+            assertNull("Check bool nullity", bool);
+            
+            Integer upb = (Integer) props.get("upbs");
+            Integer ups = (Integer) props.get("upss");
+            Integer upi = (Integer) props.get("upis");
+            Integer upl = (Integer) props.get("upls");
+            Integer upd = (Integer) props.get("upds");
+            Integer upf = (Integer) props.get("upfs");
+            Integer upc = (Integer) props.get("upcs");
+            Integer upbool = (Integer) props.get("upbools");
+            
+            assertEquals("Check upb", upb, new Integer(0));
+            assertEquals("Check ups", ups, new Integer(0));
+            assertEquals("Check upi", upi, new Integer(0));
+            assertEquals("Check upl", upl, new Integer(0));
+            assertEquals("Check upd", upd, new Integer(0));
+            assertEquals("Check upf", upf, new Integer(0));
+            assertEquals("Check upc", upc, new Integer(0));
+            assertEquals("Check upbool", upbool, new Integer(0));
+            
+    
+            reconfigureString(instance3);
+            
+            ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+            assertNotNull("Test check service availability", ref);
+            check = (CheckService) context.getService(ref);
+            props = check.getProps();
+            
+            b = (byte[]) props.get("bs");
+            s = (short[]) props.get("ss");
+            i = (int[]) props.get("is");
+            l = (long[]) props.get("ls");
+            d = (double[]) props.get("ds");
+            f = (float[]) props.get("fs");
+            c = (char[]) props.get("cs");
+            bool = (boolean[]) props.get("bools");
+            
+            assertEquals("2) Check b 0", b[0], 3);
+            assertEquals("2) Check b 1", b[1], 2);
+            assertEquals("2) Check b 2", b[2], 1);
+            assertEquals("2) Check s 0", s[0], 3);
+            assertEquals("2) Check s 1", s[1], 2);
+            assertEquals("2) Check s 2", s[2], 1);
+            assertEquals("2) Check i 0", i[0], 3);
+            assertEquals("2) Check i 1", i[1], 2);
+            assertEquals("2) Check i 2", i[2], 1);
+            assertEquals("2) Check l 0", l[0], 3);
+            assertEquals("2) Check l 1", l[1], 2);
+            assertEquals("2) Check l 2", l[2], 1);
+            assertEquals("2) Check d 0", d[0], 3);
+            assertEquals("2) Check d 1", d[1], 2);
+            assertEquals("2) Check d 2", d[2], 1);
+            assertEquals("2) Check f 0", f[0], 3);
+            assertEquals("2) Check f 1", f[1], 2);
+            assertEquals("2) Check f 2", f[2], 1);
+            assertEquals("2) Check c 0", c[0], 'c');
+            assertEquals("2) Check c 1", c[1], 'b');
+            assertEquals("2) Check c 2", c[2], 'a');
+            assertFalse("2) Check bool 0", bool[0]);
+            assertFalse("2) Check bool 1", bool[0]);
+            assertFalse("2) Check bool 2", bool[0]);
+            
+            upb = (Integer) props.get("upbs");
+            ups = (Integer) props.get("upss");
+            upi = (Integer) props.get("upis");
+            upl = (Integer) props.get("upls");
+            upd = (Integer) props.get("upds");
+            upf = (Integer) props.get("upfs");
+            upc = (Integer) props.get("upcs");
+            upbool = (Integer) props.get("upbools");
+            
+            assertEquals("2) Check upb", upb, new Integer(1));
+            assertEquals("2) Check ups", ups, new Integer(1));
+            assertEquals("2) Check upi", upi, new Integer(1));
+            assertEquals("2) Check upl", upl, new Integer(1));
+            assertEquals("2) Check upd", upd, new Integer(1));
+            assertEquals("2) Check upf", upf, new Integer(1));
+            assertEquals("2) Check upc", upc, new Integer(1));
+            assertEquals("2) Check upbool", upbool, new Integer(1));
+            
+        }
+
+    public void testConfigurationObjNoValue() {
+            ServiceReference ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+            assertNotNull("Test check service availability", ref);
+            CheckService check = (CheckService) context.getService(ref);
+            Properties props = check.getProps();
+            
+            String s = (String) props.get("string");
+            String[] ss = (String[]) props.get("strings");
+                    
+            assertEquals("Check string", s, null);
+            assertEquals("Check strings", ss, null);
+
+            
+            Integer upString = (Integer) props.get("upstring");
+            Integer upStrings = (Integer) props.get("upstrings");
+            
+            assertEquals("Check upString", upString, new Integer(0));
+            assertEquals("Check upStrings", upStrings, new Integer(0));
+            
+            reconfigure(instance3);
+            
+            ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+            assertNotNull("Test check service availability", ref);
+            check = (CheckService) context.getService(ref);
+            props = check.getProps();
+            
+            s = (String) props.get("string");
+            ss = (String[]) props.get("strings");
+                    
+            assertEquals("2) Check string", s, "bar");
+            assertEquals("2) Check strings 0", ss[0], "baz");
+            assertEquals("2) Check strings 1", ss[1], "bar");
+            assertEquals("2) Check strings 2", ss[2], "foo");
+            
+            upString = (Integer) props.get("upstring");
+            upStrings = (Integer) props.get("upstrings");
+            
+            assertEquals("2) Check upString", upString, new Integer(1));
+            assertEquals("2) Check upStrings", upStrings, new Integer(1));
+        }
+
+    public void testConfigurationObjStringNoValue() {
+            ServiceReference ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+            assertNotNull("Test check service availability", ref);
+            CheckService check = (CheckService) context.getService(ref);
+            Properties props = check.getProps();
+            
+            String s = (String) props.get("string");
+            String[] ss = (String[]) props.get("strings");
+                    
+            assertEquals("Check string", s, null);
+            assertEquals("Check strings", ss, null);
+
+            
+            Integer upString = (Integer) props.get("upstring");
+            Integer upStrings = (Integer) props.get("upstrings");
+            
+            assertEquals("Check upString", upString, new Integer(0));
+            assertEquals("Check upStrings", upStrings, new Integer(0));
+            
+            reconfigureString(instance3);
+            
+            ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+            assertNotNull("Test check service availability", ref);
+            check = (CheckService) context.getService(ref);
+            props = check.getProps();
+            
+            s = (String) props.get("string");
+            ss = (String[]) props.get("strings");
+                    
+            assertEquals("2) Check string", s, "bar");
+            assertEquals("2) Check strings 0", ss[0], "baz");
+            assertEquals("2) Check strings 1", ss[1], "bar");
+            assertEquals("2) Check strings 2", ss[2], "foo");
+            
+            upString = (Integer) props.get("upstring");
+            upStrings = (Integer) props.get("upstrings");
+            
+            assertEquals("2) Check upString", upString, new Integer(1));
+            assertEquals("2) Check upStrings", upStrings, new Integer(1));
+        }
 
 }

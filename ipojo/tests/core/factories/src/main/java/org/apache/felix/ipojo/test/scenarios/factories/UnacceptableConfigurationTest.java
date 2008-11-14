@@ -52,6 +52,27 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 	}
 	
 	/**
+     * Configuration without the name property.
+     */
+    public void testWithoutNameOpt() {
+        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-2opt");
+        
+        Properties  p = new Properties();
+        p.put("int", new Integer(3));
+        p.put("long", new Long(42));
+        p.put("string", "absdir");
+        p.put("strAProp", new String[] {"a"});
+        p.put("intAProp", new int[] {1,2});
+        
+        ComponentInstance ci = null;
+        try {
+            ci = f.createComponentInstance(p);
+            ci.dispose();
+        } catch(Exception e) { fail("an acceptable configuration is refused : " + e.getMessage()); }
+        
+    }
+	
+	/**
 	 * Empty configuration.
 	 */
 	public void testEmptyConfiguration() {
@@ -64,6 +85,20 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 			ci.dispose();
 		} catch(Exception e) { fail("An acceptable configuration is refused"); }
 	}
+	
+	/**
+     * Empty configuration.
+     */
+    public void testEmptyConfigurationOpt() {
+        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-2opt");
+        Properties  p = new Properties();
+        
+        ComponentInstance ci = null;
+        try {
+            ci = f.createComponentInstance(p);
+            ci.dispose();
+        } catch(Exception e) { fail("An acceptable configuration is refused"); }
+    }
 	
 	/**
 	 * Empty configuration (just the name).
@@ -82,6 +117,23 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 	}
 	
 	/**
+     * Empty configuration (just the name).
+     */
+    public void testEmptyConfiguration2opt() {
+        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2opt");
+        Properties  p = new Properties();
+        p.put("instance.name","ko");
+        ComponentInstance ci = null;
+        try {
+            ci = f.createComponentInstance(p);
+            ci.dispose();
+        } catch(Exception e) { 
+            fail("An acceptable configuration is refused");
+        }
+        
+    }
+	
+	/**
 	 * Null configuration (accept).
 	 */
 	public void testNull() {
@@ -93,6 +145,19 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 			ci.dispose();
 		} catch(Exception e) { fail("An acceptable configuration is refused"); }
 	}
+	
+	/**
+     * Null configuration (accept).
+     */
+    public void testNullOpt() {
+        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-2opt");
+        
+        ComponentInstance ci = null;
+        try {
+            ci = f.createComponentInstance(null);
+            ci.dispose();
+        } catch(Exception e) { fail("An acceptable configuration is refused"); }
+    }
 	
 	/**
 	 * Null configuration (fail).
@@ -108,6 +173,23 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 		
 		fail("An unacceptable configuration is accepted");
 	}
+	
+	/**
+     * Null configuration (success).
+     */
+    public void testNull2Opt() {
+        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2opt");
+        
+        ComponentInstance ci = null;
+        try {
+            ci = f.createComponentInstance(null);
+            ci.dispose();
+        } catch(Exception e) {
+            fail("An acceptable configuration is refused");
+        }
+        
+        
+    }
 	
 	/**
 	 * Check static properties.
@@ -133,6 +215,29 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 	}
 	
 	/**
+     * Check static properties.
+     */
+    public void testStaticOKopt() {
+        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-2opt");
+        
+        Properties  p = new Properties();
+        p.put("instance.name","ok");
+        p.put("int", new Integer(3));
+        p.put("long", new Long(42));
+        p.put("string", "absdir");
+        p.put("strAProp", new String[] {"a"});
+        p.put("intAProp", new int[] {1,2});
+        
+        ComponentInstance ci = null;
+        try {
+            ci = f.createComponentInstance(p);
+            ci.dispose();
+        } catch(Exception e) {
+            fail("An acceptable configuration is rejected : " + e.getMessage());
+        }
+    }
+	
+	/**
 	 * Check dynamic properties.
 	 */
 	public void testDynamicOK() {
@@ -156,6 +261,46 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 		}
 	}
 	
+	
+	/**
+     * Check dynamic properties.
+     */
+    public void testDynamicOKopt() {
+        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dynopt");
+        
+        Properties  p = new Properties();
+        p.put("instance.name","ok");
+        p.put("int", new Integer(3));
+        p.put("boolean", new Boolean(true));
+        p.put("string", "absdir");
+        p.put("strAProp", new String[] {"a"});
+        p.put("intAProp", new int[] {1,2});
+        
+        ComponentInstance ci = null;
+        try {
+            ci = f.createComponentInstance(p);
+            ci.dispose();
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("An acceptable configuration is rejected : " + e.getMessage());
+        }
+        
+        p = new Properties();
+        p.put("instance.name","ok");
+        p.put("boolean", new Boolean(true));
+        p.put("strAProp", new String[] {"a"});
+        p.put("intAProp", new int[] {1,2});
+        
+        ci = null;
+        try {
+            ci = f.createComponentInstance(p);
+            ci.dispose();
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("An acceptable configuration is rejected (2) : " + e.getMessage());
+        }
+    }
+    
 	/**
 	 * Check inconsistent types.
 	 */
@@ -178,6 +323,43 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 			fail("An acceptable configuration is rejected : " + e.getMessage());
 		}
 	}
+	
+	/**
+     * Check inconsistent types.
+     */
+    public void testDynamicBadTypeOpt() {
+        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dynopt");
+        
+        Properties  p = new Properties();
+        p.put("instance.name","ok");
+        p.put("int", new Integer(3));
+        p.put("long", new Long(42));
+        p.put("string", "absdir");
+        p.put("strAProp", new String[] {"a"});
+        p.put("intAProp", new int[] {1,2});
+        
+        ComponentInstance ci = null;
+        try {
+            ci = f.createComponentInstance(p);
+            ci.dispose();
+        } catch(Exception e) {
+            fail("An acceptable configuration is rejected : " + e.getMessage());
+        }
+        
+        p = new Properties();
+        p.put("instance.name","ok");
+        p.put("int", new Integer(3));
+        p.put("strAProp", new String[] {"a"});
+        p.put("intAProp", new int[] {1,2});
+        
+        ci = null;
+        try {
+            ci = f.createComponentInstance(p);
+            ci.dispose();
+        } catch(Exception e) {
+            fail("An acceptable configuration is rejected (2) : " + e.getMessage());
+        }
+    }
 	
 	/**
 	 * Check good configuration (with overriding).
@@ -203,6 +385,44 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 	}
 	
 	/**
+     * Check good configuration (with overriding).
+     */
+    public void testDynamicCompleteOpt() {
+        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2opt");
+        
+        Properties  p = new Properties();
+        p.put("instance.name","ok");
+        p.put("int", new Integer(3));
+        p.put("boolean", new Boolean(true));
+        p.put("string", "absdir");
+        p.put("strAProp", new String[] {"a"});
+        p.put("intAProp", new int[] {1,2});
+        
+        ComponentInstance ci = null;
+        try {
+            ci = f.createComponentInstance(p);
+            ci.dispose();
+        } catch(Exception e) {
+            fail("An acceptable configuration is rejected : " + e.getMessage());
+        }
+        
+        
+        p = new Properties();
+        p.put("instance.name","ok");
+        p.put("int", new Integer(3));
+        p.put("strAProp", new String[] {"a"});
+        p.put("intAProp", new int[] {1,2});
+        
+        ci = null;
+        try {
+            ci = f.createComponentInstance(p);
+            ci.dispose();
+        } catch(Exception e) {
+            fail("An acceptable configuration is rejected (2) : " + e.getMessage());
+        }
+    }
+	
+	/**
 	 * Check good configuration.
 	 */
 	public void testDynamicJustEnough() {
@@ -222,6 +442,40 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 			fail("An acceptable configuration is rejected : " + e.getMessage());
 		}
 	}
+	
+	/**
+     * Check good configuration.
+     */
+    public void testDynamicJustEnoughOpt() {
+        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2opt");
+        
+        Properties  p = new Properties();
+        p.put("instance.name","ok");
+        p.put("boolean", new Boolean(true));
+        p.put("string", "absdir");
+        p.put("strAProp", new String[] {"a"});
+        
+        ComponentInstance ci = null;
+        try {
+            ci = f.createComponentInstance(p);
+            ci.dispose();
+        } catch(Exception e) {
+            fail("An acceptable configuration is rejected : " + e.getMessage());
+        }
+        
+        p = new Properties();
+        p.put("instance.name","ok");
+        p.put("boolean", new Boolean(true));
+        p.put("strAProp", new String[] {"a"});
+        
+        ci = null;
+        try {
+            ci = f.createComponentInstance(p);
+            ci.dispose();
+        } catch(Exception e) {
+            fail("An acceptable configuration is rejected : " + e.getMessage());
+        }
+    }
 	
 	/**
 	 * Check good configuration.
@@ -246,6 +500,42 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 	}
 	
 	/**
+     * Check good configuration.
+     */
+    public void testDynamicMixOpt() {
+        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2opt");
+        
+        Properties  p = new Properties();
+        p.put("instance.name","ok");
+        p.put("boolean", new Boolean(true));
+        p.put("string", "absdir");
+        p.put("strAProp", new String[] {"a"});
+        p.put("intAProp", new int[] {1,2});
+        
+        ComponentInstance ci = null;
+        try {
+            ci = f.createComponentInstance(p);
+            ci.dispose();
+        } catch(Exception e) {
+            fail("An acceptable configuration is rejected : " + e.getMessage());
+        }
+        
+        p = new Properties();
+        p.put("instance.name","ok");
+        p.put("string", "absdir");
+        p.put("strAProp", new String[] {"a"});
+        p.put("intAProp", new int[] {1,2});
+        
+        ci = null;
+        try {
+            ci = f.createComponentInstance(p);
+            ci.dispose();
+        } catch(Exception e) {
+            fail("An acceptable configuration is rejected : " + e.getMessage());
+        }
+    }
+	
+	/**
 	 * Check uncomplete configuration.
 	 */
 	public void testDynamicUncomplete() {
@@ -265,6 +555,27 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 		
 		fail("An unacceptable configuration is accepted");
 	}
+	
+	/**
+     * Check uncomplete configuration.
+     */
+    public void testDynamicUncompleteOpt() {
+        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2opt");
+        
+        Properties  p = new Properties();
+        p.put("instance.name","ok");
+        p.put("string", "absdir");
+        p.put("strAProp", new String[] {"a"});
+        p.put("intAProp", new int[] {1,2});
+        
+        ComponentInstance ci = null;
+        try {
+            ci = f.createComponentInstance(p);
+            ci.dispose();
+        } catch(Exception e) { fail("An acceptable configuration is refused"); }
+        
+        
+    }
 	
 	/**
 	 * Check good configuration (more properties).
@@ -291,6 +602,30 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 	}
 	
 	/**
+     * Check good configuration (more properties).
+     */
+    public void testDynamicMoreOpt() {
+        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2opt");
+        
+        Properties  p = new Properties();
+        p.put("instance.name","ok");
+        p.put("int", new Integer(3));
+        p.put("boolean", new Boolean(true));
+        p.put("string", "absdir");
+        p.put("strAProp", new String[] {"a"});
+        p.put("intAProp", new int[] {1,2});
+        p.put("tralala", "foo");
+        
+        ComponentInstance ci = null;
+        try {
+            ci = f.createComponentInstance(p);
+            ci.dispose();
+        } catch(Exception e) {
+            fail("An acceptable configuration is rejected : " + e.getMessage());
+        }
+    }
+	
+	/**
 	 * Check properties affecting services and component.
 	 */
 	public void testDoubleProps() {
@@ -314,6 +649,31 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 			fail("An acceptable configuration is rejected : " + e.getMessage());
 		}
 	}
+	
+	/**
+     * Check properties affecting services and component.
+     */
+    public void testDoublePropsOpt() {
+        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2opt");
+        
+        Properties  p = new Properties();
+        p.put("instance.name","ok");
+        p.put("int", new Integer(3));
+        p.put("boolean", new Boolean(true));
+        p.put("string", "absdir");
+        p.put("strAProp", new String[] {"a"});
+        p.put("intAProp", new int[] {1,2});
+        p.put("boolean", new Boolean(false));
+        p.put("string", "toto");
+        
+        ComponentInstance ci = null;
+        try {
+            ci = f.createComponentInstance(p);
+            ci.dispose();
+        } catch(Exception e) {
+            fail("An acceptable configuration is rejected : " + e.getMessage());
+        }
+    }
     
     /**
      * Check instance name unicity.
@@ -367,7 +727,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
     public void testUnicity3() {
         Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-2");
         
-        ComponentInstance ci1 = null,ci2 = null, ci3 = null;
+        ComponentInstance ci1 = null,ci2 = null;
         try {
             Properties p1 = new Properties();
             p1.put("instance.name","name1");
@@ -376,11 +736,8 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
             p2.put("instance.name","name1");
             ci2 = f.createComponentInstance(p2);
             assertNotEquals("Check name ci1, ci2", ci1.getInstanceName(), ci2.getInstanceName());
-            assertNotEquals("Check name ci1, ci3", ci1.getInstanceName(), ci3.getInstanceName());
-            assertNotEquals("Check name ci3, ci2", ci3.getInstanceName(), ci3.getInstanceName());
             ci1.dispose();
             ci2.dispose();
-            ci3.dispose();
         } catch(Exception e) { 
             ci1.dispose();
             return; }
@@ -395,7 +752,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
         Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-2");
         Factory f2 = Utils.getFactoryByName(context, "Factories-FooProviderType-1");
         
-        ComponentInstance ci1 = null,ci2 = null, ci3 = null;
+        ComponentInstance ci1 = null,ci2 = null;
         try {
             Properties p1 = new Properties();
             p1.put("instance.name","name1");
@@ -403,13 +760,9 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
             Properties p2 = new Properties();
             p2.put("instance.name","name1");
             ci2 = f2.createComponentInstance(p2);
-            System.err.println("==== " + ci1.getInstanceName() + " === " + ci2.getInstanceName());
             assertNotEquals("Check name ci1, ci2", ci1.getInstanceName(), ci2.getInstanceName());
-            assertNotEquals("Check name ci1, ci3", ci1.getInstanceName(), ci3.getInstanceName());
-            assertNotEquals("Check name ci3, ci2", ci3.getInstanceName(), ci3.getInstanceName());
             ci1.dispose();
             ci2.dispose();
-            ci3.dispose();
         } catch(Exception e) { 
             ci1.dispose();
             return; }

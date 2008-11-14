@@ -18,6 +18,7 @@
  */
 package org.apache.felix.ipojo.context;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -92,7 +93,12 @@ public class StringMap extends TreeMap {
         ((StringComparator) comparator()).setCaseSensitive(flag);
     }
 
-    private static class StringComparator implements Comparator {
+    private static class StringComparator implements Comparator, Serializable {
+        /**
+         * Id.
+         */
+        private static final long serialVersionUID = 1L;
+        
         /**
          * Is the map case sensitive?
          */

@@ -47,17 +47,23 @@ public class PropertyDescription {
     
     /**
      * Immutable property flag
-     * IF true, the property cannot be override by the instance configuration.
+     * If set to <code>true</code>, the property cannot be override by the instance configuration.
      * Moreover, immutable properties are exposed on the factory service too.
      */
     private boolean m_immutable = false;
+    
+    /**
+     * A property is mandatory. So, either the component type description provides a value or
+     * the instance configuration must provide a value. Immutable properties are mandatories. 
+     */
+    private boolean m_isMandatory = false;
 
     /**
      * Constructor.
      * 
-     * @param name : name of the property
-     * @param type : type of the property
-     * @param value : default value of the property
+     * @param name the name of the property
+     * @param type the type of the property
+     * @param value the default value of the property, can be <code>null</code>
      */
     public PropertyDescription(String name, String type, String value) {
         m_name = name;
@@ -68,10 +74,10 @@ public class PropertyDescription {
     /**
      * Constructor.
      * 
-     * @param name : name of the property
-     * @param type : type of the property
-     * @param value : default value of the property
-     * @param immutable : the property is immutable.
+     * @param name the name of the property
+     * @param type the type of the property
+     * @param value the default value (String form) of the property, can be <code>null</code>
+     * @param immutable the property is immutable.
      */
     public PropertyDescription(String name, String type, String value, boolean immutable) {
         m_name = name;
@@ -81,7 +87,7 @@ public class PropertyDescription {
     }
 
     /**
-     * Get the current property name.
+     * Gets the current property name.
      * @return the property name.
      */
     public String getName() {
@@ -89,7 +95,7 @@ public class PropertyDescription {
     }
 
     /**
-     * Get the current property type.
+     * Gets the current property type.
      * @return the property type.
      */
     public String getType() {
@@ -97,8 +103,9 @@ public class PropertyDescription {
     }
 
     /**
-     * Get the current property value.
-     * @return the default value for the property.
+     * Gets the current property value.
+     * @return the default value for the property,
+     * <code>null</code> if the property hasn't a value..
      */
     public String getValue() {
         return m_value;
@@ -106,17 +113,39 @@ public class PropertyDescription {
     
     /**
      * Is the property immutable.
-     * @return true if the property is immutable.
+     * @return <code>true</code> if the property is immutable.
      */
     public boolean isImmutable() {
         return m_immutable;
     }
+    
     /**
-     * Get the object value of the current immutable property.
-     * @param context : bundle context to use to load classes.
-     * @return the object value of the current property.
+     * Sets the property as mandatory.
+     */
+    public void setMandatory() {
+        m_isMandatory = true;
+    }
+    
+    /**
+     * Is the property mandatory.
+     * @return <code>true</code> if the property is mandatory,
+     * <code>false</code> otherwise.
+     */
+    public boolean isMandatory() {
+        return m_isMandatory;
+    }
+    
+    /**
+     * Gets the object value of the current immutable property.
+     * @param context  the bundle context to use to load classes.
+     * @return the object value of the current property or <code>
+     * null</code> if the current value is <code>null</code>.
      */
     public Object getObjectValue(BundleContext context) {
+        if (m_value == null) {
+            return null;
+        }
+        
         Class type = null;
         try {
             type = Property.computeType(m_type, context);

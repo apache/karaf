@@ -13,6 +13,21 @@
 			<property name="intAProp" field="intAProp" value="{1,2, 3}" />
 		</properties>
 	</component>
+	
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn"
+		name="CONFIG-FooProviderType-ConfNoValue" architecture="true">
+		<provides />
+		<properties propagation="false">
+			<property name="int" field="intProp"/>
+			<property name="boolean" field="boolProp"/>
+			<property name="string" field="strProp"/>
+			<property name="strAProp" field="strAProp"/>
+			<property name="intAProp" field="intAProp"/>
+		</properties>
+	</component>
+	
+	
 	<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="CONFIG-FooProviderType-3" architecture="true">
@@ -222,5 +237,14 @@
 		<property name="empty-list" type="list"/>
 		<property name="empty-map" type="map"/>
 	</instance>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.PropertyModifier">
+		<provides>
+			<property field="classes"/>
+		</provides>
+		<properties>
+			<property method="setClasses" name="cls"/>
+		</properties>
+	</component>
 	
 </ipojo>

@@ -424,8 +424,8 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
                 throw new UnacceptableConfiguration("The property " + props[i] + " cannot be overide : immutable property"); // The instance configuration tries to override an immutable property.
             }
             // Is the property required ?
-            if (props[i].getValue() == null && conf.get(props[i].getName()) == null) {
-                throw new UnacceptableConfiguration("The property " + props[i].getName() + " is missing"); // The property must be set.
+            if (props[i].isMandatory() && props[i].getValue() == null && conf.get(props[i].getName()) == null) {
+                throw new UnacceptableConfiguration("The mandatory property " + props[i].getName() + " is missing"); // The property must be set.
             }
         }
     }

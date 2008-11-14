@@ -195,5 +195,58 @@ public class ProvidedServiceArchitectureTest extends OSGiTestCase {
 		
 		ci.dispose();
 	}
+
+    public void testPropsNoValue() {
+    	String factName = "PS-FooProviderType-3";
+    	String compName = "FooProvider";
+    	
+    	// Get the factory to create a component instance
+    	Factory fact = Utils.getFactoryByName(context, factName);
+    	assertNotNull("Cannot find the factory FooProvider", fact);
+    	
+    	Properties props = new Properties();
+    	props.put("instance.name",compName);
+    	ComponentInstance ci = null;
+    	try {
+    		ci = fact.createComponentInstance(props);
+    	} catch (Exception e) { fail(e.getMessage()); }
+    
+    	ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), compName);
+    	assertNotNull("Architecture not available", arch_ref);
+    
+    	Architecture arch = (Architecture) context.getService(arch_ref);
+    	InstanceDescription id = arch.getInstanceDescription();
+    	
+    	assertEquals("Check component instance name (" + id.getName() + ")", id.getName(), compName);
+    	assertEquals("Check component type implementation class", id.getComponentDescription().getClassName(), "org.apache.felix.ipojo.test.scenarios.component.FooProviderType1");
+    	
+    	HandlerDescription[] handlers = id.getHandlers();
+    	assertEquals("Number of handlers", handlers.length, 3);
+    	
+    	//Look for the ProvidedService Handler
+    	ProvidedServiceHandlerDescription pshd = null;
+    	for(int i = 0; i < handlers.length; i++) {
+    		if(handlers[i].getHandlerName().equals("org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler")) {
+    			pshd = (ProvidedServiceHandlerDescription) handlers[i];
+    		}
+    	}
+    	
+    	assertNotNull("Check ProvidedServiceHandlerDescription", pshd);
+    	ProvidedServiceDescription[] ps = pshd.getProvidedServices();
+    	
+    	assertEquals("Check ProvidedService number", ps.length, 1);
+    	assertEquals("Check Provided Service Specs - 1", ps[0].getServiceSpecification().length, 1);
+    	assertEquals("Check Provided Service Specs - 2", ps[0].getServiceSpecification()[0], FooService.class.getName());
+    	assertEquals("Check Provided Service availability", ps[0].getState(), ProvidedServiceDescription.REGISTERED);
+    
+    	Properties prop = ps[0].getProperties();
+    	assertNotNull("Check Props", prop);
+    	assertEquals("Check service properties number (#" + prop + "?=5)" , prop.size(), 2);
+    	assertEquals("Check instance.name property", prop.getProperty("instance.name"), compName);
+    	assertEquals("Check factory.name property", prop.getProperty("factory.name"), factName);
+
+    	
+    	ci.dispose();
+    }
 	
 }

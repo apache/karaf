@@ -319,9 +319,17 @@ public abstract class DependencyModel implements TrackerCustomizer {
         synchronized (this) {
             m_matchingRefs.add(ref);
 
-            // Sort the collection if needed.
+            // Sort the collection if needed, if not sort, services are append to the list.
             if (m_comparator != null) {
-                Collections.sort(m_matchingRefs, m_comparator);
+                // The collection must be sort only if:
+                // The policy is dynamic-priority
+                // No services are already used
+                // If so, sorting can imply a re-binding, and so don't follow the Dynamic Binding policy
+                if (m_policy == DYNAMIC_PRIORITY_BINDING_POLICY
+                       || m_tracker.getUsedServiceReferences() == null
+                       || m_tracker.getUsedServiceReferences().isEmpty()) {
+                    Collections.sort(m_matchingRefs, m_comparator);
+                }
             }
 
             size = m_matchingRefs.size();
@@ -383,6 +391,14 @@ public abstract class DependencyModel implements TrackerCustomizer {
             if (obj == null) {
                 computeDependencyState(); // check if the dependency stills valid.
             } else {
+                // A used service disappears, we have to sort the available providers to choose the best one.
+                // However, the sort has to be done only for scalar dependencies following the dynamic binding
+                // policy. Static dependencies will be broken, DP dependencies are always sorted.
+                // Aggregate dependencies does not need to be sort, as it will change the array
+                // order.
+                if (m_comparator != null && m_policy == DYNAMIC_BINDING_POLICY && ! m_aggregate) {
+                    Collections.sort(m_matchingRefs, m_comparator);
+                }
                 onServiceDeparture(ref);
                 ServiceReference newRef = getServiceReference();
                 if (newRef == null) { // Check if there is another provider.
