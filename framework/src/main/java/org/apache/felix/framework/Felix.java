@@ -541,7 +541,7 @@ public class Felix extends FelixBundle implements Framework
 
             List result = new ArrayList();
 
-            for (int i = 0;i < refs.length;i++)
+            for (int i = 0; i < refs.length; i++)
             {
                 String[] objectClass = (String[]) refs[i].getProperty(
                     Constants.OBJECTCLASS);
@@ -551,7 +551,7 @@ public class Felix extends FelixBundle implements Framework
                     continue;
                 }
 
-                for (int j = 0;j < objectClass.length;j++)
+                for (int j = 0; j < objectClass.length; j++)
                 {
                     try
                     {
@@ -597,7 +597,7 @@ public class Felix extends FelixBundle implements Framework
 
             List result = new ArrayList();
 
-            for (int i = 0;i < refs.length;i++)
+            for (int i = 0; i < refs.length; i++)
             {
                 String[] objectClass = (String[]) refs[i].getProperty(
                     Constants.OBJECTCLASS);
@@ -607,7 +607,7 @@ public class Felix extends FelixBundle implements Framework
                     continue;
                 }
 
-                for (int j = 0;j < objectClass.length;j++)
+                for (int j = 0; j < objectClass.length; j++)
                 {
                     try
                     {
@@ -2833,7 +2833,7 @@ ex.printStackTrace();
 
         List result = new ArrayList();
 
-        for (int i = 0;i < refs.length;i++)
+        for (int i = 0; i < refs.length; i++)
         {
             String[] objectClass = (String[]) refs[i].getProperty(Constants.OBJECTCLASS);
 
