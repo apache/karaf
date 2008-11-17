@@ -30,6 +30,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.felix.framework.security.util.Permissions;
+import org.apache.felix.framework.security.util.PropertiesCache;
 import org.apache.felix.moduleloader.IContent;
 import org.apache.felix.moduleloader.IContentLoader;
 import org.osgi.framework.Bundle;
@@ -94,8 +96,6 @@ public final class LocalPermissions
                 try
                 {
                     content = loader.getContent();
-
-                    content.open();
 
                     in = content.getEntryAsStream("OSGI-INF/permissions.perm");
                     if (in != null)

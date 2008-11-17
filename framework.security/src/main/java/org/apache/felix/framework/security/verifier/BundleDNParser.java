@@ -135,7 +135,7 @@ public final class BundleDNParser
         }
     }
 
-    public String[] getDNChains(String root, BundleRevision bundleRevision)
+    public String[] getDNChains(String root, IContentLoader bundleRevision)
     {
         synchronized (m_cache)
         {
@@ -156,7 +156,6 @@ public final class BundleDNParser
         try
         {
             content = bundleRevision.getContent();
-            content.open();
             result = _getDNChains(root, content);
         }
         catch (Exception ex)
@@ -181,7 +180,7 @@ public final class BundleDNParser
         }
 
         return result;
-    }
+    } 
 
     private String[] _getDNChains(String root, IContent content)
         throws IOException

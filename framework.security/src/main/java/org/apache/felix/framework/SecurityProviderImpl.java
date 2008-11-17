@@ -68,8 +68,8 @@ public final class SecurityProviderImpl implements SecurityProvider
         BundleInfo info = ((FelixBundle) bundle).getInfo();
 
         m_parser.checkDNChains(
-            (Long.toString(bundle.getBundleId()) + "-" + info.getArchive()
-                .getLastModified()), info.getCurrentModule().getContentLoader());
+            (Long.toString(bundle.getBundleId()) + "-" + info.getLastModified()), 
+            info.getCurrentModule().getContentLoader());
     }
 
     /**
@@ -77,8 +77,10 @@ public final class SecurityProviderImpl implements SecurityProvider
      */
     public Object getSignerMatcher(final Bundle bundle)
     {
-        return new SignerMatcher(Long.toString(bundle.getBundleId()),
-            ((FelixBundle) bundle).getInfo().getArchive(), m_parser);
+        return new SignerMatcher(Long.toString(bundle.getBundleId()), 
+            ((FelixBundle) bundle).getInfo().getLastModified(),
+            ((FelixBundle) bundle).getInfo().getCurrentModule().getContentLoader(), 
+            m_parser);
     }
 
     /**
@@ -122,7 +124,7 @@ public final class SecurityProviderImpl implements SecurityProvider
                 return m_cpai.hasPermission(bundle, 
                     info.getCurrentModule().getContentLoader(), 
                     bundle.getBundleId() + "-" + 
-                    info.getArchive().getLastModified(),null, pd,
+                    info.getLastModified(),null, pd,
                     permission, direct, m_pai);
             }
             catch (Exception e)

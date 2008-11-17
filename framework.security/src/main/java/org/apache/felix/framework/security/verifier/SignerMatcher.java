@@ -22,14 +22,16 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.felix.framework.cache.BundleArchive;
+import org.apache.felix.moduleloader.IContentLoader;
+import org.apache.felix.moduleloader.IModule;
 
 public final class SignerMatcher
 {
     private final String m_filter;
     private final String m_root;
-    private final BundleArchive m_archive;
+    private final IContentLoader m_archive;
     private final BundleDNParser m_parser;
+    private final long m_lastModified;
     
     public SignerMatcher(String filter)
     {
@@ -37,14 +39,16 @@ public final class SignerMatcher
         m_root = null;
         m_archive = null;
         m_parser = null;
+        m_lastModified = 0;
     }
     
-    public SignerMatcher(String root, BundleArchive archive, BundleDNParser parser)
+    public SignerMatcher(String root, long lastModified, IContentLoader archive, BundleDNParser parser)
     {
         m_filter = null;
         m_root = root;
         m_archive = archive;
         m_parser = parser;
+        m_lastModified = lastModified;
     }
 
     public boolean equals(Object o)
@@ -69,8 +73,7 @@ public final class SignerMatcher
         String[] dns;
         try
         {
-            dns = m_parser.getDNChains(m_root + "-" + m_archive.getLastModified(), 
-                m_archive.getRevision(m_archive.getRevisionCount() -1));
+            dns = m_parser.getDNChains(m_root + "-" + m_lastModified, m_archive);
         }
         catch (Exception ex)
         {
