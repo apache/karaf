@@ -3121,7 +3121,10 @@ ex.printStackTrace();
                 depIdx++)
             {
                 Bundle b = getBundle(Util.getBundleIdFromModuleId(dependents[depIdx].getId()));
-                list.add(b);
+                if (b != null)
+                {
+                    list.add(b);
+                }
             }
         }
 
