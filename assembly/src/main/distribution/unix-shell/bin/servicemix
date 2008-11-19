@@ -213,12 +213,17 @@ setupDefaults() {
         fi
     fi
 
-    # Add the conf directory so it picks up the Log4J config
-    if [ "x$CLASSPATH" = "x" ]; then
-        CLASSPATH="$SERVICEMIX_HOME/lib/servicemix.jar:$SERVICEMIX_HOME/lib/servicemix-jaas-boot.jar"
-    else
-        CLASSPATH="$CLASSPATH:$SERVICEMIX_HOME/lib/servicemix.jar:$SERVICEMIX_HOME/lib/servicemix-jaas-boot.jar"
-    fi
+    # Add the jars in the lib dir
+    for file in $SERVICEMIX_HOME/lib/*
+    do
+        if [[ $file == *.jar ]]; then
+            if [ "x$CLASSPATH" = "x" ]; then
+                CLASSPATH="$file"
+            else
+                CLASSPATH="$CLASSPATH:$file"
+            fi
+        fi
+    done
     DEFAULT_JAVA_DEBUG_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"
 
     ##

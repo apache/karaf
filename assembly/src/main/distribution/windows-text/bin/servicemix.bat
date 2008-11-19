@@ -107,6 +107,19 @@ if "%SERVICEMIX_PROFILER%" == "" goto :SERVICEMIX_PROFILER_END
 :SERVICEMIX_PROFILER_END
 
 rem Setup the classpath
+pushd "%SERVICEMIX_HOME%\lib"
+for %%G in (*.*) do call:APPEND_TO_CLASSPATH %%G
+popd
+goto CLASSPATH_END
+
+: APPEND_TO_CLASSPATH
+set filename=%~1
+set suffix=%filename:~-4%
+if %suffix% equ .jar set CLASSPATH=%CLASSPATH%;%SERVICEMIX_HOME%\lib\%filename%
+exit
+
+:CLASSPATH_END
+
 set CLASSPATH=%CLASSPATH%;%SERVICEMIX_HOME%\lib\servicemix.jar;%SERVICEMIX_HOME%\lib\servicemix-jaas-boot.jar
 
 rem Execute the JVM or the load the profiler

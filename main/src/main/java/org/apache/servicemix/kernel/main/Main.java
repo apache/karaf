@@ -35,6 +35,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.concurrent.CountDownLatch;
+import java.security.Security;
+import java.security.Provider;
 
 import org.apache.felix.framework.Felix;
 import org.apache.felix.framework.cache.BundleCache;
@@ -152,6 +154,8 @@ public class Main implements MainService, BundleActivator {
 
         // Copy framework properties from the system properties.
         Main.copySystemProperties(m_configProps);
+
+        processSecurityProperties(m_configProps);
 
         String profileName = m_configProps.getProperty(BundleCache.CACHE_PROFILE_PROP);
         String profileDirName = m_configProps.getProperty(BundleCache.CACHE_PROFILE_DIR_PROP);
@@ -395,6 +399,20 @@ public class Main implements MainService, BundleActivator {
             rc = defaultValue;
         }
         return rc;
+    }
+
+    private static void processSecurityProperties(Properties m_configProps) {
+        String prop = m_configProps.getProperty("org.apache.servicemix.security.providers");
+        if (prop != null) {
+            String[] providers = prop.split(",");
+            for (String provider : providers) {
+                try {
+                    Security.addProvider((Provider) Class.forName(provider).newInstance());
+                } catch (Throwable t) {
+                    System.err.println("Unable to register security provider: " + t);
+                }
+            }
+        }
     }
 
     /**

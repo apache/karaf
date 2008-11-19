@@ -22,6 +22,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.io.FilenameFilter;
 import java.util.Properties;
 import java.net.URI;
 import java.net.Socket;
@@ -114,16 +115,26 @@ public class InstanceImpl implements Instance {
         if (javaOpts == null) {
             javaOpts = "-server -Xms128M -Xmx512M -Dcom.sun.management.jmxremote";
         }
+        File libDir = new File(System.getProperty("servicemix.home"), "lib");
+        File[] jars = libDir.listFiles(new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                return name.endsWith(".jar");
+            }
+        });
+        StringBuilder classpath = new StringBuilder();
+        for (File jar : jars) {
+            if (classpath.length() > 0) {
+                classpath.append(System.getProperty("path.separator"));
+            }
+            classpath.append(jar.getCanonicalPath());
+        }
         String command = new File(System.getProperty("java.home"), "bin/java" + (ScriptUtils.isWindows() ? ".exe" : "")).getCanonicalPath()
                 + " " + javaOpts
                 + " -Dservicemix.home=\"" + System.getProperty("servicemix.home") + "\""
                 + " -Dservicemix.base=\"" + new File(location).getCanonicalPath() + "\""
                 + " -Dservicemix.startLocalConsole=false"
                 + " -Dservicemix.startRemoteShell=true"
-                + " -classpath "
-                + new File(System.getProperty("servicemix.home"), "lib/servicemix.jar").getCanonicalPath()
-                + System.getProperty("path.separator")
-                + new File(System.getProperty("servicemix.home"), "lib/servicemix-jaas-boot.jar").getCanonicalPath()
+                + " -classpath " + classpath.toString()
                 + " org.apache.servicemix.kernel.main.Main";
         this.process = ProcessBuilderFactory.newInstance().newBuilder()
                         .directory(new File(location))
