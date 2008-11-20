@@ -102,7 +102,7 @@ class EventAdminPublisherMetadata {
      *             the instance is invalid.
      */
     public EventAdminPublisherMetadata(Element publisher)
-            throws ConfigurationException {
+        throws ConfigurationException {
 
         /**
          * Setup required attributes

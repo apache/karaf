@@ -81,7 +81,7 @@ public class ManipulationProperty {
          * @param message : message to log
          */
         public void log(int level, String message) {
-            if (level >= m_logLevel) {
+            if (level >= LOG_LEVEL) {
                 switch (level) {
                     case INFO:
                         System.err.println("[INFO] " + message);
@@ -103,12 +103,12 @@ public class ManipulationProperty {
     /**
      * Manipulator logger.
      */
-    private static Logger m_logger;
+    private static Logger LOGGER;
 
     /**
      * Default logger level.
      */
-    private static int m_logLevel = WARNING;
+    private static int LOG_LEVEL = WARNING;
     
 
     /**
@@ -116,9 +116,9 @@ public class ManipulationProperty {
      * @return the logger used by the manipulator.
      */
     public static Logger getLogger() {
-        if (m_logger == null) {
-            m_logger = new Logger();
+        if (LOGGER == null) {
+            LOGGER = new Logger();
         }
-        return m_logger;
+        return LOGGER;
     }
 }

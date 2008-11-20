@@ -26,7 +26,7 @@ public class ComparatorTestCase extends OSGiTestCase {
     }
     
     public void tearDown() {
-        dynInstance.dispose();
+       dynInstance.dispose();
        dpInstance.dispose();
     }
     
@@ -46,6 +46,8 @@ public class ComparatorTestCase extends OSGiTestCase {
         assertEquals("fs grade -1", 2, fsGrade);
         assertEquals("fs2 grade -1", 2, fs2Grade);
         assertEquals("fss grade size -1", 2, fssGrades.length);
+        
+
         assertEquals("fss grade[0] -1", 2, fssGrades[0]);
         assertEquals("fss grade[1] -1", 1, fssGrades[1]);
         

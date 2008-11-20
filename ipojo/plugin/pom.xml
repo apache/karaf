@@ -16,14 +16,14 @@
 	specific language governing permissions and limitations
 	under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
 		<groupId>org.apache.felix</groupId>
 		<artifactId>felix</artifactId>
 		<version>1.0.2</version>
 		<relativePath>../../pom/pom.xml</relativePath>
 	</parent>
-
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>maven-ipojo-plugin</artifactId>
 	<groupId>org.apache.felix</groupId>
@@ -68,5 +68,35 @@
 			<version>1.1.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
-
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>rat-maven-plugin</artifactId>
+				<configuration>
+					<excludeSubProjects>false</excludeSubProjects>
+					<useEclipseDefaultExcludes>true</useEclipseDefaultExcludes>
+					<useMavenDefaultExcludes>true</useMavenDefaultExcludes>
+					<excludes>
+						<param>doc/**/*</param>
+						<param>maven-eclipse.xml</param>
+						<param>.checkstyle</param>
+						<param>.externalToolBuilders/*</param>
+						<param>LICENSE.asm</param>
+						<param>**/archetype-resources/**/*</param>
+						<param>**/archetype.xml</param>
+					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<configuration>
+					<enableRulesSummary>false</enableRulesSummary>
+					<violationSeverity>warning</violationSeverity>
+					<configLocation>http://felix.apache.org/ipojo/dev/checkstyle_ipojo.xml</configLocation>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

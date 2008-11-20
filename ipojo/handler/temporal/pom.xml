@@ -16,7 +16,8 @@
 	specific language governing permissions and limitations
 	under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
 		<groupId>org.apache.felix</groupId>
 		<artifactId>felix</artifactId>
@@ -29,12 +30,11 @@
 	<groupId>org.apache.felix</groupId>
 	<version>1.1.0-SNAPSHOT</version>
 	<name>Apache Felix iPOJO Temporal Service Dependency Handler</name>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.osgi.core</artifactId>
-			<version>1.2.0</version>
+			<version>1.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
@@ -52,7 +52,6 @@
 			<version>1.1.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -62,26 +61,19 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Private-Package>
-							org.apache.felix.ipojo.handler.temporal
+						<Private-Package> org.apache.felix.ipojo.handler.temporal 
 						</Private-Package>
 						<Bundle-Name>${pom.name}</Bundle-Name>
-						<Bundle-SymbolicName>
-							org.apache.felix.ipojo.handler.temporal
+						<Bundle-SymbolicName> org.apache.felix.ipojo.handler.temporal 
 						</Bundle-SymbolicName>
-						<Bundle-Vendor>
-							The Apache Software Foundation
-						</Bundle-Vendor>
-						<Bundle-Description>
-							iPOJO Temporal Dependency Handler
+						<Bundle-Vendor> The Apache Software Foundation </Bundle-Vendor>
+						<Bundle-Description> iPOJO Temporal Dependency Handler 
 						</Bundle-Description>
 						<Bundle-DocURL>
-							http://felix.apache.org/site/temporal-service-dependency.html
+							http://felix.apache.org/site/temporal-service-dependency.html 
 						</Bundle-DocURL>
-						<Include-Resource>
-							META-INF/LICENCE=LICENSE,
-							META-INF/NOTICE=NOTICE
-						</Include-Resource>
+						<Include-Resource> META-INF/LICENCE=LICENSE,
+							META-INF/NOTICE=NOTICE </Include-Resource>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -100,7 +92,31 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>rat-maven-plugin</artifactId>
+				<configuration>
+					<excludeSubProjects>false</excludeSubProjects>
+					<useEclipseDefaultExcludes>true</useEclipseDefaultExcludes>
+					<useMavenDefaultExcludes>true</useMavenDefaultExcludes>
+					<excludes>
+						<param>doc/**/*</param>
+						<param>maven-eclipse.xml</param>
+						<param>.checkstyle</param>
+						<param>.externalToolBuilders/*</param>
+						<param>LICENSE.asm</param>
+					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<configuration>
+					<enableRulesSummary>false</enableRulesSummary>
+					<violationSeverity>warning</violationSeverity>
+					<configLocation>http://felix.apache.org/ipojo/dev/checkstyle_ipojo.xml</configLocation>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
-
 </project>

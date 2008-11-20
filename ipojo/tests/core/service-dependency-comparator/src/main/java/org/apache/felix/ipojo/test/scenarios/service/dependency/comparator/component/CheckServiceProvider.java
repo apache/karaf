@@ -42,6 +42,11 @@ public class CheckServiceProvider implements CheckService {
 		props.put("fs2", new Integer(fs2.getInt()));
 		
 		int[] grades = new int[fss.length];
+		
+		for (int i = 0; i < grades.length; i++) {
+            grades[i] = fss[i].getInt();
+        }
+		
 		props.put("fss", grades);
 		
 		return props;

@@ -270,7 +270,7 @@ public class XMLMetadataParser implements ContentHandler, ErrorHandler {
      * @see org.xml.sax.ErrorHandler#fatalError(SAXParseException)
      */
     public void fatalError(SAXParseException saxparseexception)
-            throws SAXException {
+        throws SAXException {
         System.err.println("Fatal error during XML-Schema parsing : " + saxparseexception);
         throw saxparseexception;
     }
@@ -284,7 +284,7 @@ public class XMLMetadataParser implements ContentHandler, ErrorHandler {
      * @see org.xml.sax.ErrorHandler#warning(SAXParseException)
      */
     public void warning(SAXParseException saxparseexception)
-            throws SAXException {
+        throws SAXException {
         System.err.println("Warning : an error was detected in the metadata file : " + saxparseexception);
         
     }

@@ -203,7 +203,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
      * @throws ConfigurationException if the instance creation failed during the configuration process.
      */
     public abstract ComponentInstance createInstance(Dictionary config, IPojoContext context, HandlerManager[] handlers)
-            throws ConfigurationException;
+        throws ConfigurationException;
 
     /**
      * Creates an instance.

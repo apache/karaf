@@ -16,7 +16,8 @@
 	specific language governing permissions and limitations
 	under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
 		<groupId>org.apache.felix</groupId>
 		<artifactId>felix</artifactId>
@@ -33,7 +34,7 @@
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.osgi.core</artifactId>
-			<version>1.2.0</version>
+			<version>1.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
@@ -66,48 +67,32 @@
 				<configuration>
 					<instructions>
 						<Bundle-Name>iPOJO Composite</Bundle-Name>
-						<Bundle-Vendor>
-							The Apache Software Foundation
-						</Bundle-Vendor>
-						<Bundle-Description>
-							iPOJO Composititon Framework
+						<Bundle-Vendor> The Apache Software Foundation </Bundle-Vendor>
+						<Bundle-Description> iPOJO Composititon Framework 
 						</Bundle-Description>
 						<Bundle-DocURL>
-							http://felix.apache.org/site/apache-felix-ipojo.html
+							http://felix.apache.org/site/apache-felix-ipojo.html 
 						</Bundle-DocURL>
-						<Import-Package>
-							org.apache.felix.ipojo,
+						<Import-Package> org.apache.felix.ipojo,
 							org.apache.felix.ipojo.architecture,
-							org.apache.felix.ipojo.context,
-							org.apache.felix.ipojo.metadata,
-							org.apache.felix.ipojo.parser,
-							org.apache.felix.ipojo.util,
-							org.osgi.framework
-						</Import-Package>
-						<Private-Package>
-							org.apache.felix.ipojo.manipulation,
+							org.apache.felix.ipojo.context, org.apache.felix.ipojo.metadata,
+							org.apache.felix.ipojo.parser, org.apache.felix.ipojo.util,
+							org.osgi.framework;version=1.3 </Import-Package>
+						<Private-Package> org.apache.felix.ipojo.manipulation,
 							org.apache.felix.ipojo.composite.architecture,
 							org.apache.felix.ipojo.composite.service*,
 							org.apache.felix.ipojo.composite.instance,
-							org.apache.felix.ipojo.composite.util,
-							!org.objectweb.asm.xml*,
-							org.objectweb.asm*;-split-package:=merge-first
-						</Private-Package>
-						<Export-Package>
-							org.apache.felix.ipojo.composite;
-							version="0.9.0"
+							org.apache.felix.ipojo.composite.util, !org.objectweb.asm.xml*,
+							org.objectweb.asm*;-split-package:=merge-first </Private-Package>
+						<Export-Package> org.apache.felix.ipojo.composite; version="0.9.0" 
 						</Export-Package>
-						<Include-Resource>
-							META-INF/LICENSE=LICENSE,
-							META-INF/NOTICE=NOTICE,
-							META-INF/LICENSE.asm=LICENSE.asm
+						<Include-Resource> META-INF/LICENSE=LICENSE,
+							META-INF/NOTICE=NOTICE, META-INF/LICENSE.asm=LICENSE.asm 
 						</Include-Resource>
 						<IPOJO-Extension>
-							composite:org.apache.felix.ipojo.composite.CompositeFactory
+							composite:org.apache.felix.ipojo.composite.CompositeFactory 
 						</IPOJO-Extension>
-						<_donotcopy>
-							(CVS|.svn|.+.bak|~.+|metadata.xml)
-						</_donotcopy>
+						<_donotcopy> (CVS|.svn|.+.bak|~.+|metadata.xml) </_donotcopy>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -127,7 +112,31 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>rat-maven-plugin</artifactId>
+				<configuration>
+					<excludeSubProjects>false</excludeSubProjects>
+					<useEclipseDefaultExcludes>true</useEclipseDefaultExcludes>
+					<useMavenDefaultExcludes>true</useMavenDefaultExcludes>
+					<excludes>
+						<param>doc/**/*</param>
+						<param>maven-eclipse.xml</param>
+						<param>.checkstyle</param>
+						<param>.externalToolBuilders/*</param>
+						<param>LICENSE.asm</param>
+					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<configuration>
+					<enableRulesSummary>false</enableRulesSummary>
+					<violationSeverity>warning</violationSeverity>
+					<configLocation>http://felix.apache.org/ipojo/dev/checkstyle_ipojo.xml</configLocation>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
-
 </project>

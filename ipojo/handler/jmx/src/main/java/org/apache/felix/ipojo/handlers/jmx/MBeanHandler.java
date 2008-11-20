@@ -249,7 +249,15 @@ public class MBeanHandler extends PrimitiveHandler {
         }
 
         // set property
-        Element[] attributes = mbeans[0].getElements(JMX_PROPERTY_ELT);
+        Element[] attributes = mbeans[0].getElements(JMX_PROPERTY_ELT, m_namespace);
+        
+        if (attributes == null) {
+            attributes = mbeans[0].getElements(JMX_METHOD_ELT);
+            if (attributes != null) {
+                warn("The JMX property element should use the '" + m_namespace + "' namespace.");
+            }
+        }
+        
         // String[] fields = new String[attributes.length];
         if (attributes != null) {
             for (int i = 0; attributes != null && i < attributes.length; i++) {
@@ -296,9 +304,20 @@ public class MBeanHandler extends PrimitiveHandler {
         }
 
         // set methods
-        Element[] methods = mbeans[0].getElements(JMX_METHOD_ELT);
+        Element[] methods = mbeans[0].getElements(JMX_METHOD_ELT, m_namespace);
+        
+        if (methods == null) {
+            methods = mbeans[0].getElements(JMX_METHOD_ELT);
+            if (methods != null) {
+                warn("The JMX method element should use the '" + m_namespace + "' namespace.");
+            }
+        }
+        
         for (int i = 0; methods != null && i < methods.length; i++) {
             String name = methods[i].getAttribute(JMX_NAME_ELT);
+            if (name == null) {
+                name = methods[i].getAttribute("method");
+            }
             String description = null;
             if (methods[i].containsAttribute(JMX_DESCRIPTION_ELT)) {
                 description = methods[i].getAttribute(JMX_DESCRIPTION_ELT);
@@ -394,7 +413,7 @@ public class MBeanHandler extends PrimitiveHandler {
         String name = "type=" + m_instanceManager.getClassName() + ",instance="
                 + m_instanceManager.getInstanceName();
         if (m_objNameWODomainElt != null) {
-            name = m_objNameWODomainElt;
+            name = "name=" + m_objNameWODomainElt;
         }
 
         StringBuffer sb = new StringBuffer();
@@ -403,6 +422,8 @@ public class MBeanHandler extends PrimitiveHandler {
         }
         sb.append(name);
 
+        info("Computed Objectname: " + sb.toString());
+        
         return sb.toString();
     }
 
@@ -522,19 +543,19 @@ public class MBeanHandler extends PrimitiveHandler {
     private MethodField[] getMethodsFromName(String methodName,
             PojoMetadata manipulation, String description) {
 
-        MethodMetadata[] fields = manipulation.getMethods(methodName);
-        if (fields.length == 0) {
+        MethodMetadata[] methods = manipulation.getMethods(methodName);
+        if (methods.length == 0) {
             return null;
         }
 
-        MethodField[] ret = new MethodField[fields.length];
+        MethodField[] ret = new MethodField[methods.length];
 
-        if (fields.length == 1) {
-            ret[0] = new MethodField(fields[0], description);
+        if (methods.length == 1) {
+            ret[0] = new MethodField(methods[0], description);
             return ret;
         } else {
-            for (int i = 0; i < fields.length; i++) {
-                ret[i] = new MethodField(fields[i], description);
+            for (int i = 0; i < methods.length; i++) {
+                ret[i] = new MethodField(methods[i], description);
             }
             return ret;
         }

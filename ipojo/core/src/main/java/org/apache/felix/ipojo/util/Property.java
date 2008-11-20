@@ -37,6 +37,9 @@ import org.osgi.framework.BundleContext;
  */
 public class Property implements FieldInterceptor {
     
+    /**
+     * Object used for an unvalued property.
+     */
     public static final Object NO_VALUE = new Object();
 
     /**

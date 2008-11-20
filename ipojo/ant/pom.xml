@@ -16,7 +16,8 @@
 	specific language governing permissions and limitations
 	under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<parent>
 		<groupId>org.apache.felix</groupId>
 		<artifactId>felix</artifactId>
@@ -51,7 +52,6 @@
 			<version>1.6.5</version>
 		</dependency>
 	</dependencies>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -62,39 +62,51 @@
 				<configuration>
 					<instructions>
 						<Bundle-Name>iPOJO Ant Task</Bundle-Name>
-						<Bundle-Vendor>
-							The Apache Software Foundation
-						</Bundle-Vendor>
-						<Bundle-Description>
-							iPOJO Ant Task
-						</Bundle-Description>
-						<Private-Package>
-							org.apache.felix.ipojo.metadata,
+						<Bundle-Vendor> The Apache Software Foundation </Bundle-Vendor>
+						<Bundle-Description> iPOJO Ant Task </Bundle-Description>
+						<Private-Package> org.apache.felix.ipojo.metadata,
 							org.apache.felix.ipojo.manipulator,
 							org.apache.felix.ipojo.xml.parser,
 							org.apache.felix.ipojo.manipulation*,
 							org.objectweb.asm.util;-split-package:=merge-first,
 							org.objectweb.asm;-split-package:=merge-first,
 							org.objectweb.asm.commons;-split-package:=merge-first,
-							org.apache.xerces.parsers,
-							org.apache.xerces.xni*,
-							org.apache.xerces.impl*,
-							org.apache.xerces.util.*,
-							org.apache.xerces.dom.*,
-							org.apache.xerces.dom3.*
+							org.apache.xerces.parsers, org.apache.xerces.xni*,
+							org.apache.xerces.impl*, org.apache.xerces.util.*,
+							org.apache.xerces.dom.*, org.apache.xerces.dom3.* 
 						</Private-Package>
-						<Export-Package>
-							org.apache.felix.ipojo.task
-						</Export-Package>
-						<Include-Resource>
-							META-INF/LICENCE=LICENSE,
-							META-INF/NOTICE=NOTICE,
-							META-INF/LICENSE.asm=LICENSE.asm
+						<Export-Package> org.apache.felix.ipojo.task </Export-Package>
+						<Include-Resource> META-INF/LICENCE=LICENSE,
+							META-INF/NOTICE=NOTICE, META-INF/LICENSE.asm=LICENSE.asm 
 						</Include-Resource>
 					</instructions>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>rat-maven-plugin</artifactId>
+				<configuration>
+					<excludeSubProjects>false</excludeSubProjects>
+					<useEclipseDefaultExcludes>true</useEclipseDefaultExcludes>
+					<useMavenDefaultExcludes>true</useMavenDefaultExcludes>
+					<excludes>
+						<param>doc/**/*</param>
+						<param>maven-eclipse.xml</param>
+						<param>.checkstyle</param>
+						<param>.externalToolBuilders/*</param>
+						<param>LICENSE.asm</param>
+					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<configuration>
+					<enableRulesSummary>false</enableRulesSummary>
+					<violationSeverity>warning</violationSeverity>
+					<configLocation>http://felix.apache.org/ipojo/dev/checkstyle_ipojo.xml</configLocation>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
-
 </project>

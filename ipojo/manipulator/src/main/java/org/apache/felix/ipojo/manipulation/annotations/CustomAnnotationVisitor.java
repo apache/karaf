@@ -39,12 +39,14 @@ public class CustomAnnotationVisitor extends EmptyVisitor implements AnnotationV
     private Element m_elem;
 
     /**
-     * Id attribute (if found).
+     * Id attribute (if found)
+     * else use the annotation package name.
      */
     private String m_id;
 
     /**
-     * Parent attribute (if found).
+     * Parent attribute (if found)
+     * else use the annotation package name.
      */
     private String m_parent;
 
@@ -95,6 +97,17 @@ public class CustomAnnotationVisitor extends EmptyVisitor implements AnnotationV
         String name = s.substring(index + 1);
         String namespace = s.substring(0, index);
         return new Element(name, namespace);
+    }
+    
+    /**
+     * Build the element object from the given descriptor.
+     * @param desc : annotation descriptor
+     * @return the package of the annotation
+     */
+    public static String getPackage(String desc) {
+        String s = (desc.replace('/', '.')).substring(1, desc.length() - 1);
+        int index = s.lastIndexOf('.');
+        return s.substring(0, index);
     }
 
     /**
@@ -154,6 +167,17 @@ public class CustomAnnotationVisitor extends EmptyVisitor implements AnnotationV
     public AnnotationVisitor visitArray(String arg0) {
         return new SubArrayVisitor(m_elem, arg0);
     }
+    
+    /**
+     * Visits an enumeration attribute.
+     * @param arg0 the attribute name
+     * @param arg1 the enumeration descriptor
+     * @param arg2 the attribute value
+     * @see org.objectweb.asm.AnnotationVisitor#visitEnum(java.lang.String, java.lang.String, java.lang.String)
+     */
+    public void visitEnum(String arg0, String arg1, String arg2) {
+        m_elem.addAttribute(new Attribute(arg0, arg2));
+    }
 
     /**
      * End of the visit.
@@ -164,7 +188,19 @@ public class CustomAnnotationVisitor extends EmptyVisitor implements AnnotationV
         if (m_root) {
             if (m_id != null) {
                 m_collector.getIds().put(m_id, m_elem);
+            } else {
+                if (! m_collector.getIds().containsKey(m_elem.getNameSpace())) {
+                    // If the namespace is not already used, add the annotation as the
+                    // root element of this namespace.
+                    m_collector.getIds().put(m_elem.getNameSpace(), m_elem);
+                } else {
+                    // Already used, the element is the parent.
+                    if (m_parent == null) {
+                        m_parent = m_elem.getNameSpace();
+                    }
+                }
             }
+            
             m_collector.getElements().put(m_elem, m_parent);
         }
     }

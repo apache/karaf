@@ -51,7 +51,7 @@ public class SchemaResolver implements EntityResolver {
      * @see org.xml.sax.EntityResolver#resolveEntity(java.lang.String, java.lang.String)
      */
     public InputSource resolveEntity(String publicId, String systemId)
-            throws SAXException, IOException {
+        throws SAXException, IOException {
         
         URL url = getURL(systemId);
         if (url == null) {

@@ -21,7 +21,6 @@ package org.apache.felix.ipojo.task;
 import java.io.File;
 
 import org.apache.felix.ipojo.manipulator.Pojoization;
-import org.apache.felix.ipojo.xml.parser.SchemaResolver;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;

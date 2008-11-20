@@ -227,7 +227,7 @@ public class Element {
 
     /**
      * Gets the elements array of the element type given in parameter. 
-     * This method look for an empty namespace.
+     * This method looks for an empty namespace.
      * @param name the type of the element to find (element name)
      * @return the resulting element array (<code>null</code> if the search failed)
      */

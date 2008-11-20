@@ -43,7 +43,7 @@ public final class EventDispatcher implements ServiceListener {
      * The internal event dispatcher.
      * This dispatcher is a singleton.
      */
-    private static EventDispatcher m_dispatcher;
+    private static EventDispatcher DISPATCHER;
     
     /**
      * The list of listeners.
@@ -74,7 +74,7 @@ public final class EventDispatcher implements ServiceListener {
      * internal event dispatcher.
      */
     public static void create(BundleContext bc) {
-        m_dispatcher = new EventDispatcher(bc);
+        DISPATCHER = new EventDispatcher(bc);
     }
     
     /**
@@ -83,8 +83,8 @@ public final class EventDispatcher implements ServiceListener {
      * if iPOJO is stopping.
      */
     public static void dispose() {
-        m_dispatcher.stop();
-        m_dispatcher = null;
+        DISPATCHER.stop();
+        DISPATCHER = null;
     }
     
     
@@ -94,7 +94,7 @@ public final class EventDispatcher implements ServiceListener {
      * <code>null</code> if not created.
      */
     public static EventDispatcher getDispatcher() {
-        return m_dispatcher;
+        return DISPATCHER;
     }
     
     

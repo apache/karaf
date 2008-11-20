@@ -16,7 +16,8 @@
 	specific language governing permissions and limitations
 	under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
 		<groupId>org.apache.felix</groupId>
 		<artifactId>felix</artifactId>
@@ -33,7 +34,7 @@
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.osgi.core</artifactId>
-			<version>1.2.0</version>
+			<version>1.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
@@ -61,60 +62,38 @@
 				<configuration>
 					<instructions>
 						<Bundle-Name>iPOJO</Bundle-Name>
-						<Bundle-Vendor>
-							The Apache Software Foundation
-						</Bundle-Vendor>
-						<Bundle-SymbolicName>
-							org.apache.felix.ipojo
+						<Bundle-Vendor> The Apache Software Foundation </Bundle-Vendor>
+						<Bundle-SymbolicName> org.apache.felix.ipojo 
 						</Bundle-SymbolicName>
-						<Bundle-Description>
-							iPOJO Core Framework
-						</Bundle-Description>
-						<Bundle-Activator>
-							org.apache.felix.ipojo.Extender
+						<Bundle-Description> iPOJO Core Framework </Bundle-Description>
+						<Bundle-Activator> org.apache.felix.ipojo.Extender 
 						</Bundle-Activator>
 						<Bundle-DocURL>
-							http://felix.apache.org/site/apache-felix-ipojo.html
+							http://felix.apache.org/site/apache-felix-ipojo.html 
 						</Bundle-DocURL>
 						<IPOJO-Extension>
 							component:org.apache.felix.ipojo.ComponentFactory,
-							handler:org.apache.felix.ipojo.HandlerManagerFactory
+							handler:org.apache.felix.ipojo.HandlerManagerFactory 
 						</IPOJO-Extension>
-						<Import-Package>
-							org.osgi.framework, org.osgi.service.cm,
-							org.osgi.service.log
-						</Import-Package>
-						<Private-Package>
-							org.apache.felix.ipojo.handlers.architecture,
+						<Import-Package> org.osgi.framework;version=1.3, org.osgi.service.cm,
+							org.osgi.service.log </Import-Package>
+						<Private-Package> org.apache.felix.ipojo.handlers.architecture,
 							org.apache.felix.ipojo.handlers.configuration,
 							org.apache.felix.ipojo.handlers.lifecycle.callback,
-							org.apache.felix.ipojo.handlers.lifecycle.controller
+							org.apache.felix.ipojo.handlers.lifecycle.controller 
 						</Private-Package>
-						<Export-Package>
-							org.apache.felix.ipojo; version="0.9.0",
-							org.apache.felix.ipojo.metadata;
-							version="0.9.0",
-							org.apache.felix.ipojo.architecture;
-							version="0.9.0",
-							org.apache.felix.ipojo.parser;
-							version="0.9.0",
-							org.apache.felix.ipojo.util;
-							version="0.9.0",
-							org.apache.felix.ipojo.handlers.dependency;
-							version="0.9.0",
-							org.apache.felix.ipojo.handlers.providedservice;
-							version="0.9.0",
-							org.apache.felix.ipojo.context;
-							version="0.9.0", org.osgi.service.cm,
-							org.osgi.service.log
-						</Export-Package>
-						<Include-Resource>
-							META-INF/LICENCE=LICENSE,
-							META-INF/NOTICE=NOTICE
-						</Include-Resource>
-						<_donotcopy>
-							(CVS|.svn|.+.bak|~.+|metadata.xml)
-						</_donotcopy>
+						<Export-Package> org.apache.felix.ipojo; version="0.9.0",
+							org.apache.felix.ipojo.metadata; version="0.9.0",
+							org.apache.felix.ipojo.architecture; version="0.9.0",
+							org.apache.felix.ipojo.parser; version="0.9.0",
+							org.apache.felix.ipojo.util; version="0.9.0",
+							org.apache.felix.ipojo.handlers.dependency; version="0.9.0",
+							org.apache.felix.ipojo.handlers.providedservice; version="0.9.0",
+							org.apache.felix.ipojo.context; version="0.9.0",
+							org.osgi.service.cm, org.osgi.service.log </Export-Package>
+						<Include-Resource> META-INF/LICENCE=LICENSE,
+							META-INF/NOTICE=NOTICE </Include-Resource>
+						<_donotcopy> (CVS|.svn|.+.bak|~.+|metadata.xml) </_donotcopy>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -134,7 +113,32 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>rat-maven-plugin</artifactId>
+				<configuration>
+					<excludeSubProjects>false</excludeSubProjects>
+					<useEclipseDefaultExcludes>true</useEclipseDefaultExcludes>
+					<useMavenDefaultExcludes>true</useMavenDefaultExcludes>
+					<excludes>
+						<param>doc/**/*</param>
+						<param>maven-eclipse.xml</param>
+						<param>.checkstyle</param>
+						<param>.externalToolBuilders/*</param>
+						<param>LICENSE.asm</param>
+						<param>.fbprefs</param>
+					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<configuration>
+					<enableRulesSummary>false</enableRulesSummary>
+					<violationSeverity>warning</violationSeverity>
+					<configLocation>http://felix.apache.org/ipojo/dev/checkstyle_ipojo.xml</configLocation>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
-
 </project>
