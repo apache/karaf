@@ -130,15 +130,13 @@
     </gshell:command-bundle>
 
     <gshell:command-bundle>
-        <gshell:command name="remote/rsh">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.core.remote.RshAction"/>
+        <gshell:command name="remote/ssh">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.core.sshd.SshAction"/>
         </gshell:command>
 
-        <gshell:command name="remote/rsh-server">
-            <gshell:action class="org.apache.geronimo.gshell.commands.remote.RshServerAction"/>
+        <gshell:command name="remote/sshd">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.core.sshd.SshServerAction"/>
         </gshell:command>
-
-        <gshell:link name="remote/rshd" target="remote/rsh-server"/>
     </gshell:command-bundle>
 
     <gshell:command-bundle>

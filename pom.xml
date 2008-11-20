@@ -96,6 +96,7 @@
         <servicemix.specs.version>1.2-SNAPSHOT</servicemix.specs.version>
         <spring.osgi.version>1.1.0</spring.osgi.version>
         <spring.version>2.5.5</spring.version>
+        <sshd.version>1.0-SNAPSHOT</sshd.version>
         <woodstox.version>3.2.7_1</woodstox.version>
     </properties>
 
@@ -146,6 +147,18 @@
             </releases>
             <snapshots>
                 <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <!-- SSHD snapshots -->
+        <repository>
+            <id>sshd-snapshots</id>
+            <name>SSHD Snapshots repository</name>
+            <url>http://sshd.googlecode.com/svn/m2-snapshot-repo/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
             </snapshots>
         </repository>
     </repositories>
@@ -662,6 +675,11 @@
                 <groupId>org.easymock</groupId>
                 <artifactId>easymock</artifactId>
                 <version>${easymock.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.sshd</groupId>
+                <artifactId>sshd</artifactId>
+                <version>${sshd.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

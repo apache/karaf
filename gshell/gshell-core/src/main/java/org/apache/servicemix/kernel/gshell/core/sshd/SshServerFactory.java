@@ -16,30 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.servicemix.kernel.gshell.core.remote;
+package org.apache.servicemix.kernel.gshell.core.sshd;
 
-import java.net.URI;
+import com.google.code.sshd.SshServer;
 
-import org.apache.geronimo.gshell.remote.server.RshServer;
+public class SshServerFactory {
 
-public class RshServerFactory {
-
-    private RshServer server;
+    private SshServer server;
 
     private String location;
 
     private boolean start;
 
-    public RshServerFactory(RshServer server) {
+    public SshServerFactory(SshServer server) {
         this.server = server;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
     }
 
     public boolean isStart() {
@@ -53,7 +43,7 @@ public class RshServerFactory {
     public void start() throws Exception {
         if (start) {
             try {
-                server.bind(URI.create(location));
+                server.start();
             } catch (Exception e) {
                 e.printStackTrace();
                 throw e;
@@ -63,7 +53,7 @@ public class RshServerFactory {
 
     public void stop() throws Exception {
         if (start) {
-            server.close();
+            server.stop();
         }
     }
 

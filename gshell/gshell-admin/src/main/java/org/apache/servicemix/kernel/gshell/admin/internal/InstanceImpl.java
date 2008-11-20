@@ -73,9 +73,8 @@ public class InstanceImpl implements Instance {
             is = new FileInputStream(f);
             Properties props = new Properties();
             props.load(is);
-            String loc = props.getProperty("remoteShellLocation");
-            URI uri = new URI(loc);
-            return uri.getPort();
+            String loc = props.getProperty("sshPort");
+            return Integer.parseInt(loc);
         } finally {
             if (is != null) {
                 is.close();
@@ -96,9 +95,7 @@ public class InstanceImpl implements Instance {
         } finally {
             is.close();
         }
-        String loc = props.getProperty("remoteShellLocation");
-        loc = loc.replace(Integer.toString(new URI(loc).getPort()), Integer.toString(port));
-        props.setProperty("remoteShellLocation", loc);
+        props.setProperty("sshPort", Integer.toString(port));
         OutputStream os = new FileOutputStream(f);
         try {
             props.store(os, null);

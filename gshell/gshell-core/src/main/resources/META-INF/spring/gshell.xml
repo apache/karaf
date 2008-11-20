@@ -123,10 +123,7 @@
             </bean>
         </property>
         <property name="errorHandler">
-            <bean class="org.apache.geronimo.gshell.wisdom.shell.ConsoleErrorHandlerImpl">
-                <constructor-arg ref="eventManager"/>
-                <constructor-arg ref="application"/>
-            </bean>
+            <bean class="org.apache.geronimo.gshell.wisdom.shell.ConsoleErrorHandlerImpl" />
         </property>
         <property name="history">
             <bean class="org.apache.geronimo.gshell.wisdom.shell.HistoryImpl">

@@ -37,7 +37,7 @@ public class ConnectCommand extends AdminCommandSupport {
 
     protected Object doExecute() throws Exception {
         int port = getExistingInstance(instance).getPort();
-        ShellContextHolder.get().getShell().execute("remote/rsh -u " + username + " -p " + password + " -n " + instance + " tcp://localhost:" + port);
+        ShellContextHolder.get().getShell().execute("remote/ssh -u " + username + " -p " + password + " -n " + instance + " tcp://localhost:" + port);
         return Result.SUCCESS;
     }
 }

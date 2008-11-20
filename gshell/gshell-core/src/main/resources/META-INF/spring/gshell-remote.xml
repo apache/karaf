@@ -36,120 +36,59 @@
        default-init-method="init"
        default-destroy-method="destroy">
 
-    <bean id="timeoutManager" class="org.apache.geronimo.gshell.remote.server.timeout.TimeoutManagerImpl" lazy-init="true"/>
-
-    <bean id="rshServer" class="org.apache.geronimo.gshell.remote.server.RshServer" scope="prototype">
-        <constructor-arg ref="timeoutManager"/>
-        <constructor-arg ref="transportFactoryLocator"/>
-        <constructor-arg>
-            <list>
-                <bean class="org.apache.geronimo.gshell.remote.server.handler.ConnectHandler">
-                    <constructor-arg ref="cryptoContext"/>
-                    <constructor-arg ref="timeoutManager"/>
-                </bean>
-                <bean class="org.apache.servicemix.kernel.gshell.core.remote.LoginHandler">
-                    <constructor-arg ref="timeoutManager"/>
-                    <constructor-arg value="RshServer" />
-                </bean>
-                <bean class="org.apache.servicemix.kernel.gshell.core.remote.OpenShellHandler"/>
-                <bean class="org.apache.geronimo.gshell.remote.server.handler.ExecuteHandler"/>
-                <bean class="org.apache.geronimo.gshell.remote.server.handler.CloseShellHandler"/>
-                <bean class="org.apache.geronimo.gshell.remote.server.handler.EchoHandler"/>
-                <bean class="org.apache.geronimo.gshell.remote.server.handler.CompleteHandler" />
-            </list>
-        </constructor-arg>
+    <bean name="sshClient" class="com.google.code.sshd.SshClient" factory-method="setUpDefaultClient" init-method="start" destroy-method="stop">
     </bean>
 
-    <bean id="remoteShell" class="org.apache.geronimo.gshell.remote.server.RemoteShellImpl" scope="prototype">
-        <constructor-arg ref="commandLineExecutor"/>
-
-        <property name="completers">
-            <list>
-                <ref bean="commandsCompleter"/>
-                <ref bean="aliasNameCompleter"/>
-            </list>
+    <bean name="sshServer" class="com.google.code.sshd.SshServer" factory-method="setUpDefaultServer" scope="prototype">
+        <property name="port" value="${sshPort}" />
+        <property name="shellFactory">
+            <bean class="org.apache.servicemix.kernel.gshell.core.sshd.GShellShellFactory">
+                <property name="branding" ref="branding" />
+                <property name="completers">
+                    <list>
+                        <ref bean="commandsCompleter"/>
+                        <ref bean="aliasNameCompleter"/>
+                    </list>
+                </property>
+                <property name="executor" ref="commandLineExecutor" />
+                <property name="prompter">
+                    <bean class="org.apache.geronimo.gshell.wisdom.shell.ConsolePrompterImpl">
+                        <constructor-arg ref="application"/>
+                    </bean>
+                </property>
+                <property name="errorHandler">
+                    <bean class="org.apache.geronimo.gshell.wisdom.shell.ConsoleErrorHandlerImpl" />
+                </property>
+                <property name="history">
+                    <bean class="org.apache.geronimo.gshell.wisdom.shell.HistoryImpl">
+                        <constructor-arg ref="application"/>
+                    </bean>
+                </property>
+            </bean>
         </property>
+        <property name="keyPairProvider" ref="keyPairProvider" />
+        <property name="passwordAuthenticator" ref="passwordAuthenticator" />
     </bean>
 
-    <bean class="org.apache.geronimo.gshell.remote.client.RshClient" scope="prototype">
-        <constructor-arg ref="cryptoContext"/>
-        <constructor-arg ref="transportFactoryLocator"/>
-        <constructor-arg>
-            <list>
-                <bean class="org.apache.geronimo.gshell.remote.client.handler.EchoHandler"/>
-            </list>
-        </constructor-arg>
+    <bean name="keyPairProvider" class="com.google.code.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider">
+        <property name="path" value="${hostKey}" />
     </bean>
-
-    <bean id="transportFactoryLocator" class="org.apache.geronimo.gshell.whisper.transport.TransportFactoryLocatorImpl" lazy-init="true">
-        <property name="factories">
-            <set>
-                <ref bean="vmTransportFactory"/>
-                <ref bean="tcpTransportFactory"/>
-                <ref bean="sslTransportFactory"/>
-            </set>
-        </property>
+    <!--
+    <bean name="passwordAuthenticator" class="com.google.code.sshd.server.jaas.JaasPasswordAuthenticator">
+        <property name="domain" value="SshServer" />
     </bean>
+    -->
+    <bean name="passwordAuthenticator" class="org.apache.servicemix.kernel.gshell.core.sshd.BogusPasswordAuthenticator" />
 
-    <!-- vm:// -->
-
-    <bean id="vmTransportFactory" class="org.apache.geronimo.gshell.whisper.transport.vm.VmTransportFactory" lazy-init="true"/>
-
-    <bean id="vmTransport" class="org.apache.geronimo.gshell.whisper.transport.vm.VmTransport" scope="prototype"/>
-
-    <bean id="vmTransportServer" class="org.apache.geronimo.gshell.whisper.transport.vm.VmTransportServer" scope="prototype"/>
-
-    <!-- tcp:// -->
-
-    <bean id="tcpTransportFactory" class="org.apache.geronimo.gshell.whisper.transport.tcp.TcpTransportFactory" lazy-init="true"/>
-
-    <bean id="tcpTransport" class="org.apache.geronimo.gshell.whisper.transport.tcp.TcpTransport" scope="prototype"/>
-
-    <bean id="tcpTransportServer" class="org.apache.geronimo.gshell.whisper.transport.tcp.TcpTransportServer" scope="prototype"/>
-
-    <!-- ssl:// -->
-
-    <bean id="sslTransportFactory" class="org.apache.geronimo.gshell.whisper.transport.ssl.SslTransportFactory" lazy-init="true"/>
-
-    <bean id="sslContextFactory" class="org.apache.servicemix.kernel.gshell.core.remote.KeystoreSSLContextFactory" lazy-init="true">
-        <property name="keystoreManager" ref="keystoreManager" />
-        <property name="clientKeystore" value="${clientKeystore}" />
-        <property name="clientKeyAlias" value="${clientKeyAlias}" />
-        <property name="clientTruststore" value="${clientTruststore}" />
-        <property name="serverKeystore" value="${serverKeystore}" />
-        <property name="serverKeyAlias" value="${serverKeyAlias}" />
-        <property name="serverTruststore" value="${serverTruststore}" />
-     </bean>
-
-    <bean id="sslTransport" class="org.apache.geronimo.gshell.whisper.transport.ssl.SslTransport" scope="prototype">
-        <property name="sslContextFactory" ref="sslContextFactory"/>
-    </bean>
-
-    <bean id="sslTransportServer" class="org.apache.geronimo.gshell.whisper.transport.ssl.SslTransportServer" scope="prototype">
-        <property name="sslContextFactory" ref="sslContextFactory"/>
-    </bean>
-
-
-    <bean id="rshServerFactory" class="org.apache.servicemix.kernel.gshell.core.remote.RshServerFactory"
-                                init-method="start" destroy-method="stop">
-        <constructor-arg ref="rshServer" />
-        <property name="location" value="${remoteShellLocation}" />
+    <bean id="sshServerFactory" class="org.apache.servicemix.kernel.gshell.core.sshd.SshServerFactory" init-method="start" destroy-method="stop">
+        <constructor-arg ref="sshServer" />
         <property name="start" value="${startRemoteShell}" />
     </bean>
 
-    <osgi:reference id="keystoreManager" interface="org.apache.servicemix.kernel.jaas.config.KeystoreManager" cardinality="1..1" />
-
-    <jaas:config id="RshClient">
-        <jaas:module className="org.apache.geronimo.gshell.remote.client.auth.RemoteLoginModule" flags="required" />
-    </jaas:config>
-
-    <jaas:config id="RshServer" rank="-1">
+    <!--
+    <jaas:config id="SshServer" rank="-1">
         <jaas:module className="org.apache.geronimo.gshell.remote.server.auth.BogusLoginModule" flags="required" />
     </jaas:config>
-
-    <bean id="cryptoContext" class="org.apache.geronimo.gshell.security.crypto.CryptoContextImpl" lazy-init="true">
-        <property name="transformation" value="RSA"/>
-        <property name="provider" value="default"/>
-    </bean>
+    -->
 
 </beans>

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.servicemix.kernel.gshell.core.remote;
+package org.apache.servicemix.kernel.gshell.core.sshd;
 
 import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.geronimo.gshell.clp.Option;
@@ -25,8 +25,6 @@ import org.apache.geronimo.gshell.command.CommandAction;
 import org.apache.geronimo.gshell.command.CommandContext;
 import org.apache.geronimo.gshell.io.IO;
 import org.apache.geronimo.gshell.io.PromptReader;
-import org.apache.geronimo.gshell.notification.ExitNotification;
-import org.apache.geronimo.gshell.remote.client.RshClient;
 import org.apache.geronimo.gshell.spring.BeanContainer;
 import org.apache.geronimo.gshell.spring.BeanContainerAware;
 import org.apache.geronimo.gshell.i18n.MessageSource;
@@ -34,21 +32,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
+
+import com.google.code.sshd.SshClient;
+import com.google.code.sshd.ClientSession;
+import com.google.code.sshd.Channel;
 
 /**
  * Connect to a remote shell server.
  *
  * @version $Rev: 707952 $ $Date: 2008-10-26 08:51:45 +0100 (Sun, 26 Oct 2008) $
  */
-public class RshAction
+public class SshAction
     implements CommandAction, BeanContainerAware
 {
     private final Logger log = LoggerFactory.getLogger(getClass());
-
-    @Option(name="-b", aliases={"--bind"})
-    private URI local;
 
     @Option(name="-u", aliases={"--username"})
     private String username;
@@ -131,43 +129,42 @@ public class RshAction
         }
 
         // Create the client from prototype
-        RshClient client = container.getBean(RshClient.class);
-
+        SshClient client = container.getBean(SshClient.class);
         log.debug("Created client: {}", client);
-
-        client.connect(remote, local);
-
+        ClientSession session = client.connect(remote.getHost(), remote.getPort());
         io.info(messages.getMessage("info.connected"));
+        session.authPassword(username, password);
+        Channel channel = session.createChannel("shell");
+        channel.setIn(io.inputStream);
+        channel.setOut(io.outputStream);
+        channel.setErr(io.errorStream);
+        channel.open();
+        channel.waitFor(Channel.CLOSED, 0);
 
-        client.login(username, password);
+//        RemoteShellProxy shell = new RemoteShellProxy(client, io, instance, username);
+//
+//        Object result = Result.SUCCESS;
+//
+//        try {
+//            if (command == null) {
+//                command = new ArrayList<String>();
+//            }
+//
+//            shell.run(command.toArray());
+//        }
+//        catch (ExitNotification n) {
+//            // Make sure that we catch this notification, so that our parent shell doesn't exit when the remote shell does
+//            result = n.code;
+//        }
+//
+//        shell.close();
+//
+//        io.verbose(messages.getMessage("verbose.disconnecting"));
+//
+//        client.close();
+//
+//        io.verbose(messages.getMessage("verbose.disconnected"));
 
-        // client.echo("HELLO");
-        // Thread.sleep(1 * 1000);
-
-        RemoteShellProxy shell = new RemoteShellProxy(client, io, instance, username);
-
-        Object result = Result.SUCCESS;
-
-        try {
-            if (command == null) {
-                command = new ArrayList<String>();
-            }
-
-            shell.run(command.toArray());
-        }
-        catch (ExitNotification n) {
-            // Make sure that we catch this notification, so that our parent shell doesn't exit when the remote shell does
-            result = n.code;
-        }
-
-        shell.close();
-
-        io.verbose(messages.getMessage("verbose.disconnecting"));
-
-        client.close();
-
-        io.verbose(messages.getMessage("verbose.disconnected"));
-
-        return result;
+        return Result.SUCCESS;
     }
 }

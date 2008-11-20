@@ -63,6 +63,7 @@
                         <_donotcopy>(CVS|.svn|config.properties)</_donotcopy>
                         <Main-Class>org.apache.servicemix.kernel.client.Main</Main-Class>
                         <Class-Path>
+                            ../system/com/google/code/sshd/sshd/${sshd.version}/sshd-${sshd.version}.jar
                             ../system/org/apache/servicemix/kernel/gshell/org.apache.servicemix.kernel.gshell.core/${pom.version}/org.apache.servicemix.kernel.gshell.core-${pom.version}.jar
                             ../system/org/apache/servicemix/bundles/org.apache.servicemix.bundles.mina/${mina.version}/org.apache.servicemix.bundles.mina-${mina.version}.jar
                         </Class-Path>

@@ -16,24 +16,10 @@
  */
 package org.apache.servicemix.kernel.client;
 
-import java.net.URI;
-import java.util.List;
-import java.util.LinkedList;
-
-import org.apache.geronimo.gshell.remote.client.RshClient;
-import org.apache.geronimo.gshell.remote.client.handler.EchoHandler;
-import org.apache.geronimo.gshell.remote.client.handler.ClientMessageHandler;
-import org.apache.geronimo.gshell.whisper.transport.TransportException;
-import org.apache.geronimo.gshell.whisper.transport.TransportFactory;
-import org.apache.geronimo.gshell.whisper.transport.TransportFactoryLocator;
-import org.apache.geronimo.gshell.whisper.transport.tcp.TcpTransportFactory;
-import org.apache.geronimo.gshell.whisper.transport.tcp.TcpTransport;
-import org.apache.geronimo.gshell.whisper.stream.StreamFeeder;
-import org.apache.geronimo.gshell.notification.ExitNotification;
-import org.apache.geronimo.gshell.security.crypto.CryptoContextImpl;
-import org.apache.geronimo.gshell.security.crypto.CryptoContext;
-import org.apache.geronimo.gshell.io.IO;
-import org.apache.servicemix.kernel.gshell.core.remote.RemoteShellProxy;
+import com.google.code.sshd.SshClient;
+import com.google.code.sshd.ClientSession;
+import com.google.code.sshd.Channel;
+import jline.ConsoleReader;
 
 /**
  * A very simple
@@ -41,23 +27,24 @@ import org.apache.servicemix.kernel.gshell.core.remote.RemoteShellProxy;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        URI address = new URI("tcp://127.0.0.1:8101/");
+        String host = "localhost";
+        int port = 8101;
         String user = "smx";
         String password = "smx";
         StringBuilder sb = new StringBuilder();
 
-        boolean options = true;
         for (int i = 0; i < args.length; i++) {
             if (args[i].charAt(0) == '-') {
                 if (args[i].equals("-a")) {
-                    address = new URI(args[++i]);
+                    port = Integer.parseInt(args[++i]);
                 } else if (args[i].equals("-u")) {
                     user = args[++i];
                 } else if (args[i].equals("-p")) {
                     password = args[++i];
                 } else if (args[i].equals("--help")) {
                     System.out.println("Apache ServiceMix Kernel client");
-                    System.out.println("  -a [address]  specify the URL to connect to");
+                    System.out.println("  -a [port]     specify the port to connect to");
+                    System.out.println("  -h [host]     specify the host to connect to");
                     System.out.println("  -u [user]     specify the user name");
                     System.out.println("  -p [password] specify the password");
                     System.out.println("  --help        shows this help message");
@@ -71,59 +58,32 @@ public class Main {
             } else {
                 sb.append(args[i]);
                 sb.append(' ');
-                options = false;
             }
         }
-        RshClient client = null;
+
+        // TODO: implement sending a direct command
+
+        SshClient client = null;
         try {
-            IO io = new IO();
-            CryptoContext context = new CryptoContextImpl();
-            List<ClientMessageHandler> handlers = new LinkedList<ClientMessageHandler>();
-            handlers.add(new EchoHandler());
-            client = new RshClient(context, new Locator(), handlers) {
-                protected void onSessionClosed() {
-                    System.exit(2);
-                }
-            };
-
-            client.connect(address, new URI("tcp://0.0.0.0:0"));
-            client.login(user, password);
-            StreamFeeder outputFeeder = new StreamFeeder(client.getInputStream(), io.outputStream);
-            outputFeeder.createThread().start();
-            client.openShell();
-            io.out.println("Connected");
-
-            String commandLine = sb.toString().trim();
-            if (commandLine.length() > 0) {
-                client.execute(commandLine);
-            } else {
-                RemoteShellProxy shell = new RemoteShellProxy(client, io, "localhost", user);
-                shell.run();
-            }
-        } catch (ExitNotification e) {
-            System.exit(0);
+            client = SshClient.setUpDefaultClient();
+            client.start();
+            ClientSession session = client.connect(host, port);
+            session.authPassword(user, password);
+            Channel channel = session.createChannel("shell");
+            channel.setIn(new ConsoleReader().getInput());
+            channel.setOut(System.out);
+            channel.setErr(System.err);
+            channel.open();
+            channel.waitFor(Channel.CLOSED, 0);
         } catch (Throwable t) {
             t.printStackTrace();
             System.exit(1);
         } finally {
             try {
-                client.closeShell();
-                client.close();
+                client.stop();
             } catch (Throwable t) { }
         }
         System.exit(0);
     }
 
-    private static class Locator implements TransportFactoryLocator {
-        public TransportFactory locate(URI uri) throws TransportException {
-            return new SimpleTcpTransportFactory();
-        }
-
-    }
-
-    private static class SimpleTcpTransportFactory extends TcpTransportFactory {
-        protected TcpTransport createTransport() {
-            return new TcpTransport();
-        }
-    }
 }

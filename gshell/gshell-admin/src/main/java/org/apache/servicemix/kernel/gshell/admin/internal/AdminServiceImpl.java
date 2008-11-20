@@ -89,27 +89,27 @@ public class AdminServiceImpl implements AdminService, InitializingBean {
             throw new IllegalArgumentException("Instance '" + name + "' already exists");
         }
         File serviceMixBase = new File(location != null ? location : ("instances/" + name)).getCanonicalFile();
-        int remoteShellPort = port;
-        if (remoteShellPort <= 0) {
+        int sshPort = port;
+        if (sshPort <= 0) {
             try {
                 Preferences prefs = preferences.getUserPreferences("AdminServiceState");
-                remoteShellPort = prefs.getInt("port", defaultPortStart + 1);
-                prefs.putInt("port", remoteShellPort + 1);
+                sshPort = prefs.getInt("port", defaultPortStart + 1);
+                prefs.putInt("port", sshPort + 1);
                 prefs.flush();
                 prefs.sync();
             } catch (Exception e) {
                 try {
                     ServerSocket ss = new ServerSocket(0);
-                    remoteShellPort = ss.getLocalPort();
+                    sshPort = ss.getLocalPort();
                     ss.close();
                 } catch (Exception t) {
                 }
             }
-            if (remoteShellPort <= 0) {
-                remoteShellPort = defaultPortStart;
+            if (sshPort <= 0) {
+                sshPort = defaultPortStart;
             }
         }
-        println("Creating new instance on port " + remoteShellPort + " at: @|bold " + serviceMixBase + "|");
+        println("Creating new instance on port " + sshPort + " at: @|bold " + serviceMixBase + "|");
 
         mkdir(serviceMixBase, "bin");
         mkdir(serviceMixBase, "etc");
@@ -127,7 +127,7 @@ public class AdminServiceImpl implements AdminService, InitializingBean {
         HashMap<String, String> props = new HashMap<String, String>();
         props.put("${servicemix.home}", System.getProperty("servicemix.home"));
         props.put("${servicemix.base}", serviceMixBase.getPath());
-        props.put("${servicemix.remoteShellPort}", Integer.toString(remoteShellPort));
+        props.put("${servicemix.sshPort}", Integer.toString(sshPort));
         copyFilteredResourceToDir(serviceMixBase, "etc/org.apache.servicemix.shell.cfg", props);
         if( System.getProperty("os.name").startsWith("Win") ) {
             copyFilteredResourceToDir(serviceMixBase, "bin/servicemix.bat", props);

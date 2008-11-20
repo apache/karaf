@@ -211,6 +211,14 @@
                 <include>org.apache.servicemix.kernel.jaas:org.apache.servicemix.kernel.jaas.keystore</include>
             </includes>
         </dependencySet>
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <outputFileNameMapping>com/google/code/sshd/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <includes>
+                <include>com.google.code.sshd:sshd</include>
+            </includes>
+        </dependencySet>
 
     </dependencySets>
 
