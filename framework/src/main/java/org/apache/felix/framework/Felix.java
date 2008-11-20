@@ -1951,7 +1951,7 @@ ex.printStackTrace();
                 {
                     try
                     {
-                        refreshPackages(new Bundle[] { bundle });
+                        _refreshPackages(new FelixBundle[] { bundle });
                     }
                     catch (Exception ex)
                     {
@@ -2203,7 +2203,7 @@ ex.printStackTrace();
         {
             try
             {
-                refreshPackages(new Bundle[] { bundle });
+                _refreshPackages(new FelixBundle[] { bundle });
             }
             catch (Exception ex)
             {
@@ -3121,10 +3121,7 @@ ex.printStackTrace();
                 depIdx++)
             {
                 Bundle b = getBundle(Util.getBundleIdFromModuleId(dependents[depIdx].getId()));
-                if (b != null)
-                {
-                    list.add(b);
-                }
+                list.add(b);
             }
         }
 
@@ -3216,8 +3213,20 @@ ex.printStackTrace();
 
     protected void refreshPackages(Bundle[] targets)
     {
-        // Acquire locks for all impacted bundles.
         FelixBundle[] bundles = acquireBundleRefreshLocks(targets);
+        try
+        {
+            _refreshPackages(bundles);
+        }
+        finally
+        {
+            // Always release all bundle locks.
+            releaseBundleLocks(bundles);
+        }
+    }
+    
+    protected void _refreshPackages(FelixBundle[] bundles)
+    {
         boolean restart = false;
 
         Bundle systemBundle = getBundle(0);
@@ -3258,51 +3267,42 @@ ex.printStackTrace();
         {
             forgetUninstalledBundle(bundles[i]);
         }
-
-        try
+        // If there are targets, then refresh each one.
+        if (bundles != null)
         {
-            // If there are targets, then refresh each one.
-            if (bundles != null)
+            // At this point the map contains every bundle that has been
+            // updated and/or removed as well as all bundles that import
+            // packages from these bundles.
+
+            // Create refresh helpers for each bundle.
+            RefreshHelper[] helpers = new RefreshHelper[bundles.length];
+            for (int i = 0; i < bundles.length; i++)
             {
-                // At this point the map contains every bundle that has been
-                // updated and/or removed as well as all bundles that import
-                // packages from these bundles.
-
-                // Create refresh helpers for each bundle.
-                RefreshHelper[] helpers = new RefreshHelper[bundles.length];
-                for (int i = 0; i < bundles.length; i++)
+                if (!bundles[i].getInfo().isExtension())
                 {
-                    if (!bundles[i].getInfo().isExtension())
-                    {
-                        helpers[i] = new RefreshHelper(bundles[i]);
-                    }
-                }
-
-                // Stop, purge or remove, and reinitialize all bundles first.
-                for (int i = 0; i < helpers.length; i++)
-                {
-                    if (helpers[i] != null)
-                    {
-                        helpers[i].stop();
-                        helpers[i].purgeOrRemove();
-                        helpers[i].reinitialize();
-                    }
-                }
-
-                // Then restart all bundles that were previously running.
-                for (int i = 0; i < helpers.length; i++)
-                {
-                    if (helpers[i] != null)
-                    {
-                        helpers[i].restart();
-                    }
+                    helpers[i] = new RefreshHelper(bundles[i]);
                 }
             }
-        }
-        finally
-        {
-            // Always release all bundle locks.
-            releaseBundleLocks(bundles);
+
+            // Stop, purge or remove, and reinitialize all bundles first.
+            for (int i = 0; i < helpers.length; i++)
+            {
+                if (helpers[i] != null)
+                {
+                    helpers[i].stop();
+                    helpers[i].purgeOrRemove();
+                    helpers[i].reinitialize();
+                }
+            }
+
+            // Then restart all bundles that were previously running.
+            for (int i = 0; i < helpers.length; i++)
+            {
+                if (helpers[i] != null)
+                {
+                    helpers[i].restart();
+                }
+            }
         }
 
         fireFrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, this, null);
@@ -4148,11 +4148,27 @@ ex.printStackTrace();
             m_installRequestLock_Priority1.notifyAll();
         }
     }
+    
+    private long m_lockCount = 0;
+    private Thread m_lockThread = null;
 
     protected void acquireBundleLock(FelixBundle bundle)
     {
         synchronized (m_bundleLock)
         {
+            while ((m_lockCount < 0) && (m_lockThread != Thread.currentThread()))
+            {
+                try
+                {
+                    m_bundleLock.wait();
+                }
+                catch (InterruptedException e)
+                {
+                    // Ignore and just keep waiting.
+                }
+            }
+            m_lockCount++;
+
             while (!bundle.getInfo().isLockable())
             {
                 try
@@ -4172,6 +4188,18 @@ ex.printStackTrace();
     {
         synchronized (m_bundleLock)
         {
+            while ((m_lockCount < 0) && (m_lockThread != Thread.currentThread()))
+            {
+                try
+                {
+                    m_bundleLock.wait();
+                }
+                catch (InterruptedException e)
+                {
+                    // Ignore and just keep waiting.
+                }
+            }
+            m_lockCount++;
             if (!bundle.getInfo().isLockable())
             {
                 return false;
@@ -4185,6 +4213,7 @@ ex.printStackTrace();
     {
         synchronized (m_bundleLock)
         {
+            m_lockCount--;
             bundle.getInfo().unlock();
             m_bundleLock.notifyAll();
         }
@@ -4206,6 +4235,20 @@ ex.printStackTrace();
 
         synchronized (m_bundleLock)
         {
+            while (m_lockCount != 0)
+            {
+                try
+                {
+                    m_bundleLock.wait();
+                }
+                catch (InterruptedException e)
+                {
+                    // Ignore
+                }
+            }
+            m_lockCount = -1;
+            m_lockThread = Thread.currentThread();
+            
             boolean success = false;
             while (!success)
             {
@@ -4285,6 +4328,20 @@ ex.printStackTrace();
 
         synchronized (m_bundleLock)
         {
+            while (m_lockCount != 0)
+            {
+                try
+                {
+                    m_bundleLock.wait();
+                }
+                catch (InterruptedException e)
+                {
+                    // Ignore
+                }
+            }
+            m_lockCount = -1;
+            m_lockThread = Thread.currentThread();
+            
             boolean success = false;
             while (!success)
             {
@@ -4396,6 +4453,8 @@ ex.printStackTrace();
         // Always unlock any locked bundles.
         synchronized (m_bundleLock)
         {
+            m_lockCount = 0;
+            m_lockThread = null;
             for (int i = 0; (bundles != null) && (i < bundles.length); i++)
             {
                 bundles[i].getInfo().unlock();
