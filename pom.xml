@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.servicemix</groupId>
         <artifactId>servicemix-pom</artifactId>
-        <version>2-SNAPSHOT</version>
+        <version>2</version>
     </parent>
 
     <groupId>org.apache.servicemix.kernel</groupId>
@@ -90,7 +90,7 @@
         <log4j.version>1.2.14</log4j.version>
         <mina.version>1.1.6_1</mina.version>
         <oro.version>2.0.8_1</oro.version>
-        <pax.logging.version>1.1.1</pax.logging.version>
+        <pax.logging.version>1.2.1</pax.logging.version>
         <pax.url.version>0.3.2</pax.url.version>
         <servicemix.legal.version>1.0</servicemix.legal.version>
         <servicemix.specs.version>1.2-SNAPSHOT</servicemix.specs.version>
