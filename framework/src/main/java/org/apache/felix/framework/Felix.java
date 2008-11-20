@@ -3838,13 +3838,37 @@ ex.printStackTrace();
                 // Should never happen.
             }
 
+            // Shutdown event dispatching queue.
+            EventDispatcher.shutdown();
+
+            // Remove all bundles from the module factory so that any
+            // open resources will be closed.
+            Bundle[] bundles = getBundles();
+            for (int i = 0; i < bundles.length; i++)
+            {
+                FelixBundle bundle = (FelixBundle) bundles[i];
+                IModule[] modules = bundle.getInfo().getModules();
+                for (int j = 0; j < modules.length; j++)
+                {
+                    try
+                    {
+                        m_factory.removeModule(modules[j]);
+                    }
+                    catch (Exception ex)
+                    {
+                        m_logger.log(Logger.LOG_ERROR,
+                           "Unable to clean up " + bundle.getInfo().getLocation(), ex);
+                    }
+                }
+            }
+
             // Since there may be updated and uninstalled bundles that
             // have not been refreshed, we will take care of refreshing
             // them during shutdown.
 
             // First loop through all bundled and purge old revisions
             // from updated bundles.
-            Bundle[] bundles = getBundles();
+            bundles = getBundles();
             for (int i = 0; i < bundles.length; i++)
             {
                 FelixBundle bundle = (FelixBundle) bundles[i];
@@ -3880,30 +3904,6 @@ ex.printStackTrace();
                         Logger.LOG_ERROR,
                         "Unable to remove "
                         + m_uninstalledBundles[i].getInfo().getLocation(), ex);
-                }
-            }
-
-            // Shutdown event dispatching queue.
-            EventDispatcher.shutdown();
-
-            // Remove all bundles from the module factory so that any
-            // open resources will be closed.
-            bundles = getBundles();
-            for (int i = 0; i < bundles.length; i++)
-            {
-                FelixBundle bundle = (FelixBundle) bundles[i];
-                IModule[] modules = bundle.getInfo().getModules();
-                for (int j = 0; j < modules.length; j++)
-                {
-                    try
-                    {
-                        m_factory.removeModule(modules[j]);
-                    }
-                    catch (Exception ex)
-                    {
-                        m_logger.log(Logger.LOG_ERROR,
-                           "Unable to clean up " + bundle.getInfo().getLocation(), ex);
-                    }
                 }
             }
 
