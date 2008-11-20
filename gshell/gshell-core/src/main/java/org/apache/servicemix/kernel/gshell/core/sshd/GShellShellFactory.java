@@ -228,7 +228,7 @@ public class GShellShellFactory implements ShellFactory {
             ShellContext ctx = ShellContextHolder.get(true);
             try {
                 ShellContextHolder.set(getContext());
-                ShellImpl.this.run();
+                run(new Object[0]);
             } catch (Exception e) {
                 e.printStackTrace();
                 // TODO: do something about this exception
