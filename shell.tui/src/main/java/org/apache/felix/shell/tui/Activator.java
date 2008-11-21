@@ -110,17 +110,16 @@ public class Activator implements BundleActivator
         if (m_runnable != null)
         {
             m_runnable.stop();
-            m_thread.interrupt();
         }
     }
 
     private class ShellTuiRunnable implements Runnable
     {
-        private volatile boolean stop = false;
+        private volatile boolean m_stop = false;
 
         public void stop()
         {
-            stop = true;
+            m_stop = true;
         }
 
         public void run()
@@ -128,7 +127,17 @@ public class Activator implements BundleActivator
             String line = null;
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
-            while (!stop)
+            // Check to see if we have stdin.
+            try
+            {
+                System.in.available();
+            }
+            catch (IOException ex)
+            {
+                m_stop = true;
+            }
+
+            while (!m_stop)
             {
                 System.out.print("-> ");
 
