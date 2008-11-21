@@ -25,9 +25,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import org.apache.felix.framework.searchpolicy.ModuleDefinition;
 import org.apache.felix.framework.util.manifestparser.Capability;
 import org.apache.felix.moduleloader.*;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
 public class Util
@@ -511,5 +514,22 @@ public class Util
 
         // Return the value.
         return val;
+    }
+
+    /**
+     * Checks if the provided module definition declares a fragment host.
+     *
+     * @param module the module to check
+     * @return <code>true</code> if the module declares a fragment host, <code>false</code>
+     *      otherwise.
+     */
+    public static boolean isFragment(IModule module)
+    {
+        if (module.getDefinition() instanceof ModuleDefinition)
+        {
+            Map headerMap = ((ModuleDefinition) module.getDefinition()).getHeaders();
+            return headerMap.containsKey(Constants.FRAGMENT_HOST);
+        }
+        return false;
     }
 }

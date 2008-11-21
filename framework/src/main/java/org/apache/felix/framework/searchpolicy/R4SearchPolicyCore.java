@@ -79,7 +79,7 @@ public class R4SearchPolicyCore implements ModuleListener
     // Reusable empty array.
     public static final IModule[] m_emptyModules = new IModule[0];
     public static final ICapability[] m_emptyCapabilities = new ICapability[0];
-    public static final PackageSource[] m_emptySources= new PackageSource[0];
+    public static final PackageSource[] m_emptySources = new PackageSource[0];
 
     // Re-usable security manager for accessing class context.
     private static SecurityManagerEx m_sm = new SecurityManagerEx();
@@ -1043,7 +1043,7 @@ m_logger.log(Logger.LOG_DEBUG, "WIRE: " + newWires[newWires.length - 1]);
 // TODO: FRAGMENT - Currently we just make a single selection of the available
 //       fragments or hosts and try to resolve. In case of failure, we do not
 //       backtrack. We will likely want to add backtracking.
-            if (isFragment(rootModule))
+            if (Util.isFragment(rootModule))
             {
                 targetFragment = rootModule;
                 List hostList = getPotentialHosts(targetFragment);
@@ -1150,20 +1150,7 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: "
         }
     }
 
-    private boolean isFragment(IModule module)
-    {
-        if (module.getDefinition() instanceof ModuleDefinition)
-        {
-            Map headerMap = ((ModuleDefinition) module.getDefinition()).getHeaders();
-            if (headerMap.containsKey(Constants.FRAGMENT_HOST))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-// TODO: FRAGMENT - Not very efficient.
+    // TODO: FRAGMENT - Not very efficient.
     private List getPotentialHosts(IModule fragment)
         throws ResolveException
     {

@@ -1181,8 +1181,9 @@ ex.printStackTrace();
                     }
                 }
                 // Stop the bundle if necessary.
-                else if (impl.getInfo().getStartLevel(getInitialBundleStartLevel())
-                    > m_activeStartLevel)
+                else if ((impl.getInfo().getPersistentState() == Bundle.ACTIVE) &&
+                    (impl.getInfo().getStartLevel(getInitialBundleStartLevel())
+                        > m_activeStartLevel))
                 {
                     try
                     {
@@ -1598,6 +1599,13 @@ ex.printStackTrace();
             return;
         }
 
+        // As per the OSGi spec, fragment bundles can not be started and must
+        // throw a BundleException when there is an attempt to start one.
+        if (Util.isFragment(info.getCurrentModule()))
+        {
+            throw new BundleException("Fragment bundles can not be started.");
+        }
+
         // Set and save the bundle's persistent state to active
         // if we are supposed to record state change.
         if (record)
@@ -1831,8 +1839,12 @@ ex.printStackTrace();
                 updateLocation = info.getLocation();
             }
 
-            // Stop the bundle, but do not change the persistent state.
-            stopBundle(bundle, false);
+            // Stop the bundle if it is active, but do not change its
+            // persistent state.
+            if (oldState == Bundle.ACTIVE)
+            {
+                stopBundle(bundle, false);
+            }
 
             try
             {
@@ -1962,9 +1974,18 @@ ex.printStackTrace();
                 }
             }
 
-            // Restart the bundle if necessary, but do not change its
-            // persistent state.
-            if (oldState == Bundle.ACTIVE)
+            // If the old state was active, but the new module is a fragment,
+            // then mark the persistent state to inactive.
+            if ((oldState == Bundle.ACTIVE) && Util.isFragment(info.getCurrentModule()))
+            {
+                info.setPersistentStateInactive();
+                m_logger.log(Logger.LOG_WARNING,
+                    "Previously active bundle was updated to a fragment, resetting state to inactive: "
+                    + bundle);
+            }
+            // Otherwise, restart the bundle if it was previously active,
+            // but do not change its persistent state.
+            else if (oldState == Bundle.ACTIVE)
             {
                 startBundle(bundle, false);
             }
@@ -2023,6 +2044,13 @@ ex.printStackTrace();
         }
 
         BundleInfo info = bundle.getInfo();
+
+        // As per the OSGi spec, fragment bundles can not be stopped and must
+        // throw a BundleException when there is an attempt to stop one.
+        if (Util.isFragment(info.getCurrentModule()))
+        {
+            throw new BundleException("Fragment bundles can not be stopped.");
+        }
 
         switch (info.getState())
         {
@@ -3224,7 +3252,7 @@ ex.printStackTrace();
             releaseBundleLocks(bundles);
         }
     }
-    
+
     protected void _refreshPackages(FelixBundle[] bundles)
     {
         boolean restart = false;
@@ -4148,7 +4176,7 @@ ex.printStackTrace();
             m_installRequestLock_Priority1.notifyAll();
         }
     }
-    
+
     private long m_lockCount = 0;
     private Thread m_lockThread = null;
 
@@ -4248,7 +4276,7 @@ ex.printStackTrace();
             }
             m_lockCount = -1;
             m_lockThread = Thread.currentThread();
-            
+
             boolean success = false;
             while (!success)
             {
@@ -4341,7 +4369,7 @@ ex.printStackTrace();
             }
             m_lockCount = -1;
             m_lockThread = Thread.currentThread();
-            
+
             boolean success = false;
             while (!success)
             {
