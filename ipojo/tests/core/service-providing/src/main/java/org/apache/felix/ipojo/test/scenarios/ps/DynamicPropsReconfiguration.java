@@ -23,8 +23,8 @@ import java.util.Properties;
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
 import org.apache.felix.ipojo.test.scenarios.ps.service.FooService;
-import org.apache.felix.ipojo.test.scenarios.util.Utils;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedServiceFactory;
@@ -32,7 +32,10 @@ import org.osgi.service.cm.ManagedServiceFactory;
 public class DynamicPropsReconfiguration extends OSGiTestCase {
 	ComponentInstance fooProvider3, fooProvider4;
 	
-	public void setUp() {		
+	IPOJOHelper helper;
+
+    public void setUp() {
+        helper = new IPOJOHelper(this);		
 		String type2 = "PS-FooProviderType-Dyn2";
 		Properties p3 = new Properties();
 		p3.put("instance.name","FooProvider-3");
@@ -41,22 +44,17 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
 		p3.put("string", new String(""));
 		p3.put("strAProp", new String[0]);
 		p3.put("intAProp", new int[0]);
-		fooProvider3 = Utils.getComponentInstance(context, type2, p3);
+		fooProvider3 = helper.createComponentInstance(type2, p3);
 		
-		Properties p4 = new Properties();
-        p4.put("instance.name","FooProvider-4");
-        fooProvider4 = Utils.getComponentInstance(context, type2, p4);
+        fooProvider4 = helper.createComponentInstance(type2, "FooProvider-4");
 	}
 	
 	public void tearDown() {
-		fooProvider3.dispose();
-		fooProvider3 = null;
-	    fooProvider4.dispose();
-	    fooProvider4 = null;
+		helper.dispose();
 	}
 	
 	public void testFactoryReconf() {
-    	ServiceReference sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-3");
+    	ServiceReference sr = helper.getServiceReferenceByName(FooService.class.getName(), "FooProvider-3");
     	assertNotNull("Check the availability of the FS service", sr);
     	
     	// Check service properties
@@ -81,8 +79,8 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
     	}
     	
     	// Reconfiguration
-    	ServiceReference fact_ref = Utils.getServiceReferenceByName(context, Factory.class.getName() , "PS-FooProviderType-Dyn2");
-    	Factory fact = (Factory) context.getService(fact_ref);
+    	ServiceReference fact_ref = helper.getServiceReferenceByName(Factory.class.getName() , "PS-FooProviderType-Dyn2");
+    	Factory fact = (Factory) getServiceObject(fact_ref);
     	Properties p3 = new Properties();
     	p3.put("instance.name","FooProvider-3");
     	p3.put("int", new Integer(1));
@@ -96,7 +94,7 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
     		fail("Unable to reconfigure the instance with : " + p3);
     	}
     	
-    	sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-3");
+    	sr = helper.getServiceReferenceByName(FooService.class.getName(), "FooProvider-3");
     	assertNotNull("Check the availability of the FS service", sr);
     	
     	// Check service properties
@@ -121,7 +119,7 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
     	}	
     	
     	// Invoke
-    	FooService fs = (FooService) context.getService(sr);
+    	FooService fs = (FooService) getServiceObject(sr);
     	assertTrue("invoke fs", fs.foo());
     	
     	// Re-check the property (change)
@@ -142,8 +140,8 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
     	assertNull("Check intAProp hidding (no value)", intAProp);
     	
     	//	Reconfiguration
-    	fact_ref = Utils.getServiceReferenceByName(context, Factory.class.getName() , "PS-FooProviderType-Dyn2");
-    	fact = (Factory) context.getService(fact_ref);
+    	fact_ref = helper.getServiceReferenceByName(Factory.class.getName() , "PS-FooProviderType-Dyn2");
+    	fact = (Factory) getServiceObject(fact_ref);
     	p3 = new Properties();
     	p3.put("instance.name","FooProvider-3");
     	p3.put("int", new Integer(1));
@@ -157,7 +155,7 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
     		fail("Unable to reconfigure the instance with : " + p3);
     	}
     	
-    	sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-3");
+    	sr = helper.getServiceReferenceByName(FooService.class.getName(), "FooProvider-3");
     	assertNotNull("Check the availability of the FS service", sr);
     	
     	// Check service properties
@@ -182,13 +180,11 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
     	}	
     	
     	fact = null;
-    	context.ungetService(fact_ref);
     	fs = null;
-    	context.ungetService(sr);	
     }
 
     public void testFactoryReconfString() {
-		ServiceReference sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-3");
+		ServiceReference sr = helper.getServiceReferenceByName(FooService.class.getName(), "FooProvider-3");
 		assertNotNull("Check the availability of the FS service", sr);
 		
 		// Check service properties
@@ -213,8 +209,8 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
 		}
 		
 		// Reconfiguration
-		ServiceReference fact_ref = Utils.getServiceReferenceByName(context, Factory.class.getName() , "PS-FooProviderType-Dyn2");
-		Factory fact = (Factory) context.getService(fact_ref);
+		ServiceReference fact_ref = helper.getServiceReferenceByName(Factory.class.getName() , "PS-FooProviderType-Dyn2");
+		Factory fact = (Factory) getServiceObject(fact_ref);
 		Properties p3 = new Properties();
 		p3.put("instance.name","FooProvider-3");
 		p3.put("int", "1");
@@ -228,7 +224,7 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
 			fail("Unable to reconfigure the instance with : " + p3);
 		}
 		
-		sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-3");
+		sr = helper.getServiceReferenceByName(FooService.class.getName(), "FooProvider-3");
 		assertNotNull("Check the availability of the FS service", sr);
 		
 		// Check service properties
@@ -253,7 +249,7 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
 		}	
 		
 		// Invoke
-		FooService fs = (FooService) context.getService(sr);
+		FooService fs = (FooService) getServiceObject(sr);
 		assertTrue("invoke fs", fs.foo());
 		
 		// Re-check the property (change)
@@ -274,8 +270,8 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
 		assertNull("Check intAProp hidding (no value)", intAProp);
 		
 		//	Reconfiguration
-		fact_ref = Utils.getServiceReferenceByName(context, Factory.class.getName() , "PS-FooProviderType-Dyn2");
-		fact = (Factory) context.getService(fact_ref);
+		fact_ref = helper.getServiceReferenceByName(Factory.class.getName() , "PS-FooProviderType-Dyn2");
+		fact = (Factory) getServiceObject(fact_ref);
 		p3 = new Properties();
 		p3.put("instance.name","FooProvider-3");
 		p3.put("int", "1");
@@ -289,7 +285,7 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
 			fail("Unable to reconfigure the instance with : " + p3);
 		}
 		
-		sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-3");
+		sr = helper.getServiceReferenceByName(FooService.class.getName(), "FooProvider-3");
 		assertNotNull("Check the availability of the FS service", sr);
 		
 		// Check service properties
@@ -314,13 +310,11 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
 		}	
 		
 		fact = null;
-		context.ungetService(fact_ref);
 		fs = null;
-		context.ungetService(sr);	
 	}
 	
 	public void testMSFReconf() {
-		ServiceReference sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-3");
+		ServiceReference sr = helper.getServiceReferenceByName(FooService.class.getName(), "FooProvider-3");
 		assertNotNull("Check the availability of the FS service", sr);
 		
 		// Check service properties
@@ -345,8 +339,8 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
 		}
 		
 		// Reconfiguration
-		ServiceReference fact_ref = Utils.getServiceReferenceByName(context, ManagedServiceFactory.class.getName() , "PS-FooProviderType-Dyn2");
-		ManagedServiceFactory fact = (ManagedServiceFactory) context.getService(fact_ref);
+		ServiceReference fact_ref = helper.getServiceReferenceByName(ManagedServiceFactory.class.getName() , "PS-FooProviderType-Dyn2");
+		ManagedServiceFactory fact = (ManagedServiceFactory) getServiceObject(fact_ref);
 		Properties p3 = new Properties();
 		p3.put("int", new Integer(1));
 		p3.put("boolean", new Boolean(true));
@@ -359,7 +353,7 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
 			fail("Unable to reconfigure the instance with : " + p3);
 		}
 		
-		sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-3");
+		sr = helper.getServiceReferenceByName(FooService.class.getName(), "FooProvider-3");
 		assertNotNull("Check the availability of the FS service", sr);
 		
 		// Check service properties
@@ -384,7 +378,7 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
 		}	
 		
 		// Invoke
-		FooService fs = (FooService) context.getService(sr);
+		FooService fs = (FooService) getServiceObject(sr);
 		assertTrue("invoke fs", fs.foo());
 		
 		// Re-check the property (change)
@@ -405,8 +399,8 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
 		assertNull("Check intAProp hidding (no value)", intAProp);
 		
 		//	Reconfiguration
-		fact_ref = Utils.getServiceReferenceByName(context, ManagedServiceFactory.class.getName() , "PS-FooProviderType-Dyn2");
-		fact = (ManagedServiceFactory) context.getService(fact_ref);
+		fact_ref = helper.getServiceReferenceByName(ManagedServiceFactory.class.getName() , "PS-FooProviderType-Dyn2");
+		fact = (ManagedServiceFactory) getServiceObject(fact_ref);
 		p3 = new Properties();
 		p3.put("int", new Integer(1));
 		p3.put("boolean", new Boolean(true));
@@ -419,7 +413,7 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
 			fail("Unable to reconfigure the instance with : " + p3);
 		}
 		
-		sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-3");
+		sr = helper.getServiceReferenceByName(FooService.class.getName(), "FooProvider-3");
 		assertNotNull("Check the availability of the FS service", sr);
 		
 		// Check service properties
@@ -444,13 +438,11 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
 		}	
 		
 		fact = null;
-		context.ungetService(fact_ref);
 		fs = null;
-		context.ungetService(sr);	
 	}
 
     public void testMSFReconfString() {
-    	ServiceReference sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-3");
+    	ServiceReference sr = helper.getServiceReferenceByName(FooService.class.getName(), "FooProvider-3");
     	assertNotNull("Check the availability of the FS service", sr);
     	
     	// Check service properties
@@ -475,8 +467,8 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
     	}
     	
     	// Reconfiguration
-    	ServiceReference fact_ref = Utils.getServiceReferenceByName(context, ManagedServiceFactory.class.getName() , "PS-FooProviderType-Dyn2");
-    	ManagedServiceFactory fact = (ManagedServiceFactory) context.getService(fact_ref);
+    	ServiceReference fact_ref = helper.getServiceReferenceByName(ManagedServiceFactory.class.getName() , "PS-FooProviderType-Dyn2");
+    	ManagedServiceFactory fact = (ManagedServiceFactory) getServiceObject(fact_ref);
     	Properties p3 = new Properties();
     	p3.put("int", "1");
     	p3.put("boolean", "true");
@@ -489,7 +481,7 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
     		fail("Unable to reconfigure the instance with : " + p3);
     	}
     	
-    	sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-3");
+    	sr = helper.getServiceReferenceByName(FooService.class.getName(), "FooProvider-3");
     	assertNotNull("Check the availability of the FS service", sr);
     	
     	// Check service properties
@@ -514,7 +506,7 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
     	}	
     	
     	// Invoke
-    	FooService fs = (FooService) context.getService(sr);
+    	FooService fs = (FooService) getServiceObject(sr);
     	assertTrue("invoke fs", fs.foo());
     	
     	// Re-check the property (change)
@@ -535,8 +527,8 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
     	assertNull("Check intAProp hidding (no value)", intAProp);
     	
     	//	Reconfiguration
-    	fact_ref = Utils.getServiceReferenceByName(context, ManagedServiceFactory.class.getName() , "PS-FooProviderType-Dyn2");
-    	fact = (ManagedServiceFactory) context.getService(fact_ref);
+    	fact_ref = helper.getServiceReferenceByName(ManagedServiceFactory.class.getName() , "PS-FooProviderType-Dyn2");
+    	fact = (ManagedServiceFactory) getServiceObject(fact_ref);
     	p3 = new Properties();
     	p3.put("int", "1");
         p3.put("boolean", "true");
@@ -549,7 +541,7 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
     		fail("Unable to reconfigure the instance with : " + p3);
     	}
     	
-    	sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-3");
+    	sr = helper.getServiceReferenceByName(FooService.class.getName(), "FooProvider-3");
     	assertNotNull("Check the availability of the FS service", sr);
     	
     	// Check service properties
@@ -574,13 +566,11 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
     	}	
     	
     	fact = null;
-    	context.ungetService(fact_ref);
     	fs = null;
-    	context.ungetService(sr);	
     }
 
     public void testFactoryReconfNoValue() {
-    	ServiceReference sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-4");
+    	ServiceReference sr = helper.getServiceReferenceByName(FooService.class.getName(), "FooProvider-4");
     	assertNotNull("Check the availability of the FS service", sr);
     	
     	// Check service properties
@@ -602,8 +592,8 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
         }
     	
     	// Reconfiguration
-    	ServiceReference fact_ref = Utils.getServiceReferenceByName(context, Factory.class.getName() , "PS-FooProviderType-Dyn2");
-    	Factory fact = (Factory) context.getService(fact_ref);
+    	ServiceReference fact_ref = helper.getServiceReferenceByName(Factory.class.getName() , "PS-FooProviderType-Dyn2");
+    	Factory fact = (Factory) getServiceObject(fact_ref);
     	Properties p3 = new Properties();
     	p3.put("instance.name","FooProvider-4");
     	p3.put("int", new Integer(1));
@@ -617,7 +607,7 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
     		fail("Unable to reconfigure the instance with : " + p3);
     	}
     	
-    	sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-4");
+    	sr = helper.getServiceReferenceByName(FooService.class.getName(), "FooProvider-4");
     	assertNotNull("Check the availability of the FS service", sr);
     	
     	// Check service properties
@@ -642,7 +632,7 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
     	}	
     	
     	// Invoke
-    	FooService fs = (FooService) context.getService(sr);
+    	FooService fs = (FooService) getServiceObject(sr);
     	assertTrue("invoke fs", fs.foo());
     	
     	// Re-check the property (change)
@@ -663,8 +653,8 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
     	assertNull("Check intAProp hidding (no value)", intAProp);
     	
     	//	Reconfiguration
-    	fact_ref = Utils.getServiceReferenceByName(context, Factory.class.getName() , "PS-FooProviderType-Dyn2");
-    	fact = (Factory) context.getService(fact_ref);
+    	fact_ref = helper.getServiceReferenceByName(Factory.class.getName() , "PS-FooProviderType-Dyn2");
+    	fact = (Factory) getServiceObject(fact_ref);
     	p3 = new Properties();
     	p3.put("instance.name","FooProvider-3");
     	p3.put("int", new Integer(1));
@@ -678,7 +668,7 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
     		fail("Unable to reconfigure the instance with : " + p3);
     	}
     	
-    	sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-3");
+    	sr = helper.getServiceReferenceByName(FooService.class.getName(), "FooProvider-3");
     	assertNotNull("Check the availability of the FS service", sr);
     	
     	// Check service properties
@@ -703,9 +693,7 @@ public class DynamicPropsReconfiguration extends OSGiTestCase {
     	}	
     	
     	fact = null;
-    	context.ungetService(fact_ref);
     	fs = null;
-    	context.ungetService(sr);	
     }
 
 }

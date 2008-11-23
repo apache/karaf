@@ -4,12 +4,11 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.felix.ipojo.ComponentInstance;
-import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
 import org.apache.felix.ipojo.test.scenarios.component.InnerClasses;
 import org.apache.felix.ipojo.test.scenarios.component.InnerClasses.PublicNested;
 import org.apache.felix.ipojo.test.scenarios.manipulation.service.CheckService;
-import org.apache.felix.ipojo.test.scenarios.util.Utils;
 import org.osgi.framework.ServiceReference;
 
 public class NestedClassesTests extends OSGiTestCase {
@@ -17,8 +16,11 @@ public class NestedClassesTests extends OSGiTestCase {
     private ComponentInstance instance;
     private CheckService service; 
     
+    IPOJOHelper helper;
+    
+    
     public void setUp() {
-        Factory factory = Utils.getFactoryByName(context, "inners");
+        helper = new IPOJOHelper(this);
         Properties map = new Properties();
         map.put("publicObject", "publicObject");
         map.put("publicInt", new Integer(0));
@@ -30,20 +32,15 @@ public class NestedClassesTests extends OSGiTestCase {
         map.put("privateInt", new Integer(3));
         map.put("nonObject", "nonObject");
         map.put("nonInt", new Integer(4));
-        try {
-            instance = factory.createComponentInstance(map);
-        } catch (Exception e) {
-           fail(e.getMessage());
-        }
+        instance = helper.createComponentInstance("inners", map);
         
-        ServiceReference ref =Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance.getInstanceName());
+        ServiceReference ref = helper.getServiceReferenceByName(CheckService.class.getName(), instance.getInstanceName());
         assertNotNull("Check service availability", ref);
-        service = (CheckService) context.getService(ref);
+        service = (CheckService) getServiceObject(ref);
     }
     
     public void tearDown() {
-        instance.dispose();
-        instance = null;
+        helper.dispose();
         service = null;
     }
     
@@ -177,7 +174,5 @@ public class NestedClassesTests extends OSGiTestCase {
         assertEquals("Check non-managed int", new Integer(5), data.get("nonInt"));
         
     }
-    
-    
 
 }

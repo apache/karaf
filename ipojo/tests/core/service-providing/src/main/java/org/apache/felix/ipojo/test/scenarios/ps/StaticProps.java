@@ -20,23 +20,20 @@ package org.apache.felix.ipojo.test.scenarios.ps;
 
 import java.util.Properties;
 
-import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
 import org.apache.felix.ipojo.test.scenarios.ps.service.FooService;
-import org.apache.felix.ipojo.test.scenarios.util.Utils;
 import org.osgi.framework.ServiceReference;
 
 public class StaticProps extends OSGiTestCase {
-	
-	ComponentInstance fooProvider1;
-	ComponentInstance fooProvider2;
+
+	IPOJOHelper helper;
 	
 	public void setUp() {
+	    helper = new IPOJOHelper(this);
 		String type = "PS-FooProviderType-2";
-		
-		Properties p1 = new Properties();
-		p1.put("instance.name","FooProvider-1");
-		fooProvider1 = Utils.getComponentInstance(context, type, p1);
+
+		helper.createComponentInstance(type, "FooProvider-1");
 		
 		Properties p2 = new Properties();
 		p2.put("instance.name","FooProvider-2");
@@ -45,19 +42,16 @@ public class StaticProps extends OSGiTestCase {
 		p2.put("string", new String("bar"));
 		p2.put("strAProp", new String[] {"bar", "foo"});
 		p2.put("intAProp", new int[] {1, 2, 3});
-		fooProvider2 = Utils.getComponentInstance(context, type, p2);
+		helper.createComponentInstance(type, p2);
 		
 	}
 	
 	public void tearDown() {
-		fooProvider1.dispose();
-		fooProvider1 = null;
-		fooProvider2.dispose();
-		fooProvider2 = null;
+	    helper.dispose();
 	}
 	
 	public void testProperties1() {
-		ServiceReference sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-1");
+		ServiceReference sr = helper.getServiceReferenceByName(FooService.class.getName(), "FooProvider-1");
 		assertNotNull("Check the availability of the FS service", sr);
 		
 		// Check service properties
@@ -84,7 +78,7 @@ public class StaticProps extends OSGiTestCase {
 	}
 	
 	public void testProperties2() {
-		ServiceReference sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-2");
+		ServiceReference sr = helper.getServiceReferenceByName(FooService.class.getName(), "FooProvider-2");
 		assertNotNull("Check the availability of the FS service", sr);
 		
 		// Check service properties

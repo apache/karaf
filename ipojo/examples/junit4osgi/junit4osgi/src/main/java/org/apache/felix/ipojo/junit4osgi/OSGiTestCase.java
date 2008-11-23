@@ -18,14 +18,15 @@
  */
 package org.apache.felix.ipojo.junit4osgi;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import junit.framework.TestCase;
 
-import org.apache.felix.ipojo.Factory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.cm.ManagedServiceFactory;
 
 /**
  * OSGi Test Case. Allow the injection of the bundle context.
@@ -35,6 +36,23 @@ import org.osgi.service.cm.ManagedServiceFactory;
 public class OSGiTestCase extends TestCase {
 
 	protected BundleContext context;
+	
+	
+	private List references = new ArrayList();
+	
+    /**
+     * Extends runBare to release (unget) services after the teardown.
+     * @throws Throwable when an error occurs.
+     * @see junit.framework.TestCase#runBare()
+     */
+    public void runBare() throws Throwable {
+	    super.runBare();
+	    // Unget services
+	    for (int i = 0; i < references.size(); i++) {
+	        context.ungetService((ServiceReference) references.get(i));
+	    }
+	    references.clear();
+	}
 
 	public void setBundleContext(BundleContext bc) {
 		context = bc;
@@ -180,8 +198,6 @@ public class OSGiTestCase extends TestCase {
 		return false;
 	}
 
-	
-
 	private static String formatEqualsMessage(String message, Object expected,
 			Object actual) {
 		String formatted = "";
@@ -311,18 +327,6 @@ public class OSGiTestCase extends TestCase {
         ServiceReference ref = getServiceReference(itf, null);
         return ref != null;
     }
-
-	/**
-     * Checks if the service is available.
-     * @param itf the service interface
-     * @param the service provider name
-     * @return <code>true</code> if the service is available,
-     * <code>false</code> otherwise.
-     */
-    public boolean isServiceAvailableByName(String itf, String name) {
-        ServiceReference ref = getServiceReferenceByName(itf, name);
-        return ref != null;
-    }
     
     /**
      * Checks if the service is available.
@@ -366,33 +370,6 @@ public class OSGiTestCase extends TestCase {
 							+ refs.length + ")" + " for " + itf + " with pid="
 							+ pid);
 		}
-	}
-
-	
-
-	/**
-	 * Returns the service reference of a service provided by the specified
-	 * bundle, offering the specified interface and having the given name.
-	 * 
-	 * @param bundle
-	 *            the bundle in which the service is searched.
-	 * @param itf
-	 *            the interface provided by the searched service.
-	 * @param name
-	 *            the name of the searched service.
-	 * @return a service provided by the specified bundle, offering the
-	 *         specified interface and having the given name.
-	 */
-	public static ServiceReference getServiceReferenceByName(Bundle bundle,
-			String itf, String name) {
-		String filter = null;
-		if (itf.equals(Factory.class.getName())
-				|| itf.equals(ManagedServiceFactory.class.getName())) {
-			filter = "(" + "factory.name" + "=" + name + ")";
-		} else {
-			filter = "(" + "instance.name" + "=" + name + ")";
-		}
-		return getServiceReference(bundle, itf, filter);
 	}
 
 	
@@ -443,8 +420,32 @@ public class OSGiTestCase extends TestCase {
 	 *         specified interface and matching the given filter.
 	 */
 	public Object getServiceObject(String itf, String filter) {
-		return getServiceObject(context.getBundle(), itf, filter);
+		ServiceReference ref = getServiceReference(itf, filter);
+        if (ref != null) {
+            references.add(ref);
+            return context.getService(ref);
+        } else {
+            return null;
+        }
 	}
+	
+	   
+	/**
+     * Returns the service object associated with this service
+     * reference.
+     * 
+     * @param ref
+     *            service reference
+     * @return the service object.
+     */
+    public Object getServiceObject(ServiceReference ref) {
+        if (ref != null) {
+            references.add(ref);
+            return context.getService(ref);
+        } else {
+            return null;
+        }
+    }
 
 	/**
 	 * Returns the service objects of the services provided by the local
@@ -458,8 +459,18 @@ public class OSGiTestCase extends TestCase {
 	 *         the specified interface and matching the given filter.
 	 */
 	public Object[] getServiceObjects(String itf, String filter) {
-		return getServiceObjects(context.getBundle(), itf, filter);
-	}
+	    ServiceReference[] refs = getServiceReferences(itf, filter);
+        if (refs != null) {
+            Object[] list = new Object[refs.length];
+            for (int i = 0; i < refs.length; i++) {
+                references.add(refs[i]);
+                list[i] = context.getService(refs[i]);
+            }
+            return list;
+        } else {
+            return new Object[0];
+        }
+    }
 
 	/**
 	 * Returns the service reference of a service provided by the local
@@ -476,6 +487,20 @@ public class OSGiTestCase extends TestCase {
 	public ServiceReference getServiceReference(String itf, String filter) {
 		return getServiceReference(context.getBundle(), itf, filter);
 	}
+	
+	/**
+     * Returns the service reference of a service provided 
+     * offering the specified interface.
+     * 
+     * @param itf
+     *            the interface provided by the searched service.
+     * @return a service reference provided by the local bundle, offering
+     *         the specified interface and matching the given filter. If no
+     *         service is found, {@code null} is returned.
+     */
+    public ServiceReference getServiceReference(String itf) {
+        return getServiceReference(context.getBundle(), itf, null);
+    }
 
 	/**
 	 * Returns the service reference of the service provided by the local
@@ -491,21 +516,6 @@ public class OSGiTestCase extends TestCase {
 	 */
 	public ServiceReference getServiceReferenceByPID(String itf, String pid) {
 		return getServiceReferenceByPID(context.getBundle(), itf, pid);
-	}
-
-	/**
-	 * Returns the service reference of a service provided by the local
-	 * bundle, offering the specified interface and having the given name.
-	 * 
-	 * @param itf
-	 *            the interface provided by the searched service.
-	 * @param name
-	 *            the name of the searched service.
-	 * @return a service provided by the specified bundle, offering the
-	 *         specified interface and having the given name.
-	 */
-	public ServiceReference getServiceReferenceByName(String itf, String name) {
-		return getServiceReferenceByName(context.getBundle(), itf, name);
 	}
 
 	/**

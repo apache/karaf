@@ -27,6 +27,7 @@
   <modules>
 		<module>junit4osgi</module>
 		<module>felix-command</module>
+		<module>maven-junit4osgi-plugin</module>
   </modules>
 
   <profiles>

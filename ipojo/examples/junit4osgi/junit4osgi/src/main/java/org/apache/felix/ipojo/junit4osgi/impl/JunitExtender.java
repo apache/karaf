@@ -40,6 +40,7 @@ import org.apache.felix.ipojo.junit4osgi.OSGiTestSuite;
 import org.apache.felix.ipojo.parser.ParseUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.log.LogService;
 
 /**
  * Detect test suite from installed bundles.
@@ -52,18 +53,20 @@ public class JunitExtender implements OSGiJunitRunner {
     private Map/*<Bundle, List<Class>>*/ m_suites = new HashMap/*<Bundle, List<Class>>*/();
 
     private ResultPrinter m_printer = new ResultPrinter(System.out);
+    
+    private LogService m_log;
 
     void onBundleArrival(Bundle bundle, String header) {
         String[] tss = ParseUtils.split(header, ",");
         for (int i = 0; i < tss.length; i++) {
             try {
                 if (tss[i].length() != 0) {
-                    System.out.println("Loading " + tss[i]);
+                    m_log.log(LogService.LOG_INFO, "Loading " + tss[i]);
                     Class/*<? extends Test>*/ clazz = bundle.loadClass(tss[i].trim());
                     addTestSuite(bundle, clazz);
                 }
             } catch (ClassNotFoundException e) {
-                System.err.println("The test suite " + tss[i] + " is not in the bundle " + bundle.getBundleId() + " : " + e.getMessage());
+                m_log.log(LogService.LOG_ERROR, "The test suite " + tss[i] + " is not in the bundle " + bundle.getBundleId() + " : " + e.getMessage());
             }
         }
     }
@@ -81,7 +84,7 @@ public class JunitExtender implements OSGiJunitRunner {
 
     private synchronized void removeTestSuites(Bundle bundle) {
         List list = (List) m_suites.remove(bundle);
-        System.out.println("Unload test suites " + list);
+        m_log.log(LogService.LOG_INFO, "Unload test suites " + list);
     }
 
     void onBundleDeparture(Bundle bundle) {
@@ -147,7 +150,7 @@ public class JunitExtender implements OSGiJunitRunner {
         }
 
         if (!Modifier.isStatic(suiteMethod.getModifiers())) {
-            System.err.println("Suite() method must be static");
+            m_log.log(LogService.LOG_ERROR, "Suite() method must be static");
             return null;
         }
         Test test = null;
@@ -158,10 +161,10 @@ public class JunitExtender implements OSGiJunitRunner {
                 test = (Test) suiteMethod.invoke(null, (Object[]) new Class[0]); // static method
             }
         } catch (InvocationTargetException e) {
-            System.err.println("Failed to invoke suite():" + e.getTargetException().toString());
+            m_log.log(LogService.LOG_ERROR, "Failed to invoke suite():" + e.getTargetException().toString());
             return null;
         } catch (IllegalAccessException e) {
-            System.err.println("Failed to invoke suite():" + e.toString());
+            m_log.log(LogService.LOG_ERROR, "Failed to invoke suite():" + e.toString());
             return null;
         }
 
@@ -225,12 +228,12 @@ public class JunitExtender implements OSGiJunitRunner {
     }
 
     public synchronized void stopping() {
-        System.out.println("Cleaning test suites ...");
+        m_log.log(LogService.LOG_INFO, "Cleaning test suites ...");
         m_suites.clear();
     }
     
     public void starting() {
-        System.out.println("Junit Extender starting ...");
+        m_log.log(LogService.LOG_INFO, "Junit Extender starting ...");
     }
 
     private BundleContext getBundleContext(Bundle bundle) {
@@ -264,13 +267,13 @@ public class JunitExtender implements OSGiJunitRunner {
             try {
                 return (BundleContext) meth.invoke(bundle, new Object[0]);
             } catch (IllegalArgumentException e) {
-                err("Cannot get the BundleContext by invoking " + meth.getName(), e);
+                m_log.log(LogService.LOG_ERROR, "Cannot get the BundleContext by invoking " + meth.getName(), e);
                 return null;
             } catch (IllegalAccessException e) {
-                err("Cannot get the BundleContext by invoking " + meth.getName(), e);
+                m_log.log(LogService.LOG_ERROR, "Cannot get the BundleContext by invoking " + meth.getName(), e);
                 return null;
             } catch (InvocationTargetException e) {
-                err("Cannot get the BundleContext by invoking " + meth.getName(), e);
+                m_log.log(LogService.LOG_ERROR, "Cannot get the BundleContext by invoking " + meth.getName(), e);
                 return null;
             }
         }
@@ -285,20 +288,16 @@ public class JunitExtender implements OSGiJunitRunner {
                 try {
                     return (BundleContext) fields[i].get(bundle);
                 } catch (IllegalArgumentException e) {
-                    err("Cannot get the BundleContext by invoking " + meth.getName(), e);
+                    m_log.log(LogService.LOG_ERROR, "Cannot get the BundleContext by invoking " + meth.getName(), e);
                     return null;
                 } catch (IllegalAccessException e) {
-                    err("Cannot get the BundleContext by invoking " + meth.getName(), e);
+                    m_log.log(LogService.LOG_ERROR, "Cannot get the BundleContext by invoking " + meth.getName(), e);
                     return null;
                 }
             }
         }
-        err("Cannot find the BundleContext for " + bundle.getSymbolicName(), null);
+        m_log.log(LogService.LOG_ERROR, "Cannot find the BundleContext for " + bundle.getSymbolicName(), null);
         return null;
-    }
-
-    private void err(String s, Throwable e) {
-        System.err.println(s + " : " + e.getMessage());
     }
 
 }

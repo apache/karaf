@@ -26,14 +26,12 @@ public class TypedList extends OSGiTestCase {
     }
     
     public void tearDown() {
-        foo1.dispose();
-        foo2.dispose();
-        checker.dispose();
+        helper.dispose();
     }
     
     public void testTypedList() {
-        ServiceReference ref = getServiceReferenceByName(CheckService.class.getName(), checker.getInstanceName()); 
-        CheckService check = (CheckService) context.getService(ref);
+        ServiceReference ref = helper.getServiceReferenceByName(CheckService.class.getName(), checker.getInstanceName()); 
+        CheckService check = (CheckService) getServiceObject(ref);
         assertNotNull("Checker availability", check);
         // Check without providers
         assertFalse("Empty list", check.check());
@@ -58,10 +56,6 @@ public class TypedList extends OSGiTestCase {
         props = check.getProps();
         list = (List<FooService>) props.get("list");
         assertEquals("Check size - 3", 1, list.size());
-        
-        context.ungetService(ref);
     }
-    
-    
 
 }

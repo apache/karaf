@@ -26,18 +26,17 @@ public class ComparatorTestCase extends OSGiTestCase {
     }
     
     public void tearDown() {
-       dynInstance.dispose();
-       dpInstance.dispose();
+       helper.dispose();
     }
     
     public void testDynamic() {
-        ComponentInstance grade1 = createGrade(1);
+        createGrade(1);
         ComponentInstance grade2 = createGrade(2);
         
-        ServiceReference ref = getServiceReferenceByName(CheckService.class.getName(), dynInstance.getInstanceName());
+        ServiceReference ref = helper.getServiceReferenceByName(CheckService.class.getName(), dynInstance.getInstanceName());
         assertNotNull("CS availability", ref);
         
-        CheckService cs = (CheckService) context.getService(ref);
+        CheckService cs = (CheckService) getServiceObject(ref);
         Properties result = cs.getProps();
         int fsGrade = ((Integer) result.get("fs")).intValue();
         int fs2Grade = ((Integer) result.get("fs2")).intValue();
@@ -51,7 +50,7 @@ public class ComparatorTestCase extends OSGiTestCase {
         assertEquals("fss grade[0] -1", 2, fssGrades[0]);
         assertEquals("fss grade[1] -1", 1, fssGrades[1]);
         
-        ComponentInstance grade3 = createGrade(3);
+        createGrade(3);
         result = cs.getProps();
         fsGrade = ((Integer) result.get("fs")).intValue();
         fs2Grade = ((Integer) result.get("fs2")).intValue();
@@ -76,21 +75,16 @@ public class ComparatorTestCase extends OSGiTestCase {
         assertEquals("fss grade size -3", 2, fssGrades.length);
         assertEquals("fss grade[0] -3", 1, fssGrades[0]);
         assertEquals("fss grade[1] -3", 3, fssGrades[1]);        
-        
-        context.ungetService(ref);
-        grade1.dispose();
-        grade2.dispose();
-        grade3.dispose();
     }
     
     public void testDynamicPriority() {
-        ComponentInstance grade1 = createGrade(1);
+        createGrade(1);
         ComponentInstance grade2 = createGrade(2);
         
-        ServiceReference ref = getServiceReferenceByName(CheckService.class.getName(), dpInstance.getInstanceName());
+        ServiceReference ref = helper.getServiceReferenceByName(CheckService.class.getName(), dpInstance.getInstanceName());
         assertNotNull("CS availability", ref);
         
-        CheckService cs = (CheckService) context.getService(ref);
+        CheckService cs = (CheckService) getServiceObject(ref);
         Properties result = cs.getProps();
         int fsGrade = ((Integer) result.get("fs")).intValue();
         int fs2Grade = ((Integer) result.get("fs2")).intValue();
@@ -102,7 +96,7 @@ public class ComparatorTestCase extends OSGiTestCase {
         assertEquals("fss grade[0] -1", 2, fssGrades[0]);
         assertEquals("fss grade[1] -1", 1, fssGrades[1]);
         
-        ComponentInstance grade3 = createGrade(3);
+        createGrade(3);
         result = cs.getProps();
         fsGrade = ((Integer) result.get("fs")).intValue();
         fs2Grade = ((Integer) result.get("fs2")).intValue();
@@ -127,11 +121,6 @@ public class ComparatorTestCase extends OSGiTestCase {
         assertEquals("fss grade size -3", 2, fssGrades.length);
         assertEquals("fss grade[0] -3", 3, fssGrades[0]);
         assertEquals("fss grade[1] -3", 1, fssGrades[1]);        
-        
-        context.ungetService(ref);
-        grade1.dispose();
-        grade2.dispose();
-        grade3.dispose();
     }
     
     private ComponentInstance createGrade(int grade) {

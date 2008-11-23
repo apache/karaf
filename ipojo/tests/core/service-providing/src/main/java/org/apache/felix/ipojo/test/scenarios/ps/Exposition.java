@@ -18,13 +18,11 @@
  */
 package org.apache.felix.ipojo.test.scenarios.ps;
 
-import java.util.Properties;
-
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
 import org.apache.felix.ipojo.test.scenarios.ps.service.BarService;
 import org.apache.felix.ipojo.test.scenarios.ps.service.FooService;
-import org.apache.felix.ipojo.test.scenarios.util.Utils;
 import org.osgi.framework.ServiceReference;
 
 public class Exposition extends OSGiTestCase {
@@ -35,26 +33,19 @@ public class Exposition extends OSGiTestCase {
 	private ComponentInstance fooBarProvider2;
 	private ComponentInstance fooBarProvider3;
 	
+	private IPOJOHelper helper;
+	
 	public void setUp(){ 
-		Properties p1 = new Properties();
-		p1.put("instance.name","fooProviderSimple");
-		fooProviderSimple = Utils.getComponentInstance(context, "PS-FooProviderType-1", p1);
+	    helper = new IPOJOHelper(this);
+		fooProviderSimple = helper.createComponentInstance("PS-FooProviderType-1", "fooProviderSimple");
 		
-		Properties p2 = new Properties();
-		p2.put("instance.name","fooProviderItf");
-		fooProviderItf = Utils.getComponentInstance(context, "PS-FooProviderType-itf", p2);
+		fooProviderItf = helper.createComponentInstance("PS-FooProviderType-itf", "fooProviderItf");
 		
-		Properties p3 = new Properties();
-		p3.put("instance.name","fooProviderItfs");
-		fooBarProvider = Utils.getComponentInstance(context, "PS-FooBarProviderType-1", p3);
+		fooBarProvider = helper.createComponentInstance("PS-FooBarProviderType-1", "fooProviderItfs");
 		
-		Properties p4 = new Properties();
-		p4.put("instance.name","fooProviderItfs2");
-		fooBarProvider2 = Utils.getComponentInstance(context, "PS-FooBarProviderType-2", p4);
+		fooBarProvider2 = helper.createComponentInstance("PS-FooBarProviderType-2", "fooProviderItfs2");
 		
-		Properties p5 = new Properties();
-		p5.put("instance.name","fooProviderItfs3");
-		fooBarProvider3 = Utils.getComponentInstance(context, "PS-FooBarProviderType-3", p5);
+		fooBarProvider3 = helper.createComponentInstance("PS-FooBarProviderType-3", "fooProviderItfs3");
 		
 		assertNotNull("Check the instance creation of fooProviderSimple", fooProviderSimple);
 		assertNotNull("Check the instance creation of fooProviderItf", fooProviderItf);
@@ -65,113 +56,96 @@ public class Exposition extends OSGiTestCase {
 	}
 	
 	public void tearDown() {
-		fooProviderSimple.dispose();
-		fooProviderItf.dispose();
-		fooBarProvider.dispose();
-		fooBarProvider2.dispose();
-		fooBarProvider3.dispose();
-		fooProviderSimple = null;
-		fooProviderItf = null;
-		fooBarProvider = null;
-		fooBarProvider2 = null;
-		fooBarProvider3 = null;		
+	    helper.dispose();	
 	}
 	
 	public void testSimpleExposition() {
-		ServiceReference ref = Utils.getServiceReferenceByName(context, FooService.class.getName(), fooProviderSimple.getInstanceName());
+		ServiceReference ref = helper.getServiceReferenceByName(FooService.class.getName(), fooProviderSimple.getInstanceName());
 		assertNotNull("Check the availability of the FS from "+fooProviderSimple.getInstanceName(), ref);
-		FooService fs = (FooService) context.getService(ref);
+		FooService fs = (FooService) getServiceObject(ref);
 		assertTrue("Check fs invocation", fs.foo());
 		fs = null;
-		context.ungetService(ref);
 		fooProviderSimple.stop();
-		ref = Utils.getServiceReferenceByName(context, FooService.class.getName(), fooProviderSimple.getInstanceName());
+		ref = helper.getServiceReferenceByName(FooService.class.getName(), fooProviderSimple.getInstanceName());
 		assertNull("Check the absence of the FS from "+fooProviderSimple.getInstanceName(), ref);
 		
 	}
 	
 	public void testItfExposition() {
-		ServiceReference ref = Utils.getServiceReferenceByName(context, FooService.class.getName(), fooProviderItf.getInstanceName());
+		ServiceReference ref = helper.getServiceReferenceByName(FooService.class.getName(), fooProviderItf.getInstanceName());
 		assertNotNull("Check the availability of the FS from "+fooProviderItf.getInstanceName(), ref);
-		FooService fs = (FooService) context.getService(ref);
+		FooService fs = (FooService) getServiceObject(ref);
 		assertTrue("Check fs invocation", fs.foo());
 		fs = null;
-		context.ungetService(ref);
 		fooProviderItf.stop();
 		
-		ref = Utils.getServiceReferenceByName(context, FooService.class.getName(), fooProviderItf.getInstanceName());
+		ref = helper.getServiceReferenceByName(FooService.class.getName(), fooProviderItf.getInstanceName());
 		assertNull("Check the absence of the FS from "+fooProviderItf.getInstanceName(), ref);
 	}
 	
 	public void testItfsExposition() {
-		ServiceReference refFoo = Utils.getServiceReferenceByName(context, FooService.class.getName(), fooBarProvider.getInstanceName());
+		ServiceReference refFoo = helper.getServiceReferenceByName(FooService.class.getName(), fooBarProvider.getInstanceName());
 		assertNotNull("Check the availability of the FS from "+fooBarProvider.getInstanceName(), refFoo);
-		ServiceReference refBar = Utils.getServiceReferenceByName(context, BarService.class.getName(), fooBarProvider.getInstanceName());
+		ServiceReference refBar = helper.getServiceReferenceByName(BarService.class.getName(), fooBarProvider.getInstanceName());
 		assertNotNull("Check the availability of the BS from "+fooBarProvider.getInstanceName(), refBar);
 		
 		assertSame("Check service reference equality", refFoo, refBar);
 		
-		FooService fs = (FooService) context.getService(refFoo);
+		FooService fs = (FooService) getServiceObject(refFoo);
 		assertTrue("Check fs invocation", fs.foo());
 		fs = null;
-		context.ungetService(refFoo);
 		
-		BarService bs = (BarService) context.getService(refBar);
+		BarService bs = (BarService) getServiceObject(refBar);
 		assertTrue("Check bs invocation", bs.bar());
 		bs = null;
-		context.ungetService(refBar);
 		
 		fooBarProvider.stop();
 		
-		refFoo = Utils.getServiceReferenceByName(context, FooService.class.getName(), fooBarProvider.getInstanceName());
-		refBar = Utils.getServiceReferenceByName(context, BarService.class.getName(), fooBarProvider.getInstanceName());
+		refFoo = helper.getServiceReferenceByName(FooService.class.getName(), fooBarProvider.getInstanceName());
+		refBar = helper.getServiceReferenceByName(BarService.class.getName(), fooBarProvider.getInstanceName());
 		assertNull("Check the absence of the FS from "+fooBarProvider.getInstanceName(), refFoo);
 		assertNull("Check the absence of the BS from "+fooBarProvider.getInstanceName(), refBar);
 	}
 	
 	public void testItfsExposition2() {
-		ServiceReference refFoo = Utils.getServiceReferenceByName(context, FooService.class.getName(), fooBarProvider2.getInstanceName());
+		ServiceReference refFoo = helper.getServiceReferenceByName(FooService.class.getName(), fooBarProvider2.getInstanceName());
 		assertNotNull("Check the availability of the FS from "+fooBarProvider2.getInstanceName(), refFoo);
-		ServiceReference refBar = Utils.getServiceReferenceByName(context, BarService.class.getName(), fooBarProvider2.getInstanceName());
+		ServiceReference refBar = helper.getServiceReferenceByName(BarService.class.getName(), fooBarProvider2.getInstanceName());
 		assertNotNull("Check the availability of the BS from "+fooBarProvider2.getInstanceName(), refBar);
 		
 		assertSame("Check service reference equality", refFoo, refBar);
 		
-		FooService fs = (FooService) context.getService(refFoo);
+		FooService fs = (FooService) getServiceObject(refFoo);
 		assertTrue("Check fs invocation", fs.foo());
 		fs = null;
-		context.ungetService(refFoo);
 		
-		BarService bs = (BarService) context.getService(refBar);
+		BarService bs = (BarService) getServiceObject(refBar);
 		assertTrue("Check bs invocation", bs.bar());
 		bs = null;
-		context.ungetService(refBar);
 		
 		fooBarProvider2.stop();
 		
-		refFoo = Utils.getServiceReferenceByName(context, FooService.class.getName(), fooBarProvider2.getInstanceName());
-		refBar = Utils.getServiceReferenceByName(context, BarService.class.getName(), fooBarProvider2.getInstanceName());
+		refFoo = helper.getServiceReferenceByName(FooService.class.getName(), fooBarProvider2.getInstanceName());
+		refBar = helper.getServiceReferenceByName(BarService.class.getName(), fooBarProvider2.getInstanceName());
 		assertNull("Check the absence of the FS from "+fooBarProvider.getInstanceName(), refFoo);
 		assertNull("Check the absence of the BS from "+fooBarProvider.getInstanceName(), refBar);
 	}
 	
 	public void testItfsExposition3() {
-		ServiceReference refFoo = Utils.getServiceReferenceByName(context, FooService.class.getName(), fooBarProvider3.getInstanceName());
+		ServiceReference refFoo = helper.getServiceReferenceByName(FooService.class.getName(), fooBarProvider3.getInstanceName());
 		assertNotNull("Check the availability of the FS from "+fooBarProvider3.getInstanceName(), refFoo);
-		ServiceReference refBar = Utils.getServiceReferenceByName(context, BarService.class.getName(), fooBarProvider3.getInstanceName());
+		ServiceReference refBar = helper.getServiceReferenceByName(BarService.class.getName(), fooBarProvider3.getInstanceName());
 		assertNotNull("Check the availability of the BS from "+fooBarProvider3.getInstanceName(), refBar);
 		
 		assertNotSame("Check service reference inequality", refFoo, refBar);
 		
-		FooService fs = (FooService) context.getService(refFoo);
+		FooService fs = (FooService) getServiceObject(refFoo);
 		assertTrue("Check fs invocation", fs.foo());
 		fs = null;
-		context.ungetService(refFoo);
 		
-		BarService bs = (BarService) context.getService(refBar);
+		BarService bs = (BarService) getServiceObject(refBar);
 		assertTrue("Check bs invocation", bs.bar());
 		bs = null;
-		context.ungetService(refBar);
 		
 		// Check properties
 		String baz1 = (String) refFoo.getProperty("baz");
@@ -182,8 +156,8 @@ public class Exposition extends OSGiTestCase {
 		
 		fooBarProvider3.stop();
 		
-		refFoo = Utils.getServiceReferenceByName(context, FooService.class.getName(), fooBarProvider3.getInstanceName());
-		refBar = Utils.getServiceReferenceByName(context, BarService.class.getName(), fooBarProvider3.getInstanceName());
+		refFoo = helper.getServiceReferenceByName(FooService.class.getName(), fooBarProvider3.getInstanceName());
+		refBar = helper.getServiceReferenceByName(BarService.class.getName(), fooBarProvider3.getInstanceName());
 		assertNull("Check the absence of the FS from "+fooBarProvider.getInstanceName(), refFoo);
 		assertNull("Check the absence of the BS from "+fooBarProvider.getInstanceName(), refBar);
 	}

@@ -21,27 +21,34 @@ package org.apache.felix.ipojo.test.scenarios.ps;
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
 import org.apache.felix.ipojo.test.scenarios.ps.service.ChildInterface;
 import org.apache.felix.ipojo.test.scenarios.ps.service.FooService;
 import org.apache.felix.ipojo.test.scenarios.ps.service.ParentInterface1;
 import org.apache.felix.ipojo.test.scenarios.ps.service.ParentInterface2;
 import org.apache.felix.ipojo.test.scenarios.ps.service.ParentParentInterface;
-import org.apache.felix.ipojo.test.scenarios.util.Utils;
 import org.osgi.framework.ServiceReference;
 
 public class InheritedTest extends OSGiTestCase {
     
     private Factory pi1, pi11, pi12, pi2, pi21, pi3;
     
+    private IPOJOHelper helper;
+    
     public void setUp() {
-        pi1 = Utils.getFactoryByName(context, "PS-PI1");
-        pi11 = Utils.getFactoryByName(context, "PS-PI1-1");
-        pi12 = Utils.getFactoryByName(context, "PS-PI1-2");
+        helper = new IPOJOHelper(this);
+        pi1 = helper.getFactory("PS-PI1");
+        pi11 = helper.getFactory("PS-PI1-1");
+        pi12 = helper.getFactory("PS-PI1-2");
         
-        pi2 = Utils.getFactoryByName(context, "PS-PI2");
-        pi21 = Utils.getFactoryByName(context, "PS-PI2-1");
+        pi2 = helper.getFactory("PS-PI2");
+        pi21 = helper.getFactory("PS-PI2-1");
         
-        pi3 = Utils.getFactoryByName(context, "PS-PI3");
+        pi3 = helper.getFactory("PS-PI3");
+    }
+    
+    public void tearDown() {
+        helper.dispose();
     }
     
     private boolean contains(String[] arr, String txt) {
@@ -101,87 +108,87 @@ public class InheritedTest extends OSGiTestCase {
     }
     
     public void testIP1() {
-        ComponentInstance ci = Utils.getComponentInstanceByName(context, pi1.getName(), "ci");
+        ComponentInstance ci = helper.createComponentInstance( pi1.getName(), "ci");
         
-        ServiceReference ref1 = Utils.getServiceReferenceByName(context, ChildInterface.class.getName(), "ci");
+        ServiceReference ref1 = helper.getServiceReferenceByName( ChildInterface.class.getName(), "ci");
         assertNotNull("Check Child", ref1);
         
-        ServiceReference ref2 = Utils.getServiceReferenceByName(context, ParentInterface1.class.getName(), "ci");
+        ServiceReference ref2 = helper.getServiceReferenceByName( ParentInterface1.class.getName(), "ci");
         assertNotNull("Check Parent1", ref2);
         
-        ServiceReference ref3 = Utils.getServiceReferenceByName(context, ParentInterface2.class.getName(), "ci");
+        ServiceReference ref3 = helper.getServiceReferenceByName( ParentInterface2.class.getName(), "ci");
         assertNotNull("Check Parent2", ref3);
         
-        ServiceReference ref4 = Utils.getServiceReferenceByName(context, ParentParentInterface.class.getName(), "ci");
+        ServiceReference ref4 = helper.getServiceReferenceByName( ParentParentInterface.class.getName(), "ci");
         assertNotNull("Check PP", ref4);
         
         ci.dispose();
     }
     
     public void testIP11() {
-        ComponentInstance ci = Utils.getComponentInstanceByName(context, pi11.getName(), "ci");
+        ComponentInstance ci = helper.createComponentInstance( pi11.getName(), "ci");
         
-        ServiceReference ref4 = Utils.getServiceReferenceByName(context, ParentParentInterface.class.getName(), "ci");
+        ServiceReference ref4 = helper.getServiceReferenceByName( ParentParentInterface.class.getName(), "ci");
         assertNotNull("Check PP", ref4);
         
         ci.dispose();
     }
     
     public void testIP12() {
-        ComponentInstance ci = Utils.getComponentInstanceByName(context, pi12.getName(), "ci");
+        ComponentInstance ci = helper.createComponentInstance( pi12.getName(), "ci");
         
-        ServiceReference ref3 = Utils.getServiceReferenceByName(context, ParentInterface2.class.getName(), "ci");
+        ServiceReference ref3 = helper.getServiceReferenceByName( ParentInterface2.class.getName(), "ci");
         assertNotNull("Check Parent2", ref3);
         
-        ServiceReference ref4 = Utils.getServiceReferenceByName(context, ParentParentInterface.class.getName(), "ci");
+        ServiceReference ref4 = helper.getServiceReferenceByName( ParentParentInterface.class.getName(), "ci");
         assertNotNull("Check PP", ref4);
         
         ci.dispose();
     }
     
     public void testIP2() {
-        ComponentInstance ci = Utils.getComponentInstanceByName(context, pi2.getName(), "ci");
+        ComponentInstance ci = helper.createComponentInstance( pi2.getName(), "ci");
         
-        ServiceReference ref1 = Utils.getServiceReferenceByName(context, ChildInterface.class.getName(), "ci");
+        ServiceReference ref1 = helper.getServiceReferenceByName( ChildInterface.class.getName(), "ci");
         assertNotNull("Check Child", ref1);
         
-        ServiceReference ref2 = Utils.getServiceReferenceByName(context, ParentInterface1.class.getName(), "ci");
+        ServiceReference ref2 = helper.getServiceReferenceByName( ParentInterface1.class.getName(), "ci");
         assertNotNull("Check Parent1", ref2);
         
-        ServiceReference ref3 = Utils.getServiceReferenceByName(context, ParentInterface2.class.getName(), "ci");
+        ServiceReference ref3 = helper.getServiceReferenceByName( ParentInterface2.class.getName(), "ci");
         assertNotNull("Check Parent2", ref3);
         
-        ServiceReference ref4 = Utils.getServiceReferenceByName(context, ParentParentInterface.class.getName(), "ci");
+        ServiceReference ref4 = helper.getServiceReferenceByName( ParentParentInterface.class.getName(), "ci");
         assertNotNull("Check PP", ref4);
         
         ci.dispose();
     }
     
     public void testIP21() {
-        ComponentInstance ci = Utils.getComponentInstanceByName(context, pi21.getName(), "ci");
+        ComponentInstance ci = helper.createComponentInstance( pi21.getName(), "ci");
         
-        ServiceReference ref4 = Utils.getServiceReferenceByName(context, ParentParentInterface.class.getName(), "ci");
+        ServiceReference ref4 = helper.getServiceReferenceByName( ParentParentInterface.class.getName(), "ci");
         assertNotNull("Check PP", ref4);
         
         ci.dispose();
     }
     
     public void testIP3() {
-        ComponentInstance ci = Utils.getComponentInstanceByName(context, pi3.getName(), "ci");
+        ComponentInstance ci = helper.createComponentInstance( pi3.getName(), "ci");
         
-        ServiceReference ref1 = Utils.getServiceReferenceByName(context, ChildInterface.class.getName(), "ci");
+        ServiceReference ref1 = helper.getServiceReferenceByName( ChildInterface.class.getName(), "ci");
         assertNotNull("Check Child", ref1);
         
-        ServiceReference ref2 = Utils.getServiceReferenceByName(context, ParentInterface1.class.getName(), "ci");
+        ServiceReference ref2 = helper.getServiceReferenceByName( ParentInterface1.class.getName(), "ci");
         assertNotNull("Check Parent1", ref2);
         
-        ServiceReference ref3 = Utils.getServiceReferenceByName(context, ParentInterface2.class.getName(), "ci");
+        ServiceReference ref3 = helper.getServiceReferenceByName( ParentInterface2.class.getName(), "ci");
         assertNotNull("Check Parent2", ref3);
         
-        ServiceReference ref4 = Utils.getServiceReferenceByName(context, ParentParentInterface.class.getName(), "ci");
+        ServiceReference ref4 = helper.getServiceReferenceByName( ParentParentInterface.class.getName(), "ci");
         assertNotNull("Check PP", ref4);
         
-        ServiceReference ref5 = Utils.getServiceReferenceByName(context, FooService.class.getName(), "ci");
+        ServiceReference ref5 = helper.getServiceReferenceByName( FooService.class.getName(), "ci");
         assertNotNull("Check FS", ref5);
         
         ci.dispose();

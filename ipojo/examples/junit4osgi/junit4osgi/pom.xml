@@ -78,7 +78,6 @@
 							org.apache.felix.ipojo.junit4osgi.test.TestOSGiTestCase,
 							org.apache.felix.ipojo.junit4osgi.test.TestTestSuite,
 							org.apache.felix.ipojo.junit4osgi.test.TestOSGiTestSuite,
-							org.apache.felix.ipojo.junit4osgi.test.MyTestCase
 						</Test-Suite>  -->
 					</instructions>
 				</configuration>

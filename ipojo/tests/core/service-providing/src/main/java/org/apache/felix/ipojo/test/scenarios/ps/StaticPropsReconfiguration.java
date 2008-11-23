@@ -21,26 +21,23 @@ package org.apache.felix.ipojo.test.scenarios.ps;
 import java.util.Dictionary;
 import java.util.Properties;
 
-import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
 import org.apache.felix.ipojo.test.scenarios.ps.service.FooService;
-import org.apache.felix.ipojo.test.scenarios.util.Utils;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedServiceFactory;
 
 public class StaticPropsReconfiguration extends OSGiTestCase {
 
-	ComponentInstance fooProvider1;
-	ComponentInstance fooProvider2;
-
-	public void setUp() {
+	IPOJOHelper helper;
+    
+    public void setUp() {
+        helper = new IPOJOHelper(this);
+        
 		String type = "PS-FooProviderType-2";
-		
-		Properties p1 = new Properties();
-		p1.put("instance.name","FooProvider-1");
-		fooProvider1 = Utils.getComponentInstance(context, type, p1);
+		helper.createComponentInstance(type, "FooProvider-1");
 		
 		Properties p2 = new Properties();
 		p2.put("instance.name","FooProvider-2");
@@ -49,19 +46,15 @@ public class StaticPropsReconfiguration extends OSGiTestCase {
 		p2.put("string", new String("bar"));
 		p2.put("strAProp", new String[] {"bar", "foo"});
 		p2.put("intAProp", new int[] {1, 2, 3});
-		fooProvider2 = Utils.getComponentInstance(context, type, p2);
-		
+		helper.createComponentInstance(type, p2);
 	}
 	
 	public void tearDown() {
-		fooProvider1.dispose();
-		fooProvider1 = null;
-		fooProvider2.dispose();
-		fooProvider2 = null;
+	    helper.dispose();
 	}
 	
 	public void testReconfFactory1() {
-		ServiceReference sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-1");
+		ServiceReference sr = helper.getServiceReferenceByName(FooService.class.getName(), "FooProvider-1");
 		assertNotNull("Check the availability of the FS service", sr);
 		
 		// Check service properties
@@ -86,7 +79,7 @@ public class StaticPropsReconfiguration extends OSGiTestCase {
 		}
 
 		// Reconfiguration
-		ServiceReference fact_ref = Utils.getServiceReferenceByName(context, Factory.class.getName(), "PS-FooProviderType-2");
+		ServiceReference fact_ref = helper.getServiceReferenceByName(Factory.class.getName(), "PS-FooProviderType-2");
 		Dictionary reconf = new Properties();
 		reconf.put("instance.name","FooProvider-1");
 		reconf.put("int", new Integer(5));
@@ -94,14 +87,14 @@ public class StaticPropsReconfiguration extends OSGiTestCase {
 		reconf.put("string", new String("toto"));
 		reconf.put("strAProp", new String[] {"foo", "baz"});
 		reconf.put("intAProp", new int[] {3, 2, 1});
-		Factory fact = (Factory) context.getService(fact_ref);
+		Factory fact = (Factory) getServiceObject(fact_ref);
 		try {
 			fact.reconfigure(reconf);
 		} catch(Exception e) {
 			fail("Configuration non acceptable : " + reconf);
 		}
 
-		sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-1");
+		sr = helper.getServiceReferenceByName( FooService.class.getName(), "FooProvider-1");
 		assertNotNull("Check the availability of the FS service", sr);
 		
 		// Check service properties after the reconfiguration
@@ -125,13 +118,12 @@ public class StaticPropsReconfiguration extends OSGiTestCase {
 			if(intAProp[i] != v2[i]) { fail("Check the intAProp Equality"); }
 		}
 		
-		context.ungetService(fact_ref);
 		fact = null;
 		       
 	}
 	
 	public void testReconfFactory2() {
-		ServiceReference sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-2");
+		ServiceReference sr = helper.getServiceReferenceByName( FooService.class.getName(), "FooProvider-2");
 		assertNotNull("Check the availability of the FS service", sr);
 		
 		// Check service properties
@@ -157,7 +149,7 @@ public class StaticPropsReconfiguration extends OSGiTestCase {
 		}
 		
 		// Reconfiguration
-		ServiceReference fact_ref = Utils.getServiceReferenceByName(context, Factory.class.getName(), "PS-FooProviderType-2");
+		ServiceReference fact_ref = helper.getServiceReferenceByName( Factory.class.getName(), "PS-FooProviderType-2");
 		Dictionary reconf = new Properties();
 		reconf.put("instance.name","FooProvider-2");
 		reconf.put("int", new Integer(5));
@@ -165,7 +157,7 @@ public class StaticPropsReconfiguration extends OSGiTestCase {
 		reconf.put("string", new String("toto"));
 		reconf.put("strAProp", new String[] {"foo", "baz"});
 		reconf.put("intAProp", new int[] {3, 2, 1});
-		Factory fact = (Factory) context.getService(fact_ref);
+		Factory fact = (Factory) getServiceObject(fact_ref);
 		try {
 			fact.reconfigure(reconf);
 		} catch(Exception e) {
@@ -192,13 +184,11 @@ public class StaticPropsReconfiguration extends OSGiTestCase {
 		for (int i = 0; i < intAProp.length; i++) {
 			if(intAProp[i] != v2[i]) { fail("Check the intAProp Equality"); }
 		}
-		
-		context.ungetService(fact_ref);
 		fact = null;
 	}
 	
 	public void testMSFFactory1() {
-		ServiceReference sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-1");
+		ServiceReference sr = helper.getServiceReferenceByName( FooService.class.getName(), "FooProvider-1");
 		assertNotNull("Check the availability of the FS service", sr);
 		
 		// Check service properties
@@ -223,21 +213,21 @@ public class StaticPropsReconfiguration extends OSGiTestCase {
 		}
 
 		// Reconfiguration
-		ServiceReference fact_ref = Utils.getServiceReferenceByName(context, ManagedServiceFactory.class.getName(), "PS-FooProviderType-2");
+		ServiceReference fact_ref = helper.getServiceReferenceByName( ManagedServiceFactory.class.getName(), "PS-FooProviderType-2");
 		Dictionary reconf = new Properties();
 		reconf.put("int", new Integer(5));
 		reconf.put("long", new Long(43));
 		reconf.put("string", new String("toto"));
 		reconf.put("strAProp", new String[] {"foo", "baz"});
 		reconf.put("intAProp", new int[] {3, 2, 1});
-		ManagedServiceFactory fact = (ManagedServiceFactory) context.getService(fact_ref);
+		ManagedServiceFactory fact = (ManagedServiceFactory) getServiceObject(fact_ref);
 		try {
 			fact.updated("FooProvider-1", reconf);
 		} catch (ConfigurationException e) {
 			fail("Configuration non acceptable : " + reconf);
 		}
 
-		sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-1");
+		sr = helper.getServiceReferenceByName( FooService.class.getName(), "FooProvider-1");
 		assertNotNull("Check the availability of the FS service", sr);
 		
 		// Check service properties after the reconfiguration
@@ -261,13 +251,12 @@ public class StaticPropsReconfiguration extends OSGiTestCase {
 			if(intAProp[i] != v2[i]) { fail("Check the intAProp Equality"); }
 		}
 		
-		context.ungetService(fact_ref);
 		fact = null;
 		       
 	}
 	
 	public void testReconfMSF2() {
-		ServiceReference sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-2");
+		ServiceReference sr = helper.getServiceReferenceByName( FooService.class.getName(), "FooProvider-2");
 		assertNotNull("Check the availability of the FS service", sr);
 		
 		// Check service properties
@@ -293,14 +282,14 @@ public class StaticPropsReconfiguration extends OSGiTestCase {
 		}
 		
 		// Reconfiguration
-		ServiceReference fact_ref = Utils.getServiceReferenceByName(context, ManagedServiceFactory.class.getName(), "PS-FooProviderType-2");
+		ServiceReference fact_ref = helper.getServiceReferenceByName( ManagedServiceFactory.class.getName(), "PS-FooProviderType-2");
 		Dictionary reconf = new Properties();
 		reconf.put("int", new Integer(5));
 		reconf.put("long", new Long(43));
 		reconf.put("string", new String("toto"));
 		reconf.put("strAProp", new String[] {"foo", "baz"});
 		reconf.put("intAProp", new int[] {3, 2, 1});
-		ManagedServiceFactory fact = (ManagedServiceFactory) context.getService(fact_ref);
+		ManagedServiceFactory fact = (ManagedServiceFactory) getServiceObject(fact_ref);
 		try {
 			fact.updated("FooProvider-2", reconf);
 		} catch (ConfigurationException e) {
@@ -328,7 +317,6 @@ public class StaticPropsReconfiguration extends OSGiTestCase {
 			if(intAProp[i] != v2[i]) { fail("Check the intAProp Equality"); }
 		}
 		
-		context.ungetService(fact_ref);
 		fact = null;
 	}
 	

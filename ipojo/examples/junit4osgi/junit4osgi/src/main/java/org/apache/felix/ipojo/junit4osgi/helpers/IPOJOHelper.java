@@ -18,7 +18,9 @@
  */
 package org.apache.felix.ipojo.junit4osgi.helpers;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.felix.ipojo.ComponentInstance;
@@ -26,6 +28,7 @@ import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.Handler;
 import org.apache.felix.ipojo.HandlerFactory;
 import org.apache.felix.ipojo.ServiceContext;
+import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.ManifestMetadataParser;
@@ -41,9 +44,29 @@ public class IPOJOHelper {
     private BundleContext context;
     private OSGiTestCase testcase;
     
+    
+    private List instances;
+    
     public IPOJOHelper(OSGiTestCase tc) {
         testcase = tc;
         context = testcase.getBundleContext();
+        instances = new ArrayList();
+    }
+    
+    public void dispose() {
+        for (int i = 0; i < instances.size(); i++) {
+            ((ComponentInstance) instances.get(i)).dispose();
+        }
+        instances.clear();
+    }
+    
+    public ComponentInstance getInstanceByName(String name) {
+        for (int i = 0; i < instances.size(); i++) {
+            if (((ComponentInstance) instances.get(i)).getInstanceName().equals(name)) {
+                return (ComponentInstance) instances.get(i);
+            }
+        }
+        return null;
     }
     
     /**
@@ -232,8 +255,10 @@ public class IPOJOHelper {
      */
     public ComponentInstance createComponentInstance(String factoryName,
             String instanceName) {
-        return createComponentInstance(context.getBundle(), factoryName,
+        ComponentInstance ci = createComponentInstance(context.getBundle(), factoryName,
                 instanceName);
+        instances.add(ci);
+        return ci;
     }
 
     /**
@@ -248,8 +273,25 @@ public class IPOJOHelper {
      */
     public ComponentInstance createComponentInstance(String factoryName,
             Dictionary configuration) {
-        return createComponentInstance(context.getBundle(), factoryName,
+        ComponentInstance ci =  createComponentInstance(context.getBundle(), factoryName,
                 configuration);
+        instances.add(ci);
+        return ci;
+    }
+    
+    /**
+     * Creates a new component instance with no configuration, from the
+     * factory specified in the local bundle.
+     * 
+     * @param factoryName
+     *            the name of the component factory, in the local bundle.
+     * @return the newly created component instance.
+     */
+    public ComponentInstance createComponentInstance(String factoryName) {
+        ComponentInstance ci =  createComponentInstance(context.getBundle(), factoryName,
+                (Dictionary) null);
+        instances.add(ci);
+        return ci;
     }
 
     /**
@@ -269,8 +311,10 @@ public class IPOJOHelper {
      */
     public ComponentInstance createComponentInstance(String factoryName,
             String instanceName, Dictionary configuration) {
-        return createComponentInstance(context.getBundle(), factoryName,
+        ComponentInstance ci = createComponentInstance(context.getBundle(), factoryName,
                 instanceName, configuration);
+        instances.add(ci);
+        return ci;
     }
 
     /**
@@ -614,6 +658,8 @@ public class IPOJOHelper {
         if (itf.equals(Factory.class.getName())
                 || itf.equals(ManagedServiceFactory.class.getName())) {
             filter = "(" + "factory.name" + "=" + name + ")";
+        } else if (itf.equals(Architecture.class.getName())) {
+            filter = "(" + "architecture.instance" + "=" + name + ")";
         } else {
             filter = "(" + "instance.name" + "=" + name + ")";
         }
@@ -656,6 +702,60 @@ public class IPOJOHelper {
      */
     public static boolean isServiceAvailableByPID(ServiceContext sc, String itf, String pid) {
         ServiceReference ref = getServiceReferenceByPID(sc, itf, pid);
+        return ref != null;
+    }
+    
+    /**
+     * Returns the service reference of a service provided by the specified
+     * bundle, offering the specified interface and having the given name.
+     * 
+     * @param bundle
+     *            the bundle in which the service is searched.
+     * @param itf
+     *            the interface provided by the searched service.
+     * @param name
+     *            the name of the searched service.
+     * @return a service provided by the specified bundle, offering the
+     *         specified interface and having the given name.
+     */
+    public static ServiceReference getServiceReferenceByName(Bundle bundle,
+            String itf, String name) {
+        String filter = null;
+        if (itf.equals(Factory.class.getName())
+                || itf.equals(ManagedServiceFactory.class.getName())) {
+            filter = "(" + "factory.name" + "=" + name + ")";
+        } else if (itf.equals(Architecture.class.getName())) {
+            filter = "(" + "architecture.instance" + "=" + name + ")";
+        } else {
+            filter = "(" + "instance.name" + "=" + name + ")";
+        }
+        return OSGiTestCase.getServiceReference(bundle, itf, filter);
+    }
+    
+    /**
+     * Returns the service reference of a service provided by the local
+     * bundle, offering the specified interface and having the given name.
+     * 
+     * @param itf
+     *            the interface provided by the searched service.
+     * @param name
+     *            the name of the searched service.
+     * @return a service provided by the specified bundle, offering the
+     *         specified interface and having the given name.
+     */
+    public ServiceReference getServiceReferenceByName(String itf, String name) {
+        return getServiceReferenceByName(context.getBundle(), itf, name);
+    }
+    
+    /**
+     * Checks if the service is available.
+     * @param itf the service interface
+     * @param the service provider name
+     * @return <code>true</code> if the service is available,
+     * <code>false</code> otherwise.
+     */
+    public boolean isServiceAvailableByName(String itf, String name) {
+        ServiceReference ref = getServiceReferenceByName(itf, name);
         return ref != null;
     }
     

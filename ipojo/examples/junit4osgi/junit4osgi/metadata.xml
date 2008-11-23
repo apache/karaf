@@ -10,6 +10,8 @@
 			onArrival="onBundleArrival" onDeparture="onBundleDeparture" />
 		<callback transition="invalidate" method="stopping" />
 		<callback transition="validate" method="starting" />
+		<requires field="m_log" optional="true" 
+			default-implementation="org.apache.felix.ipojo.junit4osgi.impl.LogServiceImpl"/>
 		<provides />
 	</component>
 	<instance

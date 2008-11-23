@@ -20,7 +20,6 @@ package org.apache.felix.ipojo.test.scenarios.ps;
 
 import java.util.Properties;
 
-import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
@@ -28,35 +27,37 @@ import org.apache.felix.ipojo.architecture.InstanceDescription;
 import org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceDescription;
 import org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandlerDescription;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
 import org.apache.felix.ipojo.test.scenarios.ps.service.BarService;
 import org.apache.felix.ipojo.test.scenarios.ps.service.FooService;
-import org.apache.felix.ipojo.test.scenarios.util.Utils;
 import org.osgi.framework.ServiceReference;
 
 public class ProvidedServiceArchitectureTest extends OSGiTestCase {
 	
+    private IPOJOHelper helper;
+    
+    public void setUp() {
+        helper = new IPOJOHelper(this);
+    }
+    
+    public void tearDown() {
+        helper.dispose();
+    }
 	
 	public void testExposition() {
 		String factName = "PS-FooProviderType-1";
 		String compName = "FooProvider-1";
 		
 		// Get the factory to create a component instance
-		Factory fact = Utils.getFactoryByName(context, factName);
+		Factory fact = helper.getFactory( factName);
 		assertNotNull("Cannot find the factory FooProvider-1", fact);
-		
-		Properties props = new Properties();
-		props.put("instance.name",compName);
-		ComponentInstance ci = null;
-		try {
-			ci = fact.createComponentInstance(props);
-		} catch (Exception e) {
-			fail(e.getMessage());
-		}
 
-		ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), "FooProvider-1");
+		helper.createComponentInstance(factName, compName);
+
+		ServiceReference arch_ref = helper.getServiceReferenceByName(Architecture.class.getName(), compName);		
 		assertNotNull("Architecture not available", arch_ref);
 
-		Architecture arch = (Architecture) context.getService(arch_ref);
+		Architecture arch = (Architecture) getServiceObject(arch_ref);
 		InstanceDescription id = arch.getInstanceDescription();
 		
 		assertEquals("Check component instance name (" + id.getName() + ")", id.getName(), compName);
@@ -85,8 +86,6 @@ public class ProvidedServiceArchitectureTest extends OSGiTestCase {
 		assertEquals("Check service properties number", prop.size(), 2);
 		assertEquals("Check instance.name property", prop.getProperty("instance.name"), compName);
 		assertEquals("Check factory.name property", prop.getProperty("factory.name"), factName);
-		
-		ci.dispose();
 	}
 	
 	public void testProps() {
@@ -94,7 +93,7 @@ public class ProvidedServiceArchitectureTest extends OSGiTestCase {
 		String compName = "FooProvider";
 		
 		// Get the factory to create a component instance
-		Factory fact = Utils.getFactoryByName(context, factName);
+		Factory fact = helper.getFactory( factName);
 		assertNotNull("Cannot find the factory FooProvider", fact);
 		
 		Properties props = new Properties();
@@ -102,15 +101,12 @@ public class ProvidedServiceArchitectureTest extends OSGiTestCase {
 		props.put("foo", "foo");
 		props.put("bar", "2");
 		props.put("baz", "baz");
-		ComponentInstance ci = null;
-		try {
-			ci = fact.createComponentInstance(props);
-		} catch (Exception e) { fail(e.getMessage()); }
+		helper.createComponentInstance(factName, props);
 
-		ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), compName);
+		ServiceReference arch_ref = helper.getServiceReferenceByName(Architecture.class.getName(), compName);
 		assertNotNull("Architecture not available", arch_ref);
 
-		Architecture arch = (Architecture) context.getService(arch_ref);
+		Architecture arch = (Architecture) getServiceObject(arch_ref);
 		InstanceDescription id = arch.getInstanceDescription();
 		
 		assertEquals("Check component instance name (" + id.getName() + ")", id.getName(), compName);
@@ -144,7 +140,6 @@ public class ProvidedServiceArchitectureTest extends OSGiTestCase {
 		assertEquals("Check bar property", prop.getProperty("bar"), "2");
 		assertEquals("Check baz property", prop.getProperty("baz"), "baz");
 		
-		ci.dispose();
 	}
 	
 	public void testDoubleProviding() {
@@ -152,22 +147,15 @@ public class ProvidedServiceArchitectureTest extends OSGiTestCase {
 		String compName = "FooProvider";
 		
 		// Get the factory to create a component instance
-		Factory fact = Utils.getFactoryByName(context, factName);
+		Factory fact = helper.getFactory( factName);
 		assertNotNull("Cannot find the factory FooProvider", fact);
 		
-		Properties props = new Properties();
-		props.put("instance.name",compName);
-		ComponentInstance ci = null;
-		try {
-			ci = fact.createComponentInstance(props);
-		} catch (Exception e) {
-			fail(e.getMessage());
-		}
+		helper.createComponentInstance(factName, compName);
 
-		ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), compName);
+		ServiceReference arch_ref = helper.getServiceReferenceByName(Architecture.class.getName(), compName);
 		assertNotNull("Architecture not available", arch_ref);
 
-		Architecture arch = (Architecture) context.getService(arch_ref);
+		Architecture arch = (Architecture) getServiceObject(arch_ref);
 		InstanceDescription id = arch.getInstanceDescription();
 		
 		assertEquals("Check component instance name (" + id.getName() + ")", id.getName(), compName);
@@ -193,7 +181,6 @@ public class ProvidedServiceArchitectureTest extends OSGiTestCase {
 		assertContains("Check provided service specs - 2", ps[0].getServiceSpecification(), BarService.class.getName());
 		assertEquals("Check Provided Service availability", ps[0].getState(), ProvidedServiceDescription.REGISTERED);
 		
-		ci.dispose();
 	}
 
     public void testPropsNoValue() {
@@ -201,20 +188,15 @@ public class ProvidedServiceArchitectureTest extends OSGiTestCase {
     	String compName = "FooProvider";
     	
     	// Get the factory to create a component instance
-    	Factory fact = Utils.getFactoryByName(context, factName);
+    	Factory fact = helper.getFactory( factName);
     	assertNotNull("Cannot find the factory FooProvider", fact);
-    	
-    	Properties props = new Properties();
-    	props.put("instance.name",compName);
-    	ComponentInstance ci = null;
-    	try {
-    		ci = fact.createComponentInstance(props);
-    	} catch (Exception e) { fail(e.getMessage()); }
+    		
+        helper.createComponentInstance(factName, compName);
     
-    	ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), compName);
+    	ServiceReference arch_ref = helper.getServiceReferenceByName(Architecture.class.getName(), compName);
     	assertNotNull("Architecture not available", arch_ref);
     
-    	Architecture arch = (Architecture) context.getService(arch_ref);
+    	Architecture arch = (Architecture) getServiceObject(arch_ref);
     	InstanceDescription id = arch.getInstanceDescription();
     	
     	assertEquals("Check component instance name (" + id.getName() + ")", id.getName(), compName);
@@ -245,8 +227,6 @@ public class ProvidedServiceArchitectureTest extends OSGiTestCase {
     	assertEquals("Check instance.name property", prop.getProperty("instance.name"), compName);
     	assertEquals("Check factory.name property", prop.getProperty("factory.name"), factName);
 
-    	
-    	ci.dispose();
     }
 	
 }

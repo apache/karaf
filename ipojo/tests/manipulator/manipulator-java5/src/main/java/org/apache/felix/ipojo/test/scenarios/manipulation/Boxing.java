@@ -4,8 +4,8 @@ import java.util.Properties;
 
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
 import org.apache.felix.ipojo.test.scenarios.manipulation.service.PrimitiveManipulationTestService;
-import org.apache.felix.ipojo.test.scenarios.util.Utils;
 import org.osgi.framework.ServiceReference;
 
 public class Boxing extends OSGiTestCase {
@@ -15,22 +15,23 @@ public class Boxing extends OSGiTestCase {
     PrimitiveManipulationTestService prim;
 
     ServiceReference prim_ref;
+    
+    IPOJOHelper helper;
 
     public void setUp() {
+        helper = new IPOJOHelper(this);
         Properties p1 = new Properties();
         p1.put("instance.name","primitives");
-        instance = Utils.getComponentInstance(context, "ManipulationPrimitives5-PrimitiveManipulationTester", p1);
+        instance = helper.createComponentInstance("ManipulationPrimitives5-PrimitiveManipulationTester", p1);
         assertTrue("check instance state", instance.getState() == ComponentInstance.VALID);
-        prim_ref = Utils.getServiceReferenceByName(context, PrimitiveManipulationTestService.class.getName(), instance.getInstanceName());
+        prim_ref = helper.getServiceReferenceByName(PrimitiveManipulationTestService.class.getName(), instance.getInstanceName());
         assertNotNull("Check prim availability", prim_ref);
-        prim = (PrimitiveManipulationTestService) context.getService(prim_ref);
+        prim = (PrimitiveManipulationTestService) getServiceObject(prim_ref);
     }
 
     public void tearDown() {
-        context.ungetService(prim_ref);
+        helper.dispose();
         prim = null;
-        instance.dispose();
-        instance = null;
     }
     
   public void testLongFromObject() {

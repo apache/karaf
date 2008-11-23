@@ -18,12 +18,10 @@
  */
 package org.apache.felix.ipojo.test.scenarios.manipulation;
 
-import java.util.Properties;
-
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
 import org.apache.felix.ipojo.test.scenarios.manipulation.service.PrimitiveManipulationTestService;
-import org.apache.felix.ipojo.test.scenarios.util.Utils;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -32,27 +30,21 @@ import org.osgi.framework.ServiceReference;
  */
 public class PrimitiveTypeTest2 extends OSGiTestCase {
 
-    ComponentInstance instance; // Instance under test
-
     PrimitiveManipulationTestService prim;
-
-    ServiceReference prim_ref;
-
+    IPOJOHelper helper;
+    
     public void setUp() {
-        Properties p1 = new Properties();
-        p1.put("instance.name","primitives");
-        instance = Utils.getComponentInstance(context, "ManipulationPrimitives-PrimitiveManipulationTesterA", p1);
+        helper = new IPOJOHelper(this);
+        ComponentInstance instance = helper.createComponentInstance("ManipulationPrimitives-PrimitiveManipulationTesterA");
         assertTrue("check instance state", instance.getState() == ComponentInstance.VALID);
-        prim_ref = Utils.getServiceReferenceByName(context, PrimitiveManipulationTestService.class.getName(), instance.getInstanceName());
-        assertNotNull("Check prim availability", prim_ref);
-        prim = (PrimitiveManipulationTestService) context.getService(prim_ref);
+        ServiceReference ref = helper.getServiceReferenceByName(PrimitiveManipulationTestService.class.getName(), instance.getInstanceName());
+        assertNotNull("Check prim availability", ref);
+        prim = (PrimitiveManipulationTestService) getServiceObject(ref);
     }
 
     public void tearDown() {
-        context.ungetService(prim_ref);
         prim = null;
-        instance.dispose();
-        instance = null;
+        helper.dispose();
     }
 
     public void testByte() {

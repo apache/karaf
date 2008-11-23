@@ -25,15 +25,24 @@ import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.Pojo;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
 import org.apache.felix.ipojo.test.scenarios.manipulation.service.FooService;
-import org.apache.felix.ipojo.test.scenarios.util.Utils;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 /**
  * Check the getComponentInstance method on a POJO
  */
 public class GetComponentInstanceTest extends OSGiTestCase {
+    
+    IPOJOHelper helper;
+    
+    public void setUp() {
+        helper = new IPOJOHelper(this);
+    }
+    
+    public void tearDown() {
+        helper.dispose();
+    }
     
 	/**
 	 * Check if a pojo can correctly be cast in POJO.
@@ -42,10 +51,10 @@ public class GetComponentInstanceTest extends OSGiTestCase {
 	public void testGetComponentInstance() {
 		String factName = "Manipulation-FooProviderType-1";
 		String compName = "FooProvider-1";
-		ServiceReference[] refs = null;
+		ServiceReference ref = null;
 		
 		// Get the factory to create a component instance
-		Factory fact = Utils.getFactoryByName(context, factName);
+		Factory fact = helper.getFactory(factName);
 		assertNotNull("Cannot find the factory FooProvider-1", fact);
 		
 		Properties props = new Properties();
@@ -58,14 +67,12 @@ public class GetComponentInstanceTest extends OSGiTestCase {
 		assertEquals("Check instance name", compName, ci.getInstanceName());
 		
 		// Get a FooService provider
-		try {
-			refs = context.getServiceReferences(FooService.class.getName(), "(instance.name=" + compName + ")");
-		} catch (InvalidSyntaxException e) { fail("Service query failed (2) " + e); }
+		ref = helper.getServiceReferenceByName(FooService.class.getName(),  compName);
 		
-		assertNotNull("FS not available", refs);
+		assertNotNull("FS not available", ref);
 		
 		// Get foo object
-		FooService fs = (FooService) context.getService(refs[0]);
+		FooService fs = (FooService) getServiceObject(ref);
 		
 		// Cast to POJO
 		Pojo pojo = (Pojo) fs;
@@ -81,16 +88,13 @@ public class GetComponentInstanceTest extends OSGiTestCase {
 		assertEquals("Check instance description name", id.getName(), compName); 
 		
 		// Unget the service
-		context.ungetService(refs[0]);
+		context.ungetService(ref);
 		
 		ci.dispose();
 		
 		// Check that there is no more FooService
-		try {
-			refs = context.getServiceReferences(FooService.class.getName(), null);
-		} catch (InvalidSyntaxException e) { fail("Service query failed (3) : " + e.getMessage()); }
-		
-		assertNull("FS available, but component instance stopped", refs);
+		ref = getServiceReference(FooService.class.getName());
+		assertNull("FS available, but component instance stopped", ref);
 	}
 
 }

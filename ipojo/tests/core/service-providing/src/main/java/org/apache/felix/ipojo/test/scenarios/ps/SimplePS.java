@@ -18,63 +18,50 @@
  */
 package org.apache.felix.ipojo.test.scenarios.ps;
 
-import java.util.Properties;
-
-import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
 import org.apache.felix.ipojo.test.scenarios.ps.service.FooService;
-import org.apache.felix.ipojo.test.scenarios.util.Utils;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 public class SimplePS extends OSGiTestCase {
 	
 	public void testPS() {
+	    IPOJOHelper helper = new IPOJOHelper(this);
+	    
 		String factName = "PS-FooProviderType-1";
 		String compName = "FooProvider-1";
-		ServiceReference[] refs = null;
+		ServiceReference ref = null;
 		
 		// Check that no Foo Service are available
-		try {
-			refs = context.getServiceReferences(FooService.class.getName(), null);
-		} catch (InvalidSyntaxException e) { fail("Service query failed : " + e); }
+		ref = getServiceReference(FooService.class.getName());
 		
-		assertNull("FS already available", refs);
+		assertNull("FS already available", ref);
 	
 		// Get the factory to create a component instance
-		Factory fact = Utils.getFactoryByName(context, factName);
+		Factory fact = helper.getFactory(factName);
 		assertNotNull("Cannot find the factory FooProvider-1", fact);
 		
-		Properties props = new Properties();
-		props.put("instance.name",compName);
-		ComponentInstance ci = null;
-		try {
-			ci = fact.createComponentInstance(props);
-		} catch (Exception e1) { fail(e1.getMessage()); }		
+		helper.createComponentInstance(factName, compName);
 		
 		// Get a FooService provider
-		try {
-			refs = context.getServiceReferences(FooService.class.getName(), "(" + "instance.name" + "=" + compName + ")");
-		} catch (InvalidSyntaxException e) { fail("Service query failed (2) " + e); }
-		
-		assertNotNull("FS not available", refs);
+		ref = getServiceReference(FooService.class.getName(), "(" + "instance.name" + "=" + compName + ")");
+
+		assertNotNull("FS not available", ref);
 		
 		// Test foo invocation
-		FooService fs = (FooService) context.getService(refs[0]);
+		FooService fs = (FooService) getServiceObject(ref);
 		assertTrue("FooService invocation failed", fs.foo());
 		
-		// Unget the service
-		context.ungetService(refs[0]);
-		
-		ci.dispose();
+		helper.dispose();
+
 		
 		// Check that there is no more FooService
-		try {
-			refs = context.getServiceReferences(FooService.class.getName(), null);
-		} catch (InvalidSyntaxException e) { fail("Service query failed (3) : " + e.getMessage()); }
+		ref = getServiceReference(FooService.class.getName(), null);
 		
-		assertNull("FS available, but component instance stopped", refs);
+		
+		assertNull("FS available, but component instance stopped", ref);
+		
 	}
 
 }
