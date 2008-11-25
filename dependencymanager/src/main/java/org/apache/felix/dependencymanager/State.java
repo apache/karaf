@@ -64,7 +64,7 @@ public final class State {
 		return m_deps;
 	}
 	
-	public String toString() {
+	public synchronized String toString() {
 	    if (m_stringValue == null) {
 	        // we only need to determine this once, but we do it lazily
 	        StringBuffer buf = new StringBuffer();

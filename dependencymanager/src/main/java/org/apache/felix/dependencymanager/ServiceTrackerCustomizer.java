@@ -21,9 +21,9 @@ package org.apache.felix.dependencymanager;
 import org.osgi.framework.ServiceReference;
 
 /**
- * TODO modified version of a normal service tracker customizer, this one has an
+ * A modified version of a normal service tracker customizer. This one has an
  * extra callback "addedservice" that is invoked after the service has been added
- * to the tracker (and therefore is accessible through the tracker API)
+ * to the tracker (and therefore is accessible through the tracker API).
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */

@@ -852,7 +852,23 @@ public class ServiceImpl implements Service, ServiceComponent {
     }
 
     public String getName() {
-        return (String) (m_serviceName != null ? m_serviceName : m_serviceInstance);
+        if (m_serviceName instanceof String[]) {
+            StringBuffer sb = new StringBuffer();
+            String[] names = (String[]) m_serviceName;
+            for (int i = 0; i < names.length; i++) {
+                if (i > 0) {
+                    sb.append(", ");
+                }
+                sb.append(names[i]);
+            }
+            return sb.toString();
+        }
+        else if (m_serviceName instanceof String) {
+            return m_serviceName.toString();
+        }
+        else {
+            return m_implementation.toString();
+        }
     }
 
     public int getState() {

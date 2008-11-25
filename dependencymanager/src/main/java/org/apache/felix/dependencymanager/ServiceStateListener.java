@@ -35,6 +35,7 @@ public interface ServiceStateListener {
      * @param service the service
      */
     public void starting(Service service);
+    
     /**
      * Called when the service is started. At this point, the service has been
      * registered.
@@ -42,6 +43,7 @@ public interface ServiceStateListener {
      * @param service the service
      */
     public void started(Service service);
+    
     /**
      * Called when the service is stopping. At this point, the service is still
      * registered.
@@ -49,6 +51,7 @@ public interface ServiceStateListener {
      * @param service the service
      */
     public void stopping(Service service);
+    
     /**
      * Called when the service is stopped. At this point, the service has been
      * unregistered.

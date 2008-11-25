@@ -29,26 +29,22 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 
 /**
- * <p>
  * This class mimics the standard OSGi <tt>LogService</tt> interface. An
- * instance of this class is used by the framework for all logging. By default
- * this class logs messages to standard out. The log level can be set to
+ * instance of this class is used by the dependency manager for all logging. 
+ * By default this class logs messages to standard out. The log level can be set to
  * control the amount of logging performed, where a higher number results in
  * more logging. A log level of zero turns off logging completely.
- * </p>
- * <p>
- * The log levels match those specified in the OSGi Log Service (i.e., 1 = error,
- * 2 = warning, 3 = information, and 4 = debug). The default value is 1.
- * </p>
- * <p>
- * This class also uses the System Bundle's context to track log services
- * and will use the highest ranking log service, if present, as a back end
- * instead of printing to standard out. The class uses reflection to invoking
- * the log service's method to avoid a dependency on the log interface.
- * </p>
-**/
-public class Logger implements ServiceListener
-{
+ * 
+ * The log levels match those specified in the OSGi Log Service.
+ * This class also tracks log services and will use the highest ranking 
+ * log service, if present, as a back end instead of printing to standard
+ * out. The class uses reflection to invoking the log service's method to 
+ * avoid a dependency on the log interface. This class is in many ways similar
+ * to the one used in the system bundle for that same purpose.
+ *
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
+ */
+public class Logger implements ServiceListener {
     public static final int LOG_ERROR = 1;
     public static final int LOG_WARNING = 2;
     public static final int LOG_INFO = 3;
@@ -61,49 +57,39 @@ public class Logger implements ServiceListener
     private ServiceReference m_logRef = null;
     private Object[] m_logger = null;
 
-    public Logger(BundleContext context)
-    {
-         m_context = context;
-         startListeningForLogService();
+    public Logger(BundleContext context) {
+        m_context = context;
+        startListeningForLogService();
     }
 
-    public final void log(int level, String msg)
-    {
+    public final void log(int level, String msg) {
         _log(null, level, msg, null);
     }
 
-    public final void log(int level, String msg, Throwable throwable)
-    {
+    public final void log(int level, String msg, Throwable throwable) {
         _log(null, level, msg, throwable);
     }
 
-    public final void log(ServiceReference sr, int level, String msg)
-    {
+    public final void log(ServiceReference sr, int level, String msg) {
         _log(sr, level, msg, null);
     }
 
-    public final void log(ServiceReference sr, int level, String msg, Throwable throwable)
-    {
+    public final void log(ServiceReference sr, int level, String msg, Throwable throwable) {
         _log(sr, level, msg, throwable);
     }
 
-    protected void doLog(ServiceReference sr, int level, String msg, Throwable throwable)
-    {
+    protected void doLog(ServiceReference sr, int level, String msg, Throwable throwable) {
         String s = (sr == null) ? null : "SvcRef " + sr;
         s = (s == null) ? msg : s + " " + msg;
         s = (throwable == null) ? s : s + " (" + throwable + ")";
-        switch (level)
-        {
+        switch (level) {
             case LOG_DEBUG:
                 System.out.println("DEBUG: " + s);
                 break;
             case LOG_ERROR:
                 System.out.println("ERROR: " + s);
-                if (throwable != null)
-                {
-                    if ((throwable instanceof BundleException) &&
-                        (((BundleException) throwable).getNestedException() != null))
-                    {
+                if (throwable != null) {
+                    if ((throwable instanceof BundleException) && (((BundleException) throwable).getNestedException() != null)) {
                         throwable = ((BundleException) throwable).getNestedException();
                     }
                     throwable.printStackTrace();
@@ -120,42 +106,30 @@ public class Logger implements ServiceListener
         }
     }
 
-    private void _log(ServiceReference sr, int level, String msg, Throwable throwable)
-    {
+    private void _log(ServiceReference sr, int level, String msg, Throwable throwable) {
         // Save our own copy just in case it changes. We could try to do
         // more conservative locking here, but let's be optimistic.
         Object[] logger = m_logger;
-
         // Use the log service if available.
-        if (logger != null)
-        {
+        if (logger != null) {
             _logReflectively(logger, sr, level, msg, throwable);
         }
         // Otherwise, default logging action.
-        else
-        {
+        else {
             doLog(sr, level, msg, throwable);
         }
     }
 
-    private void _logReflectively(
-        Object[] logger, ServiceReference sr, int level, String msg, Throwable throwable)
-    {
-        if (logger != null)
-        {
-            Object[] params = {
-                sr, new Integer(level), msg, throwable
-            };
-            try
-            {
+    private void _logReflectively(Object[] logger, ServiceReference sr, int level, String msg, Throwable throwable) {
+        if (logger != null) {
+            Object[] params = { sr, new Integer(level), msg, throwable };
+            try {
                 ((Method) logger[LOGGER_METHOD_IDX]).invoke(logger[LOGGER_OBJECT_IDX], params);
             }
-            catch (InvocationTargetException ex)
-            {
+            catch (InvocationTargetException ex) {
                 System.err.println("Logger: " + ex);
             }
-            catch (IllegalAccessException ex)
-            {
+            catch (IllegalAccessException ex) {
                 System.err.println("Logger: " + ex);
             }
         }
@@ -168,14 +142,11 @@ public class Logger implements ServiceListener
      * attempts to get an existing log service, if present, but in general
      * there will never be a log service present since the system bundle is
      * started before every other bundle.
-    **/
-    private void startListeningForLogService()
-    {
+     */
+    private void startListeningForLogService() {
         // Add a service listener for log services.
-        try
-        {
-            m_context.addServiceListener(
-                this, "(objectClass=org.osgi.service.log.LogService)");
+        try {
+            m_context.addServiceListener(this, "(objectClass=org.osgi.service.log.LogService)");
         }
         catch (InvalidSyntaxException ex) {
             // This will never happen since the filter is hard coded.
@@ -183,8 +154,7 @@ public class Logger implements ServiceListener
         // Try to get an existing log service.
         m_logRef = m_context.getServiceReference("org.osgi.service.log.LogService");
         // Get the service object if available and set it in the logger.
-        if (m_logRef != null)
-        {
+        if (m_logRef != null) {
             setLogger(m_context.getService(m_logRef));
         }
     }
@@ -197,47 +167,36 @@ public class Logger implements ServiceListener
      * logging mechanism goes away, then this will try to find an alternative.
      * If a higher ranking log service is registered, then this will switch
      * to the higher ranking log service.
-    **/
-    public final synchronized void serviceChanged(ServiceEvent event)
-    {
+     */
+    public final synchronized void serviceChanged(ServiceEvent event) {
         // If no logger is in use, then grab this one.
-        if ((event.getType() == ServiceEvent.REGISTERED) && (m_logRef == null))
-        {
+        if ((event.getType() == ServiceEvent.REGISTERED) && (m_logRef == null)) {
             m_logRef = event.getServiceReference();
             // Get the service object and set it in the logger.
             setLogger(m_context.getService(m_logRef));
         }
         // If a logger is in use, but this one has a higher ranking, then swap
         // it for the existing logger.
-        else if ((event.getType() == ServiceEvent.REGISTERED) && (m_logRef != null))
-        {
-            ServiceReference ref =
-                m_context.getServiceReference("org.osgi.service.log.LogService");
-            if (!ref.equals(m_logRef))
-            {
+        else if ((event.getType() == ServiceEvent.REGISTERED) && (m_logRef != null)) {
+            ServiceReference ref = m_context.getServiceReference("org.osgi.service.log.LogService");
+            if (!ref.equals(m_logRef)) {
                 m_context.ungetService(m_logRef);
                 m_logRef = ref;
                 setLogger(m_context.getService(m_logRef));
             }
-
         }
         // If the current logger is going away, release it and try to
         // find another one.
-        else if ((event.getType() == ServiceEvent.UNREGISTERING) &&
-            m_logRef.equals(event.getServiceReference()))
-        {
+        else if ((event.getType() == ServiceEvent.UNREGISTERING) && m_logRef.equals(event.getServiceReference())) {
             // Unget the service object.
             m_context.ungetService(m_logRef);
             // Try to get an existing log service.
-            m_logRef = m_context.getServiceReference(
-                "org.osgi.service.log.LogService");
+            m_logRef = m_context.getServiceReference("org.osgi.service.log.LogService");
             // Get the service object if available and set it in the logger.
-            if (m_logRef != null)
-            {
+            if (m_logRef != null) {
                 setLogger(m_context.getService(m_logRef));
             }
-            else
-            {
+            else {
                 setLogger(null);
             }
         }
@@ -247,30 +206,19 @@ public class Logger implements ServiceListener
      * This method sets the new log service object. It also caches the method to
      * invoke. The service object and method are stored in array to optimistically
      * eliminate the need to locking when logging.
-    **/
-    private void setLogger(Object logObj)
-    {
-        if (logObj == null)
-        {
+     */
+    private void setLogger(Object logObj) {
+        if (logObj == null) {
             m_logger = null;
         }
-        else
-        {
-            Class[] formalParams = {
-                ServiceReference.class,
-                Integer.TYPE,
-                String.class,
-                Throwable.class
-            };
-
-            try
-            {
+        else {
+            Class[] formalParams = { ServiceReference.class, Integer.TYPE, String.class, Throwable.class };
+            try {
                 Method logMethod = logObj.getClass().getMethod("log", formalParams);
                 logMethod.setAccessible(true);
                 m_logger = new Object[] { logObj, logMethod };
             }
-            catch (NoSuchMethodException ex)
-            {
+            catch (NoSuchMethodException ex) {
                 System.err.println("Logger: " + ex);
                 m_logger = null;
             }
