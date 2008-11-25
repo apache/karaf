@@ -625,6 +625,14 @@
                 <groupId>com.thoughtworks.xstream</groupId>
                 <artifactId>xstream</artifactId>
                 <version>1.3</version>
+                <exclusions>
+                    <exclusion>
+                    <!-- xom is an optional dependency of xstream. Its also 
+                         LGPL, so its really not ASF compatible. -->
+                        <groupId>xom</groupId>
+                        <artifactId>xom</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.logging</groupId>
