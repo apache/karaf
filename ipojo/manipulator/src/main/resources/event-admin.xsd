@@ -16,8 +16,8 @@
 	specific language governing permissions and limitations
 	under the License.
 -->
-<xs:schema targetNamespace="org.apache.felix.ipojo.handlers.event.EventAdminHandler"
-	xmlns="org.apache.felix.ipojo.handlers.event.EventAdminHandler"
+<xs:schema targetNamespace="org.apache.felix.ipojo.handlers.event"
+	xmlns="org.apache.felix.ipojo.handlers.event"
 	xmlns:xs="http://www.w3.org/2001/XMLSchema"
 	elementFormDefault="qualified">	
 

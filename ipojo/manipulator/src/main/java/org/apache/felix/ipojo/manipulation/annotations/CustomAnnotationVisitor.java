@@ -34,7 +34,7 @@ public class CustomAnnotationVisitor extends EmptyVisitor implements AnnotationV
     //TODO manage enum annotations.
     
     /**
-     * PArent element.
+     * Parent element.
      */
     private Element m_elem;
 
@@ -54,22 +54,29 @@ public class CustomAnnotationVisitor extends EmptyVisitor implements AnnotationV
      * Is the custom annotation a first-order annotation.
      */
     private boolean m_root;
+    
+    /**
+     * Is the visit annotation a class annotation?
+     */
+    private boolean m_classAnnotation;
 
     /**
-     * MEtadata collector.
+     * Metadata collector.
      */
     private MetadataCollector m_collector;
     
     /**
      * Constructor.
-     * @param elem : parent element
-     * @param collector : metadata collector
-     * @param root : is the annotation a root
+     * @param elem the parent element
+     * @param collector the metadata collector
+     * @param root is the annotation a root
+     * @param clazz the annotation is a class annotation.
      */
-    public CustomAnnotationVisitor(Element elem, MetadataCollector collector, boolean root) {
+    public CustomAnnotationVisitor(Element elem, MetadataCollector collector, boolean root, boolean clazz) {
         m_elem = elem;
         m_root = root;
         m_collector = collector;
+        m_classAnnotation = clazz;
     }
     
     /**
@@ -98,17 +105,7 @@ public class CustomAnnotationVisitor extends EmptyVisitor implements AnnotationV
         String namespace = s.substring(0, index);
         return new Element(name, namespace);
     }
-    
-    /**
-     * Build the element object from the given descriptor.
-     * @param desc : annotation descriptor
-     * @return the package of the annotation
-     */
-    public static String getPackage(String desc) {
-        String s = (desc.replace('/', '.')).substring(1, desc.length() - 1);
-        int index = s.lastIndexOf('.');
-        return s.substring(0, index);
-    }
+
 
     /**
      * Visit a 'simple' annotation attribute.
@@ -155,7 +152,7 @@ public class CustomAnnotationVisitor extends EmptyVisitor implements AnnotationV
         // Sub annotations are mapped to sub-elements
         Element elem = buildElement(arg1);
         m_elem.addElement(elem);
-        return new CustomAnnotationVisitor(elem, m_collector, false);
+        return new CustomAnnotationVisitor(elem, m_collector, false, false);
     }
 
     /**
@@ -189,7 +186,7 @@ public class CustomAnnotationVisitor extends EmptyVisitor implements AnnotationV
             if (m_id != null) {
                 m_collector.getIds().put(m_id, m_elem);
             } else {
-                if (! m_collector.getIds().containsKey(m_elem.getNameSpace())) {
+                if (! m_collector.getIds().containsKey(m_elem.getNameSpace()) && m_classAnnotation) {
                     // If the namespace is not already used, add the annotation as the
                     // root element of this namespace.
                     m_collector.getIds().put(m_elem.getNameSpace(), m_elem);
@@ -257,7 +254,7 @@ public class CustomAnnotationVisitor extends EmptyVisitor implements AnnotationV
             // Sub annotations are map to sub-elements
             Element elem = buildElement(arg1);
             m_elem.addElement(elem);
-            return new CustomAnnotationVisitor(elem, m_collector, false);
+            return new CustomAnnotationVisitor(elem, m_collector, false, false);
         }
 
         /**

@@ -293,7 +293,7 @@ public class ProvidedService implements ServiceFactory {
     }
 
     /**
-     * Update the service properties. The new list of properties is sended to
+     * Update the service properties. The new list of properties is sent to
      * the service registry.
      */
     public synchronized void update() {

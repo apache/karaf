@@ -53,8 +53,8 @@ public class BadTests extends OSGiTestCase {
     /**
      * The namespace of the Event admin handler.
      */
-    private static final String NAMESPACE = "org.apache.felix.ipojo.handlers.event.EventAdminHandler";
-
+    private static final String NAMESPACE = "org.apache.felix.ipojo.handlers.event";
+    
     /**
      * The available components.
      */

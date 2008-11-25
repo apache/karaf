@@ -1,11 +1,12 @@
 package org.apache.felix.ipojo.test.scenarios.component.jmx;
 
 import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.handlers.jmx.Config;
 import org.apache.felix.ipojo.handlers.jmx.Method;
 import org.apache.felix.ipojo.handlers.jmx.Property;
 
 @Component
-@org.apache.felix.ipojo.handlers.jmx.Config(domain="my-domain", usesMOSGi=false)
+@Config(domain="my-domain", usesMOSGi=false)
 public class JMXSimple {
 
     @Property(name="prop", notification=true, rights="w")

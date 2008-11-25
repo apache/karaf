@@ -54,7 +54,7 @@ public class EventAdminSubscriberHandler extends PrimitiveHandler implements
     /**
      * The handler namespace.
      */
-    public static final String NAMESPACE = "org.apache.felix.ipojo.handlers.event.EventAdminHandler";
+    public static final String NAMESPACE = "org.apache.felix.ipojo.handlers.event";
 
     // Names of instance configuration properties.
 

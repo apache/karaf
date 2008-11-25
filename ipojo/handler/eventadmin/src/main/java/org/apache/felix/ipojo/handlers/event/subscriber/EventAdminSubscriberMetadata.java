@@ -90,7 +90,7 @@ class EventAdminSubscriberMetadata {
     /**
      * The key where user data are stored in the event dictionary.
      */
-    private final String m_dataKey;
+    private String m_dataKey;
 
     /**
      * The type of received data.
@@ -135,6 +135,8 @@ class EventAdminSubscriberMetadata {
         // CALLBACK_ATTRIBUTE
         if (subscriber.containsAttribute(CALLBACK_ATTRIBUTE)) {
             m_callback = subscriber.getAttribute(CALLBACK_ATTRIBUTE);
+        } else if (subscriber.containsAttribute("method")) {
+            m_callback = subscriber.getAttribute("method");
         } else {
             throw new ConfigurationException(
                     "Missing required attribute in component configuration : "
@@ -156,14 +158,21 @@ class EventAdminSubscriberMetadata {
 
         // DATA_KEY_ATTRIBUTE
         m_dataKey = subscriber.getAttribute(DATA_KEY_ATTRIBUTE);
-        if (subscriber.containsAttribute(DATA_TYPE_ATTRIBUTE)) {
+        if (m_dataKey == null) { // Alternative configuration
+            m_dataKey = subscriber.getAttribute("data_key");
+        }
+        
+        String t = subscriber.getAttribute(DATA_TYPE_ATTRIBUTE);
+        if (t == null) { // Alternative configuration
+            t = subscriber.getAttribute("data_type");
+        }
+        if (t != null) {
             Class type;
-            String typeName = subscriber.getAttribute(DATA_TYPE_ATTRIBUTE);
             try {
-                type = m_bundleContext.getBundle().loadClass(typeName);
+                type = m_bundleContext.getBundle().loadClass(t);
             } catch (ClassNotFoundException e) {
                 throw new ConfigurationException("Data type class not found : "
-                        + typeName);
+                        + t);
             }
             m_dataType = type;
         } else {

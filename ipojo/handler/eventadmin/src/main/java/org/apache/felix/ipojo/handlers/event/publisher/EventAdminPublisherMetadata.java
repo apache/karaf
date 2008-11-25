@@ -150,6 +150,8 @@ class EventAdminPublisherMetadata {
         // DATA_KEY_ATTRIBUTE
         if (publisher.containsAttribute(DATA_KEY_ATTRIBUTE)) {
             m_dataKey = publisher.getAttribute(DATA_KEY_ATTRIBUTE);
+        } else if (publisher.containsAttribute("data_key")) {
+            m_dataKey = publisher.getAttribute("data_key");
         } else {
             m_dataKey = DEFAULT_DATA_KEY_VALUE;
         }

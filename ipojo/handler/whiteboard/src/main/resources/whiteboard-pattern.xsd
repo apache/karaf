@@ -16,8 +16,8 @@
 	specific language governing permissions and limitations
 	under the License.
 -->
-<xs:schema targetNamespace="org.apache.felix.ipojo.white-board-pattern"
-	xmlns="org.apache.felix.ipojo.white-board-pattern"
+<xs:schema targetNamespace="org.apache.felix.ipojo.whiteboard"
+	xmlns="org.apache.felix.ipojo.whiteboard"
 	xmlns:xs="http://www.w3.org/2001/XMLSchema"
 	elementFormDefault="qualified">
 	<xs:element name="wbp" type="WBPType"></xs:element>

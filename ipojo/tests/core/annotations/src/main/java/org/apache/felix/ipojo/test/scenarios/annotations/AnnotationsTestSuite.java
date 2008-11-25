@@ -44,6 +44,11 @@ public class AnnotationsTestSuite extends TestSuite {
         // External handler annotations
         ots.addTestSuite(TemporalDependencies.class);
         ots.addTestSuite(JMX.class);
+        ots.addTestSuite(WhiteBoard.class);
+        ots.addTestSuite(Extender.class);
+        ots.addTestSuite(EventAdmin.class);
+
+
         return ots;
     }
 

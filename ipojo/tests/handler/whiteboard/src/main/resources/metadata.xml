@@ -1,9 +1,9 @@
 <ipojo 
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/schemas/core.xsd 
-	    org.apache.felix.ipojo.white-board-pattern http://people.apache.org/~clement/ipojo/schemas/whiteboard-pattern.xsd"
+	    org.apache.felix.ipojo.whiteboard http://people.apache.org/~clement/ipojo/schemas/whiteboard-pattern.xsd"
 	xmlns="org.apache.felix.ipojo"
-	xmlns:wbp="org.apache.felix.ipojo.white-board-pattern">
+	xmlns:wbp="org.apache.felix.ipojo.whiteboard">
 	<component classname="org.apache.felix.ipojo.test.FooProvider" name="fooprovider">
 		<provides>
 			<property field="foo" value="foo"/>

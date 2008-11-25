@@ -94,7 +94,7 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
         if (CustomAnnotationVisitor.isCustomAnnotation(arg0)) {
             Element elem = CustomAnnotationVisitor.buildElement(arg0);
             elem.addAttribute(new Attribute("field", m_field)); // Add a field attribute
-            return new CustomAnnotationVisitor(elem, m_collector, true);
+            return new CustomAnnotationVisitor(elem, m_collector, true, false);
         }
         
         return null;

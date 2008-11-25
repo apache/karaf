@@ -96,7 +96,7 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
     
     /**
      * Visit class annotations.
-     * This method detects @component, @provides and @Element annotations.
+     * This method detects @component and @provides annotations.
      * @param desc : annotation descriptor.
      * @param visible : is the annotation visible at runtime.
      * @return the annotation visitor.
@@ -118,7 +118,7 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
         
         if (CustomAnnotationVisitor.isCustomAnnotation(desc)) {
             Element elem = CustomAnnotationVisitor.buildElement(desc);
-            return new CustomAnnotationVisitor(elem, this, true);
+            return new CustomAnnotationVisitor(elem, this, true, true);
         }
         
         return null;

@@ -80,7 +80,7 @@ public class MethodCollector extends EmptyVisitor {
         if (CustomAnnotationVisitor.isCustomAnnotation(arg0)) {
             Element elem = CustomAnnotationVisitor.buildElement(arg0);
             elem.addAttribute(new Attribute("method", m_name));
-            return new CustomAnnotationVisitor(elem, m_collector, true);
+            return new CustomAnnotationVisitor(elem, m_collector, true, false);
         }
         
         return null;

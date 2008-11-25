@@ -19,6 +19,6 @@
 <ipojo>
 	<handler
 		classname="org.apache.felix.ipojo.handler.wbp.WhiteBoardPatternHandler"
-		name="wbp" namespace="org.apache.felix.ipojo.white-board-pattern">
+		name="wbp" namespace="org.apache.felix.ipojo.whiteboard">
 	</handler>
 </ipojo>

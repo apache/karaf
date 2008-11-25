@@ -52,7 +52,10 @@
 						<Bundle-Description> iPOJO Annotations </Bundle-Description>
 						<Export-Package> org.apache.felix.ipojo.annotations,
 							org.apache.felix.ipojo.handler.temporal,
-							org.apache.felix.ipojo.handlers.jmx
+							org.apache.felix.ipojo.handlers.jmx,
+							org.apache.felix.ipojo.extender,
+							org.apache.felix.ipojo.whiteboard,
+							org.apache.felix.ipojo.handlers.event
 						 </Export-Package>
 						<Include-Resource> META-INF/LICENCE=LICENSE,
 							META-INF/NOTICE=NOTICE </Include-Resource>

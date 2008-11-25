@@ -20,7 +20,7 @@
 	<handler
 		classname="org.apache.felix.ipojo.handlers.event.subscriber.EventAdminSubscriberHandler"
 		name="subscriber"
-		namespace="org.apache.felix.ipojo.handlers.event.EventAdminHandler">
+		namespace="org.apache.felix.ipojo.handlers.event">
 		<provides>
 			<property field="m_topics" name="event.topics"/>
 		</provides>
@@ -28,7 +28,7 @@
 	
 	<handler classname="org.apache.felix.ipojo.handlers.event.publisher.EventAdminPublisherHandler"
 		name="publisher"
-		namespace="org.apache.felix.ipojo.handlers.event.EventAdminHandler">
+		namespace="org.apache.felix.ipojo.handlers.event">
 		<requires field="m_ea"/>
 	</handler>
 </ipojo>

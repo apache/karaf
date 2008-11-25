@@ -37,7 +37,7 @@ public class WhiteBoardPatternHandler extends PrimitiveHandler {
     /**
      * The handler namespace.
      */
-    public static final String NAMESPACE = "org.apache.felix.ipojo.white-board-pattern";
+    public static final String NAMESPACE = "org.apache.felix.ipojo.whiteboard";
     
     /**
      * The white board pattern to manage. By default just one. 

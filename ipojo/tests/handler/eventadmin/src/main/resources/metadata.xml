@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ipojo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/schemas/core.xsd 
-	    org.apache.felix.ipojo.handlers.event.EventAdminHandler http://people.apache.org/~clement/ipojo/schemas/event-admin.xsd"
+	    org.apache.felix.ipojo.handlers.event http://people.apache.org/~clement/ipojo/schemas/event-admin.xsd"
 	xmlns="org.apache.felix.ipojo"
-	xmlns:ev="org.apache.felix.ipojo.handlers.event.EventAdminHandler">
+	xmlns:ev="org.apache.felix.ipojo.handlers.event">
 	
 	<!-- The (asynchronous) donut provider -->
 	<component classname="org.apache.felix.ipojo.test.donut.DonutProviderImpl"
