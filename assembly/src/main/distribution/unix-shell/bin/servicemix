@@ -214,14 +214,12 @@ setupDefaults() {
     fi
 
     # Add the jars in the lib dir
-    for file in $SERVICEMIX_HOME/lib/*
+    for file in $SERVICEMIX_HOME/lib/*.jar
     do
-        if [[ $file == *.jar ]]; then
-            if [ "x$CLASSPATH" = "x" ]; then
-                CLASSPATH="$file"
-            else
-                CLASSPATH="$CLASSPATH:$file"
-            fi
+        if [ -z "$CLASSPATH" ]; then
+            CLASSPATH="$file"
+        else
+            CLASSPATH="$CLASSPATH:$file"
         fi
     done
     DEFAULT_JAVA_DEBUG_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"
