@@ -65,7 +65,7 @@
             <Bundle-SymbolicName>org.apache.felix.dependencymanager.shell</Bundle-SymbolicName>
             <Bundle-Activator>org.apache.felix.dependencymanager.shell.Activator</Bundle-Activator>
             <Bundle-Name>Apache Felix Dependency Manager Shell</Bundle-Name>
-            <Bundle-Description>Shell commands for the dependency manager.</Bundle-Description>
+            <Bundle-Description>Shell command for the dependency manager.</Bundle-Description>
             <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
           </instructions>
         </configuration>
