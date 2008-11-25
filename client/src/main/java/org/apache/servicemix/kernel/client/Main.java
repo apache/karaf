@@ -16,9 +16,9 @@
  */
 package org.apache.servicemix.kernel.client;
 
-import com.google.code.sshd.SshClient;
+import com.google.code.sshd.ClientChannel;
 import com.google.code.sshd.ClientSession;
-import com.google.code.sshd.Channel;
+import com.google.code.sshd.SshClient;
 import jline.ConsoleReader;
 
 /**
@@ -69,12 +69,12 @@ public class Main {
             client.start();
             ClientSession session = client.connect(host, port);
             session.authPassword(user, password);
-            Channel channel = session.createChannel("shell");
+            ClientChannel channel = session.createChannel("shell");
             channel.setIn(new ConsoleReader().getInput());
             channel.setOut(System.out);
             channel.setErr(System.err);
             channel.open();
-            channel.waitFor(Channel.CLOSED, 0);
+            channel.waitFor(ClientChannel.CLOSED, 0);
         } catch (Throwable t) {
             t.printStackTrace();
             System.exit(1);

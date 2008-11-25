@@ -34,9 +34,9 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.util.List;
 
-import com.google.code.sshd.SshClient;
+import com.google.code.sshd.ClientChannel;
 import com.google.code.sshd.ClientSession;
-import com.google.code.sshd.Channel;
+import com.google.code.sshd.SshClient;
 
 /**
  * Connect to a remote shell server.
@@ -134,12 +134,12 @@ public class SshAction
         ClientSession session = client.connect(remote.getHost(), remote.getPort());
         io.info(messages.getMessage("info.connected"));
         session.authPassword(username, password);
-        Channel channel = session.createChannel("shell");
+        ClientChannel channel = session.createChannel("shell");
         channel.setIn(io.inputStream);
         channel.setOut(io.outputStream);
         channel.setErr(io.errorStream);
         channel.open();
-        channel.waitFor(Channel.CLOSED, 0);
+        channel.waitFor(ClientChannel.CLOSED, 0);
 
 //        RemoteShellProxy shell = new RemoteShellProxy(client, io, instance, username);
 //

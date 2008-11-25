@@ -131,7 +131,7 @@ public class GShellShellFactory implements ShellFactory {
             this.err = err;
         }
 
-        public void start(Map<String,String> env) throws Exception {
+        public void start(Map<String,String> env) throws IOException {
             this.io = new IO(in, out, err, false);
             this.variables = new Variables((Map) env);
             new Thread(this).start();
