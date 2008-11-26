@@ -69,7 +69,7 @@ public class ServiceMixBranding extends Branding {
 
         out.println();
         // TODO: get version
-        out.println(" @|bold ServiceMix| (" + "1.0.0" + ")");
+        out.println(" @|bold ServiceMix| (" + "1.1.0-SNAPSHOT" + ")");
         out.println();
         out.println("Type '@|bold help|' for more information.");
 
