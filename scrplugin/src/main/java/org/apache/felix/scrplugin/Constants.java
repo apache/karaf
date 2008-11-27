@@ -101,7 +101,7 @@ public class Constants {
 
     public static final String REFERENCE_CHECKED = "checked";
     
-    /** @since 1.0.10 */
+    /** @since 1.0.9 */
     public static final String REFERENCE_STRATEGY = "strategy";
 
     public static final String ABSTRACT_DESCRIPTOR_FILENAME = "scrinfo.xml";
