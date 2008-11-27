@@ -37,6 +37,9 @@ public class Reference extends AbstractObject {
     protected String policy;
     protected String bind;
     protected String unbind;
+    
+    /** @since 1.0.10 */
+    protected String strategy;
 
     /** Is this reference already checked? */
     protected boolean checked = false;
@@ -125,6 +128,21 @@ public class Reference extends AbstractObject {
     public void setChecked(boolean checked) {
         this.checked = checked;
     }
+    
+    /** @since 1.0.10 */
+    public String getStrategy() {
+        return strategy;
+    }
+
+    /** @since 1.0.10 */
+    public void setStrategy(String strategy) {
+        this.strategy = strategy;
+    }
+    
+    /** @since 1.0.10 */
+    public boolean isLookupStrategy() {
+        return "lookup".equals(getStrategy());
+    }
 
     /**
      * Validate the property.
@@ -163,24 +181,36 @@ public class Reference extends AbstractObject {
         } else if (!"static".equals(this.policy) && !"dynamic".equals(this.policy)) {
             issues.add(this.getMessage("Invalid Policy specification " + this.policy));
         }
+        
+        // validate strategy
+        if (this.strategy == null) {
+            this.strategy = "event";
+        } else if (!"event".equals(this.strategy) && !"lookup".equals(this.strategy)) {
+            issues.add(this.getMessage("Invalid startegy type " + this.strategy));
+        }
 
         // validate bind and unbind methods
-        final String oldBind = this.bind;
-        final String oldUnbind = this.unbind;
-        this.bind = this.validateMethod(this.bind, issues, warnings, componentIsAbstract);
-        this.unbind = this.validateMethod(this.unbind, issues, warnings, componentIsAbstract);
-        if ( issues.size() == currentIssueCount ) {
-            if ( this.bind != null && this.unbind != null ) {
-                // no errors, so we're checked
-                this.checked = true;
-            } else {
-                if ( this.bind == null ) {
-                    this.bind = oldBind;
-                }
-                if ( this.unbind == null ) {
-                    this.unbind = oldUnbind;
+        if (!isLookupStrategy()) {
+            final String oldBind = this.bind;
+            final String oldUnbind = this.unbind;
+            this.bind = this.validateMethod(this.bind, issues, warnings, componentIsAbstract);
+            this.unbind = this.validateMethod(this.unbind, issues, warnings, componentIsAbstract);
+            if ( issues.size() == currentIssueCount ) {
+                if ( this.bind != null && this.unbind != null ) {
+                    // no errors, so we're checked
+                    this.checked = true;
+                } else {
+                    if ( this.bind == null ) {
+                        this.bind = oldBind;
+                    }
+                    if ( this.unbind == null ) {
+                        this.unbind = oldUnbind;
+                    }
                 }
             }
+        } else {
+            this.bind = null;
+            this.unbind = null;
         }
     }
 

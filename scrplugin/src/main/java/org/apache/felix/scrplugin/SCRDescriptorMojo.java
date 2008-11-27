@@ -570,10 +570,15 @@ public class SCRDescriptorMojo extends AbstractMojo {
         if ( isChecked != null ) {
             ref.setChecked(Boolean.valueOf(isChecked).booleanValue());
         }
+        final String strategy = reference.getNamedParameter(Constants.REFERENCE_STRATEGY);
+        if ( strategy != null ) {
+            ref.setStrategy(strategy);
+        }
+        
         // if this is a field with a single cardinality,
         // we look for the bind/unbind methods
         // and create them if they are not availabe
-        if ( this.generateAccessors ) {
+        if ( this.generateAccessors && !ref.isLookupStrategy() ) {
             if ( reference.getField() != null && component.getJavaClassDescription() instanceof ModifiableJavaClassDescription ) {
                 if ( ref.getCardinality().equals("0..1") || ref.getCardinality().equals("1..1") ) {
                     boolean createBind = false;

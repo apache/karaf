@@ -283,10 +283,14 @@ public class ComponentDescriptorIO {
         IOUtils.addAttribute(ai, "cardinality", reference.getCardinality());
         IOUtils.addAttribute(ai, "policy", reference.getPolicy());
         IOUtils.addAttribute(ai, "target", reference.getTarget());
-        IOUtils.addAttribute(ai, "bind", reference.getBind());
-        IOUtils.addAttribute(ai, "unbind", reference.getUnbind());
+        
+        if (!reference.isLookupStrategy()) {
+            IOUtils.addAttribute(ai, "bind", reference.getBind());
+            IOUtils.addAttribute(ai, "unbind", reference.getUnbind());
+        }
         if ( isScrPrivateFile ) {
             IOUtils.addAttribute(ai, "checked", String.valueOf(reference.isChecked()));
+            IOUtils.addAttribute(ai, "strategy", reference.getStrategy());
         }
         IOUtils.indent(contentHandler, 2);
         contentHandler.startElement(INNER_NAMESPACE_URI, ComponentDescriptorIO.REFERENCE, ComponentDescriptorIO.REFERENCE_QNAME, ai);
@@ -420,6 +424,7 @@ public class ComponentDescriptorIO {
                     ref.setTarget(attributes.getValue("target"));
                     ref.setBind(attributes.getValue("bind"));
                     ref.setUnbind(attributes.getValue("unbind"));
+                    ref.setStrategy(attributes.getValue("strategy"));
 
                     if ( attributes.getValue("checked") != null ) {
                         ref.setChecked(Boolean.valueOf(attributes.getValue("checked")).booleanValue());

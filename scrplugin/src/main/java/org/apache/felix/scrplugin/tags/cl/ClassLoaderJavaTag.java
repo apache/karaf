@@ -113,6 +113,7 @@ public class ClassLoaderJavaTag implements JavaTag {
             map.put(Constants.REFERENCE_TARGET, this.reference.getTarget());
             map.put(Constants.REFERENCE_UNDBIND, this.reference.getUnbind());
             map.put(Constants.REFERENCE_CHECKED, String.valueOf(this.reference.isChecked()));
+            map.put(Constants.REFERENCE_STRATEGY, this.reference.getStrategy());
             return map;
         } else if ( this.property != null ) {
             final Map map = new HashMap();
