@@ -38,7 +38,7 @@ public class Reference extends AbstractObject {
     protected String bind;
     protected String unbind;
     
-    /** @since 1.0.10 */
+    /** @since 1.0.9 */
     protected String strategy;
 
     /** Is this reference already checked? */
@@ -129,17 +129,17 @@ public class Reference extends AbstractObject {
         this.checked = checked;
     }
     
-    /** @since 1.0.10 */
+    /** @since 1.0.9 */
     public String getStrategy() {
         return strategy;
     }
 
-    /** @since 1.0.10 */
+    /** @since 1.0.9 */
     public void setStrategy(String strategy) {
         this.strategy = strategy;
     }
     
-    /** @since 1.0.10 */
+    /** @since 1.0.9 */
     public boolean isLookupStrategy() {
         return "lookup".equals(getStrategy());
     }
