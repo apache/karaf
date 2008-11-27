@@ -25,6 +25,7 @@ import org.apache.geronimo.gshell.application.ClassPath;
 import org.apache.geronimo.gshell.io.IO;
 import org.apache.geronimo.gshell.command.Variables;
 import org.apache.geronimo.gshell.application.model.ApplicationModel;
+import org.apache.geronimo.gshell.artifact.Artifact;
 
 public class ApplicationImpl implements Application {
 
@@ -89,6 +90,10 @@ public class ApplicationImpl implements Application {
 
     public String getUserName() {
         return System.getProperty("user.name");
+    }
+
+    public Artifact getArtifact() {
+        return null;
     }
 
     private File detectHomeDir() {
