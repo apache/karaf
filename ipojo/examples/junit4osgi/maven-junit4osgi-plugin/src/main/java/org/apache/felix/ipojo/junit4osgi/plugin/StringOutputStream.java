@@ -1,3 +1,21 @@
+/* 
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.apache.felix.ipojo.junit4osgi.plugin;
 
 import java.io.OutputStream;
@@ -6,6 +24,7 @@ import java.io.Serializable;
 /**
  * Provides an OutputStream to an internal String. Internally converts bytes to
  * a Strings and stores them in an internal StringBuffer.
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class StringOutputStream extends OutputStream implements Serializable {
 
@@ -17,14 +36,14 @@ public class StringOutputStream extends OutputStream implements Serializable {
     /**
      * The internal destination StringBuffer.
      */
-    protected StringBuffer buf = null;
+    protected StringBuffer m_buffer = null;
 
     /**
      * Creates new StringOutputStream, makes a new internal StringBuffer.
      */
     public StringOutputStream() {
         super();
-        buf = new StringBuffer();
+        m_buffer = new StringBuffer();
     }
 
     /**
@@ -34,14 +53,14 @@ public class StringOutputStream extends OutputStream implements Serializable {
      * @return returns the content of the internal StringBuffer
      */
     public String toString() {
-        return buf.toString();
+        return m_buffer.toString();
     }
 
     /**
      * Sets the internal StringBuffer to null.
      */
     public void close() {
-        buf = null;
+        m_buffer = null;
 
     }
 
@@ -62,7 +81,7 @@ public class StringOutputStream extends OutputStream implements Serializable {
             bytes[i] = b[off];
             off++;
         }
-        buf.append(toCharArray(bytes));
+        m_buffer.append(toCharArray(bytes));
     }
 
     /**
@@ -71,7 +90,7 @@ public class StringOutputStream extends OutputStream implements Serializable {
      * @param b the byte as an int to add
      */
     public void write(int b) {
-        buf.append((char) b);
+        m_buffer.append((char) b);
     }
     
     /**
@@ -80,11 +99,14 @@ public class StringOutputStream extends OutputStream implements Serializable {
      * @param s the String to add
      */
     public void write(String s) {
-        buf.append(s);
+        m_buffer.append(s);
     }
     
     /**
      * Converts byte array to char array.
+     * @param barr input byte array
+     * @return the char array corresponding to the 
+     * given byte array
      */
     public static char[] toCharArray(byte[] barr) {
         if (barr == null) {

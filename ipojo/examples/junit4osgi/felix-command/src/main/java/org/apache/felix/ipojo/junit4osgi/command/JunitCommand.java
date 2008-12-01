@@ -38,8 +38,16 @@ import org.apache.felix.shell.Command;
  */
 public class JunitCommand implements Command {
 
-    private OSGiJunitRunner runner;
+    /**
+     * OSGi Junit Runner service.
+     */
+    private OSGiJunitRunner m_runner;
 
+    /**
+     * Gets the Test names.
+     * @param list the list of test
+     * @return the list of test names.
+     */
     private List getNamesFromTests(List list) {
         List names = new ArrayList(list.size());
         for (int i = 0; i < list.size(); i++) {
@@ -57,26 +65,33 @@ public class JunitCommand implements Command {
         return names;
     }
 
+    /**
+     * Executes the command.
+     * @param line the command line
+     * @param out the output stream
+     * @param err the error stream
+     * @see org.apache.felix.shell.Command#execute(java.lang.String, java.io.PrintStream, java.io.PrintStream)
+     */
     public void execute(String line, PrintStream out, PrintStream err) {
         line = line.substring(getName().length()).trim();
         List tr = null;
         if (line.equals("all")) {
-            if (runner.getTests() == null) {
+            if (m_runner.getTests() == null) {
                 err.println("No tests to execute");
                 return;
             } else {
-                out.println("Executing " + getNamesFromTests(runner.getTests()));
-                tr = runner.run();
+                out.println("Executing " + getNamesFromTests(m_runner.getTests()));
+                tr = m_runner.run();
             }
         } else {
             try {
                 Long bundleId = new Long(line);
-                if (runner.getTests(bundleId.longValue()) == null) {
+                if (m_runner.getTests(bundleId.longValue()) == null) {
                     err.println("No tests to execute");
                     return;
                 } else {
-                    out.println("Executing " + getNamesFromTests(runner.getTests(bundleId.longValue())));
-                    tr = runner.run(bundleId.longValue());
+                    out.println("Executing " + getNamesFromTests(m_runner.getTests(bundleId.longValue())));
+                    tr = m_runner.run(bundleId.longValue());
                 }
             } catch (NumberFormatException e) {
                 err.println("Unable to parse id " + line);
@@ -96,16 +111,31 @@ public class JunitCommand implements Command {
 
     }
 
+    /**
+     * Gets the command name.
+     * @return "junit"
+     * @see org.apache.felix.shell.Command#getName()
+     */
     public String getName() {
         return "junit";
     }
 
+    /**
+     * Gets a small description of the command.
+     * @return "launch junit tests"
+     * @see org.apache.felix.shell.Command#getShortDescription()
+     */
     public String getShortDescription() {
         return "launch junit tests";
     }
 
+    /**
+     * Gets command usage.
+     * @return the command usage.
+     * @see org.apache.felix.shell.Command#getUsage()
+     */
     public String getUsage() {
-        return "junit";
+        return "junit <bundleid> | junit all";
     }
 
 }

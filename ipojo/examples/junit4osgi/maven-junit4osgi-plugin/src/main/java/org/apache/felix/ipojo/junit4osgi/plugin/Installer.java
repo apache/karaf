@@ -1,4 +1,4 @@
-/*
+/* 
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -41,37 +41,37 @@ public class Installer implements BundleActivator {
     /**
      * The list of artifact containing bundles for the junit4osgi framework.
      */
-    private List artifacts;
+    private List m_artifacts;
     
     /**
      * The current maven project. 
      */
-    private MavenProject project;
+    private MavenProject m_project;
     
     /**
-     * Flag enabling/disbling the deployment of the current
+     * Flag enabling/disabling the deployment of the current
      * project artifact.
      */
-    private boolean deployCurrent;
+    private boolean m_deployCurrent;
     
     /**
      * List of bundle URLs to install. 
      */
-    private List bundles;
+    private List m_bundles;
     
     
     /**
-     * Creates a Installer
+     * Creates a Installer.
      * @param artifacts the list of artifact containing bundles for the junit4osgi framework.
      * @param bundles the list of bundle URLs to install 
      * @param project the current maven project
      * @param deployCurrentArtifact flag enabling/disabling the deployment of the current project artifact
      */
     public Installer(List artifacts, List bundles, MavenProject project, boolean deployCurrentArtifact) {
-        this.artifacts = artifacts;
-        this.project = project;
-        deployCurrent = deployCurrentArtifact;
-        this.bundles = bundles;
+        this.m_artifacts = artifacts;
+        this.m_project = project;
+        m_deployCurrent = deployCurrentArtifact;
+        this.m_bundles = bundles;
     }
     
     /**
@@ -109,11 +109,12 @@ public class Installer implements BundleActivator {
     
     /**
      * Installs and Starts required bundles.
+     * @param context the bundle context used to deploy bundles.
      * @throws BundleException when a bundle cannot be installed or started correctly
      */
     private void deployBundles(BundleContext context) throws BundleException {
-        for (int i = 0; i < bundles.size(); i++) {
-            URL url = (URL) bundles.get(i);
+        for (int i = 0; i < m_bundles.size(); i++) {
+            URL url = (URL) m_bundles.get(i);
             Bundle bundle = context.installBundle(url.toString());
             bundle.start();
         }
@@ -126,8 +127,8 @@ public class Installer implements BundleActivator {
      * be found.
      */
     private URL getUrlByArtifactId(String id) {
-        for (int i = 0; i < artifacts.size(); i++) {
-            Artifact artifact = (Artifact) artifacts.get(i);
+        for (int i = 0; i < m_artifacts.size(); i++) {
+            Artifact artifact = (Artifact) m_artifacts.get(i);
             if (artifact.getArtifactId().equals(id)) {
                 try {
                     return artifact.getFile().toURL();
@@ -145,12 +146,12 @@ public class Installer implements BundleActivator {
      * @throws BundleException when the bundle cannot be installed or started correctly.
      */
     private void deployProjectArtifact(BundleContext context)
-            throws BundleException {
-        if (!deployCurrent) {
+        throws BundleException {
+        if (!m_deployCurrent) {
             return;
         }
 
-        File file = project.getArtifact().getFile();
+        File file = m_project.getArtifact().getFile();
         if (file.exists()) {
             URL url = null;
             try {

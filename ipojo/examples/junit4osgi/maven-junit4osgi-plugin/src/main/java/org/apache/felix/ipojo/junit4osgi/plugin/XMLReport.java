@@ -1,4 +1,4 @@
-/*
+/* 
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -51,7 +51,7 @@ public class XMLReport extends Report {
     /**
      * List of results.
      */
-    private List results = new ArrayList();
+    private List m_results = new ArrayList();
 
     /**
      * A test ends successfully.
@@ -60,17 +60,20 @@ public class XMLReport extends Report {
     public void testSucceeded(Test test) {
         super.testSucceeded();
 
-        long runTime = this.endTime - this.startTime;
+        long runTime = this.m_endTime - this.m_startTime;
 
         Xpp3Dom testCase = createTestElement(test, runTime);
 
-        results.add(testCase);
+        m_results.add(testCase);
     }
 
     /**
      * A test throws an unexpected errors.
      * @param test the test in error
      * @param e the thrown exception
+     * @param out the output messages printed during the test execution
+     * @param err the error messages printed during the test execution
+     * @param log the messages logged during the test execution
      */
     public void testError(Test test, Throwable e, String out, String err, String log) {
         super.testError(test);
@@ -82,6 +85,9 @@ public class XMLReport extends Report {
      * A test fails.
      * @param test the failing test
      * @param e the thrown failure
+     * @param out the output messages printed during the test execution
+     * @param err the error messages printed during the test execution
+     * @param log the messages logged during the test execution
      */
     public void testFailed(Test test, Throwable e, String out, String err, String log) {
         super.testFailed(test);
@@ -94,10 +100,13 @@ public class XMLReport extends Report {
      * @param test the test
      * @param e the thrown error
      * @param name type of failure ("error" or "failure")
+     * @param out the output messages printed during the test execution
+     * @param err the error messages printed during the test execution
+     * @param log the messages logged during the test execution
      */
     private void writeTestProblems(Test test, Throwable e, String name, String out, String err, String log) {
 
-        long runTime = endTime - startTime;
+        long runTime = m_endTime - m_startTime;
 
         Xpp3Dom testCase = createTestElement(test, runTime);
 
@@ -115,8 +124,8 @@ public class XMLReport extends Report {
                 element.setAttribute("message", message);
 
                 element.setAttribute("type",
-                        (stackTrace.indexOf(":") > -1 ? stackTrace.substring(0,
-                                stackTrace.indexOf(":")) : stackTrace));
+                        stackTrace.indexOf(":") > -1 ? stackTrace.substring(0,
+                                stackTrace.indexOf(":")) : stackTrace);
             } else {
                 element.setAttribute("type", new StringTokenizer(stackTrace)
                         .nextToken());
@@ -127,13 +136,13 @@ public class XMLReport extends Report {
             element.setValue(stackTrace);
         }
         
-        addOutputStreamElement( out, "system-out", testCase );
+        addOutputStreamElement(out, "system-out", testCase);
 
-        addOutputStreamElement( err, "system-err", testCase );
-        
-        addOutputStreamElement( log, "log-service", testCase );
+        addOutputStreamElement(err, "system-err", testCase);
 
-        results.add(testCase);
+        addOutputStreamElement(log, "log-service", testCase);
+
+        m_results.add(testCase);
     }
 
     /**
@@ -146,7 +155,7 @@ public class XMLReport extends Report {
      */
     public void generateReport(Test test, TestResult tr, File reportsDirectory,
             BundleContext bc) throws Exception {
-        long runTime = this.endTime - this.startTime;
+        long runTime = this.m_endTime - this.m_startTime;
 
         Xpp3Dom testSuite = createTestSuiteElement(test, runTime);
 
@@ -158,7 +167,7 @@ public class XMLReport extends Report {
 
         testSuite.setAttribute("failures", String.valueOf(tr.failureCount()));
 
-        for (Iterator i = results.iterator(); i.hasNext();) {
+        for (Iterator i = m_results.iterator(); i.hasNext();) {
             Xpp3Dom testcase = (Xpp3Dom) i.next();
             testSuite.addChild(testcase);
         }
@@ -183,9 +192,7 @@ public class XMLReport extends Report {
             throw new Exception("Unable to use UTF-8 encoding", e);
         } catch (FileNotFoundException e) {
             throw new Exception("Unable to create file: " + e.getMessage(), e);
-        }
-
-        finally {
+        } finally {
             IOUtil.close(writer);
         }
     }
@@ -231,7 +238,7 @@ public class XMLReport extends Report {
     }
 
     /**
-     * Creates an XML element
+     * Creates an XML element.
      * @param element the parent element
      * @param name the name of the element to create
      * @return the resulting XML tree.
@@ -294,6 +301,8 @@ public class XMLReport extends Report {
                 case Bundle.UNINSTALLED:
                     state = "UNINSTALLED";
                     break;
+                default:
+                    break;
             }
             Xpp3Dom bundle = createElement(buns, "bundle");
             bundle.setAttribute("symbolic-name", sn);
@@ -302,6 +311,13 @@ public class XMLReport extends Report {
 
     }
     
+    /**
+     * Adds messages written during the test execution in the
+     * XML tree.
+     * @param stdOut the messages
+     * @param name the name of the stream (out, error, log)
+     * @param testCase the XML tree
+     */
     private void addOutputStreamElement(String stdOut, String name,
             Xpp3Dom testCase) {
         if (stdOut != null && stdOut.trim().length() > 0) {

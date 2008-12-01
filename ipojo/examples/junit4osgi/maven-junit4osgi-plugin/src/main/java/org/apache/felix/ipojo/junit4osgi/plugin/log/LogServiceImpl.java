@@ -1,4 +1,4 @@
-/*
+/* 
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -35,25 +35,25 @@ public class LogServiceImpl implements LogService, BundleActivator {
     /**
      * Default output stream (not collected).
      */
-    private StringOutputStream defaultStream;
+    private StringOutputStream m_defaultStream;
   
     /**
      * Collected output stream.
      */
-    private StringOutputStream outputStream; 
+    private StringOutputStream m_outputStream; 
     
     /**
      * Creates the log service object.
      */
     public LogServiceImpl() {
-        defaultStream = new StringOutputStream();
+        m_defaultStream = new StringOutputStream();
     }
    
     /**
      * Enables the log messages collection.
      */
     public void enableOutputStream() {
-        outputStream = new StringOutputStream();
+        m_outputStream = new StringOutputStream();
     }
     
     /**
@@ -61,14 +61,14 @@ public class LogServiceImpl implements LogService, BundleActivator {
      * @return the String containing the logged messages.
      */
     public String getLoggedMessages() {
-        return outputStream.toString();
+        return m_outputStream.toString();
     }
     
     /**
      * Re-initializes the collected message list.
      */
     public void reset() {
-        outputStream = null;
+        m_outputStream = null;
     }
 
     /**
@@ -138,6 +138,8 @@ public class LogServiceImpl implements LogService, BundleActivator {
             case LogService.LOG_WARNING:
                 message = "[WARNING] " + msg;
                 break;
+            default:
+                break;
         }
         
         if (exception != null) {
@@ -152,10 +154,10 @@ public class LogServiceImpl implements LogService, BundleActivator {
      * @param log the message
      */
     public void write(String log) {
-        if (outputStream != null) {
-            outputStream.write(log);
+        if (m_outputStream != null) {
+            m_outputStream.write(log);
         } else {
-            defaultStream.write(log);
+            m_defaultStream.write(log);
         }
     }
 

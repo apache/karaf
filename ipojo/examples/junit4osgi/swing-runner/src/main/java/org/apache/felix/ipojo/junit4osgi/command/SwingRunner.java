@@ -41,6 +41,9 @@ import org.osgi.framework.BundleListener;
  */
 public class SwingRunner extends javax.swing.JFrame implements BundleListener {
 
+    /**
+     * UUID.
+     */
     private static final long serialVersionUID = 1L;
 
     /**
@@ -96,17 +99,17 @@ public class SwingRunner extends javax.swing.JFrame implements BundleListener {
         m_progress.setIndeterminate(false);
         m_progress.setMaximum(100);
         m_progress.setValue(100);
-        
+
         TableColumn column = null;
         for (int i = 0; i < m_resultTable.getColumnCount(); i++) {
             column = m_resultTable.getColumnModel().getColumn(i);
             if (i == 0) {
-                column.setPreferredWidth(350); //first column is bigger
+                column.setPreferredWidth(350); // first column is bigger
             } else {
                 column.setPreferredWidth(50);
                 column.setCellRenderer(new ResultCellRenderer());
+            }
         }
-}
     }
 
     /**
@@ -120,6 +123,7 @@ public class SwingRunner extends javax.swing.JFrame implements BundleListener {
     /**
      * Refresh the list of available test suites.
      */
+    @SuppressWarnings("unchecked")
     private void refreshSuites() {
         List<Test> list = m_runner.getTests();
         TestListModel lm = (TestListModel) m_suiteList.getModel();
@@ -296,13 +300,13 @@ public class SwingRunner extends javax.swing.JFrame implements BundleListener {
         getContentPane().add(m_statusBar, gridBagConstraints);
 
         pack();
-    }// </editor-fold>//GEN-END:initComponents
+    } // </editor-fold>//GEN-END:initComponents
 
     /**
      * Execute button action.
      * @param evt : event.
      */
-    private void executeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m_executeButtonActionPerformed
+    private void executeButtonActionPerformed(java.awt.event.ActionEvent evt) { //GEN-FIRST:event_m_executeButtonActionPerformed
         if (m_running) { return; }
         // Collect selected test.
         int[] indices = m_suiteList.getSelectedIndices();
@@ -313,26 +317,26 @@ public class SwingRunner extends javax.swing.JFrame implements BundleListener {
         }
         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         executeTest(list);
-    }//GEN-LAST:event_m_executeButtonActionPerformed
+    } //GEN-LAST:event_m_executeButtonActionPerformed
 
     /**
      * All button action.
      * @param evt : event.
      */
-    private void allButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m_allButtonActionPerformed
+    private void allButtonActionPerformed(java.awt.event.ActionEvent evt) { //GEN-FIRST:event_m_allButtonActionPerformed
         int max = m_suiteList.getModel().getSize();
         int[] indices = new int[max];
         for (int i = 0; i < max; i++) {
             indices[i] = i;
         }
         m_suiteList.setSelectedIndices(indices);
-    }//GEN-LAST:event_m_allButtonActionPerformed
+    } //GEN-LAST:event_m_allButtonActionPerformed
 
     /**
      * Listener on table click.
      * @param evt : event.
      */
-    private void resultTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_m_resultTableMouseClicked
+    private void resultTableMouseClicked(java.awt.event.MouseEvent evt) { //GEN-FIRST:event_m_resultTableMouseClicked
         Point p = evt.getPoint();
         int row = m_resultTable.rowAtPoint(p);
         int col = m_resultTable.columnAtPoint(p);
@@ -344,25 +348,25 @@ public class SwingRunner extends javax.swing.JFrame implements BundleListener {
             m_messageArea.setText(message);
             m_resultDialog.setVisible(true);
         }
-    }//GEN-LAST:event_m_resultTableMouseClicked
+    } //GEN-LAST:event_m_resultTableMouseClicked
 
     /**
      * Ok button action.
      * @param evt : event.
      */
-    private void okActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m_okActionPerformed
+    private void okActionPerformed(java.awt.event.ActionEvent evt) { //GEN-FIRST:event_m_okActionPerformed
         m_resultDialog.setVisible(false);
         setEnabled(true);
-    }//GEN-LAST:event_m_okActionPerformed
+    } //GEN-LAST:event_m_okActionPerformed
 
     /**
      * Listener when the test report is closed.
      * @param evt : event.
      */
-    private void onDialogClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_onDialogClosed
+    private void onDialogClosed(java.awt.event.WindowEvent evt) { //GEN-FIRST:event_onDialogClosed
         m_resultDialog.setVisible(false);
         setEnabled(true);
-    }//GEN-LAST:event_onDialogClosed
+    } //GEN-LAST:event_onDialogClosed
 
     /**
      * Execute method.
@@ -394,15 +398,19 @@ public class SwingRunner extends javax.swing.JFrame implements BundleListener {
         new Thread(thread).start();
     }
     
-     private void computeExecutedTest() {
+    /**
+     * Compute executed tests.
+     * (Status bar message)
+     */
+    private void computeExecutedTest() {
         ResultTableModel results = (ResultTableModel) m_resultTable.getModel();
         String m = " \t ";
-        m+= results.getTestCount() + " tests executed / ";
-        m+= results.getSucess() + " sucess / ";
-        m+= results.getFailures() + " failures / ";
-        m+= results.getErrors() + " errors ";
+        m += results.getTestCount() + " tests executed / ";
+        m += results.getSucess() + " sucess / ";
+        m += results.getFailures() + " failures / ";
+        m += results.getErrors() + " errors ";
         m_executedResults.setText(m);
-     }
+    }
 
     private class MyTestListener implements junit.framework.TestListener {
         /**

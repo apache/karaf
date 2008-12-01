@@ -21,15 +21,22 @@ package org.apache.felix.ipojo.junit4osgi.command;
 import org.apache.felix.ipojo.junit4osgi.OSGiJunitRunner;
 
 /**
- * Felix shell command. Allow to run tests.
+ * Junit Immediate runner.
+ * Executes test when starts.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ImmediateRunner {
 
-    private OSGiJunitRunner runner;
+    /**
+     * OSGi Junit Runner service.
+     */
+    private OSGiJunitRunner m_runner;
     
+    /**
+     * Start method. 
+     */
     public void start() {
-        runner.run();
+        m_runner.run();
     }
 
 }

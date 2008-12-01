@@ -26,9 +26,12 @@ import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
  */
 public class TestOSGiTestCase extends OSGiTestCase {
     
+    /**
+     * Test.
+     */
     public void test1() {
         System.out.println("Test BC");
-        assertNotNull("Test bundle context", context);
+        assertNotNull("Test bundle context", getContext());
     }
 
 }

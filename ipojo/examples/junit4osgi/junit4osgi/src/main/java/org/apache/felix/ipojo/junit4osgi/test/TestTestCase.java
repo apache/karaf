@@ -26,12 +26,24 @@ import junit.framework.TestCase;
  */
 public class TestTestCase extends TestCase {
     
+    /**
+     * test1.
+     */
     public void test1() { }
     
+    /**
+     * test2.
+     */
     public void test2() { }
     
+    /**
+     * test3.
+     */
     public void test3() { }
     
+    /**
+     * test4.
+     */
     public void test4() { }
 
 }

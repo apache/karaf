@@ -29,6 +29,7 @@ import org.apache.felix.ipojo.Handler;
 import org.apache.felix.ipojo.HandlerFactory;
 import org.apache.felix.ipojo.ServiceContext;
 import org.apache.felix.ipojo.architecture.Architecture;
+import org.apache.felix.ipojo.junit4osgi.Helper;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.ManifestMetadataParser;
@@ -39,47 +40,74 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ManagedServiceFactory;
 
-public class IPOJOHelper {
-    
-    private BundleContext context;
-    private OSGiTestCase testcase;
-    
-    
-    private List instances;
-    
+/**
+ * iPOJO Helper.
+ * This helper helps getting {@link Factory}, and managing
+ * {@link ComponentInstance}.
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
+ */
+public class IPOJOHelper extends Helper {
+
+    /**
+     * The bundle context.
+     */
+    private BundleContext m_context;
+    /**
+     * The test case.
+     */
+    private OSGiTestCase m_testcase;
+
+    /**
+     * List of instances.
+     */
+    private List m_instances;
+
+    /**
+     * Creates a IPOJOHelper.
+     * @param tc the OSGi Test Case
+     */
     public IPOJOHelper(OSGiTestCase tc) {
-        testcase = tc;
-        context = testcase.getBundleContext();
-        instances = new ArrayList();
+        super(tc);
+        m_testcase = tc;
+        m_context = m_testcase.getBundleContext();
+        m_instances = new ArrayList();
     }
-    
+
+    /**
+     * Disposes created instances.
+     * @see org.apache.felix.ipojo.junit4osgi.Helper#dispose()
+     */
     public void dispose() {
-        for (int i = 0; i < instances.size(); i++) {
-            ((ComponentInstance) instances.get(i)).dispose();
+        for (int i = 0; i < m_instances.size(); i++) {
+            ((ComponentInstance) m_instances.get(i)).dispose();
         }
-        instances.clear();
+        m_instances.clear();
     }
-    
+
+    /**
+     * Gets a created instance from the instance name.
+     * @param name the instance name.
+     * @return the created {@link ComponentInstance} or <code>null</code>
+     * if the instance was not created during the session.
+     */
     public ComponentInstance getInstanceByName(String name) {
-        for (int i = 0; i < instances.size(); i++) {
-            if (((ComponentInstance) instances.get(i)).getInstanceName().equals(name)) {
-                return (ComponentInstance) instances.get(i);
+        for (int i = 0; i < m_instances.size(); i++) {
+            if (((ComponentInstance) m_instances.get(i)).getInstanceName()
+                    .equals(name)) {
+                return (ComponentInstance) m_instances.get(i);
             }
         }
         return null;
     }
-    
+
     /**
      * Creates a new component instance with the given name (and empty
      * configuration), from the factory specified in the given bundle.
      * 
-     * @param bundle
-     *            the bundle in which the component factory is defined.
-     * @param factoryName
-     *            the name of the component factory, defined in the specified
-     *            bundle.
-     * @param instanceName
-     *            the name of the component instance to create.
+     * @param bundle the bundle from which the component factory is defined.
+     * @param factoryName the name of the component factory, defined in the
+     *            specified bundle.
+     * @param instanceName the name of the component instance to create.
      * @return the newly created component instance.
      */
     public static ComponentInstance createComponentInstance(Bundle bundle,
@@ -96,13 +124,11 @@ public class IPOJOHelper {
      * Creates a new component instance with the given configuration, from the
      * factory specified in the given bundle.
      * 
-     * @param bundle
-     *            the bundle in which the component factory is defined.
-     * @param factoryName
-     *            the name of the component factory, defined in the specified
-     *            bundle.
-     * @param configuration
-     *            the configuration of the component instance to create.
+     * @param bundle the bundle from which the component factory is defined.
+     * @param factoryName the name of the component factory, defined in the
+     *            specified bundle.
+     * @param configuration the configuration of the component instance to
+     *            create.
      * @return the newly created component instance.
      */
     public static ComponentInstance createComponentInstance(Bundle bundle,
@@ -123,8 +149,8 @@ public class IPOJOHelper {
             return fact.createComponentInstance(configuration);
         } catch (Exception e) {
             throw new IllegalArgumentException(
-                    "Cannot create the component instance with the given configuration:" +
-                    e.getMessage());
+                    "Cannot create the component instance with the given configuration:"
+                            + e.getMessage());
         }
     }
 
@@ -132,15 +158,11 @@ public class IPOJOHelper {
      * Creates a new component instance with the given name and configuration,
      * from the factory specified in the given bundle.
      * 
-     * @param bundle
-     *            the bundle in which the component factory is defined.
-     * @param factoryName
-     *            the name of the component factory, defined in the specified
-     *            bundle.
-     * @param instanceName
-     *            the name of the component instance to create.
-     * @param configuration
-     *            the configuration of the instance to create.
+     * @param bundle the bundle from which the component factory is defined.
+     * @param factoryName the name of the component factory, defined in the
+     *            specified bundle.
+     * @param instanceName the name of the component instance to create.
+     * @param configuration the configuration of the instance to create.
      * @return the newly created component instance.
      */
     public static ComponentInstance createComponentInstance(Bundle bundle,
@@ -156,14 +178,11 @@ public class IPOJOHelper {
      * Creates a new component instance with the given name (and an empty
      * configuration), from the factory specified in the given service context.
      * 
-     * @param serviceContext
-     *            the service context in which the component factory service is
-     *            registered.
-     * @param factoryName
-     *            the name of the component factory, defined in the specified
-     *            service context.
-     * @param instanceName
-     *            the name of the component instance to create.
+     * @param serviceContext the service context in which the component factory
+     *            service is registered.
+     * @param factoryName the name of the component factory, defined in the
+     *            specified service context.
+     * @param instanceName the name of the component instance to create.
      * @return the newly created component instance.
      */
     public static ComponentInstance createComponentInstance(
@@ -182,14 +201,11 @@ public class IPOJOHelper {
      * Creates a new component instance with the given name and configuration,
      * from the factory specified in the given service context.
      * 
-     * @param serviceContext
-     *            the service context in which the component factory service is
-     *            registered.
-     * @param factoryName
-     *            the name of the component factory, defined in the specified
-     *            service context.
-     * @param configuration
-     *            the configuration of the instance to create.
+     * @param serviceContext the service context in which the component factory
+     *            service is registered.
+     * @param factoryName the name of the component factory, defined in the
+     *            specified service context.
+     * @param configuration the configuration of the instance to create.
      * @return the newly created component instance.
      */
     public static ComponentInstance createComponentInstance(
@@ -210,8 +226,8 @@ public class IPOJOHelper {
             return fact.createComponentInstance(configuration);
         } catch (Exception e) {
             throw new IllegalArgumentException(
-                    "Cannot create the component instance with the given configuration: " +
-                    e.getMessage());
+                    "Cannot create the component instance with the given configuration: "
+                            + e.getMessage());
         }
     }
 
@@ -219,16 +235,12 @@ public class IPOJOHelper {
      * Creates a new component instance with the given name and configuration,
      * from the factory specified in the given service context.
      * 
-     * @param serviceContext
-     *            the service context in which the component factory service is
-     *            registered.
-     * @param factoryName
-     *            the name of the component factory, defined in the specified
-     *            service context.
-     * @param instanceName
-     *            the name of the component instance to create.
-     * @param configuration
-     *            the configuration of the instance to create.
+     * @param serviceContext the service context in which the component factory
+     *            service is registered.
+     * @param factoryName the name of the component factory, defined in the
+     *            specified service context.
+     * @param instanceName the name of the component instance to create.
+     * @param configuration the configuration of the instance to create.
      * @return the newly created component instance.
      */
     public static ComponentInstance createComponentInstance(
@@ -241,23 +253,21 @@ public class IPOJOHelper {
         return createComponentInstance(serviceContext, factoryName,
                 configuration);
     }
-    
+
     /**
      * Creates a new component instance with the given name (and empty
      * configuration), from the factory specified in the local bundle.
      * 
-     * @param factoryName
-     *            the name of the component factory, defined in the local
-     *            bundle.
-     * @param instanceName
-     *            the name of the component instance to create.
+     * @param factoryName the name of the component factory, defined in the
+     *            local bundle.
+     * @param instanceName the name of the component instance to create.
      * @return the newly created component instance.
      */
     public ComponentInstance createComponentInstance(String factoryName,
             String instanceName) {
-        ComponentInstance ci = createComponentInstance(context.getBundle(), factoryName,
-                instanceName);
-        instances.add(ci);
+        ComponentInstance ci = createComponentInstance(m_context.getBundle(),
+                factoryName, instanceName);
+        m_instances.add(ci);
         return ci;
     }
 
@@ -265,32 +275,32 @@ public class IPOJOHelper {
      * Creates a new component instance with the given configuration, from the
      * factory specified in the local bundle.
      * 
-     * @param factoryName
-     *            the name of the component factory, in the local bundle.
-     * @param configuration
-     *            the configuration of the component instance to create.
+     * @param factoryName the name of the component factory, in the local
+     *            bundle.
+     * @param configuration the configuration of the component instance to
+     *            create.
      * @return the newly created component instance.
      */
     public ComponentInstance createComponentInstance(String factoryName,
             Dictionary configuration) {
-        ComponentInstance ci =  createComponentInstance(context.getBundle(), factoryName,
-                configuration);
-        instances.add(ci);
+        ComponentInstance ci = createComponentInstance(m_context.getBundle(),
+                factoryName, configuration);
+        m_instances.add(ci);
         return ci;
     }
-    
+
     /**
-     * Creates a new component instance with no configuration, from the
-     * factory specified in the local bundle.
+     * Creates a new component instance with no configuration, from the factory
+     * specified in the local bundle.
      * 
-     * @param factoryName
-     *            the name of the component factory, in the local bundle.
+     * @param factoryName the name of the component factory, in the local
+     *            bundle.
      * @return the newly created component instance.
      */
     public ComponentInstance createComponentInstance(String factoryName) {
-        ComponentInstance ci =  createComponentInstance(context.getBundle(), factoryName,
-                (Dictionary) null);
-        instances.add(ci);
+        ComponentInstance ci = createComponentInstance(m_context.getBundle(),
+                factoryName, (Dictionary) null);
+        m_instances.add(ci);
         return ci;
     }
 
@@ -298,68 +308,58 @@ public class IPOJOHelper {
      * Creates a new component instance with the given name and configuration,
      * from the factory specified in the given bundle.
      * 
-     * @param bundle
-     *            the bundle in which the component factory is defined.
-     * @param factoryName
-     *            the name of the component factory, defined in the specified
-     *            bundle.
-     * @param instanceName
-     *            the name of the component instance to create.
-     * @param configuration
-     *            the configuration of the instance to create.
+     * @param factoryName the name of the component factory, defined in the
+     *            specified bundle.
+     * @param instanceName the name of the component instance to create.
+     * @param configuration the configuration of the instance to create.
      * @return the newly created component instance.
      */
     public ComponentInstance createComponentInstance(String factoryName,
             String instanceName, Dictionary configuration) {
-        ComponentInstance ci = createComponentInstance(context.getBundle(), factoryName,
-                instanceName, configuration);
-        instances.add(ci);
+        ComponentInstance ci = createComponentInstance(m_context.getBundle(),
+                factoryName, instanceName, configuration);
+        m_instances.add(ci);
         return ci;
     }
 
     /**
      * Returns the component factory with the given name in the local bundle.
      * 
-     * @param factoryName
-     *            the name of the factory to retrieve.
+     * @param factoryName the name of the factory to retrieve.
      * @return the component factory with the given name in the local bundle, or
      *         {@code null} if not found.
      */
     public Factory getFactory(String factoryName) {
-        return getFactory(context.getBundle(), factoryName);
+        return getFactory(m_context.getBundle(), factoryName);
     }
 
     /**
      * Returns the handler factory with the given name in the local bundle.
      * 
-     * @param factoryName
-     *            the name of the handler factory to retrieve.
+     * @param factoryName the name of the handler factory to retrieve.
      * @return the handler factory with the given name in the local bundle, or
      *         {@code null} if not found.
      */
     public HandlerFactory getHandlerFactory(String factoryName) {
-        return getHandlerFactory(context.getBundle(), factoryName);
+        return getHandlerFactory(m_context.getBundle(), factoryName);
     }
 
     /**
      * Returns the metadata description of the component defined in this bundle.
      * 
-     * @param component
-     *            the name of the locally defined component.
+     * @param component the name of the locally defined component.
      * @return the metadata description of the component with the given name,
      *         defined in this given bundle, or {@code null} if not found.
      */
     public Element getMetadata(String component) {
-        return getMetadata(context.getBundle(), component);
+        return getMetadata(m_context.getBundle(), component);
     }
-    
+
     /**
      * Returns the component factory with the given name in the given bundle.
      * 
-     * @param bundle
-     *            the bundle in which the component factory is defined.
-     * @param factoryName
-     *            the name of the defined factory.
+     * @param bundle the bundle from which the component factory is defined.
+     * @param factoryName the name of the defined factory.
      * @return the component factory with the given name in the given bundle, or
      *         {@code null} if not found.
      */
@@ -371,7 +371,7 @@ public class IPOJOHelper {
                     Factory.class.getName(),
                     "(factory.name=" + factoryName + ")");
             if (refs != null) {
-                return ((Factory) bundle.getBundleContext().getService(refs[0]));
+                return (Factory) bundle.getBundleContext().getService(refs[0]);
             }
 
             // Factory not found...
@@ -379,7 +379,8 @@ public class IPOJOHelper {
 
         } catch (InvalidSyntaxException e) {
             throw new IllegalArgumentException(
-                    "Cannot get the component factory services: " + e.getMessage());
+                    "Cannot get the component factory services: "
+                            + e.getMessage());
         }
     }
 
@@ -387,10 +388,9 @@ public class IPOJOHelper {
      * Returns the component factory with the given name, registered in the
      * given service context.
      * 
-     * @param serviceContext
-     *            the service context in which the factory service is defined.
-     * @param factoryName
-     *            the name of the factory.
+     * @param serviceContext the service context in which the factory service is
+     *            defined.
+     * @param factoryName the name of the factory.
      * @return the component factory with the given name, registered in the
      *         given service context.
      */
@@ -403,7 +403,7 @@ public class IPOJOHelper {
             refs = serviceContext.getServiceReferences(Factory.class.getName(),
                     "(factory.name=" + factoryName + ")");
             if (refs != null) {
-                return ((Factory) serviceContext.getService(refs[0]));
+                return (Factory) serviceContext.getService(refs[0]);
             }
             return null;
 
@@ -417,10 +417,8 @@ public class IPOJOHelper {
     /**
      * Returns the handler factory with the given name in the given bundle.
      * 
-     * @param bundle
-     *            the bundle in which the handler factory is defined.
-     * @param factoryName
-     *            the name of the handler factory to retrieve.
+     * @param bundle the bundle from which the handler factory is defined.
+     * @param factoryName the name of the handler factory to retrieve.
      * @return the handler factory with the given name in the given bundle, or
      *         {@code null} if not found.
      */
@@ -442,7 +440,8 @@ public class IPOJOHelper {
             return null;
         } catch (InvalidSyntaxException e) {
             throw new IllegalArgumentException(
-                    "Cannot get the handler factory services: " + e.getMessage());
+                    "Cannot get the handler factory services: "
+                            + e.getMessage());
         }
     }
 
@@ -450,10 +449,8 @@ public class IPOJOHelper {
      * Returns the metadata description of the component with the given name,
      * defined in the given bundle.
      * 
-     * @param bundle
-     *            the bundle in which the component is defined.
-     * @param component
-     *            the name of the defined component.
+     * @param bundle the bundle from which the component is defined.
+     * @param component the name of the defined component.
      * @return the metadata description of the component with the given name,
      *         defined in the given bundle, or {@code null} if not found.
      */
@@ -493,18 +490,16 @@ public class IPOJOHelper {
                             + bundle.getSymbolicName() + "): " + e.getMessage());
         }
     }
-    
+
     /**
      * Returns the service object of a service registered in the specified
      * service context, offering the specified interface and matching the given
      * filter.
      * 
-     * @param serviceContext
-     *            the service context in which the service is searched.
-     * @param itf
-     *            the interface provided by the searched service.
-     * @param filter
-     *            an additional filter (can be {@code null}).
+     * @param serviceContext the service context in which the service is
+     *            searched.
+     * @param itf the interface provided by the searched service.
+     * @param filter an additional filter (can be {@code null}).
      * @return the service object provided by the specified bundle, offering the
      *         specified interface and matching the given filter.
      */
@@ -517,18 +512,15 @@ public class IPOJOHelper {
             return null;
         }
     }
-    
+
     /**
      * Returns the service objects of the services registered in the specified
      * service context, offering the specified interface and matching the given
      * filter.
      * 
-     * @param serviceContext
-     *            the service context in which services are searched.
-     * @param itf
-     *            the interface provided by the searched services.
-     * @param filter
-     *            an additional filter (can be {@code null}).
+     * @param serviceContext the service context in which services are searched.
+     * @param itf the interface provided by the searched services.
+     * @param filter an additional filter (can be {@code null}).
      * @return the service objects provided by the specified bundle, offering
      *         the specified interface and matching the given filter.
      */
@@ -546,18 +538,15 @@ public class IPOJOHelper {
             return new Object[0];
         }
     }
-    
+
     /**
      * Returns the service reference of a service registered in the specified
      * service context, offering the specified interface and matching the given
      * filter.
      * 
-     * @param serviceContext
-     *            the service context in which services are searched.
-     * @param itf
-     *            the interface provided by the searched service.
-     * @param filter
-     *            an additional filter (can be {@code null}).
+     * @param serviceContext the service context in which services are searched.
+     * @param itf the interface provided by the searched service.
+     * @param filter an additional filter (can be {@code null}).
      * @return a service reference registered in the specified service context,
      *         offering the specified interface and matching the given filter.
      *         If no service is found, {@code null} is returned.
@@ -573,18 +562,15 @@ public class IPOJOHelper {
             return null;
         }
     }
-    
+
     /**
      * Returns the service reference of the service registered in the specified
      * service context, offering the specified interface and having the given
      * persistent ID.
      * 
-     * @param serviceContext
-     *            the service context in which services are searched.
-     * @param itf
-     *            the interface provided by the searched service.
-     * @param pid
-     *            the persistent ID of the searched service.
+     * @param serviceContext the service context in which services are searched.
+     * @param itf the interface provided by the searched service.
+     * @param pid the persistent ID of the searched service.
      * @return a service registered in the specified service context, offering
      *         the specified interface and having the given persistent ID.
      */
@@ -604,18 +590,15 @@ public class IPOJOHelper {
                             + pid);
         }
     }
-    
+
     /**
      * Returns the service reference of all the services registered in the
      * specified service context, offering the specified interface and matching
      * the given filter.
      * 
-     * @param serviceContext
-     *            the service context in which services are searched.
-     * @param itf
-     *            the interface provided by the searched services.
-     * @param filter
-     *            an additional filter (can be {@code null}).
+     * @param serviceContext the service context in which services are searched.
+     * @param itf the interface provided by the searched services.
+     * @param filter an additional filter (can be {@code null}).
      * @return all the service references registered in the specified service
      *         context, offering the specified interface and matching the given
      *         filter. If no service matches, an empty array is returned.
@@ -637,18 +620,14 @@ public class IPOJOHelper {
         }
     }
 
-    
     /**
      * Returns the service reference of a service registered in the specified
      * service context, offering the specified interface and having the given
      * name.
      * 
-     * @param serviceContext
-     *            the service context in which services are searched.
-     * @param itf
-     *            the interface provided by the searched service.
-     * @param name
-     *            the name of the searched service.
+     * @param serviceContext the service context in which services are searched.
+     * @param itf the interface provided by the searched service.
+     * @param name the name of the searched service.
      * @return a service registered in the specified service context, offering
      *         the specified interface and having the given name.
      */
@@ -665,56 +644,54 @@ public class IPOJOHelper {
         }
         return getServiceReference(serviceContext, itf, filter);
     }
-    
+
     /**
      * Checks the availability of a service inside the given service context.
      * @param sc the service context
      * @param itf the service interface to found
      * @return <code>true</code> if the service is available in the service
-     * context, <code>false</code> otherwise.
+     *         context, <code>false</code> otherwise.
      */
     public static boolean isServiceAvailable(ServiceContext sc, String itf) {
         ServiceReference ref = getServiceReference(sc, itf, null);
         return ref != null;
     }
 
-    
     /**
      * Checks the availability of a service inside the given service context.
      * @param sc the service context
      * @param itf the service interface to found
      * @param name the service provider name
      * @return <code>true</code> if the service is available in the service
-     * context, <code>false</code> otherwise.
+     *         context, <code>false</code> otherwise.
      */
-    public static boolean isServiceAvailableByName(ServiceContext sc, String itf, String name) {
+    public static boolean isServiceAvailableByName(ServiceContext sc,
+            String itf, String name) {
         ServiceReference ref = getServiceReferenceByName(sc, itf, name);
         return ref != null;
     }
-    
+
     /**
      * Checks the availability of a service inside the given service context.
      * @param sc the service context
      * @param itf the service interface to found
      * @param pid the pid of the service
      * @return <code>true</code> if the service is available in the service
-     * context, <code>false</code> otherwise.
+     *         context, <code>false</code> otherwise.
      */
-    public static boolean isServiceAvailableByPID(ServiceContext sc, String itf, String pid) {
+    public static boolean isServiceAvailableByPID(ServiceContext sc,
+            String itf, String pid) {
         ServiceReference ref = getServiceReferenceByPID(sc, itf, pid);
         return ref != null;
     }
-    
+
     /**
      * Returns the service reference of a service provided by the specified
      * bundle, offering the specified interface and having the given name.
      * 
-     * @param bundle
-     *            the bundle in which the service is searched.
-     * @param itf
-     *            the interface provided by the searched service.
-     * @param name
-     *            the name of the searched service.
+     * @param bundle the bundle from which the service is searched.
+     * @param itf the interface provided by the searched service.
+     * @param name the name of the searched service.
      * @return a service provided by the specified bundle, offering the
      *         specified interface and having the given name.
      */
@@ -731,33 +708,30 @@ public class IPOJOHelper {
         }
         return OSGiTestCase.getServiceReference(bundle, itf, filter);
     }
-    
+
     /**
-     * Returns the service reference of a service provided by the local
-     * bundle, offering the specified interface and having the given name.
+     * Returns the service reference of a service provided by the local bundle,
+     * offering the specified interface and having the given name.
      * 
-     * @param itf
-     *            the interface provided by the searched service.
-     * @param name
-     *            the name of the searched service.
+     * @param itf the interface provided by the searched service.
+     * @param name the name of the searched service.
      * @return a service provided by the specified bundle, offering the
      *         specified interface and having the given name.
      */
     public ServiceReference getServiceReferenceByName(String itf, String name) {
-        return getServiceReferenceByName(context.getBundle(), itf, name);
+        return getServiceReferenceByName(m_context.getBundle(), itf, name);
     }
-    
+
     /**
      * Checks if the service is available.
      * @param itf the service interface
-     * @param the service provider name
-     * @return <code>true</code> if the service is available,
-     * <code>false</code> otherwise.
+     * @param name the service provider name
+     * @return <code>true</code> if the service is available, <code>false</code>
+     *         otherwise.
      */
     public boolean isServiceAvailableByName(String itf, String name) {
         ServiceReference ref = getServiceReferenceByName(itf, name);
         return ref != null;
     }
-    
 
 }

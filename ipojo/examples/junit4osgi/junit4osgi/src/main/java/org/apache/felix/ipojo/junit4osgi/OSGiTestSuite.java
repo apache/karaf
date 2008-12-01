@@ -32,38 +32,71 @@ import org.osgi.framework.BundleContext;
  */
 public class OSGiTestSuite extends TestSuite {
 
-    protected BundleContext context;
+    /**
+     * The bundle context of the bundle containing
+     * the test suite.
+     */
+    protected BundleContext m_context;
 
+    /**
+     * Creates a OSGiTestSuite.
+     * @param clazz the class
+     * @param bc the bundle context
+     * @see TestSuite#TestSuite(Class)
+     */
     public OSGiTestSuite(Class clazz, BundleContext bc) {
         super(clazz);
-        context = bc;
-    }
-
-    public OSGiTestSuite(BundleContext bc) {
-        super();
-        context = bc;
-    }
-
-    public OSGiTestSuite(String name, BundleContext bc) {
-        super(name);
-        context = bc;
-    }
-
-    public OSGiTestSuite(Class clazz, String name, BundleContext bc) {
-        super(clazz, name);
-        context = bc;
-    }
-
-    public void setBundleContext(BundleContext bc) {
-        context = bc;
+        m_context = bc;
     }
 
     /**
-     * Adds the tests from the given class to the suite
+     * Creates a OSGiTestSuite.
+     * @param bc the bundle context
+     * @see TestSuite#TestSuite()
+     */
+    public OSGiTestSuite(BundleContext bc) {
+        super();
+        m_context = bc;
+    }
+
+    /**
+     * Creates a OSGiTestSuite.
+     * @param name the name
+     * @param bc the bundle context
+     * @see TestSuite#TestSuite(String)
+     */
+    public OSGiTestSuite(String name, BundleContext bc) {
+        super(name);
+        m_context = bc;
+    }
+
+    /**
+     * Creates a OSGiTestSuite.
+     * @param clazz the class
+     * @param name the name
+     * @param bc the bundle context
+     * @see TestSuite#TestSuite(Class, String)
+     */
+    public OSGiTestSuite(Class clazz, String name, BundleContext bc) {
+        super(clazz, name);
+        m_context = bc;
+    }
+
+    /**
+     * Set the bundle context.
+     * @param bc the bundle context to use.
+     */
+    public void setBundleContext(BundleContext bc) {
+        m_context = bc;
+    }
+
+    /**
+     * Adds the tests from the given class to the suite.
+     * @param testClass the class to add
      */
     public void addTestSuite(Class testClass) {
         if (OSGiTestCase.class.isAssignableFrom(testClass)) {
-            addTest(new OSGiTestSuite(testClass, context));
+            addTest(new OSGiTestSuite(testClass, m_context));
         } else if (TestCase.class.isAssignableFrom(testClass)) {
             addTest(new TestSuite(testClass));
         } else {
@@ -71,12 +104,19 @@ public class OSGiTestSuite extends TestSuite {
         }
     }
 
+    /**
+     * Executes the given {@link Test} with the
+     * given {@link TestResult}.
+     * @param test the test
+     * @param result the test result.
+     * @see junit.framework.TestSuite#runTest(junit.framework.Test, junit.framework.TestResult)
+     */
     public void runTest(Test test, TestResult result) {
         if (test instanceof OSGiTestSuite) {
-            ((OSGiTestSuite) test).context = context;
+            ((OSGiTestSuite) test).m_context = m_context;
             test.run(result);
         } else if (test instanceof OSGiTestCase) {
-            ((OSGiTestCase) test).context = context;
+            ((OSGiTestCase) test).setBundleContext(m_context);
             test.run(result);
         } else {
             test.run(result);

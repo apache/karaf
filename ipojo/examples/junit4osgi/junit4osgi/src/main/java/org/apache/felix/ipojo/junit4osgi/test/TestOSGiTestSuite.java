@@ -30,6 +30,11 @@ import org.osgi.framework.BundleContext;
  */
 public class TestOSGiTestSuite extends TestSuite {
     
+    /**
+     * Suite method.
+     * @param bc the bundle context
+     * @return the Test Suite.
+     */
     public static Test suite(BundleContext bc) {
         TestSuite ts = new TestSuite();
         ts.setName("Test OSGi suite() method");

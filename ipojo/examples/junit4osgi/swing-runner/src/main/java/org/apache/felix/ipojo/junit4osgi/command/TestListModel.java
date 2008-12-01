@@ -29,39 +29,65 @@ import junit.framework.Test;
  */
 public class TestListModel extends AbstractListModel {
 
+    /**
+     * Id.
+     */
     private static final long serialVersionUID = 1L;
 
-    private List<TestRecord> list = new ArrayList<TestRecord>();
+    /**
+     * List of {@link TestRecord}. 
+     */
+    private List<TestRecord> m_list = new ArrayList<TestRecord>();
 
+    /**
+     * Gets the element placed at the given index.
+     * @param index the index
+     * @return the element placed at the given index 
+     * or <code>null</code> if no element at this index
+     * @see javax.swing.ListModel#getElementAt(int)
+     */
     public Object getElementAt(int index) {
-        if (index >= list.size()) {
+        if (index >= m_list.size()) {
             return null;
         } else {
-            return list.get(index).name;
+            return m_list.get(index).m_name;
         }
     }
 
+    /**
+     * Gets the test object placed at the given index.
+     * @param index the index
+     * @return the test object placed at the given index
+     */
     public Test getTestElementAt(int index) {
-        return list.get(index).test;
+        return m_list.get(index).m_test;
     }
 
+    /**
+     * Adds a test.
+     * @param test the test to add
+     */
     public void addTest(Test test) {
-        synchronized(this) {
+        synchronized (this) {
             TestRecord tr = new TestRecord();
-            tr.test = test;
-            tr.name = test.toString();
-            list.add(tr);
+            tr.m_test = test;
+            tr.m_name = test.toString();
+            m_list.add(tr);
         }
-        fireContentsChanged(this, list.size() - 1, list.size() - 1);
+        fireContentsChanged(this, m_list.size() - 1, m_list.size() - 1);
     }
 
+    /**
+     * Removes a test.
+     * @param test the test to remove
+     */
     public void removeTest(Test test) {
         int index = 1;
-        synchronized(this) {
-            for (TestRecord t : list) {
-                if (t.test.equals(test)) {
-                    index = list.indexOf(t);
-                    list.remove(t);
+        synchronized (this) {
+            for (TestRecord t : m_list) {
+                if (t.m_test.equals(test)) {
+                    index = m_list.indexOf(t);
+                    m_list.remove(t);
                     return;
                 }
             }
@@ -72,18 +98,32 @@ public class TestListModel extends AbstractListModel {
         }
     }
 
+    /**
+     * Clears the list.
+     */
     public void clear() {
-        list.clear();
+        m_list.clear();
     }
 
     private class TestRecord {
-        public Test test;
+        /**
+         * The test.
+         */
+        public Test m_test;
 
-        public String name;
+        /**
+         * The test name.
+         */
+        public String m_name;
     }
 
+    /**
+     * Gets the list size.
+     * @return the list size.
+     * @see javax.swing.ListModel#getSize()
+     */
     public int getSize() {
-        return list.size();
+        return m_list.size();
     }
 
 }

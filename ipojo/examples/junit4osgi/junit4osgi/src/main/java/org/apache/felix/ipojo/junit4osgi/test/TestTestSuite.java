@@ -27,6 +27,10 @@ import junit.framework.TestSuite;
  */
 public class TestTestSuite extends TestSuite {
     
+    /**
+     * Suite method.
+     * @return the test suite.
+     */
     public static Test suite() {
         TestSuite ts = new TestSuite();
         ts.setName("Test suite() method");

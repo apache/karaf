@@ -32,7 +32,7 @@ public interface OSGiJunitRunner {
     
     /**
      * Set the output stream of the runner.
-     * @param ps : print stream.
+     * @param ps the print stream.
      */
     void setResultPrinter(PrintStream ps);
     
@@ -44,7 +44,7 @@ public interface OSGiJunitRunner {
     
     /**
      * Run the tests from the given bundle.
-     * @param bundleId : bundle containing the tests. 
+     * @param bundleId the bundle id containing the tests. 
      * @return the list of the test results.
      */
     List/*<TestResult>*/ run(long bundleId);
@@ -57,16 +57,16 @@ public interface OSGiJunitRunner {
     
     /**
      * Get the tests from the given bundle. 
-     * @param bundleId : bundle id.
+     * @param bundleId the bundle id.
      * @return the list of Test contained in the given bundle.
      */
     List/*<Test>*/ getTests(long bundleId);
     
     /**
      * Run the given test.
-     * @param test : test to execute.
+     * @param test the test to execute.
      * @return the result.
      */
-    public TestResult run(Test test);
+    TestResult run(Test test);
 
 }

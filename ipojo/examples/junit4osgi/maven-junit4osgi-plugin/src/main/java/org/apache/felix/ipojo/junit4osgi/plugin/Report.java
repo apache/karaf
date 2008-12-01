@@ -1,4 +1,4 @@
-/*
+/* 
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -37,57 +37,57 @@ import org.codehaus.plexus.util.StringUtils;
 public class Report {
     
     /**
-     * Number of ran tests.
+     * New line constant.
      */
-    protected int completedCount;
+    protected static final String NL = System.getProperty("line.separator");
 
     /**
-     * Number of errors
+     * Number of ran tests.
      */
-    protected int errorsCount;
+    protected int m_completedCount;
+
+    /**
+     * Number of errors.
+     */
+    protected int m_errorsCount;
     
     /**
-     * Number of failures
+     * Number of failures.
      */
-    protected int failuresCount;
+    protected int m_failuresCount;
     
-    
-    /**
-     * Failing tests.
-     */
-    private List failureSources = new ArrayList();
-    
-    /**
-     * Tests in error
-     */
-    private List errorSources = new ArrayList();
     
     /**
      * Time at the beginning of the test execution. 
      */
-    protected long startTime;
+    protected long m_startTime;
 
     /**
      * Time at the end of the test execution. 
      */
-    protected long endTime;
+    protected long m_endTime;
 
+    /**
+     * Failing tests.
+     */
+    private List m_failureSources = new ArrayList();
+    
+    /**
+     * Tests in error.
+     */
+    private List m_errorSources = new ArrayList();
+    
     /**
      * Double format. 
      */
-    private NumberFormat numberFormat = NumberFormat.getInstance( Locale.US );
+    private NumberFormat m_numberFormat = NumberFormat.getInstance(Locale.US);
 
-    /**
-     * New line constant.
-     */
-    protected static final String NL = System.getProperty( "line.separator" );
-   
     /**
      * Gets failing tests.
      * @return the list of failing tests.
      */
     public List getFailureSources() {
-        return this.failureSources;
+        return this.m_failureSources;
     }
 
     /**
@@ -95,14 +95,14 @@ public class Report {
      * @return the list of test throwing unexpected exceptions
      */
     public List getErrorSources() {
-        return this.errorSources;
+        return this.m_errorSources;
     }
     
     /**
      * Callback called when a test starts.
      */
     public void testStarting() {
-        startTime = System.currentTimeMillis();
+        m_startTime = System.currentTimeMillis();
     }
 
     /**
@@ -117,8 +117,8 @@ public class Report {
      * @param test the test in error.
      */
     public void testError(Test test) {
-        ++errorsCount;
-        errorSources.add(test.toString());
+        ++m_errorsCount;
+        m_errorSources.add(test.toString());
         endTest();
     }
 
@@ -127,8 +127,8 @@ public class Report {
      * @param test the failing test.
      */
     public void testFailed(Test test) {
-        ++failuresCount;
-        failureSources.add(test.toString());
+        ++m_failuresCount;
+        m_failureSources.add(test.toString());
         endTest();
     }
 
@@ -137,41 +137,41 @@ public class Report {
      * This method handles common action when a test ends.
      */
     private void endTest() {
-        ++completedCount;
+        ++m_completedCount;
 
-        endTime = System.currentTimeMillis();
+        m_endTime = System.currentTimeMillis();
 
-        if (startTime == 0) {
-            startTime = endTime;
+        if (m_startTime == 0) {
+            m_startTime = m_endTime;
         }
     }
     
     
     public int getNumErrors() {
-        return errorsCount;
+        return m_errorsCount;
     }
 
     public int getNumFailures() {
-        return failuresCount;
+        return m_failuresCount;
     }
 
     public int getNumTests() {
-        return completedCount;
+        return m_completedCount;
     }
 
     /**
      * Reset the report.
      */
     public void reset() {
-        errorsCount = 0;
+        m_errorsCount = 0;
 
-        failuresCount = 0;
+        m_failuresCount = 0;
 
-        completedCount = 0;
+        m_completedCount = 0;
 
-        this.failureSources = new ArrayList();
+        this.m_failureSources = new ArrayList();
 
-        this.errorSources = new ArrayList();
+        this.m_errorSources = new ArrayList();
 
     }
 
@@ -182,13 +182,14 @@ public class Report {
      * @return the String displaying the elapsed time
      */
     protected String elapsedTimeAsString(long runTime) {
-        return numberFormat.format((double) runTime / 1000);
+        return m_numberFormat.format((double) runTime / 1000);
     }
 
     /**
-     * Returns the stacktrace as String.
-     * @param report ReportEntry object.
-     * @return stacktrace as string.
+     * Returns the stack trace as String.
+     * @param test the test
+     * @param e the exception
+     * @return stack trace as string.
      */
     protected String getStackTrace(Test test, Throwable e) {
 

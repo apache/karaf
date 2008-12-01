@@ -21,7 +21,7 @@
 	<packaging>bundle</packaging>
 	<name>Junit4Osgi</name>
 	<artifactId>org.apache.felix.ipojo.junit4osgi</artifactId>
-	<groupId>ipojo.examples</groupId>
+	<groupId>org.apache.felix</groupId>
 	<version>1.1.0-SNAPSHOT</version>
 	<dependencies>
 		<dependency>
@@ -79,6 +79,8 @@
 							org.apache.felix.ipojo.junit4osgi.test.TestTestSuite,
 							org.apache.felix.ipojo.junit4osgi.test.TestOSGiTestSuite,
 						</Test-Suite>  -->
+						<Include-Resource> META-INF/LICENCE=LICENSE,
+							META-INF/NOTICE=NOTICE </Include-Resource>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -96,6 +98,29 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>rat-maven-plugin</artifactId>
+				<configuration>
+					<excludeSubProjects>false</excludeSubProjects>
+					<useEclipseDefaultExcludes>true</useEclipseDefaultExcludes>
+					<useMavenDefaultExcludes>true</useMavenDefaultExcludes>
+					<excludes>
+						<param>doc/*</param>
+						<param>maven-eclipse.xml</param>
+						<param>.checkstyle</param>
+						<param>.externalToolBuilders/*</param>
+					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<configuration>
+					<configLocation>http://felix.apache.org/ipojo/dev/checkstyle_ipojo.xml</configLocation>
+					<violationSeverity>error</violationSeverity>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
