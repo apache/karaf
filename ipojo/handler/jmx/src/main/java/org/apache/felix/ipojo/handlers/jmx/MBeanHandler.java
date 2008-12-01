@@ -252,7 +252,7 @@ public class MBeanHandler extends PrimitiveHandler {
         Element[] attributes = mbeans[0].getElements(JMX_PROPERTY_ELT, m_namespace);
         
         if (attributes == null) {
-            attributes = mbeans[0].getElements(JMX_METHOD_ELT);
+            attributes = mbeans[0].getElements(JMX_PROPERTY_ELT);
             if (attributes != null) {
                 warn("The JMX property element should use the '" + m_namespace + "' namespace.");
             }
