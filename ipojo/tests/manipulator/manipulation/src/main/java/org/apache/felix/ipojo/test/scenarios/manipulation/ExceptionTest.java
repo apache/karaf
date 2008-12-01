@@ -82,7 +82,7 @@ public class ExceptionTest extends OSGiTestCase {
     public void testTry() {
         ServiceReference ref = helper.getServiceReferenceByName(FooService.class.getName(), ci_lazzy.getInstanceName());
         assertNotNull("Check that a FooService from " + ci_lazzy.getInstanceName() + " is available",ref);
-        FooProviderType1 fs = (FooProviderType1) context.getService(ref);
+        FooProviderType1 fs = (FooProviderType1) getServiceObject(ref);
         try {
             fs.testTry();
         } catch(Exception e) {

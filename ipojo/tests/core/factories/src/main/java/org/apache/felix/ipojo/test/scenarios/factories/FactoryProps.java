@@ -36,7 +36,7 @@ public class FactoryProps extends OSGiTestCase {
 //	}
 	
 	public void testSimpleExposition() {
-		ServiceReference ref1 = Utils.getServiceReferenceByName(context, Factory.class.getName(), "Factories-FooProviderType-1");
+		ServiceReference ref1 = Utils.getServiceReferenceByName(getContext(), Factory.class.getName(), "Factories-FooProviderType-1");
 		assertNotNull("The factory is available", ref1);
 		String[] spec = (String[]) ref1.getProperty("component.providedServiceSpecifications");
 		assertEquals("Check array length", spec.length, 1);
@@ -44,7 +44,7 @@ public class FactoryProps extends OSGiTestCase {
 	}
 	
 	public void testDoubleExposition() {
-		ServiceReference ref1 = Utils.getServiceReferenceByName(context, Factory.class.getName(), "Factories-FooBarProviderType-1");
+		ServiceReference ref1 = Utils.getServiceReferenceByName(getContext(), Factory.class.getName(), "Factories-FooBarProviderType-1");
 		assertNotNull("The factory is available", ref1);
 		String[] spec = (String[]) ref1.getProperty("component.providedServiceSpecifications");
 		assertEquals("Check array length", spec.length, 2);
@@ -53,7 +53,7 @@ public class FactoryProps extends OSGiTestCase {
 	}
 	
 	public void testProps() {
-		ServiceReference ref1 = Utils.getServiceReferenceByName(context, Factory.class.getName(), "Factories-FooProviderType-Dyn2");
+		ServiceReference ref1 = Utils.getServiceReferenceByName(getContext(), Factory.class.getName(), "Factories-FooProviderType-Dyn2");
 		assertNotNull("The factory is available", ref1);
 		PropertyDescription[] pd = (PropertyDescription[]) ref1.getProperty("component.properties");
 		assertEquals("Check property list size", pd.length, 5);

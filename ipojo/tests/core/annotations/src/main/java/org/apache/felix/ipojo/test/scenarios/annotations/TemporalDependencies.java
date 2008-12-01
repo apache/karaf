@@ -1,13 +1,19 @@
 package org.apache.felix.ipojo.test.scenarios.annotations;
 
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
 import org.apache.felix.ipojo.metadata.Element;
-import org.apache.felix.ipojo.test.scenarios.util.Utils;
 
 public class TemporalDependencies extends OSGiTestCase {
     
+    private IPOJOHelper helper;
+    
+    public void setUp() {
+        helper = new IPOJOHelper(this);
+    }
+    
     public void testSimple() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.temporal.TemporalSimple");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.temporal.TemporalSimple");
         Element[] provs = meta.getElements("requires", "org.apache.felix.ipojo.handler.temporal");
         assertNotNull("Temporal exists ", provs);
         String field = provs[0].getAttribute("field");
@@ -20,7 +26,7 @@ public class TemporalDependencies extends OSGiTestCase {
     }
     
     public void testDI() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.temporal.TemporalWithDI");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.temporal.TemporalWithDI");
         Element[] provs = meta.getElements("requires", "org.apache.felix.ipojo.handler.temporal");
         assertNotNull("Temporal exists ", provs);
         String field = provs[0].getAttribute("field");
@@ -33,7 +39,7 @@ public class TemporalDependencies extends OSGiTestCase {
     }
     
     public void testEmptyArray() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.temporal.TemporalWithEmptyArray");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.temporal.TemporalWithEmptyArray");
         Element[] provs = meta.getElements("requires", "org.apache.felix.ipojo.handler.temporal");
         assertNotNull("Temporal exists ", provs);
         String field = provs[0].getAttribute("field");
@@ -46,7 +52,7 @@ public class TemporalDependencies extends OSGiTestCase {
     }
     
     public void testNull() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.temporal.TemporalWithNull");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.temporal.TemporalWithNull");
         Element[] provs = meta.getElements("requires", "org.apache.felix.ipojo.handler.temporal");
         assertNotNull("Temporal exists ", provs);
         String field = provs[0].getAttribute("field");
@@ -59,7 +65,7 @@ public class TemporalDependencies extends OSGiTestCase {
     }
     
     public void testNullable() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.temporal.TemporalWithNullable");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.temporal.TemporalWithNullable");
         Element[] provs = meta.getElements("requires", "org.apache.felix.ipojo.handler.temporal");
         assertNotNull("Temporal exists ", provs);
         String field = provs[0].getAttribute("field");
@@ -72,7 +78,7 @@ public class TemporalDependencies extends OSGiTestCase {
     }
     
     public void testFilter() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.temporal.TemporalWithFilter");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.temporal.TemporalWithFilter");
         Element[] provs = meta.getElements("requires", "org.apache.felix.ipojo.handler.temporal");
         assertNotNull("Temporal exists ", provs);
         String field = provs[0].getAttribute("field");
@@ -85,7 +91,7 @@ public class TemporalDependencies extends OSGiTestCase {
     }
     
     public void testTimeout() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.temporal.TemporalWithTimeout");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.temporal.TemporalWithTimeout");
         Element[] provs = meta.getElements("requires", "org.apache.felix.ipojo.handler.temporal");
         assertNotNull("Temporal exists ", provs);
         String field = provs[0].getAttribute("field");

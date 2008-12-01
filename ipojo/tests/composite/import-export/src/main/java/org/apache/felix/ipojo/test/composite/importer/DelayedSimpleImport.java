@@ -38,7 +38,7 @@ public class DelayedSimpleImport extends OSGiTestCase {
 		
 		Properties p = new Properties();
 		p.put("instance.name","importer");
-		Factory compFact = Utils.getFactoryByName(context, "composite.requires.1");
+		Factory compFact = Utils.getFactoryByName(getContext(), "composite.requires.1");
 		try {
 			import1 = compFact.createComponentInstance(p);
 		} catch(Exception e) {
@@ -47,7 +47,7 @@ public class DelayedSimpleImport extends OSGiTestCase {
 		
 		import1.stop();
 		
-		fooProvider = Utils.getFactoryByName(context, "COMPO-FooProviderType-1");
+		fooProvider = Utils.getFactoryByName(getContext(), "COMPO-FooProviderType-1");
 		assertNotNull("Check fooProvider availability", fooProvider);
 		
 		Properties p1 = new Properties();

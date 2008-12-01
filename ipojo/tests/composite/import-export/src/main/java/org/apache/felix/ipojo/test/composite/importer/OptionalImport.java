@@ -34,12 +34,12 @@ public class OptionalImport extends OSGiTestCase {
 	Factory fooProvider;
 
 	public void setUp() {
-		fooProvider = Utils.getFactoryByName(context, "COMPO-FooProviderType-1");
+		fooProvider = Utils.getFactoryByName(getContext(), "COMPO-FooProviderType-1");
 		assertNotNull("Check fooProvider availability", fooProvider);
 		
 		Properties p = new Properties();
 		p.put("instance.name","importer");
-		Factory compFact = Utils.getFactoryByName(context, "composite.requires.3");
+		Factory compFact = Utils.getFactoryByName(getContext(), "composite.requires.3");
 		try {
 			import3 = compFact.createComponentInstance(p);
 		} catch(Exception e) {

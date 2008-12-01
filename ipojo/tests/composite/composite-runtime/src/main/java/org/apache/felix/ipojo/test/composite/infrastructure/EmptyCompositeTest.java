@@ -33,7 +33,7 @@ import org.osgi.framework.InvalidSyntaxException;
 public class EmptyCompositeTest extends OSGiTestCase {
 	
 	public void testEmptyCompositeCreation() {
-		Factory factory = Utils.getFactoryByName(context, "composite.empty");
+		Factory factory = Utils.getFactoryByName(getContext(), "composite.empty");
 		Properties props = new Properties();
 		props.put("instance.name","empty");
 		
@@ -61,7 +61,7 @@ public class EmptyCompositeTest extends OSGiTestCase {
 		CompositeManager cm = (CompositeManager) ci;
 		ServiceContext sc = cm.getServiceContext();
 		try {
-			assertEquals("Check number of factories imported", sc.getServiceReferences(Factory.class.getName(), null).length, context.getServiceReferences(Factory.class.getName(), null).length);
+			assertEquals("Check number of factories imported", sc.getServiceReferences(Factory.class.getName(), null).length, getContext().getServiceReferences(Factory.class.getName(), null).length);
 		} catch (InvalidSyntaxException e) {
 			fail("Invalid filter : " + e.getMessage());
 		}
@@ -69,7 +69,7 @@ public class EmptyCompositeTest extends OSGiTestCase {
 	}
 	
 	public void testInstanceCreation1() {
-		Factory factory = Utils.getFactoryByName(context, "composite.empty");
+		Factory factory = Utils.getFactoryByName(getContext(), "composite.empty");
 		Properties props = new Properties();
 		props.put("instance.name","empty");
 		
@@ -85,7 +85,7 @@ public class EmptyCompositeTest extends OSGiTestCase {
 		CompositeManager cm = (CompositeManager) ci;
 		ServiceContext sc = cm.getServiceContext();
 		try {
-			assertEquals("Check number of factories imported", sc.getServiceReferences(Factory.class.getName(), null).length, context.getServiceReferences(Factory.class.getName(), null).length);
+			assertEquals("Check number of factories imported", sc.getServiceReferences(Factory.class.getName(), null).length, getContext().getServiceReferences(Factory.class.getName(), null).length);
 		} catch (InvalidSyntaxException e) {
 			fail("Invalid filter : " + e.getMessage());
 		}
@@ -119,7 +119,7 @@ public class EmptyCompositeTest extends OSGiTestCase {
 	}
 	
 	public void testInstanceCreation2() {
-		Factory factory = Utils.getFactoryByName(context, "composite.empty");
+		Factory factory = Utils.getFactoryByName(getContext(), "composite.empty");
 		Properties props = new Properties();
 		props.put("instance.name","empty");
 		
@@ -134,7 +134,7 @@ public class EmptyCompositeTest extends OSGiTestCase {
 		CompositeManager cm = (CompositeManager) ci;
 		ServiceContext sc = cm.getServiceContext();
 		try {
-			assertEquals("Check number of factories imported", sc.getServiceReferences(Factory.class.getName(), null).length, context.getServiceReferences(Factory.class.getName(), null).length);
+			assertEquals("Check number of factories imported", sc.getServiceReferences(Factory.class.getName(), null).length, getContext().getServiceReferences(Factory.class.getName(), null).length);
 		} catch (InvalidSyntaxException e) {
 			fail("Invalid filter : " + e.getMessage());
 		}
@@ -169,7 +169,7 @@ public class EmptyCompositeTest extends OSGiTestCase {
 	}
 	
 	public void testInstanceCreation3() {
-		Factory factory = Utils.getFactoryByName(context, "composite.empty");
+		Factory factory = Utils.getFactoryByName(getContext(), "composite.empty");
 		Properties props = new Properties();
 		props.put("instance.name","empty");
 		
@@ -184,7 +184,7 @@ public class EmptyCompositeTest extends OSGiTestCase {
 		CompositeManager cm = (CompositeManager) ci;
 		ServiceContext sc = cm.getServiceContext();
 		try {
-			assertEquals("Check number of factories imported", sc.getServiceReferences(Factory.class.getName(), null).length, context.getServiceReferences(Factory.class.getName(), null).length);
+			assertEquals("Check number of factories imported", sc.getServiceReferences(Factory.class.getName(), null).length, getContext().getServiceReferences(Factory.class.getName(), null).length);
 		} catch (InvalidSyntaxException e) {
 			fail("Invalid filter : " + e.getMessage());
 		}

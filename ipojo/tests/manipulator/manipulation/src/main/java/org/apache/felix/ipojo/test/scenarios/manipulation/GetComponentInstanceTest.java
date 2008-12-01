@@ -87,9 +87,6 @@ public class GetComponentInstanceTest extends OSGiTestCase {
 		assertEquals("Check created pojo count", id.getCreatedObjects().length, 1);
 		assertEquals("Check instance description name", id.getName(), compName); 
 		
-		// Unget the service
-		context.ungetService(ref);
-		
 		ci.dispose();
 		
 		// Check that there is no more FooService

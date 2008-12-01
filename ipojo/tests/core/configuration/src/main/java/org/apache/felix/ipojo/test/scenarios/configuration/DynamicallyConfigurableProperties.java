@@ -40,12 +40,12 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
 		p1.put("foo", "foo");
 		p1.put("bar", "2");
 		p1.put("baz", "baz");
-		instance = Utils.getComponentInstance(context, type, p1);
+		instance = Utils.getComponentInstance(getContext(), type, p1);
 		
 		Properties p2 = new Properties();
         p2.put("instance.name","instance2");
 
-        instance2 = Utils.getComponentInstance(context, type, p2);
+        instance2 = Utils.getComponentInstance(getContext(), type, p2);
 	}
 	
 	public void tearDown() {
@@ -56,7 +56,7 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
 	}
 	
 	public void testStatic() {
-		ServiceReference fooRef = Utils.getServiceReferenceByName(context, FooService.class.getName(), instance.getInstanceName());
+		ServiceReference fooRef = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), instance.getInstanceName());
 		assertNotNull("Check FS availability", fooRef);
 		String fooP = (String) fooRef.getProperty("foo");
 		Integer barP = (Integer) fooRef.getProperty("bar");
@@ -65,7 +65,7 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
 		assertEquals("Check bar equality -1", barP, new Integer(2));
 		assertEquals("Check baz equality -1", bazP, "baz");
 		
-		ServiceReference msRef = Utils.getServiceReferenceByName(context, ManagedServiceFactory.class.getName(), instance.getFactory().getName());
+		ServiceReference msRef = Utils.getServiceReferenceByName(getContext(), ManagedServiceFactory.class.getName(), instance.getFactory().getName());
 		assertNotNull("Check ManagedServiceFactory availability", msRef);
 		
 		
@@ -74,24 +74,24 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
 		conf.put("baz", "zab");
 		conf.put("bar", new Integer(2));
 		conf.put("foo", "foo");
-		ManagedServiceFactory ms = (ManagedServiceFactory) context.getService(msRef);
+		ManagedServiceFactory ms = (ManagedServiceFactory) getContext().getService(msRef);
 		try {
 			ms.updated(instance.getInstanceName(), conf);
 		} catch (ConfigurationException e) { fail("Configuration Exception : " + e); }
 		
 		// Recheck props
-		fooRef = Utils.getServiceReferenceByName(context, FooService.class.getName(), instance.getInstanceName());
+		fooRef = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), instance.getInstanceName());
 		fooP = (String) fooRef.getProperty("foo");
 		barP = (Integer) fooRef.getProperty("bar");
 		bazP = (String) fooRef.getProperty("baz");
 		assertEquals("Check foo equality -2", fooP, "foo");
 		assertEquals("Check bar equality -2", barP, new Integer(2));
 		assertEquals("Check baz equality -2", bazP, "zab");
-		context.ungetService(msRef);
+		getContext().ungetService(msRef);
 	}
 	
 	public void testStaticNoValue() {
-        ServiceReference fooRef = Utils.getServiceReferenceByName(context, FooService.class.getName(), instance2.getInstanceName());
+        ServiceReference fooRef = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), instance2.getInstanceName());
         assertNotNull("Check FS availability", fooRef);
         Object fooP = fooRef.getProperty("foo");
         Object barP = fooRef.getProperty("bar");
@@ -100,7 +100,7 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
         assertEquals("Check bar equality -1", barP, null);
         assertEquals("Check baz equality -1", bazP, null);
         
-        ServiceReference msRef = Utils.getServiceReferenceByName(context, ManagedServiceFactory.class.getName(), instance2.getFactory().getName());
+        ServiceReference msRef = Utils.getServiceReferenceByName(getContext(), ManagedServiceFactory.class.getName(), instance2.getFactory().getName());
         assertNotNull("Check ManagedServiceFactory availability", msRef);
         
         
@@ -109,24 +109,24 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
         conf.put("baz", "zab");
         conf.put("bar", new Integer(2));
         conf.put("foo", "foo");
-        ManagedServiceFactory ms = (ManagedServiceFactory) context.getService(msRef);
+        ManagedServiceFactory ms = (ManagedServiceFactory) getContext().getService(msRef);
         try {
             ms.updated(instance2.getInstanceName(), conf);
         } catch (ConfigurationException e) { fail("Configuration Exception : " + e); }
         
         // Recheck props
-        fooRef = Utils.getServiceReferenceByName(context, FooService.class.getName(), instance2.getInstanceName());
+        fooRef = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), instance2.getInstanceName());
         fooP = (String) fooRef.getProperty("foo");
         barP = (Integer) fooRef.getProperty("bar");
         bazP = (String) fooRef.getProperty("baz");
         assertEquals("Check foo equality -2", fooP, "foo");
         assertEquals("Check bar equality -2", barP, new Integer(2));
         assertEquals("Check baz equality -2", bazP, "zab");
-        context.ungetService(msRef);
+        getContext().ungetService(msRef);
     }
 	
 	public void testDynamic() {
-    	ServiceReference fooRef = Utils.getServiceReferenceByName(context, FooService.class.getName(), instance.getInstanceName());
+    	ServiceReference fooRef = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), instance.getInstanceName());
     	assertNotNull("Check FS availability", fooRef);
     	
     	String fooP = (String) fooRef.getProperty("foo");
@@ -137,7 +137,7 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
     	assertEquals("Check bar equality", barP, new Integer(2));
     	assertEquals("Check baz equality", bazP, "baz");
     	
-    	ServiceReference msRef = Utils.getServiceReferenceByName(context, ManagedServiceFactory.class.getName(), instance.getFactory().getName());
+    	ServiceReference msRef = Utils.getServiceReferenceByName(getContext(), ManagedServiceFactory.class.getName(), instance.getFactory().getName());
     	assertNotNull("Check ManagedServiceFactory availability", msRef);
     	
     	// Configuration of baz
@@ -145,13 +145,13 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
     	conf.put("baz", "zab");
     	conf.put("foo", "oof");
     	conf.put("bar", new Integer(0));
-    	ManagedServiceFactory ms = (ManagedServiceFactory) context.getService(msRef);
+    	ManagedServiceFactory ms = (ManagedServiceFactory) getContext().getService(msRef);
     	try {
     		ms.updated(instance.getInstanceName(), conf);
     	} catch (ConfigurationException e) { fail("Configuration Exception : " + e); }
     	
     	// Recheck props
-    	fooRef = Utils.getServiceReferenceByName(context, FooService.class.getName(), instance.getInstanceName());
+    	fooRef = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), instance.getInstanceName());
     	fooP = (String) fooRef.getProperty("foo");
     	barP = (Integer) fooRef.getProperty("bar");
     	bazP = (String) fooRef.getProperty("baz");
@@ -161,7 +161,7 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
     	assertEquals("Check baz equality", bazP, "zab");
     	
     	// Check field value
-    	FooService fs = (FooService) context.getService(fooRef);
+    	FooService fs = (FooService) getContext().getService(fooRef);
     	Properties p = fs.fooProps();
     	fooP = (String) p.get("foo");
     	barP = (Integer) p.get("bar");
@@ -169,12 +169,12 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
     	assertEquals("Check foo field equality", fooP, "oof");
     	assertEquals("Check bar field equality", barP, new Integer(0));
     	
-    	context.ungetService(fooRef);
-    	context.ungetService(msRef);
+    	getContext().ungetService(fooRef);
+    	getContext().ungetService(msRef);
     }
 	
 	public void testDynamicNoValue() {
-        ServiceReference fooRef = Utils.getServiceReferenceByName(context, FooService.class.getName(), instance2.getInstanceName());
+        ServiceReference fooRef = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), instance2.getInstanceName());
         assertNotNull("Check FS availability", fooRef);
         
         Object fooP = fooRef.getProperty("foo");
@@ -184,7 +184,7 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
         assertEquals("Check bar equality -1", barP, null);
         assertEquals("Check baz equality -1", bazP, null);
         
-        ServiceReference msRef = Utils.getServiceReferenceByName(context, ManagedServiceFactory.class.getName(), instance2.getFactory().getName());
+        ServiceReference msRef = Utils.getServiceReferenceByName(getContext(), ManagedServiceFactory.class.getName(), instance2.getFactory().getName());
         assertNotNull("Check ManagedServiceFactory availability", msRef);
         
         // Configuration of baz
@@ -192,13 +192,13 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
         conf.put("baz", "zab");
         conf.put("foo", "oof");
         conf.put("bar", new Integer(0));
-        ManagedServiceFactory ms = (ManagedServiceFactory) context.getService(msRef);
+        ManagedServiceFactory ms = (ManagedServiceFactory) getContext().getService(msRef);
         try {
             ms.updated(instance2.getInstanceName(), conf);
         } catch (ConfigurationException e) { fail("Configuration Exception : " + e); }
         
         // Recheck props
-        fooRef = Utils.getServiceReferenceByName(context, FooService.class.getName(), instance2.getInstanceName());
+        fooRef = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), instance2.getInstanceName());
         fooP = (String) fooRef.getProperty("foo");
         barP = (Integer) fooRef.getProperty("bar");
         bazP = (String) fooRef.getProperty("baz");
@@ -208,7 +208,7 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
         assertEquals("Check baz equality", bazP, "zab");
         
         // Check field value
-        FooService fs = (FooService) context.getService(fooRef);
+        FooService fs = (FooService) getContext().getService(fooRef);
         Properties p = fs.fooProps();
         fooP = (String) p.get("foo");
         barP = (Integer) p.get("bar");
@@ -216,13 +216,13 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
         assertEquals("Check foo field equality", fooP, "oof");
         assertEquals("Check bar field equality", barP, new Integer(0));
         
-        context.ungetService(fooRef);
-        context.ungetService(msRef);
+        getContext().ungetService(fooRef);
+        getContext().ungetService(msRef);
     }
 
 
     public void testDynamicString() {
-		ServiceReference fooRef = Utils.getServiceReferenceByName(context, FooService.class.getName(), instance.getInstanceName());
+		ServiceReference fooRef = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), instance.getInstanceName());
 		assertNotNull("Check FS availability", fooRef);
 		
 		String fooP = (String) fooRef.getProperty("foo");
@@ -233,7 +233,7 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
 		assertEquals("Check bar equality", barP, new Integer(2));
 		assertEquals("Check baz equality", bazP, "baz");
 		
-		ServiceReference msRef = Utils.getServiceReferenceByName(context, ManagedServiceFactory.class.getName(), instance.getFactory().getName());
+		ServiceReference msRef = Utils.getServiceReferenceByName(getContext(), ManagedServiceFactory.class.getName(), instance.getFactory().getName());
 		assertNotNull("Check ManagedServiceFactory availability", msRef);
 		
 		// Configuration of baz
@@ -241,13 +241,13 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
 		conf.put("baz", "zab");
 		conf.put("foo", "oof");
 		conf.put("bar", "0");
-		ManagedServiceFactory ms = (ManagedServiceFactory) context.getService(msRef);
+		ManagedServiceFactory ms = (ManagedServiceFactory) getContext().getService(msRef);
 		try {
 			ms.updated(instance.getInstanceName(), conf);
 		} catch (ConfigurationException e) { fail("Configuration Exception : " + e); }
 		
 		// Recheck props
-		fooRef = Utils.getServiceReferenceByName(context, FooService.class.getName(), instance.getInstanceName());
+		fooRef = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), instance.getInstanceName());
 		fooP = (String) fooRef.getProperty("foo");
 		barP = (Integer) fooRef.getProperty("bar");
 		bazP = (String) fooRef.getProperty("baz");
@@ -257,7 +257,7 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
 		assertEquals("Check baz equality", bazP, "zab");
 		
 		// Check field value
-		FooService fs = (FooService) context.getService(fooRef);
+		FooService fs = (FooService) getContext().getService(fooRef);
 		Properties p = fs.fooProps();
 		fooP = (String) p.get("foo");
 		barP = (Integer) p.get("bar");
@@ -265,12 +265,12 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
 		assertEquals("Check foo field equality", fooP, "oof");
 		assertEquals("Check bar field equality", barP, new Integer(0));
 		
-		context.ungetService(fooRef);
-		context.ungetService(msRef);
+		getContext().ungetService(fooRef);
+		getContext().ungetService(msRef);
 	}
 	
 	public void testPropagation() {
-		ServiceReference fooRef = Utils.getServiceReferenceByName(context, FooService.class.getName(), instance.getInstanceName());
+		ServiceReference fooRef = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), instance.getInstanceName());
 		assertNotNull("Check FS availability", fooRef);
 		
 		String fooP = (String) fooRef.getProperty("foo");
@@ -281,7 +281,7 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
 		assertEquals("Check bar equality", barP, new Integer(2));
 		assertEquals("Check baz equality", bazP, "baz");
 		
-		ServiceReference msRef = Utils.getServiceReferenceByName(context, ManagedServiceFactory.class.getName(), instance.getFactory().getName());
+		ServiceReference msRef = Utils.getServiceReferenceByName(getContext(), ManagedServiceFactory.class.getName(), instance.getFactory().getName());
 		assertNotNull("Check ManagedServiceFactory availability", msRef);
 		
 		// Configuration of baz
@@ -291,13 +291,13 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
 		conf.put("bar", new Integer(2));
 		conf.put("propagated1", "propagated");
 		conf.put("propagated2", new Integer(1));
-		ManagedServiceFactory ms = (ManagedServiceFactory) context.getService(msRef);
+		ManagedServiceFactory ms = (ManagedServiceFactory) getContext().getService(msRef);
 		try {
 			ms.updated(instance.getInstanceName(), conf);
 		} catch (ConfigurationException e) { fail("Configuration Exception : " + e); }
 		
 		// Recheck props
-		fooRef = Utils.getServiceReferenceByName(context, FooService.class.getName(), instance.getInstanceName());
+		fooRef = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), instance.getInstanceName());
 		fooP = (String) fooRef.getProperty("foo");
 		barP = (Integer) fooRef.getProperty("bar");
 		bazP = (String) fooRef.getProperty("baz");
@@ -312,11 +312,11 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
 		assertEquals("Check propagated1 equality", prop1, "propagated");
 		assertEquals("Check propagated2 equality", prop2, new Integer(1));
 		
-		context.ungetService(msRef);
+		getContext().ungetService(msRef);
 	}
 	
 	public void testPropagationNoValue() {
-        ServiceReference fooRef = Utils.getServiceReferenceByName(context, FooService.class.getName(), instance2.getInstanceName());
+        ServiceReference fooRef = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), instance2.getInstanceName());
         assertNotNull("Check FS availability", fooRef);
         
         Object fooP = fooRef.getProperty("foo");
@@ -326,7 +326,7 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
         assertEquals("Check bar equality -1", barP, null);
         assertEquals("Check baz equality -1", bazP, null);
         
-        ServiceReference msRef = Utils.getServiceReferenceByName(context, ManagedServiceFactory.class.getName(), instance2.getFactory().getName());
+        ServiceReference msRef = Utils.getServiceReferenceByName(getContext(), ManagedServiceFactory.class.getName(), instance2.getFactory().getName());
         assertNotNull("Check ManagedServiceFactory availability", msRef);
         
         // Configuration of baz
@@ -336,13 +336,13 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
         conf.put("bar", new Integer(2));
         conf.put("propagated1", "propagated");
         conf.put("propagated2", new Integer(1));
-        ManagedServiceFactory ms = (ManagedServiceFactory) context.getService(msRef);
+        ManagedServiceFactory ms = (ManagedServiceFactory) getContext().getService(msRef);
         try {
             ms.updated(instance2.getInstanceName(), conf);
         } catch (ConfigurationException e) { fail("Configuration Exception : " + e); }
         
         // Recheck props
-        fooRef = Utils.getServiceReferenceByName(context, FooService.class.getName(), instance2.getInstanceName());
+        fooRef = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), instance2.getInstanceName());
         fooP = (String) fooRef.getProperty("foo");
         barP = (Integer) fooRef.getProperty("bar");
         bazP = (String) fooRef.getProperty("baz");
@@ -357,7 +357,7 @@ public class DynamicallyConfigurableProperties extends OSGiTestCase {
         assertEquals("Check propagated1 equality", prop1, "propagated");
         assertEquals("Check propagated2 equality", prop2, new Integer(1));
         
-        context.ungetService(msRef);
+        getContext().ungetService(msRef);
     }
 
 }

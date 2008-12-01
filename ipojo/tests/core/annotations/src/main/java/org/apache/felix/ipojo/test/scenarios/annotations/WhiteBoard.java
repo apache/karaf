@@ -1,8 +1,8 @@
 package org.apache.felix.ipojo.test.scenarios.annotations;
 
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
 import org.apache.felix.ipojo.metadata.Element;
-import org.apache.felix.ipojo.test.scenarios.util.Utils;
 
 public class WhiteBoard extends OSGiTestCase {
     
@@ -10,8 +10,14 @@ public class WhiteBoard extends OSGiTestCase {
     String typeWO = "org.apache.felix.ipojo.test.scenarios.component.whiteboard.WhiteBoardWOModification";
     String namespace = "org.apache.felix.ipojo.whiteboard";
     
+    private IPOJOHelper helper;
+    
+    public void setUp() {
+        helper = new IPOJOHelper(this);
+    }
+    
     public void testMetadataWithOnModification() {
-        Element meta = Utils.getMetatadata(context, typeWI);
+        Element meta = helper.getMetadata(typeWI);
         assertNotNull("Check meta", meta);
         Element[] ext = meta.getElements("wbp", namespace);
         assertEquals("Check size", 1, ext.length);
@@ -29,7 +35,7 @@ public class WhiteBoard extends OSGiTestCase {
     }
     
     public void testMetadataWithoutOnModification() {
-        Element meta = Utils.getMetatadata(context, typeWO);
+        Element meta = helper.getMetadata(typeWO);
         assertNotNull("Check meta", meta);
         Element[] ext = meta.getElements("wbp", namespace);
         assertEquals("Check size", 1, ext.length);

@@ -38,31 +38,31 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
 		try {
 			Properties prov = new Properties();
 			prov.put("instance.name","FooProvider1");
-			fooProvider1 = Utils.getFactoryByName(context, "SimpleFilterCheckServiceProvider").createComponentInstance(prov);
+			fooProvider1 = Utils.getFactoryByName(getContext(), "SimpleFilterCheckServiceProvider").createComponentInstance(prov);
 			fooProvider1.stop();
 			
 			prov = new Properties();
             prov.put("instance.name","FooProvider2");
-            fooProvider2 = Utils.getFactoryByName(context, "SimpleFilterCheckServiceProvider").createComponentInstance(prov);
+            fooProvider2 = Utils.getFactoryByName(getContext(), "SimpleFilterCheckServiceProvider").createComponentInstance(prov);
             fooProvider2.stop();
 		
 			Properties i1 = new Properties();
 			i1.put("instance.name","Subscriber1");
-			instance1 = Utils.getFactoryByName(context, "OptionalMultipleFilterCheckServiceSubscriber").createComponentInstance(i1);
+			instance1 = Utils.getFactoryByName(getContext(), "OptionalMultipleFilterCheckServiceSubscriber").createComponentInstance(i1);
 			
 			Properties i2 = new Properties();
             i2.put("instance.name","Subscriber2");
             Properties ii2 = new Properties();
             ii2.put("id2", "(toto=A)");
             i2.put("requires.filters", ii2);
-            instance2 = Utils.getFactoryByName(context, "OptionalMultipleFilterCheckServiceSubscriber2").createComponentInstance(i2);
+            instance2 = Utils.getFactoryByName(getContext(), "OptionalMultipleFilterCheckServiceSubscriber2").createComponentInstance(i2);
             
             Properties i3 = new Properties();
             i3.put("instance.name","Subscriber3");
             Properties ii3 = new Properties();
             ii3.put("id1", "(toto=A)");
             i3.put("requires.filters", ii3);
-            instance3 = Utils.getFactoryByName(context, "OptionalMultipleFilterCheckServiceSubscriber").createComponentInstance(i3);
+            instance3 = Utils.getFactoryByName(getContext(), "OptionalMultipleFilterCheckServiceSubscriber").createComponentInstance(i3);
 		
 		} catch(Exception e) { 
 		    e.printStackTrace();
@@ -86,53 +86,53 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
 	public void testMultipleNotMatch() {
 	    instance1.start();
 	    
-		ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance1.getInstanceName());
+		ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance1.getInstanceName());
 		assertNotNull("Check architecture availability", arch_ref);
-		InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
-		ServiceReference cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance1.getInstanceName());
+		ServiceReference cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        CheckService cs_instance = (CheckService) context.getService(cs_instance_ref);
+        CheckService cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check service Binding - 1", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(0)));
         assertTrue("Check Array size - 1", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(0)));
         
 		fooProvider1.start();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
 		assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check service Binding - 2", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(0)));
         assertTrue("Check Array size - 2", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(0)));
 		
-		ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), fooProvider1.getInstanceName());
+		ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), fooProvider1.getInstanceName());
 		assertNotNull("Check CheckService availability", cs_ref);
-		CheckService cs = (CheckService) context.getService(cs_ref);
+		CheckService cs = (CheckService) getContext().getService(cs_ref);
 		// change the value of the property toto
 		cs.check();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
-        cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance1.getInstanceName());
+        cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        cs_instance = (CheckService) context.getService(cs_instance_ref);
+        cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check Array size - 3", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(1)));
         assertTrue("Check service Binding - 3", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(1)));
         
         fooProvider2.start();
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 4", id.getState() == ComponentInstance.VALID);
-        cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance1.getInstanceName());
+        cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        cs_instance = (CheckService) context.getService(cs_instance_ref);
+        cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check Array size - 4", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(1)));
         assertTrue("Check service Binding - 4", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(1)));
         
-        ServiceReference cs_ref2 = Utils.getServiceReferenceByName(context, CheckService.class.getName(), fooProvider2.getInstanceName());
+        ServiceReference cs_ref2 = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), fooProvider2.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref2);
-        CheckService cs2 = (CheckService) context.getService(cs_ref2);
+        CheckService cs2 = (CheckService) getContext().getService(cs_ref2);
         // change the value of the property toto
         cs2.check();
         assertTrue("Check service invocation", cs_instance.check());
@@ -141,28 +141,28 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
         
         // change the value of the property toto
         cs.check();
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 6", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service Binding - 6", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(1)));
         assertTrue("Check Array size - 6", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(1)));
         
 		fooProvider2.stop();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 7", id.getState() == ComponentInstance.VALID);
 		assertTrue("Check service Binding - 7", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(0)));
 		assertTrue("Check Array size - 7", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(0)));
 		
 		fooProvider2.start();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 8", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service Binding - 8", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(1)));
         assertTrue("Check Array size - 8", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(1)));
 		
 		fooProvider2.stop();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 9", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service Binding - 9", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(0)));
         assertTrue("Check Array size - 9", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(0)));
@@ -171,10 +171,10 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
         cs = null;
         cs2 = null;
         cs_instance = null;
-        context.ungetService(cs_instance_ref);
-        context.ungetService(arch_ref);
-        context.ungetService(cs_ref);
-        context.ungetService(cs_ref2);		
+        getContext().ungetService(cs_instance_ref);
+        getContext().ungetService(arch_ref);
+        getContext().ungetService(cs_ref);
+        getContext().ungetService(cs_ref2);		
 	}
 	
 	public void testMultipleMatch() {
@@ -182,28 +182,28 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
 	    fooProvider1.start();
 	    fooProvider2.start();
 	    
-	    ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), fooProvider1.getInstanceName());
+	    ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), fooProvider1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        CheckService cs = (CheckService) context.getService(cs_ref);
+        CheckService cs = (CheckService) getContext().getService(cs_ref);
         // change the value of the property toto
         cs.check();
         
-        ServiceReference cs_ref2 = Utils.getServiceReferenceByName(context, CheckService.class.getName(), fooProvider2.getInstanceName());
+        ServiceReference cs_ref2 = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), fooProvider2.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref2);
-        CheckService cs2 = (CheckService) context.getService(cs_ref2);
+        CheckService cs2 = (CheckService) getContext().getService(cs_ref2);
         // change the value of the property toto
         cs2.check();
 	    
         instance1.start();
         
-        ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance1.getInstanceName());
+        ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance1.getInstanceName());
         assertNotNull("Check architecture availability", arch_ref);
-        InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
         
-        ServiceReference cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance1.getInstanceName());
+        ServiceReference cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        CheckService cs_instance = (CheckService) context.getService(cs_instance_ref);
+        CheckService cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check service Binding - 1", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(2)));
         assertTrue("Check Array size - 1", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(2)));
@@ -211,7 +211,7 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
         // change the value of the property toto
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check service Binding - 2", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(1)));
@@ -219,7 +219,7 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
         
         fooProvider2.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check service Binding - 3", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(0)));
@@ -227,7 +227,7 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
         
         fooProvider2.start();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 4", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check service Binding - 4", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(1)));
@@ -235,7 +235,7 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
         
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 5", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check service Binding - 5", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(2)));
@@ -245,66 +245,66 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
         cs = null;
         cs2 = null;
         cs_instance = null;
-        context.ungetService(cs_instance_ref);
-        context.ungetService(arch_ref);
-        context.ungetService(cs_ref);
-        context.ungetService(cs_ref2);      
+        getContext().ungetService(cs_instance_ref);
+        getContext().ungetService(arch_ref);
+        getContext().ungetService(cs_ref);
+        getContext().ungetService(cs_ref2);      
     }
 	
 	public void testMultipleNotMatchInstance() {
         instance3.start();
         
-        ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance3.getInstanceName());
+        ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance3.getInstanceName());
         assertNotNull("Check architecture availability", arch_ref);
-        InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
-        ServiceReference cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+        ServiceReference cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance3.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        CheckService cs_instance = (CheckService) context.getService(cs_instance_ref);
+        CheckService cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check service Binding - 1", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(0)));
         assertTrue("Check Array size - 1", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(0)));
         
         fooProvider1.start();
-        ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), fooProvider1.getInstanceName());
+        ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), fooProvider1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        CheckService cs = (CheckService) context.getService(cs_ref);
+        CheckService cs = (CheckService) getContext().getService(cs_ref);
         // change the value of the property toto
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check service Binding - 2", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(0)));
         assertTrue("Check Array size - 2", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(0)));
         
-        cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), fooProvider1.getInstanceName());
+        cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), fooProvider1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        cs = (CheckService) context.getService(cs_ref);
+        cs = (CheckService) getContext().getService(cs_ref);
         // change the value of the property toto
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
-        cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+        cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance3.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        cs_instance = (CheckService) context.getService(cs_instance_ref);
+        cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check Array size - 3", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(1)));
         assertTrue("Check service Binding - 3", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(1)));
         
         fooProvider2.start();
-        ServiceReference cs_ref2 = Utils.getServiceReferenceByName(context, CheckService.class.getName(), fooProvider2.getInstanceName());
+        ServiceReference cs_ref2 = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), fooProvider2.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref2);
-        CheckService cs2 = (CheckService) context.getService(cs_ref2);
+        CheckService cs2 = (CheckService) getContext().getService(cs_ref2);
         // change the value of the property toto
         cs2.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 4", id.getState() == ComponentInstance.VALID);
-        cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+        cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance3.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        cs_instance = (CheckService) context.getService(cs_instance_ref);
+        cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check Array size - 4", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(1)));
         assertTrue("Check service Binding - 4", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(1)));
@@ -317,28 +317,28 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
         
         // change the value of the property toto
         cs.check();
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 6", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service Binding - 6", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(1)));
         assertTrue("Check Array size - 6", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(1)));
         
         fooProvider2.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 7", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service Binding - 7", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(0)));
         assertTrue("Check Array size - 7", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(0)));
         
         fooProvider2.start();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 8", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service Binding - 8", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(1)));
         assertTrue("Check Array size - 8", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(1)));
         
         fooProvider2.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 9", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service Binding - 9", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(0)));
         assertTrue("Check Array size - 9", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(0)));
@@ -347,10 +347,10 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
         cs = null;
         cs2 = null;
         cs_instance = null;
-        context.ungetService(cs_instance_ref);
-        context.ungetService(arch_ref);
-        context.ungetService(cs_ref);
-        context.ungetService(cs_ref2);
+        getContext().ungetService(cs_instance_ref);
+        getContext().ungetService(arch_ref);
+        getContext().ungetService(cs_ref);
+        getContext().ungetService(cs_ref2);
     }
     
     public void testMultipleMatchInstance() {
@@ -359,21 +359,21 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
         fooProvider2.start();
         instance3.start();
         
-        ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), fooProvider1.getInstanceName());
+        ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), fooProvider1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        CheckService cs = (CheckService) context.getService(cs_ref);
+        CheckService cs = (CheckService) getContext().getService(cs_ref);
         
-        ServiceReference cs_ref2 = Utils.getServiceReferenceByName(context, CheckService.class.getName(), fooProvider2.getInstanceName());
+        ServiceReference cs_ref2 = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), fooProvider2.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref2);
         
-        ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance3.getInstanceName());
+        ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance3.getInstanceName());
         assertNotNull("Check architecture availability", arch_ref);
-        InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
         
-        ServiceReference cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+        ServiceReference cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance3.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        CheckService cs_instance = (CheckService) context.getService(cs_instance_ref);
+        CheckService cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check service Binding - 1", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(2)));
         assertTrue("Check Array size - 1", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(2)));
@@ -381,7 +381,7 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
         // change the value of the property toto
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check service Binding - 2", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(1)));
@@ -389,7 +389,7 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
         
         fooProvider2.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check service Binding - 3", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(0)));
@@ -397,7 +397,7 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
         
         fooProvider2.start();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 4", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check service Binding - 4", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(1)));
@@ -405,7 +405,7 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
         
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 5", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check service Binding - 5", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(2)));
@@ -414,66 +414,66 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
         id = null;
         cs = null;
         cs_instance = null;
-        context.ungetService(cs_instance_ref);
-        context.ungetService(arch_ref);
-        context.ungetService(cs_ref);
-        context.ungetService(cs_ref2);        
+        getContext().ungetService(cs_instance_ref);
+        getContext().ungetService(arch_ref);
+        getContext().ungetService(cs_ref);
+        getContext().ungetService(cs_ref2);        
     }
 	
     public void testMultipleNotMatchInstanceWithoutFilter() {
         instance2.start();
         
-        ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance2.getInstanceName());
+        ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance2.getInstanceName());
         assertNotNull("Check architecture availability", arch_ref);
-        InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
-        ServiceReference cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance2.getInstanceName());
+        ServiceReference cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance2.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        CheckService cs_instance = (CheckService) context.getService(cs_instance_ref);
+        CheckService cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check service Binding - 1", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(0)));
         assertTrue("Check Array size - 1", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(0)));
         
         fooProvider1.start();
-        ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), fooProvider1.getInstanceName());
+        ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), fooProvider1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        CheckService cs = (CheckService) context.getService(cs_ref);
+        CheckService cs = (CheckService) getContext().getService(cs_ref);
         // change the value of the property toto
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check service Binding - 2", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(0)));
         assertTrue("Check Array size - 2", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(0)));
         
-        cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), fooProvider1.getInstanceName());
+        cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), fooProvider1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        cs = (CheckService) context.getService(cs_ref);
+        cs = (CheckService) getContext().getService(cs_ref);
         // change the value of the property toto
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
-        cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance2.getInstanceName());
+        cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance2.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        cs_instance = (CheckService) context.getService(cs_instance_ref);
+        cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check Array size - 3", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(1)));
         assertTrue("Check service Binding - 3", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(1)));
         
         fooProvider2.start();
-        ServiceReference cs_ref2 = Utils.getServiceReferenceByName(context, CheckService.class.getName(), fooProvider2.getInstanceName());
+        ServiceReference cs_ref2 = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), fooProvider2.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref2);
-        CheckService cs2 = (CheckService) context.getService(cs_ref2);
+        CheckService cs2 = (CheckService) getContext().getService(cs_ref2);
         // change the value of the property toto
         cs2.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 4", id.getState() == ComponentInstance.VALID);
-        cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance2.getInstanceName());
+        cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance2.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        cs_instance = (CheckService) context.getService(cs_instance_ref);
+        cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check Array size - 4", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(1)));
         assertTrue("Check service Binding - 4", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(1)));
@@ -486,28 +486,28 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
         
         // change the value of the property toto
         cs.check();
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 6", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service Binding - 6", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(1)));
         assertTrue("Check Array size - 6", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(1)));
         
         fooProvider2.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 7", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service Binding - 7", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(0)));
         assertTrue("Check Array size - 7", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(0)));
         
         fooProvider2.start();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 8", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service Binding - 8", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(1)));
         assertTrue("Check Array size - 8", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(1)));
         
         fooProvider2.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 9", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service Binding - 9", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(0)));
         assertTrue("Check Array size - 9", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(0)));
@@ -516,10 +516,10 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
         cs = null;
         cs2 = null;
         cs_instance = null;
-        context.ungetService(cs_instance_ref);
-        context.ungetService(arch_ref);
-        context.ungetService(cs_ref);
-        context.ungetService(cs_ref2);   
+        getContext().ungetService(cs_instance_ref);
+        getContext().ungetService(arch_ref);
+        getContext().ungetService(cs_ref);
+        getContext().ungetService(cs_ref2);   
     }
     
     public void testMultipleMatchInstanceWithoutFilter() {
@@ -529,21 +529,21 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
         fooProvider2.start();
         instance2.start();
         
-        ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), fooProvider1.getInstanceName());
+        ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), fooProvider1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        CheckService cs = (CheckService) context.getService(cs_ref);
+        CheckService cs = (CheckService) getContext().getService(cs_ref);
         
-        ServiceReference cs_ref2 = Utils.getServiceReferenceByName(context, CheckService.class.getName(), fooProvider2.getInstanceName());
+        ServiceReference cs_ref2 = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), fooProvider2.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref2);
         
-        ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance2.getInstanceName());
+        ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance2.getInstanceName());
         assertNotNull("Check architecture availability", arch_ref);
-        InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
         
-        ServiceReference cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance2.getInstanceName());
+        ServiceReference cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance2.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        CheckService cs_instance = (CheckService) context.getService(cs_instance_ref);
+        CheckService cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check service Binding - 1", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(2)));
         assertTrue("Check Array size - 1", ((Integer)cs_instance.getProps().get("Size")).equals(new Integer(2)));
@@ -551,7 +551,7 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
         // change the value of the property toto
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check service Binding - 2", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(1)));
@@ -559,7 +559,7 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
         
         fooProvider2.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check service Binding - 3", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(0)));
@@ -567,7 +567,7 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
         
         fooProvider2.start();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 4", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check service Binding - 4", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(1)));
@@ -575,7 +575,7 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
         
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 5", id.getState() == ComponentInstance.VALID);
         assertTrue("Check service invocation", cs_instance.check());
         assertTrue("Check service Binding - 5", ((Integer)cs_instance.getProps().get("Bind")).equals(new Integer(2)));
@@ -584,10 +584,10 @@ public class OptionalMultipleFilterDependencies extends OSGiTestCase {
         id = null;
         cs = null;
         cs_instance = null;
-        context.ungetService(cs_instance_ref);
-        context.ungetService(arch_ref);
-        context.ungetService(cs_ref);
-        context.ungetService(cs_ref2);      
+        getContext().ungetService(cs_instance_ref);
+        getContext().ungetService(arch_ref);
+        getContext().ungetService(cs_ref);
+        getContext().ungetService(cs_ref2);      
     }
 
 }

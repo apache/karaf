@@ -50,7 +50,7 @@ public class BadFactories extends OSGiTestCase {
     
     public void testBadFactory() {
         try {
-            new ComponentFactory(context, getElementFactoryWithNoClassName());
+            new ComponentFactory(getContext(), getElementFactoryWithNoClassName());
             fail("A factory with no class name must be rejected");
         } catch (ConfigurationException e) {
           // OK.   
@@ -59,7 +59,7 @@ public class BadFactories extends OSGiTestCase {
     
     public void testBadHandlerFactory1() {
         try {
-            new HandlerManagerFactory(context, getElementHandlerFactoryWithNoClassName());
+            new HandlerManagerFactory(getContext(), getElementHandlerFactoryWithNoClassName());
             fail("An handler factory with no class name must be rejected");
         } catch (ConfigurationException e) {
           // OK.   
@@ -68,7 +68,7 @@ public class BadFactories extends OSGiTestCase {
     
     public void testBadHandlerFactory2() {
         try {
-            new HandlerManagerFactory(context, getElementHandlerFactoryWithNoName());
+            new HandlerManagerFactory(getContext(), getElementHandlerFactoryWithNoName());
             fail("An handler factory with no name must be rejected");
         } catch (ConfigurationException e) {
           // OK.   
@@ -76,7 +76,7 @@ public class BadFactories extends OSGiTestCase {
     }
     
     public void testCreationOnBadConstructor() {
-            Factory factory = Utils.getFactoryByName(context, "BAD-BadConstructor");
+            Factory factory = Utils.getFactoryByName(getContext(), "BAD-BadConstructor");
             ComponentInstance ci;
             try {
                 ci = factory.createComponentInstance(null);
@@ -88,7 +88,7 @@ public class BadFactories extends OSGiTestCase {
     }
     
     public void testCreationOnBadFactory() {
-        Factory factory = Utils.getFactoryByName(context, "BAD-BadFactory");
+        Factory factory = Utils.getFactoryByName(getContext(), "BAD-BadFactory");
         ComponentInstance ci;
         try {
             ci = factory.createComponentInstance(null);
@@ -100,7 +100,7 @@ public class BadFactories extends OSGiTestCase {
     }
     
     public void testCreationOnBadFactory2() {
-        Factory factory = Utils.getFactoryByName(context, "BAD-BadFactory2");
+        Factory factory = Utils.getFactoryByName(getContext(), "BAD-BadFactory2");
         ComponentInstance ci;
         try {
             ci = factory.createComponentInstance(null);
@@ -115,7 +115,7 @@ public class BadFactories extends OSGiTestCase {
         Element elem = new Element("component", "");
         elem.addAttribute(new Attribute("classname", "org.apache.felix.ipojo.test.scenarios.component.CallbackCheckService"));
         try {
-            ComponentFactory fact = new ComponentFactory(context, elem);
+            ComponentFactory fact = new ComponentFactory(getContext(), elem);
             fact.stop();
             fail("A factory with no manipulation metadata must be rejected");
         } catch (ConfigurationException e) {

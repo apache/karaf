@@ -104,7 +104,7 @@ public class ServiceRegistryTest extends OSGiTestCase {
 	public void testRegistrationAndListener() {
 		ComponentInstance im = new FakeComponent();
 		ComponentInstance im2 = new FakeComponent();
-		ServiceRegistry registry = new ServiceRegistry(context);
+		ServiceRegistry registry = new ServiceRegistry(getContext());
 		assertNotNull("Assert registry not null", registry);
 		svcListener all = new svcListener();
 		try {
@@ -147,7 +147,7 @@ public class ServiceRegistryTest extends OSGiTestCase {
 	public void testRegistrationAndFilter() {
 		ComponentInstance im = new FakeComponent();
 		ComponentInstance im2 = new FakeComponent();
-		ServiceRegistry registry = new ServiceRegistry(context);
+		ServiceRegistry registry = new ServiceRegistry(getContext());
 		svcListener filtered = new svcListener();
 		
 		try {
@@ -185,7 +185,7 @@ public class ServiceRegistryTest extends OSGiTestCase {
 	public void testGetService() {
 		ComponentInstance im = new FakeComponent();
 		ComponentInstance im2 = new FakeComponent();
-		ServiceRegistry registry = new ServiceRegistry(context);
+		ServiceRegistry registry = new ServiceRegistry(getContext());
 		
 		try {
 			assertNull("Check that there is no available service", registry.getServiceReferences(null, null));
@@ -209,7 +209,7 @@ public class ServiceRegistryTest extends OSGiTestCase {
 	public void testGetFilteredService() {
 		ComponentInstance im = new FakeComponent();
 		ComponentInstance im2 = new FakeComponent();
-		ServiceRegistry registry = new ServiceRegistry(context);
+		ServiceRegistry registry = new ServiceRegistry(getContext());
 		
 		try {
 			assertNull("Check that there is no available service", registry.getServiceReferences(null, null));

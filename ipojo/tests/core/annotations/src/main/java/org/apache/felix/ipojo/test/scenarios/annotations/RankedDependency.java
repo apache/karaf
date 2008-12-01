@@ -1,16 +1,19 @@
 package org.apache.felix.ipojo.test.scenarios.annotations;
 
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.test.scenarios.component.MyComparator;
-import org.apache.felix.ipojo.test.scenarios.util.Utils;
 
 public class RankedDependency extends OSGiTestCase {
     
     private Element[] deps ;
     
+    private IPOJOHelper helper;
+    
     public void setUp() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.RankedDependency");
+        helper = new IPOJOHelper(this);
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.RankedDependency");
         deps = meta.getElements("requires");
     }
     

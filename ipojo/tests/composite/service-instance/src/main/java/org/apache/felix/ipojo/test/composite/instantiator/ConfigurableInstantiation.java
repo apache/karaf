@@ -36,9 +36,9 @@ public class ConfigurableInstantiation extends OSGiTestCase {
 	private ComponentFactory refuse2F;
 	
 	public void setUp() {
-		acceptF = (ComponentFactory) Utils.getFactoryByName(context, "composite.bar.5-accept");
-		refuse1F = (ComponentFactory) Utils.getFactoryByName(context, "composite.bar.5-refuse1");
-		refuse2F = (ComponentFactory) Utils.getFactoryByName(context, "composite.bar.5-refuse2");
+		acceptF = (ComponentFactory) Utils.getFactoryByName(getContext(), "composite.bar.5-accept");
+		refuse1F = (ComponentFactory) Utils.getFactoryByName(getContext(), "composite.bar.5-refuse1");
+		refuse2F = (ComponentFactory) Utils.getFactoryByName(getContext(), "composite.bar.5-refuse2");
 		
 	}
 	

@@ -36,12 +36,12 @@ public class ImmediateCallbackTest extends OSGiTestCase {
     public void setUp() {
         Properties p2 = new Properties();
         p2.put("instance.name","fooProvider");
-        fooProvider = Utils.getComponentInstance(context, "LFCB-FooProviderType-1", p2);
+        fooProvider = Utils.getComponentInstance(getContext(), "LFCB-FooProviderType-1", p2);
         fooProvider.stop();
         
         Properties p1 = new Properties();
         p1.put("instance.name","callback");
-        instance = Utils.getComponentInstance(context, "LFCB-ImmediateCallbackCheckService", p1);
+        instance = Utils.getComponentInstance(getContext(), "LFCB-ImmediateCallbackCheckService", p1);
         
     }
     
@@ -54,9 +54,9 @@ public class ImmediateCallbackTest extends OSGiTestCase {
     
     public void testCallback() {
         // Check instance is invalid
-        ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance.getInstanceName());
+        ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance.getInstanceName());
         assertNotNull("Check architecture availability", arch_ref);
-        InstanceDescription id_dep = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        InstanceDescription id_dep = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 1", id_dep.getState() == ComponentInstance.INVALID);
         assertEquals("Check pojo count - 1", id_dep.getCreatedObjects().length, 0);
         
@@ -64,13 +64,13 @@ public class ImmediateCallbackTest extends OSGiTestCase {
         fooProvider.start();
         
         // Check instance validity
-        id_dep = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id_dep = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 1", id_dep.getState() == ComponentInstance.VALID);
         
         // Check service providing
-        ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance.getInstanceName());
+        ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        CheckService cs = (CheckService) context.getService(cs_ref);
+        CheckService cs = (CheckService) getContext().getService(cs_ref);
         assertTrue("check CheckService invocation", cs.check());
         
         assertEquals("Check pojo count - 2", id_dep.getCreatedObjects().length, 1);
@@ -80,7 +80,7 @@ public class ImmediateCallbackTest extends OSGiTestCase {
         
         fooProvider.stop();
         
-        id_dep = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id_dep = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 2", id_dep.getState() == ComponentInstance.INVALID);
         
         assertEquals("Check pojo count - 3", id_dep.getCreatedObjects().length, 1);
@@ -88,13 +88,13 @@ public class ImmediateCallbackTest extends OSGiTestCase {
         fooProvider.start();
         
         // Check instance validity
-        id_dep = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id_dep = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 2", id_dep.getState() == ComponentInstance.VALID);
         
         // Check service providing
-        cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance.getInstanceName());
+        cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        cs = (CheckService) context.getService(cs_ref);
+        cs = (CheckService) getContext().getService(cs_ref);
         assertTrue("check CheckService invocation", cs.check());
         
         // Check int property
@@ -104,8 +104,8 @@ public class ImmediateCallbackTest extends OSGiTestCase {
         assertEquals("Check pojo count - 4 ", id_dep.getCreatedObjects().length, 1);
         
         // Clean up
-        context.ungetService(arch_ref);
-        context.ungetService(cs_ref);
+        getContext().ungetService(arch_ref);
+        getContext().ungetService(cs_ref);
         cs = null;
         id_dep = null;
     }

@@ -1,15 +1,17 @@
 package org.apache.felix.ipojo.test.scenarios.annotations;
 
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
 import org.apache.felix.ipojo.metadata.Element;
-import org.apache.felix.ipojo.test.scenarios.util.Utils;
 
 public class PolicyDependency extends OSGiTestCase {
     
     private Element[] deps ;
+    private IPOJOHelper helper;
     
     public void setUp() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.PolicyDependency");
+        helper = new IPOJOHelper(this);
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.PolicyDependency");
         deps = meta.getElements("requires");
     }
     
@@ -69,26 +71,6 @@ public class PolicyDependency extends OSGiTestCase {
             }
         }
         fail("Dependency  " + name + " not found");
-        return null;
-    }
-    
-    private String getBind(Element dep) {
-        Element[] elem = dep.getElements("callback");
-        for (int i = 0; elem != null && i < elem.length; i++) {
-            if (elem[i].getAttribute("type").equalsIgnoreCase("bind")) {
-                return elem[i].getAttribute("method");
-            }
-        }
-        return null;
-    }
-    
-    private String getUnbind(Element dep) {
-        Element[] elem = dep.getElements("callback");
-        for (int i = 0; elem != null && i < elem.length; i++) {
-            if (elem[i].getAttribute("type").equalsIgnoreCase("unbind")) {
-                return elem[i].getAttribute("method");
-            }
-        }
         return null;
     }
 

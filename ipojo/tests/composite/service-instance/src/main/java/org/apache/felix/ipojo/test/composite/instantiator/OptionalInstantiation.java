@@ -37,8 +37,8 @@ public class OptionalInstantiation extends OSGiTestCase {
 	private ComponentInstance empty;
 	
 	public void setUp() {
-		bar1Factory = (ComponentFactory) Utils.getFactoryByName(context, "composite.bar.3");
-		Factory fact = Utils.getFactoryByName(context, "composite.empty");
+		bar1Factory = (ComponentFactory) Utils.getFactoryByName(getContext(), "composite.bar.3");
+		Factory fact = Utils.getFactoryByName(getContext(), "composite.empty");
 		Properties props = new Properties();
 		props.put("instance.name","empty");
 		try {
@@ -124,9 +124,9 @@ public class OptionalInstantiation extends OSGiTestCase {
 		}
 		assertTrue("Check instance validity - 1", under.getState() == ComponentInstance.VALID);
 		
-		ComponentFactory fact1 = (ComponentFactory) Utils.getFactoryByName(context, "COMPO-FooBarProviderType-1");
-		ComponentFactory fact2 = (ComponentFactory) Utils.getFactoryByName(context, "COMPO-FooBarProviderType-2");
-		ComponentFactory fact3 = (ComponentFactory) Utils.getFactoryByName(context, "COMPO-FooBarProviderType-3");
+		ComponentFactory fact1 = (ComponentFactory) Utils.getFactoryByName(getContext(), "COMPO-FooBarProviderType-1");
+		ComponentFactory fact2 = (ComponentFactory) Utils.getFactoryByName(getContext(), "COMPO-FooBarProviderType-2");
+		ComponentFactory fact3 = (ComponentFactory) Utils.getFactoryByName(getContext(), "COMPO-FooBarProviderType-3");
 		
 		fact1.stop();
 		assertTrue("Check instance validity - 2", under.getState() == ComponentInstance.VALID);
@@ -159,9 +159,9 @@ public class OptionalInstantiation extends OSGiTestCase {
 		}
 		assertTrue("Check instance validity - 1", under.getState() == ComponentInstance.VALID);
 		
-		ComponentFactory fact1 = (ComponentFactory) Utils.getFactoryByName(context, "COMPO-FooBarProviderType-1");
-		ComponentFactory fact2 = (ComponentFactory) Utils.getFactoryByName(context, "COMPO-FooBarProviderType-2");
-		ComponentFactory fact3 = (ComponentFactory) Utils.getFactoryByName(context, "COMPO-FooBarProviderType-3");
+		ComponentFactory fact1 = (ComponentFactory) Utils.getFactoryByName(getContext(), "COMPO-FooBarProviderType-1");
+		ComponentFactory fact2 = (ComponentFactory) Utils.getFactoryByName(getContext(), "COMPO-FooBarProviderType-2");
+		ComponentFactory fact3 = (ComponentFactory) Utils.getFactoryByName(getContext(), "COMPO-FooBarProviderType-3");
 		
 		fact1.stop();
 		assertTrue("Check instance validity - 2", under.getState() == ComponentInstance.VALID);
@@ -190,9 +190,9 @@ public class OptionalInstantiation extends OSGiTestCase {
 			fail("Cannot instantiate under : " + e.getMessage());
 		}
 		
-		ServiceReference ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), "under");
+		ServiceReference ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), "under");
 		assertNotNull("Check architecture availability", ref);
-		Architecture arch = (Architecture) context.getService(ref);
+		Architecture arch = (Architecture) getContext().getService(ref);
 		assertNotNull("Check architecture", arch);
 		InstanceDescription id = arch.getInstanceDescription();
 		assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
@@ -203,16 +203,16 @@ public class OptionalInstantiation extends OSGiTestCase {
 		assertEquals("Check instance name" , id.getName(), "under");
 		assertEquals("Check component type name" , id.getComponentDescription().getName(), "composite.bar.3");
 		
-		ComponentFactory fact1 = (ComponentFactory) Utils.getFactoryByName(context, "COMPO-FooBarProviderType-1");
-		ComponentFactory fact2 = (ComponentFactory) Utils.getFactoryByName(context, "COMPO-FooBarProviderType-2");
-		ComponentFactory fact3 = (ComponentFactory) Utils.getFactoryByName(context, "COMPO-FooBarProviderType-3");
+		ComponentFactory fact1 = (ComponentFactory) Utils.getFactoryByName(getContext(), "COMPO-FooBarProviderType-1");
+		ComponentFactory fact2 = (ComponentFactory) Utils.getFactoryByName(getContext(), "COMPO-FooBarProviderType-2");
+		ComponentFactory fact3 = (ComponentFactory) Utils.getFactoryByName(getContext(), "COMPO-FooBarProviderType-3");
 		
 		
 		fact1.stop();
 		assertTrue("Check instance validity - 2", under.getState() == ComponentInstance.VALID);
-		ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), "under");
+		ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), "under");
 		assertNotNull("Check architecture availability", ref);
-		arch = (Architecture) context.getService(ref);
+		arch = (Architecture) getContext().getService(ref);
 		id = arch.getInstanceDescription();
 		assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
 		contained = id.getContainedInstances();
@@ -223,9 +223,9 @@ public class OptionalInstantiation extends OSGiTestCase {
 		
 		fact2.stop();
 		assertTrue("Check instance validity - 3", under.getState() == ComponentInstance.VALID);
-		ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), "under");
+		ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), "under");
 		assertNotNull("Check architecture availability", ref);
-		arch = (Architecture) context.getService(ref);
+		arch = (Architecture) getContext().getService(ref);
 		id = arch.getInstanceDescription();
 		assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
 		contained = id.getContainedInstances();
@@ -236,9 +236,9 @@ public class OptionalInstantiation extends OSGiTestCase {
 
 		fact3.stop();
 		assertTrue("Check instance invalidity", under.getState() == ComponentInstance.VALID);
-		ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), "under");
+		ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), "under");
 		assertNotNull("Check architecture availability", ref);
-		arch = (Architecture) context.getService(ref);
+		arch = (Architecture) getContext().getService(ref);
 		id = arch.getInstanceDescription();
 		assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
 		contained = id.getContainedInstances();
@@ -249,9 +249,9 @@ public class OptionalInstantiation extends OSGiTestCase {
 
 		fact1.start();
 		assertTrue("Check instance validity - 4", under.getState() == ComponentInstance.VALID);
-		ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), "under");
+		ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), "under");
 		assertNotNull("Check architecture availability", ref);
-		arch = (Architecture) context.getService(ref);
+		arch = (Architecture) getContext().getService(ref);
 		id = arch.getInstanceDescription();
 		assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
 		contained = id.getContainedInstances();
@@ -260,7 +260,7 @@ public class OptionalInstantiation extends OSGiTestCase {
 		assertEquals("Check instance name" , id.getName(), "under");
 		assertEquals("Check component type name" , id.getComponentDescription().getName(), "composite.bar.3");
 
-		context.ungetService(ref);
+		getContext().ungetService(ref);
 		under.dispose();
 		fact2.start();
 		fact3.start();

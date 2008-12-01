@@ -128,7 +128,7 @@ public class BadServiceDependencies extends OSGiTestCase {
     
     
     private Element getManipulationForComponent() {
-        String header = (String) context.getBundle().getHeaders().get("iPOJO-Components");
+        String header = (String) getContext().getBundle().getHeaders().get("iPOJO-Components");
         Element elem = null;
         try {
             elem = ManifestMetadataParser.parse(header);
@@ -158,7 +158,7 @@ public class BadServiceDependencies extends OSGiTestCase {
     
     public void testNothing() {
         try {
-            ComponentFactory cf = new ComponentFactory(context, getNothing());
+            ComponentFactory cf = new ComponentFactory(getContext(), getNothing());
             cf.start();
             ComponentInstance ci = cf.createComponentInstance(props);
             ci.dispose();
@@ -175,7 +175,7 @@ public class BadServiceDependencies extends OSGiTestCase {
     
     public void testNoField() {
         try {
-            ComponentFactory cf = new ComponentFactory(context, getNoField());
+            ComponentFactory cf = new ComponentFactory(getContext(), getNoField());
             cf.start();
             ComponentInstance ci = cf.createComponentInstance(props);
             ci.dispose();
@@ -192,7 +192,7 @@ public class BadServiceDependencies extends OSGiTestCase {
     
     public void testBadField() {
         try {
-            ComponentFactory cf = new ComponentFactory(context, getBadField());
+            ComponentFactory cf = new ComponentFactory(getContext(), getBadField());
             cf.start();
             ComponentInstance ci = cf.createComponentInstance(props);
             ci.dispose();
@@ -209,7 +209,7 @@ public class BadServiceDependencies extends OSGiTestCase {
     
     public void testBadFilter() {
         try {
-            ComponentFactory cf = new ComponentFactory(context, getBadFilter());
+            ComponentFactory cf = new ComponentFactory(getContext(), getBadFilter());
             cf.start();
             ComponentInstance ci = cf.createComponentInstance(props);
             ci.dispose();
@@ -226,7 +226,7 @@ public class BadServiceDependencies extends OSGiTestCase {
     
     public void testBadFrom() {
         try {
-            ComponentFactory cf = new ComponentFactory(context, getBadFrom());
+            ComponentFactory cf = new ComponentFactory(getContext(), getBadFrom());
             cf.start();
             ComponentInstance ci = cf.createComponentInstance(props);
             ci.dispose();
@@ -243,7 +243,7 @@ public class BadServiceDependencies extends OSGiTestCase {
     
     public void testBadType() {
         try {
-            ComponentFactory cf = new ComponentFactory(context, getBadType());
+            ComponentFactory cf = new ComponentFactory(getContext(), getBadType());
             cf.start();
             ComponentInstance ci = cf.createComponentInstance(props);
             ci.dispose();

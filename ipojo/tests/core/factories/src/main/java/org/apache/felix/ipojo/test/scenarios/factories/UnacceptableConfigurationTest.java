@@ -34,7 +34,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 	 * Configuration without the name property.
 	 */
 	public void testWithoutName() {
-		Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-2");
+		Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-2");
 		
 		Properties  p = new Properties();
 		p.put("int", new Integer(3));
@@ -55,7 +55,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
      * Configuration without the name property.
      */
     public void testWithoutNameOpt() {
-        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-2opt");
+        Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-2opt");
         
         Properties  p = new Properties();
         p.put("int", new Integer(3));
@@ -76,7 +76,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 	 * Empty configuration.
 	 */
 	public void testEmptyConfiguration() {
-		Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-2");
+		Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-2");
 		Properties  p = new Properties();
 		
 		ComponentInstance ci = null;
@@ -90,7 +90,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
      * Empty configuration.
      */
     public void testEmptyConfigurationOpt() {
-        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-2opt");
+        Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-2opt");
         Properties  p = new Properties();
         
         ComponentInstance ci = null;
@@ -104,7 +104,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 	 * Empty configuration (just the name).
 	 */
 	public void testEmptyConfiguration2() {
-		Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2");
+		Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-Dyn2");
 		Properties  p = new Properties();
 		p.put("instance.name","ko");
 		ComponentInstance ci = null;
@@ -120,7 +120,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
      * Empty configuration (just the name).
      */
     public void testEmptyConfiguration2opt() {
-        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2opt");
+        Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-Dyn2opt");
         Properties  p = new Properties();
         p.put("instance.name","ko");
         ComponentInstance ci = null;
@@ -137,7 +137,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 	 * Null configuration (accept).
 	 */
 	public void testNull() {
-		Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-2");
+		Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-2");
 		
 		ComponentInstance ci = null;
 		try {
@@ -150,7 +150,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
      * Null configuration (accept).
      */
     public void testNullOpt() {
-        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-2opt");
+        Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-2opt");
         
         ComponentInstance ci = null;
         try {
@@ -163,7 +163,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 	 * Null configuration (fail).
 	 */
 	public void testNull2() {
-		Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2");
+		Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-Dyn2");
 		
 		ComponentInstance ci = null;
 		try {
@@ -178,7 +178,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
      * Null configuration (success).
      */
     public void testNull2Opt() {
-        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2opt");
+        Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-Dyn2opt");
         
         ComponentInstance ci = null;
         try {
@@ -195,7 +195,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 	 * Check static properties.
 	 */
 	public void testStaticOK() {
-		Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-2");
+		Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-2");
 		
 		Properties  p = new Properties();
 		p.put("instance.name","ok");
@@ -218,7 +218,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
      * Check static properties.
      */
     public void testStaticOKopt() {
-        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-2opt");
+        Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-2opt");
         
         Properties  p = new Properties();
         p.put("instance.name","ok");
@@ -241,7 +241,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 	 * Check dynamic properties.
 	 */
 	public void testDynamicOK() {
-		Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn");
+		Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-Dyn");
 		
 		Properties  p = new Properties();
 		p.put("instance.name","ok");
@@ -266,7 +266,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
      * Check dynamic properties.
      */
     public void testDynamicOKopt() {
-        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dynopt");
+        Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-Dynopt");
         
         Properties  p = new Properties();
         p.put("instance.name","ok");
@@ -305,7 +305,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 	 * Check inconsistent types.
 	 */
 	public void testDynamicBadType() {
-		Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn");
+		Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-Dyn");
 		
 		Properties  p = new Properties();
 		p.put("instance.name","ok");
@@ -328,7 +328,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
      * Check inconsistent types.
      */
     public void testDynamicBadTypeOpt() {
-        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dynopt");
+        Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-Dynopt");
         
         Properties  p = new Properties();
         p.put("instance.name","ok");
@@ -365,7 +365,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 	 * Check good configuration (with overriding).
 	 */
 	public void testDynamicComplete() {
-		Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2");
+		Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-Dyn2");
 		
 		Properties  p = new Properties();
 		p.put("instance.name","ok");
@@ -388,7 +388,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
      * Check good configuration (with overriding).
      */
     public void testDynamicCompleteOpt() {
-        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2opt");
+        Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-Dyn2opt");
         
         Properties  p = new Properties();
         p.put("instance.name","ok");
@@ -426,7 +426,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 	 * Check good configuration.
 	 */
 	public void testDynamicJustEnough() {
-		Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2");
+		Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-Dyn2");
 		
 		Properties  p = new Properties();
 		p.put("instance.name","ok");
@@ -447,7 +447,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
      * Check good configuration.
      */
     public void testDynamicJustEnoughOpt() {
-        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2opt");
+        Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-Dyn2opt");
         
         Properties  p = new Properties();
         p.put("instance.name","ok");
@@ -481,7 +481,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 	 * Check good configuration.
 	 */
 	public void testDynamicMix() {
-		Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2");
+		Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-Dyn2");
 		
 		Properties  p = new Properties();
 		p.put("instance.name","ok");
@@ -503,7 +503,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
      * Check good configuration.
      */
     public void testDynamicMixOpt() {
-        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2opt");
+        Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-Dyn2opt");
         
         Properties  p = new Properties();
         p.put("instance.name","ok");
@@ -539,7 +539,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 	 * Check uncomplete configuration.
 	 */
 	public void testDynamicUncomplete() {
-		Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2");
+		Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-Dyn2");
 		
 		Properties  p = new Properties();
 		p.put("instance.name","ok");
@@ -560,7 +560,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
      * Check uncomplete configuration.
      */
     public void testDynamicUncompleteOpt() {
-        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2opt");
+        Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-Dyn2opt");
         
         Properties  p = new Properties();
         p.put("instance.name","ok");
@@ -581,7 +581,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 	 * Check good configuration (more properties).
 	 */
 	public void testDynamicMore() {
-		Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2");
+		Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-Dyn2");
 		
 		Properties  p = new Properties();
 		p.put("instance.name","ok");
@@ -605,7 +605,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
      * Check good configuration (more properties).
      */
     public void testDynamicMoreOpt() {
-        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2opt");
+        Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-Dyn2opt");
         
         Properties  p = new Properties();
         p.put("instance.name","ok");
@@ -629,7 +629,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 	 * Check properties affecting services and component.
 	 */
 	public void testDoubleProps() {
-		Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2");
+		Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-Dyn2");
 		
 		Properties  p = new Properties();
 		p.put("instance.name","ok");
@@ -654,7 +654,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
      * Check properties affecting services and component.
      */
     public void testDoublePropsOpt() {
-        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-Dyn2opt");
+        Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-Dyn2opt");
         
         Properties  p = new Properties();
         p.put("instance.name","ok");
@@ -679,7 +679,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
      * Check instance name unicity.
      */
     public void testUnicity1() {
-        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-2");
+        Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-2");
         
         ComponentInstance ci1,ci2, ci3 = null;
         try {
@@ -699,7 +699,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
      * Check instance name unicity.
      */
     public void testUnicity2() {
-        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-2");
+        Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-2");
         
         ComponentInstance ci1,ci2, ci3 = null;
         try {
@@ -725,7 +725,7 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
      * Check instance name unicity.
      */
     public void testUnicity3() {
-        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-2");
+        Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-2");
         
         ComponentInstance ci1 = null,ci2 = null;
         try {
@@ -749,8 +749,8 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
      * Check instance name unicity.
      */
     public void testUnicity4() {
-        Factory f = Utils.getFactoryByName(context, "Factories-FooProviderType-2");
-        Factory f2 = Utils.getFactoryByName(context, "Factories-FooProviderType-1");
+        Factory f = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-2");
+        Factory f2 = Utils.getFactoryByName(getContext(), "Factories-FooProviderType-1");
         
         ComponentInstance ci1 = null,ci2 = null;
         try {

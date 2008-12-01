@@ -38,31 +38,31 @@ public class SimpleFilterDependencies extends OSGiTestCase {
 		try {
 			Properties prov = new Properties();
 			prov.put("instance.name","FooProvider1");
-			fooProvider1 = Utils.getFactoryByName(context, "SimpleFilterCheckServiceProvider").createComponentInstance(prov);
+			fooProvider1 = Utils.getFactoryByName(getContext(), "SimpleFilterCheckServiceProvider").createComponentInstance(prov);
 			fooProvider1.stop();
 			
 			prov = new Properties();
             prov.put("instance.name","FooProvider2");
-            fooProvider2 = Utils.getFactoryByName(context, "SimpleFilterCheckServiceProvider").createComponentInstance(prov);
+            fooProvider2 = Utils.getFactoryByName(getContext(), "SimpleFilterCheckServiceProvider").createComponentInstance(prov);
             fooProvider2.stop();
 		
 			Properties i1 = new Properties();
 			i1.put("instance.name","Subscriber1");
-			instance1 = Utils.getFactoryByName(context, "SimpleFilterCheckServiceSubscriber").createComponentInstance(i1);
+			instance1 = Utils.getFactoryByName(getContext(), "SimpleFilterCheckServiceSubscriber").createComponentInstance(i1);
 			
 			Properties i2 = new Properties();
             i2.put("instance.name","Subscriber2");
             Properties ii2 = new Properties();
             ii2.put("id2", "(toto=A)");
             i2.put("requires.filters", ii2);
-            instance2 = Utils.getFactoryByName(context, "SimpleFilterCheckServiceSubscriber2").createComponentInstance(i2);
+            instance2 = Utils.getFactoryByName(getContext(), "SimpleFilterCheckServiceSubscriber2").createComponentInstance(i2);
             
             Properties i3 = new Properties();
             i3.put("instance.name","Subscriber3");
             Properties ii3 = new Properties();
             ii3.put("id1", "(toto=A)");
             i3.put("requires.filters", ii3);
-            instance3 = Utils.getFactoryByName(context, "SimpleFilterCheckServiceSubscriber").createComponentInstance(i3);
+            instance3 = Utils.getFactoryByName(getContext(), "SimpleFilterCheckServiceSubscriber").createComponentInstance(i3);
 		
 		} catch(Exception e) { 
 		    e.printStackTrace();
@@ -86,214 +86,214 @@ public class SimpleFilterDependencies extends OSGiTestCase {
 	public void testSimpleNotMatch() {
 	    instance1.start();
 	    
-		ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance1.getInstanceName());
+		ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance1.getInstanceName());
 		assertNotNull("Check architecture availability", arch_ref);
-		InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance invalidity - 1", id.getState() == ComponentInstance.INVALID);
 		
 		fooProvider1.start();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance invalidity - 2", id.getState() == ComponentInstance.INVALID);
 		
-		ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), fooProvider1.getInstanceName());
+		ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), fooProvider1.getInstanceName());
 		assertNotNull("Check CheckService availability", cs_ref);
-		CheckService cs = (CheckService) context.getService(cs_ref);
+		CheckService cs = (CheckService) getContext().getService(cs_ref);
 		// change the value of the property toto
 		cs.check();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
 		
-        ServiceReference cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance1.getInstanceName());
+        ServiceReference cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        CheckService cs_instance = (CheckService) context.getService(cs_instance_ref);
+        CheckService cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("Check service invocation", cs_instance.check());
         
         // change the value of the property toto
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 3", id.getState() == ComponentInstance.INVALID);
         
         // change the value of the property toto
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
         
-        cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance1.getInstanceName());
+        cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        cs_instance = (CheckService) context.getService(cs_instance_ref);
+        cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("check CheckService invocation", cs_instance.check());
         
 		fooProvider1.stop();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance invalidity - 4", id.getState() == ComponentInstance.INVALID);
 		
 		fooProvider1.start();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
 		
-		cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance1.getInstanceName());
+		cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance1.getInstanceName());
 		assertNotNull("Check CheckService availability", cs_instance_ref);
-		cs_instance = (CheckService) context.getService(cs_instance_ref);
+		cs_instance = (CheckService) getContext().getService(cs_instance_ref);
 		assertTrue("check CheckService invocation", cs_instance.check());
 		
 		fooProvider1.stop();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance invalidity - 5", id.getState() == ComponentInstance.INVALID);
 		
 		id = null;
 		cs = null;
 		cs_instance = null;
-		context.ungetService(cs_instance_ref);
-		context.ungetService(arch_ref);
-		context.ungetService(cs_ref);		
+		getContext().ungetService(cs_instance_ref);
+		getContext().ungetService(arch_ref);
+		getContext().ungetService(cs_ref);		
 	}
 	
 	public void testSimpleMatch() {
 	    
 	    fooProvider1.start();
 	    
-	    ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), fooProvider1.getInstanceName());
+	    ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), fooProvider1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        CheckService cs = (CheckService) context.getService(cs_ref);
+        CheckService cs = (CheckService) getContext().getService(cs_ref);
         // change the value of the property toto
         cs.check();
 	    
         instance1.start();
         
-        ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance1.getInstanceName());
+        ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance1.getInstanceName());
         assertNotNull("Check architecture availability", arch_ref);
-        InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
         
-        ServiceReference cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance1.getInstanceName());
+        ServiceReference cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        CheckService cs_instance = (CheckService) context.getService(cs_instance_ref);
+        CheckService cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("Check service invocation", cs_instance.check());
         
         // change the value of the property toto
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 1", id.getState() == ComponentInstance.INVALID);
         
         // change the value of the property toto
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
         
-        cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance1.getInstanceName());
+        cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        cs_instance = (CheckService) context.getService(cs_instance_ref);
+        cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("check CheckService invocation", cs_instance.check());
         
         fooProvider1.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 2", id.getState() == ComponentInstance.INVALID);
         
         fooProvider1.start();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
         
-        cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance1.getInstanceName());
+        cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        cs_instance = (CheckService) context.getService(cs_instance_ref);
+        cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("check CheckService invocation", cs_instance.check());
         
         fooProvider1.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 3", id.getState() == ComponentInstance.INVALID);
         
         id = null;
         cs = null;
         cs_instance = null;
-        context.ungetService(cs_instance_ref);
-        context.ungetService(arch_ref);
-        context.ungetService(cs_ref);       
+        getContext().ungetService(cs_instance_ref);
+        getContext().ungetService(arch_ref);
+        getContext().ungetService(cs_ref);       
     }
 	
 	public void testSimpleNotMatchInstance() {
         instance3.start();
         
-        ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance3.getInstanceName());
+        ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance3.getInstanceName());
         assertNotNull("Check architecture availability", arch_ref);
-        InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 1", id.getState() == ComponentInstance.INVALID);
         
         fooProvider1.start();
-        ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), fooProvider1.getInstanceName());
+        ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), fooProvider1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        CheckService cs = (CheckService) context.getService(cs_ref);
+        CheckService cs = (CheckService) getContext().getService(cs_ref);
         // change the value of the property toto
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 2", id.getState() == ComponentInstance.INVALID);
         
         // change the value of the property toto
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
         
-        ServiceReference cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+        ServiceReference cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance3.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        CheckService cs_instance = (CheckService) context.getService(cs_instance_ref);
+        CheckService cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("Check service invocation", cs_instance.check());
         
         // change the value of the property toto
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 3", id.getState() == ComponentInstance.INVALID);
         
         // change the value of the property toto
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
         
-        cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+        cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance3.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        cs_instance = (CheckService) context.getService(cs_instance_ref);
+        cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("check CheckService invocation", cs_instance.check());
         
         fooProvider1.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 4", id.getState() == ComponentInstance.INVALID);
         
         fooProvider1.start();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
         
-        cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+        cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance3.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        cs_instance = (CheckService) context.getService(cs_instance_ref);
+        cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("check CheckService invocation", cs_instance.check());
         
         fooProvider1.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 5", id.getState() == ComponentInstance.INVALID);
         
         id = null;
         cs = null;
         cs_instance = null;
-        context.ungetService(cs_instance_ref);
-        context.ungetService(arch_ref);
-        context.ungetService(cs_ref);       
+        getContext().ungetService(cs_instance_ref);
+        getContext().ungetService(arch_ref);
+        getContext().ungetService(cs_ref);       
     }
     
     public void testSimpleMatchInstance() {
@@ -301,136 +301,136 @@ public class SimpleFilterDependencies extends OSGiTestCase {
         fooProvider1.start();
         instance3.start();
         
-        ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance3.getInstanceName());
+        ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance3.getInstanceName());
         assertNotNull("Check architecture availability", arch_ref);
-        InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
         
-        ServiceReference cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+        ServiceReference cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance3.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        CheckService cs_instance = (CheckService) context.getService(cs_instance_ref);
+        CheckService cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("Check service invocation", cs_instance.check());
         
-        ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), fooProvider1.getInstanceName());
+        ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), fooProvider1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        CheckService cs = (CheckService) context.getService(cs_ref);
+        CheckService cs = (CheckService) getContext().getService(cs_ref);
         // change the value of the property toto
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 1", id.getState() == ComponentInstance.INVALID);
         
         // change the value of the property toto
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
         
-        cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+        cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance3.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        cs_instance = (CheckService) context.getService(cs_instance_ref);
+        cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("check CheckService invocation", cs_instance.check());
         
         fooProvider1.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 2", id.getState() == ComponentInstance.INVALID);
         
         fooProvider1.start();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
         
-        cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+        cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance3.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        cs_instance = (CheckService) context.getService(cs_instance_ref);
+        cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("check CheckService invocation", cs_instance.check());
         
         fooProvider1.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 3", id.getState() == ComponentInstance.INVALID);
         
         id = null;
         cs = null;
         cs_instance = null;
-        context.ungetService(cs_instance_ref);
-        context.ungetService(arch_ref);
-        context.ungetService(cs_ref);       
+        getContext().ungetService(cs_instance_ref);
+        getContext().ungetService(arch_ref);
+        getContext().ungetService(cs_ref);       
     }
 	
     public void testSimpleNotMatchInstanceWithoutFilter() {
         instance2.start();
         
-        ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance2.getInstanceName());
+        ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance2.getInstanceName());
         assertNotNull("Check architecture availability", arch_ref);
-        InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 1", id.getState() == ComponentInstance.INVALID);
         
         fooProvider1.start();
-        ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), fooProvider1.getInstanceName());
+        ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), fooProvider1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        CheckService cs = (CheckService) context.getService(cs_ref);
+        CheckService cs = (CheckService) getContext().getService(cs_ref);
         // change the value of the property toto
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 2", id.getState() == ComponentInstance.INVALID);
         
         // change the value of the property toto
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
         
-        ServiceReference cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance2.getInstanceName());
+        ServiceReference cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance2.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        CheckService cs_instance = (CheckService) context.getService(cs_instance_ref);
+        CheckService cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("Check service invocation", cs_instance.check());
         
         // change the value of the property toto
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 3", id.getState() == ComponentInstance.INVALID);
         
         // change the value of the property toto
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
         
-        cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance2.getInstanceName());
+        cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance2.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        cs_instance = (CheckService) context.getService(cs_instance_ref);
+        cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("check CheckService invocation", cs_instance.check());
         
         fooProvider1.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 4", id.getState() == ComponentInstance.INVALID);
         
         fooProvider1.start();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
         
-        cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance2.getInstanceName());
+        cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance2.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        cs_instance = (CheckService) context.getService(cs_instance_ref);
+        cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("check CheckService invocation", cs_instance.check());
         
         fooProvider1.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 5", id.getState() == ComponentInstance.INVALID);
         
         id = null;
         cs = null;
         cs_instance = null;
-        context.ungetService(cs_instance_ref);
-        context.ungetService(arch_ref);
-        context.ungetService(cs_ref);       
+        getContext().ungetService(cs_instance_ref);
+        getContext().ungetService(arch_ref);
+        getContext().ungetService(cs_ref);       
     }
     
     public void testSimpleMatchInstanceWithoutFilter() {
@@ -438,62 +438,62 @@ public class SimpleFilterDependencies extends OSGiTestCase {
         fooProvider1.start();
         instance2.start();
         
-        ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance2.getInstanceName());
+        ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance2.getInstanceName());
         assertNotNull("Check architecture availability", arch_ref);
-        InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
         
-        ServiceReference cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance2.getInstanceName());
+        ServiceReference cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance2.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        CheckService cs_instance = (CheckService) context.getService(cs_instance_ref);
+        CheckService cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("Check service invocation", cs_instance.check());
         
-        ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), fooProvider1.getInstanceName());
+        ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), fooProvider1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        CheckService cs = (CheckService) context.getService(cs_ref);
+        CheckService cs = (CheckService) getContext().getService(cs_ref);
         // change the value of the property toto
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 1", id.getState() == ComponentInstance.INVALID);
         
         // change the value of the property toto
         cs.check();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
         
-        cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance2.getInstanceName());
+        cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance2.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        cs_instance = (CheckService) context.getService(cs_instance_ref);
+        cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("check CheckService invocation", cs_instance.check());
         
         fooProvider1.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 2", id.getState() == ComponentInstance.INVALID);
         
         fooProvider1.start();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
         
-        cs_instance_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance2.getInstanceName());
+        cs_instance_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance2.getInstanceName());
         assertNotNull("Check CheckService availability", cs_instance_ref);
-        cs_instance = (CheckService) context.getService(cs_instance_ref);
+        cs_instance = (CheckService) getContext().getService(cs_instance_ref);
         assertTrue("check CheckService invocation", cs_instance.check());
         
         fooProvider1.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 3", id.getState() == ComponentInstance.INVALID);
         
         id = null;
         cs = null;
         cs_instance = null;
-        context.ungetService(cs_instance_ref);
-        context.ungetService(arch_ref);
-        context.ungetService(cs_ref);       
+        getContext().ungetService(cs_instance_ref);
+        getContext().ungetService(arch_ref);
+        getContext().ungetService(cs_ref);       
     }
 
 }

@@ -16,7 +16,6 @@
 	specific language governing permissions and limitations
 	under the License.
 -->
-<?xml version="1.0" encoding="UTF-8"?>
 <iPOJO>
 	<component
 		classname="org.apache.felix.ipojo.junit4osgi.command.SwingRunner">

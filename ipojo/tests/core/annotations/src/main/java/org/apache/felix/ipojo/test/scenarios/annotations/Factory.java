@@ -1,13 +1,19 @@
 package org.apache.felix.ipojo.test.scenarios.annotations;
 
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
 import org.apache.felix.ipojo.metadata.Element;
-import org.apache.felix.ipojo.test.scenarios.util.Utils;
 
 public class Factory extends OSGiTestCase {
     
+    private IPOJOHelper helper;
+    
+    public void setUp() {
+        helper = new IPOJOHelper(this);
+    }
+    
     public void testArch() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.Factory");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.Factory");
         String fact = meta.getAttribute("public");
         String name = meta.getAttribute("name");
         assertNotNull("Factory exists ", fact);
@@ -17,7 +23,7 @@ public class Factory extends OSGiTestCase {
     }
     
     public void testNoArch() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.NoFactory");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.NoFactory");
         String fact = meta.getAttribute("public");
         String name = meta.getAttribute("name");
         assertNotNull("Factory exists ", fact);

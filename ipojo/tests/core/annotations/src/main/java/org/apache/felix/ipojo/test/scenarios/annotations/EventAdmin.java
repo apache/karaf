@@ -1,17 +1,19 @@
 package org.apache.felix.ipojo.test.scenarios.annotations;
 
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
 import org.apache.felix.ipojo.metadata.Element;
-import org.apache.felix.ipojo.test.scenarios.util.Utils;
 
 public class EventAdmin extends OSGiTestCase {
     String type = "org.apache.felix.ipojo.test.scenarios.component.event.PubSub";
     String namespace = "org.apache.felix.ipojo.handlers.event";
     
     Element component;
+    private IPOJOHelper helper;
     
     public void setUp() {
-        component = Utils.getMetatadata(context, type);
+        helper = new IPOJOHelper(this);
+        component = helper.getMetadata(type);
         assertNotNull("Check component", component);
     }
     

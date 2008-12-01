@@ -35,7 +35,7 @@ public class FilteredExport extends OSGiTestCase {
 	ComponentInstance foo1 = null, foo2 = null;
 	
 	public void setUp() {
-		fooProvider = Utils.getFactoryByName(context, "BazProviderType");
+		fooProvider = Utils.getFactoryByName(getContext(), "BazProviderType");
 		assertNotNull("Check fooProvider availability", fooProvider);
 		
 		Properties p1 = new Properties();
@@ -53,7 +53,7 @@ public class FilteredExport extends OSGiTestCase {
 		foo1.stop();
 		foo2.stop();
 		
-		Factory factory = Utils.getFactoryByName(context, "composite.export.5");
+		Factory factory = Utils.getFactoryByName(getContext(), "composite.export.5");
 		Properties props = new Properties();
 		props.put("instance.name","export");
 		try {
@@ -76,7 +76,7 @@ public class FilteredExport extends OSGiTestCase {
 		export1.start();
 		
 		// Check that no foo service are available
-		assertEquals("Check no foo service", Utils.getServiceReferences(context, FooService.class.getName(), null).length, 0);
+		assertEquals("Check no foo service", Utils.getServiceReferences(getContext(), FooService.class.getName(), null).length, 0);
 		
 		// Test invalidity
 		assertTrue("Check invalidity - 0", export1.getState() == ComponentInstance.INVALID);
@@ -206,19 +206,19 @@ public class FilteredExport extends OSGiTestCase {
 	
 	
 	private boolean isFooServiceProvided() {
-		ServiceReference ref = Utils.getServiceReferenceByName(context, BazService.class.getName(), export1.getInstanceName());
+		ServiceReference ref = Utils.getServiceReferenceByName(getContext(), BazService.class.getName(), export1.getInstanceName());
 		return ref != null;
 	}
 	
 	private int countFooServiceProvided() {
-		ServiceReference[] refs = Utils.getServiceReferences(context, BazService.class.getName(), "(instance.name="+export1.getInstanceName()+")");
+		ServiceReference[] refs = Utils.getServiceReferences(getContext(), BazService.class.getName(), "(instance.name="+export1.getInstanceName()+")");
 		return refs.length;
 	}
 	
 	private boolean invoke() {
-		ServiceReference ref = Utils.getServiceReferenceByName(context, BazService.class.getName(), export1.getInstanceName());
+		ServiceReference ref = Utils.getServiceReferenceByName(getContext(), BazService.class.getName(), export1.getInstanceName());
 		if(ref == null) { return false; }
-		BazService fs = (BazService) context.getService(ref);
+		BazService fs = (BazService) getContext().getService(ref);
 		return fs.foo();
 	}
 	

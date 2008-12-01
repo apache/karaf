@@ -36,9 +36,9 @@ public class ConfigAdminTest extends OSGiTestCase {
 	private ManagedServiceFactory getFactoryByName(String pid) {
 		ServiceReference[] refs;
 		try {
-			refs = context.getServiceReferences(ManagedServiceFactory.class.getName(), "(service.pid="+pid+")");
+			refs = getContext().getServiceReferences(ManagedServiceFactory.class.getName(), "(service.pid="+pid+")");
 			if(refs == null) { return null; }
-			return ((org.osgi.service.cm.ManagedServiceFactory) context.getService(refs[0]));
+			return ((org.osgi.service.cm.ManagedServiceFactory) getContext().getService(refs[0]));
 		} catch (InvalidSyntaxException e) {
 			System.err.println("Cannot get the factory " + pid + " : " + e.getMessage());
 			return null;
@@ -60,10 +60,10 @@ public class ConfigAdminTest extends OSGiTestCase {
 		
 		try {
 			f.updated("ok2", p);
-			ServiceReference ref = Utils.getServiceReferenceByName(context, FooService.class.getName(), "ok2");
+			ServiceReference ref = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), "ok2");
 			assertNotNull("Check instance creation", ref);
 			f.deleted("ok2");
-			ref = Utils.getServiceReferenceByName(context, FooService.class.getName(), "ok2");
+			ref = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), "ok2");
 			assertNull("Check instance deletion", ref);
 		} catch (ConfigurationException e) {
 			fail("An acceptable configuration is rejected : " + e.getMessage());
@@ -85,10 +85,10 @@ public class ConfigAdminTest extends OSGiTestCase {
         
         try {
             f.updated("ok2", p);
-            ServiceReference ref = Utils.getServiceReferenceByName(context, FooService.class.getName(), "ok2");
+            ServiceReference ref = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), "ok2");
             assertNotNull("Check instance creation", ref);
             f.deleted("ok2");
-            ref = Utils.getServiceReferenceByName(context, FooService.class.getName(), "ok2");
+            ref = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), "ok2");
             assertNull("Check instance deletion", ref);
         } catch (ConfigurationException e) {
             fail("An acceptable configuration is rejected : " + e.getMessage());
@@ -110,15 +110,15 @@ public class ConfigAdminTest extends OSGiTestCase {
 		
 		try {
 			f.updated("okkkk", p);
-			ServiceReference ref = Utils.getServiceReferenceByName(context, FooService.class.getName(), "okkkk");
+			ServiceReference ref = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), "okkkk");
 			assertNotNull("Check instance creation", ref);
 			p.put("int", new Integer("4"));
 			f.updated("okkkk", p);
-			ref = Utils.getServiceReferenceByName(context, FooService.class.getName(), "okkkk");
+			ref = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), "okkkk");
 			Integer test = (Integer) ref.getProperty("int");
 			assertEquals("Check instance modification", 4, test.intValue());
 			f.deleted("okkkk");
-			ref = Utils.getServiceReferenceByName(context, FooService.class.getName(), "okkkk");
+			ref = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), "okkkk");
 			assertNull("Check instance deletion", ref);
 		} catch (ConfigurationException e) {
 			fail("An acceptable configuration is rejected : " + e.getMessage());
@@ -141,15 +141,15 @@ public class ConfigAdminTest extends OSGiTestCase {
     	
     	try {
     		f.updated("okkkk", p);
-    		ServiceReference ref = Utils.getServiceReferenceByName(context, FooService.class.getName(), "okkkk");
+    		ServiceReference ref = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), "okkkk");
     		assertNotNull("Check instance creation", ref);
     		p.put("int", new Integer("4"));
     		f.updated("okkkk", p);
-    		ref = Utils.getServiceReferenceByName(context, FooService.class.getName(), "okkkk");
+    		ref = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), "okkkk");
     		Integer test = (Integer) ref.getProperty("int");
     		assertEquals("Check instance modification", 4, test.intValue());
     		f.deleted("okkkk");
-    		ref = Utils.getServiceReferenceByName(context, FooService.class.getName(), "okkkk");
+    		ref = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), "okkkk");
     		assertNull("Check instance deletion", ref);
     	} catch (ConfigurationException e) {
     		fail("An acceptable configuration is rejected : " + e.getMessage());

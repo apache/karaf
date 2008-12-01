@@ -13,7 +13,7 @@ public class Annotation extends OSGiTestCase {
     
     public void setUp() {
         try {
-            clazz = context.getBundle().
+            clazz = getContext().getBundle().
                 loadClass("org.apache.felix.ipojo.test.scenarios.component.Annotation");
         } catch (ClassNotFoundException e) {
             fail("Cannot load the annotation class : " + e.getMessage());

@@ -283,7 +283,7 @@ public class GoodTests extends OSGiTestCase {
         throws UnacceptableConfiguration, MissingHandlerException,
         ConfigurationException {
 
-        m_utils = new EahTestUtils(context);
+        m_utils = new EahTestUtils(getContext());
         Dictionary properties = new Hashtable();
 
         // All the providers
@@ -336,9 +336,9 @@ public class GoodTests extends OSGiTestCase {
         // Get all the services references
         for (int i = 0; i < NUMBER_OF_PROVIDERS; i++) {
             m_providersServices[i] = IPojoTestUtils.getServiceReferenceByName(
-                    context, DonutProvider.class.getName(),
+                    getContext(), DonutProvider.class.getName(),
                     m_providersInstances[i].getInstanceName());
-            m_providers[i] = (DonutProvider) context
+            m_providers[i] = (DonutProvider) getContext()
                     .getService(m_providersServices[i]);
         }
         m_synchronousProviders[0] = m_providers[1];
@@ -408,9 +408,9 @@ public class GoodTests extends OSGiTestCase {
         // Get all the services references
         for (int i = 0; i < NUMBER_OF_CONSUMERS; i++) {
             m_consumersServices[i] = IPojoTestUtils.getServiceReferenceByName(
-                    context, DonutConsumer.class.getName(),
+                    getContext(), DonutConsumer.class.getName(),
                     m_consumersInstances[i].getInstanceName());
-            m_consumers[i] = (DonutConsumer) context
+            m_consumers[i] = (DonutConsumer) getContext()
                     .getService(m_consumersServices[i]);
         }
         m_quickConsumers[0] = m_consumers[0];
@@ -423,9 +423,9 @@ public class GoodTests extends OSGiTestCase {
         m_eventTrackerInstance = m_utils.getEventTrackerFactory()
                 .createComponentInstance(properties);
         m_eventTrackerService = IPojoTestUtils.getServiceReferenceByName(
-                context, EventTracker.class.getName(), m_eventTrackerInstance
+                getContext(), EventTracker.class.getName(), m_eventTrackerInstance
                         .getInstanceName());
-        m_eventTracker = (EventTracker) context
+        m_eventTracker = (EventTracker) getContext()
                 .getService(m_eventTrackerService);
 
         // Create the filtered consumer
@@ -440,10 +440,10 @@ public class GoodTests extends OSGiTestCase {
                     .getDonutEventConsumerFactory().createComponentInstance(
                             properties);
             m_filteredConsumersServices[i] = IPojoTestUtils
-                    .getServiceReferenceByName(context, DonutConsumer.class
+                    .getServiceReferenceByName(getContext(), DonutConsumer.class
                             .getName(), m_filteredConsumersInstances[i]
                             .getInstanceName());
-            m_filteredConsumers[i] = (DonutConsumer) context
+            m_filteredConsumers[i] = (DonutConsumer) getContext()
                     .getService(m_filteredConsumersServices[i]);
         }
 
@@ -461,10 +461,10 @@ public class GoodTests extends OSGiTestCase {
                     .getSynchronousDonutProviderFactory()
                     .createComponentInstance(properties);
             m_topicsProvidersServices[i] = IPojoTestUtils
-                    .getServiceReferenceByName(context, DonutProvider.class
+                    .getServiceReferenceByName(getContext(), DonutProvider.class
                             .getName(), m_topicsProvidersInstances[i]
                             .getInstanceName());
-            m_topicsProviders[i] = (DonutProvider) context
+            m_topicsProviders[i] = (DonutProvider) getContext()
                     .getService(m_topicsProvidersServices[i]);
 
             // Create consumer
@@ -476,10 +476,10 @@ public class GoodTests extends OSGiTestCase {
             m_topicsConsumersInstances[i] = m_utils.getDonutConsumerFactory()
                     .createComponentInstance(properties);
             m_topicsConsumersServices[i] = IPojoTestUtils
-                    .getServiceReferenceByName(context, DonutConsumer.class
+                    .getServiceReferenceByName(getContext(), DonutConsumer.class
                             .getName(), m_topicsConsumersInstances[i]
                             .getInstanceName());
-            m_topicsConsumers[i] = (DonutConsumer) context
+            m_topicsConsumers[i] = (DonutConsumer) getContext()
                     .getService(m_topicsConsumersServices[i]);
             topics.remove("donut-subscriber");
         }
@@ -721,23 +721,23 @@ public class GoodTests extends OSGiTestCase {
     public void tearDown() {
         int index;
         for (index = 0; index < NUMBER_OF_PROVIDERS; index++) {
-            context.ungetService(m_providersServices[index]);
+            getContext().ungetService(m_providersServices[index]);
             m_providersInstances[index].dispose();
         }
         for (index = 0; index < NUMBER_OF_CONSUMERS; index++) {
-            context.ungetService(m_consumersServices[index]);
+            getContext().ungetService(m_consumersServices[index]);
             m_consumersInstances[index].dispose();
         }
-        context.ungetService(m_eventTrackerService);
+        getContext().ungetService(m_eventTrackerService);
         m_eventTrackerInstance.dispose();
         for (int i = 0; i < Donut.FLAVOURS.length; i++) {
-            context.ungetService(m_filteredConsumersServices[i]);
+            getContext().ungetService(m_filteredConsumersServices[i]);
             m_filteredConsumersInstances[i].dispose();
         }
         for (int i = 0; i < TOPICS_LIST.length; i++) {
-            context.ungetService(m_topicsProvidersServices[i]);
+            getContext().ungetService(m_topicsProvidersServices[i]);
             m_topicsProvidersInstances[i].dispose();
-            context.ungetService(m_topicsConsumersServices[i]);
+            getContext().ungetService(m_topicsConsumersServices[i]);
             m_topicsConsumersInstances[i].dispose();
         }
 

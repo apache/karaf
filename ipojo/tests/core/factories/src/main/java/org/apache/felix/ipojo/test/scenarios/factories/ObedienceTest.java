@@ -36,8 +36,8 @@ import org.osgi.framework.ServiceReference;
 public class ObedienceTest extends OSGiTestCase {
 
 	public void testObedience() {
-		assertNull("Check no foo service", context.getServiceReference(FooService.class.getName()));
-		ComponentFactory factory = (ComponentFactory) Utils.getFactoryByName(context, "Factories-FooProviderType-1");
+		assertNull("Check no foo service", getContext().getServiceReference(FooService.class.getName()));
+		ComponentFactory factory = (ComponentFactory) Utils.getFactoryByName(getContext(), "Factories-FooProviderType-1");
 		assertNotNull("Check factory existing", factory);
 		
 		Properties props1 = new Properties();
@@ -56,59 +56,59 @@ public class ObedienceTest extends OSGiTestCase {
 		assertTrue("Check foo1 validity", ci1.getState() == ComponentInstance.VALID);
 		assertTrue("Check foo2 validity", ci2.getState() == ComponentInstance.VALID);
 		
-		assertNotNull("Check foo service", context.getServiceReference(FooService.class.getName()));
-		assertEquals("Check the number of Foo", Utils.getServiceReferences(context, FooService.class.getName(), null).length, 2);
+		assertNotNull("Check foo service", getContext().getServiceReference(FooService.class.getName()));
+		assertEquals("Check the number of Foo", Utils.getServiceReferences(getContext(), FooService.class.getName(), null).length, 2);
 		
 		factory.stop();
 		
 		assertTrue("Check foo1 invalidity ("+ci1.getState()+")", ci1.getState() == ComponentInstance.DISPOSED);
 		assertTrue("Check foo2 invalidity ("+ci1.getState()+")", ci2.getState() == ComponentInstance.DISPOSED);
 		
-		assertNull("Check no foo service", context.getServiceReference(FooService.class.getName()));
+		assertNull("Check no foo service", getContext().getServiceReference(FooService.class.getName()));
 		
 		factory.start();
-		assertNull("Check no foo service", context.getServiceReference(FooService.class.getName()));
+		assertNull("Check no foo service", getContext().getServiceReference(FooService.class.getName()));
 	}
 	
 	public void testDisposeAfterFactoryInvalidation() {
-	    ComponentFactory cf = (ComponentFactory) Utils.getFactoryByName(context, "org.apache.felix.ipojo.test.scenarios.component.SimpleType");
+	    ComponentFactory cf = (ComponentFactory) Utils.getFactoryByName(getContext(), "org.apache.felix.ipojo.test.scenarios.component.SimpleType");
 	    assertNotNull("Check factory availability -1", cf);
 	    assertEquals("Check factory state -1", Factory.VALID, cf.getState());
 	    
-	    ServiceReference ref_arch = Utils.getServiceReferenceByName(context, Architecture.class.getName(), "SimpleInstance");
+	    ServiceReference ref_arch = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), "SimpleInstance");
 	    assertNotNull("Check Architecture availability -1", ref_arch);
 	    
-        HandlerManagerFactory hf = (HandlerManagerFactory) Utils.getHandlerFactoryByName(context, "controller");
+        HandlerManagerFactory hf = (HandlerManagerFactory) Utils.getHandlerFactoryByName(getContext(), "controller");
         assertNotNull("Check handler availability -1", hf);
         assertEquals("Check handler state -1", Factory.VALID, hf.getState());
         
         // Stop the handler
         hf.stop();
-        HandlerManagerFactory hf2 = (HandlerManagerFactory) Utils.getHandlerFactoryByName(context, "controller");
+        HandlerManagerFactory hf2 = (HandlerManagerFactory) Utils.getHandlerFactoryByName(getContext(), "controller");
         assertNull("Check handler availability -2", hf2);
         
         // Check the factory invalidity
-        cf = (ComponentFactory) Utils.getFactoryByName(context, "org.apache.felix.ipojo.test.scenarios.component.SimpleType");
+        cf = (ComponentFactory) Utils.getFactoryByName(getContext(), "org.apache.felix.ipojo.test.scenarios.component.SimpleType");
         assertNotNull("Check factory availability -2", cf);
         assertEquals("Check factory state -2", Factory.INVALID, cf.getState());
         
         // Check the instance disparition
-        ref_arch = Utils.getServiceReferenceByName(context, Architecture.class.getName(), "SimpleInstance");
+        ref_arch = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), "SimpleInstance");
         assertNull("Check Architecture availability -1", ref_arch);
         
         // Restart the handler
         hf.start();
-        hf2 = (HandlerManagerFactory) Utils.getHandlerFactoryByName(context, "controller");
+        hf2 = (HandlerManagerFactory) Utils.getHandlerFactoryByName(getContext(), "controller");
         assertNotNull("Check handler availability -3", hf2);
         
         // Check the factory state
-        cf = (ComponentFactory) Utils.getFactoryByName(context, "org.apache.felix.ipojo.test.scenarios.component.SimpleType");
+        cf = (ComponentFactory) Utils.getFactoryByName(getContext(), "org.apache.felix.ipojo.test.scenarios.component.SimpleType");
         assertNotNull("Check factory availability -3", cf);
         assertEquals("Check factory state -3", Factory.VALID, cf.getState());
         
         
         // Check the instance re-creation
-        ref_arch = Utils.getServiceReferenceByName(context, Architecture.class.getName(), "SimpleInstance");
+        ref_arch = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), "SimpleInstance");
         assertNotNull("Check Architecture availability -3", ref_arch);
         
 	}

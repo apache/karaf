@@ -38,36 +38,36 @@ public class MethodDelayedMultipleDependencies extends OSGiTestCase {
 		
 			Properties i3 = new Properties();
 			i3.put("instance.name","Object");
-			instance3 = Utils.getFactoryByName(context, "MObjectMultipleCheckServiceProvider").createComponentInstance(i3);
+			instance3 = Utils.getFactoryByName(getContext(), "MObjectMultipleCheckServiceProvider").createComponentInstance(i3);
 			instance3.stop();
 		
 			Properties i4 = new Properties();
 			i4.put("instance.name","Ref");
-			instance4 = Utils.getFactoryByName(context, "MRefMultipleCheckServiceProvider").createComponentInstance(i4);
+			instance4 = Utils.getFactoryByName(getContext(), "MRefMultipleCheckServiceProvider").createComponentInstance(i4);
 			instance4.stop();
 			
 			Properties i5 = new Properties();
             i5.put("instance.name","Both");
-            instance5 = Utils.getFactoryByName(context, "MBothMultipleCheckServiceProvider").createComponentInstance(i5);
+            instance5 = Utils.getFactoryByName(getContext(), "MBothMultipleCheckServiceProvider").createComponentInstance(i5);
             instance5.stop();
             
             Properties i6 = new Properties();
             i6.put("instance.name","Map");
-            instance6 = Utils.getFactoryByName(context, "MMapMultipleCheckServiceProvider").createComponentInstance(i6);
+            instance6 = Utils.getFactoryByName(getContext(), "MMapMultipleCheckServiceProvider").createComponentInstance(i6);
             instance6.stop();
             
             Properties i7 = new Properties();
             i7.put("instance.name","Dict");
-            instance7 = Utils.getFactoryByName(context, "MDictMultipleCheckServiceProvider").createComponentInstance(i7);
+            instance7 = Utils.getFactoryByName(getContext(), "MDictMultipleCheckServiceProvider").createComponentInstance(i7);
             instance7.stop();
 		
 			Properties prov = new Properties();
 			prov.put("instance.name","FooProvider1");
-			fooProvider1 = Utils.getFactoryByName(context, "FooProviderType-1").createComponentInstance(prov);
+			fooProvider1 = Utils.getFactoryByName(getContext(), "FooProviderType-1").createComponentInstance(prov);
 		
 			Properties prov2 = new Properties();
 			prov2.put("instance.name","FooProvider2");
-			fooProvider2 = Utils.getFactoryByName(context, "FooProviderType-1").createComponentInstance(prov2);
+			fooProvider2 = Utils.getFactoryByName(getContext(), "FooProviderType-1").createComponentInstance(prov2);
 		} catch(Exception e) { fail(e.getMessage()); }
 	}
 	
@@ -91,17 +91,17 @@ public class MethodDelayedMultipleDependencies extends OSGiTestCase {
 	public void testObject() {
 		instance3.start();
 		
-		ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance3.getInstanceName());
+		ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance3.getInstanceName());
 		assertNotNull("Check architecture availability", arch_ref);
-		InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance invalidity - 1", id.getState() == ComponentInstance.VALID);
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
 		
-		ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+		ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance3.getInstanceName());
 		assertNotNull("Check CheckService availability", cs_ref);
-		CheckService cs = (CheckService) context.getService(cs_ref);
+		CheckService cs = (CheckService) getContext().getService(cs_ref);
 		Properties props = cs.getProps();
 		//Check properties
 		assertTrue("check CheckService invocation - 1", ((Boolean)props.get("result")).booleanValue()); // True, a provider is here
@@ -117,10 +117,10 @@ public class MethodDelayedMultipleDependencies extends OSGiTestCase {
 		
 		fooProvider1.stop();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
 		
-		cs = (CheckService) context.getService(cs_ref);
+		cs = (CheckService) getContext().getService(cs_ref);
 		props = cs.getProps();
 		//Check properties
 		assertTrue("check CheckService invocation - 3", ((Boolean)props.get("result")).booleanValue()); // True, two providers are here
@@ -136,26 +136,26 @@ public class MethodDelayedMultipleDependencies extends OSGiTestCase {
 		
 		fooProvider2.stop();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 5", id.getState() == ComponentInstance.INVALID);
 		
 		id = null;
 		cs = null;
-		context.ungetService(arch_ref);
-		context.ungetService(cs_ref);
+		getContext().ungetService(arch_ref);
+		getContext().ungetService(cs_ref);
 		instance3.stop();
 	}
 	
 	public void testRef() {
 		instance4.start();
-		ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance4.getInstanceName());
+		ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance4.getInstanceName());
 		assertNotNull("Check architecture availability", arch_ref);
-		InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance invalidity - 1", id.getState() == ComponentInstance.VALID);
 		
-		ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance4.getInstanceName());
+		ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance4.getInstanceName());
 		assertNotNull("Check CheckService availability", cs_ref);
-		CheckService cs = (CheckService) context.getService(cs_ref);
+		CheckService cs = (CheckService) getContext().getService(cs_ref);
 		Properties props = cs.getProps();
 		//Check properties
 		assertTrue("check CheckService invocation - 1", ((Boolean)props.get("result")).booleanValue()); // True, a provider is here
@@ -171,10 +171,10 @@ public class MethodDelayedMultipleDependencies extends OSGiTestCase {
 		
 		fooProvider1.stop();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
 		
-		cs = (CheckService) context.getService(cs_ref);
+		cs = (CheckService) getContext().getService(cs_ref);
 		props = cs.getProps();
 		//Check properties
 		assertTrue("check CheckService invocation - 3", ((Boolean)props.get("result")).booleanValue()); // True, two providers are here
@@ -190,26 +190,26 @@ public class MethodDelayedMultipleDependencies extends OSGiTestCase {
 		
 		fooProvider2.stop();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 4", id.getState() == ComponentInstance.INVALID);
 		
 		id = null;
 		cs = null;
-		context.ungetService(arch_ref);
+		getContext().ungetService(arch_ref);
 		instance4.stop();
-		context.ungetService(cs_ref);
+		getContext().ungetService(cs_ref);
 	}
 	
 	public void testBoth() {
         instance5.start();
-        ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance5.getInstanceName());
+        ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance5.getInstanceName());
         assertNotNull("Check architecture availability", arch_ref);
-        InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 1", id.getState() == ComponentInstance.VALID);
         
-        ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance5.getInstanceName());
+        ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance5.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        CheckService cs = (CheckService) context.getService(cs_ref);
+        CheckService cs = (CheckService) getContext().getService(cs_ref);
         Properties props = cs.getProps();
         //Check properties
         assertTrue("check CheckService invocation - 1", ((Boolean)props.get("result")).booleanValue()); // True, a provider is here
@@ -229,10 +229,10 @@ public class MethodDelayedMultipleDependencies extends OSGiTestCase {
         
         fooProvider1.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
         
-        cs = (CheckService) context.getService(cs_ref);
+        cs = (CheckService) getContext().getService(cs_ref);
         props = cs.getProps();
         //Check properties
         assertTrue("check CheckService invocation - 3", ((Boolean)props.get("result")).booleanValue()); // True, two providers are here
@@ -252,26 +252,26 @@ public class MethodDelayedMultipleDependencies extends OSGiTestCase {
         
         fooProvider2.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 4", id.getState() == ComponentInstance.INVALID);
         
         id = null;
         cs = null;
-        context.ungetService(arch_ref);
+        getContext().ungetService(arch_ref);
         instance5.stop();
-        context.ungetService(cs_ref);
+        getContext().ungetService(cs_ref);
     }
 	
 	public void testMap() {
         instance6.start();
-        ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance6.getInstanceName());
+        ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance6.getInstanceName());
         assertNotNull("Check architecture availability", arch_ref);
-        InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 1", id.getState() == ComponentInstance.VALID);
         
-        ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance6.getInstanceName());
+        ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance6.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        CheckService cs = (CheckService) context.getService(cs_ref);
+        CheckService cs = (CheckService) getContext().getService(cs_ref);
         Properties props = cs.getProps();
         //Check properties
         assertTrue("check CheckService invocation - 1", ((Boolean)props.get("result")).booleanValue()); // True, a provider is here
@@ -291,10 +291,10 @@ public class MethodDelayedMultipleDependencies extends OSGiTestCase {
         
         fooProvider1.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
         
-        cs = (CheckService) context.getService(cs_ref);
+        cs = (CheckService) getContext().getService(cs_ref);
         props = cs.getProps();
         //Check properties
         assertTrue("check CheckService invocation - 3", ((Boolean)props.get("result")).booleanValue()); // True, two providers are here
@@ -314,26 +314,26 @@ public class MethodDelayedMultipleDependencies extends OSGiTestCase {
         
         fooProvider2.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 4", id.getState() == ComponentInstance.INVALID);
         
         id = null;
         cs = null;
-        context.ungetService(arch_ref);
+        getContext().ungetService(arch_ref);
         instance6.stop();
-        context.ungetService(cs_ref);
+        getContext().ungetService(cs_ref);
     }
 	
 	public void testDict() {
         instance7.start();
-        ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance7.getInstanceName());
+        ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance7.getInstanceName());
         assertNotNull("Check architecture availability", arch_ref);
-        InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 1", id.getState() == ComponentInstance.VALID);
         
-        ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance7.getInstanceName());
+        ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance7.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        CheckService cs = (CheckService) context.getService(cs_ref);
+        CheckService cs = (CheckService) getContext().getService(cs_ref);
         Properties props = cs.getProps();
         //Check properties
         assertTrue("check CheckService invocation - 1", ((Boolean)props.get("result")).booleanValue()); // True, a provider is here
@@ -353,10 +353,10 @@ public class MethodDelayedMultipleDependencies extends OSGiTestCase {
         
         fooProvider1.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
         
-        cs = (CheckService) context.getService(cs_ref);
+        cs = (CheckService) getContext().getService(cs_ref);
         props = cs.getProps();
         //Check properties
         assertTrue("check CheckService invocation - 3", ((Boolean)props.get("result")).booleanValue()); // True, two providers are here
@@ -376,14 +376,14 @@ public class MethodDelayedMultipleDependencies extends OSGiTestCase {
         
         fooProvider2.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 4", id.getState() == ComponentInstance.INVALID);
         
         id = null;
         cs = null;
-        context.ungetService(arch_ref);
+        getContext().ungetService(arch_ref);
         instance7.stop();
-        context.ungetService(cs_ref);
+        getContext().ungetService(cs_ref);
     }
 
 	

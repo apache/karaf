@@ -39,7 +39,7 @@ public class FilteredImport extends OSGiTestCase {
 	public void setUp() {
 		Properties p = new Properties();
 		p.put("instance.name","importer");
-		Factory compFact = Utils.getFactoryByName(context, "composite.requires.5");
+		Factory compFact = Utils.getFactoryByName(getContext(), "composite.requires.5");
 		try {
 			import1 = compFact.createComponentInstance(p);
 		} catch(Exception e) {
@@ -47,10 +47,10 @@ public class FilteredImport extends OSGiTestCase {
 		}
 		import1.stop();
 		
-		fooProvider = Utils.getFactoryByName(context, "COMPO-FooProviderType-1");
+		fooProvider = Utils.getFactoryByName(getContext(), "COMPO-FooProviderType-1");
 		assertNotNull("Check fooProvider availability", fooProvider);
 		
-		fooProvider2 = Utils.getFactoryByName(context, "COMPO-FooProviderType-2");
+		fooProvider2 = Utils.getFactoryByName(getContext(), "COMPO-FooProviderType-2");
 		assertNotNull("Check fooProvider availability", fooProvider2);
 		
 		Properties p1 = new Properties();

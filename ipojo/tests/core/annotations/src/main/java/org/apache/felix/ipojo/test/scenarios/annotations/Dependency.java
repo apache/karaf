@@ -1,13 +1,19 @@
 package org.apache.felix.ipojo.test.scenarios.annotations;
 
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
 import org.apache.felix.ipojo.metadata.Element;
-import org.apache.felix.ipojo.test.scenarios.util.Utils;
 
 public class Dependency extends OSGiTestCase {
     
+    private IPOJOHelper helper;
+    
+    public void setUp() {
+        helper = new IPOJOHelper(this);
+    }
+    
     public void testDependencyDeclaration() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.Dependency");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.Dependency");
         Element[] deps = meta.getElements("requires");
         
         // Check fs

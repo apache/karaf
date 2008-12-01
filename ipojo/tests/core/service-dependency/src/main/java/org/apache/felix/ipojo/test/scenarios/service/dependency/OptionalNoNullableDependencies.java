@@ -38,36 +38,36 @@ public class OptionalNoNullableDependencies extends OSGiTestCase {
 		try {
 			Properties prov = new Properties();
 			prov.put("instance.name","FooProvider");
-			fooProvider = Utils.getFactoryByName(context, "FooProviderType-1").createComponentInstance(prov);
+			fooProvider = Utils.getFactoryByName(getContext(), "FooProviderType-1").createComponentInstance(prov);
 			fooProvider.stop();
 			
 			Properties i1 = new Properties();
 			i1.put("instance.name","Simple");
-			instance1 = Utils.getFactoryByName(context, "SimpleOptionalNoNullableCheckServiceProvider").createComponentInstance(i1);
+			instance1 = Utils.getFactoryByName(getContext(), "SimpleOptionalNoNullableCheckServiceProvider").createComponentInstance(i1);
 		
 			Properties i2 = new Properties();
 			i2.put("instance.name","Void");
-			instance2 = Utils.getFactoryByName(context, "VoidOptionalNoNullableCheckServiceProvider").createComponentInstance(i2);
+			instance2 = Utils.getFactoryByName(getContext(), "VoidOptionalNoNullableCheckServiceProvider").createComponentInstance(i2);
 		
 			Properties i3 = new Properties();
 			i3.put("instance.name","Object");
-			instance3 = Utils.getFactoryByName(context, "ObjectOptionalNoNullableCheckServiceProvider").createComponentInstance(i3);
+			instance3 = Utils.getFactoryByName(getContext(), "ObjectOptionalNoNullableCheckServiceProvider").createComponentInstance(i3);
 		
 			Properties i4 = new Properties();
 			i4.put("instance.name","Ref");
-			instance4 = Utils.getFactoryByName(context, "RefOptionalNoNullableCheckServiceProvider").createComponentInstance(i4);
+			instance4 = Utils.getFactoryByName(getContext(), "RefOptionalNoNullableCheckServiceProvider").createComponentInstance(i4);
 			
 			Properties i5 = new Properties();
             i5.put("instance.name","Both");
-            instance5 = Utils.getFactoryByName(context, "BothOptionalNoNullableCheckServiceProvider").createComponentInstance(i5);
+            instance5 = Utils.getFactoryByName(getContext(), "BothOptionalNoNullableCheckServiceProvider").createComponentInstance(i5);
             
             Properties i6 = new Properties();
             i6.put("instance.name","Map");
-            instance6 = Utils.getFactoryByName(context, "MapOptionalNoNullableCheckServiceProvider").createComponentInstance(i6);
+            instance6 = Utils.getFactoryByName(getContext(), "MapOptionalNoNullableCheckServiceProvider").createComponentInstance(i6);
             
             Properties i7 = new Properties();
             i7.put("instance.name","Dictionary");
-            instance7 = Utils.getFactoryByName(context, "DictOptionalNoNullableCheckServiceProvider").createComponentInstance(i7);
+            instance7 = Utils.getFactoryByName(getContext(), "DictOptionalNoNullableCheckServiceProvider").createComponentInstance(i7);
 		} catch(Exception e) { 
 		    e.getMessage();
 		    fail(e.getMessage()); 
@@ -94,14 +94,14 @@ public class OptionalNoNullableDependencies extends OSGiTestCase {
 	}
 	
 	public void testSimple() {
-		ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance1.getInstanceName());
+		ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance1.getInstanceName());
 		assertNotNull("Check architecture availability", arch_ref);
-		InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
 		
-		ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance1.getInstanceName());
+		ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance1.getInstanceName());
 		assertNotNull("Check CheckService availability", cs_ref);
-		CheckService cs = (CheckService) context.getService(cs_ref);
+		CheckService cs = (CheckService) getContext().getService(cs_ref);
 		Properties props = cs.getProps();
 		
 		//Check properties
@@ -116,11 +116,11 @@ public class OptionalNoNullableDependencies extends OSGiTestCase {
 		
 		fooProvider.start();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
 		
 		assertNotNull("Check CheckService availability", cs_ref);
-		cs = (CheckService) context.getService(cs_ref);
+		cs = (CheckService) getContext().getService(cs_ref);
 		props = cs.getProps();
 		
 		//Check properties
@@ -138,24 +138,24 @@ public class OptionalNoNullableDependencies extends OSGiTestCase {
 		
 		fooProvider.stop();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
 		
 		id = null;
 		cs = null;
-		context.ungetService(arch_ref);
-		context.ungetService(cs_ref);		
+		getContext().ungetService(arch_ref);
+		getContext().ungetService(cs_ref);		
 	}
 	
 	public void testVoid() {
-		ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance2.getInstanceName());
+		ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance2.getInstanceName());
 		assertNotNull("Check architecture availability", arch_ref);
-		InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
 		
-		ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance2.getInstanceName());
+		ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance2.getInstanceName());
 		assertNotNull("Check CheckService availability", cs_ref);
-		CheckService cs = (CheckService) context.getService(cs_ref);
+		CheckService cs = (CheckService) getContext().getService(cs_ref);
 		Properties props = cs.getProps();
 		//Check properties
 		assertNull("check CheckService invocation - 1", props.get("result")); // Null, no provider
@@ -169,11 +169,11 @@ public class OptionalNoNullableDependencies extends OSGiTestCase {
 		
 		fooProvider.start();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
 		
 		assertNotNull("Check CheckService availability", cs_ref);
-		cs = (CheckService) context.getService(cs_ref);
+		cs = (CheckService) getContext().getService(cs_ref);
 		props = cs.getProps();
 		//Check properties
 		assertTrue("check CheckService invocation -2", ((Boolean)props.get("result")).booleanValue());
@@ -190,10 +190,10 @@ public class OptionalNoNullableDependencies extends OSGiTestCase {
 		
 		fooProvider.stop();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
 		
-		cs = (CheckService) context.getService(cs_ref);
+		cs = (CheckService) getContext().getService(cs_ref);
 		props = cs.getProps();
 		//Check properties
 		assertNull("check CheckService invocation -3", props.get("result"));
@@ -207,19 +207,19 @@ public class OptionalNoNullableDependencies extends OSGiTestCase {
 		
 		id = null;
 		cs = null;
-		context.ungetService(arch_ref);
-		context.ungetService(cs_ref);	
+		getContext().ungetService(arch_ref);
+		getContext().ungetService(cs_ref);	
 	}
 	
 	public void testObject() {
-		ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance3.getInstanceName());
+		ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance3.getInstanceName());
 		assertNotNull("Check architecture availability", arch_ref);
-		InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
 		
-		ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+		ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance3.getInstanceName());
 		assertNotNull("Check CheckService availability", cs_ref);
-		CheckService cs = (CheckService) context.getService(cs_ref);
+		CheckService cs = (CheckService) getContext().getService(cs_ref);
 		Properties props = cs.getProps();
 		//Check properties
 		assertNull("check CheckService invocation -1", props.get("result")); // Null, no provider
@@ -232,11 +232,11 @@ public class OptionalNoNullableDependencies extends OSGiTestCase {
 		
 		fooProvider.start();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
 		
 		assertNotNull("Check CheckService availability", cs_ref);
-		cs = (CheckService) context.getService(cs_ref);
+		cs = (CheckService) getContext().getService(cs_ref);
 		props = cs.getProps();
 		//Check properties
 		assertTrue("check CheckService invocation -2", ((Boolean)props.get("result")).booleanValue());
@@ -249,10 +249,10 @@ public class OptionalNoNullableDependencies extends OSGiTestCase {
 		
 		fooProvider.stop();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
 		
-		cs = (CheckService) context.getService(cs_ref);
+		cs = (CheckService) getContext().getService(cs_ref);
 		props = cs.getProps();
 		//Check properties
 		assertNull("check CheckService invocation -3", props.get("result")); // No provider.
@@ -265,19 +265,19 @@ public class OptionalNoNullableDependencies extends OSGiTestCase {
 		
 		id = null;
 		cs = null;
-		context.ungetService(arch_ref);
-		context.ungetService(cs_ref);		
+		getContext().ungetService(arch_ref);
+		getContext().ungetService(cs_ref);		
 	}
 	
 	public void testRef() {
-		ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance4.getInstanceName());
+		ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance4.getInstanceName());
 		assertNotNull("Check architecture availability", arch_ref);
-		InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
 		
-		ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance4.getInstanceName());
+		ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance4.getInstanceName());
 		assertNotNull("Check CheckService availability", cs_ref);
-		CheckService cs = (CheckService) context.getService(cs_ref);
+		CheckService cs = (CheckService) getContext().getService(cs_ref);
 		Properties props = cs.getProps();
 		//Check properties
 		assertNull("check CheckService invocation -1", props.get("result")); //Null, no provider
@@ -290,11 +290,11 @@ public class OptionalNoNullableDependencies extends OSGiTestCase {
 		
 		fooProvider.start();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
 		
 		assertNotNull("Check CheckService availability", cs_ref);
-		cs = (CheckService) context.getService(cs_ref);
+		cs = (CheckService) getContext().getService(cs_ref);
 		props = cs.getProps();
 		//Check properties
 		assertTrue("check CheckService invocation -2", ((Boolean)props.get("result")).booleanValue());
@@ -307,10 +307,10 @@ public class OptionalNoNullableDependencies extends OSGiTestCase {
 		
 		fooProvider.stop();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
 		
-		cs = (CheckService) context.getService(cs_ref);
+		cs = (CheckService) getContext().getService(cs_ref);
 		props = cs.getProps();
 		//Check properties
 		assertNull("check CheckService invocation -3", props.get("result")); // Null, no provider
@@ -323,19 +323,19 @@ public class OptionalNoNullableDependencies extends OSGiTestCase {
 		
 		id = null;
 		cs = null;
-		context.ungetService(arch_ref);
-		context.ungetService(cs_ref);
+		getContext().ungetService(arch_ref);
+		getContext().ungetService(cs_ref);
 	}
 	
 	public void testBoth() {
-        ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance5.getInstanceName());
+        ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance5.getInstanceName());
         assertNotNull("Check architecture availability", arch_ref);
-        InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
         
-        ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance5.getInstanceName());
+        ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance5.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        CheckService cs = (CheckService) context.getService(cs_ref);
+        CheckService cs = (CheckService) getContext().getService(cs_ref);
         Properties props = cs.getProps();
         //Check properties
         assertNull("check CheckService invocation -1", props.get("result")); // Null, no provider
@@ -348,11 +348,11 @@ public class OptionalNoNullableDependencies extends OSGiTestCase {
         
         fooProvider.start();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
         
         assertNotNull("Check CheckService availability", cs_ref);
-        cs = (CheckService) context.getService(cs_ref);
+        cs = (CheckService) getContext().getService(cs_ref);
         props = cs.getProps();
         //Check properties
         assertTrue("check CheckService invocation -2", ((Boolean)props.get("result")).booleanValue());
@@ -367,10 +367,10 @@ public class OptionalNoNullableDependencies extends OSGiTestCase {
         
         fooProvider.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
         
-        cs = (CheckService) context.getService(cs_ref);
+        cs = (CheckService) getContext().getService(cs_ref);
         props = cs.getProps();
         //Check properties
         assertNull("check CheckService invocation -3", props.get("result")); // Null, no provider
@@ -385,19 +385,19 @@ public class OptionalNoNullableDependencies extends OSGiTestCase {
   
         id = null;
         cs = null;
-        context.ungetService(arch_ref);
-        context.ungetService(cs_ref);
+        getContext().ungetService(arch_ref);
+        getContext().ungetService(cs_ref);
     }
 	
 	public void testDict() {
-        ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance7.getInstanceName());
+        ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance7.getInstanceName());
         assertNotNull("Check architecture availability", arch_ref);
-        InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
         
-        ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance7.getInstanceName());
+        ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance7.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        CheckService cs = (CheckService) context.getService(cs_ref);
+        CheckService cs = (CheckService) getContext().getService(cs_ref);
         Properties props = cs.getProps();
         //Check properties
         assertNull("check CheckService invocation -1", props.get("result")); // Null, no provider
@@ -414,11 +414,11 @@ public class OptionalNoNullableDependencies extends OSGiTestCase {
         
         fooProvider.start();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
         
         assertNotNull("Check CheckService availability", cs_ref);
-        cs = (CheckService) context.getService(cs_ref);
+        cs = (CheckService) getContext().getService(cs_ref);
         props = cs.getProps();
         //Check properties
         assertTrue("check CheckService invocation -2", ((Boolean)props.get("result")).booleanValue());
@@ -437,10 +437,10 @@ public class OptionalNoNullableDependencies extends OSGiTestCase {
         
         fooProvider.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
         
-        cs = (CheckService) context.getService(cs_ref);
+        cs = (CheckService) getContext().getService(cs_ref);
         props = cs.getProps();
         //Check properties
         assertNull("check CheckService invocation -3", props.get("result")); // Null, no provider
@@ -459,19 +459,19 @@ public class OptionalNoNullableDependencies extends OSGiTestCase {
   
         id = null;
         cs = null;
-        context.ungetService(arch_ref);
-        context.ungetService(cs_ref);
+        getContext().ungetService(arch_ref);
+        getContext().ungetService(cs_ref);
     }
 
     public void testMap() {
-        ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance6.getInstanceName());
+        ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance6.getInstanceName());
         assertNotNull("Check architecture availability", arch_ref);
-        InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
         
-        ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance6.getInstanceName());
+        ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance6.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        CheckService cs = (CheckService) context.getService(cs_ref);
+        CheckService cs = (CheckService) getContext().getService(cs_ref);
         Properties props = cs.getProps();
         //Check properties
         assertNull("check CheckService invocation -1", props.get("result")); // Null, no provider
@@ -488,11 +488,11 @@ public class OptionalNoNullableDependencies extends OSGiTestCase {
         
         fooProvider.start();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
         
         assertNotNull("Check CheckService availability", cs_ref);
-        cs = (CheckService) context.getService(cs_ref);
+        cs = (CheckService) getContext().getService(cs_ref);
         props = cs.getProps();
         //Check properties
         assertTrue("check CheckService invocation -2", ((Boolean)props.get("result")).booleanValue());
@@ -511,10 +511,10 @@ public class OptionalNoNullableDependencies extends OSGiTestCase {
         
         fooProvider.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
         
-        cs = (CheckService) context.getService(cs_ref);
+        cs = (CheckService) getContext().getService(cs_ref);
         props = cs.getProps();
         //Check properties
         assertNull("check CheckService invocation -3", props.get("result")); // Null, no provider
@@ -533,8 +533,8 @@ public class OptionalNoNullableDependencies extends OSGiTestCase {
     
         id = null;
         cs = null;
-        context.ungetService(arch_ref);
-        context.ungetService(cs_ref);
+        getContext().ungetService(arch_ref);
+        getContext().ungetService(cs_ref);
     }
 
 

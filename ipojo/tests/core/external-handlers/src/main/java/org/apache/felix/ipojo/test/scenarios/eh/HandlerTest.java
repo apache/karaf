@@ -42,7 +42,7 @@ public class HandlerTest extends OSGiTestCase {
 		p.put("b", "b");
 		p.put("c", "c");
 		props.put("csh.map", p);
-		instance = Utils.getComponentInstance(context, "HANDLER-HandlerTester", props);
+		instance = Utils.getComponentInstance(getContext(), "HANDLER-HandlerTester", props);
 	}
 	
 	public void tearDown() {
@@ -57,13 +57,13 @@ public class HandlerTest extends OSGiTestCase {
 		ServiceReference[] refs = null;
         String filter = "("+"instance.name"+"="+name+")";
         try {
-            refs = context.getServiceReferences(CheckService.class.getName(), filter);
+            refs = getContext().getServiceReferences(CheckService.class.getName(), filter);
         } catch (InvalidSyntaxException e) { System.err.println("Invalid Filter : " + filter);}
         if(refs != null) { sr = refs[0]; }
         
 		assertNotNull("Check the check service availability", sr);
 		
-		CheckService cs = (CheckService) context.getService(sr);
+		CheckService cs = (CheckService) getContext().getService(sr);
 		Properties p = cs.getProps();
 		assertEquals("Assert 'simple' equality", p.get("Simple"), "simple");
 		assertEquals("Assert 'a' equality", p.get("Map1"), "a");
@@ -71,7 +71,7 @@ public class HandlerTest extends OSGiTestCase {
 		assertEquals("Assert 'c' equality", p.get("Map3"), "c");
 		
 		cs = null;
-		context.ungetService(sr);
+		getContext().ungetService(sr);
 	}
 	
 	public void testConfiguration2() {
@@ -81,12 +81,12 @@ public class HandlerTest extends OSGiTestCase {
         ServiceReference[] refs = null;
         String filter = "("+"instance.name"+"="+name+")";
         try {
-            refs = context.getServiceReferences(CheckService.class.getName(), filter);
+            refs = getContext().getServiceReferences(CheckService.class.getName(), filter);
         } catch (InvalidSyntaxException e) { System.err.println("Invalid Filter : " + filter);}
         if(refs != null) { sr = refs[0]; }
 		assertNotNull("Check the check service availability", sr);
 		
-		CheckService cs = (CheckService) context.getService(sr);
+		CheckService cs = (CheckService) getContext().getService(sr);
 		Properties p = cs.getProps();
 		assertEquals("Assert 'simple' equality", p.get("Simple"), "Simple");
 		assertEquals("Assert 'a' equality", p.get("Map1"), "a");
@@ -94,7 +94,7 @@ public class HandlerTest extends OSGiTestCase {
 		assertEquals("Assert 'c' equality", p.get("Map3"), "c");
 		
 		cs = null;
-		context.ungetService(sr);
+		getContext().ungetService(sr);
 	}
 	
 
@@ -105,18 +105,18 @@ public class HandlerTest extends OSGiTestCase {
         ServiceReference[] refs = null;
         String filter = "("+"instance.name"+"="+name+")";
         try {
-            refs = context.getServiceReferences(CheckService.class.getName(), filter);
+            refs = getContext().getServiceReferences(CheckService.class.getName(), filter);
         } catch (InvalidSyntaxException e) { System.err.println("Invalid Filter : " + filter);}
         if(refs != null) { sr = refs[0]; }
         assertNotNull("Check the check service availability", sr);
         
-        CheckService cs = (CheckService) context.getService(sr);
+        CheckService cs = (CheckService) getContext().getService(sr);
         Properties p = cs.getProps();
         assertEquals("Assert 'simple' equality", p.get("Simple"), "Simple");
         assertEquals("Size of p", 3, p.size()); // instance name, simple and changes.
         
         cs = null;
-        context.ungetService(sr);
+        getContext().ungetService(sr);
     }
 	
 	public void testLifecycle() {
@@ -126,17 +126,17 @@ public class HandlerTest extends OSGiTestCase {
         ServiceReference[] refs = null;
         String filter = "("+"instance.name"+"="+name+")";
         try {
-            refs = context.getServiceReferences(CheckService.class.getName(), filter);
+            refs = getContext().getServiceReferences(CheckService.class.getName(), filter);
         } catch (InvalidSyntaxException e) { System.err.println("Invalid Filter : " + filter);}
         if(refs != null) { sr = refs[0]; }
 		assertNotNull("Check the check service availability", sr);
 		
-		ServiceReference sr_arch = Utils.getServiceReferenceByName(context, Architecture.class.getName(), "HandlerTest-1");
-		Architecture arch = (Architecture) context.getService(sr_arch);
+		ServiceReference sr_arch = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), "HandlerTest-1");
+		Architecture arch = (Architecture) getContext().getService(sr_arch);
 		
 		assertEquals("Check instance validity - 0", arch.getInstanceDescription().getState(), ComponentInstance.VALID);
 		
-		CheckService cs = (CheckService) context.getService(sr);
+		CheckService cs = (CheckService) getContext().getService(sr);
 		Properties p = cs.getProps();
 		Integer changes = (Integer) p.get("changes");
 		assertNotNull("Check changes no null", changes);
@@ -160,8 +160,8 @@ public class HandlerTest extends OSGiTestCase {
 		
 		cs = null;
 		arch = null;
-		context.ungetService(sr_arch);
-		context.ungetService(sr);
+		getContext().ungetService(sr_arch);
+		getContext().ungetService(sr);
 	}
 	
 	public void testAvailability() {
@@ -170,23 +170,23 @@ public class HandlerTest extends OSGiTestCase {
         ServiceReference[] refs = null;
         String filter = "("+"instance.name"+"="+name+")";
         try {
-            refs = context.getServiceReferences(CheckService.class.getName(), filter);
+            refs = getContext().getServiceReferences(CheckService.class.getName(), filter);
         } catch (InvalidSyntaxException e) { System.err.println("Invalid Filter : " + filter);}
         if(refs != null) { sr = refs[0]; }
         assertNotNull("Check the check service availability", sr);
         
-        ServiceReference sr_arch = Utils.getServiceReferenceByName(context, Architecture.class.getName(), "HandlerTest-1");
-        Architecture arch = (Architecture) context.getService(sr_arch);
+        ServiceReference sr_arch = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), "HandlerTest-1");
+        Architecture arch = (Architecture) getContext().getService(sr_arch);
         assertEquals("Check validity", arch.getInstanceDescription().getState(), ComponentInstance.VALID);
         
         // Kill the handler factory
-        HandlerManagerFactory f = (HandlerManagerFactory) Utils.getHandlerFactoryByName(context, "check");
+        HandlerManagerFactory f = (HandlerManagerFactory) Utils.getHandlerFactoryByName(getContext(), "check");
         f.stop();
         
-        sr = Utils.getServiceReferenceByName(context, CheckService.class.getName(), "HandlerTest-1");
+        sr = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "HandlerTest-1");
         assertNull("Check the check service unavailability", sr);
         
-        sr_arch = Utils.getServiceReferenceByName(context, Architecture.class.getName(), "HandlerTest-1");
+        sr_arch = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), "HandlerTest-1");
         assertNull("Check the architecture unavailability", sr_arch);
         
         // The instance is disposed, restart the handler
@@ -200,13 +200,13 @@ public class HandlerTest extends OSGiTestCase {
         p.put("b", "b");
         p.put("c", "c");
         props.put("csh.map", p);
-        instance = Utils.getComponentInstance(context, "HANDLER-HandlerTester", props);
+        instance = Utils.getComponentInstance(getContext(), "HANDLER-HandlerTester", props);
         
-        sr = Utils.getServiceReferenceByName(context, CheckService.class.getName(), "HandlerTest-1");
+        sr = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "HandlerTest-1");
         assertNotNull("Check the check service availability - 2", sr);
         
-        sr_arch = Utils.getServiceReferenceByName(context, Architecture.class.getName(), "HandlerTest-1");
-        arch = (Architecture) context.getService(sr_arch);
+        sr_arch = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), "HandlerTest-1");
+        arch = (Architecture) getContext().getService(sr_arch);
         assertEquals("Check validity - 2", arch.getInstanceDescription().getState(), ComponentInstance.VALID);
 	}
 

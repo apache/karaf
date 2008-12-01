@@ -3,30 +3,34 @@ package org.apache.felix.ipojo.test.scenarios.annotations;
 import java.util.List;
 
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.ParseUtils;
 import org.apache.felix.ipojo.test.scenarios.annotations.service.CheckService;
 import org.apache.felix.ipojo.test.scenarios.annotations.service.FooService;
-import org.apache.felix.ipojo.test.scenarios.util.Utils;
 
 public class ServiceProdiving extends OSGiTestCase {
     
+    private IPOJOHelper helper;
+    
+    public void setUp() {
+        helper = new IPOJOHelper(this);
+    }
+    
     public void testProvidesSimple() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.ProvidesSimple");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.ProvidesSimple");
         Element[] provs = meta.getElements("provides");
         assertNotNull("Provides exists ", provs);
-        Element prov = provs[0];
     }
     
     public void testProvidesDouble() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.ProvidesDouble");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.ProvidesDouble");
         Element[] provs = meta.getElements("provides");
         assertNotNull("Provides exists ", provs);
-        Element prov = provs[0];
     }
     
     public void testProvidesTriple() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.ProvidesTriple");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.ProvidesTriple");
         Element[] provs = meta.getElements("provides");
         assertNotNull("Provides exists ", provs);
         Element prov = provs[0];
@@ -36,7 +40,7 @@ public class ServiceProdiving extends OSGiTestCase {
     }
     
     public void testProvidesQuatro() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.ProvidesQuatro");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.ProvidesQuatro");
         Element[] provs = meta.getElements("provides");
         assertNotNull("Provides exists ", provs);
         Element prov = provs[0];
@@ -47,7 +51,7 @@ public class ServiceProdiving extends OSGiTestCase {
     }
     
     public void testProperties() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.ProvidesProperties");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.ProvidesProperties");
         Element[] provs = meta.getElements("provides");
         assertNotNull("Provides exists ", provs);
         Element prov = provs[0];

@@ -40,9 +40,9 @@ public class TestComp1 extends OSGiTestCase {
 	private ComponentFactory tataFactory2;
     
     public void setUp() {
-        tataFactory = (ComponentFactory) Utils.getFactoryByName(context, "tata");
-        totoFactory = (ComponentFactory) Utils.getFactoryByName(context, "toto");
-        tataFactory2 = (ComponentFactory) Utils.getFactoryByName(context, "comp-6");
+        tataFactory = (ComponentFactory) Utils.getFactoryByName(getContext(), "tata");
+        totoFactory = (ComponentFactory) Utils.getFactoryByName(getContext(), "toto");
+        tataFactory2 = (ComponentFactory) Utils.getFactoryByName(getContext(), "comp-6");
         tataFactory2.stop();
         
         tataFactory.stop();
@@ -66,7 +66,7 @@ public class TestComp1 extends OSGiTestCase {
         totoProv.stop();
         totoProv2.stop();
         
-        Factory factory = Utils.getFactoryByName(context, "comp-1");
+        Factory factory = Utils.getFactoryByName(getContext(), "comp-1");
         Properties props2 = new Properties();
         try {
             under = factory.createComponentInstance(props2);
@@ -95,19 +95,19 @@ public class TestComp1 extends OSGiTestCase {
     public void testSimple() {
         // Neither factory nor instance
         assertTrue("Assert under state - 1", under.getState() == ComponentInstance.INVALID);
-        assertNull("Assert no tota service - 1", context.getServiceReference(Tota.class.getName()));
+        assertNull("Assert no tota service - 1", getContext().getServiceReference(Tota.class.getName()));
         
         // Start the importer
         totoProv.start();
         assertTrue("Assert under state - 2 ("+under.getState()+")", under.getState() == ComponentInstance.INVALID);
-        assertNull("Assert no tota service - 2", context.getServiceReference(Tota.class.getName()));
+        assertNull("Assert no tota service - 2", getContext().getServiceReference(Tota.class.getName()));
         
         // Start the factory
         tataFactory.start();
         assertTrue("Assert under state - 3", under.getState() == ComponentInstance.VALID);
-        assertNotNull("Assert tota service - 3", context.getServiceReference(Tota.class.getName()));
-        ServiceReference ref = context.getServiceReference(Tota.class.getName());
-        Tota tota = (Tota) context.getService(ref);
+        assertNotNull("Assert tota service - 3", getContext().getServiceReference(Tota.class.getName()));
+        ServiceReference ref = getContext().getServiceReference(Tota.class.getName());
+        Tota tota = (Tota) getContext().getService(ref);
         invokeAll(tota);
         // Check toto
         Properties props = tota.getProps();
@@ -142,15 +142,15 @@ public class TestComp1 extends OSGiTestCase {
         assertEquals("Assert tata5_1 - 3", tata5_1.intValue(), 1);
         assertEquals("Assert tata5_2 - 3", tata5_2.intValue(), 1);
         
-        context.ungetService(ref);
+        getContext().ungetService(ref);
         tota = null;
         
         // Start a second import
         totoProv2.start();
         assertTrue("Assert under state - 4", under.getState() == ComponentInstance.VALID);
-        assertNotNull("Assert tota service - 4", context.getServiceReference(Tota.class.getName()));
-        ref = context.getServiceReference(Tota.class.getName());
-        tota = (Tota) context.getService(ref);
+        assertNotNull("Assert tota service - 4", getContext().getServiceReference(Tota.class.getName()));
+        ref = getContext().getServiceReference(Tota.class.getName());
+        tota = (Tota) getContext().getService(ref);
         invokeAll(tota);
         // Check toto
         props = tota.getProps();
@@ -185,19 +185,19 @@ public class TestComp1 extends OSGiTestCase {
         assertEquals("Assert tata5_1 - 4", tata5_1.intValue(), 2);
         assertEquals("Assert tata5_2 - 4", tata5_2.intValue(), 2);
         
-        context.ungetService(ref);
+        getContext().ungetService(ref);
         tota = null;
         
         tataFactory.stop();
         assertTrue("Assert under state - 5", under.getState() == ComponentInstance.INVALID);
-        assertNull("Assert no tota service - 5", context.getServiceReference(Tota.class.getName()));
+        assertNull("Assert no tota service - 5", getContext().getServiceReference(Tota.class.getName()));
         
         totoProv2.stop();
         tataFactory.start();
         assertTrue("Assert under state - 6", under.getState() == ComponentInstance.VALID);
-        assertNotNull("Assert tota service - 6", context.getServiceReference(Tota.class.getName()));
-        ref = context.getServiceReference(Tota.class.getName());
-        tota = (Tota) context.getService(ref);
+        assertNotNull("Assert tota service - 6", getContext().getServiceReference(Tota.class.getName()));
+        ref = getContext().getServiceReference(Tota.class.getName());
+        tota = (Tota) getContext().getService(ref);
         invokeAll(tota);
         // Check toto
         props = tota.getProps();
@@ -232,17 +232,17 @@ public class TestComp1 extends OSGiTestCase {
         assertEquals("Assert tata5_1 - 6", tata5_1.intValue(), 1);
         assertEquals("Assert tata5_2 - 6", tata5_2.intValue(), 1);
         
-        context.ungetService(ref);
+        getContext().ungetService(ref);
         tota = null;
         
         // Is arch exposed
-        assertNotNull("Test arch", Utils.getServiceReferenceByName(context, Architecture.class.getName(), under.getInstanceName()));
+        assertNotNull("Test arch", Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), under.getInstanceName()));
         
         totoProv.stop();
         
         assertTrue("Assert under state - 7", under.getState() == ComponentInstance.INVALID);
-        assertNotNull("Test arch-2", Utils.getServiceReferenceByName(context, Architecture.class.getName(), under.getInstanceName()));
-        assertNull("Assert no tota service - 7", context.getServiceReference(Tota.class.getName()));
+        assertNotNull("Test arch-2", Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), under.getInstanceName()));
+        assertNull("Assert no tota service - 7", getContext().getServiceReference(Tota.class.getName()));
         
         under.dispose();
         under = null;

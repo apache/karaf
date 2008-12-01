@@ -54,21 +54,21 @@ public class ComponentDesc extends OSGiTestCase {
 //	Factory multiple_optional;
 	
 	public void setUp() {
-		sr_fooProvider1 = Utils.getServiceReferenceByName(context, Factory.class.getName(), "Factories-FooProviderType-1");
-		sr_fooProvider2 = Utils.getServiceReferenceByName(context, Factory.class.getName(), "Factories-FooProviderType-2");
-		sr_fooProviderDyn2 = Utils.getServiceReferenceByName(context, Factory.class.getName(), "Factories-FooProviderType-Dyn2");
-		sr_fooProvider3 = Utils.getServiceReferenceByName(context, Factory.class.getName(), "Factories-FooProviderType-3");
-		sr_foobarProvider = Utils.getServiceReferenceByName(context, Factory.class.getName(), "Factories-FooBarProviderType-1");
+		sr_fooProvider1 = Utils.getServiceReferenceByName(getContext(), Factory.class.getName(), "Factories-FooProviderType-1");
+		sr_fooProvider2 = Utils.getServiceReferenceByName(getContext(), Factory.class.getName(), "Factories-FooProviderType-2");
+		sr_fooProviderDyn2 = Utils.getServiceReferenceByName(getContext(), Factory.class.getName(), "Factories-FooProviderType-Dyn2");
+		sr_fooProvider3 = Utils.getServiceReferenceByName(getContext(), Factory.class.getName(), "Factories-FooProviderType-3");
+		sr_foobarProvider = Utils.getServiceReferenceByName(getContext(), Factory.class.getName(), "Factories-FooBarProviderType-1");
 //		sr_simple = Utils.getServiceReferenceByName(context, Factory.class.getName(), "SimpleCheckServiceProvider");
 //		sr_optional = Utils.getServiceReferenceByName(context, Factory.class.getName(), "SimpleOptionalCheckServiceProvider");
 //		sr_multiple = Utils.getServiceReferenceByName(context, Factory.class.getName(), "SimpleMultipleCheckServiceProvider");
 //		sr_multiple_optional = Utils.getServiceReferenceByName(context, Factory.class.getName(), "SimpleOptionalMultipleCheckServiceProvider");
 		
-		fooProvider1 = (Factory) context.getService(sr_fooProvider1);
-		fooProvider2 = (Factory) context.getService(sr_fooProvider2);
-		fooProviderDyn2 = (Factory) context.getService(sr_fooProviderDyn2);
-		fooProvider3 = (Factory) context.getService(sr_fooProvider3);
-		foobarProvider = (Factory) context.getService(sr_foobarProvider);
+		fooProvider1 = (Factory) getContext().getService(sr_fooProvider1);
+		fooProvider2 = (Factory) getContext().getService(sr_fooProvider2);
+		fooProviderDyn2 = (Factory) getContext().getService(sr_fooProviderDyn2);
+		fooProvider3 = (Factory) getContext().getService(sr_fooProvider3);
+		foobarProvider = (Factory) getContext().getService(sr_foobarProvider);
 //		simple = (Factory) context.getService(sr_simple);
 //		optional = (Factory) context.getService(sr_optional);
 //		multiple = (Factory) context.getService(sr_multiple);
@@ -87,11 +87,11 @@ public class ComponentDesc extends OSGiTestCase {
 //		optional = null;
 //		multiple_optional = null;
 		
-		context.ungetService(sr_fooProvider1);
-		context.ungetService(sr_fooProvider2);
-		context.ungetService(sr_fooProviderDyn2);
-		context.ungetService(sr_fooProvider3);
-		context.ungetService(sr_foobarProvider);
+		getContext().ungetService(sr_fooProvider1);
+		getContext().ungetService(sr_fooProvider2);
+		getContext().ungetService(sr_fooProviderDyn2);
+		getContext().ungetService(sr_fooProvider3);
+		getContext().ungetService(sr_foobarProvider);
 //		context.ungetService(sr_simple);
 //		context.ungetService(sr_optional);
 //		context.ungetService(sr_multiple);

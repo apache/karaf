@@ -1,17 +1,22 @@
 package org.apache.felix.ipojo.test.scenarios.annotations;
 
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
 import org.apache.felix.ipojo.metadata.Element;
-import org.apache.felix.ipojo.test.scenarios.util.Utils;
 
 public class Extender extends OSGiTestCase {
     
     String type = "org.apache.felix.ipojo.test.scenarios.component.extender.Extender";
     String namespace = "org.apache.felix.ipojo.extender";
-
+    
+    private IPOJOHelper helper;
+    
+    public void setUp() {
+        helper = new IPOJOHelper(this);
+    }
     
     public void testMetadata() {
-        Element meta = Utils.getMetatadata(context, type);
+        Element meta = helper.getMetadata(type);
         assertNotNull("Check meta", meta);
         Element[] ext = meta.getElements("extender", namespace);
         assertEquals("Check size", 1, ext.length);

@@ -217,11 +217,11 @@ public class POJOCreation extends OSGiTestCase {
      * Not manipulated.
      */
     public void testCustomConstuctor() {
-        FooService fs = new FooProviderType1(0, "foo", context);
+        FooService fs = new FooProviderType1(0, "foo", getContext());
         Properties props = fs.fooProps();
         assertEquals("Check bar", 0, ((Integer) props.get("bar")).intValue());
         assertEquals("Check foo", "foo", props.get("foo"));
-        assertEquals("Check context", context, props.get("context"));
+        assertEquals("Check context", getContext(), props.get("context"));
     }
     
     public void testSuperCall() {

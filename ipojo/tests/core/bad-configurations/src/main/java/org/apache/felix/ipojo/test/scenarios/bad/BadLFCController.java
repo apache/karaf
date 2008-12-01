@@ -50,7 +50,7 @@ public class BadLFCController extends OSGiTestCase {
     }
     
     private Element getManipulationForComponent(String comp_name) {
-        String header = (String) context.getBundle().getHeaders().get("iPOJO-Components");
+        String header = (String) getContext().getBundle().getHeaders().get("iPOJO-Components");
         Element elem = null;
         try {
             elem = ManifestMetadataParser.parseHeaderMetadata(header);
@@ -77,7 +77,7 @@ public class BadLFCController extends OSGiTestCase {
     
     public void testNoField() {
         try {
-            ComponentFactory cf = new ComponentFactory(context, getNoFieldController());
+            ComponentFactory cf = new ComponentFactory(getContext(), getNoFieldController());
             cf.start();
             cf.stop();
             fail("A lifecycle controller with a missing field must be rejected " + cf);
@@ -88,7 +88,7 @@ public class BadLFCController extends OSGiTestCase {
     
     public void testBadField() {
         try {
-            ComponentFactory cf = new ComponentFactory(context, getBadFieldController());
+            ComponentFactory cf = new ComponentFactory(getContext(), getBadFieldController());
             cf.start();
             cf.stop();
             fail("A lifecycle controller with a bad field must be rejected " + cf);

@@ -37,7 +37,7 @@ public class SimpleProperties extends OSGiTestCase {
 		
 		Properties p1 = new Properties();
 		p1.put("instance.name","FooProvider-1");
-		fooProvider1 = Utils.getComponentInstance(context, type, p1);
+		fooProvider1 = Utils.getComponentInstance(getContext(), type, p1);
 		
 		Properties p2 = new Properties();
 		p2.put("instance.name","FooProvider-2");
@@ -46,11 +46,11 @@ public class SimpleProperties extends OSGiTestCase {
 		p2.put("string", new String("bar"));
 		p2.put("strAProp", new String[] {"bar", "foo"});
 		p2.put("intAProp", new int[] {1, 2, 3});
-		fooProvider2 = Utils.getComponentInstance(context, type, p2);
+		fooProvider2 = Utils.getComponentInstance(getContext(), type, p2);
 		
 		Properties p3 = new Properties();
         p3.put("instance.name","FooProvider-3");
-        fooProvider3 = Utils.getComponentInstance(context, "CONFIG-FooProviderType-ConfNoValue", p3);
+        fooProvider3 = Utils.getComponentInstance(getContext(), "CONFIG-FooProviderType-ConfNoValue", p3);
 	}
 	
 	public void tearDown() {
@@ -63,9 +63,9 @@ public class SimpleProperties extends OSGiTestCase {
 	}
 	
 	public void testComponentTypeConfiguration() {
-		ServiceReference ref = Utils.getServiceReferenceByName(context, FooService.class.getName(), fooProvider1.getInstanceName());
+		ServiceReference ref = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), fooProvider1.getInstanceName());
 		assertNotNull("Check FooService availability", ref);
-		FooService fs = (FooService) context.getService(ref);
+		FooService fs = (FooService) getContext().getService(ref);
 		Properties toCheck = fs.fooProps();
 		
 		Integer intProp = (Integer) toCheck.get("intProp");
@@ -115,14 +115,14 @@ public class SimpleProperties extends OSGiTestCase {
 		}
 		
 		fs = null;
-		context.ungetService(ref);
+		getContext().ungetService(ref);
 	}
 	
 	public void testInstanceConfiguration() {
-		ServiceReference sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-2");
+		ServiceReference sr = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), "FooProvider-2");
 		assertNotNull("Check the availability of the FS service", sr);
 		
-		FooService fs = (FooService) context.getService(sr);
+		FooService fs = (FooService) getContext().getService(sr);
 		Properties toCheck = fs.fooProps();
 		
 		// Check service properties
@@ -172,14 +172,14 @@ public class SimpleProperties extends OSGiTestCase {
 		}
 		
 		fs = null;
-		context.ungetService(sr);	
+		getContext().ungetService(sr);	
 	}
 	
 	public void testNoValue() {
-        ServiceReference sr = Utils.getServiceReferenceByName(context, FooService.class.getName(), "FooProvider-3");
+        ServiceReference sr = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), "FooProvider-3");
         assertNotNull("Check the availability of the FS service", sr);
         
-        FooService fs = (FooService) context.getService(sr);
+        FooService fs = (FooService) getContext().getService(sr);
         Properties toCheck = fs.fooProps();
         
         // Check service properties
@@ -220,7 +220,7 @@ public class SimpleProperties extends OSGiTestCase {
         }
         
         fs = null;
-        context.ungetService(sr);   
+        getContext().ungetService(sr);   
     }
 
 }

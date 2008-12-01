@@ -114,7 +114,7 @@ public class BadLFCCallback extends OSGiTestCase {
     }
     
     private Element getManipulationForComponent() {
-        String header = (String) context.getBundle().getHeaders().get("iPOJO-Components");
+        String header = (String) getContext().getBundle().getHeaders().get("iPOJO-Components");
         Element elem = null;
         try {
             elem = ManifestMetadataParser.parseHeaderMetadata(header);
@@ -144,7 +144,7 @@ public class BadLFCCallback extends OSGiTestCase {
     
     public void testNothing() {
         try {
-            ComponentFactory cf = new ComponentFactory(context, getNothing());
+            ComponentFactory cf = new ComponentFactory(getContext(), getNothing());
             cf.start();
             ComponentInstance ci = cf.createComponentInstance(props);
             ci.dispose();
@@ -161,7 +161,7 @@ public class BadLFCCallback extends OSGiTestCase {
     
     public void testNoTransition() {
         try {
-            ComponentFactory cf = new ComponentFactory(context, getNoTransition());
+            ComponentFactory cf = new ComponentFactory(getContext(), getNoTransition());
             cf.start();
             ComponentInstance ci = cf.createComponentInstance(props);
             ci.dispose();
@@ -178,7 +178,7 @@ public class BadLFCCallback extends OSGiTestCase {
     
     public void testNoMethod() {
         try {
-            ComponentFactory cf = new ComponentFactory(context, getNoMethod());
+            ComponentFactory cf = new ComponentFactory(getContext(), getNoMethod());
             cf.start();
             ComponentInstance ci = cf.createComponentInstance(props);
             ci.dispose();
@@ -195,7 +195,7 @@ public class BadLFCCallback extends OSGiTestCase {
     
     public void testBadMethod() {
         try {
-            ComponentFactory cf = new ComponentFactory(context, getBadMethod());
+            ComponentFactory cf = new ComponentFactory(getContext(), getBadMethod());
             cf.start();
             ComponentInstance ci = cf.createComponentInstance(props);
             if (ci.isStarted()) {
@@ -215,7 +215,7 @@ public class BadLFCCallback extends OSGiTestCase {
     
     public void testBadMethod2() {
         try {
-            ComponentFactory cf = new ComponentFactory(context, getBadMethod2());
+            ComponentFactory cf = new ComponentFactory(getContext(), getBadMethod2());
             cf.start();
             ComponentInstance ci = cf.createComponentInstance(props);
             ci.stop();
@@ -236,7 +236,7 @@ public class BadLFCCallback extends OSGiTestCase {
     
     public void testBadTransition() {
         try {
-            ComponentFactory cf = new ComponentFactory(context, getBadTransition());
+            ComponentFactory cf = new ComponentFactory(getContext(), getBadTransition());
             cf.start();
             ComponentInstance ci = cf.createComponentInstance(props);
             ci.dispose();

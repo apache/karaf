@@ -33,7 +33,7 @@ public class TestBothProperties extends OSGiTestCase {
 
     
     public void setUp() {
-        Factory fact = Utils.getFactoryByName(context, "CONFIG-BothConfigurableCheckService");
+        Factory fact = Utils.getFactoryByName(getContext(), "CONFIG-BothConfigurableCheckService");
         Properties props = new Properties();
         props.put("instance.name","under-test");
         props.put("b", "1");
@@ -78,9 +78,9 @@ public class TestBothProperties extends OSGiTestCase {
     }
     
     public void testConfigurationPrimitive() {
-        ServiceReference ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance.getInstanceName());
+        ServiceReference ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance.getInstanceName());
         assertNotNull("Test check service availability", ref);
-        CheckService check = (CheckService) context.getService(ref);
+        CheckService check = (CheckService) getContext().getService(ref);
         Properties props = check.getProps();
         
         Byte b = (Byte) props.get("b");
@@ -121,9 +121,9 @@ public class TestBothProperties extends OSGiTestCase {
         
         reconfigure(instance);
         
-        ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance.getInstanceName());
+        ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance.getInstanceName());
         assertNotNull("Test check service availability", ref);
-        check = (CheckService) context.getService(ref);
+        check = (CheckService) getContext().getService(ref);
         props = check.getProps();
         
         b = (Byte) props.get("b");
@@ -165,9 +165,9 @@ public class TestBothProperties extends OSGiTestCase {
     }
 
     public void testConfigurationPrimitiveString() {
-        ServiceReference ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance.getInstanceName());
+        ServiceReference ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance.getInstanceName());
         assertNotNull("Test check service availability", ref);
-        CheckService check = (CheckService) context.getService(ref);
+        CheckService check = (CheckService) getContext().getService(ref);
         Properties props = check.getProps();
         
         Byte b = (Byte) props.get("b");
@@ -208,9 +208,9 @@ public class TestBothProperties extends OSGiTestCase {
         
         reconfigureString(instance);
         
-        ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance.getInstanceName());
+        ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance.getInstanceName());
         assertNotNull("Test check service availability", ref);
-        check = (CheckService) context.getService(ref);
+        check = (CheckService) getContext().getService(ref);
         props = check.getProps();
         
         b = (Byte) props.get("b");
@@ -252,9 +252,9 @@ public class TestBothProperties extends OSGiTestCase {
     }
     
     public void testConfigurationPrimitiveArrays() {
-        ServiceReference ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance.getInstanceName());
+        ServiceReference ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance.getInstanceName());
         assertNotNull("Test check service availability", ref);
-        CheckService check = (CheckService) context.getService(ref);
+        CheckService check = (CheckService) getContext().getService(ref);
         Properties props = check.getProps();
         
         byte[] b = (byte[]) props.get("bs");
@@ -311,9 +311,9 @@ public class TestBothProperties extends OSGiTestCase {
         
         reconfigure(instance);
         
-        ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance.getInstanceName());
+        ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance.getInstanceName());
         assertNotNull("Test check service availability", ref);
-        check = (CheckService) context.getService(ref);
+        check = (CheckService) getContext().getService(ref);
         props = check.getProps();
         
         b = (byte[]) props.get("bs");
@@ -371,9 +371,9 @@ public class TestBothProperties extends OSGiTestCase {
     }
 
     public void testConfigurationPrimitiveArraysString() {
-        ServiceReference ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance.getInstanceName());
+        ServiceReference ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance.getInstanceName());
         assertNotNull("Test check service availability", ref);
-        CheckService check = (CheckService) context.getService(ref);
+        CheckService check = (CheckService) getContext().getService(ref);
         Properties props = check.getProps();
         
         byte[] b = (byte[]) props.get("bs");
@@ -430,9 +430,9 @@ public class TestBothProperties extends OSGiTestCase {
         
         reconfigureString(instance);
         
-        ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance.getInstanceName());
+        ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance.getInstanceName());
         assertNotNull("Test check service availability", ref);
-        check = (CheckService) context.getService(ref);
+        check = (CheckService) getContext().getService(ref);
         props = check.getProps();
         
         b = (byte[]) props.get("bs");
@@ -490,9 +490,9 @@ public class TestBothProperties extends OSGiTestCase {
     }
     
     public void testConfigurationObj() {
-        ServiceReference ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance.getInstanceName());
+        ServiceReference ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance.getInstanceName());
         assertNotNull("Test check service availability", ref);
-        CheckService check = (CheckService) context.getService(ref);
+        CheckService check = (CheckService) getContext().getService(ref);
         Properties props = check.getProps();
         
         String s = (String) props.get("string");
@@ -511,9 +511,9 @@ public class TestBothProperties extends OSGiTestCase {
         
         reconfigure(instance);
         
-        ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance.getInstanceName());
+        ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance.getInstanceName());
         assertNotNull("Test check service availability", ref);
-        check = (CheckService) context.getService(ref);
+        check = (CheckService) getContext().getService(ref);
         props = check.getProps();
         
         s = (String) props.get("string");
@@ -532,9 +532,9 @@ public class TestBothProperties extends OSGiTestCase {
     }
 
     public void testConfigurationObjString() {
-        ServiceReference ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance.getInstanceName());
+        ServiceReference ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance.getInstanceName());
         assertNotNull("Test check service availability", ref);
-        CheckService check = (CheckService) context.getService(ref);
+        CheckService check = (CheckService) getContext().getService(ref);
         Properties props = check.getProps();
         
         String s = (String) props.get("string");
@@ -553,9 +553,9 @@ public class TestBothProperties extends OSGiTestCase {
         
         reconfigureString(instance);
         
-        ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance.getInstanceName());
+        ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance.getInstanceName());
         assertNotNull("Test check service availability", ref);
-        check = (CheckService) context.getService(ref);
+        check = (CheckService) getContext().getService(ref);
         props = check.getProps();
         
         s = (String) props.get("string");
@@ -622,9 +622,9 @@ public class TestBothProperties extends OSGiTestCase {
     }
 
     public void testConfigurationPrimitiveNoValue() {
-        ServiceReference ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance2.getInstanceName());
+        ServiceReference ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance2.getInstanceName());
         assertNotNull("Test check service availability", ref);
-        CheckService check = (CheckService) context.getService(ref);
+        CheckService check = (CheckService) getContext().getService(ref);
         Properties props = check.getProps();
         
         Byte b = (Byte) props.get("b");
@@ -665,9 +665,9 @@ public class TestBothProperties extends OSGiTestCase {
         
         reconfigure(instance2);
         
-        ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance2.getInstanceName());
+        ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance2.getInstanceName());
         assertNotNull("Test check service availability", ref);
-        check = (CheckService) context.getService(ref);
+        check = (CheckService) getContext().getService(ref);
         props = check.getProps();
         
         b = (Byte) props.get("b");
@@ -709,9 +709,9 @@ public class TestBothProperties extends OSGiTestCase {
     }
 
     public void testConfigurationPrimitiveArraysNoValue() {
-        ServiceReference ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance2.getInstanceName());
+        ServiceReference ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance2.getInstanceName());
         assertNotNull("Test check service availability", ref);
-        CheckService check = (CheckService) context.getService(ref);
+        CheckService check = (CheckService) getContext().getService(ref);
         Properties props = check.getProps();
         
         byte[] b = (byte[]) props.get("bs");
@@ -752,9 +752,9 @@ public class TestBothProperties extends OSGiTestCase {
         
         reconfigure(instance2);
         
-        ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance2.getInstanceName());
+        ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance2.getInstanceName());
         assertNotNull("Test check service availability", ref);
-        check = (CheckService) context.getService(ref);
+        check = (CheckService) getContext().getService(ref);
         props = check.getProps();
         
         b = (byte[]) props.get("bs");
@@ -812,9 +812,9 @@ public class TestBothProperties extends OSGiTestCase {
     }
 
     public void testConfigurationObjNoValue() {
-        ServiceReference ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance2.getInstanceName());
+        ServiceReference ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance2.getInstanceName());
         assertNotNull("Test check service availability", ref);
-        CheckService check = (CheckService) context.getService(ref);
+        CheckService check = (CheckService) getContext().getService(ref);
         Properties props = check.getProps();
         
         
@@ -833,9 +833,9 @@ public class TestBothProperties extends OSGiTestCase {
         
         reconfigure(instance2);
         
-        ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance2.getInstanceName());
+        ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance2.getInstanceName());
         assertNotNull("Test check service availability", ref);
-        check = (CheckService) context.getService(ref);
+        check = (CheckService) getContext().getService(ref);
         props = check.getProps();
         
         s = (String) props.get("string");

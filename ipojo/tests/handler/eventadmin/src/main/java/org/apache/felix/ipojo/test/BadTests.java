@@ -147,12 +147,12 @@ public class BadTests extends OSGiTestCase {
      * 
      */
     public void setUp() {
-    	m_utils = new EahTestUtils(context);
+    	m_utils = new EahTestUtils(getContext());
         /**
          * Get the list of available components.
          */
         try {
-            String header = (String) context.getBundle().getHeaders().get(
+            String header = (String) getContext().getBundle().getHeaders().get(
                     "iPOJO-Components");
             m_components = ManifestMetadataParser.parseHeaderMetadata(header)
                     .getElements("component");
@@ -279,21 +279,21 @@ public class BadTests extends OSGiTestCase {
         Dictionary properties = new Hashtable();
 
         // Provider
-        ComponentFactory providerFactory = new ComponentFactory(context,
+        ComponentFactory providerFactory = new ComponentFactory(getContext(),
                 m_provider);
         providerFactory.start();
         properties.put("instance.name","Emperor of donuts");
         ComponentInstance providerInstance = providerFactory
                 .createComponentInstance(properties);
         ServiceReference providerService = IPojoTestUtils
-                .getServiceReferenceByName(context, DonutProvider.class
+                .getServiceReferenceByName(getContext(), DonutProvider.class
                         .getName(), providerInstance.getInstanceName());
-        DonutProvider provider = (DonutProvider) context
+        DonutProvider provider = (DonutProvider) getContext()
                 .getService(providerService);
 
         // The consumer
         properties = new Hashtable();
-        ComponentFactory consumerFactory = new ComponentFactory(context,
+        ComponentFactory consumerFactory = new ComponentFactory(getContext(),
                 m_consumer);
         consumerFactory.start();
         properties.put("instance.name","Homer Simpson");
@@ -301,9 +301,9 @@ public class BadTests extends OSGiTestCase {
         ComponentInstance consumerInstance = consumerFactory
                 .createComponentInstance(properties);
         ServiceReference consumerService = IPojoTestUtils
-                .getServiceReferenceByName(context, DonutConsumer.class
+                .getServiceReferenceByName(getContext(), DonutConsumer.class
                         .getName(), consumerInstance.getInstanceName());
-        DonutConsumer consumer = (DonutConsumer) context
+        DonutConsumer consumer = (DonutConsumer) getContext()
                 .getService(consumerService);
 
         /**
@@ -318,9 +318,9 @@ public class BadTests extends OSGiTestCase {
         /**
          * Destroy component's instances.
          */
-        context.ungetService(providerService);
+        getContext().ungetService(providerService);
         providerInstance.dispose();
-        context.ungetService(consumerService);
+        getContext().ungetService(consumerService);
         consumerInstance.dispose();
         providerFactory.stop();
         consumerFactory.stop();
@@ -344,7 +344,7 @@ public class BadTests extends OSGiTestCase {
         m_publisher.removeAttribute(m_publisherName);
 
         // Create and try to start the factory
-        ComponentFactory fact = new ComponentFactory(context, m_provider);
+        ComponentFactory fact = new ComponentFactory(getContext(), m_provider);
         try {
             fact.start();
             // Should not be executed
@@ -376,7 +376,7 @@ public class BadTests extends OSGiTestCase {
         m_publisher.removeAttribute(m_publisherField);
 
         // Create and try to start the factory
-        ComponentFactory fact = new ComponentFactory(context, m_provider);
+        ComponentFactory fact = new ComponentFactory(getContext(), m_provider);
         try {
             fact.start();
             // Should not be executed
@@ -411,7 +411,7 @@ public class BadTests extends OSGiTestCase {
         m_publisher.addAttribute(unexistingField);
 
         // Create and try to start the factory
-        ComponentFactory fact = new ComponentFactory(context, m_provider);
+        ComponentFactory fact = new ComponentFactory(getContext(), m_provider);
         try {
             fact.start();
             // Should not be executed
@@ -447,7 +447,7 @@ public class BadTests extends OSGiTestCase {
         m_publisher.addAttribute(badTypedField);
 
         // Create and try to start the factory
-        ComponentFactory fact = new ComponentFactory(context, m_provider);
+        ComponentFactory fact = new ComponentFactory(getContext(), m_provider);
         try {
             fact.start();
             // Should not be executed
@@ -478,7 +478,7 @@ public class BadTests extends OSGiTestCase {
 
         // Remove the topics attribute of the publisher
         m_publisher.removeAttribute(m_publisherTopics);
-        ComponentFactory fact = new ComponentFactory(context, m_provider);
+        ComponentFactory fact = new ComponentFactory(getContext(), m_provider);
         fact.start();
 
         // Try to create an instance without specified topics
@@ -522,7 +522,7 @@ public class BadTests extends OSGiTestCase {
         m_publisher.addAttribute(malformedTopics);
 
         // Create and try to start the factory
-        ComponentFactory fact = new ComponentFactory(context, m_provider);
+        ComponentFactory fact = new ComponentFactory(getContext(), m_provider);
         try {
             fact.start();
             // Should not be executed
@@ -559,7 +559,7 @@ public class BadTests extends OSGiTestCase {
         m_publisher.addAttribute(malformedTopics);
 
         // Create and try to start the factory
-        ComponentFactory fact = new ComponentFactory(context, m_provider);
+        ComponentFactory fact = new ComponentFactory(getContext(), m_provider);
         try {
             fact.start();
             // Should not be executed
@@ -591,7 +591,7 @@ public class BadTests extends OSGiTestCase {
         // Remove the topics attribute of the publisher and replace with a
         // malformed one
         m_publisher.removeAttribute(m_publisherTopics);
-        ComponentFactory fact = new ComponentFactory(context, m_provider);
+        ComponentFactory fact = new ComponentFactory(getContext(), m_provider);
         fact.start();
 
         // Try to create an instance with malformed specified topics
@@ -634,7 +634,7 @@ public class BadTests extends OSGiTestCase {
         m_subscriber.removeAttribute(m_subscriberName);
 
         // Create and try to start the factory
-        ComponentFactory fact = new ComponentFactory(context, m_consumer);
+        ComponentFactory fact = new ComponentFactory(getContext(), m_consumer);
         try {
             fact.start();
             // Should not be executed
@@ -666,7 +666,7 @@ public class BadTests extends OSGiTestCase {
         m_subscriber.removeAttribute(m_subscriberCallback);
 
         // Create and try to start the factory
-        ComponentFactory fact = new ComponentFactory(context, m_consumer);
+        ComponentFactory fact = new ComponentFactory(getContext(), m_consumer);
         try {
             fact.start();
             // Should not be executed
@@ -696,7 +696,7 @@ public class BadTests extends OSGiTestCase {
 
         // Remove the topics attribute of the subscriber
         m_subscriber.removeAttribute(m_subscriberTopics);
-        ComponentFactory fact = new ComponentFactory(context, m_consumer);
+        ComponentFactory fact = new ComponentFactory(getContext(), m_consumer);
         fact.start();
 
         // Try to create an instance without specified topics
@@ -741,7 +741,7 @@ public class BadTests extends OSGiTestCase {
         m_subscriber.addAttribute(malformedTopics);
 
         // Create and try to start the factory
-        ComponentFactory fact = new ComponentFactory(context, m_consumer);
+        ComponentFactory fact = new ComponentFactory(getContext(), m_consumer);
         try {
             fact.start();
             // Should not be executed
@@ -773,7 +773,7 @@ public class BadTests extends OSGiTestCase {
         // Remove the topics attribute of the subscriber and replace with a
         // malformed one
         m_subscriber.removeAttribute(m_subscriberTopics);
-        ComponentFactory fact = new ComponentFactory(context, m_consumer);
+        ComponentFactory fact = new ComponentFactory(getContext(), m_consumer);
         fact.start();
 
         // Try to create an instance with malformed specified topics
@@ -819,7 +819,7 @@ public class BadTests extends OSGiTestCase {
         m_subscriber.addAttribute(unknownType);
 
         // Create and try to start the factory
-        ComponentFactory fact = new ComponentFactory(context, m_consumer);
+        ComponentFactory fact = new ComponentFactory(getContext(), m_consumer);
         try {
             fact.start();
             // Should not be executed
@@ -856,7 +856,7 @@ public class BadTests extends OSGiTestCase {
         m_subscriber.addAttribute(unknownType);
 
         // Create and try to start the factory
-        ComponentFactory fact = new ComponentFactory(context, m_consumer);
+        ComponentFactory fact = new ComponentFactory(getContext(), m_consumer);
         try {
             fact.start();
             // Should not be executed

@@ -1,16 +1,18 @@
 package org.apache.felix.ipojo.test.scenarios.annotations;
 
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.test.scenarios.component.ProvidesSimple;
-import org.apache.felix.ipojo.test.scenarios.util.Utils;
 
 public class OptionalDependency extends OSGiTestCase {
     
     private Element[] deps ;
+    private IPOJOHelper helper;
     
     public void setUp() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.OptionalDependency");
+        helper = new IPOJOHelper(this);
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.OptionalDependency");
         deps = meta.getElements("requires");
     }
     
@@ -57,7 +59,7 @@ public class OptionalDependency extends OSGiTestCase {
     }
     
     public void testNullable() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.NullableDependency");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.NullableDependency");
         Element[] deps = meta.getElements("requires");
         Element fs = getDependencyById(deps, "fs");
         String nullable = fs.getAttribute("nullable");
@@ -66,7 +68,7 @@ public class OptionalDependency extends OSGiTestCase {
     }
     
     public void testNoNullable() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.NullableDependency");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.NullableDependency");
         Element[] deps = meta.getElements("requires");
         Element fs = getDependencyById(deps, "fs2");
         String nullable = fs.getAttribute("nullable");
@@ -75,7 +77,7 @@ public class OptionalDependency extends OSGiTestCase {
     }
     
     public void testDefaultImplmentation() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.DefaultImplementationDependency");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.DefaultImplementationDependency");
         Element[] deps = meta.getElements("requires");
         Element fs = getDependencyById(deps, "fs");
         String di = fs.getAttribute("default-implementation");
@@ -97,26 +99,6 @@ public class OptionalDependency extends OSGiTestCase {
             }
         }
         fail("Dependency  " + name + " not found");
-        return null;
-    }
-    
-    private String getBind(Element dep) {
-        Element[] elem = dep.getElements("callback");
-        for (int i = 0; elem != null && i < elem.length; i++) {
-            if (elem[i].getAttribute("type").equalsIgnoreCase("bind")) {
-                return elem[i].getAttribute("method");
-            }
-        }
-        return null;
-    }
-    
-    private String getUnbind(Element dep) {
-        Element[] elem = dep.getElements("callback");
-        for (int i = 0; elem != null && i < elem.length; i++) {
-            if (elem[i].getAttribute("type").equalsIgnoreCase("unbind")) {
-                return elem[i].getAttribute("method");
-            }
-        }
         return null;
     }
 

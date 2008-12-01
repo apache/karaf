@@ -38,31 +38,31 @@ public class MethodDelayedSimpleDependencies extends OSGiTestCase {
 		try {
 			Properties prov = new Properties();
 			prov.put("instance.name","FooProvider");
-			fooProvider = Utils.getFactoryByName(context, "FooProviderType-1").createComponentInstance(prov);
+			fooProvider = Utils.getFactoryByName(getContext(), "FooProviderType-1").createComponentInstance(prov);
 		
 			Properties i3 = new Properties();
 			i3.put("instance.name","Object");
-			instance3 = Utils.getFactoryByName(context, "MObjectCheckServiceProvider").createComponentInstance(i3);
+			instance3 = Utils.getFactoryByName(getContext(), "MObjectCheckServiceProvider").createComponentInstance(i3);
 			instance3.stop();
 		
 			Properties i4 = new Properties();
 			i4.put("instance.name","Ref");
-			instance4 = Utils.getFactoryByName(context, "MRefCheckServiceProvider").createComponentInstance(i4);
+			instance4 = Utils.getFactoryByName(getContext(), "MRefCheckServiceProvider").createComponentInstance(i4);
 			instance4.stop();
 			
 			Properties i5 = new Properties();
             i5.put("instance.name","Both");
-            instance5 = Utils.getFactoryByName(context, "MBothCheckServiceProvider").createComponentInstance(i5);
+            instance5 = Utils.getFactoryByName(getContext(), "MBothCheckServiceProvider").createComponentInstance(i5);
             instance5.stop();
             
             Properties i6 = new Properties();
             i6.put("instance.name","Map");
-            instance6 = Utils.getFactoryByName(context, "MMapCheckServiceProvider").createComponentInstance(i6);
+            instance6 = Utils.getFactoryByName(getContext(), "MMapCheckServiceProvider").createComponentInstance(i6);
             instance6.stop();
             
             Properties i7 = new Properties();
             i7.put("instance.name","Dictionary");
-            instance7 = Utils.getFactoryByName(context, "MDictCheckServiceProvider").createComponentInstance(i7);
+            instance7 = Utils.getFactoryByName(getContext(), "MDictCheckServiceProvider").createComponentInstance(i7);
             instance7.stop();
 		} catch(Exception e) { fail(e.getMessage()); } 
 		
@@ -85,15 +85,15 @@ public class MethodDelayedSimpleDependencies extends OSGiTestCase {
 	
 	public void testObject() {
 		instance3.start();
-		ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance3.getInstanceName());
+		ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance3.getInstanceName());
 		assertNotNull("Check architecture availability", arch_ref);
-		InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();		
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity", id.getState() == ComponentInstance.VALID);
 		
-		ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance3.getInstanceName());
+		ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance3.getInstanceName());
 		assertNotNull("Check CheckService availability", cs_ref);
-		CheckService cs = (CheckService) context.getService(cs_ref);
+		CheckService cs = (CheckService) getContext().getService(cs_ref);
 		Properties props = cs.getProps();
 		//Check properties
 		assertTrue("check CheckService invocation -1", ((Boolean)props.get("result")).booleanValue());
@@ -108,29 +108,29 @@ public class MethodDelayedSimpleDependencies extends OSGiTestCase {
 		
 		fooProvider.stop();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance invalidity - 2", id.getState() == ComponentInstance.INVALID);
 		
 		id = null;
 		cs = null;
-		context.ungetService(arch_ref);
-		context.ungetService(cs_ref);
+		getContext().ungetService(arch_ref);
+		getContext().ungetService(cs_ref);
 		
 		instance3.stop();
 	}
 	
 	public void testRef() {
 		instance4.start();
-		ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance4.getInstanceName());
+		ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance4.getInstanceName());
 		assertNotNull("Check architecture availability", arch_ref);
-		InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity", id.getState() == ComponentInstance.VALID);
 		
-		ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance4.getInstanceName());
+		ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance4.getInstanceName());
 		assertNotNull("Check CheckService availability", cs_ref);
-		CheckService cs = (CheckService) context.getService(cs_ref);
+		CheckService cs = (CheckService) getContext().getService(cs_ref);
 		Properties props = cs.getProps();
 		//Check properties
 		assertTrue("check CheckService invocation -1", ((Boolean)props.get("result")).booleanValue());
@@ -145,29 +145,29 @@ public class MethodDelayedSimpleDependencies extends OSGiTestCase {
 	        
 		fooProvider.stop();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance invalidity - 2", id.getState() == ComponentInstance.INVALID);
 		
 		id = null;
 		cs = null;
-		context.ungetService(arch_ref);
-		context.ungetService(cs_ref);
+		getContext().ungetService(arch_ref);
+		getContext().ungetService(cs_ref);
 		
 		instance4.stop();
 	}
 	
 	public void testBoth() {
         instance5.start();
-        ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance5.getInstanceName());
+        ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance5.getInstanceName());
         assertNotNull("Check architecture availability", arch_ref);
-        InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity", id.getState() == ComponentInstance.VALID);
         
-        ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance5.getInstanceName());
+        ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance5.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        CheckService cs = (CheckService) context.getService(cs_ref);
+        CheckService cs = (CheckService) getContext().getService(cs_ref);
         Properties props = cs.getProps();
         //Check properties
         assertTrue("check CheckService invocation -1", ((Boolean)props.get("result")).booleanValue());
@@ -182,29 +182,29 @@ public class MethodDelayedSimpleDependencies extends OSGiTestCase {
         
         fooProvider.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 2", id.getState() == ComponentInstance.INVALID);
         
         id = null;
         cs = null;
-        context.ungetService(arch_ref);
-        context.ungetService(cs_ref);
+        getContext().ungetService(arch_ref);
+        getContext().ungetService(cs_ref);
         
         instance5.stop();
     }
 	
 	public void testMap() {
 	        instance6.start();
-	        ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance6.getInstanceName());
+	        ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance6.getInstanceName());
 	        assertNotNull("Check architecture availability", arch_ref);
-	        InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+	        InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 	        
-	        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+	        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 	        assertTrue("Check instance validity", id.getState() == ComponentInstance.VALID);
 	        
-	        ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance6.getInstanceName());
+	        ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance6.getInstanceName());
 	        assertNotNull("Check CheckService availability", cs_ref);
-	        CheckService cs = (CheckService) context.getService(cs_ref);
+	        CheckService cs = (CheckService) getContext().getService(cs_ref);
 	        Properties props = cs.getProps();
 	        //Check properties
 	        assertTrue("check CheckService invocation -1", ((Boolean)props.get("result")).booleanValue());
@@ -223,29 +223,29 @@ public class MethodDelayedSimpleDependencies extends OSGiTestCase {
 	        
 	        fooProvider.stop();
 	        
-	        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+	        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 	        assertTrue("Check instance invalidity - 2", id.getState() == ComponentInstance.INVALID);
 	        
 	        id = null;
 	        cs = null;
-	        context.ungetService(arch_ref);
-	        context.ungetService(cs_ref);
+	        getContext().ungetService(arch_ref);
+	        getContext().ungetService(cs_ref);
 	        
 	        instance6.stop();
 	}
 	
 	public void testDict() {
         instance7.start();
-        ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance7.getInstanceName());
+        ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance7.getInstanceName());
         assertNotNull("Check architecture availability", arch_ref);
-        InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity", id.getState() == ComponentInstance.VALID);
         
-        ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance7.getInstanceName());
+        ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance7.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        CheckService cs = (CheckService) context.getService(cs_ref);
+        CheckService cs = (CheckService) getContext().getService(cs_ref);
         Properties props = cs.getProps();
         //Check properties
         assertTrue("check CheckService invocation -1", ((Boolean)props.get("result")).booleanValue());
@@ -264,13 +264,13 @@ public class MethodDelayedSimpleDependencies extends OSGiTestCase {
         
         fooProvider.stop();
         
-        id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+        id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 2", id.getState() == ComponentInstance.INVALID);
         
         id = null;
         cs = null;
-        context.ungetService(arch_ref);
-        context.ungetService(cs_ref);
+        getContext().ungetService(arch_ref);
+        getContext().ungetService(cs_ref);
         
         instance7.stop();
 }

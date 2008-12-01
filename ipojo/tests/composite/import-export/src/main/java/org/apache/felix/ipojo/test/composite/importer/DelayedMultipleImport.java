@@ -38,7 +38,7 @@ public class DelayedMultipleImport extends OSGiTestCase {
 		
 		Properties p = new Properties();
 		p.put("instance.name","importer");
-		Factory compFact = Utils.getFactoryByName(context, "composite.requires.2");
+		Factory compFact = Utils.getFactoryByName(getContext(), "composite.requires.2");
 		try {
 			import2 = compFact.createComponentInstance(p);
 		} catch(Exception e) {
@@ -47,7 +47,7 @@ public class DelayedMultipleImport extends OSGiTestCase {
 		
 		import2.stop();
 		
-		fooProvider = Utils.getFactoryByName(context, "COMPO-FooProviderType-1");
+		fooProvider = Utils.getFactoryByName(getContext(), "COMPO-FooProviderType-1");
 		assertNotNull("Check fooProvider availability", fooProvider);
 		
 		Properties p1 = new Properties();

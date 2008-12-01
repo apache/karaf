@@ -37,7 +37,7 @@ public class FooProviderType1 implements FooService {
         if (bc ==null) {
             throw new RuntimeException("Injected bundle context null");
         }
-            m_context = bc;
+        m_context = bc;
     }
 
 	public boolean foo() {

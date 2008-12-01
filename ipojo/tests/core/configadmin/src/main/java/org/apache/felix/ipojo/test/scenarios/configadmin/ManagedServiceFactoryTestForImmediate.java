@@ -20,8 +20,8 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
     private ConfigurationAdmin admin;
     
     public void setUp() {
-        factory = (ComponentFactory) Utils.getFactoryByName(context, "CA-ImmConfigurableProvider");
-        admin = (ConfigurationAdmin) Utils.getServiceObject(context, ConfigurationAdmin.class.getName(), null);
+        factory = (ComponentFactory) Utils.getFactoryByName(getContext(), "CA-ImmConfigurableProvider");
+        admin = (ConfigurationAdmin) Utils.getServiceObject(getContext(), ConfigurationAdmin.class.getName(), null);
         assertNotNull("Check configuration admin availability", admin);
         try {
             Configuration[] configurations = admin.listConfigurations("(service.factoryPid=CA-ImmConfigurableProvider)");
@@ -77,16 +77,16 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
         String pid = configuration.getPid();
         
         //  The instance should be created, wait for the architecture service
-        Utils.waitForService(context, Architecture.class.getName(), "(architecture.instance="+pid+")");
-        Architecture architecture = (Architecture) Utils.getServiceObject(context, Architecture.class.getName(), "(architecture.instance="+pid+")");
+        Utils.waitForService(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
+        Architecture architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         
         assertEquals("Check object", 1, architecture.getInstanceDescription().getCreatedObjects().length);
         
-        FooService fs = (FooService) Utils.getServiceObject(context, FooService.class.getName(), "(instance.name=" + pid + ")");
+        FooService fs = (FooService) Utils.getServiceObject(getContext(), FooService.class.getName(), "(instance.name=" + pid + ")");
         Properties p = fs.fooProps();
         String mes = p.getProperty("message");
         int count = ((Integer) p.get("count")).intValue();
-        architecture = (Architecture) Utils.getServiceObject(context, Architecture.class.getName(), "(architecture.instance="+pid+")");
+        architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         
         assertEquals("Assert Message", "message", mes);
         assertEquals("Assert count", 1, count);
@@ -101,11 +101,11 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
             fail(e.getMessage());
         }
         
-        fs = (FooService) Utils.getServiceObject(context, FooService.class.getName(), "(instance.name=" + pid + ")");
+        fs = (FooService) Utils.getServiceObject(getContext(), FooService.class.getName(), "(instance.name=" + pid + ")");
         p = fs.fooProps();
         mes = p.getProperty("message");
         count = ((Integer) p.get("count")).intValue();
-        architecture = (Architecture) Utils.getServiceObject(context, Architecture.class.getName(), "(architecture.instance="+pid+")");
+        architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         
         assertEquals("Assert Message", "message2", mes);
         assertEquals("Assert count", 2, count);
@@ -118,7 +118,7 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
             fail(e.getMessage());
         }
         
-        ServiceReference ref = Utils.getServiceReference(context, FooService.class.getName(), "(instance.name=" + pid + ")");
+        ServiceReference ref = Utils.getServiceReference(getContext(), FooService.class.getName(), "(instance.name=" + pid + ")");
         assertNull("Check unavailability", ref);
     }
     
@@ -146,8 +146,8 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
         System.out.println("PID : " + pid);
         
         //  The instance should be created, wait for the architecture service
-        Utils.waitForService(context, Architecture.class.getName(), "(architecture.instance="+pid+")");
-        Architecture architecture = (Architecture) Utils.getServiceObject(context, Architecture.class.getName(), "(architecture.instance="+pid+")");
+        Utils.waitForService(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
+        Architecture architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         
         assertEquals("Check object", 1, architecture.getInstanceDescription().getCreatedObjects().length);
         
@@ -160,16 +160,16 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
             fail(e.getMessage());
         }
         
-        architecture = (Architecture) Utils.getServiceObject(context, Architecture.class.getName(), "(architecture.instance="+pid+")");
+        architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         
         assertEquals("Check object -2", 1, architecture.getInstanceDescription().getCreatedObjects().length);
         
         //Invoke
-        FooService fs = (FooService) Utils.getServiceObject(context, FooService.class.getName(), "(instance.name=" + pid + ")");
+        FooService fs = (FooService) Utils.getServiceObject(getContext(), FooService.class.getName(), "(instance.name=" + pid + ")");
         Properties p = fs.fooProps();
         String mes = p.getProperty("message");
         int count = ((Integer) p.get("count")).intValue();
-        architecture = (Architecture) Utils.getServiceObject(context, Architecture.class.getName(), "(architecture.instance="+pid+")");
+        architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         
         assertEquals("Assert Message", "message2", mes);
         assertEquals("Assert count", 2, count);
@@ -182,7 +182,7 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
             fail(e.getMessage());
         }
         
-        ServiceReference ref = Utils.getServiceReference(context, FooService.class.getName(), "(instance.name=" + pid + ")");
+        ServiceReference ref = Utils.getServiceReference(getContext(), FooService.class.getName(), "(instance.name=" + pid + ")");
         assertNull("Check unavailability", ref);
     }
     
@@ -208,22 +208,22 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
         
         String pid = configuration.getPid();
         
-        assertNull("check no instance", Utils.getServiceObject(context, Architecture.class.getName(), "(architecture.instance="+pid+")"));
+        assertNull("check no instance", Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")"));
         
         factory.start();
         
         
         //  The instance should be created, wait for the architecture service
-        Utils.waitForService(context, Architecture.class.getName(), "(architecture.instance="+pid+")");
-        Architecture architecture = (Architecture) Utils.getServiceObject(context, Architecture.class.getName(), "(architecture.instance="+pid+")");
+        Utils.waitForService(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
+        Architecture architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         
         assertEquals("Check object", 1, architecture.getInstanceDescription().getCreatedObjects().length);
         
-        FooService fs = (FooService) Utils.getServiceObject(context, FooService.class.getName(), "(instance.name=" + pid + ")");
+        FooService fs = (FooService) Utils.getServiceObject(getContext(), FooService.class.getName(), "(instance.name=" + pid + ")");
         Properties p = fs.fooProps();
         String mes = p.getProperty("message");
         int count = ((Integer) p.get("count")).intValue();
-        architecture = (Architecture) Utils.getServiceObject(context, Architecture.class.getName(), "(architecture.instance="+pid+")");
+        architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         
         assertEquals("Assert Message", "message", mes);
         assertEquals("Assert count", 1, count);
@@ -238,11 +238,11 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
             fail(e.getMessage());
         }
         
-        fs = (FooService) Utils.getServiceObject(context, FooService.class.getName(), "(instance.name=" + pid + ")");
+        fs = (FooService) Utils.getServiceObject(getContext(), FooService.class.getName(), "(instance.name=" + pid + ")");
         p = fs.fooProps();
         mes = p.getProperty("message");
         count = ((Integer) p.get("count")).intValue();
-        architecture = (Architecture) Utils.getServiceObject(context, Architecture.class.getName(), "(architecture.instance="+pid+")");
+        architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         
         assertEquals("Assert Message", "message2", mes);
         //assertEquals("Assert count", 2, count);
@@ -256,7 +256,7 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
             fail(e.getMessage());
         }
         
-        ServiceReference ref = Utils.getServiceReference(context, FooService.class.getName(), "(instance.name=" + pid + ")");
+        ServiceReference ref = Utils.getServiceReference(getContext(), FooService.class.getName(), "(instance.name=" + pid + ")");
         assertNull("Check unavailability", ref);
     }
     
@@ -283,14 +283,14 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
         
         String pid = configuration.getPid();
         
-        assertNull("check no instance", Utils.getServiceObject(context, Architecture.class.getName(), "(architecture.instance="+pid+")"));
+        assertNull("check no instance", Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")"));
         
         factory.start();
         
         
         //  The instance should be created, wait for the architecture service
-        Utils.waitForService(context, Architecture.class.getName(), "(architecture.instance="+pid+")");
-        Architecture architecture = (Architecture) Utils.getServiceObject(context, Architecture.class.getName(), "(architecture.instance="+pid+")");
+        Utils.waitForService(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
+        Architecture architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         
         assertEquals("Check object", 1, architecture.getInstanceDescription().getCreatedObjects().length);
         
@@ -303,16 +303,16 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
             fail(e.getMessage());
         }
         
-        architecture = (Architecture) Utils.getServiceObject(context, Architecture.class.getName(), "(architecture.instance="+pid+")");
+        architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         
         assertEquals("Check object -1", 1, architecture.getInstanceDescription().getCreatedObjects().length);
         
         //Invoke
-        FooService fs = (FooService) Utils.getServiceObject(context, FooService.class.getName(), "(instance.name=" + pid + ")");
+        FooService fs = (FooService) Utils.getServiceObject(getContext(), FooService.class.getName(), "(instance.name=" + pid + ")");
         Properties p = fs.fooProps();
         String mes = p.getProperty("message");
         int count = ((Integer) p.get("count")).intValue();
-        architecture = (Architecture) Utils.getServiceObject(context, Architecture.class.getName(), "(architecture.instance="+pid+")");
+        architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         
         assertEquals("Assert Message", "message2", mes);
         assertEquals("Assert count", 2, count);
@@ -325,7 +325,7 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
             fail(e.getMessage());
         }
         
-        ServiceReference ref = Utils.getServiceReference(context, FooService.class.getName(), "(instance.name=" + pid + ")");
+        ServiceReference ref = Utils.getServiceReference(getContext(), FooService.class.getName(), "(instance.name=" + pid + ")");
         assertNull("Check unavailability", ref);
     }
     

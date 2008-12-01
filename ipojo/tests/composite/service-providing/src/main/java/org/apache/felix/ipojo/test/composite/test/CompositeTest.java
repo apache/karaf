@@ -34,7 +34,7 @@ import org.osgi.framework.ServiceReference;
 public class CompositeTest extends OSGiTestCase {
 	
 	public void testAPI() {
-		Factory fact1 = Utils.getFactoryByName(context, "composite.empty");
+		Factory fact1 = Utils.getFactoryByName(getContext(), "composite.empty");
 		Properties p = new Properties();
 		p.put("instance.name","empty-1");
 		ComponentInstance empty = null;
@@ -47,10 +47,10 @@ public class CompositeTest extends OSGiTestCase {
 		
 		ServiceContext sc = Utils.getServiceContext(empty);
 		
-		Factory fact2 = Utils.getFactoryByName(context, "composite.test.2");
+		Factory fact2 = Utils.getFactoryByName(getContext(), "composite.test.2");
 		Properties props2 = new Properties();
 		props2.put("instance.name","2"); // 2
-		Factory fact3 = Utils.getFactoryByName(context, "composite.test.3");
+		Factory fact3 = Utils.getFactoryByName(getContext(), "composite.test.3");
 		Properties props3 = new Properties();
 		props3.put("instance.name","3");
 		ComponentInstance comp2 = null;
@@ -81,7 +81,7 @@ public class CompositeTest extends OSGiTestCase {
 	
 	public void testInstantiator() {
 		String type = "composite.instantiator";
-		Factory fact = Utils.getFactoryByName(context, type);
+		Factory fact = Utils.getFactoryByName(getContext(), type);
 		ComponentInstance ci = null;
 		Properties p = new Properties();
 		p.put("instance.name","mon_coeur");
@@ -92,21 +92,21 @@ public class CompositeTest extends OSGiTestCase {
 		}
 				
 		assertTrue("Check ci", ci.getState() == ComponentInstance.VALID);
-		ServiceReference ref = Utils.getServiceReferenceByName(context, BazService.class.getName(), "mon_coeur");
+		ServiceReference ref = Utils.getServiceReferenceByName(getContext(), BazService.class.getName(), "mon_coeur");
 		assertNotNull("Check ref",ref);
-		BazService bs = (BazService) context.getService(ref);
+		BazService bs = (BazService) getContext().getService(ref);
 		assertTrue("Check invocation", bs.foo());
-		context.ungetService(ref);
-		ref = Utils.getServiceReferenceByName(context, FooService.class.getName(), "mon_coeur");
+		getContext().ungetService(ref);
+		ref = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), "mon_coeur");
 		assertNotNull("Check ref 2 ",ref);
-		FooService fs = (FooService) context.getService(ref);
+		FooService fs = (FooService) getContext().getService(ref);
 		assertTrue("Check invocation", fs.foo());
-		context.ungetService(ref);
+		getContext().ungetService(ref);
 		ci.dispose();
 	}
 	
 	public void testAPI2() {
-		Factory fact1 = Utils.getFactoryByName(context, "composite.empty");
+		Factory fact1 = Utils.getFactoryByName(getContext(), "composite.empty");
 		Properties p = new Properties();
 		p.put("instance.name","empty-2");
 		ComponentInstance empty = null;
@@ -151,7 +151,7 @@ public class CompositeTest extends OSGiTestCase {
 
 	
 	public void testApplication() {
-		Factory factory = Utils.getFactoryByName(context, "composite.test.1");
+		Factory factory = Utils.getFactoryByName(getContext(), "composite.test.1");
 		ComponentInstance ci = null;
 		Properties props = new Properties();
 		props.put("instance.name","Test");
@@ -165,12 +165,12 @@ public class CompositeTest extends OSGiTestCase {
 		
 		ServiceReference[] refs = null;
 		try {
-			refs = context.getServiceReferences(CheckService.class.getName(), "(instance.name=Test)");
+			refs = getContext().getServiceReferences(CheckService.class.getName(), "(instance.name=Test)");
 		} catch (InvalidSyntaxException e) {
 			fail("Invalid filter : " + e.getMessage());
 		}
 		assertNotNull("Check refs not null", refs);
-		CheckService cs = (CheckService) context.getService(refs[0]);
+		CheckService cs = (CheckService) getContext().getService(refs[0]);
 		
 		assertTrue("Check invocation", cs.check());
 		ci.dispose();

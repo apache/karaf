@@ -1,13 +1,19 @@
 package org.apache.felix.ipojo.test.scenarios.annotations;
 
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
 import org.apache.felix.ipojo.metadata.Element;
-import org.apache.felix.ipojo.test.scenarios.util.Utils;
 
 public class LifecycleCallbacks extends OSGiTestCase {
     
+    private IPOJOHelper helper;
+    
+    public void setUp() {
+        helper = new IPOJOHelper(this);
+    }
+    
     public void testCallbacks() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.Lifecycle");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.Lifecycle");
         Element[] cbs = meta.getElements("callback");
         assertNotNull("Callbacks exists ", cbs);
         assertEquals("Callbacks count ", 2, cbs.length);
@@ -22,13 +28,13 @@ public class LifecycleCallbacks extends OSGiTestCase {
     }
     
     public void testImmediate() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.Immediate");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.Immediate");
         assertNotNull("Immediate attribute", meta.getAttribute("immediate"));
         assertEquals("Immediate attribute value", "true", meta.getAttribute("immediate"));
     }
     
     public void testNoImmediate() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.NoImmediate");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.NoImmediate");
         assertNotNull("Immediate attribute", meta.getAttribute("immediate"));
         assertEquals("Immediate attribute value", "false", meta.getAttribute("immediate"));
     }

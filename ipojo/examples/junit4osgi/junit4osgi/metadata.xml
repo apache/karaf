@@ -16,7 +16,6 @@
 	specific language governing permissions and limitations
 	under the License.
 -->
-<?xml version="1.0" encoding="UTF-8"?>
 <ipojo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/schemas/core.xsd 
 	    org.apache.felix.ipojo.extender http://people.apache.org/~clement/ipojo/schemas/extender-pattern.xsd"

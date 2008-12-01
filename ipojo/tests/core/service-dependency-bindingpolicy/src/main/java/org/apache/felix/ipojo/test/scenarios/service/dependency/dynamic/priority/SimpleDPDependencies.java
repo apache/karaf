@@ -41,22 +41,22 @@ public class SimpleDPDependencies extends OSGiTestCase {
 			Properties prov = new Properties();
 			prov.put("instance.name","FooProvider-1");
 			prov.put("service.ranking", "1");
-			fooProvider = Utils.getFactoryByName(context, "RankedFooProviderType").createComponentInstance(prov);
+			fooProvider = Utils.getFactoryByName(getContext(), "RankedFooProviderType").createComponentInstance(prov);
 			fooProvider.stop();
 			
 			Properties prov2 = new Properties();
             prov2.put("instance.name","FooProvider-2");
             prov2.put("service.ranking", "0");
-            fooProvider2 = Utils.getFactoryByName(context, "RankedFooProviderType").createComponentInstance(prov2);
+            fooProvider2 = Utils.getFactoryByName(getContext(), "RankedFooProviderType").createComponentInstance(prov2);
             fooProvider2.stop();
 		
 			Properties i1 = new Properties();
 			i1.put("instance.name","Simple");
-			instance1 = Utils.getFactoryByName(context, "DPSimpleCheckServiceProvider").createComponentInstance(i1);
+			instance1 = Utils.getFactoryByName(getContext(), "DPSimpleCheckServiceProvider").createComponentInstance(i1);
 		
 			Properties i3 = new Properties();
 			i3.put("instance.name","Object");
-			instance3 = Utils.getFactoryByName(context, "DPObjectCheckServiceProvider").createComponentInstance(i3);
+			instance3 = Utils.getFactoryByName(getContext(), "DPObjectCheckServiceProvider").createComponentInstance(i3);
 			
 		} catch(Exception e) { 
 		    e.printStackTrace();
@@ -76,81 +76,81 @@ public class SimpleDPDependencies extends OSGiTestCase {
 	}
 	
 	public void testSimple() {
-		ServiceReference arch_ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance1.getInstanceName());
+		ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance1.getInstanceName());
 		assertNotNull("Check architecture availability", arch_ref);
-		InstanceDescription id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance invalidity - 1", id.getState() == ComponentInstance.INVALID);
 		
 		fooProvider.start();
 		fooProvider2.start();
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
 		
-		ServiceReference cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance1.getInstanceName());
+		ServiceReference cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance1.getInstanceName());
 		assertNotNull("Check CheckService availability", cs_ref);
-		CheckService cs = (CheckService) context.getService(cs_ref);
+		CheckService cs = (CheckService) getContext().getService(cs_ref);
 		// Check grade
 		Integer grade = (Integer) cs.getProps().get("int");
 		assertEquals("Check first grade", 1, grade.intValue());
 		
 		fooProvider.stop(); // Turn off the best provider.
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
         
-        cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance1.getInstanceName());
+        cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        cs = (CheckService) context.getService(cs_ref);
+        cs = (CheckService) getContext().getService(cs_ref);
         // Check grade
         grade = (Integer) cs.getProps().get("int");
         assertEquals("Check second grade", 0, grade.intValue());
         
 		fooProvider.start(); // Turn on the best provider.
 		
-		id = ((Architecture) context.getService(arch_ref)).getInstanceDescription();
+		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
         
-        cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance1.getInstanceName());
+        cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        cs = (CheckService) context.getService(cs_ref);
+        cs = (CheckService) getContext().getService(cs_ref);
         // Check grade
         grade = (Integer) cs.getProps().get("int");
         assertEquals("Check third grade", 1, grade.intValue());
         
 		
         // Increase the second provider grade.
-        ServiceReference fs_ref = Utils.getServiceReferenceByName(context, FooService.class.getName(), fooProvider2.getInstanceName());
+        ServiceReference fs_ref = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), fooProvider2.getInstanceName());
         assertNotNull("Check foo service (2) reference", fs_ref);
-        FooService fs = (FooService) context.getService(fs_ref);
+        FooService fs = (FooService) getContext().getService(fs_ref);
         
         fs.foo(); // Increase the grade (now = 2)
         
-        cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance1.getInstanceName());
+        cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        cs = (CheckService) context.getService(cs_ref);
+        cs = (CheckService) getContext().getService(cs_ref);
         // Check grade
         grade = (Integer) cs.getProps().get("int");
         assertEquals("Check fourth grade", 2, grade.intValue());
         
         // Increase the other provider grade.
-        fs_ref = Utils.getServiceReferenceByName(context, FooService.class.getName(), fooProvider.getInstanceName());
+        fs_ref = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), fooProvider.getInstanceName());
         assertNotNull("Check foo service (1) reference", fs_ref);
-        fs = (FooService) context.getService(fs_ref);
+        fs = (FooService) getContext().getService(fs_ref);
         fs.foo(); //(grade = 3)
         
-        cs_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), instance1.getInstanceName());
+        cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance1.getInstanceName());
         assertNotNull("Check CheckService availability", cs_ref);
-        cs = (CheckService) context.getService(cs_ref);
+        cs = (CheckService) getContext().getService(cs_ref);
         // Check grade
         grade = (Integer) cs.getProps().get("int");
         assertEquals("Check fifth grade", 3, grade.intValue());
         		
 		id = null;
 		cs = null;
-		context.ungetService(arch_ref);
-		context.ungetService(cs_ref);
-		context.ungetService(fs_ref);
+		getContext().ungetService(arch_ref);
+		getContext().ungetService(cs_ref);
+		getContext().ungetService(fs_ref);
 		fooProvider.stop();
 		fooProvider2.stop();
 	}

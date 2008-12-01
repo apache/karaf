@@ -35,7 +35,7 @@ public class OptionalMultipleExport extends OSGiTestCase {
 	ComponentInstance foo1 = null, foo2 = null;
 
 	public void setUp() {
-		fooProvider = Utils.getFactoryByName(context, "BazProviderType");
+		fooProvider = Utils.getFactoryByName(getContext(), "BazProviderType");
 		assertNotNull("Check fooProvider availability", fooProvider);
 		
 		Properties p1 = new Properties();
@@ -53,7 +53,7 @@ public class OptionalMultipleExport extends OSGiTestCase {
 		foo1.stop();
 		foo2.stop();
 		
-		Factory factory = Utils.getFactoryByName(context, "composite.export.4");
+		Factory factory = Utils.getFactoryByName(getContext(), "composite.export.4");
 		Properties props = new Properties();
 		props.put("instance.name","export");
 		try {
@@ -76,7 +76,7 @@ public class OptionalMultipleExport extends OSGiTestCase {
 		export3.start();
 		
 		// Check that no foo service are available
-		assertEquals("Check no foo service", Utils.getServiceReferences(context, FooService.class.getName(), null).length, 0);
+		assertEquals("Check no foo service", Utils.getServiceReferences(getContext(), FooService.class.getName(), null).length, 0);
 		
 		// Test invalidity
 		assertTrue("Check validity - 0", export3.getState() == ComponentInstance.VALID);
@@ -210,30 +210,30 @@ public class OptionalMultipleExport extends OSGiTestCase {
 	
 	
 	private boolean isFooServiceProvided() {
-		ServiceReference ref = Utils.getServiceReferenceByName(context, BazService.class.getName(), export3.getInstanceName());
+		ServiceReference ref = Utils.getServiceReferenceByName(getContext(), BazService.class.getName(), export3.getInstanceName());
 		return ref != null;
 	}
 	
 	private int countFooServiceProvided() {
-		ServiceReference[] refs = Utils.getServiceReferences(context, BazService.class.getName(), "(instance.name="+export3.getInstanceName()+")");
+		ServiceReference[] refs = Utils.getServiceReferences(getContext(), BazService.class.getName(), "(instance.name="+export3.getInstanceName()+")");
 		return refs.length;
 	}
 	
 	private boolean invoke() {
-		ServiceReference ref = Utils.getServiceReferenceByName(context, BazService.class.getName(), export3.getInstanceName());
+		ServiceReference ref = Utils.getServiceReferenceByName(getContext(), BazService.class.getName(), export3.getInstanceName());
 		if(ref == null) { return false; }
-		BazService fs = (BazService) context.getService(ref);
-		context.ungetService(ref);
+		BazService fs = (BazService) getContext().getService(ref);
+		getContext().ungetService(ref);
 		return fs.foo();
 	}
 	
 	private boolean invoke(int nb) {
-		ServiceReference[] refs = Utils.getServiceReferences(context, BazService.class.getName(), "(instance.name="+export3.getInstanceName()+")");
+		ServiceReference[] refs = Utils.getServiceReferences(getContext(), BazService.class.getName(), "(instance.name="+export3.getInstanceName()+")");
 		if(refs == null) { return false; }
 		if (nb > refs.length) { return false; }
 		for(int i = 0; i < nb; i++) {
-			BazService fs = (BazService) context.getService(refs[i]);
-			context.ungetService(refs[i]);
+			BazService fs = (BazService) getContext().getService(refs[i]);
+			getContext().ungetService(refs[i]);
 			if(!fs.foo()) { return false; }
 		}
 		return true;

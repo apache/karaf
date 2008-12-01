@@ -15,14 +15,14 @@ public class TestComplexProperties extends OSGiTestCase {
     private CheckService m_check;
     
     public void setUp() {
-       m_ref = Utils.getServiceReferenceByName(context, CheckService.class.getName(), "complex");
+       m_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "complex");
        assertNotNull("Complex service availability", m_ref);
-       m_check = (CheckService) context.getService(m_ref);
+       m_check = (CheckService) getContext().getService(m_ref);
     }
     
     public void tearDown() {
         m_check = null;
-        context.ungetService(m_ref);
+        getContext().ungetService(m_ref);
     }
     
     public void testArray() {

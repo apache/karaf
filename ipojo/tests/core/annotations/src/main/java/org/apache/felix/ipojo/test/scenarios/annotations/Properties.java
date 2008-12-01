@@ -1,13 +1,19 @@
 package org.apache.felix.ipojo.test.scenarios.annotations;
 
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
 import org.apache.felix.ipojo.metadata.Element;
-import org.apache.felix.ipojo.test.scenarios.util.Utils;
 
 public class Properties extends OSGiTestCase {
     
+    private IPOJOHelper helper;
+    
+    public void setUp() {
+        helper = new IPOJOHelper(this);
+    }
+    
     public void testProperties() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.Properties");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.Properties");
         Element[] provs = meta.getElements("properties");
         assertNotNull("Properties exists ", provs);
         Element prov = provs[0];
@@ -40,7 +46,7 @@ public class Properties extends OSGiTestCase {
     }
     
     public void testAbsentPropagation() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.Properties");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.Properties");
         Element[] provs = meta.getElements("properties");
         assertNotNull("Properties exists ", provs);
         Element prov = provs[0];
@@ -49,7 +55,7 @@ public class Properties extends OSGiTestCase {
     }
     
     public void testPropagation() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.Propagation");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.Propagation");
         Element[] provs = meta.getElements("properties");
         assertNotNull("Properties exists ", provs);
         Element prov = provs[0];
@@ -59,7 +65,7 @@ public class Properties extends OSGiTestCase {
     }
     
     public void testNoPropagation() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.NoPropagation");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.NoPropagation");
         Element[] provs = meta.getElements("properties");
         assertNotNull("Properties exists ", provs);
         Element prov = provs[0];
@@ -69,7 +75,7 @@ public class Properties extends OSGiTestCase {
     }
     
     public void testPID() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.ManagedServicePID");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.ManagedServicePID");
         Element[] provs = meta.getElements("properties");
         assertNotNull("Properties exists ", provs);
         Element prov = provs[0];
@@ -79,7 +85,7 @@ public class Properties extends OSGiTestCase {
     }
     
     public void testAbsentPID() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.Properties");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.Properties");
         Element[] provs = meta.getElements("properties");
         assertNotNull("Properties exists ", provs);
         Element prov = provs[0];
@@ -88,7 +94,7 @@ public class Properties extends OSGiTestCase {
     }
     
     public void testPropagationAndPID() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.PropagationandPID");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.PropagationandPID");
         Element[] provs = meta.getElements("properties");
         assertNotNull("Properties exists ", provs);
         Element prov = provs[0];
@@ -101,7 +107,7 @@ public class Properties extends OSGiTestCase {
     }
     
     public void testPIDAndPropagation() {
-        Element meta = Utils.getMetatadata(context, "org.apache.felix.ipojo.test.scenarios.component.PIDandPropagation");
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.PIDandPropagation");
         Element[] provs = meta.getElements("properties");
         assertNotNull("Properties exists ", provs);
         Element prov = provs[0];

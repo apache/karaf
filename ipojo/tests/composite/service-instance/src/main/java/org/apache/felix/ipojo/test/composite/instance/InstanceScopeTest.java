@@ -18,7 +18,7 @@ public class InstanceScopeTest extends OSGiTestCase {
     ComponentInstance instance;
     
     public void setUp() {
-        factory = (CompositeFactory) Utils.getFactoryByName(context, "SCOPE-scope");
+        factory = (CompositeFactory) Utils.getFactoryByName(getContext(), "SCOPE-scope");
         assertNotNull("Factory", factory);
         try {
             instance = factory.createComponentInstance(null);
@@ -35,9 +35,9 @@ public class InstanceScopeTest extends OSGiTestCase {
     }
     
     public void testScope() {
-        ServiceReference ref = Utils.getServiceReferenceByName(context, Architecture.class.getName(), instance.getInstanceName());
+        ServiceReference ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance.getInstanceName());
         assertNotNull("Check architecture availability", ref);
-        Architecture arch = (Architecture) context.getService(ref);
+        Architecture arch = (Architecture) getContext().getService(ref);
         assertTrue("Validity", arch.getInstanceDescription().getState() == ComponentInstance.VALID);
         
         // Get internal service
@@ -53,12 +53,12 @@ public class InstanceScopeTest extends OSGiTestCase {
     }
     
     public void testGlobalUnavailability() {
-        ServiceReference ref2 = Utils.getServiceReference(context, Service.class.getName(), null);
+        ServiceReference ref2 = Utils.getServiceReference(getContext(), Service.class.getName(), null);
         assertNull("Check Service unavailability", ref2);
     }
     
     public void testScopeUnvailability() {
-        CompositeFactory factory2 = (CompositeFactory) Utils.getFactoryByName(context, "SCOPE-badscope");
+        CompositeFactory factory2 = (CompositeFactory) Utils.getFactoryByName(getContext(), "SCOPE-badscope");
         assertNotNull("Factory", factory2);
         ComponentInstance instance2 = null;
         try {

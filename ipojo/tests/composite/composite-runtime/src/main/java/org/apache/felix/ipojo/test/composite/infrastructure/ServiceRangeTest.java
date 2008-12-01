@@ -37,7 +37,7 @@ public class ServiceRangeTest extends OSGiTestCase {
 
 	
 	public void setUp() {
-		emptyFactory = Utils.getFactoryByName(context, "composite.empty");
+		emptyFactory = Utils.getFactoryByName(getContext(), "composite.empty");
 		Properties props = new Properties();
 		props.put("instance.name","empty-1");
 		try {
@@ -82,9 +82,9 @@ public class ServiceRangeTest extends OSGiTestCase {
 		assertNotNull("Check foo service visible inside the composite", sc2.getServiceReference(FooService.class.getName()));
 		assertNotNull("Check check service visible inside the composite", sc2.getServiceReference(CheckService.class.getName()));
 		// Check invisibilty
-		assertNull("Check foo service invisible inside the context", context.getServiceReference(FooService.class.getName()));
+		assertNull("Check foo service invisible inside the context", getContext().getServiceReference(FooService.class.getName()));
 		try {
-			assertNull("Check check service invisible inside the context", context.getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
+			assertNull("Check check service invisible inside the context", getContext().getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
 		} catch (InvalidSyntaxException e) {
 			fail("Invalid filter : " + e);
 		}
@@ -94,9 +94,9 @@ public class ServiceRangeTest extends OSGiTestCase {
 		 
 		assertNull("Check foo service invisible inside the composite", sc2.getServiceReference(FooService.class.getName()));
 		assertNull("Check check service invisible inside the composite", sc2.getServiceReference(CheckService.class.getName()));
-		assertNull("Check foo service invisible from the context", context.getServiceReference(FooService.class.getName()));
+		assertNull("Check foo service invisible from the context", getContext().getServiceReference(FooService.class.getName()));
 		try {
-			assertNull("Check check service invisible inside the context", context.getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
+			assertNull("Check check service invisible inside the context", getContext().getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
 		} catch (InvalidSyntaxException e) {
 			fail("Invalid filter : " + e);
 		}
@@ -134,9 +134,9 @@ public class ServiceRangeTest extends OSGiTestCase {
 		assertNotNull("Check foo service visible inside the composite", sc2.getServiceReference(FooService.class.getName()));
 		assertNotNull("Check check service visible inside the composite", sc2.getServiceReference(CheckService.class.getName()));
 		// Check invisibilty
-		assertNull("Check foo service invisible inside the context", context.getServiceReference(FooService.class.getName()));
+		assertNull("Check foo service invisible inside the context", getContext().getServiceReference(FooService.class.getName()));
 		try {
-			assertNull("Check check service invisible inside the context", context.getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
+			assertNull("Check check service invisible inside the context", getContext().getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
 		} catch (InvalidSyntaxException e) {
 			fail("Invalid filter : " + e);
 		}
@@ -146,9 +146,9 @@ public class ServiceRangeTest extends OSGiTestCase {
 		 
 		assertNull("Check foo service visible inside the composite 2", sc2.getServiceReference(FooService.class.getName()));
 		assertNull("Check check service visible inside the composite 2", sc2.getServiceReference(CheckService.class.getName()));
-		assertNull("Check foo service invisible inside the global", context.getServiceReference(FooService.class.getName()));
+		assertNull("Check foo service invisible inside the global", getContext().getServiceReference(FooService.class.getName()));
 		try {
-			assertNull("Check check service invisible inside the context", context.getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
+			assertNull("Check check service invisible inside the context", getContext().getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
 		} catch (InvalidSyntaxException e) {
 			fail("Invalid filter : " + e);
 		}
@@ -157,7 +157,7 @@ public class ServiceRangeTest extends OSGiTestCase {
 	public void testLevelOne3() {
 		ServiceContext sc2 = Utils.getServiceContext(empty);
 		
-		Factory fact1 = Utils.getFactoryByName(context, "COMPO-SimpleCheckServiceProvider");
+		Factory fact1 = Utils.getFactoryByName(getContext(), "COMPO-SimpleCheckServiceProvider");
 		Properties props = new Properties();
 		props.put("instance.name","client");
 		ComponentInstance client = null;
@@ -165,7 +165,7 @@ public class ServiceRangeTest extends OSGiTestCase {
 			client = fact1.createComponentInstance(props, sc2);
 		} catch(Exception e) { fail("Cannot instantiate the client : " + e.getMessage()); }
 		
-		Factory fact2 = Utils.getFactoryByName(context, "COMPO-FooProviderType-1");
+		Factory fact2 = Utils.getFactoryByName(getContext(), "COMPO-FooProviderType-1");
 		Properties props2 = new Properties();
 		props2.put("instance.name","provider");
 		ComponentInstance provider = null;
@@ -186,9 +186,9 @@ public class ServiceRangeTest extends OSGiTestCase {
 		assertNotNull("Check foo service visible inside the composite", sc2.getServiceReference(FooService.class.getName()));
 		assertNotNull("Check check service visible inside the composite", sc2.getServiceReference(CheckService.class.getName()));
 		// Check invisibilty
-		assertNull("Check foo service invisible inside the context", context.getServiceReference(FooService.class.getName()));
+		assertNull("Check foo service invisible inside the context", getContext().getServiceReference(FooService.class.getName()));
 		try {
-			assertNull("Check check service invisible inside the context", context.getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
+			assertNull("Check check service invisible inside the context", getContext().getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
 		} catch (InvalidSyntaxException e) {
 			fail("Invalid filter : " + e);
 		}
@@ -198,9 +198,9 @@ public class ServiceRangeTest extends OSGiTestCase {
 		 
 		assertNull("Check foo service visible inside the composite 2", sc2.getServiceReference(FooService.class.getName()));
 		assertNull("Check check service visible inside the composite 2", sc2.getServiceReference(CheckService.class.getName()));
-		assertNull("Check foo service invisible inside the global", context.getServiceReference(FooService.class.getName()));
+		assertNull("Check foo service invisible inside the global", getContext().getServiceReference(FooService.class.getName()));
 		try {
-			assertNull("Check check service invisible inside the context", context.getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
+			assertNull("Check check service invisible inside the context", getContext().getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
 		} catch (InvalidSyntaxException e) {
 			fail("Invalid filter : " + e);
 		}
@@ -251,9 +251,9 @@ public class ServiceRangeTest extends OSGiTestCase {
 		// Check invisibilty
 		assertNull("Check foo service invisible inside the composite 1", sc1.getServiceReference(FooService.class.getName()));
 		assertNull("Check check service invisible inside the composite 1", sc1.getServiceReference(CheckService.class.getName()));
-		assertNull("Check foo service invisible inside the global", context.getServiceReference(FooService.class.getName()));
+		assertNull("Check foo service invisible inside the global", getContext().getServiceReference(FooService.class.getName()));
 		try {
-			assertNull("Check check service invisible inside the context", context.getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
+			assertNull("Check check service invisible inside the context", getContext().getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
 		} catch (InvalidSyntaxException e) {
 			fail("Invalid filter : " + e);
 		}
@@ -265,9 +265,9 @@ public class ServiceRangeTest extends OSGiTestCase {
 		assertNull("Check check service visible inside the composite 2", sc2.getServiceReference(CheckService.class.getName()));
 		assertNull("Check foo service invisible inside the composite 1", sc1.getServiceReference(FooService.class.getName()));
 		assertNull("Check check service invisible inside the composite 1", sc1.getServiceReference(CheckService.class.getName()));
-		assertNull("Check foo service invisible inside the global", context.getServiceReference(FooService.class.getName()));
+		assertNull("Check foo service invisible inside the global", getContext().getServiceReference(FooService.class.getName()));
 		try {
-			assertNull("Check check service invisible inside the context", context.getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
+			assertNull("Check check service invisible inside the context", getContext().getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
 		} catch (InvalidSyntaxException e) {
 			fail("Invalid filter : " + e);
 		}
@@ -319,9 +319,9 @@ public class ServiceRangeTest extends OSGiTestCase {
 		// Check invisibilty
 		assertNull("Check foo service invisible inside the composite 1", sc1.getServiceReference(FooService.class.getName()));
 		assertNull("Check check service invisible inside the composite 1", sc1.getServiceReference(CheckService.class.getName()));
-		assertNull("Check foo service invisible inside the global", context.getServiceReference(FooService.class.getName()));
+		assertNull("Check foo service invisible inside the global", getContext().getServiceReference(FooService.class.getName()));
 		try {
-			assertNull("Check check service invisible inside the context", context.getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
+			assertNull("Check check service invisible inside the context", getContext().getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
 		} catch (InvalidSyntaxException e) {
 			fail("Invalid filter : " + e);
 		}
@@ -333,9 +333,9 @@ public class ServiceRangeTest extends OSGiTestCase {
 		assertNull("Check check service visible inside the composite 2", sc2.getServiceReference(CheckService.class.getName()));
 		assertNull("Check foo service invisible inside the composite 1", sc1.getServiceReference(FooService.class.getName()));
 		assertNull("Check check service invisible inside the composite 1", sc1.getServiceReference(CheckService.class.getName()));
-		assertNull("Check foo service invisible inside the global", context.getServiceReference(FooService.class.getName()));
+		assertNull("Check foo service invisible inside the global", getContext().getServiceReference(FooService.class.getName()));
 		try {
-			assertNull("Check check service invisible inside the context", context.getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
+			assertNull("Check check service invisible inside the context", getContext().getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
 		} catch (InvalidSyntaxException e) {
 			fail("Invalid filter : " + e);
 		}
@@ -356,7 +356,7 @@ public class ServiceRangeTest extends OSGiTestCase {
 		
 		ServiceContext sc2 = Utils.getServiceContext(empty2);
 		
-		Factory fact1 = Utils.getFactoryByName(context, "COMPO-SimpleCheckServiceProvider");
+		Factory fact1 = Utils.getFactoryByName(getContext(), "COMPO-SimpleCheckServiceProvider");
 		Properties props = new Properties();
 		props.put("instance.name","client");
 		ComponentInstance client = null;
@@ -364,7 +364,7 @@ public class ServiceRangeTest extends OSGiTestCase {
 			client = fact1.createComponentInstance(props, sc2);
 		} catch(Exception e) { fail("Cannot instantiate the client : " + e.getMessage()); }
 		
-		Factory fact2 = Utils.getFactoryByName(context, "COMPO-FooProviderType-1");
+		Factory fact2 = Utils.getFactoryByName(getContext(), "COMPO-FooProviderType-1");
 		Properties props2 = new Properties();
 		props2.put("instance.name","provider");
 		ComponentInstance provider = null;
@@ -387,9 +387,9 @@ public class ServiceRangeTest extends OSGiTestCase {
 		// Check invisibilty
 		assertNull("Check foo service invisible inside the composite 1", sc1.getServiceReference(FooService.class.getName()));
 		assertNull("Check check service invisible inside the composite 1", sc1.getServiceReference(CheckService.class.getName()));
-		assertNull("Check foo service invisible inside the global", context.getServiceReference(FooService.class.getName()));
+		assertNull("Check foo service invisible inside the global", getContext().getServiceReference(FooService.class.getName()));
 		try {
-			assertNull("Check check service invisible inside the context", context.getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
+			assertNull("Check check service invisible inside the context", getContext().getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
 		} catch (InvalidSyntaxException e) {
 			fail("Invalid filter : " + e);
 		}
@@ -401,9 +401,9 @@ public class ServiceRangeTest extends OSGiTestCase {
 		assertNull("Check check service visible inside the composite 2", sc2.getServiceReference(CheckService.class.getName()));
 		assertNull("Check foo service invisible inside the composite 1", sc1.getServiceReference(FooService.class.getName()));
 		assertNull("Check check service invisible inside the composite 1", sc1.getServiceReference(CheckService.class.getName()));
-		assertNull("Check foo service invisible inside the global", context.getServiceReference(FooService.class.getName()));
+		assertNull("Check foo service invisible inside the global", getContext().getServiceReference(FooService.class.getName()));
 		try {
-			assertNull("Check check service invisible inside the context", context.getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
+			assertNull("Check check service invisible inside the context", getContext().getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
 		} catch (InvalidSyntaxException e) {
 			fail("Invalid filter : " + e);
 		}
@@ -455,9 +455,9 @@ public class ServiceRangeTest extends OSGiTestCase {
 		// Check invisibilty
 		assertNull("Check foo service invisible inside the composite 1", sc1.getServiceReference(FooService.class.getName()));
 		assertNull("Check check service invisible inside the composite 1", sc1.getServiceReference(CheckService.class.getName()));
-		assertNull("Check foo service invisible inside the global", context.getServiceReference(FooService.class.getName()));
+		assertNull("Check foo service invisible inside the global", getContext().getServiceReference(FooService.class.getName()));
 		try {
-			assertNull("Check check service invisible inside the context", context.getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
+			assertNull("Check check service invisible inside the context", getContext().getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
 		} catch (InvalidSyntaxException e) {
 			fail("Invalid filter : " + e);
 		}
@@ -469,9 +469,9 @@ public class ServiceRangeTest extends OSGiTestCase {
 		assertNull("Check check service visible inside the composite 2", sc2.getServiceReference(CheckService.class.getName()));
 		assertNull("Check foo service invisible inside the composite 1", sc1.getServiceReference(FooService.class.getName()));
 		assertNull("Check check service invisible inside the composite 1", sc1.getServiceReference(CheckService.class.getName()));
-		assertNull("Check foo service invisible inside the global", context.getServiceReference(FooService.class.getName()));
+		assertNull("Check foo service invisible inside the global", getContext().getServiceReference(FooService.class.getName()));
 		try {
-			assertNull("Check check service invisible inside the context", context.getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
+			assertNull("Check check service invisible inside the context", getContext().getServiceReferences(CheckService.class.getName(), "(instance.name=client)"));
 		} catch (InvalidSyntaxException e) {
 			fail("Invalid filter : " + e);
 		}
