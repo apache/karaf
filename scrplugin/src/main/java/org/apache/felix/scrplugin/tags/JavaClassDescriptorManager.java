@@ -158,7 +158,10 @@ public class JavaClassDescriptorManager {
                                     while ( st.hasMoreTokens() ) {
                                         final String entry = st.nextToken().trim();
                                         if ( entry.length() > 0 ) {
-                                            components.addAll(this.readServiceComponentDescriptor(artifact, entry).getComponents());
+                                            final Components c = this.readServiceComponentDescriptor(artifact, entry);
+                                            if ( c != null ) {
+                                                components.addAll(c.getComponents());
+                                            }
                                         }
                                     }
                                 } else {
@@ -242,18 +245,26 @@ public class JavaClassDescriptorManager {
      * @throws IOException
      * @throws MojoExecutionException
      */
-    protected Components readServiceComponentDescriptor(Artifact artifact, String entry)
-    throws IOException, MojoExecutionException {
+    protected Components readServiceComponentDescriptor(Artifact artifact, String entry) {
         this.log.debug("Reading " + entry + " from " + artifact);
-        final File xml = this.getFile(artifact, entry);
-        if ( xml == null ) {
-            throw new MojoExecutionException("Artifact " + artifact + " does not contain declared service component descriptor " + entry);
+        try {
+            final File xml = this.getFile(artifact, entry);
+            if ( xml == null ) {
+                throw new MojoExecutionException("Artifact " + artifact + " does not contain declared service component descriptor " + entry);
+            }
+            return this.parseServiceComponentDescriptor(artifact, xml);
+        } catch (IOException mee) {
+            this.log.warn("Unable to read SCR descriptor file from artifact " + artifact + " at " + entry);
+            this.log.debug("Exception occurred during reading: " + mee.getMessage(), mee);
+        } catch (MojoExecutionException mee) {
+            this.log.warn("Unable to read SCR descriptor file from artifact " + artifact + " at " + entry);
+            this.log.debug("Exception occurred during reading: " + mee.getMessage(), mee);
         }
-        return this.parseServiceComponentDescriptor(artifact, xml);
+        return null;
     }
 
     protected Components parseServiceComponentDescriptor(Artifact artifact, File file)
-    throws IOException, MojoExecutionException {
+    throws MojoExecutionException {
         this.log.debug("Parsing " + file);
         final Components list = ComponentDescriptorIO.read(file);
         return list;
