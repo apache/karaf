@@ -64,12 +64,7 @@
             <prop key="startLocalConsole">true</prop>
             <prop key="startRemoteShell">true</prop>
             <prop key="sshPort">8101</prop>
-            <prop key="clientKeyAlias">servicemix</prop>
-            <prop key="clientKeystore">RshKeystore</prop>
-            <prop key="clientTruststore">RshTruststore</prop>
-            <prop key="serverKeyAlias">servicemix</prop>
-            <prop key="serverKeystore">RshKeystore</prop>
-            <prop key="serverTruststore">RshTruststore</prop>
+            <prop key="sshRealm">servicemix</prop>
             <prop key="hostKey">${servicemix.base}/etc/host.key</prop>
         </osgix:default-properties>
     </osgix:property-placeholder>

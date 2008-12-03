@@ -1,0 +1,113 @@
+package org.apache.servicemix.kernel.jaas.modules.osgi;
+
+import java.util.Map;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Set;
+import java.util.HashSet;
+import java.io.IOException;
+import java.security.Principal;
+
+import javax.security.auth.spi.LoginModule;
+import javax.security.auth.Subject;
+import javax.security.auth.login.LoginException;
+import javax.security.auth.login.FailedLoginException;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.NameCallback;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.PasswordCallback;
+import javax.security.auth.callback.UnsupportedCallbackException;
+
+import org.osgi.service.cm.Configuration;
+import org.apache.servicemix.kernel.jaas.modules.UserPrincipal;
+import org.apache.servicemix.kernel.jaas.modules.RolePrincipal;
+
+public class OsgiConfigLoginModule implements LoginModule {
+
+    public static final String PID = "pid";
+    public static final String USER_PREFIX = "user.";
+
+    private Subject subject;
+    private CallbackHandler callbackHandler;
+    private Map<String, ?> options;
+
+    private Set<Principal> principals;
+
+    public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState, Map<String, ?> options) {
+        this.subject = subject;
+        this.callbackHandler = callbackHandler;
+        this.options = options;
+    }
+
+    public boolean login() throws LoginException {
+        try {
+            String pid = (String) options.get(PID);
+            Configuration config = ConfigAdminHolder.getService().getConfiguration(pid);
+            Dictionary properties = config.getProperties();
+
+            Callback[] callbacks = new Callback[2];
+
+            callbacks[0] = new NameCallback("Username: ");
+            callbacks[1] = new PasswordCallback("Password: ", false);
+            try {
+                callbackHandler.handle(callbacks);
+            } catch (IOException ioe) {
+                throw new LoginException(ioe.getMessage());
+            } catch (UnsupportedCallbackException uce) {
+                throw new LoginException(uce.getMessage() + " not available to obtain information from user");
+            }
+            String user = ((NameCallback) callbacks[0]).getName();
+            char[] tmpPassword = ((PasswordCallback) callbacks[1]).getPassword();
+            if (tmpPassword == null) {
+                tmpPassword = new char[0];
+            }
+
+            String userInfos = (String) properties.get(USER_PREFIX + user);
+            if (userInfos == null) {
+                throw new FailedLoginException("User does not exist");
+            }
+            String[] infos = userInfos.split(",");
+            if (!new String(tmpPassword).equals(infos[0])) {
+                throw new FailedLoginException("Password does not match");
+            }
+
+            principals = new HashSet<Principal>();
+            principals.add(new UserPrincipal(user));
+            for (int i = 1; i < infos.length; i++) {
+                principals.add(new RolePrincipal(infos[i]));
+            }
+
+            return true;
+        } catch (LoginException e) {
+            throw e;
+        } catch (Exception e) {
+            throw (LoginException) new LoginException("Unable to authenticate user").initCause(e);
+        } finally {
+            callbackHandler = null;
+            options = null;
+        }
+    }
+
+    public boolean commit() throws LoginException {
+        subject.getPrincipals().addAll(principals);
+        return true;
+    }
+
+    public boolean abort() throws LoginException {
+        subject = null;
+        principals = null;
+        return true;
+    }
+
+    public boolean logout() throws LoginException {
+        try {
+            subject.getPrincipals().removeAll(principals);
+            principals.clear();
+            return true;
+        } finally {
+            subject = null;
+            principals = null;
+        }
+    }
+
+}

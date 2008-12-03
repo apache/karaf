@@ -19,26 +19,26 @@
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:util="http://www.springframework.org/schema/util"
        xmlns:osgi="http://www.springframework.org/schema/osgi"
        xmlns:jaas="http://servicemix.apache.org/jaas"
        xsi:schemaLocation="
   http://www.springframework.org/schema/beans
   http://www.springframework.org/schema/beans/spring-beans.xsd
-  http://www.springframework.org/schema/util
-  http://www.springframework.org/schema/util/spring-util.xsd
   http://www.springframework.org/schema/osgi
   http://www.springframework.org/schema/osgi/spring-osgi.xsd
   http://servicemix.apache.org/jaas
   http://servicemix.apache.org/schema/servicemix-jaas.xsd">
 
-    <jaas:keystore id="RshKeystore" rank="-1"
-                   path="classpath:org/apache/servicemix/kernel/jaas/keystore/keys.shell.cert"
-                   keystorePassword="servicemixpw"
-                   keyPasswords="servicemix=servicemixpw" />
+    <bean id="configAdminHolder" class="org.apache.servicemix.kernel.jaas.modules.osgi.ConfigAdminHolder">
+        <property name="service" ref="configAdmin" />
+    </bean>
 
-    <jaas:keystore id="RshTruststore" rank="-1"
-                   path="classpath:org/apache/servicemix/kernel/jaas/keystore/trust.shell.cert"
-                   keystorePassword="servicemixpw" />
+    <osgi:reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" />
+
+    <jaas:config id="servicemix">
+        <jaas:module className="org.apache.servicemix.kernel.jaas.modules.osgi.OsgiConfigLoginModule" flags="required">
+            pid = org.apache.servicemix.users
+        </jaas:module>
+    </jaas:config>
 
 </beans>

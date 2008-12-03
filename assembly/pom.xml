@@ -92,7 +92,11 @@
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.kernel.jaas</groupId>
-            <artifactId>org.apache.servicemix.kernel.jaas.keystore</artifactId>
+            <artifactId>org.apache.servicemix.kernel.jaas.modules</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.kernel</groupId>
+            <artifactId>org.apache.servicemix.kernel.management</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.osgi</groupId>

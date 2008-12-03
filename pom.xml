@@ -42,6 +42,7 @@
         <module>testing</module>
         <module>jaas</module>
         <module>client</module>
+        <module>management</module>
         <module>assembly</module>
     </modules>
 
@@ -195,6 +196,11 @@
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.servicemix.kernel</groupId>
+                <artifactId>org.apache.servicemix.kernel.management</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.servicemix.kernel.gshell</groupId>
                 <artifactId>org.apache.servicemix.kernel.gshell.core</artifactId>
                 <version>${pom.version}</version>
@@ -246,7 +252,7 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.kernel.jaas</groupId>
-                <artifactId>org.apache.servicemix.kernel.jaas.keystore</artifactId>
+                <artifactId>org.apache.servicemix.kernel.jaas.modules</artifactId>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>

@@ -72,12 +72,9 @@
     <bean name="keyPairProvider" class="com.google.code.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider">
         <property name="path" value="${hostKey}" />
     </bean>
-    <!--
     <bean name="passwordAuthenticator" class="com.google.code.sshd.server.jaas.JaasPasswordAuthenticator">
-        <property name="domain" value="SshServer" />
+        <property name="domain" value="${sshRealm}" />
     </bean>
-    -->
-    <bean name="passwordAuthenticator" class="org.apache.servicemix.kernel.gshell.core.sshd.BogusPasswordAuthenticator" />
 
     <bean id="sshServerFactory" class="org.apache.servicemix.kernel.gshell.core.sshd.SshServerFactory" init-method="start" destroy-method="stop">
         <constructor-arg ref="sshServer" />

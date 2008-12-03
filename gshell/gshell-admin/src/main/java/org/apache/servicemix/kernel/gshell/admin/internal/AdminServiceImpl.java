@@ -119,6 +119,7 @@ public class AdminServiceImpl implements AdminService, InitializingBean {
 
         copyResourceToDir(serviceMixBase, "etc/config.properties", true);
         copyResourceToDir(serviceMixBase, "etc/org.apache.servicemix.features.cfg", true);
+        copyResourceToDir(serviceMixBase, "etc/org.apache.servicemix.users.cfg", true);
         copyResourceToDir(serviceMixBase, "etc/org.ops4j.pax.logging.cfg", true);
         copyResourceToDir(serviceMixBase, "etc/org.ops4j.pax.url.mvn.cfg", true);
         copyResourceToDir(serviceMixBase, "etc/startup.properties", true);

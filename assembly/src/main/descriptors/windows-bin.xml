@@ -186,6 +186,7 @@
             <includes>
                 <include>org.apache.servicemix.kernel:org.apache.servicemix.kernel.filemonitor</include>
                 <include>org.apache.servicemix.kernel:org.apache.servicemix.kernel.spring</include>
+                <include>org.apache.servicemix.kernel:org.apache.servicemix.kernel.management</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -208,7 +209,7 @@
             <outputFileNameMapping>org/apache/servicemix/kernel/jaas/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
                 <include>org.apache.servicemix.kernel.jaas:org.apache.servicemix.kernel.jaas.config</include>
-                <include>org.apache.servicemix.kernel.jaas:org.apache.servicemix.kernel.jaas.keystore</include>
+                <include>org.apache.servicemix.kernel.jaas:org.apache.servicemix.kernel.jaas.modules</include>
             </includes>
         </dependencySet>
         <dependencySet>

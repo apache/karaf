@@ -58,6 +58,7 @@
             org.bouncycastle*;resolution:=optional,
             com.sun*;resolution:=optional,
             com.google.code.sshd.server.keyprovider,
+            com.google.code.sshd.server.jaas,
             org.jsecurity*;resolution:=optional,
             *
         </gshell.osgi.import>

@@ -28,16 +28,43 @@
     </parent>
 
     <groupId>org.apache.servicemix.kernel.jaas</groupId>
-    <artifactId>org.apache.servicemix.kernel.jaas.keystore</artifactId>
+    <artifactId>org.apache.servicemix.kernel.jaas.modules</artifactId>
     <packaging>bundle</packaging>
     <version>1.1.0-SNAPSHOT</version>
-    <name>Apache ServiceMix Kernel :: JAAS Keystore</name>
+    <name>Apache ServiceMix Kernel :: JAAS Modules</name>
 
     <description>
         Provides the JAAS Config
     </description>
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.servicemix.kernel.jaas</groupId>
+            <artifactId>org.apache.servicemix.kernel.jaas.config</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.osgi</groupId>
+            <artifactId>spring-osgi-core</artifactId>
+            <version>${spring.osgi.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -48,12 +75,18 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
-                        <Export-Package/>
-                        <Import-Package>org.apache.servicemix.kernel.jaas.config</Import-Package>
+                        <Export-Package>
+                            org.apache.servicemix.kernel.jaas.modules*;version=${project.version};-split-package:=merge-first
+                        </Export-Package>
+                        <Import-Package>
+                            org.apache.servicemix.kernel.jaas.config,
+                            *
+                        </Import-Package>
                         <Spring-Context>*;publish-context:=false;create-asynchronously:=false</Spring-Context>
                     </instructions>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
 </project>
