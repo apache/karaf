@@ -43,7 +43,7 @@
   <dependency>
    <groupId>biz.aQute</groupId>
    <artifactId>bndlib</artifactId>
-   <version>0.0.255</version>
+   <version>0.0.295</version>
   </dependency>
   <dependency>
     <groupId>net.sf.kxml</groupId>
@@ -137,4 +137,18 @@
    <scope>test</scope>
   </dependency>
  </dependencies>
+
+ <repositories>
+  <repository>
+   <id>aQute</id>
+   <url>http://www.aQute.biz/repo</url>
+   <releases>
+    <updatePolicy>never</updatePolicy>
+   </releases>
+   <snapshots>
+    <enabled>false</enabled>
+   </snapshots>
+  </repository>
+ </repositories>
+
 </project>

@@ -30,9 +30,9 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.plexus.util.StringUtils;
 
-import aQute.lib.header.OSGiHeader;
 import aQute.lib.osgi.Analyzer;
 import aQute.lib.osgi.Instruction;
+import aQute.libg.header.OSGiHeader;
 
 
 /**
