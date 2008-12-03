@@ -42,8 +42,7 @@
     <bean name="sshServer" class="com.google.code.sshd.SshServer" factory-method="setUpDefaultServer" scope="prototype">
         <property name="port" value="${sshPort}" />
         <property name="shellFactory">
-            <bean class="org.apache.servicemix.kernel.gshell.core.sshd.GShellShellFactory">
-                <property name="branding" ref="branding" />
+            <bean class="org.apache.geronimo.gshell.commands.ssh.ShellFactoryImpl">
                 <property name="completers">
                     <list>
                         <ref bean="commandsCompleter"/>

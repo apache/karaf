@@ -88,7 +88,7 @@
         <junit.version>4.4_1</junit.version>
         <jline.version>0.9.94</jline.version>
         <log4j.version>1.2.14</log4j.version>
-        <mina.version>1.1.6_1</mina.version>
+        <mina.version>1.1.7_1-SNAPSHOT</mina.version>
         <oro.version>2.0.8_1</oro.version>
         <pax.logging.version>1.2.1</pax.logging.version>
         <pax.url.version>0.3.2</pax.url.version>
@@ -552,49 +552,9 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.apache.geronimo.gshell.remote</groupId>
-                <artifactId>gshell-remote-client</artifactId>
+                <groupId>org.apache.geronimo.gshell.commands</groupId>
+                <artifactId>gshell-ssh</artifactId>
                 <version>${gshell.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.apache.mina</groupId>
-                        <artifactId>mina-filter-ssl</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.mina</groupId>
-                        <artifactId>mina-core</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.gshell.remote</groupId>
-                <artifactId>gshell-remote-common</artifactId>
-                <version>${gshell.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.apache.mina</groupId>
-                        <artifactId>mina-filter-ssl</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.mina</groupId>
-                        <artifactId>mina-core</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.gshell.remote</groupId>
-                <artifactId>gshell-remote-server</artifactId>
-                <version>${gshell.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.apache.mina</groupId>
-                        <artifactId>mina-filter-ssl</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.mina</groupId>
-                        <artifactId>mina-core</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.codehaus.plexus</groupId>

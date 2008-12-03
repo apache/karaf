@@ -58,6 +58,7 @@
             org.bouncycastle*;resolution:=optional,
             com.sun*;resolution:=optional,
             com.google.code.sshd.server.keyprovider,
+            org.jsecurity*;resolution:=optional,
             *
         </gshell.osgi.import>
         <!-- TODO: remove plexus util package -->
@@ -114,19 +115,11 @@
             <artifactId>gshell-vfs</artifactId>
             <version>${gshell.version}</version>
         </dependency>
-        <!--
         <dependency>
             <groupId>org.apache.geronimo.gshell.commands</groupId>
-            <artifactId>gshell-remote</artifactId>
+            <artifactId>gshell-ssh</artifactId>
             <version>${gshell.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.jsecurity</groupId>
-                    <artifactId>jsecurity</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
-        -->
         <dependency>
             <groupId>org.apache.geronimo.gshell.wisdom</groupId>
             <artifactId>gshell-wisdom-core</artifactId>

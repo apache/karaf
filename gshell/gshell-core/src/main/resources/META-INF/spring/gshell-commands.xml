@@ -131,11 +131,11 @@
 
     <gshell:command-bundle>
         <gshell:command name="remote/ssh">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.core.sshd.SshAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.ssh.SshAction"/>
         </gshell:command>
 
         <gshell:command name="remote/sshd">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.core.sshd.SshServerAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.ssh.SshServerAction"/>
         </gshell:command>
     </gshell:command-bundle>
 
@@ -158,6 +158,42 @@
 
         <gshell:command name="optional/hostname">
             <gshell:action class="org.apache.geronimo.gshell.commands.optional.HostnameAction"/>
+        </gshell:command>
+
+        <gshell:command name="optional/cat">
+            <gshell:action class="org.apache.geronimo.gshell.commands.optional.CatAction"/>
+            <gshell:completers>
+                <ref bean="fileObjectNameCompleter"/>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+
+        <gshell:command name="optional/edit">
+            <gshell:action class="org.apache.geronimo.gshell.commands.optional.EditAction"/>
+            <gshell:completers>
+                <ref bean="fileObjectNameCompleter"/>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+
+        <gshell:command name="optional/touch">
+            <gshell:action class="org.apache.geronimo.gshell.commands.optional.TouchAction"/>
+            <gshell:completers>
+                <ref bean="fileObjectNameCompleter"/>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+
+        <gshell:command name="optional/find">
+            <gshell:action class="org.apache.geronimo.gshell.commands.optional.FindAction"/>
+            <gshell:completers>
+                <ref bean="fileObjectNameCompleter"/>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+
+        <gshell:command name="optional/grep">
+            <gshell:action class="org.apache.geronimo.gshell.commands.optional.GrepAction"/>
         </gshell:command>
     </gshell:command-bundle>
 
@@ -205,48 +241,12 @@
 
         <gshell:link name="vfs/del" target="vfs/rm"/>
 
-        <gshell:command name="optional/cat">
-            <gshell:action class="org.apache.geronimo.gshell.commands.optional.CatAction"/>
-            <gshell:completers>
-                <ref bean="fileObjectNameCompleter"/>
-                <null/>
-            </gshell:completers>
-        </gshell:command>
-
-        <gshell:command name="optional/edit">
-            <gshell:action class="org.apache.geronimo.gshell.commands.optional.EditAction"/>
-            <gshell:completers>
-                <ref bean="fileObjectNameCompleter"/>
-                <null/>
-            </gshell:completers>
-        </gshell:command>
-
-        <gshell:command name="optional/touch">
-            <gshell:action class="org.apache.geronimo.gshell.commands.optional.TouchAction"/>
-            <gshell:completers>
-                <ref bean="fileObjectNameCompleter"/>
-                <null/>
-            </gshell:completers>
-        </gshell:command>
-
         <gshell:command name="vfs/fileinfo">
             <gshell:action class="org.apache.geronimo.gshell.commands.vfs.FileInfoAction"/>
             <gshell:completers>
                 <ref bean="fileObjectNameCompleter"/>
                 <null/>
             </gshell:completers>
-        </gshell:command>
-
-        <gshell:command name="optional/find">
-            <gshell:action class="org.apache.geronimo.gshell.commands.optional.FindAction"/>
-            <gshell:completers>
-                <ref bean="fileObjectNameCompleter"/>
-                <null/>
-            </gshell:completers>
-        </gshell:command>
-
-        <gshell:command name="optional/grep">
-            <gshell:action class="org.apache.geronimo.gshell.commands.optional.GrepAction"/>
         </gshell:command>
     </gshell:command-bundle>
 
