@@ -116,11 +116,9 @@ goto CLASSPATH_END
 set filename=%~1
 set suffix=%filename:~-4%
 if %suffix% equ .jar set CLASSPATH=%CLASSPATH%;%SERVICEMIX_HOME%\lib\%filename%
-exit
+goto :EOF
 
 :CLASSPATH_END
-
-set CLASSPATH=%CLASSPATH%;%SERVICEMIX_HOME%\lib\servicemix.jar;%SERVICEMIX_HOME%\lib\servicemix-jaas-boot.jar
 
 rem Execute the JVM or the load the profiler
 if "%SERVICEMIX_PROFILER%" == "" goto :RUN
