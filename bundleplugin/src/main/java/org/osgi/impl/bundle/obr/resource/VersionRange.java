@@ -1,5 +1,5 @@
 /*
- * $Id: VersionRange.java 46 2008-01-17 19:05:21Z peter.kriens@aqute.biz $
+ * $Id: VersionRange.java 84 2008-08-28 08:11:30Z peter.kriens@aqute.biz $
  * 
  * Copyright (c) OSGi Alliance (2002, 2006, 2007). All Rights Reserved.
  * 

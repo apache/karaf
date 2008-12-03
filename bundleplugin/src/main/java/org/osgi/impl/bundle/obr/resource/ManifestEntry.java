@@ -1,5 +1,5 @@
 /*
- * $Id: ManifestEntry.java 44 2007-07-13 20:49:41Z hargrave@us.ibm.com $
+ * $Id: ManifestEntry.java 92 2008-11-06 07:46:37Z peter.kriens@aqute.biz $
  * 
  * Copyright (c) OSGi Alliance (2002, 2006, 2007). All Rights Reserved.
  * 
@@ -106,6 +106,20 @@ public class ManifestEntry implements Comparable {
 		me.directives = directives;
 		me.version = version;
 		return me;
+	}
+
+	public String getDirective(String directive) {
+		if ( directives == null )
+			return null;
+		
+		return (String) directives.get(directive);
+	}
+
+	public String getAttribute(String attribute) {
+		if ( attributes == null )
+			return null;
+		
+		return (String) attributes.get(attribute);
 	}
 
 }

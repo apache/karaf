@@ -1,5 +1,5 @@
 /*
- * $Id: BundleInfo.java 44 2007-07-13 20:49:41Z hargrave@us.ibm.com $
+ * $Id: BundleInfo.java 92 2008-11-06 07:46:37Z peter.kriens@aqute.biz $
  * 
  * Copyright (c) OSGi Alliance (2002, 2006, 2007). All Rights Reserved.
  * 
@@ -28,27 +28,30 @@ import org.osgi.service.obr.Resource;
  * Convert a bundle to a generic resource description and store its local
  * dependencies (like for example a license file in the JAR) in a zip file.
  * 
- * @version $Revision: 44 $
+ * @version $Revision: 92 $
  */
 public class BundleInfo {
-	Manifest	manifest;
-	File		bundleJar;
-	ZipFile		jar;
-	String		license;
-	Properties	localization;
-	RepositoryImpl	repository;
+	Manifest manifest;
+	File bundleJar;
+	ZipFile jar;
+	String license;
+	Properties localization;
+	RepositoryImpl repository;
 
 	/**
 	 * Parse a zipFile from the file system. We only need the manifest and the
 	 * localization. So a zip file is used to minimze memory consumption.
 	 * 
-	 * @param bundleJar Path name
-	 * @throws Exception Any errors that occur
+	 * @param bundleJar
+	 *            Path name
+	 * @throws Exception
+	 *             Any errors that occur
 	 */
-	public BundleInfo(RepositoryImpl repository, File bundleJar) throws Exception {
+	public BundleInfo(RepositoryImpl repository, File bundleJar)
+			throws Exception {
 		this.bundleJar = bundleJar;
 		this.repository = repository;
-		
+
 		if (!this.bundleJar.exists())
 			throw new FileNotFoundException(bundleJar.toString());
 
@@ -75,8 +78,8 @@ public class BundleInfo {
 		ResourceImpl resource;
 		// Setup the manifest
 		// and create a resource
-		resource = new ResourceImpl(repository, manifest.getSymbolicName(), manifest
-				.getVersion());
+		resource = new ResourceImpl(repository, manifest.getSymbolicName(),
+				manifest.getVersion());
 
 		try {
 
@@ -98,12 +101,10 @@ public class BundleInfo {
 			doExecutionEnvironment(resource);
 
 			return resource;
-		}
-		finally {
+		} finally {
 			try {
 				jar.close();
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				// ignore
 			}
 		}
@@ -167,8 +168,7 @@ public class BundleInfo {
 	URL toURL(URL location, String source) {
 		try {
 			return new URL(location, source);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			System.err.println("Error in converting url: " + location + " : "
 					+ source);
 			return null;
@@ -234,19 +234,18 @@ public class BundleInfo {
 		ManifestEntry entry = manifest.getHost();
 		if (entry == null) {
 			return;
-		}
-		else {
+		} else {
 			// We are a fragment, create a requirement
 			// to our host.
 			RequirementImpl r = new RequirementImpl("bundle");
 			StringBuffer sb = new StringBuffer();
 			sb.append("(&(symbolicname=");
 			sb.append(entry.getName());
-			sb.append(")(version>=");
-			sb.append(entry.getVersion());
-			sb.append("))");
+			sb.append(")");
+			appendVersion(sb, entry.getVersion());
+			sb.append(")");
 			r.setFilter(sb.toString());
-			r.setComment("Required Host " + entry.getName() );
+			r.setComment("Required Host " + entry.getName());
 			r.setExtend(true);
 			r.setOptional(false);
 			r.setMultiple(false);
@@ -270,15 +269,25 @@ public class BundleInfo {
 			ManifestEntry entry = (ManifestEntry) i.next();
 			RequirementImpl r = new RequirementImpl("bundle");
 
+			Map attrs = entry.getAttributes();
+			String version = "0";
+			if (attrs != null) {
+				if (attrs.containsKey("bundle-version"))
+					version = (String) attrs.get("bundle-version");
+				else
+					version = "0";
+			}
+			VersionRange v = new VersionRange(version);
+
 			StringBuffer sb = new StringBuffer();
 			sb.append("(&(symbolicname=");
 			sb.append(entry.getName());
-			sb.append(")(version>=");
-			sb.append(entry.getVersion());
-			sb.append("))");
+			sb.append(")");
+			appendVersion(sb, v);
+			sb.append(")");
 			r.setFilter(sb.toString());
-			r.setComment("Require Bundle " + entry.getName() + "; "
-					+ entry.getVersion());
+
+			r.setComment("Require Bundle " + entry.getName() + "; " + v);
 			if (entry.directives == null
 					|| "true".equalsIgnoreCase((String) entry.directives
 							.get("resolution")))
@@ -322,6 +331,8 @@ public class BundleInfo {
 
 			createImportFilter(requirement, "package", pack);
 			requirement.setComment("Import package " + pack);
+			String resolution = pack.getDirective("resolution");
+			requirement.setOptional("optional".equals(resolution));
 			requirements.add(requirement);
 		}
 		for (Iterator i = requirements.iterator(); i.hasNext();)
@@ -343,29 +354,7 @@ public class BundleInfo {
 		filter.append("=");
 		filter.append(pack.getName());
 		filter.append(")");
-		VersionRange version = pack.getVersion();
-		if (version != null) {
-			if ( version.isRange() ) {
-				filter.append("(version");
-				filter.append(">");
-				if (version.includeLow())
-					filter.append("=");
-				filter.append(version.low);
-				filter.append(")");
-
-				filter.append("(version");
-				filter.append("<");
-				if (version.includeHigh())
-					filter.append("=");
-				filter.append(version.high);
-				filter.append(")");
-			}
-			else {
-				filter.append("(version>=");
-				filter.append(pack.getVersion());
-				filter.append(")");
-			}
-		}
+		appendVersion(filter, pack.getVersion());
 		Map attributes = pack.getAttributes();
 		Set attrs = doImportPackageAttributes(req, filter, attributes);
 		if (attrs.size() > 0) {
@@ -380,6 +369,30 @@ public class BundleInfo {
 		}
 		filter.append(")");
 		req.setFilter(filter.toString());
+	}
+
+	private void appendVersion(StringBuffer filter, VersionRange version) {
+		if (version != null) {
+			if (version.isRange()) {
+				filter.append("(version");
+				filter.append(">");
+				if (version.includeLow())
+					filter.append("=");
+				filter.append(version.low);
+				filter.append(")");
+
+				filter.append("(version");
+				filter.append("<");
+				if (version.includeHigh())
+					filter.append("=");
+				filter.append(version.high);
+				filter.append(")");
+			} else {
+				filter.append("(version>=");
+				filter.append(version);
+				filter.append(")");
+			}
+		}
 	}
 
 	Set doImportPackageAttributes(RequirementImpl req, StringBuffer filter,
@@ -398,8 +411,7 @@ public class BundleInfo {
 				}
 				if (attribute.endsWith(":")) {
 					// Ignore
-				}
-				else {
+				} else {
 					filter.append("(");
 					filter.append(attribute);
 					filter.append("=");
@@ -415,8 +427,7 @@ public class BundleInfo {
 		CapabilityImpl capability = new CapabilityImpl("bundle");
 		capability.addProperty("symbolicname", manifest.getSymbolicName());
 		if (manifest.getValue("Bundle-Name") != null)
-			capability.addProperty(
-					Resource.PRESENTATION_NAME,
+			capability.addProperty(Resource.PRESENTATION_NAME,
 					translated("Bundle-Name"));
 		capability.addProperty("version", manifest.getVersion());
 		capability
@@ -443,7 +454,7 @@ public class BundleInfo {
 				CapabilityImpl capability = createCapability("package", pack);
 				capabilities.add(capability);
 			}
-        }
+		}
 		for (Iterator i = capabilities.iterator(); i.hasNext();)
 			resource.addCapability((CapabilityImpl) i.next());
 	}
@@ -470,6 +481,13 @@ public class BundleInfo {
 					capability.addProperty(key, value);
 				}
 			}
+		Map directives = pack.getDirectives();
+		if (directives != null)
+			for (Iterator at = directives.keySet().iterator(); at.hasNext();) {
+				String key = (String) at.next();
+				Object value = directives.get(key);
+				capability.addProperty(key, value);
+			}
 		return capability;
 	}
 
@@ -492,8 +510,7 @@ public class BundleInfo {
 					localization.load(in);
 					in.close();
 				}
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		s = s.substring(1);

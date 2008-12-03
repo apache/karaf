@@ -1,5 +1,5 @@
 /*
- * $Id: Manifest.java 44 2007-07-13 20:49:41Z hargrave@us.ibm.com $
+ * $Id: Manifest.java 84 2008-08-28 08:11:30Z peter.kriens@aqute.biz $
  * 
  * Copyright (c) OSGi Alliance (2002, 2006, 2007). All Rights Reserved.
  * 
@@ -32,7 +32,7 @@ public class Manifest extends Hashtable {
 	String				location;
 	Native				_native[];
 	Vector				duplicates	= new Vector();
-	final static String	wordparts	= "~!@#$%^&*_:/?><.-+";
+	final static String	wordparts	= "~!@#$%^&*_/?><.-+";
 	ManifestEntry		bsn;
 	VersionRange			version;
 	ManifestEntry		host;
@@ -207,6 +207,8 @@ public class Manifest extends Hashtable {
 				}
 				else {
 					if (parameter.type == Parameter.ATTRIBUTE)
+						p.addParameter(parameter);
+					else if ( parameter.type == Parameter.DIRECTIVE )
 						p.addParameter(parameter);
 					else
 						p.addParameter(parameter);
