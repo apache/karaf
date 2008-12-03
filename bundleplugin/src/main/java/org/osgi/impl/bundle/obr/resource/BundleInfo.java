@@ -1,5 +1,5 @@
 /*
- * $Id: BundleInfo.java 92 2008-11-06 07:46:37Z peter.kriens@aqute.biz $
+ * $Id: BundleInfo.java 94 2008-12-03 13:31:50Z peter.kriens@aqute.biz $
  * 
  * Copyright (c) OSGi Alliance (2002, 2006, 2007). All Rights Reserved.
  * 
@@ -28,7 +28,7 @@ import org.osgi.service.obr.Resource;
  * Convert a bundle to a generic resource description and store its local
  * dependencies (like for example a license file in the JAR) in a zip file.
  * 
- * @version $Revision: 92 $
+ * @version $Revision: 94 $
  */
 public class BundleInfo {
 	Manifest manifest;
@@ -357,6 +357,12 @@ public class BundleInfo {
 		appendVersion(filter, pack.getVersion());
 		Map attributes = pack.getAttributes();
 		Set attrs = doImportPackageAttributes(req, filter, attributes);
+		
+		// The next code is using the subset operator 
+		// to check mandatory attributes, it seems to be
+		// impossible to rewrite. It must assert that whateber
+		// is in mandatory: must be in any of the attributes.
+		// This is a fundamental shortcoming of the filter language.
 		if (attrs.size() > 0) {
 			String del = "";
 			filter.append("(mandatory:<*");
@@ -374,19 +380,31 @@ public class BundleInfo {
 	private void appendVersion(StringBuffer filter, VersionRange version) {
 		if (version != null) {
 			if (version.isRange()) {
-				filter.append("(version");
-				filter.append(">");
-				if (version.includeLow())
-					filter.append("=");
-				filter.append(version.low);
-				filter.append(")");
+				if (version.includeLow()) {
+					filter.append("(version");
+					filter.append(">=");
+					filter.append(version.low);
+					filter.append(")");
+				}
+				else {
+					filter.append("(!(version");
+					filter.append("<=");
+					filter.append(version.low);
+					filter.append("))");
+				}
 
-				filter.append("(version");
-				filter.append("<");
-				if (version.includeHigh())
-					filter.append("=");
-				filter.append(version.high);
-				filter.append(")");
+				if ( version.includeHigh() ) {
+					filter.append("(version");
+					filter.append("<=");
+					filter.append(version.high);
+					filter.append(")");					
+				}
+				else {
+					filter.append("(!(version");
+					filter.append(">=");
+					filter.append(version.low);
+					filter.append("))");
+				}
 			} else {
 				filter.append("(version>=");
 				filter.append(version);
