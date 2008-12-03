@@ -288,7 +288,7 @@ public class BundlePlugin extends AbstractMojo
 
             if ( errors.size() > 0 )
             {
-                String failok = properties.getProperty( "-failok" );
+                String failok = builder.getProperty( "-failok" );
                 if ( null == failok || "false".equalsIgnoreCase( failok ) )
                 {
                     jarFile.delete();
@@ -363,48 +363,49 @@ public class BundlePlugin extends AbstractMojo
         builder.setClasspath( classpath );
 
         // update BND instructions to add included Maven resources
-        includeMavenResources( currentProject, properties, getLog() );
+        includeMavenResources( currentProject, builder, getLog() );
 
-        if ( !properties.containsKey( Analyzer.EXPORT_PACKAGE ) && !properties.containsKey( Analyzer.PRIVATE_PACKAGE ) )
+        if ( builder.getProperty( Analyzer.EXPORT_PACKAGE ) == null &&
+             builder.getProperty( Analyzer.PRIVATE_PACKAGE ) == null )
         {
-            if ( properties.containsKey( Analyzer.EXPORT_CONTENTS ) )
+            if ( builder.getProperty( Analyzer.EXPORT_CONTENTS ) != null )
             {
                 /*
                  * if we have exportcontents but no export packages or private packages then we're probably embedding or
                  * inlining one or more jars, so set private package to a non-null (but empty) value to keep Bnd happy.
                  */
-                properties.put( Analyzer.PRIVATE_PACKAGE, "!*" );
+                builder.setProperty( Analyzer.PRIVATE_PACKAGE, "!*" );
             }
             else
             {
-                String bsn = properties.getProperty( Analyzer.BUNDLE_SYMBOLICNAME );
+                String bsn = builder.getProperty( Analyzer.BUNDLE_SYMBOLICNAME );
                 String namespace = bsn.replaceAll( "\\W", "." );
 
-                properties.put( Analyzer.EXPORT_PACKAGE, namespace + ".*" );
+                builder.setProperty( Analyzer.EXPORT_PACKAGE, namespace + ".*" );
             }
         }
 
         // update BND instructions to embed selected Maven dependencies
-        Collection embeddableArtifacts = getEmbeddableArtifacts( currentProject, properties );
-        new DependencyEmbedder( embeddableArtifacts ).processHeaders( properties );
+        Collection embeddableArtifacts = getEmbeddableArtifacts( currentProject, builder );
+        new DependencyEmbedder( embeddableArtifacts ).processHeaders( builder );
 
         builder.build();
         Jar jar = builder.getJar();
         doMavenMetadata( currentProject, jar );
         builder.setJar( jar );
 
-        String[] removeHeaders = properties.getProperty( Analyzer.REMOVE_HEADERS, "" ).split( "," );
+        String[] removeHeaders = builder.getProperty( Analyzer.REMOVE_HEADERS, "" ).split( "," );
         mergeMavenManifest( currentProject, jar, removeHeaders, getLog() );
 
         return builder;
     }
 
 
-    protected static void includeMavenResources( MavenProject currentProject, Properties properties, Log log )
+    protected static void includeMavenResources( MavenProject currentProject, Analyzer analyzer, Log log )
     {
         // pass maven resource paths onto BND analyzer
         final String mavenResourcePaths = getMavenResourcePaths( currentProject );
-        final String includeResource = ( String ) properties.get( Analyzer.INCLUDE_RESOURCE );
+        final String includeResource = ( String ) analyzer.getProperty( Analyzer.INCLUDE_RESOURCE );
         if ( includeResource != null )
         {
             if ( includeResource.indexOf( MAVEN_RESOURCES ) >= 0 )
@@ -416,18 +417,18 @@ public class BundlePlugin extends AbstractMojo
                     String cleanedResource = removeTagFromInstruction( includeResource, MAVEN_RESOURCES );
                     if ( cleanedResource.length() > 0 )
                     {
-                        properties.put( Analyzer.INCLUDE_RESOURCE, cleanedResource );
+                        analyzer.setProperty( Analyzer.INCLUDE_RESOURCE, cleanedResource );
                     }
                     else
                     {
-                        properties.remove( Analyzer.INCLUDE_RESOURCE );
+                        analyzer.unsetProperty( Analyzer.INCLUDE_RESOURCE );
                     }
                 }
                 else
                 {
                     String combinedResource = StringUtils
                         .replace( includeResource, MAVEN_RESOURCES, mavenResourcePaths );
-                    properties.put( Analyzer.INCLUDE_RESOURCE, combinedResource );
+                    analyzer.setProperty( Analyzer.INCLUDE_RESOURCE, combinedResource );
                 }
             }
             else if ( mavenResourcePaths.length() > 0 )
@@ -438,7 +439,7 @@ public class BundlePlugin extends AbstractMojo
         }
         else if ( mavenResourcePaths.length() > 0 )
         {
-            properties.put( Analyzer.INCLUDE_RESOURCE, mavenResourcePaths );
+            analyzer.setProperty( Analyzer.INCLUDE_RESOURCE, mavenResourcePaths );
         }
     }
 
@@ -947,9 +948,9 @@ public class BundlePlugin extends AbstractMojo
     }
 
 
-    protected static Collection getEmbeddableArtifacts( MavenProject project, Properties properties )
+    protected static Collection getEmbeddableArtifacts( MavenProject project, Analyzer analyzer )
     {
-        String embedTransitive = properties.getProperty( DependencyEmbedder.EMBED_TRANSITIVE );
+        String embedTransitive = analyzer.getProperty( DependencyEmbedder.EMBED_TRANSITIVE );
         if ( Boolean.valueOf( embedTransitive ).booleanValue() )
         {
             // includes transitive dependencies

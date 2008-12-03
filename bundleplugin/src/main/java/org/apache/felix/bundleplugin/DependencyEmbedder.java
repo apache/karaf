@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -79,7 +78,7 @@ public final class DependencyEmbedder
     }
 
 
-    public void processHeaders( Properties properties ) throws MojoExecutionException
+    public void processHeaders( Analyzer analyzer ) throws MojoExecutionException
     {
         StringBuffer includeResource = new StringBuffer();
         StringBuffer bundleClassPath = new StringBuffer();
@@ -87,12 +86,12 @@ public final class DependencyEmbedder
         m_inlinedPaths.clear();
         m_embeddedArtifacts.clear();
 
-        String embedDependencyHeader = properties.getProperty( EMBED_DEPENDENCY );
+        String embedDependencyHeader = analyzer.getProperty( EMBED_DEPENDENCY );
         if ( null != embedDependencyHeader && embedDependencyHeader.length() > 0 )
         {
-            m_embedDirectory = properties.getProperty( EMBED_DIRECTORY );
-            m_embedStripGroup = properties.getProperty( EMBED_STRIP_GROUP, "true" );
-            m_embedStripVersion = properties.getProperty( EMBED_STRIP_VERSION );
+            m_embedDirectory = analyzer.getProperty( EMBED_DIRECTORY );
+            m_embedStripGroup = analyzer.getProperty( EMBED_STRIP_GROUP, "true" );
+            m_embedStripVersion = analyzer.getProperty( EMBED_STRIP_VERSION );
 
             Map embedInstructions = OSGiHeader.parseHeader( embedDependencyHeader );
             processEmbedInstructions( embedInstructions );
@@ -110,14 +109,14 @@ public final class DependencyEmbedder
         if ( bundleClassPath.length() > 0 )
         {
             // set explicit default before merging dependency classpath
-            if ( !properties.containsKey( Analyzer.BUNDLE_CLASSPATH ) )
+            if ( analyzer.getProperty( Analyzer.BUNDLE_CLASSPATH ) == null )
             {
-                properties.setProperty( Analyzer.BUNDLE_CLASSPATH, "." );
+                analyzer.setProperty( Analyzer.BUNDLE_CLASSPATH, "." );
             }
         }
 
-        appendDependencies( properties, Analyzer.INCLUDE_RESOURCE, includeResource.toString() );
-        appendDependencies( properties, Analyzer.BUNDLE_CLASSPATH, bundleClassPath.toString() );
+        appendDependencies( analyzer, Analyzer.INCLUDE_RESOURCE, includeResource.toString() );
+        appendDependencies( analyzer, Analyzer.BUNDLE_CLASSPATH, bundleClassPath.toString() );
     }
 
     protected static abstract class DependencyFilter
@@ -417,12 +416,12 @@ public final class DependencyEmbedder
     }
 
 
-    private static void appendDependencies( Properties properties, String directiveName, String mavenDependencies )
+    private static void appendDependencies( Analyzer analyzer, String directiveName, String mavenDependencies )
     {
         /*
          * similar algorithm to {maven-resources} but default behaviour here is to append rather than override
          */
-        final String instruction = properties.getProperty( directiveName );
+        final String instruction = analyzer.getProperty( directiveName );
         if ( instruction != null && instruction.length() > 0 )
         {
             if ( instruction.indexOf( MAVEN_DEPENDENCIES ) >= 0 )
@@ -432,12 +431,12 @@ public final class DependencyEmbedder
                 if ( mavenDependencies.length() == 0 )
                 {
                     String cleanInstruction = BundlePlugin.removeTagFromInstruction( instruction, MAVEN_DEPENDENCIES );
-                    properties.setProperty( directiveName, cleanInstruction );
+                    analyzer.setProperty( directiveName, cleanInstruction );
                 }
                 else
                 {
                     String mergedInstruction = StringUtils.replace( instruction, MAVEN_DEPENDENCIES, mavenDependencies );
-                    properties.setProperty( directiveName, mergedInstruction );
+                    analyzer.setProperty( directiveName, mergedInstruction );
                 }
             }
             else if ( mavenDependencies.length() > 0 )
@@ -445,20 +444,20 @@ public final class DependencyEmbedder
                 if ( Analyzer.INCLUDE_RESOURCE.equalsIgnoreCase( directiveName ) )
                 {
                     // dependencies should be prepended so they can be overwritten by local resources
-                    properties.setProperty( directiveName, mavenDependencies + ',' + instruction );
+                    analyzer.setProperty( directiveName, mavenDependencies + ',' + instruction );
                 }
                 else
                 // Analyzer.BUNDLE_CLASSPATH
                 {
                     // for the classpath we want dependencies to be appended after local entries
-                    properties.setProperty( directiveName, instruction + ',' + mavenDependencies );
+                    analyzer.setProperty( directiveName, instruction + ',' + mavenDependencies );
                 }
             }
             // otherwise leave instruction unchanged
         }
         else if ( mavenDependencies.length() > 0 )
         {
-            properties.setProperty( directiveName, mavenDependencies );
+            analyzer.setProperty( directiveName, mavenDependencies );
         }
         // otherwise leave instruction unchanged
     }

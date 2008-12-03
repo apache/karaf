@@ -127,7 +127,7 @@ public class ManifestPlugin extends BundlePlugin
 
         if ( errors.size() > 0 )
         {
-            String failok = properties.getProperty( "-failok" );
+            String failok = analyzer.getProperty( "-failok" );
             if ( null == failok || "false".equalsIgnoreCase( failok ) )
             {
                 throw new MojoFailureException( "Error(s) found in manifest configuration" );
@@ -178,16 +178,17 @@ public class ManifestPlugin extends BundlePlugin
 
         analyzer.setJar( file );
 
-        if ( !properties.containsKey( Analyzer.EXPORT_PACKAGE ) && !properties.containsKey( Analyzer.EXPORT_CONTENTS )
-            && !properties.containsKey( Analyzer.PRIVATE_PACKAGE ) )
+        if ( analyzer.getProperty( Analyzer.EXPORT_PACKAGE ) == null &&
+             analyzer.getProperty( Analyzer.EXPORT_CONTENTS ) == null &&
+             analyzer.getProperty( Analyzer.PRIVATE_PACKAGE ) == null )
         {
             String export = analyzer.calculateExportsFromContents( analyzer.getJar() );
             analyzer.setProperty( Analyzer.EXPORT_PACKAGE, export );
         }
 
         // Apply Embed-Dependency headers, even though the contents won't be changed
-        Collection embeddableArtifacts = getEmbeddableArtifacts( project, properties );
-        new DependencyEmbedder( embeddableArtifacts ).processHeaders( properties );
+        Collection embeddableArtifacts = getEmbeddableArtifacts( project, analyzer );
+        new DependencyEmbedder( embeddableArtifacts ).processHeaders( analyzer );
 
         analyzer.mergeManifest( analyzer.getJar().getManifest() );
         analyzer.calcManifest();
