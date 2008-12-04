@@ -159,8 +159,7 @@ public class Verifier extends Analyzer {
 
                         try {
                             Jar sub = new Jar(jarOrDir);
-                            EmbeddedResource.build(sub, resource);
-                            
+                            addClose(sub);
                             // TODO verify if directory exists and see how to 
                             // get it in a JAR ...
                             list.add(sub);
