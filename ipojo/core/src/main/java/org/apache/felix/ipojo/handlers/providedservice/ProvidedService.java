@@ -75,7 +75,7 @@ public class ProvidedService implements ServiceFactory {
     private int m_factoryPolicy = SINGLETON_FACTORY;
 
     /**
-     * The service registration. is null when the service is not registred.
+     * The service registration. is null when the service is not registered.
      * m_serviceRegistration : ServiceRegistration
      */
     private ServiceRegistration m_serviceRegistration;
@@ -205,6 +205,9 @@ public class ProvidedService implements ServiceFactory {
                 // In this case, we need to try to create a new pojo object, the factory method will handle the creation.
                 svc = m_handler.getInstanceManager().createPojoObject();
                 break;
+            // Other policies:
+            // Thread : one service object per asking thread
+            // Consumer : one service object per consumer TODO how to shortcut the service factory
             default:
                 List specs = Arrays.asList(m_serviceSpecification);
                 m_handler.error("[" + m_handler.getInstanceManager().getClassName() + "] Unknown factory policy for " + specs + " : " + m_factoryPolicy);
