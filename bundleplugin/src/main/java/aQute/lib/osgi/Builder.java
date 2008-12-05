@@ -266,7 +266,7 @@ public class Builder extends Analyzer {
             // Private-Package
             Map<String, Map<String, String>> filtered = merge(
                     CONDITIONAL_PACKAGE, conditionals, imports,
-                    new HashSet<String>());
+                    new HashSet<String>(), null);
 
             // Imports can also specify a private import. These
             // packages must also be copied to the bundle

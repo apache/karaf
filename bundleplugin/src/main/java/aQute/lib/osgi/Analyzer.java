@@ -164,7 +164,7 @@ public class Analyzer extends Processor {
             }
 
             exports = merge("export-package", exportInstructions, contained,
-                    superfluous.keySet());
+                    superfluous.keySet(), null);
 
             for (Iterator<Map.Entry<String, Map<String, String>>> i = superfluous
                     .entrySet().iterator(); i.hasNext();) {
@@ -196,7 +196,7 @@ public class Analyzer extends Processor {
             // merge the info for matching packages
             Set<String> extra = new TreeSet<String>(importInstructions.keySet());
             imports = merge("import-package", importInstructions,
-                    referredAndExported, extra);
+                    referredAndExported, extra, ignored);
 
             // Instructions that have not been used could be superfluous
             // or if they do not contain wildcards, should be added
@@ -621,13 +621,13 @@ public class Analyzer extends Processor {
         if (bndInfo == null) {
             bndInfo = new Properties();
             try {
-                InputStream in = getClass().getResourceAsStream("bnd.info");
+                InputStream in = Analyzer.class.getResourceAsStream("bnd.info");
                 if (in != null) {
                     bndInfo.load(in);
                     in.close();
                 }
             } catch (IOException ioe) {
-                warning("Could not read bnd.info in " + getClass().getPackage()
+                warning("Could not read bnd.info in " + Analyzer.class.getPackage()
                         + ioe);
             }
         }
