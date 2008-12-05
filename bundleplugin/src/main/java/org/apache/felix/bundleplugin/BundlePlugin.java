@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -389,15 +390,54 @@ public class BundlePlugin extends AbstractMojo
         Collection embeddableArtifacts = getEmbeddableArtifacts( currentProject, builder );
         new DependencyEmbedder( embeddableArtifacts ).processHeaders( builder );
 
+        dumpInstructions( "BND Instructions:", builder.getProperties(), getLog() );
+
         builder.build();
         Jar jar = builder.getJar();
-        doMavenMetadata( currentProject, jar );
-        builder.setJar( jar );
+
+        dumpManifest( "BND Manifest:", jar.getManifest(), getLog() );
 
         String[] removeHeaders = builder.getProperty( Analyzer.REMOVE_HEADERS, "" ).split( "," );
+
+        doMavenMetadata( currentProject, jar );
         mergeMavenManifest( currentProject, jar, removeHeaders, getLog() );
+        builder.setJar( jar );
+
+        dumpManifest( "Final Manifest:", jar.getManifest(), getLog() );
 
         return builder;
+    }
+
+
+    protected static void dumpInstructions( String title, Properties properties, Log log )
+    {
+        if ( log.isDebugEnabled() )
+        {
+            log.debug( title );
+            log.debug( "------------------------------------------------------------------------" );
+            for ( Enumeration e = properties.propertyNames(); e.hasMoreElements(); )
+            {
+                String key = (String) e.nextElement();
+                log.debug( key + ": " + properties.getProperty( key ) );
+            }
+            log.debug( "------------------------------------------------------------------------" );
+        }
+    }
+
+
+    protected static void dumpManifest( String title, Manifest manifest, Log log )
+    {
+        if ( log.isDebugEnabled() )
+        {
+            log.debug( title );
+            log.debug( "------------------------------------------------------------------------" );
+            for ( Iterator i = manifest.getMainAttributes().entrySet().iterator(); i.hasNext(); )
+            {
+                Map.Entry entry = (Map.Entry) i.next();
+                log.debug( entry.getKey() + ": " + entry.getValue() );
+            }
+            log.debug( "------------------------------------------------------------------------" );
+        }
     }
 
 
