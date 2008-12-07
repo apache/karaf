@@ -87,7 +87,7 @@
         <gshell.version>1.0-alpha-2-SNAPSHOT</gshell.version>
         <jaxp.ri.version>1.4.2_1-SNAPSHOT</jaxp.ri.version>
         <junit.version>4.4_1</junit.version>
-        <jline.version>0.9.94</jline.version>
+        <jline.version>0.9.94_1-SNAPSHOT</jline.version>
         <log4j.version>1.2.14</log4j.version>
         <mina.version>1.1.7_1-SNAPSHOT</mina.version>
         <oro.version>2.0.8_1</oro.version>
@@ -446,15 +446,9 @@
                 <version>${log4j.version}</version>
             </dependency>
             <dependency>
-                <groupId>jline</groupId>
-                <artifactId>jline</artifactId>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.jline</artifactId>
                 <version>${jline.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>junit</groupId>
-                        <artifactId>junit</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>commons-logging</groupId>

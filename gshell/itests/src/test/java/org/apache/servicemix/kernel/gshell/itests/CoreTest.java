@@ -29,6 +29,7 @@ public class CoreTest extends AbstractIntegrationTest {
     @Override
     protected String[] getTestBundlesNames() {
         return new String[] {
+            getBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.jline"),
             getBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.commons-httpclient"),
             getBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.commons-jexl"),
             getBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.commons-vfs"),
