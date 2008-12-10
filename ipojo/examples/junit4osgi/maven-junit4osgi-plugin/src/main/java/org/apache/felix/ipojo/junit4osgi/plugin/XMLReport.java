@@ -140,7 +140,9 @@ public class XMLReport extends Report {
 
         addOutputStreamElement(err, "system-err", testCase);
 
-        addOutputStreamElement(log, "log-service", testCase);
+        if (log != null) {
+            addOutputStreamElement(log, "log-service", testCase);
+        }
 
         m_results.add(testCase);
     }

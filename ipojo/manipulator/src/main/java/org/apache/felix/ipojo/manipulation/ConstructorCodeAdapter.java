@@ -136,9 +136,8 @@ public class ConstructorCodeAdapter extends GeneratorAdapter implements Opcodes 
      */
     public void visitMethodInsn(int opcode, String owner, String name, String desc) {
         
-        
         // A method call is detected, check if it is the super call :
-        if (!m_superDetected) {
+        if (!m_superDetected && name.equals("<init>")) {
             m_superDetected = true; 
             // The first invocation is the super call
             // 1) Visit the super constructor :

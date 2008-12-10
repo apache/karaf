@@ -478,7 +478,10 @@ public abstract class DependencyModel implements TrackerCustomizer {
             // The list must confront actual matching services with already get services from the tracker.
 
             int size = m_matchingRefs.size();
-            List usedByTracker = m_tracker.getUsedServiceReferences();
+            List usedByTracker = null;
+            if (m_tracker != null) {
+                usedByTracker = m_tracker.getUsedServiceReferences();
+            }
             if (size == 0 || usedByTracker == null) { return null; }
 
             List list = new ArrayList(1);

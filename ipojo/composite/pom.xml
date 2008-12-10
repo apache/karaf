@@ -66,7 +66,8 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Bundle-Name>iPOJO Composite</Bundle-Name>
+						<Bundle-Name>Apache Felix iPOJO Composite</Bundle-Name>
+						<Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
 						<Bundle-Vendor> The Apache Software Foundation </Bundle-Vendor>
 						<Bundle-Description> iPOJO Composititon Framework 
 						</Bundle-Description>

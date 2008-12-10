@@ -63,8 +63,7 @@
 						<Export-Package>org.apache.felix.ipojo.handlers.event.*;
 							version="0.9.0"</Export-Package>
 						<Bundle-Name>${pom.name}</Bundle-Name>
-						<Bundle-SymbolicName> org.apache.felix.ipojo.handler.eventadmin 
-						</Bundle-SymbolicName>
+						<Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
 						<Bundle-Description> iPOJO Event Admin Handlers 
 						</Bundle-Description>
 						<Bundle-DocURL>

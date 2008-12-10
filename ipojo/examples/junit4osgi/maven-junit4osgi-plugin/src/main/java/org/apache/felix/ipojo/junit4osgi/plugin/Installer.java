@@ -22,6 +22,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.jar.JarFile;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
@@ -152,18 +153,27 @@ public class Installer implements BundleActivator {
         }
 
         File file = m_project.getArtifact().getFile();
-        if (file.exists()) {
-            URL url = null;
-            try {
-                url = file.toURL();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
+        try {
+            if (file.exists()) {
+                if (file.getName().endsWith("jar")) {
+                    JarFile jar = new JarFile(file);
+                    if (jar.getManifest().getMainAttributes().getValue("Bundle-ManifestVersion") != null) {
+                        Bundle bundle = context.installBundle(file.toURL().toString());
+                        bundle.start();
+                    } else {
+                        System.err.println("The current artifact " + file.getName() + " is not a valid bundle");
+                    }
+                } else {
+                    System.err.println("The current artifact " + file.getName() + " is not a Jar file.");
+                }
+            } else {
+                System.err.println("The current artifact " + file.getName() + " does not exist.");
             }
-            Bundle bundle = context.installBundle(url.toString());
-            bundle.start();
-        } else {
-            throw new BundleException("The current project artifact does not exist (" + file.getAbsolutePath() + ")");
+        } catch (Exception e) {
+            throw new BundleException("The current project artifact cannot be installed (" + e.getMessage() + ")");
         }
+        
+        
     }
 
 

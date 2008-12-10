@@ -22,12 +22,14 @@
 						<goals>
 							<goal>test</goal>
 						</goals>
-						<configuration>
-							<deployProjectArtifact>false</deployProjectArtifact>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
+			
+		</plugins>
+	</build>
+	<reporting>
+		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-report-plugin 
@@ -40,8 +42,13 @@
 					</reportsDirectories>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+			</plugin>
 		</plugins>
-	</build>
+	</reporting>
+	
 	<dependencies>
    <!-- Manipulation -->
 		<dependency>
@@ -95,12 +102,6 @@
 		</dependency>
 		<dependency>
 			<groupId>ipojo.tests</groupId>
-			<artifactId>tests.core.configadmin</artifactId>
-			<version>${ipojo.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>ipojo.tests</groupId>
 			<artifactId>tests.core.configuration 
 			</artifactId>
 			<version>${ipojo.version}</version>
@@ -110,6 +111,12 @@
 			<groupId>ipojo.tests</groupId>
 			<artifactId>tests.core.external.handlers 
 			</artifactId>
+			<version>${ipojo.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>ipojo.tests</groupId>
+			<artifactId>tests.core.configadmin</artifactId>
 			<version>${ipojo.version}</version>
 			<scope>test</scope>
 		</dependency>
@@ -173,7 +180,7 @@
 			</artifactId>
 			<version>${ipojo.version}</version>
 			<scope>test</scope>
-		</dependency>
+		</dependency> 
     
    		<!-- Composite -->
 		<dependency>
@@ -203,7 +210,7 @@
 			<version>${ipojo.version}</version>
 			<scope>test</scope>
 		</dependency>
-	
+
 	<!--  External handlers -->
 		<dependency>
 			<groupId>ipojo.tests</groupId>
@@ -224,7 +231,6 @@
 			<version>${ipojo.version}</version>
 			<scope>test</scope>
 		</dependency>
-	
 	<!--  Utility bundles -->
 		<dependency>
 			<groupId>org.apache.felix</groupId>

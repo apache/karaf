@@ -68,10 +68,8 @@
 						</Bundle-DocURL>
 						<Private-Package> org.apache.felix.ipojo.handler.extender 
 						</Private-Package>
+						<Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
 						<Bundle-Name>${pom.name}</Bundle-Name>
-						<Bundle-SymbolicName>
-							org.apache.felix.ipojo.handler.extender.pattern 
-						</Bundle-SymbolicName>
 						<Include-Resource> META-INF/LICENCE=LICENSE,
 							META-INF/NOTICE=NOTICE </Include-Resource>
 					</instructions>

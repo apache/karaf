@@ -56,8 +56,8 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Bundle-Name> iPOJO Arch Felix Command </Bundle-Name>
-						<Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
+						<Bundle-Name>Apache Felix iPOJO Arch Command</Bundle-Name>
+						<Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
 						<Bundle-Vendor> The Apache Software Foundation </Bundle-Vendor>
 						<Bundle-Description> iPOJO Arch command for Felix 
 						</Bundle-Description>

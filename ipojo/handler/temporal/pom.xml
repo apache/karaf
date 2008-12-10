@@ -64,8 +64,7 @@
 						<Private-Package> org.apache.felix.ipojo.handler.temporal 
 						</Private-Package>
 						<Bundle-Name>${pom.name}</Bundle-Name>
-						<Bundle-SymbolicName> org.apache.felix.ipojo.handler.temporal 
-						</Bundle-SymbolicName>
+						<Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
 						<Bundle-Vendor> The Apache Software Foundation </Bundle-Vendor>
 						<Bundle-Description> iPOJO Temporal Dependency Handler 
 						</Bundle-Description>

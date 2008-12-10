@@ -92,7 +92,7 @@ public class Junit4osgiPlugin extends AbstractMojo {
     /**
      * Must the current artifact be deployed?
      * 
-     * @parameter expression="${deployProjectArtifact}" default-value="false"
+     * @parameter expression="${deployProjectArtifact}" default-value="true"
      */
     private boolean m_deployProjectArtifact;
     
@@ -102,6 +102,13 @@ public class Junit4osgiPlugin extends AbstractMojo {
      * @parameter expression="${bundles}"
      */
     private ArrayList m_bundles;
+    
+    /**
+     * Enables / Disables the log service provided by the plugin.
+     * 
+     * @parameter expression="${logService}" default-value="true"
+     */
+    private boolean m_logEnable;
     
     /**
      * Number of executed test case.
@@ -151,15 +158,23 @@ public class Junit4osgiPlugin extends AbstractMojo {
         
         List activators = new ArrayList();
         m_logService = new LogServiceImpl();
-        activators.add(m_logService);
+        if (m_logEnable) { // Starts the log service if enabled
+            activators.add(m_logService);
+        } else {
+            getLog().info("Log Service disabled");
+        }
         activators.add(new Installer(m_pluginArtifacts, bundles, m_project, m_deployProjectArtifact));
         Map map = new HashMap();
         map.put("felix.systembundle.activators", activators);
         map.put("org.osgi.framework.storage.clean", "onFirstInit");
         map.put("ipojo.log.level", "WARNING");
-        map.put("org.osgi.framework.bootdelegation", "junit.framework, org.osgi.service.log");
+        // Use a boot delagation to share classes between the host and the embedded Felix.
+        // The junit.framework package is boot delegated to execute tests
+        // The log service package is also boot delegated as the host publish a log service
+        // The cobertura package is used during code coverage collection
+        map.put("org.osgi.framework.bootdelegation", "junit.framework, org.osgi.service.log, net.sourceforge.cobertura.coveragedata"); 
+        
         map.put("org.osgi.framework.storage", m_targetDir.getAbsolutePath() + "/felix-cache"); 
-
         
         System.out.println("");
         System.out.println("-------------------------------------------------------");
@@ -305,12 +320,20 @@ public class Junit4osgiPlugin extends AbstractMojo {
             if (Artifact.SCOPE_TEST.equals(artifact.getScope())) { // Select scope=test.
                 File file = artifact.getFile();
                 try {
-                    JarFile jar = new JarFile(file);
-                    if (jar.getManifest().getMainAttributes().getValue("Bundle-ManifestVersion") != null) {
-                        toDeploy.add(file.toURL());
+                    if (file.exists()) {
+                        if (file.getName().endsWith("jar")) {
+                            JarFile jar = new JarFile(file);
+                            if (jar.getManifest().getMainAttributes().getValue("Bundle-ManifestVersion") != null) {
+                                toDeploy.add(file.toURL());
+                            }
+                        } else {
+                            getLog().info("The test artifact " + artifact.getFile().getName() + " is not a Jar file.");
+                        }
+                    } else {
+                        getLog().info("The test artifact " + artifact.getFile().getName() + " does not exist.");
                     }
                 } catch (Exception e) {
-                    getLog().error(e);
+                    getLog().error(file + " is not a valid bundle, this artifact is ignored");
                 }
             }
         }

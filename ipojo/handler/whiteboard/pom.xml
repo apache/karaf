@@ -61,8 +61,7 @@
 				<configuration>
 					<instructions>
 						<Bundle-Name>${pom.name}</Bundle-Name>
-						<Bundle-SymbolicName> org.apache.felix.ipojo.handler.whiteboard 
-						</Bundle-SymbolicName>
+						<Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
 						<Bundle-Vendor> The Apache Software Foundation </Bundle-Vendor>
 						<Bundle-Description> iPOJO White-Board Pattern Handler 
 						</Bundle-Description>
