@@ -125,7 +125,7 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     }
 
     public void removeRepository(URI uri) {
-        if (repositories.values().contains(uri)) {
+        if (repositories.containsKey(uri)) {
             internalRemoveRepository(uri);
             saveState();
         }
