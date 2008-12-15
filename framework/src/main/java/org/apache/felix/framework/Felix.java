@@ -38,7 +38,7 @@ import org.osgi.service.startlevel.StartLevel;
 public class Felix extends FelixBundle implements Framework
 {
     // The secure action used to do privileged calls
-    static SecureAction m_secureAction = new SecureAction();
+    static final SecureAction m_secureAction = new SecureAction();
 
     // The extension manager to handle extension bundles
     ExtensionManager m_extensionManager;
@@ -54,17 +54,24 @@ public class Felix extends FelixBundle implements Framework
     private IModuleFactory m_factory = null;
     private R4SearchPolicyCore m_policyCore = null;
 
-    // Object used as a lock when calculating which bundles
-    // when performing an operation on one or more bundles.
-    private Object[] m_bundleLock = new Object[0];
+    // Lock object used to determine if an individual bundle
+    // lock or the global lock can be acquired.
+    private final Object[] m_bundleLock = new Object[0];
+    // Maps a thread object to a single-element int array to
+    // keep track of how many locks the thread has acquired.
+    private final Map m_lockingThreadMap = new HashMap();
+    // Separately keeps track of how many times the global
+    // lock was acquired by a given thread; if this value is
+    // zero, then it means the global lock is free.
+    private int m_globalLockCount = 0;
 
     // Maps a bundle location to a bundle location;
     // used to reserve a location when installing a bundle.
-    private Map m_installRequestMap = new HashMap();
+    private final Map m_installRequestMap = new HashMap();
     // This lock must be acquired to modify m_installRequestMap;
     // to help avoid deadlock this lock as priority 1 and should
     // be acquired before locks with lower priority.
-    private Object[] m_installRequestLock_Priority1 = new Object[0];
+    private final Object[] m_installRequestLock_Priority1 = new Object[0];
 
     // Maps a bundle location to a bundle.
     private HashMap m_installedBundleMap;
@@ -72,14 +79,14 @@ public class Felix extends FelixBundle implements Framework
     // This lock must be acquired to modify m_installedBundleMap;
     // to help avoid deadlock this lock as priority 2 and should
     // be acquired before locks with lower priority.
-    private Object[] m_installedBundleLock_Priority2 = new Object[0];
+    private final Object[] m_installedBundleLock_Priority2 = new Object[0];
 
     // An array of uninstalled bundles before a refresh occurs.
     private FelixBundle[] m_uninstalledBundles = null;
     // This lock must be acquired to modify m_uninstalledBundles;
     // to help avoid deadlock this lock as priority 3 and should
     // be acquired before locks with lower priority.
-    private Object[] m_uninstalledBundlesLock_Priority3 = new Object[0];
+    private final Object[] m_uninstalledBundlesLock_Priority3 = new Object[0];
 
     // Framework's active start level.
     private int m_activeStartLevel =
@@ -96,7 +103,7 @@ public class Felix extends FelixBundle implements Framework
 
     // Next available bundle identifier.
     private long m_nextId = 1L;
-    private Object m_nextIdLock = new Object[0];
+    private final Object m_nextIdLock = new Object[0];
 
     // List of event listeners.
     private EventDispatcher m_dispatcher = null;
@@ -4177,14 +4184,14 @@ ex.printStackTrace();
         }
     }
 
-    private long m_lockCount = 0;
-    private Thread m_lockThread = null;
-
-    protected void acquireBundleLock(FelixBundle bundle)
+    void acquireBundleLock(FelixBundle bundle)
     {
         synchronized (m_bundleLock)
         {
-            while ((m_lockCount < 0) && (m_lockThread != Thread.currentThread()))
+            // Wait if any thread has the global lock, unless the current thread
+            // holds the global lock.
+            while ((m_globalLockCount > 0)
+                && m_lockingThreadMap.containsKey(Thread.currentThread()))
             {
                 try
                 {
@@ -4195,8 +4202,17 @@ ex.printStackTrace();
                     // Ignore and just keep waiting.
                 }
             }
-            m_lockCount++;
 
+            // Increment the current thread's lock count.
+            int[] counter = (int[]) m_lockingThreadMap.get(Thread.currentThread());
+            if (counter == null)
+            {
+                counter = new int[] { 0 };
+            }
+            counter[0]++;
+            m_lockingThreadMap.put(Thread.currentThread(), counter);
+
+            // Wait until the bundle lock is available, then lock it.
             while (!bundle.getInfo().isLockable())
             {
                 try
@@ -4212,11 +4228,14 @@ ex.printStackTrace();
         }
     }
 
-    protected boolean acquireBundleLockOrFail(FelixBundle bundle)
+    private boolean acquireBundleLockOrFail(FelixBundle bundle)
     {
         synchronized (m_bundleLock)
         {
-            while ((m_lockCount < 0) && (m_lockThread != Thread.currentThread()))
+            // Wait if any thread has the global lock, unless the current thread
+            // holds the global lock.
+            while ((m_globalLockCount > 0)
+                && m_lockingThreadMap.containsKey(Thread.currentThread()))
             {
                 try
                 {
@@ -4227,27 +4246,58 @@ ex.printStackTrace();
                     // Ignore and just keep waiting.
                 }
             }
-            m_lockCount++;
+
+            // Return immediately if the bundle lock is not available.
             if (!bundle.getInfo().isLockable())
             {
                 return false;
             }
+
+            // Increment the current thread's lock count.
+            int[] counter = (int[]) m_lockingThreadMap.get(Thread.currentThread());
+            if (counter == null)
+            {
+                counter = new int[] { 0 };
+            }
+            counter[0]++;
+            m_lockingThreadMap.put(Thread.currentThread(), counter);
+
+            // Acquire the bundle lock.
             bundle.getInfo().lock();
             return true;
         }
     }
 
-    protected void releaseBundleLock(FelixBundle bundle)
+    void releaseBundleLock(FelixBundle bundle)
     {
         synchronized (m_bundleLock)
         {
-            m_lockCount--;
+            // Decrement the current thread's lock count.
+            int[] counter = (int[]) m_lockingThreadMap.get(Thread.currentThread());
+            if (counter != null)
+            {
+                counter[0]--;
+                if (counter[0] == 0)
+                {
+                    m_lockingThreadMap.remove(Thread.currentThread());
+                }
+                else
+                {
+                    m_lockingThreadMap.put(Thread.currentThread(), counter);
+                }
+            }
+            else
+            {
+                m_logger.log(Logger.LOG_ERROR, "Thread released a lock it doesn't own: " + bundle);
+            }
+
+            // Unlock the bundle.
             bundle.getInfo().unlock();
             m_bundleLock.notifyAll();
         }
     }
 
-    protected FelixBundle[] acquireBundleResolveLocks(Bundle[] targets)
+    private FelixBundle[] acquireBundleResolveLocks(Bundle[] targets)
     {
         // Hold bundles to be locked.
         FelixBundle[] bundles = null;
@@ -4263,7 +4313,12 @@ ex.printStackTrace();
 
         synchronized (m_bundleLock)
         {
-            while (m_lockCount != 0)
+            // Wait as long as there are multiple threads holding locks,
+            // but proceed if there are no lock holders or the current thread
+            // is the only lock holder.
+            while ((m_lockingThreadMap.size() > 1)
+               || ((m_lockingThreadMap.size() == 1)
+                   && !m_lockingThreadMap.containsKey(Thread.currentThread())))
             {
                 try
                 {
@@ -4274,89 +4329,69 @@ ex.printStackTrace();
                     // Ignore
                 }
             }
-            m_lockCount = -1;
-            m_lockThread = Thread.currentThread();
 
-            boolean success = false;
-            while (!success)
+            // Increment the current thread's lock count.
+            int[] counter = (int[]) m_lockingThreadMap.get(Thread.currentThread());
+            if (counter == null)
             {
-                // If targets is null, then resolve all unresolved bundles.
-                if (targets == null)
+                counter = new int[] { 0 };
+            }
+            counter[0]++;
+            m_lockingThreadMap.put(Thread.currentThread(), counter);
+
+            // Increment the current thread's global lock count.
+            m_globalLockCount++;
+
+            // If targets is null, then resolve all unresolved bundles.
+            if (targets == null)
+            {
+                List list = new ArrayList();
+
+                // Add all unresolved bundles to the list.
+                synchronized (m_installedBundleLock_Priority2)
                 {
-                    List list = new ArrayList();
-
-                    // Add all unresolved bundles to the list.
-                    synchronized (m_installedBundleLock_Priority2)
+                    Iterator iter = m_installedBundleMap.values().iterator();
+                    while (iter.hasNext())
                     {
-                        Iterator iter = m_installedBundleMap.values().iterator();
-                        while (iter.hasNext())
+                        FelixBundle bundle = (FelixBundle) iter.next();
+                        if (bundle.getInfo().getState() == Bundle.INSTALLED)
                         {
-                            FelixBundle bundle = (FelixBundle) iter.next();
-                            if (bundle.getInfo().getState() == Bundle.INSTALLED)
-                            {
-                                list.add(bundle);
-                            }
+                            list.add(bundle);
                         }
-                    }
-
-                    // Create an array.
-                    if (list.size() > 0)
-                    {
-                        bundles = (FelixBundle[]) list.toArray(new FelixBundle[list.size()]);
                     }
                 }
 
-                // Check if all unresolved bundles can be locked.
-                boolean lockable = true;
-                if (bundles != null)
+                // Create an array.
+                if (list.size() > 0)
                 {
-                    for (int i = 0; lockable && (i < bundles.length); i++)
-                    {
-                        lockable = bundles[i].getInfo().isLockable();
-                    }
+                    bundles = (FelixBundle[]) list.toArray(new FelixBundle[list.size()]);
+                }
+            }
 
-                    // If we can lock all bundles, then lock them.
-                    if (lockable)
-                    {
-                        for (int i = 0; i < bundles.length; i++)
-                        {
-                            bundles[i].getInfo().lock();
-                        }
-                        success = true;
-                    }
-                    // Otherwise, wait and try again.
-                    else
-                    {
-                        try
-                        {
-                            m_bundleLock.wait();
-                        }
-                        catch (InterruptedException ex)
-                        {
-                            // Ignore and just keep waiting.
-                        }
-                    }
-                }
-                else
-                {
-                    // If there were no bundles to lock, then we can just
-                    // exit the lock loop.
-                    success = true;
-                }
+            // Lock all needed bundles; this is not strictly
+            // necessary since we hold the global lock.
+            for (int i = 0; i < bundles.length; i++)
+            {
+                bundles[i].getInfo().lock();
             }
         }
 
         return bundles;
     }
 
-    protected FelixBundle[] acquireBundleRefreshLocks(Bundle[] targets)
+    private FelixBundle[] acquireBundleRefreshLocks(Bundle[] targets)
     {
         // Hold bundles to be locked.
         FelixBundle[] bundles = null;
 
         synchronized (m_bundleLock)
         {
-            while (m_lockCount != 0)
+            // Wait as long as there are multiple threads holding locks,
+            // but proceed if there are no lock holders or the current thread
+            // is the only lock holder.
+            while ((m_lockingThreadMap.size() > 1)
+               || ((m_lockingThreadMap.size() == 1)
+                   && !m_lockingThreadMap.containsKey(Thread.currentThread())))
             {
                 try
                 {
@@ -4367,122 +4402,119 @@ ex.printStackTrace();
                     // Ignore
                 }
             }
-            m_lockCount = -1;
-            m_lockThread = Thread.currentThread();
 
-            boolean success = false;
-            while (!success)
+            // Increment the current thread's lock count.
+            int[] counter = (int[]) m_lockingThreadMap.get(Thread.currentThread());
+            if (counter == null)
             {
-                // If targets is null, then refresh all pending bundles.
-                Bundle[] newTargets = targets;
-                if (newTargets == null)
+                counter = new int[] { 0 };
+            }
+            counter[0]++;
+            m_lockingThreadMap.put(Thread.currentThread(), counter);
+
+            // Increment the current thread's global lock count.
+            m_globalLockCount++;
+
+            // If targets is null, then refresh all pending bundles.
+            Bundle[] newTargets = targets;
+            if (newTargets == null)
+            {
+                List list = new ArrayList();
+
+                // First add all uninstalled bundles.
+                synchronized (m_uninstalledBundlesLock_Priority3)
                 {
-                    List list = new ArrayList();
-
-                    // First add all uninstalled bundles.
-                    synchronized (m_uninstalledBundlesLock_Priority3)
+                    for (int i = 0;
+                        (m_uninstalledBundles != null) && (i < m_uninstalledBundles.length);
+                        i++)
                     {
-                        for (int i = 0;
-                            (m_uninstalledBundles != null) && (i < m_uninstalledBundles.length);
-                            i++)
-                        {
-                            list.add(m_uninstalledBundles[i]);
-                        }
-                    }
-
-                    // Then add all updated bundles.
-                    synchronized (m_installedBundleLock_Priority2)
-                    {
-                        Iterator iter = m_installedBundleMap.values().iterator();
-                        while (iter.hasNext())
-                        {
-                            FelixBundle bundle = (FelixBundle) iter.next();
-                            BundleInfo info = bundle.getInfo();
-                            if ((info instanceof RegularBundleInfo) &&
-                                (((RegularBundleInfo) info).getArchive().getRevisionCount() > 1))
-                            {
-                                list.add(bundle);
-                            }
-                        }
-                    }
-
-                    // Create an array.
-                    if (list.size() > 0)
-                    {
-                        newTargets = (Bundle[]) list.toArray(new Bundle[list.size()]);
+                        list.add(m_uninstalledBundles[i]);
                     }
                 }
 
-                // If there are targets, then find all dependencies
-                // for each one.
-                if (newTargets != null)
+                // Then add all updated bundles.
+                synchronized (m_installedBundleLock_Priority2)
                 {
-                    // Create map of bundles that import the packages
-                    // from the target bundles.
-                    Map map = new HashMap();
-                    for (int targetIdx = 0; targetIdx < newTargets.length; targetIdx++)
+                    Iterator iter = m_installedBundleMap.values().iterator();
+                    while (iter.hasNext())
                     {
-                        // Add the current target bundle to the map of
-                        // bundles to be refreshed.
-                        FelixBundle target = (FelixBundle) newTargets[targetIdx];
-                        map.put(target, target);
-                        // Add all importing bundles to map.
-                        populateDependentGraph(target, map);
-                    }
-
-                    bundles = (FelixBundle[]) map.values().toArray(new FelixBundle[map.size()]);
-                }
-
-                // Check if all corresponding bundles can be locked.
-                boolean lockable = true;
-                if (bundles != null)
-                {
-                    for (int i = 0; lockable && (i < bundles.length); i++)
-                    {
-                        lockable = bundles[i].getInfo().isLockable();
-                    }
-
-                    // If we can lock all bundles, then lock them.
-                    if (lockable)
-                    {
-                        for (int i = 0; i < bundles.length; i++)
+                        FelixBundle bundle = (FelixBundle) iter.next();
+                        BundleInfo info = bundle.getInfo();
+                        if ((info instanceof RegularBundleInfo) &&
+                            (((RegularBundleInfo) info).getArchive().getRevisionCount() > 1))
                         {
-                            bundles[i].getInfo().lock();
-                        }
-                        success = true;
-                    }
-                    // Otherwise, wait and try again.
-                    else
-                    {
-                        try
-                        {
-                            m_bundleLock.wait();
-                        }
-                        catch (InterruptedException ex)
-                        {
-                            // Ignore and just keep waiting.
+                            list.add(bundle);
                         }
                     }
                 }
-                else
+
+                // Create an array.
+                if (list.size() > 0)
                 {
-                    // If there were no bundles to lock, then we can just
-                    // exit the lock loop.
-                    success = true;
+                    newTargets = (Bundle[]) list.toArray(new Bundle[list.size()]);
                 }
+            }
+
+            // If there are targets, then find all dependencies
+            // for each one.
+            if (newTargets != null)
+            {
+                // Create map of bundles that import the packages
+                // from the target bundles.
+                Map map = new HashMap();
+                for (int targetIdx = 0; targetIdx < newTargets.length; targetIdx++)
+                {
+                    // Add the current target bundle to the map of
+                    // bundles to be refreshed.
+                    FelixBundle target = (FelixBundle) newTargets[targetIdx];
+                    map.put(target, target);
+                    // Add all importing bundles to map.
+                    populateDependentGraph(target, map);
+                }
+
+                bundles = (FelixBundle[]) map.values().toArray(new FelixBundle[map.size()]);
+            }
+
+            // Lock all needed bundles; this is not strictly
+            // necessary since we hold the global lock.
+            for (int i = 0; i < bundles.length; i++)
+            {
+                bundles[i].getInfo().lock();
             }
         }
 
         return bundles;
     }
 
-    protected void releaseBundleLocks(FelixBundle[] bundles)
+    private void releaseBundleLocks(FelixBundle[] bundles)
     {
         // Always unlock any locked bundles.
         synchronized (m_bundleLock)
         {
-            m_lockCount = 0;
-            m_lockThread = null;
+            // Decrement the current thread's lock count.
+            int[] counter = (int[]) m_lockingThreadMap.get(Thread.currentThread());
+            if (counter != null)
+            {
+                counter[0]--;
+                if (counter[0] == 0)
+                {
+                    m_lockingThreadMap.remove(Thread.currentThread());
+                }
+                else
+                {
+                    m_lockingThreadMap.put(Thread.currentThread(), counter);
+                }
+                counter = new int[] { 0 };
+            }
+            else
+            {
+                m_logger.log(Logger.LOG_ERROR, "Thread release a lock it doesn't own.");
+            }
+
+            // Decrement the current thread's global lock count;
+            m_globalLockCount--;
+
+            // Unlock all the bundles.
             for (int i = 0; (bundles != null) && (i < bundles.length); i++)
             {
                 bundles[i].getInfo().unlock();
