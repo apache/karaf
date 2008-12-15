@@ -30,7 +30,7 @@ import org.osgi.framework.*;
 
 abstract class BundleInfo
 {
-    private Logger m_logger = null;
+    private final Logger m_logger;
     private boolean m_removalPending = false;
     private IModule[] m_modules = null;
     private int m_state = 0;

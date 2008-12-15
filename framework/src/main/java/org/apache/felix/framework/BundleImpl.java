@@ -28,8 +28,8 @@ import org.osgi.framework.*;
 class BundleImpl extends FelixBundle
 {
     private final long m_id;
-    private Felix m_felix = null;
-    private RegularBundleInfo m_info = null;
+    private final Felix m_felix;
+    private volatile RegularBundleInfo m_info = null;
 
     protected BundleImpl(Felix felix, RegularBundleInfo info)
     {
