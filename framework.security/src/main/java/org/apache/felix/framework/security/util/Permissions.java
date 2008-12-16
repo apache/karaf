@@ -26,6 +26,7 @@ import java.lang.ref.WeakReference;
 import java.security.AllPermission;
 import java.security.Permission;
 import java.security.PermissionCollection;
+import java.security.*;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -464,9 +465,12 @@ public final class Permissions
         return null;
     }
 
-    private Permission createPermission(PermissionInfo permissionInfo,
-        Class target)
+    private Permission createPermission(final PermissionInfo permissionInfo,
+        final Class target)
     {
+        return (Permission) AccessController.doPrivileged(new PrivilegedAction() {
+            public Object run()
+            {
         Permission cached = getFromCache(permissionInfo.getEncoded(), target);
 
         if (cached != null)
@@ -539,6 +543,7 @@ public final class Permissions
         }
 
         return null;
+        }});
     }
 
     private Permission createPermission(String name, String action, Class target)
