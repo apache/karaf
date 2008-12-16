@@ -55,6 +55,7 @@ function renderData( eventData )  {
     for ( var idx in eventData.data ) {
         entry( eventData.data[idx] );
     }
+    $("#events").trigger("update");
 }
 
 function entry( /* Object */ dataEntry ) {
