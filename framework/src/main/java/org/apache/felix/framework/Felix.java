@@ -894,7 +894,7 @@ ex.printStackTrace();
         {
             // Get the framework's default start level.
             int startLevel = FelixConstants.FRAMEWORK_DEFAULT_STARTLEVEL;
-            String s = (String) m_configMap.get(FelixConstants.FRAMEWORK_STARTLEVEL_PROP);
+            String s = (String) m_configMap.get(Constants.FRAMEWORK_BEGINNING_STARTLEVEL);
             if (s != null)
             {
                 try
