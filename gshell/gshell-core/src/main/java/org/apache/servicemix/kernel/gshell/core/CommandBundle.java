@@ -18,7 +18,6 @@
  */
 package org.apache.servicemix.kernel.gshell.core;
 
-import java.util.Map;
 import java.util.Dictionary;
 import java.util.Properties;
 import java.util.List;
@@ -27,19 +26,17 @@ import java.util.ArrayList;
 import org.springframework.osgi.context.BundleContextAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationContext;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.apache.geronimo.gshell.command.Command;
+import org.apache.geronimo.gshell.command.Link;
+import org.apache.geronimo.gshell.command.Alias;
 import org.apache.geronimo.gshell.registry.CommandRegistry;
 import org.apache.geronimo.gshell.registry.AliasRegistry;
-import org.apache.geronimo.gshell.wisdom.command.CommandSupport;
 import org.apache.geronimo.gshell.wisdom.command.LinkCommand;
 import org.apache.geronimo.gshell.wisdom.registry.CommandLocationImpl;
-import org.apache.geronimo.gshell.spring.BeanContainerAware;
-import org.apache.geronimo.gshell.spring.BeanContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,9 +52,9 @@ public class CommandBundle implements BundleContextAware, InitializingBean, Disp
 
     private List<Command> commands;
 
-    private Map<String,String> links;
+    private List<Link> links;
 
-    private Map<String,String> aliases;
+    private List<Alias> aliases;
 
     private ApplicationContext applicationContext;
 
@@ -80,19 +77,21 @@ public class CommandBundle implements BundleContextAware, InitializingBean, Disp
         this.commands = commands;
     }
 
-    public Map<String, String> getLinks() {
+    public List<Link> getLinks() {
         return links;
     }
 
-    public void setLinks(Map<String, String> links) {
+    public void setLinks(List<Link> links) {
+        assert links != null;
+
         this.links = links;
     }
 
-    public Map<String, String> getAliases() {
+    public List<Alias> getAliases() {
         return aliases;
     }
 
-    public void setAliases(final Map<String, String> aliases) {
+    public void setAliases(List<Alias> aliases) {
         assert aliases != null;
 
         this.aliases = aliases;
@@ -125,17 +124,17 @@ public class CommandBundle implements BundleContextAware, InitializingBean, Disp
                 }
             }
             if (links != null) {
-                for (String name : links.keySet()) {
-                    log.debug("Registering link: {}", name);
-                    LinkCommand link = new LinkCommand(commandRegistry, links.get(name));
-                    link.setLocation(new CommandLocationImpl(name));
-                    commandRegistry.registerCommand(link);
+                for (Link link : links) {
+                    log.debug("Registering link: {}", link.getName());
+                    LinkCommand cmd = new LinkCommand(commandRegistry, link.getTarget());
+                    cmd.setLocation(new CommandLocationImpl(link.getName()));
+                    commandRegistry.registerCommand(cmd);
                 }
             }
             if (aliases != null) {
-                for (String name : aliases.keySet()) {
-                    log.debug("Registering alias: {}", name);
-                    aliasRegistry.registerAlias(name, aliases.get(name));
+                for (Alias alias : aliases) {
+                    log.debug("Registering alias: {}", alias.getName());
+                    aliasRegistry.registerAlias(alias.getName(), alias.getAlias());
                 }
             }
         } else if (bundleContext != null) {
@@ -149,21 +148,16 @@ public class CommandBundle implements BundleContextAware, InitializingBean, Disp
                 }
             }
             if (links != null) {
-                for (String name : links.keySet()) {
-                    log.debug("Registering link: {}", name);
-                    Dictionary props = new Properties();
-                    props.put(OsgiCommandRegistry.NAME, name);
-                    props.put(OsgiCommandRegistry.TARGET, links.get(name));
-                    registrations.add(bundleContext.registerService(Link.class.getName(), new Link() {}, props));
+                for (Link link : links) {
+                    log.debug("Registering link: {}", link.getName());
+                    registrations.add(bundleContext.registerService(Link.class.getName(), link, new Properties()));
                 }
             }
             if (aliases != null) {
-                for (String name : aliases.keySet()) {
-                    log.debug("Registering alias: {}", name);
+                for (Alias alias : aliases) {
+                    log.debug("Registering alias: {}", alias.getName());
                     Dictionary props = new Properties();
-                    props.put(OsgiAliasRegistry.NAME, name);
-                    props.put(OsgiAliasRegistry.ALIAS, aliases.get(name));
-                    registrations.add(bundleContext.registerService(Alias.class.getName(), new Alias() {}, props));
+                    registrations.add(bundleContext.registerService(Alias.class.getName(), alias, new Properties()));
                 }
             }
         } else {

@@ -45,7 +45,7 @@
         <property name="model">
             <bean class="org.apache.geronimo.gshell.application.model.ApplicationModel">
                 <!-- TODO: fix version -->
-                <property name="version" value="1.0.0"/>
+                <property name="version" value="1.1.0"/>
                 <property name="branding" ref="branding"/>
             </bean>
         </property>
@@ -149,9 +149,7 @@
         <constructor-arg ref="commandRegistry"/>
     </bean>
 
-    <bean id="variableNameCompleter" class="org.apache.geronimo.gshell.wisdom.completer.VariableNameCompleter"
-          lazy-init="true">
-        <constructor-arg ref="applicationManager"/>                             
+    <bean id="variableNameCompleter" class="org.apache.geronimo.gshell.wisdom.completer.VariableNameCompleter" lazy-init="true">
     </bean>
 
 </beans>

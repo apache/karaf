@@ -48,11 +48,11 @@
         <osgi:listener ref="osgiCommandRegistry" bind-method="register" unbind-method="unregister" />
     </osgi:list>
 
-    <osgi:list id="osgiLinkCommands" interface="org.apache.servicemix.kernel.gshell.core.Link" cardinality="0..N">
+    <osgi:list id="osgiLinkCommands" interface="org.apache.geronimo.gshell.command.Link" cardinality="0..N">
         <osgi:listener ref="osgiCommandRegistry" bind-method="register" unbind-method="unregister" />
     </osgi:list>
 
-    <osgi:list id="osgiAliases" interface="org.apache.servicemix.kernel.gshell.core.Alias" cardinality="0..N">
+    <osgi:list id="osgiAliases" interface="org.apache.geronimo.gshell.command.Alias" cardinality="0..N">
         <osgi:listener ref="osgiAliasRegistry" bind-method="register" unbind-method="unregister" />
     </osgi:list>
 

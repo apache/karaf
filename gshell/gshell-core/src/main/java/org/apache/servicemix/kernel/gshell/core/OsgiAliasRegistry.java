@@ -21,6 +21,7 @@ package org.apache.servicemix.kernel.gshell.core;
 import java.util.Map;
 
 import org.apache.geronimo.gshell.registry.AliasRegistry;
+import org.apache.geronimo.gshell.command.Alias;
 
 public class OsgiAliasRegistry {
 
@@ -34,11 +35,11 @@ public class OsgiAliasRegistry {
     }
 
     public void register(final Alias alias, Map<String, ?> properties) throws Exception {
-        aliasRegistry.registerAlias((String) properties.get(NAME), (String) properties.get(ALIAS));
+        aliasRegistry.registerAlias(alias.getName(), alias.getAlias());
     }
 
     public void unregister(final Alias alias, Map<String, ?> properties) throws Exception {
-        aliasRegistry.removeAlias((String) properties.get(NAME));
+        aliasRegistry.removeAlias(alias.getName());
     }
 
 }

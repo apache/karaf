@@ -33,7 +33,6 @@
        default-destroy-method="destroy">
 
     <bean id="fileSystemAccess" class="org.apache.geronimo.gshell.vfs.FileSystemAccessImpl">
-        <constructor-arg ref="applicationManager"/>
         <constructor-arg ref="fileSystemManager"/>
     </bean>
 

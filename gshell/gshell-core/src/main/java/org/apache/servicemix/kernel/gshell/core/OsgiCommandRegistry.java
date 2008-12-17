@@ -21,11 +21,10 @@ package org.apache.servicemix.kernel.gshell.core;
 import java.util.Map;
 
 import org.apache.geronimo.gshell.command.Command;
-import org.apache.geronimo.gshell.command.CommandResult;
+import org.apache.geronimo.gshell.command.Link;
 import org.apache.geronimo.gshell.registry.CommandRegistry;
 import org.apache.geronimo.gshell.wisdom.command.LinkCommand;
 import org.apache.geronimo.gshell.wisdom.registry.CommandLocationImpl;
-import org.apache.geronimo.gshell.shell.ShellContext;
 
 public class OsgiCommandRegistry {
 
@@ -47,13 +46,13 @@ public class OsgiCommandRegistry {
     }
 
     public void register(final Link link, Map<String, ?> properties) throws Exception {
-        LinkCommand cmd = new LinkCommand(commandRegistry, (String) properties.get(TARGET));
-        cmd.setLocation(new CommandLocationImpl((String) properties.get(NAME)));
+        LinkCommand cmd = new LinkCommand(commandRegistry, link.getTarget());
+        cmd.setLocation(new CommandLocationImpl(link.getName()));
         commandRegistry.registerCommand(cmd);
     }
 
     public void unregister(final Link link, Map<String, ?> properties) throws Exception {
-        commandRegistry.removeCommand(commandRegistry.getCommand((String) properties.get(NAME)));
+        commandRegistry.removeCommand(commandRegistry.getCommand(link.getName()));
     }
 
 }
