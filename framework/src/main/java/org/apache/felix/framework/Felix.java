@@ -3505,6 +3505,9 @@ ex.printStackTrace();
                     // The content loader was opened when trying to find the libraries,
                     // so make sure to close it since it will be deleted.
                     contentLoader.close();
+                    // Remove the module we created, since it is not valid and
+                    // has not yet been added to the bundle to be removed later.
+                    m_factory.removeModule(module);
                     throw new BundleException("Native library does not exist: " + entryName);
                 }
             }
