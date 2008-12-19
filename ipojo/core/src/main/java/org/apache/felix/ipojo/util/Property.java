@@ -183,31 +183,31 @@ public class Property implements FieldInterceptor {
     private static Class computeArrayType(String type, BundleContext context) throws ConfigurationException {
         String internalType = type.substring(0, type.length() - 2);
         if ("string".equals(internalType) || "String".equals(internalType)) {
-            return new String[0].getClass();
+            return String[].class;
         }
         if ("boolean".equals(internalType)) {
-            return new boolean[0].getClass();
+            return boolean[].class;
         }
         if ("byte".equals(internalType)) {
-            return new byte[0].getClass();
+            return byte[].class;
         }
         if ("short".equals(internalType)) {
-            return new short[0].getClass();
+            return short[].class;
         }
         if ("int".equals(internalType)) {
-            return new int[0].getClass();
+            return int[].class;
         }
         if ("long".equals(internalType)) {
-            return new long[0].getClass();
+            return long[].class;
         }
         if ("float".equals(internalType)) {
-            return new float[0].getClass();
+            return float[].class;
         }
         if ("double".equals(internalType)) {
-            return new double[0].getClass();
+            return double[].class;
         }
         if ("char".equals(internalType)) {
-            return new char[0].getClass();
+            return char[].class;
         }
 
         // Complex array type.
@@ -271,7 +271,7 @@ public class Property implements FieldInterceptor {
      * @return the object to inject when the property has no value.
      */
     private static Object getNoValue(Class type) {
-        if (Boolean.TYPE.equals(type)) { return new Boolean(false); }
+        if (Boolean.TYPE.equals(type)) { return Boolean.FALSE; }
         if (Byte.TYPE.equals(type)) { return new Byte((byte) 0); }
         if (Short.TYPE.equals(type)) { return new Short((short) 0); }
         if (Integer.TYPE.equals(type)) { return new Integer(0); }
@@ -344,7 +344,9 @@ public class Property implements FieldInterceptor {
      * @throws ConfigurationException if the object cannot be created.
      */
     public static Object create(Class type, String strValue) throws ConfigurationException {
-        if (Boolean.TYPE.equals(type)) { return new Boolean(strValue); }
+        if (Boolean.TYPE.equals(type)) {
+            return Boolean.valueOf(strValue);
+        }
         if (Byte.TYPE.equals(type)) { return new Byte(strValue); }
         if (Short.TYPE.equals(type)) { return new Short(strValue); }
         if (Integer.TYPE.equals(type)) { return new Integer(strValue); }
@@ -390,7 +392,7 @@ public class Property implements FieldInterceptor {
         if (Boolean.TYPE.equals(interntype)) {
             boolean[] bool = new boolean[values.length];
             for (int i = 0; i < values.length; i++) {
-                bool[i] = new Boolean(values[i]).booleanValue();
+                bool[i] = Boolean.valueOf(values[i]).booleanValue();
             }
             return bool;
         }

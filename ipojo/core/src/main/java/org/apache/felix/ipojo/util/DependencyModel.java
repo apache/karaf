@@ -21,9 +21,15 @@ package org.apache.felix.ipojo.util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.ConfigurationException;
+import org.apache.felix.ipojo.IPOJOServiceFactory;
 import org.apache.felix.ipojo.context.ServiceReferenceImpl;
 import org.apache.felix.ipojo.metadata.Element;
 import org.osgi.framework.BundleContext;
@@ -142,6 +148,18 @@ public abstract class DependencyModel implements TrackerCustomizer {
      * to the filter and the {@link DependencyModel#match(ServiceReference)} method.
      */
     private final List m_matchingRefs = new ArrayList();
+    
+    /**
+     * The instance requiring the service.
+     */
+    private final ComponentInstance m_instance;
+
+    /**
+     * Map {@link ServiceReference} -> Service Object.
+     * This map stores service object, and so is able to handle
+     * iPOJO custom policies.
+     */
+    private Map/*<ServiceReference, Object>*/ m_serviceObjects = new HashMap();
 
     /**
      * Creates a DependencyModel.
@@ -156,10 +174,11 @@ public abstract class DependencyModel implements TrackerCustomizer {
      * @param policy the binding policy
      * @param context the bundle context (or service context)
      * @param listener the dependency lifecycle listener to notify from dependency
+     * @param ci instance managing the dependency
      * state changes.
      */
     public DependencyModel(Class specification, boolean aggregate, boolean optional, Filter filter, Comparator comparator, int policy,
-            BundleContext context, DependencyStateListener listener) {
+            BundleContext context, DependencyStateListener listener, ComponentInstance ci) {
         m_specification = specification;
         m_aggregate = aggregate;
         m_optional = optional;
@@ -173,6 +192,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
         }
         m_state = UNRESOLVED;
         m_listener = listener;
+        m_instance = ci;
     }
 
     /**
@@ -196,7 +216,29 @@ public abstract class DependencyModel implements TrackerCustomizer {
             m_tracker.close();
             m_tracker = null;
         }
+        ungetAllServices();
         m_state = UNRESOLVED;
+    }
+    
+    /**
+     * Ungets all 'get' service references.
+     * This also clears the service object map.
+     */
+    private void ungetAllServices() {
+        Set entries = m_serviceObjects.entrySet();
+        Iterator it = entries.iterator();
+        while (it.hasNext()) {
+            Map.Entry entry = (Map.Entry) it.next();
+            ServiceReference ref = (ServiceReference) entry.getKey();
+            Object svc = entry.getValue();
+            if (m_tracker != null) {
+                m_tracker.ungetService(ref);
+            }
+            if (svc instanceof IPOJOServiceFactory) {
+                ((IPOJOServiceFactory) svc).ungetService(m_instance, svc);
+            }
+        }
+        m_serviceObjects.clear();
     }
 
     /**
@@ -378,6 +420,9 @@ public abstract class DependencyModel implements TrackerCustomizer {
      * @param obj the service object if the service was get
      */
     private void manageDeparture(ServiceReference ref, Object obj) {
+        // Unget the service reference
+        ungetService(ref);
+        
         // If we already get this service and the binding policy is static, the dependency becomes broken
         if (isFrozen() && obj != null) {
             if (m_state != BROKEN) {
@@ -833,15 +878,28 @@ public abstract class DependencyModel implements TrackerCustomizer {
      * @return the service object attached to the given reference
      */
     public Object getService(ServiceReference ref) {
-        return m_tracker.getService(ref);
+        Object svc =  m_tracker.getService(ref);
+        if (svc instanceof IPOJOServiceFactory) {
+            Object obj =  ((IPOJOServiceFactory) svc).getService(m_instance);
+            m_serviceObjects.put(ref, obj);
+            return obj;
+        } else {
+            m_serviceObjects.put(ref, svc);
+            return svc;
+        }
     }
-
+    
     /**
      * Ungets a used service reference.
      * @param ref the reference to unget.
      */
     public void ungetService(ServiceReference ref) {
+        Object svc = m_tracker.getService(ref); // Get the service object
         m_tracker.ungetService(ref);
+        Object obj = m_serviceObjects.remove(ref);  // Remove the service object
+        if (svc instanceof IPOJOServiceFactory) {
+            ((IPOJOServiceFactory) svc).ungetService(m_instance, obj);
+        }
     }
 
     /**

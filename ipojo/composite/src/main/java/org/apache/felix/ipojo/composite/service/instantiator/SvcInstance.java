@@ -82,7 +82,7 @@ public class SvcInstance extends DependencyModel {
      * @throws ConfigurationException : an attribute cannot be parsed correctly, or is incorrect.
      */
     public SvcInstance(ServiceDependencyHandler handler, String spec, Dictionary conf, boolean isAgg, boolean isOpt, Filter filt, Comparator cmp, int policy) throws ConfigurationException {
-        super(Factory.class, isAgg, isOpt, filt, cmp, policy, null, handler);
+        super(Factory.class, isAgg, isOpt, filt, cmp, policy, null, handler, handler.getCompositeManager());
 
         m_specification = spec;
 

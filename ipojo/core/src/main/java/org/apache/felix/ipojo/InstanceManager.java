@@ -732,6 +732,16 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
         
         return instance;
     }
+    
+    /**
+     * Deletes a POJO object.
+     * @param pojo the pojo to remove from the list of created pojos.
+     */
+    public synchronized void deletePojoObject(Object pojo) {
+        if (m_pojoObjects != null) {
+            m_pojoObjects.remove(pojo);
+        }
+    }
 
     /**
      * Gets the first object created by the instance. 

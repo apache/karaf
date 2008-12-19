@@ -35,9 +35,13 @@ public @interface Provides {
     Class[] specifications() default { };
     
     /**
-     * Set the service object creation policy.
-     * Two value are possible: SINGLETON or FACTORY. FACTORY means OSGi Service Factory.
+     * Set the service object creation strategy.
+     * Two value are possible: SINGLETON, SERVICE, METHOD, INSTANCE or the strategy class name. 
+     * SERVICE means OSGi Service Factory.
+     * METHOD delegates the creation to the factory-method of the component
+     * INSTANCE creates one service object per requiring instance
+     * for other strategies, specify the qualified name of the CreationStrategy class.
      * Default : SINGLETON
      */
-    String factory() default "SINGLETON";
+    String strategy() default "SINGLETON";
 }

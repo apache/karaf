@@ -44,11 +44,11 @@ public class LifeCycleControllerTest extends OSGiTestCase {
     public void testOne() {
         Properties props = new Properties();
         props.put("conf", "foo");
-        props.put("instance.name","under");
+        props.put("instance.name","under1");
         under = Utils.getComponentInstance(getContext(), "LFC-Test", props);
 
         // The conf is correct, the PS must be provided
-        ServiceReference ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "under");
+        ServiceReference ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "under1");
         assertNotNull("Check service availability -1", ref);
         CheckService cs = (CheckService) getContext().getService(ref);
         assertTrue("Check state 1", cs.check());
@@ -64,7 +64,7 @@ public class LifeCycleControllerTest extends OSGiTestCase {
         }
 
         // The instance should now be invalid 
-        ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "under");
+        ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "under1");
         assertNull("Check service availability -2", ref);
 
         // Reconfigure the instance with a valid configuration
@@ -75,7 +75,7 @@ public class LifeCycleControllerTest extends OSGiTestCase {
             fail("The reconfiguration is not unacceptable and seems unacceptable (2) : " + props);
         }
 
-        ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "under");
+        ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "under1");
         assertNotNull("Check service availability -3", ref);
         cs = (CheckService) getContext().getService(ref);
         assertTrue("Check state 2", cs.check());
@@ -92,11 +92,11 @@ public class LifeCycleControllerTest extends OSGiTestCase {
     public void notestTwo() {
         Properties props = new Properties();
         props.put("conf", "bar");
-        props.put("instance.name","under");
+        props.put("instance.name","under2");
         under = Utils.getComponentInstance(getContext(), "LFC-Test", props);
 
         // The conf is incorrect, but the test can appears only when the object is created : the PS must be provided
-        ServiceReference ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "under");
+        ServiceReference ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "under2");
         assertNotNull("Check service availability -1", ref);
 
         System.out.println("CS received : " + getContext().getService(ref));
@@ -110,7 +110,7 @@ public class LifeCycleControllerTest extends OSGiTestCase {
         }
 
         // As soon as the instance is created, the service has to disappear :
-        ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "under");
+        ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "under2");
         assertNull("Check service availability -2", ref);
 
         // Reconfigure the instance with a correct configuration
@@ -121,7 +121,7 @@ public class LifeCycleControllerTest extends OSGiTestCase {
             fail("The reconfiguration is not unacceptable and seems unacceptable : " + props);
         }
 
-        ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "under");
+        ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "under2");
         assertNotNull("Check service availability -3", ref);
         cs = (CheckService) getContext().getService(ref);
         assertTrue("Check state ", cs.check());

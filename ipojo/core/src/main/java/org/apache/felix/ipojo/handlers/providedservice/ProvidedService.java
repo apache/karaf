@@ -18,16 +18,26 @@
  */
 package org.apache.felix.ipojo.handlers.providedservice;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
+import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.ConfigurationException;
+import org.apache.felix.ipojo.IPOJOServiceFactory;
 import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.util.Property;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -63,6 +73,12 @@ public class ProvidedService implements ServiceFactory {
      * Factory policy : STATIC_FACTORY.
      */
     public static final int STATIC_FACTORY = 2;
+    
+    /**
+     * Factory policy : INSTANCE.
+     * Creates one service object per instance consuming the service.
+     */
+    public static final int INSTANCE = 3;
 
     /**
      * At this time, it is only the java interface full name.
@@ -89,15 +105,21 @@ public class ProvidedService implements ServiceFactory {
      * Properties Array.
      */
     private Property[] m_properties;
+    
+    /**
+     * Service Object creation policy.
+     */
+    private CreationStrategy m_strategy;
 
     /**
-     * Construct a provided service object.
+     * Creates a provided service object.
      * 
-     * @param handler : the provided service handler.
-     * @param specification : specifications provided by this provided service
-     * @param factoryPolicy : service providing policy
+     * @param handler the the provided service handler.
+     * @param specification the specifications provided by this provided service
+     * @param factoryPolicy the service providing policy
+     * @param creationStrategyClass the customized service object creation strategy.
      */
-    public ProvidedService(ProvidedServiceHandler handler, String[] specification, int factoryPolicy) {
+    public ProvidedService(ProvidedServiceHandler handler, String[] specification, int factoryPolicy, Class creationStrategyClass) {
         m_handler = handler;
 
         m_serviceSpecification = specification;
@@ -109,6 +131,53 @@ public class ProvidedService implements ServiceFactory {
             addProperty(new Property("factory.name", null, null, handler.getInstanceManager().getFactory().getFactoryName(), String.class.getName(), handler.getInstanceManager(), handler));
         } catch (ConfigurationException e) {
             m_handler.error("An exception occurs when adding instance.name and factory.name property : " + e.getMessage());
+        }
+        if (creationStrategyClass != null) {
+            try {
+                m_strategy = (CreationStrategy) creationStrategyClass.newInstance();
+            } catch (IllegalAccessException e) {
+                m_handler.error("["
+                        + m_handler.getInstanceManager().getInstanceName()
+                        + "] The customized service object creation policy "
+                        + "(" + creationStrategyClass.getName() + ") is not accessible: "
+                        + e.getMessage());
+                getInstanceManager().stop();
+                return;
+            } catch (InstantiationException e) {
+                m_handler.error("["
+                        + m_handler.getInstanceManager().getInstanceName()
+                        + "] The customized service object creation policy "
+                        + "(" + creationStrategyClass.getName() + ") cannot be instantiated: "
+                        + e.getMessage());
+                getInstanceManager().stop();
+                return;
+            }
+        } else {
+            switch (m_factoryPolicy) {
+                case SINGLETON_FACTORY:
+                    m_strategy = new SingletonStrategy();
+                    break;
+                case SERVICE_FACTORY:
+                case STATIC_FACTORY:
+                    // In this case, we need to try to create a new pojo object,
+                    // the factory method will handle the creation.
+                    m_strategy = new FactoryStrategy();
+                    break;
+                case INSTANCE:
+                    m_strategy = new PerInstanceStrategy();
+                    break;
+                // Other policies:
+                // Thread : one service object per asking thread
+                // Consumer : one service object per consumer
+                default:
+                    List specs = Arrays.asList(m_serviceSpecification);
+                    m_handler.error("["
+                            + m_handler.getInstanceManager().getInstanceName()
+                            + "] Unknown creation policy for " + specs + " : "
+                            + m_factoryPolicy);
+                    getInstanceManager().stop();
+                    break;
+            }
         }
     }
 
@@ -193,28 +262,7 @@ public class ProvidedService implements ServiceFactory {
      * @return : a new service object or a already created service object (in the case of singleton)
      */
     public Object getService(Bundle bundle, ServiceRegistration registration) {
-        Object svc = null;
-        switch (m_factoryPolicy) {
-            case SINGLETON_FACTORY:
-                svc = m_handler.getInstanceManager().getPojoObject();
-                break;
-            case SERVICE_FACTORY:
-                svc = m_handler.getInstanceManager().createPojoObject();
-                break;
-            case STATIC_FACTORY:
-                // In this case, we need to try to create a new pojo object, the factory method will handle the creation.
-                svc = m_handler.getInstanceManager().createPojoObject();
-                break;
-            // Other policies:
-            // Thread : one service object per asking thread
-            // Consumer : one service object per consumer TODO how to shortcut the service factory
-            default:
-                List specs = Arrays.asList(m_serviceSpecification);
-                m_handler.error("[" + m_handler.getInstanceManager().getClassName() + "] Unknown factory policy for " + specs + " : " + m_factoryPolicy);
-                getInstanceManager().stop();
-                break;
-        }
-        return svc;
+        return m_strategy.getService(bundle, registration);
     }
 
     /**
@@ -227,30 +275,34 @@ public class ProvidedService implements ServiceFactory {
      * @param service : service object
      */
     public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
-        // Nothing to do
+        m_strategy.ungetService(bundle, registration, service);
     }
 
     /**
-     * Register the service. The service object must be able to serve this
-     * service. To avoid cycle in Check Context, the registered service is set to
-     * registered before the real registration.
+     * Registers the service. The service object must be able to serve this
+     * service. 
+     * This method also notifies the creation strategy of the publication.
      */
-    protected synchronized void registerService() {
+    protected synchronized void registerService() {        
         if (m_serviceRegistration == null) {
             // Build the service properties list
             Properties serviceProperties = getServiceProperties();
+            m_strategy.onPublication(getInstanceManager(), m_serviceSpecification, serviceProperties);
             m_serviceRegistration = m_handler.getInstanceManager().getContext().registerService(m_serviceSpecification, this, serviceProperties);
         }
     }
 
     /**
-     * Unregister the service.
+     * Unregisters the service.
      */
     protected synchronized void unregisterService() {
         if (m_serviceRegistration != null) {
             m_serviceRegistration.unregister();
             m_serviceRegistration = null;
         }
+        
+        m_strategy.onUnpublication();
+        
     }
 
     /**
@@ -352,6 +404,247 @@ public class ProvidedService implements ServiceFactory {
      */
     public ServiceRegistration getServiceRegistration() {
         return m_serviceRegistration;
+    }
+    
+    /**
+     * Singleton creation strategy.
+     * This strategy just creates one service object and
+     * returns always the same.
+     */
+    private class SingletonStrategy extends CreationStrategy {
+
+        /**
+         * The service is going to be registered.
+         * @param instance the instance manager
+         * @param interfaces the published interfaces
+         * @param props the properties
+         * @see org.apache.felix.ipojo.handlers.providedservice.CreationStrategy#onPublication(InstanceManager, java.lang.String[], java.util.Properties)
+         */
+        public void onPublication(InstanceManager instance, String[] interfaces,
+                Properties props) { }
+
+        /**
+         * The service was unpublished.
+         * @see org.apache.felix.ipojo.handlers.providedservice.CreationStrategy#onUnpublication()
+         */
+        public void onUnpublication() { }
+
+        /**
+         * A service object is required.
+         * @param arg0 the bundle requiring the service object.
+         * @param arg1 the service registration.
+         * @return the first pojo object.
+         * @see org.osgi.framework.ServiceFactory#getService(org.osgi.framework.Bundle, org.osgi.framework.ServiceRegistration)
+         */
+        public Object getService(Bundle arg0, ServiceRegistration arg1) {
+            return m_handler.getInstanceManager().getPojoObject();
+        }
+
+        /**
+         * A service object is released.
+         * @param arg0  the bundle
+         * @param arg1 the service registration
+         * @param arg2 the get service object.
+         * @see org.osgi.framework.ServiceFactory#ungetService(org.osgi.framework.Bundle, org.osgi.framework.ServiceRegistration, java.lang.Object)
+         */
+        public void ungetService(Bundle arg0, ServiceRegistration arg1,
+                Object arg2) {            
+        }
+        
+    }
+    
+    /**
+     * Service object creation policy following the OSGi Service Factory 
+     * policy {@link ServiceFactory}.
+     */
+    private class FactoryStrategy extends CreationStrategy {
+
+        /**
+         * The service is going to be registered.
+         * @param instance the instance manager
+         * @param interfaces the published interfaces
+         * @param props the properties
+         * @see org.apache.felix.ipojo.handlers.providedservice.CreationStrategy#onPublication(InstanceManager, java.lang.String[], java.util.Properties)
+         */
+        public void onPublication(InstanceManager instance, String[] interfaces,
+                Properties props) { }
+
+        /**
+         * The service is unpublished.
+         * @see org.apache.felix.ipojo.handlers.providedservice.CreationStrategy#onUnpublication()
+         */
+        public void onUnpublication() { }
+
+        /**
+         * OSGi Service Factory getService method.
+         * Returns a new service object per asking bundle.
+         * This object is then cached by the framework.
+         * @param arg0 the bundle requiring the service
+         * @param arg1 the service registration
+         * @return the service object for the asking bundle
+         * @see org.osgi.framework.ServiceFactory#getService(org.osgi.framework.Bundle, org.osgi.framework.ServiceRegistration)
+         */
+        public Object getService(Bundle arg0, ServiceRegistration arg1) {
+            return m_handler.getInstanceManager().createPojoObject();
+        }
+
+        /**
+         * OSGi Service Factory unget method.
+         * Deletes the created object for the asking bundle.
+         * @param arg0 the asking bundle
+         * @param arg1 the service registration
+         * @param arg2 the created service object returned for this bundle
+         * @see org.osgi.framework.ServiceFactory#ungetService(org.osgi.framework.Bundle, org.osgi.framework.ServiceRegistration, java.lang.Object)
+         */
+        public void ungetService(Bundle arg0, ServiceRegistration arg1,
+                Object arg2) { 
+            m_handler.getInstanceManager().deletePojoObject(arg2);
+        }
+    }
+    
+    
+    /**
+     * Service object creation policy creating a service object per asking iPOJO component
+     * instance. This creation policy follows the iPOJO Service Factory interaction pattern 
+     * and does no support 'direct' invocation.
+     */
+    private class PerInstanceStrategy extends CreationStrategy implements IPOJOServiceFactory, InvocationHandler {
+        /**
+         * Map [ComponentInstance->ServiceObject] storing created service objects.
+         */
+        private Map/*<ComponentInstance, ServiceObject>*/ m_instances = new HashMap();
+
+        /**
+         * A method is invoked on the proxy object.
+         * If the method is the {@link IPOJOServiceFactory#getService(ComponentInstance)} 
+         * method, this method creates a service object if no already created for the asking
+         * component instance. 
+         * If the method is {@link IPOJOServiceFactory#ungetService(ComponentInstance, Object)}
+         * the service object is unget (i.e. removed from the map and deleted).
+         * In all other cases, a {@link UnsupportedOperationException} is thrown as this policy
+         * requires to use  the {@link IPOJOServiceFactory} interaction pattern.  
+         * @param arg0 the proxy object
+         * @param arg1 the called method
+         * @param arg2 the arguments
+         * @return the service object attached to the asking instance for 'get', 
+         * <code>null</code> for 'unget',
+         * a {@link UnsupportedOperationException} for all other methods.
+         * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
+         */
+        public Object invoke(Object arg0, Method arg1, Object[] arg2) {
+            if (isGetServiceMethod(arg1)) {
+                return getService((ComponentInstance) arg2[0]);
+            }
+            
+            if (isUngetServiceMethod(arg1)) {
+                ungetService((ComponentInstance) arg2[0], arg2[1]);
+                return null;
+            }
+            
+            throw new UnsupportedOperationException("This service requires an advanced creation policy. "
+                    + "Before calling the service, call the getService(ComponentInstance) method to get "
+                    + "the service object. ");
+        }
+
+        /**
+         * A service object is required.
+         * This policy returns a service object per asking instance.
+         * @param instance the instance requiring the service object
+         * @return the service object for this instance
+         * @see org.apache.felix.ipojo.IPOJOServiceFactory#getService(org.apache.felix.ipojo.ComponentInstance)
+         */
+        public Object getService(ComponentInstance instance) {
+            Object obj = m_instances.get(instance);
+            if (obj == null) {
+                obj = m_handler.getInstanceManager().createPojoObject();
+                m_instances.put(instance, obj);
+            }
+            return obj;
+        }
+
+        /**
+         * A service object is unget.
+         * The service object is removed from the map and deleted.
+         * @param instance the instance releasing the service
+         * @param svcObject the service object
+         * @see org.apache.felix.ipojo.IPOJOServiceFactory#ungetService(org.apache.felix.ipojo.ComponentInstance, java.lang.Object)
+         */
+        public void ungetService(ComponentInstance instance, Object svcObject) {
+            Object pojo = m_instances.remove(instance);
+            m_handler.getInstanceManager().deletePojoObject(pojo);
+        }
+
+        /**
+         * The service is going to be registered.
+         * @param instance the instance manager
+         * @param interfaces the published interfaces
+         * @param props the properties
+         * @see org.apache.felix.ipojo.handlers.providedservice.CreationStrategy#onPublication(InstanceManager, java.lang.String[], java.util.Properties)
+         */
+        public void onPublication(InstanceManager instance, String[] interfaces,
+                Properties props) { }
+
+        /**
+         * The service is going to be unregistered.
+         * The instance map is cleared. Created object are disposed.
+         * @see org.apache.felix.ipojo.handlers.providedservice.CreationStrategy#onUnpublication()
+         */
+        public void onUnpublication() {
+            Collection col = m_instances.values();
+            Iterator it = col.iterator();
+            while (it.hasNext()) {
+                m_handler.getInstanceManager().deletePojoObject(it.next());
+            }
+            m_instances.clear();
+        }
+
+        /**
+         * OSGi Service Factory getService method.
+         * @param arg0 the asking bundle
+         * @param arg1 the service registration
+         * @return a proxy implementing the {@link IPOJOServiceFactory}
+         * @see org.osgi.framework.ServiceFactory#getService(org.osgi.framework.Bundle, org.osgi.framework.ServiceRegistration)
+         */
+        public Object getService(Bundle arg0, ServiceRegistration arg1) {
+            Object proxy = Proxy.newProxyInstance(getInstanceManager().getClazz().getClassLoader(), 
+                    getSpecificationsWithIPOJOServiceFactory(m_serviceSpecification, m_handler.getInstanceManager().getContext()), this);
+            return proxy;
+        }
+
+        /**
+         * OSGi Service factory unget method.
+         * Does nothing.
+         * @param arg0 the asking bundle
+         * @param arg1 the service registration
+         * @param arg2 the service object created for this bundle.
+         * @see org.osgi.framework.ServiceFactory#ungetService(org.osgi.framework.Bundle, org.osgi.framework.ServiceRegistration, java.lang.Object)
+         */
+        public void ungetService(Bundle arg0, ServiceRegistration arg1,
+                Object arg2) { }
+        
+        /**
+         * Utility method returning the class array of provided service
+         * specification and the {@link IPOJOServiceFactory} interface.
+         * @param specs the published service interface
+         * @param bc the bundle context, used to load classes
+         * @return the class array containing provided service specification and
+         * the {@link IPOJOServiceFactory} class.
+         */
+        private Class[] getSpecificationsWithIPOJOServiceFactory(String[] specs, BundleContext bc) {
+            Class[] classes = new Class[specs.length + 1];
+            int i = 0;
+            for (i = 0; i < specs.length; i++) {
+                try {
+                    classes[i] = bc.getBundle().loadClass(specs[i]);
+                } catch (ClassNotFoundException e) {
+                    // Should not happen.
+                }
+            }
+            classes[i] = IPOJOServiceFactory.class;
+            return classes;
+        }
+        
+        
     }
 
 }

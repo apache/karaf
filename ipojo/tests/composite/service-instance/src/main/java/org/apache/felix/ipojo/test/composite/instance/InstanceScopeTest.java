@@ -69,6 +69,7 @@ public class InstanceScopeTest extends OSGiTestCase {
         //System.out.println(instance2.getInstanceDescription().getDescription());
         
         assertEquals("Check invalidity", ComponentInstance.INVALID, instance2.getState());
+        instance2.dispose();
  
     }
     

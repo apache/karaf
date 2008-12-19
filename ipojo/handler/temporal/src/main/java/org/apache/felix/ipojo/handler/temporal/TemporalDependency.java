@@ -83,7 +83,7 @@ public class TemporalDependency extends DependencyModel implements
             BundleContext context, long timeout, int policy,
             String defaultImpl, TemporalHandler handler) {
         super(spec, agg, true, filter, null,
-                DependencyModel.DYNAMIC_BINDING_POLICY, context, handler);
+                DependencyModel.DYNAMIC_BINDING_POLICY, context, handler, handler.getInstanceManager());
         m_di = defaultImpl;
         m_policy = policy;
         m_timeout = timeout;

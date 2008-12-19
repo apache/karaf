@@ -156,7 +156,7 @@ public class ServiceImporter extends DependencyModel {
      */
     public ServiceImporter(Class specification, Filter filter, boolean multiple, boolean optional, Comparator cmp, int policy, BundleContext context, String identitity
             , ServiceDependencyHandler handler) {
-        super(specification, multiple, optional, filter, cmp, policy, context, handler);
+        super(specification, multiple, optional, filter, cmp, policy, context, handler, handler.getCompositeManager());
 
         this.m_handler = handler;
 

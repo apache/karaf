@@ -1,0 +1,42 @@
+<ipojo>
+	<!-- Simple provider  -->
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.strategies.FooProviderType1"
+		name="PSS-FooProviderType-Instance" architecture="true">
+		<provides strategy="instance"/>
+	</component>
+	
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.strategies.Consumer"
+		name="PSS-Cons" architecture="true">
+		<requires field="fs"/>
+		<provides/>
+	</component>
+	
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.strategies.BarConsumer"
+		name="PSS-ConsBar" architecture="true">
+		<requires field="bs"/>
+		<provides/>
+	</component>
+	
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.strategies.FooBarProviderType1"
+		name="PSS-FooBarProviderType-Instance" architecture="true">
+		<provides strategy="instance"/>
+	</component>
+	
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.strategies.FooProviderType1"
+		name="PSS-FooProviderType-Custom" architecture="true">
+		<provides strategy="org.apache.felix.ipojo.test.scenarios.component.strategies.DummyCreationStrategy"/>
+	</component>
+	
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.strategies.FooBarProviderType1"
+		name="PSS-FooBarProviderType-Custom" architecture="true">
+		<provides strategy="org.apache.felix.ipojo.test.scenarios.component.strategies.DummyCreationStrategy"/>
+	</component>
+	
+	
+</ipojo>

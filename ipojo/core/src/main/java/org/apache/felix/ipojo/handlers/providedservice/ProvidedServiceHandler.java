@@ -102,16 +102,35 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
             
             // Get the factory policy
             int factory = ProvidedService.SINGLETON_FACTORY;
-            String fact = providedServices[i].getAttribute("factory");
-            if (fact != null && "service".equalsIgnoreCase(fact)) {
-                factory = ProvidedService.SERVICE_FACTORY;
+            Class custom = null;
+            String strategy = providedServices[i].getAttribute("strategy");
+            if (strategy == null) {
+                strategy = providedServices[i].getAttribute("factory");
             }
-            if (fact != null && "method".equalsIgnoreCase(fact)) {
-                factory = ProvidedService.STATIC_FACTORY;
-            }
+            if (strategy != null) {
+                if ("service".equalsIgnoreCase(strategy)) {
+                    factory = ProvidedService.SERVICE_FACTORY;
+                } else if ("method".equalsIgnoreCase(strategy)) {
+                    factory = ProvidedService.STATIC_FACTORY;
+                } else if ("instance".equalsIgnoreCase(strategy)) {
+                    factory = ProvidedService.INSTANCE;
+                } else {
+                    // Customized policy
+                    try {
+                        custom = getInstanceManager().getContext().getBundle().loadClass(strategy);
+                        if (! CreationStrategy.class.isAssignableFrom(custom)) {
+                            throw new ConfigurationException("The custom creation policy class " + custom.getName() + " does not implement " + CreationStrategy.class.getName());
+                        }
+                    } catch (ClassNotFoundException e) {
+                        throw new ConfigurationException("The custom creation policy class " + strategy + " cannot be loaded " + e.getMessage());
 
+                    }
+                    
+                }
+            }
+            
             // Then create the provided service
-            ProvidedService svc = new ProvidedService(this, serviceSpecifications, factory);
+            ProvidedService svc = new ProvidedService(this, serviceSpecifications, factory, custom);
 
             Element[] props = providedServices[i].getElements("Property");
             if (props != null) {

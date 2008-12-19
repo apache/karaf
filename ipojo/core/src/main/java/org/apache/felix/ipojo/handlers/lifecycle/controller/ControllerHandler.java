@@ -82,7 +82,11 @@ public class ControllerHandler extends PrimitiveHandler {
      * @return : the handler state.
      */
     public Object onGet(Object pojo, String field, Object value) {
-        return new Boolean(m_state);
+        if (m_state) { 
+            return Boolean.TRUE;
+        } else {
+            return Boolean.FALSE;
+        }
     }
     
     /**

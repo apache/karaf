@@ -39,11 +39,11 @@ public class ImmediateLifeCycleControllerTest extends OSGiTestCase {
     public void testOne() {
         Properties props = new Properties();
         props.put("conf", "foo");
-        props.put("instance.name","under");
+        props.put("instance.name","under1");
         under = Utils.getComponentInstance(getContext(), "LFC-Test-Immediate", props);
         
         // The conf is correct, the PS must be provided
-        ServiceReference ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "under");
+        ServiceReference ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "under1");
         assertNotNull("Check service availability -1", ref);
         CheckService cs = (CheckService) getContext().getService(ref);
         assertTrue("Check state 1", cs.check());
@@ -59,7 +59,7 @@ public class ImmediateLifeCycleControllerTest extends OSGiTestCase {
         }
         
         // The instance should now be invalid 
-        ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "under");
+        ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "under1");
         assertNull("Check service availability -2", ref);
         
         // Reconfigure the instance with a valid configuration
@@ -70,7 +70,7 @@ public class ImmediateLifeCycleControllerTest extends OSGiTestCase {
             fail("The reconfiguration is not unacceptable and seems unacceptable (2) : " + props);
         }
         
-        ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "under");
+        ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "under1");
         assertNotNull("Check service availability -3", ref);
         cs = (CheckService) getContext().getService(ref);
         assertTrue("Check state 2", cs.check());
@@ -83,13 +83,13 @@ public class ImmediateLifeCycleControllerTest extends OSGiTestCase {
     public void testTwo() {        
         Properties props = new Properties();
         props.put("conf", "bar");
-        props.put("instance.name","under");
+        props.put("instance.name","under2");
         under = Utils.getComponentInstance(getContext(), "LFC-Test-Immediate", props);    
         
         assertEquals("check under state", under.getState(), ComponentInstance.INVALID);
         
         // The conf is incorrect, the PS must not be provided
-        ServiceReference ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "under");
+        ServiceReference ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "under2");
         assertNull("Check service availability -1", ref);
         
         // Reconfigure the instance with a correct configuration
@@ -100,7 +100,7 @@ public class ImmediateLifeCycleControllerTest extends OSGiTestCase {
             fail("The reconfiguration is not unacceptable and seems unacceptable : " + props);
         }
         
-        ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "under");
+        ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), "under2");
         assertNotNull("Check service availability -2", ref);
         CheckService cs = (CheckService) getContext().getService(ref);
         assertTrue("Check state ", cs.check());

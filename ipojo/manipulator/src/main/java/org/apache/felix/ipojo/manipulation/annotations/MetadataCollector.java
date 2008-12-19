@@ -206,8 +206,11 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
          * @see org.objectweb.asm.commons.EmptyVisitor#visit(java.lang.String, java.lang.Object)
          */
         public void visit(String arg0, Object arg1) {
-            if (arg0.equals("factory")) {
+            if (arg0.equals("factory")) { // Should be deprecated
                 m_prov.addAttribute(new Attribute("factory", arg1.toString()));
+            }
+            if (arg0.equals("strategy")) {
+                m_prov.addAttribute(new Attribute("strategy", arg1.toString()));
             }
         }
         

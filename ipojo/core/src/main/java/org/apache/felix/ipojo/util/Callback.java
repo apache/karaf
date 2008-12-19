@@ -228,8 +228,7 @@ public class Callback {
             // - if instances already exists : call on each instances
             // - if no instance exists : create an instance
             if (m_manager.getPojoObjects() == null) {
-                Object r = m_methodObj.invoke(m_manager.getPojoObject(), arg);
-                return r;
+                return  m_methodObj.invoke(m_manager.getPojoObject(), arg);
             } else {
                 Object newObject = null;
                 for (int i = 0; i < m_manager.getPojoObjects().length; i++) {

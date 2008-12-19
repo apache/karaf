@@ -323,9 +323,14 @@ The 'instance.name' property has a special semantic as it will be used as the in
 			<xs:annotation>
 				<xs:documentation>The list of interfaces of the service to expose. By default, all interfaces implemented by the component implementation class are published.</xs:documentation>
 			</xs:annotation></xs:attribute>
-		<xs:attribute name="factory" type="xs:string" use="optional">
+		<xs:attribute name="factory" type="xs:string" use="prohibited">
 			<xs:annotation>
-				<xs:documentation>POJO factory policy. By default, the POJO object is created once (singleton). If the factory is set to "SERVICE", the creation policy follows the OSGi service factory policy (one object object per asking bundle).</xs:documentation>
+				<xs:documentation>Use 'strategy' instead of 'factory'</xs:documentation>
+			</xs:annotation></xs:attribute>
+		<xs:attribute name="strategy" type="xs:string" use="optional">
+			<xs:annotation>
+				<xs:documentation>POJO creation strategy. By default, the POJO object is created once (singleton). If the factory is set to "SERVICE", the creation policy follows the OSGi service factory policy (one object object per asking bundle).
+				INSTANCE allows creating one different POJO object per asking instance. Finally, a custom strategy can be used by specifying the qualified name of the class extending CreationPolicy</xs:documentation>
 			</xs:annotation></xs:attribute>
 	</xs:complexType>
 	<xs:complexType name="PropertyType">

@@ -129,7 +129,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * @param defaultImplem : default-implementation class
      */
     public Dependency(DependencyHandler handler, String field, Class spec, Filter filter, boolean isOptional, boolean isAggregate, boolean nullable, String identity, BundleContext context, int policy, Comparator cmp, String defaultImplem) {
-        super(spec, isAggregate, isOptional, filter, cmp, policy, context, handler);
+        super(spec, isAggregate, isOptional, filter, cmp, policy, context, handler, handler.getInstanceManager());
         m_handler = handler;
         m_field = field;
         if (field != null) {

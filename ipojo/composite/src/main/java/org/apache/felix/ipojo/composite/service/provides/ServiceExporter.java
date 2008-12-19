@@ -71,7 +71,7 @@ public class ServiceExporter extends DependencyModel {
      * @param manager : composite manager
      */
     public ServiceExporter(Class specification, Filter filter, boolean multiple, boolean optional, Comparator cmp, int policy, ServiceContext from, BundleContext dest, DependencyStateListener listener, CompositeManager manager) {
-        super(specification, multiple, optional, filter, cmp, policy, from, listener);
+        super(specification, multiple, optional, filter, cmp, policy, from, listener, manager);
 
         m_destination = dest;
 
