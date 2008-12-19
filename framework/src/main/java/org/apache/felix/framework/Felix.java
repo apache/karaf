@@ -4194,7 +4194,7 @@ ex.printStackTrace();
             // Wait if any thread has the global lock, unless the current thread
             // holds the global lock.
             while ((m_globalLockCount > 0)
-                && m_lockingThreadMap.containsKey(Thread.currentThread()))
+                && !m_lockingThreadMap.containsKey(Thread.currentThread()))
             {
                 try
                 {
@@ -4238,7 +4238,7 @@ ex.printStackTrace();
             // Wait if any thread has the global lock, unless the current thread
             // holds the global lock.
             while ((m_globalLockCount > 0)
-                && m_lockingThreadMap.containsKey(Thread.currentThread()))
+                && !m_lockingThreadMap.containsKey(Thread.currentThread()))
             {
                 try
                 {
