@@ -2056,7 +2056,7 @@ ex.printStackTrace();
         // throw a BundleException when there is an attempt to stop one.
         if (Util.isFragment(info.getCurrentModule()))
         {
-            throw new BundleException("Fragment bundles can not be stopped.");
+            throw new BundleException("Fragment bundles can not be stopped: " + bundle);
         }
 
         switch (info.getState())
