@@ -4373,7 +4373,7 @@ ex.printStackTrace();
 
             // Lock all needed bundles; this is not strictly
             // necessary since we hold the global lock.
-            for (int i = 0; i < bundles.length; i++)
+            for (int i = 0; (bundles != null) && (i < bundles.length); i++)
             {
                 bundles[i].getInfo().lock();
             }
@@ -4480,7 +4480,7 @@ ex.printStackTrace();
 
             // Lock all needed bundles; this is not strictly
             // necessary since we hold the global lock.
-            for (int i = 0; i < bundles.length; i++)
+            for (int i = 0; (bundles != null) && (i < bundles.length); i++)
             {
                 bundles[i].getInfo().lock();
             }
