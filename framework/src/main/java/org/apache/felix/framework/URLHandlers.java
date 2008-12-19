@@ -19,11 +19,25 @@
 package org.apache.felix.framework;
 
 import java.io.IOException;
-import java.net.*;
-import java.util.*;
+import java.net.ContentHandler;
+import java.net.ContentHandlerFactory;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
+import java.net.URLStreamHandlerFactory;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.apache.felix.framework.searchpolicy.ContentClassLoader;
-import org.apache.felix.framework.util.*;
+import org.apache.felix.framework.util.FelixConstants;
+import org.apache.felix.framework.util.SecureAction;
+import org.apache.felix.framework.util.SecurityManagerEx;
+import org.osgi.service.url.URLStreamHandlerService;
 
 /**
  * <p>
@@ -83,7 +97,39 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
     private static Map m_streamHandlerCache = null;
     private static URLStreamHandlerFactory m_streamHandlerFactory;
     private static ContentHandlerFactory m_contentHandlerFactory;
+    private static final String STREAM_HANDLER_PACKAGE_PROP = "java.protocol.handler.pkgs";
+    private static final String DEFAULT_STREAM_HANDLER_PACKAGE = "sun.net.www.protocol|com.ibm.oti.net.www.protocol|gnu.java.net.protocol|wonka.net|com.acunia.wonka.net|org.apache.harmony.luni.internal.net.www.protocol|weblogic.utils|weblogic.net|javax.net.ssl|COM.newmonics.www.protocols";
+    private static Object m_rootURLHandlers;
 
+    private static final String m_streamPkgs;
+    private static final Map m_builtIn = new HashMap();
+    private static final boolean m_loaded;
+    
+    static 
+    {
+        String pkgs = new SecureAction().getSystemProperty(STREAM_HANDLER_PACKAGE_PROP, "");
+        m_streamPkgs = (pkgs.equals(""))
+            ? DEFAULT_STREAM_HANDLER_PACKAGE
+            : pkgs + "|" + DEFAULT_STREAM_HANDLER_PACKAGE;
+        m_loaded = (null != URLHandlersStreamHandlerProxy.class) &&
+            (null != URLHandlersContentHandlerProxy.class) && (null != URLStreamHandlerService.class);
+    }
+
+    
+    private static final Map m_handlerToURL = new HashMap();
+    private void init(String protocol)
+    {
+        try
+        {
+            m_handlerToURL.put(getBuiltInStreamHandler(protocol, null), new URL(protocol + ":") );
+        }
+        catch (MalformedURLException ex)
+        {
+            ex.printStackTrace();
+            // Ignore, this is a best effort (maybe log it or something).
+        }
+    }
+    
     /**
      * <p>
      * Only one instance of this class is created per classloader 
@@ -94,12 +140,19 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
     **/
     private URLHandlers()
     {
+        init("file");
+        init("ftp");
+        init("http");
+        init("https");
+        getBuiltInStreamHandler("jar", null);
+        m_sm = new SecurityManagerEx();
         synchronized (URL.class)
         {
             try
             {
                 URL.setURLStreamHandlerFactory(this);
                 m_streamHandlerFactory = this;
+                m_rootURLHandlers = this;
             }
             catch (Error err)
             {
@@ -117,6 +170,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
                     if (!m_streamHandlerFactory.getClass().getName().equals(URLHandlers.class.getName()))
                     {
                         URL.setURLStreamHandlerFactory(this);
+                        m_rootURLHandlers = this;
                     }
                     else if (URLHandlers.class != m_streamHandlerFactory.getClass())
                     {
@@ -128,6 +182,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
                                 new Class[]{ClassLoader.class, List.class}), 
                                 m_streamHandlerFactory, new Object[]{ URLHandlers.class.getClassLoader(), 
                                     m_frameworks });
+                            m_rootURLHandlers = m_streamHandlerFactory;
                         }
                         catch (Exception ex)
                         {
@@ -172,11 +227,12 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
             }
         }
         // are we not the new root?
-        if ((m_streamHandlerFactory == this) || !URLHandlers.class.getName().equals(
-            m_streamHandlerFactory.getClass().getName()))
+        if (!((m_streamHandlerFactory == this) || !URLHandlers.class.getName().equals(
+            m_streamHandlerFactory.getClass().getName())))
         {
-            // we only need a security manager in the root
-            m_sm = new SecurityManagerEx();
+            m_sm = null;
+            m_handlerToURL.clear();
+            m_builtIn.clear();
         }
     }
 
@@ -243,6 +299,60 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
         }
     }
 
+    private URLStreamHandler getBuiltInStreamHandler(String protocol, URLStreamHandlerFactory factory)
+    {
+        synchronized (m_builtIn)
+        {
+            if (m_builtIn.containsKey(protocol))
+            {
+                return (URLStreamHandler) m_builtIn.get(protocol);
+            }
+        }
+        if (factory != null)
+        {
+            URLStreamHandler result = factory.createURLStreamHandler(protocol);
+            if (result != null)
+            {
+                return addToCache(protocol, result);
+            }
+        }
+        // Check for built-in handlers for the mime type.
+        // Iterate over built-in packages.
+        StringTokenizer pkgTok = new StringTokenizer(m_streamPkgs, "| ");
+        while (pkgTok.hasMoreTokens())
+        {
+            String pkg = pkgTok.nextToken().trim();
+            String className = pkg + "." + protocol + ".Handler";
+            try
+            {
+                // If a built-in handler is found then cache and return it
+                Class handler = m_secureAction.forName(className); 
+                if (handler != null)
+                {
+                    return addToCache(protocol, 
+                        (URLStreamHandler) handler.newInstance());
+                }
+            }
+            catch (Exception ex)
+            {
+                // This could be a class not found exception or an
+                // instantiation exception, not much we can do in either
+                // case other than ignore it.
+            }
+        }
+        return addToCache(protocol, null);
+    }
+
+    private synchronized URLStreamHandler addToCache(String protocol, URLStreamHandler result)
+    {
+        if (!m_builtIn.containsKey(protocol))
+        {
+            m_builtIn.put(protocol, result);
+            return result;
+        }
+        return (URLStreamHandler) m_builtIn.get(protocol);
+    }
+    
     /**
      * <p>
      * This is a method implementation for the <tt>URLStreamHandlerFactory</tt>
@@ -275,42 +385,14 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
             return addToStreamCache(protocol, 
                 new URLHandlersBundleStreamHandler(m_secureAction));
         }
-    
-        // If this is the framework's "felix:" extension protocol, then
-        // return the ExtensionManager.m_extensionManager handler for 
-        // that immediately - this is a workaround for certain jvms that
-        // do a toString() on the extension url we add to the global
-        // URLClassloader.
-        if (protocol.equals("felix"))
-        {
-            return addToStreamCache(protocol, new URLStreamHandler()
-            {
-                protected URLConnection openConnection(URL url)
-                    throws IOException
-                {
-                    Object framework = getFrameworkFromContext();
-                    
-                    try
-                    {
-                        Object handler =  m_secureAction.getDeclaredField(
-                            framework.getClass(),"m_extensionManager", framework);
 
-                        return (URLConnection) m_secureAction.invoke(
-                            m_secureAction.getMethod(handler.getClass(), 
-                            "openConnection", new Class[]{URL.class}), handler, 
-                            new Object[]{url});
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new IOException(ex.getMessage());
-                    }
-                }
-            });
-        }
+       handler = getBuiltInStreamHandler(protocol, 
+           (m_streamHandlerFactory != this) ? m_streamHandlerFactory : null);
 
         // If built-in content handler, then create a proxy handler.
-        return addToStreamCache(protocol, new URLHandlersStreamHandlerProxy(protocol, m_secureAction, 
-            (m_streamHandlerFactory != this) ? m_streamHandlerFactory : null));
+        return addToStreamCache(protocol, 
+            new URLHandlersStreamHandlerProxy(protocol, m_secureAction, 
+                handler, (URL) m_handlerToURL.get(handler)));
     }
 
     /**
@@ -390,6 +472,23 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
         return result;
     }
 
+    synchronized void flush()
+    {
+        if (m_streamHandlerCache != null)
+        {
+            for (Iterator iter = m_streamHandlerCache.values().iterator();iter.hasNext();)
+            {
+                ((URLHandlersStreamHandlerProxy) iter.next()).flush();
+            }
+        }
+        if (m_contentHandlerCache != null)
+        {
+            for (Iterator iter = m_contentHandlerCache.values().iterator();iter.hasNext();)
+            {
+                ((URLHandlersContentHandlerProxy) iter.next()).flush();
+            }
+        }
+    }
     /**
      * <p>
      * Static method that adds a framework instance to the centralized
@@ -434,27 +533,38 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
         synchronized (m_frameworks)
         {
             m_counter--;
-            if (m_frameworks.remove(framework) && m_frameworks.isEmpty())
-            {
-                if (m_handler.m_streamHandlerFactory.getClass().getName().equals(
-                    URLHandlers.class.getName()))
+            if (m_frameworks.remove(framework))
+            {    
+                try
+                {
+                    m_secureAction.invoke(m_secureAction.getDeclaredMethod(
+                        m_rootURLHandlers.getClass(), 
+                       "flush", null), 
+                       m_rootURLHandlers, null);
+                }
+                catch (Exception e)
+                {
+                    // TODO: this should not happen
+                    e.printStackTrace();
+                }
+                if (m_frameworks.isEmpty())
                 {
                     try
                     {
                         m_secureAction.invoke(m_secureAction.getDeclaredMethod(
-                            m_handler.m_streamHandlerFactory.getClass(), 
+                            m_rootURLHandlers.getClass(), 
                             "unregisterFrameworkListsForContextSearch", 
                             new Class[]{ ClassLoader.class}), 
-                            m_handler.m_streamHandlerFactory, 
+                            m_rootURLHandlers,
                             new Object[] {URLHandlers.class.getClassLoader()});
                     }
                     catch (Exception e)
                     {
-                        // TODO this should not happen
+                        // TODO: this should not happen
                         e.printStackTrace();
                     }
+                    m_handler = null;
                 }
-                m_handler = null;
             }
         }
     }

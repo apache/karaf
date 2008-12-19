@@ -721,6 +721,27 @@ public class SecureAction
         }
     }
 
+    public void setAccesssible(Method method)
+    {
+        if (System.getSecurityManager() != null)
+        {
+            Actions actions = (Actions) m_actions.get();
+            actions.set(Actions.SET_ACCESSIBLE_ACTION, method);
+            try
+            {
+                AccessController.doPrivileged(actions, m_acc);
+            }
+            catch (PrivilegedActionException e)
+            {
+                throw (RuntimeException) e.getException();
+            }
+        }
+        else
+        {
+            method.setAccessible(true);
+        }
+    }
+
     public Object invoke(Method method, Object target, Object[] params) throws Exception
     {
         if (System.getSecurityManager() != null)
@@ -742,6 +763,27 @@ public class SecureAction
             return method.invoke(target, params);
         }
     }
+    
+    public Object invokeDirect(Method method, Object target, Object[] params) throws Exception
+    {
+        if (System.getSecurityManager() != null)
+        {
+            Actions actions = (Actions) m_actions.get();
+            actions.set(Actions.INVOKE_DIRECTMETHOD_ACTION, method, target, params);
+            try
+            {
+                return AccessController.doPrivileged(actions, m_acc);
+            }
+            catch (PrivilegedActionException e)
+            {
+                throw e.getException();
+            }
+        }
+        else
+        {
+            return method.invoke(target, params);
+        }
+    }
 
     public Object invoke(Constructor constructor, Object[] params) throws Exception
     {
@@ -760,7 +802,6 @@ public class SecureAction
         }
         else
         {
-            constructor.setAccessible(true);
             return constructor.newInstance(params);
         }
     }
@@ -919,6 +960,8 @@ public class SecureAction
         public static final int SWAP_FIELD_ACTION = 30;
         public static final int GET_FIELD_ACTION = 31;
         public static final int GET_DECLAREDMETHOD_ACTION = 32;
+        public static final int SET_ACCESSIBLE_ACTION = 33;
+        public static final int INVOKE_DIRECTMETHOD_ACTION = 34;
 
         private int m_action = -1;
         private Object m_arg1 = null;
@@ -1118,9 +1161,12 @@ public class SecureAction
                 ((Method) arg1).setAccessible(true);
                 return ((Method) arg1).invoke(arg2, (Object[]) arg3);
             }
+            else if (action == INVOKE_DIRECTMETHOD_ACTION)
+            {
+                return ((Method) arg1).invoke(arg2, (Object[]) arg3);
+            }
             else if (action == INVOKE_CONSTRUCTOR_ACTION)
             {
-                ((Constructor) arg1).setAccessible(true);
                 return ((Constructor) arg1).newInstance((Object[]) arg2);
             }
             else if (action == SWAP_FIELD_ACTION)
@@ -1137,6 +1183,10 @@ public class SecureAction
             else if (action == GET_DECLAREDMETHOD_ACTION)
             {
                 return ((Class) arg1).getDeclaredMethod((String) arg2, (Class[]) arg3);
+            }
+            else if (action == SET_ACCESSIBLE_ACTION)
+            {
+                ((Method) arg1).setAccessible(true);
             }
 
             return null;

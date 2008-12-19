@@ -23,6 +23,7 @@ import java.net.ContentHandler;
 import java.net.ContentHandlerFactory;
 import java.net.URLConnection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -55,8 +56,18 @@ class URLHandlersContentHandlerProxy extends ContentHandler
 {
     private static final String CONTENT_HANDLER_PACKAGE_PROP = "java.content.handler.pkgs";
     private static final String DEFAULT_CONTENT_HANDLER_PACKAGE = "sun.net.www.content|com.ibm.oti.net.www.content|gnu.java.net.content|org.apache.harmony.luni.internal.net.www.content|COM.newmonics.www.content";
-
+    
     private static final Map m_builtIn = new HashMap();
+    private static final String m_pkgs;
+
+    static 
+    {
+        String pkgs = new SecureAction().getSystemProperty(CONTENT_HANDLER_PACKAGE_PROP, "");
+        m_pkgs = (pkgs.equals(""))
+            ? DEFAULT_CONTENT_HANDLER_PACKAGE
+            : pkgs + "|" + DEFAULT_CONTENT_HANDLER_PACKAGE;
+    }
+
     private final ContentHandlerFactory m_factory;
 
     private final Map m_trackerMap = new HashMap();
@@ -153,7 +164,7 @@ class URLHandlersContentHandlerProxy extends ContentHandler
             }
             else
             {
-                result = (ContentHandler) m_action.invoke(
+                result = (ContentHandler) m_action.invokeDirect(
                     m_action.getMethod(tracker.getClass(), "getService", null), 
                     tracker, null);
             }
@@ -168,6 +179,38 @@ class URLHandlersContentHandlerProxy extends ContentHandler
             // TODO: log this or something
             ex.printStackTrace();
             return null;
+        }
+    }
+
+    void flush()
+    {
+        synchronized (m_trackerMap)
+        {
+            for (Iterator iter = m_trackerMap.values().iterator(); iter.hasNext();)
+            {
+                unregister(iter.next());
+            }
+            m_trackerMap.clear();
+        }
+    }
+
+    private void unregister(Object tracker)
+    {
+        if (tracker instanceof URLHandlersServiceTracker)
+        {
+            ((URLHandlersServiceTracker) tracker).unregister();
+        }
+        else
+        {
+            try
+            {
+                m_action.invokeDirect(m_action.getMethod(tracker.getClass(), 
+                    "unregister", null), tracker, null);
+            }
+            catch (Exception e)
+            {
+                // Not much we can do - log this or something
+            }
         }
     }
 
@@ -189,16 +232,11 @@ class URLHandlersContentHandlerProxy extends ContentHandler
             }
         }
         // Check for built-in handlers for the mime type.
-        String pkgs = m_action.getSystemProperty(CONTENT_HANDLER_PACKAGE_PROP, "");
-        pkgs = (pkgs.equals(""))
-            ? DEFAULT_CONTENT_HANDLER_PACKAGE
-            : pkgs + "|" + DEFAULT_CONTENT_HANDLER_PACKAGE;
-
         // Remove periods, slashes, and dashes from mime type.
         String fixedType = m_mimeType.replace('.', '_').replace('/', '.').replace('-', '_');
 
         // Iterate over built-in packages.
-        StringTokenizer pkgTok = new StringTokenizer(pkgs, "| ");
+        StringTokenizer pkgTok = new StringTokenizer(m_pkgs, "| ");
         while (pkgTok.hasMoreTokens())
         {
             String pkg = pkgTok.nextToken().trim();

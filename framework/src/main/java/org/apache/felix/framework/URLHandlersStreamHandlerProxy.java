@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.*;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -57,39 +58,43 @@ import org.osgi.service.url.URLStreamHandlerSetter;
 public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
     implements URLStreamHandlerSetter, InvocationHandler
 {
-    private static final String STREAM_HANDLER_PACKAGE_PROP = "java.protocol.handler.pkgs";
-    private static final String DEFAULT_STREAM_HANDLER_PACKAGE = "sun.net.www.protocol|com.ibm.oti.net.www.protocol|gnu.java.net.protocol|wonka.net|com.acunia.wonka.net|org.apache.harmony.luni.internal.net.www.protocol|weblogic.utils|weblogic.net|javax.net.ssl|COM.newmonics.www.protocols";
-    
     private static final Method EQUALS;
     private static final Method GET_DEFAULT_PORT;
     private static final Method GET_HOST_ADDRESS;
     private static final Method HASH_CODE;
     private static final Method HOSTS_EQUAL;
     private static final Method OPEN_CONNECTION;
-    private static final Method PARSE_URL;
     private static final Method SAME_FILE;
     private static final Method TO_EXTERNAL_FORM;
     
     static {
         try
         {
+            SecureAction action = new SecureAction();
             EQUALS = URLStreamHandler.class.getDeclaredMethod("equals", 
                 new Class[]{URL.class, URL.class});
-            GET_DEFAULT_PORT = URLStreamHandler.class.getDeclaredMethod("getDefaultPort", null);
+            action.setAccesssible(EQUALS);
+            GET_DEFAULT_PORT = URLStreamHandler.class.getDeclaredMethod("getDefaultPort", 
+                (Class[]) null);
+            action.setAccesssible(GET_DEFAULT_PORT);
             GET_HOST_ADDRESS = URLStreamHandler.class.getDeclaredMethod(
                     "getHostAddress", new Class[]{URL.class});
+            action.setAccesssible(GET_HOST_ADDRESS);
             HASH_CODE = URLStreamHandler.class.getDeclaredMethod( 
                     "hashCode", new Class[]{URL.class});
+            action.setAccesssible(HASH_CODE);
             HOSTS_EQUAL = URLStreamHandler.class.getDeclaredMethod(
                     "hostsEqual", new Class[]{URL.class, URL.class});
+            action.setAccesssible(HOSTS_EQUAL);
             OPEN_CONNECTION = URLStreamHandler.class.getDeclaredMethod(
                     "openConnection", new Class[]{URL.class});
-            PARSE_URL = URLStreamHandler.class.getDeclaredMethod( 
-                    "parseURL", new Class[]{URL.class, String.class, Integer.TYPE, Integer.TYPE});
+            action.setAccesssible(OPEN_CONNECTION);
             SAME_FILE = URLStreamHandler.class.getDeclaredMethod(
                     "sameFile", new Class[]{URL.class, URL.class});
+            action.setAccesssible(SAME_FILE);
             TO_EXTERNAL_FORM = URLStreamHandler.class.getDeclaredMethod( 
                    "toExternalForm", new Class[]{URL.class});
+            action.setAccesssible(TO_EXTERNAL_FORM);
         }
         catch (Exception ex)
         {
@@ -97,22 +102,22 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
             throw new RuntimeException(ex.getMessage());
         }
     }
-
-    private static final Map m_builtIn = new HashMap();
-    private final URLStreamHandlerFactory m_factory;
     
     private final Map m_trackerMap = new HashMap();
     private final String m_protocol;
     private final Object m_service;
     private final SecureAction m_action;
+    private final URLStreamHandler m_builtIn;
+    private final URL m_builtInURL;
 
-    public URLHandlersStreamHandlerProxy(String protocol, SecureAction action, 
-        URLStreamHandlerFactory factory)
+    public URLHandlersStreamHandlerProxy(String protocol, 
+        SecureAction action, URLStreamHandler builtIn, URL builtInURL)
     {
         m_protocol = protocol;
         m_service = null;
         m_action = action;
-        m_factory = factory;
+        m_builtIn = builtIn;
+        m_builtInURL = builtInURL;
     }
     
     private URLHandlersStreamHandlerProxy(Object service, SecureAction action)
@@ -120,7 +125,8 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
         m_protocol = null;
         m_service = service;
         m_action = action;
-        m_factory = null;
+        m_builtIn = null;
+        m_builtInURL = null;
     }
 
     //
@@ -140,7 +146,7 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
         }
         try 
         {
-            return ((Boolean) m_action.invoke(EQUALS, svc, new Object[]{url1, url2})).booleanValue();
+            return ((Boolean) EQUALS.invoke(svc, new Object[]{url1, url2})).booleanValue();
         } 
         catch (Exception ex)  
         {
@@ -162,7 +168,7 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
         }
         try 
         {
-            return ((Integer) m_action.invoke(GET_DEFAULT_PORT, svc, null)).intValue();
+            return ((Integer) GET_DEFAULT_PORT.invoke(svc, null)).intValue();
         } 
         catch (Exception ex)  
         {
@@ -185,7 +191,7 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
         }
         try 
         {
-            return (InetAddress) m_action.invoke(GET_HOST_ADDRESS, svc, new Object[]{url});
+            return (InetAddress) GET_HOST_ADDRESS.invoke(svc, new Object[]{url});
         } 
         catch (Exception ex)  
         {
@@ -208,7 +214,7 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
         }
         try 
         {
-            return ((Integer) m_action.invoke(HASH_CODE, svc, new Object[]{url})).intValue();
+            return ((Integer) HASH_CODE.invoke(svc, new Object[]{url})).intValue();
         } 
         catch (Exception ex)  
         {
@@ -231,7 +237,7 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
         }
         try 
         {
-            return ((Boolean) m_action.invoke(HOSTS_EQUAL, svc, new Object[]{url1, url2})).booleanValue();
+            return ((Boolean) HOSTS_EQUAL.invoke(svc, new Object[]{url1, url2})).booleanValue();
         } 
         catch (Exception ex)  
         {
@@ -253,7 +259,31 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
         }
         try 
         {
-            return (URLConnection) m_action.invoke(OPEN_CONNECTION, svc, new Object[]{url});
+            if ("http".equals(url.getProtocol()) &&
+                "felix.extensions".equals(url.getHost()) &&
+                9 == url.getPort())
+            {
+                try
+                {
+                    Object handler =  m_action.getDeclaredField(
+                        ExtensionManager.class, "m_extensionManager", null);
+    
+                    if (handler != null)
+                    {
+                        return (URLConnection) m_action.invoke(
+                            m_action.getMethod(handler.getClass(), 
+                            "openConnection", new Class[]{URL.class}), handler, 
+                            new Object[]{url});
+                    }
+                    
+                    throw new IOException("Extensions not supported or ambiguous context.");
+                }
+                catch (Exception ex)
+                {
+                    throw new IOException(ex.getMessage());
+                }
+            }
+            return (URLConnection) OPEN_CONNECTION.invoke(svc, new Object[]{url});
         } 
         catch (Exception ex)  
         {
@@ -278,10 +308,18 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
         {
             try 
             {
-                URL test = new URL(url, spec, (URLStreamHandler) svc);
-                
+                URL test = null;
+                if (m_builtInURL != null)
+                {
+                    test = new URL(new URL(m_builtInURL, url.toExternalForm()), spec);
+                }
+                else
+                {
+                    test = m_action.createURL(url, spec, (URLStreamHandler) svc);
+                }
+                    
                 super.setURL(url, test.getProtocol(), test.getHost(), test.getPort(),test.getAuthority(), 
-                        test.getUserInfo(), test.getPath(), test.getQuery(), test.getRef());
+                   test.getUserInfo(), test.getPath(), test.getQuery(), test.getRef());
             } 
             catch (Exception ex)  
             {
@@ -305,7 +343,7 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
         }
         try 
         {
-            return ((Boolean) m_action.invoke(SAME_FILE, 
+            return ((Boolean) SAME_FILE.invoke( 
                 svc, new Object[]{url1, url2})).booleanValue();
         } 
         catch (Exception ex)  
@@ -346,7 +384,7 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
         }
         try 
         {
-            return (String) m_action.invoke(TO_EXTERNAL_FORM, 
+            return (String) TO_EXTERNAL_FORM.invoke( 
                 svc, new Object[]{url});
         } 
         catch (Exception ex)  
@@ -355,7 +393,7 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
             throw new IllegalStateException("Stream handler unavailable due to: " + ex.getMessage());
         }
     }
-
+    
     /**
      * <p>
      * Private method to retrieve the stream handler service from the
@@ -369,22 +407,22 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
     **/
     private Object getStreamHandlerService()
     {
-        // Get the framework instance associated with call stack.
-        Object framework = URLHandlers.getFrameworkFromContext();
-
-        if (framework == null) 
-        {
-            return getBuiltIn();
-        }
-
-        // Get the service tracker for the framework instance or create one.
-        Object tracker;
-        synchronized (m_trackerMap)
-        {
-            tracker = m_trackerMap.get(framework);
-        }
         try
         {
+            // Get the framework instance associated with call stack.
+            Object framework = URLHandlers.getFrameworkFromContext();
+    
+            if (framework == null) 
+            {
+                return m_builtIn;
+            }
+    
+            // Get the service tracker for the framework instance or create one.
+            Object tracker;
+            synchronized (m_trackerMap)
+            {
+                tracker = m_trackerMap.get(framework);
+            }
             if (tracker == null)
             {
                 // Create a filter for the protocol.
@@ -413,6 +451,7 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
                     }
                     else
                     {
+                        unregister(tracker);
                         tracker = m_trackerMap.get(framework);
                     }
                 }
@@ -424,12 +463,12 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
             }
             else
             {
-                service = m_action.invoke(m_action.getMethod(
+                service = m_action.invokeDirect(m_action.getMethod(
                     tracker.getClass(), "getService", null), tracker, null);
             }
             if (service == null) 
             {
-                return getBuiltIn();
+                return m_builtIn;
             }
             if (service instanceof URLStreamHandlerService)
             {
@@ -440,71 +479,47 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
                 new Class[]{URLStreamHandlerService.class}, 
                 new URLHandlersStreamHandlerProxy(service, m_action));
         }
-        catch (Exception ex)
+        catch (ThreadDeath td)
         {
-            // TODO: log this or something
-            ex.printStackTrace();
-            return null;
+            throw td;
+        }
+        catch (Throwable t)
+        {
+         //   t.printStackTrace();
+            return m_builtIn;
         }
     }
-    
-    private URLStreamHandler getBuiltIn()
-    {
-        synchronized (m_builtIn)
-        {
-            if (m_builtIn.containsKey(m_protocol))
-            {
-                return (URLStreamHandler) m_builtIn.get(m_protocol);
-            }
-        }
-        if (m_factory != null)
-        {
-            URLStreamHandler result = m_factory.createURLStreamHandler(m_protocol);
-            if (result != null)
-            {
-                return addToCache(m_protocol, result);
-            }
-        }
-        // Check for built-in handlers for the mime type.
-        String pkgs = m_action.getSystemProperty(STREAM_HANDLER_PACKAGE_PROP, "");
-        pkgs = (pkgs.equals(""))
-            ? DEFAULT_STREAM_HANDLER_PACKAGE
-            : pkgs + "|" + DEFAULT_STREAM_HANDLER_PACKAGE;
 
-        // Iterate over built-in packages.
-        StringTokenizer pkgTok = new StringTokenizer(pkgs, "| ");
-        while (pkgTok.hasMoreTokens())
+    void flush()
+    {
+        synchronized (m_trackerMap)
         {
-            String pkg = pkgTok.nextToken().trim();
-            String className = pkg + "." + m_protocol + ".Handler";
+            for (Iterator iter = m_trackerMap.values().iterator(); iter.hasNext();)
+            {
+                unregister(iter.next());
+            }
+            m_trackerMap.clear();
+        }
+    }
+
+    private void unregister(Object tracker)
+    {
+        if (tracker instanceof URLHandlersServiceTracker)
+        {
+            ((URLHandlersServiceTracker) tracker).unregister();
+        }
+        else
+        {
             try
             {
-                // If a built-in handler is found then cache and return it
-                Class handler = m_action.forName(className); 
-                if (handler != null)
-                {
-                    return addToCache(m_protocol, 
-                        (URLStreamHandler) handler.newInstance());
-                }
+                m_action.invokeDirect(m_action.getMethod(tracker.getClass(), 
+                    "unregister", null), tracker, null);
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                // This could be a class not found exception or an
-                // instantiation exception, not much we can do in either
-                // case other than ignore it.
+                // Not much we can do - log this or something
             }
         }
-        return addToCache(m_protocol, null);
-    }
-
-    private synchronized URLStreamHandler addToCache(String protocol, URLStreamHandler result)
-    {
-        if (!m_builtIn.containsKey(protocol))
-        {
-            m_builtIn.put(protocol, result);
-            return result;
-        }
-        return (URLStreamHandler) m_builtIn.get(protocol);
     }
 
     public Object invoke(Object obj, Method method, Object[] params)
@@ -521,7 +536,7 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
                     m_service.getClass().getClassLoader(), new Class[]{types[0]}, 
                     (URLHandlersStreamHandlerProxy) params[0]);
             }
-            return m_action.invoke(m_action.getMethod(m_service.getClass(), 
+            return m_action.invokeDirect(m_action.getMethod(m_service.getClass(), 
                 method.getName(), types), m_service, params);
         } 
         catch (Exception ex)

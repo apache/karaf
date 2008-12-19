@@ -30,7 +30,7 @@ import org.osgi.framework.*;
  * and lowest service identifier.
  *</p>
 **/
-class URLHandlersServiceTracker
+public class URLHandlersServiceTracker implements ServiceListener
 {
     private final BundleContext m_context;
     private final String m_filter;
@@ -57,47 +57,9 @@ class URLHandlersServiceTracker
         {
             // Add a service listener to track service changes
             // for services matching the specified filter.
-            ServiceListener sl = new ServiceListener() {
-                public void serviceChanged(ServiceEvent event)
-                {
-                    ServiceReference eventRef = event.getServiceReference();
-                    if ((event.getType() == ServiceEvent.REGISTERED) ||
-                        (event.getType() == ServiceEvent.MODIFIED))
-                    {
-                        synchronized (URLHandlersServiceTracker.this)
-                        {
-                            Long idObj = (Long) eventRef.getProperty(FelixConstants.SERVICE_ID);
-                            Integer rankObj = (Integer) eventRef.getProperty(FelixConstants.SERVICE_RANKING);
-                            int rank = (rankObj == null) ? 0 : rankObj.intValue();
-                            if ((rank > m_rank) ||
-                                ((rank == m_rank) && (idObj.longValue() < m_id)))
-                            {
-                                if (m_ref != null)
-                                {
-                                    m_context.ungetService(m_ref);
-                                }
-                                m_ref = eventRef;
-                                m_rank = rank;
-                                m_id = idObj.longValue();
-                                m_svcObj = m_context.getService(m_ref);
-                            }
-                        }
-                    }
-                    else if (event.getType() == ServiceEvent.UNREGISTERING)
-                    {
-                        synchronized (URLHandlersServiceTracker.this)
-                        {
-                            if (eventRef == m_ref)
-                            {
-                                selectBestService();
-                            }
-                        }
-                    }
-                }
-            };
             try
             {
-                m_context.addServiceListener(sl, m_filter);
+                m_context.addServiceListener(this, m_filter);
             }
             catch (InvalidSyntaxException ex)
             {
@@ -110,9 +72,51 @@ class URLHandlersServiceTracker
         } // End of synchronized block.
     }
 
+    public void unregister()
+    {
+        m_context.removeServiceListener(this);
+    }
+
     public Object getService()
     {
         return m_svcObj;
+    }
+    
+    public void serviceChanged(ServiceEvent event)
+    {
+        ServiceReference eventRef = event.getServiceReference();
+        if ((event.getType() == ServiceEvent.REGISTERED) ||
+            (event.getType() == ServiceEvent.MODIFIED))
+        {
+            synchronized (URLHandlersServiceTracker.this)
+            {
+                Long idObj = (Long) eventRef.getProperty(FelixConstants.SERVICE_ID);
+                Integer rankObj = (Integer) eventRef.getProperty(FelixConstants.SERVICE_RANKING);
+                int rank = (rankObj == null) ? 0 : rankObj.intValue();
+                if ((rank > m_rank) ||
+                    ((rank == m_rank) && (idObj.longValue() < m_id)))
+                {
+                    if (m_ref != null)
+                    {
+                        m_context.ungetService(m_ref);
+                    }
+                    m_ref = eventRef;
+                    m_rank = rank;
+                    m_id = idObj.longValue();
+                    m_svcObj = m_context.getService(m_ref);
+                }
+            }
+        }
+        else if (event.getType() == ServiceEvent.UNREGISTERING)
+        {
+            synchronized (URLHandlersServiceTracker.this)
+            {
+                if (eventRef == m_ref)
+                {
+                    selectBestService();
+                }
+            }
+        }
     }
 
     /**

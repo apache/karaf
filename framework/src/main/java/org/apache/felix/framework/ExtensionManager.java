@@ -21,6 +21,7 @@ package org.apache.felix.framework;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.io.InputStream;
+import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
@@ -37,6 +38,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.felix.framework.util.FelixConstants;
+import org.apache.felix.framework.util.SecurityManagerEx;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.framework.util.manifestparser.Capability;
 import org.apache.felix.framework.util.manifestparser.ManifestParser;
@@ -95,8 +97,8 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
         try
         {
             Felix.m_secureAction.addURLToURLClassLoader(Felix.m_secureAction.createURL(
-                Felix.m_secureAction.createURL(null, "felix:", extensionManager),
-                "felix://extensions/", extensionManager),
+                Felix.m_secureAction.createURL(null, "http:", extensionManager),
+                "http://felix.extensions:9/", extensionManager),
                 Felix.class.getClassLoader());
         }
         catch (Exception ex)
