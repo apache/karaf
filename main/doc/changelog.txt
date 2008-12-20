@@ -1,5 +1,14 @@
+Changes from 1.4.0 to 1.4.1
+---------------------------
+
+* [2008-12-20] Update to latest framework version 1.4.0
+* [2008-11-18] Modified the pom file to export the OSGi packages; this can be 
+  helpful for tools trying to determine what the JAR file provides.
+* [2008-11-07] Align log level property name in pom.xml and config.properties
+
 Changes from 1.2.2 to 1.4.0
 ---------------------------
+
 * [2008-10-31] Fixed a possible NPE when no configuration file is found.
 * [2008-10-23] Change the name of the SystemBundle interface to be Framework. 
   (FELIX-753)

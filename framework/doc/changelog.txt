@@ -1,5 +1,28 @@
+Changes from 1.4.0 to 1.4.1
+---------------------------
+
+* [2008-12-19] Refactor the URLHandlers implementation to fix a possible 
+  Linkage-Error when running embedded inside tomcat. Furthermore, make it possible
+  to dynamically set a SecurityManager, change the url we add to the framework
+  classloader to fix issues with rmi and make sure we restore the previous URLStreamHandlerFactory
+  after stopping. (FELIX-842, FELIX-837, FELIX-844, FELIX-827)
+* [2008-12-19] Add missing javax.security.cert in JRE 1.4 and 1.5. (FELIX-854)
+* [2008-12-19] Improve framework internal locking protocol.
+* [2008-12-18] Fixed an issue where bundles with a non-existing native library
+  would not be removed correctly. (FELIX-835)
+* [2008-11-21] Throw an exception when there is an attempt to start or stop a 
+  fragment, as per the spec. (FELIX-820)
+* [2008-11-20] Fixed a bug during shutdown where uninstalled fragments are not
+  properly closed. (FELIX-819)
+* [2008-11-14] Added partial support for new service registry hooks as proposed 
+  for OSGi R4.2; currently, only listener hooks are supported. (FELIX-804)
+* [2008-11-08] Fixed Felix' delegation hack so that it correctly delegates to 
+  the parent class loader for resources as appropriate; previously it was always 
+  delegating for class loading, which was incorrect. (FELIX-808)
+
 Changes from 1.2.2 to 1.4.0
 ---------------------------
+
 * [2008-11-05] URLStreamHandlerService and ContentHandlerService override
   built-in handlers and make it possible to use URLHandlers when extending the 
   Felix class. (FELIX-756, FELIX-800)
@@ -69,6 +92,7 @@ Changes from 1.2.2 to 1.4.0
 
 Changes from 1.2.1 to 1.2.2
 ---------------------------
+
 * [2008-10-14] Fixed a NullPointer exception that could happen when 
   running with a SecurityManager as a backport of FELIX-766.
 
