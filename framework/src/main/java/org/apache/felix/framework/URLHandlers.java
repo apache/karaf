@@ -478,14 +478,22 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
         {
             for (Iterator iter = m_streamHandlerCache.values().iterator();iter.hasNext();)
             {
-                ((URLHandlersStreamHandlerProxy) iter.next()).flush();
+                Object proxy = iter.next();
+                if (proxy instanceof URLHandlersStreamHandlerProxy)
+                {
+                    ((URLHandlersStreamHandlerProxy) proxy).flush();
+                }
             }
         }
         if (m_contentHandlerCache != null)
         {
             for (Iterator iter = m_contentHandlerCache.values().iterator();iter.hasNext();)
             {
-                ((URLHandlersContentHandlerProxy) iter.next()).flush();
+                Object proxy = iter.next();
+                if (proxy instanceof URLHandlersContentHandlerProxy)
+                {
+                    ((URLHandlersContentHandlerProxy) proxy).flush();
+                }
             }
         }
     }
