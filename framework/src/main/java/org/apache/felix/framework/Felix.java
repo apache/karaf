@@ -1188,7 +1188,7 @@ ex.printStackTrace();
                     }
                 }
                 // Stop the bundle if necessary.
-                else if ((impl.getInfo().getPersistentState() == Bundle.ACTIVE) &&
+                else if ((impl.getInfo().getState() == Bundle.ACTIVE) &&
                     (impl.getInfo().getStartLevel(getInitialBundleStartLevel())
                         > m_activeStartLevel))
                 {
@@ -1327,8 +1327,9 @@ ex.printStackTrace();
                         startBundle(impl, false);
                     }
                     // Stop the bundle if necessary.
-                    else if (impl.getInfo().getStartLevel(getInitialBundleStartLevel())
-                        > m_activeStartLevel)
+                    else if ((impl.getInfo().getState() == Bundle.ACTIVE) &&
+                        (impl.getInfo().getStartLevel(getInitialBundleStartLevel())
+                        > m_activeStartLevel))
                     {
                         stopBundle(impl, false);
                     }
@@ -2173,13 +2174,16 @@ ex.printStackTrace();
         // The spec says that uninstall should always succeed, so
         // catch an exception here if stop() doesn't succeed and
         // rethrow it at the end.
-        try
+        if (info.getState() == Bundle.ACTIVE)
         {
-            stopBundle(bundle, true);
-        }
-        catch (BundleException ex)
-        {
-            fireFrameworkEvent(FrameworkEvent.ERROR, bundle, ex);
+            try
+            {
+                stopBundle(bundle, true);
+            }
+            catch (BundleException ex)
+            {
+                fireFrameworkEvent(FrameworkEvent.ERROR, bundle, ex);
+            }
         }
 
         // Remove the bundle from the installed map.
