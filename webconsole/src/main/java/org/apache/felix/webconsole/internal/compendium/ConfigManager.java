@@ -603,7 +603,7 @@ public class ConfigManager extends ConfigManagerBase
 
         if ( config.getFactoryPid() != null )
         {
-            json.key( "factoryPID" );
+            json.key( factoryPID );
             json.value( config.getFactoryPid() );
         }
 

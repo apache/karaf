@@ -265,14 +265,14 @@ function printConfigurationInfo( /* Element */ parent, obj )
         ])
     );
 
-    if (obj.factoryPID)
+    if (obj.factoryPid)
     {
         parent.appendChild( tr( "content", null, [
                 td( "content", null, [
                     text( "Factory Peristent Identifier (Factory PID)" )
                 ]),
                 td( "content", null, [
-                    text( obj.factoryPID )
+                    text( obj.factoryPid )
                 ])
             ])
         );
