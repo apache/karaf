@@ -178,16 +178,47 @@ public class OsgiManager extends GenericServlet
             // might be caused by CM not available
         }
 
-        // track renders and operations
-        operationsTracker = new OperationServiceTracker( this );
-        operationsTracker.open();
-        rendersTracker = new RenderServiceTracker( this );
-        rendersTracker.open();
-        pluginsTracker = new PluginServiceTracker( this );
-        pluginsTracker.open();
+        // get at the HttpService first, this should initialize
+        // the OSGi Manager and start the initial setup
         httpServiceTracker = new HttpServiceTracker( this );
         httpServiceTracker.open();
+    }
 
+    
+    public void dispose()
+    {
+        // now drop the HttpService and continue with further destroyals
+        if ( httpServiceTracker != null )
+        {
+            httpServiceTracker.close();
+            httpServiceTracker = null;
+        }
+
+        // stop listening for configuration
+        if ( configurationListener != null )
+        {
+            configurationListener.unregister();
+            configurationListener = null;
+        }
+
+        if ( log != null )
+        {
+            log.dispose();
+        }
+
+        this.defaultRender = null;
+        this.bundleContext = null;
+    }
+
+
+    //---------- Servlet API
+    
+    public void init()
+    {
+        // base class initialization not needed, since the GenericServlet.init
+        // is an empty method
+
+        // setup the included plugins
         ClassLoader classLoader = getClass().getClassLoader();
         for ( int i = 0; i < PLUGIN_CLASSES.length; i++ )
         {
@@ -222,67 +253,16 @@ public class OsgiManager extends GenericServlet
                 log( "Failed to instantiate plugin " + pluginClassName + ". Reason: " + t );
             }
         }
+
+        // start tracking external plugins after setting up our own plugins
+        operationsTracker = new OperationServiceTracker( this );
+        operationsTracker.open();
+        rendersTracker = new RenderServiceTracker( this );
+        rendersTracker.open();
+        pluginsTracker = new PluginServiceTracker( this );
+        pluginsTracker.open();
     }
-
-
-    public void dispose()
-    {
-
-        if ( configurationListener != null )
-        {
-            configurationListener.unregister();
-            configurationListener = null;
-        }
-
-        if ( operationsTracker != null )
-        {
-            operationsTracker.close();
-            operationsTracker = null;
-        }
-
-        if ( rendersTracker != null )
-        {
-            rendersTracker.close();
-            rendersTracker = null;
-        }
-
-        if ( pluginsTracker != null )
-        {
-            pluginsTracker.close();
-            pluginsTracker = null;
-        }
-
-        if ( httpServiceTracker != null )
-        {
-            httpServiceTracker.close();
-            httpServiceTracker = null;
-        }
-
-        // deactivate any remaining plugins
-        for ( Iterator pi = plugins.values().iterator(); pi.hasNext(); )
-        {
-            Object plugin = pi.next();
-            if ( plugin instanceof OsgiManagerPlugin )
-            {
-                ( ( OsgiManagerPlugin ) plugin ).deactivate();
-            }
-        }
-
-        // simply remove all operations, we should not be used anymore
-        this.defaultRender = null;
-        this.plugins.clear();
-        this.labelMap.clear();
-        this.operations.clear();
-
-        if ( log != null )
-        {
-            log.dispose();
-        }
-
-        this.bundleContext = null;
-    }
-
-
+    
     public void service( ServletRequest req, ServletResponse res ) throws ServletException, IOException
     {
 
@@ -331,7 +311,46 @@ public class OsgiManager extends GenericServlet
         }
 
     }
+    
+    public void destroy()
+    {
+        // base class destroy not needed, since the GenericServlet.destroy
+        // is an empty method
+        
+        // stop listening for plugins
+        if ( operationsTracker != null )
+        {
+            operationsTracker.close();
+            operationsTracker = null;
+        }
+        if ( rendersTracker != null )
+        {
+            rendersTracker.close();
+            rendersTracker = null;
+        }
+        if ( pluginsTracker != null )
+        {
+            pluginsTracker.close();
+            pluginsTracker = null;
+        }
 
+        // deactivate any remaining plugins
+        for ( Iterator pi = plugins.values().iterator(); pi.hasNext(); )
+        {
+            Object plugin = pi.next();
+            if ( plugin instanceof OsgiManagerPlugin )
+            {
+                ( ( OsgiManagerPlugin ) plugin ).deactivate();
+            }
+        }
+
+        // simply remove all operations, we should not be used anymore
+        this.plugins.clear();
+        this.labelMap.clear();
+        this.operations.clear();
+    }
+
+    //---------- internal
 
     protected boolean handleAction( HttpServletRequest req, HttpServletResponse resp ) throws IOException
     {
