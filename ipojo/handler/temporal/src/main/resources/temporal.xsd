@@ -43,5 +43,15 @@
             	<xs:documentation>Specifies the onTimeout policy. This determines the object to inject when the service stills unavailable when the timeout expires. Several values are supported: 'nullable' means that a Nullable object will be injected, 'empty-array' injects an empty array (only for aggregate dependency), 'null' injects Null, any other value are interpreted as the default implementation class to use. If the onTimetout attribute is not specified, a RuntimeException is thrown when the timeout is reached.</xs:documentation>
             </xs:annotation>
 		</xs:attribute>
+		<xs:attribute name="proxy" use="optional" type="xs:boolean">
+            <xs:annotation>
+            	<xs:documentation>Enables or Disables the proxy injection</xs:documentation>
+            </xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="specification" use="optional" type="xs:string">
+            <xs:annotation>
+            	<xs:documentation>Specifies the looked service specification. This attribute is mandatory when injecting in a Collection</xs:documentation>
+            </xs:annotation>
+		</xs:attribute>
 	</xs:complexType>
 </xs:schema>
