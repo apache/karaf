@@ -33,14 +33,11 @@ import org.apache.felix.webconsole.internal.servlet.OsgiManager;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.deploymentadmin.*;
+import org.osgi.service.deploymentadmin.DeploymentAdmin;
+import org.osgi.service.deploymentadmin.DeploymentException;
+import org.osgi.service.deploymentadmin.DeploymentPackage;
 
 
-/**
- * @scr.component metatype="false"
- * @scr.service interface="javax.servlet.Servlet"
- * @scr.property name="felix.webconsole.label" valueRef="LABEL"
- */
 public class DepPackServlet extends BaseWebConsolePlugin
 {
 
@@ -54,6 +51,7 @@ public class DepPackServlet extends BaseWebConsolePlugin
 
     private static final String PARAMETER_PCK_FILE = "pckfile";
 
+
     public String getLabel()
     {
         return LABEL;
@@ -66,74 +64,78 @@ public class DepPackServlet extends BaseWebConsolePlugin
     }
 
 
-    protected void activate(ComponentContext context) {
-        this.activate(context.getBundleContext());
+    protected void activate( ComponentContext context )
+    {
+        this.activate( context.getBundleContext() );
     }
 
-    protected void deactivate(ComponentContext context) {
+
+    protected void deactivate( ComponentContext context )
+    {
         this.deactivate();
     }
 
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException
+
+    protected void doPost( HttpServletRequest req, HttpServletResponse resp ) throws ServletException, IOException
     {
         // get the uploaded data
-        final String action = getParameter(req, Util.PARAM_ACTION);
-        if ( ACTION_DEPLOY.equals(action))
+        final String action = getParameter( req, Util.PARAM_ACTION );
+        if ( ACTION_DEPLOY.equals( action ) )
         {
             Map params = ( Map ) req.getAttribute( AbstractWebConsolePlugin.ATTR_FILEUPLOAD );
             if ( params != null )
             {
                 final FileItem pck = getFileItem( params, PARAMETER_PCK_FILE, false );
-                final DeploymentAdmin admin = (DeploymentAdmin) this.getService(DeploymentAdmin.class.getName());
+                final DeploymentAdmin admin = ( DeploymentAdmin ) this.getService( DeploymentAdmin.class.getName() );
                 if ( admin != null )
                 {
                     try
                     {
-                        admin.installDeploymentPackage(pck.getInputStream());
+                        admin.installDeploymentPackage( pck.getInputStream() );
 
                         final String uri = req.getRequestURI();
                         resp.sendRedirect( uri );
                         return;
                     }
-                    catch (DeploymentException e)
+                    catch ( DeploymentException e )
                     {
-                        throw new ServletException("Unable to deploy package.", e);
+                        throw new ServletException( "Unable to deploy package.", e );
                     }
                 }
             }
-            throw new ServletException("Upload file or deployment admin missing.");
+            throw new ServletException( "Upload file or deployment admin missing." );
         }
-        else if (ACTION_UNINSTALL.equals(action))
+        else if ( ACTION_UNINSTALL.equals( action ) )
         {
             final String pckId = req.getPathInfo().substring( req.getPathInfo().lastIndexOf( '/' ) + 1 );
             if ( pckId != null && pckId.length() > 0 )
             {
-                final DeploymentAdmin admin = (DeploymentAdmin) this.getService(DeploymentAdmin.class.getName());
+                final DeploymentAdmin admin = ( DeploymentAdmin ) this.getService( DeploymentAdmin.class.getName() );
                 if ( admin != null )
                 {
                     try
                     {
-                        final DeploymentPackage pck = admin.getDeploymentPackage(pckId);
+                        final DeploymentPackage pck = admin.getDeploymentPackage( pckId );
                         if ( pck != null )
                         {
                             pck.uninstall();
                         }
                     }
-                    catch (DeploymentException e)
+                    catch ( DeploymentException e )
                     {
-                        throw new ServletException("Unable to undeploy package.", e);
+                        throw new ServletException( "Unable to undeploy package.", e );
                     }
                 }
 
             }
 
             final PrintWriter pw = resp.getWriter();
-            pw.println("{ \"reload\":true }");
+            pw.println( "{ \"reload\":true }" );
             return;
         }
-        throw new ServletException("Unknown action: " + action);
+        throw new ServletException( "Unknown action: " + action );
     }
+
 
     private FileItem getFileItem( Map params, String name, boolean isFormField )
     {
@@ -153,6 +155,7 @@ public class DepPackServlet extends BaseWebConsolePlugin
         return null;
     }
 
+
     protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
         IOException
     {
@@ -162,10 +165,11 @@ public class DepPackServlet extends BaseWebConsolePlugin
         String appRoot = ( String ) request.getAttribute( OsgiManager.ATTR_APP_ROOT );
         pw.println( "<script src='" + appRoot + "/res/ui/packages.js' language='JavaScript'></script>" );
 
-        pw.println("<h1>Deployment Admin</h1>");
-        final DeploymentAdmin admin = (DeploymentAdmin) this.getService(DeploymentAdmin.class.getName());
-        if ( admin == null ) {
-            pw.println("<p><em>Deployment Admin is not installed.</em></p>");
+        pw.println( "<h1>Deployment Admin</h1>" );
+        final DeploymentAdmin admin = ( DeploymentAdmin ) this.getService( DeploymentAdmin.class.getName() );
+        if ( admin == null )
+        {
+            pw.println( "<p><em>Deployment Admin is not installed.</em></p>" );
             return;
         }
         final DeploymentPackage[] packages = admin.listDeploymentPackages();
@@ -181,7 +185,7 @@ public class DepPackServlet extends BaseWebConsolePlugin
 
             jw.array();
 
-            for(int i=0; i<packages.length; i++)
+            for ( int i = 0; i < packages.length; i++ )
             {
                 packageInfoJson( jw, packages[i] );
             }
@@ -201,14 +205,14 @@ public class DepPackServlet extends BaseWebConsolePlugin
         Util.endScript( pw );
     }
 
-    private void packageInfoJson( JSONWriter jw, DeploymentPackage pack)
-    throws JSONException
+
+    private void packageInfoJson( JSONWriter jw, DeploymentPackage pack ) throws JSONException
     {
         jw.object();
         jw.key( "id" );
         jw.value( pack.getName() );
         jw.key( "name" );
-        jw.value( pack.getName());
+        jw.value( pack.getName() );
         jw.key( "state" );
         jw.value( pack.getVersion() );
 
@@ -232,18 +236,20 @@ public class DepPackServlet extends BaseWebConsolePlugin
         keyVal( jw, "Version", pack.getVersion() );
 
         final StringBuffer buffer = new StringBuffer();
-        for(int i=0; i<pack.getBundleInfos().length; i++) {
-            buffer.append(pack.getBundleInfos()[i].getSymbolicName() );
-            buffer.append(" - " );
-            buffer.append(pack.getBundleInfos()[i].getVersion() );
-            buffer.append("<br/>");
+        for ( int i = 0; i < pack.getBundleInfos().length; i++ )
+        {
+            buffer.append( pack.getBundleInfos()[i].getSymbolicName() );
+            buffer.append( " - " );
+            buffer.append( pack.getBundleInfos()[i].getVersion() );
+            buffer.append( "<br/>" );
         }
-        keyVal(jw, "Bundles", buffer.toString());
+        keyVal( jw, "Bundles", buffer.toString() );
 
         jw.endArray();
 
         jw.endObject();
     }
+
 
     private void keyVal( JSONWriter jw, String key, Object value ) throws JSONException
     {
