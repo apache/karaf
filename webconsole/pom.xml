@@ -72,7 +72,7 @@
                             The Apache Software Foundation
                         </Bundle-Vendor>
                         <Bundle-DocURL>
-                            http://felix.apache.org/apache-felix-web-console.html
+                            http://felix.apache.org/site/apache-felix-web-console.html
                         </Bundle-DocURL>
                         <Bundle-Activator>
                             org.apache.felix.webconsole.internal.OsgiManagerActivator
