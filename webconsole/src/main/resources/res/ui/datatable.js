@@ -134,12 +134,12 @@ function entryInternal( /* Element */ parent, /* Object */ dataEntry, /* boolean
     for ( var aidx in dataEntry.actions )
     {
         var action = dataEntry.actions[aidx];
-        parent.appendChild( actionButton( action.enabled, id, action.link, action.name ) );
+        parent.appendChild( actionButton( action.enabled, id, action.link, action.name, action.title ) );
     }
 }
 
 
-/* Element */ function actionButton( /* boolean */ enabled, /* long */ id, /* String */ op, /* String */ opLabel )
+/* Element */ function actionButton( /* boolean */ enabled, /* long */ id, /* String */ op, /* String */ opLabel, /* String */ title )
 {
     var buttonTd = td( "content", { align: "right" } );
     if ( op )
@@ -152,6 +152,10 @@ function entryInternal( /* Element */ parent, /* Object */ dataEntry, /* boolean
         if (!enabled)
         {
             input.setAttribute( "disabled", true );
+        }
+        if (title)
+        {
+            input.setAttribute( "title", title );
         }
         buttonTd.appendChild( input );
     }

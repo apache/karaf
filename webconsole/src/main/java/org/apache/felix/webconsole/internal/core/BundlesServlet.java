@@ -191,10 +191,10 @@ public class BundlesServlet extends BaseWebConsolePlugin
                     getLog().log( LogService.LOG_ERROR, "Cannot stop", be );
                 }
             }
-            else if ( "update".equals( action ) )
+            else if ( "refresh".equals( action ) )
             {
-                // update bundle
-                update( bundle );
+                // refresh bundle wiring
+                refresh( bundle );
                 success = true;
             }
             else if ( "uninstall".equals( action ) )
@@ -285,16 +285,21 @@ public class BundlesServlet extends BaseWebConsolePlugin
         return null;
     }
 
-    private void renderBundleInfoCount(final PrintWriter pw, String msg, int count)
-    throws IOException {
-        pw.print("<td class='content'>" );
-        pw.print(msg);pw.print(" : ");pw.print(count);
-        pw.print(" Bundle"); if ( count != 1) pw.print('s');
-        pw.println("</td>");
+
+    private void renderBundleInfoCount( final PrintWriter pw, String msg, int count )
+    {
+        pw.print( "<td class='content'>" );
+        pw.print( msg );
+        pw.print( " : " );
+        pw.print( count );
+        pw.print( " Bundle" );
+        if ( count != 1 )
+            pw.print( 's' );
+        pw.println( "</td>" );
     }
 
-    protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
-        IOException
+
+    protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         Bundle bundle = getBundle( request.getPathInfo() );
         Bundle[] bundles = ( bundle != null ) ? new Bundle[]
@@ -306,23 +311,32 @@ public class BundlesServlet extends BaseWebConsolePlugin
         pw.println( "<script src='" + appRoot + "/res/ui/datatable.js' language='JavaScript'></script>" );
         pw.println( "<script src='" + appRoot + "/res/ui/bundles.js' language='JavaScript'></script>" );
 
-        if ( bundles != null ) {
+        if ( bundles != null )
+        {
             int active = 0, installed = 0, resolved = 0;
-            for(int i=0; i<bundles.length; i++) {
-                switch ( bundles[i].getState() ) {
-                    case Bundle.ACTIVE: active++; break;
-                    case Bundle.INSTALLED: installed++;break;
-                    case Bundle.RESOLVED: resolved++;break;
+            for ( int i = 0; i < bundles.length; i++ )
+            {
+                switch ( bundles[i].getState() )
+                {
+                    case Bundle.ACTIVE:
+                        active++;
+                        break;
+                    case Bundle.INSTALLED:
+                        installed++;
+                        break;
+                    case Bundle.RESOLVED:
+                        resolved++;
+                        break;
                 }
             }
 
-            pw.println("<table class='content' cellpadding='0' cellspacing='0' width='100%'><tbody>" );
-            pw.println("<tr class='content'>" );
-            renderBundleInfoCount(pw, "Total", bundles.length);
-            renderBundleInfoCount(pw, "Active", active);
-            renderBundleInfoCount(pw, "Resolved", resolved);
-            renderBundleInfoCount(pw, "Installed", installed);
-            pw.println("</tr></tbody></table>");
+            pw.println( "<table class='content' cellpadding='0' cellspacing='0' width='100%'><tbody>" );
+            pw.println( "<tr class='content'>" );
+            renderBundleInfoCount( pw, "Total", bundles.length );
+            renderBundleInfoCount( pw, "Active", active );
+            renderBundleInfoCount( pw, "Resolved", resolved );
+            renderBundleInfoCount( pw, "Installed", installed );
+            pw.println( "</tr></tbody></table>" );
         }
 
         Util.startScript( pw );
@@ -398,10 +412,10 @@ public class BundlesServlet extends BaseWebConsolePlugin
         }
         else
         {
-            action( jw, hasStart( bundle ), "start", "Start" );
-            action( jw, hasStop( bundle ), "stop", "Stop" );
-            action( jw, hasUpdate( bundle ), "update", "Update" );
-            action( jw, hasUninstall( bundle ), "uninstall", "Uninstall" );
+            action( jw, hasStart( bundle ), "start", "Start", null );
+            action( jw, hasStop( bundle ), "stop", "Stop", null );
+            action( jw, true, "refresh", "Refresh", "Refresh Package Imports" );
+            action( jw, hasUninstall( bundle ), "uninstall", "Uninstall", null );
         }
         jw.endArray();
 
@@ -442,15 +456,15 @@ public class BundlesServlet extends BaseWebConsolePlugin
     }
 
 
-    private void action( JSONWriter jw, boolean enabled, String op, String opLabel ) throws JSONException
+    private void action( JSONWriter jw, boolean enabled, String op, String opLabel, String title ) throws JSONException
     {
         jw.object();
-        jw.key( "enabled" );
-        jw.value( enabled );
-        jw.key( "name" );
-        jw.value( opLabel );
-        jw.key( "link" );
-        jw.value( op );
+        jw.key( "enabled" ).value( enabled );
+        jw.key( "name" ).value( opLabel );
+        jw.key( "link" ).value( op );
+        if (title != null) {
+            jw.key( "title" ).value( title );
+        }
         jw.endObject();
     }
 
@@ -464,47 +478,6 @@ public class BundlesServlet extends BaseWebConsolePlugin
     private boolean hasStop( Bundle bundle )
     {
         return bundle.getState() == Bundle.ACTIVE;
-    }
-
-
-    private boolean hasUpdate( Bundle bundle )
-    {
-        //        enabled = bundle.getState() != Bundle.UNINSTALLED && this.hasUpdates( bundle );
-
-        // don't care for bundles with no symbolic name
-        if ( bundle.getSymbolicName() == null )
-        {
-            return false;
-        }
-
-        // no updates if there is no installer service
-        Object isObject = getService( REPOSITORY_ADMIN_NAME );
-        if ( isObject == null )
-        {
-            return false;
-        }
-
-        Version bundleVersion = Version.parseVersion( ( String ) bundle.getHeaders().get( Constants.BUNDLE_VERSION ) );
-
-        RepositoryAdmin repoAdmin = ( RepositoryAdmin ) isObject;
-        Repository[] repositories = repoAdmin.listRepositories();
-        for ( int i = 0; i < repositories.length; i++ )
-        {
-            Resource[] resources = repositories[i].getResources();
-            for ( int j = 0; resources != null && j < resources.length; j++ )
-            {
-                Resource res = resources[j];
-                if ( bundle.getSymbolicName().equals( res.getSymbolicName() ) )
-                {
-                    if ( res.getVersion().compareTo( bundleVersion ) > 0 )
-                    {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
     }
 
 
@@ -1002,42 +975,9 @@ public class BundlesServlet extends BaseWebConsolePlugin
     }
 
 
-    private void update( final Bundle bundle )
+    private void refresh( final Bundle bundle )
     {
-        final RepositoryAdmin repoAdmin = ( RepositoryAdmin ) getService( REPOSITORY_ADMIN_NAME );
-        if ( repoAdmin != null && bundle.getSymbolicName() != null )
-        {
-            // current bundle version
-            Version bundleVersion = Version
-                .parseVersion( ( String ) bundle.getHeaders().get( Constants.BUNDLE_VERSION ) );
-
-            // discover candidates for the update
-            String filter = "(&(symbolicname=" + bundle.getSymbolicName() + ")(version>=" + bundleVersion + "))";
-            Resource[] cand = repoAdmin.discoverResources( filter );
-
-            // find the candidate with the highest version number
-            Version base = bundleVersion;
-            int idx = -1;
-            for ( int i = 0; cand != null && i < cand.length; i++ )
-            {
-                if ( cand[i].getVersion().compareTo( base ) > 0 )
-                {
-                    base = cand[i].getVersion();
-                    idx = i;
-                }
-            }
-
-            // try to resolve and deploy the best candidate
-            if ( idx >= 0 )
-            {
-                Resolver resolver = repoAdmin.resolver();
-                resolver.add( cand[idx] );
-
-                DeployerThread dt = new DeployerThread( resolver, getLog(), bundle.getState() == Bundle.ACTIVE,
-                    "Update " + bundle.getSymbolicName() );
-                dt.start();
-            }
-        }
-
+        getPackageAdmin().refreshPackages( new Bundle[]
+            { bundle } );
     }
 }
