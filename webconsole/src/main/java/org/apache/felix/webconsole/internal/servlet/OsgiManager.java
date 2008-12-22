@@ -18,22 +18,32 @@ package org.apache.felix.webconsole.internal.servlet;
 
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
 
-import javax.servlet.*;
+import javax.servlet.GenericServlet;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.webconsole.*;
-import org.apache.felix.webconsole.internal.*;
-import org.apache.felix.webconsole.internal.compendium.*;
-import org.apache.felix.webconsole.internal.core.*;
-import org.apache.felix.webconsole.internal.misc.*;
-import org.apache.felix.webconsole.internal.obr.BundleRepositoryRender;
-import org.apache.felix.webconsole.internal.obr.InstallFromRepoAction;
-import org.apache.felix.webconsole.internal.obr.RefreshRepoAction;
-import org.apache.felix.webconsole.internal.system.*;
-import org.osgi.framework.*;
+import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.apache.felix.webconsole.Action;
+import org.apache.felix.webconsole.Render;
+import org.apache.felix.webconsole.WebConsoleConstants;
+import org.apache.felix.webconsole.internal.Logger;
+import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
+import org.apache.felix.webconsole.internal.Util;
+import org.apache.felix.webconsole.internal.core.BundlesServlet;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.log.LogService;
@@ -102,11 +112,23 @@ public class OsgiManager extends GenericServlet
      */
     private static final String DEFAULT_MANAGER_ROOT = "/system/console";
 
-    private static final Class[] PLUGIN_CLASSES =
-        { ComponentConfigurationPrinter.class, ComponentsServlet.class, ConfigManager.class, BundlesServlet.class,
-            InstallAction.class, SetStartLevelAction.class, ConfigurationRender.class, GCAction.class,
-            ShutdownAction.class, ShutdownRender.class, VMStatRender.class, BundleRepositoryRender.class,
-            LicenseServlet.class, RefreshRepoAction.class, InstallFromRepoAction.class, ShellServlet.class };
+    private static final String[] PLUGIN_CLASSES =
+        { "org.apache.felix.webconsole.internal.compendium.ComponentConfigurationPrinter",
+            "org.apache.felix.webconsole.internal.compendium.ComponentsServlet",
+            "org.apache.felix.webconsole.internal.compendium.ConfigManager",
+            "org.apache.felix.webconsole.internal.core.BundlesServlet",
+            "org.apache.felix.webconsole.internal.core.InstallAction",
+            "org.apache.felix.webconsole.internal.core.SetStartLevelAction",
+            "org.apache.felix.webconsole.internal.misc.LicenseServlet",
+            "org.apache.felix.webconsole.internal.misc.ConfigurationRender",
+            "org.apache.felix.webconsole.internal.misc.ShellServlet",
+            "org.apache.felix.webconsole.internal.obr.BundleRepositoryRender",
+            "org.apache.felix.webconsole.internal.obr.InstallFromRepoAction",
+            "org.apache.felix.webconsole.internal.obr.RefreshRepoAction",
+            "org.apache.felix.webconsole.internal.system.GCAction",
+            "org.apache.felix.webconsole.internal.system.ShutdownAction",
+            "org.apache.felix.webconsole.internal.system.ShutdownRender",
+            "org.apache.felix.webconsole.internal.system.VMStatRender", };
 
     private BundleContext bundleContext;
 
@@ -166,11 +188,13 @@ public class OsgiManager extends GenericServlet
         httpServiceTracker = new HttpServiceTracker( this );
         httpServiceTracker.open();
 
+        ClassLoader classLoader = getClass().getClassLoader();
         for ( int i = 0; i < PLUGIN_CLASSES.length; i++ )
         {
-            Class pluginClass = PLUGIN_CLASSES[i];
+            String pluginClassName = PLUGIN_CLASSES[i];
             try
             {
+                Class pluginClass = classLoader.loadClass( pluginClassName );
                 Object plugin = pluginClass.newInstance();
                 if ( plugin instanceof OsgiManagerPlugin )
                 {
@@ -195,7 +219,7 @@ public class OsgiManager extends GenericServlet
             }
             catch ( Throwable t )
             {
-                // todo: log
+                log( "Failed to instantiate plugin " + pluginClassName + ". Reason: " + t );
             }
         }
     }
