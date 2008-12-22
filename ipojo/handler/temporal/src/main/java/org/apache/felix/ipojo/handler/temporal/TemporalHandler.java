@@ -19,6 +19,7 @@
 package org.apache.felix.ipojo.handler.temporal;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.List;
 
@@ -60,7 +61,7 @@ public class TemporalHandler extends PrimitiveHandler implements DependencyState
     /**
      * Uses an empty array.
      */
-    public static final int EMPTY_ARRAY = 3;
+    public static final int EMPTY = 3;
     /**
      * Uses {@code null}. 
      */
@@ -132,10 +133,27 @@ public class TemporalHandler extends PrimitiveHandler implements DependencyState
             }
             
             boolean agg = false;
+            boolean collection = false;
             String spec = fieldmeta.getFieldType();
             if (spec.endsWith("[]")) {
                 agg = true;
                 spec = spec.substring(0, spec.length() - 2);
+            } else if (Collection.class.getName().equals(spec)) {
+                agg = true;
+                collection = true;
+                // Collection detected. Check for the specification attribute
+                spec = deps[i].getAttribute("specification");
+                if (spec == null) {
+                    error("A dependency injected inside a Collection must contain the 'specification' attribute");
+                }
+            }
+            
+            String prox = deps[i].getAttribute("proxy");
+            boolean proxy = prox != null && prox.equals("true");
+            if (proxy && agg) {
+                if (! collection) {
+                    error("Proxied aggregate temporal dependencies cannot be an array. Only collections are supported");
+                }
             }
             
             long timeout = DEFAULT_TIMEOUT;
@@ -154,8 +172,8 @@ public class TemporalHandler extends PrimitiveHandler implements DependencyState
             if (onTimeout != null) {
                 if (onTimeout.equalsIgnoreCase("nullable")) {
                     policy = NULLABLE;
-                } else if (onTimeout.equalsIgnoreCase("empty-array")) {
-                    policy = EMPTY_ARRAY;
+                } else if (onTimeout.equalsIgnoreCase("empty-array")  || onTimeout.equalsIgnoreCase("empty")) {
+                    policy = EMPTY;
                     if (! agg) {
                         // The empty array policy can only be used on aggregate dependencies
                         error("Cannot use the empty array policy for " + field + " : non aggregate dependency.");
@@ -169,7 +187,7 @@ public class TemporalHandler extends PrimitiveHandler implements DependencyState
             }
          
             Class specification = DependencyModel.loadSpecification(spec, getInstanceManager().getContext());
-            TemporalDependency dep = new TemporalDependency(specification, agg, filter, getInstanceManager().getContext(), timeout, policy, di, this);
+            TemporalDependency dep = new TemporalDependency(specification, agg, collection, proxy, filter, getInstanceManager().getContext(), timeout, policy, di, this);
             m_dependencies.add(dep);
             
             getInstanceManager().register(fieldmeta, dep);

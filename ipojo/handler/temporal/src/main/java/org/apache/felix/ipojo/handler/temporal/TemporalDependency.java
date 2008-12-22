@@ -20,6 +20,9 @@ package org.apache.felix.ipojo.handler.temporal;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import org.apache.felix.ipojo.FieldInterceptor;
 import org.apache.felix.ipojo.Nullable;
@@ -67,19 +70,32 @@ public class TemporalDependency extends DependencyModel implements
      * policy (0) throw a runtime exception when the timeout occurs *
      */
     private int m_policy;
+    
+    /**
+     * The dependency is injected as a collection.
+     * The field must be of the {@link Collection} type
+     */
+    private boolean m_collection;
+    
+    /**
+     * Enables the proxy mode.
+     */
+    private boolean m_proxy;
 
     /**
-     * Constructor.
-     * @param spec service specification
+     * Creates a temporal dependency.
+     * @param spec the service specification
      * @param agg is the dependency aggregate ?
-     * @param filter LDAP filter
+     * @param collection the dependency field is a collection
+     * @param proxy enable the proxy-mode
+     * @param filter the LDAP filter
      * @param context service context
      * @param timeout timeout
      * @param handler Handler managing this dependency
      * @param defaultImpl class used as default-implementation
      * @param policy onTimeout policy
      */
-    public TemporalDependency(Class spec, boolean agg, Filter filter,
+    public TemporalDependency(Class spec, boolean agg, boolean collection, boolean proxy, Filter filter,
             BundleContext context, long timeout, int policy,
             String defaultImpl, TemporalHandler handler) {
         super(spec, agg, true, filter, null,
@@ -88,6 +104,8 @@ public class TemporalDependency extends DependencyModel implements
         m_policy = policy;
         m_timeout = timeout;
         m_handler = handler;
+        m_collection = collection;
+        m_proxy = proxy;
     }
 
     /**
@@ -138,21 +156,11 @@ public class TemporalDependency extends DependencyModel implements
         ServiceReference[] refs = getServiceReferences();
         if (refs != null) {
             // Immediate return.
-            if (isAggregate()) {
-                Object[] svc = (Object[]) Array.newInstance(getSpecification(),
-                        refs.length);
-                for (int i = 0; i < svc.length; i++) {
-                    svc[i] = getService(refs[i]);
-                }
-                return svc;
-            } else {
-                return getService(refs[0]);
-            }
+            return getServiceObjects(refs);
         } else {
             // Begin to wait ...
             long enter = System.currentTimeMillis();
             boolean exhausted = false;
-            ServiceReference ref = null;
             synchronized (this) {
                 while (getServiceReference() == null && !exhausted) {
                     try {
@@ -169,17 +177,50 @@ public class TemporalDependency extends DependencyModel implements
             if (exhausted) {
                 return onTimeout();
             } else {
-                ref = getServiceReference();
-                if (isAggregate()) {
-                    Object[] svc = (Object[]) Array.newInstance(
-                            getSpecification(), 1);
-                    svc[0] = getService(ref);
-                    return svc;
-                } else {
-                    return getService(ref);
-                }
+                refs = getServiceReferences();
+                return getServiceObjects(refs);
             }
         }
+    }
+    
+    /**
+     * Creates and returns object to inject in the dependency.
+     * This method handles aggregate, collection and proxy cases.
+     * @param refs the available service references
+     * @return the object to inject. Can be a 'simple' object, a proxy, 
+     * a collection or an array.
+     */
+    private Object getServiceObjects(ServiceReference [] refs) {
+        if (m_proxy) {
+            if (isAggregate()) { // Necessary a collection
+                return new ServiceCollection(this);
+            } else {
+                return Proxy.newProxyInstance(m_handler
+                        .getInstanceManager().getClazz().getClassLoader(),
+                        new Class[] { getSpecification() },
+                        new ServiceProxy(this)); // NOPMD
+            }
+        } else {
+            if (isAggregate()) {
+                if (m_collection) {
+                    Collection svc = new ArrayList(refs.length);  // Use an array list as collection implementation. 
+                    for (int i = 0; i < refs.length; i++) {
+                        svc.add(getService(refs[i]));
+                    }
+                    return svc;
+                } else {
+                    Object[] svc = (Object[]) Array.newInstance(getSpecification(),
+                            refs.length);
+                    for (int i = 0; i < svc.length; i++) {
+                        svc[i] = getService(refs[i]);
+                    }
+                    return svc;
+                }
+            } else {
+                return getService(refs[0]);
+            }
+        }
+        
     }
 
     /**
@@ -202,10 +243,16 @@ public class TemporalDependency extends DependencyModel implements
                             new Class[] { getSpecification(), Nullable.class },
                             new NullableObject()); // NOPMD
                     if (isAggregate()) {
-                        Object[] array = (Object[]) Array.newInstance(
+                        if (m_collection) {
+                            List list = new ArrayList(1);
+                            list.add(m_nullableObject);
+                            m_nullableObject = list;
+                        } else {
+                            Object[] array = (Object[]) Array.newInstance(
                                 getSpecification(), 1);
-                        array[0] = m_nullableObject;
-                        m_nullableObject = array;
+                            array[0] = m_nullableObject;
+                            m_nullableObject = array;
+                        }
                     }
                 } catch (NoClassDefFoundError e) {
                     // A NoClassDefFoundError is thrown if the specification
@@ -238,14 +285,24 @@ public class TemporalDependency extends DependencyModel implements
                                     + " : " + e.getMessage());
                 }
                 if (isAggregate()) {
-                    Object[] array = (Object[]) Array.newInstance(
+                    if (m_collection) {
+                        List list = new ArrayList(1);
+                        list.add(m_nullableObject);
+                        m_nullableObject = list;
+                    } else {
+                        Object[] array = (Object[]) Array.newInstance(
                             getSpecification(), 1);
-                    array[0] = m_nullableObject;
-                    m_nullableObject = array;
+                        array[0] = m_nullableObject;
+                        m_nullableObject = array;
+                    }
                 }
                 break;
-            case TemporalHandler.EMPTY_ARRAY:
-                m_nullableObject = Array.newInstance(getSpecification(), 0);
+            case TemporalHandler.EMPTY:
+                if (! m_collection) {
+                    m_nullableObject = Array.newInstance(getSpecification(), 0);
+                } else { // Empty collection
+                    m_nullableObject = new ArrayList(0);
+                }
                 break;
             default: // Cannot occurs
                 break;
@@ -275,12 +332,12 @@ public class TemporalDependency extends DependencyModel implements
      * Implements the timeout policy according to the specified configuration.
      * @return the object to return when the timeout occurs.
      */
-    private Object onTimeout() {
+    Object onTimeout() {
         switch (m_policy) {
             case TemporalHandler.NULL:
             case TemporalHandler.NULLABLE:
             case TemporalHandler.DEFAULT_IMPLEMENTATION:
-            case TemporalHandler.EMPTY_ARRAY:
+            case TemporalHandler.EMPTY:
                 return m_nullableObject;
             default:
                 // Throws a runtime exception
@@ -289,5 +346,11 @@ public class TemporalDependency extends DependencyModel implements
                         + " unavailable : timeout");
         }
     }
+    
+    long getTimeout() {
+        return m_timeout;
+    }
+    
+    
 
 }

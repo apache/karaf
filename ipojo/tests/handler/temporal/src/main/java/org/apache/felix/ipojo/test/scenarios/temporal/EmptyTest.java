@@ -25,243 +25,13 @@ import org.apache.felix.ipojo.test.scenarios.temporal.service.FooService;
 import org.apache.felix.ipojo.test.scenarios.util.Utils;
 import org.osgi.framework.ServiceReference;
 
-public class DelayTest extends OSGiTestCase {
-    
-   public void testDelay() {
-       String prov = "provider";
-       ComponentInstance provider = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov);
-       String un = "under-1";
-       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-CheckServiceProvider", un);
-       
-       ServiceReference ref_fs = Utils.getServiceReferenceByName(context, FooService.class.getName(), prov);
-       assertNotNull("Check foo availability", ref_fs);
-       
-       ServiceReference ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
-       assertNotNull("Check cs availability", ref_cs);
-       
-       CheckService cs = (CheckService) context.getService(ref_cs);
-       assertTrue("Check invocation", cs.check());
-       
-       // Stop the provider.
-       provider.stop();
-       ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
-       assertNotNull("Check cs availability - 2", ref_cs);
-       long begin = System.currentTimeMillis();
-       DelayedProvider dp = new DelayedProvider(provider, 200);
-       dp.start();
-       cs = (CheckService) context.getService(ref_cs);
-       assertTrue("Check invocation - 2", cs.check());
-       long end = System.currentTimeMillis();
-       
-       assertTrue("Assert delay", (end - begin) >= 200);
-       
-       ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
-       assertNotNull("Check cs availability - 3", ref_cs);
-       cs = (CheckService) context.getService(ref_cs);
-       assertTrue("Check invocation - 3", cs.check());
-       
-       provider.stop();
-       provider.dispose();
-       under.stop();
-       under.dispose();
-   }
+public class EmptyTest extends OSGiTestCase {
    
-   public void testDelayWithProxy() {
+   public void testEmptyArrayTimeout() {
        String prov = "provider";
        ComponentInstance provider = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov);
        String un = "under-1";
-       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-ProxiedCheckServiceProvider", un);
-       
-       ServiceReference ref_fs = Utils.getServiceReferenceByName(context, FooService.class.getName(), prov);
-       assertNotNull("Check foo availability", ref_fs);
-       
-       ServiceReference ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
-       assertNotNull("Check cs availability", ref_cs);
-       
-       CheckService cs = (CheckService) context.getService(ref_cs);
-       assertTrue("Check invocation", cs.check());
-       
-       // Stop the provider.
-       provider.stop();
-       ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
-       assertNotNull("Check cs availability - 2", ref_cs);
-       long begin = System.currentTimeMillis();
-       DelayedProvider dp = new DelayedProvider(provider, 200);
-       dp.start();
-       cs = (CheckService) context.getService(ref_cs);
-       assertTrue("Check invocation - 2", cs.check());
-       long end = System.currentTimeMillis();
-       
-       assertTrue("Assert delay", (end - begin) >= 200);
-       
-       ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
-       assertNotNull("Check cs availability - 3", ref_cs);
-       cs = (CheckService) context.getService(ref_cs);
-       assertTrue("Check invocation - 3", cs.check());
-       
-       provider.stop();
-       provider.dispose();
-       under.stop();
-       under.dispose();
-   }
-   
-   public void testTimeout() {
-       String prov = "provider";
-       ComponentInstance provider = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov);
-       String un = "under-1";
-       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-CheckServiceProvider", un);
-       
-       ServiceReference ref_fs = Utils.getServiceReferenceByName(context, FooService.class.getName(), prov);
-       assertNotNull("Check foo availability", ref_fs);
-       
-       ServiceReference ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
-       assertNotNull("Check cs availability", ref_cs);
-       
-       CheckService cs = (CheckService) context.getService(ref_cs);
-       assertTrue("Check invocation", cs.check());
-       
-       // Stop the provider.
-       provider.stop();
-       ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
-       assertNotNull("Check cs availability - 2", ref_cs);
-       DelayedProvider dp = new DelayedProvider(provider, 4000);
-       dp.start();
-       cs = (CheckService) context.getService(ref_cs);
-       try {
-           cs.check();
-       } catch(RuntimeException e) {
-           // OK
-           dp.stop();
-           provider.stop();
-           provider.dispose();
-           under.stop();
-           under.dispose();
-           return;
-       }   
-       
-       fail("Timeout expected");
-   }
-   
-   public void testTimeoutWithProxy() {
-       String prov = "provider";
-       ComponentInstance provider = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov);
-       String un = "under-1";
-       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-ProxiedCheckServiceProvider", un);
-       
-       ServiceReference ref_fs = Utils.getServiceReferenceByName(context, FooService.class.getName(), prov);
-       assertNotNull("Check foo availability", ref_fs);
-       
-       ServiceReference ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
-       assertNotNull("Check cs availability", ref_cs);
-       
-       CheckService cs = (CheckService) context.getService(ref_cs);
-       assertTrue("Check invocation", cs.check());
-       
-       // Stop the provider.
-       provider.stop();
-       ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
-       assertNotNull("Check cs availability - 2", ref_cs);
-       DelayedProvider dp = new DelayedProvider(provider, 4000);
-       dp.start();
-       cs = (CheckService) context.getService(ref_cs);
-       try {
-           cs.check();
-       } catch(RuntimeException e) {
-           // OK
-           dp.stop();
-           provider.stop();
-           provider.dispose();
-           under.stop();
-           under.dispose();
-           return;
-       }   
-       
-       fail("Timeout expected");
-   }
-   
-   public void testDelayTimeout() {
-       String prov = "provider";
-       ComponentInstance provider = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov);
-       String un = "under-1";
-       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-CheckServiceProviderTimeout", un);
-       
-       ServiceReference ref_fs = Utils.getServiceReferenceByName(context, FooService.class.getName(), prov);
-       assertNotNull("Check foo availability", ref_fs);
-       
-       ServiceReference ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
-       assertNotNull("Check cs availability", ref_cs);
-       
-       CheckService cs = (CheckService) context.getService(ref_cs);
-       assertTrue("Check invocation", cs.check());
-       
-       // Stop the provider.
-       provider.stop();
-       ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
-       assertNotNull("Check cs availability - 2", ref_cs);
-       long begin = System.currentTimeMillis();
-       DelayedProvider dp = new DelayedProvider(provider, 200);
-       dp.start();
-       cs = (CheckService) context.getService(ref_cs);
-       assertTrue("Check invocation - 2", cs.check());
-       long end = System.currentTimeMillis();
-       
-       assertTrue("Assert delay", (end - begin) >= 200);
-       
-       ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
-       assertNotNull("Check cs availability - 3", ref_cs);
-       cs = (CheckService) context.getService(ref_cs);
-       assertTrue("Check invocation - 3", cs.check());
-       
-       provider.stop();
-       provider.dispose();
-       under.stop();
-       under.dispose();
-   }
-   
-   public void testDelayTimeoutWithProxy() {
-       String prov = "provider";
-       ComponentInstance provider = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov);
-       String un = "under-1";
-       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-ProxiedCheckServiceProviderTimeout", un);
-       
-       ServiceReference ref_fs = Utils.getServiceReferenceByName(context, FooService.class.getName(), prov);
-       assertNotNull("Check foo availability", ref_fs);
-       
-       ServiceReference ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
-       assertNotNull("Check cs availability", ref_cs);
-       
-       CheckService cs = (CheckService) context.getService(ref_cs);
-       assertTrue("Check invocation", cs.check());
-       
-       // Stop the provider.
-       provider.stop();
-       ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
-       assertNotNull("Check cs availability - 2", ref_cs);
-       long begin = System.currentTimeMillis();
-       DelayedProvider dp = new DelayedProvider(provider, 200);
-       dp.start();
-       cs = (CheckService) context.getService(ref_cs);
-       assertTrue("Check invocation - 2", cs.check());
-       long end = System.currentTimeMillis();
-       
-       assertTrue("Assert delay", (end - begin) >= 200);
-       
-       ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
-       assertNotNull("Check cs availability - 3", ref_cs);
-       cs = (CheckService) context.getService(ref_cs);
-       assertTrue("Check invocation - 3", cs.check());
-       
-       provider.stop();
-       provider.dispose();
-       under.stop();
-       under.dispose();
-   }
-   
-   public void testSetTimeout() {
-       String prov = "provider";
-       ComponentInstance provider = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov);
-       String un = "under-1";
-       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-CheckServiceProviderTimeout", un);
+       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-EmptyMultipleCheckServiceProviderTimeout", un);
        
        ServiceReference ref_fs = Utils.getServiceReferenceByName(context, FooService.class.getName(), prov);
        assertNotNull("Check foo availability", ref_fs);
@@ -279,26 +49,27 @@ public class DelayTest extends OSGiTestCase {
        DelayedProvider dp = new DelayedProvider(provider, 400);
        dp.start();
        cs = (CheckService) context.getService(ref_cs);
+       boolean res = false;
        try {
-           cs.check();
+           res = cs.check();
        } catch(RuntimeException e) {
-           // OK
-           dp.stop();
-           provider.stop();
-           provider.dispose();
-           under.stop();
-           under.dispose();
-           return;
+           fail("An empty array was expected ...");
        }   
+       assertTrue("Check empty array", res);
        
-       fail("Timeout expected");
+       dp.stop();
+       provider.stop();
+       provider.dispose();
+       under.stop();
+       under.dispose();
+       return;
    }
    
-   public void testSetTimeoutWithProxy() {
+   public void testEmptyCollectionTimeout() {
        String prov = "provider";
        ComponentInstance provider = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov);
        String un = "under-1";
-       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-ProxiedCheckServiceProviderTimeout", un);
+       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-EmptyColCheckServiceProviderTimeout", un);
        
        ServiceReference ref_fs = Utils.getServiceReferenceByName(context, FooService.class.getName(), prov);
        assertNotNull("Check foo availability", ref_fs);
@@ -316,19 +87,58 @@ public class DelayTest extends OSGiTestCase {
        DelayedProvider dp = new DelayedProvider(provider, 400);
        dp.start();
        cs = (CheckService) context.getService(ref_cs);
+       boolean res = false;
        try {
-           cs.check();
+           res = cs.check();
        } catch(RuntimeException e) {
-           // OK
-           dp.stop();
-           provider.stop();
-           provider.dispose();
-           under.stop();
-           under.dispose();
-           return;
+           fail("An empty array was expected ...");
        }   
+       assertTrue("Check empty array", res);
        
-       fail("Timeout expected");
+       dp.stop();
+       provider.stop();
+       provider.dispose();
+       under.stop();
+       under.dispose();
+       return;
+   }
+   
+   public void testEmptyProxiedCollectionTimeout() {
+       String prov = "provider";
+       ComponentInstance provider = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov);
+       String un = "under-1";
+       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-EmptyProxiedColCheckServiceProviderTimeout", un);
+       
+       ServiceReference ref_fs = Utils.getServiceReferenceByName(context, FooService.class.getName(), prov);
+       assertNotNull("Check foo availability", ref_fs);
+       
+       ServiceReference ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
+       assertNotNull("Check cs availability", ref_cs);
+       
+       CheckService cs = (CheckService) context.getService(ref_cs);
+       assertTrue("Check invocation", cs.check());
+       
+       // Stop the provider.
+       provider.stop();
+       ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
+       assertNotNull("Check cs availability - 2", ref_cs);
+       DelayedProvider dp = new DelayedProvider(provider, 400);
+       dp.start();
+       cs = (CheckService) context.getService(ref_cs);
+       boolean res = false;
+       try {
+           res = cs.check();
+       } catch(RuntimeException e) {
+           fail("An empty array was expected ...");
+       }   
+       assertTrue("Check empty array", res);
+       
+       dp.stop();
+       provider.stop();
+       provider.dispose();
+       under.stop();
+       under.dispose();
+       return;
    }
    
    public void testDelayOnMultipleDependency() {
@@ -337,7 +147,7 @@ public class DelayTest extends OSGiTestCase {
        String prov2 = "provider2";
        ComponentInstance provider2 = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov2);
        String un = "under-1";
-       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-MultipleCheckServiceProvider", un);
+       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-EmptyMultipleCheckServiceProvider", un);
        
        ServiceReference ref_fs = Utils.getServiceReferenceByName(context, FooService.class.getName(), prov);
        assertNotNull("Check foo availability", ref_fs);
@@ -367,13 +177,15 @@ public class DelayTest extends OSGiTestCase {
        dp.stop();
        dp2.stop();
        
+       provider1.stop();
+       provider2.stop();
+       
        ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
        assertNotNull("Check cs availability - 3", ref_cs);
        cs = (CheckService) context.getService(ref_cs);
-       assertTrue("Check invocation - 3", cs.check());
        
-       provider1.stop();
-       provider2.stop();
+       assertTrue("Check invocation - 3", cs.check()); 
+       
        provider1.dispose();
        provider2.dispose();
        under.stop();
@@ -386,7 +198,7 @@ public class DelayTest extends OSGiTestCase {
        String prov2 = "provider2";
        ComponentInstance provider2 = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov2);
        String un = "under-1";
-       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-ColCheckServiceProvider", un);
+       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-EmptyColCheckServiceProvider", un);
        
        ServiceReference ref_fs = Utils.getServiceReferenceByName(context, FooService.class.getName(), prov);
        assertNotNull("Check foo availability", ref_fs);
@@ -416,13 +228,15 @@ public class DelayTest extends OSGiTestCase {
        dp.stop();
        dp2.stop();
        
+       provider1.stop();
+       provider2.stop();
+       
        ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
        assertNotNull("Check cs availability - 3", ref_cs);
        cs = (CheckService) context.getService(ref_cs);
-       assertTrue("Check invocation - 3", cs.check());
        
-       provider1.stop();
-       provider2.stop();
+       assertTrue("Check invocation - 3", cs.check()); 
+       
        provider1.dispose();
        provider2.dispose();
        under.stop();
@@ -435,7 +249,7 @@ public class DelayTest extends OSGiTestCase {
        String prov2 = "provider2";
        ComponentInstance provider2 = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov2);
        String un = "under-1";
-       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-ProxiedColCheckServiceProvider", un);
+       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-EmptyProxiedColCheckServiceProvider", un);
        
        ServiceReference ref_fs = Utils.getServiceReferenceByName(context, FooService.class.getName(), prov);
        assertNotNull("Check foo availability", ref_fs);
@@ -465,13 +279,15 @@ public class DelayTest extends OSGiTestCase {
        dp.stop();
        dp2.stop();
        
+       provider1.stop();
+       provider2.stop();
+       
        ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
        assertNotNull("Check cs availability - 3", ref_cs);
        cs = (CheckService) context.getService(ref_cs);
-       assertTrue("Check invocation - 3", cs.check());
        
-       provider1.stop();
-       provider2.stop();
+       assertTrue("Check invocation - 3", cs.check()); 
+       
        provider1.dispose();
        provider2.dispose();
        under.stop();

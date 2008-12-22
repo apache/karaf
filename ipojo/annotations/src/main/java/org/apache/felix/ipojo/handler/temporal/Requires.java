@@ -45,11 +45,24 @@ public @interface Requires {
     
     /**
      * Set the on timeout action.
-     * Supports null, nullable, empty-array, and default-implementation.
+     * Supports null, nullable, empty, and default-implementation.
      * In this latter case, you must specify the qualified class name
      * of the default-implementation (instead of default-implementation).
-     * Default: no action (i.e throw a runtime exception)
+     * Default: no action (i.e throws a runtime exception)
      */
     String onTimeout() default "";
+    
+    /**
+     * Set the service specification (for Collection fields).
+     * This attribute is mandatory for Collections.
+     */
+    String specification() default "";
+    
+    /**
+     * Inject a proxy instead of the real object.
+     * This allows passing this reference to collaborators.
+     * Default: false
+     */
+    boolean proxy() default false;
 
 }

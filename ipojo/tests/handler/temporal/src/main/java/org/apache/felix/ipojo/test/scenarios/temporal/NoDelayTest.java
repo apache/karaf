@@ -50,11 +50,76 @@ public class NoDelayTest extends OSGiTestCase {
        under.dispose();
    }
    
+   public void testNoDelayWithProxy() {
+       String prov = "provider";
+       ComponentInstance provider = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov);
+       String un = "under-1";
+       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-ProxiedCheckServiceProvider", un);
+       assertNotNull("Check creation", under);
+       assertNotNull("Check provider creation", prov);
+       
+       ServiceReference ref_fs = Utils.getServiceReferenceByName(context, FooService.class.getName(), prov);
+       assertNotNull("Check foo availability", ref_fs);
+       
+       ServiceReference ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
+       assertNotNull("Check cs availability", ref_cs);
+       
+       CheckService cs = (CheckService) context.getService(ref_cs);
+       assertTrue("Check invocation", cs.check());
+       
+       provider.stop();
+       provider.dispose();
+       under.stop();
+       under.dispose();
+   }
+   
    public void testMultipleNoDelay() {
        String prov1 = "provider-1";
        ComponentInstance provider1 = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov1);
        String un = "under-2";
        ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-MultipleCheckServiceProvider", un);
+       
+       ServiceReference ref_fs = Utils.getServiceReferenceByName(context, FooService.class.getName(), prov1);
+       assertNotNull("Check foo availability", ref_fs);
+       
+       ServiceReference ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
+       assertNotNull("Check cs availability", ref_cs);
+       
+       CheckService cs = (CheckService) context.getService(ref_cs);
+       assertTrue("Check invocation", cs.check());
+       
+       provider1.stop();
+       provider1.dispose();
+       under.stop();
+       under.dispose();
+   }
+   
+   public void testCollectionNoDelay() {
+       String prov1 = "provider-1";
+       ComponentInstance provider1 = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov1);
+       String un = "under-2";
+       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-ColCheckServiceProvider", un);
+       
+       ServiceReference ref_fs = Utils.getServiceReferenceByName(context, FooService.class.getName(), prov1);
+       assertNotNull("Check foo availability", ref_fs);
+       
+       ServiceReference ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
+       assertNotNull("Check cs availability", ref_cs);
+       
+       CheckService cs = (CheckService) context.getService(ref_cs);
+       assertTrue("Check invocation", cs.check());
+       
+       provider1.stop();
+       provider1.dispose();
+       under.stop();
+       under.dispose();
+   }
+   
+   public void testProxiedCollectionNoDelay() {
+       String prov1 = "provider-1";
+       ComponentInstance provider1 = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov1);
+       String un = "under-2";
+       ComponentInstance under = Utils.getComponentInstanceByName(context, "TEMPORAL-ProxiedColCheckServiceProvider", un);
        
        ServiceReference ref_fs = Utils.getServiceReferenceByName(context, FooService.class.getName(), prov1);
        assertNotNull("Check foo availability", ref_fs);

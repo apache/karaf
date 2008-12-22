@@ -1,11 +1,12 @@
-<ipojo 
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/schemas/core.xsd 
-	    org.apache.felix.ipojo.handler.temporal http://people.apache.org/~clement/ipojo/schemas/temporal.xsd"
-	xmlns="org.apache.felix.ipojo"
+<ipojo
 	xmlns:temp="org.apache.felix.ipojo.handler.temporal">
 	<component classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider" name="TEMPORAL-CheckServiceProvider">
 		<temp:requires field="fs"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.proxy.HelpedCheckServiceProvider" name="TEMPORAL-ProxiedCheckServiceProvider">
+		<temp:requires field="fs" proxy="true"/>
 		<provides/>
 	</component>
 	
@@ -14,8 +15,23 @@
 		<provides/>
 	</component>
 	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.proxy.HelpedCheckServiceProvider" name="TEMPORAL-ProxiedCheckServiceProviderTimeout">
+		<temp:requires field="fs" proxy="true" timeout="300"/>
+		<provides/>
+	</component>
+	
 	<component classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckServiceProvider" name="TEMPORAL-MultipleCheckServiceProvider">
 		<temp:requires field="fs"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.CollectionCheckServiceProvider" name="TEMPORAL-ColCheckServiceProvider">
+		<temp:requires field="fs" specification="org.apache.felix.ipojo.test.scenarios.temporal.service.FooService"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.proxy.HelpedCollectionCheckServiceProvider" name="TEMPORAL-ProxiedColCheckServiceProvider">
+		<temp:requires field="fs" proxy="true" specification="org.apache.felix.ipojo.test.scenarios.temporal.service.FooService"/>
 		<provides/>
 	</component>
 	
@@ -29,8 +45,23 @@
 		<provides/>
 	</component>
 	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.CollectionCheckServiceProvider" name="TEMPORAL-NullableColCheckServiceProvider">
+		<temp:requires field="fs" onTimeout="nullable" specification="org.apache.felix.ipojo.test.scenarios.temporal.service.FooService"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.proxy.HelpedCollectionCheckServiceProvider" name="TEMPORAL-NullableProxiedColCheckServiceProvider">
+		<temp:requires field="fs" proxy="true" onTimeout="nullable" specification="org.apache.felix.ipojo.test.scenarios.temporal.service.FooService"/>
+		<provides/>
+	</component>
+	
 	<component classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider" name="TEMPORAL-NullableCheckServiceProvider">
 		<temp:requires field="fs" onTimeout="nullable"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.proxy.HelpedCheckServiceProvider" name="TEMPORAL-NullableProxiedCheckServiceProvider">
+		<temp:requires field="fs" proxy="true" onTimeout="nullable"/>
 		<provides/>
 	</component>
 	
@@ -39,8 +70,23 @@
 		<provides/>
 	</component>
 	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.proxy.HelpedCheckServiceProvider" name="TEMPORAL-NullableProxiedCheckServiceProviderTimeout">
+		<temp:requires field="fs" proxy="true" onTimeout="nullable" timeout="300"/>
+		<provides/>
+	</component>
+	
 	<component classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckServiceProvider" name="TEMPORAL-NullableMultipleCheckServiceProviderTimeout">
 		<temp:requires field="fs" timeout="300" onTimeout="nullable"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.CollectionCheckServiceProvider" name="TEMPORAL-NullableColCheckServiceProviderTimeout">
+		<temp:requires field="fs" onTimeout="nullable" timeout="300" specification="org.apache.felix.ipojo.test.scenarios.temporal.service.FooService"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.proxy.HelpedCollectionCheckServiceProvider" name="TEMPORAL-NullableProxiedColCheckServiceProviderTimeout">
+		<temp:requires field="fs" proxy="true" onTimeout="nullable" timeout="300" specification="org.apache.felix.ipojo.test.scenarios.temporal.service.FooService"/>
 		<provides/>
 	</component>
 	
@@ -50,8 +96,23 @@
 		<provides/>
 	</component>
 	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.CollectionCheckServiceProvider" name="TEMPORAL-DIColCheckServiceProvider">
+		<temp:requires field="fs" onTimeout="org.apache.felix.ipojo.test.scenarios.component.NullableFooProvider" specification="org.apache.felix.ipojo.test.scenarios.temporal.service.FooService"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.proxy.HelpedCollectionCheckServiceProvider" name="TEMPORAL-DIProxiedColCheckServiceProvider">
+		<temp:requires field="fs" proxy="true" onTimeout="org.apache.felix.ipojo.test.scenarios.component.NullableFooProvider" specification="org.apache.felix.ipojo.test.scenarios.temporal.service.FooService"/>
+		<provides/>
+	</component>
+	
 	<component classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider" name="TEMPORAL-DICheckServiceProvider">
 		<temp:requires field="fs" onTimeout="org.apache.felix.ipojo.test.scenarios.component.NullableFooProvider"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.proxy.HelpedCheckServiceProvider" name="TEMPORAL-DIProxiedCheckServiceProvider">
+		<temp:requires field="fs" proxy="true" onTimeout="org.apache.felix.ipojo.test.scenarios.component.NullableFooProvider"/>
 		<provides/>
 	</component>
 	
@@ -60,8 +121,23 @@
 		<provides/>
 	</component>
 	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.proxy.HelpedCheckServiceProvider" name="TEMPORAL-DIProxiedCheckServiceProviderTimeout">
+		<temp:requires field="fs" proxy="true" timeout="300" onTimeout="org.apache.felix.ipojo.test.scenarios.component.NullableFooProvider"/>
+		<provides/>
+	</component>
+	
 	<component classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckServiceProvider" name="TEMPORAL-DIMultipleCheckServiceProviderTimeout">
 		<temp:requires field="fs" timeout="300" onTimeout="org.apache.felix.ipojo.test.scenarios.component.NullableFooProvider"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.CollectionCheckServiceProvider" name="TEMPORAL-DIColCheckServiceProviderTimeout">
+		<temp:requires field="fs" timeout="300" onTimeout="org.apache.felix.ipojo.test.scenarios.component.NullableFooProvider" specification="org.apache.felix.ipojo.test.scenarios.temporal.service.FooService"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.proxy.HelpedCollectionCheckServiceProvider" name="TEMPORAL-DIProxiedColCheckServiceProviderTimeout">
+		<temp:requires field="fs" proxy="true" timeout="300" onTimeout="org.apache.felix.ipojo.test.scenarios.component.NullableFooProvider" specification="org.apache.felix.ipojo.test.scenarios.temporal.service.FooService"/>
 		<provides/>
 	</component>
 	
@@ -71,8 +147,23 @@
 		<provides/>
 	</component>
 	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.CollectionCheckServiceProvider" name="TEMPORAL-NullColCheckServiceProvider">
+		<temp:requires field="fs" onTimeout="null" specification="org.apache.felix.ipojo.test.scenarios.temporal.service.FooService"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.proxy.HelpedCollectionCheckServiceProvider" name="TEMPORAL-NullProxiedColCheckServiceProvider">
+		<temp:requires field="fs" proxy="true" onTimeout="null" specification="org.apache.felix.ipojo.test.scenarios.temporal.service.FooService"/>
+		<provides/>
+	</component>
+	
 	<component classname="org.apache.felix.ipojo.test.scenarios.component.CheckServiceProvider" name="TEMPORAL-NullCheckServiceProvider">
 		<temp:requires field="fs" onTimeout="null"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.proxy.HelpedCheckServiceProvider" name="TEMPORAL-NullProxiedCheckServiceProvider">
+		<temp:requires field="fs" proxy="true" onTimeout="null"/>
 		<provides/>
 	</component>
 	
@@ -81,19 +172,54 @@
 		<provides/>
 	</component>
 	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.proxy.HelpedCheckServiceProvider" name="TEMPORAL-NullProxiedCheckServiceProviderTimeout">
+		<temp:requires field="fs" proxy="true" timeout="300" onTimeout="null"/>
+		<provides/>
+	</component>
+	
 	<component classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckServiceProvider" name="TEMPORAL-NullMultipleCheckServiceProviderTimeout">
 		<temp:requires field="fs" timeout="300" onTimeout="null"/>
 		<provides/>
 	</component>
 	
-		<!-- Dependencies using empty arrays -->
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.CollectionCheckServiceProvider" name="TEMPORAL-NullColCheckServiceProviderTimeout">
+		<temp:requires field="fs" timeout="300" onTimeout="null" specification="org.apache.felix.ipojo.test.scenarios.temporal.service.FooService"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.proxy.HelpedCollectionCheckServiceProvider" name="TEMPORAL-NullProxiedColCheckServiceProviderTimeout">
+		<temp:requires field="fs" proxy="true" timeout="300" onTimeout="null" specification="org.apache.felix.ipojo.test.scenarios.temporal.service.FooService"/>
+		<provides/>
+	</component>
+	
+	<!-- Dependencies using empty arrays -->
 	<component classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckServiceProvider" name="TEMPORAL-EmptyMultipleCheckServiceProvider">
 		<temp:requires field="fs" onTimeout="empty-array"/>
 		<provides/>
 	</component>
 	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.CollectionCheckServiceProvider" name="TEMPORAL-EmptyColCheckServiceProvider">
+		<temp:requires field="fs" onTimeout="empty" specification="org.apache.felix.ipojo.test.scenarios.temporal.service.FooService"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.proxy.HelpedCollectionCheckServiceProvider" name="TEMPORAL-EmptyProxiedColCheckServiceProvider">
+		<temp:requires field="fs" proxy="true" onTimeout="empty" specification="org.apache.felix.ipojo.test.scenarios.temporal.service.FooService"/>
+		<provides/>
+	</component>
+	
 	<component classname="org.apache.felix.ipojo.test.scenarios.component.MultipleCheckServiceProvider" name="TEMPORAL-EmptyMultipleCheckServiceProviderTimeout">
 		<temp:requires field="fs" timeout="300" onTimeout="empty-array"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.CollectionCheckServiceProvider" name="TEMPORAL-EmptyColCheckServiceProviderTimeout">
+		<temp:requires field="fs" timeout="300" onTimeout="empty" specification="org.apache.felix.ipojo.test.scenarios.temporal.service.FooService"/>
+		<provides/>
+	</component>
+	
+	<component classname="org.apache.felix.ipojo.test.scenarios.component.proxy.HelpedCollectionCheckServiceProvider" name="TEMPORAL-EmptyProxiedColCheckServiceProviderTimeout">
+		<temp:requires field="fs" timeout="300" proxy="true" onTimeout="empty" specification="org.apache.felix.ipojo.test.scenarios.temporal.service.FooService"/>
 		<provides/>
 	</component>
 </ipojo>

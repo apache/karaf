@@ -102,5 +102,54 @@ public class TemporalDependencies extends OSGiTestCase {
         assertEquals("Check timeout", "100", to);
             
     }
+    
+    public void testSimpleCollection() {
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.temporal.TemporalCollection");
+        Element dep = getElementPerField(meta, "fs1");
+        String spec = dep.getAttribute("specification");
+        assertNotNull("Specification not null", spec);
+        assertEquals("Check specification", "org.apache.felix.ipojo.test.scenarios.annotations.service.FooService", spec);
+    }
+    
+    public void testCollectionWithTimeout() {
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.temporal.TemporalCollection");
+        Element dep = getElementPerField(meta, "fs2");
+        String spec = dep.getAttribute("specification");
+        assertNotNull("Specification not null", spec);
+        assertEquals("Check specification", "org.apache.felix.ipojo.test.scenarios.annotations.service.FooService", spec);
+        String to = dep.getAttribute("timeout");
+        assertEquals("Check timeout", "300", to);
+    }
+    
+    public void testCollectionWithPolicy() {
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.temporal.TemporalCollection");
+        Element dep = getElementPerField(meta, "fs3");
+        String spec = dep.getAttribute("specification");
+        assertNotNull("Specification not null", spec);
+        assertEquals("Check specification", "org.apache.felix.ipojo.test.scenarios.annotations.service.FooService", spec);
+        String to = dep.getAttribute("ontimeout");
+        assertEquals("Check policy", "empty", to);
+    }
+    
+    public void testCollectionWithProxy() {
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.temporal.TemporalCollection");
+        Element dep = getElementPerField(meta, "fs4");
+        String spec = dep.getAttribute("specification");
+        assertNotNull("Specification not null", spec);
+        assertEquals("Check specification", "org.apache.felix.ipojo.test.scenarios.annotations.service.FooService", spec);
+        String proxy = dep.getAttribute("proxy");
+        assertEquals("Check proxy", "true", proxy);
+    }
+    
+    private Element getElementPerField(Element elem, String field) {
+        Element[] provs = elem.getElements("requires", "org.apache.felix.ipojo.handler.temporal");
+        assertNotNull("Temporal exists ", provs);
+        for (int i = 0; i < provs.length; i++) {
+            if (provs[i].getAttribute("field").equals(field)) {
+                return provs[i];
+            }
+        }
+        return null;
+    }
 
 }
