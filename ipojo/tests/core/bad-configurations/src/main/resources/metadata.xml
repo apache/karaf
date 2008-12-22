@@ -1,4 +1,5 @@
 <ipojo>
+	<!-- No XSD as this file violates the format -->
 	<component
 		className="org.apache.felix.ipojo.test.scenarios.component.CallbackCheckService"
 		name="BAD-CallbackCheckService" architecture="true">

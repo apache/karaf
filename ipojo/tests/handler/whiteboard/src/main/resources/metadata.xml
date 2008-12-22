@@ -1,7 +1,7 @@
 <ipojo 
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/schemas/core.xsd 
-	    org.apache.felix.ipojo.whiteboard http://people.apache.org/~clement/ipojo/schemas/whiteboard-pattern.xsd"
+	xsi:schemaLocation="org.apache.felix.ipojo http://felix.apache.org/ipojo/schemas/1.1.0-SNAPSHOT/core.xsd 
+	    org.apache.felix.ipojo.whiteboard http://felix.apache.org/ipojo/schemas/1.1.0-SNAPSHOT/whiteboard-pattern.xsd"
 	xmlns="org.apache.felix.ipojo"
 	xmlns:wbp="org.apache.felix.ipojo.whiteboard">
 	<component classname="org.apache.felix.ipojo.test.FooProvider" name="fooprovider">

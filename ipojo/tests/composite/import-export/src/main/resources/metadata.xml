@@ -1,7 +1,7 @@
 <ipojo
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/schemas/core.xsd 
-	    org.apache.felix.composite http://people.apache.org/~clement/ipojo/schemas/composite.xsd"
+	xsi:schemaLocation="org.apache.felix.ipojo http://felix.apache.org/ipojo/schemas/1.1.0-SNAPSHOT/core.xsd 
+	    org.apache.felix.composite http://felix.apache.org/ipojo/schemas/1.1.0-SNAPSHOT/composite.xsd"
 	xmlns="org.apache.felix.ipojo"
 	xmlns:comp="org.apache.felix.ipojo.composite"
 	xmlns:cs="org.apache.felix.ipojo.test.composite.handler.CheckServiceHandler">
