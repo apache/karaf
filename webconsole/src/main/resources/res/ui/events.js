@@ -82,8 +82,11 @@ function entryInternal( /* Element */ parent, /* Object */ dataEntry ) {
 	    tableE.appendChild(bodyE);
 	
 	    for( var p in dataEntry.properties ) {
-	    	bodyE.appendChild(tr(null, null, [td(null, null, [text(p)] ),
-	    	                                  td(null, null, [text(dataEntry.properties[p])])]));
+	    	var c1 = td(null, null, [text(p)]);
+	    	c1.setAttribute("style", "border:0px none;");
+	    	var c2 = td(null, null, [text(dataEntry.properties[p])]);
+	    	c2.setAttribute("style", "border:0px none;");
+	    	bodyE.appendChild(tr(null, null, [ c1, c2 ]));
 	    }
 	    propE = tableE;
     }
