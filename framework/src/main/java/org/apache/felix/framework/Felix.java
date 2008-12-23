@@ -27,6 +27,8 @@ import java.util.*;
 import org.apache.felix.framework.cache.*;
 import org.apache.felix.framework.ext.SecurityProvider;
 import org.apache.felix.framework.searchpolicy.*;
+import org.apache.felix.framework.searchpolicy.PackageSource;
+import org.apache.felix.framework.searchpolicy.Resolver.ResolverState;
 import org.apache.felix.framework.util.*;
 import org.apache.felix.framework.util.manifestparser.*;
 import org.apache.felix.moduleloader.*;
@@ -52,6 +54,9 @@ public class Felix extends FelixBundle implements Framework
 
     // MODULE FACTORY.
     private IModuleFactory m_factory = null;
+    private final Resolver m_resolver;
+    private final FelixResolverState m_resolverState;
+    private final FelixResolver m_felixResolver;
     private R4SearchPolicyCore m_policyCore = null;
 
     // Lock object used to determine if an individual bundle
@@ -283,74 +288,16 @@ public class Felix extends FelixBundle implements Framework
         // Create default bundle stream handler.
         m_bundleStreamHandler = new URLHandlersBundleStreamHandler(this);
 
+        // Create a resolver and its state.
+        m_resolver = new Resolver(m_logger);
+        m_resolverState = new FelixResolverState(m_logger);
+        m_felixResolver = new FelixResolver(m_resolver, m_resolverState);
+
         // Create search policy for module loader.
-        m_policyCore = new R4SearchPolicyCore(m_logger, m_configMap);
-
-        // Add a resolver listener to the search policy
-        // so that we will be notified when modules are resolved
-        // in order to update the bundle state.
-        m_policyCore.addResolverListener(new ResolveListener() {
-            public void moduleResolved(ModuleEvent event)
-            {
-                FelixBundle bundle = null;
-                try
-                {
-                    long id = Util.getBundleIdFromModuleId(
-                        event.getModule().getId());
-                    if (id > 0)
-                    {
-                        // Update the bundle's state to resolved when the
-                        // current module is resolved; just ignore resolve
-                        // events for older revisions since this only occurs
-                        // when an update is done on an unresolved bundle
-                        // and there was no refresh performed.
-                        bundle = (FelixBundle) getBundle(id);
-
-                        // Lock the bundle first.
-                        try
-                        {
-                            acquireBundleLock(bundle);
-                            if (bundle.getInfo().getCurrentModule() == event.getModule())
-                            {
-                                if (bundle.getInfo().getState() != Bundle.INSTALLED)
-                                {
-                                    m_logger.log(
-                                        Logger.LOG_WARNING,
-                                        "Received a resolve event for a bundle that has already been resolved.");
-                                }
-                                else
-                                {
-                                    bundle.getInfo().setState(Bundle.RESOLVED);
-                                    fireBundleEvent(BundleEvent.RESOLVED, bundle);
-                                }
-                            }
-                        }
-                        finally
-                        {
-                            releaseBundleLock(bundle);
-                        }
-                    }
-                }
-                catch (NumberFormatException ex)
-                {
-                    // Ignore.
-                }
-            }
-
-            public void moduleUnresolved(ModuleEvent event)
-            {
-                // We can ignore this, because the only time it
-                // should happen is when a refresh occurs. The
-                // refresh operation resets the bundle's state
-                // by calling BundleInfo.reset(), thus it is not
-                // necessary for us to reset the bundle's state
-                // here.
-            }
-        });
+        m_policyCore = new R4SearchPolicyCore(m_logger, m_configMap, m_felixResolver);
 
         // Create the module factory and attach it to the search policy.
         m_factory = new ModuleFactoryImpl(m_logger);
-        m_policyCore.setModuleFactory(m_factory);
 
         // Create the system bundle info object, which will hold state info.
         m_sbi = new SystemBundleInfo(m_logger, null);
@@ -358,6 +305,7 @@ public class Felix extends FelixBundle implements Framework
         // definition for creating the system bundle module.
         m_extensionManager = new ExtensionManager(m_logger, m_configMap, m_sbi);
         m_sbi.addModule(m_factory.createModule("0", m_extensionManager));
+        m_resolverState.addModule(m_sbi.getCurrentModule());
         // Set the extension manager as the content loader for the system
         // bundle module.
         m_extensionManager.setSearchPolicy(
@@ -749,7 +697,7 @@ public class Felix extends FelixBundle implements Framework
             // state to be set to RESOLVED.
             try
             {
-                m_policyCore.resolve(m_sbi.getCurrentModule());
+                m_felixResolver.resolve(m_sbi.getCurrentModule());
             }
             catch (ResolveException ex)
             {
@@ -1783,7 +1731,7 @@ ex.printStackTrace();
         IModule module = bundle.getInfo().getCurrentModule();
         try
         {
-            m_policyCore.resolve(module);
+            m_felixResolver.resolve(module);
         }
         catch (ResolveException ex)
         {
@@ -2989,8 +2937,8 @@ ex.printStackTrace();
     protected ExportedPackage[] getExportedPackages(String pkgName)
     {
         // First, get all exporters of the package.
-        R4SearchPolicyCore.PackageSource[] exporters =
-            m_policyCore.getResolvedCandidates(
+        PackageSource[] exporters =
+            m_resolverState.getResolvedCandidates(
                 new Requirement(
                     ICapability.PACKAGE_NAMESPACE,
                     null,
@@ -3120,7 +3068,7 @@ ex.printStackTrace();
                     // "in use" exporters of the package.
                     if (caps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
                     {
-                        R4SearchPolicyCore.PackageSource[] inUseModules = m_policyCore.getResolvedCandidates(
+                        PackageSource[] inUseModules = m_resolverState.getResolvedCandidates(
                             new Requirement(
                                 ICapability.PACKAGE_NAMESPACE,
                                 null,
@@ -3478,6 +3426,7 @@ ex.printStackTrace();
         // Create the module using the module definition.
         IModule module = m_factory.createModule(
             Long.toString(targetId) + "." + Integer.toString(revision), md);
+        m_resolverState.addModule(module);
 
         // Create the content loader from the module archive.
         IContentLoader contentLoader = new ContentLoaderImpl(
@@ -3513,6 +3462,11 @@ ex.printStackTrace();
                     // has not yet been added to the bundle to be removed later.
                     m_factory.removeModule(module);
                     throw new BundleException("Native library does not exist: " + entryName);
+// TODO: REFACTOR - We have a memory leak here since we added a module above
+//                  and then don't remove it in case of an error; this may also
+//                  be a general issue for installing/updating bundles, so check.
+//                  This will likely go away when we refactor out the module
+//                  factory, but we will track it under FELIX-835 until then.
                 }
             }
         }
@@ -3575,6 +3529,7 @@ ex.printStackTrace();
             for (int i = 0; i < modules.length; i++)
             {
                 m_factory.removeModule(modules[i]);
+                m_resolverState.removeModule(modules[i]);
             }
 
             // Purge all bundle revisions, but the current one.
@@ -3599,6 +3554,7 @@ ex.printStackTrace();
         for (int i = 0; i < modules.length; i++)
         {
             m_factory.removeModule(modules[i]);
+            m_resolverState.removeModule(modules[i]);
         }
 
         // Remove the bundle from the cache.
@@ -3818,6 +3774,191 @@ ex.printStackTrace();
     // Miscellaneous inner classes.
     //
 
+    public class FelixResolver
+    {
+        private final Resolver m_resolver;
+        private final FelixResolverState m_resolverState;
+
+        public FelixResolver(Resolver resolver, FelixResolverState resolverState)
+        {
+            m_resolver = resolver;
+            m_resolverState = resolverState;
+        }
+
+        public void resolve(IModule rootModule) throws ResolveException
+        {
+            if (!m_resolverState.isResolved(rootModule))
+            {
+                Resolver.Result result = m_resolver.resolve(m_resolverState, rootModule);
+
+                // Mark all modules as resolved.
+                markResolvedModules(result.m_resolvedModuleWireMap);
+
+                // Attach and mark all fragments as resolved.
+                attachFragments(result.m_host, result.m_fragmentMap);
+            }
+        }
+
+        public IWire resolveDynamicImport(IModule importer, String pkgName) throws ResolveException
+        {
+            IWire candidateWire = null;
+
+            if (m_resolverState.isResolved(importer))
+            {
+                Object[] result = m_resolver.resolveDynamicImport(m_resolverState, importer, pkgName);
+                if (result != null)
+                {
+                    candidateWire = (IWire) result[0];
+                    Map resolvedModuleWireMap = (Map) result[1];
+
+                    // Mark all modules as resolved.
+                    markResolvedModules(resolvedModuleWireMap);
+
+                    // Dynamically add new wire to importing module.
+                    if (candidateWire != null)
+                    {
+                        IWire[] wires = importer.getWires();
+                        IWire[] newWires = null;
+                        if (wires == null)
+                        {
+                            newWires = new IWire[1];
+                        }
+                        else
+                        {
+                            newWires = new IWire[wires.length + 1];
+                            System.arraycopy(wires, 0, newWires, 0, wires.length);
+                        }
+
+                        newWires[newWires.length - 1] = candidateWire;
+                        ((ModuleImpl) importer).setWires(newWires);
+m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1]);
+                    }
+                }
+            }
+
+            return candidateWire;
+        }
+
+        public synchronized PackageSource[] getResolvedCandidates(IRequirement req)
+        {
+            return m_resolverState.getResolvedCandidates(req);
+        }
+
+        public synchronized PackageSource[] getUnresolvedCandidates(IRequirement req)
+        {
+            return m_resolverState.getUnresolvedCandidates(req);
+        }
+
+        private void markResolvedModules(Map resolvedModuleWireMap)
+        {
+            Iterator iter = resolvedModuleWireMap.entrySet().iterator();
+            // Iterate over the map to mark the modules as resolved and
+            // update our resolver data structures.
+            while (iter.hasNext())
+            {
+                Map.Entry entry = (Map.Entry) iter.next();
+                IModule module = (IModule) entry.getKey();
+                IWire[] wires = (IWire[]) entry.getValue();
+
+                // Only add wires attribute if some exist; export
+                // only modules may not have wires.
+                if (wires.length > 0)
+                {
+                    ((ModuleImpl) module).setWires(wires);
+for (int wireIdx = 0; (wires != null) && (wireIdx < wires.length); wireIdx++)
+{
+    m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
+}
+                }
+
+                // Update the resolver state to show the module as resolved.
+                m_resolverState.setResolved(module, true);
+                // Update the state of the module's bundle to resolved as well.
+                markBundleResolved(module);
+            }
+        }
+
+        private void attachFragments(IModule host, Map fragmentMap)
+        {
+            // Attach fragments to host module.
+            if ((fragmentMap != null) && (fragmentMap.size() > 0))
+            {
+                List list = new ArrayList();
+                for (Iterator iter = fragmentMap.entrySet().iterator(); iter.hasNext(); )
+                {
+                    Map.Entry entry = (Map.Entry) iter.next();
+                    String symName = (String) entry.getKey();
+                    IModule[] fragments = (IModule[]) entry.getValue();
+// TODO: FRAGMENT - For now, just attach first candidate.
+                    list.add(fragments[0]);
+m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: "
+    + host + " -> " + symName + " -> " + fragments[0]);
+
+                    // Update the resolver state to show the module as resolved.
+                    m_resolverState.setResolved(fragments[0], true);
+                    // Update the state of the module's bundle to resolved as well.
+                    markBundleResolved(fragments[0]);
+                }
+                try
+                {
+                    ((ModuleImpl) host).attachFragments(
+                        (IModule[]) list.toArray(new IModule[list.size()]));
+                }
+                catch (Exception ex)
+                {
+                    m_logger.log(Logger.LOG_ERROR, "Unable to attach fragments", ex);
+                }
+            }
+        }
+
+        private void markBundleResolved(IModule module)
+        {
+            // Mark associated bundle as resolved.
+            try
+            {
+                long id = Util.getBundleIdFromModuleId(module.getId());
+                if (id > 0)
+                {
+                    // Update the bundle's state to resolved when the
+                    // current module is resolved; just ignore resolve
+                    // events for older revisions since this only occurs
+                    // when an update is done on an unresolved bundle
+                    // and there was no refresh performed.
+                    FelixBundle bundle = (FelixBundle) getBundle(id);
+
+                    // Lock the bundle first.
+                    try
+                    {
+// TODO: RESOLVER - Seems like we should release the lock before we fire the event.
+                        acquireBundleLock(bundle);
+                        if (bundle.getInfo().getCurrentModule() == module)
+                        {
+                            if (bundle.getInfo().getState() != Bundle.INSTALLED)
+                            {
+                                m_logger.log(
+                                    Logger.LOG_WARNING,
+                                    "Received a resolve event for a bundle that has already been resolved.");
+                            }
+                            else
+                            {
+                                bundle.getInfo().setState(Bundle.RESOLVED);
+                                fireBundleEvent(BundleEvent.RESOLVED, bundle);
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        releaseBundleLock(bundle);
+                    }
+                }
+            }
+            catch (NumberFormatException ex)
+            {
+                // Ignore.
+            }
+        }
+    }
+
     class SystemBundleActivator implements BundleActivator, Runnable
     {
         public void start(BundleContext context) throws Exception
@@ -3895,6 +4036,7 @@ ex.printStackTrace();
                     try
                     {
                         m_factory.removeModule(modules[j]);
+                        m_resolverState.removeModule(modules[j]);
                     }
                     catch (Exception ex)
                     {
