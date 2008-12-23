@@ -28,7 +28,6 @@ import org.apache.felix.framework.cache.*;
 import org.apache.felix.framework.ext.SecurityProvider;
 import org.apache.felix.framework.searchpolicy.*;
 import org.apache.felix.framework.searchpolicy.PackageSource;
-import org.apache.felix.framework.searchpolicy.Resolver.ResolverState;
 import org.apache.felix.framework.util.*;
 import org.apache.felix.framework.util.manifestparser.*;
 import org.apache.felix.moduleloader.*;
@@ -3789,13 +3788,10 @@ ex.printStackTrace();
         {
             if (!m_resolverState.isResolved(rootModule))
             {
-                Resolver.Result result = m_resolver.resolve(m_resolverState, rootModule);
+                Map resolvedModuleWireMap = m_resolver.resolve(m_resolverState, rootModule);
 
                 // Mark all modules as resolved.
-                markResolvedModules(result.m_resolvedModuleWireMap);
-
-                // Attach and mark all fragments as resolved.
-                attachFragments(result.m_host, result.m_fragmentMap);
+                markResolvedModules(resolvedModuleWireMap);
             }
         }
 
@@ -3854,16 +3850,34 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1])
             Iterator iter = resolvedModuleWireMap.entrySet().iterator();
             // Iterate over the map to mark the modules as resolved and
             // update our resolver data structures.
+            List fragmentList = new ArrayList();
+            List wireList = new ArrayList();
             while (iter.hasNext())
             {
+                fragmentList.clear();
+                wireList.clear();
+
                 Map.Entry entry = (Map.Entry) iter.next();
                 IModule module = (IModule) entry.getKey();
                 IWire[] wires = (IWire[]) entry.getValue();
 
                 // Only add wires attribute if some exist; export
                 // only modules may not have wires.
+// TODO: RESOLVER - Seems stupid that we package these up as wires to tear them apart.
                 if (wires.length > 0)
                 {
+                    for (int wireIdx = 0; wireIdx < wires.length; wireIdx++)
+                    {
+                        if (wires[wireIdx] instanceof R4WireFragment)
+                        {
+                            fragmentList.add(wires[wireIdx].getExporter());
+                        }
+                        else
+                        {
+                            wireList.add(wires[wireIdx]);
+                        }
+                    }
+                    wires = (IWire[]) wireList.toArray(new IWire[wireList.size()]);
                     ((ModuleImpl) module).setWires(wires);
 for (int wireIdx = 0; (wires != null) && (wireIdx < wires.length); wireIdx++)
 {
@@ -3875,34 +3889,30 @@ for (int wireIdx = 0; (wires != null) && (wireIdx < wires.length); wireIdx++)
                 m_resolverState.setResolved(module, true);
                 // Update the state of the module's bundle to resolved as well.
                 markBundleResolved(module);
+
+                // Attach and mark all fragments as resolved.
+                attachFragments(module, fragmentList);
             }
         }
 
-        private void attachFragments(IModule host, Map fragmentMap)
+        private void attachFragments(IModule host, List fragmentList)
         {
             // Attach fragments to host module.
-            if ((fragmentMap != null) && (fragmentMap.size() > 0))
+            if (fragmentList.size() > 0)
             {
-                List list = new ArrayList();
-                for (Iterator iter = fragmentMap.entrySet().iterator(); iter.hasNext(); )
+                for (int i = 0; i < fragmentList.size(); i++)
                 {
-                    Map.Entry entry = (Map.Entry) iter.next();
-                    String symName = (String) entry.getKey();
-                    IModule[] fragments = (IModule[]) entry.getValue();
-// TODO: FRAGMENT - For now, just attach first candidate.
-                    list.add(fragments[0]);
-m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: "
-    + host + " -> " + symName + " -> " + fragments[0]);
+m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fragmentList.get(i));
 
                     // Update the resolver state to show the module as resolved.
-                    m_resolverState.setResolved(fragments[0], true);
+                    m_resolverState.setResolved((IModule) fragmentList.get(i), true);
                     // Update the state of the module's bundle to resolved as well.
-                    markBundleResolved(fragments[0]);
+                    markBundleResolved((IModule) fragmentList.get(i));
                 }
                 try
                 {
                     ((ModuleImpl) host).attachFragments(
-                        (IModule[]) list.toArray(new IModule[list.size()]));
+                        (IModule[]) fragmentList.toArray(new IModule[fragmentList.size()]));
                 }
                 catch (Exception ex)
                 {

@@ -77,10 +77,10 @@ public class FelixResolverState implements Resolver.ResolverState
             }
         }
 
-System.out.println("UNRESOLVED PACKAGES:");
-dumpPackageIndexMap(m_unresolvedPkgIndexMap);
-System.out.println("RESOLVED PACKAGES:");
-dumpPackageIndexMap(m_resolvedPkgIndexMap);
+//System.out.println("UNRESOLVED PACKAGES:");
+//dumpPackageIndexMap(m_unresolvedPkgIndexMap);
+//System.out.println("RESOLVED PACKAGES:");
+//dumpPackageIndexMap(m_resolvedPkgIndexMap);
     }
 
     public synchronized void removeModule(IModule module)
@@ -303,10 +303,10 @@ dumpPackageIndexMap(m_resolvedPkgIndexMap);
             }
         }
 
-System.out.println("UNRESOLVED PACKAGES:");
-dumpPackageIndexMap(m_unresolvedPkgIndexMap);
-System.out.println("RESOLVED PACKAGES:");
-dumpPackageIndexMap(m_resolvedPkgIndexMap);
+//System.out.println("UNRESOLVED PACKAGES:");
+//dumpPackageIndexMap(m_unresolvedPkgIndexMap);
+//System.out.println("RESOLVED PACKAGES:");
+//dumpPackageIndexMap(m_resolvedPkgIndexMap);
     }
 
     // TODO: FRAGMENT - Not very efficient.
