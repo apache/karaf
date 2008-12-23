@@ -70,21 +70,36 @@
 					</instructions>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-ipojo-plugin</artifactId>
-				<version>1.1.0-SNAPSHOT</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>ipojo-bundle</goal>
-						</goals>
-						<configuration>
-							<ignoreAnnotations>true</ignoreAnnotations>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+	<plugin>
+		<groupId>org.apache.felix</groupId>
+		<artifactId>maven-ipojo-plugin</artifactId>
+		<version>1.1.0-SNAPSHOT</version>
+		<executions>
+			<execution>
+				<goals>
+					<goal>ipojo-bundle</goal>
+				</goals>
+				<configuration>
+					<ignoreAnnotations>true</ignoreAnnotations>
+					<metadata>
+					<![CDATA[
+						<ipojo>
+							<component classname="org.apache.felix.ipojo.arch.ArchCommandImpl"
+								public="false">
+								<Provides />
+								<requires field="m_archs" optional="true" />
+								<requires field="m_factories" optional="true" />
+								<requires field="m_handlers" optional="true" />
+							</component>
+							<instance component="org.apache.felix.ipojo.arch.ArchCommandImpl"
+								name="ArchCommand" />
+						</ipojo>
+						]]>
+					</metadata>
+				</configuration>
+			</execution>
+		</executions>
+	</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>rat-maven-plugin</artifactId>

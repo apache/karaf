@@ -135,6 +135,46 @@ public class Pojoization {
     public void setUseLocalXSD() {
         m_ignoreLocalXSD = false;
     }
+    
+    /**
+     * Manipulates an input bundle.
+     * This method creates an iPOJO bundle based on the given metadata file.
+     * The original and final bundles must be different.
+     * @param in the original bundle.
+     * @param out the final bundle.
+     * @param metadata the iPOJO metadata input stream. 
+     */
+    public void pojoization(File in, File out, InputStream metadata) {
+        m_metadata = parseXMLMetadata(metadata);
+        if (m_metadata == null) { // An error occurs during the parsing.
+            return;
+        }
+        // m_metadata can be either an empty array or an Element
+        // array with component type description. It also can be null
+        // if no metadata file is given.
+        
+        JarFile inputJar;
+        try {
+            inputJar = new JarFile(in);
+        } catch (IOException e) {
+            error("The input file " + in.getAbsolutePath() + " is not a Jar file");
+            return;
+        }
+
+        // Get the list of declared component
+        m_components = getDeclaredComponents(m_metadata);
+
+        // Start the manipulation
+        manipulation(inputJar, out);
+
+        // Check that all declared components are manipulated
+        for (int i = 0; i < m_components.size(); i++) {
+            ComponentInfo ci = (ComponentInfo) m_components.get(i);
+            if (!ci.m_isManipulated) {
+                error("The component " + ci.m_classname + " is declared but not in the bundle");
+            }
+        }
+    }
 
     /**
      * Manipulates an input bundle.
@@ -147,14 +187,28 @@ public class Pojoization {
     public void pojoization(File in, File out, File metadataFile) {
         // Get the metadata.xml location if not null
         if (metadataFile != null) {
-            String path = metadataFile.getAbsolutePath();
-            if (!path.startsWith("/")) {
-                path = "/" + path;
+            try {
+                InputStream stream = null;
+                URL url = metadataFile.toURL();
+                if (url == null) {
+                    warn("Cannot find the metadata file : " + metadataFile.getAbsolutePath());
+                    m_metadata = new Element[0];
+                } else {
+                    stream = url.openStream();
+                    m_metadata = parseXMLMetadata(stream);
+                }
+            } catch (MalformedURLException e) {
+                error("Cannot open the metadata input stream from " + metadataFile.getAbsolutePath() + ": " + e.getMessage());
+                m_metadata = null;
+            } catch (IOException e) {
+                error("Cannot open the metadata input stream: " + metadataFile.getAbsolutePath() + ": " + e.getMessage());
+                m_metadata = null;
             }
-            m_metadata = parseXMLMetadata(path);
+            
             if (m_metadata == null) { // An error occurs during the parsing.
                 return;
             }
+            
             // m_metadata can be either an empty array or an Element
             // array with component type description. It also can be null
             // if no metadata file is given.
@@ -663,21 +717,12 @@ public class Pojoization {
 
     /**
      * Parse XML Metadata.
-     * @param path : path of the file to parse.
+     * @param stream metadata input stream.
      * @return the parsed element array.
      */
-    private Element[] parseXMLMetadata(String path) {
-        File metadata = new File(path);
-        URL url;
+    private Element[] parseXMLMetadata(InputStream stream) {
         Element[] meta = null;
         try {
-            url = metadata.toURL();
-            if (url == null) {
-                warn("Cannot find the metadata file : " + path);
-                return new Element[0];
-            }
-
-            InputStream stream = url.openStream();            
             XMLReader parser = (XMLReader) Class.forName("org.apache.xerces.parsers.SAXParser").newInstance();
             XMLMetadataParser handler = new XMLMetadataParser();
             parser.setContentHandler(handler);
@@ -685,18 +730,7 @@ public class Pojoization {
                     true); 
             parser.setFeature("http://apache.org/xml/features/validation/schema", 
                     true);
-            
-            
-           
-            
-//            parser
-//                    .setProperty(
-//                            "http://apache.org/xml/properties/schema/external-noNamespaceSchemaLocation",
-//                            xsd.toString());
-//
-//            
-            
-            
+   
             parser.setErrorHandler(handler);
             
             if (! m_ignoreLocalXSD) {
@@ -708,26 +742,23 @@ public class Pojoization {
             meta = handler.getMetadata();
             stream.close();
 
-        } catch (MalformedURLException e) {
-            error("Malformed metadata URL for " + path);
-            return null;
         } catch (IOException e) {
-            error("Cannot open the file : " + path);
+            error("Cannot open the metadata input stream: " + e.getMessage());
             return null;
         } catch (ParseException e) {
-            error("Parsing error when parsing the XML file " + path + " : " + e.getMessage());
+            error("Parsing error when parsing the XML file: " + e.getMessage());
             return null;
         } catch (SAXParseException e) {
             error("Error during metadata parsing at line " + e.getLineNumber() + " : " + e.getMessage());
             return null;
         } catch (SAXException e) {
-            error("Parsing error when parsing (Sax Error) the XML file " + path + " : " + e.getMessage());
+            error("Parsing error when parsing (Sax Error) the XML file: " + e.getMessage());
             return null;
         } catch (InstantiationException e) {
-            error("Cannot instantiate the SAX parser for the XML file " + path + " : " + e.getMessage());
+            error("Cannot instantiate the SAX parser for the XML file: " + e.getMessage());
             return null;
         } catch (IllegalAccessException e) {
-            error("Cannot instantiate  the SAX parser (IllegalAccess) for the XML file " + path + " : " + e.getMessage());
+            error("Cannot instantiate  the SAX parser (IllegalAccess) to the XML file: " + e.getMessage());
             return null;
         } catch (ClassNotFoundException e) {
             error("Cannot load the SAX Parser : " + e.getMessage());
@@ -735,7 +766,7 @@ public class Pojoization {
         }
 
         if (meta == null || meta.length == 0) {
-            warn("Neither component types, nor instances in " + path);
+            warn("Neither component types, nor instances in the metadata");
         }
 
         return meta;

@@ -18,7 +18,11 @@
  */
 package org.apache.felix.ipojo.plugin;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
@@ -66,7 +70,7 @@ public class ManipulatorMojo extends AbstractMojo {
     private String m_jarName;
 
     /**
-     * Location of the metadata file.
+     * Location of the metadata file or iPOJO metadata configuration.
      * @parameter alias="metadata" default-value="metadata.xml"
      */
     private String m_metadata;
@@ -111,9 +115,13 @@ public class ManipulatorMojo extends AbstractMojo {
      * @parameter alias="IgnoreEmbeddedSchemas" default-value="false"
      */
     private boolean m_ignoreEmbeddedXSD;
-
+    
     protected MavenProject getProject() {
         return this.m_project;
+    }
+    
+    private boolean isXML() {
+        return m_metadata != null && m_metadata.contains("<");
     }
 
     /**
@@ -127,27 +135,46 @@ public class ManipulatorMojo extends AbstractMojo {
             this.getLog().debug("Ignoring project " + this.getProject().getArtifact() + " : type " + this.getProject().getArtifact().getType() + " is not supported by iPOJO plugin, supported types are " + this.m_supportedProjectTypes);
             return;
         }
+        
 
         getLog().info("Start bundle manipulation");
-        // Get metadata file
+
+        // Get metadata
+        // Check if metadata are contained in the configuration
+        InputStream is = null;
         
-        // Look for the metadata file in the output directory
-        File meta = new File(m_outputDirectory + File.separator + m_metadata);
+        if (isXML()) {
+            is = new ByteArrayInputStream(m_metadata.getBytes()); 
+        } else {
+            if (m_metadata == null) {
+                // Try with metadata.xml
+                m_metadata = "metadata.xml";
+            }
+            // Look for the metadata file in the output directory
+            File meta = new File(m_outputDirectory + File.separator + m_metadata);
+            // If not found look inside the pom directory 
+            if (! meta.exists()) {
+                meta = new File(m_project.getBasedir() + File.separator + m_metadata);
+            }
         
-        // If not found look inside the pom directory
-        if (! meta.exists()) {
-            meta = new File(m_project.getBasedir() + File.separator + m_metadata);
-        }
-        
-        getLog().info("Metadata file : " + meta.getAbsolutePath());
-        if (!meta.exists()) {
-            // Verify if annotations are ignored
-            if (m_ignoreAnnotations) {
-                getLog().info("No metadata file found - ignoring annotations");
-                return;
-            } else {
-                getLog().info("No metadata file found - trying to use only annotations");
-                meta = null;
+            getLog().info("Metadata file : " + meta.getAbsolutePath());
+            if (!meta.exists()) {
+                // Verify if annotations are ignored
+                if (m_ignoreAnnotations) {
+                    getLog().info("No metadata file found - ignoring annotations");
+                    return;
+                } else {
+                    getLog().info("No metadata file found - trying to use only annotations");
+                    meta = null;
+                }
+            }
+            
+            if (meta != null) {
+                try {
+                    is = new FileInputStream(meta);
+                } catch (FileNotFoundException e) {
+                    throw new MojoExecutionException("the specified metadata file does not exist: " + e.getMessage());
+                }
             }
         }
 
@@ -163,7 +190,14 @@ public class ManipulatorMojo extends AbstractMojo {
         Pojoization pojo = new Pojoization();
         if (!m_ignoreAnnotations) { pojo.setAnnotationProcessing(); }
         if (!m_ignoreEmbeddedXSD) { pojo.setUseLocalXSD(); }
-        pojo.pojoization(in, out, meta);
+        
+        // Executes the pojoization.
+        if (is == null) {
+            pojo.pojoization(in, out, (File) null); // Only annotations
+        } else  {
+            pojo.pojoization(in, out, is);
+        }
+        
         for (int i = 0; i < pojo.getWarnings().size(); i++) {
             getLog().warn((String) pojo.getWarnings().get(i));
         }
