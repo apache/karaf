@@ -732,8 +732,16 @@ class DependencyManager implements ServiceListener, Reference
             try
             {
                 // Case2 - Service object parameter
-                parameterClass = targetClass.getClassLoader().loadClass(
-                    parameterClassName );
+
+                // need the class loader of the target class, which may be the
+                // system classloader, which case getClassLoader may retur null
+                ClassLoader loader = targetClass.getClassLoader();
+                if ( loader == null )
+                {
+                    loader = ClassLoader.getSystemClassLoader();
+                }
+
+                parameterClass = loader.loadClass( parameterClassName );
                 return AbstractComponentManager.getMethod( targetClass, methodname, new Class[]
                     { parameterClass }, true );
             }
