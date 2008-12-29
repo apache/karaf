@@ -9,7 +9,7 @@
 	<component classname="org.apache.felix.ipojo.test.donut.DonutProviderImpl"
 		name="donut-provider">
 		<!-- Expose the donut provider service -->
-		<provides interface="org.apache.felix.ipojo.test.donut.DonutProvider">
+		<provides specifications="org.apache.felix.ipojo.test.donut.DonutProvider">
 			<property name="name" field="m_name" value="Unknown donut vendor"/>
 		</provides>
 		<!-- Donut publisher -->
@@ -21,7 +21,7 @@
 	<component classname="org.apache.felix.ipojo.test.donut.DonutProviderImpl"
 		name="synchronous-donut-provider">
 		<!-- Expose the donut provider service -->
-		<provides interface="org.apache.felix.ipojo.test.donut.DonutProvider">
+		<provides specifications="org.apache.felix.ipojo.test.donut.DonutProvider">
 			<property name="name" field="m_name" value="Unknown donut vendor"/>
 		</provides>
 		<!-- Donut publisher -->
@@ -34,7 +34,7 @@
 		classname="org.apache.felix.ipojo.test.donut.DonutEventProviderImpl"
 		name="donut-event-provider">
 		<!-- Expose the donut provider service -->
-		<provides interface="org.apache.felix.ipojo.test.donut.DonutProvider">
+		<provides specifications="org.apache.felix.ipojo.test.donut.DonutProvider">
 			<property name="name" field="m_name" value="Unknown donut vendor"/>
 		</provides>
 		<!-- Raw events publisher -->
@@ -47,7 +47,7 @@
 		classname="org.apache.felix.ipojo.test.donut.DonutEventProviderImpl"
 		name="synchronous-donut-event-provider">
 		<!-- Expose the donut provider service -->
-		<provides interface="org.apache.felix.ipojo.test.donut.DonutProvider">
+		<provides specifications="org.apache.felix.ipojo.test.donut.DonutProvider">
 			<property name="name" field="m_name" value="Unknown donut vendor"/>
 		</provides>
 		<!-- Raw events publisher -->
@@ -60,7 +60,7 @@
 		classname="org.apache.felix.ipojo.test.donut.AsyncEventProviderImpl"
 		name="event-provider">
 		<!-- Expose the donut provider service -->
-		<provides interface="org.apache.felix.ipojo.test.donut.DonutProvider">
+		<provides specifications="org.apache.felix.ipojo.test.donut.DonutProvider">
 			<property name="name" field="m_name" value="Unknown donut vendor"/>
 		</provides>
 		<!-- Direcly interacts with the Event Admin service -->
@@ -72,7 +72,7 @@
 		classname="org.apache.felix.ipojo.test.donut.SyncEventProviderImpl"
 		name="synchronous-event-provider">
 		<!-- Expose the donut provider service -->
-		<provides interface="org.apache.felix.ipojo.test.donut.DonutProvider">
+		<provides specifications="org.apache.felix.ipojo.test.donut.DonutProvider">
 			<property name="name" field="m_name" value="Unknown donut vendor"/>
 		</provides>
 		<!-- Direcly interacts with the Event Admin service -->
@@ -83,7 +83,7 @@
 	<component classname="org.apache.felix.ipojo.test.donut.DonutConsumerImpl"
 		name="donut-consumer">
 		<!-- Expose the donut consumer service -->
-		<provides interface="org.apache.felix.ipojo.test.donut.DonutConsumer">
+		<provides specifications="org.apache.felix.ipojo.test.donut.DonutConsumer">
 			<property name="name" field="m_name" value="Unknown donut consumer"/>
 			<property name="slow" field="m_isSlow" value="false"/>
 		</provides>
@@ -97,7 +97,7 @@
 	<component classname="org.apache.felix.ipojo.test.donut.DonutConsumerImpl"
 		name="donut-event-consumer">
 		<!-- Expose the donut consumer service -->
-		<provides interface="org.apache.felix.ipojo.test.donut.DonutConsumer">
+		<provides specifications="org.apache.felix.ipojo.test.donut.DonutConsumer">
 			<property name="name" field="m_name" value="Unknown donut consumer"/>
 			<property name="slow" field="m_isSlow" value="false"/>
 		</provides>
@@ -111,7 +111,7 @@
 		name="event-consumer">
 		<!-- Expose the donut consumer service -->
 		<provides
-			interface="{org.apache.felix.ipojo.test.donut.DonutConsumer,org.osgi.service.event.EventHandler}">
+			specifications="{org.apache.felix.ipojo.test.donut.DonutConsumer,org.osgi.service.event.EventHandler}">
 			<property name="name" field="m_name" value="Unknown event consumer"/>
 			<property name="slow" field="m_isSlow" value="false"/>
 			<property name="event.topics" type="String" value="food/donuts"/>
@@ -123,7 +123,7 @@
 		name="event-tracker">
 		<!-- Expose the donut consumer service -->
 		<provides
-			interface="{org.apache.felix.ipojo.test.donut.EventTracker,org.osgi.service.event.EventHandler}">
+			specifications="{org.apache.felix.ipojo.test.donut.EventTracker,org.osgi.service.event.EventHandler}">
 			<property name="name" field="m_name" value="Unknown event tracker"/>
 			<property name="event.topics" type="String" value="food/donuts"/>
 		</provides>

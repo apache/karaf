@@ -64,4 +64,12 @@ public @interface Component {
      * default no PID (i.e. the managed service will not be exposed).
      */
     String managedservice() default "";
+    
+    /**
+     * Set the factory-method, if the pojo has to be created
+     * from a static method. The specified method must be a static
+     * method and return a pojo object.
+     * By default, iPOJO uses the 'regular' constructor. 
+     */
+    String factory_method() default "";
 }

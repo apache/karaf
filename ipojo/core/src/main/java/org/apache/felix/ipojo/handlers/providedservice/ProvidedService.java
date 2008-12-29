@@ -62,33 +62,28 @@ public class ProvidedService implements ServiceFactory {
     /**
      * Factory Policy : SINGLETON_FACTORY.
      */
-    public static final int SINGLETON_FACTORY = 0;
+    public static final int SINGLETON_STRATEGY = 0;
 
     /**
      * Factory policy : SERVICE_FACTORY.
      */
-    public static final int SERVICE_FACTORY = 1;
+    public static final int SERVICE_STRATEGY = 1;
     
     /**
      * Factory policy : STATIC_FACTORY.
      */
-    public static final int STATIC_FACTORY = 2;
+    public static final int STATIC_STRATEGY = 2;
     
     /**
      * Factory policy : INSTANCE.
      * Creates one service object per instance consuming the service.
      */
-    public static final int INSTANCE = 3;
+    public static final int INSTANCE_STRATEGY = 3;
 
     /**
      * At this time, it is only the java interface full name.
      */
     private String[] m_serviceSpecification = new String[0];
-
-    /**
-     * Factory policy.
-     */
-    private int m_factoryPolicy = SINGLETON_FACTORY;
 
     /**
      * The service registration. is null when the service is not registered.
@@ -123,7 +118,6 @@ public class ProvidedService implements ServiceFactory {
         m_handler = handler;
 
         m_serviceSpecification = specification;
-        m_factoryPolicy = factoryPolicy;
         
         // Add instance name & factory name
         try {
@@ -153,17 +147,17 @@ public class ProvidedService implements ServiceFactory {
                 return;
             }
         } else {
-            switch (m_factoryPolicy) {
-                case SINGLETON_FACTORY:
+            switch (factoryPolicy) {
+                case SINGLETON_STRATEGY:
                     m_strategy = new SingletonStrategy();
                     break;
-                case SERVICE_FACTORY:
-                case STATIC_FACTORY:
+                case SERVICE_STRATEGY:
+                case STATIC_STRATEGY:
                     // In this case, we need to try to create a new pojo object,
                     // the factory method will handle the creation.
                     m_strategy = new FactoryStrategy();
                     break;
-                case INSTANCE:
+                case INSTANCE_STRATEGY:
                     m_strategy = new PerInstanceStrategy();
                     break;
                 // Other policies:
@@ -174,7 +168,7 @@ public class ProvidedService implements ServiceFactory {
                     m_handler.error("["
                             + m_handler.getInstanceManager().getInstanceName()
                             + "] Unknown creation policy for " + specs + " : "
-                            + m_factoryPolicy);
+                            + factoryPolicy);
                     getInstanceManager().stop();
                     break;
             }
@@ -394,7 +388,7 @@ public class ProvidedService implements ServiceFactory {
      * @return the list of provided service specifications (i.e. java
      * interface).
      */
-    public String[] getServiceSpecification() {
+    public String[] getServiceSpecifications() {
         return m_serviceSpecification;
     }
 

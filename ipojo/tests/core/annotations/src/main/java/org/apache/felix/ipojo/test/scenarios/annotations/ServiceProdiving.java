@@ -34,7 +34,7 @@ public class ServiceProdiving extends OSGiTestCase {
         Element[] provs = meta.getElements("provides");
         assertNotNull("Provides exists ", provs);
         Element prov = provs[0];
-        String itfs = prov.getAttribute("interface");
+        String itfs = prov.getAttribute("specifications");
         List list = ParseUtils.parseArraysAsList(itfs);
         assertTrue("Provides CS ", list.contains(CheckService.class.getName()));
     }
@@ -44,7 +44,7 @@ public class ServiceProdiving extends OSGiTestCase {
         Element[] provs = meta.getElements("provides");
         assertNotNull("Provides exists ", provs);
         Element prov = provs[0];
-        String itfs = prov.getAttribute("interface");
+        String itfs = prov.getAttribute("specifications");
         List list = ParseUtils.parseArraysAsList(itfs);
         assertTrue("Provides CS ", list.contains(CheckService.class.getName()));
         assertTrue("Provides Foo ", list.contains(FooService.class.getName()));
@@ -69,19 +69,15 @@ public class ServiceProdiving extends OSGiTestCase {
         //Boo
         Element boo = getPropertyByName(props, "boo");
         assertEquals("Check boo field", "boo", boo.getAttribute("field"));
-        assertEquals("Check boo method", "setboo", boo.getAttribute("method"));
         //Baa
         Element baa = getPropertyByName(props, "baa");
         assertEquals("Check baa field", "m_baa", baa.getAttribute("field"));
         assertEquals("Check baa name", "baa", baa.getAttribute("name"));
-        assertEquals("Check baa method", "setbaa", baa.getAttribute("method"));
         
         //Bar
         Element baz = getPropertyByName(props, "baz");
         assertEquals("Check baz field", "m_baz", baz.getAttribute("field"));
-        assertEquals("Check baz method", "setBaz", baz.getAttribute("method"));
-        assertEquals("Check baz name", "baz", baz.getAttribute("name"));
-        
+        assertEquals("Check baz name", "baz", baz.getAttribute("name"));        
         
         
     }

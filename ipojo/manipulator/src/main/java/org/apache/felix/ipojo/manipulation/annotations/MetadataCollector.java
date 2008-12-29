@@ -264,7 +264,7 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
              * @see org.objectweb.asm.commons.EmptyVisitor#visitEnd()
              */
             public void visitEnd() {
-                m_prov.addAttribute(new Attribute("interface", m_itfs + "}"));
+                m_prov.addAttribute(new Attribute("specifications", m_itfs + "}"));
             }
             
         }
@@ -307,6 +307,11 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
         private String m_managedservice;
         
         /**
+         * Factory-Method.
+         */
+        private String m_method;
+        
+        /**
          * Element properties.
          */
         private Element m_props;
@@ -342,6 +347,10 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
                 m_managedservice = arg1.toString();
                 return;
             }
+            if (arg0.equals("factory_method")) {
+                m_method = arg1.toString();
+                return;
+            }
         }
 
         /**
@@ -364,6 +373,9 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
             }
             if (m_immediate != null) {
                 m_elem.addAttribute(new Attribute("immediate", m_immediate));
+            }
+            if (m_method != null) {
+                m_elem.addAttribute(new Attribute("factory-method", m_method));
             }
             if (m_propagation != null) {
                 if (m_props == null) {

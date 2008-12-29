@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
  * It can target both fields and methods.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-@Target({ ElementType.FIELD, ElementType.METHOD })
+@Target(ElementType.FIELD)
 public @interface ServiceProperty {
     
     /**

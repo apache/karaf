@@ -62,17 +62,17 @@
 		classname="org.apache.felix.ipojo.test.composite.component.FooBarProviderType1"
 		name="COMPO-FooBarProviderType-2" architecture="true">
 		<provides
-			interface="{org.apache.felix.ipojo.test.composite.service.FooService, org.apache.felix.ipojo.test.composite.service.BarService }" />
+			specifications="{org.apache.felix.ipojo.test.composite.service.FooService, org.apache.felix.ipojo.test.composite.service.BarService }" />
 	</component>
 	<component
 		classname="org.apache.felix.ipojo.test.composite.component.FooBarProviderType1"
 		name="COMPO-FooBarProviderType-3" architecture="true">
 		<provides
-			interface="{org.apache.felix.ipojo.test.composite.service.FooService}">
+			specifications="{org.apache.felix.ipojo.test.composite.service.FooService}">
 			<property name="baz" type="java.lang.String" value="foo" />
 		</provides>
 		<provides
-			interface="{org.apache.felix.ipojo.test.composite.service.BarService}">
+			specifications="{org.apache.felix.ipojo.test.composite.service.BarService}">
 			<property name="baz" type="java.lang.String" value="bar" />
 		</provides>
 	</component>

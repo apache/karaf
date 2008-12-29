@@ -32,6 +32,13 @@ public class Factory extends OSGiTestCase {
         assertEquals("Name value", "nofactory", name);
     }
     
+    public void testFactoryMethod() {
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.FactoryMethod");
+        String method = meta.getAttribute("factory-method");
+        assertNotNull("Method exists ", method);
+        assertEquals("Method value", "create", method);
+    }
+    
     
 
 }

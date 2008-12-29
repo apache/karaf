@@ -18,29 +18,14 @@ public class ProvidesProperties implements FooService, BarService {
     @ServiceProperty(value = "4", mandatory=true)
     public int bar;
     
-    @ServiceProperty
-    public void setboo(int boo) {
-        
-    }
-    
-    @ServiceProperty(name="baz")
-    public void setBaz(int baz) {
-        
-    }
-    
     @ServiceProperty(name="baz")
     int m_baz;
     
     @ServiceProperty
     public int boo;
     
-    @ServiceProperty(name="baa")
+    @ServiceProperty(name="baa", value="5")
     public int m_baa;
-    
-    @ServiceProperty(value="5")
-    public void setbaa(int baa) {
-        
-    }
 
     public boolean foo() {
         return false;

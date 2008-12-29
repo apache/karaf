@@ -319,9 +319,13 @@ The 'instance.name' property has a special semantic as it will be used as the in
 					<xs:documentation>List of service specific properties.</xs:documentation>
 				</xs:annotation></xs:element>
 		</xs:sequence>
-		<xs:attribute name="interface" type="xs:string" use="optional">
+		<xs:attribute name="interface" type="xs:string" use="prohibited">
 			<xs:annotation>
-				<xs:documentation>The list of interfaces of the service to expose. By default, all interfaces implemented by the component implementation class are published.</xs:documentation>
+				<xs:documentation>Deprecated attribute, use 'specifications' instead of 'interface'</xs:documentation>
+			</xs:annotation></xs:attribute>
+		<xs:attribute name="specifications" type="xs:string" use="optional">
+			<xs:annotation>
+				<xs:documentation>The list of service specifications (i.e. interfaces) to expose. By default, all interfaces implemented by the component implementation class are published.</xs:documentation>
 			</xs:annotation></xs:attribute>
 		<xs:attribute name="factory" type="xs:string" use="prohibited">
 			<xs:annotation>

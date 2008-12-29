@@ -82,7 +82,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
      * Get the array of provided service.
      * @return the list of the provided service.
      */
-    public ProvidedService[] getProvidedService() {
+    public ProvidedService[] getProvidedServices() {
         return m_providedServices;
     }
 
@@ -98,22 +98,24 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
         // Create the dependency according to the component metadata
         Element[] providedServices = componentMetadata.getElements("Provides");
         for (int i = 0; i < providedServices.length; i++) {
-            String[] serviceSpecifications = ParseUtils.parseArrays(providedServices[i].getAttribute("interface")); // Set by the initialize component factory.
-            
+            String[] serviceSpecifications = ParseUtils.parseArrays(providedServices[i].getAttribute("specifications")); // Set by the initialize component factory.
+
             // Get the factory policy
-            int factory = ProvidedService.SINGLETON_FACTORY;
+            int factory = ProvidedService.SINGLETON_STRATEGY;
             Class custom = null;
             String strategy = providedServices[i].getAttribute("strategy");
             if (strategy == null) {
                 strategy = providedServices[i].getAttribute("factory");
             }
             if (strategy != null) {
-                if ("service".equalsIgnoreCase(strategy)) {
-                    factory = ProvidedService.SERVICE_FACTORY;
+                if ("singleton".equalsIgnoreCase(strategy)) {
+                    factory = ProvidedService.SINGLETON_STRATEGY;
+                } else if ("service".equalsIgnoreCase(strategy)) {
+                    factory = ProvidedService.SERVICE_STRATEGY;
                 } else if ("method".equalsIgnoreCase(strategy)) {
-                    factory = ProvidedService.STATIC_FACTORY;
+                    factory = ProvidedService.STATIC_STRATEGY;
                 } else if ("instance".equalsIgnoreCase(strategy)) {
-                    factory = ProvidedService.INSTANCE;
+                    factory = ProvidedService.INSTANCE_STRATEGY;
                 } else {
                     // Customized policy
                     try {
@@ -245,8 +247,8 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
      * @throws ConfigurationException : the checked provided service is not correct.
      */
     private boolean checkProvidedService(ProvidedService svc) throws ConfigurationException {        
-        for (int i = 0; i < svc.getServiceSpecification().length; i++) {
-            String specName = svc.getServiceSpecification()[i];
+        for (int i = 0; i < svc.getServiceSpecifications().length; i++) {
+            String specName = svc.getServiceSpecifications()[i];
             
             // Check service level dependencies
             try {
@@ -265,18 +267,18 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                         isDependencyCorrect(dep, deps[j]);
                     }
                 } else {
-                    throw new ConfigurationException("Service Providing: The specification field of the service specification " + svc.getServiceSpecification()[i] + " needs to be a String");
+                    throw new ConfigurationException("Service Providing: The specification field of the service specification " + svc.getServiceSpecifications()[i] + " needs to be a String");
                 }
             } catch (NoSuchFieldException e) {
                 return true; // No specification field
             } catch (ClassNotFoundException e) {
-                throw new ConfigurationException("Service Providing: The service specification " + svc.getServiceSpecification()[i] + " cannot be load");
+                throw new ConfigurationException("Service Providing: The service specification " + svc.getServiceSpecifications()[i] + " cannot be load");
             } catch (IllegalArgumentException e) {
-                throw new ConfigurationException("Service Providing: The field 'specification' of the service specification " + svc.getServiceSpecification()[i] + " is not accessible : " + e.getMessage());
+                throw new ConfigurationException("Service Providing: The field 'specification' of the service specification " + svc.getServiceSpecifications()[i] + " is not accessible : " + e.getMessage());
             } catch (IllegalAccessException e) {
-                throw new ConfigurationException("Service Providing: The field 'specification' of the service specification " + svc.getServiceSpecification()[i] + " is not accessible : " + e.getMessage());
+                throw new ConfigurationException("Service Providing: The field 'specification' of the service specification " + svc.getServiceSpecifications()[i] + " is not accessible : " + e.getMessage());
             } catch (ParseException e) {
-                throw new ConfigurationException("Service Providing: The field 'specification' of the service specification " + svc.getServiceSpecification()[i] + " does not contain a valid String : " + e.getMessage());
+                throw new ConfigurationException("Service Providing: The field 'specification' of the service specification " + svc.getServiceSpecifications()[i] + " does not contain a valid String : " + e.getMessage());
             }
         }
 
@@ -466,9 +468,9 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
     public HandlerDescription getDescription() {
         ProvidedServiceHandlerDescription pshd = new ProvidedServiceHandlerDescription(this);
 
-        for (int j = 0; j < getProvidedService().length; j++) {
-            ProvidedService svc = getProvidedService()[j];
-            ProvidedServiceDescription psd = new ProvidedServiceDescription(svc.getServiceSpecification(), svc.getState(), svc.getServiceReference());
+        for (int j = 0; j < getProvidedServices().length; j++) {
+            ProvidedService svc = getProvidedServices()[j];
+            ProvidedServiceDescription psd = new ProvidedServiceDescription(svc.getServiceSpecifications(), svc.getState(), svc.getServiceReference());
 
             Properties props = new Properties();
             for (int k = 0; k < svc.getProperties().length; k++) {
@@ -489,8 +491,8 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
      * @see org.apache.felix.ipojo.Handler#reconfigure(java.util.Dictionary)
      */
     public void reconfigure(Dictionary dict) {
-        for (int j = 0; j < getProvidedService().length; j++) {
-            ProvidedService svc = getProvidedService()[j];
+        for (int j = 0; j < getProvidedServices().length; j++) {
+            ProvidedService svc = getProvidedServices()[j];
             Property[] props = svc.getProperties();
             boolean update = false;
             for (int k = 0; k < props.length; k++) {
@@ -528,7 +530,14 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                 throw new ConfigurationException("An interface cannot be loaded : " + e.getMessage());
             }
             
-            String serviceSpecificationStr = provides[i].getAttribute("interface");
+            String serviceSpecificationStr = provides[i].getAttribute("specifications");
+            if (serviceSpecificationStr == null) {
+                serviceSpecificationStr = provides[i].getAttribute("interface");
+                if (serviceSpecificationStr != null) {
+                    warn("The 'interface' attribute is deprecated, use the 'specifications' attribute instead of 'interface'");
+                }
+            }
+
             if (serviceSpecificationStr != null) {
                 List itfs = ParseUtils.parseArraysAsList(serviceSpecificationStr);
                 for (int j = 0; j < itfs.size(); j++) {
@@ -559,7 +568,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
             }
             
             specs.append('}');
-            provides[i].addAttribute(new Attribute("interface", specs.toString())); // Add interface attribute to avoid checking in the configure method
+            provides[i].addAttribute(new Attribute("specifications", specs.toString())); // Add interface attribute to avoid checking in the configure method
 
             Element[] props = provides[i].getElements("property");
             for (int j = 0; props != null && j < props.length; j++) {

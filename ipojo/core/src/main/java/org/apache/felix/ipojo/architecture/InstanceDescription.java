@@ -60,7 +60,7 @@ public class InstanceDescription {
     private ComponentTypeDescription m_type;
 
     /**
-     * COntained instance list.
+     * Contained instance list.
      */
     private InstanceDescription[] m_containedInstances = new InstanceDescription[0];
 

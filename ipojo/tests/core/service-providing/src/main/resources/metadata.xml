@@ -14,7 +14,7 @@
 		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="PS-FooProviderType-itf" architecture="true">
 		<provides
-			interface="org.apache.felix.ipojo.test.scenarios.ps.service.FooService" />
+			specifications="org.apache.felix.ipojo.test.scenarios.ps.service.FooService" />
 	</component>
 	
 	<component
@@ -41,17 +41,17 @@
 		classname="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
 		name="PS-FooBarProviderType-2" architecture="true">
 		<provides
-			interface="{org.apache.felix.ipojo.test.scenarios.ps.service.FooService, org.apache.felix.ipojo.test.scenarios.ps.service.BarService }" />
+			specifications="{org.apache.felix.ipojo.test.scenarios.ps.service.FooService, org.apache.felix.ipojo.test.scenarios.ps.service.BarService }" />
 	</component>
 	<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.FooBarProviderType1"
 		name="PS-FooBarProviderType-3" architecture="true">
 		<provides
-			interface="{org.apache.felix.ipojo.test.scenarios.ps.service.FooService}">
+			specifications="{org.apache.felix.ipojo.test.scenarios.ps.service.FooService}">
 			<property name="baz" type="java.lang.String" value="foo" />
 		</provides>
 		<provides
-			interface="{org.apache.felix.ipojo.test.scenarios.ps.service.BarService}">
+			specifications="{org.apache.felix.ipojo.test.scenarios.ps.service.BarService}">
 			<property name="baz" type="java.lang.String" value="bar" />
 		</provides>
 	</component>
@@ -108,14 +108,14 @@
 		classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessImplementation1"
 		name="PS-PI1-1" architecture="true">
 		<provides
-			interface="org.apache.felix.ipojo.test.scenarios.ps.service.ParentParentInterface" />
+			specifications="org.apache.felix.ipojo.test.scenarios.ps.service.ParentParentInterface" />
 	</component>
 
 	<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessImplementation1"
 		name="PS-PI1-2" architecture="true">
 		<provides
-			interface="{org.apache.felix.ipojo.test.scenarios.ps.service.ParentParentInterface, org.apache.felix.ipojo.test.scenarios.ps.service.ParentInterface2}" />
+			specifications="{org.apache.felix.ipojo.test.scenarios.ps.service.ParentParentInterface, org.apache.felix.ipojo.test.scenarios.ps.service.ParentInterface2}" />
 	</component>
 
 	<component
@@ -128,7 +128,7 @@
 		classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessImplementation2"
 		name="PS-PI2-1" architecture="true">
 		<provides
-			interface="org.apache.felix.ipojo.test.scenarios.ps.service.ParentParentInterface" />
+			specifications="org.apache.felix.ipojo.test.scenarios.ps.service.ParentParentInterface" />
 	</component>
 
 	<component

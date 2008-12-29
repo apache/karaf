@@ -61,9 +61,6 @@ public class MethodCollector extends EmptyVisitor {
         if (arg0.equals("Lorg/apache/felix/ipojo/annotations/Property;")) {
             return processProperty();
         }
-        if (arg0.equals("Lorg/apache/felix/ipojo/annotations/ServiceProperty;")) {
-            return processServiceProperty();
-        }
         if (arg0.equals("Lorg/apache/felix/ipojo/annotations/Validate;")) {
             return processValidate();
         }
@@ -117,20 +114,6 @@ public class MethodCollector extends EmptyVisitor {
         cb.addAttribute(new org.apache.felix.ipojo.metadata.Attribute("method", m_name));
         m_collector.getElements().put(cb, null);
         return null;
-    }
-
-    /**
-     * Process @serviceProperty annotation.
-     * @return the visitor parsing the visited annotation.
-     */
-    private AnnotationVisitor processServiceProperty() {
-        if (! m_collector.getIds().containsKey("provides")) {
-            System.err.println("The component does not provide services, skipping ServiceProperty for " + m_name);
-            return null;
-        } else {
-            Element provides = (Element) m_collector.getIds().get("provides");
-            return new PropertyAnnotationParser(provides, m_name);
-        }
     }
 
     /**
