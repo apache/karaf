@@ -23,26 +23,6 @@
         multiple="false" name="service" optional="true">
         Import Service org.osgi.service.log.LogService
     </require>
-    <require extend="false"
-        filter="(service=org.osgi.service.cm.ManagedService)"
-        multiple="true" name="service" optional="true">
-        Import Service org.osgi.service.cm.ManagedService
-    </require>
-    <require extend="false"
-        filter="(service=org.osgi.service.cm.ManagedServiceFactory)"
-        multiple="true" name="service" optional="true">
-        Import Service org.osgi.service.cm.ManagedServiceFactory
-    </require>
-    <require extend="false"
-        filter="(service=org.osgi.service.cm.ConfigurationListener)"
-        multiple="true" name="service" optional="true">
-        Import Service org.osgi.service.cm.ConfigurationListener
-    </require>
-    <require extend="false"
-        filter="(service=org.apache.felix.cm.PersistenceManager)"
-        multiple="true" name="service" optional="false">
-        Import Service org.apache.felix.cm.PersistenceManager
-    </require>
     <capability name="service">
         <p n="service" v="org.apache.felix.cm.PersistenceManager" />
         <p n="service.description"
