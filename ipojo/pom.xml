@@ -43,6 +43,7 @@
 		<module>handler/temporal</module>
 		<module>handler/eventadmin</module>
 		<module>handler/whiteboard</module>
+		<module>junit4osgi</module>
 	</modules>
 		
 	
