@@ -77,6 +77,11 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * The instance factory.
      */
     private final ComponentFactory m_factory;
+    
+    /**
+     * The instance description.
+     */
+    private final PrimitiveInstanceDescription m_description;
 
     /**
      * The bundle context of the instance.
@@ -146,6 +151,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
         m_factory = factory;
         m_context = context;
         m_handlers = handlers;
+        m_description = new PrimitiveInstanceDescription(m_factory.getComponentDescription(), this);
     }
 
     /**
@@ -177,25 +183,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
      * @see org.apache.felix.ipojo.ComponentInstance#getInstanceDescription()
      */
     public InstanceDescription getInstanceDescription() {
-        int componentState = getState();
-        InstanceDescription desc =
-                new InstanceDescription(m_name, componentState, getContext().getBundle().getBundleId(), m_factory.getComponentDescription());
-
-        synchronized (this) { // Must be synchronized, it access to the m_pojoObjects list.
-            if (m_pojoObjects != null) {
-                String[] objects = new String[m_pojoObjects.size()];
-                for (int i = 0; i < m_pojoObjects.size(); i++) {
-                    objects[i] = m_pojoObjects.get(i).toString();
-                }
-                desc.setCreatedObjects(objects);
-            }
-        }
-
-        Handler[] handlers = getRegistredHandlers();
-        for (int i = 0; i < handlers.length; i++) {
-            desc.addHandler(handlers[i].getDescription());
-        }
-        return desc;
+        return m_description;
     }
 
     /**
@@ -293,6 +281,12 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
             } else {
                 m_state = -2; // Temporary state.
             }
+        }
+        
+        // Plug handler descriptions
+        Handler[] handlers = getRegistredHandlers();
+        for (int i = 0; i < handlers.length; i++) {
+            m_description.addHandler(handlers[i].getDescription());
         }
         
         for (int i = 0; i < m_handlers.length; i++) {

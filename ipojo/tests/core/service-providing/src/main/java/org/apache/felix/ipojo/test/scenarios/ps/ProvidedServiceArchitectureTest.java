@@ -68,12 +68,14 @@ public class ProvidedServiceArchitectureTest extends OSGiTestCase {
 		
 		//Look for the ProvidedService Handler
 		ProvidedServiceHandlerDescription pshd = null;
-		for(int i = 0; i < handlers.length; i++) {
-			if(handlers[i].getHandlerName().equals("org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler")) {
-				pshd = (ProvidedServiceHandlerDescription) handlers[i];
-			}
-		}
-		
+        pshd = (ProvidedServiceHandlerDescription) id.getHandlerDescription("org.apache.felix.ipojo:provides");
+
+//		for(int i = 0; i < handlers.length; i++) {
+//			if(handlers[i].getHandlerName().equals("org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler")) {
+//				pshd = (ProvidedServiceHandlerDescription) handlers[i];
+//			}
+//		}
+//		
 		assertNotNull("Check ProvidedServiceHandlerDescription", pshd);
 		ProvidedServiceDescription[] ps = pshd.getProvidedServices();
 		
@@ -117,11 +119,8 @@ public class ProvidedServiceArchitectureTest extends OSGiTestCase {
 		
 		//Look for the ProvidedService Handler
 		ProvidedServiceHandlerDescription pshd = null;
-		for(int i = 0; i < handlers.length; i++) {
-			if(handlers[i].getHandlerName().equals("org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler")) {
-				pshd = (ProvidedServiceHandlerDescription) handlers[i];
-			}
-		}
+		pshd = (ProvidedServiceHandlerDescription) id.getHandlerDescription("org.apache.felix.ipojo:provides");
+
 		
 		assertNotNull("Check ProvidedServiceHandlerDescription", pshd);
 		ProvidedServiceDescription[] ps = pshd.getProvidedServices();
@@ -136,9 +135,9 @@ public class ProvidedServiceArchitectureTest extends OSGiTestCase {
 		assertEquals("Check service properties number (#" + prop + "?=5)" , prop.size(), 5);
 		assertEquals("Check instance.name property", prop.getProperty("instance.name"), compName);
 		assertEquals("Check factory.name property", prop.getProperty("factory.name"), factName);
-		assertEquals("Check foo property", prop.getProperty("foo"), "foo");
-		assertEquals("Check bar property", prop.getProperty("bar"), "2");
-		assertEquals("Check baz property", prop.getProperty("baz"), "baz");
+		assertEquals("Check foo property", prop.get("foo"), "foo");
+		assertEquals("Check bar property", prop.get("bar"), new Integer(2));
+		assertEquals("Check baz property", prop.get("baz"), "baz");
 		
 	}
 	
@@ -166,11 +165,13 @@ public class ProvidedServiceArchitectureTest extends OSGiTestCase {
 		
 		//Look for the ProvidedService Handler
 		ProvidedServiceHandlerDescription pshd = null;
-		for(int i = 0; i < handlers.length; i++) {
-			if(handlers[i].getHandlerName().equals("org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler")) {
-				pshd = (ProvidedServiceHandlerDescription) handlers[i];
-			}
-		}
+        pshd = (ProvidedServiceHandlerDescription) id.getHandlerDescription("org.apache.felix.ipojo:provides");
+
+//		for(int i = 0; i < handlers.length; i++) {
+//			if(handlers[i].getHandlerName().equals("org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler")) {
+//				pshd = (ProvidedServiceHandlerDescription) handlers[i];
+//			}
+//		}
 		
 		assertNotNull("Check ProvidedServiceHandlerDescription", pshd);
 		ProvidedServiceDescription[] ps = pshd.getProvidedServices();
@@ -207,11 +208,13 @@ public class ProvidedServiceArchitectureTest extends OSGiTestCase {
     	
     	//Look for the ProvidedService Handler
     	ProvidedServiceHandlerDescription pshd = null;
-    	for(int i = 0; i < handlers.length; i++) {
-    		if(handlers[i].getHandlerName().equals("org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler")) {
-    			pshd = (ProvidedServiceHandlerDescription) handlers[i];
-    		}
-    	}
+        pshd = (ProvidedServiceHandlerDescription) id.getHandlerDescription("org.apache.felix.ipojo:provides");
+
+//    	for(int i = 0; i < handlers.length; i++) {
+//    		if(handlers[i].getHandlerName().equals("org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler")) {
+//    			pshd = (ProvidedServiceHandlerDescription) handlers[i];
+//    		}
+//    	}
     	
     	assertNotNull("Check ProvidedServiceHandlerDescription", pshd);
     	ProvidedServiceDescription[] ps = pshd.getProvidedServices();

@@ -28,6 +28,7 @@
 		<module>junit4osgi</module>
 		<module>felix-command</module>
 		<module>maven-junit4osgi-plugin</module>
+		<module>immediate-launcher</module>
   </modules>
 
   <profiles>
@@ -38,7 +39,6 @@
 		</activation>
 		<modules>
 			<module>swing-runner</module>
-			<module>immediate-launcher</module>
 		</modules>
 	</profile>
 	<profile>
@@ -48,7 +48,6 @@
 		</activation>
 		<modules>
 			<module>swing-runner</module>
-			<module>immediate-launcher</module>
 		</modules>
 	</profile>
   </profiles>

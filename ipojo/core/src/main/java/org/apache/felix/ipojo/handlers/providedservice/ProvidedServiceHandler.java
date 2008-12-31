@@ -23,7 +23,6 @@ import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import org.apache.felix.ipojo.ConfigurationException;
@@ -56,6 +55,11 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
      * The list of the provided service.
      */
     private ProvidedService[] m_providedServices = new ProvidedService[0];
+    
+    /**
+     * The handler description.
+     */
+    private ProvidedServiceHandlerDescription m_description;
 
     /**
      * Add a provided service to the list .
@@ -173,6 +177,9 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                 }
                 throw new ConfigurationException("The provided service" + itfs + " is not valid");                
             }
+            
+            // Initialize the description.
+            m_description = new ProvidedServiceHandlerDescription(this, m_providedServices);
 
         }
     }
@@ -466,23 +473,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
      * @see org.apache.felix.ipojo.Handler#getDescription()
      */
     public HandlerDescription getDescription() {
-        ProvidedServiceHandlerDescription pshd = new ProvidedServiceHandlerDescription(this);
-
-        for (int j = 0; j < getProvidedServices().length; j++) {
-            ProvidedService svc = getProvidedServices()[j];
-            ProvidedServiceDescription psd = new ProvidedServiceDescription(svc.getServiceSpecifications(), svc.getState(), svc.getServiceReference());
-
-            Properties props = new Properties();
-            for (int k = 0; k < svc.getProperties().length; k++) {
-                Property prop = svc.getProperties()[k];
-                if (prop.getValue() != null  && prop.getValue() != Property.NO_VALUE) {
-                    props.put(prop.getName(), prop.getValue().toString());
-                }
-            }
-            psd.setProperty(props);
-            pshd.addProvidedService(psd);
-        }
-        return pshd;
+        return m_description;
     }
 
     /**

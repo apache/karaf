@@ -19,6 +19,7 @@
 package org.apache.felix.ipojo.architecture;
 
 import org.apache.felix.ipojo.Handler;
+import org.apache.felix.ipojo.HandlerFactory;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 
@@ -30,49 +31,51 @@ import org.apache.felix.ipojo.metadata.Element;
 public class HandlerDescription {
 
     /**
-     * Handler Class Name (i.e namespace).
+     * The Handler Qualified Name.
      */
     private String m_handlerName;
 
-    /**
-     * Is the handler valid.
-     */
-    private boolean m_isValid;
 
     /**
-     * Constructor.
-     * 
-     * @param handler : handler.
+     * The described handler instance.
+     */
+    private Handler m_handler;
+
+    /**
+     * Creates a handler description.
+     * @param handler the handler.
      */
     public HandlerDescription(Handler handler) {
-        m_handlerName = handler.getClass().getName();
-        m_isValid = handler.isValid();
+        HandlerFactory factory = (HandlerFactory) handler.getHandlerManager().getFactory();
+        m_handlerName = factory.getHandlerName();
+        m_handler = handler;
     }
 
     /**
-     * Check if the handler is valid.
+     * Checks if the handler is valid.
      * @return true if the handler is valid.
      */
     public boolean isValid() {
-        return m_isValid;
+        return m_handler.isValid();
     }
 
     /**
-     * Get the handler name.
-     * @return the handler name (i.e. namespace).
+     * Gets the handler name.
+     * @return the handler qualified name (i.e. namespace:name).
      */
     public String getHandlerName() {
         return m_handlerName;
     }
 
     /**
-     * Get handler information.
+     * Gets handler information.
+     * This represent the actual state of the handler.
      * @return the handler information.
      */
     public Element getHandlerInfo() {
         Element elem = new Element("Handler", "");
         elem.addAttribute(new Attribute("name", m_handlerName));
-        if (m_isValid) {
+        if (isValid()) {
             elem.addAttribute(new Attribute("state", "valid"));
         } else {
             elem.addAttribute(new Attribute("state", "invalid"));

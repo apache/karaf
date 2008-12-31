@@ -20,7 +20,6 @@ package org.apache.felix.ipojo.handlers.providedservice;
 
 import java.util.Iterator;
 
-import org.apache.felix.ipojo.Handler;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
@@ -37,13 +36,18 @@ public class ProvidedServiceHandlerDescription extends HandlerDescription {
      * Provided Service Description list.
      */
     private ProvidedServiceDescription[] m_providedServices = new ProvidedServiceDescription[0];
-
+   
     /**
      * Constructor.
-     * @param handler : handler.
+     * @param handler the handler.
+     * @param pss the list of provided service
      */
-    public ProvidedServiceHandlerDescription(Handler handler) {
+    public ProvidedServiceHandlerDescription(ProvidedServiceHandler handler, ProvidedService[] pss) {
         super(handler);
+        m_providedServices = new ProvidedServiceDescription[pss.length];
+        for (int i = 0; i < pss.length; i++) {
+            m_providedServices[i] = new ProvidedServiceDescription(pss[i]);
+        }
     }
 
     /**
@@ -52,27 +56,6 @@ public class ProvidedServiceHandlerDescription extends HandlerDescription {
      */
     public ProvidedServiceDescription[] getProvidedServices() {
         return m_providedServices;
-    }
-
-    /**
-     * Add a provided service.
-     * 
-     * @param pds : the provided service to add
-     */
-    public void addProvidedService(ProvidedServiceDescription pds) {
-        // Verify that the provided service description is not already in the
-        // array.
-        for (int i = 0; i < m_providedServices.length; i++) {
-            if (m_providedServices[i] == pds) {
-                return; // NOTHING DO DO, the description is already in the
-                        // array
-            }
-        }
-        // The component Description is not in the array, add it
-        ProvidedServiceDescription[] newPSD = new ProvidedServiceDescription[m_providedServices.length + 1];
-        System.arraycopy(m_providedServices, 0, newPSD, 0, m_providedServices.length);
-        newPSD[m_providedServices.length] = pds;
-        m_providedServices = newPSD;
     }
 
     /**

@@ -27,134 +27,51 @@ import org.osgi.framework.ServiceReference;
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class DependencyDescription {
-
     /**
-     * Required Service Interface.
+     * The described dependency.
      */
-    private String m_interface;
-    
-    /**
-     * Dependency Id.
-     */
-    private String m_id;
-
-    /**
-     * Is the dependency aggregate?
-     */
-    private boolean m_aggregate;
-
-    /**
-     * Is the dependency optional ?
-     */
-    private boolean m_optional;
-    
-    /**
-     * Binding policy used by this service dependency.
-     */
-    private int m_bindingPolicy;
-    
-    /**
-     * Does the dependency use a nullable object?
-     */
-    private boolean m_useNullable;
-    
-    /**
-     * Does the dependency use a default-implementation? 
-     */
-    private String m_defaultImplementation;
-
-    /**
-     * State (VALID | INVALID).
-     */
-    private int m_state;
-
-    /**
-     * Dependency Filter.
-     */
-    private String m_filter;
-    
-    /**
-     * Is the provider set frozen ?
-     */
-    private boolean m_isFrozen;
-    
-    /**
-     * Comparator used by the dependency.
-     * Null means OSGi default comparator.
-     */
-    private String m_comparator;
-
-    /**
-     * List of used service references.
-     */
-    private List m_usedServices;
-
-    /**
-     * List of matching service references.
-     */
-    private List m_serviceReferences;
+    private Dependency m_dependency;
 
     /**
      * Creates a dependency description.
-     * @param itf the needed interface
-     * @param id the dependency id.
-     * @param multiple is the dependency a multiple dependency ?
-     * @param optional is the dependency optional ?
-     * @param filter the filter
-     * @param policy binding policy
-     * @param nullable does the dependency support nullable object
-     * @param defaultImpl does the dependency use a default implementation
-     * @param comparator does the dependency use a special comparator
-     * @param frozen is the provider set frozen
-     * @param state the state
+     * @param dep the described dependency
      */
-    public DependencyDescription(String itf, String id, boolean multiple, boolean optional, String filter, int policy, boolean nullable, String defaultImpl, String comparator, boolean frozen, int state) {
-        super();
-        m_interface = itf;
-        m_id = id;
-        m_aggregate = multiple;
-        m_optional = optional;
-        m_filter = filter;
-        m_state = state;
-        m_bindingPolicy = policy;
-        m_useNullable = nullable;
-        m_defaultImplementation = defaultImpl;
-        m_comparator = comparator;
-        m_isFrozen = frozen;
+    public DependencyDescription(Dependency dep) {
+        m_dependency = dep;
     }
 
-    public boolean isMultiple() { return m_aggregate; }
+    public boolean isMultiple() { return m_dependency.isAggregate(); }
 
-    public boolean isOptional() { return m_optional; }
+    public boolean isOptional() { return m_dependency.isOptional(); }
 
-    public String getFilter() { return m_filter; }
+    public String getFilter() { return m_dependency.getFilter(); }
 
-    public String getInterface() { return m_interface; }
+    public String getInterface() { return m_dependency.getSpecification().getName(); }
 
-    public int getState() { return m_state; }
+    public int getState() { return m_dependency.getState(); }
     
-    public String getId() { return m_id; }
+    public String getId() { return m_dependency.getId(); }
     
     /**
-     * Gets true if the dependency uses Nullable objects.
+     * Gets <code>true</code> if the dependency uses Nullable objects.
      * @return true if the dependency is optional and supports nullable object.
      */
-    public boolean supportsNullable() { return m_useNullable; }
+    public boolean supportsNullable() { return m_dependency.supportsNullable(); }
     
-    public String getDefaultImplementation() { return m_defaultImplementation; }
+    public String getDefaultImplementation() { return m_dependency.getDefaultImplementation(); }
     
-    public int getPolicy() { return m_bindingPolicy; }
+    public int getPolicy() { return m_dependency.getBindingPolicy(); }
     
-    public String getComparator() { return m_comparator; }
+    public String getComparator() { return m_dependency.getComparator(); }
     
-    public boolean isFrozen() { return m_isFrozen; }
+    public boolean isFrozen() { return m_dependency.isFrozen(); }
 
     /**
      * Gets the service reference list.
      * @return the list of matching service reference,
      * null if no service reference.
      */
-    public List getServiceReferences() { return m_serviceReferences; }
+    public List getServiceReferences() { return m_dependency.getServiceReferencesAsList(); }
 
     /**
      * Gets the service reference if only one service reference is used.
@@ -162,34 +79,19 @@ public class DependencyDescription {
      * or null if no service reference.
      */
     public ServiceReference getServiceReference() { 
-        if (m_serviceReferences == null) {
+        List list = getServiceReferences();
+        if (list == null) {
             return null;
         } else {
-            return (ServiceReference) m_serviceReferences.get(0);
+            return (ServiceReference) list.get(0);
         }
     }
-
-    /**
-     * Sets the service reference array.
-     * @param refs : the list of service reference
-     */
-    public void setServiceReferences(List refs) { m_serviceReferences = refs; }
 
     /**
      * Gets the used service set.
      * @return the list [service reference] containing the used services,
      * null if no providers are used
      */
-    public List getUsedServices() { return m_usedServices; }
-
-    /**
-     * Sets the usedServices.
-     * @param usages : the list of used service reference.
-     */
-    public void setUsedServices(List usages) {
-        m_usedServices = usages;
-    }
-
-
+    public List getUsedServices() { return m_dependency.getUsedServiceReferences(); }
 
 }

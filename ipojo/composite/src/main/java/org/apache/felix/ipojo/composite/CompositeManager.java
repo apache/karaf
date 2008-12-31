@@ -25,17 +25,15 @@ import java.util.List;
 import org.apache.felix.ipojo.ComponentFactory;
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.ConfigurationException;
+import org.apache.felix.ipojo.Handler;
 import org.apache.felix.ipojo.HandlerFactory;
 import org.apache.felix.ipojo.HandlerManager;
 import org.apache.felix.ipojo.IPojoContext;
 import org.apache.felix.ipojo.InstanceStateListener;
 import org.apache.felix.ipojo.ServiceContext;
-import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
 import org.apache.felix.ipojo.metadata.Element;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 
 /**
  * iPOJO Composite manager. The composite manager class manages one instance of
@@ -72,6 +70,11 @@ public class CompositeManager implements ComponentInstance, InstanceStateListene
     private CompositeServiceContext m_internalContext;
     
     /**
+     * The instance description.
+     */
+    private final CompositeInstanceDescription m_description;
+    
+    /**
      * Name of the component instance.
      */
     private String m_name;
@@ -93,6 +96,8 @@ public class CompositeManager implements ComponentInstance, InstanceStateListene
         // Initialize the service context.
         m_internalContext = new CompositeServiceContext(m_context, this);
         m_handlers = handlers;
+        m_description = new CompositeInstanceDescription(m_factory.getComponentDescription(), this);
+
     }
 
     /**
@@ -209,27 +214,7 @@ public class CompositeManager implements ComponentInstance, InstanceStateListene
      * @see org.apache.felix.ipojo.ComponentInstance#getInstanceDescription()
      */
     public InstanceDescription getInstanceDescription() {
-        InstanceDescription desc = new InstanceDescription(m_name, m_state, getContext().getBundle().getBundleId(), m_factory.getComponentDescription());
-        CompositeHandler[] handlers = getRegistredCompositeHandlers();
-        for (int i = 0; i < handlers.length; i++) {
-            desc.addHandler(handlers[i].getDescription());
-        }
-
-        // Get instances description of internal instance
-        ServiceReference[] refs;
-        try {
-            refs = m_internalContext.getServiceReferences(Architecture.class.getName(), null);
-            if (refs != null) {
-                for (int i = 0; i < refs.length; i++) {
-                    Architecture arch = (Architecture) m_internalContext.getService(refs[i]);
-                    desc.addInstance(arch.getInstanceDescription());
-                    m_internalContext.ungetService(refs[i]);
-                }
-            }
-        } catch (InvalidSyntaxException e) {
-            // Cannot happen
-        }
-        return desc;
+        return m_description;
     }
 
     /**
@@ -350,6 +335,12 @@ public class CompositeManager implements ComponentInstance, InstanceStateListene
         m_state = INVALID;
 
         m_internalContext.start(); // Turn on the factory tracking
+        
+        // Plug handler descriptions
+        Handler[] handlers = getRegistredCompositeHandlers();
+        for (int i = 0; i < handlers.length; i++) {
+            m_description.addHandler(handlers[i].getDescription());
+        }
 
         for (int i = 0; i < m_handlers.length; i++) {
             m_handlers[i].start();

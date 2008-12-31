@@ -54,6 +54,11 @@ public class InstanceHandler extends CompositeHandler implements InstanceStateLi
      */
     private Factory[] m_factories;
     
+    /**
+     * Handler description.
+     */
+    private InstanceHandlerDescription m_description;
+    
 
     /**
      * This structure aims to manage a configuration. It stores all necessary
@@ -238,6 +243,8 @@ public class InstanceHandler extends CompositeHandler implements InstanceStateLi
             }
             m_configurations[i] = new ManagedConfiguration(conf);
         }
+        
+        m_description = new InstanceHandlerDescription(this, m_configurations);
     }
 
     /**
@@ -380,11 +387,7 @@ public class InstanceHandler extends CompositeHandler implements InstanceStateLi
      * @see org.apache.felix.ipojo.CompositeHandler#getDescription()
      */
     public HandlerDescription getDescription() {
-        List list = new ArrayList();
-        for (int i = 0; i < m_configurations.length; i++) {
-            list.add(m_configurations[i]);
-        }
-        return new InstanceHandlerDescription(this, list);
+        return m_description;
     }
 
     /**

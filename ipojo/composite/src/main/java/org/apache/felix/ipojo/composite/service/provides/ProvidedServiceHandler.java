@@ -80,6 +80,11 @@ public class ProvidedServiceHandler extends CompositeHandler implements Dependen
      * List of component type.
      */
     private List m_types;
+    
+    /**
+     * Handler description.
+     */
+    private ProvidedServiceHandlerDescription m_description;
 
     /**
      * Initialize the component type.
@@ -163,6 +168,8 @@ public class ProvidedServiceHandler extends CompositeHandler implements Dependen
                 m_exporters.add(imp);
             } // Others case cannot happen. The test was already made during the factory initialization.
         }
+        
+        m_description = new ProvidedServiceHandlerDescription(this, m_services, m_exporters);
 
     }
 
@@ -474,7 +481,7 @@ public class ProvidedServiceHandler extends CompositeHandler implements Dependen
     }
 
     public HandlerDescription getDescription() {
-        return new ProvidedServiceHandlerDescription(this, m_managedServices, m_exporters);
+        return m_description;
     }
 
     /**

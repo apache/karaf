@@ -75,6 +75,11 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
      * Is the handler started.
      */
     private boolean m_started;
+    
+    /**
+     * The handler description.
+     */
+    private DependencyHandlerDescription m_description;
 
     /**
      * Add a dependency.
@@ -435,6 +440,8 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
                 }
             }
         }
+        
+        m_description = new DependencyHandlerDescription(this, m_dependencies); // Initialize the description.
     }
 
     /**
@@ -445,6 +452,7 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
         // Start the dependencies
         for (int i = 0; i < m_dependencies.length; i++) {
             Dependency dep = m_dependencies[i];
+           
             dep.start();
         }
         // Check the state
@@ -481,17 +489,7 @@ public class DependencyHandler extends PrimitiveHandler implements DependencySta
      * @see org.apache.felix.ipojo.Handler#getDescription()
      */
     public HandlerDescription getDescription() {
-        DependencyHandlerDescription dhd = new DependencyHandlerDescription(this);
-        for (int j = 0; j < getDependencies().length; j++) {
-            Dependency dep = getDependencies()[j];
-            // Create & add the dependency description
-            DependencyDescription desc =
-                    new DependencyDescription(dep.getSpecification().getName(), dep.getId(), dep.isAggregate(), dep.isOptional(), dep.getFilter(), dep.getBindingPolicy(), dep.supportsNullable(), dep.getDefaultImplementation(), dep.getComparator(), dep.isFrozen(), dep.getState());
-            desc.setServiceReferences(dep.getServiceReferencesAsList());
-            desc.setUsedServices(dep.getUsedServiceReferences());
-            dhd.addDependency(desc);
-        }
-        return dhd;
+        return m_description;
     }
 
 }

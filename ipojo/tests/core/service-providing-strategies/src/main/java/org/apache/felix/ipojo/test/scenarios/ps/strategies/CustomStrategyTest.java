@@ -3,6 +3,7 @@ package org.apache.felix.ipojo.test.scenarios.ps.strategies;
 import java.util.Properties;
 
 import org.apache.felix.ipojo.ComponentInstance;
+import org.apache.felix.ipojo.PrimitiveInstanceDescription;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
 import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
 import org.apache.felix.ipojo.test.scenarios.component.strategies.FooBarProviderType1;
@@ -43,7 +44,7 @@ public class CustomStrategyTest extends OSGiTestCase {
     }
     
     private void checkCreatedObjects(ComponentInstance ci, int expected) {
-        assertEquals("Number of created objects", expected, ci.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Number of created objects", expected, ((PrimitiveInstanceDescription) ci.getInstanceDescription()).getCreatedObjects().length);
     }
     
     public void testOneService() {

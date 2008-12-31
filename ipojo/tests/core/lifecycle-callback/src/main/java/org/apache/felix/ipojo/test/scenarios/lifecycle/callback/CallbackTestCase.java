@@ -21,8 +21,8 @@ package org.apache.felix.ipojo.test.scenarios.lifecycle.callback;
 import java.util.Properties;
 
 import org.apache.felix.ipojo.ComponentInstance;
+import org.apache.felix.ipojo.PrimitiveInstanceDescription;
 import org.apache.felix.ipojo.architecture.Architecture;
-import org.apache.felix.ipojo.architecture.InstanceDescription;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
 import org.apache.felix.ipojo.test.scenarios.lifecycle.callback.service.CheckService;
 import org.apache.felix.ipojo.test.scenarios.util.Utils;
@@ -56,7 +56,7 @@ public class CallbackTestCase extends OSGiTestCase {
 		// Check instance is invalid
 		ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance.getInstanceName());
 		assertNotNull("Check architecture availability", arch_ref);
-		InstanceDescription id_dep = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
+		PrimitiveInstanceDescription id_dep = (PrimitiveInstanceDescription) ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance invalidity - 1", id_dep.getState() == ComponentInstance.INVALID);
 		assertEquals("Check pojo count - 1", id_dep.getCreatedObjects().length, 0);
 		
@@ -64,7 +64,7 @@ public class CallbackTestCase extends OSGiTestCase {
 		fooProvider.start();
 		
 		// Check instance validity
-		id_dep = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
+		//id_dep = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 1", id_dep.getState() == ComponentInstance.VALID);
 		
 		// Check service providing
@@ -81,7 +81,7 @@ public class CallbackTestCase extends OSGiTestCase {
 		
 		fooProvider.stop();
 		
-		id_dep = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
+		//id_dep = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance invalidity - 2", id_dep.getState() == ComponentInstance.INVALID);
 		
 		assertEquals("Check pojo count - 3", id_dep.getCreatedObjects().length, 1);
@@ -89,7 +89,7 @@ public class CallbackTestCase extends OSGiTestCase {
 		fooProvider.start();
 		
 		// Check instance validity
-		id_dep = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
+		//id_dep = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 2", id_dep.getState() == ComponentInstance.VALID);
 		
 		// Check service providing

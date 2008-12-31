@@ -10,7 +10,7 @@ public class ConfigurableFooProvider implements FooService {
     private int invokeCount = 0;
     
     public void setMessage(String message) {
-        System.out.println("Set message to " + message);
+        System.err.println("=== Set message to " + message);
         this.message = message;
         invokeCount++;
     }

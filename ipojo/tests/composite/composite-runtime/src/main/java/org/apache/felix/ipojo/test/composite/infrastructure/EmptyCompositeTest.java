@@ -24,7 +24,7 @@ import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.ServiceContext;
 import org.apache.felix.ipojo.architecture.ComponentTypeDescription;
-import org.apache.felix.ipojo.architecture.InstanceDescription;
+import org.apache.felix.ipojo.composite.CompositeInstanceDescription;
 import org.apache.felix.ipojo.composite.CompositeManager;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
 import org.apache.felix.ipojo.test.composite.util.Utils;
@@ -51,7 +51,7 @@ public class EmptyCompositeTest extends OSGiTestCase {
 		assertEquals("Check offered service", cd.getprovidedServiceSpecification().length, 0);
 		assertEquals("Check configurable properties", cd.getProperties().length, 0);
 		
-		InstanceDescription id = ci.getInstanceDescription();
+		CompositeInstanceDescription id = (CompositeInstanceDescription) ci.getInstanceDescription();
 		assertEquals("Check composite instance name", id.getName(), "empty");
 		assertEquals("Check composite instance state (" + id.getState() + ")", id.getState(), ComponentInstance.VALID);
 		
@@ -100,17 +100,17 @@ public class EmptyCompositeTest extends OSGiTestCase {
 			fail("Unacceptable configuration : " + e.getMessage());
 		}
 		
-		InstanceDescription id = ci.getInstanceDescription();
+		CompositeInstanceDescription id = (CompositeInstanceDescription) ci.getInstanceDescription();
 		assertEquals("Check composite instance name", id.getName(), "empty");
 		assertEquals("Check composite instance state", id.getState(), ComponentInstance.VALID);
 		assertEquals("Check contained instance", id.getContainedInstances().length, 1);
-		InstanceDescription id2 = id.getContainedInstances()[0];
+		CompositeInstanceDescription id2 = (CompositeInstanceDescription) id.getContainedInstances()[0];
 		assertEquals("Check composite instance name", id2.getName(), "empty2");
 		assertEquals("Check composite instance state", id2.getState(), ComponentInstance.VALID);
 		assertEquals("Check contained instance", id2.getContainedInstances().length, 0);
 		
 		ci2.dispose();
-		id = ci.getInstanceDescription();
+		//id = ci.getInstanceDescription();
 		assertEquals("Check composite instance name", id.getName(), "empty");
 		assertEquals("Check composite instance state", id.getState(), ComponentInstance.VALID);
 		assertEquals("Check contained instance", id.getContainedInstances().length, 0);
@@ -150,17 +150,17 @@ public class EmptyCompositeTest extends OSGiTestCase {
 			fail("Unacceptable configuration : " + e.getMessage());
 		}
 		
-		InstanceDescription id = ci.getInstanceDescription();
+		CompositeInstanceDescription id = (CompositeInstanceDescription) ci.getInstanceDescription();
 		assertEquals("Check composite instance name", id.getName(), "empty");
 		assertEquals("Check composite instance state", id.getState(), ComponentInstance.VALID);
 		assertEquals("Check contained instance", id.getContainedInstances().length, 1);
-		InstanceDescription id2 = id.getContainedInstances()[0];
+		CompositeInstanceDescription id2 = (CompositeInstanceDescription) id.getContainedInstances()[0];
 		assertEquals("Check composite instance name", id2.getName(), "empty2");
 		assertEquals("Check composite instance state", id2.getState(), ComponentInstance.VALID);
 		assertEquals("Check contained instance", id2.getContainedInstances().length, 0);
 		
 		ci2.dispose();
-		id = ci.getInstanceDescription();
+		//id = ci.getInstanceDescription();
 		assertEquals("Check composite instance name", id.getName(), "empty");
 		assertEquals("Check composite instance state", id.getState(), ComponentInstance.VALID);
 		assertEquals("Check contained instance", id.getContainedInstances().length, 0);
@@ -200,17 +200,17 @@ public class EmptyCompositeTest extends OSGiTestCase {
 			fail("Unacceptable configuration : " + e.getMessage());
 		}
 		
-		InstanceDescription id = ci.getInstanceDescription();
+		CompositeInstanceDescription id = (CompositeInstanceDescription) ci.getInstanceDescription();
 		assertEquals("Check composite instance name", id.getName(), "empty");
 		assertEquals("Check composite instance state", id.getState(), ComponentInstance.VALID);
 		assertEquals("Check contained instance", id.getContainedInstances().length, 1);
-		InstanceDescription id2 = id.getContainedInstances()[0];
+		CompositeInstanceDescription id2 = (CompositeInstanceDescription) id.getContainedInstances()[0];
 		assertEquals("Check composite instance name", id2.getName(), "empty2");
 		assertEquals("Check composite instance state", id2.getState(), ComponentInstance.VALID);
 		assertEquals("Check contained instance", id2.getContainedInstances().length, 0);
 		
 		ci2.dispose();
-		id = ci.getInstanceDescription();
+		//id = ci.getInstanceDescription();
 		assertEquals("Check composite instance name", id.getName(), "empty");
 		assertEquals("Check composite instance state", id.getState(), ComponentInstance.VALID);
 		assertEquals("Check contained instance", id.getContainedInstances().length, 0);

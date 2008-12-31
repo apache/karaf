@@ -18,8 +18,6 @@
  */
 package org.apache.felix.ipojo.composite.instance;
 
-import java.util.List;
-
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.composite.CompositeHandler;
@@ -34,10 +32,11 @@ import org.apache.felix.ipojo.metadata.Element;
  */
 public class InstanceHandlerDescription extends HandlerDescription {
 
+  
     /**
      * List of managed instances.
      */
-    private List m_instances;
+    private ManagedConfiguration[] m_configurations; 
 
     /**
      * Constructor.
@@ -45,9 +44,9 @@ public class InstanceHandlerDescription extends HandlerDescription {
      * @param handler : handler
      * @param insts : list of component instances
      */
-    public InstanceHandlerDescription(CompositeHandler handler, List insts) {
+    public InstanceHandlerDescription(CompositeHandler handler, ManagedConfiguration[] insts) {
         super(handler);
-        m_instances = insts;
+        m_configurations = insts;
     }
 
     /**
@@ -57,8 +56,8 @@ public class InstanceHandlerDescription extends HandlerDescription {
      */
     public Element getHandlerInfo() {
         Element instances = super.getHandlerInfo();
-        for (int i = 0; i < m_instances.size(); i++) {
-            ManagedConfiguration inst = (ManagedConfiguration) m_instances.get(i);
+        for (int i = 0; i < m_configurations.length; i++) {
+            ManagedConfiguration inst = m_configurations[i];
             Element instance = new Element("Instance", "");
             if (inst.getInstance() == null) { 
                 instance.addAttribute(new Attribute("Factory", inst.getConfiguration().get("component").toString()));

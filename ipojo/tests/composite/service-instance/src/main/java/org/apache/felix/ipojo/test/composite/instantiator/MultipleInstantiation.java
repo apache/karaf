@@ -26,6 +26,7 @@ import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.ServiceContext;
 import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
+import org.apache.felix.ipojo.composite.CompositeInstanceDescription;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
 import org.apache.felix.ipojo.test.composite.service.BarService;
 import org.apache.felix.ipojo.test.composite.util.Utils;
@@ -202,12 +203,11 @@ public class MultipleInstantiation extends OSGiTestCase {
 		ServiceReference ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), "under");
 		assertNotNull("Check architecture availability", ref);
 		Architecture arch = (Architecture) getContext().getService(ref);
-		InstanceDescription id = arch.getInstanceDescription();
+        CompositeInstanceDescription id = (CompositeInstanceDescription) arch.getInstanceDescription();
 		
 		assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
 		InstanceDescription[] contained = id.getContainedInstances();
 		assertEquals("Check contained instances count", contained.length, 3);
-		assertEquals("Check that no object are created" , id.getCreatedObjects().length, 0);
 		assertEquals("Check instance name" , id.getName(), "under");
 		assertEquals("Check component type name" , id.getComponentDescription().getName(), "composite.bar.2");
 		
@@ -220,11 +220,10 @@ public class MultipleInstantiation extends OSGiTestCase {
 		ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), "under");
 		assertNotNull("Check architecture availability", ref);
 		arch = (Architecture) getContext().getService(ref);
-		id = arch.getInstanceDescription();
+		//id = arch.getInstanceDescription();
 		assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
 		contained = id.getContainedInstances();
 		assertEquals("Check contained instances count", contained.length, 2);
-		assertEquals("Check that no object are created" , id.getCreatedObjects().length, 0);
 		assertEquals("Check instance name" , id.getName(), "under");
 		assertEquals("Check component type name" , id.getComponentDescription().getName(), "composite.bar.2");
 		
@@ -233,11 +232,10 @@ public class MultipleInstantiation extends OSGiTestCase {
 		ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), "under");
 		assertNotNull("Check architecture availability", ref);
 		arch = (Architecture) getContext().getService(ref);
-		id = arch.getInstanceDescription();
+		//id = arch.getInstanceDescription();
 		assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
 		contained = id.getContainedInstances();
 		assertEquals("Check contained instances count", contained.length, 1);
-		assertEquals("Check that no object are created" , id.getCreatedObjects().length, 0);
 		assertEquals("Check instance name" , id.getName(), "under");
 		assertEquals("Check component type name" , id.getComponentDescription().getName(), "composite.bar.2");
 
@@ -246,11 +244,10 @@ public class MultipleInstantiation extends OSGiTestCase {
 		ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), "under");
 		assertNotNull("Check architecture availability", ref);
 		arch = (Architecture) getContext().getService(ref);
-		id = arch.getInstanceDescription();
+		//id = arch.getInstanceDescription();
 		assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.INVALID);
 		contained = id.getContainedInstances();
 		assertEquals("Check contained instances count", contained.length, 0);
-		assertEquals("Check that no object are created" , id.getCreatedObjects().length, 0);
 		assertEquals("Check instance name" , id.getName(), "under");
 		assertEquals("Check component type name" , id.getComponentDescription().getName(), "composite.bar.2");
 
@@ -259,11 +256,10 @@ public class MultipleInstantiation extends OSGiTestCase {
 		ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), "under");
 		assertNotNull("Check architecture availability", ref);
 		arch = (Architecture) getContext().getService(ref);
-		id = arch.getInstanceDescription();
+		//id = arch.getInstanceDescription();
 		assertTrue("Check instance validity - 1", id.getState() == ComponentInstance.VALID);
 		contained = id.getContainedInstances();
 		assertEquals("Check contained instances count", contained.length, 1);
-		assertEquals("Check that no object are created" , id.getCreatedObjects().length, 0);
 		assertEquals("Check instance name" , id.getName(), "under");
 		assertEquals("Check component type name" , id.getComponentDescription().getName(), "composite.bar.2");
 

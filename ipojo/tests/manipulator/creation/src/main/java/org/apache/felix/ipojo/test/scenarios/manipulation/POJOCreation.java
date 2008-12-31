@@ -21,6 +21,7 @@ package org.apache.felix.ipojo.test.scenarios.manipulation;
 import java.util.Properties;
 
 import org.apache.felix.ipojo.ComponentInstance;
+import org.apache.felix.ipojo.PrimitiveInstanceDescription;
 import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
 import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
@@ -110,50 +111,50 @@ public class POJOCreation extends OSGiTestCase {
 	 * Check lazy creation.
 	 */
 	public void testLazyCreation() {
-		assertEquals("Check that no objects are created ", 0, lazzyArch.getInstanceDescription().getCreatedObjects().length);
+		assertEquals("Check that no objects are created ", 0, ((PrimitiveInstanceDescription) lazzyArch.getInstanceDescription()).getCreatedObjects().length);
 		ServiceReference ref = helper.getServiceReferenceByName(FooService.class.getName(), ci_lazzy.getInstanceName());
 		assertNotNull("Check that a FooService from " + ci_lazzy.getInstanceName() + " is available",ref);
 		FooService fs = (FooService) getServiceObject(ref);
 		assertTrue("Check the FooService invocation", fs.foo());
-		assertEquals("Check the creation of 1 object",1, lazzyArch.getInstanceDescription().getCreatedObjects().length);
+		assertEquals("Check the creation of 1 object",1,  ((PrimitiveInstanceDescription) lazzyArch.getInstanceDescription()).getCreatedObjects().length);
 	}
 	
 	/**
 	 * Check lazy and singleton creation.
 	 */
 	public void testLazyCreationSingleton() {
-        assertEquals("Check that no objects are created ", 0, lazzyArchSing.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check that no objects are created ", 0,  ((PrimitiveInstanceDescription) lazzyArchSing.getInstanceDescription()).getCreatedObjects().length);
         ServiceReference ref = helper.getServiceReferenceByName(FooService.class.getName(), ci_lazzy_sing.getInstanceName());
         assertNotNull("Check that a FooService from " + ci_lazzy_sing.getInstanceName() + " is available",ref);
         FooService fs = (FooService) getServiceObject(ref);
         assertTrue("Check the FooService invocation", fs.foo());
-        assertEquals("Check the creation of 1 object",1, lazzyArchSing.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check the creation of 1 object",1,  ((PrimitiveInstanceDescription) lazzyArchSing.getInstanceDescription()).getCreatedObjects().length);
     }
 	
 	/**
 	 * Check lazy and "several" creation.
 	 */
 	public void testLazyCreationSeveral() {
-        assertEquals("Check that no objects are created ", 0, lazzyArchSev.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check that no objects are created ", 0,  ((PrimitiveInstanceDescription) lazzyArchSev.getInstanceDescription()).getCreatedObjects().length);
         ServiceReference ref = helper.getServiceReferenceByName(FooService.class.getName(), ci_lazzy_sev.getInstanceName());
         assertNotNull("Check that a FooService from " + ci_lazzy_sev.getInstanceName() + " is available", ref);
         FooService fs = (FooService) getServiceObject(ref);
         FooService fs2 = (FooService) getServiceObject(ref);
         assertTrue("Check the FooService invocation", fs.foo());
         assertTrue("Check the FooService invocation-2", fs2.foo());
-        assertEquals("Check the creation of 1 object",1, lazzyArchSev.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check the creation of 1 object",1, ((PrimitiveInstanceDescription) lazzyArchSev.getInstanceDescription()).getCreatedObjects().length);
     }
 	
 	/**
 	 * Check immediate creation.
 	 */
 	public void testImmediateCreation() {
-		assertEquals("Check that one object is created ", 1, immeArch.getInstanceDescription().getCreatedObjects().length);
+		assertEquals("Check that one object is created ", 1, ((PrimitiveInstanceDescription) immeArch.getInstanceDescription()).getCreatedObjects().length);
 		ServiceReference ref = helper.getServiceReferenceByName(FooService.class.getName(), ci_immediate.getInstanceName());
 		assertNotNull("Check that a FooService from " + ci_immediate.getInstanceName() + " is available", ref);
 		FooService fs = (FooService) getServiceObject(ref);
 		assertTrue("Check the FooService invocation", fs.foo());
-		assertEquals("Check the creation of 1 object", 1, immeArch.getInstanceDescription().getCreatedObjects().length);
+		assertEquals("Check the creation of 1 object", 1, ((PrimitiveInstanceDescription) immeArch.getInstanceDescription()).getCreatedObjects().length);
 	}
     
     /**
@@ -165,19 +166,19 @@ public class POJOCreation extends OSGiTestCase {
         FooService fs = (FooService) getServiceObject(ref);
         Properties p = fs.fooProps();
         assertNotNull("Check the bundle context", p.get("context"));
-        assertEquals("Check the creation of 1 object",1, lazzyArch.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check the creation of 1 object",1, ((PrimitiveInstanceDescription) lazzyArch.getInstanceDescription()).getCreatedObjects().length);
     }
 
     /**
      * Test immediate singleton creation.
      */
     public void testImmediateSingletonCreation() {
-    	assertEquals("Check that one object is created ", 1, immeArchSing.getInstanceDescription().getCreatedObjects().length);
+    	assertEquals("Check that one object is created ", 1, ((PrimitiveInstanceDescription) immeArchSing.getInstanceDescription()).getCreatedObjects().length);
     	ServiceReference ref = helper.getServiceReferenceByName(FooService.class.getName(), ci_immediate_singleton.getInstanceName());
     	assertNotNull("Check that a FooService from " + ci_immediate_singleton.getInstanceName() + " is available",ref);
     	FooService fs = (FooService) getServiceObject(ref);
     	assertTrue("Check the FooService invocation", fs.foo());
-    	assertEquals("Check the creation of 1 object", 1, immeArchSing.getInstanceDescription().getCreatedObjects().length);
+    	assertEquals("Check the creation of 1 object", 1, ((PrimitiveInstanceDescription) immeArchSing.getInstanceDescription()).getCreatedObjects().length);
     }
 
     /**
@@ -185,14 +186,14 @@ public class POJOCreation extends OSGiTestCase {
      * (lazy & singleton creation)
      */
     public void testLazyCreationSingletonM() {
-        assertEquals("Check that no objects are created ", 0, lazzyArchSingM.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check that no objects are created ", 0, ((PrimitiveInstanceDescription) lazzyArchSingM.getInstanceDescription()).getCreatedObjects().length);
         ServiceReference ref = helper.getServiceReferenceByName(FooService.class.getName(), ci_lazzy_singM.getInstanceName());
         assertNotNull("Check that a FooService from " + ci_lazzy_singM.getInstanceName() + " is available",ref);
         FooService fs = (FooService) getServiceObject(ref);
         FooService fs2 = (FooService) getServiceObject(ref);
         assertTrue("Check the FooService invocation", fs.foo());
         assertTrue("Check the FooService invocation", fs2.foo());
-        assertEquals("Check the creation of 1 object",1, lazzyArchSingM.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check the creation of 1 object",1, ((PrimitiveInstanceDescription) lazzyArchSingM.getInstanceDescription()).getCreatedObjects().length);
     }
 
     /**
@@ -200,16 +201,16 @@ public class POJOCreation extends OSGiTestCase {
      * (lazy & several creation)
      */
     public void testLazyCreationSeveralM() {
-        assertEquals("Check that no objects are created ", 0, lazzyArchSevM.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check that no objects are created ", 0, ((PrimitiveInstanceDescription) lazzyArchSevM.getInstanceDescription()).getCreatedObjects().length);
         ServiceReference ref= helper.getServiceReferenceByName(FooService.class.getName(), ci_lazzy_sevM.getInstanceName());
         assertNotNull("Check that a FooService from " + ci_lazzy_sevM.getInstanceName() + " is available",ref);
         FooService fs = (FooService) getServiceObject(ref);
         assertTrue("Check the FooService invocation", fs.foo());
-        assertEquals("Check the creation of 1 object",1, lazzyArchSevM.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check the creation of 1 object",1, ((PrimitiveInstanceDescription) lazzyArchSevM.getInstanceDescription()).getCreatedObjects().length);
         FooService fs2 = (FooService) getServiceObject(ref);
         assertTrue("Check the FooService invocation-2", fs2.foo());
         // Only one object as the getService method is called only once (service factory) despite the policy="method".
-        assertEquals("Check the creation of 1 object",1, lazzyArchSevM.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check the creation of 1 object",1, ((PrimitiveInstanceDescription) lazzyArchSevM.getInstanceDescription()).getCreatedObjects().length);
     }
     
     /**

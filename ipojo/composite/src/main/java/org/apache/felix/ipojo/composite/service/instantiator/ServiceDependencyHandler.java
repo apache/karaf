@@ -61,6 +61,11 @@ public class ServiceDependencyHandler extends CompositeHandler implements Depend
      * Flag indicating if the handler has already finished the start method.
      */
     private boolean m_isStarted;
+    
+    /**
+     * The handler description.
+     */
+    private ServiceInstantiatorDescription m_description;
 
     /**
      * Source Managers.
@@ -228,10 +233,9 @@ public class ServiceDependencyHandler extends CompositeHandler implements Depend
             } else {
                 throw new ConfigurationException("Unknown action : " + action);
             }
-            
-            
-
         }
+        
+        m_description = new ServiceInstantiatorDescription(this, m_instances, m_importers);
     }
 
     /**
@@ -358,7 +362,7 @@ public class ServiceDependencyHandler extends CompositeHandler implements Depend
      * @see org.apache.felix.ipojo.CompositeHandler#getDescription()
      */
     public HandlerDescription getDescription() {
-        return new ServiceInstantiatorDescription(this, m_instances, m_importers);
+        return m_description;
     }
     
     public List getInstances() {

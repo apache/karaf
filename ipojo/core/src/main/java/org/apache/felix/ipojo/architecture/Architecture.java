@@ -28,7 +28,7 @@ public interface Architecture {
 
     /**
      * Returns the description of the instance.
-     * @return the current component instance description
+     * @return the component instance description
      */
     InstanceDescription getInstanceDescription();
 

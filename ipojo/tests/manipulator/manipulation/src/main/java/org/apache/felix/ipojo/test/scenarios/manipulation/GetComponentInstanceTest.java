@@ -23,6 +23,7 @@ import java.util.Properties;
 import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.Pojo;
+import org.apache.felix.ipojo.PrimitiveInstanceDescription;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
 import org.apache.felix.ipojo.junit4osgi.helpers.IPOJOHelper;
@@ -82,7 +83,7 @@ public class GetComponentInstanceTest extends OSGiTestCase {
 		assertEquals("Check component instance name", instance.getInstanceName(), compName);
 		assertEquals("Check component factory name", instance.getFactory().getName(), factName);
 		assertNotNull("Instance description not null", instance.getInstanceDescription());
-		InstanceDescription id = instance.getInstanceDescription();
+		PrimitiveInstanceDescription id = (PrimitiveInstanceDescription) instance.getInstanceDescription();
 		assertTrue("Check instance state", id.getState() == ComponentInstance.VALID);
 		assertEquals("Check created pojo count", id.getCreatedObjects().length, 1);
 		assertEquals("Check instance description name", id.getName(), compName); 

@@ -20,6 +20,7 @@ package org.apache.felix.ipojo.handlers.providedservice;
 
 import java.util.Properties;
 
+import org.apache.felix.ipojo.util.Property;
 import org.osgi.framework.ServiceReference;
 
 /**
@@ -32,51 +33,24 @@ public class ProvidedServiceDescription {
     /**
      * State : the service is unregistered.
      */
-    public static final int UNREGISTERED = 0;
+    public static final int UNREGISTERED = ProvidedService.UNREGISTERED;
 
     /**
      * State : the service is registered.
      */
-    public static final int REGISTERED = 1;
-
+    public static final int REGISTERED = ProvidedService.REGISTERED;
+    
     /**
-     * Provided Service Specification.
+     * The describe provided service.
      */
-    private String[] m_serviceSpecification;
-
-    /**
-     * State.
-     */
-    private int m_state;
-
-    /**
-     * The service reference.
-     */
-    private ServiceReference m_serviceReference;
-
-    // /**
-    // * Handler on the component description who contains this description.
-    // */
-    // private InstanceDescription m_parent;
-
-    /**
-     * Properties of the provided service.
-     */
-    private Properties m_properties = new Properties();
+    private ProvidedService m_ps;
 
     /**
      * Constructor.
-     * 
-     * @param serviceSpecification : the provided contract
-     * @param state : state (UNREGITRED | REGISTRED)
-     * @param ref : Service Registration (to obtain the reference), or null if
-     * state is UNREGISTRED
+     * @param ps the described provided service.
      */
-    public ProvidedServiceDescription(String[] serviceSpecification, int state, ServiceReference ref) {
-        m_serviceSpecification = serviceSpecification;
-        m_state = state;
-        m_serviceReference = ref;
-        // m_parent = parent;
+    public ProvidedServiceDescription(ProvidedService ps) {
+        m_ps = ps;
     }
 
     /**
@@ -84,34 +58,23 @@ public class ProvidedServiceDescription {
      * @return the provided contract name.
      */
     public String[] getServiceSpecification() {
-        return m_serviceSpecification;
+        return m_ps.getServiceSpecifications();
     }
 
     /**
-     * Add a property to the current provided service description.
-     * 
-     * @param key : the key of the property
-     * @param value : the value of the property
-     */
-    public void addProperty(String key, String value) {
-        m_properties.put(key, value);
-    }
-
-    /**
-     * Set the set of properties. This function create a clone of the argument.
-     * 
-     * @param props : the properties
-     */
-    public void setProperty(Properties props) {
-        m_properties = props;
-    }
-
-    /**
-     * Get the list of properties.
+     * Gets the list of properties.
+     * A copy of the actual property set is returned.
      * @return the properties.
      */
     public Properties getProperties() {
-        return m_properties;
+        Properties props = new Properties();
+        org.apache.felix.ipojo.util.Property[] ps = m_ps.getProperties();
+        for (int i = 0; i < ps.length; i++) {
+            if (ps[i].getValue() != Property.NO_VALUE) {
+                props.put(ps[i].getName(), ps[i].getValue());
+            }
+        }
+        return props;
     }
 
     /**
@@ -119,15 +82,15 @@ public class ProvidedServiceDescription {
      * @return the state of the provided service (UNREGISTERED | REGISTRED).
      */
     public int getState() {
-        return m_state;
+        return m_ps.getState();
     }
 
     /**
      * Get the service reference.
-     * @return the service reference (null if the service is unregistred).
+     * @return the service reference (null if the service is unregistered).
      */
     public ServiceReference getServiceReference() {
-        return m_serviceReference;
+        return m_ps.getServiceReference();
     }
 
 }

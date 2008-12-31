@@ -5,6 +5,7 @@ import java.util.Dictionary;
 import java.util.Properties;
 
 import org.apache.felix.ipojo.ComponentFactory;
+import org.apache.felix.ipojo.PrimitiveInstanceDescription;
 import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
 import org.apache.felix.ipojo.test.scenarios.configadmin.service.FooService;
@@ -76,21 +77,28 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
         
         String pid = configuration.getPid();
         
+        // Wait for the processing of the first configuration.
+        try {
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
+        } catch (InterruptedException e1) {
+            fail(e1.getMessage());
+        }
+        
         //  The instance should be created, wait for the architecture service
         Utils.waitForService(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         Architecture architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         
-        assertEquals("Check object", 1, architecture.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check object", 1, ((PrimitiveInstanceDescription) architecture.getInstanceDescription()).getCreatedObjects().length);
         
         FooService fs = (FooService) Utils.getServiceObject(getContext(), FooService.class.getName(), "(instance.name=" + pid + ")");
         Properties p = fs.fooProps();
         String mes = p.getProperty("message");
         int count = ((Integer) p.get("count")).intValue();
-        architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
+        //architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         
         assertEquals("Assert Message", "message", mes);
         assertEquals("Assert count", 1, count);
-        assertEquals("Check 1 object", 1, architecture.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check 1 object", 1, ((PrimitiveInstanceDescription) architecture.getInstanceDescription()).getCreatedObjects().length);
         
         props.put("message", "message2");
         try {
@@ -105,11 +113,11 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
         p = fs.fooProps();
         mes = p.getProperty("message");
         count = ((Integer) p.get("count")).intValue();
-        architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
+        //architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         
         assertEquals("Assert Message", "message2", mes);
         assertEquals("Assert count", 2, count);
-        assertEquals("Check 1 object", 1, architecture.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check 1 object", 1, ((PrimitiveInstanceDescription) architecture.getInstanceDescription()).getCreatedObjects().length);
         
         try {
             configuration.delete();
@@ -145,11 +153,18 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
         String pid = configuration.getPid();
         System.out.println("PID : " + pid);
         
+        // Wait for the processing of the first configuration.
+        try {
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
+        } catch (InterruptedException e1) {
+            fail(e1.getMessage());
+        }
+        
         //  The instance should be created, wait for the architecture service
         Utils.waitForService(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         Architecture architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         
-        assertEquals("Check object", 1, architecture.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check object", 1, ((PrimitiveInstanceDescription) architecture.getInstanceDescription()).getCreatedObjects().length);
         
         props.put("message", "message2");
         try {
@@ -160,20 +175,20 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
             fail(e.getMessage());
         }
         
-        architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
+        //architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         
-        assertEquals("Check object -2", 1, architecture.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check object -2", 1, ((PrimitiveInstanceDescription) architecture.getInstanceDescription()).getCreatedObjects().length);
         
         //Invoke
         FooService fs = (FooService) Utils.getServiceObject(getContext(), FooService.class.getName(), "(instance.name=" + pid + ")");
         Properties p = fs.fooProps();
         String mes = p.getProperty("message");
         int count = ((Integer) p.get("count")).intValue();
-        architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
+       // architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         
         assertEquals("Assert Message", "message2", mes);
         assertEquals("Assert count", 2, count);
-        assertEquals("Check 1 object", 1, architecture.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check 1 object", 1, ((PrimitiveInstanceDescription) architecture.getInstanceDescription()).getCreatedObjects().length);
                 
         try {
             configuration.delete();
@@ -208,26 +223,41 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
         
         String pid = configuration.getPid();
         
+        // Wait for the processing of the first configuration.
+        try {
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
+        } catch (InterruptedException e1) {
+            fail(e1.getMessage());
+        }
+        
         assertNull("check no instance", Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")"));
         
         factory.start();
+
         
+        // Wait for the processing of the first configuration.
+        try {
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
+        } catch (InterruptedException e1) {
+            fail(e1.getMessage());
+        }
+
         
         //  The instance should be created, wait for the architecture service
         Utils.waitForService(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         Architecture architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         
-        assertEquals("Check object", 1, architecture.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check object", 1, ((PrimitiveInstanceDescription) architecture.getInstanceDescription()).getCreatedObjects().length);
         
         FooService fs = (FooService) Utils.getServiceObject(getContext(), FooService.class.getName(), "(instance.name=" + pid + ")");
         Properties p = fs.fooProps();
         String mes = p.getProperty("message");
         int count = ((Integer) p.get("count")).intValue();
-        architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
+        //architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         
         assertEquals("Assert Message", "message", mes);
         assertEquals("Assert count", 1, count);
-        assertEquals("Check 1 object", 1, architecture.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check 1 object", 1, ((PrimitiveInstanceDescription) architecture.getInstanceDescription()).getCreatedObjects().length);
         
         props.put("message", "message2");
         try {
@@ -242,12 +272,12 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
         p = fs.fooProps();
         mes = p.getProperty("message");
         count = ((Integer) p.get("count")).intValue();
-        architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
+       // architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         
         assertEquals("Assert Message", "message2", mes);
         //assertEquals("Assert count", 2, count);
         // This test was removed as the result can be 3. 
-        assertEquals("Check 1 object", 1, architecture.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check 1 object", 1, ((PrimitiveInstanceDescription) architecture.getInstanceDescription()).getCreatedObjects().length);
         
         try {
             configuration.delete();
@@ -283,16 +313,30 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
         
         String pid = configuration.getPid();
         
+        // Wait for the processing of the first configuration.
+        try {
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
+        } catch (InterruptedException e1) {
+            fail(e1.getMessage());
+        }
+        
         assertNull("check no instance", Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")"));
         
         factory.start();
         
+        // Wait for the processing of the first configuration.
+        try {
+            Thread.sleep(ConfigurationTestSuite.UPDATE_WAIT_TIME);
+        } catch (InterruptedException e1) {
+            fail(e1.getMessage());
+        }
+
         
         //  The instance should be created, wait for the architecture service
         Utils.waitForService(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         Architecture architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         
-        assertEquals("Check object", 1, architecture.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check object", 1, ((PrimitiveInstanceDescription) architecture.getInstanceDescription()).getCreatedObjects().length);
         
         props.put("message", "message2");
         try {
@@ -303,20 +347,20 @@ public class ManagedServiceFactoryTestForImmediate extends OSGiTestCase {
             fail(e.getMessage());
         }
         
-        architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
+        //architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         
-        assertEquals("Check object -1", 1, architecture.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check object -1", 1, ((PrimitiveInstanceDescription) architecture.getInstanceDescription()).getCreatedObjects().length);
         
         //Invoke
         FooService fs = (FooService) Utils.getServiceObject(getContext(), FooService.class.getName(), "(instance.name=" + pid + ")");
         Properties p = fs.fooProps();
         String mes = p.getProperty("message");
         int count = ((Integer) p.get("count")).intValue();
-        architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
+       // architecture = (Architecture) Utils.getServiceObject(getContext(), Architecture.class.getName(), "(architecture.instance="+pid+")");
         
         assertEquals("Assert Message", "message2", mes);
         assertEquals("Assert count", 2, count);
-        assertEquals("Check 1 object", 1, architecture.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check 1 object", 1, ((PrimitiveInstanceDescription) architecture.getInstanceDescription()).getCreatedObjects().length);
                 
         try {
             configuration.delete();

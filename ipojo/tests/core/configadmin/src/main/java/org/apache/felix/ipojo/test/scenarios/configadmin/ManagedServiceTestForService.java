@@ -6,6 +6,7 @@ import java.util.Properties;
 
 import org.apache.felix.ipojo.ComponentFactory;
 import org.apache.felix.ipojo.ComponentInstance;
+import org.apache.felix.ipojo.PrimitiveInstanceDescription;
 import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
 import org.apache.felix.ipojo.test.scenarios.configadmin.service.FooService;
@@ -68,14 +69,14 @@ public class ManagedServiceTestForService extends OSGiTestCase {
         }
         
         ServiceReference ref = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), instance.getInstanceName());
-        assertEquals("Check no object", 0, instance.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check no object", 0, ((PrimitiveInstanceDescription) instance.getInstanceDescription()).getCreatedObjects().length);
         assertNotNull("FS availability", ref);
         
         FooService fs = (FooService) getContext().getService(ref);
         Properties p = fs.fooProps();
         String mes = p.getProperty("message");
         int count = ((Integer) p.get("count")).intValue();
-        assertEquals("Check 1 object", 1, instance.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check 1 object", 1, ((PrimitiveInstanceDescription) instance.getInstanceDescription()).getCreatedObjects().length);
         assertEquals("Check message", "message", mes);
         assertEquals("Check count", 1, count);
         
@@ -95,14 +96,14 @@ public class ManagedServiceTestForService extends OSGiTestCase {
         }
         
         ref = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), instance.getInstanceName());
-        assertEquals("Check 1 object", 1, instance.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check 1 object", 1, ((PrimitiveInstanceDescription) instance.getInstanceDescription()).getCreatedObjects().length);
         assertNotNull("FS availability", ref);
         
         fs = (FooService) getContext().getService(ref);
         p = fs.fooProps();
         mes = p.getProperty("message");
         count = ((Integer) p.get("count")).intValue();
-        assertEquals("Check 1 object", 1, instance.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check 1 object", 1, ((PrimitiveInstanceDescription) instance.getInstanceDescription()).getCreatedObjects().length);
         assertEquals("Check message", "message2", mes);
         assertEquals("Check count", 2, count);
         
@@ -130,15 +131,15 @@ public class ManagedServiceTestForService extends OSGiTestCase {
         Architecture arch = (Architecture) Utils.getServiceObject(getContext(), org.apache.felix.ipojo.architecture.Architecture.class.getName(), "(architecture.instance=" + conf.getPid() + ")");
         
         ServiceReference ref = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), conf.getPid());
-        assertEquals("Check no object", 0, arch.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check no object", 0, ((PrimitiveInstanceDescription) arch.getInstanceDescription()).getCreatedObjects().length);
         assertNotNull("FS availability", ref);
         
-        arch = (Architecture) Utils.getServiceObject(getContext(), org.apache.felix.ipojo.architecture.Architecture.class.getName(), "(architecture.instance=" + conf.getPid() + ")");
+        // arch = (Architecture) Utils.getServiceObject(getContext(), org.apache.felix.ipojo.architecture.Architecture.class.getName(), "(architecture.instance=" + conf.getPid() + ")");
         FooService fs = (FooService) getContext().getService(ref);
         Properties p = fs.fooProps();
         String mes = p.getProperty("message");
         int count = ((Integer) p.get("count")).intValue();
-        assertEquals("Check 1 object", 1, arch.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check 1 object", 1, ((PrimitiveInstanceDescription) arch.getInstanceDescription()).getCreatedObjects().length);
         assertEquals("Check message", "message", mes);
         assertEquals("Check count", 1, count);
         
@@ -157,17 +158,17 @@ public class ManagedServiceTestForService extends OSGiTestCase {
             fail(e.getMessage());
         }
         
-        arch = (Architecture) Utils.getServiceObject(getContext(), org.apache.felix.ipojo.architecture.Architecture.class.getName(), "(architecture.instance=" + conf.getPid() + ")");
+        // arch = (Architecture) Utils.getServiceObject(getContext(), org.apache.felix.ipojo.architecture.Architecture.class.getName(), "(architecture.instance=" + conf.getPid() + ")");
         ref = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), conf.getPid());
-        assertEquals("Check 1 object", 1, arch.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check 1 object", 1, ((PrimitiveInstanceDescription) arch.getInstanceDescription()).getCreatedObjects().length);
         assertNotNull("FS availability", ref);
 
-        arch = (Architecture) Utils.getServiceObject(getContext(), org.apache.felix.ipojo.architecture.Architecture.class.getName(), "(architecture.instance=" + conf.getPid() + ")");
+        // arch = (Architecture) Utils.getServiceObject(getContext(), org.apache.felix.ipojo.architecture.Architecture.class.getName(), "(architecture.instance=" + conf.getPid() + ")");
         fs = (FooService) getContext().getService(ref);
         p = fs.fooProps();
         mes = p.getProperty("message");
         count = ((Integer) p.get("count")).intValue();
-        assertEquals("Check 1 object", 1, arch.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check 1 object", 1, ((PrimitiveInstanceDescription) arch.getInstanceDescription()).getCreatedObjects().length);
         assertEquals("Check message", "message2", mes);
         assertEquals("Check count", 2, count);
         
@@ -209,14 +210,14 @@ public class ManagedServiceTestForService extends OSGiTestCase {
         }
         
         ServiceReference ref = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), instance.getInstanceName());
-        assertEquals("Check no object", 0, instance.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check no object", 0, ((PrimitiveInstanceDescription) instance.getInstanceDescription()).getCreatedObjects().length);
         assertNotNull("FS availability", ref);
         
         FooService fs = (FooService) getContext().getService(ref);
         Properties p = fs.fooProps();
         String mes = p.getProperty("message");
         int count = ((Integer) p.get("count")).intValue();
-        assertEquals("Check 1 object", 1, instance.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check 1 object", 1, ((PrimitiveInstanceDescription) instance.getInstanceDescription()).getCreatedObjects().length);
         assertEquals("Check message", "message2", mes); // Already reconfigured.
         assertEquals("Check count", 1, count);
         
@@ -249,14 +250,14 @@ public class ManagedServiceTestForService extends OSGiTestCase {
         }
         
         ref = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), instance.getInstanceName());
-        assertEquals("Check no object", 0, instance.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check no object", 0, ((PrimitiveInstanceDescription) instance.getInstanceDescription()).getCreatedObjects().length);
         assertNotNull("FS availability", ref);
         
         fs = (FooService) getContext().getService(ref);
         p = fs.fooProps();
         mes = p.getProperty("message");
         count = ((Integer) p.get("count")).intValue();
-        assertEquals("Check 1 object", 1, instance.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check 1 object", 1, ((PrimitiveInstanceDescription) instance.getInstanceDescription()).getCreatedObjects().length);
         assertEquals("Check message", "message3", mes); // Already reconfigured.
         assertEquals("Check count", 1, count);
         
@@ -295,14 +296,14 @@ public class ManagedServiceTestForService extends OSGiTestCase {
         }
         
         ServiceReference ref = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), instance.getInstanceName());
-        assertEquals("Check no object", 0, instance.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check no object", 0, ((PrimitiveInstanceDescription) instance.getInstanceDescription()).getCreatedObjects().length);
         assertNotNull("FS availability", ref);
         
         FooService fs = (FooService) getContext().getService(ref);
         Properties p = fs.fooProps();
         String mes = p.getProperty("message");
         int count = ((Integer) p.get("count")).intValue();
-        assertEquals("Check 1 object", 1, instance.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check 1 object", 1, ((PrimitiveInstanceDescription) instance.getInstanceDescription()).getCreatedObjects().length);
         assertEquals("Check message", "message2", mes); // Already reconfigured.
         assertEquals("Check count", 1, count);
         
@@ -335,14 +336,14 @@ public class ManagedServiceTestForService extends OSGiTestCase {
         }
         
         ref = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), instance.getInstanceName());
-        assertEquals("Check no object", 0, instance.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check no object", 0, ((PrimitiveInstanceDescription) instance.getInstanceDescription()).getCreatedObjects().length);
         assertNotNull("FS availability", ref);
         
         fs = (FooService) getContext().getService(ref);
         p = fs.fooProps();
         mes = p.getProperty("message");
         count = ((Integer) p.get("count")).intValue();
-        assertEquals("Check 1 object", 1, instance.getInstanceDescription().getCreatedObjects().length);
+        assertEquals("Check 1 object", 1, ((PrimitiveInstanceDescription) instance.getInstanceDescription()).getCreatedObjects().length);
         assertEquals("Check message", "message3", mes); // Already reconfigured.
         assertEquals("Check count", 1, count);
         

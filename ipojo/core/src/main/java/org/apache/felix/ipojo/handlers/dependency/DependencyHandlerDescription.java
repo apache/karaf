@@ -21,7 +21,6 @@ package org.apache.felix.ipojo.handlers.dependency;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.felix.ipojo.Handler;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
@@ -42,11 +41,16 @@ public class DependencyHandlerDescription extends HandlerDescription {
     private DependencyDescription[] m_dependencies = new DependencyDescription[0];
 
     /**
-     * Constructor.
-     * @param handler : Handler.
+     * Creates the Dependency Handler description.
+     * @param handler the Dependency Handler.
+     * @param deps the Dependencies
      */
-    public DependencyHandlerDescription(Handler handler) {
+    public DependencyHandlerDescription(DependencyHandler handler, Dependency[] deps) {
         super(handler);
+        m_dependencies = new DependencyDescription[deps.length];
+        for (int i = 0; i < m_dependencies.length; i++) {
+            m_dependencies[i] = new DependencyDescription(deps[i]);
+        }
     }
 
     /**
@@ -58,27 +62,7 @@ public class DependencyHandlerDescription extends HandlerDescription {
     }
 
     /**
-     * Add a dependency.
-     * 
-     * @param dep : the dependency to add
-     */
-    public void addDependency(DependencyDescription dep) {
-        // Verify that the dependency description is not already in the array.
-        for (int i = 0; i < m_dependencies.length; i++) {
-            if (m_dependencies[i] == dep) {
-                return; // NOTHING TO DO, the description is already in the
-                        // array
-            }
-        }
-        // The component Description is not in the array, add it
-        DependencyDescription[] newDep = new DependencyDescription[m_dependencies.length + 1];
-        System.arraycopy(m_dependencies, 0, newDep, 0, m_dependencies.length);
-        newDep[m_dependencies.length] = dep;
-        m_dependencies = newDep;
-    }
-
-    /**
-     * Build Dependency Handler description.
+     * Builds the Dependency Handler description.
      * @return the handler description.
      * @see org.apache.felix.ipojo.architecture.HandlerDescription#getHandlerInfo()
      */
