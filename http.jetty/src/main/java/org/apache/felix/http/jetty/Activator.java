@@ -23,6 +23,7 @@ import java.util.Properties;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.HandlerCollection;
+import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.HashUserRealm;
 import org.mortbay.jetty.security.SslSocketConnector;
@@ -87,6 +88,10 @@ public class Activator implements BundleActivator
         name of the service property to set with the https port used. If not supplied
         then the HTTPS_PORT property name will be used for the service property */
     public static final String  HTTPS_SVCPROP_PORT   = "org.apache.felix.http.svcprop.port.secure";
+
+    /** Felix specific property. Controls whether NIO will be used. If not supplied
+        then will default to true. */
+    public static final String  HTTP_NIO             = "org.apache.felix.http.nio";
     
     /** Legacy Oscar property support. Controls whether to enable HTTPS */
     public static final String  OSCAR_HTTPS_ENABLE   = "org.ungoverned.osgi.bundle.https.enable";
@@ -253,7 +258,8 @@ public class Activator implements BundleActivator
         m_server.addUserRealm( realm );
 
         // Add a regular HTTP listener
-        Connector connector = new SelectChannelConnector();
+        Connector connector = getBooleanProperty( HTTP_NIO, true ) ? 
+                              (Connector) new SelectChannelConnector() : (Connector) new SocketConnector();
         connector.addLifeCycleListener(
                 new ConnectorListener(getStringProperty(HTTP_SVCPROP_PORT, HTTP_PORT))
             );
