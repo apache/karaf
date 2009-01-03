@@ -101,16 +101,18 @@ public class BundleRepositoryRender extends AbstractObrPlugin implements Render
         this.header( pw );
 
         RepositoryAdmin repoAdmin = getRepositoryAdmin();
-        Repository[] repos;
-        if ( repoAdmin != null )
+        if ( repoAdmin == null )
         {
-            repos = repoAdmin.listRepositories();
-        }
-        else
-        {
-            repos = null;
-        }
+            pw.println( "<tr class='content'>" );
+            pw.println( "<td class='content' colspan='4'>RepositoryAdmin Service not available</td>" );
+            pw.println( "</tr>" );
 
+            footer( pw );
+
+            return;
+        }
+        
+        Repository[] repos = repoAdmin.listRepositories();
         Set activeURLs = new HashSet();
         if ( repos == null || repos.length == 0 )
         {
