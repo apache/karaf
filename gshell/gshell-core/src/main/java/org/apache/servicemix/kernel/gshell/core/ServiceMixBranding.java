@@ -34,6 +34,8 @@ public class ServiceMixBranding extends Branding {
         "|____/ \\___|_|    \\_/ |_|\\___\\___|_|  |_|_/_/\\_\\",
     };
 
+    private String prompt;
+
     public String getName() {
         return "servicemix";
     }
@@ -76,5 +78,13 @@ public class ServiceMixBranding extends Branding {
         out.flush();
 
         return writer.toString();
+    }
+
+    public String getPrompt() {
+        return prompt;
+    }
+
+    public void setPrompt(String prompt) {
+        this.prompt = prompt;
     }
 }

@@ -43,6 +43,7 @@
         <property name="port" value="${sshPort}" />
         <property name="shellFactory">
             <bean class="org.apache.geronimo.gshell.commands.ssh.ShellFactoryImpl">
+                <property name="application" ref="application" />
                 <property name="completers">
                     <list>
                         <ref bean="commandsCompleter"/>

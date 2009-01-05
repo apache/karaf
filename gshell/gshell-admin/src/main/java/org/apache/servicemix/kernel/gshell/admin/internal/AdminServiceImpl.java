@@ -123,12 +123,13 @@ public class AdminServiceImpl implements AdminService, InitializingBean {
         copyResourceToDir(serviceMixBase, "etc/org.ops4j.pax.logging.cfg", true);
         copyResourceToDir(serviceMixBase, "etc/org.ops4j.pax.url.mvn.cfg", true);
         copyResourceToDir(serviceMixBase, "etc/startup.properties", true);
-        copyResourceToDir(serviceMixBase, "etc/system.properties", true);
 
         HashMap<String, String> props = new HashMap<String, String>();
+        props.put("${servicemix.name}", name);
         props.put("${servicemix.home}", System.getProperty("servicemix.home"));
         props.put("${servicemix.base}", serviceMixBase.getPath());
         props.put("${servicemix.sshPort}", Integer.toString(sshPort));
+        copyFilteredResourceToDir(serviceMixBase, "etc/system.properties", props);
         copyFilteredResourceToDir(serviceMixBase, "etc/org.apache.servicemix.shell.cfg", props);
         if( System.getProperty("os.name").startsWith("Win") ) {
             copyFilteredResourceToDir(serviceMixBase, "bin/servicemix.bat", props);
