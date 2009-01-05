@@ -86,7 +86,7 @@
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
         <gshell.version>1.0-alpha-2-SNAPSHOT</gshell.version>
         <jaxp.ri.version>1.4.2_1-SNAPSHOT</jaxp.ri.version>
-        <junit.version>4.4_1</junit.version>
+        <junit.version>3.8.2_1-SNAPSHOT</junit.version>
         <jline.version>0.9.94_1-SNAPSHOT</jline.version>
         <log4j.version>1.2.14</log4j.version>
         <mina.version>1.1.7_1-SNAPSHOT</mina.version>
@@ -95,8 +95,8 @@
         <pax.url.version>0.3.2</pax.url.version>
         <servicemix.legal.version>1.0</servicemix.legal.version>
         <servicemix.specs.version>1.2-SNAPSHOT</servicemix.specs.version>
-        <spring.osgi.version>1.1.0</spring.osgi.version>
-        <spring.version>2.5.5</spring.version>
+        <spring.osgi.version>1.2.0-m2</spring.osgi.version>
+        <spring.version>2.5.6</spring.version>
         <sshd.version>0.1</sshd.version>
         <woodstox.version>3.2.7_1</woodstox.version>
     </properties>
@@ -143,6 +143,19 @@
             <id>ops4j</id>
             <name>OPS4j Repository</name>
             <url>http://repository.ops4j.org/maven2</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <!-- Spring milestones repository -->
+        <!-- TODO: remove this repo when spring-dm 1.2.0 is out -->
+        <repository>
+            <id>spring-milestone</id>
+            <name>Spring Portfolio Milestone Repository</name>
+            <url>http://s3.amazonaws.com/maven.springframework.org/milestone</url>
             <releases>
                 <enabled>true</enabled>
             </releases>

@@ -16,14 +16,11 @@
  */
 package org.apache.servicemix.kernel.testing.support;
 
-import org.junit.Test;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertEquals;
+import junit.framework.TestCase;
 
-public class AbstractIntegrationTestTest {
 
-    @Test
+public class AbstractIntegrationTestTest extends TestCase {
+
     public void testSnapshotVersion() {
         assertTrue(AbstractIntegrationTest.isTimestamped("0.9.0-20070713.230317-1"));
         assertTrue(AbstractIntegrationTest.isSnapshot("0.9.0-SNAPSHOT"));

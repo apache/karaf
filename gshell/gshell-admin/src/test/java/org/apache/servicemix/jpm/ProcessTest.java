@@ -18,16 +18,11 @@ package org.apache.servicemix.jpm;
 
 import java.io.File;
 
-import org.junit.Test;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import org.apache.servicemix.jpm.impl.ScriptUtils;
+import junit.framework.TestCase;
 
-public class ProcessTest {
+public class ProcessTest extends TestCase {
 
-    @Test
     public void testCreate() throws Exception {
         String javaPath = new File(System.getProperty("java.home"), "bin/java" + (ScriptUtils.isWindows() ? ".exe" : "")).getCanonicalPath();
         System.err.println(javaPath);
@@ -60,8 +55,8 @@ public class ProcessTest {
     }
 
     /*
-    @Test
-    @Ignore("When the process creation fails, no error is reported by the script")
+     * When the process creation fails, no error is reported by the script
+     * 
     public void testFailure() throws Exception {
         ProcessBuilder builder = ProcessBuilderFactory.newInstance().newBuilder();
         Process p = builder.command("ec").start();

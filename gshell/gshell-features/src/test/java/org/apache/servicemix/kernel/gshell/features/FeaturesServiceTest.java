@@ -20,18 +20,16 @@ import java.net.URI;
 import java.io.InputStream;
 
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
-import org.junit.Test;
 import org.apache.servicemix.kernel.gshell.features.internal.FeaturesServiceImpl;
 import org.easymock.EasyMock;
 import org.osgi.service.prefs.PreferencesService;
 import org.osgi.service.prefs.Preferences;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Bundle;
+import junit.framework.TestCase;
 
-public class FeaturesServiceTest {
+public class FeaturesServiceTest extends TestCase {
 
-    @Test
     public void testInstallFeature() throws Exception {
         URI uri = getClass().getResource("repo2.xml").toURI();
 

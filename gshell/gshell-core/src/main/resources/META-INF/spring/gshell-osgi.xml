@@ -19,12 +19,15 @@
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:ctx="http://www.springframework.org/schema/context"
        xmlns:osgi="http://www.springframework.org/schema/osgi"
        xmlns:osgix="http://www.springframework.org/schema/osgi-compendium"
        xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="
   http://www.springframework.org/schema/beans
   http://www.springframework.org/schema/beans/spring-beans.xsd
+  http://www.springframework.org/schema/context
+  http://www.springframework.org/schema/context/spring-context.xsd
   http://www.springframework.org/schema/util
   http://www.springframework.org/schema/util/spring-util.xsd
   http://www.springframework.org/schema/osgi
@@ -59,14 +62,14 @@
     <osgi:service ref="localShell" interface="org.apache.geronimo.gshell.shell.Shell">
     </osgi:service>
 
-    <osgix:property-placeholder persistent-id="org.apache.servicemix.shell">
-        <osgix:default-properties>
-            <prop key="startLocalConsole">true</prop>
-            <prop key="startRemoteShell">true</prop>
-            <prop key="sshPort">8101</prop>
-            <prop key="sshRealm">servicemix</prop>
-            <prop key="hostKey">${servicemix.base}/etc/host.key</prop>
-        </osgix:default-properties>
-    </osgix:property-placeholder>
+    <osgix:cm-properties id="cmProps" persistent-id="org.apache.servicemix.shell">
+        <prop key="startLocalConsole">true</prop>
+        <prop key="startRemoteShell">true</prop>
+        <prop key="sshPort">8101</prop>
+        <prop key="sshRealm">servicemix</prop>
+        <prop key="hostKey">${servicemix.base}/etc/host.key</prop>
+    </osgix:cm-properties>
+
+    <ctx:property-placeholder properties-ref="cmProps" />
     
 </beans>

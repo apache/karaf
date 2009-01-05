@@ -42,6 +42,7 @@ public class AbstractIntegrationTest extends AbstractConfigurableBundleCreatorTe
         try {
             File f = new File("target/smx4");
             f.mkdirs();
+            System.setProperty("servicemix.name", "root");
             System.setProperty("servicemix.home", f.getAbsolutePath());
             System.setProperty("servicemix.base", f.getAbsolutePath());
             System.setProperty("org.apache.servicemix.filemonitor.configDir", new File(f, "etc").getAbsolutePath());

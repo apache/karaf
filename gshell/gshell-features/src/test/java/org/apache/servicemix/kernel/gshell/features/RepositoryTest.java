@@ -18,14 +18,12 @@ package org.apache.servicemix.kernel.gshell.features;
 
 import java.net.URI;
 
-import static org.junit.Assert.*;
-import org.junit.Test;
 import org.apache.servicemix.kernel.gshell.features.internal.RepositoryImpl;
+import junit.framework.TestCase;
 
 
-public class RepositoryTest {
+public class RepositoryTest extends TestCase {
 
-    @Test
     public void testLoad() throws Exception {
         RepositoryImpl r = new RepositoryImpl(getClass().getResource("repo1.xml").toURI());
         // Check repo

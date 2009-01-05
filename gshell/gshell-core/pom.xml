@@ -39,9 +39,11 @@
 
     <properties>
         <gshell.osgi.import>
+            org.springframework.aop,
             org.springframework.aop.framework,
             org.springframework.beans.factory.annotation,
             org.springframework.context.annotation,
+            org.springframework.osgi.service.importer,
             org.aopalliance.aop,
             org.apache.commons.vfs.provider.temp,
             org.apache.commons.vfs.provider.ram,
