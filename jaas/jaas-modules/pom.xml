@@ -80,6 +80,7 @@
                         </Export-Package>
                         <Import-Package>
                             org.apache.servicemix.kernel.jaas.config,
+                            org.springframework.beans.factory.config,
                             *
                         </Import-Package>
                         <Spring-Context>*;publish-context:=false;create-asynchronously:=false</Spring-Context>

@@ -29,6 +29,7 @@
   http://servicemix.apache.org/jaas
   http://servicemix.apache.org/schema/servicemix-jaas.xsd">
 
+    <!--
     <bean id="configAdminHolder" class="org.apache.servicemix.kernel.jaas.modules.osgi.ConfigAdminHolder">
         <property name="service" ref="configAdmin" />
     </bean>
@@ -38,6 +39,16 @@
     <jaas:config id="servicemix">
         <jaas:module className="org.apache.servicemix.kernel.jaas.modules.osgi.OsgiConfigLoginModule" flags="required">
             pid = org.apache.servicemix.users
+        </jaas:module>
+    </jaas:config>
+    -->
+
+    <!-- Bean to allow the ${servicemix.home} property to be correctly resolved -->
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" />
+
+    <jaas:config id="servicemix">
+        <jaas:module className="org.apache.servicemix.kernel.jaas.modules.properties.PropertiesLoginModule" flags="required">
+            users = ${servicemix.home}/etc/users.properties
         </jaas:module>
     </jaas:config>
 
