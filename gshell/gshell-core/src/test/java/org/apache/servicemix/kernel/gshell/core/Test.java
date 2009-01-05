@@ -27,6 +27,7 @@ public class Test extends TestCase {
     public void test() throws Exception {
 
         System.setProperty("startLocalConsole", "true");
+        System.setProperty("servicemix.name", "root");
 
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
                 new String[] { "META-INF/spring/gshell.xml",
