@@ -19,12 +19,15 @@
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:ctx="http://www.springframework.org/schema/context"
        xmlns:osgi="http://www.springframework.org/schema/osgi"
        xmlns:osgix="http://www.springframework.org/schema/osgi-compendium"
        xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="
   http://www.springframework.org/schema/beans
   http://www.springframework.org/schema/beans/spring-beans.xsd
+  http://www.springframework.org/schema/context
+  http://www.springframework.org/schema/context/spring-context.xsd
   http://www.springframework.org/schema/util
   http://www.springframework.org/schema/util/spring-util.xsd
   http://www.springframework.org/schema/osgi
@@ -90,19 +93,19 @@
         </property>
         <property name="assembler" ref="assembler"/>
     </bean>
-    
+
     <!-- Property place holder -->
-    <osgix:property-placeholder persistent-id="org.apache.servicemix.management">
-        <osgix:default-properties>
-            <prop key="rmiRegistryPort">1099</prop>
-            <prop key="jmxRealm">servicemix</prop>
-            <prop key="serviceUrl">service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi</prop>
-            <prop key="daemon">true</prop>
-            <prop key="threaded">true</prop>
-            <prop key="objectName">connector:name=rmi</prop>
-            <prop key="frameworkName">org.osgi:name=Framework</prop>
-        </osgix:default-properties>
-    </osgix:property-placeholder>
+    <osgix:cm-properties id="cmProps" persistent-id="org.apache.servicemix.management">
+        <prop key="rmiRegistryPort">1099</prop>
+        <prop key="jmxRealm">servicemix</prop>
+        <prop key="serviceUrl">service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi</prop>
+        <prop key="daemon">true</prop>
+        <prop key="threaded">true</prop>
+        <prop key="objectName">connector:name=rmi</prop>
+        <prop key="frameworkName">org.osgi:name=Framework</prop>
+    </osgix:cm-properties>
+
+    <ctx:property-placeholder properties-ref="cmProps" />
 
 </beans>
 

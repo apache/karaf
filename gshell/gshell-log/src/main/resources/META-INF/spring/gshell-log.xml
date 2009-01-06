@@ -19,6 +19,7 @@
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:ctx="http://www.springframework.org/schema/context"
        xmlns:osgi="http://www.springframework.org/schema/osgi"
        xmlns:osgix="http://www.springframework.org/schema/osgi-compendium"
        xmlns:util="http://www.springframework.org/schema/util"
@@ -26,6 +27,8 @@
        xsi:schemaLocation="
   http://www.springframework.org/schema/beans
   http://www.springframework.org/schema/beans/spring-beans.xsd
+  http://www.springframework.org/schema/context
+  http://www.springframework.org/schema/context/spring-context.xsd
   http://www.springframework.org/schema/osgi
   http://www.springframework.org/schema/osgi/spring-osgi.xsd
   http://www.springframework.org/schema/osgi-compendium
@@ -79,11 +82,11 @@
         </osgi:service-properties>
     </osgi:service>
 
-    <osgix:property-placeholder persistent-id="org.apache.servicemix.log">
-        <osgix:default-properties>
-            <prop key="size">500</prop>
-            <prop key="pattern">%d{ABSOLUTE} | %-5.5p | %-16.16t | %-32.32c{1} | %-32.32C %4L | %m%n</prop>
-        </osgix:default-properties>
-    </osgix:property-placeholder>
+    <osgix:cm-properties id="cmProps" persistent-id="org.apache.servicemix.log">
+        <prop key="size">500</prop>
+        <prop key="pattern">%d{ABSOLUTE} | %-5.5p | %-16.16t | %-32.32c{1} | %-32.32C %4L | %m%n</prop>
+    </osgix:cm-properties>
+
+    <ctx:property-placeholder properties-ref="cmProps" />
 
 </beans>
