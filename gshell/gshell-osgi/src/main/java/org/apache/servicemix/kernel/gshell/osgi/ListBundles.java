@@ -34,6 +34,16 @@ public class ListBundles extends OsgiCommandSupport {
     @Option(name = "-u", description = "Show update")
     boolean showUpdate;
 
+    private SpringApplicationListener springApplicationListener;
+
+    public SpringApplicationListener getSpringApplicationListener() {
+        return springApplicationListener;
+    }
+
+    public void setSpringApplicationListener(SpringApplicationListener springApplicationListener) {
+        this.springApplicationListener = springApplicationListener;
+    }
+
     protected Object doExecute() throws Exception {
         ServiceReference ref = getBundleContext().getServiceReference(StartLevel.class.getName());
         StartLevel sl = null;
@@ -63,7 +73,7 @@ public class ListBundles extends OsgiCommandSupport {
                    msg = " Update location";
                 }
                 String level = (sl == null) ? "" : "  Level ";
-                io.out.println("   ID " + "  State       " + level + msg);
+                io.out.println("   ID   State         Spring   " + level + msg);
                 for (int i = 0; i < bundles.length; i++) {
                     // Get the bundle name or location.
                     String name = (String) bundles[i].getHeaders().get(Constants.BUNDLE_NAME);
@@ -103,7 +113,8 @@ public class ListBundles extends OsgiCommandSupport {
                         id = " " + id;
                     }
                     io.out.println("[" + id + "] ["
-                        + getStateString(bundles[i].getState())
+                        + getStateString(bundles[i])
+                        + "] [" + getSpringStateString(bundles[i])
                         + "] [" + level + "] " + name);
                 }
             }
@@ -119,18 +130,34 @@ public class ListBundles extends OsgiCommandSupport {
         }
     }
 
-    public String getStateString(int i)
+    public String getStateString(Bundle bundle)
     {
-        if (i == Bundle.ACTIVE)
+        int state = bundle.getState();
+        if (state == Bundle.ACTIVE) {
             return "Active     ";
-        else if (i == Bundle.INSTALLED)
+        } else if (state == Bundle.INSTALLED) {
             return "Installed  ";
-        else if (i == Bundle.RESOLVED)
+        } else if (state == Bundle.RESOLVED) {
             return "Resolved   ";
-        else if (i == Bundle.STARTING)
+        } else if (state == Bundle.STARTING) {
             return "Starting   ";
-        else if (i == Bundle.STOPPING)
+        } else if (state == Bundle.STOPPING) {
             return "Stopping   ";
-        return "Unknown    ";
+        } else {
+            return "Unknown    ";
+        }
+    }
+
+    public String getSpringStateString(Bundle bundle) {
+        SpringApplicationListener.SpringState state = springApplicationListener.getSpringState(bundle);
+        if (state == SpringApplicationListener.SpringState.Waiting) {
+            return "Waiting";
+        } else if (state == SpringApplicationListener.SpringState.Started) {
+            return "Started";
+        } else if (state == SpringApplicationListener.SpringState.Failed) {
+            return "Failed ";
+        } else {
+            return "       ";
+        }
     }
 }
