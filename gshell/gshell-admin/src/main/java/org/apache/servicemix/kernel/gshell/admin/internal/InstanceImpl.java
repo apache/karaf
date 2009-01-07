@@ -24,15 +24,18 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.FilenameFilter;
 import java.util.Properties;
-import java.net.URI;
 import java.net.Socket;
 
 import org.apache.servicemix.jpm.Process;
 import org.apache.servicemix.jpm.ProcessBuilderFactory;
 import org.apache.servicemix.jpm.impl.ScriptUtils;
 import org.apache.servicemix.kernel.gshell.admin.Instance;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class InstanceImpl implements Instance {
+
+    private static final Log LOG = LogFactory.getLog(InstanceImpl.class);
 
     private AdminServiceImpl service;
     private String name;
@@ -110,7 +113,7 @@ public class InstanceImpl implements Instance {
             throw new IllegalStateException("Instance already started");
         }
         if (javaOpts == null) {
-            javaOpts = "-server -Xms128M -Xmx512M -Dcom.sun.management.jmxremote";
+            javaOpts = "-server -Xmx512M -Dcom.sun.management.jmxremote";
         }
         File libDir = new File(System.getProperty("servicemix.home"), "lib");
         File[] jars = libDir.listFiles(new FilenameFilter() {
@@ -125,7 +128,7 @@ public class InstanceImpl implements Instance {
             }
             classpath.append(jar.getCanonicalPath());
         }
-        String command = new File(System.getProperty("java.home"), "bin/java" + (ScriptUtils.isWindows() ? ".exe" : "")).getCanonicalPath()
+        String command = new File(System.getProperty("java.home"), ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java").getCanonicalPath()
                 + " " + javaOpts
                 + " -Dservicemix.home=\"" + System.getProperty("servicemix.home") + "\""
                 + " -Dservicemix.base=\"" + new File(location).getCanonicalPath() + "\""
@@ -133,6 +136,7 @@ public class InstanceImpl implements Instance {
                 + " -Dservicemix.startRemoteShell=true"
                 + " -classpath " + classpath.toString()
                 + " org.apache.servicemix.kernel.main.Main";
+        LOG.debug("Starting instance with command: " + command);
         this.process = ProcessBuilderFactory.newInstance().newBuilder()
                         .directory(new File(location))
                         .command(command)

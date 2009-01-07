@@ -24,10 +24,11 @@ import junit.framework.TestCase;
 public class ProcessTest extends TestCase {
 
     public void testCreate() throws Exception {
-        String javaPath = new File(System.getProperty("java.home"), "bin/java" + (ScriptUtils.isWindows() ? ".exe" : "")).getCanonicalPath();
+        String javaPath = new File(System.getProperty("java.home"), ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java").getCanonicalPath();
         System.err.println(javaPath);
         StringBuilder command = new StringBuilder();
         command.append(javaPath);
+        command.append(" -Dprop=\"key\"");
         command.append(" -classpath ");
         String clRes = getClass().getName().replace('.', '/') + ".class";
         String str = getClass().getClassLoader().getResource(clRes).toString();

@@ -118,6 +118,9 @@ public class ProcessImpl implements Process {
             //props.put("${err.file}", error.getCanonicalPath());
             props.put("${pid.file}", pidFile.getCanonicalPath());
             props.put("${dir}", dir != null ? dir.getCanonicalPath() : "");
+            if (ScriptUtils.isWindows()) {
+                command = command.replaceAll("\"", "\"\"");
+            }
             props.put("${command}", command);
             int ret = ScriptUtils.execute("start", props);
             if (ret != 0) {
