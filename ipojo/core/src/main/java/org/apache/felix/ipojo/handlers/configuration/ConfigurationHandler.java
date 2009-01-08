@@ -28,6 +28,7 @@ import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.HandlerFactory;
 import org.apache.felix.ipojo.PrimitiveHandler;
 import org.apache.felix.ipojo.architecture.ComponentTypeDescription;
+import org.apache.felix.ipojo.architecture.HandlerDescription;
 import org.apache.felix.ipojo.architecture.PropertyDescription;
 import org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandler;
 import org.apache.felix.ipojo.metadata.Attribute;
@@ -93,6 +94,12 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
      * with the Configuration Admin.
      */
     private String m_managedServicePID;
+    
+    /**
+     * the handler description. 
+     */
+    private ConfigurationHandlerDescription m_description;
+   
 
     /**
      * Initialize the component type.
@@ -171,6 +178,7 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
             
             desc.addProperty(pd);
         }
+        
     }
 
     /**
@@ -229,6 +237,9 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
                 getInstanceManager().register(field, prop);
             }
         }
+        
+        m_description = new ConfigurationHandlerDescription(this, m_configurableProperties);
+
     }
 
     /**
@@ -365,7 +376,7 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
      * @param prop the property object to reconfigure
      * @param value the new value.
      */
-    private void reconfigureProperty(Property prop, Object value) {
+    public void reconfigureProperty(Property prop, Object value) {
         if (prop.getValue() == null || ! prop.getValue().equals(value)) {
             prop.setValue(value);
             if (prop.hasField()) {
@@ -437,6 +448,15 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
             m_propagatedFromCA = null;
             m_configurationAlreadyPushed = false;
         }
+    }
+    
+    /**
+     * Gets the configuration handler description.
+     * @return the configuration handler description.
+     * @see org.apache.felix.ipojo.Handler#getDescription()
+     */
+    public HandlerDescription getDescription() {
+        return m_description;
     }
 
 }

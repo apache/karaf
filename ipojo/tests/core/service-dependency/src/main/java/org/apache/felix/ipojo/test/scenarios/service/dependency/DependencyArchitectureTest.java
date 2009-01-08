@@ -24,6 +24,8 @@ import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.PrimitiveInstanceDescription;
 import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
+import org.apache.felix.ipojo.handlers.dependency.Dependency;
+import org.apache.felix.ipojo.handlers.dependency.DependencyDescription;
 import org.apache.felix.ipojo.handlers.dependency.DependencyHandlerDescription;
 import org.apache.felix.ipojo.handlers.providedservice.ProvidedServiceHandlerDescription;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
@@ -94,6 +96,11 @@ public class DependencyArchitectureTest extends OSGiTestCase {
 		    return handler;
 		}
 	}
+	
+	private DependencyDescription getDependencyDescBySpecification(
+            PrimitiveInstanceDescription id, String spec) {
+        return id.getDependency(spec);
+    }
 	
 	private ProvidedServiceHandlerDescription getPSDesc(InstanceDescription id) {
 	    ProvidedServiceHandlerDescription handler = (ProvidedServiceHandlerDescription) id.getHandlerDescription("org.apache.felix.ipojo:provides");
@@ -295,13 +302,21 @@ public class DependencyArchitectureTest extends OSGiTestCase {
 		
 		// Check dependency handler invalidity
 		DependencyHandlerDescription dhd = getDependencyDesc(id_dep);
+		DependencyDescription dd = getDependencyDescBySpecification(id_dep, FooService.class.getName());
 		assertFalse("Check dependency handler invalidity", dhd.isValid());
+	    assertTrue("Check dependency invalidity", dd.getState() == Dependency.UNRESOLVED);
+
 		
 		// Check dependency metadata
 		assertEquals("Check dependency interface", dhd.getDependencies()[0].getInterface(), FooService.class.getName());
 		assertTrue("Check dependency cardinality", dhd.getDependencies()[0].isMultiple());
 		assertFalse("Check dependency optionality", dhd.getDependencies()[0].isOptional());
 		assertNull("Check dependency ref -1", dhd.getDependencies()[0].getServiceReferences());
+		
+		assertEquals("Check dependency interface", dd.getSpecification(), FooService.class.getName());
+        assertTrue("Check dependency cardinality", dd.isMultiple());
+        assertFalse("Check dependency optionality", dd.isOptional());
+        assertNull("Check dependency ref -1", dd.getServiceReferences());
 		
 		fooProvider1.start();
 		

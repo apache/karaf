@@ -68,12 +68,12 @@ public class ProvidedServiceHandlerDescription extends HandlerDescription {
         for (int i = 0; i < m_providedServices.length; i++) {
             Element service = new Element("provides", null);
             StringBuffer spec = new StringBuffer("[");
-            for (int j = 0; j < m_providedServices[i].getServiceSpecification().length; j++) {
+            for (int j = 0; j < m_providedServices[i].getServiceSpecifications().length; j++) {
                 if (j == 0) {
-                    spec.append(m_providedServices[i].getServiceSpecification()[j]);
+                    spec.append(m_providedServices[i].getServiceSpecifications()[j]);
                 } else {
                     spec.append(',');
-                    spec.append(m_providedServices[i].getServiceSpecification()[j]);
+                    spec.append(m_providedServices[i].getServiceSpecifications()[j]);
                 }
             }
             spec.append(']');

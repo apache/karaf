@@ -19,6 +19,7 @@
 package org.apache.felix.ipojo.architecture;
 
 import org.apache.felix.ipojo.ConfigurationException;
+import org.apache.felix.ipojo.handlers.configuration.ConfigurationHandler;
 import org.apache.felix.ipojo.util.Property;
 import org.osgi.framework.BundleContext;
 
@@ -40,9 +41,14 @@ public class PropertyDescription {
     private String m_type;
 
     /**
-     * Default value of the property.
+     * Value of the property.
      */
     private String m_value = null;
+    
+    /**
+     * Attached property object.
+     */
+    private Property m_property;
     
     
     /**
@@ -69,6 +75,18 @@ public class PropertyDescription {
         m_name = name;
         m_type = type;
         m_value = value;
+    }
+    
+    /**
+     * Constructor.
+     * 
+     * @param prop the attache Property object.
+     */
+    public PropertyDescription(Property prop) {
+        m_property = prop;
+        m_name = prop.getName();
+        m_type = prop.getType();
+        m_value = null; // Living property, value will be asked at runtime.
     }
     
     /**
@@ -108,7 +126,31 @@ public class PropertyDescription {
      * <code>null</code> if the property hasn't a value..
      */
     public String getValue() {
-        return m_value;
+        if (m_property == null) {
+            return m_value;
+        } else {
+            Object value =  m_property.getValue();
+            if (value == null) {
+                return "null";
+            } else {
+                return value.toString();
+            }
+        }
+    }
+    
+    /**
+     * Sets the property value.
+     * This method can only be called on 'living' property
+     * (properties with a {@link Property} object).
+     * @param value the new value.
+     */
+    public void setValue(Object value) {
+        if (m_property == null) {
+            throw new UnsupportedOperationException("Cannot set the value of a non 'living' property");
+        } else {
+            ConfigurationHandler handler = (ConfigurationHandler) m_property.getHandler();
+            handler.reconfigureProperty(m_property, value);
+        }
     }
     
     /**

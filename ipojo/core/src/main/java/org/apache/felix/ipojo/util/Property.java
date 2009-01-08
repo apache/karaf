@@ -231,6 +231,10 @@ public class Property implements FieldInterceptor {
     public String getField() {
         return m_field;
     }
+    
+    public String getType() {
+        return m_type.getName();
+    }
 
     /**
      * Gets the method name, 
@@ -529,5 +533,13 @@ public class Property implements FieldInterceptor {
         if (m_value == null || ! m_value.equals(value)) {
             setValue(value);
         }
+    }
+    
+    /**
+     * Gets the handler managing the property.
+     * @return the configuration handler.
+     */
+    public Handler getHandler() {
+        return m_handler;
     }
 }

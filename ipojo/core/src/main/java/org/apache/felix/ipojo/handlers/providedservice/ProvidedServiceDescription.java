@@ -18,6 +18,7 @@
  */
 package org.apache.felix.ipojo.handlers.providedservice;
 
+import java.util.Dictionary;
 import java.util.Properties;
 
 import org.apache.felix.ipojo.util.Property;
@@ -54,10 +55,10 @@ public class ProvidedServiceDescription {
     }
 
     /**
-     * Get the list of provided service specifications.
+     * Gets the list of provided service specifications.
      * @return the provided contract name.
      */
-    public String[] getServiceSpecification() {
+    public String[] getServiceSpecifications() {
         return m_ps.getServiceSpecifications();
     }
 
@@ -76,9 +77,27 @@ public class ProvidedServiceDescription {
         }
         return props;
     }
+    
+    /**
+     * Adds and Updates service properties.
+     * Existing properties are updated. 
+     * New ones are added.
+     * @param props the new properties
+     */
+    public void addProperties(Dictionary props) {
+        m_ps.addProperties(props);
+    }
+    
+    /**
+     * Removes service properties.
+     * @param props the properties to remove
+     */
+    public void removeProperties(Dictionary props) {
+        m_ps.deleteProperties(props);
+    }
 
     /**
-     * Get provided service state.
+     * Gets provided service state.
      * @return the state of the provided service (UNREGISTERED | REGISTRED).
      */
     public int getState() {
@@ -86,11 +105,30 @@ public class ProvidedServiceDescription {
     }
 
     /**
-     * Get the service reference.
+     * Gets the service reference.
      * @return the service reference (null if the service is unregistered).
      */
     public ServiceReference getServiceReference() {
         return m_ps.getServiceReference();
     }
+    
+    /**
+     * Gets the 'main' service object.
+     * @return the 'main' service object or <code>null</code>
+     * if no service object are created.
+     */
+    public Object getService() {
+        Object[] objs = m_ps.getInstanceManager().getPojoObjects();
+        if (objs == null) { 
+            return null;
+        } else {
+            return objs[0];
+        }
+    }
+    
+    public Object[] getServices() {
+        return m_ps.getInstanceManager().getPojoObjects();
+    }
+    
 
 }

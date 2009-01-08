@@ -80,8 +80,8 @@ public class ProvidedServiceArchitectureTest extends OSGiTestCase {
 		ProvidedServiceDescription[] ps = pshd.getProvidedServices();
 		
 		assertEquals("Check ProvidedService number", ps.length, 1);
-		assertEquals("Check Provided Service Specs - 1", ps[0].getServiceSpecification().length, 1);
-		assertEquals("Check Provided Service Specs - 2", ps[0].getServiceSpecification()[0], FooService.class.getName());
+		assertEquals("Check Provided Service Specs - 1", ps[0].getServiceSpecifications().length, 1);
+		assertEquals("Check Provided Service Specs - 2", ps[0].getServiceSpecifications()[0], FooService.class.getName());
 		assertEquals("Check Provided Service availability", ps[0].getState(), ProvidedServiceDescription.REGISTERED);
 		Properties prop = ps[0].getProperties();
 		assertNotNull("Check Props", prop);
@@ -126,8 +126,8 @@ public class ProvidedServiceArchitectureTest extends OSGiTestCase {
 		ProvidedServiceDescription[] ps = pshd.getProvidedServices();
 		
 		assertEquals("Check ProvidedService number", ps.length, 1);
-		assertEquals("Check Provided Service Specs - 1", ps[0].getServiceSpecification().length, 1);
-		assertEquals("Check Provided Service Specs - 2", ps[0].getServiceSpecification()[0], FooService.class.getName());
+		assertEquals("Check Provided Service Specs - 1", ps[0].getServiceSpecifications().length, 1);
+		assertEquals("Check Provided Service Specs - 2", ps[0].getServiceSpecifications()[0], FooService.class.getName());
 		assertEquals("Check Provided Service availability", ps[0].getState(), ProvidedServiceDescription.REGISTERED);
 	
 		Properties prop = ps[0].getProperties();
@@ -177,9 +177,9 @@ public class ProvidedServiceArchitectureTest extends OSGiTestCase {
 		ProvidedServiceDescription[] ps = pshd.getProvidedServices();
 		
 		assertEquals("Check ProvidedService number", ps.length, 1);
-		assertEquals("Check Provided Service Specs - 1", ps[0].getServiceSpecification().length, 2);
-		assertContains("Check provided service specs - 2", ps[0].getServiceSpecification(), FooService.class.getName());;
-		assertContains("Check provided service specs - 2", ps[0].getServiceSpecification(), BarService.class.getName());
+		assertEquals("Check Provided Service Specs - 1", ps[0].getServiceSpecifications().length, 2);
+		assertContains("Check provided service specs - 2", ps[0].getServiceSpecifications(), FooService.class.getName());;
+		assertContains("Check provided service specs - 2", ps[0].getServiceSpecifications(), BarService.class.getName());
 		assertEquals("Check Provided Service availability", ps[0].getState(), ProvidedServiceDescription.REGISTERED);
 		
 	}
@@ -220,8 +220,8 @@ public class ProvidedServiceArchitectureTest extends OSGiTestCase {
     	ProvidedServiceDescription[] ps = pshd.getProvidedServices();
     	
     	assertEquals("Check ProvidedService number", ps.length, 1);
-    	assertEquals("Check Provided Service Specs - 1", ps[0].getServiceSpecification().length, 1);
-    	assertEquals("Check Provided Service Specs - 2", ps[0].getServiceSpecification()[0], FooService.class.getName());
+    	assertEquals("Check Provided Service Specs - 1", ps[0].getServiceSpecifications().length, 1);
+    	assertEquals("Check Provided Service Specs - 2", ps[0].getServiceSpecifications()[0], FooService.class.getName());
     	assertEquals("Check Provided Service availability", ps[0].getState(), ProvidedServiceDescription.REGISTERED);
     
     	Properties prop = ps[0].getProperties();
