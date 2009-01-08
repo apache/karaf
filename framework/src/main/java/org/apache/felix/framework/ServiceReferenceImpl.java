@@ -122,8 +122,7 @@ class ServiceReferenceImpl implements ServiceReference
         // Get the package.
         String pkgName =
             Util.getClassPackage(className);
-        IModule requesterModule = 
-            ((FelixBundle) requester).getInfo().getCurrentModule();
+        IModule requesterModule = ((BundleImpl) requester).getCurrentModule();
         // Get package wiring from service requester.
         IWire requesterWire = Util.getWire(requesterModule, pkgName);
 
@@ -148,8 +147,7 @@ class ServiceReferenceImpl implements ServiceReference
         }
 
         // Get package wiring from service provider.
-        IModule providerModule = 
-            ((FelixBundle) m_bundle).getInfo().getCurrentModule();
+        IModule providerModule = ((BundleImpl) m_bundle).getCurrentModule();
         IWire providerWire = Util.getWire(providerModule, pkgName);
         
         // Case 2: Only include service reference if the service
@@ -159,12 +157,12 @@ class ServiceReferenceImpl implements ServiceReference
             // If the provider is not the exporter of the requester's package,
             // then try to use the service registration to see if the requester's
             // class is accessible.
-            if (!((FelixBundle) m_bundle).getInfo().hasModule(requesterWire.getExporter()))
+            if (!((BundleImpl) m_bundle).hasModule(requesterWire.getExporter()))
             {
                 try
                 {
                     // Load the class from the requesting bundle.
-                    Class requestClass = requesterModule.getClass(className);
+                    Class requestClass = requesterModule.getClassByDelegation(className);
                     // Get the service registration and ask it to check
                     // if the service object is assignable to the requesting
                     // bundle's class.

@@ -38,16 +38,13 @@ public class StartLevelImpl implements StartLevel, Runnable
 
     private Logger m_logger = null;
     private Felix m_felix = null;
-    private List m_requestList = null;
-    private Bundle m_systemBundle = null;
+    private final List m_requestList = new ArrayList();
     private Thread m_thread = null;
 
     public StartLevelImpl(Logger logger, Felix felix)
     {
         m_logger = logger;
         m_felix = felix;
-        m_requestList = new ArrayList();
-        m_systemBundle = m_felix.getBundle(0);
         // Start a thread to perform asynchronous package refreshes.
         m_thread = new Thread(this, "FelixStartLevel");
         m_thread.setDaemon(true);
@@ -85,7 +82,7 @@ public class StartLevelImpl implements StartLevel, Runnable
     **/
     public int getStartLevel()
     {
-        return m_felix.getStartLevel();
+        return m_felix.getActiveStartLevel();
     }
 
     /* (non-Javadoc)
@@ -98,7 +95,7 @@ public class StartLevelImpl implements StartLevel, Runnable
         if (sm != null)
         {
             ((SecurityManager) sm).checkPermission(
-                new AdminPermission(m_systemBundle, AdminPermission.STARTLEVEL));
+                new AdminPermission(m_felix, AdminPermission.STARTLEVEL));
         }
         
         if (startlevel <= 0)
@@ -202,7 +199,7 @@ public class StartLevelImpl implements StartLevel, Runnable
         if (sm != null)
         {
             ((SecurityManager) sm).checkPermission(
-                new AdminPermission(m_systemBundle, AdminPermission.STARTLEVEL));
+                new AdminPermission(m_felix, AdminPermission.STARTLEVEL));
         }
         m_felix.setInitialBundleStartLevel(startlevel);
     }
@@ -262,7 +259,7 @@ public class StartLevelImpl implements StartLevel, Runnable
             if (request instanceof Integer)
             {
                 // Set the new framework start level.
-                m_felix.setFrameworkStartLevel(((Integer) request).intValue());
+                m_felix.setActiveStartLevel(((Integer) request).intValue());
             }
             else
             {

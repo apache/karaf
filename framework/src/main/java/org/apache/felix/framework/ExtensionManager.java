@@ -21,7 +21,6 @@ package org.apache.felix.framework;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.io.InputStream;
-import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
@@ -37,21 +36,20 @@ import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.felix.framework.Felix.FelixResolver;
+import org.apache.felix.framework.searchpolicy.ModuleImpl;
 import org.apache.felix.framework.util.FelixConstants;
-import org.apache.felix.framework.util.SecurityManagerEx;
+import org.apache.felix.framework.util.StringMap;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.framework.util.manifestparser.Capability;
 import org.apache.felix.framework.util.manifestparser.ManifestParser;
 import org.apache.felix.framework.util.manifestparser.R4Attribute;
 import org.apache.felix.framework.util.manifestparser.R4Directive;
-import org.apache.felix.framework.util.manifestparser.R4Library;
 import org.apache.felix.moduleloader.ICapability;
 import org.apache.felix.moduleloader.IContent;
-import org.apache.felix.moduleloader.IContentLoader;
-import org.apache.felix.moduleloader.IModuleDefinition;
-import org.apache.felix.moduleloader.IRequirement;
-import org.apache.felix.moduleloader.ISearchPolicy;
+import org.apache.felix.moduleloader.IModule;
 import org.apache.felix.moduleloader.IURLPolicy;
+import org.apache.felix.moduleloader.ResourceNotFoundException;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -82,7 +80,7 @@ import org.osgi.framework.Constants;
 // with the parent classloader and one instance per framework instance that
 // keeps track of extension bundles and systembundle exports for that framework
 // instance.
-class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IContentLoader, IContent
+class ExtensionManager extends URLStreamHandler implements IContent
 {
     // The private instance that is added to Felix.class.getClassLoader() -
     // will be null if extension bundles are not supported (i.e., we are not
@@ -110,10 +108,10 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
     }
 
     private Logger m_logger = null;
-    private BundleInfo m_sbi = null;
+    private final Map m_headerMap = new StringMap(false);
+    private final IModule m_module;
     private ICapability[] m_capabilities = null;
     private Set m_exportNames = null;
-    private ISearchPolicy m_searchPolicy = null;
     private IURLPolicy m_urlPolicy = null;
     private Object m_securityContext = null;
     private final List m_extensions;
@@ -124,6 +122,8 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
     // classloader.
     private ExtensionManager()
     {
+// TODO: REFACTOR - Karl, is this correct?
+        m_module = new ExtensionManagerModule();
         m_extensions = new ArrayList();
         m_names = new HashSet();
         m_sourceToExtensions = new HashMap();
@@ -140,28 +140,24 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
      * @param config the configuration to read properties from.
      * @param systemBundleInfo the info to change if we need to add exports.
      */
-    ExtensionManager(Logger logger, Map configMap, BundleInfo sbi)
+    ExtensionManager(Logger logger, Map configMap)
     {
+        m_module = new ExtensionManagerModule();
         m_extensions = null;
         m_names = null;
         m_sourceToExtensions = null;
         m_logger = logger;
-        m_sbi = sbi;
 
 // TODO: FRAMEWORK - Not all of this stuff really belongs here, probably only exports.
         // Populate system bundle header map.
-        // Note: This is a reference to the actual header map,
-        // so these changes are saved. Kind of hacky.
-        Map map = m_sbi.getCurrentHeader();
-        // Initialize header map as a case insensitive map.
-        map.put(FelixConstants.BUNDLE_VERSION,
+        m_headerMap.put(FelixConstants.BUNDLE_VERSION,
             configMap.get(FelixConstants.FELIX_VERSION_PROPERTY));
-        map.put(FelixConstants.BUNDLE_SYMBOLICNAME,
+        m_headerMap.put(FelixConstants.BUNDLE_SYMBOLICNAME,
             FelixConstants.SYSTEM_BUNDLE_SYMBOLICNAME);
-        map.put(FelixConstants.BUNDLE_NAME, "System Bundle");
-        map.put(FelixConstants.BUNDLE_DESCRIPTION,
+        m_headerMap.put(FelixConstants.BUNDLE_NAME, "System Bundle");
+        m_headerMap.put(FelixConstants.BUNDLE_DESCRIPTION,
             "This bundle is system specific; it implements various system services.");
-        map.put(FelixConstants.EXPORT_SERVICE,
+        m_headerMap.put(FelixConstants.EXPORT_SERVICE,
             "org.osgi.service.packageadmin.PackageAdmin," +
             "org.osgi.service.startlevel.StartLevel," +
             "org.osgi.service.url.URLHandlers");
@@ -180,7 +176,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
         try
         {
             setCapabilities(
-                addModuleCapability(map,
+                addModuleCapability(m_headerMap,
                     ManifestParser.parseExportHeader(syspkgs)));
         }
         catch (Exception ex)
@@ -191,6 +187,11 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
                 "Error parsing system bundle export statement: "
                 + syspkgs, ex);
         }
+    }
+
+    public IModule getModule()
+    {
+        return m_module;
     }
 
     private ICapability[] addModuleCapability(Map headerMap, ICapability[] caps)
@@ -245,7 +246,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
     /**
      * Check whether the given manifest headers are from an extension bundle.
      */
-    boolean isExtensionBundle(Map headers)
+    static boolean isExtensionBundle(Map headers)
     {
         return (ManifestParser.parseExtensionBundleHeader((String)
                 headers.get(Constants.FRAGMENT_HOST)) != null);
@@ -265,7 +266,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
      *          AdminPermission.EXTENSIONLIFECYCLE and security is enabled.
      * @throws Exception in case something goes wrong.
      */
-    void addExtensionBundle(Felix felix, FelixBundle bundle)
+    void addExtensionBundle(Felix felix, BundleImpl bundle)
         throws SecurityException, BundleException, Exception
     {
         Object sm = System.getSecurityManager();
@@ -275,13 +276,13 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
                 new AdminPermission(bundle, AdminPermission.EXTENSIONLIFECYCLE));
         }
 
-        if (!((BundleProtectionDomain) bundle.getInfo().getProtectionDomain()).impliesDirect(new AllPermission()))
+        if (!((BundleProtectionDomain) bundle.getProtectionDomain()).impliesDirect(new AllPermission()))
         {
             throw new SecurityException("Extension Bundles must have AllPermission");
         }
 
         R4Directive dir = ManifestParser.parseExtensionBundleHeader((String)
-            bundle.getInfo().getCurrentHeader().get(Constants.FRAGMENT_HOST));
+            bundle.getCurrentModule().getHeaders().get(Constants.FRAGMENT_HOST));
 
         // We only support classpath extensions (not bootclasspath).
         if (!Constants.EXTENSION_FRAMEWORK.equals(dir.getValue()))
@@ -296,21 +297,21 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
 
         try
         {
-            bundle.getInfo().setExtension(true);
+            bundle.setExtension(true);
 
             // Merge the exported packages with the exported packages of the systembundle.
             ICapability[] exports = null;
             try
             {
                 exports = ManifestParser.parseExportHeader((String)
-                    bundle.getInfo().getCurrentHeader().get(Constants.EXPORT_PACKAGE));
+                    bundle.getCurrentModule().getHeaders().get(Constants.EXPORT_PACKAGE));
             }
             catch (Exception ex)
             {
                 m_logger.log(
                     Logger.LOG_ERROR,
                     "Error parsing extension bundle export statement: "
-                    + bundle.getInfo().getCurrentHeader().get(Constants.EXPORT_PACKAGE), ex);
+                    + bundle.getCurrentModule().getHeaders().get(Constants.EXPORT_PACKAGE), ex);
                 return;
             }
 
@@ -328,14 +329,14 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
                 throw new UnsupportedOperationException(
                     "Unable to add extension bundle to FrameworkClassLoader - Maybe not an URLClassLoader?");
             }
-            ICapability[] temp = new ICapability[getCapabilities().length + exports.length];
-            System.arraycopy(getCapabilities(), 0, temp, 0, getCapabilities().length);
-            System.arraycopy(exports, 0, temp, getCapabilities().length, exports.length);
+            ICapability[] temp = new ICapability[m_capabilities.length + exports.length];
+            System.arraycopy(m_capabilities, 0, temp, 0, m_capabilities.length);
+            System.arraycopy(exports, 0, temp, m_capabilities.length, exports.length);
             setCapabilities(temp);
         }
         catch (Exception ex)
         {
-            bundle.getInfo().setExtension(false);
+            bundle.setExtension(false);
             throw ex;
         }
         finally
@@ -343,7 +344,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
             felix.releaseBundleLock(felix);
         }
 
-        bundle.getInfo().setState(Bundle.RESOLVED);
+        bundle.setState(Bundle.RESOLVED);
     }
 
     /**
@@ -353,10 +354,10 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
      * @param felix the framework instance the extension bundle is installed in.
      * @param bundle the extension bundle to start if it has a Felix specific activator.
      */
-    void startExtensionBundle(Felix felix, FelixBundle bundle)
+    void startExtensionBundle(Felix felix, BundleImpl bundle)
     {
         String activatorClass = (String)
-        bundle.getInfo().getCurrentHeader().get(
+        bundle.getCurrentModule().getHeaders().get(
             FelixConstants.FELIX_EXTENSION_ACTIVATOR);
 
         if (activatorClass != null)
@@ -370,11 +371,11 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
 // TODO: KARL - This is kind of hacky, can we improve it?
                 felix.m_activatorList.add(activator);
 
-                BundleContext context = m_sbi.getBundleContext();
+                BundleContext context = felix.getBundleContext();
 
-                bundle.getInfo().setBundleContext(context);
+                bundle.setBundleContext(context);
 
-                if (felix.getInfo().getState() == Bundle.ACTIVE)
+                if (felix.getState() == Bundle.ACTIVE)
                 {
                     Felix.m_secureAction.startActivator(activator, context);
                 }
@@ -403,37 +404,13 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
         }
     }
 
-    //
-    // IModuleDefinition
-    //
-    public ICapability[] getCapabilities()
-    {
-        return m_capabilities;
-    }
-
     void setCapabilities(ICapability[] capabilities)
     {
         m_capabilities = capabilities;
 
         // Note: This is a reference to the actual header map,
         // so these changes are saved. Kind of hacky.
-        Map map = m_sbi.getCurrentHeader();
-        map.put(Constants.EXPORT_PACKAGE, convertCapabilitiesToHeaders(map));
-    }
-
-    public IRequirement[] getDynamicRequirements()
-    {
-        return null;
-    }
-
-    public R4Library[] getLibraries()
-    {
-        return null;
-    }
-
-    public IRequirement[] getRequirements()
-    {
-        return null;
+        m_headerMap.put(Constants.EXPORT_PACKAGE, convertCapabilitiesToHeaders(m_headerMap));
     }
 
     private String convertCapabilitiesToHeaders(Map headers)
@@ -468,105 +445,6 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
     }
 
     //
-    // IContentLoader
-    //
-
-    public void open()
-    {
-        // Nothing needed here.
-    }
-
-    public void close()
-    {
-        // Nothing needed here.
-    }
-
-    public IContent getContent()
-    {
-        return this;
-    }
-
-    public ISearchPolicy getSearchPolicy()
-    {
-        return m_searchPolicy;
-    }
-
-    public void setSearchPolicy(ISearchPolicy searchPolicy)
-    {
-        m_searchPolicy = searchPolicy;
-    }
-
-    public IURLPolicy getURLPolicy()
-    {
-        return m_urlPolicy;
-    }
-
-    public void setURLPolicy(IURLPolicy urlPolicy)
-    {
-        m_urlPolicy = urlPolicy;
-    }
-
-    public Class getClass(String name)
-    {
-        if (!m_exportNames.contains(Util.getClassPackage(name)))
-        {
-            return null;
-        }
-
-        try
-        {
-            return getClass().getClassLoader().loadClass(name);
-        }
-        catch (ClassNotFoundException ex)
-        {
-            m_logger.log(
-                Logger.LOG_WARNING,
-                ex.getMessage(),
-                ex);
-        }
-        return null;
-    }
-
-    public URL getResource(String name)
-    {
-        return getClass().getClassLoader().getResource(name);
-    }
-
-    public Enumeration getResources(String name)
-    {
-       try
-       {
-           return getClass().getClassLoader().getResources(name);
-       }
-       catch (IOException ex)
-       {
-           return null;
-       }
-    }
-
-    public URL getResourceFromContent(String name)
-    {
-        // There is no content for the system bundle, so return null.
-        return null;
-    }
-
-    public boolean hasInputStream(int index, String urlPath)
-    {
-        return (getClass().getClassLoader().getResource(urlPath) != null);
-    }
-
-    public InputStream getInputStream(int index, String urlPath)
-    {
-        return getClass().getClassLoader().getResourceAsStream(urlPath);
-    }
-
-    public String findLibrary(String name)
-    {
-        // No native libs associated with the system bundle.
-        return null;
-    }
-
-    //
     // Classpath Extension
     //
 
@@ -585,7 +463,7 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
 
         for (Iterator iter = m_extensions.iterator(); iter.hasNext();)
         {
-            URL result = ((FelixBundle) iter.next()).getInfo().getCurrentModule().getContentLoader().getResourceFromContent(path);
+            URL result = ((BundleImpl) iter.next()).getCurrentModule().getResourceFromContent(path);
 
             if (result != null)
             {
@@ -645,6 +523,11 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
             m_names.add(name);
             m_extensions.add(extension);
         }
+    }
+
+    public void close()
+    {
+        // Do nothing on close, since we have nothing open.
     }
 
     public Enumeration getEntries()
@@ -735,6 +618,172 @@ class ExtensionManager extends URLStreamHandler implements IModuleDefinition, IC
             logger.log(
                 Logger.LOG_ERROR, "Unable to load any configuration properties.", ex);
             return "";
+        }
+    }
+
+    class ExtensionManagerModule extends ModuleImpl
+    {
+        ExtensionManagerModule()
+        {
+            super(m_logger, null, null, "0", null, null, null, null, null, null);
+        }
+
+        public Map getHeaders()
+        {
+            return m_headerMap;
+        }
+
+        public ICapability[] getCapabilities()
+        {
+            return m_capabilities;
+        }
+
+        public String getSymbolicName()
+        {
+            return FelixConstants.SYSTEM_BUNDLE_SYMBOLICNAME;
+        }
+
+        public Class getClassByDelegation(String name) throws ClassNotFoundException
+        {
+            // System bundle does not delegate to other modules.
+            return getClassFromModule(name);
+        }
+
+        public URL getResourceByDelegation(String name)
+        {
+            // System bundle does not delegate to other modules.
+            return getResourceFromModule(name);
+        }
+
+        public Enumeration getResourcesByDelegation(String name)
+        {
+            // System bundle does not delegate to other modules.
+            return getResourcesFromModule(name);
+        }
+
+        public Logger getLogger()
+        {
+            return m_logger;
+        }
+
+        public Map getConfig()
+        {
+            return null;
+        }
+
+        public FelixResolver getResolver()
+        {
+            return null;
+        }
+
+        public synchronized IContent[] getClassPath()
+        {
+            throw new UnsupportedOperationException("Should not be used!");
+        }
+
+        public synchronized void attachFragmentContents(IContent[] fragmentContents)
+            throws Exception
+        {
+            throw new UnsupportedOperationException("Should not be used!");
+        }
+
+        public void close()
+        {
+            // Nothing needed here.
+        }
+
+        public IContent getContent()
+        {
+            return ExtensionManager.this;
+        }
+
+        public synchronized void setURLPolicy(IURLPolicy urlPolicy)
+        {
+            m_urlPolicy = urlPolicy;
+        }
+
+        public synchronized IURLPolicy getURLPolicy()
+        {
+            return m_urlPolicy;
+        }
+
+        public void setSecurityContext(Object securityContext)
+        {
+            throw new UnsupportedOperationException("Should not be used!");
+        }
+
+        public Object getSecurityContext()
+        {
+            throw new UnsupportedOperationException("Should not be used!");
+        }
+
+        public Class findClassByDelegation(String name) throws ClassNotFoundException
+        {
+            return getClassFromModule(name);
+        }
+
+        public URL findResourceByDelegation(String name) throws ResourceNotFoundException
+        {
+            return getResourceFromModule(name);
+        }
+
+        public Enumeration findResourcesByDelegation(String name) throws ResourceNotFoundException
+        {
+            return getResourcesFromModule(name);
+        }
+
+        public Class getClassFromModule(String name)
+        {
+            if (!m_exportNames.contains(Util.getClassPackage(name)))
+            {
+                return null;
+            }
+
+            try
+            {
+                return getClass().getClassLoader().loadClass(name);
+            }
+            catch (ClassNotFoundException ex)
+            {
+                m_logger.log(
+                    Logger.LOG_WARNING,
+                    ex.getMessage(),
+                    ex);
+            }
+            return null;
+        }
+
+        public URL getResourceFromModule(String name)
+        {
+            return getClass().getClassLoader().getResource(name);
+        }
+
+        public Enumeration getResourcesFromModule(String name)
+        {
+           try
+           {
+               return getClass().getClassLoader().getResources(name);
+           }
+           catch (IOException ex)
+           {
+               return null;
+           }
+        }
+
+        public URL getResourceFromContent(String name)
+        {
+            // There is no content for the system bundle, so return null.
+            return null;
+        }
+
+        public boolean hasInputStream(int index, String urlPath)
+        {
+            return (getClass().getClassLoader().getResource(urlPath) != null);
+        }
+
+        public InputStream getInputStream(int index, String urlPath)
+        {
+            return getClass().getClassLoader().getResourceAsStream(urlPath);
         }
     }
 }

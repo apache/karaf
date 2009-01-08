@@ -25,8 +25,8 @@ import java.security.*;
 import java.util.Hashtable;
 import java.util.jar.JarFile;
 
-import org.apache.felix.framework.searchpolicy.ContentClassLoader;
-import org.apache.felix.framework.searchpolicy.ContentLoaderImpl;
+import org.apache.felix.framework.searchpolicy.ModuleClassLoader;
+import org.apache.felix.framework.searchpolicy.ModuleImpl;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
@@ -541,12 +541,12 @@ public class SecureAction
         }
     }
 
-    public ContentClassLoader createContentClassLoader(ContentLoaderImpl impl)
+    public ModuleClassLoader createModuleClassLoader(ModuleImpl impl)
     {
-        return createContentClassLoader(impl, null);
+        return createModuleClassLoader(impl, null);
     }
 
-    public ContentClassLoader createContentClassLoader(ContentLoaderImpl impl,
+    public ModuleClassLoader createModuleClassLoader(ModuleImpl impl,
         ProtectionDomain protectionDomain)
     {
         if (System.getSecurityManager() != null)
@@ -554,8 +554,8 @@ public class SecureAction
             try
             {
                 Actions actions = (Actions) m_actions.get();
-                actions.set(Actions.CREATE_CONTENTCLASSLOADER_ACTION, impl, protectionDomain);
-                return (ContentClassLoader) AccessController.doPrivileged(actions, m_acc);
+                actions.set(Actions.CREATE_MODULECLASSLOADER_ACTION, impl, protectionDomain);
+                return (ModuleClassLoader) AccessController.doPrivileged(actions, m_acc);
             }
             catch (PrivilegedActionException ex)
             {
@@ -564,7 +564,7 @@ public class SecureAction
         }
         else
         {
-            return new ContentClassLoader(impl, protectionDomain);
+            return new ModuleClassLoader(impl, protectionDomain);
         }
     }
 
@@ -943,7 +943,7 @@ public class SecureAction
         public static final int DELETE_FILE_ACTION = 13;
         public static final int OPEN_JARX_ACTION = 14;
         public static final int GET_URL_INPUT_ACTION = 15;
-        public static final int CREATE_CONTENTCLASSLOADER_ACTION = 16;
+        public static final int CREATE_MODULECLASSLOADER_ACTION = 16;
         public static final int START_ACTIVATOR_ACTION = 17;
         public static final int STOP_ACTIVATOR_ACTION = 18;
         public static final int SYSTEM_EXIT_ACTION = 19;
@@ -1104,10 +1104,9 @@ public class SecureAction
             {
                 return ((URLConnection) arg1).getInputStream();
             }
-            else if (action == CREATE_CONTENTCLASSLOADER_ACTION)
+            else if (action == CREATE_MODULECLASSLOADER_ACTION)
             {
-                return new ContentClassLoader((ContentLoaderImpl) arg1,
-                    (ProtectionDomain) arg2);
+                return new ModuleClassLoader((ModuleImpl) arg1, (ProtectionDomain) arg2);
             }
             else if (action == START_ACTIVATOR_ACTION)
             {

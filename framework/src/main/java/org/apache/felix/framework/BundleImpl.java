@@ -21,45 +21,122 @@ package org.apache.felix.framework;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.security.ProtectionDomain;
 import java.util.*;
 
+import org.apache.felix.framework.cache.BundleArchive;
+import org.apache.felix.framework.searchpolicy.ModuleImpl;
+import org.apache.felix.framework.searchpolicy.URLPolicyImpl;
+import org.apache.felix.framework.util.manifestparser.ManifestParser;
+import org.apache.felix.framework.util.manifestparser.R4Library;
+import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.*;
 
-class BundleImpl extends FelixBundle
+class BundleImpl implements Bundle
 {
-    private final long m_id;
-    private final Felix m_felix;
-    private volatile RegularBundleInfo m_info = null;
+    private final Felix m_feli;
 
-    protected BundleImpl(Felix felix, RegularBundleInfo info)
+    private final BundleArchive m_archive;
+    private IModule[] m_modules = new IModule[0];
+    private int m_state;
+    private BundleActivator m_activator = null;
+    private BundleContext m_context = null;
+    private final Map m_cachedHeaders = new HashMap();
+    private long m_cachedHeadersTimestamp;
+
+    // Indicates whether the bundle has been updated/uninstalled
+    // and is waiting to be refreshed.
+    private boolean m_removalPending = false;
+    // Indicates whether the bundle is stale, meaning that it has
+    // been refreshed and completely removed from the framework.
+    private boolean m_stale = false;
+
+    // Indicates whether the bundle is an extension, meaning that it is
+    // installed as an extension bundle to the framework (i.e., can not be
+    // removed or updated until a framework restart.
+    private boolean m_extension = false;
+
+    // Used for bundle locking.
+    private int m_lockCount = 0;
+    private Thread m_lockThread = null;
+
+    BundleImpl(Felix felix, BundleArchive archive) throws Exception
     {
-        m_felix = felix;
-        m_info = info;
-        m_id = info.getBundleId();
+        m_feli = felix;
+        m_archive = archive;
+        m_state = Bundle.INSTALLED;
+        m_stale = false;
+        m_activator = null;
+        m_context = null;
+
+        // TODO: REFACTOR - Null check is a hHack due to system bundle.
+        if (m_archive != null)
+        {
+            createAndAddModule();
+        }
     }
 
-    /* package private */ BundleInfo getInfo()
+    // TODO: REFACTOR - We need this method so the system bundle can override it.
+    Felix getFramework()
     {
-        return m_info;
+        return m_feli;
     }
 
-    /*
-     * Only used when refreshing a bundle.
-    **/
-    /* package private */ void setInfo(RegularBundleInfo info)
+    void reset() throws Exception
     {
-        m_info = info;
+        m_modules = new IModule[0];
+        createAndAddModule();
+        m_state = Bundle.INSTALLED;
+        m_stale = false;
+        m_cachedHeaders.clear();
+        m_cachedHeadersTimestamp = 0;
+        m_removalPending = false;
     }
 
-    public BundleContext getBundleContext()
+    // TODO: REFACTOR - This method is sort of a hack. Since the system bundle
+    //       doesn't have an archive, it can override this method to return its
+    //       manifest.
+    Map getCurrentManifestFromArchive() throws Exception
+    {
+        return m_archive.getRevision(
+            m_archive.getRevisionCount() - 1).getManifestHeader();
+    }
+
+    synchronized BundleActivator getActivator()
+    {
+        return m_activator;
+    }
+
+    synchronized void setActivator(BundleActivator activator)
+    {
+        m_activator = activator;
+    }
+
+    public synchronized BundleContext getBundleContext()
     {
 // TODO: SECURITY - We need a security check here.
-        return m_info.getBundleContext();
+        return m_context;
+    }
+
+    synchronized void setBundleContext(BundleContext context)
+    {
+        m_context = context;
     }
 
     public long getBundleId()
     {
-        return m_id;
+        try
+        {
+            return m_archive.getId();
+        }
+        catch (Exception ex)
+        {
+            getFramework().getLogger().log(
+                Logger.LOG_ERROR,
+                "Error getting the identifier from bundle archive.",
+                ex);
+            return -1;
+        }
     }
 
     public URL getEntry(String name)
@@ -79,7 +156,7 @@ class BundleImpl extends FelixBundle
             }
         }
 
-        return m_felix.getBundleEntry(this, name);
+        return getFramework().getBundleEntry(this, name);
     }
 
     public Enumeration getEntryPaths(String path)
@@ -99,7 +176,7 @@ class BundleImpl extends FelixBundle
             }
         }
 
-        return m_felix.getBundleEntryPaths(this, path);
+        return getFramework().getBundleEntryPaths(this, path);
     }
 
     public Enumeration findEntries(String path, String filePattern, boolean recurse)
@@ -119,7 +196,7 @@ class BundleImpl extends FelixBundle
             }
         }
 
-        return m_felix.findBundleEntries(this, path, filePattern, recurse);
+        return getFramework().findBundleEntries(this, path, filePattern, recurse);
     }
 
     public Dictionary getHeaders()
@@ -142,12 +219,161 @@ class BundleImpl extends FelixBundle
             locale = Locale.getDefault().toString();
         }
 
-        return m_felix.getBundleHeaders(this, locale);
+        return getFramework().getBundleHeaders(this, locale);
+    }
+
+    Map getCurrentLocalizedHeader(String locale)
+    {
+        synchronized (m_cachedHeaders)
+        {
+            // If the bundle has been updated, clear the cached headers
+            if (getLastModified() > m_cachedHeadersTimestamp)
+            {
+                m_cachedHeaders.clear();
+            }
+            else
+            {
+                // Check if headers for this locale have already been resolved
+                if (m_cachedHeaders.containsKey(locale))
+                {
+                    return (Map) m_cachedHeaders.get(locale);
+                }
+            }
+        }
+
+        Map rawHeaders = getCurrentModule().getHeaders();
+        Map headers = new HashMap(rawHeaders.size());
+        headers.putAll(rawHeaders);
+
+        // Check to see if we actually need to localize anything
+        boolean needsLocalization = false;
+        for (Iterator it = headers.values().iterator(); it.hasNext(); )
+        {
+            if (((String) it.next()).startsWith("%"))
+            {
+                needsLocalization = true;
+                break;
+            }
+        }
+
+        if (!needsLocalization)
+        {
+            // If localization is not needed, just cache the headers and return them as-is
+            // Not sure if this is useful
+            updateHeaderCache(locale, headers);
+            return headers;
+        }
+
+        // Do localization here and return the localized headers
+        String basename = (String) headers.get(Constants.BUNDLE_LOCALIZATION);
+        if (basename == null)
+        {
+            basename = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
+        }
+
+        // Create ordered list of files to load properties from
+        List resourceList = createResourceList(basename, locale);
+
+        // Create a merged props file with all available props for this locale
+        Properties mergedProperties = new Properties();
+        for (Iterator it = resourceList.iterator(); it.hasNext(); )
+        {
+            URL temp = this.getCurrentModule().getResourceFromModule(it.next() + ".properties");
+            if (temp == null)
+            {
+                continue;
+            }
+            try
+            {
+                mergedProperties.load(temp.openConnection().getInputStream());
+            }
+            catch (IOException ex)
+            {
+                // File doesn't exist, just continue loop
+            }
+        }
+
+        // Resolve all localized header entries
+        for (Iterator it = headers.entrySet().iterator(); it.hasNext(); )
+        {
+            Map.Entry entry = (Map.Entry) it.next();
+            String value = (String) entry.getValue();
+            if (value.startsWith("%"))
+            {
+                String newvalue;
+                String key = value.substring(value.indexOf("%") + 1);
+                newvalue = mergedProperties.getProperty(key);
+                if (newvalue==null)
+                {
+                    newvalue = key;
+                }
+                entry.setValue(newvalue);
+            }
+        }
+
+        updateHeaderCache(locale, headers);
+        return headers;
+    }
+
+    private void updateHeaderCache(String locale, Map localizedHeaders)
+    {
+        synchronized (m_cachedHeaders)
+        {
+            m_cachedHeaders.put(locale, localizedHeaders);
+            m_cachedHeadersTimestamp = System.currentTimeMillis();
+        }
+    }
+
+    private List createResourceList(String basename, String locale)
+    {
+        List result = new ArrayList(4);
+
+        StringTokenizer tokens;
+        StringBuffer tempLocale = new StringBuffer(basename);
+
+        result.add(tempLocale.toString());
+
+        if (locale.length() > 0)
+        {
+            tokens = new StringTokenizer(locale, "_");
+            while (tokens.hasMoreTokens())
+            {
+                tempLocale.append("_").append(tokens.nextToken());
+                result.add(tempLocale.toString());
+            }
+        }
+        return result;
     }
 
     public long getLastModified()
     {
-        return m_info.getLastModified();
+        try
+        {
+            return m_archive.getLastModified();
+        }
+        catch (Exception ex)
+        {
+            getFramework().getLogger().log(
+                Logger.LOG_ERROR,
+                "Error reading last modification time from bundle archive.",
+                ex);
+            return 0;
+        }
+    }
+
+    void setLastModified(long l)
+    {
+        try
+        {
+            m_archive.setLastModified(l);
+        }
+        catch (Exception ex)
+        {
+            getFramework().getLogger().log(
+                Logger.LOG_ERROR,
+                "Error writing last modification time to bundle archive.",
+                ex);
+        }
     }
 
     public String getLocation()
@@ -159,7 +385,23 @@ class BundleImpl extends FelixBundle
             ((SecurityManager) sm).checkPermission(new AdminPermission(this,
                 AdminPermission.METADATA));
         }
-        return m_felix.getBundleLocation(this);
+        return _getLocation();
+    }
+
+    String _getLocation()
+    {
+        try
+        {
+            return m_archive.getLocation();
+        }
+        catch (Exception ex)
+        {
+            getFramework().getLogger().log(
+                Logger.LOG_ERROR,
+                "Error getting location from bundle archive.",
+                ex);
+            return null;
+        }
     }
 
     /**
@@ -184,7 +426,7 @@ class BundleImpl extends FelixBundle
             }
         }
 
-        return m_felix.getBundleResource(this, name);
+        return getFramework().getBundleResource(this, name);
     }
 
     public Enumeration getResources(String name) throws IOException
@@ -204,7 +446,7 @@ class BundleImpl extends FelixBundle
             }
         }
 
-        return m_felix.getBundleResources(this, name);
+        return getFramework().getBundleResources(this, name);
     }
 
     /**
@@ -219,7 +461,7 @@ class BundleImpl extends FelixBundle
 
         if (sm != null)
         {
-            ServiceReference[] refs = m_felix.getBundleRegisteredServices(this);
+            ServiceReference[] refs = getFramework().getBundleRegisteredServices(this);
 
             if (refs == null)
             {
@@ -228,7 +470,7 @@ class BundleImpl extends FelixBundle
 
             List result = new ArrayList();
 
-            for (int i = 0;i < refs.length;i++)
+            for (int i = 0; i < refs.length; i++)
             {
                 String[] objectClass = (String[]) refs[i].getProperty(
                     Constants.OBJECTCLASS);
@@ -238,7 +480,7 @@ class BundleImpl extends FelixBundle
                     continue;
                 }
 
-                for (int j = 0;j < objectClass.length;j++)
+                for (int j = 0; j < objectClass.length; j++)
                 {
                     try
                     {
@@ -265,7 +507,7 @@ class BundleImpl extends FelixBundle
         }
         else
         {
-            return m_felix.getBundleRegisteredServices(this);
+            return getFramework().getBundleRegisteredServices(this);
         }
     }
 
@@ -275,7 +517,7 @@ class BundleImpl extends FelixBundle
 
         if (sm != null)
         {
-            ServiceReference[] refs = m_felix.getBundleServicesInUse(this);
+            ServiceReference[] refs = getFramework().getBundleServicesInUse(this);
 
             if (refs == null)
             {
@@ -284,7 +526,7 @@ class BundleImpl extends FelixBundle
 
             List result = new ArrayList();
 
-            for (int i = 0;i < refs.length;i++)
+            for (int i = 0; i < refs.length; i++)
             {
                 String[] objectClass = (String[]) refs[i].getProperty(
                     Constants.OBJECTCLASS);
@@ -294,7 +536,7 @@ class BundleImpl extends FelixBundle
                     continue;
                 }
 
-                for (int j = 0;j < objectClass.length;j++)
+                for (int j = 0; j < objectClass.length; j++)
                 {
                     try
                     {
@@ -320,22 +562,143 @@ class BundleImpl extends FelixBundle
             return (ServiceReference[]) result.toArray(new ServiceReference[result.size()]);
         }
 
-        return m_felix.getBundleServicesInUse(this);
+        return getFramework().getBundleServicesInUse(this);
     }
 
-    public int getState()
+    public synchronized int getState()
     {
-        return m_info.getState();
+        return m_state;
+    }
+
+    synchronized void setState(int i)
+    {
+        m_state = i;
+    }
+
+    int getPersistentState()
+    {
+        try
+        {
+            return m_archive.getPersistentState();
+        }
+        catch (Exception ex)
+        {
+            getFramework().getLogger().log(
+                Logger.LOG_ERROR,
+                "Error reading persistent state from bundle archive.",
+                ex);
+            return Bundle.INSTALLED;
+        }
+    }
+
+    void setPersistentStateInactive()
+    {
+        try
+        {
+            m_archive.setPersistentState(Bundle.INSTALLED);
+        }
+        catch (Exception ex)
+        {
+            getFramework().getLogger().log(Logger.LOG_ERROR,
+                "Error writing persistent state to bundle archive.",
+                ex);
+        }
+    }
+
+    void setPersistentStateActive()
+    {
+        try
+        {
+            m_archive.setPersistentState(Bundle.ACTIVE);
+        }
+        catch (Exception ex)
+        {
+            getFramework().getLogger().log(
+                Logger.LOG_ERROR,
+                "Error writing persistent state to bundle archive.",
+                ex);
+        }
+    }
+
+    void setPersistentStateUninstalled()
+    {
+        try
+        {
+            m_archive.setPersistentState(Bundle.UNINSTALLED);
+        }
+        catch (Exception ex)
+        {
+            getFramework().getLogger().log(
+                Logger.LOG_ERROR,
+                "Error writing persistent state to bundle archive.",
+                ex);
+        }
+    }
+
+    int getStartLevel(int defaultLevel)
+    {
+        try
+        {
+            return m_archive.getStartLevel();
+        }
+        catch (Exception ex)
+        {
+            getFramework().getLogger().log(
+                Logger.LOG_ERROR,
+                "Error reading start level from bundle archive.",
+                ex);
+            return defaultLevel;
+        }
+    }
+
+    void setStartLevel(int i)
+    {
+        try
+        {
+            m_archive.setStartLevel(i);
+        }
+        catch (Exception ex)
+        {
+            getFramework().getLogger().log(
+                Logger.LOG_ERROR,
+                "Error writing start level to bundle archive.",
+                ex);
+        }
+    }
+
+    synchronized boolean isStale()
+    {
+        return m_stale;
+    }
+
+    synchronized void setStale()
+    {
+        m_stale = true;
+    }
+
+    synchronized boolean isExtension()
+    {
+        return m_extension;
+    }
+
+    synchronized void setExtension(boolean extension)
+    {
+        m_extension = extension;
     }
 
     public String getSymbolicName()
     {
-        return m_info.getSymbolicName();
+        return getCurrentModule().getSymbolicName();
     }
 
     public boolean hasPermission(Object obj)
     {
-        return m_felix.bundleHasPermission(this, obj);
+        return getFramework().bundleHasPermission(this, obj);
+    }
+
+    Object getSignerMatcher()
+    {
+        return getFramework().getSignerMatcher(this);
     }
 
     public Class loadClass(String name) throws ClassNotFoundException
@@ -349,13 +712,13 @@ class BundleImpl extends FelixBundle
                 ((SecurityManager) sm).checkPermission(new AdminPermission(this,
                     AdminPermission.CLASS));
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                throw new ClassNotFoundException("No permission.", e);
+                throw new ClassNotFoundException("No permission.", ex);
             }
         }
 
-        return m_felix.loadBundleClass(this, name);
+        return getFramework().loadBundleClass(this, name);
     }
 
     public void start() throws BundleException
@@ -379,7 +742,7 @@ class BundleImpl extends FelixBundle
                 AdminPermission.EXECUTE));
         }
 
-        m_felix.startBundle(this, ((options & Bundle.START_TRANSIENT) == 0));
+        getFramework().startBundle(this, ((options & Bundle.START_TRANSIENT) == 0));
     }
 
     public void update() throws BundleException
@@ -397,7 +760,7 @@ class BundleImpl extends FelixBundle
                 AdminPermission.LIFECYCLE));
         }
 
-        m_felix.updateBundle(this, is);
+        getFramework().updateBundle(this, is);
     }
 
     public void stop() throws BundleException
@@ -415,7 +778,7 @@ class BundleImpl extends FelixBundle
                 AdminPermission.EXECUTE));
         }
 
-        m_felix.stopBundle(this, ((options & Bundle.STOP_TRANSIENT) == 0));
+        getFramework().stopBundle(this, ((options & Bundle.STOP_TRANSIENT) == 0));
     }
 
     public void uninstall() throws BundleException
@@ -428,12 +791,12 @@ class BundleImpl extends FelixBundle
                 AdminPermission.LIFECYCLE));
         }
 
-        m_felix.uninstallBundle(this);
+        getFramework().uninstallBundle(this);
     }
 
     public String toString()
     {
-        String sym = m_info.getSymbolicName();
+        String sym = getCurrentModule().getSymbolicName();
         if (sym != null)
         {
             return sym + " [" + getBundleId() +"]";
@@ -441,8 +804,250 @@ class BundleImpl extends FelixBundle
         return "[" + getBundleId() +"]";
     }
 
-    Object getSignerMatcher()
+    synchronized boolean isRemovalPending()
     {
-        return m_felix.getSignerMatcher(this);
+        return m_removalPending;
+    }
+
+    synchronized void setRemovalPending(boolean removalPending)
+    {
+        m_removalPending = removalPending;
+    }
+
+    //
+    // Module management.
+    //
+
+    /**
+     * Returns an array of all modules associated with the bundle represented by
+     * this <tt>BundleInfo</tt> object. A module in the array corresponds to a
+     * revision of the bundle's JAR file and is ordered from oldest to newest.
+     * Multiple revisions of a bundle JAR file might exist if a bundle is
+     * updated, without refreshing the framework. In this case, exports from
+     * the prior revisions of the bundle JAR file are still offered; the
+     * current revision will be bound to packages from the prior revision,
+     * unless the packages were not offered by the prior revision. There is
+     * no limit on the potential number of bundle JAR file revisions.
+     * @return array of modules corresponding to the bundle JAR file revisions.
+    **/
+    synchronized IModule[] getModules()
+    {
+        return m_modules;
+    }
+
+    /**
+     * Determines if the specified module is associated with this bundle.
+     * @param module the module to determine if it is associate with this bundle.
+     * @return <tt>true</tt> if the specified module is in the array of modules
+     *         associated with this bundle, <tt>false</tt> otherwise.
+    **/
+    synchronized boolean hasModule(IModule module)
+    {
+        for (int i = 0; i < m_modules.length; i++)
+        {
+            if (m_modules[i] == module)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns the newest module, which corresponds to the last module
+     * in the module array.
+     * @return the newest module.
+    **/
+    synchronized IModule getCurrentModule()
+    {
+        return m_modules[m_modules.length - 1];
+    }
+
+    synchronized boolean isUsed()
+    {
+        boolean used = false;
+        for (int i = 0; !used && (i < m_modules.length); i++)
+        {
+            IModule[] dependents = ((ModuleImpl) m_modules[i]).getDependents();
+            for (int j = 0; (dependents != null) && (j < dependents.length) && !used; j++)
+            {
+                if (dependents[j] != m_modules[i])
+                {
+                    used = true;
+                }
+            }
+        }
+        return used;
+    }
+
+    synchronized void revise(String location, InputStream is) throws Exception
+    {
+        // This operation will increase the revision count for the bundle.
+        m_archive.revise(location, is);
+        createAndAddModule();
+    }
+
+    synchronized boolean rollbackRevise() throws Exception
+    {
+        return m_archive.rollbackRevise();
+    }
+
+    // TODO: REFACTOR - Hack for the system bundle.
+    synchronized void addModule(IModule module)
+    {
+        ((ModuleImpl) module).setBundle(this);
+
+        IModule[] dest = new IModule[m_modules.length + 1];
+        System.arraycopy(m_modules, 0, dest, 0, m_modules.length);
+        dest[m_modules.length] = module;
+        m_modules = dest;
+    }
+
+    synchronized void createAndAddModule() throws Exception
+    {
+        // Get and parse the manifest from the most recent revision to
+        // create an associated module for it.
+        Map headerMap = getCurrentManifestFromArchive();
+        ManifestParser mp = new ManifestParser(
+            getFramework().getLogger(), getFramework().getConfig(), headerMap);
+
+        // Verify that the bundle symbolic name and version is unique.
+        if (mp.getManifestVersion().equals("2"))
+        {
+            Version bundleVersion = mp.getBundleVersion();
+            bundleVersion = (bundleVersion == null) ? Version.emptyVersion : bundleVersion;
+            String symName = mp.getSymbolicName();
+
+            Bundle[] bundles = getFramework().getBundles();
+            for (int i = 0; (bundles != null) && (i < bundles.length); i++)
+            {
+                long id = ((BundleImpl) bundles[i]).getBundleId();
+                if (id != getBundleId())
+                {
+                    String sym = bundles[i].getSymbolicName();
+                    Version ver = Version.parseVersion((String) ((BundleImpl) bundles[i])
+                        .getCurrentModule().getHeaders().get(Constants.BUNDLE_VERSION));
+                    if (symName.equals(sym) && bundleVersion.equals(ver))
+                    {
+                        throw new BundleException("Bundle symbolic name and version are not unique: " + sym + ':' + ver);
+                    }
+                }
+            }
+        }
+
+        // Now that we have parsed and verified the module metadata, we
+        // can actually create the module. Note, if this is an extension
+        // bundle it's exports are removed, aince they will be added to
+        // the system bundle directly later on.
+        final int revision = m_archive.getRevisionCount() - 1;
+        IModule module = new ModuleImpl(
+            getFramework().getLogger(),
+            getFramework().getConfig(),
+            getFramework().getResolver(),
+            Long.toString(getBundleId()) + "." + Integer.toString(revision),
+            m_archive.getRevision(revision).getContent(),
+            headerMap,
+// TODO: REFACTOR - Karl, does this work correctly if the module is updated to
+//       an extension bundle or vice versa?
+            (ExtensionManager.isExtensionBundle(headerMap)) ? null : mp.getCapabilities(),
+            mp.getRequirements(),
+            mp.getDynamicRequirements(),
+            mp.getLibraries());
+
+        // Set the content loader's URL policy.
+        module.setURLPolicy(
+// TODO: REFACTOR - SUCKS NEEDING URL POLICY PER MODULE.
+            new URLPolicyImpl(
+                getFramework().getLogger(),
+                getFramework().getBundleStreamHandler(),
+                module));
+
+        // Verify that all native libraries exist in advance; this will
+        // throw an exception if the native library does not exist.
+        // TODO: CACHE - It would be nice if this check could be done
+        //               some place else in the module, perhaps.
+        R4Library[] libs = module.getNativeLibraries();
+        for (int i = 0; (libs != null) && (i < libs.length); i++)
+        {
+            String entryName = libs[i].getEntryName();
+            if (entryName != null)
+            {
+                if (module.getContent().getEntryAsNativeLibrary(entryName) == null)
+                {
+                    throw new BundleException("Native library does not exist: " + entryName);
+// TODO: REFACTOR - We have a memory leak here since we added a module above
+//                  and then don't remove it in case of an error; this may also
+//                  be a general issue for installing/updating bundles, so check.
+//                  This will likely go away when we refactor out the module
+//                  factory, but we will track it under FELIX-835 until then.
+                }
+            }
+        }
+
+        ((ModuleImpl) module).setBundle(this);
+
+        IModule[] dest = new IModule[m_modules.length + 1];
+        System.arraycopy(m_modules, 0, dest, 0, m_modules.length);
+        dest[m_modules.length] = module;
+        m_modules = dest;
+    }
+
+    void setProtectionDomain(ProtectionDomain pd)
+    {
+        getCurrentModule().setSecurityContext(pd);
+    }
+
+    synchronized ProtectionDomain getProtectionDomain()
+    {
+        ProtectionDomain pd = null;
+
+        for (int i = m_modules.length - 1; (i >= 0) && (pd == null); i--)
+        {
+            pd = (ProtectionDomain) m_modules[i].getSecurityContext();
+        }
+
+        return pd;
+    }
+
+    //
+    // Locking related methods.
+    //
+
+    synchronized boolean isLockable()
+    {
+        return (m_lockCount == 0) || (m_lockThread == Thread.currentThread());
+    }
+
+    synchronized void lock()
+    {
+        if ((m_lockCount > 0) && (m_lockThread != Thread.currentThread()))
+        {
+            throw new IllegalStateException("Bundle is locked by another thread.");
+        }
+        m_lockCount++;
+        m_lockThread = Thread.currentThread();
+    }
+
+    synchronized void unlock()
+    {
+        if (m_lockCount == 0)
+        {
+            throw new IllegalStateException("Bundle is not locked.");
+        }
+        if ((m_lockCount > 0) && (m_lockThread != Thread.currentThread()))
+        {
+            throw new IllegalStateException("Bundle is locked by another thread.");
+        }
+        m_lockCount--;
+        if (m_lockCount == 0)
+        {
+            m_lockThread = null;
+        }
+    }
+
+    synchronized void syncLock(BundleImpl impl)
+    {
+        m_lockCount = impl.m_lockCount;
+        m_lockThread = impl.m_lockThread;
     }
 }

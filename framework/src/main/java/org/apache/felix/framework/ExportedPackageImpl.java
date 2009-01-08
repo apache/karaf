@@ -27,14 +27,14 @@ import org.osgi.service.packageadmin.ExportedPackage;
 class ExportedPackageImpl implements ExportedPackage
 {
     private final Felix m_felix;
-    private final FelixBundle m_exportingBundle;
+    private final BundleImpl m_exportingBundle;
     private final IModule m_exportingModule;
     private final Capability m_export;
     private String m_toString = null;
     private String m_versionString = null;
 
     public ExportedPackageImpl(
-        Felix felix, FelixBundle exporter, IModule module, Capability export)
+        Felix felix, BundleImpl exporter, IModule module, Capability export)
     {
         m_felix = felix;
         m_exportingBundle = exporter;
@@ -45,7 +45,7 @@ class ExportedPackageImpl implements ExportedPackage
     public Bundle getExportingBundle()
     {
         // If the package is stale, then return null per the spec.
-        if (m_exportingBundle.getInfo().isStale())
+        if (m_exportingBundle.isStale())
         {
             return null;
         }
@@ -55,7 +55,7 @@ class ExportedPackageImpl implements ExportedPackage
     public Bundle[] getImportingBundles()
     {
         // If the package is stale, then return null per the spec.
-        if (m_exportingBundle.getInfo().isStale())
+        if (m_exportingBundle.isStale())
         {
             return null;
         }
@@ -87,7 +87,7 @@ class ExportedPackageImpl implements ExportedPackage
 
     public boolean isRemovalPending()
     {
-        return m_exportingBundle.getInfo().isRemovalPending();
+        return m_exportingBundle.isRemovalPending();
     }
 
     public String toString()

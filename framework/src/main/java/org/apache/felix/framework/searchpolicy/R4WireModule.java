@@ -100,14 +100,26 @@ public class R4WireModule implements IWire
             for (int srcIdx = 0; srcIdx < rp.m_sourceList.size(); srcIdx++)
             {
                 PackageSource ps = (PackageSource) rp.m_sourceList.get(srcIdx);
+// TODO: REFACTOR - Module's shouldn't depend on themself.
                 if ((ps.m_module == m_importer) ||
                     ((ps.m_capability instanceof Capability) &&
                     ((Capability) ps.m_capability).isIncluded(name)))
                 {
-                    Class clazz = ps.m_module.getContentLoader().getClass(name);
-                    if (clazz != null)
+// TODO: REFACTOR - It seems like we should be able to use getClassByDelegation()
+//       here once we don't allow modules to require themself above.
+                    try
                     {
-                        return clazz;
+                        Class clazz = ps.m_module.getClassFromModule(name);
+                        if (clazz != null)
+                        {
+                            return clazz;
+                        }
+                    }
+                    catch (ClassNotFoundException ex)
+                    {
+                        // Do not throw the exception here, since we want
+                        // to continue search other package sources and
+                        // ultimately the module's own content.
                     }
                 }
             }
@@ -130,7 +142,9 @@ public class R4WireModule implements IWire
             for (int srcIdx = 0; srcIdx < rp.m_sourceList.size(); srcIdx++)
             {
                 PackageSource ps = (PackageSource) rp.m_sourceList.get(srcIdx);
-                URL url = ps.m_module.getContentLoader().getResource(name);
+// TODO: REFACTOR - It seems like we should be able to use getClassByDelegation()
+//       here once we don't allow modules to require themself above.
+                URL url = ps.m_module.getResourceFromModule(name);
                 if (url != null)
                 {
                     return url;
@@ -164,7 +178,9 @@ public class R4WireModule implements IWire
             for (int srcIdx = 0; srcIdx < rp.m_sourceList.size(); srcIdx++)
             {
                 PackageSource ps = (PackageSource) rp.m_sourceList.get(srcIdx);
-                Enumeration urls = ps.m_module.getContentLoader().getResources(name);
+// TODO: REFACTOR - It seems like we should be able to use getClassByDelegation()
+//       here once we don't allow modules to require themself above.
+                Enumeration urls = ps.m_module.getResourcesFromModule(name);
                 if (urls != null)
                 {
                     enums.add(urls);

@@ -18,27 +18,56 @@
  */
 package org.apache.felix.moduleloader;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.Map;
+import org.apache.felix.framework.util.manifestparser.R4Library;
+import org.osgi.framework.Bundle;
 
 public interface IModule
 {
-    public String getId();
-    public IModuleDefinition getDefinition();
-    public IContentLoader getContentLoader();
-    public IWire[] getWires();
+    Bundle getBundle();
 
-    public Class getClass(String name) throws ClassNotFoundException;
-    public URL getResource(String name);
-    public Enumeration getResources(String name);
+    void setURLPolicy(IURLPolicy urlPolicy);
+    IURLPolicy getURLPolicy();
+    void setSecurityContext(Object securityContext);
+    Object getSecurityContext();
 
+    // Metadata access
+    Map getHeaders();
+    ICapability[] getCapabilities();
+    IRequirement[] getRequirements();
+    IRequirement[] getDynamicRequirements();
+    R4Library[] getNativeLibraries();
 
-    /**
-     * Returns whether the module is associated with an uninstalled bundle.
-     * If so, then it should not be used when resolving fragments or fragment
-     * hosts. However, it still can be used for resolving imported packages.
-     * @return <tt>true</tt> if the module's bundle is uninstalled, otherwise
-     *         <tt>false</tt>.
-    **/
-    public boolean isStale();
+    // Run-time data access.
+    String getId();
+    String getSymbolicName();
+    IWire[] getWires();
+    boolean isResolved();
+
+    // Content access.
+    IContent getContent();
+    Class getClassByDelegation(String name) throws ClassNotFoundException;
+    URL getResourceByDelegation(String name);
+    Enumeration getResourcesByDelegation(String name);
+    Class getClassFromModule(String name) throws ClassNotFoundException;
+    URL getResourceFromModule(String name);
+    Enumeration getResourcesFromModule(String name);
+    URL getResourceFromContent(String name);
+
+    // TODO: ML - For expediency, the index argument was added to these methods
+    // but it is not clear that this makes sense in the long run. This needs to
+    // be readdressed in the future, perhaps by the spec to clearly indicate
+    // how resources on the bundle class path are searched, which is why we
+    // need the index number in the first place -- to differentiate among
+    // resources with the same name on the bundle class path. This was previously
+    // handled as part of the resource path, but that approach is not spec
+    // compliant.
+    boolean hasInputStream(int index, String urlPath)
+        throws IOException;
+    InputStream getInputStream(int index, String urlPath)
+        throws IOException;
 }

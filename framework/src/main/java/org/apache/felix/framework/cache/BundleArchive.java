@@ -22,10 +22,7 @@ import java.io.*;
 import java.net.URLDecoder;
 
 import org.apache.felix.framework.Logger;
-import org.apache.felix.framework.util.ObjectInputStreamX;
-import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleActivator;
 
 /**
  * <p>
@@ -77,7 +74,6 @@ public class BundleArchive
     private static final transient String BUNDLE_STATE_FILE = "bundle.state";
     private static final transient String BUNDLE_START_LEVEL_FILE = "bundle.startlevel";
     private static final transient String REFRESH_COUNTER_FILE = "refresh.counter";
-    private static final transient String BUNDLE_ACTIVATOR_FILE = "bundle.activator";
     private static final transient String BUNDLE_LASTMODIFIED_FILE = "bundle.lastmodified";
     private static final transient String REVISION_DIRECTORY = "version";
     private static final transient String DATA_DIRECTORY = "data";
@@ -572,90 +568,6 @@ public class BundleArchive
 
     /**
      * <p>
-     * Returns the serialized activator for this archive. This is an
-     * extension to the OSGi specification.
-     * </p>
-     * @return the serialized activator for this archive.
-     * @throws Exception if any error occurs.
-    **/
-    public synchronized BundleActivator getActivator(IModule module)
-        throws Exception
-    {
-        // Get bundle activator file.
-        File activatorFile = new File(m_archiveRootDir, BUNDLE_ACTIVATOR_FILE);
-        // If the activator file doesn't exist, then
-        // assume there isn't one.
-        if (!BundleCache.getSecureAction().fileExists(activatorFile))
-        {
-            return null;
-        }
-
-        // Deserialize the activator object.
-        InputStream is = null;
-        ObjectInputStreamX ois = null;
-        try
-        {
-            is = BundleCache.getSecureAction()
-                .getFileInputStream(activatorFile);
-            ois = new ObjectInputStreamX(is, module);
-            Object o = ois.readObject();
-            return (BundleActivator) o;
-        }
-        catch (Exception ex)
-        {
-            m_logger.log(
-                Logger.LOG_ERROR,
-                getClass().getName() + ": Trying to deserialize - " + ex);
-        }
-        finally
-        {
-            if (ois != null) ois.close();
-            if (is != null) is.close();
-        }
-
-        return null;
-    }
-
-    /**
-     * <p>
-     * Serializes the activator for this archive.
-     * </p>
-     * @param obj the activator to serialize.
-     * @throws Exception if any error occurs.
-    **/
-    public synchronized void setActivator(Object obj) throws Exception
-    {
-        if (!(obj instanceof Serializable))
-        {
-            return;
-        }
-
-        // Serialize the activator object.
-        OutputStream os = null;
-        ObjectOutputStream oos = null;
-        try
-        {
-            os = BundleCache.getSecureAction()
-                .getFileOutputStream(new File(m_archiveRootDir, BUNDLE_ACTIVATOR_FILE));
-            oos = new ObjectOutputStream(os);
-            oos.writeObject(obj);
-        }
-        catch (IOException ex)
-        {
-            m_logger.log(
-                Logger.LOG_ERROR,
-                getClass().getName() + ": Unable to serialize activator - " + ex);
-            throw ex;
-        }
-        finally
-        {
-            if (oos != null) oos.close();
-            if (os != null) os.close();
-        }
-    }
-
-    /**
-     * <p>
      * Returns the number of revisions available for this archive.
      * </p>
      * @return tthe number of revisions available for this archive.
@@ -733,7 +645,7 @@ public class BundleArchive
      * @return true if the undo was a success false if there is no previous revision
      * @throws Exception if any error occurs.
      */
-    public synchronized boolean undoRevise() throws Exception
+    public synchronized boolean rollbackRevise() throws Exception
     {
         // Can only undo the revision if there is more than one.
         if (getRevisionCount() <= 1)

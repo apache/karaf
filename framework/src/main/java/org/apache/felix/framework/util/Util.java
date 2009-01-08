@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.felix.framework.searchpolicy.ModuleDefinition;
 import org.apache.felix.framework.util.manifestparser.Capability;
 import org.apache.felix.moduleloader.*;
 import org.osgi.framework.Bundle;
@@ -232,7 +231,7 @@ public class Util
 
     public static ICapability getSatisfyingCapability(IModule m, IRequirement req)
     {
-        ICapability[] caps = m.getDefinition().getCapabilities();
+        ICapability[] caps = m.getCapabilities();
         for (int i = 0; (caps != null) && (i < caps.length); i++)
         {
             if (caps[i].getNamespace().equals(req.getNamespace()) &&
@@ -254,7 +253,7 @@ public class Util
     public static ICapability[] getCapabilityByNamespace(IModule module, String namespace)
     {
         final List matching = new ArrayList();
-        final ICapability[] caps = module.getDefinition().getCapabilities();
+        final ICapability[] caps = module.getCapabilities();
         for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
         {
             if (caps[capIdx].getNamespace().equals(namespace))
@@ -525,11 +524,7 @@ public class Util
      */
     public static boolean isFragment(IModule module)
     {
-        if (module.getDefinition() instanceof ModuleDefinition)
-        {
-            Map headerMap = ((ModuleDefinition) module.getDefinition()).getHeaders();
-            return headerMap.containsKey(Constants.FRAGMENT_HOST);
-        }
-        return false;
+        Map headerMap = module.getHeaders();
+        return headerMap.containsKey(Constants.FRAGMENT_HOST);
     }
 }

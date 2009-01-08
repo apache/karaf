@@ -97,23 +97,15 @@ public class R4Wire implements IWire
         if (m_capability.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
             m_capability.getProperties().get(ICapability.PACKAGE_PROPERTY).equals(pkgName))
         {
-            // If the importer and the exporter are the same, then
-            // just ask for the class from the exporting module's
-            // content directly.
-            if (m_exporter == m_importer)
-            {
-                clazz = m_exporter.getContentLoader().getClass(name);
-            }
-            // Otherwise, check the include/exclude filters from the target
-            // package to make sure that the class is actually visible. In
-            // this case since the importing and exporting modules are different,
-            // we delegate to the exporting module, rather than its content,
-            // so that it can follow any internal wires it may have (e.g.,
-            // if the package has multiple sources).
-            else if (m_capability.getNamespace().equals(ICapability.PACKAGE_NAMESPACE)
+            // Check the include/exclude filters from the target package
+            // to make sure that the class is actually visible. We delegate
+            // to the exporting module, rather than its content, so it can
+            // it can follow any internal wires it may have (e.g., if the
+            // package has multiple sources).
+            if (m_capability.getNamespace().equals(ICapability.PACKAGE_NAMESPACE)
                 && ((Capability) m_capability).isIncluded(name))
             {
-                clazz = m_exporter.getClass(name);
+                clazz = m_exporter.getClassByDelegation(name);
             }
 
             // If no class was found, then we must throw an exception
@@ -143,20 +135,10 @@ public class R4Wire implements IWire
         if (m_capability.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
             m_capability.getProperties().get(ICapability.PACKAGE_PROPERTY).equals(pkgName))
         {
-            // If the importer and the exporter are the same, then
-            // just ask for the resource from the exporting module's
-            // content directly.
-            if (m_exporter == m_importer)
-            {
-                url = m_exporter.getContentLoader().getResource(name);
-            }
-            // Otherwise, delegate to the exporting module, rather than its
+            // Delegate to the exporting module, rather than its
             // content, so that it can follow any internal wires it may have
             // (e.g., if the package has multiple sources).
-            else
-            {
-                url = m_exporter.getResource(name);
-            }
+            url = m_exporter.getResourceByDelegation(name);
 
             // If no resource was found, then we must throw an exception
             // since the exporter for this package did not contain the
@@ -185,7 +167,7 @@ public class R4Wire implements IWire
         if (m_capability.getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
             m_capability.getProperties().get(ICapability.PACKAGE_PROPERTY).equals(pkgName))
         {
-            urls = m_exporter.getContentLoader().getResources(name);
+            urls = m_exporter.getResourcesByDelegation(name);
 
             // If no resource was found, then we must throw an exception
             // since the exporter for this package did not contain the

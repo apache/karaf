@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.apache.felix.framework.searchpolicy.ModuleImpl;
 import org.apache.felix.framework.searchpolicy.Resolver;
 import org.apache.felix.framework.searchpolicy.PackageSource;
 import org.apache.felix.framework.util.Util;
@@ -32,7 +33,6 @@ import org.apache.felix.moduleloader.ICapability;
 import org.apache.felix.moduleloader.IModule;
 import org.apache.felix.moduleloader.IRequirement;
 import org.apache.felix.moduleloader.IWire;
-import org.apache.felix.moduleloader.ModuleImpl;
 import org.osgi.framework.Constants;
 import org.osgi.framework.PackagePermission;
 import org.osgi.framework.Version;
@@ -66,7 +66,7 @@ public class FelixResolverState implements Resolver.ResolverState
         // exports to simplify later processing when resolving bundles.
         m_moduleList.add(module);
 
-        ICapability[] caps = module.getDefinition().getCapabilities();
+        ICapability[] caps = module.getCapabilities();
 
         // Add exports to unresolved package map.
         for (int i = 0; (caps != null) && (i < caps.length); i++)
@@ -93,7 +93,7 @@ public class FelixResolverState implements Resolver.ResolverState
         m_moduleList.remove(module);
 
         // Remove exports from package maps.
-        ICapability[] caps = module.getDefinition().getCapabilities();
+        ICapability[] caps = module.getCapabilities();
         for (int i = 0; (caps != null) && (i < caps.length); i++)
         {
             if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
@@ -132,6 +132,9 @@ public class FelixResolverState implements Resolver.ResolverState
         // Set wires to null, which will remove the module from all
         // of its dependent modules.
         ((ModuleImpl) module).setWires(null);
+        // Close the module's content.
+        ((ModuleImpl) module).close();
+
         // Remove the module from the "resolved" map.
 // TODO: RB - Maybe this can be merged with ModuleData.
         m_resolvedCapMap.remove(module);
@@ -139,6 +142,39 @@ public class FelixResolverState implements Resolver.ResolverState
         m_moduleDataMap.remove(module);
     }
 
+/* TODO: RESOLVER - We need to figure out what to do with this.
+    public void moduleRefreshed(ModuleEvent event)
+    {
+        synchronized (m_factory)
+        {
+            IModule module = event.getModule();
+            // Remove exports from package maps.
+            ICapability[] caps = event.getModule().getDefinition().getCapabilities();
+            // Add exports to unresolved package map.
+            for (int i = 0; (caps != null) && (i < caps.length); i++)
+            {
+                ICapability[] resolvedCaps = (ICapability[]) m_resolvedCapMap.get(module);
+                resolvedCaps = addCapabilityToArray(resolvedCaps, caps[i]);
+                m_resolvedCapMap.put(module, resolvedCaps);
+
+                // If the capability is a package, then add the exporter module
+                // of the wire to the "resolved" package index and remove it
+                // from the "unresolved" package index.
+                if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                {
+                    // Get package name.
+                    String pkgName = (String)
+                        caps[i].getProperties().get(ICapability.PACKAGE_PROPERTY);
+                    // Add to "resolved" package index.
+                    indexPackageCapability(
+                        m_resolvedPkgIndexMap,
+                        module,
+                        caps[i]);
+                }
+            }
+        }
+    }
+*/
     private void dumpPackageIndexMap(Map pkgIndexMap)
     {
         for (Iterator i = pkgIndexMap.entrySet().iterator(); i.hasNext(); )
@@ -164,24 +200,10 @@ public class FelixResolverState implements Resolver.ResolverState
         return (IModule[]) m_moduleList.toArray(new IModule[m_moduleList.size()]);
     }
 
-    public String getBundleSymbolicName(IModule module)
-    {
-        ICapability[] caps = module.getDefinition().getCapabilities();
-        for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
-        {
-            if (caps[capIdx].getNamespace().equals(ICapability.MODULE_NAMESPACE))
-            {
-                return (String)
-                    caps[capIdx].getProperties().get(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE);
-            }
-        }
-        return null;
-    }
-
 // TODO: FRAGMENT - Not very efficient.
     private static Version getBundleVersion(IModule module)
     {
-        ICapability[] caps = module.getDefinition().getCapabilities();
+        ICapability[] caps = module.getCapabilities();
         for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
         {
             if (caps[capIdx].getNamespace().equals(ICapability.MODULE_NAMESPACE))
@@ -193,27 +215,9 @@ public class FelixResolverState implements Resolver.ResolverState
         return Version.emptyVersion;
     }
 
-    public synchronized boolean isResolved(IModule module)
+    public synchronized void moduleResolved(IModule module)
     {
-        ModuleData data = (ModuleData) m_moduleDataMap.get(module);
-        if (data != null)
-        {
-            return data.m_resolved;
-        }
-        return false;
-    }
-
-    public synchronized void setResolved(IModule module, boolean b)
-    {
-        ModuleData data = (ModuleData) m_moduleDataMap.get(module);
-        if (data == null)
-        {
-            data = new ModuleData(module);
-            m_moduleDataMap.put(module, data);
-        }
-        data.m_resolved = b;
-
-        if (data.m_resolved)
+        if (module.isResolved())
         {
             // At this point, we need to remove all of the resolved module's
             // capabilities from the "unresolved" package map and put them in
@@ -223,7 +227,7 @@ public class FelixResolverState implements Resolver.ResolverState
             // module and not another module. If it points to another module
             // then the capability should be ignored, since the framework
             // decided to honor the import and discard the export.
-            ICapability[] caps = module.getDefinition().getCapabilities();
+            ICapability[] caps = module.getCapabilities();
 
             // First remove all existing capabilities from the "unresolved" map.
             for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
@@ -261,18 +265,15 @@ public class FelixResolverState implements Resolver.ResolverState
                 // satisfies any of the wire requirements.
                 for (int wireIdx = 0; (wires != null) && (wireIdx < wires.length); wireIdx++)
                 {
-                    // If the wire requirement is satisfied by the current capability,
-                    // then check to see if the wire is to the module itself. If it
-                    // is to another module, then null the current capability since
-                    // it was both providing and requiring the same capability and
-                    // the resolve process chose to import rather than provide that
-                    // capability, therefore we should ignore it.
+                    // If one of the module's capabilities satifies the requirement
+                    // for an existing wire, this means the capability was
+                    // substituted with another provider by the resolver and
+                    // the module's capability was not used. Therefore, we should
+                    // null it here so it doesn't get added the list of resolved
+                    // capabilities for this module.
                     if (wires[wireIdx].getRequirement().isSatisfied(capsCopy[capIdx]))
                     {
-                        if (!wires[wireIdx].getExporter().equals(module))
-                        {
-                            capsCopy[capIdx] = null;
-                        }
+                        capsCopy[capIdx] = null;
                         break;
                     }
                 }
@@ -314,7 +315,7 @@ public class FelixResolverState implements Resolver.ResolverState
     {
         List hostList = new ArrayList();
 
-        IRequirement[] reqs = fragment.getDefinition().getRequirements();
+        IRequirement[] reqs = fragment.getRequirements();
         IRequirement hostReq = null;
         for (int reqIdx = 0; reqIdx < reqs.length; reqIdx++)
         {
@@ -328,14 +329,14 @@ public class FelixResolverState implements Resolver.ResolverState
         IModule[] modules = getModules();
         for (int modIdx = 0; (hostReq != null) && (modIdx < modules.length); modIdx++)
         {
-            if (!fragment.equals(modules[modIdx]) && !isResolved(modules[modIdx]))
+            if (!fragment.equals(modules[modIdx]) && !modules[modIdx].isResolved())
             {
-                ICapability[] caps = modules[modIdx].getDefinition().getCapabilities();
+                ICapability[] caps = modules[modIdx].getCapabilities();
                 for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
                 {
                     if (caps[capIdx].getNamespace().equals(ICapability.HOST_NAMESPACE)
                         && hostReq.isSatisfied(caps[capIdx])
-                        && !modules[modIdx].isStale())
+                        && !((BundleImpl) modules[modIdx].getBundle()).isStale())
                     {
                         hostList.add(modules[modIdx]);
                         break;
@@ -353,7 +354,7 @@ public class FelixResolverState implements Resolver.ResolverState
 // TODO: FRAGMENT - This should check to make sure that the host allows fragments.
         Map fragmentMap = new HashMap();
 
-        ICapability[] caps = host.getDefinition().getCapabilities();
+        ICapability[] caps = host.getCapabilities();
         ICapability bundleCap = null;
         for (int capIdx = 0; capIdx < caps.length; capIdx++)
         {
@@ -369,12 +370,13 @@ public class FelixResolverState implements Resolver.ResolverState
         {
             if (!host.equals(modules[modIdx]))
             {
-                IRequirement[] reqs = modules[modIdx].getDefinition().getRequirements();
+                IRequirement[] reqs = modules[modIdx].getRequirements();
                 for (int reqIdx = 0; (reqs != null) && (reqIdx < reqs.length); reqIdx++)
                 {
                     if (reqs[reqIdx].getNamespace().equals(ICapability.HOST_NAMESPACE)
                         && reqs[reqIdx].isSatisfied(bundleCap)
-                        && !modules[modIdx].isStale())
+                        && !((BundleImpl) modules[modIdx].getBundle()).isStale()
+                        && !((BundleImpl) modules[modIdx].getBundle()).isRemovalPending())
                     {
                         indexFragment(fragmentMap, modules[modIdx]);
                         break;
@@ -404,7 +406,7 @@ public class FelixResolverState implements Resolver.ResolverState
                 {
 // TODO: RB - Is this permission check correct.
                     if ((System.getSecurityManager() != null) &&
-                        !((BundleProtectionDomain) modules[modIdx].getContentLoader().getSecurityContext()).impliesDirect(
+                        !((BundleProtectionDomain) modules[modIdx].getSecurityContext()).impliesDirect(
                             new PackagePermission(pkgName,
                                 PackagePermission.EXPORT)))
                     {
@@ -439,7 +441,7 @@ public class FelixResolverState implements Resolver.ResolverState
 // TODO: RB - Is this permission check correct.
                         if (resolvedCaps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
                             (System.getSecurityManager() != null) &&
-                            !((BundleProtectionDomain) module.getContentLoader().getSecurityContext()).impliesDirect(
+                            !((BundleProtectionDomain) module.getSecurityContext()).impliesDirect(
                                 new PackagePermission(
                                     (String) resolvedCaps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY),
                                     PackagePermission.EXPORT)))
@@ -486,7 +488,7 @@ public class FelixResolverState implements Resolver.ResolverState
             ICapability cap = Util.getSatisfyingCapability(modules[modIdx], req);
             // If compatible and it is not currently resolved, then add
             // the unresolved candidate to the list.
-            if ((cap != null) && !isResolved(modules[modIdx]))
+            if ((cap != null) && !modules[modIdx].isResolved())
             {
                 PackageSource[] tmp = new PackageSource[candidates.length + 1];
                 System.arraycopy(candidates, 0, tmp, 0, candidates.length);
@@ -574,8 +576,7 @@ public class FelixResolverState implements Resolver.ResolverState
 
     private void indexFragment(Map map, IModule module)
     {
-        String symName = getBundleSymbolicName(module);
-        IModule[] modules = (IModule[]) map.get(symName);
+        IModule[] modules = (IModule[]) map.get(module.getSymbolicName());
 
         // We want to add the fragment into the list of matching
         // fragments in sorted order (descending version and
@@ -631,7 +632,7 @@ public class FelixResolverState implements Resolver.ResolverState
             }
         }
 
-        map.put(symName, modules);
+        map.put(module.getSymbolicName(), modules);
     }
 
     private static IModule[] removeModuleFromArray(IModule[] modules, IModule m)
@@ -682,7 +683,7 @@ public class FelixResolverState implements Resolver.ResolverState
 
     public static ICapability getExportPackageCapability(IModule m, String pkgName)
     {
-        ICapability[] caps = m.getDefinition().getCapabilities();
+        ICapability[] caps = m.getCapabilities();
         for (int i = 0; (caps != null) && (i < caps.length); i++)
         {
             if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
@@ -718,18 +719,5 @@ public class FelixResolverState implements Resolver.ResolverState
         }
 
         return caps;
-    }
-    //
-    // Simple utility classes.
-    //
-
-    private static class ModuleData
-    {
-        public IModule m_module = null;
-        public boolean m_resolved = false;
-        public ModuleData(IModule module)
-        {
-            m_module = module;
-        }
     }
 }

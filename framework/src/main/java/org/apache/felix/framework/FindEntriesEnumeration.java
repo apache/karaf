@@ -22,7 +22,7 @@ import java.util.*;
 
 class FindEntriesEnumeration implements Enumeration
 {
-    private FelixBundle m_bundle = null;
+    private BundleImpl m_bundle = null;
     private Enumeration m_enumeration = null;
     private String m_path = null;
     private String[] m_filePattern = null;
@@ -30,12 +30,12 @@ class FindEntriesEnumeration implements Enumeration
     private Object m_next = null;
 
     public FindEntriesEnumeration(
-        FelixBundle bundle, String path, String filePattern, boolean recurse)
+        BundleImpl bundle, String path, String filePattern, boolean recurse)
     {
         m_bundle = bundle;
         m_path = path;
-        m_enumeration = (m_bundle.getInfo().getCurrentModule().getContentLoader().getContent() == null)
-            ? null : m_bundle.getInfo().getCurrentModule().getContentLoader().getContent().getEntries();
+        m_enumeration = (m_bundle.getCurrentModule().getContent() == null)
+            ? null : m_bundle.getCurrentModule().getContent().getEntries();
         m_recurse = recurse;
 
         // Sanity check the parameters.
@@ -113,8 +113,8 @@ class FindEntriesEnumeration implements Enumeration
                     if (checkSubstring(m_filePattern, lastElement))
                     {
                         // Convert entry name into an entry URL.
-                        return m_bundle.getInfo().getCurrentModule()
-                            .getContentLoader().getResourceFromContent(entryName);
+                        return m_bundle.getCurrentModule()
+                            .getResourceFromContent(entryName);
                     }
                 }
             }

@@ -29,10 +29,10 @@ class BundleContextImpl implements FelixBundleContext
 {
     private Logger m_logger = null;
     private Felix m_felix = null;
-    private FelixBundle m_bundle = null;
+    private BundleImpl m_bundle = null;
     private boolean m_valid = true;
 
-    protected BundleContextImpl(Logger logger, Felix felix, FelixBundle bundle)
+    protected BundleContextImpl(Logger logger, Felix felix, BundleImpl bundle)
     {
         m_logger = logger;
         m_felix = felix;
@@ -381,7 +381,7 @@ class BundleContextImpl implements FelixBundleContext
     {
         if (m_valid)
         {
-            switch (m_bundle.getInfo().getState())
+            switch (m_bundle.getState())
             {
                 case Bundle.ACTIVE:
                 case Bundle.STARTING:

@@ -20,10 +20,10 @@ package org.apache.felix.framework;
 
 import java.util.*;
 
+import org.apache.felix.framework.searchpolicy.ModuleImpl;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.framework.util.VersionRange;
 import org.apache.felix.moduleloader.IModule;
-import org.apache.felix.moduleloader.ModuleImpl;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.*;
 
@@ -111,8 +111,8 @@ class PackageAdminImpl implements PackageAdmin, Runnable
             String sym = bundles[i].getSymbolicName();
             if ((sym != null) && sym.equals(symbolicName))
             {
-                String s = (String) ((FelixBundle) bundles[i])
-                    .getInfo().getCurrentHeader().get(Constants.BUNDLE_VERSION);
+                String s = (String) ((BundleImpl) bundles[i])
+                    .getCurrentModule().getHeaders().get(Constants.BUNDLE_VERSION);
                 Version v = (s == null) ? new Version("0.0.0") : new Version(s);
                 if ((vr == null) || vr.isInRange(v))
                 {
@@ -128,10 +128,10 @@ class PackageAdminImpl implements PackageAdmin, Runnable
         Arrays.sort(bundles,new Comparator() {
             public int compare(Object o1, Object o2)
             {
-                String s1 = (String) ((FelixBundle) o1)
-                    .getInfo().getCurrentHeader().get(Constants.BUNDLE_VERSION);
-                String s2 = (String) ((FelixBundle) o2)
-                    .getInfo().getCurrentHeader().get(Constants.BUNDLE_VERSION);
+                String s1 = (String) ((BundleImpl) o1)
+                    .getCurrentModule().getHeaders().get(Constants.BUNDLE_VERSION);
+                String s2 = (String) ((BundleImpl) o2)
+                    .getCurrentModule().getHeaders().get(Constants.BUNDLE_VERSION);
                 Version v1 = (s1 == null) ? new Version("0.0.0") : new Version(s1);
                 Version v2 = (s2 == null) ? new Version("0.0.0") : new Version(s2);
                 // Compare in reverse order to get descending sort.
@@ -143,7 +143,7 @@ class PackageAdminImpl implements PackageAdmin, Runnable
 
     public int getBundleType(Bundle bundle)
     {
-        Map headerMap = ((FelixBundle) bundle).getInfo().getCurrentHeader();
+        Map headerMap = ((BundleImpl) bundle).getCurrentModule().getHeaders();
         if (headerMap.containsKey(Constants.FRAGMENT_HOST))
         {
             return PackageAdmin.BUNDLE_TYPE_FRAGMENT;
@@ -201,13 +201,12 @@ class PackageAdminImpl implements PackageAdmin, Runnable
             // Get attached fragments.
             IModule[] modules =
                 ((ModuleImpl)
-                    ((FelixBundle) bundle).getInfo().getCurrentModule()).getFragments();
+                    ((BundleImpl) bundle).getCurrentModule()).getFragments();
             // Convert fragment modules to bundles.
             List list = new ArrayList();
             for (int i = 0; (modules != null) && (i < modules.length); i++)
             {
-                long id = Util.getBundleIdFromModuleId(modules[i].getId());
-                Bundle b = m_felix.getBundle(id);
+                Bundle b = modules[i].getBundle();
                 if (b != null)
                 {
                     list.add(b);
@@ -225,7 +224,7 @@ class PackageAdminImpl implements PackageAdmin, Runnable
     {
         if (getBundleType(bundle) == BUNDLE_TYPE_FRAGMENT)
         {
-            return m_felix.getDependentBundles((FelixBundle) bundle);
+            return m_felix.getDependentBundles((BundleImpl) bundle);
         }
         return null;
     }
@@ -236,10 +235,11 @@ class PackageAdminImpl implements PackageAdmin, Runnable
         Bundle[] bundles = m_felix.getBundles();
         for (int i = 0; i < bundles.length; i++)
         {
-            FelixBundle fb = (FelixBundle) bundles[i];
-            if ((symbolicName == null) || (symbolicName.equals(fb.getInfo().getSymbolicName())))
+            BundleImpl impl = (BundleImpl) bundles[i];
+            if ((symbolicName == null)
+                || (symbolicName.equals(impl.getCurrentModule().getSymbolicName())))
             {
-                list.add(new RequiredBundleImpl(m_felix, fb));
+                list.add(new RequiredBundleImpl(m_felix, impl));
             }
         }
         return (list.size() == 0)

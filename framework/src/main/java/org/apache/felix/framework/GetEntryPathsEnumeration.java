@@ -23,17 +23,16 @@ import java.util.NoSuchElementException;
 
 class GetEntryPathsEnumeration implements Enumeration
 {
-    private FelixBundle m_bundle = null;
+    private BundleImpl m_bundle = null;
     private Enumeration m_enumeration = null;
     private String m_path = null;
     private Object m_next = null;
 
-    public GetEntryPathsEnumeration(FelixBundle bundle, String path)
+    public GetEntryPathsEnumeration(BundleImpl bundle, String path)
     {
         m_bundle = bundle;
         m_path = path;
-        m_enumeration = m_bundle.getInfo().getCurrentModule()
-            .getContentLoader().getContent().getEntries();
+        m_enumeration = m_bundle.getCurrentModule().getContent().getEntries();
 
         // Sanity check the parameters.
         if (m_path == null)

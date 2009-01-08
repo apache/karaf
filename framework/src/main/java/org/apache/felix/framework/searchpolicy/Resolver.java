@@ -40,6 +40,7 @@ public class Resolver
     private final Logger m_logger;
 
     // Reusable empty array.
+    private static final IWire[] m_emptyWires = new IWire[0];
     private static final IModule[] m_emptyModules = new IModule[0];
     private static final PackageSource[] m_emptySources = new PackageSource[0];
 
@@ -55,7 +56,7 @@ public class Resolver
     public Map resolve(ResolverState state, IModule rootModule) throws ResolveException
     {
         // If the module is already resolved, then we can just return.
-        if (state.isResolved(rootModule))
+        if (rootModule.isResolved())
         {
             return null;
         }
@@ -119,7 +120,7 @@ public class Resolver
             // Loop through the importer's dynamic requirements to determine if
             // there is a matching one for the package from which we want to
             // load a class.
-            IRequirement[] dynamics = importer.getDefinition().getDynamicRequirements();
+            IRequirement[] dynamics = importer.getDynamicRequirements();
             for (int dynIdx = 0; (dynamics != null) && (dynIdx < dynamics.length); dynIdx++)
             {
                 IRequirement target =
@@ -186,7 +187,7 @@ public class Resolver
     {
         // If any of the module exports this package, then we cannot
         // attempt to dynamically import it.
-        ICapability[] caps = importer.getDefinition().getCapabilities();
+        ICapability[] caps = importer.getCapabilities();
         for (int i = 0; (caps != null) && (i < caps.length); i++)
         {
             if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE)
@@ -258,7 +259,7 @@ public class Resolver
         // provider. If there is no consistent class space, then a resolve
         // exception is thrown.
         Map candidatesMap = new HashMap();
-        if (!state.isResolved(provider))
+        if (!provider.isResolved())
         {
             populateCandidatesMap(state, candidatesMap, provider);
             findConsistentClassSpace(state, candidatesMap, provider);
@@ -403,7 +404,7 @@ public class Resolver
 
         // Loop through each requirement and calculate its resolving
         // set of candidates.
-        IRequirement[] reqs = targetModule.getDefinition().getRequirements();
+        IRequirement[] reqs = targetModule.getRequirements();
         for (int reqIdx = 0; (reqs != null) && (reqIdx < reqs.length); reqIdx++)
         {
             if (reqs[reqIdx].getNamespace().equals(ICapability.HOST_NAMESPACE))
@@ -421,7 +422,7 @@ public class Resolver
                         {
                             // Only populate the resolver map with hosts that
                             // are not already resolved.
-                            if (!state.isResolved(hosts[hostIdx]))
+                            if (!hosts[hostIdx].isResolved())
                             {
                                 populateCandidatesMap(state, candidatesMap, hosts[hostIdx]);
                             }
@@ -489,7 +490,7 @@ public class Resolver
                         {
                             // Only populate the resolver map with modules that
                             // are not already resolved.
-                            if (!state.isResolved(candidates[candIdx].m_module))
+                            if (!candidates[candIdx].m_module.isResolved())
                             {
                                 populateCandidatesMap(state, candidatesMap, candidates[candIdx].m_module);
                             }
@@ -606,9 +607,9 @@ public class Resolver
         IModule[] modules = state.getModules();
         for (int i = 0; (modules != null) && (i < modules.length); i++)
         {
-            if (state.isResolved(modules[i]) && isSingleton(modules[i]))
+            if (modules[i].isResolved() && isSingleton(modules[i]))
             {
-                String symName = state.getBundleSymbolicName(modules[i]);
+                String symName = modules[i].getSymbolicName();
                 singletonMap.put(symName, symName);
             }
         }
@@ -648,7 +649,7 @@ public class Resolver
         // Check to see if the targetModule violates a singleton.
         // If not and it is a singleton, then add it to the singleton
         // map since it will constrain other singletons.
-        String symName = state.getBundleSymbolicName(targetModule);
+        String symName = targetModule.getSymbolicName();
         boolean isSingleton = isSingleton(targetModule);
         if (isSingleton && singletonMap.containsKey(symName))
         {
@@ -689,7 +690,7 @@ public class Resolver
                 // we have to see if resolving it would violate a singleton
                 // constraint.
                 PackageSource ps = (PackageSource) rp.m_sourceList.get(srcIdx);
-                if (!state.isResolved(ps.m_module))
+                if (!ps.m_module.isResolved())
                 {
                     return areCandidatesSingletonConsistent(state, ps.m_module, singletonMap, moduleMap, cycleMap, candidatesMap);
                 }
@@ -1099,7 +1100,7 @@ public class Resolver
 
         // Loop through the target module's capabilities that represent
         // exported packages and add them to the exported package map.
-        ICapability[] caps = targetModule.getDefinition().getCapabilities();
+        ICapability[] caps = targetModule.getCapabilities();
         for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
         {
             if (caps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
@@ -1354,7 +1355,7 @@ public class Resolver
 
         // Now loop through the target module's export package capabilities and
         // add the target module as a package source for any exported packages.
-        ICapability[] candCaps = psTarget.m_module.getDefinition().getCapabilities();
+        ICapability[] candCaps = psTarget.m_module.getCapabilities();
         for (int capIdx = 0; (candCaps != null) && (capIdx < candCaps.length); capIdx++)
         {
             if (candCaps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
@@ -1470,7 +1471,7 @@ public class Resolver
 
         // Now loop through the target module's export package capabilities and
         // add the target module as a package source for any exported packages.
-        ICapability[] caps = targetModule.getDefinition().getCapabilities();
+        ICapability[] caps = targetModule.getCapabilities();
         for (int i = 0; (caps != null) && (i < caps.length); i++)
         {
             if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
@@ -1529,7 +1530,7 @@ public class Resolver
     {
         // If the module is already resolved or it is part of
         // a cycle, then just return the wire map.
-        if (state.isResolved(importer) || (wireMap.get(importer) != null))
+        if (importer.isResolved() || (wireMap.get(importer) != null))
         {
             return wireMap;
         }
@@ -1585,11 +1586,10 @@ public class Resolver
 
         List moduleWires = new ArrayList();
         List packageWires = new ArrayList();
-        IWire[] wires = new IWire[candSetList.size()];
 
         // Put the module in the wireMap with an empty wire array;
         // we do this early so we can use it to detect cycles.
-        wireMap.put(importer, wires);
+        wireMap.put(importer, m_emptyModules);
 
         // Loop through each candidate Set and create a wire
         // for the selected candidate for the associated import.
@@ -1606,6 +1606,7 @@ public class Resolver
             }
             else
             {
+                // Create a module wire for module dependencies.
                 if (cs.m_requirement.getNamespace().equals(ICapability.MODULE_NAMESPACE))
                 {
                     moduleWires.add(new R4WireModule(
@@ -1615,7 +1616,11 @@ public class Resolver
                         cs.m_candidates[cs.m_idx].m_capability,
                         calculateCandidateRequiredPackages(importer, cs.m_candidates[cs.m_idx], candidatesMap)));
                 }
-                else
+                // Create a package wire for package dependencies.
+                // Filter out the case where a module imports from
+                // itself, since the module should simply load from
+                // its internal class path in this case.
+                else if (importer != cs.m_candidates[cs.m_idx].m_module)
                 {
                     // Add wire for imported package.
                     packageWires.add(new R4Wire(
@@ -1632,7 +1637,7 @@ public class Resolver
         }
 
         packageWires.addAll(moduleWires);
-        wireMap.put(importer, packageWires.toArray(wires));
+        wireMap.put(importer, packageWires.toArray(new IWire[packageWires.size()]));
 
         return wireMap;
     }
@@ -1705,9 +1710,6 @@ public class Resolver
     {
         IModule[] getModules();
         // TODO: RESOLVER - This should be on module.
-        String getBundleSymbolicName(IModule module);
-        // TODO: RESOLVER - This should be on module.
-        boolean isResolved(IModule module);
         Map getPotentialFragments(IModule module);
         List getPotentialHosts(IModule module);
         PackageSource[] getResolvedCandidates(IRequirement req);

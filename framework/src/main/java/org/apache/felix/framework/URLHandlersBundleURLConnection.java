@@ -69,7 +69,7 @@ class URLHandlersBundleURLConnection extends URLConnection
         //     bundle://<module-id>:<bundle-classpath-index>/<resource-path>
         // Where <module-id> = <bundle-id>.<revision>
         long bundleId = Util.getBundleIdFromModuleId(url.getHost());
-        FelixBundle bundle = (FelixBundle) m_framework.getBundle(bundleId);
+        BundleImpl bundle = (BundleImpl) m_framework.getBundle(bundleId);
         if (bundle == null)
         {
             throw new IOException("No bundle associated with resource: " + url);
@@ -77,7 +77,7 @@ class URLHandlersBundleURLConnection extends URLConnection
         m_contentTime = bundle.getLastModified();
 
         int revision = Util.getModuleRevisionFromModuleId(url.getHost());
-        IModule[] modules = bundle.getInfo().getModules();
+        IModule[] modules = bundle.getModules();
         if ((modules == null) || (revision >= modules.length))
         {
             throw new IOException("Resource does not exist: " + url);
@@ -102,9 +102,9 @@ class URLHandlersBundleURLConnection extends URLConnection
         {
             m_classPathIdx = 0;
         }
-        if (!modules[revision].getContentLoader().hasInputStream(m_classPathIdx, url.getPath()))
+        if (!modules[revision].hasInputStream(m_classPathIdx, url.getPath()))
         {
-            URL newurl = modules[revision].getContentLoader().getResource(url.getPath());
+            URL newurl = modules[revision].getResourceByDelegation(url.getPath());
             if (newurl == null)
             {
                 throw new IOException("Resource does not exist: " + url);
@@ -121,8 +121,7 @@ class URLHandlersBundleURLConnection extends URLConnection
             {
                 throw new IOException("Resource does not exist: " + url);
             }
-            m_is = m_targetModule.getContentLoader()
-                .getInputStream(m_classPathIdx, url.getPath());
+            m_is = m_targetModule.getInputStream(m_classPathIdx, url.getPath());
             m_contentLength = (m_is == null) ? 0 : m_is.available();
             m_contentType = URLConnection.guessContentTypeFromName(url.getFile());
             connected = true;

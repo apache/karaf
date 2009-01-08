@@ -49,8 +49,7 @@ public class URLHandlersServiceTracker implements ServiceListener
     **/
     public URLHandlersServiceTracker(Felix framework, String filter)
     {
-        m_context = ((FelixBundle) 
-            framework.getBundle(0)).getInfo().getBundleContext();
+        m_context = ((BundleImpl) framework).getBundleContext();
         m_filter = filter;
 
         synchronized (this)

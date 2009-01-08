@@ -44,9 +44,9 @@ public class ModuleEvent extends EventObject
      * @param mgr the source of the event.
      * @param module the subject of the event.
     **/
-    public ModuleEvent(IModuleFactory factory, IModule module)
+    public ModuleEvent(IModule module)
     {
-        super(factory);
+        super(module);
         m_module = module;
     }
 

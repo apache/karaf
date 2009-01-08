@@ -31,7 +31,7 @@ public class DirectoryContent implements IContent
     private static final transient String LIBRARY_DIRECTORY = "lib";
 
     private Logger m_logger;
-    private Object m_revisionLock;
+    private final Object m_revisionLock;
     private File m_rootDir;
     private File m_dir;
 
@@ -168,7 +168,6 @@ public class DirectoryContent implements IContent
                     }
                 }
             }
-            System.out.println("+++ EXTRACTED JAR DIR " + extractedDir);
             return new JarContent(m_logger, m_revisionLock, extractedDir, file);
         }
 

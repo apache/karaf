@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.apache.felix.framework.searchpolicy.ContentClassLoader;
+import org.apache.felix.framework.searchpolicy.ModuleClassLoader;
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.SecureAction;
 import org.apache.felix.framework.util.SecurityManagerEx;
@@ -611,7 +611,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
         for (int i = 0; i < stack.length; i++)
         {
             if ((stack[i].getClassLoader() != null) && 
-                ContentClassLoader.class.getName().equals(
+                ModuleClassLoader.class.getName().equals(
                 stack[i].getClassLoader().getClass().getName()))
             {
                 targetClass = stack[i];

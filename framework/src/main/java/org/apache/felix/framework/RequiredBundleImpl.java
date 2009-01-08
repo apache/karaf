@@ -22,10 +22,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.felix.framework.searchpolicy.ModuleImpl;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.moduleloader.ICapability;
 import org.apache.felix.moduleloader.IModule;
-import org.apache.felix.moduleloader.ModuleImpl;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
@@ -34,9 +34,9 @@ import org.osgi.service.packageadmin.RequiredBundle;
 class RequiredBundleImpl implements RequiredBundle
 {
     private final Felix m_felix;
-    private final FelixBundle m_bundle;
+    private final BundleImpl m_bundle;
 
-    public RequiredBundleImpl(Felix felix, FelixBundle bundle)
+    public RequiredBundleImpl(Felix felix, BundleImpl bundle)
     {
         m_felix = felix;
         m_bundle = bundle;
@@ -55,7 +55,7 @@ class RequiredBundleImpl implements RequiredBundle
     public Bundle[] getRequiringBundles()
     {
         // Spec says to return null for stale bundles.
-        if (m_bundle.getInfo().isStale())
+        if (m_bundle.isStale())
         {
             return null;
         }
@@ -64,7 +64,7 @@ class RequiredBundleImpl implements RequiredBundle
         // associated with this bundle.
         List moduleList = new ArrayList();
         // Loop through all of this bundle's modules.
-        IModule[] modules = m_bundle.getInfo().getModules();
+        IModule[] modules = m_bundle.getModules();
         for (int modIdx = 0; (modules != null) && (modIdx < modules.length); modIdx++)
         {
             // For each of this bundle's modules, loop through all of the
@@ -80,8 +80,7 @@ class RequiredBundleImpl implements RequiredBundle
         Set bundleSet = new HashSet();
         for (int modIdx = 0; modIdx < moduleList.size(); modIdx++)
         {
-            long id = Util.getBundleIdFromModuleId(((IModule) moduleList.get(modIdx)).getId());
-            Bundle bundle = m_felix.getBundle(id);
+            Bundle bundle = ((IModule) moduleList.get(modIdx)).getBundle();
             if (bundle != null)
             {
                 bundleSet.add(bundle);
@@ -94,7 +93,7 @@ class RequiredBundleImpl implements RequiredBundle
     {
         ICapability[] caps = 
             Util.getCapabilityByNamespace(
-                m_bundle.getInfo().getCurrentModule(), ICapability.MODULE_NAMESPACE);
+                m_bundle.getCurrentModule(), ICapability.MODULE_NAMESPACE);
         if ((caps != null) && (caps.length > 0))
         {
             return (Version) caps[0].getProperties().get(Constants.BUNDLE_VERSION_ATTRIBUTE);
@@ -104,6 +103,6 @@ class RequiredBundleImpl implements RequiredBundle
 
     public boolean isRemovalPending()
     {
-        return m_bundle.getInfo().isRemovalPending();
+        return m_bundle.isRemovalPending();
     }
 }

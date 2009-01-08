@@ -28,13 +28,13 @@ import java.security.cert.Certificate;
 public class BundleProtectionDomain extends ProtectionDomain
 {
     private final Felix m_felix;
-    private final FelixBundle m_bundle;
+    private final BundleImpl m_bundle;
 
-    public BundleProtectionDomain(Felix felix, FelixBundle bundle) 
+    BundleProtectionDomain(Felix felix, BundleImpl bundle)
         throws MalformedURLException
     {
         super(new CodeSource(new URL(new URL(null, "location:", 
-            new FakeURLStreamHandler()), felix.getBundleLocation(bundle), 
+            new FakeURLStreamHandler()), bundle._getLocation(),
             new FakeURLStreamHandler()), (Certificate[]) null), null);
         m_felix = felix;
         m_bundle = bundle;
@@ -50,7 +50,7 @@ public class BundleProtectionDomain extends ProtectionDomain
         return m_felix.impliesBundlePermission(this, permission, true);
     }
 
-    FelixBundle getBundle()
+    BundleImpl getBundle()
     {
         return m_bundle;
     }
