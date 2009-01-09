@@ -621,10 +621,7 @@ public class ModuleImpl implements IModule
         {
             m_fragmentContents[i].close();
         }
-        synchronized (this)
-        {
-            m_classLoader = null;
-        }
+        m_classLoader = null;
     }
 
     public IContent getContent()
@@ -819,15 +816,12 @@ public class ModuleImpl implements IModule
         return getClassPath()[index - 1].getEntryAsStream(urlPath);
     }
 
-    private ModuleClassLoader getClassLoader()
+    private synchronized ModuleClassLoader getClassLoader()
     {
-        synchronized (this)
+        if (m_classLoader == null)
         {
-            if (m_classLoader == null)
-            {
-                m_classLoader = m_secureAction.createModuleClassLoader(
-                    this, m_protectionDomain);
-            }
+            m_classLoader = m_secureAction.createModuleClassLoader(
+                this, m_protectionDomain);
         }
         return m_classLoader;
     }
