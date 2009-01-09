@@ -63,6 +63,10 @@ public class SimpleFileLock implements Lock {
         }
         lock = null;
     }
+ 
+    public boolean isAlive() throws Exception {
+        return lock != null;
+    }
 
     private static File getServiceMixLock(File lock,Properties props) {
         File rc = null;

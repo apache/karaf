@@ -123,6 +123,20 @@ public class Main implements MainService, BundleActivator {
 
     public static final String PROPERTY_LOCK_CLASS_DEFAULT = SimpleFileLock.class.getName();
 
+    public static final String PROPERTY_LOCK_URL = "servicemix.lock.jdbc.url";
+ 
+    public static final String PROPERTY_LOCK_JDBC_DRIVER = "servicemix.lock.jdbc.driver";
+
+    public static final String PROPERTY_LOCK_JDBC_USER = "servicemix.lock.jdbc.user";
+
+    public static final String PROPERTY_LOCK_JDBC_PASSWORD = "servicemix.lock.jdbc.password";
+
+    public static final String PROPERTY_LOCK_JDBC_TABLE = "servicemix.lock.jdbc.table";
+
+    public static final String PROPERTY_LOCK_JDBC_CLUSTERNAME = "servicemix.lock.jdbc.clustername";
+
+    public static final String PROPERTY_LOCK_JDBC_TIMEOUT = "servicemix.lock.jdbc.timeout";
+
     private File servicemixHome;
     private File servicemixBase;
     private static Properties m_configProps = null;
@@ -187,6 +201,10 @@ public class Main implements MainService, BundleActivator {
             lock(m_configProps);
             // Start up the OSGI framework
             m_felix = new Felix(new StringMap(m_configProps, false), activations);
+            // Start lock monitor
+            int pollLock = 30000;
+            Thread lockMonitor = new LockMonitor(lock, m_felix, pollLock);
+            lockMonitor.start();
             m_felix.start();
         }
         catch (Exception ex) {

@@ -24,4 +24,6 @@ public interface Lock {
 
     void release() throws Exception;
 
+    boolean isAlive() throws Exception;
+
 }
