@@ -179,17 +179,24 @@ public class InstallAction extends BundleAction
 
             // check for existing bundle first
             Bundle updateBundle = null;
-            Bundle[] bundles = getBundleContext().getBundles();
-            for ( int i = 0; i < bundles.length; i++ )
+            if ( Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals( symbolicName ) )
             {
-                if ( ( bundles[i].getLocation() != null && bundles[i].getLocation().equals( location ) )
-                    || ( bundles[i].getSymbolicName() != null && bundles[i].getSymbolicName().equals( symbolicName ) ) )
+                updateBundle = getBundleContext().getBundle( 0 );
+            }
+            else
+            {
+                Bundle[] bundles = getBundleContext().getBundles();
+                for ( int i = 0; i < bundles.length; i++ )
                 {
-                    updateBundle = bundles[i];
-                    break;
+                    if ( ( bundles[i].getLocation() != null && bundles[i].getLocation().equals( location ) )
+                        || ( bundles[i].getSymbolicName() != null && bundles[i].getSymbolicName().equals( symbolicName ) ) )
+                    {
+                        updateBundle = bundles[i];
+                        break;
+                    }
                 }
             }
-
+            
             if ( updateBundle != null )
             {
 
