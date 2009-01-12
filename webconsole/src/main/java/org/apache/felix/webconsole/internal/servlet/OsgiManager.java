@@ -128,9 +128,7 @@ public class OsgiManager extends GenericServlet
             "org.apache.felix.webconsole.internal.obr.InstallFromRepoAction",
             "org.apache.felix.webconsole.internal.obr.RefreshRepoAction",
             "org.apache.felix.webconsole.internal.system.GCAction",
-            "org.apache.felix.webconsole.internal.system.ShutdownAction",
-            "org.apache.felix.webconsole.internal.system.ShutdownRender",
-            "org.apache.felix.webconsole.internal.system.VMStatRender", };
+            "org.apache.felix.webconsole.internal.system.VMStatPlugin" };
 
     private BundleContext bundleContext;
 
