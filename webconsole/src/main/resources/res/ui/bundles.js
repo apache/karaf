@@ -49,7 +49,7 @@ function installForm( /* int */ startLevel )
     document.write( "<input type='hidden' name='action' value='install' />" );
     document.write( "<input class='input' type='file' name='bundlefile' size='50'>" );
     document.write( " - Start <input class='checkradio' type='checkbox' name='bundlestart' value='start'>" );
-    document.write( " - Start Level <input class='input' type='input' name='bundlestartelevel' value='" + startLevel + "' size='4'>" );
+    document.write( " - Start Level <input class='input' type='input' name='bundlestartlevel' value='" + startLevel + "' size='4'>" );
     document.write( "</td>" );
     document.write( "<td class='content' align='right' colspan='5' noWrap>" );
     document.write( "<input class='submit' style='width:auto' type='submit' value='Install or Update'>" );
