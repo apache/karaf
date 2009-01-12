@@ -96,7 +96,12 @@ public class RepositoryImpl implements Repository {
                     NodeList featureNodes = e.getElementsByTagName("feature");
                     for (int j = 0; j < featureNodes.getLength(); j++) {
                         Element b = (Element) featureNodes.item(j);
-                        f.addDependency(b.getTextContent());
+                        String dependencyFeatureVersion = b.getAttribute("version");
+                        if (dependencyFeatureVersion != null && dependencyFeatureVersion.length() > 0) {
+                        	f.addDependency(new FeatureImpl(b.getTextContent(), dependencyFeatureVersion));
+                        } else {
+                        	f.addDependency(new FeatureImpl(b.getTextContent()));
+                        }
                     }
                     NodeList configNodes = e.getElementsByTagName("config");
                     for (int j = 0; j < configNodes.getLength(); j++) {

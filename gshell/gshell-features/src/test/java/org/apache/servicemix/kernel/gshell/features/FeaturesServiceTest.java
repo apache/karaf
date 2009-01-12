@@ -20,6 +20,8 @@ import java.net.URI;
 import java.io.InputStream;
 
 import static org.easymock.EasyMock.*;
+
+import org.apache.servicemix.kernel.gshell.features.internal.FeatureImpl;
 import org.apache.servicemix.kernel.gshell.features.internal.FeaturesServiceImpl;
 import org.easymock.EasyMock;
 import org.osgi.service.prefs.PreferencesService;
@@ -89,7 +91,7 @@ public class FeaturesServiceTest extends TestCase {
         repositoriesNode.put("item.0", uri.toString());
         expect(prefs.node("features")).andReturn(featuresNode);
         featuresNode.clear();
-        featuresNode.put("f1", "12345");
+        featuresNode.put("f1" + FeatureImpl.SPLIT_FOR_NAME_AND_VERSION + FeatureImpl.DEFAULT_VERSION, "12345");
         prefs.putBoolean("bootFeaturesInstalled", false);
         prefs.flush();
 

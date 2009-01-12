@@ -30,13 +30,19 @@ public class FeatureImpl implements Feature {
 
     private String name;
     private String version;
-    private List<String> dependencies = new ArrayList<String>();
+    private List<Feature> dependencies = new ArrayList<Feature>();
     private List<String> bundles = new ArrayList<String>();
     private Map<String, Map<String,String>> configs = new HashMap<String, Map<String,String>>();
+    public static String SPLIT_FOR_NAME_AND_VERSION = "_split_for_name_and_version_";
+    public static String DEFAULT_VERSION = "0.0.0";
     
     public FeatureImpl(String name) {
-        this.name = name;
-        this.version = "0.0.0";
+        this(name, DEFAULT_VERSION);
+    }
+    
+    public FeatureImpl(String name, String version) {
+    	this.name = name;
+    	this.version = version;
     }
 
     public String getName() {
@@ -46,12 +52,12 @@ public class FeatureImpl implements Feature {
     public String getVersion() {
 		return version;
 	}
-
+    
 	public void setVersion(String version) {
 		this.version = version;
 	}
 
-    public List<String> getDependencies() {
+    public List<Feature> getDependencies() {
         return dependencies;
     }
 
@@ -63,7 +69,7 @@ public class FeatureImpl implements Feature {
         return configs;
     }
 
-    public void addDependency(String dependency) {
+    public void addDependency(Feature dependency) {
         dependencies.add(dependency);
     }
 
@@ -75,4 +81,21 @@ public class FeatureImpl implements Feature {
         configs.put(name, properties);
     }
 
+    public String toString() {
+    	String ret = getName() + SPLIT_FOR_NAME_AND_VERSION + getVersion();
+    	return ret;
+    }
+    
+    public static Feature valueOf(String str) {
+    	if (str.indexOf(SPLIT_FOR_NAME_AND_VERSION) >= 0) {
+    		String strName = str.substring(0, str.indexOf(SPLIT_FOR_NAME_AND_VERSION));
+        	String strVersion = str.substring(str.indexOf(SPLIT_FOR_NAME_AND_VERSION) 
+        			+ SPLIT_FOR_NAME_AND_VERSION.length(), str.length());
+        	return new FeatureImpl(strName, strVersion);
+    	} else {
+    		return new FeatureImpl(str);
+    	}
+    			
+    	
+    }
 }

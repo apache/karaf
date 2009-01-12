@@ -16,22 +16,19 @@
  */
 package org.apache.servicemix.kernel.gshell.features;
 
-import java.util.List;
-import java.util.Map;
+import org.apache.servicemix.kernel.gshell.features.internal.FeatureImpl;
 
-/**
- * A feature is a list of bundles associated identified by its name.
- */
-public interface Feature {
+import junit.framework.TestCase;
 
-    String getName();
-
-    String getVersion();
-
-    List<Feature> getDependencies();
-
-    List<String> getBundles();
-
-    Map<String, Map<String, String>> getConfigurations();
-
+public class FeatureTest extends TestCase {
+	
+	public void testValueOf() {
+		Feature feature = FeatureImpl.valueOf("name" + FeatureImpl.SPLIT_FOR_NAME_AND_VERSION + "version");
+		assertEquals(feature.getName(), "name");
+		assertEquals(feature.getVersion(), "version");
+		feature = FeatureImpl.valueOf("name");
+		assertEquals(feature.getName(), "name");
+		assertEquals(feature.getVersion(), FeatureImpl.DEFAULT_VERSION);
+	}
+	
 }

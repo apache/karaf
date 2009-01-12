@@ -70,8 +70,8 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     private PreferencesService preferences;
     private Set<URI> uris;
     private Map<URI, RepositoryImpl> repositories = new HashMap<URI, RepositoryImpl>();
-    private Map<String, Feature> features;
-    private Map<String, Set<Long>> installed = new HashMap<String, Set<Long>>();
+    private Map<String, Map<String, Feature>> features;
+    private Map<Feature, Set<Long>> installed = new HashMap<Feature, Set<Long>>();
     private String boot;
     private boolean bootFeaturesInstalled;
 
@@ -142,12 +142,17 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     }
 
     public void installFeature(String name) throws Exception {
-        Feature f = getFeature(name);
+    	installFeature(name, FeatureImpl.DEFAULT_VERSION);//install feature with default version
+    }
+
+    public void installFeature(String name, String version) throws Exception {
+        Feature f = getFeature(name, version);
         if (f == null) {
-            throw new Exception("No feature named '" + name + "' available");
+            throw new Exception("No feature named '" + name 
+            		+ "' with version '" + version + "' available");
         }
-        for (String dependency : f.getDependencies()) {
-            installFeature(dependency);
+        for (Feature dependency : f.getDependencies()) {
+        	installFeature(dependency.getName(), dependency.getVersion());
         }
         for (String config : f.getConfigurations().keySet()) {
             Dictionary<String,String> props = new Hashtable<String, String>(f.getConfigurations().get(config));
@@ -167,10 +172,10 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
             b.start();
             bundles.add(b.getBundleId());
         }
-        installed.put(name, bundles);
+        
+        installed.put(f, bundles);
         saveState();
     }
-
     protected Bundle installBundleIfNeeded(String bundleLocation) throws IOException, BundleException {
         LOGGER.debug("Checking " + bundleLocation);
         InputStream is = new BufferedInputStream(new URL(bundleLocation).openStream());
@@ -205,13 +210,19 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     }
 
     public void uninstallFeature(String name) throws Exception {
-        if (!installed.containsKey(name)) {
-            throw new Exception("Feature named '" + name + "' is not installed");
+        uninstallFeature(name, FeatureImpl.DEFAULT_VERSION);//uninstall feature with default version
+    }
+    
+    public void uninstallFeature(String name, String version) throws Exception {
+    	Feature feature = getFeature(name, version);
+        if (feature == null || !installed.containsKey(feature)) {
+            throw new Exception("Feature named '" + name 
+            		+ "' with version '" + version + "' is not installed");
         }
         // Grab all the bundles installed by this feature
         // and remove all those who will still be in use.
         // This gives this list of bundles to uninstall.
-        Set<Long> bundles = installed.remove(name);
+        Set<Long> bundles = installed.remove(feature);
         for (Set<Long> b : installed.values()) {
             bundles.removeAll(b);
         }
@@ -223,20 +234,32 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
 
     public String[] listFeatures() throws Exception {
         Collection<String> features = new ArrayList<String>();
-        for (Feature f : getFeatures().values()) {
-            String installStatus = installed.containsKey(f.getName()) ? "installed  " : "uninstalled";
-            String version = f.getVersion();
-            switch (version.length()) {
-            case 1: version = "       " + version;
-            case 2: version = "      " + version;
-            case 3: version = "     " + version;
-            case 4: version = "    " + version;
-            case 5: version = "   " + version;
-            case 6: version = "  " + version;
-            case 7: version = " " + version;
-            }
-            features.add("[" + installStatus + "] " + " [" + version + "] " + f.getName());
-        }
+        for (Map<String, Feature> featureWithDifferentVersion : getFeatures()
+				.values()) {
+			for (Feature f : featureWithDifferentVersion.values()) {
+				String installStatus = installed.containsKey(f) ? "installed  "
+						: "uninstalled";
+				String version = f.getVersion();
+				switch (version.length()) {
+				case 1:
+					version = "       " + version;
+				case 2:
+					version = "      " + version;
+				case 3:
+					version = "     " + version;
+				case 4:
+					version = "    " + version;
+				case 5:
+					version = "   " + version;
+				case 6:
+					version = "  " + version;
+				case 7:
+					version = " " + version;
+				}
+				features.add("[" + installStatus + "] " + " [" + version + "] "
+						+ f.getName());
+			}
+		}
         return features.toArray(new String[features.size()]);
     }
 
@@ -244,13 +267,14 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
         return installed.keySet().toArray(new String[installed.size()]);
     }
 
-    protected Feature getFeature(String name) throws Exception {
-        return getFeatures().get(name);
+    protected Feature getFeature(String name, String version) throws Exception {
+        return getFeatures().get(name).get(version);
     }
 
-    protected Map<String, Feature> getFeatures() throws Exception {
+    protected Map<String, Map<String, Feature>> getFeatures() throws Exception {
         if (features == null) {
-            Map<String, Feature> map = new HashMap<String, Feature>();
+        	//the outer map's key is feature name, the inner map's key is feature version       
+            Map<String, Map<String, Feature>> map = new HashMap<String, Map<String, Feature>>();
             // Two phase load:
             // * first load dependent repositories
             for (;;) {
@@ -270,7 +294,13 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
             // * then load all features
             for (Repository repo : repositories.values()) {
                 for (Feature f : repo.getFeatures()) {
-                    map.put(f.getName(), f);
+                	if (map.get(f.getName()) == null) {
+                		Map<String, Feature> versionMap = new HashMap<String, Feature>();
+                		versionMap.put(f.getVersion(), f);
+                		map.put(f.getName(), versionMap);
+                	} else {
+                		map.get(f.getName()).put(f.getVersion(), f);
+                	}
                 }
             }
             features = map;
@@ -387,21 +417,21 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
         return l;
     }
 
-    protected void saveMap(Preferences node, Map<String, Set<Long>> map) throws BackingStoreException {
+    protected void saveMap(Preferences node, Map<Feature, Set<Long>> map) throws BackingStoreException {
         node.clear();
-        for (Map.Entry<String, Set<Long>> entry : map.entrySet()) {
-            String key = entry.getKey();
+        for (Map.Entry<Feature, Set<Long>> entry : map.entrySet()) {
+            Feature key = entry.getKey();
             String val = createValue(entry.getValue());
-            node.put(key, val);
+            node.put(key.toString(), val);
         }
     }
 
-    protected Map<String, Set<Long>> loadMap(Preferences node) throws BackingStoreException {
-        Map<String, Set<Long>> map = new HashMap<String, Set<Long>>();
+    protected Map<Feature, Set<Long>> loadMap(Preferences node) throws BackingStoreException {
+        Map<Feature, Set<Long>> map = new HashMap<Feature, Set<Long>>();
         for (String key : node.keys()) {
             String val = node.get(key, null);
             Set<Long> set = readValue(val);
-            map.put(key, set);
+            map.put(FeatureImpl.valueOf(key), set);
         }
         return map;
     }

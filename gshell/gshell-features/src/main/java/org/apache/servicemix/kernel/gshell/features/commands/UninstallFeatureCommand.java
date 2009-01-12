@@ -23,8 +23,14 @@ public class UninstallFeatureCommand extends FeaturesCommandSupport {
 
     @Argument(required = true, description = "The name of the feature")
     String name;
+    @Argument(description = "The version of the feature", index = 1)
+    String version;
 
     protected void doExecute(FeaturesService admin) throws Exception {
-        admin.uninstallFeature(name);
+    	if (version != null && version.length() > 0) {
+    		admin.uninstallFeature(name, version);
+    	} else {
+    		admin.uninstallFeature(name );
+    	}
     }
 }

@@ -18,6 +18,7 @@ package org.apache.servicemix.kernel.gshell.features;
 
 import java.net.URI;
 
+import org.apache.servicemix.kernel.gshell.features.internal.FeatureImpl;
 import org.apache.servicemix.kernel.gshell.features.internal.RepositoryImpl;
 import junit.framework.TestCase;
 
@@ -54,7 +55,7 @@ public class RepositoryTest extends TestCase {
         assertEquals(0, features[1].getConfigurations().size());
         assertNotNull(features[1].getDependencies());
         assertEquals(1, features[1].getDependencies().size());
-        assertEquals("f1", features[1].getDependencies().get(0));
+        assertEquals("f1" + FeatureImpl.SPLIT_FOR_NAME_AND_VERSION + FeatureImpl.DEFAULT_VERSION, features[1].getDependencies().get(0).toString());
         assertNotNull(features[1].getBundles());
         assertEquals(1, features[1].getBundles().size());
         assertEquals("b3", features[1].getBundles().get(0));
