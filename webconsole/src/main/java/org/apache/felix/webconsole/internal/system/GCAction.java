@@ -45,7 +45,7 @@ public class GCAction implements Action
     public boolean performAction( HttpServletRequest request, HttpServletResponse response )
     {
         System.gc();
-        return false;
+        return true;
     }
 
 }
