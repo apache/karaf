@@ -78,4 +78,10 @@ public @interface Requires {
      * Set the from attribute.
      */
     String from() default "";
+    
+    /**
+     * Set the required service specification.
+     * This attribute is required for Collection field.
+     */
+    String specification() default "";
 }

@@ -70,6 +70,7 @@
 							META-INF/LICENCE.asm=LICENSE.asm, META-INF/NOTICE=NOTICE,
 							xsd=src/main/resources </Include-Resource>
 					</instructions>
+					<obrRepository>NONE</obrRepository>
 				</configuration>
 			</plugin>
 			<plugin>

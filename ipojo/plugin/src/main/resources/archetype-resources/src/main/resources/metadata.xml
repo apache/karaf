@@ -1,7 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<iPOJO>
-	<component className="$YOUR_COMPONENT_CLASS">
-   
+<ipojo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="org.apache.felix.ipojo http://felix.apache.org/ipojo/schemas/CURRENT/core.xsd"
+	xmlns="org.apache.felix.ipojo">
+	<component classname="$YOUR_COMPONENT_CLASS">
+   		<!-- Component type description -->
 	</component>
-	<instance component="$YOUR_COMPONENT_CLASS"/>
-</iPOJO>
+	<instance component="$YOUR_COMPONENT_CLASS" />
+</ipojo>

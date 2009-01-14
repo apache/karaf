@@ -46,6 +46,7 @@
 						<Include-Resource> META-INF/LICENCE=LICENSE,
 							META-INF/NOTICE=NOTICE </Include-Resource>
 					</instructions>
+					<obrRepository>NONE</obrRepository>
 				</configuration>
 			</plugin>
 			<plugin>

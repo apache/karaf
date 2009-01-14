@@ -58,6 +58,11 @@ import org.xml.sax.XMLReader;
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class Pojoization {
+    
+    /**
+     * iPOJO Imported Package Version.
+     */
+    public static final String IPOJO_PACKAGE_VERSION = " 1.1.0";
 
     /**
      * List of component types.
@@ -586,7 +591,7 @@ public class Pojoization {
     private void setImports(Attributes att) {
         Map imports = parseHeader(att.getValue("Import-Package"));
         Map ver = new TreeMap();
-        ver.put("version", "0.9.0");
+        ver.put("version", IPOJO_PACKAGE_VERSION);
         if (!imports.containsKey("org.apache.felix.ipojo")) {
             imports.put("org.apache.felix.ipojo", ver);
         }
@@ -773,21 +778,19 @@ public class Pojoization {
     }
     
     /**
-     * Get packages referenced by composite.
+     * Get packages referenced by component.
      * @return the list of referenced packages.
      */
     private List getReferredPackages() {
         List referred = new ArrayList();
         for (int i = 0; i < m_metadata.length; i++) {
-            if (m_metadata[i].getName().equalsIgnoreCase("composite")) {
-                Element[] elems = m_metadata[i].getElements();
-                for (int j = 0; j < elems.length; j++) {
-                    String att = elems[j].getAttribute("specification");
-                    if (att != null) {
-                        int last = att.lastIndexOf('.');
-                        if (last != -1) {
-                            referred.add(att.substring(0, last));
-                        }
+            Element[] elems = m_metadata[i].getElements();
+            for (int j = 0; j < elems.length; j++) {
+                String att = elems[j].getAttribute("specification");
+                if (att != null) {
+                    int last = att.lastIndexOf('.');
+                    if (last != -1) {
+                        referred.add(att.substring(0, last));
                     }
                 }
             }

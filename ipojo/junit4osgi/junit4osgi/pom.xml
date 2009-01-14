@@ -62,7 +62,7 @@
 				<configuration>
 					<instructions>
 						<Bundle-Name>
-							iPOJO OSGi Junit Runner
+							Apache Felix iPOJO OSGi Junit Runner
 						</Bundle-Name>
 						<Bundle-SymbolicName>
 							${pom.artifactId}

@@ -30,21 +30,16 @@
 	<artifactId>org.apache.felix.ipojo.composite</artifactId>
 	<groupId>org.apache.felix</groupId>
 	<version>1.1.0-SNAPSHOT</version>
+	
+	<properties>
+		<ipojo.package.version>1.1.0</ipojo.package.version>
+	</properties>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.osgi.core</artifactId>
 			<version>1.0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.osgi.compendium</artifactId>
-			<version>1.2.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.ipojo.metadata</artifactId>
-			<version>1.1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
@@ -74,18 +69,25 @@
 						<Bundle-DocURL>
 							http://felix.apache.org/site/apache-felix-ipojo.html 
 						</Bundle-DocURL>
-						<Import-Package> org.apache.felix.ipojo,
+						<Import-Package> 
+							org.apache.felix.ipojo,
 							org.apache.felix.ipojo.architecture,
-							org.apache.felix.ipojo.context, org.apache.felix.ipojo.metadata,
-							org.apache.felix.ipojo.parser, org.apache.felix.ipojo.util,
+							org.apache.felix.ipojo.context, 
+							org.apache.felix.ipojo.metadata,
+							org.apache.felix.ipojo.parser, 
+							org.apache.felix.ipojo.util,
 							org.osgi.framework;version=1.3 </Import-Package>
-						<Private-Package> org.apache.felix.ipojo.manipulation,
+						<Private-Package> 
+							org.apache.felix.ipojo.manipulation,
 							org.apache.felix.ipojo.composite.architecture,
 							org.apache.felix.ipojo.composite.service*,
 							org.apache.felix.ipojo.composite.instance,
-							org.apache.felix.ipojo.composite.util, !org.objectweb.asm.xml*,
-							org.objectweb.asm*;-split-package:=merge-first </Private-Package>
-						<Export-Package> org.apache.felix.ipojo.composite; version="0.9.0" 
+							org.apache.felix.ipojo.composite.util, 
+							!org.objectweb.asm.xml*,
+							org.objectweb.asm*;-split-package:=merge-first 
+						</Private-Package>
+						<Export-Package> 
+							org.apache.felix.ipojo.composite; version="${ipojo.package.version}" 
 						</Export-Package>
 						<Include-Resource> META-INF/LICENSE=LICENSE,
 							META-INF/NOTICE=NOTICE, META-INF/LICENSE.asm=LICENSE.asm 

@@ -56,7 +56,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
      * This internal dispatcher helps the OSGi framework to support large
      * scale applications. The internal dispatcher is disabled by default.
      */
-    protected static boolean DISPATCHER_ENABLED = true;
+    static boolean DISPATCHER_ENABLED = true;
     
     /**
      * Property allowing to set if the internal dispatcher is enabled or disabled.

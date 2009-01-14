@@ -30,6 +30,11 @@
 	<artifactId>org.apache.felix.ipojo</artifactId>
 	<groupId>org.apache.felix</groupId>
 	<version>1.1.0-SNAPSHOT</version>
+	
+	<properties>
+		<ipojo.package.version>1.1.0</ipojo.package.version>
+	</properties>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
@@ -44,11 +49,6 @@
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.ipojo.metadata</artifactId>
-			<version>1.1.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.ipojo.manipulator</artifactId>
 			<version>1.1.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
@@ -75,22 +75,30 @@
 							component:org.apache.felix.ipojo.ComponentFactory,
 							handler:org.apache.felix.ipojo.HandlerManagerFactory 
 						</IPOJO-Extension>
-						<Import-Package> org.osgi.framework;version=1.3, org.osgi.service.cm,
-							org.osgi.service.log, !net.sourceforge.cobertura.* </Import-Package>
-						<Private-Package> org.apache.felix.ipojo.handlers.architecture,
-							org.apache.felix.ipojo.handlers.configuration,
+						<Import-Package> 
+							org.osgi.framework;version=1.3, <!-- To support KF 2 --> 
+							org.osgi.service.cm,
+							org.osgi.service.log, 
+							!net.sourceforge.cobertura.* <!--  To support code coverage -->
+						</Import-Package>
+						<Private-Package> 
+							org.apache.felix.ipojo.handlers.architecture,
 							org.apache.felix.ipojo.handlers.lifecycle.callback,
 							org.apache.felix.ipojo.handlers.lifecycle.controller 
 						</Private-Package>
-						<Export-Package> org.apache.felix.ipojo; version="0.9.0",
-							org.apache.felix.ipojo.metadata; version="0.9.0",
-							org.apache.felix.ipojo.architecture; version="0.9.0",
-							org.apache.felix.ipojo.parser; version="0.9.0",
-							org.apache.felix.ipojo.util; version="0.9.0",
-							org.apache.felix.ipojo.handlers.dependency; version="0.9.0",
-							org.apache.felix.ipojo.handlers.providedservice; version="0.9.0",
-							org.apache.felix.ipojo.context; version="0.9.0",
-							org.osgi.service.cm, org.osgi.service.log </Export-Package>
+						<Export-Package> 
+							org.apache.felix.ipojo; version="${ipojo.package.version}",
+							org.apache.felix.ipojo.metadata; version="${ipojo.package.version}",
+							org.apache.felix.ipojo.architecture; version="${ipojo.package.version}",
+							org.apache.felix.ipojo.parser; version="${ipojo.package.version}",
+							org.apache.felix.ipojo.util; version="${ipojo.package.version}",
+							org.apache.felix.ipojo.handlers.dependency; version="${ipojo.package.version}",
+							org.apache.felix.ipojo.handlers.providedservice; version="${ipojo.package.version}",
+							org.apache.felix.ipojo.handlers.configuration; version="${ipojo.package.version}",
+							org.apache.felix.ipojo.context; version="${ipojo.package.version}",
+							org.osgi.service.cm, 
+							org.osgi.service.log 
+						</Export-Package>
 						<Include-Resource> META-INF/LICENCE=LICENSE,
 							META-INF/NOTICE=NOTICE </Include-Resource>
 						<_donotcopy> (CVS|.svn|.+.bak|~.+|metadata.xml) </_donotcopy>

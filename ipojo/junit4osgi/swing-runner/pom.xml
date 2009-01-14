@@ -56,7 +56,7 @@
 			<extensions>true</extensions>
 			<configuration>
 				<instructions>
-					<Bundle-Name> iPOJO OSGi Junit Runner - Swing Gui</Bundle-Name>
+					<Bundle-Name>Apache Felix iPOJO OSGi Junit Runner - Swing Gui</Bundle-Name>
 					<Bundle-SymbolicName> ${pom.artifactId}</Bundle-SymbolicName>
 					<Private-Package> org.apache.felix.ipojo.junit4osgi.command
 					</Private-Package>

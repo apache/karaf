@@ -230,7 +230,7 @@ public class FieldCollector extends EmptyVisitor implements FieldVisitor {
 
             req.addAttribute(new Attribute("field", m_field));
             if (m_specification != null) {
-                req.addAttribute(new Attribute("interface", m_specification));
+                req.addAttribute(new Attribute("specification", m_specification));
             }
             if (m_filter != null) {
                 req.addAttribute(new Attribute("filter", m_filter));

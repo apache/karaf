@@ -63,7 +63,7 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Bundle-Name> iPOJO OSGi Junit Runner - Immediate Runner
+						<Bundle-Name> Apache Felix iPOJO OSGi Junit Runner - Immediate Runner
 						</Bundle-Name>
 						<Bundle-SymbolicName> ${pom.artifactId}</Bundle-SymbolicName>
 						<Private-Package> org.apache.felix.ipojo.junit4osgi.command
