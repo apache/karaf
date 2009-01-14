@@ -19,14 +19,7 @@ package org.apache.felix.webconsole.internal.misc;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -37,15 +30,8 @@ import org.apache.felix.webconsole.internal.Util;
 import org.apache.felix.webconsole.internal.servlet.OsgiManager;
 import org.json.JSONException;
 import org.json.JSONWriter;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleEvent;
-import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
+import org.osgi.framework.*;
+import org.osgi.service.event.*;
 
 
 public class EventAdminServlet extends BaseWebConsolePlugin implements EventHandler
@@ -228,7 +214,7 @@ public class EventAdminServlet extends BaseWebConsolePlugin implements EventHand
         final String info = request.getPathInfo();
         if ( info.endsWith( ".json" ) )
         {
-            response.setContentType( "text/javascript" );
+            response.setContentType( "application/json" );
             response.setCharacterEncoding( "UTF-8" );
 
             PrintWriter pw = response.getWriter();
