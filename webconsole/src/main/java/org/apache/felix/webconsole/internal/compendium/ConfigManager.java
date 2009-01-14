@@ -22,6 +22,7 @@ import java.lang.reflect.Array;
 import java.util.*;
 import java.util.Map.Entry;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -78,7 +79,7 @@ public class ConfigManager extends ConfigManagerBase
         // the filter to select part of the configurations
         String pidFilter = request.getParameter( PID_FILTER );
 
-        ConfigurationAdmin ca = this.getConfigurationAdmin();
+        final ConfigurationAdmin ca = this.getConfigurationAdmin();
 
         // ignore this request if the pid and/or configuration admin is missing
         if ( pid == null || ca == null )
@@ -117,17 +118,87 @@ public class ConfigManager extends ConfigManagerBase
         }
 
         // send the result
-        response.setContentType( "text/javascript" );
+        response.setContentType( "application/json" );
         response.setCharacterEncoding( "UTF-8" );
-        printConfigurationJson( response.getWriter(), pid, config, pidFilter, getLocale( request ) );
+        final Locale loc = getLocale( request );
+        final String locale = ( loc != null ) ? loc.toString() : null;
+        printConfigurationJson( response.getWriter(), pid, config, pidFilter, locale );
     }
 
 
+    /**
+     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
+    protected void doGet( HttpServletRequest request, HttpServletResponse response )
+    throws ServletException, IOException
+    {
+        // let's check for a json request
+        final String info = request.getPathInfo();
+        if ( info.endsWith( ".json" ) )
+        {
+            response.setContentType( "application/json" );
+            response.setCharacterEncoding( "UTF-8" );
+
+            // after last slash and without extension
+            String pid = info.substring( info.lastIndexOf( '/' ) + 1, info.length() - 5 );
+            // check whether the pid is actually a filter for the selection
+            // of configurations to display, if the filter correctly converts
+            // into an OSGi filter, we use it to select configurations
+            // to display
+            String pidFilter = request.getParameter( PID_FILTER );
+            if ( pidFilter == null )
+            {
+                pidFilter = pid;
+            }
+            try
+            {
+                getBundleContext().createFilter( pidFilter );
+
+                // if the pidFilter was set from the pid, clear the pid
+                if ( pid == pidFilter )
+                {
+                    pid = null;
+                }
+            }
+            catch ( InvalidSyntaxException ise )
+            {
+                // its ok, if the pid is just a single PID
+                pidFilter = null;
+            }
+
+            final ConfigurationAdmin ca = this.getConfigurationAdmin();
+
+            final Locale loc = getLocale( request );
+            final String locale = ( loc != null ) ? loc.toString() : null;
+
+            final PrintWriter pw = response.getWriter();
+
+            try {
+                pw.write("[");
+                final SortedMap services = this.getServices(pid, pidFilter, locale, false);
+                final Iterator i = services.keySet().iterator();
+                while ( i.hasNext() ) {
+                    final String servicePid = i.next().toString();
+
+                    final Configuration config = this.getConfiguration(ca, servicePid);
+                    this.printConfigurationJson(pw, servicePid, config, pidFilter, locale);
+                }
+                pw.write("]");
+            } catch (InvalidSyntaxException e) {
+                // this should not happend as we checked the filter before
+            }
+            // nothing more to do
+            return;
+        }
+
+        super.doGet( request, response );
+    }
+
+    /**
+     * @see org.apache.felix.webconsole.AbstractWebConsolePlugin#renderContent(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
     public void renderContent( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
-
-        // true if MetaType service information is not required
-        boolean optionalMetaType = false;
 
         // extract the configuration pid from the request path
         String pid = request.getPathInfo();
@@ -158,17 +229,18 @@ public class ConfigManager extends ConfigManagerBase
             pidFilter = null;
         }
 
-        Locale loc = getLocale( request );
-        String locale = ( loc != null ) ? loc.toString() : null;
+        final ConfigurationAdmin ca = this.getConfigurationAdmin();
 
-        PrintWriter pw = response.getWriter();
+        final Locale loc = getLocale( request );
+        final String locale = ( loc != null ) ? loc.toString() : null;
 
-        String appRoot = (String) request.getAttribute( OsgiManager.ATTR_APP_ROOT );
+        final PrintWriter pw = response.getWriter();
+
+        final String appRoot = (String) request.getAttribute( OsgiManager.ATTR_APP_ROOT );
         pw.println( "<script src='" + appRoot + "/res/ui/configmanager.js' language='JavaScript'></script>" );
 
         pw.println( "<table class='content' cellpadding='0' cellspacing='0' width='100%'>" );
 
-        ConfigurationAdmin ca = this.getConfigurationAdmin();
         if ( ca == null )
         {
             pw.println( "<tr class='content' id='configField'>" );
@@ -183,14 +255,14 @@ public class ConfigManager extends ConfigManagerBase
             pw.println( "<tr class='content' id='configField'>" );
             pw.println( "<td class='content'>Configurations</th>" );
             pw.println( "<td class='content'>" );
-            this.listConfigurations( pw, ca, pidFilter, optionalMetaType, locale );
+            this.listConfigurations( pw, ca, pidFilter, locale );
             pw.println( "</td>" );
             pw.println( "</tr>" );
 
             pw.println( "<tr class='content' id='factoryField'>" );
             pw.println( "<td class='content'>Factory Configurations</th>" );
             pw.println( "<td class='content'>" );
-            this.listFactoryConfigurations( pw, ca, pidFilter, optionalMetaType, locale );
+            this.listFactoryConfigurations( pw, ca, pidFilter, locale );
             pw.println( "</td>" );
             pw.println( "</tr>" );
         }
@@ -206,7 +278,7 @@ public class ConfigManager extends ConfigManagerBase
         }
         else
         {
-            config = getConfiguration( getConfigurationAdmin(), pid );
+            config = getConfiguration( ca, pid );
         }
 
         if ( config != null )
@@ -214,7 +286,7 @@ public class ConfigManager extends ConfigManagerBase
             Util.startScript( pw );
 
             pw.println( "var configuration=" );
-            printConfigurationJson( pw, config.getPid(), config, pidFilter, getLocale( request ) );
+            printConfigurationJson( pw, config.getPid(), config, pidFilter, locale );
             pw.println( ";" );
 
             pw.println( "displayConfigForm(configuration);" );
@@ -255,12 +327,12 @@ public class ConfigManager extends ConfigManagerBase
     }
 
 
-    private void listConfigurations( PrintWriter pw, ConfigurationAdmin ca, String pidFilter, boolean optionalMetaType, String locale )
+    private void listConfigurations( PrintWriter pw, ConfigurationAdmin ca, String pidFilter, String locale )
     {
         try
         {
             // start with ManagedService instances
-            SortedMap optionsPlain = getServices( ManagedService.class.getName(), pidFilter, optionalMetaType, locale );
+            SortedMap optionsPlain = getServices( ManagedService.class.getName(), pidFilter, locale, true );
 
             // add in existing configuration (not duplicating ManagedServices)
             Configuration[] cfgs = ca.listConfigurations( pidFilter );
@@ -288,7 +360,7 @@ public class ConfigManager extends ConfigManagerBase
                     name = pid;
                 }
 
-                if ( ocd != null || optionalMetaType )
+                if ( ocd != null )
                 {
                     optionsPlain.put( pid, name );
                 }
@@ -303,12 +375,12 @@ public class ConfigManager extends ConfigManagerBase
     }
 
 
-    private void listFactoryConfigurations( PrintWriter pw, ConfigurationAdmin ca, String pidFilter, boolean optionalMetaType,
+    private void listFactoryConfigurations( PrintWriter pw, ConfigurationAdmin ca, String pidFilter,
         String locale )
     {
         try
         {
-            SortedMap optionsFactory = getServices( ManagedServiceFactory.class.getName(), pidFilter, optionalMetaType, locale );
+            SortedMap optionsFactory = getServices( ManagedServiceFactory.class.getName(), pidFilter, locale, true );
             printOptionsForm( pw, optionsFactory, "configSelection_factory", "create", "Create" );
         }
         catch ( Exception e )
@@ -318,7 +390,7 @@ public class ConfigManager extends ConfigManagerBase
     }
 
 
-    private SortedMap getServices( String serviceClass, String serviceFilter, boolean optionalMetaType, String locale )
+    private SortedMap getServices( String serviceClass, String serviceFilter, String locale, boolean ocdRequired )
         throws InvalidSyntaxException
     {
         // sorted map of options
@@ -333,7 +405,7 @@ public class ConfigManager extends ConfigManagerBase
             {
                 String pid = ( String ) pidObject;
                 String name;
-                ObjectClassDefinition ocd = this.getObjectClassDefinition( refs[i].getBundle(), pid, locale );
+                final ObjectClassDefinition ocd = this.getObjectClassDefinition( refs[i].getBundle(), pid, locale );
                 if ( ocd != null )
                 {
                     name = ocd.getName() + " (";
@@ -344,8 +416,7 @@ public class ConfigManager extends ConfigManagerBase
                     name = pid;
                 }
 
-                if ( ocd != null || optionalMetaType )
-                {
+                if ( !ocdRequired || ocd != null ) {
                     optionsFactory.put( pid, name );
                 }
             }
@@ -385,7 +456,7 @@ public class ConfigManager extends ConfigManagerBase
 
 
     private void printConfigurationJson( PrintWriter pw, String pid, Configuration config, String pidFilter,
-        Locale locale )
+        String locale )
     {
 
         JSONWriter result = new JSONWriter( pw );
@@ -407,10 +478,9 @@ public class ConfigManager extends ConfigManagerBase
     }
 
 
-    private void configForm( JSONWriter json, String pid, Configuration config, String pidFilter, Locale loc )
+    private void configForm( JSONWriter json, String pid, Configuration config, String pidFilter, String locale )
         throws JSONException
     {
-        String locale = ( loc == null ) ? null : loc.toString();
 
         json.key( ConfigManager.PID );
         json.value( pid );
@@ -441,8 +511,7 @@ public class ConfigManager extends ConfigManagerBase
             json.key( "title" );
             json.value( pid );
             json.key( "description" );
-            json
-                .value( "Please enter configuration properties for this configuration in the field below. This configuration has no associated description" );
+            json.value( "Please enter configuration properties for this configuration in the field below. This configuration has no associated description" );
 
             json.key( "propertylist" );
             json.value( "properties" );
