@@ -29,14 +29,16 @@ import java.io.OutputStreamWriter;
 import java.io.PushbackReader;
 import java.io.Writer;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 
 /**
@@ -46,17 +48,17 @@ import java.util.Vector;
  * {@link FilePersistenceManager} class.
  * 
  * <pre>
- cfg = prop "=" value .
- prop = symbolic-name . // 1.4.2 of OSGi Core Specification
- symbolic-name = token { "." token } .
- token = { [ 0..9 ] | [ a..z ] | [ A..Z ] | '_' | '-' } .
- value = [ type ] ( "[" values "]" | "(" values ")" | simple ) .
- values = simple { "," simple } .
- simple = """ stringsimple """ .
- type = // 1-char type code .
- stringsimple = // quoted string representation of the value .
+ * cfg = prop &quot;=&quot; value .
+ *  prop = symbolic-name . // 1.4.2 of OSGi Core Specification
+ *  symbolic-name = token { &quot;.&quot; token } .
+ *  token = { [ 0..9 ] | [ a..z ] | [ A..Z ] | '_' | '-' } .
+ *  value = [ type ] ( &quot;[&quot; values &quot;]&quot; | &quot;(&quot; values &quot;)&quot; | simple ) .
+ *  values = simple { &quot;,&quot; simple } .
+ *  simple = &quot;&quot;&quot; stringsimple &quot;&quot;&quot; .
+ *  type = // 1-char type code .
+ *  stringsimple = // quoted string representation of the value .
  * </pre>
- *
+ * 
  * @author fmeschbe
  */
 public class ConfigurationHandler
@@ -187,11 +189,13 @@ public class ConfigurationHandler
      * This method writes at the current location in the stream and does not
      * close the outputstream.
      * 
-     * @param out The <code>OutputStream</code> to write the configurtion data
-     *      to.
-     * @param properties The <code>Dictionary</code> to write.
-     * 
-     * @throws IOException If an error occurrs writing to the output stream.
+     * @param out
+     *            The <code>OutputStream</code> to write the configurtion data
+     *            to.
+     * @param properties
+     *            The <code>Dictionary</code> to write.
+     * @throws IOException
+     *             If an error occurrs writing to the output stream.
      */
     public static void write( OutputStream out, Dictionary properties ) throws IOException
     {
@@ -201,7 +205,7 @@ public class ConfigurationHandler
         {
             String key = ( String ) ce.nextElement();
 
-            //     cfg = prop "=" value "." .
+            // cfg = prop "=" value "." .
             writeQuoted( bw, key );
             bw.write( TOKEN_EQ );
             writeValue( bw, properties.get( key ) );
@@ -216,18 +220,18 @@ public class ConfigurationHandler
      * Reads configuration data from the given <code>InputStream</code> and
      * returns a new <code>Dictionary</code> object containing the data.
      * <p>
-     * This method reads from the current location in the stream upto the end
-     * of the stream but does not close the stream at the end.
+     * This method reads from the current location in the stream upto the end of
+     * the stream but does not close the stream at the end.
      * 
-     * @param ins The <code>InputStream</code> from which to read the
-     *      configuration data.
-     *      
+     * @param ins
+     *            The <code>InputStream</code> from which to read the
+     *            configuration data.
      * @return A <code>Dictionary</code> object containing the configuration
-     *      data. This object may be empty if the stream contains no
-     *      configuration data.
-     *      
-     * @throws IOException If an error occurrs reading from the stream. This
-     *      exception is also thrown if a syntax error is encountered.
+     *         data. This object may be empty if the stream contains no
+     *         configuration data.
+     * @throws IOException
+     *             If an error occurrs reading from the stream. This exception
+     *             is also thrown if a syntax error is encountered.
      */
     public static Dictionary read( InputStream ins ) throws IOException
     {
@@ -235,12 +239,13 @@ public class ConfigurationHandler
     }
 
 
-    // private constructor, this class is not to be instantiated from the outside
+    // private constructor, this class is not to be instantiated from the
+    // outside
     private ConfigurationHandler()
     {
     }
 
-    //---------- Configuration Input Implementation ---------------------------
+    // ---------- Configuration Input Implementation ---------------------------
 
     private int token;
     private String tokenValue;
@@ -283,11 +288,9 @@ public class ConfigurationHandler
 
 
     /**
-     value = type ( "[" values "]" | "(" values ")" | simple ) .
-     values = value { "," value } .
-     simple = "{" stringsimple "}" .
-     type = // 1-char type code .
-     stringsimple = // quoted string representation of the value .
+     * value = type ( "[" values "]" | "(" values ")" | simple ) . values =
+     * value { "," value } . simple = "{" stringsimple "}" . type = // 1-char
+     * type code . stringsimple = // quoted string representation of the value .
      * 
      * @param pr
      * @return
@@ -316,7 +319,7 @@ public class ConfigurationHandler
                 return readArray( type, pr );
 
             case TOKEN_VEC_OPEN:
-                return readVector( type, pr );
+                return readCollection( type, pr );
 
             case TOKEN_VAL_OPEN:
                 return readSimple( type, pr );
@@ -329,7 +332,7 @@ public class ConfigurationHandler
 
     private Object readArray( int typeCode, PushbackReader pr ) throws IOException
     {
-        Vector vector = new Vector();
+        List list = new ArrayList();
         for ( ;; )
         {
             if ( !checkNext( pr, TOKEN_VAL_OPEN ) )
@@ -344,16 +347,16 @@ public class ConfigurationHandler
                 return null;
             }
 
-            vector.add( value );
+            list.add( value );
 
             int c = read( pr );
             if ( c == TOKEN_ARR_CLOS )
             {
                 Class type = ( Class ) code2Type.get( new Integer( typeCode ) );
-                Object array = Array.newInstance( type, vector.size() );
-                for ( int i = 0; i < vector.size(); i++ )
+                Object array = Array.newInstance( type, list.size() );
+                for ( int i = 0; i < list.size(); i++ )
                 {
-                    Array.set( array, i, vector.get( i ) );
+                    Array.set( array, i, list.get( i ) );
                 }
                 return array;
             }
@@ -369,9 +372,9 @@ public class ConfigurationHandler
     }
 
 
-    private Vector readVector( int typeCode, PushbackReader pr ) throws IOException
+    private Collection readCollection( int typeCode, PushbackReader pr ) throws IOException
     {
-        Vector vector = new Vector();
+        Collection collection = new ArrayList();
         for ( ;; )
         {
             if ( !checkNext( pr, TOKEN_VAL_OPEN ) )
@@ -386,12 +389,12 @@ public class ConfigurationHandler
                 return null;
             }
 
-            vector.add( value );
+            collection.add( value );
 
             int c = read( pr );
             if ( c == TOKEN_VEC_CLOS )
             {
-                return vector;
+                return collection;
             }
             else if ( c < 0 )
             {
@@ -653,7 +656,7 @@ public class ConfigurationHandler
     }
 
 
-    //---------- Configuration Output Implementation --------------------------
+    // ---------- Configuration Output Implementation --------------------------
 
     private static void writeValue( Writer out, Object value ) throws IOException
     {
@@ -662,9 +665,9 @@ public class ConfigurationHandler
         {
             writeArray( out, value );
         }
-        else if ( clazz == Vector.class )
+        else if ( value instanceof Collection )
         {
-            writeVector( out, ( Vector ) value );
+            writeCollection( out, ( Collection ) value );
         }
         else
         {
@@ -694,20 +697,24 @@ public class ConfigurationHandler
     }
 
 
-    private static void writeVector( Writer out, Vector vector ) throws IOException
+    private static void writeCollection( Writer out, Collection collection ) throws IOException
     {
-        if ( vector.isEmpty() )
+        if ( collection.isEmpty() )
         {
             return;
         }
 
-        writeType( out, vector.get( 0 ).getClass() );
+        Iterator ci = collection.iterator();
+        Object firstElement = ci.next();
+
+        writeType( out, firstElement.getClass() );
         out.write( TOKEN_VEC_OPEN );
-        for ( int i = 0; i < vector.size(); i++ )
+        writeSimple( out, firstElement );
+
+        while ( ci.hasNext() )
         {
-            if ( i > 0 )
-                out.write( TOKEN_COMMA );
-            writeSimple( out, vector.get( i ) );
+            out.write( TOKEN_COMMA );
+            writeSimple( out, ci.next() );
         }
         out.write( TOKEN_VEC_CLOS );
     }

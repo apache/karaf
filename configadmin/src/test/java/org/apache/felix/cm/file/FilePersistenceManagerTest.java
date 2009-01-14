@@ -120,9 +120,18 @@ public class FilePersistenceManagerTest extends TestCase
     public void testVector() throws IOException
     {
         check( "StringVector", new Vector( Arrays.asList( new String[]
-            { "one", "two", "three" } ) ) );
+                                                                     { "one", "two", "three" } ) ) );
         check( "IntegerVector", new Vector( Arrays.asList( new Integer[]
-            { new Integer( 0 ), new Integer( 1 ), new Integer( 2 ) } ) ) );
+                                                                       { new Integer( 0 ), new Integer( 1 ), new Integer( 2 ) } ) ) );
+    }
+    
+    
+    public void testList() throws IOException
+    {
+        check( "StringList", Arrays.asList( new String[]
+            { "one", "two", "three" } ) );
+        check( "IntegerList", Arrays.asList( new Integer[]
+            { new Integer( 0 ), new Integer( 1 ), new Integer( 2 ) } ) );
     }
 
 

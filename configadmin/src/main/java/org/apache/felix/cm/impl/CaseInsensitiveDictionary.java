@@ -19,11 +19,13 @@
 package org.apache.felix.cm.impl;
 
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Vector;
+import java.util.Iterator;
 
 
 /**
@@ -77,7 +79,7 @@ class CaseInsensitiveDictionary extends Dictionary
 
             // check the value
             Object value = props.get( key );
-            checkValue( value );
+            value = checkValue( value );
 
             // add the key/value pair
             internalMap.put( lowerCase, value );
@@ -156,7 +158,7 @@ class CaseInsensitiveDictionary extends Dictionary
         }
 
         checkKey( key );
-        checkValue( value );
+        value = checkValue( value );
 
         String lowerCase = String.valueOf( key ).toLowerCase();
         originalKeys.put( lowerCase, key );
@@ -249,7 +251,7 @@ class CaseInsensitiveDictionary extends Dictionary
     }
 
 
-    static void checkValue( Object value )
+    static Object checkValue( Object value )
     {
         Class type;
         if ( value instanceof Object[] )
@@ -261,27 +263,28 @@ class CaseInsensitiveDictionary extends Dictionary
             if ( type == Integer.TYPE || type == Long.TYPE || type == Float.TYPE || type == Double.TYPE
                 || type == Byte.TYPE || type == Short.TYPE || type == Character.TYPE || type == Boolean.TYPE )
             {
-                return;
+                return value;
             }
 
         }
-        else if ( value instanceof Vector )
+        else if ( value instanceof Collection )
         {
             // check simple
-            Vector vector = ( Vector ) value;
-            if ( vector.isEmpty() )
+            Collection collection = ( Collection ) value;
+            if ( collection.isEmpty() )
             {
-                throw new IllegalArgumentException( "Vector must not be empty" );
+                throw new IllegalArgumentException( "Collection must not be empty" );
             }
 
-            // ensure all elements have the same type
+            // ensure all elements have the same type and to internal list
+            Collection internalValue = new ArrayList( collection.size() );
             type = null;
-            for ( int i = 0; i < vector.size(); i++ )
+            for ( Iterator ci = collection.iterator(); ci.hasNext(); )
             {
-                Object el = vector.get( i );
+                Object el = ci.next();
                 if ( el == null )
                 {
-                    throw new IllegalArgumentException( "Vector must not contain null elements" );
+                    throw new IllegalArgumentException( "Collection must not contain null elements" );
                 }
                 if ( type == null )
                 {
@@ -289,10 +292,11 @@ class CaseInsensitiveDictionary extends Dictionary
                 }
                 else if ( type != el.getClass() )
                 {
-                    throw new IllegalArgumentException( "Vector element types must not be mixed" );
+                    throw new IllegalArgumentException( "Collection element types must not be mixed" );
                 }
+                internalValue.add( el );
             }
-
+            value = internalValue;
         }
         else if ( value != null )
         {
@@ -311,7 +315,7 @@ class CaseInsensitiveDictionary extends Dictionary
             || type == Double.class || type == Byte.class || type == Short.class || type == Character.class
             || type == Boolean.class )
         {
-            return;
+            return value;
         }
 
         // not a valid type
