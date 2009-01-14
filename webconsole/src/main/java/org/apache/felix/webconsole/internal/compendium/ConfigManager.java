@@ -177,11 +177,18 @@ public class ConfigManager extends ConfigManagerBase
                 pw.write("[");
                 final SortedMap services = this.getServices(pid, pidFilter, locale, false);
                 final Iterator i = services.keySet().iterator();
+                boolean printColon = false;
                 while ( i.hasNext() ) {
                     final String servicePid = i.next().toString();
 
                     final Configuration config = this.getConfiguration(ca, servicePid);
-                    this.printConfigurationJson(pw, servicePid, config, pidFilter, locale);
+                    if ( config != null ) {
+                        if ( printColon ) {
+                            pw.print(',');
+                        }
+                        this.printConfigurationJson(pw, servicePid, config, pidFilter, locale);
+                        printColon = true;
+                    }
                 }
                 pw.write("]");
             } catch (InvalidSyntaxException e) {
