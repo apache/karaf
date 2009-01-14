@@ -91,9 +91,6 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     // the service registration of the configuration admin
     private ServiceRegistration configurationAdminRegistration;
 
-    // the service reference to the ConfigurationAdmin service
-    private ServiceReference configurationAdminReference;
-
     // the ServiceTracker to emit log services (see log(int, String, Throwable))
     private ServiceTracker logTracker;
 
@@ -777,7 +774,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         Object log = logTracker.getService();
         if ( log != null )
         {
-            ( ( LogService ) log ).log( configurationAdminReference, level, message, t );
+            ( ( LogService ) log ).log( configurationAdminRegistration.getReference(), level, message, t );
             return;
         }
 
@@ -1359,7 +1356,8 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 return;
             }
 
-            ConfigurationEvent event = new ConfigurationEvent( configurationAdminReference, type, factoryPid, pid);
+            ConfigurationEvent event = new ConfigurationEvent( configurationAdminRegistration.getReference(), type,
+                factoryPid, pid );
 
             for ( int i = 0; i < srs.length; i++ )
             {
