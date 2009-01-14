@@ -854,12 +854,20 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                     return;
                 }
                 
+                Bundle serviceBundle = sr.getBundle();
+                if ( serviceBundle == null )
+                {
+                    log( LogService.LOG_INFO, "ServiceFactory for PID " + pid
+                        + " seems to already have been unregistered, not updating with configuration", null );
+                    return;
+                }
+
                 // 104.3 Ignore duplicate PIDs from other bundles and report
                 // them to the log
                 // 104.4.1 No update call back for PID already bound to another
                 // bundle location
                 // 104.4.1 assign configuration to bundle if unassigned
-                String bundleLocation = sr.getBundle().getLocation();
+                String bundleLocation = serviceBundle.getLocation();
                 if ( cfg.getBundleLocation() == null )
                 {
                     cfg.setBundleLocation( bundleLocation );
@@ -867,7 +875,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 else if ( !bundleLocation.equals( cfg.getBundleLocation() ) )
                 {
                     log( LogService.LOG_ERROR, "Cannot use configuration for " + pid + " requested by bundle "
-                        + sr.getBundle().getLocation() + " but belongs to " + cfg.getBundleLocation(), null );
+                        + serviceBundle.getLocation() + " but belongs to " + cfg.getBundleLocation(), null );
                     return;
                 }
 
@@ -961,7 +969,15 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 return;
             }
 
-            String bundleLocation = sr.getBundle().getLocation();
+            Bundle serviceBundle = sr.getBundle();
+            if ( serviceBundle == null )
+            {
+                log( LogService.LOG_INFO, "ManagedServiceFactory for factory PID " + factoryPid
+                    + " seems to already have been unregistered, not updating with factory", null );
+                return;
+            }
+
+            String bundleLocation = serviceBundle.getLocation();
             if ( factory.getBundleLocation() == null )
             {
                 // bind to the location of the service if unbound
@@ -971,7 +987,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             {
                 // factory PID is bound to another bundle
                 log( LogService.LOG_ERROR, "Cannot use Factory configuration for " + factoryPid
-                    + " requested by bundle " + sr.getBundle().getLocation() + " but belongs to "
+                    + " requested by bundle " + serviceBundle.getLocation() + " but belongs to "
                     + factory.getBundleLocation(), null );
                 return;
             }
