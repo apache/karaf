@@ -1,592 +1,774 @@
-
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<HTML>
+<html><head>
+
+
   
-<!-- Mirrored Site: felix.apache.org. File: /site/service-requirement-handler.html. Date: Mon, 13 Oct 2008 06:53:05 GMT -->
-<HEAD>
-    <TITLE>Apache Felix - Service Requirement Handler</TITLE>
-    <LINK rel="stylesheet" href="media.data/site.css" type="text/css" media="all">
-    <META http-equiv="Content-Type" content="text/html;charset=UTF-8">
-  </HEAD>
-  <BODY>
-    <DIV class="title"><DIV class="logo"><A href="index.html"><IMG border="0" alt="Apache Felix" src="media.data/logo.png"></A></DIV><DIV class="header"><A href="http://www.apache.org/"><IMG border="0" alt="Apache" src="media.data/apache.png"></A></DIV></DIV>
-    <DIV class="menu">
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <UL>
-	<LI><A href="news.html" title="news">news</A></LI>
-	<LI><A href="license.html" title="license">license</A></LI>
-	<LI><SPAN class="nobr"><A href="downloads.html" title="Visit page outside Confluence" rel="nofollow">downloads<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
-	<LI><A href="documentation.html" title="documentation">documentation</A></LI>
-	<LI><A href="mailinglists.html" title="mailinglists">mailing lists</A></LI>
-	<LI><A href="contributing.html" title="Contributing">contributing</A></LI>
-	<LI><SPAN class="nobr"><A href="http://www.apache.org/" title="Visit page outside Confluence" rel="nofollow">asf<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
-	<LI><SPAN class="nobr"><A href="http://www.apache.org/foundation/sponsorship.html" title="Visit page outside Confluence" rel="nofollow">sponsorship<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
-	<LI><SPAN class="nobr"><A href="http://www.apache.org/foundation/thanks.html" title="Visit page outside Confluence" rel="nofollow">sponsors<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN>
+    <title>Apache Felix - Service Requirement Handler</title>
+    <link rel="stylesheet" href="service-requirement-handler_files/site.css" type="text/css" media="all">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  </head><body>
+    <div class="title"><div class="logo"><a href="http://felix.apache.org/site/index.html"><img alt="Apache Felix" src="service-requirement-handler_files/logo.png" border="0"></a></div><div class="header"><a href="http://www.apache.org/"><img alt="Apache" src="service-requirement-handler_files/apache.png" border="0"></a></div></div>
+    <div class="menu">
+<ul>
+	<li><a href="http://felix.apache.org/site/news.html" title="news">news</a></li>
+	<li><a href="http://felix.apache.org/site/license.html" title="license">license</a></li>
+	<li><span class="nobr"><a href="http://felix.apache.org/site/downloads.cgi" title="Visit page outside Confluence" rel="nofollow">downloads<sup><img class="rendericon" src="service-requirement-handler_files/linkext7.gif" alt="" align="absmiddle" border="0" width="7" height="7"></sup></a></span></li>
+	<li><a href="http://felix.apache.org/site/documentation.html" title="documentation">documentation</a></li>
+	<li><a href="http://felix.apache.org/site/mailinglists.html" title="mailinglists">mailing lists</a></li>
+	<li><a href="http://felix.apache.org/site/contributing.html" title="Contributing">contributing</a></li>
+	<li><span class="nobr"><a href="http://www.apache.org/" title="Visit page outside Confluence" rel="nofollow">asf<sup><img class="rendericon" src="service-requirement-handler_files/linkext7.gif" alt="" align="absmiddle" border="0" width="7" height="7"></sup></a></span></li>
+	<li><span class="nobr"><a href="http://www.apache.org/foundation/sponsorship.html" title="Visit page outside Confluence" rel="nofollow">sponsorship<sup><img class="rendericon" src="service-requirement-handler_files/linkext7.gif" alt="" align="absmiddle" border="0" width="7" height="7"></sup></a></span></li>
+	<li><span class="nobr"><a href="http://www.apache.org/foundation/thanks.html" title="Visit page outside Confluence" rel="nofollow">sponsors<sup><img class="rendericon" src="service-requirement-handler_files/linkext7.gif" alt="" align="absmiddle" border="0" width="7" height="7"></sup></a></span>
 <!-- ApacheCon Ad -->
-<IFRAME src="http://www.apache.org/ads/button.html" style="border-width:0; float: left" frameborder="0" scrolling="no" width="135" height="135"></IFRAME>
-<P style="height: 100px">
-<!-- ApacheCon Ad --></LI>
-</UL>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </DIV>
-    <DIV class="main">
-<TABLE class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><TBODY><TR>
-<TD class="confluenceTd" valign="top" width="80%">
-<H1><A name="ServiceRequirementHandler-ServiceDependencyManagement"></A>Service Dependency Management</H1>
+<iframe src="service-requirement-handler_files/button.html" style="border-width: 0pt; float: left;" scrolling="no" width="135" frameborder="0" height="135"></iframe>
+<p style="height: 100px;">
+<!-- ApacheCon Ad -->
+</p></li></ul> </div>
+    <div class="main">
+<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
+<td class="confluenceTd" valign="top" width="80%">
+<h1><a name="ServiceRequirementHandler-ServiceDependencyManagement"></a>Service Dependency Management</h1>
 
-<P>The dependency handler manages <EM>OSGi service</EM> <EM>dependencies/requirements</EM>. It allows a component to consume service without managing service discovery, tracking and binding. The handler manages all this interaction and injects required service in the component.</P>
+<p>The dependency handler manages <em>OSGi service</em> <em>dependencies/requirements</em>.
+It allows a component to consume service without managing service
+discovery, tracking and binding. The handler manages all this
+interaction and injects required service in the component.</p>
 
-<H2><A name="ServiceRequirementHandler-ServiceRequirement"></A>Service Requirement</H2>
-
-
-<H3><A name="ServiceRequirementHandler-What%27saservicerequirement%3F"></A>What's a service requirement?</H3>
-
-<P>A requirement represents a required service. Therefore, it manages the service lookup and the service binding. When an instance requires a service, the handler injects directly a service object inside a field, or invokes a method when a consistent service appears (or disappears). Service requirements can be:</P>
-<UL>
-	<LI>Simple / Aggregate : the component can require      one or several service providers</LI>
-	<LI>Mandatory / Optional : a component can declare an      optional dependency</LI>
-	<LI>Filtered : a component can filter available      providers</LI>
-	<LI>Dynamic / Static / Dynamic-Priority : the      component can specify the binding policy</LI>
-	<LI>Specific : the dependency targets a specific service provider</LI>
-</UL>
+<h2><a name="ServiceRequirementHandler-ServiceRequirement"></a>Service Requirement</h2>
 
 
-<H3><A name="ServiceRequirementHandler-Dynamism%26InstanceLifecycle"></A>Dynamism &amp; Instance Lifecycle</H3>
+<h3><a name="ServiceRequirementHandler-What'saservicerequirement?"></a>What's a service requirement?</h3>
 
-<P>In OSGi&trade;, services can appear and disappear dynamically. This implies dependencies can target a provider which can appear or disappear dynamically.&nbsp; So, dependencies need to manage this dynamism by tracking every time available services. At any moment, a dependency can be unresolved (i.e. no more provider can fulfill the requirement).&nbsp; In the case of a mandatory requirement, the instance becomes invalid (an invalid instance is no more accessible externally, for example provided service are unpublished). If a service, resolving the unfilled dependency appears, the instance becomes valid. In consequence, dependencies affect directly the instance state, and must manage correctly OSGi dynamism to allow a complete unloading when a service goes away. As soon a mandatory dependency cannot be fulfilled, the instance is invalidated.</P>
-
-<P>By default, dependencies are managed dynamically (as previously explained). However, iPOJO supports two other types of binding policies:&nbsp;</P>
-<UL>
-	<LI>Static : if a bound service disappears, the      instance is invalidated and cannot be revalidated (binding broken)</LI>
-	<LI>Dynamic-Priority: at each injection, the <EM>best</EM> provider is injected, or the providers array is sorted according to the OSGi Ranking policy.</LI>
-</UL>
-
-
-<H2><A name="ServiceRequirementHandler-ServiceRequirementInjectionMechanisms"></A>Service Requirement Injection Mechanisms</H2>
-
-<P>The handler manages two types of injections:</P>
-<UL>
-	<LI>Field injection: a field contains the service object. As soon as the field is used, a consistent service object is      injected. This injection type fully hides the dynamism</LI>
-	<LI>Method invocation: when a service appears, or disappears a method in the component is invoked. For each dependency, bind      and unbind methods are invoke to notify the component of the event.</LI>
-</UL>
+<p>A requirement represents a required service. Therefore, it manages
+the service lookup and the service binding. When an instance requires a
+service, the handler injects directly a service object inside a field,
+or invokes a method when a consistent service appears (or disappears).
+Service requirements can be:</p>
+<ul>
+	<li>Simple / Aggregate : the component can require      one or several service providers</li>
+	<li>Mandatory / Optional : a component can declare an      optional dependency</li>
+	<li>Filtered : a component can filter available      providers</li>
+	<li>Dynamic / Static / Dynamic-Priority : the      component can specify the binding policy</li>
+	<li>Specific : the dependency targets a specific service provider</li>
+</ul>
 
 
-<P>Moreover, the two injections type can be merged. A component can declare a requirement containing both a field and 'binding'.</P>
+<h3><a name="ServiceRequirementHandler-Dynamism&amp;InstanceLifecycle"></a>Dynamism &amp; Instance Lifecycle</h3>
 
-<H3><A name="ServiceRequirementHandler-Fieldinjection"></A>Field injection</H3>
+<p>In OSGi™, services can appear and disappear dynamically. This
+implies dependencies can target a provider which can appear or
+disappear dynamically.&nbsp; So, dependencies need to manage this
+dynamism by tracking every time available services. At any moment, a
+dependency can be unresolved (i.e. no more provider can fulfill the
+requirement).&nbsp; In the case of a mandatory requirement, the
+instance becomes invalid (an invalid instance is no more accessible
+externally, for example provided service are unpublished). If a
+service, resolving the unfilled dependency appears, the instance
+becomes valid. In consequence, dependencies affect directly the
+instance state, and must manage correctly OSGi dynamism to allow a
+complete unloading when a service goes away. As soon a mandatory
+dependency cannot be fulfilled, the instance is invalidated.</p>
 
-<P>Imagine a Hello service with one method 'getMessage' returning a &quot;Hello Message&quot;. The following component implementation can use this service by attaching this service to a field and by using the field:</P>
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-java"><SPAN class="code-keyword">public</SPAN> class HelloConsumer {
-    <SPAN class="code-keyword">private</SPAN> Hello m_hello;
-    <SPAN class="code-keyword">public</SPAN> doSomething() {
-        <SPAN class="code-object">System</SPAN>.out.println(m_hello.getMesage());
+<p>By default, dependencies are managed dynamically (as previously
+explained). However, iPOJO supports two other types of binding
+policies:&nbsp;</p>
+<ul>
+	<li>Static : if a bound service disappears, the      instance is invalidated and cannot be revalidated (binding broken)</li>
+	<li>Dynamic-Priority: at each injection, the <em>best</em> provider is injected, or the providers array is sorted according to the OSGi Ranking policy.</li>
+</ul>
+
+
+<h2><a name="ServiceRequirementHandler-ServiceRequirementInjectionMechanisms"></a>Service Requirement Injection Mechanisms</h2>
+
+<p>The handler manages two types of injections:</p>
+<ul>
+	<li>Field injection: a field contains the service object. As soon
+as the field is used, a consistent service object is injected. This
+injection type fully hides the dynamism</li>
+	<li>Method invocation:
+when a service appears, or disappears a method in the component is
+invoked. For each dependency, bind and unbind methods are invoke to
+notify the component of the event.</li>
+</ul>
+
+
+<p>Moreover, the two injections type can be merged. A component can declare a requirement containing both a field and 'binding'.</p>
+
+<h3><a name="ServiceRequirementHandler-Fieldinjection"></a>Field injection</h3>
+
+<p>Imagine a Hello service with one method 'getMessage' returning a
+"Hello Message". The following component implementation can use this
+service by attaching this service to a field and by using the field:</p>
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">public</span> class HelloConsumer {
+    <span class="code-keyword">private</span> Hello m_hello;
+    <span class="code-keyword">public</span> doSomething() {
+        <span class="code-object">System</span>.out.println(m_hello.getMesage());
     }
-}</PRE>
-</DIV></DIV>
-<P>For this component, metadata could be:</P>
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-xml"><SPAN class="code-tag">&lt;component classname=<SPAN class="code-quote">&quot;...HelloConsumer&quot;</SPAN>&gt;</SPAN>
-    <SPAN class="code-tag">&lt;requires field=<SPAN class="code-quote">&quot;m_hello&quot;</SPAN>/&gt;</SPAN>
+}</pre>
+</div></div>
+<p>For this component, metadata could be:</p>
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;component classname=<span class="code-quote">"...HelloConsumer"</span>&gt;</span>
+    <span class="code-tag">&lt;requires field=<span class="code-quote">"m_hello"</span>/&gt;</span>
     ...
-<SPAN class="code-tag">&lt;/component&gt;</SPAN></PRE>
-</DIV></DIV>
-<P>The metadata contains a 'requires' element (representing the service dependency). This element has a field attribute. This attribute is the name of the field representing the service dependency in the implementation class. The implementation uses the field as a normal field without managing service interactions.</P>
+<span class="code-tag">&lt;/component&gt;</span></pre>
+</div></div>
+<p>The metadata contains a 'requires' element (representing the service
+dependency). This element has a field attribute. This attribute is the
+name of the field representing the service dependency in the
+implementation class. The implementation uses the field as a normal
+field without managing service interactions.</p>
 
-<H3><A name="ServiceRequirementHandler-Methodinvocation"></A>Method invocation</H3>
+<h3><a name="ServiceRequirementHandler-Methodinvocation"></a>Method invocation</h3>
 
-<P>The second injection mechanism uses methods in the implementation class. By this way, the dynamics can be managed directly by the developer. Each dependency can declare two methods:</P>
-<UL>
-	<LI>A bind method called when a service appears</LI>
-	<LI>An unbind method called when a service disappears</LI>
-</UL>
-
-
-<P>Moreover, callbacks can be in the component super class (in this case methods must be public). These methods can have one of these four signatures:</P>
-<UL>
-	<LI>Without any argument: the method is just a      notification (method())</LI>
-	<LI>With the service object : the object is the      implicated service object (method(Service svc))</LI>
-	<LI>With an OSGi service reference: the service      reference appearing or disappearing (method(ServiceReference ref))</LI>
-	<LI>With the service object and the OSGi service      reference (method(Service svc, ServiceReference ref))</LI>
-</UL>
+<p>The second injection mechanism uses methods in the implementation
+class. By this way, the dynamics can be managed directly by the
+developer. Each dependency can declare two methods:</p>
+<ul>
+	<li>A bind method called when a service appears</li>
+	<li>An unbind method called when a service disappears</li>
+</ul>
 
 
-<P>The following component implementation shows an example of implementation using this mechanism:</P>
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-java"><SPAN class="code-keyword">public</SPAN> class HelloConsumer {
-  <SPAN class="code-keyword">private</SPAN> Hello m_hello;
+<p>Moreover, callbacks can be in the component super class (in this
+case methods must be public). These methods can have one of these four
+signatures:</p>
+<ul>
+	<li>Without any argument: the method is just a      notification (method())</li>
+	<li>With the service object : the object is the      implicated service object (method(Service svc))</li>
+	<li>With an OSGi service reference: the service      reference appearing or disappearing (method(ServiceReference ref))</li>
+	<li>With the service object and the OSGi service      reference (method(Service svc, ServiceReference ref))</li>
+	<li>With the service object and the service properties inside a Map (method(Service svc, Map properties)) <b>[New in the 1.1.0-SNAPSHOT version]</b></li>
+	<li>With the service object and the service properties inside a Dictionary (method(Service svc, Dictionary properties)) <b>[New in the 1.1.0-SNAPSHOT version]</b></li>
+</ul>
 
-  <SPAN class="code-keyword">public</SPAN> void bindHello(Hello h) { m_hello = h; }
-  <SPAN class="code-keyword">public</SPAN> void unbindHello() { m_hello = <SPAN class="code-keyword">null</SPAN>; }
-  <SPAN class="code-keyword">public</SPAN> doSomething() { <SPAN class="code-object">System</SPAN>.out.println(m_hello.getMesage()); }
-}</PRE>
-</DIV></DIV>
-<P>For this component, metadata could be:</P>
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-xml"><SPAN class="code-tag">&lt;component classname=<SPAN class="code-quote">&quot;...HelloConsumer&quot;</SPAN>&gt;</SPAN>
-<SPAN class="code-tag">&lt;requires&gt;</SPAN>
-    <SPAN class="code-tag">&lt;callback type=<SPAN class="code-quote">&quot;bind&quot;</SPAN> method=<SPAN class="code-quote">&quot;bindHello&quot;</SPAN>&gt;</SPAN>
-    <SPAN class="code-tag">&lt;callback type=<SPAN class="code-quote">&quot;unbind&quot;</SPAN> method=<SPAN class="code-quote">&quot;unbindHello&quot;</SPAN>&gt;</SPAN>
-<SPAN class="code-tag">&lt;/requires&gt;</SPAN>
+
+<p>The following component implementation shows an example of implementation using this mechanism:</p>
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">public</span> class HelloConsumer {
+  <span class="code-keyword">private</span> Hello m_hello;
+
+  <span class="code-keyword">public</span> void bindHello(Hello h) { m_hello = h; }
+  <span class="code-keyword">public</span> void unbindHello() { m_hello = <span class="code-keyword">null</span>; }
+  <span class="code-keyword">public</span> doSomething() { <span class="code-object">System</span>.out.println(m_hello.getMesage()); }
+}</pre>
+</div></div>
+<p>For this component, metadata could be:</p>
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;component classname=<span class="code-quote">"...HelloConsumer"</span>&gt;</span>
+<span class="code-tag">&lt;requires&gt;</span>
+    <span class="code-tag">&lt;callback type=<span class="code-quote">"bind"</span> method=<span class="code-quote">"bindHello"</span>&gt;</span>
+    <span class="code-tag">&lt;callback type=<span class="code-quote">"unbind"</span> method=<span class="code-quote">"unbindHello"</span>&gt;</span>
+<span class="code-tag">&lt;/requires&gt;</span>
 ...
-<SPAN class="code-tag">&lt;/component&gt;</SPAN></PRE>
-</DIV></DIV>
-<P>Note, that the bind the unbind method can be have different signatures. By using this mechanism, you need to be sure to manage the dynamism correctly.<BR>
-(<A href="#ServiceRequirementHandler-discovery" title="discovery on Service Requirement Handler">See note on type discovery</A>)</P>
+<span class="code-tag">&lt;/component&gt;</span></pre>
+</div></div>
+<p>Note, that the bind the unbind method can be have different
+signatures. By using this mechanism, you need to be sure to manage the
+dynamism correctly.<br>
+(<a href="#ServiceRequirementHandler-discovery" title="discovery on Service Requirement Handler">See note on type discovery</a>)</p>
 
-<H3><A name="ServiceRequirementHandler-FieldinjectionsandMethodinvocations"></A>Field injections and Method invocations</H3>
+<h3><a name="ServiceRequirementHandler-FieldinjectionsandMethodinvocations"></a>Field injections and Method invocations</h3>
 
-<P>The two mechanisms can be used together. In this case, the field receives the value before the bind method invocation. So, if the field is use in the method, the returned value will be up to date. The following component implementation uses this mechanism:</P>
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-java"><SPAN class="code-keyword">public</SPAN> class HelloConsumer {
-     <SPAN class="code-keyword">private</SPAN> Hello m_hello; <SPAN class="code-comment">// Injected Field
-</SPAN>
-     <SPAN class="code-keyword">public</SPAN> void bindHello() { <SPAN class="code-object">System</SPAN>.out.println(<SPAN class="code-quote">&quot;Hello appears&quot;</SPAN>); }
-     <SPAN class="code-keyword">public</SPAN> void unbindHello() { <SPAN class="code-object">System</SPAN>.out.println(<SPAN class="code-quote">&quot;Hello disapears&quot;</SPAN>); }
-     <SPAN class="code-keyword">public</SPAN> doSomething() { <SPAN class="code-object">System</SPAN>.out.println(m_hello.getMesage()); }
-}</PRE>
-</DIV></DIV>
+<p>The two mechanisms can be used together. In this case, the field
+receives the value before the bind method invocation. So, if the field
+is use in the method, the returned value will be up to date. The
+following component implementation uses this mechanism:</p>
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">public</span> class HelloConsumer {
+     <span class="code-keyword">private</span> Hello m_hello; <span class="code-comment">// Injected Field
+</span>
+     <span class="code-keyword">public</span> void bindHello() { <span class="code-object">System</span>.out.println(<span class="code-quote">"Hello appears"</span>); }
+     <span class="code-keyword">public</span> void unbindHello() { <span class="code-object">System</span>.out.println(<span class="code-quote">"Hello disapears"</span>); }
+     <span class="code-keyword">public</span> doSomething() { <span class="code-object">System</span>.out.println(m_hello.getMesage()); }
+}</pre>
+</div></div>
 
-<P>For this component, metadata could be:</P>
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-xml"><SPAN class="code-tag">&lt;component classname=<SPAN class="code-quote">&quot;...HelloConsumer&quot;</SPAN>&gt;</SPAN>
-    <SPAN class="code-tag">&lt;requires  field=<SPAN class="code-quote">&quot;m_hello&quot;</SPAN>&gt;</SPAN>
-        <SPAN class="code-tag">&lt;callback type=<SPAN class="code-quote">&quot;bind&quot;</SPAN> method=<SPAN class="code-quote">&quot;bindHello&quot;</SPAN>&gt;</SPAN>
-        <SPAN class="code-tag">&lt;callback type=<SPAN class="code-quote">&quot;unbind&quot;</SPAN> method=<SPAN class="code-quote">&quot;unbindHello&quot;</SPAN>&gt;</SPAN>
-    <SPAN class="code-tag">&lt;/requires&gt;</SPAN>
+<p>For this component, metadata could be:</p>
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;component classname=<span class="code-quote">"...HelloConsumer"</span>&gt;</span>
+    <span class="code-tag">&lt;requires  field=<span class="code-quote">"m_hello"</span>&gt;</span>
+        <span class="code-tag">&lt;callback type=<span class="code-quote">"bind"</span> method=<span class="code-quote">"bindHello"</span>&gt;</span>
+        <span class="code-tag">&lt;callback type=<span class="code-quote">"unbind"</span> method=<span class="code-quote">"unbindHello"</span>&gt;</span>
+    <span class="code-tag">&lt;/requires&gt;</span>
     ...
-<SPAN class="code-tag">&lt;/component&gt;</SPAN></PRE>
-</DIV></DIV>
+<span class="code-tag">&lt;/component&gt;</span></pre>
+</div></div>
 
-<H3><A name="ServiceRequirementHandler-Injectionmechanisms%26lazyobjectcreation"></A>Injection mechanisms &amp; lazy object creation</H3>
+<h3><a name="ServiceRequirementHandler-Injectionmechanisms&amp;lazyobjectcreation"></a>Injection mechanisms &amp; lazy object creation</h3>
 
-<P>IPOJO creates objects only when required. When needed, iPOJO invokes the constructor of the implementation class. The implementation class can use field requirement because values are already injected. However, method dependencies are called just after the constructor. If the service already presents, the invocation of the methods are delayed just after the constructor invocation.</P>
+<p>IPOJO creates objects only when required. When needed, iPOJO invokes
+the constructor of the implementation class. The implementation class
+can use field requirement because values are already injected. However,
+method dependencies are called just after the constructor. If the
+service already presents, the invocation of the methods are delayed
+just after the constructor invocation.</p>
 
-<H2><A name="ServiceRequirementHandler-SomeExamples"></A>Some Examples</H2>
+<h2><a name="ServiceRequirementHandler-SomeExamples"></a>Some Examples</h2>
 
 
-<H3><A name="ServiceRequirementHandler-SimpleRequirement"></A>Simple Requirement</H3>
+<h3><a name="ServiceRequirementHandler-SimpleRequirement"></a>Simple Requirement</h3>
 
-<P>By default, a requirement is mandatory, non-filtered and simple (non-aggregate). The two previous examples illustrate this kind of dependency. When services goes away and appears, the service substitution is hidden. Fields attached to simple requirement point always a consistent service object. For a simple dependency, the bind method is called once time when the service appears or just after the POJO constructor invocation is the service is available. When the service disappears the unbind method is called. The bind method is re-invoked as soon as another service provider is available. This invocation occurs immediately if another service provider if available. In this case, the instance is not invalidated.</P>
+<p>By default, a requirement is mandatory, non-filtered and simple
+(non-aggregate). The two previous examples illustrate this kind of
+dependency. When services goes away and appears, the service
+substitution is hidden. Fields attached to simple requirement point
+always a consistent service object. For a simple dependency, the bind
+method is called once time when the service appears or just after the
+POJO constructor invocation is the service is available. When the
+service disappears the unbind method is called. The bind method is
+re-invoked as soon as another service provider is available. This
+invocation occurs immediately if another service provider if available.
+In this case, the instance is not invalidated.</p>
 
-<H3><A name="ServiceRequirementHandler-AggregateRequirement"></A>Aggregate Requirement</H3>
+<h3><a name="ServiceRequirementHandler-AggregateRequirement"></a>Aggregate Requirement</h3>
 
-<P>When a component requires several providers of the same service, it declares an aggregate dependency.</P>
+<p>When a component requires several providers of the same service, it declares an aggregate dependency.</p>
 
-<H4><A name="ServiceRequirementHandler-AggregateDependencywithfieldinjection"></A>Aggregate Dependency with field injection</H4>
+<h4><a name="ServiceRequirementHandler-AggregateDependencywithfieldinjection"></a>Aggregate Dependency with field injection</h4>
 
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-java"><SPAN class="code-keyword">public</SPAN> class HelloConsumer {
-     <SPAN class="code-keyword">private</SPAN> Hello m_hellos[];
-     <SPAN class="code-keyword">public</SPAN> doSomething() {
-             <SPAN class="code-keyword">for</SPAN>(<SPAN class="code-object">int</SPAN> I = 0; I &lt; m_hellos.length; i++) { 
-                 <SPAN class="code-object">System</SPAN>.out.println(m_hellos[i].getMessage());
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">public</span> class HelloConsumer {
+     <span class="code-keyword">private</span> Hello m_hellos[];
+     <span class="code-keyword">public</span> doSomething() {
+             <span class="code-keyword">for</span>(<span class="code-object">int</span> I = 0; I &lt; m_hellos.length; i++) { 
+                 <span class="code-object">System</span>.out.println(m_hellos[i].getMessage());
              }
        }
-}</PRE>
-</DIV></DIV>
+}</pre>
+</div></div>
 
-<P>For this component, metadata could be:</P>
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-xml"><SPAN class="code-tag">&lt;component classname=<SPAN class="code-quote">&quot;...HelloConsumer&quot;</SPAN>&gt;</SPAN>
-    <SPAN class="code-tag">&lt;requires field=<SPAN class="code-quote">&quot;m_hellos&quot;</SPAN>/&gt;</SPAN>
+<p>For this component, metadata could be:</p>
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;component classname=<span class="code-quote">"...HelloConsumer"</span>&gt;</span>
+    <span class="code-tag">&lt;requires field=<span class="code-quote">"m_hellos"</span>/&gt;</span>
     ...
-<SPAN class="code-tag">&lt;/component&gt;</SPAN></PRE>
-</DIV></DIV>
+<span class="code-tag">&lt;/component&gt;</span></pre>
+</div></div>
 
-<P>To declare an aggregate field for field requirement, you only need to declare an array (instead of a scalar type). IPOJO will create and inject the service object array. IPOJO discover that the dependency is aggregate during the bytecode introspection.</P>
+<p>To declare an aggregate field for field requirement, you only need
+to declare an array (instead of a scalar type). IPOJO will create and
+inject the service object array. iPOJO discover that the dependency is
+aggregate during the bytecode introspection.</p>
 
-<P><EM>Note:</EM> The synchronization is managed by iPOJO. As soon as you are 'touching' a dependency in a method, iPOJO ensure that you will keep these objects until the end of the method. Nested methods will share the same service object set.</P>
+<p><em>Note:</em> The synchronization is managed by iPOJO. As soon as
+you are 'touching' a dependency in a method, iPOJO ensure that you will
+keep these objects until the end of the method. Nested methods will
+share the same service object set.</p>
 
-<H4><A name="ServiceRequirementHandler-AggregateDependencywithfieldinjection%3Alist%2Cvector%2Ccollectionandset%5CNewinthe0.9.0SNAPSHOTversion%5C"></A>Aggregate Dependency with field injection: list, vector, collection and set [New in the 0.9.0-SNAPSHOT version]</H4>
-<P>It is also possible to inject service objects inside fields of the type:</P>
-<UL>
-	<LI>list</LI>
-	<LI>vector</LI>
-	<LI>collection</LI>
-	<LI>set</LI>
-</UL>
+<h4><a name="ServiceRequirementHandler-AggregateDependencywithfieldinjection:list,vector,collectionandset"></a>Aggregate Dependency with field injection: list, vector, collection and set</h4>
+<p>It is also possible to inject service objects inside fields of the type:</p>
+<ul>
+	<li>list</li>
+	<li>vector</li>
+	<li>collection</li>
+	<li>set</li>
+</ul>
 
 
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-java"><SPAN class="code-keyword">public</SPAN> class HelloConsumer {
-     <SPAN class="code-keyword">private</SPAN> List m_hellos;
-     <SPAN class="code-keyword">public</SPAN> doSomething() {
-             <SPAN class="code-keyword">for</SPAN>(<SPAN class="code-object">int</SPAN> I = 0; I &lt; m_hellos.size(); i++) { 
-                 <SPAN class="code-object">System</SPAN>.out.println(((Hello) m_hellos.get(i)).
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">public</span> class HelloConsumer {
+     <span class="code-keyword">private</span> List m_hellos;
+     <span class="code-keyword">public</span> doSomething() {
+             <span class="code-keyword">for</span>(<span class="code-object">int</span> I = 0; I &lt; m_hellos.size(); i++) { 
+                 <span class="code-object">System</span>.out.println(((Hello) m_hellos.get(i)).
                  getMessage());
              }
        }
-}</PRE>
-</DIV></DIV>
-<P>For this component, metadata could be:</P>
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-xml"><SPAN class="code-tag">&lt;component classname=<SPAN class="code-quote">&quot;...HelloConsumer&quot;</SPAN>&gt;</SPAN>
-    <SPAN class="code-tag">&lt;requires field=<SPAN class="code-quote">&quot;m_hellos&quot;</SPAN> interface=<SPAN class="code-quote">&quot;o.a.f.i.Hello&quot;</SPAN>/&gt;</SPAN>
+}</pre>
+</div></div>
+<p>For this component, metadata could be:</p>
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;component classname=<span class="code-quote">"...HelloConsumer"</span>&gt;</span>
+    <span class="code-tag">&lt;requires field=<span class="code-quote">"m_hellos"</span> specification=<span class="code-quote">"o.a.f.i.Hello"</span>/&gt;</span>
     ...
-<SPAN class="code-tag">&lt;/component&gt;</SPAN></PRE>
-</DIV></DIV>
-<P>In this case, just use the supported type that you want. iPOJO will automatically understand that it is an aggregate dependency, and will create the collection object containing service objects.<BR>
-<EM>Note:</EM> The service interface cannot be discovered when using these types as the bytecode does not provide enough information. So, you have to indicate the required service interface (with the 'interface' attribute) in the requirement description.<BR>
-<EM>Note:</EM> As in the previous case, the synchronization is managed by iPOJO. As soon as you are 'touching' a dependency in a method, iPOJO ensure that you will keep these objects until the end of the method. Nested methods will share the same service object set.<BR>
-<EM>Note:</EM> The 0.9.0-SNAPSHOT version has changed the 'interface' attribute in 'specification'. The attribute semantic don't change.</P>
+<span class="code-tag">&lt;/component&gt;</span></pre>
+</div></div>
+<p>In this case, just use the supported type that you want. iPOJO will
+automatically understand that it is an aggregate dependency, and will
+create the collection object containing service objects.<br>
+<em>Note:</em> The service specification (i.e. interface) cannot be
+discovered when using these types as the bytecode does not provide
+enough information. So, you have to indicate the required service
+interface (with the 'specification' attribute) in the requirement
+description.<br>
+<em>Note:</em> As in the previous case, the synchronization is managed
+by iPOJO. As soon as you are 'touching' a dependency in a method, iPOJO
+ensure that you will keep these objects until the end of the method.
+Nested methods will share the same service object set.</p>
 
 
-<H4><A name="ServiceRequirementHandler-AggregateDependencywithmethodinvocation"></A>Aggregate Dependency with method invocation</H4>
+<h4><a name="ServiceRequirementHandler-AggregateDependencywithmethodinvocation"></a>Aggregate Dependency with method invocation</h4>
 
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-java"><SPAN class="code-keyword">public</SPAN> class HelloConsumer {
-      <SPAN class="code-keyword">private</SPAN> List m_hellos= <SPAN class="code-keyword">new</SPAN> ArrayList();
-      <SPAN class="code-keyword">private</SPAN> void bindHello(Hello h) { m_hellos.add(h); }
-      <SPAN class="code-keyword">private</SPAN> void unbindHello(Hello h) { m_hellos.remove(h); }
-      <SPAN class="code-keyword">public</SPAN> <SPAN class="code-keyword">synchronized</SPAN> doSomething() {
-                  <SPAN class="code-keyword">for</SPAN>(<SPAN class="code-object">int</SPAN> I = 0; I &lt; m_hellos.size(); i++) { 
-                    <SPAN class="code-object">System</SPAN>.out.println(m_hellos.get(i).
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">public</span> class HelloConsumer {
+      <span class="code-keyword">private</span> List m_hellos= <span class="code-keyword">new</span> ArrayList();
+      <span class="code-keyword">private</span> void bindHello(Hello h) { m_hellos.add(h); }
+      <span class="code-keyword">private</span> void unbindHello(Hello h) { m_hellos.remove(h); }
+      <span class="code-keyword">public</span> <span class="code-keyword">synchronized</span> doSomething() {
+                  <span class="code-keyword">for</span>(<span class="code-object">int</span> I = 0; I &lt; m_hellos.size(); i++) { 
+                    <span class="code-object">System</span>.out.println(m_hellos.get(i).
                     getMessage());
                   }
                 }
         }
-}</PRE>
-</DIV></DIV>
-<P>This requirement is configured as following:</P>
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-xml"><SPAN class="code-tag">&lt;requires  aggregate=<SPAN class="code-quote">&quot;true&quot;</SPAN>&gt;</SPAN>
-    <SPAN class="code-tag">&lt;callback type=<SPAN class="code-quote">&quot;bind&quot;</SPAN> method=<SPAN class="code-quote">&quot;bindHello&quot;</SPAN>&gt;</SPAN>
-    <SPAN class="code-tag">&lt;callback type=<SPAN class="code-quote">&quot;unbind&quot;</SPAN> method=<SPAN class="code-quote">&quot;unbindHello&quot;</SPAN>&gt;</SPAN>
-<SPAN class="code-tag">&lt;/requires&gt;</SPAN></PRE>
-</DIV></DIV>
-<P>In this case, iPOJO cannot detect if the dependency is aggregate or not. So, you need to add the '<EM>aggregate</EM>' attribute. The bindHello and unbindHello will be called each time a Hello service appears or disappears.<BR>
-<EM>Note:</EM> To avoid the list modification during the loop, you need synchronized the block. Indeed, as the field is not an iPOJO requirement, iPOJO will not manage the synchronization.</P>
+}</pre>
+</div></div>
+<p>This requirement is configured as following:</p>
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;requires  aggregate=<span class="code-quote">"true"</span>&gt;</span>
+    <span class="code-tag">&lt;callback type=<span class="code-quote">"bind"</span> method=<span class="code-quote">"bindHello"</span>&gt;</span>
+    <span class="code-tag">&lt;callback type=<span class="code-quote">"unbind"</span> method=<span class="code-quote">"unbindHello"</span>&gt;</span>
+<span class="code-tag">&lt;/requires&gt;</span></pre>
+</div></div>
+<p>In this case, iPOJO cannot detect if the dependency is aggregate or not. So, you need to add the '<em>aggregate</em>' attribute. The bindHello and unbindHello will be called each time a Hello service appears or disappears.<br>
+<em>Note:</em> To avoid the list modification during the loop, you need
+synchronized the block. Indeed, as the field is not an iPOJO
+requirement, iPOJO will not manage the synchronization.</p>
 
-<H3><A name="ServiceRequirementHandler-OptionalRequirement%28nonaggregate%29"></A>Optional Requirement (non-aggregate)</H3>
+<h3><a name="ServiceRequirementHandler-OptionalRequirement(nonaggregate)"></a>Optional Requirement (non-aggregate)</h3>
 
-<P>An optional requirement does not invalidate the instance despite no providers are available. Moreover, it is possible to inject a default service implementation when no <EM>real</EM> providers are available.</P>
+<p>An optional requirement does not invalidate the instance despite no
+providers are available. Moreover, it is possible to inject a default
+service implementation when no <em>real</em> providers are available.</p>
 
-<H4><A name="ServiceRequirementHandler-OptionalRequirementwithfieldinjection"></A>Optional Requirement with field injection</H4>
+<h4><a name="ServiceRequirementHandler-OptionalRequirementwithfieldinjection"></a>Optional Requirement with field injection</h4>
 
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-java"><SPAN class="code-keyword">public</SPAN> class HelloConsumer {
-         <SPAN class="code-keyword">private</SPAN> Hello m_hello;
-         <SPAN class="code-keyword">public</SPAN> doSomething() {  
-            <SPAN class="code-object">System</SPAN>.out.println(m_hello.getMesage());  
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">public</span> class HelloConsumer {
+         <span class="code-keyword">private</span> Hello m_hello;
+         <span class="code-keyword">public</span> doSomething() {  
+            <span class="code-object">System</span>.out.println(m_hello.getMesage());  
          }
-}</PRE>
-</DIV></DIV>
-<P>For this component, metadata could be:</P>
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-xml"><SPAN class="code-tag">&lt;component classname=<SPAN class="code-quote">&quot;...HelloConsumer&quot;</SPAN>&gt;</SPAN>
-    <SPAN class="code-tag">&lt;requires field=<SPAN class="code-quote">&quot;m_hello&quot;</SPAN> optional=<SPAN class="code-quote">&quot;true&quot;</SPAN>/&gt;</SPAN>
+}</pre>
+</div></div>
+<p>For this component, metadata could be:</p>
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;component classname=<span class="code-quote">"...HelloConsumer"</span>&gt;</span>
+    <span class="code-tag">&lt;requires field=<span class="code-quote">"m_hello"</span> optional=<span class="code-quote">"true"</span>/&gt;</span>
     ...
-<SPAN class="code-tag">&lt;/component&gt;</SPAN></PRE>
-</DIV></DIV>
-<P>To declare an optional requirement, you need to add the <EM>'optional'</EM> attribute. To avoid null pointer exception, iPOJO injects a <EM>Nullable</EM> object in the field when no service provider is available. The <EM>nullable</EM> object implements the service interface, but does nothing. Moreover, it is possible to set a default-implementation for the service. A default-implementation is a class implementing the service but used only when no others service providers are available. The default-implementation object will be injected instead of the <EM>Nullable</EM> objet. For further information <A href="#ServiceRequirementHandler-nullable" title="nullable on Service Requirement Handler">refer to the note about nullable object</A>.</P>
+<span class="code-tag">&lt;/component&gt;</span></pre>
+</div></div>
+<p>To declare an optional requirement, you need to add the <em>'optional'</em> attribute. To avoid null pointer exception, iPOJO injects a <em>Nullable</em> object in the field when no service provider is available. The <em>nullable</em>
+object implements the service interface, but does nothing. Moreover, it
+is possible to set a default-implementation for the service. A
+default-implementation is a class implementing the service but used
+only when no others service providers are available. The
+default-implementation object will be injected instead of the <em>Nullable</em> objet. For further information <a href="#ServiceRequirementHandler-nullable" title="nullable on Service Requirement Handler">refer to the note about nullable object</a>.</p>
 
-<H4><A name="ServiceRequirementHandler-OptionalDependencywithmethodinvocation"></A>Optional Dependency with method invocation</H4>
+<h4><a name="ServiceRequirementHandler-OptionalDependencywithmethodinvocation"></a>Optional Dependency with method invocation</h4>
 
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-java"><SPAN class="code-keyword">public</SPAN> class HelloConsumer {
-     <SPAN class="code-keyword">private</SPAN> Hello m_hello;
-     <SPAN class="code-keyword">public</SPAN> void bindHello(Hello h) { m_hello = h; }
-     <SPAN class="code-keyword">public</SPAN> void unbindHello() { m_hello = <SPAN class="code-keyword">null</SPAN>; }
-     <SPAN class="code-keyword">public</SPAN> doSomething() { 
-          <SPAN class="code-keyword">if</SPAN>(m_hello != <SPAN class="code-keyword">null</SPAN>) { 
-              <SPAN class="code-object">System</SPAN>.out.println(m_hello.getMesage()); 
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">public</span> class HelloConsumer {
+     <span class="code-keyword">private</span> Hello m_hello;
+     <span class="code-keyword">public</span> void bindHello(Hello h) { m_hello = h; }
+     <span class="code-keyword">public</span> void unbindHello() { m_hello = <span class="code-keyword">null</span>; }
+     <span class="code-keyword">public</span> doSomething() { 
+          <span class="code-keyword">if</span>(m_hello != <span class="code-keyword">null</span>) { 
+              <span class="code-object">System</span>.out.println(m_hello.getMesage()); 
           }
     }
-}</PRE>
-</DIV></DIV>
-<P>For this component, metadata should be:</P>
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-xml"><SPAN class="code-tag">&lt;component classname=<SPAN class="code-quote">&quot;...HelloConsumer&quot;</SPAN>&gt;</SPAN>
-<SPAN class="code-tag">&lt;requires optional=<SPAN class="code-quote">&quot;true&quot;</SPAN>&gt;</SPAN>
-    <SPAN class="code-tag">&lt;callback type=<SPAN class="code-quote">&quot;bind&quot;</SPAN> method=<SPAN class="code-quote">&quot;bindHello&quot;</SPAN>&gt;</SPAN>
-    <SPAN class="code-tag">&lt;callback type=<SPAN class="code-quote">&quot;unbind&quot;</SPAN> method=<SPAN class="code-quote">&quot;unbindHello&quot;</SPAN>&gt;</SPAN>
-<SPAN class="code-tag">&lt;/requires&gt;</SPAN>
+}</pre>
+</div></div>
+<p>For this component, metadata should be:</p>
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;component classname=<span class="code-quote">"...HelloConsumer"</span>&gt;</span>
+<span class="code-tag">&lt;requires optional=<span class="code-quote">"true"</span>&gt;</span>
+    <span class="code-tag">&lt;callback type=<span class="code-quote">"bind"</span> method=<span class="code-quote">"bindHello"</span>&gt;</span>
+    <span class="code-tag">&lt;callback type=<span class="code-quote">"unbind"</span> method=<span class="code-quote">"unbindHello"</span>&gt;</span>
+<span class="code-tag">&lt;/requires&gt;</span>
 ...
-<SPAN class="code-tag">&lt;/component&gt;</SPAN></PRE>
-</DIV></DIV>
-<P>As for field requirement, the dependency metadata needs to contain the optional attribute. IPOJO invokes the method only when a 'real' service is available, so you need to test if m_hello is null before to use it.</P>
+<span class="code-tag">&lt;/component&gt;</span></pre>
+</div></div>
+<p>As for field requirement, the dependency metadata needs to contain
+the optional attribute. IPOJO invokes the method only when a 'real'
+service is available, so you need to test if m_hello is null before to
+use it.</p>
 
-<H3><A name="ServiceRequirementHandler-Aggregate%26OptionalRequirement"></A>Aggregate &amp; Optional Requirement</H3>
+<h3><a name="ServiceRequirementHandler-Aggregate&amp;OptionalRequirement"></a>Aggregate &amp; Optional Requirement</h3>
 
-<P>A dependency can be both aggregate and optional.</P>
+<p>A dependency can be both aggregate and optional.</p>
 
-<H4><A name="ServiceRequirementHandler-Aggregate%26OptionalDependencywithfieldinjection"></A>Aggregate &amp; Optional Dependency with field injection</H4>
+<h4><a name="ServiceRequirementHandler-Aggregate&amp;OptionalDependencywithfieldinjection"></a>Aggregate &amp; Optional Dependency with field injection</h4>
 
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-java"><SPAN class="code-keyword">public</SPAN> class HelloConsumer {
-     <SPAN class="code-keyword">private</SPAN> Hello m_hellos[];
-     <SPAN class="code-keyword">public</SPAN> doSomething() {
-           <SPAN class="code-keyword">for</SPAN>(<SPAN class="code-object">int</SPAN> I = 0; I &lt; m_hellos.length; i++) { 
-             <SPAN class="code-object">System</SPAN>.out.println(m_hellos[i].getMessage());
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">public</span> class HelloConsumer {
+     <span class="code-keyword">private</span> Hello m_hellos[];
+     <span class="code-keyword">public</span> doSomething() {
+           <span class="code-keyword">for</span>(<span class="code-object">int</span> I = 0; I &lt; m_hellos.length; i++) { 
+             <span class="code-object">System</span>.out.println(m_hellos[i].getMessage());
            }
      }
-}</PRE>
-</DIV></DIV>
-<P>For this component, metadata could be:</P>
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-xml"><SPAN class="code-tag">&lt;component classname=<SPAN class="code-quote">&quot;...HelloConsumer&quot;</SPAN>&gt;</SPAN>
-<SPAN class="code-tag">&lt;requires field=<SPAN class="code-quote">&quot;m_hellos&quot;</SPAN> optional=<SPAN class="code-quote">&quot;true&quot;</SPAN>/&gt;</SPAN>
+}</pre>
+</div></div>
+<p>For this component, metadata could be:</p>
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;component classname=<span class="code-quote">"...HelloConsumer"</span>&gt;</span>
+<span class="code-tag">&lt;requires field=<span class="code-quote">"m_hellos"</span> optional=<span class="code-quote">"true"</span>/&gt;</span>
 ...
-<SPAN class="code-tag">&lt;/component&gt;</SPAN></PRE>
-</DIV></DIV>
-<P>To declare an optional &amp; aggregate field requirement you need to write the optional attribute in the dependency metadata and to point on a field array. If no service available, iPOJO injects an empty array.</P>
+<span class="code-tag">&lt;/component&gt;</span></pre>
+</div></div>
+<p>To declare an optional &amp; aggregate field requirement you need to
+write the optional attribute in the dependency metadata and to point on
+a field array. If no service available, iPOJO injects an empty array.</p>
 
-<H4><A name="ServiceRequirementHandler-Aggregate%26OptionalRequirementwithmethodinvocation"></A>Aggregate &amp; Optional Requirement with method invocation</H4>
+<h4><a name="ServiceRequirementHandler-Aggregate&amp;OptionalRequirementwithmethodinvocation"></a>Aggregate &amp; Optional Requirement with method invocation</h4>
 
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-java"><SPAN class="code-keyword">public</SPAN> class HelloConsumer {
-     <SPAN class="code-keyword">private</SPAN> List m_hellos&lt;Hello&gt; = <SPAN class="code-keyword">new</SPAN> ArrayList&lt;Hello&gt;();
-     <SPAN class="code-keyword">private</SPAN> void bindHello(Hello h) { m_hellos.add(h); }
-     <SPAN class="code-keyword">private</SPAN> void unbindHello(Hello h) { m_hellos.remove(h); }
-     <SPAN class="code-keyword">public</SPAN> <SPAN class="code-keyword">synchronized</SPAN> doSomething() {
-               <SPAN class="code-keyword">for</SPAN>(<SPAN class="code-object">int</SPAN> I = 0; I &lt; m_hellos.size(); i++) { 
-                  <SPAN class="code-object">System</SPAN>.out.println(m_hellos.get(i).getMessage());
+<div class="code"><div class="codeContent">
+<pre class="code-java"><span class="code-keyword">public</span> class HelloConsumer {
+     <span class="code-keyword">private</span> List m_hellos&lt;Hello&gt; = <span class="code-keyword">new</span> ArrayList&lt;Hello&gt;();
+     <span class="code-keyword">private</span> void bindHello(Hello h) { m_hellos.add(h); }
+     <span class="code-keyword">private</span> void unbindHello(Hello h) { m_hellos.remove(h); }
+     <span class="code-keyword">public</span> <span class="code-keyword">synchronized</span> doSomething() {
+               <span class="code-keyword">for</span>(<span class="code-object">int</span> I = 0; I &lt; m_hellos.size(); i++) { 
+                  <span class="code-object">System</span>.out.println(m_hellos.get(i).getMessage());
                }
      }
-}</PRE>
-</DIV></DIV>
-<P>For this component, metadata could be:</P>
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-xml"><SPAN class="code-tag">&lt;requires aggregate=<SPAN class="code-quote">&quot;true&quot;</SPAN> optional=<SPAN class="code-quote">&quot;true&quot;</SPAN>&gt;</SPAN>
-     <SPAN class="code-tag">&lt;callback type=<SPAN class="code-quote">&quot;bind&quot;</SPAN> method=<SPAN class="code-quote">&quot;bindHello&quot;</SPAN>&gt;</SPAN>
-     <SPAN class="code-tag">&lt;callback type=<SPAN class="code-quote">&quot;unbind&quot;</SPAN> method=<SPAN class="code-quote">&quot;unbindHello&quot;</SPAN>&gt;</SPAN>
-<SPAN class="code-tag">&lt;/requires&gt;</SPAN></PRE>
-</DIV></DIV>
-<P>In this case, you need to add the &#95;'aggregate'_attribute and the &#95;'optional'_attribute. The bindHello and unbindHello will be called each time a Hello service appears or disappears. These bind / unbind methods are not called when binding / unbinding a Nullable object (when both field and method are used).</P>
+}</pre>
+</div></div>
+<p>For this component, metadata could be:</p>
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;requires aggregate=<span class="code-quote">"true"</span> optional=<span class="code-quote">"true"</span>&gt;</span>
+     <span class="code-tag">&lt;callback type=<span class="code-quote">"bind"</span> method=<span class="code-quote">"bindHello"</span>&gt;</span>
+     <span class="code-tag">&lt;callback type=<span class="code-quote">"unbind"</span> method=<span class="code-quote">"unbindHello"</span>&gt;</span>
+<span class="code-tag">&lt;/requires&gt;</span></pre>
+</div></div>
+<p>In this case, you need to add the _'aggregate'_attribute and the
+_'optional'_attribute. The bindHello and unbindHello will be called
+each time a Hello service appears or disappears. These bind / unbind
+methods are not called when binding / unbinding a Nullable object (when
+both field and method are used).</p>
 
-<H3><A name="ServiceRequirementHandler-FilteredRequirement"></A>Filtered Requirement</H3>
+<h3><a name="ServiceRequirementHandler-FilteredRequirement"></a>Filtered Requirement</h3>
 
-<P>A filtered dependency applies an LDAP filter on service provider. IPOJO reuses OSGi LDAP filter ability. The following metadata illustrates how to use filters:</P>
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-xml"><SPAN class="code-tag">&lt;component classname=<SPAN class="code-quote">&quot;...HelloConsumer&quot;</SPAN>&gt;</SPAN>
-<SPAN class="code-tag">&lt;requires filter=<SPAN class="code-quote">&quot;(language=fr)&quot;</SPAN>&gt;</SPAN>
-     <SPAN class="code-tag">&lt;callback type=<SPAN class="code-quote">&quot;bind&quot;</SPAN> method=<SPAN class="code-quote">&quot;bindHello&quot;</SPAN>&gt;</SPAN>
-     <SPAN class="code-tag">&lt;callback type=<SPAN class="code-quote">&quot;unbind&quot;</SPAN> method=<SPAN class="code-quote">&quot;unbindHello&quot;</SPAN>&gt;</SPAN>
-<SPAN class="code-tag">&lt;/requires&gt;</SPAN>
+<p>A filtered dependency applies an LDAP filter on service provider.
+IPOJO reuses OSGi LDAP filter ability. The following metadata
+illustrates how to use filters:</p>
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;component classname=<span class="code-quote">"...HelloConsumer"</span>&gt;</span>
+<span class="code-tag">&lt;requires filter=<span class="code-quote">"(language=fr)"</span>&gt;</span>
+     <span class="code-tag">&lt;callback type=<span class="code-quote">"bind"</span> method=<span class="code-quote">"bindHello"</span>&gt;</span>
+     <span class="code-tag">&lt;callback type=<span class="code-quote">"unbind"</span> method=<span class="code-quote">"unbindHello"</span>&gt;</span>
+<span class="code-tag">&lt;/requires&gt;</span>
 ...
-<SPAN class="code-tag">&lt;/component&gt;</SPAN></PRE>
-</DIV></DIV>
-<P>To add a filter, just add a 'filter' attribute in your dependency containing the LDAP filter. iPOJO will select only provider matching with this filter.</P>
+<span class="code-tag">&lt;/component&gt;</span></pre>
+</div></div>
+<p>To add a filter, just add a 'filter' attribute in your dependency
+containing the LDAP filter. iPOJO will select only provider matching
+with this filter.</p>
 
-<P>Moreover, filters can be customized instance by instance. It is possible to specialize / change / add the filter of a component in the instance description. It is useful when you want to create different instances of the same component, with different filter. To do it, you have to identify your dependency with an 'id' attribute. Then, you can adapt the filter of the dependency in the instance description by using the property &quot;requires.filters&quot;. In this property you can specify each dependency identified by its id and the new value of the filter.</P>
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-xml">&lt;component 
-   className=<SPAN class="code-quote">&quot;org.apache.felix.ipojo.example.FilteredDependency&quot;</SPAN> 
-   name=<SPAN class="code-quote">&quot;FOO&quot;</SPAN>&gt;
-	<SPAN class="code-tag">&lt;requires field=<SPAN class="code-quote">&quot;m_foo&quot;</SPAN> fiter=<SPAN class="code-quote">&quot;(foo.property=FOO)&quot;</SPAN> id=<SPAN class="code-quote">&quot;id1&quot;</SPAN>&gt;</SPAN>
-		<SPAN class="code-tag">&lt;callback type=<SPAN class="code-quote">&quot;bind&quot;</SPAN> method=<SPAN class="code-quote">&quot;bind&quot;</SPAN>/&gt;</SPAN>
-		<SPAN class="code-tag">&lt;callback type=<SPAN class="code-quote">&quot;unbind&quot;</SPAN> method=<SPAN class="code-quote">&quot;unbind&quot;</SPAN>/&gt;</SPAN>
-	<SPAN class="code-tag">&lt;/requires&gt;</SPAN>
-<SPAN class="code-tag">&lt;/component&gt;</SPAN>
+<p>Moreover, filters can be customized instance by instance. It is
+possible to specialize / change / add the filter of a component in the
+instance description. It is useful when you want to create different
+instances of the same component, with different filter. To do it, you
+have to identify your dependency with an 'id' attribute. Then, you can
+adapt the filter of the dependency in the instance description by using
+the property "requires.filters". In this property you can specify each
+dependency identified by its id and the new value of the filter.</p>
+<div class="code"><div class="codeContent">
+<pre class="code-xml">&lt;component 
+   className=<span class="code-quote">"org.apache.felix.ipojo.example.FilteredDependency"</span> 
+   name=<span class="code-quote">"FOO"</span>&gt;
+	<span class="code-tag">&lt;requires field=<span class="code-quote">"m_foo"</span> fiter=<span class="code-quote">"(foo.property=FOO)"</span> id=<span class="code-quote">"id1"</span>&gt;</span>
+		<span class="code-tag">&lt;callback type=<span class="code-quote">"bind"</span> method=<span class="code-quote">"bind"</span>/&gt;</span>
+		<span class="code-tag">&lt;callback type=<span class="code-quote">"unbind"</span> method=<span class="code-quote">"unbind"</span>/&gt;</span>
+	<span class="code-tag">&lt;/requires&gt;</span>
+<span class="code-tag">&lt;/component&gt;</span>
 
-<SPAN class="code-tag">&lt;instance name=<SPAN class="code-quote">&quot;FOO1&quot;</SPAN> component=<SPAN class="code-quote">&quot;FOO&quot;</SPAN>/&gt;</SPAN>
+<span class="code-tag">&lt;instance name=<span class="code-quote">"FOO1"</span> component=<span class="code-quote">"FOO"</span>/&gt;</span>
 
-<SPAN class="code-tag">&lt;instance name=<SPAN class="code-quote">&quot;FOO2&quot;</SPAN> component=<SPAN class="code-quote">&quot;FOO&quot;</SPAN>&gt;</SPAN>
-	<SPAN class="code-tag">&lt;property name=<SPAN class="code-quote">&quot;requires.filters&quot;</SPAN>&gt;</SPAN>
-		<SPAN class="code-tag">&lt;property name=<SPAN class="code-quote">&quot;id1&quot;</SPAN> value=<SPAN class="code-quote">&quot;(foo.property=BAR)&quot;</SPAN>/&gt;</SPAN>
-	<SPAN class="code-tag">&lt;/property&gt;</SPAN>
-<SPAN class="code-tag">&lt;/instance&gt;</SPAN>
+<span class="code-tag">&lt;instance name=<span class="code-quote">"FOO2"</span> component=<span class="code-quote">"FOO"</span>&gt;</span>
 
-<SPAN class="code-tag">&lt;instance name=<SPAN class="code-quote">&quot;FOO3&quot;</SPAN> component=<SPAN class="code-quote">&quot;FOO&quot;</SPAN>&gt;</SPAN>
-	<SPAN class="code-tag">&lt;property name=<SPAN class="code-quote">&quot;requires.filters&quot;</SPAN>&gt;</SPAN>
-		<SPAN class="code-tag">&lt;property name=<SPAN class="code-quote">&quot;id1&quot;</SPAN> value=<SPAN class="code-quote">&quot;(foo.property=BAZ)&quot;</SPAN>/&gt;</SPAN>
-	<SPAN class="code-tag">&lt;/property&gt;</SPAN>
-<SPAN class="code-tag">&lt;/instance&gt;</SPAN></PRE>
-</DIV></DIV>
-<P>The FOO component type declares a service dependency with the 'id1' id. This dependency has no filter by default. The first instance is just an instance of the FOO component type and does not modify the dependency. The second one adds a filter to the declared dependency to target providers with foo.property = BAR. The last one adds another filter to the declared dependency. By using instance filter customization, it is possible to create complex applications where you avoid binding problems by filtering dependencies instance by instance.</P>
+	<span class="code-tag">&lt;property name=<span class="code-quote">"requires.filters"</span>&gt;</span>
+		<span class="code-tag">&lt;property name=<span class="code-quote">"id1"</span> value=<span class="code-quote">"(foo.property=BAR)"</span>/&gt;</span>
+	<span class="code-tag">&lt;/property&gt;</span>
+<span class="code-tag">&lt;/instance&gt;</span>
 
-<H3><A name="ServiceRequirementHandler-Targetingaspecificprovider%5CNewinthe0.9.0SNAPSHOTversion%5C"></A>Targeting a specific provider [New in the 0.9.0-SNAPSHOT version]</H3>
-<P>A service dependency can choose a specific provider. To achieve this, add a 'from' attribute in your requirement description such as in:</P>
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-xml"><SPAN class="code-tag">&lt;component classname=<SPAN class="code-quote">&quot;...HelloConsumer&quot;</SPAN>&gt;</SPAN>
-<SPAN class="code-tag">&lt;requires from=<SPAN class="code-quote">&quot;MyHelloProvider&quot;</SPAN>&gt;</SPAN>
-     <SPAN class="code-tag">&lt;callback type=<SPAN class="code-quote">&quot;bind&quot;</SPAN> method=<SPAN class="code-quote">&quot;bindHello&quot;</SPAN>&gt;</SPAN>
-     <SPAN class="code-tag">&lt;callback type=<SPAN class="code-quote">&quot;unbind&quot;</SPAN> method=<SPAN class="code-quote">&quot;unbindHello&quot;</SPAN>&gt;</SPAN>
-<SPAN class="code-tag">&lt;/requires&gt;</SPAN>
+<span class="code-tag">&lt;instance name=<span class="code-quote">"FOO3"</span> component=<span class="code-quote">"FOO"</span>&gt;</span>
+	<span class="code-tag">&lt;property name=<span class="code-quote">"requires.filters"</span>&gt;</span>
+		<span class="code-tag">&lt;property name=<span class="code-quote">"id1"</span> value=<span class="code-quote">"(foo.property=BAZ)"</span>/&gt;</span>
+	<span class="code-tag">&lt;/property&gt;</span>
+<span class="code-tag">&lt;/instance&gt;</span></pre>
+</div></div>
+<p>The FOO component type declares a service dependency with the 'id1'
+id. This dependency has no filter by default. The first instance is
+just an instance of the FOO component type and does not modify the
+dependency. The second one adds a filter to the declared dependency to
+target providers with foo.property = BAR. The last one adds another
+filter to the declared dependency. By using instance filter
+customization, it is possible to create complex applications where you
+avoid binding problems by filtering dependencies instance by instance.</p>
+
+<h3><a name="ServiceRequirementHandler-Targetingaspecificprovider"></a>Targeting a specific provider</h3>
+<p>A service dependency can choose a specific provider. To achieve
+this, add a 'from' attribute in your requirement description such as in:</p>
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;component classname=<span class="code-quote">"...HelloConsumer"</span>&gt;</span>
+<span class="code-tag">&lt;requires from=<span class="code-quote">"MyHelloProvider"</span>&gt;</span>
+     <span class="code-tag">&lt;callback type=<span class="code-quote">"bind"</span> method=<span class="code-quote">"bindHello"</span>&gt;</span>
+     <span class="code-tag">&lt;callback type=<span class="code-quote">"unbind"</span> method=<span class="code-quote">"unbindHello"</span>&gt;</span>
+<span class="code-tag">&lt;/requires&gt;</span>
 ...
-<SPAN class="code-tag">&lt;/component&gt;</SPAN></PRE>
-</DIV></DIV>
-<P>iPOJO maps the from attribute to a specific filter : '|(instance.name=MyHelloProvider)(service.pid=MyHelloProvider)'. Then the dependency can only be fulfilled by a service matching this filter.</P>
+<span class="code-tag">&lt;/component&gt;</span></pre>
+</div></div>
+<p>iPOJO maps the from attribute to a specific filter :
+'|(instance.name=MyHelloProvider)(service.pid=MyHelloProvider)'. Then
+the dependency can only be fulfilled by a service matching this filter.</p>
 
-<P>Moreover, from attributes can be customized instance by instance. It is possible to specialize / change / add a 'from' attribute of a component in the instance configuration. It is useful when you want to create different instances of the same component, with different 'from' clauses. To do it, you have to identify your dependency with an 'id' attribute. Then, you can adapt the 'from' of the dependency in the instance configuration by using the property &quot;requires.from&quot;. In this property you can specify each dependency identified by its id and the 'from' value.</P>
+<p>Moreover, from attributes can be customized instance by instance. It
+is possible to specialize / change / add a 'from' attribute of a
+component in the instance configuration. It is useful when you want to
+create different instances of the same component, with different 'from'
+clauses. To do it, you have to identify your dependency with an 'id'
+attribute. Then, you can adapt the 'from' of the dependency in the
+instance configuration by using the property "requires.from". In this
+property you can specify each dependency identified by its id and the
+'from' value.</p>
 
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-xml">&lt;component 
-   className=<SPAN class="code-quote">&quot;org.apache.felix.ipojo.example.FilteredDependency&quot;</SPAN>
-   name=<SPAN class="code-quote">&quot;FOO&quot;</SPAN>&gt;
-	<SPAN class="code-tag">&lt;requires field=<SPAN class="code-quote">&quot;m_foo&quot;</SPAN> id=<SPAN class="code-quote">&quot;id1&quot;</SPAN>&gt;</SPAN>
-		<SPAN class="code-tag">&lt;callback type=<SPAN class="code-quote">&quot;bind&quot;</SPAN> method=<SPAN class="code-quote">&quot;bind&quot;</SPAN>/&gt;</SPAN>
-		<SPAN class="code-tag">&lt;callback type=<SPAN class="code-quote">&quot;unbind&quot;</SPAN> method=<SPAN class="code-quote">&quot;unbind&quot;</SPAN>/&gt;</SPAN>
-	<SPAN class="code-tag">&lt;/requires&gt;</SPAN>
-<SPAN class="code-tag">&lt;/component&gt;</SPAN>
+<div class="code"><div class="codeContent">
+<pre class="code-xml">&lt;component 
+   className=<span class="code-quote">"org.apache.felix.ipojo.example.FilteredDependency"</span>
+   name=<span class="code-quote">"FOO"</span>&gt;
+	<span class="code-tag">&lt;requires field=<span class="code-quote">"m_foo"</span> id=<span class="code-quote">"id1"</span>&gt;</span>
+		<span class="code-tag">&lt;callback type=<span class="code-quote">"bind"</span> method=<span class="code-quote">"bind"</span>/&gt;</span>
+		<span class="code-tag">&lt;callback type=<span class="code-quote">"unbind"</span> method=<span class="code-quote">"unbind"</span>/&gt;</span>
+	<span class="code-tag">&lt;/requires&gt;</span>
+<span class="code-tag">&lt;/component&gt;</span>
 
-<SPAN class="code-tag">&lt;instance name=<SPAN class="code-quote">&quot;FOO1&quot;</SPAN> component=<SPAN class="code-quote">&quot;FOO&quot;</SPAN>/&gt;</SPAN>
+<span class="code-tag">&lt;instance name=<span class="code-quote">"FOO1"</span> component=<span class="code-quote">"FOO"</span>/&gt;</span>
 
-<SPAN class="code-tag">&lt;instance name=<SPAN class="code-quote">&quot;FOO2&quot;</SPAN> component=<SPAN class="code-quote">&quot;FOO&quot;</SPAN>&gt;</SPAN>
-	<SPAN class="code-tag">&lt;property name=<SPAN class="code-quote">&quot;requires.from&quot;</SPAN>&gt;</SPAN>
-		<SPAN class="code-tag">&lt;property name=<SPAN class="code-quote">&quot;id1&quot;</SPAN> value=<SPAN class="code-quote">&quot;myprovider&quot;</SPAN>/&gt;</SPAN>
-	<SPAN class="code-tag">&lt;/property&gt;</SPAN>
-<SPAN class="code-tag">&lt;/instance&gt;</SPAN>
+<span class="code-tag">&lt;instance name=<span class="code-quote">"FOO2"</span> component=<span class="code-quote">"FOO"</span>&gt;</span>
+	<span class="code-tag">&lt;property name=<span class="code-quote">"requires.from"</span>&gt;</span>
+		<span class="code-tag">&lt;property name=<span class="code-quote">"id1"</span> value=<span class="code-quote">"myprovider"</span>/&gt;</span>
+	<span class="code-tag">&lt;/property&gt;</span>
+<span class="code-tag">&lt;/instance&gt;</span>
 
-<SPAN class="code-tag">&lt;instance name=<SPAN class="code-quote">&quot;FOO3&quot;</SPAN> component=<SPAN class="code-quote">&quot;FOO&quot;</SPAN>&gt;</SPAN>
-	<SPAN class="code-tag">&lt;property name=<SPAN class="code-quote">&quot;requires.from&quot;</SPAN>&gt;</SPAN>
-		<SPAN class="code-tag">&lt;property name=<SPAN class="code-quote">&quot;id1&quot;</SPAN> value=<SPAN class="code-quote">&quot;myotherprovider&quot;</SPAN>/&gt;</SPAN>
-	<SPAN class="code-tag">&lt;/property&gt;</SPAN>
-<SPAN class="code-tag">&lt;/instance&gt;</SPAN></PRE>
-</DIV></DIV>
+<span class="code-tag">&lt;instance name=<span class="code-quote">"FOO3"</span> component=<span class="code-quote">"FOO"</span>&gt;</span>
+	<span class="code-tag">&lt;property name=<span class="code-quote">"requires.from"</span>&gt;</span>
+		<span class="code-tag">&lt;property name=<span class="code-quote">"id1"</span> value=<span class="code-quote">"myotherprovider"</span>/&gt;</span>
+	<span class="code-tag">&lt;/property&gt;</span>
+<span class="code-tag">&lt;/instance&gt;</span></pre>
+</div></div>
 
-<P>The FOO component type declares a service dependency with the 'id1' id. This dependency has no 'from' attribute by default. The first instance is just an instance of the FOO component type and does not modify the dependency. The second one adds a 'from' attribute to the declared dependency to target the 'myprovider' provider. The last one adds another 'from' clause to the declared dependency.</P>
-
-
-<H2><A name="ServiceRequirementHandler-BindingPolicies"></A>Binding Policies</H2>
-
-<P>Three binding policies are supported inside iPOJO.</P>
-<UL>
-	<LI>Dynamic policy (default): the binding are managed      dynamically. At each injection, the same provider is injected if the      provider is always available. Else a new one is chosen. For aggregate      dependency, the array order does not change; new providers are placed at      the end of the array.</LI>
-	<LI>Static policy: the binding is static. So, once      bound a provider cannot disappear. If it disappears, the instance is      invalidated and cannot be revalidated without stopping and restarting the      instance.</LI>
-	<LI>Dynamic-priority policy: the binding is managed      dynamically but the injected provider is selected by using a ranking      policy. Two injections can return two different providers, is a new      provider is 'better' than the previous one, despite the first one is always      available. For aggregate dependency, the array is sorted.</LI>
-</UL>
+<p>The FOO component type declares a service dependency with the 'id1'
+id. This dependency has no 'from' attribute by default. The first
+instance is just an instance of the FOO component type and does not
+modify the dependency. The second one adds a 'from' attribute to the
+declared dependency to target the 'myprovider' provider. The last one
+adds another 'from' clause to the declared dependency.</p>
 
 
-<P>A static binding is declared as following:</P>
+<h2><a name="ServiceRequirementHandler-BindingPolicies"></a>Binding Policies</h2>
 
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-xml"><SPAN class="code-tag">&lt;component classname=<SPAN class="code-quote">&quot;...HelloConsumer&quot;</SPAN>&gt;</SPAN>
-    <SPAN class="code-tag">&lt;requires field=<SPAN class="code-quote">&quot;m_hellos&quot;</SPAN> policy=<SPAN class="code-quote">&quot;static&quot;</SPAN>/&gt;</SPAN>
+<p>Three binding policies are supported inside iPOJO.</p>
+<ul>
+	<li>Dynamic policy (default): the binding are managed
+dynamically. At each injection, the same provider is injected if the
+provider is always available. Else a new one is chosen. For aggregate
+dependency, the array order does not change; new providers are placed
+at the end of the array.</li>
+	<li>Static policy: the binding is
+static. So, once bound a provider cannot disappear. If it disappears,
+the instance is invalidated and cannot be revalidated without stopping
+and restarting the instance.</li>
+	<li>Dynamic-priority policy: the
+binding is managed dynamically but the injected provider is selected by
+using a ranking policy. Two injections can return two different
+providers, is a new provider is 'better' than the previous one, despite
+the first one is always available. For aggregate dependency, the array
+is sorted.</li>
+</ul>
+
+
+
+<p>A static binding is declared as following:</p>
+
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;component classname=<span class="code-quote">"...HelloConsumer"</span>&gt;</span>
+    <span class="code-tag">&lt;requires field=<span class="code-quote">"m_hellos"</span> policy=<span class="code-quote">"static"</span>/&gt;</span>
     ...
-<SPAN class="code-tag">&lt;/component&gt;</SPAN></PRE>
-</DIV></DIV>
+<span class="code-tag">&lt;/component&gt;</span></pre>
+</div></div>
 
-<P>A dynamic-priority binding is declared as following:</P>
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-xml"><SPAN class="code-tag">&lt;component classname=<SPAN class="code-quote">&quot;...HelloConsumer&quot;</SPAN>&gt;</SPAN>
-    <SPAN class="code-tag">&lt;requires field=<SPAN class="code-quote">&quot;m_hellos&quot;</SPAN> policy=<SPAN class="code-quote">&quot;dynamic-priority&quot;</SPAN>/&gt;</SPAN>
+<p>A dynamic-priority binding is declared as following:</p>
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;component classname=<span class="code-quote">"...HelloConsumer"</span>&gt;</span>
+    <span class="code-tag">&lt;requires field=<span class="code-quote">"m_hellos"</span> policy=<span class="code-quote">"dynamic-priority"</span>/&gt;</span>
     ...
-<SPAN class="code-tag">&lt;/component&gt;</SPAN></PRE>
-</DIV></DIV>
-<P>By default, the dynamic-priority policy uses the OSGi service ranking policy. However, it is possible to customize the policy by adding the '<EM>comparator</EM>' attribute. This attribute indicates the class name of a class implementing the java.util.Comparator interface. IPOJO will create an instance of your comparator and use it to sort service references (so your customized comparator needs to be able to sort OSGi Service Reference).</P>
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-xml"><SPAN class="code-tag">&lt;component classname=<SPAN class="code-quote">&quot;...HelloConsumer&quot;</SPAN>&gt;</SPAN>
-    <SPAN class="code-tag">&lt;requires field=<SPAN class="code-quote">&quot;m_hellos&quot;</SPAN> policy=<SPAN class="code-quote">&quot;dynamic-priority&quot;</SPAN> comparator=<SPAN class="code-quote">&quot;my.great.Comparator&quot;</SPAN>/&gt;</SPAN>
+<span class="code-tag">&lt;/component&gt;</span></pre>
+</div></div>
+<p>By default, the dynamic-priority policy uses the OSGi service
+ranking policy. However, it is possible to customize the policy by
+adding the '<em>comparator</em>' attribute. This attribute indicates
+the class name of a class implementing the java.util.Comparator
+interface. IPOJO will create an instance of your comparator and use it
+to sort service references (so your customized comparator needs to be
+able to sort OSGi Service Reference).</p>
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;component classname=<span class="code-quote">"...HelloConsumer"</span>&gt;</span>
+    <span class="code-tag">&lt;requires field=<span class="code-quote">"m_hellos"</span> policy=<span class="code-quote">"dynamic-priority"</span> comparator=<span class="code-quote">"my.great.Comparator"</span>/&gt;</span>
     ...
-<SPAN class="code-tag">&lt;/component&gt;</SPAN></PRE>
-</DIV></DIV>
+<span class="code-tag">&lt;/component&gt;</span></pre>
+</div></div>
 
-<P><A name="ServiceRequirementHandler-nullable"></A></P>
-<H2><A name="ServiceRequirementHandler-Noteaboutnullableobject%26defaultimplementation"></A>Note about nullable object &amp; default-implementation</H2>
+<p><a name="ServiceRequirementHandler-nullable"></a></p>
+<h2><a name="ServiceRequirementHandler-Noteaboutnullableobject&amp;defaultimplementation"></a>Note about nullable object &amp; default-implementation</h2>
 
-<P>The instance implementation can use an optional dependency without any checking. Indeed, when an instance declares an optional dependency using field injection, iPOJO create on the fly a Nullable class implementing the service specification but doing nothing (mock object). Therefore, iPOJO cannot return a service to the instance, for an optional dependency, it returns a nullable object.</P>
+<p>The instance implementation can use an optional dependency without
+any checking. Indeed, when an instance declares an optional dependency
+using field injection, iPOJO create on the fly a Nullable class
+implementing the service specification but doing nothing (mock object).
+Therefore, iPOJO cannot return a service to the instance, for an
+optional dependency, it returns a nullable object.</p>
 
-<P>A nullable object returns:</P>
-<UL>
-	<LI>Null when the method returns an object</LI>
-	<LI>0 when the method returns an int, log, byte, short, char, float or a double</LI>
-	<LI>False when the method return a boolean</LI>
-</UL>
+<p>A nullable object returns:</p>
+<ul>
+	<li>Null when the method returns an object</li>
+	<li>0 when the method returns an int, log, byte, short, char, float or a double</li>
+	<li>False when the method return a boolean</li>
+</ul>
 
 
-<P>You can check if the returned object is a nullable object with the test: <EM>&quot;myservice instanceof Nullable&quot;</EM>.</P>
+<p>You can check if the returned object is a nullable object with the test: <em>"myservice instanceof Nullable"</em>.</p>
 
-<P>You can disable the Nullable pattern too (activated by default). In this case, iPOJO will inject <EM>null</EM> instead of a <EM>Nullable</EM> object. So, you can just test if your field is equals to <EM>null</EM> to check if the service is available. To disable the Nullable pattern, you need to add the 'nullable=&quot;false&quot;' attribute in your service dependency description as follows:</P>
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-xml"><SPAN class="code-tag">&lt;component classname=<SPAN class="code-quote">&quot;...LogExample&quot;</SPAN>&gt;</SPAN>
-    <SPAN class="code-tag">&lt;requires field=<SPAN class="code-quote">&quot;m_log&quot;</SPAN> optional=<SPAN class="code-quote">&quot;true&quot;</SPAN> nullable=<SPAN class="code-quote">&quot;false&quot;</SPAN>/&gt;</SPAN>
+<p>You can disable the Nullable pattern too (activated by default). In this case, iPOJO will inject <em>null</em> instead of a <em>Nullable</em> object. So, you can just test if your field is equals to <em>null</em>
+to check if the service is available. To disable the Nullable pattern,
+you need to add the 'nullable="false"' attribute in your service
+dependency description as follows:</p>
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;component classname=<span class="code-quote">"...LogExample"</span>&gt;</span>
+    <span class="code-tag">&lt;requires field=<span class="code-quote">"m_log"</span> optional=<span class="code-quote">"true"</span> nullable=<span class="code-quote">"false"</span>/&gt;</span>
     ...
-<SPAN class="code-tag">&lt;/component&gt;</SPAN></PRE>
-</DIV></DIV>
+<span class="code-tag">&lt;/component&gt;</span></pre>
+</div></div>
 
-<P>However, you can also indicate a <EM>default-implementation</EM> for your optional service. In this case, if no providers are found, iPOJO creates an instance of the default-implementation and injects it. The default-implementation attribute describes the class name of your implementation. The given class <B>MUST</B> implement the required service interface.</P>
+<p>However, you can also indicate a <em>default-implementation</em> for
+your optional service. In this case, if no providers are found, iPOJO
+creates an instance of the default-implementation and injects it. The
+default-implementation attribute describes the class name of your
+implementation. The given class <b>MUST</b> implement the required service interface.</p>
 
-<P>For example, the following component uses a default implementation for a Log Service dependency:</P>
-<DIV class="code"><DIV class="codeContent">
-<PRE class="code-xml"><SPAN class="code-tag">&lt;component classname=<SPAN class="code-quote">&quot;...LogExample&quot;</SPAN>&gt;</SPAN>
-    &lt;requires field=<SPAN class="code-quote">&quot;m_log&quot;</SPAN> optional=<SPAN class="code-quote">&quot;true&quot;</SPAN> 
+<p>For example, the following component uses a default implementation for a Log Service dependency:</p>
+<div class="code"><div class="codeContent">
+<pre class="code-xml"><span class="code-tag">&lt;component classname=<span class="code-quote">"...LogExample"</span>&gt;</span>
+    &lt;requires field=<span class="code-quote">"m_log"</span> optional=<span class="code-quote">"true"</span> 
     default-implementation=
-       <SPAN class="code-quote">&quot;org.apache.felix.ipojo.example.default.MyLogService&quot;</SPAN>/&gt;
+       <span class="code-quote">"org.apache.felix.ipojo.example.default.MyLogService"</span>/&gt;
     ...
-<SPAN class="code-tag">&lt;/component&gt;</SPAN></PRE>
-</DIV></DIV>
-<P>If the log service is not available, iPOJO creates an object of the 'org.apache.felix.ipojo.example.default.MyLogService' class. This object is injected instead of a Nullable object. For instance, the default implementation can print messages on the System.err stream. The nullable object does no display anything.</P>
+<span class="code-tag">&lt;/component&gt;</span></pre>
+</div></div>
+<p>If the log service is not available, iPOJO creates an object of the
+'org.apache.felix.ipojo.example.default.MyLogService' class. This
+object is injected instead of a Nullable object. For instance, the
+default implementation can print messages on the System.err stream. The
+nullable object does no display anything.</p>
 
 
-<P><A name="ServiceRequirementHandler-callbacks"></A></P>
-<H2><A name="ServiceRequirementHandler-NoteaboutCallbacks"></A>Note about Callbacks</H2>
-<P>Dependency manages two type of callback: bind and unbind. A callback with a type &quot;bind&quot; is called each type that a service provider arrives and the binding is necessary. According to the cardinality of the dependency it means:</P>
-<UL>
-	<LI>Simple dependency : at the firs binding and at      each rebinding to another service provider</LI>
-	<LI>Aggregate dependencies: each time that a service      provider arrives</LI>
-</UL>
+<p><a name="ServiceRequirementHandler-callbacks"></a></p>
+<h2><a name="ServiceRequirementHandler-NoteaboutCallbacks"></a>Note about Callbacks</h2>
+<p>Dependency manages two type of callback: bind and unbind. A callback
+with a type "bind" is called each type that a service provider arrives
+and the binding is necessary. According to the cardinality of the
+dependency it means:</p>
+<ul>
+	<li>Simple dependency : at the firs binding and at      each rebinding to another service provider</li>
+	<li>Aggregate dependencies: each time that a service      provider arrives</li>
+</ul>
 
 
-<P>An unbind callback is called each time that a <B>used</B> service provider goes away. For a simple dependency this method is called each time that the used service provider goes away. For a multiple dependency this method is called each time that a service provider goes away.</P>
+<p>An unbind callback is called each time that a <b>used</b> service
+provider goes away. For a simple dependency this method is called each
+time that the used service provider goes away. For a multiple
+dependency this method is called each time that a service provider goes
+away.</p>
 
-<P>The method can receive in argument the service object or the service reference (in order to obtain service properties). The bind methods are delayed since a POJO object is created.</P>
+<p>The method can receive in argument the service object or the service
+reference (in order to obtain service properties). The bind methods are
+delayed since a POJO object is created.</p>
 
-<P><A name="ServiceRequirementHandler-discovery"></A></P>
-<H2><A name="ServiceRequirementHandler-Noteonserviceinterfacediscovery"></A>Note on service interface discovery</H2>
+<p><a name="ServiceRequirementHandler-discovery"></a></p>
+<h2><a name="ServiceRequirementHandler-Noteonserviceinterfacediscovery"></a>Note on service interface discovery</h2>
 
-<P>The <EM>'interface'</EM> (replaced by 'specification' during the 0.9.0-SNASPHOT version development) attribute is generally optional except when iPOJO cannot discover the type of the service. iPOJO cannot infer the type when the dependency has no field and callbacks do not receive the service object in parameter. In this case, you need to declare the service interface.</P>
-</TD>
-<TD class="confluenceTd" valign="top" width="20%">
-<H6><A name="ServiceRequirementHandler-Overview"></A><B>Overview</B></H6>
-<UL>
-	<LI><A href="apache-felix-ipojo.html" title="Apache Felix iPOJO">Home Page</A></LI>
-	<LI><A href="apache-felix-ipojo-feature-overview.html" title="Apache Felix iPOJO Feature Overview">iPOJO Feature Overview</A></LI>
-	<LI><A href="download.html" title="Download">Download &amp; Install </A></LI>
-</UL>
-
-
-<H6><A name="ServiceRequirementHandler-GettingStarted"></A><B>Getting Started</B></H6>
-<UL>
-	<LI><A href="ipojo-in-10-minutes.html" title="iPOJO in 10 minutes">iPOJO in 10 minutes</A></LI>
-	<LI><A href="ipojo-hello-word-maven-based-tutorial.html" title="iPOJO Hello Word (Maven-Based) tutorial">iPOJO Hello Word &#40;Maven&#45;Based&#41; tutorial</A></LI>
-	<LI><A href="ipojo-advanced-tutorial.html" title="iPOJO Advanced Tutorial">iPOJO Advanced Tutorial</A></LI>
-</UL>
-
-
-<H6><A name="ServiceRequirementHandler-UserGuide"></A><B>User Guide</B></H6>
-<UL>
-	<LI><A href="describing-components.html" title="Describing components">Describing components (handler list) </A></LI>
-	<LI><A href="how-to-use-ipojo-annotations.html" title="How to use iPOJO Annotations">How to use iPOJO Annotations</A></LI>
-	<LI><A href="using-xml-schemas.html" title="Using XML Schemas">Using XML Schemas</A></LI>
-	<LI><A href="ipojo-advanced-topics.html" title="iPOJO Advanced Topics">Advanced Topics</A></LI>
-	<LI><A href="ipojo-faq.html" title="iPOJO FAQ">FAQ</A></LI>
-</UL>
+<p>The <tt>specification</tt> attribute is generally optional except
+when iPOJO cannot discover the type of the service. iPOJO cannot infer
+the type when the dependency has no field and callbacks do not receive
+the service object in parameter. In this case, you need to declare the
+service interface.</p>
+</td>
+<td class="confluenceTd" valign="top" width="20%">
+<h6><a name="ServiceRequirementHandler-Overview"></a><b>Overview</b></h6>
+<ul>
+	<li><a href="http://felix.apache.org/site/apache-felix-ipojo.html" title="Apache Felix iPOJO">Home Page</a></li>
+	<li><a href="http://felix.apache.org/site/apache-felix-ipojo-feature-overview.html" title="Apache Felix iPOJO Feature Overview">iPOJO Feature Overview</a></li>
+	<li><a href="http://felix.apache.org/site/download.html" title="Download">Download &amp; Install </a></li>
+</ul>
 
 
-<H6><A name="ServiceRequirementHandler-Tools"></A><B>Tools</B></H6>
-<UL>
-	<LI><A href="ipojo-eclipse-plug-in.html" title="iPOJO Eclipse Plug-in">iPOJO Eclipse Plug&#45;in</A></LI>
-	<LI><A href="ipojo-ant-task.html" title="iPOJO Ant Task">iPOJO Ant Task</A></LI>
-	<LI><A href="ipojo-maven-plug-in.html" title="iPOJO Maven Plug-in">iPOJO Maven Plug&#45;in</A></LI>
-	<LI><A href="ipojo-concepts-overview.html" title="iPOJO Concepts Overview">iPOJO concepts overview</A></LI>
-</UL>
+<h6><a name="ServiceRequirementHandler-GettingStarted"></a><b>Getting Started</b></h6>
+<ul>
+	<li><a href="http://felix.apache.org/site/ipojo-in-10-minutes.html" title="iPOJO in 10 minutes">iPOJO in 10 minutes</a></li>
+	<li><a href="http://felix.apache.org/site/how-to-use-ipojo-annotations.html" title="How to use iPOJO Annotations">How to use iPOJO Annotations</a></li>
+	<li><a href="http://felix.apache.org/site/ipojo-hello-word-maven-based-tutorial.html" title="iPOJO Hello Word (Maven-Based) tutorial">iPOJO Hello Word (Maven-Based) tutorial</a></li>
+	<li><a href="http://felix.apache.org/site/ipojo-advanced-tutorial.html" title="iPOJO Advanced Tutorial">iPOJO Advanced Tutorial</a></li>
+	<li><a href="http://felix.apache.org/site/ipojo-composition-tutorial.html" title="iPOJO Composition Tutorial">iPOJO Composition Tutorial</a></li>
+</ul>
 
 
-<H6><A name="ServiceRequirementHandler-DeveloperGuide"></A><B>Developer Guide</B></H6>
-<UL>
-	<LI>API: <SPAN class="nobr"><A href="http://people.apache.org/~clement/ipojo/api/0.8/" title="Visit page outside Confluence" rel="nofollow">0.8<SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></LI>
-	<LI><A href="how-to-write-your-own-handler.html" title="How to write your own handler">How to write your own handler</A></LI>
-	<LI><A href="how-to-use-ipojo-manipulation-metadata.html" title="How to use iPOJO Manipulation Metadata">How to use iPOJO Manipulation Metadata</A></LI>
-</UL>
+<h6><a name="ServiceRequirementHandler-UserGuide"></a><b>User Guide</b></h6>
+<ul>
+	<li><a href="http://felix.apache.org/site/describing-components.html" title="Describing components">Describing components (handler list) </a></li>
+	<li><a href="http://felix.apache.org/site/using-xml-schemas.html" title="Using XML Schemas">Using XML Schemas</a></li>
+	<li><a href="http://felix.apache.org/site/apache-felix-ipojo-testing-components.html" title="apache-felix-ipojo-testing-components">Testing components</a></li>
+	<li><a href="http://felix.apache.org/site/ipojo-advanced-topics.html" title="iPOJO Advanced Topics">Advanced Topics</a></li>
+	<li><a href="http://felix.apache.org/site/ipojo-faq.html" title="iPOJO FAQ">FAQ</a></li>
+</ul>
 
 
-<H6><A name="ServiceRequirementHandler-Misc%26Contact"></A><B>Misc &amp; Contact</B></H6>
-<UL>
-	<LI><A href="apache-felix-ipojo-issuestracker.html" title="apache-felix-ipojo-issuestracker">Issues Tracker</A></LI>
-	<LI><A href="apache-felix-ipojo-supportedvms.html" title="apache-felix-ipojo-supportedVMs">Supported JVMs</A></LI>
-	<LI><A href="apache-felix-ipojo-supportedosgi.html" title="apache-felix-ipojo-supportedOSGi">Supported OSGi Implementations</A></LI>
-	<LI><A href="future-ideas.html" title="Future Ideas">Future Ideas</A></LI>
-	<LI><A href="contact.html" title="Contact">Contact</A></LI>
-	<LI><A href="related-works.html" title="Related Works">Related Works</A></LI>
-	<LI><A href="article-presentations.html" title="Article & Presentations">Article &amp; Presentations</A></LI>
-</UL>
+<h6><a name="ServiceRequirementHandler-Tools"></a><b>Tools</b></h6>
+<ul>
+	<li><a href="http://felix.apache.org/site/ipojo-eclipse-plug-in.html" title="iPOJO Eclipse Plug-in">iPOJO Eclipse Plug-in</a></li>
+	<li><a href="http://felix.apache.org/site/ipojo-ant-task.html" title="iPOJO Ant Task">iPOJO Ant Task</a></li>
+	<li><a href="http://felix.apache.org/site/ipojo-maven-plug-in.html" title="iPOJO Maven Plug-in">iPOJO Maven Plug-in</a></li>
+	<li><a href="http://felix.apache.org/site/apache-felix-ipojo-junit4osgi.html" title="apache-felix-ipojo-junit4osgi">Junit4OSGi</a></li>
+	<li><a href="http://felix.apache.org/site/ipojo-concepts-overview.html" title="iPOJO Concepts Overview">iPOJO concepts overview</a></li>
+</ul>
 
 
-<HR>
-<DIV class="" align="center">
-<P><SPAN class="nobr"><A href="http://cwiki.apache.org/confluence/createrssfeed.action?types=blogpost&amp;statuses=created&amp;statuses=modified&amp;spaces=FELIX&amp;labelString=iPOJO&amp;rssType=atom&amp;maxResults=10&amp;timeSpan=5&amp;publicFeed=true&amp;title=iPOJO%20Atom%20Feed" title="Stay tuned!" rel="nofollow"><IMG src="../../cwiki.apache.org/confluence/images/icons/feed-icon-32x32.png" align="absmiddle" border="0"><SUP><IMG class="rendericon" src="../../cwiki.apache.org/confluence/images/icons/linkext7.gif" height="7" width="7" align="absmiddle" alt="" border="0"></SUP></A></SPAN></P></DIV></TD></TR></TBODY></TABLE>
-    </DIV>
-  </BODY>
+<h6><a name="ServiceRequirementHandler-DeveloperGuide"></a><b>Developer Guide</b></h6>
+<ul>
+	<li>API: <span class="nobr"><a href="http://people.apache.org/%7Eclement/ipojo/api/1.0/" title="Visit page outside Confluence" rel="nofollow">1.0<sup><img class="rendericon" src="service-requirement-handler_files/linkext7.gif" alt="" align="absmiddle" border="0" width="7" height="7"></sup></a></span></li>
+	<li><a href="http://felix.apache.org/site/how-to-write-your-own-handler.html" title="How to write your own handler">How to write your own handler</a></li>
+	<li><a href="http://felix.apache.org/site/how-to-use-ipojo-manipulation-metadata.html" title="How to use iPOJO Manipulation Metadata">How to use iPOJO Manipulation Metadata</a></li>
+	<li><a href="http://felix.apache.org/site/dive-into-the-ipojo-manipulation-depths.html" title="Dive into the iPOJO Manipulation depths">Dive into the iPOJO Manipulation depths</a></li>
+</ul>
 
-<!-- Mirrored Site: felix.apache.org. File: /site/service-requirement-handler.html. Date: Mon, 13 Oct 2008 06:53:05 GMT -->
-</HTML>
+
+<h6><a name="ServiceRequirementHandler-Misc&amp;Contact"></a><b>Misc &amp; Contact</b></h6>
+<ul>
+	<li><a href="http://felix.apache.org/site/apache-felix-ipojo-issuestracker.html" title="apache-felix-ipojo-issuestracker">Issues Tracker</a></li>
+	<li><a href="http://felix.apache.org/site/apache-felix-ipojo-supportedvms.html" title="apache-felix-ipojo-supportedVMs">Supported JVMs</a></li>
+	<li><a href="http://felix.apache.org/site/apache-felix-ipojo-supportedosgi.html" title="apache-felix-ipojo-supportedOSGi">Supported OSGi Implementations</a></li>
+	<li><span class="nobr"><a href="http://ipojo-dark-side.blogspot.com/" title="Visit page outside Confluence" rel="nofollow">iPOJO's Dark Side Blog<sup><img class="rendericon" src="service-requirement-handler_files/linkext7.gif" alt="" align="absmiddle" border="0" width="7" height="7"></sup></a></span></li>
+	<li><a href="http://felix.apache.org/site/future-ideas.html" title="Future Ideas">Future Ideas</a></li>
+	<li><a href="http://felix.apache.org/site/contact.html" title="Contact">Contact</a></li>
+	<li><a href="http://felix.apache.org/site/related-works.html" title="Related Works">Related Works</a></li>
+	<li><a href="http://felix.apache.org/site/article-presentations.html" title="Article &amp; Presentations">Article &amp; Presentations</a></li>
+</ul>
+
+
+<hr>
+<div class="" align="center">
+<p><span class="nobr"><a href="http://cwiki.apache.org/confluence/createrssfeed.action?types=blogpost&amp;statuses=created&amp;statuses=modified&amp;spaces=FELIX&amp;labelString=iPOJO&amp;rssType=atom&amp;maxResults=10&amp;timeSpan=5&amp;publicFeed=true&amp;title=iPOJO%20Atom%20Feed" title="Stay tuned!" rel="nofollow"><img src="service-requirement-handler_files/feed-icon-32x32.png" align="absmiddle" border="0"><sup><img class="rendericon" src="service-requirement-handler_files/linkext7.gif" alt="" align="absmiddle" border="0" width="7" height="7"></sup></a></span></p></div>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script><script src="service-requirement-handler_files/ga.js" type="text/javascript"></script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-1518442-4");
+pageTracker._trackPageview();
+</script>
+</td></tr></tbody></table>
+    </div>
+  </body></html>
