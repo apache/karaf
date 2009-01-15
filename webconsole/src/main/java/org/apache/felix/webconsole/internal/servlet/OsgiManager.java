@@ -250,7 +250,7 @@ public class OsgiManager extends GenericServlet
             }
             catch ( Throwable t )
             {
-                log( "Failed to instantiate plugin " + pluginClassName + ". Reason: " + t );
+                log.log( LogService.LOG_INFO, "Failed to instantiate plugin " + pluginClassName + ". Reason: " + t );
             }
         }
 
@@ -368,11 +368,11 @@ public class OsgiManager extends GenericServlet
                 }
                 catch ( IOException ioe )
                 {
-                    this.log( ioe.getMessage(), ioe );
+                    log.log( LogService.LOG_WARNING, ioe.getMessage(), ioe );
                 }
                 catch ( ServletException se )
                 {
-                    this.log( se.getMessage(), se.getRootCause() );
+                    log.log( LogService.LOG_WARNING, se.getMessage(), se.getRootCause() );
                 }
 
                 // maybe overwrite redirect
