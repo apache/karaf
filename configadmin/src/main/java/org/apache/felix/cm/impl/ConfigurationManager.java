@@ -191,8 +191,14 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     {
 
         // immediately unregister the Configuration Admin before cleaning up
-        configurationAdminRegistration.unregister();
-        configurationAdminRegistration = null;
+        // clearing the field before actually unregistering the service
+        // prevents IllegalStateException in getServiceReference() if
+        // the field is not null but the service already unregistered
+        if (configurationAdminRegistration != null) {
+            ServiceRegistration reg = configurationAdminRegistration;
+            configurationAdminRegistration = null;
+            reg.unregister();
+        }
 
         // stop handling ManagedService[Factory] services
         managedServiceFactoryTracker.close();
