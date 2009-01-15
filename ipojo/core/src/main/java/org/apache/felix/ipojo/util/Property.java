@@ -181,33 +181,35 @@ public class Property implements FieldInterceptor {
      * @throws ConfigurationException if the class cannot be loaded
      */
     private static Class computeArrayType(String type, BundleContext context) throws ConfigurationException {
+        // Note: Harmony does't support the type[].class notation.
+        // An empty array has to be created to get the class object.
         String internalType = type.substring(0, type.length() - 2);
         if ("string".equals(internalType) || "String".equals(internalType)) {
-            return String[].class;
+            return new String[0].getClass();
         }
         if ("boolean".equals(internalType)) {
-            return boolean[].class;
+            return new boolean[0].getClass();
         }
         if ("byte".equals(internalType)) {
-            return byte[].class;
+            return new byte[0].getClass();
         }
         if ("short".equals(internalType)) {
-            return short[].class;
+            return new short[0].getClass();
         }
         if ("int".equals(internalType)) {
-            return int[].class;
+            return new int[0].getClass();
         }
         if ("long".equals(internalType)) {
-            return long[].class;
+            return new long[0].getClass();
         }
         if ("float".equals(internalType)) {
-            return float[].class;
+            return new float[0].getClass();
         }
         if ("double".equals(internalType)) {
-            return double[].class;
+            return new double[0].getClass();
         }
         if ("char".equals(internalType)) {
-            return char[].class;
+            return new char[0].getClass();
         }
 
         // Complex array type.

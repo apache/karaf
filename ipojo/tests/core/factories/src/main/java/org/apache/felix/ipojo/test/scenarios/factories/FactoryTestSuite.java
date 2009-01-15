@@ -32,7 +32,7 @@ public class FactoryTestSuite {
         ots.addTestSuite(ConfigAdminTest.class);
         ots.addTestSuite(ObedienceTest.class);
         ots.addTestSuite(FactoryProps.class);
-       // ots.addTestSuite(EmptyArrayTest.class);
+   //     ots.addTestSuite(EmptyArrayTest.class);
         return ots;
     }
 

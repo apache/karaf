@@ -47,7 +47,10 @@ public class UnacceptableConfigurationTest extends OSGiTestCase {
 		try {
 			ci = f.createComponentInstance(p);
 			ci.dispose();
-		} catch(Exception e) { fail("an acceptable configuration is refused : " + e.getMessage()); }
+		} catch(Exception e) { 
+		    fail("an acceptable configuration is refused : " + e.getMessage());
+		    e.printStackTrace();
+		}
 		
 	}
 	
