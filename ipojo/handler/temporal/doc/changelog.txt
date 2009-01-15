@@ -1,11 +1,17 @@
+Changes from 1.0.0 to 1.2.0
+---------------------------
+** Improvement
+    * [FELIX-855] - Collection support in iPOJO Temporal Dependencies
+    * [FELIX-860] - Temporal Dependency Proxy injection
+    
 Changes from 0.8.1 to 1.0.0
 ---------------------------
 ** Improvement
-    * [FELIX-625] - Temporal Dependency improvements (onTimeout policies) (2008-07-07)
-    * [FELIX-673] - Provide OBR description to iPOJO bundles (2008-08-07
-    * [FELIX-716] - Provide XML schemas for iPOJO descriptors (2008-09-09)
+    * [FELIX-625] - Temporal Dependency improvements (onTimeout policies)
+    * [FELIX-673] - Provide OBR description to iPOJO bundles
+    * [FELIX-716] - Provide XML schemas for iPOJO descriptors
 
 
 Version 0.8.1
 -------------
-    * Initial release (2008-06-06) 
+    * Initial release

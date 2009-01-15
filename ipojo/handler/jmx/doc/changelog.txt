@@ -1,3 +1,9 @@
+Changes from 1.0.0 to 1.2.0
+---------------------------
+** Bug
+ 	* [FELIX-828] - iPOJO JMX Handler: the name attribute has not the expected behavior
+    * [FELIX-829] - iPOJO JMX Handler: the sub-element should refer to the handler namespace    
+
 Version 1.0.0
 -------------
-    * Initial release (2008-10-13)
+    * Initial release

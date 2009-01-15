@@ -1,9 +1,14 @@
+Changes from 1.0.0 to 1.2.0
+---------------------------
+** Bug
+    * [FELIX-797] - Composite Architecture contains duplicate instances
+    
 Changes from 0.8.0 to 1.0.0
 ---------------------------
 ** Improvement
-    * [FELIX-673] - Provide OBR description to iPOJO bundles (2008-08-07)
+    * [FELIX-673] - Provide OBR description to iPOJO bundles
     
     
 Version 0.8.0
 -------------
-    * Initial release (2008-05-16) 
+    * Initial release

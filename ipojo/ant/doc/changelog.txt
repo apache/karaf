@@ -1,11 +1,16 @@
+Changes from 1.0.0 to 1.2.0
+---------------------------
+** Improvement
+    * [FELIX-813] - Resolve XML-Schemas locally rather than from Internet
+
 Changes from 0.8.1 to 1.0.0
 ---------------------------
 ** Bug    
-    * Update contained Xerces packages to support XML-Schemas (2008-10-06)
+    * Update contained Xerces packages to support XML-Schemas
 
 ** Improvement
-    * Embed the latest manipulator (2008-07-03)
+    * Embed the latest manipulator
     
 Version 0.8.1
 -------------
-    * Initial release (2008-06-06) 
+    * Initial release 

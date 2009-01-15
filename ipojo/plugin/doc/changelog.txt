@@ -1,8 +1,14 @@
+Changes from 1.0.0 to 1.2.0
+---------------------------
+** Improvement
+    * [FELIX-813] - Resolve XML-Schemas locally rather than from Internet
+    * [FELIX-846] - Enhance the iPojo maven plugin to take metadata from pom.
+        
 Changes from 0.8.0 to 1.0.0
 ---------------------------
 ** Improvement
-    * Embed the latest manipulator (2008-05-26)
+    * Embed the latest manipulator
     
 Version 0.8.0
 -------------
-    * Initial release (2008-05-16) 
+    * Initial release 

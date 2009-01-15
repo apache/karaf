@@ -1,9 +1,20 @@
+Changes from 1.0.0 to 1.2.0
+---------------------------
+** Improvement
+    * [FELIX-825] - Provide annotation for iPojo JMX Handler
+    * [FELIX-834] - Provide Annotations for the extender, whiteboard and event admin handlers
+
+** Bug
+    * [FELIX-867] - iPOJO @ServiceProperty can target method
+    * [FELIX-868] - iPOJO @Component don't support factory methods    
+
+
 Changes from 0.8.0 to 1.0.0
 ---------------------------
 ** Improvement
-    * [FELIX-627] - Temporal dependency annotation (2008-07-08)
+    * [FELIX-627] - Temporal dependency annotation
 
 
 Version 0.8.0
 -------------
-    * Initial release (2008-05-16) 
+    * Initial release

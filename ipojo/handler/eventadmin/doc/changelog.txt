@@ -1,3 +1,12 @@
+Changes from 1.0.0 to 1.2.0
+---------------------------
+** Bug
+    * [FELIX-794] - Event Admin handler reject correctly formed topics
+
+** Improvement
+    * [FELIX-795] - Improve metadata and manipulator performance
+    * [FELIX-834] - Provide Annotations for the extender, whiteboard and event admin handlers
+
 Version 1.0.0
 -------------
-    * Initial release (2008-10-13)
+    * Initial release
