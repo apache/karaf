@@ -550,6 +550,13 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     }
 
 
+    private ServiceReference getServiceReference()
+    {
+        ServiceRegistration reg = configurationAdminRegistration;
+        return ( reg != null ) ? reg.getReference() : null;
+    }
+
+
     private void configure( ServiceReference sr, ManagedService service )
     {
         String pid = ( String ) sr.getProperty( Constants.SERVICE_PID );
@@ -774,7 +781,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         Object log = logTracker.getService();
         if ( log != null )
         {
-            ( ( LogService ) log ).log( configurationAdminRegistration.getReference(), level, message, t );
+            ( ( LogService ) log ).log( getServiceReference(), level, message, t );
             return;
         }
 
@@ -1356,8 +1363,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 return;
             }
 
-            ConfigurationEvent event = new ConfigurationEvent( configurationAdminRegistration.getReference(), type,
-                factoryPid, pid );
+            ConfigurationEvent event = new ConfigurationEvent( getServiceReference(), type, factoryPid, pid );
 
             for ( int i = 0; i < srs.length; i++ )
             {
