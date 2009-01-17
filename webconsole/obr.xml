@@ -49,6 +49,6 @@
             v="OSGi Management Console Configuration Receiver" />
         <p n="service.pid"
             v="org.apache.felix.webconsole.internal.servlet.OsgiManager" />
-        <p n="service.vendor" v="he Apache Software Foundation" />
+        <p n="service.vendor" v="The Apache Software Foundation" />
     </capability>
 </obr>
