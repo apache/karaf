@@ -839,7 +839,7 @@ public class ConfigManager extends ConfigManagerBase
 
     private Configuration getConfiguration( ConfigurationAdmin ca, String pid, String factoryPid ) throws IOException
     {
-        if ( factoryPid != null )
+        if ( factoryPid != null && ( pid == null || pid.equals( PLACEHOLDER_PID ) ) )
         {
             return ca.createFactoryConfiguration( factoryPid, null );
         }
