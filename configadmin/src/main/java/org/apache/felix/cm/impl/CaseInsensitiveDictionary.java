@@ -254,14 +254,20 @@ class CaseInsensitiveDictionary extends Dictionary
     static Object checkValue( Object value )
     {
         Class type;
-        if ( value instanceof Object[] )
+        if ( value == null )
+        {
+            // null is illegal
+            throw new IllegalArgumentException( "Value must not be null" );
+
+        }
+        else if ( value.getClass().isArray() )
         {
             // check simple or primitive
             type = value.getClass().getComponentType();
 
-            // check for primitive type
-            if ( type == Integer.TYPE || type == Long.TYPE || type == Float.TYPE || type == Double.TYPE
-                || type == Byte.TYPE || type == Short.TYPE || type == Character.TYPE || type == Boolean.TYPE )
+            // check for primitive type (simple types are checked below)
+            // note: void[] cannot be created, so we ignore this here
+            if ( type.isPrimitive() )
             {
                 return value;
             }
@@ -298,16 +304,11 @@ class CaseInsensitiveDictionary extends Dictionary
             }
             value = internalValue;
         }
-        else if ( value != null )
+        else
         {
             // get the type to check (must be simple)
             type = value.getClass();
 
-        }
-        else
-        {
-            // null is illegal
-            throw new IllegalArgumentException( "Value must not be null" );
         }
 
         // check for simple type
