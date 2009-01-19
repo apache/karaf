@@ -226,6 +226,8 @@ public class BundlesServlet extends BaseWebConsolePlugin
         {
             // redirect or 200
             resp.setStatus( HttpServletResponse.SC_OK );
+            resp.setContentType( "application/json" );
+            resp.setCharacterEncoding( "UTF-8" );
             JSONWriter jw = new JSONWriter( resp.getWriter() );
             try
             {
