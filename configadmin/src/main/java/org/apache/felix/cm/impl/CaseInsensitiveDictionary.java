@@ -19,6 +19,7 @@
 package org.apache.felix.cm.impl;
 
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,6 +27,8 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Vector;
 
 
 /**
@@ -88,9 +91,43 @@ class CaseInsensitiveDictionary extends Dictionary
     }
 
 
-    CaseInsensitiveDictionary( CaseInsensitiveDictionary props )
+    CaseInsensitiveDictionary( CaseInsensitiveDictionary props, boolean deepCopy )
     {
-        internalMap = new Hashtable( props.internalMap );
+        Hashtable tmp = new Hashtable( Math.max( 2 * props.internalMap.size(), 11 ), 0.75f );
+        if ( deepCopy )
+        {
+            Iterator entries = props.internalMap.entrySet().iterator();
+            while ( entries.hasNext() )
+            {
+                Map.Entry entry = ( Map.Entry ) entries.next();
+                Object value = entry.getValue();
+                if ( value.getClass().isArray() )
+                {
+                    // copy array
+                    int length = Array.getLength( value );
+                    Object newValue = Array.newInstance( value.getClass().getComponentType(), length );
+                    System.arraycopy( value, 0, newValue, 0, length );
+                    value = newValue;
+                }
+                else if ( value instanceof Collection )
+                {
+                    // copy collection, create Vector
+                    // a Vector is created because the R4 and R4.1 specs
+                    // state that the values must be simple, array or
+                    // Vector. And even though we accept Collection nowadays
+                    // there might be clients out there still written against
+                    // R4 and R4.1 spec expecting Vector
+                    value = new Vector( ( Collection ) value );
+                }
+                tmp.put( entry.getKey(), value );
+            }
+        }
+        else
+        {
+            tmp.putAll( props.internalMap );
+        }
+        
+        internalMap = tmp;
         originalKeys = new Hashtable( props.originalKeys );
     }
 

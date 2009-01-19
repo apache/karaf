@@ -223,10 +223,20 @@ class ConfigurationImpl
     }
 
 
-    /* (non-Javadoc)
-     * @see org.osgi.service.cm.Configuration#getProperties()
+    /**
+     * Returns an optionally deep copy of the properties of this configuration
+     * instance.
+     * <p>
+     * This method returns a copy of the internal dictionary. If the
+     * <code>deepCopy</code> parameter is true array and collection values are
+     * copied into new arrays or collections. Otherwise just a new dictionary
+     * referring to the same objects is returned.
+     * 
+     * @param deepCopy
+     *            <code>true</code> if a deep copy is to be returned.
+     * @return
      */
-    public Dictionary getProperties()
+    public Dictionary getProperties( boolean deepCopy )
     {
         // no properties yet
         if ( properties == null )
@@ -234,7 +244,7 @@ class ConfigurationImpl
             return null;
         }
 
-        CaseInsensitiveDictionary props = new CaseInsensitiveDictionary( properties );
+        CaseInsensitiveDictionary props = new CaseInsensitiveDictionary( properties, deepCopy );
 
         // fix special properties (pid, factory PID, bundle location)
         setAutoProperties( props, false );
@@ -375,7 +385,10 @@ class ConfigurationImpl
 
     void store() throws IOException
     {
-        Dictionary props = getProperties();
+        // we don't need a deep copy, since we are not modifying
+        // any value in the dictionary itself. we are just adding
+        // properties to it, which are required for storing
+        Dictionary props = getProperties( false );
 
         // if this is a new configuration, we just use an empty Dictionary
         if ( props == null )

@@ -680,7 +680,9 @@ public class ConfigurationManager implements BundleActivator, BundleListener
      */
     private Dictionary callPlugins( ServiceReference sr, ConfigurationImpl cfg )
     {
-        Dictionary props = cfg.getProperties();
+        // return a deep copy, since the plugins may tamper with the array
+        // and collection elements, which should not modify the internal data
+        Dictionary props = cfg.getProperties( true );
 
         // guard against NPE for new configuration never updated
         if (props == null) {

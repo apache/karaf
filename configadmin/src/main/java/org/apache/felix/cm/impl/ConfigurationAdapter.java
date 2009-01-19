@@ -29,7 +29,7 @@ import org.osgi.service.cm.Configuration;
  * The <code>ConfigurationAdapter</code> TODO
  *
  * @author fmeschbe
- * @version $Rev: 527592 $, $Date$
+ * @version $Rev:616219 $, $Date$
  */
 public class ConfigurationAdapter implements Configuration
 {
@@ -117,7 +117,10 @@ public class ConfigurationAdapter implements Configuration
     public Dictionary getProperties()
     {
         checkDeleted();
-        return delegatee.getProperties();
+        
+        // return a deep copy since the spec says, that modification of
+        // any value should not modify the internal, stored value
+        return delegatee.getProperties( true );
     }
 
 
