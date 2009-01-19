@@ -33,7 +33,7 @@
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.ipojo</artifactId>
-			<version>1.2.0</version>
+			<version>1.3.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
@@ -67,7 +67,7 @@
 	<plugin>
 		<groupId>org.apache.felix</groupId>
 		<artifactId>maven-ipojo-plugin</artifactId>
-		<version>1.2.0</version>
+		<version>1.3.0-SNAPSHOT</version>
 		<executions>
 			<execution>
 				<goals>
