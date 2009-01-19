@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.felix.bundlerepository.*;
 import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.apache.felix.webconsole.internal.Util;
-import org.apache.felix.webconsole.internal.obr.DeployerThread;
 import org.apache.felix.webconsole.internal.servlet.OsgiManager;
 import org.json.JSONException;
 import org.json.JSONWriter;
@@ -36,7 +35,7 @@ import org.osgi.framework.*;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.log.LogService;
-import org.osgi.service.obr.*;
+import org.osgi.service.obr.RepositoryAdmin;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
@@ -122,7 +121,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
                 {
                     // bundle properties
 
-                    response.setContentType( "text/javascript" );
+                    response.setContentType( "application/json" );
                     response.setCharacterEncoding( "UTF-8" );
 
                     PrintWriter pw = response.getWriter();
@@ -267,20 +266,44 @@ public class BundlesServlet extends BaseWebConsolePlugin
         pathInfo = pathInfo.substring( pathInfo.lastIndexOf( '/' ) + 1 );
 
         // assume bundle Id
-        long bundleId;
         try
         {
-            bundleId = Long.parseLong( pathInfo );
+            final long bundleId = Long.parseLong( pathInfo );
+            if ( bundleId >= 0 )
+            {
+                return getBundleContext().getBundle( bundleId );
+            }
         }
         catch ( NumberFormatException nfe )
         {
-            bundleId = -1;
+            // check if this follows the pattern {symbolic-name}[:{version}]
+            final int pos = pathInfo.indexOf(':');
+            final String symbolicName;
+            final String version;
+            if ( pos == -1 ) {
+                symbolicName = pathInfo;
+                version = null;
+            } else {
+                symbolicName = pathInfo.substring(0, pos);
+                version = pathInfo.substring(pos+1);
+            }
+
+            // search
+            final Bundle[] bundles = getBundleContext().getBundles();
+            for(int i=0; i<bundles.length; i++)
+            {
+                final Bundle bundle = bundles[i];
+                // check symbolic name first
+                if ( symbolicName.equals(bundle.getSymbolicName()) )
+                {
+                    if ( version == null || version.equals(bundle.getHeaders().get(Constants.BUNDLE_VERSION)) )
+                    {
+                        return bundle;
+                    }
+                }
+            }
         }
 
-        if ( bundleId >= 0 )
-        {
-            return getBundleContext().getBundle( bundleId );
-        }
 
         return null;
     }

@@ -17,10 +17,7 @@
 package org.apache.felix.webconsole.internal.core;
 
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Map;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -30,9 +27,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
+import org.apache.felix.webconsole.Action;
+import org.apache.felix.webconsole.internal.BaseManagementPlugin;
+import org.osgi.framework.*;
 import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
@@ -41,7 +38,7 @@ import org.osgi.service.startlevel.StartLevel;
 /**
  * The <code>InstallAction</code> TODO
  */
-public class InstallAction extends BundleAction
+public class InstallAction extends BaseManagementPlugin implements Action
 {
 
     public static final String NAME = "install";
@@ -196,7 +193,7 @@ public class InstallAction extends BundleAction
                     }
                 }
             }
-            
+
             if ( updateBundle != null )
             {
 
@@ -273,7 +270,7 @@ public class InstallAction extends BundleAction
                 {
                     bundle.start();
                 }
-                
+
                 return bundle;
             }
         };
