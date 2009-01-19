@@ -7,6 +7,10 @@ This product includes software developed at
 The Apache Software Foundation (http://www.apache.org/).
 Licensed under the Apache License 2.0.
 
+This product includes software developed at
+Copyright (c) 2000-2005 INRIA, France Telecom
+Licensed under BSD License.
+
 II. Used Software
 
 This product uses software developed at
@@ -16,3 +20,5 @@ Licensed under the Apache License 2.0.
 
 III. License Summary
 - Apache License 2.0
+- BSD Licence
+

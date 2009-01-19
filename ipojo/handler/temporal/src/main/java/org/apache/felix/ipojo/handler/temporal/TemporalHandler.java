@@ -27,6 +27,7 @@ import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.PrimitiveHandler;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.FieldMetadata;
+import org.apache.felix.ipojo.parser.MethodMetadata;
 import org.apache.felix.ipojo.parser.PojoMetadata;
 import org.apache.felix.ipojo.util.DependencyModel;
 import org.apache.felix.ipojo.util.DependencyStateListener;
@@ -189,6 +190,13 @@ public class TemporalHandler extends PrimitiveHandler implements DependencyState
             Class specification = DependencyModel.loadSpecification(spec, getInstanceManager().getContext());
             TemporalDependency dep = new TemporalDependency(specification, agg, collection, proxy, filter, getInstanceManager().getContext(), timeout, policy, di, this);
             m_dependencies.add(dep);
+            
+            if (! proxy) { // Register method interceptor only if are not a proxy
+                MethodMetadata[] methods = manipulation.getMethods();
+                for (int k = 0; k < methods.length; k++) {
+                    getInstanceManager().register(methods[k], dep);
+                }
+            }
             
             getInstanceManager().register(fieldmeta, dep);
         }        

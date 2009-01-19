@@ -44,16 +44,18 @@ public class DelayTest extends OSGiTestCase {
        
        // Stop the provider.
        provider.stop();
+       assertNull("No FooService", Utils.getServiceReference(context, FooService.class.getName(), null));
        ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
        assertNotNull("Check cs availability - 2", ref_cs);
        long begin = System.currentTimeMillis();
        DelayedProvider dp = new DelayedProvider(provider, 200);
        dp.start();
        cs = (CheckService) context.getService(ref_cs);
+       
        assertTrue("Check invocation - 2", cs.check());
        long end = System.currentTimeMillis();
        
-       assertTrue("Assert delay", (end - begin) >= 200);
+       assertTrue("Assert delay (" + (end - begin) + ")", (end - begin) >= 200);
        
        ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
        assertNotNull("Check cs availability - 3", ref_cs);
@@ -80,7 +82,7 @@ public class DelayTest extends OSGiTestCase {
        
        CheckService cs = (CheckService) context.getService(ref_cs);
        assertTrue("Check invocation", cs.check());
-       
+              
        // Stop the provider.
        provider.stop();
        ref_cs = Utils.getServiceReferenceByName(context, CheckService.class.getName(), un);
@@ -105,6 +107,7 @@ public class DelayTest extends OSGiTestCase {
        under.dispose();
    }
    
+
    public void testTimeout() {
        String prov = "provider";
        ComponentInstance provider = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov);
@@ -142,6 +145,7 @@ public class DelayTest extends OSGiTestCase {
        fail("Timeout expected");
    }
    
+
    public void testTimeoutWithProxy() {
        String prov = "provider";
        ComponentInstance provider = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov);
@@ -178,7 +182,8 @@ public class DelayTest extends OSGiTestCase {
        
        fail("Timeout expected");
    }
-   
+
+
    public void testDelayTimeout() {
        String prov = "provider";
        ComponentInstance provider = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov);
@@ -217,7 +222,7 @@ public class DelayTest extends OSGiTestCase {
        under.stop();
        under.dispose();
    }
-   
+
    public void testDelayTimeoutWithProxy() {
        String prov = "provider";
        ComponentInstance provider = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov);
@@ -256,7 +261,7 @@ public class DelayTest extends OSGiTestCase {
        under.stop();
        under.dispose();
    }
-   
+
    public void testSetTimeout() {
        String prov = "provider";
        ComponentInstance provider = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov);
@@ -293,7 +298,8 @@ public class DelayTest extends OSGiTestCase {
        
        fail("Timeout expected");
    }
-   
+
+
    public void testSetTimeoutWithProxy() {
        String prov = "provider";
        ComponentInstance provider = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov);
@@ -330,7 +336,7 @@ public class DelayTest extends OSGiTestCase {
        
        fail("Timeout expected");
    }
-   
+
    public void testDelayOnMultipleDependency() {
        String prov = "provider";
        ComponentInstance provider1 = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov);
@@ -379,7 +385,8 @@ public class DelayTest extends OSGiTestCase {
        under.stop();
        under.dispose();
    }
-   
+
+
    public void testDelayOnCollectionDependency() {
        String prov = "provider";
        ComponentInstance provider1 = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov);
@@ -428,7 +435,8 @@ public class DelayTest extends OSGiTestCase {
        under.stop();
        under.dispose();
    }
-   
+
+
    public void testDelayOnProxiedCollectionDependency() {
        String prov = "provider";
        ComponentInstance provider1 = Utils.getComponentInstanceByName(context, "TEMPORAL-FooProvider", prov);
