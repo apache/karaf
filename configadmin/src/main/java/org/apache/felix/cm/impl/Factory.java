@@ -32,8 +32,6 @@ import org.osgi.service.cm.ConfigurationAdmin;
 /**
  * The <code>Factory</code> class is used to manage mappings between factory
  * PIDs the configuration PID belonging to it.
- *
- * @author fmeschbe
  */
 class Factory
 {

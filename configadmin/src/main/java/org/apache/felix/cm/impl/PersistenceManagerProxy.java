@@ -28,8 +28,6 @@ import org.apache.felix.cm.PersistenceManager;
 
 /**
  * The <code>PersistenceManagerProxy</code> TODO
- *
- * @author fmeschbe
  */
 class PersistenceManagerProxy implements PersistenceManager
 {

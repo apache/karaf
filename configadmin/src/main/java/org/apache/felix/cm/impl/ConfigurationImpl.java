@@ -30,10 +30,13 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.log.LogService;
 
+
 /**
--* The <code>ConfigurationImpl</code> is the implementation of the Configuration * Admin Service Specification <i>Configuration object</i> (section 104.4).
- *
- * @author fmeschbe
+ * The <code>ConfigurationImpl</code> is the backend implementation of the
+ * Configuration Admin Service Specification <i>Configuration object</i>
+ * (section 104.4). Instances of this class are shared by multiple instances of
+ * the {@link ConfigurationAdapter} class, whose instances are actually returned
+ * to clients.
  */
 class ConfigurationImpl
 {

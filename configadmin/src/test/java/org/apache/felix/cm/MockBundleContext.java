@@ -40,8 +40,6 @@ import org.osgi.framework.ServiceRegistration;
  * value is specified.
  * <p>
  * Extensions may overwrite methods as see fit.
- *
- * @author fmeschbe
  */
 public class MockBundleContext implements BundleContext
 {

@@ -27,8 +27,6 @@ import org.osgi.service.log.LogService;
 /**
  * The <code>UpdateThread</code> is the thread used to update managed services
  * and managed service factories as well as to send configuration events.
- *
- * @author fmeschbe
  */
 public class UpdateThread extends Thread
 {

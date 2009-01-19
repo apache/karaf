@@ -61,8 +61,6 @@ import org.osgi.util.tracker.ServiceTracker;
  * this property is not set the <code>config</code> directory in the current
  * working directory as specified in the <code>user.dir</code> system property
  * is used.
- *
- * @author fmeschbe
  */
 public class ConfigurationManager implements BundleActivator, BundleListener
 {

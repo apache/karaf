@@ -33,8 +33,6 @@ import junit.framework.TestCase;
 
 /**
  * The <code>FilePersistenceManagerTest</code> TODO
- *
- * @author fmeschbe
  */
 public class FilePersistenceManagerTest extends TestCase
 {

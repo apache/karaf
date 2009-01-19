@@ -36,8 +36,6 @@ import java.util.Vector;
  * <code>java.util.Dictionary</code> which conforms to the requirements laid
  * out by the Configuration Admin Service Specification requiring the property
  * names to keep case but to ignore case when accessing the properties.
- * 
- * @author fmeschbe
  */
 class CaseInsensitiveDictionary extends Dictionary
 {

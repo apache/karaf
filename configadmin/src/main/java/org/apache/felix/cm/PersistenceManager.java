@@ -47,8 +47,6 @@ import java.util.Enumeration;
  * highest rank value - the <code>service.ranking</code> service property - is
  * used. If no pesistence manager service has been registered, the platfrom
  * file system based implementation is used.
- *
- * @author fmeschbe
  */
 public interface PersistenceManager
 {

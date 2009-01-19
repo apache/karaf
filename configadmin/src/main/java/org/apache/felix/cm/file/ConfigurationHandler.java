@@ -58,8 +58,6 @@ import java.util.Map;
  *  type = // 1-char type code .
  *  stringsimple = // quoted string representation of the value .
  * </pre>
- * 
- * @author fmeschbe
  */
 public class ConfigurationHandler
 {

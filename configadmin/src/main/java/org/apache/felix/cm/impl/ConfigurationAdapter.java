@@ -26,10 +26,10 @@ import org.osgi.service.cm.Configuration;
 
 
 /**
- * The <code>ConfigurationAdapter</code> TODO
- *
- * @author fmeschbe
- * @version $Rev:616219 $, $Date$
+ * The <code>ConfigurationAdapter</code> is just an adapter to the internal
+ * configuration object. Instances of this class are returned as Configuration
+ * objects to the client, where each caller gets a fresh instance of this
+ * class while internal Configuration objects are shared.
  */
 public class ConfigurationAdapter implements Configuration
 {

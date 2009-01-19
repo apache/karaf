@@ -33,8 +33,6 @@ import org.osgi.service.cm.ConfigurationPermission;
  * configuration manager. Instances of this class are created on-demand for
  * each bundle trying to get hold of the <code>ConfigurationAdmin</code>
  * service.
- *
- * @author fmeschbe
  */
 public class ConfigurationAdminImpl implements ConfigurationAdmin
 {

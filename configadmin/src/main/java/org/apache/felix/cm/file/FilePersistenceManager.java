@@ -95,8 +95,6 @@ import org.osgi.framework.Constants;
  * <li>Finally the <code>Iterator</code> returned by {@link #getDictionaries()}
  * is implemented such that any temporary configuration file is just ignored.</li>
  * </ul>
- *
- * @author fmeschbe
  */
 public class FilePersistenceManager implements PersistenceManager
 {
@@ -543,8 +541,6 @@ public class FilePersistenceManager implements PersistenceManager
      * <p>
      * This enumeration loads configuration lazily with a look ahead of one
      * dictionary.
-     *
-     * @author fmeschbe
      */
     private class DictionaryEnumeration implements Enumeration
     {

@@ -29,8 +29,6 @@ import org.osgi.framework.ServiceRegistration;
  * registered as the <code>ConfigurationAdmin</code> service responsible to
  * create the real <code>ConfiguratAdmin</code> instances returend to client
  * bundles. Each bundle gets a separate instance.
- *
- * @author fmeschbe
  */
 class ConfigurationAdminFactory implements ServiceFactory
 {

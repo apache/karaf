@@ -27,8 +27,6 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * The <code>RankingComparator</code> TODO
- *
- * @author fmeschbe
  */
 public class RankingComparator implements Comparator
 {
