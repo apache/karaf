@@ -228,7 +228,7 @@ public class ServiceRegistry
         Object svcObj = null;
 
         // Get the service registration.
-        ServiceRegistrationImpl reg = ((ServiceReferenceImpl) ref).getServiceRegistration();
+        ServiceRegistrationImpl reg = ((ServiceRegistrationImpl.ServiceReferenceImpl) ref).getServiceRegistration();
 
         synchronized (this)
         {
@@ -337,7 +337,7 @@ public class ServiceRegistry
     public boolean ungetService(Bundle bundle, ServiceReference ref)
     {
         UsageCount usage = null;
-        ServiceRegistrationImpl reg = ((ServiceReferenceImpl) ref).getServiceRegistration();
+        ServiceRegistrationImpl reg = ((ServiceRegistrationImpl.ServiceReferenceImpl) ref).getServiceRegistration();
 
         synchronized (this)
         {
@@ -402,7 +402,7 @@ public class ServiceRegistry
             if (usage.m_count == 0)
             {
                 // Remove reference from usages array.
-                ((ServiceReferenceImpl) ref)
+                ((ServiceRegistrationImpl.ServiceReferenceImpl) ref)
                     .getServiceRegistration().ungetService(bundle, usage.m_svcObj);
                 usage.m_svcObj = null;
             }

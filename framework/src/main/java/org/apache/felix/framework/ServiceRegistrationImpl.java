@@ -24,6 +24,8 @@ import java.util.*;
 
 import org.apache.felix.framework.util.StringMap;
 import org.apache.felix.framework.util.Util;
+import org.apache.felix.moduleloader.IModule;
+import org.apache.felix.moduleloader.IWire;
 import org.osgi.framework.*;
 
 class ServiceRegistrationImpl implements ServiceRegistration
@@ -67,7 +69,7 @@ class ServiceRegistrationImpl implements ServiceRegistration
         // Since all reference to this service are supposed to
         // be equal, we use the hashcode of this reference for
         // a references to this service in ServiceReference.
-        m_ref = new ServiceReferenceImpl(this, m_bundle);
+        m_ref = new ServiceReferenceImpl();
     }
 
     protected synchronized boolean isValid()
@@ -316,6 +318,168 @@ class ServiceRegistrationImpl implements ServiceRegistration
                 ungetFactoryUnchecked(m_bundle, m_svcObj);
             }
             return null;
+        }
+    }
+    
+    class ServiceReferenceImpl implements ServiceReference
+    {
+        private ServiceReferenceImpl() {}
+    
+        ServiceRegistrationImpl getServiceRegistration()
+        {
+            return ServiceRegistrationImpl.this;
+        }
+
+        public Object getProperty(String s)
+        {
+            return ServiceRegistrationImpl.this.getProperty(s);
+        }
+
+        public String[] getPropertyKeys()
+        {
+            return ServiceRegistrationImpl.this.getPropertyKeys();
+        }
+
+        public Bundle getBundle()
+        {
+            // The spec says that this should return null if
+            // the service is unregistered.
+            return (isValid()) ? m_bundle : null;
+        }
+
+        public Bundle[] getUsingBundles()
+        {
+            return ServiceRegistrationImpl.this.getUsingBundles();
+        }
+
+        public String toString()
+        {
+            String[] ocs = (String[]) getProperty("objectClass");
+            String oc = "[";
+            for(int i = 0; i < ocs.length; i++)
+            {
+                oc = oc + ocs[i];
+                if (i < ocs.length - 1)
+                    oc = oc + ", ";
+            }
+            oc = oc + "]";
+            return oc;
+        }
+
+        public boolean isAssignableTo(Bundle requester, String className)
+        {
+            // Always return true if the requester is the same as the provider.
+            if (requester == m_bundle)
+            {
+                return true;
+            }
+
+            // Boolean flag.
+            boolean allow = true;
+            // Get the package.
+            String pkgName =
+                Util.getClassPackage(className);
+            IModule requesterModule = ((BundleImpl) requester).getCurrentModule();
+            // Get package wiring from service requester.
+            IWire requesterWire = Util.getWire(requesterModule, pkgName);
+
+            // There are three situations that may occur here:
+            //   1. The requester does not have a wire for the package.
+            //   2. The provider does not have a wire for the package.
+            //   3. Both have a wire for the package.
+            // For case 1, we do not filter the service reference since we
+            // assume that the bundle is using reflection or that it won't
+            // use that class at all since it does not import it. For
+            // case 2, we have to try to load the class from the class
+            // loader of the service object and then compare the class
+            // loaders to determine if we should filter the service
+            // refernce. In case 3, we simply compare the exporting
+            // modules from the package wiring to determine if we need
+            // to filter the service reference.
+
+            // Case 1: Always include service reference.
+            if (requesterWire == null)
+            {
+                return allow;
+            }
+
+            // Get package wiring from service provider.
+            IModule providerModule = ((BundleImpl) m_bundle).getCurrentModule();
+            IWire providerWire = Util.getWire(providerModule, pkgName);
+            
+            // Case 2: Only include service reference if the service
+            // object uses the same class as the requester.
+            if (providerWire == null)
+            {
+                // If the provider is not the exporter of the requester's package,
+                // then try to use the service registration to see if the requester's
+                // class is accessible.
+                if (!((BundleImpl) m_bundle).hasModule(requesterWire.getExporter()))
+                {
+                    try
+                    {
+                        // Load the class from the requesting bundle.
+                        Class requestClass = requesterModule.getClassByDelegation(className);
+                        // Get the service registration and ask it to check
+                        // if the service object is assignable to the requesting
+                        // bundle's class.
+                        allow = getServiceRegistration().isClassAccessible(requestClass);
+                    }
+                    catch (Exception ex)
+                    {
+                        // This should not happen, filter to be safe.
+                        allow = false;
+                    }
+                }
+                else
+                {
+                    // O.k. the provider is the exporter of the requester's package, now check
+                    // if the requester is wired to the latest version of the provider, if so
+                    // then allow else don't (the provider has been updated but not refreshed).
+                    allow = providerModule == requesterWire.getExporter();
+                }
+            }
+            // Case 3: Include service reference if the wires have the
+            // same source module.
+            else
+            {
+                allow = providerWire.getExporter().equals(requesterWire.getExporter());
+            }
+
+            return allow;
+        }
+
+        public int compareTo(Object reference)
+        {
+            ServiceReference other = (ServiceReference) reference;
+
+            Long id = (Long) getProperty(Constants.SERVICE_ID);
+            Long otherId = (Long) other.getProperty(Constants.SERVICE_ID);
+
+            if (id.equals(otherId))
+            {
+                return 0; // same service
+            }
+
+            Integer rank = (Integer) getProperty(Constants.SERVICE_RANKING);
+            Integer otherRank = (Integer) other.getProperty(Constants.SERVICE_RANKING);
+
+            // If no rank, then spec says it defaults to zero.
+            rank = (rank == null) ? new Integer(0) : rank;
+            otherRank = (otherRank == null) ? new Integer(0) : otherRank;
+
+            // Sort by rank in ascending order.
+            if (rank.compareTo(otherRank) < 0)
+            {
+                return -1; // lower rank
+            }
+            else if (rank.compareTo(otherRank) > 0)
+            {
+                return 1; // higher rank
+            }
+
+            // If ranks are equal, then sort by service id in descending order.
+            return (id.compareTo(otherId) < 0) ? 1 : -1;
         }
     }
 }
