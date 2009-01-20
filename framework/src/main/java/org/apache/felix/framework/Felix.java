@@ -91,7 +91,7 @@ public class Felix extends BundleImpl implements Framework
     private final Object[] m_uninstalledBundlesLock_Priority3 = new Object[0];
 
     // Framework's active start level.
-    private int m_activeStartLevel = FelixConstants.FRAMEWORK_INACTIVE_STARTLEVEL;
+    private volatile int m_activeStartLevel = FelixConstants.FRAMEWORK_INACTIVE_STARTLEVEL;
 
     // Local file system cache.
     private BundleCache m_cache = null;
@@ -796,7 +796,7 @@ ex.printStackTrace();
      * implements functionality for the Start Level service.
      * @return The active start level of the framework.
     **/
-    synchronized int getActiveStartLevel()
+    int getActiveStartLevel()
     {
         return m_activeStartLevel;
     }
@@ -839,14 +839,10 @@ ex.printStackTrace();
         // for two requests to change the framework's start level to interfere
         // with each other.
 
-        boolean lowering;
-        synchronized (this)
-        {
-            // Determine if we are lowering or raising the
-            // active start level, then udpate active start level.
-            lowering = (requestedLevel < getActiveStartLevel());
-            m_activeStartLevel = requestedLevel;
-        }
+        // Determine if we are lowering or raising the
+        // active start level, then udpate active start level.
+        boolean lowering = (requestedLevel < getActiveStartLevel());
+        m_activeStartLevel = requestedLevel;
 
         synchronized (m_installedBundleLock_Priority2)
         {
