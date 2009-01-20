@@ -44,6 +44,7 @@
         <module>client</module>
         <module>management</module>
         <module>assembly</module>
+        <module>demos</module>
     </modules>
 
     <scm>
@@ -74,13 +75,15 @@
         <commons.vfs.version>1.0_1</commons.vfs.version>
         <depends.maven.plugin.version>1.0</depends.maven.plugin.version>
         <easymock.version>2.4</easymock.version>
-        <felix.configadmin.version>1.0.0</felix.configadmin.version>
-        <felix.main.version>1.2.1</felix.main.version>
-        <felix.plugin.version>1.4.1</felix.plugin.version>
-        <felix.framework.version>1.0.4</felix.framework.version>
+        <felix.configadmin.version>1.0.4</felix.configadmin.version>
+        <!--<felix.main.version>1.5.0-SNAPSHOT</felix.main.version>-->
+        <felix.main.version>1.4.1</felix.main.version>
+        <felix.plugin.version>1.4.3</felix.plugin.version>
+        <!--<felix.framework.version>1.5.0-SNAPSHOT</felix.framework.version>-->
+        <felix.framework.version>1.4.1</felix.framework.version>
         <felix.osgi.version>1.2.0</felix.osgi.version>
         <felix.compendium.version>1.2.0</felix.compendium.version>
-        <felix.bundlerepository.version>1.0.2</felix.bundlerepository.version>
+        <felix.bundlerepository.version>1.2.1</felix.bundlerepository.version>
         <felix.prefs.version>1.0.2</felix.prefs.version>
         <geronimo.annotation.version>1.1.1</geronimo.annotation.version>
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
@@ -201,6 +204,11 @@
                 <artifactId>org.apache.servicemix.kernel.management</artifactId>
                 <version>${pom.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.kernel</groupId>
+                <artifactId>org.apache.servicemix.kernel.demos</artifactId>
+                <version>${pom.version}</version>
+            </dependency> 
             <dependency>
                 <groupId>org.apache.servicemix.kernel.gshell</groupId>
                 <artifactId>org.apache.servicemix.kernel.gshell.core</artifactId>

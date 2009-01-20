@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.apache.servicemix.kernel</groupId>
+    <artifactId>org.apache.servicemix.kernel.demos</artifactId>
+    <version>1.1.0-SNAPSHOT</version>
+  </parent>
+
+  <groupId>org.apache.servicemix.kernel.demos</groupId>
+  <artifactId>smx4web</artifactId>
+  <packaging>war</packaging>
+  <name>Apache ServiceMix Kernel :: Demos :: smx4web</name>
+  
+  <properties>
+    <jetty.port>8080</jetty.port>
+    <jetty.version>6.1.12rc1</jetty.version>
+    <servicemix.kernel.version>1.1.0-SNAPSHOT</servicemix.kernel.version>
+    <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.servicemix.kernel</groupId>
+      <artifactId>org.apache.servicemix.kernel.main</artifactId>
+      <version>${servicemix.kernel.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.servicemix.kernel</groupId>
+        <artifactId>apache-servicemix-kernel</artifactId>
+        <version>${servicemix.kernel.version}</version>
+        <type>zip</type>
+        <exclusions>
+            <exclusion>
+                <groupId>org.apache.servicemix.kernel</groupId>
+                <artifactId>org.apache.servicemix.kernel.client</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.servicemix.kernel</groupId>
+                <artifactId>org.apache.servicemix.kernel.filemonitor</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.servicemix.kernel</groupId>
+                <artifactId>org.apache.servicemix.kernel.spring</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.servicemix.kernel.gshell</groupId>
+                <artifactId>org.apache.servicemix.kernel.gshell.core</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.servicemix.kernel.gshell</groupId>
+                <artifactId>org.apache.servicemix.kernel.gshell.admin</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.servicemix.kernel.gshell</groupId>
+                <artifactId>org.apache.servicemix.kernel.gshell.obr</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.servicemix.kernel.gshell</groupId>
+                <artifactId>org.apache.servicemix.kernel.gshell.osgi</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.servicemix.kernel.gshell</groupId>
+                <artifactId>org.apache.servicemix.kernel.gshell.log</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.servicemix.kernel.gshell</groupId>
+                <artifactId>org.apache.servicemix.kernel.gshell.features</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.servicemix.kernel.gshell</groupId>
+                <artifactId>org.apache.servicemix.kernel.gshell.config</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.servicemix.kernel.gshell</groupId>
+                <artifactId>org.apache.servicemix.kernel.gshell.packages</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.servicemix.kernel.jaas</groupId>
+                <artifactId>org.apache.servicemix.kernel.jaas.config</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.servicemix.kernel.jaas</groupId>
+                <artifactId>org.apache.servicemix.kernel.jaas.keystore</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.springframework.osgi</groupId>
+                <artifactId>spring-osgi-extender</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.springframework.osgi</groupId>
+                <artifactId>spring-osgi-core</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.springframework.osgi</groupId>
+                <artifactId>spring-osgi-io</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-beans</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-core</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-aop</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.bundlerepository</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.configadmin</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.prefs</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.osgi.compendium</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.mina</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.asm</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.cglib</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.ant</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.ops4j.pax.logging</groupId>
+                <artifactId>pax-logging-service</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.ops4j.pax.logging</groupId>
+                <artifactId>pax-logging-api</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.ops4j.pax.url</groupId>
+                <artifactId>pax-url-mvn</artifactId>
+            </exclusion>
+        </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-servlet_2.5_spec</artifactId>
+      <version>${geronimo.servlet.version}</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <configuration>
+          <warSourceDirectory>src/main/webapp/</warSourceDirectory>
+          <webResources>
+            <resource>
+              <directory>target/kernel</directory>
+            </resource>
+          </webResources>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>maven-jetty-plugin</artifactId>
+        <version>${jetty.version}</version>
+        <configuration>
+          <connectors>
+            <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
+              <port>${jetty.port}</port>
+              <maxIdleTime>60000</maxIdleTime>
+            </connector>
+          </connectors>
+          <systemProperties>
+            <!-- enable easy connection to JConsole -->
+            <systemProperty>
+              <name>com.sun.management.jmxremote</name>
+              <value></value>
+            </systemProperty>
+          </systemProperties>
+          <scanIntervalSeconds>10</scanIntervalSeconds>
+          <webAppSourceDirectory>${project.build.directory}/${project.build.finalName}</webAppSourceDirectory>
+        </configuration>
+      </plugin>
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>2.0</version>
+          <executions>
+              <execution>
+                  <id>unpack-unix</id>
+                  <phase>generate-resources</phase>
+                  <goals>
+                      <goal>unpack</goal>
+                  </goals>
+                  <configuration>
+                      <artifactItems>
+                          <artifactItem>
+                              <groupId>org.apache.servicemix.kernel</groupId>
+                              <artifactId>apache-servicemix-kernel</artifactId>
+                              <version>${servicemix.kernel.version}</version>
+                              <type>zip</type>
+                              <outputDirectory>${project.build.directory}/kernel/WEB-INF</outputDirectory>
+                              <excludes>**/lib/*,**/*.txt,**/bin/*,**/lib,**/bin</excludes>
+                          </artifactItem>
+                      </artifactItems>
+                  </configuration>
+              </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

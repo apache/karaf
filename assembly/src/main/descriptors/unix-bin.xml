@@ -50,6 +50,16 @@
             <lineEnding>unix</lineEnding>
         </fileSet>
 
+        <!-- Copy over the examples -->
+        <fileSet>
+            <directory>../demos</directory>
+            <outputDirectory>/demos/</outputDirectory>
+            <lineEnding>unix</lineEnding>
+            <excludes>
+                <exclude>**/target/**</exclude>
+            </excludes>
+        </fileSet>
+
         <!-- Copy over files that should not get the line endings converted -->
         <fileSet>
             <directory>src/main/distribution/binary</directory>
