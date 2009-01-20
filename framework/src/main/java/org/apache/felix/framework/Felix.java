@@ -3946,10 +3946,12 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
     {
         synchronized (m_bundleLock)
         {
-            // Wait if any thread has the global lock, unless the current thread
+            // Wait if the desired bundle is already locked by someone else
+            // or if any thread has the global lock, unless the current thread
             // holds the global lock.
-            while ((m_globalLockCount > 0)
-                && !m_lockingThreadMap.containsKey(Thread.currentThread()))
+            while (!bundle.isLockable() ||
+                ((m_globalLockCount > 0)
+                && !m_lockingThreadMap.containsKey(Thread.currentThread())))
             {
                 try
                 {
@@ -3970,18 +3972,7 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
             counter[0]++;
             m_lockingThreadMap.put(Thread.currentThread(), counter);
 
-            // Wait until the bundle lock is available, then lock it.
-            while (!bundle.isLockable())
-            {
-                try
-                {
-                    m_bundleLock.wait();
-                }
-                catch (InterruptedException ex)
-                {
-                    // Ignore and just keep waiting.
-                }
-            }
+            // Acquire the bundle lock.
             bundle.lock();
         }
     }
