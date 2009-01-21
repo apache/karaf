@@ -101,7 +101,7 @@ public class ModuleImpl implements IModule
 
         // Read the boot delegation property and parse it.
 // TODO: REFACTOR - This used to be per framework, now it is per module
-//       which doesn't really make sense.
+//       which doesn't really make sense. Maybe pass in the arrays.
         String s = (m_configMap == null)
             ? null
             : (String) m_configMap.get(Constants.FRAMEWORK_BOOTDELEGATION);

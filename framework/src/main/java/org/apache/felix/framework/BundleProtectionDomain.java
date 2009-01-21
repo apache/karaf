@@ -30,6 +30,7 @@ public class BundleProtectionDomain extends ProtectionDomain
     private final Felix m_felix;
     private final BundleImpl m_bundle;
 
+    // TODO: SECURITY - This should probably take a module, not a bundle.
     BundleProtectionDomain(Felix felix, BundleImpl bundle)
         throws MalformedURLException
     {

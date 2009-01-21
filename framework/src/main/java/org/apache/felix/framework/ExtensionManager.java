@@ -122,8 +122,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
     // classloader.
     private ExtensionManager()
     {
-// TODO: REFACTOR - Karl, is this correct?
-        m_module = new ExtensionManagerModule();
+        m_module = null;
         m_extensions = new ArrayList();
         m_names = new HashSet();
         m_sourceToExtensions = new HashMap();

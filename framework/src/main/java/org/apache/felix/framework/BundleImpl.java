@@ -34,7 +34,7 @@ import org.osgi.framework.*;
 
 class BundleImpl implements Bundle
 {
-    private final Felix m_feli;
+    private final Felix m_felix;
 
     private final BundleArchive m_archive;
     private IModule[] m_modules = new IModule[0];
@@ -62,44 +62,35 @@ class BundleImpl implements Bundle
 
     BundleImpl(Felix felix, BundleArchive archive) throws Exception
     {
-        m_feli = felix;
+        m_felix = felix;
         m_archive = archive;
         m_state = Bundle.INSTALLED;
         m_stale = false;
         m_activator = null;
         m_context = null;
 
-        // TODO: REFACTOR - Null check is a hHack due to system bundle.
+        // TODO: REFACTOR - Null check is a hack due to system bundle.
         if (m_archive != null)
         {
-            createAndAddModule();
+            addModule(createModule());
         }
     }
 
     // TODO: REFACTOR - We need this method so the system bundle can override it.
     Felix getFramework()
     {
-        return m_feli;
+        return m_felix;
     }
 
-    void reset() throws Exception
+    synchronized void reset() throws Exception
     {
         m_modules = new IModule[0];
-        createAndAddModule();
+        addModule(createModule());
         m_state = Bundle.INSTALLED;
         m_stale = false;
         m_cachedHeaders.clear();
         m_cachedHeadersTimestamp = 0;
         m_removalPending = false;
-    }
-
-    // TODO: REFACTOR - This method is sort of a hack. Since the system bundle
-    //       doesn't have an archive, it can override this method to return its
-    //       manifest.
-    Map getCurrentManifestFromArchive() throws Exception
-    {
-        return m_archive.getRevision(
-            m_archive.getRevisionCount() - 1).getManifestHeader();
     }
 
     synchronized BundleActivator getActivator()
@@ -884,7 +875,7 @@ class BundleImpl implements Bundle
     {
         // This operation will increase the revision count for the bundle.
         m_archive.revise(location, is);
-        createAndAddModule();
+        addModule(createModule());
     }
 
     synchronized boolean rollbackRevise() throws Exception
@@ -892,7 +883,7 @@ class BundleImpl implements Bundle
         return m_archive.rollbackRevise();
     }
 
-    // TODO: REFACTOR - Hack for the system bundle.
+    // TODO: REFACTOR - This module is only visible for the system bundle.
     synchronized void addModule(IModule module)
     {
         ((ModuleImpl) module).setBundle(this);
@@ -903,11 +894,12 @@ class BundleImpl implements Bundle
         m_modules = dest;
     }
 
-    synchronized void createAndAddModule() throws Exception
+    private synchronized IModule createModule() throws Exception
     {
         // Get and parse the manifest from the most recent revision to
         // create an associated module for it.
-        Map headerMap = getCurrentManifestFromArchive();
+        Map headerMap = m_archive.getRevision(
+            m_archive.getRevisionCount() - 1).getManifestHeader();
         ManifestParser mp = new ManifestParser(
             getFramework().getLogger(), getFramework().getConfig(), headerMap);
 
@@ -947,8 +939,6 @@ class BundleImpl implements Bundle
             Long.toString(getBundleId()) + "." + Integer.toString(revision),
             m_archive.getRevision(revision).getContent(),
             headerMap,
-// TODO: REFACTOR - Karl, does this work correctly if the module is updated to
-//       an extension bundle or vice versa?
             (ExtensionManager.isExtensionBundle(headerMap)) ? null : mp.getCapabilities(),
             mp.getRequirements(),
             mp.getDynamicRequirements(),
@@ -984,12 +974,7 @@ class BundleImpl implements Bundle
             }
         }
 
-        ((ModuleImpl) module).setBundle(this);
-
-        IModule[] dest = new IModule[m_modules.length + 1];
-        System.arraycopy(m_modules, 0, dest, 0, m_modules.length);
-        dest[m_modules.length] = module;
-        m_modules = dest;
+        return module;
     }
 
     void setProtectionDomain(ProtectionDomain pd)

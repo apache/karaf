@@ -357,14 +357,6 @@ public class Felix extends BundleImpl implements Framework
         return this;
     }
 
-    // TODO: REFACTOR - This method is sort of a hack. Since the system bundle
-    //       doesn't have an archive, it can override this method to return its
-    //       manifest.
-    Map getCurrentManifestFromArchive() throws Exception
-    {
-        return getCurrentModule().getHeaders();
-    }
-
     public long getBundleId()
     {
         return 0;
@@ -2061,7 +2053,6 @@ ex.printStackTrace();
 
                 addSecurity(bundle);
 
-// TODO: REFACTOR - Karl, why do we do this check so late?
                 if (!bundle.isExtension())
                 {
                     Object sm = System.getSecurityManager();
@@ -3081,13 +3072,15 @@ ex.printStackTrace();
         return true;
     }
 
+    // TODO: SECURITY - This should probably take a module, not a bundle.
     void addSecurity(final BundleImpl bundle) throws Exception
     {
         if (m_securityProvider != null)
         {
             m_securityProvider.checkBundle(bundle);
         }
-        bundle.setProtectionDomain(new BundleProtectionDomain(this, bundle));
+        bundle.getCurrentModule().setSecurityContext(
+            new BundleProtectionDomain(this, bundle));
     }
 
     private BundleActivator createBundleActivator(BundleImpl impl)
@@ -3139,6 +3132,7 @@ ex.printStackTrace();
             // would be incorrect, because this is a refresh operation
             // and should not trigger bundle REMOVE events.
             IModule[] modules = bundle.getModules();
+// TODO: REFACTOR - It kind of sucks we need to remember this steps.
             for (int i = 0; i < modules.length; i++)
             {
                 m_resolverState.removeModule(modules[i]);
@@ -3803,7 +3797,7 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
                     // Add new module to resolver state.
 // TODO: REFACTOR - It is not clean to have to remember these steps.
                     m_resolverState.addModule(oldImpl.getCurrentModule());
-// TODO: REFACTOR - Seems like we don't need to repeat this.
+// TODO: REFACTOR - Could we set this when we add the module to the bundle?.
                     addSecurity(m_bundle);
                     fireBundleEvent(BundleEvent.UNRESOLVED, m_bundle);
                 }
