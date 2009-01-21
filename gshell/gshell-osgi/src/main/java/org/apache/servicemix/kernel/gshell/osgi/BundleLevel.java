@@ -19,6 +19,7 @@ package org.apache.servicemix.kernel.gshell.osgi;
 import org.apache.geronimo.gshell.clp.Argument;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.startlevel.StartLevel;
 
 public class BundleLevel extends BundleCommand {
 
@@ -27,27 +28,46 @@ public class BundleLevel extends BundleCommand {
 
     protected void doExecute(Bundle bundle) throws Exception {
         // Get package admin service.
-        ServiceReference ref = getBundleContext().getServiceReference(org.osgi.service.startlevel.StartLevel.class.getName());
+        ServiceReference ref = getBundleContext().getServiceReference(StartLevel.class.getName());
         if (ref == null) {
             io.out.println("StartLevel service is unavailable.");
             return;
         }
-        try {
-            org.osgi.service.startlevel.StartLevel sl = (org.osgi.service.startlevel.StartLevel) getBundleContext().getService(ref);
-            if (sl == null) {
-                io.out.println("StartLevel service is unavailable.");
-                return;
-            }
-
-            if (level == null) {
-                io.out.println("Level " + sl.getBundleStartLevel(bundle));
-            }
-            else {
-                sl.setBundleStartLevel(bundle, level);
-            }
+        StartLevel sl = getService(StartLevel.class, ref);
+        if (sl == null) {
+            io.out.println("StartLevel service is unavailable.");
+            return;
         }
-        finally {
-            getBundleContext().ungetService(ref);
+
+        if (level == null) {
+            io.out.println("Level " + sl.getBundleStartLevel(bundle));
+        }
+        else if ((level < 50) && sl.getBundleStartLevel(bundle) > 50){
+            for (;;) {
+                StringBuffer sb = new StringBuffer();
+                io.err.println("You are about to designate bundle as a system bundle.  Do you want to continue (yes/no): ");
+                io.err.flush();
+                for (;;) {
+                    int c = io.in.read();
+                    if (c < 0) {
+                        return;
+                    }
+                    io.err.println((char) c);
+                    if (c == '\r' || c == '\n') {
+                        break;
+                    }
+                    sb.append((char) c);
+                }
+                String str = sb.toString();
+                if ("yes".equals(str)) {
+                    sl.setBundleStartLevel(bundle, level);
+                    break;
+                } else if ("no".equals(str)) {
+                    break;
+                }
+            }
+        } else {
+            sl.setBundleStartLevel(bundle, level);
         }
     }
 

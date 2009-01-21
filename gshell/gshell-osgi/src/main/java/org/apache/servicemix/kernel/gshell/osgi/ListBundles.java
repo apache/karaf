@@ -53,81 +53,74 @@ public class ListBundles extends OsgiCommandSupport {
         if (sl == null) {
             io.out.println("StartLevel service is unavailable.");
         }
-        try {
-            Bundle[] bundles = getBundleContext().getBundles();
-            if (bundles != null) {
-                // Display active start level.
-                if (sl != null) {
-                    io.out.println("START LEVEL " + sl.getStartLevel());
-                }
+        Bundle[] bundles = getBundleContext().getBundles();
+        if (bundles != null) {
+            // Display active start level.
+            if (sl != null) {
+                io.out.println("START LEVEL " + sl.getStartLevel());
+            }
 
-                // Print column headers.
-                String msg = " Name";
+            // Print column headers.
+            String msg = " Name";
+            if (showLoc) {
+               msg = " Location";
+            }
+            else if (showSymbolic) {
+               msg = " Symbolic name";
+            }
+            else if (showUpdate) {
+               msg = " Update location";
+            }
+            String level = (sl == null) ? "" : "  Level ";
+            io.out.println("   ID   State         Spring   " + level + msg);
+            for (int i = 0; i < bundles.length; i++) {
+                // Get the bundle name or location.
+                String name = (String) bundles[i].getHeaders().get(Constants.BUNDLE_NAME);
+                // If there is no name, then default to symbolic name.
+                name = (name == null) ? bundles[i].getSymbolicName() : name;
+                // If there is no symbolic name, resort to location.
+                name = (name == null) ? bundles[i].getLocation() : name;
+
+                // Overwrite the default value is the user specifically
+                // requested to display one or the other.
                 if (showLoc) {
-                   msg = " Location";
+                    name = bundles[i].getLocation();
                 }
                 else if (showSymbolic) {
-                   msg = " Symbolic name";
+                    name = bundles[i].getSymbolicName();
+                    name = (name == null) ? "<no symbolic name>" : name;
                 }
                 else if (showUpdate) {
-                   msg = " Update location";
-                }
-                String level = (sl == null) ? "" : "  Level ";
-                io.out.println("   ID   State         Spring   " + level + msg);
-                for (int i = 0; i < bundles.length; i++) {
-                    // Get the bundle name or location.
-                    String name = (String) bundles[i].getHeaders().get(Constants.BUNDLE_NAME);
-                    // If there is no name, then default to symbolic name.
-                    name = (name == null) ? bundles[i].getSymbolicName() : name;
-                    // If there is no symbolic name, resort to location.
+                    name = (String) bundles[i].getHeaders().get(Constants.BUNDLE_UPDATELOCATION);
                     name = (name == null) ? bundles[i].getLocation() : name;
-
-                    // Overwrite the default value is the user specifically
-                    // requested to display one or the other.
-                    if (showLoc) {
-                        name = bundles[i].getLocation();
-                    }
-                    else if (showSymbolic) {
-                        name = bundles[i].getSymbolicName();
-                        name = (name == null) ? "<no symbolic name>" : name;
-                    }
-                    else if (showUpdate) {
-                        name = (String) bundles[i].getHeaders().get(Constants.BUNDLE_UPDATELOCATION);
-                        name = (name == null) ? bundles[i].getLocation() : name;
-                    }
-                    // Show bundle version if not showing location.
-                    String version = (String) bundles[i].getHeaders().get(Constants.BUNDLE_VERSION);
-                    name = (!showLoc && !showUpdate && (version != null)) ? name + " (" + version + ")" : name;
-                    long l = bundles[i].getBundleId();
-                    String id = String.valueOf(l);
-                    if (sl == null) {
-                        level = "1";
-                    }
-                    else {
-                        level = String.valueOf(sl.getBundleStartLevel(bundles[i]));
-                    }
-                    while (level.length() < 5) {
-                        level = " " + level;
-                    }
-                    while (id.length() < 4) {
-                        id = " " + id;
-                    }
-                    io.out.println("[" + id + "] ["
-                        + getStateString(bundles[i])
-                        + "] [" + getSpringStateString(bundles[i])
-                        + "] [" + level + "] " + name);
                 }
+                // Show bundle version if not showing location.
+                String version = (String) bundles[i].getHeaders().get(Constants.BUNDLE_VERSION);
+                name = (!showLoc && !showUpdate && (version != null)) ? name + " (" + version + ")" : name;
+                long l = bundles[i].getBundleId();
+                String id = String.valueOf(l);
+                if (sl == null) {
+                    level = "1";
+                }
+                else {
+                    level = String.valueOf(sl.getBundleStartLevel(bundles[i]));
+                }
+                while (level.length() < 5) {
+                    level = " " + level;
+                }
+                while (id.length() < 4) {
+                    id = " " + id;
+                }
+                io.out.println("[" + id + "] ["
+                    + getStateString(bundles[i])
+                    + "] [" + getSpringStateString(bundles[i])
+                    + "] [" + level + "] " + name);
             }
-            else {
-                io.out.println("There are no installed bundles.");
-            }
-            return Result.SUCCESS;
         }
-        finally {
-            if (ref != null) {
-                getBundleContext().ungetService(ref);
-            }
+        else {
+            io.out.println("There are no installed bundles.");
         }
+        return Result.SUCCESS;
     }
 
     public String getStateString(Bundle bundle)
