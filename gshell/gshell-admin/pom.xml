@@ -99,6 +99,32 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.3</version>
+                <executions>
+                    <execution>
+                    <id>copy-resources</id>
+                    <!-- here the phase you need -->
+                    <phase>compile</phase>
+                    <goals>
+                        <goal>copy-resources</goal>
+                    </goals>
+                    <configuration>
+                            <outputDirectory>${basedir}/target/classes</outputDirectory>
+                            <resources>          
+                                <resource>
+                                    <directory>../../${config.location}</directory>
+                                        <includes>
+                                            <include>config.properties</include>
+                                        </includes>
+                                </resource>
+                            </resources>              
+                        </configuration>            
+                    </execution>
+                </executions>
+            </plugin>            
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <configuration>

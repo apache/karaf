@@ -53,9 +53,9 @@ public class SmxKernelPlatform implements OsgiPlatform {
 
     private static final Log log = LogFactory.getLog(FelixPlatform.class);
 
-    private static final String FELIX_CONF_FILE = "felix.config.properties";
+    private static final String FELIX_CONF_FILE = "config.properties";
 
-    private static final String FELIX_CONFIG_PROPERTY = "felix.config.properties";
+    private static final String FELIX_CONFIG_PROPERTY = "config.properties";
 
     private static final String FELIX_PROFILE_DIR_PROPERTY = "felix.cache.profiledir";
 

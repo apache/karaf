@@ -91,6 +91,13 @@
 
     <files>
         <file>
+            <source>${basedir}/../etc/config.properties</source>          
+            <outputDirectory>/etc/</outputDirectory>
+            <destName>config.properties</destName>
+            <fileMode>0644</fileMode>
+            <lineEnding>unix</lineEnding>
+        </file>
+        <file>
             <source>${basedir}/target/maven-shared-archive-resources/META-INF/LICENSE</source>
             <outputDirectory>/</outputDirectory>
             <destName>LICENSE.txt</destName>
