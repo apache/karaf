@@ -1334,139 +1334,139 @@ ex.printStackTrace();
 
         try
         {
-            _startBundle(bundle, record);
+            // The spec doesn't say whether it is possible to start an extension
+            // We just do nothing
+            if (bundle.isExtension())
+            {
+                return;
+            }
+
+            // As per the OSGi spec, fragment bundles can not be started and must
+            // throw a BundleException when there is an attempt to start one.
+            if (Util.isFragment(bundle.getCurrentModule()))
+            {
+                throw new BundleException("Fragment bundles can not be started.");
+            }
+
+            // Set and save the bundle's persistent state to active
+            // if we are supposed to record state change.
+            if (record)
+            {
+                bundle.setPersistentStateActive();
+            }
+
+            // Check to see if the bundle's start level is greater than the
+            // the framework's active start level.
+            if (bundle.getStartLevel(getInitialBundleStartLevel()) > getActiveStartLevel())
+            {
+                // Throw an exception for transient starts.
+                if (!record)
+                {
+                    throw new BundleException(
+                        "Cannot start bundle " + bundle + " because its start level is "
+                        + bundle.getStartLevel(getInitialBundleStartLevel())
+                        + ", which is greater than the framework's start level of "
+                        + getActiveStartLevel() + ".");
+                }
+                // Ignore persistent starts.
+                return;
+            }
+
+            switch (bundle.getState())
+            {
+                case Bundle.UNINSTALLED:
+                    throw new IllegalStateException("Cannot start an uninstalled bundle.");
+                case Bundle.STARTING:
+                case Bundle.STOPPING:
+                    throw new BundleException(
+                        "Bundle " + bundle
+                        + " cannot be started, since it is either starting or stopping.");
+                case Bundle.ACTIVE:
+                    return;
+                case Bundle.INSTALLED:
+                    _resolveBundle(bundle);
+                    // No break.
+                case Bundle.RESOLVED:
+                    bundle.setState(Bundle.STARTING);
+                    fireBundleEvent(BundleEvent.STARTING, bundle);
+                    break;
+            }
+
+            try
+            {
+                // Set the bundle's context.
+                bundle.setBundleContext(new BundleContextImpl(m_logger, this, bundle));
+
+                // Set the bundle's activator.
+                bundle.setActivator(createBundleActivator(bundle));
+
+                // Activate the bundle if it has an activator.
+                if (bundle.getActivator() != null)
+                {
+                    m_secureAction.startActivator(
+                        bundle.getActivator(), bundle.getBundleContext());
+                }
+
+                bundle.setState(Bundle.ACTIVE);
+
+                // We still need to fire the STARTED event, but we will do
+                // it later so we can release the bundle lock.
+            }
+            catch (Throwable th)
+            {
+                // If there was an error starting the bundle,
+                // then reset its state to RESOLVED.
+                bundle.setState(Bundle.RESOLVED);
+
+                // Clean up the bundle context.
+                ((BundleContextImpl) bundle.getBundleContext()).invalidate();
+                bundle.setBundleContext(null);
+
+                // Clean up the bundle activator
+                bundle.setActivator(null);
+
+                // Unregister any services offered by this bundle.
+                m_registry.unregisterServices(bundle);
+
+                // Release any services being used by this bundle.
+                m_registry.ungetServices(bundle);
+
+                // Remove any listeners registered by this bundle.
+                m_dispatcher.removeListeners(bundle);
+
+                // The spec says to expect BundleException or
+                // SecurityException, so rethrow these exceptions.
+                if (th instanceof BundleException)
+                {
+                    throw (BundleException) th;
+                }
+                else if (th instanceof SecurityException)
+                {
+                    throw (SecurityException) th;
+                }
+                else if ((System.getSecurityManager() != null) &&
+                    (th instanceof java.security.PrivilegedActionException))
+                {
+                    th = ((java.security.PrivilegedActionException) th).getException();
+                }
+
+                // Rethrow all other exceptions as a BundleException.
+                throw new BundleException("Activator start error in bundle " + bundle + ".", th);
+            }
         }
         finally
         {
             // Release bundle lock.
             releaseBundleLock(bundle);
         }
+
+        // If there was no exception, then we should fire the STARTED event
+        // here without holding the lock.
+        fireBundleEvent(BundleEvent.STARTED, bundle);
     }
 
-    private void _startBundle(BundleImpl bundle, boolean record)
-        throws BundleException
-    {
-        // The spec doesn't say whether it is possible to start an extension
-        // We just do nothing
-        if (bundle.isExtension())
-        {
-            return;
-        }
-
-        // As per the OSGi spec, fragment bundles can not be started and must
-        // throw a BundleException when there is an attempt to start one.
-        if (Util.isFragment(bundle.getCurrentModule()))
-        {
-            throw new BundleException("Fragment bundles can not be started.");
-        }
-
-        // Set and save the bundle's persistent state to active
-        // if we are supposed to record state change.
-        if (record)
-        {
-            bundle.setPersistentStateActive();
-        }
-
-        // Check to see if the bundle's start level is greater than the
-        // the framework's active start level.
-        if (bundle.getStartLevel(getInitialBundleStartLevel()) > getActiveStartLevel())
-        {
-            // Throw an exception for transient starts.
-            if (!record)
-            {
-                throw new BundleException(
-                    "Cannot start bundle " + bundle + " because its start level is "
-                    + bundle.getStartLevel(getInitialBundleStartLevel())
-                    + ", which is greater than the framework's start level of "
-                    + getActiveStartLevel() + ".");
-            }
-            // Ignore persistent starts.
-            return;
-        }
-
-        switch (bundle.getState())
-        {
-            case Bundle.UNINSTALLED:
-                throw new IllegalStateException("Cannot start an uninstalled bundle.");
-            case Bundle.STARTING:
-            case Bundle.STOPPING:
-                throw new BundleException(
-                    "Bundle " + bundle + " cannot be started, since it is either starting or stopping.");
-            case Bundle.ACTIVE:
-                return;
-            case Bundle.INSTALLED:
-                _resolveBundle(bundle);
-                // No break.
-            case Bundle.RESOLVED:
-                bundle.setState(Bundle.STARTING);
-                fireBundleEvent(BundleEvent.STARTING, bundle);
-                break;
-        }
-
-        try
-        {
-            // Set the bundle's context.
-            bundle.setBundleContext(new BundleContextImpl(m_logger, this, bundle));
-
-            // Set the bundle's activator.
-            bundle.setActivator(createBundleActivator(bundle));
-
-            // Activate the bundle if it has an activator.
-            if (bundle.getActivator() != null)
-            {
-                m_secureAction.startActivator(
-                    bundle.getActivator(), bundle.getBundleContext());
-            }
-
-            // TODO: CONCURRENCY - Reconsider firing event outside of the
-            // bundle lock.
-            bundle.setState(Bundle.ACTIVE);
-            fireBundleEvent(BundleEvent.STARTED, bundle);
-        }
-        catch (Throwable th)
-        {
-            // If there was an error starting the bundle,
-            // then reset its state to RESOLVED.
-            bundle.setState(Bundle.RESOLVED);
-
-            // Clean up the bundle context.
-            ((BundleContextImpl) bundle.getBundleContext()).invalidate();
-            bundle.setBundleContext(null);
-
-            // Clean up the bundle activator
-            bundle.setActivator(null);
-
-            // Unregister any services offered by this bundle.
-            m_registry.unregisterServices(bundle);
-
-            // Release any services being used by this bundle.
-            m_registry.ungetServices(bundle);
-
-            // Remove any listeners registered by this bundle.
-            m_dispatcher.removeListeners(bundle);
-
-            // The spec says to expect BundleException or
-            // SecurityException, so rethrow these exceptions.
-            if (th instanceof BundleException)
-            {
-                throw (BundleException) th;
-            }
-            else if (th instanceof SecurityException)
-            {
-                throw (SecurityException) th;
-            }
-            else if ((System.getSecurityManager() != null) &&
-                (th instanceof java.security.PrivilegedActionException))
-            {
-                th = ((java.security.PrivilegedActionException) th).getException();
-            }
-
-            // Rethrow all other exceptions as a BundleException.
-            throw new BundleException("Activator start error in bundle " + bundle + ".", th);
-        }
-    }
-
-// TODO: REFACTOR - Need to make sure all callers of this method acquire global lock.
+// TODO: REFACTOR - Need to make sure all callers of this method acquire global lock,
+//       further get rid of the _ method, since we should not resolve without the global lock.
     protected void _resolveBundle(BundleImpl bundle)
         throws BundleException
     {
@@ -1552,23 +1552,8 @@ ex.printStackTrace();
         // Acquire bundle lock.
         acquireBundleLock(bundle);
 
-        try
-        {
-            _updateBundle(bundle, is);
-        }
-        finally
-        {
-            // Release bundle lock.
-            releaseBundleLock(bundle);
-        }
-    }
-
-    void _updateBundle(BundleImpl bundle, InputStream is)
-        throws BundleException
-    {
-        // We guarantee to close the input stream, so put it in a
-        // finally clause.
-
+        // We must release the lock and close the input stream, so do both
+        // in a finally block.
         try
         {
             // Variable to indicate whether bundle is active or not.
@@ -1726,18 +1711,22 @@ ex.printStackTrace();
         }
         finally
         {
+            // Close the input stream.
             try
             {
                 if (is != null) is.close();
             }
-            catch (IOException ex)
+            catch (Exception ex)
             {
                 m_logger.log(Logger.LOG_ERROR, "Unable to close input stream.", ex);
             }
+
+            // Release bundle lock.
+            releaseBundleLock(bundle);
         }
     }
 
-    protected void stopBundle(BundleImpl bundle, boolean record)
+    void stopBundle(BundleImpl bundle, boolean record)
         throws BundleException
     {
         // Acquire bundle lock.
@@ -1745,207 +1734,214 @@ ex.printStackTrace();
 
         try
         {
-            _stopBundle(bundle, record);
+            Throwable rethrow = null;
+
+            // Set the bundle's persistent state to inactive if necessary.
+            if (record)
+            {
+                bundle.setPersistentStateInactive();
+            }
+
+            // As per the OSGi spec, fragment bundles can not be stopped and must
+            // throw a BundleException when there is an attempt to stop one.
+            if (Util.isFragment(bundle.getCurrentModule()))
+            {
+                throw new BundleException("Fragment bundles can not be stopped: " + bundle);
+            }
+
+            switch (bundle.getState())
+            {
+                case Bundle.UNINSTALLED:
+                    throw new IllegalStateException("Cannot stop an uninstalled bundle.");
+                case Bundle.STARTING:
+                case Bundle.STOPPING:
+                    throw new BundleException(
+                        "Stopping a starting or stopping bundle is currently not supported.");
+                case Bundle.INSTALLED:
+                case Bundle.RESOLVED:
+                    return;
+                case Bundle.ACTIVE:
+                    // Set bundle state..
+                    bundle.setState(Bundle.STOPPING);
+                    fireBundleEvent(BundleEvent.STOPPING, bundle);
+                    break;
+            }
+
+            try
+            {
+                if (bundle.getActivator() != null)
+                {
+                    m_secureAction.stopActivator(bundle.getActivator(), bundle.getBundleContext());
+                }
+            }
+            catch (Throwable th)
+            {
+                m_logger.log(Logger.LOG_ERROR, "Error stopping bundle.", th);
+                rethrow = th;
+            }
+
+            // Do not clean up after the system bundle since it will
+            // clean up after itself.
+            if (bundle.getBundleId() != 0)
+            {
+                // Clean up the bundle context.
+                ((BundleContextImpl) bundle.getBundleContext()).invalidate();
+                bundle.setBundleContext(null);
+
+                // Clean up the bundle activator.
+                bundle.setActivator(null);
+
+                // Unregister any services offered by this bundle.
+                m_registry.unregisterServices(bundle);
+
+                // Release any services being used by this bundle.
+                m_registry.ungetServices(bundle);
+
+                // The spec says that we must remove all event
+                // listeners for a bundle when it is stopped.
+                m_dispatcher.removeListeners(bundle);
+
+                bundle.setState(Bundle.RESOLVED);
+
+                // We still need to fire the STOPPED event, but we will do
+                // it later so we can release the bundle lock.
+            }
+
+            // Throw activator error if there was one.
+            if (rethrow != null)
+            {
+                // The spec says to expect BundleException or
+                // SecurityException, so rethrow these exceptions.
+                if (rethrow instanceof BundleException)
+                {
+                    throw (BundleException) rethrow;
+                }
+                else if (rethrow instanceof SecurityException)
+                {
+                    throw (SecurityException) rethrow;
+                }
+                else if ((System.getSecurityManager() != null) &&
+                    (rethrow instanceof java.security.PrivilegedActionException))
+                {
+                    rethrow = ((java.security.PrivilegedActionException) rethrow).getException();
+                }
+
+                // Rethrow all other exceptions as a BundleException.
+                throw new BundleException(
+                    "Activator stop error in bundle " + bundle + ".", rethrow);
+            }
         }
         finally
         {
             // Always release bundle lock.
             releaseBundleLock(bundle);
         }
+
+        // If there was no exception, then we should fire the STOPPED event
+        // here without holding the lock.
+        fireBundleEvent(BundleEvent.STOPPED, bundle);
     }
 
-    private void _stopBundle(BundleImpl bundle, boolean record)
-        throws BundleException
+    void uninstallBundle(BundleImpl bundle) throws BundleException
     {
-        Throwable rethrow = null;
+        // Acquire bundle lock.
+        acquireBundleLock(bundle);
 
-        // Set the bundle's persistent state to inactive if necessary.
-        if (record)
+        try
         {
-            bundle.setPersistentStateInactive();
-        }
+            if (bundle.getState() == Bundle.UNINSTALLED)
+            {
+                throw new IllegalStateException("Bundle " + bundle + " is uninstalled.");
+            }
 
-        // As per the OSGi spec, fragment bundles can not be stopped and must
-        // throw a BundleException when there is an attempt to stop one.
-        if (Util.isFragment(bundle.getCurrentModule()))
-        {
-            throw new BundleException("Fragment bundles can not be stopped: " + bundle);
-        }
-
-        switch (bundle.getState())
-        {
-            case Bundle.UNINSTALLED:
-                throw new IllegalStateException("Cannot stop an uninstalled bundle.");
-            case Bundle.STARTING:
-            case Bundle.STOPPING:
-                throw new BundleException("Stopping a bundle that is starting or stopping is currently not supported.");
-            case Bundle.INSTALLED:
-            case Bundle.RESOLVED:
+            // Extension Bundles are not removed until the framework is shutdown
+            if (bundle.isExtension())
+            {
+                bundle.setPersistentStateUninstalled();
+                bundle.setState(Bundle.INSTALLED);
                 return;
-            case Bundle.ACTIVE:
-                // Set bundle state..
-                bundle.setState(Bundle.STOPPING);
-                fireBundleEvent(BundleEvent.STOPPING, bundle);
-                break;
-        }
-
-        try
-        {
-            if (bundle.getActivator() != null)
-            {
-                m_secureAction.stopActivator(bundle.getActivator(), bundle.getBundleContext());
-            }
-        }
-        catch (Throwable th)
-        {
-            m_logger.log(Logger.LOG_ERROR, "Error stopping bundle.", th);
-            rethrow = th;
-        }
-
-        // Do not clean up after the system bundle since it will
-        // clean up after itself.
-        if (bundle.getBundleId() != 0)
-        {
-            // Clean up the bundle context.
-            ((BundleContextImpl) bundle.getBundleContext()).invalidate();
-            bundle.setBundleContext(null);
-
-            // Clean up the bundle activator.
-            bundle.setActivator(null);
-
-            // Unregister any services offered by this bundle.
-            m_registry.unregisterServices(bundle);
-
-            // Release any services being used by this bundle.
-            m_registry.ungetServices(bundle);
-
-            // The spec says that we must remove all event
-            // listeners for a bundle when it is stopped.
-            m_dispatcher.removeListeners(bundle);
-
-            bundle.setState(Bundle.RESOLVED);
-            fireBundleEvent(BundleEvent.STOPPED, bundle);
-        }
-
-        // Throw activator error if there was one.
-        if (rethrow != null)
-        {
-            // The spec says to expect BundleException or
-            // SecurityException, so rethrow these exceptions.
-            if (rethrow instanceof BundleException)
-            {
-                throw (BundleException) rethrow;
-            }
-            else if (rethrow instanceof SecurityException)
-            {
-                throw (SecurityException) rethrow;
-            }
-            else if ((System.getSecurityManager() != null) &&
-                (rethrow instanceof java.security.PrivilegedActionException))
-            {
-                rethrow = ((java.security.PrivilegedActionException) rethrow).getException();
             }
 
-            // Rethrow all other exceptions as a BundleException.
-            throw new BundleException(
-                "Activator stop error in bundle " + bundle + ".", rethrow);
-        }
-    }
-
-    protected void uninstallBundle(BundleImpl bundle) throws BundleException
-    {
-        // Acquire bundle lock.
-        acquireBundleLock(bundle);
-
-        try
-        {
-            _uninstallBundle(bundle);
-        }
-        finally
-        {
-            // Always release bundle lock.
-            releaseBundleLock(bundle);
-        }
-    }
-
-    private void _uninstallBundle(BundleImpl bundle) throws BundleException
-    {
-        if (bundle.getState() == Bundle.UNINSTALLED)
-        {
-            throw new IllegalStateException("Bundle " + bundle + " is uninstalled.");
-        }
-
-        // Extension Bundles are not removed until the framework is shutdown
-        if (bundle.isExtension())
-        {
-            bundle.setPersistentStateUninstalled();
-            bundle.setState(Bundle.INSTALLED);
-            return;
-        }
-
-        // The spec says that uninstall should always succeed, so
-        // catch an exception here if stop() doesn't succeed and
-        // rethrow it at the end.
-        if (bundle.getState() == Bundle.ACTIVE)
-        {
-            try
+            // The spec says that uninstall should always succeed, so
+            // catch an exception here if stop() doesn't succeed and
+            // rethrow it at the end.
+            if (bundle.getState() == Bundle.ACTIVE)
             {
-                stopBundle(bundle, true);
+                try
+                {
+                    stopBundle(bundle, true);
+                }
+                catch (BundleException ex)
+                {
+                    fireFrameworkEvent(FrameworkEvent.ERROR, bundle, ex);
+                }
             }
-            catch (BundleException ex)
+
+            // Remove the bundle from the installed map.
+            BundleImpl target = null;
+            synchronized (m_installedBundleLock_Priority2)
             {
-                fireFrameworkEvent(FrameworkEvent.ERROR, bundle, ex);
+                target = (BundleImpl) m_installedBundleMap.remove(bundle.getLocation());
+                m_installedBundleIndex.remove(new Long(target.getBundleId()));
             }
-        }
 
-        // Remove the bundle from the installed map.
-        BundleImpl target = null;
-        synchronized (m_installedBundleLock_Priority2)
-        {
-            target = (BundleImpl) m_installedBundleMap.remove(bundle.getLocation());
-            m_installedBundleIndex.remove(new Long(target.getBundleId()));
-        }
-
-        // Finally, put the uninstalled bundle into the
-        // uninstalled list for subsequent refreshing.
-        if (target != null)
-        {
-            // Set the bundle's persistent state to uninstalled.
-            bundle.setPersistentStateUninstalled();
-
-            // Mark the bundle as removal pending.
-            bundle.setRemovalPending(true);
-
-            // Put bundle in uninstalled bundle array.
-            rememberUninstalledBundle(bundle);
-        }
-        else
-        {
-            m_logger.log(
-                Logger.LOG_ERROR, "Unable to remove bundle from installed map!");
-        }
-
-        // Set state to uninstalled.
-        bundle.setState(Bundle.UNINSTALLED);
-        bundle.setLastModified(System.currentTimeMillis());
-
-        // Fire bundle event.
-        fireBundleEvent(BundleEvent.UNINSTALLED, bundle);
-
-        // If the bundle is not used by anyone, then garbage
-        // collect it now.
-        if (!bundle.isUsed())
-        {
-            try
+            // Finally, put the uninstalled bundle into the
+            // uninstalled list for subsequent refreshing.
+            if (target != null)
             {
-                _refreshPackages(new BundleImpl[] { bundle });
+                // Set the bundle's persistent state to uninstalled.
+                bundle.setPersistentStateUninstalled();
+
+                // Mark the bundle as removal pending.
+                bundle.setRemovalPending(true);
+
+                // Put bundle in uninstalled bundle array.
+                rememberUninstalledBundle(bundle);
             }
-            catch (Exception ex)
+            else
             {
                 m_logger.log(
-                    Logger.LOG_ERROR,
-                    "Unable to immediately garbage collect the bundle.", ex);
+                    Logger.LOG_ERROR, "Unable to remove bundle from installed map!");
             }
+
+            // Set state to uninstalled.
+            bundle.setState(Bundle.UNINSTALLED);
+            bundle.setLastModified(System.currentTimeMillis());
+        }
+        finally
+        {
+            // Always release bundle lock.
+            releaseBundleLock(bundle);
+        }
+
+        // Fire UNINSTALLED event without holding the lock.
+        fireBundleEvent(BundleEvent.UNINSTALLED, bundle);
+
+        // Acquire bundle lock again to check if we can auto-refresh.
+        acquireBundleLock(bundle);
+
+        try
+        {
+            // If the bundle is not used by anyone, then garbage
+            // collect it now.
+            if (!bundle.isUsed())
+            {
+                try
+                {
+                    _refreshPackages(new BundleImpl[] { bundle });
+                }
+                catch (Exception ex)
+                {
+                    m_logger.log(
+                        Logger.LOG_ERROR,
+                        "Unable to immediately garbage collect the bundle.", ex);
+                }
+            }
+        }
+        finally
+        {
+            // Always release bundle lock.
+            releaseBundleLock(bundle);
         }
     }
 
@@ -2951,6 +2947,7 @@ ex.printStackTrace();
         }
     }
 
+// REFACTOR - Get rid of _ method, since we should always acquire global lock to refresh.
     protected void _refreshPackages(BundleImpl[] bundles)
     {
         boolean restart = false;
