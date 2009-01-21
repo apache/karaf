@@ -41,11 +41,13 @@ import java.security.Provider;
 import org.apache.felix.framework.Felix;
 import org.apache.felix.framework.cache.BundleCache;
 import org.apache.felix.framework.util.StringMap;
+import org.apache.felix.framework.util.FelixConstants;
 import org.apache.servicemix.kernel.main.spi.MainService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.startlevel.StartLevel;
 
 /**
@@ -121,21 +123,12 @@ public class Main implements MainService, BundleActivator {
      */
     public static final String PROPERTY_LOCK_CLASS = "servicemix.lock.class";
 
+    public static final String PROPERTY_LOCK_DELAY = "servicemix.lock.delay";
+
+    public static final String PROPERTY_LOCK_LEVEL = "servicemix.lock.level";
+
     public static final String PROPERTY_LOCK_CLASS_DEFAULT = SimpleFileLock.class.getName();
 
-    public static final String PROPERTY_LOCK_URL = "servicemix.lock.jdbc.url";
- 
-    public static final String PROPERTY_LOCK_JDBC_DRIVER = "servicemix.lock.jdbc.driver";
-
-    public static final String PROPERTY_LOCK_JDBC_USER = "servicemix.lock.jdbc.user";
-
-    public static final String PROPERTY_LOCK_JDBC_PASSWORD = "servicemix.lock.jdbc.password";
-
-    public static final String PROPERTY_LOCK_JDBC_TABLE = "servicemix.lock.jdbc.table";
-
-    public static final String PROPERTY_LOCK_JDBC_CLUSTERNAME = "servicemix.lock.jdbc.clustername";
-
-    public static final String PROPERTY_LOCK_JDBC_TIMEOUT = "servicemix.lock.jdbc.timeout";
 
     private File servicemixHome;
     private File servicemixBase;
@@ -145,6 +138,9 @@ public class Main implements MainService, BundleActivator {
     private int exitCode;
     private Lock lock;
     private CountDownLatch shutdown = new CountDownLatch(1);
+    private int defaultStartLevel = 100;
+    private int lockStartLevel = 0;
+    private int lockDelay = 1000;
 
     public Main(String[] args) {
         this.args = args;
@@ -198,14 +194,19 @@ public class Main implements MainService, BundleActivator {
         activations.add(activator);
 
         try {
-            lock(m_configProps);
+            defaultStartLevel = Integer.parseInt(m_configProps.getProperty(FelixConstants.FRAMEWORK_STARTLEVEL_PROP));
+            lockStartLevel = Integer.parseInt(m_configProps.getProperty(PROPERTY_LOCK_LEVEL, Integer.toString(lockStartLevel)));
+            lockDelay = Integer.parseInt(m_configProps.getProperty(PROPERTY_LOCK_DELAY, Integer.toString(lockDelay)));
+            m_configProps.setProperty(FelixConstants.FRAMEWORK_STARTLEVEL_PROP, Integer.toString(lockStartLevel));
             // Start up the OSGI framework
             m_felix = new Felix(new StringMap(m_configProps, false), activations);
-            // Start lock monitor
-            int pollLock = 30000;
-            Thread lockMonitor = new LockMonitor(lock, m_felix, pollLock);
-            lockMonitor.start();
             m_felix.start();
+            // Start lock monitor
+            new Thread() {
+                public void run() {
+                    lock(m_configProps);
+                }
+            }.start();
         }
         catch (Exception ex) {
             setExitCode(-1);
@@ -1094,23 +1095,36 @@ public class Main implements MainService, BundleActivator {
         return servicemixBase;
     }
 
-    public void lock(Properties props) throws Exception {
-        if (Boolean.parseBoolean(props.getProperty(PROPERTY_USE_LOCK, "true"))) {
-            String clz = props.getProperty(PROPERTY_LOCK_CLASS, PROPERTY_LOCK_CLASS_DEFAULT);
-            lock = (Lock) Class.forName(clz).getConstructor(Properties.class).newInstance(props);
-            boolean lockLogged = false;
-            for (;;) {
-                if (lock.lock()) {
-                    if (lockLogged) {
-                        System.out.println("Lock acquired.");
+    public void lock(Properties props) {
+        try {
+            if (Boolean.parseBoolean(props.getProperty(PROPERTY_USE_LOCK, "true"))) {
+                String clz = props.getProperty(PROPERTY_LOCK_CLASS, PROPERTY_LOCK_CLASS_DEFAULT);
+                lock = (Lock) Class.forName(clz).getConstructor(Properties.class).newInstance(props);
+                boolean lockLogged = false;
+                for (;;) {
+                    if (lock.lock()) {
+                        if (lockLogged) {
+                            System.out.println("Lock acquired.");
+                        }
+                        setStartLevel(defaultStartLevel);
+                        for (;;) {
+                            if (!lock.isAlive()) {
+                                break;
+                            }
+                            Thread.sleep(lockDelay);
+                        }
+                        System.out.println("Lost the lock, stopping this instance ...");
+                        setStartLevel(lockStartLevel);
+                        break;
+                    } else if (!lockLogged) {
+                        System.out.println("Waiting for the lock ...");
+                        lockLogged = true;
                     }
-                    break;
-                } else if (!lockLogged) {
-                    System.out.println("Waiting for the lock ...");
-                    lockLogged = true;
+                    Thread.sleep(lockDelay);
                 }
-                Thread.sleep(1000);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -1119,4 +1133,12 @@ public class Main implements MainService, BundleActivator {
             lock.release();
         }
     }
+
+    protected void setStartLevel(int level) throws Exception {
+        BundleContext ctx = m_felix.getBundleContext();
+        ServiceReference[] refs = ctx.getServiceReferences(StartLevel.class.getName(), null);
+        StartLevel sl = (StartLevel) ctx.getService(refs[0]);
+        sl.setStartLevel(level);
+    }
+
 }

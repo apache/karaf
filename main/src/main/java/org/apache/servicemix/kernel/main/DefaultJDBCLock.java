@@ -34,13 +34,14 @@ import java.util.Properties;
  */
 public class DefaultJDBCLock implements Lock {
 
-    private static final String PROPERTY_LOCK_URL           = "servicemix.lock.jdbc.url";
-    private static final String PROPERTY_LOCK_JDBC_DRIVER   = "servicemix.lock.jdbc.driver";
-    private static final String PROPERTY_LOCK_JDBC_USER     = "servicemix.lock.jdbc.user";
-    private static final String PROPERTY_LOCK_JDBC_PASSWORD = "servicemix.lock.jdbc.password";
-    private static final String PROPERTY_LOCK_JDBC_TABLE    = "servicemix.lock.jdbc.table";
-    private static final String PROPERTY_LOCK_JDBC_CLUSTERNAME     = "servicemix.lock.jdbc.clustername";
-    private static final String PROPERTY_LOCK_JDBC_TIMEOUT  = "servicemix.lock.jdbc.timeout";
+    private static final String PROPERTY_LOCK_URL               = "servicemix.lock.jdbc.url";
+    private static final String PROPERTY_LOCK_JDBC_DRIVER       = "servicemix.lock.jdbc.driver";
+    private static final String PROPERTY_LOCK_JDBC_USER         = "servicemix.lock.jdbc.user";
+    private static final String PROPERTY_LOCK_JDBC_PASSWORD     = "servicemix.lock.jdbc.password";
+    private static final String PROPERTY_LOCK_JDBC_TABLE        = "servicemix.lock.jdbc.table";
+    private static final String PROPERTY_LOCK_JDBC_CLUSTERNAME  = "servicemix.lock.jdbc.clustername";
+    private static final String PROPERTY_LOCK_JDBC_TIMEOUT      = "servicemix.lock.jdbc.timeout";
+
     private final Statements statements;
     private Connection lockConnection;
     private String url;
