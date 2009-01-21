@@ -218,6 +218,14 @@
             <groupId>com.google.code.sshd</groupId>
             <artifactId>sshd</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>jmx</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.oracle.osgi</groupId>
+            <artifactId>jmx-impl</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <resources>

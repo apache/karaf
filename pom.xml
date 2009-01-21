@@ -103,6 +103,7 @@
         <spring.version>2.5.6</spring.version>
         <sshd.version>0.1</sshd.version>
         <woodstox.version>3.2.7_1</woodstox.version>
+        <osgi.jmx.version>1.0-SNAPSHOT</osgi.jmx.version>
     </properties>
 
     <repositories>
@@ -120,7 +121,7 @@
         </repository>
         <!-- Apache snapshots -->
         <repository>
-            <id>apache.snapshots</id>
+            <id>apache-snapshots</id>
             <name>Apache Snapshots Repository</name>
             <url>http://people.apache.org/repo/m2-snapshot-repository</url>
             <releases>
@@ -658,6 +659,16 @@
                 <groupId>com.google.code.sshd</groupId>
                 <artifactId>sshd</artifactId>
                 <version>${sshd.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>jmx</artifactId>
+                <version>${osgi.jmx.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.oracle.osgi</groupId>
+                <artifactId>jmx-impl</artifactId>
+                <version>${osgi.jmx.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

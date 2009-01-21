@@ -69,29 +69,9 @@
         <entry key="jmx.remote.authenticator" value-ref="jaasAuthenticator" />
     </util:map>
 
-    <!-- Simple authenticator -->
+    <!-- JAAS authenticator -->
     <bean id="jaasAuthenticator" class="org.apache.servicemix.management.JaasAuthenticator">
         <property name="realm" value="${jmxRealm}" />
-    </bean>
-
-    <!-- OSGI framework helper -->
-    <bean id="framework" class="org.apache.servicemix.management.osgi.OSGIFramework">
-    </bean>
-
-    <bean id="jmxAttributeSource" class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
-
-    <!-- will create management interface using annotation metadata -->
-    <bean id="assembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
-        <property name="attributeSource" ref="jmxAttributeSource"/>
-    </bean>
-
-    <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
-        <property name="beans">
-            <map>
-                <entry key="${frameworkName}" value-ref="framework"/>
-            </map>
-        </property>
-        <property name="assembler" ref="assembler"/>
     </bean>
 
     <!-- Property place holder -->
@@ -102,7 +82,6 @@
         <prop key="daemon">true</prop>
         <prop key="threaded">true</prop>
         <prop key="objectName">connector:name=rmi</prop>
-        <prop key="frameworkName">org.osgi:name=Framework</prop>
     </osgix:cm-properties>
 
     <ctx:property-placeholder properties-ref="cmProps" />
