@@ -41,10 +41,11 @@ import org.apache.geronimo.gshell.command.CommandContext;
 import org.apache.geronimo.gshell.io.IO;
 import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.servicemix.kernel.gshell.core.ServiceMixBranding;
 
 public class InfoAction implements CommandAction {
 
-    private Branding branding;
+    private ServiceMixBranding branding;
 
     private IO io;
 
@@ -52,7 +53,7 @@ public class InfoAction implements CommandAction {
     private NumberFormat fmtI = new DecimalFormat("###,###", new DecimalFormatSymbols(Locale.ENGLISH));
     private NumberFormat fmtD = new DecimalFormat("###,##0.000", new DecimalFormatSymbols(Locale.ENGLISH));
 
-    public InfoAction(Branding branding) {
+    public InfoAction(ServiceMixBranding branding) {
         this.branding = branding;
     }
 
@@ -73,7 +74,11 @@ public class InfoAction implements CommandAction {
         io.out.println("ServiceMix");
         printValue("ServiceMix home", maxNameLen, System.getProperty("servicemix.home"));
         printValue("ServiceMix base", maxNameLen, System.getProperty("servicemix.base"));
-        printValue("ServiceMix version", maxNameLen, branding.getParent().getVersion());
+        printValue("ServiceMix kernel version", maxNameLen, branding.getParent().getVersion());
+
+        if (branding.getApplicationName() != null && branding.getApplicationVersion() != null) {
+            printValue(branding.getApplicationName() + " version", maxNameLen, branding.getApplicationVersion());
+        }
         io.out.println();
 
         io.out.println("JVM");

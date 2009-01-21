@@ -19,6 +19,8 @@ package org.apache.servicemix.kernel.gshell.core;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.URL;
+import java.util.Properties;
 
 import org.apache.geronimo.gshell.application.Application;
 import org.apache.geronimo.gshell.application.ClassPath;
@@ -27,20 +29,45 @@ import org.apache.geronimo.gshell.command.Variables;
 import org.apache.geronimo.gshell.application.model.ApplicationModel;
 import org.apache.geronimo.gshell.artifact.Artifact;
 
-public class ApplicationImpl implements Application {
+import org.springframework.beans.factory.InitializingBean; 
+
+public class ApplicationImpl implements Application, InitializingBean  {
+
+	private static final String EMBEDDED_PROPS = "org/apache/servicemix/kernel/version/embedded.properties";
+    private static final String SERVICEMIX_VERSION ="org/apache/servicemix/kernel/gshell/core/servicemix-version.properties";
+    private static final String VERSION_PROPERTY = "version";
 
     private String id;
     private IO io;
     private ApplicationModel model;
     private Variables variables;
     private InetAddress localHost;
-    private File homeDir;
+    private File homeDir;         
+    private URL embeddedResource = null; 
 
     public ApplicationImpl() throws Exception {
         this.localHost = InetAddress.getLocalHost();
-        this.homeDir = detectHomeDir();
+        this.homeDir = detectHomeDir();    
+    }           
+     
+    public void afterPropertiesSet() throws Exception {      	         	    	
+        Properties props = new Properties();
+        props.load(getClass().getClassLoader().getResourceAsStream(SERVICEMIX_VERSION));
+        String kernelVersion = props.getProperty(VERSION_PROPERTY);
+        this.model.setVersion(kernelVersion);
+    	ServiceMixBranding smxBranding = (ServiceMixBranding) this.model.getBranding();
+        smxBranding.setVersion(kernelVersion);
+        
+     	if (this.getClass().getClassLoader().getResource(EMBEDDED_PROPS) != null) {                    
+            embeddedResource = this.getClass().getClassLoader().getResource(EMBEDDED_PROPS);
+            smxBranding.setEmbeddedResource(embeddedResource);
+        }
     }
-
+    
+    public URL getEmbeddedResource() {
+    	return embeddedResource;
+    }        
+        
     public String getId() {
         return id;
     }
@@ -113,4 +140,5 @@ public class ApplicationImpl implements Application {
 
         return dir;
     }
+
 }

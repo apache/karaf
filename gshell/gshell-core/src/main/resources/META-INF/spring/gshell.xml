@@ -46,8 +46,6 @@
         <property name="io" ref="io"/>
         <property name="model">
             <bean class="org.apache.geronimo.gshell.application.model.ApplicationModel">
-                <!-- TODO: fix version -->
-                <property name="version" value="1.1.0"/>
                 <property name="branding" ref="branding"/>
             </bean>
         </property>
