@@ -103,7 +103,7 @@
         <spring.version>2.5.6</spring.version>
         <sshd.version>0.1</sshd.version>
         <woodstox.version>3.2.7_1</woodstox.version>
-        <osgi.jmx.version>1.0-SNAPSHOT</osgi.jmx.version>
+        <osgi.jmx.version>1.0-r6125-patched</osgi.jmx.version>
     </properties>
 
     <repositories>
