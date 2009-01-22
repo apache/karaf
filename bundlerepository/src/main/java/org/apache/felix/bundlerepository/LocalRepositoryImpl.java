@@ -19,20 +19,32 @@
 package org.apache.felix.bundlerepository;
 
 import java.net.URL;
-import java.util.*;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
-import org.osgi.framework.*;
+import org.osgi.framework.AllServiceListener;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.service.obr.Repository;
 import org.osgi.service.obr.Resource;
 
-public class LocalRepositoryImpl implements Repository
+public class LocalRepositoryImpl implements Repository, SynchronousBundleListener, AllServiceListener
 {
-    private BundleContext m_context = null;
+    private final BundleContext m_context;
     private final Logger m_logger;
-    private long m_currentTimeStamp = 0;
     private long m_snapshotTimeStamp = 0;
-    private List m_localResourceList = new ArrayList();
-    private BundleListener m_bundleListener = null;
+    private Map m_localResourceList = new HashMap();
 
     public LocalRepositoryImpl(BundleContext context, Logger logger)
     {
@@ -41,9 +53,77 @@ public class LocalRepositoryImpl implements Repository
         initialize();
     }
 
+    public void bundleChanged(BundleEvent event)
+    {
+        if (event.getType() == BundleEvent.INSTALLED)
+        {
+            synchronized (this)
+            {
+                addBundle(event.getBundle(), m_logger);
+                m_snapshotTimeStamp = System.currentTimeMillis();
+            }
+        }
+        else if (event.getType() == BundleEvent.UNINSTALLED)
+        {
+            synchronized (this)
+            {
+                removeBundle(event.getBundle(), m_logger);
+                m_snapshotTimeStamp = System.currentTimeMillis();
+            }
+        }
+    }
+
+    public void serviceChanged(ServiceEvent event)
+    {
+        Bundle bundle = event.getServiceReference().getBundle();
+        if (bundle.getState() == Bundle.ACTIVE && event.getType() != ServiceEvent.MODIFIED)
+        {
+            synchronized (this)
+            {
+                removeBundle(bundle, m_logger);
+                addBundle(bundle, m_logger);
+                m_snapshotTimeStamp = System.currentTimeMillis();
+            }
+        }
+    }
+
+    private void addBundle(Bundle bundle, Logger logger)
+    {
+        
+        /*
+         * Concurrency note: This method MUST be called in a context which
+         * is synchronized on this instance to prevent data structure
+         * corruption.
+         */
+        
+        try
+        {
+            m_localResourceList.put(new Long(bundle.getBundleId()), new LocalResourceImpl(bundle, m_logger));
+        }
+        catch (InvalidSyntaxException ex)
+        {
+            // This should never happen since we are generating filters,
+            // but ignore the resource if it does occur.
+            m_logger.log(Logger.LOG_WARNING, ex.getMessage(), ex);
+        }
+    }
+    
+    private void removeBundle(Bundle bundle, Logger logger)
+    {
+        
+        /*
+         * Concurrency note: This method MUST be called in a context which
+         * is synchronized on this instance to prevent data structure
+         * corruption.
+         */
+        
+        m_localResourceList.remove(new Long(bundle.getBundleId()));
+    }
+    
     public void dispose()
     {
-        m_context.removeBundleListener(m_bundleListener);
+        m_context.removeBundleListener(this);
+        m_context.removeServiceListener(this);
     }
 
     public URL getURL()
@@ -61,30 +141,16 @@ public class LocalRepositoryImpl implements Repository
         return m_snapshotTimeStamp;
     }
 
-    public synchronized long getCurrentTimeStamp()
-    {
-        return m_currentTimeStamp;
-    }
-
     public synchronized Resource[] getResources()
     {
-        return (Resource[]) m_localResourceList.toArray(new Resource[m_localResourceList.size()]);
+        return (Resource[]) m_localResourceList.values().toArray(new Resource[m_localResourceList.size()]);
     }
 
     private void initialize()
     {
-        // Create a bundle listener to list for events that
-        // change the state of the framework.
-        m_bundleListener = new SynchronousBundleListener() {
-            public void bundleChanged(BundleEvent event)
-            {
-                synchronized (LocalRepositoryImpl.this)
-                {
-                    m_currentTimeStamp = new Date().getTime();
-                }
-            }
-        };
-        m_context.addBundleListener(m_bundleListener);
+        // register for bundle and service events now
+        m_context.addBundleListener(this);
+        m_context.addServiceListener(this);
 
         // Generate the resource list from the set of installed bundles.
         // Lock so we can ensure that no bundle events arrive before we 
@@ -92,24 +158,15 @@ public class LocalRepositoryImpl implements Repository
         Bundle[] bundles = null;
         synchronized (this)
         {
-            m_snapshotTimeStamp = m_currentTimeStamp = new Date().getTime();
+            // Create a local resource object for each bundle, which will
+            // convert the bundle headers to the appropriate resource metadata.
             bundles = m_context.getBundles();
-        }
+            for (int i = 0; (bundles != null) && (i < bundles.length); i++)
+            {
+                addBundle(bundles[i], m_logger);
+            }
 
-        // Create a local resource object for each bundle, which will
-        // convert the bundle headers to the appropriate resource metadata.
-        for (int i = 0; (bundles != null) && (i < bundles.length); i++)
-        {
-            try
-            {
-                m_localResourceList.add(new LocalResourceImpl(bundles[i], m_logger));
-            }
-            catch (InvalidSyntaxException ex)
-            {
-                // This should never happen since we are generating filters,
-                // but ignore the resource if it does occur.
-                m_logger.log(Logger.LOG_WARNING, ex.getMessage(), ex);
-            }
+            m_snapshotTimeStamp = System.currentTimeMillis();
         }
     }
 
@@ -151,8 +208,8 @@ public class LocalRepositoryImpl implements Repository
             // Convert export package declarations into capabilities.
             convertExportPackageToCapability(dict);
 
-            // Convert export service declarations into capabilities.
-            convertExportServiceToCapability(dict);
+            // Convert export service declarations and services into capabilities.
+            convertExportServiceToCapability(dict, m_bundle);
 
             // For the system bundle, add a special platform capability.
             if (m_bundle.getBundleId() == 0)
@@ -327,20 +384,41 @@ public class LocalRepositoryImpl implements Repository
             }
         }
 
-        private void convertExportServiceToCapability(Dictionary dict)
+        private void convertExportServiceToCapability(Dictionary dict, Bundle bundle)
         {
+            Set services = new HashSet();
+
+            // collect Export-Service
             String target = (String) dict.get(Constants.EXPORT_SERVICE);
             if (target != null)
             {
                 R4Package[] pkgs = R4Package.parseImportOrExportHeader(target);
                 for (int pkgIdx = 0; (pkgs != null) && (pkgIdx < pkgs.length); pkgIdx++)
                 {
-                    CapabilityImpl cap = new CapabilityImpl();
-                    cap.setName("service");
-                    cap.addP(new PropertyImpl("service", null, pkgs[pkgIdx].getName()));
-                    addCapability(cap);
+                    services.add(pkgs[pkgIdx].getName());
                 }
             }
+
+            // add actual registered services
+            ServiceReference[] refs = bundle.getRegisteredServices();
+            for (int i = 0; refs != null && i < refs.length; i++)
+            {
+                String[] cls = (String[]) refs[i].getProperty(Constants.OBJECTCLASS);
+                for (int j = 0; cls != null && j < cls.length; j++)
+                {
+                    services.add(cls[j]);
+                }
+            }
+
+            // register capabilities for combined set
+            for (Iterator si = services.iterator(); si.hasNext();)
+            {
+                CapabilityImpl cap = new CapabilityImpl();
+                cap.setName("service");
+                cap.addP(new PropertyImpl("service", null, (String) si.next()));
+                addCapability(cap);
+            }
         }
+
     }
 }

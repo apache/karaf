@@ -27,10 +27,10 @@ import org.osgi.service.obr.*;
 
 public class ResolverImpl implements Resolver
 {
-    private BundleContext m_context = null;
-    private RepositoryAdmin m_admin = null;
+    private final BundleContext m_context;
+    private final RepositoryAdmin m_admin;
     private final Logger m_logger;
-    private LocalRepositoryImpl m_local = null;
+    private final LocalRepositoryImpl m_local;
     private Set m_addedSet = new HashSet();
     private Set m_resolveSet = new HashSet();
     private Set m_requiredSet = new HashSet();
@@ -38,12 +38,14 @@ public class ResolverImpl implements Resolver
     private Map m_reasonMap = new HashMap();
     private Map m_unsatisfiedMap = new HashMap();
     private boolean m_resolved = false;
+    private long m_resolveTimeStamp;
 
-    public ResolverImpl(BundleContext context, RepositoryAdmin admin, Logger logger)
+    public ResolverImpl(BundleContext context, RepositoryAdminImpl admin, Logger logger)
     {
         m_context = context;
         m_admin = admin;
         m_logger = logger;
+        m_local = admin.getLocalRepository();
     }
 
     public synchronized void add(Resource resource)
@@ -110,15 +112,8 @@ public class ResolverImpl implements Resolver
 
     public synchronized boolean resolve()
     {
-        // Get a current local repository.
-        // TODO: OBR - We might want to make a smarter local repository
-        // that caches installed bundles rather than re-parsing them
-        // each time, since this could be costly.
-        if (m_local != null)
-        {
-            m_local.dispose();
-        }
-        m_local = new LocalRepositoryImpl(m_context, m_logger);
+        // time of the resolution process start
+        m_resolveTimeStamp = m_local.getLastModified();
 
         // Reset instance values.
         m_resolveSet.clear();
@@ -434,7 +429,7 @@ public class ResolverImpl implements Resolver
         // the state can still change during the operation, but we will
         // be optimistic. This could also be made smarter so that it checks
         // to see if the local state changes overlap with the resolver.
-        if (m_local.getLastModified() != m_local.getCurrentTimeStamp())
+        if (m_resolveTimeStamp != m_local.getLastModified())
         {
             throw new IllegalStateException("Framework state has changed, must resolve again.");
         }

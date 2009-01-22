@@ -56,5 +56,6 @@ public class Activator implements BundleActivator
 
     public void stop(BundleContext context)
     {
+        m_repoAdmin.dispose();
     }
 }

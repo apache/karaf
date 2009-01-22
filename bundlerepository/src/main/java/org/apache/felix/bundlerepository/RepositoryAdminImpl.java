@@ -40,6 +40,7 @@ public class RepositoryAdminImpl implements RepositoryAdmin
 {
     static BundleContext m_context = null;
     private final Logger m_logger;
+    private final LocalRepositoryImpl m_local;
     private List m_urlList = new ArrayList();
     private Map m_repoMap = new HashMap();
     private boolean m_initialized = false;
@@ -54,6 +55,17 @@ public class RepositoryAdminImpl implements RepositoryAdmin
     {
         m_context = context;
         m_logger = logger;
+        m_local = new LocalRepositoryImpl(context, logger);
+    }
+
+    LocalRepositoryImpl getLocalRepository()
+    {
+        return m_local;
+    }
+
+    public void dispose()
+    {
+        m_local.dispose();
     }
 
     public Repository addRepository(URL url) throws Exception
