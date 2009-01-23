@@ -298,15 +298,6 @@ public class Felix extends BundleImpl implements Framework
         m_extensionManager = new ExtensionManager(m_logger, m_configMap);
         addModule(m_extensionManager.getModule());
         m_resolverState.addModule(getCurrentModule());
-        // Lastly, set the system bundle's protection domain.
-        try
-        {
-            addSecurity(this);
-        }
-        catch (Exception ex)
-        {
-            // This should not happen
-        }
     }
 
     Logger getLogger()
@@ -349,9 +340,8 @@ public class Felix extends BundleImpl implements Framework
         return result;
     }
 
-    // TODO: REFACTOR - This method is sort of a hack. Since the system bundle
-    //       can't set its own framework value, it can override this method to
-    //       return itself to the BundleImpl methods.
+    // This overrides the default behavior of BundleImpl.getFramework()
+    // to return "this", since the system bundle is the framework.
     Felix getFramework()
     {
         return this;
@@ -1603,7 +1593,6 @@ ex.printStackTrace();
                         Util.isExtensionBundle(
                             bundle.getCurrentModule().getHeaders()))
                     {
-                        addSecurity(bundle);
                         m_extensionManager.addExtensionBundle(this, bundle);
 // TODO: REFACTOR - REFRESH RESOLVER STATE.
 //                        m_factory.refreshModule(m_sbi.getCurrentModule());
@@ -1612,10 +1601,6 @@ ex.printStackTrace();
                     else if (bundle.isExtension())
                     {
                         bundle.setState(Bundle.INSTALLED);
-                    }
-                    else
-                    {
-                        addSecurity(bundle);
                     }
                 }
                 catch (Throwable ex)
@@ -2050,8 +2035,6 @@ ex.printStackTrace();
                 bundle = new BundleImpl(this, archive);
 
                 verifyExecutionEnvironment(bundle);
-
-                addSecurity(bundle);
 
                 if (!bundle.isExtension())
                 {
@@ -3049,6 +3032,11 @@ ex.printStackTrace();
 
     private volatile SecurityProvider m_securityProvider;
 
+    SecurityProvider getSecurityProvider()
+    {
+        return m_securityProvider;
+    }
+
     void setSecurityProvider(SecurityProvider securityProvider)
     {
         m_securityProvider = securityProvider;
@@ -3070,17 +3058,6 @@ ex.printStackTrace();
             return m_securityProvider.hasBundlePermission(bundleProtectionDomain, permission, direct);
         }
         return true;
-    }
-
-    // TODO: SECURITY - This should probably take a module, not a bundle.
-    void addSecurity(final BundleImpl bundle) throws Exception
-    {
-        if (m_securityProvider != null)
-        {
-            m_securityProvider.checkBundle(bundle);
-        }
-        bundle.getCurrentModule().setSecurityContext(
-            new BundleProtectionDomain(this, bundle));
     }
 
     private BundleActivator createBundleActivator(BundleImpl impl)
@@ -3797,8 +3774,6 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
                     // Add new module to resolver state.
 // TODO: REFACTOR - It is not clean to have to remember these steps.
                     m_resolverState.addModule(oldImpl.getCurrentModule());
-// TODO: REFACTOR - Could we set this when we add the module to the bundle?.
-                    addSecurity(m_bundle);
                     fireBundleEvent(BundleEvent.UNRESOLVED, m_bundle);
                 }
                 catch (Exception ex)

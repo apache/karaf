@@ -697,16 +697,6 @@ class ExtensionManager extends URLStreamHandler implements IContent
             return m_urlPolicy;
         }
 
-        public void setSecurityContext(Object securityContext)
-        {
-            throw new UnsupportedOperationException("Should not be used!");
-        }
-
-        public Object getSecurityContext()
-        {
-            throw new UnsupportedOperationException("Should not be used!");
-        }
-
         public Class findClassByDelegation(String name) throws ClassNotFoundException
         {
             return getClassFromModule(name);

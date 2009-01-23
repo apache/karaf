@@ -25,10 +25,9 @@ import java.security.ProtectionDomain;
 import java.util.*;
 
 import org.apache.felix.framework.cache.BundleArchive;
+import org.apache.felix.framework.ext.SecurityProvider;
 import org.apache.felix.framework.searchpolicy.ModuleImpl;
 import org.apache.felix.framework.searchpolicy.URLPolicyImpl;
-import org.apache.felix.framework.util.manifestparser.ManifestParser;
-import org.apache.felix.framework.util.manifestparser.R4Library;
 import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.*;
 
@@ -69,14 +68,18 @@ class BundleImpl implements Bundle
         m_activator = null;
         m_context = null;
 
-        // TODO: REFACTOR - Null check is a hack due to system bundle.
+        // We have to check for null here because the framework/system bundle
+        // extends BundleImpl and it doesn't have an archive.
         if (m_archive != null)
         {
             addModule(createModule());
         }
     }
 
-    // TODO: REFACTOR - We need this method so the system bundle can override it.
+    // This method exists because the system bundle extends BundleImpl
+    // and cannot pass itself into the BundleImpl constructor. All methods
+    // in BundleImpl should use this method to get the framework and should
+    // not access the field directly.
     Felix getFramework()
     {
         return m_felix;
@@ -883,9 +886,19 @@ class BundleImpl implements Bundle
         return m_archive.rollbackRevise();
     }
 
-    // TODO: REFACTOR - This module is only visible for the system bundle.
-    synchronized void addModule(IModule module)
+    // This method should be private, but is visible because the
+    // system bundle needs to add its module directly to the bundle,
+    // since it doesn't have an archive from which the module will
+    // be created, which is the normal case.
+    synchronized void addModule(IModule module) throws Exception
     {
+        SecurityProvider sp = getFramework().getSecurityProvider();
+        if (sp != null)
+        {
+            sp.checkBundle(this);
+        }
+        module.setSecurityContext(new BundleProtectionDomain(m_felix, this));
+
         ((ModuleImpl) module).setBundle(this);
 
         IModule[] dest = new IModule[m_modules.length + 1];

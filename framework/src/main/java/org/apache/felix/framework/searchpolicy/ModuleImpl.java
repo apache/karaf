@@ -736,7 +736,6 @@ public class ModuleImpl implements IModule
         }
     }
 
-// TODO: REFACTOR - This previously didn't cause the class loader to be created.
     public URL getResourceFromModule(String name)
     {
         URL url = null;
@@ -769,7 +768,6 @@ public class ModuleImpl implements IModule
         return url;
     }
 
-// TODO: REFACTOR - This previously didn't cause the class loader to be created.
     public Enumeration getResourcesFromModule(String name)
     {
         Vector v = new Vector();
