@@ -912,6 +912,12 @@ public class ManifestParser
                 pathIdx < clauses[clauseIdx][CLAUSE_PATHS_INDEX].length;
                 pathIdx++)
             {
+                // Make sure a package name was specified.
+                if (((String) clauses[clauseIdx][CLAUSE_PATHS_INDEX][pathIdx]).length() == 0)
+                {
+                    throw new IllegalArgumentException(
+                        "An empty package name was specified: " + header);
+                }
                 // Prepend the package name to the array of attributes.
                 R4Attribute[] attrs = (R4Attribute[]) clauses[clauseIdx][CLAUSE_ATTRIBUTES_INDEX];
                 R4Attribute[] newAttrs = new R4Attribute[attrs.length + 1];
@@ -1005,6 +1011,12 @@ public class ManifestParser
                 pathIdx < clauses[clauseIdx][CLAUSE_PATHS_INDEX].length;
                 pathIdx++)
             {
+                // Make sure a package name was specified.
+                if (((String) clauses[clauseIdx][CLAUSE_PATHS_INDEX][pathIdx]).length() == 0)
+                {
+                    throw new IllegalArgumentException(
+                        "An empty package name was specified: " + header);
+                }
                 // Prepend the package name to the array of attributes.
                 R4Attribute[] attrs = (R4Attribute[]) clauses[clauseIdx][CLAUSE_ATTRIBUTES_INDEX];
                 R4Attribute[] newAttrs = new R4Attribute[attrs.length + 1];
