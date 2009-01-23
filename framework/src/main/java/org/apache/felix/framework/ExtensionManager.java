@@ -139,7 +139,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
      * @param config the configuration to read properties from.
      * @param systemBundleInfo the info to change if we need to add exports.
      */
-    ExtensionManager(Logger logger, Map configMap)
+    ExtensionManager(Logger logger, Map configMap) throws BundleException
     {
         m_module = new ExtensionManagerModule();
         m_extensions = null;
@@ -240,15 +240,6 @@ class ExtensionManager extends URLStreamHandler implements IContent
     public synchronized void setSecurityContext(Object securityContext)
     {
         m_securityContext = securityContext;
-    }
-
-    /**
-     * Check whether the given manifest headers are from an extension bundle.
-     */
-    static boolean isExtensionBundle(Map headers)
-    {
-        return (ManifestParser.parseExtensionBundleHeader((String)
-                headers.get(Constants.FRAGMENT_HOST)) != null);
     }
 
     /**
@@ -622,9 +613,9 @@ class ExtensionManager extends URLStreamHandler implements IContent
 
     class ExtensionManagerModule extends ModuleImpl
     {
-        ExtensionManagerModule()
+        ExtensionManagerModule() throws BundleException
         {
-            super(m_logger, null, null, "0", null, null, null, null, null, null);
+            super(m_logger, null, null, "0", null, null);
         }
 
         public Map getHeaders()

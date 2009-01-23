@@ -41,22 +41,30 @@ import org.apache.felix.framework.util.Util;
 import org.apache.felix.framework.util.manifestparser.ManifestParser;
 import org.apache.felix.framework.util.manifestparser.R4Library;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.Version;
 
 public class ModuleImpl implements IModule
 {
     private final Logger m_logger;
-
-    private Bundle m_bundle = null;
-
+    private final Map m_configMap;
+    private final FelixResolver m_resolver;
+    private final String m_id;
+    private final IContent m_content;
     private final Map m_headerMap;
+
+    private final String m_manifestVersion;
+    private final Version m_version;
+    private final String m_symbolicName;
+
     private final ICapability[] m_capabilities;
     private final IRequirement[] m_requirements;
     private final IRequirement[] m_dynamicRequirements;
     private final R4Library[] m_nativeLibraries;
 
-    private final String m_id;
-    private volatile String m_symbolicName = null;
+    private Bundle m_bundle = null;
+
     private IModule[] m_fragments = null;
     private IWire[] m_wires = null;
     private IModule[] m_dependentHosts = new IModule[0];
@@ -64,10 +72,6 @@ public class ModuleImpl implements IModule
     private IModule[] m_dependentRequirers = new IModule[0];
     private volatile boolean m_isResolved = false;
 
-    // TODO: REFACTOR - Fields below are from ContentLoaderImpl
-    private final Map m_configMap;
-    private final FelixResolver m_resolver;
-    private final IContent m_content;
     private IContent[] m_contentPath;
     private IContent[] m_fragmentContents = null;
     private IURLPolicy m_urlPolicy = null;
@@ -82,22 +86,78 @@ public class ModuleImpl implements IModule
     // Re-usable security manager for accessing class context.
     private static SecurityManagerEx m_sm = new SecurityManagerEx();
 
-// TODO: REFACTOR - Should the module constructor parse the manifest?
     public ModuleImpl(Logger logger, Map configMap, FelixResolver resolver,
-        String id, IContent content, Map headerMap,
-        ICapability[] caps, IRequirement[] reqs, IRequirement[] dynReqs,
-        R4Library[] nativeLibs)
+        String id, Map headerMap, IContent content) throws BundleException
     {
         m_logger = logger;
         m_configMap = configMap;
         m_resolver = resolver;
         m_id = id;
-        m_content = content;
         m_headerMap = headerMap;
-        m_capabilities = caps;
-        m_requirements = reqs;
-        m_dynamicRequirements = dynReqs;
-        m_nativeLibraries = nativeLibs;
+        m_content = content;
+
+        // We need to special case the system bundle module, which does not
+        // have a content.
+        if (m_content != null)
+        {
+            ManifestParser mp = new ManifestParser(m_logger, m_configMap, m_headerMap);
+
+            // Record some of the parsed metadata. Note, if this is an extension
+            // bundle it's exports are removed, since they will be added to the
+            // system bundle directly later on.
+            m_manifestVersion = mp.getManifestVersion();
+            m_version = mp.getBundleVersion();
+            m_capabilities = (Util.isExtensionBundle(m_headerMap))
+                ? null : mp.getCapabilities();
+            m_requirements = mp.getRequirements();
+            m_dynamicRequirements = mp.getDynamicRequirements();
+            m_nativeLibraries = mp.getLibraries();
+
+            // Get symbolic name.
+            String symName = null;
+            for (int capIdx = 0;
+                (m_capabilities != null) && (capIdx < m_capabilities.length);
+                capIdx++)
+            {
+                if (m_capabilities[capIdx].getNamespace().equals(ICapability.MODULE_NAMESPACE))
+                {
+                    symName = (String) m_capabilities[capIdx].getProperties().get(
+                        Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE);
+                    break;
+                }
+            }
+            m_symbolicName = symName;
+
+            // Verify that all native libraries exist in advance; this will
+            // throw an exception if the native library does not exist.
+            for (int i = 0; (m_nativeLibraries != null) && (i < m_nativeLibraries.length); i++)
+            {
+                String entryName = m_nativeLibraries[i].getEntryName();
+                if (entryName != null)
+                {
+                    if (m_content.getEntryAsNativeLibrary(entryName) == null)
+                    {
+                        throw new BundleException("Native library does not exist: " + entryName);
+// TODO: REFACTOR - Do we still have a memory leak here?
+//                  We have a memory leak here since we added a module above
+//                  and then don't remove it in case of an error; this may also
+//                  be a general issue for installing/updating bundles, so check.
+//                  This will likely go away when we refactor out the module
+//                  factory, but we will track it under FELIX-835 until then.
+                    }
+                }
+            }
+        }
+        else
+        {
+            m_manifestVersion = null;
+            m_version = null;
+            m_capabilities = null;
+            m_requirements = null;
+            m_dynamicRequirements = null;
+            m_nativeLibraries = null;
+            m_symbolicName = null;
+        }
 
         // Read the boot delegation property and parse it.
 // TODO: REFACTOR - This used to be per framework, now it is per module
@@ -121,6 +181,16 @@ public class ModuleImpl implements IModule
         }
    }
 
+    Logger getLogger()
+    {
+        return m_logger;
+    }
+
+    FelixResolver getResolver()
+    {
+        return m_resolver;
+    }
+
     public synchronized Bundle getBundle()
     {
         return m_bundle;
@@ -139,21 +209,18 @@ public class ModuleImpl implements IModule
         return m_id;
     }
 
+    public String getManifestVersion()
+    {
+        return m_manifestVersion;
+    }
+
+    public Version getVersion()
+    {
+        return m_version;
+    }
+
     public String getSymbolicName()
     {
-        if (m_symbolicName == null)
-        {
-            for (int capIdx = 0;
-                (m_symbolicName == null) && (m_capabilities != null) && (capIdx < m_capabilities.length);
-                capIdx++)
-            {
-                if (m_capabilities[capIdx].getNamespace().equals(ICapability.MODULE_NAMESPACE))
-                {
-                    m_symbolicName = (String) m_capabilities[capIdx].getProperties().get(
-                        Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE);
-                }
-            }
-        }
         return m_symbolicName;
     }
 
@@ -596,18 +663,6 @@ public class ModuleImpl implements IModule
         }
 
         return tmp;
-    }
-
-    // TODO: REFACTOR - Below are from ContentLoaderImpl
-
-    Logger getLogger()
-    {
-        return m_logger;
-    }
-
-    FelixResolver getResolver()
-    {
-        return m_resolver;
     }
 
     public synchronized void close()

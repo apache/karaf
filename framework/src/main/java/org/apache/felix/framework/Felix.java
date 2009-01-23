@@ -1600,7 +1600,7 @@ ex.printStackTrace();
                     // an extension bundle then don't allow it to be resolved
                     // again as per spec.
                     if (!bundle.isExtension() &&
-                        ExtensionManager.isExtensionBundle(
+                        Util.isExtensionBundle(
                             bundle.getCurrentModule().getHeaders()))
                     {
                         addSecurity(bundle);

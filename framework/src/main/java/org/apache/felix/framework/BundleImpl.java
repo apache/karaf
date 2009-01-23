@@ -900,15 +900,22 @@ class BundleImpl implements Bundle
         // create an associated module for it.
         Map headerMap = m_archive.getRevision(
             m_archive.getRevisionCount() - 1).getManifestHeader();
-        ManifestParser mp = new ManifestParser(
-            getFramework().getLogger(), getFramework().getConfig(), headerMap);
 
-        // Verify that the bundle symbolic name and version is unique.
-        if (mp.getManifestVersion().equals("2"))
+        final int revision = m_archive.getRevisionCount() - 1;
+        ModuleImpl module = new ModuleImpl(
+            getFramework().getLogger(),
+            getFramework().getConfig(),
+            getFramework().getResolver(),
+            Long.toString(getBundleId()) + "." + Integer.toString(revision),
+            headerMap,
+            m_archive.getRevision(revision).getContent());
+
+        // Verify that the bundle symbolic name + version is unique.
+        if (module.getManifestVersion().equals("2"))
         {
-            Version bundleVersion = mp.getBundleVersion();
+            Version bundleVersion = module.getVersion();
             bundleVersion = (bundleVersion == null) ? Version.emptyVersion : bundleVersion;
-            String symName = mp.getSymbolicName();
+            String symName = module.getSymbolicName();
 
             Bundle[] bundles = getFramework().getBundles();
             for (int i = 0; (bundles != null) && (i < bundles.length); i++)
@@ -927,52 +934,14 @@ class BundleImpl implements Bundle
             }
         }
 
-        // Now that we have parsed and verified the module metadata, we
-        // can actually create the module. Note, if this is an extension
-        // bundle it's exports are removed, aince they will be added to
-        // the system bundle directly later on.
-        final int revision = m_archive.getRevisionCount() - 1;
-        IModule module = new ModuleImpl(
-            getFramework().getLogger(),
-            getFramework().getConfig(),
-            getFramework().getResolver(),
-            Long.toString(getBundleId()) + "." + Integer.toString(revision),
-            m_archive.getRevision(revision).getContent(),
-            headerMap,
-            (ExtensionManager.isExtensionBundle(headerMap)) ? null : mp.getCapabilities(),
-            mp.getRequirements(),
-            mp.getDynamicRequirements(),
-            mp.getLibraries());
-
-        // Set the content loader's URL policy.
+        // Set the module's URL policy.
+// TODO: REFACTOR - Pass into constructor?
         module.setURLPolicy(
 // TODO: REFACTOR - SUCKS NEEDING URL POLICY PER MODULE.
             new URLPolicyImpl(
                 getFramework().getLogger(),
                 getFramework().getBundleStreamHandler(),
                 module));
-
-        // Verify that all native libraries exist in advance; this will
-        // throw an exception if the native library does not exist.
-        // TODO: CACHE - It would be nice if this check could be done
-        //               some place else in the module, perhaps.
-        R4Library[] libs = module.getNativeLibraries();
-        for (int i = 0; (libs != null) && (i < libs.length); i++)
-        {
-            String entryName = libs[i].getEntryName();
-            if (entryName != null)
-            {
-                if (module.getContent().getEntryAsNativeLibrary(entryName) == null)
-                {
-                    throw new BundleException("Native library does not exist: " + entryName);
-// TODO: REFACTOR - We have a memory leak here since we added a module above
-//                  and then don't remove it in case of an error; this may also
-//                  be a general issue for installing/updating bundles, so check.
-//                  This will likely go away when we refactor out the module
-//                  factory, but we will track it under FELIX-835 until then.
-                }
-            }
-        }
 
         return module;
     }
