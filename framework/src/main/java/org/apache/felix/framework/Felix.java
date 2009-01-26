@@ -315,6 +315,11 @@ public class Felix extends BundleImpl implements Framework
         return m_felixResolver;
     }
 
+    FelixResolverState getResolverState()
+    {
+        return m_resolverState;
+    }
+
     URLStreamHandler getBundleStreamHandler()
     {
         return m_bundleStreamHandler;
@@ -1568,9 +1573,9 @@ ex.printStackTrace();
 
             try
             {
+// REFACTOR - This adds the module to the resolver state, but should we do the
+//            security check first?
                 bundle.revise(updateLocation, is);
-// REFACTOR - Are we adding this to the resolver state too early?
-                m_resolverState.addModule(bundle.getCurrentModule());
 
                 // Create a module for the new revision; the revision is
                 // base zero, so subtract one from the revision count to
@@ -2051,10 +2056,6 @@ ex.printStackTrace();
 // TODO: REFACTOR - REFRESH RESOLVER STATE.
 //                    m_factory.refreshModule(m_sbi.getCurrentModule());
                 }
-
-                // Get the bundle's module and add it to the resolver state.
-                IModule module = bundle.getCurrentModule();
-                m_resolverState.addModule(module);
             }
             catch (Throwable ex)
             {
@@ -3099,7 +3100,7 @@ ex.printStackTrace();
             try
             {
                 // Reset the bundle object and fire UNRESOLVED event.
-                ((BundleImpl) bundle).refresh(m_resolverState);
+                ((BundleImpl) bundle).refresh();
                 fireBundleEvent(BundleEvent.UNRESOLVED, bundle);
             }
             catch (Exception ex)

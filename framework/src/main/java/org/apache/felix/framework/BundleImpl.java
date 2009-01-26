@@ -72,7 +72,9 @@ class BundleImpl implements Bundle
         // extends BundleImpl and it doesn't have an archive.
         if (m_archive != null)
         {
-            addModule(createModule());
+            IModule module = createModule();
+            addModule(module);
+            m_felix.getResolverState().addModule(module);
         }
     }
 
@@ -85,14 +87,14 @@ class BundleImpl implements Bundle
         return m_felix;
     }
 
-    synchronized void refresh(FelixResolverState state) throws Exception
+    synchronized void refresh() throws Exception
     {
         // We are refreshing the bundle. First, we must remove all existing
         // modules from the resolver state and close them. Closing the modules
         // is important, since we will likely be deleting their associated files.
         for (int i = 0; i < m_modules.length; i++)
         {
-            state.removeModule(m_modules[i]);
+            m_felix.getResolverState().removeModule(m_modules[i]);
             ((ModuleImpl) m_modules[i]).close();
         }
 
@@ -104,7 +106,7 @@ class BundleImpl implements Bundle
         m_modules = new IModule[0];
         final IModule module = createModule();
         addModule(module);
-        state.addModule(module);
+        m_felix.getResolverState().addModule(module);
         m_state = Bundle.INSTALLED;
         m_stale = false;
         m_cachedHeaders.clear();
@@ -890,11 +892,14 @@ class BundleImpl implements Bundle
         return used;
     }
 
-    synchronized void revise(String location, InputStream is) throws Exception
+    synchronized void revise(String location, InputStream is)
+        throws Exception
     {
         // This operation will increase the revision count for the bundle.
         m_archive.revise(location, is);
-        addModule(createModule());
+        IModule module = createModule();
+        addModule(module);
+        m_felix.addModule(module);
     }
 
     synchronized boolean rollbackRevise() throws Exception
@@ -923,7 +928,7 @@ class BundleImpl implements Bundle
         m_modules = dest;
     }
 
-    private synchronized IModule createModule() throws Exception
+    private IModule createModule() throws Exception
     {
         // Get and parse the manifest from the most recent revision to
         // create an associated module for it.
