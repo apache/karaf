@@ -2987,8 +2987,7 @@ ex.printStackTrace();
                 if (helpers[i] != null)
                 {
                     helpers[i].stop();
-                    helpers[i].purgeOrRemove();
-                    helpers[i].reinitialize();
+                    helpers[i].refreshOrRemove();
                 }
             }
 
@@ -3090,33 +3089,23 @@ ex.printStackTrace();
         return activator;
     }
 
-    private void purgeBundle(BundleImpl bundle) throws Exception
+    private void refreshBundle(BundleImpl bundle) throws Exception
     {
         // Acquire bundle lock.
         acquireBundleLock(bundle);
 
         try
         {
-            // In case of a refresh, then we want to physically
-            // remove the bundle's modules from the module manager.
-            // This is necessary for two reasons: 1) because
-            // under Windows we won't be able to delete the bundle
-            // because files might be left open in the resource
-            // sources of its modules and 2) we want to make sure
-            // that no references to old modules exist since they
-            // will all be stale after the refresh. The only other
-            // way to do this is to remove the bundle, but that
-            // would be incorrect, because this is a refresh operation
-            // and should not trigger bundle REMOVE events.
-            IModule[] modules = bundle.getModules();
-// TODO: REFACTOR - It kind of sucks we need to remember this steps.
-            for (int i = 0; i < modules.length; i++)
+            try
             {
-                m_resolverState.removeModule(modules[i]);
+                // Reset the bundle object and fire UNRESOLVED event.
+                ((BundleImpl) bundle).refresh(m_resolverState);
+                fireBundleEvent(BundleEvent.UNRESOLVED, bundle);
             }
-
-            // Purge all bundle revisions, but the current one.
-            m_cache.getArchive(bundle.getBundleId()).purge();
+            catch (Exception ex)
+            {
+                fireFrameworkEvent(FrameworkEvent.ERROR, bundle, ex);
+            }
         }
         finally
         {
@@ -3639,7 +3628,7 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
                 {
                     try
                     {
-                        purgeBundle(bundle);
+                        refreshBundle(bundle);
                     }
                     catch (Exception ex)
                     {
@@ -3732,7 +3721,7 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
             }
         }
 
-        public void purgeOrRemove()
+        public void refreshOrRemove()
         {
             try
             {
@@ -3750,36 +3739,15 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
                 }
                 else
                 {
-                    // This physically removes all old revisions of the
-                    // bundle from memory and only maintains the newest
-                    // version in the bundle cache.
-                    purgeBundle(m_bundle);
+                    // This physically removes all old bundle modules from
+                    // from memory and all old revisions from disk. It only
+                    // maintains the newest version in the bundle cache.
+                    refreshBundle(m_bundle);
                 }
             }
             catch (Exception ex)
             {
                 fireFrameworkEvent(FrameworkEvent.ERROR, m_bundle, ex);
-            }
-        }
-
-        public void reinitialize()
-        {
-            if (m_bundle != null)
-            {
-                try
-                {
-                    BundleImpl oldImpl = (BundleImpl) m_bundle;
-                    // Create the module for the new revision.
-                    oldImpl.reset();
-                    // Add new module to resolver state.
-// TODO: REFACTOR - It is not clean to have to remember these steps.
-                    m_resolverState.addModule(oldImpl.getCurrentModule());
-                    fireBundleEvent(BundleEvent.UNRESOLVED, m_bundle);
-                }
-                catch (Exception ex)
-                {
-                    fireFrameworkEvent(FrameworkEvent.ERROR, m_bundle, ex);
-                }
             }
         }
 

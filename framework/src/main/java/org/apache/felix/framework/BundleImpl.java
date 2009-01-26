@@ -85,10 +85,26 @@ class BundleImpl implements Bundle
         return m_felix;
     }
 
-    synchronized void reset() throws Exception
+    synchronized void refresh(FelixResolverState state) throws Exception
     {
+        // We are refreshing the bundle. First, we must remove all existing
+        // modules from the resolver state and close them. Closing the modules
+        // is important, since we will likely be deleting their associated files.
+        for (int i = 0; i < m_modules.length; i++)
+        {
+            state.removeModule(m_modules[i]);
+            ((ModuleImpl) m_modules[i]).close();
+        }
+
+        // Now we will purge all old revisions, only keeping the newest one.
+        m_archive.purge();
+
+        // Lastly, we want to reset our bundle be reinitializing our state
+        // and recreating a module for the newest revision.
         m_modules = new IModule[0];
-        addModule(createModule());
+        final IModule module = createModule();
+        addModule(module);
+        state.addModule(module);
         m_state = Bundle.INSTALLED;
         m_stale = false;
         m_cachedHeaders.clear();

@@ -130,22 +130,31 @@ public class ModuleImpl implements IModule
 
             // Verify that all native libraries exist in advance; this will
             // throw an exception if the native library does not exist.
-            for (int i = 0; (m_nativeLibraries != null) && (i < m_nativeLibraries.length); i++)
+            try
             {
-                String entryName = m_nativeLibraries[i].getEntryName();
-                if (entryName != null)
+                for (int i = 0;
+                    (m_nativeLibraries != null) && (i < m_nativeLibraries.length);
+                    i++)
                 {
-                    if (m_content.getEntryAsNativeLibrary(entryName) == null)
+                    String entryName = m_nativeLibraries[i].getEntryName();
+                    if (entryName != null)
                     {
-                        throw new BundleException("Native library does not exist: " + entryName);
-// TODO: REFACTOR - Do we still have a memory leak here?
-//                  We have a memory leak here since we added a module above
-//                  and then don't remove it in case of an error; this may also
-//                  be a general issue for installing/updating bundles, so check.
-//                  This will likely go away when we refactor out the module
-//                  factory, but we will track it under FELIX-835 until then.
+                        if (m_content.getEntryAsNativeLibrary(entryName) == null)
+                        {
+                            throw new BundleException("Native library does not exist: " + entryName);
+                        }
                     }
                 }
+            }
+            finally
+            {
+                // We close the module content here to make sure it is closed
+                // to avoid having to close it if there is an exception during
+                // the entire module creation process.
+// TODO: REFACTOR - If we do the above check here, then we open the module's content
+//       immediately every time, which means we must close it here so we don't have
+//       to remember to close it if there are other failures during module init.
+                m_content.close();
             }
         }
         else
