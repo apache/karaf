@@ -49,8 +49,6 @@ public class FelixResolverState implements Resolver.ResolverState
     // Maps a module to an array of capabilities.
     private final Map m_resolvedCapMap = new HashMap();
 
-    private final Map m_moduleDataMap = new HashMap();
-
     // Reusable empty array.
     private static final IModule[] m_emptyModules = new IModule[0];
     private static final PackageSource[] m_emptySources = new PackageSource[0];
@@ -136,45 +134,40 @@ public class FelixResolverState implements Resolver.ResolverState
         ((ModuleImpl) module).close();
 
         // Remove the module from the "resolved" map.
-// TODO: RB - Maybe this can be merged with ModuleData.
         m_resolvedCapMap.remove(module);
-        // Finally, remove module data.
-        m_moduleDataMap.remove(module);
     }
 
-/* TODO: RESOLVER - We need to figure out what to do with this.
-    public void moduleRefreshed(ModuleEvent event)
+    /**
+     * This method is used for installing system bundle extensions. It actually
+     * refreshes the system bundle module's capabilities in the resolver state
+     * to capture additional capabilities.
+     * @param module The module being refresh, which should always be the system bundle.
+    **/
+    synchronized void refreshSystemBundleModule(IModule module)
     {
-        synchronized (m_factory)
+        // The system bundle module should always be resolved, so we only need
+        // to update the resolved capability map.
+        ICapability[] caps = module.getCapabilities();
+        for (int i = 0; (caps != null) && (i < caps.length); i++)
         {
-            IModule module = event.getModule();
-            // Remove exports from package maps.
-            ICapability[] caps = event.getModule().getDefinition().getCapabilities();
-            // Add exports to unresolved package map.
-            for (int i = 0; (caps != null) && (i < caps.length); i++)
-            {
-                ICapability[] resolvedCaps = (ICapability[]) m_resolvedCapMap.get(module);
-                resolvedCaps = addCapabilityToArray(resolvedCaps, caps[i]);
-                m_resolvedCapMap.put(module, resolvedCaps);
+            ICapability[] resolvedCaps = (ICapability[]) m_resolvedCapMap.get(module);
+            resolvedCaps = addCapabilityToArray(resolvedCaps, caps[i]);
+            m_resolvedCapMap.put(module, resolvedCaps);
 
-                // If the capability is a package, then add the exporter module
-                // of the wire to the "resolved" package index and remove it
-                // from the "unresolved" package index.
-                if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
-                {
-                    // Get package name.
-                    String pkgName = (String)
-                        caps[i].getProperties().get(ICapability.PACKAGE_PROPERTY);
-                    // Add to "resolved" package index.
-                    indexPackageCapability(
-                        m_resolvedPkgIndexMap,
-                        module,
-                        caps[i]);
-                }
+            // If the capability is a package, then add the exporter module
+            // of the wire to the "resolved" package index and remove it
+            // from the "unresolved" package index.
+            if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+            {
+                // Add to "resolved" package index.
+                indexPackageCapability(
+                    m_resolvedPkgIndexMap,
+                    module,
+                    caps[i]);
             }
         }
     }
-*/
+
     private void dumpPackageIndexMap(Map pkgIndexMap)
     {
         for (Iterator i = pkgIndexMap.entrySet().iterator(); i.hasNext(); )

@@ -1598,8 +1598,9 @@ ex.printStackTrace();
                             bundle.getCurrentModule().getHeaders()))
                     {
                         m_extensionManager.addExtensionBundle(this, bundle);
-// TODO: REFACTOR - REFRESH RESOLVER STATE.
-//                        m_factory.refreshModule(m_sbi.getCurrentModule());
+// TODO: REFACTOR - Perhaps we could move this into extension manager.
+                        m_resolverState.refreshSystemBundleModule(bundle.getCurrentModule());
+// TODO: REFACTOR - Not clear why this is here. We should look at all of these steps more closely.
                         bundle.setState(Bundle.RESOLVED);
                     }
                     else if (bundle.isExtension())
@@ -2052,8 +2053,7 @@ ex.printStackTrace();
                 else
                 {
                     m_extensionManager.addExtensionBundle(this, bundle);
-// TODO: REFACTOR - REFRESH RESOLVER STATE.
-//                    m_factory.refreshModule(m_sbi.getCurrentModule());
+                    m_resolverState.refreshSystemBundleModule(m_extensionManager.getModule());
                 }
             }
             catch (Throwable ex)
