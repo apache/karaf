@@ -33,7 +33,8 @@ import org.osgi.framework.*;
 
 class BundleImpl implements Bundle
 {
-    private final Felix m_felix;
+    // No one should use this field directly, use getFramework() instead.
+    private final Felix _m_felix;
 
     private final BundleArchive m_archive;
     private IModule[] m_modules = new IModule[0];
@@ -61,7 +62,7 @@ class BundleImpl implements Bundle
 
     BundleImpl(Felix felix, BundleArchive archive) throws Exception
     {
-        m_felix = felix;
+        _m_felix = felix;
         m_archive = archive;
         m_state = Bundle.INSTALLED;
         m_stale = false;
@@ -74,7 +75,6 @@ class BundleImpl implements Bundle
         {
             IModule module = createModule();
             addModule(module);
-            m_felix.getResolverState().addModule(module);
         }
     }
 
@@ -84,19 +84,24 @@ class BundleImpl implements Bundle
     // not access the field directly.
     Felix getFramework()
     {
-        return m_felix;
+        return _m_felix;
+    }
+
+    synchronized void dispose()
+    {
+        // Remove the bundle's associated modules from the resolver state
+        // and close them.
+        for (int i = 0; i < m_modules.length; i++)
+        {
+            getFramework().getResolverState().removeModule(m_modules[i]);
+            ((ModuleImpl) m_modules[i]).close();
+        }
     }
 
     synchronized void refresh() throws Exception
     {
-        // We are refreshing the bundle. First, we must remove all existing
-        // modules from the resolver state and close them. Closing the modules
-        // is important, since we will likely be deleting their associated files.
-        for (int i = 0; i < m_modules.length; i++)
-        {
-            m_felix.getResolverState().removeModule(m_modules[i]);
-            ((ModuleImpl) m_modules[i]).close();
-        }
+        // Dispose of the current modules.
+        dispose();
 
         // Now we will purge all old revisions, only keeping the newest one.
         m_archive.purge();
@@ -106,7 +111,6 @@ class BundleImpl implements Bundle
         m_modules = new IModule[0];
         final IModule module = createModule();
         addModule(module);
-        m_felix.getResolverState().addModule(module);
         m_state = Bundle.INSTALLED;
         m_stale = false;
         m_cachedHeaders.clear();
@@ -899,7 +903,6 @@ class BundleImpl implements Bundle
         m_archive.revise(location, is);
         IModule module = createModule();
         addModule(module);
-        m_felix.addModule(module);
     }
 
     synchronized boolean rollbackRevise() throws Exception
@@ -918,7 +921,7 @@ class BundleImpl implements Bundle
         {
             sp.checkBundle(this);
         }
-        module.setSecurityContext(new BundleProtectionDomain(m_felix, this));
+        module.setSecurityContext(new BundleProtectionDomain(getFramework(), this));
 
         ((ModuleImpl) module).setBundle(this);
 
@@ -926,6 +929,10 @@ class BundleImpl implements Bundle
         System.arraycopy(m_modules, 0, dest, 0, m_modules.length);
         dest[m_modules.length] = module;
         m_modules = dest;
+
+        // Now that the module is added to the bundle, we can update
+        // the resolver's module state.
+        getFramework().getResolverState().addModule(module);
     }
 
     private IModule createModule() throws Exception

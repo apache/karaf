@@ -297,7 +297,6 @@ public class Felix extends BundleImpl implements Framework
         // definition for creating the system bundle module.
         m_extensionManager = new ExtensionManager(m_logger, m_configMap);
         addModule(m_extensionManager.getModule());
-        m_resolverState.addModule(getCurrentModule());
     }
 
     Logger getLogger()
@@ -3121,15 +3120,8 @@ ex.printStackTrace();
         // because this method is only called during shutdown or a
         // refresh operation and these are already guarded by locks.
 
-        // Remove the bundle's associated modules from
-        // the module manager.
-        IModule[] modules = bundle.getModules();
-        for (int i = 0; i < modules.length; i++)
-        {
-            m_resolverState.removeModule(modules[i]);
-        }
-
-        // Remove the bundle from the cache.
+        // Remove the bundle from memory and the cache.
+        bundle.dispose();
         m_cache.remove(m_cache.getArchive(bundle.getBundleId()));
     }
 
@@ -3594,34 +3586,12 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
             // Shutdown event dispatching queue.
             EventDispatcher.shutdown();
 
-            // Remove all bundles from the module factory so that any
-            // open resources will be closed.
-            Bundle[] bundles = getBundles();
-            for (int i = 0; i < bundles.length; i++)
-            {
-                BundleImpl bundle = (BundleImpl) bundles[i];
-                IModule[] modules = bundle.getModules();
-                for (int j = 0; j < modules.length; j++)
-                {
-                    try
-                    {
-                        m_resolverState.removeModule(modules[j]);
-                    }
-                    catch (Exception ex)
-                    {
-                        m_logger.log(Logger.LOG_ERROR,
-                           "Unable to clean up " + bundle._getLocation(), ex);
-                    }
-                }
-            }
-
             // Since there may be updated and uninstalled bundles that
             // have not been refreshed, we will take care of refreshing
             // them during shutdown.
 
-            // First loop through all bundled and purge old revisions
-            // from updated bundles.
-            bundles = getBundles();
+            // Refresh all updated bundles.
+            Bundle[] bundles = getBundles();
             for (int i = 0; i < bundles.length; i++)
             {
                 BundleImpl bundle = (BundleImpl) bundles[i];
@@ -3640,7 +3610,7 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
                 }
             }
 
-            // Next garbage collection any uninstalled bundles.
+            // Garbage collect uninstalled bundles.
             for (int i = 0;
                 (m_uninstalledBundles != null) && (i < m_uninstalledBundles.length);
                 i++)
@@ -3658,7 +3628,14 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
                 }
             }
 
-            // Next, stop all system bundle activators.
+            // Dispose of the bundles to close their associated contents.
+            bundles = getBundles();
+            for (int i = 0; i < bundles.length; i++)
+            {
+                ((BundleImpl) bundles[i]).dispose();
+            }
+
+            // Stop all system bundle activators.
             for (int i = 0; i < m_activatorList.size(); i++)
             {
                 try
@@ -3733,16 +3710,14 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
                 // current state.
                 if (m_bundle.getState() == Bundle.UNINSTALLED)
                 {
-                    // This physically removes the bundle from memory
-                    // as well as the bundle cache.
                     garbageCollectBundle(m_bundle);
                     m_bundle = null;
                 }
                 else
                 {
-                    // This physically removes all old bundle modules from
-                    // from memory and all old revisions from disk. It only
-                    // maintains the newest version in the bundle cache.
+                    // This removes all old bundle modules from memory and
+                    // all old revisions from disk. It only maintains the
+                    // newest version in the bundle cache.
                     refreshBundle(m_bundle);
                 }
             }
