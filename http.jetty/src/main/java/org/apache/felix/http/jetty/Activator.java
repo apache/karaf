@@ -20,9 +20,9 @@ package org.apache.felix.http.jetty;
 
 import java.util.Properties;
 
+import org.mortbay.component.LifeCycle;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Server;
-import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.HashUserRealm;
@@ -30,10 +30,7 @@ import org.mortbay.jetty.security.SslSocketConnector;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.OsgiServletHandler;
 import org.mortbay.jetty.servlet.SessionHandler;
-import org.mortbay.component.LifeCycle;
-
 import org.mortbay.log.Log;
-import org.mortbay.log.Logger;
 import org.mortbay.log.StdErrLog;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -70,30 +67,54 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class Activator implements BundleActivator
 {
+    public static final boolean DEFAULT_HTTPS_ENABLE = false;
+    public static final boolean DEFAULT_USE_NIO = true;
+    public static final int DEFAULT_HTTPS_PORT = 443;
+    public static final int DEFAULT_HTTP_PORT = 80;
+    public static final String DEFAULT_SSL_PROVIDER = "org.mortbay.http.SunJsseListener";
+    
+    /** Felix specific property to override the SSL provider. */
+    public static final String FELIX_SSL_PROVIDER = "org.apache.felix.https.provider";
+    public static final String OSCAR_SSL_PROVIDER = "org.ungoverned.osgi.bundle.https.provider";
+    
+    /** Felix specific property to override the keystore key password. */
+    public static final String FELIX_KEYSTORE_KEY_PASSWORD = "org.apache.felix.https.keystore.key.password";
+    public static final String OSCAR_KEYSTORE_KEY_PASSWORD = "org.ungoverned.osgi.bundle.https.key.password";
+    
+    /** Felix specific property to override the keystore file location. */
+    public static final String FELIX_KEYSTORE = "org.apache.felix.https.keystore";
+    public static final String OSCAR_KEYSTORE = "org.ungoverned.osgi.bundle.https.keystore";
+    
+    /** Felix specific property to override the keystore password. */
+    public static final String FELIX_KEYSTORE_PASSWORD = "org.apache.felix.https.keystore.password";
+    public static final String OSCAR_KEYSTORE_PASSWORD = "org.ungoverned.osgi.bundle.https.password";
+
     /** Standard OSGi port property for HTTP service */
     public static final String  HTTP_PORT    = "org.osgi.service.http.port";
     
-    /** Standard OSGi https port property for HTTP service */
+    /** Standard OSGi port property for HTTPS service */
     public static final String  HTTPS_PORT   = "org.osgi.service.http.port.secure";
     
-    /** Felix and Jetty specific property. Enables Jetty debug messages */
+    /** Felix specific property to enable debug messages */
+    public static final String FELIX_HTTP_DEBUG = "org.apache.felix.http.debug";
     public static final String  HTTP_DEBUG   = "org.apache.felix.http.jetty.debug";
 
-    /** Felix specific property. This property will be looked up to determine the
+    /** Felix specific property to determine the
         name of the service property to set with the http port used. If not supplied
         then the HTTP_PORT property name will be used for the service property */
     public static final String  HTTP_SVCPROP_PORT    = "org.apache.felix.http.svcprop.port";
     
-    /** Felix specific property. This property will be looked up to determine the
+    /** Felix specific property to determine the
         name of the service property to set with the https port used. If not supplied
         then the HTTPS_PORT property name will be used for the service property */
     public static final String  HTTPS_SVCPROP_PORT   = "org.apache.felix.http.svcprop.port.secure";
 
-    /** Felix specific property. Controls whether NIO will be used. If not supplied
+    /** Felix specific property to control whether NIO will be used. If not supplied
         then will default to true. */
     public static final String  HTTP_NIO             = "org.apache.felix.http.nio";
     
-    /** Legacy Oscar property support. Controls whether to enable HTTPS */
+    /** Felix specific property to control whether to enable HTTPS. */
+    public static final String FELIX_HTTPS_ENABLE = "org.apache.felix.https.enable";
     public static final String  OSCAR_HTTPS_ENABLE   = "org.ungoverned.osgi.bundle.https.enable";
     
     protected static boolean debug = false;
@@ -107,9 +128,17 @@ public class Activator implements BundleActivator
 
     private int m_httpPort;
     private int m_httpsPort;
+    private boolean m_useNIO;
+    private String m_sslProvider;
+    private String m_httpsPortProperty;
+    private String m_keystore;
+    private String m_passwd;
+    private String m_keyPasswd;
+    private boolean m_useHttps;
+    private String m_httpPortProperty;
 
     private Properties m_svcProperties = new Properties();
-    
+
     //
     // Main class instance code
     //
@@ -118,18 +147,14 @@ public class Activator implements BundleActivator
     {
         m_bundleContext = bundleContext;
 
-        // org.mortbay.util.Loader needs this (used for JDK 1.4 log classes)
-        Thread.currentThread().setContextClassLoader( this.getClass().getClassLoader() );
 
-        debug = getBooleanProperty(HTTP_DEBUG, false);
-        
-        // get default HTTP and HTTPS ports as per the OSGi spec
-        m_httpPort = getIntProperty(HTTP_PORT, 80);
-        m_httpsPort = getIntProperty(HTTPS_PORT, 443);
+        setConfiguration();
 
         m_logTracker = new ServiceTracker( bundleContext, LogService.class.getName(), null );
         m_logTracker.open();
 
+        // org.mortbay.util.Loader needs this (used for JDK 1.4 log classes)
+        Thread.currentThread().setContextClassLoader( this.getClass().getClassLoader() );
         // set the Jetty logger to be LogService based
         initializeJettyLogger();
 
@@ -150,6 +175,24 @@ public class Activator implements BundleActivator
         // OSGi spec states the properties should not be changed after registration,
         // so create new copy for later  clone for updates
         m_svcProperties = new Properties(m_svcProperties);
+    }
+
+
+    private void setConfiguration() {
+        debug = getBooleanProperty(FELIX_HTTP_DEBUG, getBooleanProperty(HTTP_DEBUG, false));
+        
+        // get default HTTP and HTTPS ports as per the OSGi spec
+        m_httpPort = getIntProperty(HTTP_PORT, DEFAULT_HTTP_PORT);
+        m_httpsPort = getIntProperty(HTTPS_PORT, DEFAULT_HTTPS_PORT);
+        // collect other properties, default to legacy names only if new ones are not available
+        m_useNIO = getBooleanProperty(HTTP_NIO, DEFAULT_USE_NIO);
+        m_sslProvider = getStringProperty(FELIX_SSL_PROVIDER, getStringProperty(OSCAR_SSL_PROVIDER, DEFAULT_SSL_PROVIDER));
+        m_httpsPortProperty = getStringProperty(HTTPS_SVCPROP_PORT, HTTPS_PORT);
+        m_keystore = getStringProperty(FELIX_KEYSTORE, m_bundleContext.getProperty(OSCAR_KEYSTORE));
+        m_passwd = getStringProperty(FELIX_KEYSTORE_PASSWORD, m_bundleContext.getProperty(OSCAR_KEYSTORE_PASSWORD));
+        m_keyPasswd = getStringProperty(FELIX_KEYSTORE_KEY_PASSWORD, m_bundleContext.getProperty(OSCAR_KEYSTORE_KEY_PASSWORD));
+        m_useHttps = getBooleanProperty(FELIX_HTTPS_ENABLE, getBooleanProperty(OSCAR_HTTPS_ENABLE, DEFAULT_HTTPS_ENABLE));
+        m_httpPortProperty = getStringProperty(HTTP_SVCPROP_PORT, HTTP_PORT);
     }
 
 
@@ -257,19 +300,17 @@ public class Activator implements BundleActivator
         m_server = new Server();
         m_server.addUserRealm( realm );
 
-        // Add a regular HTTP listener
-        Connector connector = getBooleanProperty( HTTP_NIO, true ) ? 
+        Connector connector = m_useNIO ? 
                               (Connector) new SelectChannelConnector() : (Connector) new SocketConnector();
         connector.addLifeCycleListener(
-                new ConnectorListener(getStringProperty(HTTP_SVCPROP_PORT, HTTP_PORT))
+                new ConnectorListener(m_httpPortProperty)
             );
         
         connector.setPort( m_httpPort );
         connector.setMaxIdleTime( 60000 );
         m_server.addConnector( connector );
 
-        // See if we need to add an HTTPS listener
-        if ( getBooleanProperty( OSCAR_HTTPS_ENABLE, false ))
+        if (m_useHttps)
         {
             initializeHTTPS();
         }
@@ -301,40 +342,30 @@ public class Activator implements BundleActivator
     //      keystore, passwords etc. into it's own pluggable service
     protected void initializeHTTPS() throws Exception
     {
-        String sslProvider = m_bundleContext.getProperty( "org.ungoverned.osgi.bundle.https.provider" );
-        if ( sslProvider == null )
-        {
-            sslProvider = "org.mortbay.http.SunJsseListener";
-        }
 
         SslSocketConnector s_listener = new SslSocketConnector();
         s_listener.addLifeCycleListener(
-                new ConnectorListener(getStringProperty(HTTPS_SVCPROP_PORT, HTTPS_PORT))
+                new ConnectorListener(m_httpsPortProperty)
             );
                 
         s_listener.setPort( m_httpsPort );
         s_listener.setMaxIdleTime( 60000 );
 
-        // Set default jetty properties for supplied values. For any not set,
-        // Jetty will fallback to checking system properties.
-        String keystore = m_bundleContext.getProperty( "org.ungoverned.osgi.bundle.https.keystore" );
-        if ( keystore != null )
+        if ( m_keystore != null )
         {
-            s_listener.setKeystore( keystore );
+            s_listener.setKeystore( m_keystore );
         }
 
-        String passwd = m_bundleContext.getProperty( "org.ungoverned.osgi.bundle.https.password" );
-        if ( passwd != null )
+        if ( m_passwd != null )
         {
-            System.setProperty( SslSocketConnector.PASSWORD_PROPERTY, passwd );
-            s_listener.setPassword( passwd );
+            System.setProperty( SslSocketConnector.PASSWORD_PROPERTY, m_passwd );
+            s_listener.setPassword( m_passwd );
         }
 
-        String keyPasswd = m_bundleContext.getProperty( "org.ungoverned.osgi.bundle.https.key.password" );
-        if ( keyPasswd != null )
+        if ( m_keyPasswd != null )
         {
-            System.setProperty( SslSocketConnector.KEYPASSWORD_PROPERTY, keyPasswd );
-            s_listener.setKeyPassword( keyPasswd );
+            System.setProperty( SslSocketConnector.KEYPASSWORD_PROPERTY, m_keyPasswd );
+            s_listener.setKeyPassword( m_keyPasswd );
         }
 
         m_server.addConnector( s_listener );
