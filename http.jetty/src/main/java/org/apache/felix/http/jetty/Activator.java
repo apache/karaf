@@ -26,6 +26,7 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.HashUserRealm;
+import org.mortbay.jetty.security.SslSelectChannelConnector;
 import org.mortbay.jetty.security.SslSocketConnector;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.OsgiServletHandler;
@@ -342,33 +343,42 @@ public class Activator implements BundleActivator
     //      keystore, passwords etc. into it's own pluggable service
     protected void initializeHTTPS() throws Exception
     {
-
-        SslSocketConnector s_listener = new SslSocketConnector();
-        s_listener.addLifeCycleListener(
-                new ConnectorListener(m_httpsPortProperty)
-            );
-                
-        s_listener.setPort( m_httpsPort );
-        s_listener.setMaxIdleTime( 60000 );
-
-        if ( m_keystore != null )
-        {
-            s_listener.setKeystore( m_keystore );
+        if (m_useNIO) {
+            SslSelectChannelConnector s_listener = new SslSelectChannelConnector();
+            s_listener.addLifeCycleListener(new ConnectorListener(m_httpsPortProperty));
+            s_listener.setPort(m_httpsPort);
+            s_listener.setMaxIdleTime(60000);
+            if (m_keystore != null) {
+                s_listener.setKeystore(m_keystore);
+            }
+            if (m_passwd != null) {
+                System.setProperty(SslSelectChannelConnector.PASSWORD_PROPERTY, m_passwd);
+                s_listener.setPassword(m_passwd);
+            }
+            if (m_keyPasswd != null) {
+                System.setProperty(SslSelectChannelConnector.KEYPASSWORD_PROPERTY, m_keyPasswd);
+                s_listener.setKeyPassword(m_keyPasswd);
+            }
+            m_server.addConnector(s_listener);
         }
-
-        if ( m_passwd != null )
-        {
-            System.setProperty( SslSocketConnector.PASSWORD_PROPERTY, m_passwd );
-            s_listener.setPassword( m_passwd );
+        else {
+            SslSocketConnector s_listener = new SslSocketConnector();
+            s_listener.addLifeCycleListener(new ConnectorListener(m_httpsPortProperty));
+            s_listener.setPort(m_httpsPort);
+            s_listener.setMaxIdleTime(60000);
+            if (m_keystore != null) {
+                s_listener.setKeystore(m_keystore);
+            }
+            if (m_passwd != null) {
+                System.setProperty(SslSocketConnector.PASSWORD_PROPERTY, m_passwd);
+                s_listener.setPassword(m_passwd);
+            }
+            if (m_keyPasswd != null) {
+                System.setProperty(SslSocketConnector.KEYPASSWORD_PROPERTY, m_keyPasswd);
+                s_listener.setKeyPassword(m_keyPasswd);
+            }
+            m_server.addConnector(s_listener);
         }
-
-        if ( m_keyPasswd != null )
-        {
-            System.setProperty( SslSocketConnector.KEYPASSWORD_PROPERTY, m_keyPasswd );
-            s_listener.setKeyPassword( m_keyPasswd );
-        }
-
-        m_server.addConnector( s_listener );
     }
 
 
