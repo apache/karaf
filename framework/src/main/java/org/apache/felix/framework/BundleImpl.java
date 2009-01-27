@@ -965,9 +965,9 @@ class BundleImpl implements Bundle
                 if (id != getBundleId())
                 {
                     String sym = bundles[i].getSymbolicName();
-                    Version ver = Version.parseVersion((String) ((BundleImpl) bundles[i])
-                        .getCurrentModule().getHeaders().get(Constants.BUNDLE_VERSION));
-                    if (symName.equals(sym) && bundleVersion.equals(ver))
+                    Version ver = ((ModuleImpl)
+                        ((BundleImpl) bundles[i]).getCurrentModule()).getVersion();
+                    if ((symName != null) && (sym != null) && symName.equals(sym) && bundleVersion.equals(ver))
                     {
                         throw new BundleException("Bundle symbolic name and version are not unique: " + sym + ':' + ver);
                     }

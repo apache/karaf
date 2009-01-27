@@ -63,14 +63,34 @@ public class ManifestParser
         Map dupeMap = new HashMap();
 
         //
+        // Parse bundle version.
+        //
+
+        m_bundleVersion = Version.emptyVersion;
+        if (headerMap.get(Constants.BUNDLE_VERSION) != null)
+        {
+            try
+            {
+                m_bundleVersion = Version.parseVersion((String) headerMap.get(Constants.BUNDLE_VERSION));
+            }
+            catch (RuntimeException ex)
+            {
+                // R4 bundle versions must parse, R3 bundle version may not.
+                if (manifestVersion.equals("2"))
+                {
+                    throw ex;
+                }
+                m_bundleVersion = Version.emptyVersion;
+            }
+        }
+
+        //
         // Parse bundle symbolic name.
         //
 
         ICapability moduleCap = parseBundleSymbolicName(m_headerMap);
         if (moduleCap != null)
         {
-            m_bundleVersion = (Version)
-                moduleCap.getProperties().get(Constants.BUNDLE_VERSION_ATTRIBUTE);
             m_bundleSymbolicName = (String)
                 moduleCap.getProperties().get(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE);
 
@@ -811,7 +831,7 @@ public class ManifestParser
             }
 
             // Get bundle version.
-            Version bundleVersion = null;
+            Version bundleVersion = Version.emptyVersion;
             if (headerMap.get(Constants.BUNDLE_VERSION) != null)
             {
                 try
