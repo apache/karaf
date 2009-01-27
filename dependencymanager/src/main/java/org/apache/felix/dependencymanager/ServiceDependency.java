@@ -173,6 +173,11 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
 
     public Object addingService(ServiceReference ref) {
         Object service = m_context.getService(ref);
+        // first check to make sure the service is actually an instance of our service
+        if (!m_trackedServiceName.isInstance(service)) {
+            return null;
+        }
+            
         // we remember these for future reference, needed for required service callbacks
         m_reference = ref;
         m_serviceInstance = service;

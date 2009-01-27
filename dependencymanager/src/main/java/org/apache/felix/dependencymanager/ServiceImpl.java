@@ -630,6 +630,7 @@ public class ServiceImpl implements Service, ServiceComponent {
                 wrapper.setServiceRegistration(registration);
             }
             catch (IllegalArgumentException iae) {
+                m_logger.log(Logger.LOG_ERROR, "Could not register service " + m_serviceInstance, iae);
                 // set the registration to an illegal state object, which will make all invocations on this
                 // wrapper fail with an ISE (which also occurs when the SR becomes invalid)
                 wrapper.setIllegalState();
