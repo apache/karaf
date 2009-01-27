@@ -503,7 +503,7 @@ public class ServiceImpl implements Service, ServiceComponent {
             }
         }
     }
-
+    
     private void stopTrackingOptional(State state) {
         Iterator i = state.getDependencies().iterator();
         while (i.hasNext()) {
@@ -767,7 +767,14 @@ public class ServiceImpl implements Service, ServiceComponent {
             if (dependency instanceof ServiceDependency) {
                 ServiceDependency sd = (ServiceDependency) dependency;
                 if (sd.isAutoConfig()) {
-                    configureImplementation(sd.getInterface(), sd.getService(), sd.getAutoConfigName());
+                    if (sd.isRequired()) {
+                        configureImplementation(sd.getInterface(), sd.getService(), sd.getAutoConfigName());
+                    }
+                    else {
+                        // for optional services, we do an "ad-hoc" lookup to inject the service if it is
+                        // already available even though the tracker has not yet been started
+                        configureImplementation(sd.getInterface(), sd.lookupService(), sd.getAutoConfigName());
+                    }
                 }
                 // for required dependencies, we invoke any callbacks here
                 if (sd.isRequired()) {

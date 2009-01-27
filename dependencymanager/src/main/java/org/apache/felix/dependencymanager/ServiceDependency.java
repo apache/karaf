@@ -22,8 +22,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
@@ -83,6 +86,70 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
         Object service = null;
         if (m_isStarted) {
             service = m_tracker.getService();
+        }
+        if (service == null) {
+            service = getDefaultImplementation();
+            if (service == null) {
+                service = getNullObject();
+            }
+        }
+        return service;
+    }
+
+    public Object lookupService() {
+        Object service = null;
+        if (m_isStarted) {
+            service = m_tracker.getService();
+        }
+        else {
+            ServiceReference[] refs = null;
+            ServiceReference ref = null;
+            if (m_trackedServiceName != null) {
+                if (m_trackedServiceFilter != null) {
+                    try {
+                        refs = m_context.getServiceReferences(m_trackedServiceName.getName(), m_trackedServiceFilter);
+                        if (refs != null) {
+                            Arrays.sort(refs, new Comparator() {
+                                public int getRank(ServiceReference ref) {
+                                    Object ranking = ref.getProperty(Constants.SERVICE_RANKING);
+                                    if (ranking != null && (ranking instanceof Integer)) {
+                                        return ((Integer) ranking).intValue();
+                                    }
+                                    return 0;
+                                }
+
+                                public int compare(Object a, Object b) {
+                                    ServiceReference ra = (ServiceReference) a, rb = (ServiceReference) b;
+                                    int ranka = getRank(ra);
+                                    int rankb = getRank(rb);
+                                    if (ranka < rankb) {
+                                        return -1;
+                                    }
+                                    else if (ranka > rankb) {
+                                        return 1;
+                                    }
+                                    return 0;
+                                }});
+                            ref = refs[0];
+                        }
+                    }
+                    catch (InvalidSyntaxException e) {
+                        throw new IllegalStateException("Invalid filter definition for dependency.");
+                    }
+                }
+                else if (m_trackedServiceReference != null) {
+                    ref = m_trackedServiceReference;
+                }
+                else {
+                    ref = m_context.getServiceReference(m_trackedServiceName.getName());
+                }
+                if (ref != null) {
+                    service = m_context.getService(ref);
+                }
+            }
+            else {
+                throw new IllegalStateException("Could not lookup dependency, no service name specified.");
+            }
         }
         if (service == null) {
             service = getDefaultImplementation();
