@@ -1589,7 +1589,7 @@ public class Resolver
 
         // Put the module in the wireMap with an empty wire array;
         // we do this early so we can use it to detect cycles.
-        wireMap.put(importer, m_emptyModules);
+        wireMap.put(importer, m_emptyWires);
 
         // Loop through each candidate Set and create a wire
         // for the selected candidate for the associated import.
