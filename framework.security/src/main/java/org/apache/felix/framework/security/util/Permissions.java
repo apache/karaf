@@ -177,7 +177,14 @@ public final class Permissions
                 return false;
             }
 
-            return entry.equals(o);
+            if (o instanceof Entry) 
+            {
+                return entry.equals(((Entry)o).get());
+            } 
+            else 
+            {
+                return false;
+            }
         }
     }
 
