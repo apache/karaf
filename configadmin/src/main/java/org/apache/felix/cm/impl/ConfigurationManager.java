@@ -73,9 +73,24 @@ public class ConfigurationManager implements BundleActivator, BundleListener
      */
     public static final String CM_CONFIG_DIR = "felix.cm.dir";
 
+    /**
+     * The name of the bundle context property defining the maximum log level
+     * (value is "felix.cm.loglevel"). The log level setting is only used if
+     * there is no OSGi LogService available. Otherwise this setting is ignored.
+     * <p>
+     * This value of this property is expected to be an integer number
+     * corresponding to the log level values of the OSGi LogService. That is 1
+     * for errors, 2 for warnings, 3 for informational messages and 4 for debug
+     * messages. The default value is 2, such that only warnings and errors are
+     * logged in the absence of a LogService.
+     */
+    public static final String CM_LOG_LEVEL = "felix.cm.loglevel";
+
     // The name of the LogService (not using the class, which might be missing)
     private static final String LOG_SERVICE_NAME = "org.osgi.service.log.LogService";
 
+    private static final int CM_LOG_LEVEL_DEFAULT = 2;
+    
     // random number generator to create configuration PIDs for factory
     // configurations
     private static SecureRandom numberGenerator;
@@ -125,12 +140,32 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     // the cache of Configuration instances mapped by their PID
     private Map configurations;
 
+    // the maximum log level when no LogService is available
+    private int logLevel = CM_LOG_LEVEL_DEFAULT;
 
     public void start( BundleContext bundleContext )
     {
         // track the log service using a ServiceTracker
         logTracker = new ServiceTracker( bundleContext, LOG_SERVICE_NAME , null );
         logTracker.open();
+        
+        // assign the log level
+        String logLevelProp = bundleContext.getProperty( CM_LOG_LEVEL );
+        if ( logLevelProp == null )
+        {
+            logLevel = CM_LOG_LEVEL_DEFAULT;
+        }
+        else
+        {
+            try
+            {
+                logLevel = Integer.parseInt( logLevelProp );
+            }
+            catch ( NumberFormatException nfe )
+            {
+                logLevel = CM_LOG_LEVEL_DEFAULT;
+            }
+        }
 
         // set up some fields
         this.bundleContext = bundleContext;
@@ -784,6 +819,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
     void log( int level, String message, Throwable t )
     {
+        // log using the LogService if available
         Object log = logTracker.getService();
         if ( log != null )
         {
@@ -791,30 +827,34 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             return;
         }
 
-        String code;
-        switch ( level )
+        // Otherwise only log if more serious than the configured level
+        if ( level <= logLevel )
         {
-            case LogService.LOG_INFO:
-                code = "*INFO *";
-                break;
+            String code;
+            switch ( level )
+            {
+                case LogService.LOG_INFO:
+                    code = "*INFO *";
+                    break;
 
-            case LogService.LOG_WARNING:
-                code = "*WARN *";
-                break;
+                case LogService.LOG_WARNING:
+                    code = "*WARN *";
+                    break;
 
-            case LogService.LOG_ERROR:
-                code = "*ERROR*";
-                break;
+                case LogService.LOG_ERROR:
+                    code = "*ERROR*";
+                    break;
 
-            case LogService.LOG_DEBUG:
-            default:
-                code = "*DEBUG*";
-        }
+                case LogService.LOG_DEBUG:
+                default:
+                    code = "*DEBUG*";
+            }
 
-        System.err.println( code + " " + message );
-        if ( t != null )
-        {
-            t.printStackTrace( System.err );
+            System.err.println( code + " " + message );
+            if ( t != null )
+            {
+                t.printStackTrace( System.err );
+            }
         }
     }
 
