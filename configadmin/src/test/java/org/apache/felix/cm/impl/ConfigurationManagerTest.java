@@ -166,6 +166,9 @@ public class ConfigurationManagerTest extends TestCase
         final MockBundleContext bundleContext = new MockBundleContext();
         ConfigurationManager configMgr = createConfigurationManager( null );
 
+        // ensure the configuration data goes to target
+        bundleContext.setProperty( "felix.cm.dir", "target/config" );
+        
         // default value is 2
         bundleContext.setProperty( "felix.cm.loglevel", null );
         configMgr.start( bundleContext );
