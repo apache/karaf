@@ -430,10 +430,10 @@ public class ServiceImpl implements Service, ServiceComponent {
         configureService(state);
         // inform the state listeners we're starting
         stateListenersStarting();
-        // start tracking optional services
-        startTrackingOptional(state);
         // invoke the start callback, since we're now ready to be used
         invoke(start);
+        // start tracking optional services
+        startTrackingOptional(state);
         // register the service in the framework's service registry
         registerService();
         // inform the state listeners we've started
@@ -451,10 +451,10 @@ public class ServiceImpl implements Service, ServiceComponent {
         stateListenersStopping();
         // then, unregister the service from the framework
         unregisterService();
-        // invoke the stop callback
-        invoke(stop);
         // stop tracking optional services
         stopTrackingOptional(state);
+        // invoke the stop callback
+        invoke(stop);
         // inform the state listeners we've stopped
         stateListenersStopped();
         // invoke the destroy callback

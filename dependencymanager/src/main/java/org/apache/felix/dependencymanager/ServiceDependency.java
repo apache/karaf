@@ -58,6 +58,29 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
     private Object m_defaultImplementation;
     private Object m_defaultImplementationInstance;
     
+    private static final Comparator COMPARATOR = new Comparator() {
+        public int getRank(ServiceReference ref) {
+            Object ranking = ref.getProperty(Constants.SERVICE_RANKING);
+            if (ranking != null && (ranking instanceof Integer)) {
+                return ((Integer) ranking).intValue();
+            }
+            return 0;
+        }
+
+        public int compare(Object a, Object b) {
+            ServiceReference ra = (ServiceReference) a, rb = (ServiceReference) b;
+            int ranka = getRank(ra);
+            int rankb = getRank(rb);
+            if (ranka < rankb) {
+                return -1;
+            }
+            else if (ranka > rankb) {
+                return 1;
+            }
+            return 0;
+        }
+    };
+    
     /**
      * Creates a new service dependency.
      * 
@@ -109,27 +132,7 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
                     try {
                         refs = m_context.getServiceReferences(m_trackedServiceName.getName(), m_trackedServiceFilter);
                         if (refs != null) {
-                            Arrays.sort(refs, new Comparator() {
-                                public int getRank(ServiceReference ref) {
-                                    Object ranking = ref.getProperty(Constants.SERVICE_RANKING);
-                                    if (ranking != null && (ranking instanceof Integer)) {
-                                        return ((Integer) ranking).intValue();
-                                    }
-                                    return 0;
-                                }
-
-                                public int compare(Object a, Object b) {
-                                    ServiceReference ra = (ServiceReference) a, rb = (ServiceReference) b;
-                                    int ranka = getRank(ra);
-                                    int rankb = getRank(rb);
-                                    if (ranka < rankb) {
-                                        return -1;
-                                    }
-                                    else if (ranka > rankb) {
-                                        return 1;
-                                    }
-                                    return 0;
-                                }});
+                            Arrays.sort(refs, COMPARATOR);
                             ref = refs[0];
                         }
                     }
