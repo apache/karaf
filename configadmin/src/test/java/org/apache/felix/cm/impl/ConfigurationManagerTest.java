@@ -27,6 +27,7 @@ import junit.framework.TestCase;
 
 import org.apache.felix.cm.MockBundleContext;
 import org.apache.felix.cm.MockLogService;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -160,6 +161,35 @@ public class ConfigurationManagerTest extends TestCase
     }
 
 
+    public void testLogSetup()
+    {
+        final MockBundleContext bundleContext = new MockBundleContext();
+        ConfigurationManager configMgr = createConfigurationManager( null );
+
+        // default value is 2
+        bundleContext.setProperty( "felix.cm.loglevel", null );
+        configMgr.start( bundleContext );
+        assertEquals( 2, getLogLevel( configMgr ) );
+        configMgr.stop( bundleContext );
+
+        // illegal number yields default value
+        bundleContext.setProperty( "felix.cm.loglevel", "not-a-number" );
+        configMgr.start( bundleContext );
+        assertEquals( 2, getLogLevel( configMgr ) );
+        configMgr.stop( bundleContext );
+
+        bundleContext.setProperty( "felix.cm.loglevel", "-100" );
+        configMgr.start( bundleContext );
+        assertEquals( -100, getLogLevel( configMgr ) );
+        configMgr.stop( bundleContext );
+
+        bundleContext.setProperty( "felix.cm.loglevel", "4" );
+        configMgr.start( bundleContext );
+        assertEquals( 4, getLogLevel( configMgr ) );
+        configMgr.stop( bundleContext );
+    }
+
+
     private void assertNoLog( ConfigurationManager configMgr, int level, String message, Throwable t )
     {
         try
@@ -206,7 +236,25 @@ public class ConfigurationManagerTest extends TestCase
         }
         catch ( Throwable ignore )
         {
-            ignore.printStackTrace( System.out );
+            throw ( IllegalArgumentException ) new IllegalArgumentException( "Cannot set logLevel field value" )
+                .initCause( ignore );
+        }
+    }
+
+
+    private static int getLogLevel( ConfigurationManager configMgr )
+    {
+        final String fieldName = "logLevel";
+        try
+        {
+            Field field = configMgr.getClass().getDeclaredField( fieldName );
+            field.setAccessible( true );
+            return field.getInt( configMgr );
+        }
+        catch ( Throwable ignore )
+        {
+            throw ( IllegalArgumentException ) new IllegalArgumentException( "Cannot get logLevel field value" )
+                .initCause( ignore );
         }
     }
 
@@ -229,7 +277,8 @@ public class ConfigurationManagerTest extends TestCase
         }
         catch ( Throwable ignore )
         {
-            ignore.printStackTrace( System.out );
+            throw ( IllegalArgumentException ) new IllegalArgumentException( "Cannot set logTracker field value" )
+                .initCause( ignore );
         }
 
         return configMgr;
