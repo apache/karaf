@@ -26,7 +26,6 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.HashUserRealm;
-import org.mortbay.jetty.security.SslSelectChannelConnector;
 import org.mortbay.jetty.security.SslSocketConnector;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.OsgiServletHandler;
@@ -68,6 +67,7 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class Activator implements BundleActivator
 {
+    public static final boolean DEFAULT_HTTP_ENABLE = true;
     public static final boolean DEFAULT_HTTPS_ENABLE = false;
     public static final boolean DEFAULT_USE_NIO = true;
     public static final int DEFAULT_HTTPS_PORT = 443;
@@ -118,6 +118,9 @@ public class Activator implements BundleActivator
     public static final String FELIX_HTTPS_ENABLE = "org.apache.felix.https.enable";
     public static final String  OSCAR_HTTPS_ENABLE   = "org.ungoverned.osgi.bundle.https.enable";
     
+    /** Felix specific property to control whether to enable HTTP. */
+    public static final String FELIX_HTTP_ENABLE = "org.apache.felix.http.enable";
+    
     protected static boolean debug = false;
     private static ServiceTracker m_logTracker = null;
 
@@ -139,6 +142,7 @@ public class Activator implements BundleActivator
     private String m_httpPortProperty;
 
     private Properties m_svcProperties = new Properties();
+    private boolean m_useHttp;
 
     //
     // Main class instance code
@@ -194,6 +198,7 @@ public class Activator implements BundleActivator
         m_keyPasswd = getStringProperty(FELIX_KEYSTORE_KEY_PASSWORD, m_bundleContext.getProperty(OSCAR_KEYSTORE_KEY_PASSWORD));
         m_useHttps = getBooleanProperty(FELIX_HTTPS_ENABLE, getBooleanProperty(OSCAR_HTTPS_ENABLE, DEFAULT_HTTPS_ENABLE));
         m_httpPortProperty = getStringProperty(HTTP_SVCPROP_PORT, HTTP_PORT);
+        m_useHttp = getBooleanProperty(FELIX_HTTP_ENABLE, DEFAULT_HTTP_ENABLE);
     }
 
 
@@ -301,15 +306,10 @@ public class Activator implements BundleActivator
         m_server = new Server();
         m_server.addUserRealm( realm );
 
-        Connector connector = m_useNIO ? 
-                              (Connector) new SelectChannelConnector() : (Connector) new SocketConnector();
-        connector.addLifeCycleListener(
-                new ConnectorListener(m_httpPortProperty)
-            );
-        
-        connector.setPort( m_httpPort );
-        connector.setMaxIdleTime( 60000 );
-        m_server.addConnector( connector );
+        if (m_useHttp)
+        {
+            initializeHTTP();
+        }
 
         if (m_useHttps)
         {
@@ -338,26 +338,41 @@ public class Activator implements BundleActivator
     }
 
 
+    private void initializeHTTP() {
+        Connector connector = m_useNIO ? 
+                              (Connector) new SelectChannelConnector() : (Connector) new SocketConnector();
+        connector.addLifeCycleListener(
+                new ConnectorListener(m_httpPortProperty)
+            );
+        
+        connector.setPort( m_httpPort );
+        connector.setMaxIdleTime( 60000 );
+        m_server.addConnector( connector );
+    }
+
+
     //TODO: Just a basic implementation to give us a working HTTPS port. A better
     //      long-term solution may be to separate out the SSL provider handling,
     //      keystore, passwords etc. into it's own pluggable service
     protected void initializeHTTPS() throws Exception
     {
         if (m_useNIO) {
-            SslSelectChannelConnector s_listener = new SslSelectChannelConnector();
+            // we do not want to create a compile time dependency on Java 5 classes
+            // so we use a bit of reflection here
+            SelectChannelConnector s_listener = (SelectChannelConnector) Class.forName("org.mortbay.jetty.security.SslSelectChannelConnector").newInstance();
             s_listener.addLifeCycleListener(new ConnectorListener(m_httpsPortProperty));
             s_listener.setPort(m_httpsPort);
             s_listener.setMaxIdleTime(60000);
             if (m_keystore != null) {
-                s_listener.setKeystore(m_keystore);
+                s_listener.getClass().getMethod("setKeystore", new Class[] {String.class}).invoke(s_listener, new Object[] { m_keystore });
             }
             if (m_passwd != null) {
-                System.setProperty(SslSelectChannelConnector.PASSWORD_PROPERTY, m_passwd);
-                s_listener.setPassword(m_passwd);
+                System.setProperty("jetty.ssl.password" /* SslSelectChannelConnector.PASSWORD_PROPERTY */ , m_passwd);
+                s_listener.getClass().getMethod("setPassword", new Class[] {String.class}).invoke(s_listener, new Object[] { m_passwd });
             }
             if (m_keyPasswd != null) {
-                System.setProperty(SslSelectChannelConnector.KEYPASSWORD_PROPERTY, m_keyPasswd);
-                s_listener.setKeyPassword(m_keyPasswd);
+                System.setProperty("jetty.ssl.keypassword" /* SslSelectChannelConnector.KEYPASSWORD_PROPERTY */, m_keyPasswd);
+                s_listener.getClass().getMethod("setKeyPassword", new Class[] {String.class}).invoke(s_listener, new Object[] { m_keyPasswd });
             }
             m_server.addConnector(s_listener);
         }
