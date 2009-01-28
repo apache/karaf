@@ -27,7 +27,7 @@
   <modelVersion>4.0.0</modelVersion>
   <packaging>bundle</packaging>
   <name>Apache Felix Dependency Manager Shell</name>
-  <version>2.0.0</version>
+  <version>2.0.1-SNAPSHOT</version>
   <artifactId>org.apache.felix.dependencymanager.shell</artifactId>
   <dependencies>
     <dependency>
@@ -50,7 +50,7 @@
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.dependencymanager</artifactId>
-      <version>2.0.0</version>
+      <version>2.0.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
@@ -72,10 +72,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.dependencymanager.shell-2.0.0</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.dependencymanager.shell-2.0.0</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.dependencymanager.shell-2.0.0</url>
-  </scm>
 </project>
