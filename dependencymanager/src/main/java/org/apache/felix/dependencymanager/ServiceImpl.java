@@ -568,9 +568,9 @@ public class ServiceImpl implements Service, ServiceComponent {
 		        		}
 		        	}
 		        	else {
-		        		// TODO!!!! where does the factory come from if not explicitly defined
-		        		// could be the activator?
-		        		// could be ???
+		        		// TODO review if we want to try to default to something if not specified
+		        	    // for now the JavaDoc of setFactory(method) reflects the fact that we need
+		        	    // to review it
 		        	}
 		        	if (factory == null) {
                         m_logger.log(Logger.LOG_ERROR, "Factory cannot be null.");

@@ -19,15 +19,24 @@
 package org.apache.felix.dependencymanager;
 
 /**
- * Describes a service component.
+ * Describes a service component. Service components form descriptions of services
+ * that are managed by the dependency manager. They can be used to query their state
+ * for monitoring tools. The dependency manager shell command is an example of
+ * such a tool.
  * 
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public interface ServiceComponent {
+    /** Names for the states of this component. */
     public static final String[] STATE_NAMES = { "unregistered", "registered" };
+    /** State constant for an unregistered component. */
     public static final int STATE_UNREGISTERED = 0;
+    /** State constant for a registered component. */
     public static final int STATE_REGISTERED = 1;
+    /** Returns a list of dependencies associated with this service component. */
     public ServiceComponentDependency[] getComponentDependencies();
+    /** Returns the name of this service component. */
     public String getName();
+    /** Returns the state of this service component. */
     public int getState();
 }

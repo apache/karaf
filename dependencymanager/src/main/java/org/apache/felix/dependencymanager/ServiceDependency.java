@@ -571,7 +571,6 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
         return this;
     }
     
-    
     private void ensureNotActive() {
         if (m_tracker != null) {
             throw new IllegalStateException("Cannot modify state while active.");

@@ -54,6 +54,7 @@ public interface Service {
      * @return this service
      */
     public Service setInterface(String serviceName, Dictionary properties);
+    
     /**
      * Sets the public interfaces under which this service should be registered
      * in the OSGi service registry.
@@ -217,8 +218,10 @@ public interface Service {
 	 * method to invoke. The method should return the implementation, and can
 	 * use any method to create it. Actually, this can be used together with
 	 * <code>setComposition</code> to create a composition of instances that
-	 * work together to implement a service. The factory method is called on
-	 * ??? TODO ???
+	 * work together to implement a service.
+	 * <p>
+	 * Note that currently, there is no default for the factory, so please use
+	 * <code>setFactory(factory, createMethod)</code> instead.
 	 * 
 	 * @param createMethod the name of the create method
 	 */
