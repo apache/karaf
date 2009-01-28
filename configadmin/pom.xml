@@ -27,7 +27,7 @@
     </parent>
 
     <artifactId>org.apache.felix.configadmin</artifactId>
-    <version>1.0.10</version>
+    <version>1.0.11-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <name>Apache Felix Configuration Admin Service</name>
@@ -82,10 +82,4 @@
             </plugin>
         </plugins>
     </build>
-
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.configadmin-1.0.10</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.configadmin-1.0.10</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.configadmin-1.0.10</url>
-  </scm>
 </project>
