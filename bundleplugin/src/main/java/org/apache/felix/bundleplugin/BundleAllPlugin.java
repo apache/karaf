@@ -63,7 +63,7 @@ import aQute.lib.osgi.Jar;
  * 
  * @goal bundleall
  * @phase package
- * @requiresDependencyResolution runtime
+ * @requiresDependencyResolution test
  * @description build an OSGi bundle jar for all transitive dependencies
  */
 public class BundleAllPlugin extends ManifestPlugin

@@ -39,7 +39,7 @@ import aQute.lib.osgi.Jar;
  * Generate Ant script to create the bundle (you should run ant:ant first).
  *
  * @goal ant
- * @requiresDependencyResolution runtime
+ * @requiresDependencyResolution test
  * @description generate Ant script to create the bundle
  */
 public class AntPlugin extends BundlePlugin

@@ -72,7 +72,7 @@ import aQute.lib.osgi.Jar;
  *
  * @goal bundle
  * @phase package
- * @requiresDependencyResolution runtime
+ * @requiresDependencyResolution test
  * @description build an OSGi bundle jar
  */
 public class BundlePlugin extends AbstractMojo
@@ -711,9 +711,7 @@ public class BundlePlugin extends AbstractMojo
             Artifact artifact = ( Artifact ) it.next();
             if ( artifact.getArtifactHandler().isAddedToClasspath() )
             {
-                if ( Artifact.SCOPE_COMPILE.equals( artifact.getScope() )
-                    || Artifact.SCOPE_SYSTEM.equals( artifact.getScope() )
-                    || Artifact.SCOPE_PROVIDED.equals( artifact.getScope() ) )
+                if ( !Artifact.SCOPE_TEST.equals( artifact.getScope() ) )
                 {
                     File file = getFile( artifact );
                     if ( file == null )

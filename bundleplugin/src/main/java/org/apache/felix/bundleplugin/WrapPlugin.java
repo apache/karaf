@@ -25,7 +25,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 /**
  * @goal wrap
  * @phase package
- * @requiresDependencyResolution runtime
+ * @requiresDependencyResolution test
  * @description build an OSGi bundle jar for direct dependencies
  */
 public final class WrapPlugin extends BundleAllPlugin
