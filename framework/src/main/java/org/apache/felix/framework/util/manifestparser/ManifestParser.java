@@ -76,7 +76,7 @@ public class ManifestParser
             catch (RuntimeException ex)
             {
                 // R4 bundle versions must parse, R3 bundle version may not.
-                if (manifestVersion.equals("2"))
+                if (getManifestVersion().equals("2"))
                 {
                     throw ex;
                 }
