@@ -78,7 +78,7 @@ public class DefaultMaven2OsgiConverter
      */
     public String getBundleSymbolicName( Artifact artifact )
     {
-        if ( ( artifact.getFile() != null ) && artifact.getFile().exists() )
+        if ( ( artifact.getFile() != null ) && artifact.getFile().isFile() )
         {
             Analyzer analyzer = new Analyzer();
 
@@ -121,7 +121,7 @@ public class DefaultMaven2OsgiConverter
         }
 
         int i = artifact.getGroupId().lastIndexOf( '.' );
-        if ( ( i < 0 ) && ( artifact.getFile() != null ) && artifact.getFile().exists() )
+        if ( ( i < 0 ) && ( artifact.getFile() != null ) && artifact.getFile().isFile() )
         {
             String groupIdFromPackage = getGroupIdFromPackage( artifact.getFile() );
             if ( groupIdFromPackage != null )
