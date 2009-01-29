@@ -391,6 +391,7 @@ public class BundlePlugin extends AbstractMojo
         new DependencyEmbedder( embeddableArtifacts ).processHeaders( builder );
 
         dumpInstructions( "BND Instructions:", builder.getProperties(), getLog() );
+        dumpClasspath( "BND Classpath:", builder.getClasspath(), getLog() );
 
         builder.build();
         Jar jar = builder.getJar();
@@ -419,6 +420,22 @@ public class BundlePlugin extends AbstractMojo
             {
                 String key = (String) e.nextElement();
                 log.debug( key + ": " + properties.getProperty( key ) );
+            }
+            log.debug( "------------------------------------------------------------------------" );
+        }
+    }
+
+
+    protected static void dumpClasspath( String title, List classpath, Log log )
+    {
+        if ( log.isDebugEnabled() )
+        {
+            log.debug( title );
+            log.debug( "------------------------------------------------------------------------" );
+            for ( Iterator i = classpath.iterator(); i.hasNext(); )
+            {
+                File path = ((Jar)i.next()).getSource();
+                log.debug( null == path ? "null" : path.toString() );
             }
             log.debug( "------------------------------------------------------------------------" );
         }
