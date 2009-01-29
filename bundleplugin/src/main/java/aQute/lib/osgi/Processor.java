@@ -664,8 +664,9 @@ public class Processor implements Reporter, Constants, Closeable {
 
     public static Map<String, Map<String, String>> merge(String type,
             Map<String, Map<String, String>> instructions,
-            Map<String, Map<String, String>> actual, Set<String> superfluous) {
-        Map<String, Map<String, String>> ignored = newMap();
+            Map<String, Map<String, String>> actual,
+            Set<String> superfluous,
+            Map<String, Map<String,String>> ignored) {
         Map<String, Map<String, String>> toVisit = new HashMap<String, Map<String, String>>(
                 actual); // we do not want to ruin our
         // original
@@ -706,7 +707,7 @@ public class Processor implements Reporter, Constants, Closeable {
                         newAttributes.putAll(actual.get(packageName));
                         newAttributes.putAll(instructedAttributes);
                         result.put(packageName, newAttributes);
-                    } else {
+                    } else if (ignored != null) {
                         ignored.put(packageName, new HashMap<String, String>());
                     }
                     p.remove(); // Can never match again for another pattern
