@@ -425,11 +425,11 @@ public class Builder extends Analyzer {
 
         Map<Instruction, Map<String, String>> all = newMap();
 
-        all.putAll(replaceWitInstruction(getHeader(EXPORT_PACKAGE),
-                EXPORT_PACKAGE));
-
         all.putAll(replaceWitInstruction(getHeader(PRIVATE_PACKAGE),
                 PRIVATE_PACKAGE));
+
+        all.putAll(replaceWitInstruction(getHeader(EXPORT_PACKAGE),
+                EXPORT_PACKAGE));
 
         if (isTrue(getProperty(Constants.UNDERTEST))) {
             all.putAll(replaceWitInstruction(parseHeader(getProperty(
