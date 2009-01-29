@@ -1585,7 +1585,7 @@ public class Analyzer extends Processor {
                     }
                 } else {
                     if (dot.getDirectories().containsKey(path)) {
-                        analyzeJar(dot, path, classSpace, contained, referred,
+                        analyzeJar(dot, path + '/', classSpace, contained, referred,
                                 uses);
                     } else {
                         warning("No sub JAR or directory " + path);
