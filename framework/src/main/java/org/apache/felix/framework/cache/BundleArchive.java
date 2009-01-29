@@ -309,11 +309,11 @@ public class BundleArchive
                 .getFileInputStream(stateFile);
             br = new BufferedReader(new InputStreamReader(is));
             String s = br.readLine();
-            if (s.equals(ACTIVE_STATE))
+            if ((s != null) && s.equals(ACTIVE_STATE))
             {
                 m_persistentState = Bundle.ACTIVE;
             }
-            else if (s.equals(UNINSTALLED_STATE))
+            else if ((s != null) && s.equals(UNINSTALLED_STATE))
             {
                 m_persistentState = Bundle.UNINSTALLED;
             }
@@ -343,7 +343,7 @@ public class BundleArchive
     {
         // Write the bundle state.
         OutputStream os = null;
-        BufferedWriter bw= null;
+        BufferedWriter bw = null;
         try
         {
             os = BundleCache.getSecureAction()
