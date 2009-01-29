@@ -166,6 +166,9 @@ public class Analyzer extends Processor {
             exports = merge("export-package", exportInstructions, contained,
                     superfluous.keySet(), null);
 
+            // disallow export of default package
+            exports.remove(".");
+
             for (Iterator<Map.Entry<String, Map<String, String>>> i = superfluous
                     .entrySet().iterator(); i.hasNext();) {
                 // It is possible to mention metadata directories in the export
@@ -1619,7 +1622,7 @@ public class Analyzer extends Processor {
                 String pack = getPackage(relativePath);
 
                 if (pack != null && !contained.containsKey(pack)) {
-                    if (!(pack.equals(".") || isMetaData(relativePath))) {
+                    if (!isMetaData(relativePath)) {
 
                         Map<String, String> map = new LinkedHashMap<String, String>();
                         contained.put(pack, map);
