@@ -9,6 +9,7 @@ import java.text.*;
 import java.util.*;
 import java.util.regex.*;
 
+import aQute.libg.sed.*;
 import aQute.libg.version.*;
 
 /**
@@ -19,7 +20,7 @@ import aQute.libg.version.*;
  * depth but may not contain loops.
  * 
  */
-public class Macro {
+public class Macro implements Replacer {
     Properties properties;
     Processor  domain;
     Object     targets[];
@@ -29,6 +30,11 @@ public class Macro {
         this.properties = properties;
         this.domain = domain;
         this.targets = targets;
+        if (targets != null) {
+            for (Object o : targets) {
+                assert o != null;
+            }
+        }
     }
 
     public Macro(Processor processor) {
@@ -169,7 +175,8 @@ public class Macro {
 
     private String doCommand(Object target, String method, String[] args) {
         if (target == null)
-            System.out.println("Huh? Target should never be null " + domain);
+            ; // System.out.println("Huh? Target should never be null " +
+                // domain);
         else {
             String cname = "_" + method.replaceAll("-", "_");
             try {
@@ -380,6 +387,10 @@ public class Macro {
         for (String path : paths) {
             if (path.endsWith(".class")) {
                 String name = path.substring(0, path.length() - 6).replace('/',
+                        '.');
+                names.add(name);
+            } else if (path.endsWith(".java")) {
+                String name = path.substring(0, path.length() - 5).replace('/',
                         '.');
                 names.add(name);
             } else {
@@ -698,13 +709,13 @@ public class Macro {
             InputStream in = new FileInputStream(f);
             return getString(in);
         } else if (f.isDirectory()) {
-            return Arrays.toString( f.list());
+            return Arrays.toString(f.list());
         } else {
             try {
                 URL url = new URL(args[1]);
                 InputStream in = url.openStream();
                 return getString(in);
-            } catch( MalformedURLException mfue ) {
+            } catch (MalformedURLException mfue) {
                 // Ignore here
             }
             return null;
@@ -809,7 +820,7 @@ public class Macro {
             for (Enumeration<?> e = properties.propertyNames(); e
                     .hasMoreElements();) {
                 String key = (String) e.nextElement();
-                if ( ! key.startsWith("_"))
+                if (!key.startsWith("_"))
                     flattened.put(key, process(properties.getProperty(key)));
             }
             return flattened;

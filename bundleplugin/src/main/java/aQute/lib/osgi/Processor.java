@@ -221,7 +221,10 @@ public class Processor implements Reporter, Constants, Closeable {
      * 
      * @return
      */
-    public List<Object> getPlugins() {
+    protected List<Object> getPlugins() {
+        if ( parent != null )
+            return parent.getPlugins();
+            
         if (this.plugins != null)
             return this.plugins;
 
@@ -493,10 +496,13 @@ public class Processor implements Reporter, Constants, Closeable {
         // + propertiesFile.lastModified() + " diff "
         // + (modified - propertiesFile.lastModified()));
 
+        //Date last = new Date(propertiesFile.lastModified());
+        //Date current = new Date(modified);
         changed |= modified < propertiesFile.lastModified();
         if (changed) {
             included = null;
             properties.clear();
+            plugins = null;
             setProperties(propertiesFile, base);
             propertiesChanged();
             return true;
@@ -505,7 +511,6 @@ public class Processor implements Reporter, Constants, Closeable {
     }
 
     public void propertiesChanged() {
-        plugins = null;
     }
 
     /**
@@ -528,7 +533,13 @@ public class Processor implements Reporter, Constants, Closeable {
         try {
             if (propertiesFile.isFile()) {
                 // System.out.println("Loading properties " + propertiesFile);
-                modified = propertiesFile.lastModified();
+                long modified = propertiesFile.lastModified();
+                if ( modified > System.currentTimeMillis() +100) {
+                    System.out.println("Huh? This is in the future " + propertiesFile );
+                    this.modified = System.currentTimeMillis();
+                } else
+                    this.modified = modified;
+                
                 included = null;
                 Properties p = loadProperties(propertiesFile);
                 setProperties(p);
@@ -653,9 +664,8 @@ public class Processor implements Reporter, Constants, Closeable {
 
     public static Map<String, Map<String, String>> merge(String type,
             Map<String, Map<String, String>> instructions,
-            Map<String, Map<String, String>> actual,
-            Set<String> superfluous,
-            Map<String, Map<String,String>> ignored) {
+            Map<String, Map<String, String>> actual, Set<String> superfluous) {
+        Map<String, Map<String, String>> ignored = newMap();
         Map<String, Map<String, String>> toVisit = new HashMap<String, Map<String, String>>(
                 actual); // we do not want to ruin our
         // original
@@ -696,7 +706,7 @@ public class Processor implements Reporter, Constants, Closeable {
                         newAttributes.putAll(actual.get(packageName));
                         newAttributes.putAll(instructedAttributes);
                         result.put(packageName, newAttributes);
-                    } else if (ignored != null) {
+                    } else {
                         ignored.put(packageName, new HashMap<String, String>());
                     }
                     p.remove(); // Can never match again for another pattern

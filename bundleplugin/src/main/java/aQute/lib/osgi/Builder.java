@@ -266,7 +266,7 @@ public class Builder extends Analyzer {
             // Private-Package
             Map<String, Map<String, String>> filtered = merge(
                     CONDITIONAL_PACKAGE, conditionals, imports,
-                    new HashSet<String>(), null);
+                    new HashSet<String>());
 
             // Imports can also specify a private import. These
             // packages must also be copied to the bundle
@@ -647,10 +647,13 @@ public class Builder extends Analyzer {
      */
     private void doIncludeResources(Jar jar) throws Exception {
         String includes = getProperty("Bundle-Includes");
-        if (includes == null)
-            includes = getProperty("Include-Resource");
+        if (includes == null) {
+            includes = getProperty(INCLUDERESOURCE);
+            if ( includes == null )
+                includes = getProperty("Include-Resource");
+        }
         else
-            warning("Please use Include-Resource instead of Bundle-Includes");
+            warning("Please use -includeresource instead of Bundle-Includes");
 
         if (includes == null)
             return;

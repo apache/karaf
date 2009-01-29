@@ -33,12 +33,13 @@ public class Verifier extends Analyzer {
     final static Pattern             EENAME                = Pattern
                                                                    .compile("CDC-1\\.0/Foundation-1\\.0"
                                                                            + "|CDC-1\\.1/Foundation-1\\.1"
-                                                                           + "|OSGi/Minimum-1\\.1"
+                                                                           + "|OSGi/Minimum-1\\.[1-9]"
                                                                            + "|JRE-1\\.1"
                                                                            + "|J2SE-1\\.2"
                                                                            + "|J2SE-1\\.3"
                                                                            + "|J2SE-1\\.4"
                                                                            + "|J2SE-1\\.5"
+                                                                           + "|JavaSE-1\\.6"
                                                                            + "|PersonalJava-1\\.1"
                                                                            + "|PersonalJava-1\\.2"
                                                                            + "|CDC-1\\.0/PersonalBasis-1\\.0"
@@ -160,8 +161,10 @@ public class Verifier extends Analyzer {
                         try {
                             Jar sub = new Jar(jarOrDir);
                             addClose(sub);
-                            // TODO verify if directory exists and see how to 
-                            // get it in a JAR ...
+                            for ( Map.Entry<String, Resource> entry : dot.getResources().entrySet()) {
+                                if ( entry.getKey().startsWith(jarOrDir)) 
+                                    sub.putResource( entry.getKey().substring(jarOrDir.length()+1), entry.getValue());
+                            }
                             list.add(sub);
                         } catch (Exception e) {
                             error("Invalid embedded directory file on Bundle-Classpath: "
@@ -428,12 +431,26 @@ public class Verifier extends Analyzer {
         verifyHeader("Bundle-Version", VERSION, true);
         verifyListHeader("Bundle-Classpath", FILE, false);
         verifyDynamicImportPackage();
+        verifyBundleClasspath();
         if (usesRequire) {
             if (!getErrors().isEmpty()) {
                 getWarnings()
                         .add(
                                 0,
                                 "Bundle uses Require Bundle, this can generate false errors because then not enough information is available without the required bundles");
+            }
+        }
+    }
+
+    public void verifyBundleClasspath() {
+        Map<String,Map<String,String>> bcp = parseHeader(getHeader(Analyzer.BUNDLE_CLASSPATH));
+        if ( bcp.isEmpty() || bcp.containsKey("."))
+            return;
+        
+        for ( String path : dot.getResources().keySet()) {
+            if ( path.endsWith(".class")) {
+                warning("The Bundle-Classpath does not contain the actual bundle JAR (as specified with '.' in the Bundle-Classpath) but the JAR does contain classes. Is this intentional?");
+                return;
             }
         }
     }

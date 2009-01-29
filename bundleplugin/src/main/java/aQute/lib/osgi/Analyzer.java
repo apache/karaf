@@ -164,7 +164,7 @@ public class Analyzer extends Processor {
             }
 
             exports = merge("export-package", exportInstructions, contained,
-                    superfluous.keySet(), null);
+                    superfluous.keySet());
 
             for (Iterator<Map.Entry<String, Map<String, String>>> i = superfluous
                     .entrySet().iterator(); i.hasNext();) {
@@ -196,7 +196,7 @@ public class Analyzer extends Processor {
             // merge the info for matching packages
             Set<String> extra = new TreeSet<String>(importInstructions.keySet());
             imports = merge("import-package", importInstructions,
-                    referredAndExported, extra, ignored);
+                    referredAndExported, extra);
 
             // Instructions that have not been used could be superfluous
             // or if they do not contain wildcards, should be added
@@ -354,6 +354,11 @@ public class Analyzer extends Processor {
                     || header.equals(EXPORT_PACKAGE)
                     || header.equals(IMPORT_PACKAGE))
                 continue;
+            
+            if ( header.equalsIgnoreCase("Name")) {
+                error("Your bnd file contains a header called 'Name'. This interferes with the manifest name section.");
+                continue;
+            }
 
             if (Verifier.HEADER_PATTERN.matcher(header).matches()) {
                 String value = getProperty(header);
@@ -621,13 +626,13 @@ public class Analyzer extends Processor {
         if (bndInfo == null) {
             bndInfo = new Properties();
             try {
-                InputStream in = Analyzer.class.getResourceAsStream("bnd.info");
+                InputStream in = getClass().getResourceAsStream("bnd.info");
                 if (in != null) {
                     bndInfo.load(in);
                     in.close();
                 }
             } catch (IOException ioe) {
-                warning("Could not read bnd.info in " + Analyzer.class.getPackage()
+                warning("Could not read bnd.info in " + getClass().getPackage()
                         + ioe);
             }
         }
@@ -1580,7 +1585,7 @@ public class Analyzer extends Processor {
                     }
                 } else {
                     if (dot.getDirectories().containsKey(path)) {
-                        analyzeJar(dot, path + '/', classSpace, contained, referred,
+                        analyzeJar(dot, path, classSpace, contained, referred,
                                 uses);
                     } else {
                         warning("No sub JAR or directory " + path);

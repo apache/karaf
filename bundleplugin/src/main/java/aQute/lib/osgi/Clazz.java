@@ -59,6 +59,37 @@ public class Clazz {
     int                              class$      = 0;
     String[]                         interfaces;
     String                           zuper;
+    ClassDataCollector               cd          = new ClassDataCollector() {
+                                                     public void addReference(
+                                                             String token) {
+                                                     }
+
+                                                     public void classBegin(
+                                                             int access,
+                                                             String name) {
+                                                     }
+
+                                                     public void classEnd() {
+                                                     }
+
+                                                     public void extendsClass(
+                                                             String name) {
+                                                     }
+
+                                                     public void field(
+                                                             int access,
+                                                             String descriptor) {
+                                                     }
+
+                                                     public void implementsInterfaces(
+                                                             String[] name) {
+                                                     }
+
+                                                     public void method(
+                                                             int access,
+                                                             String descriptor) {
+                                                     }
+                                                 };
 
     public Clazz(String path) {
         this.path = path;
@@ -72,6 +103,7 @@ public class Clazz {
     }
 
     Set<String> parseClassFile(DataInputStream in) throws IOException {
+
         xref = new HashSet<String>();
         classes = new HashSet<Integer>();
         descriptors = new HashSet<Integer>();
@@ -143,100 +175,111 @@ public class Clazz {
          * Falkenberg
          */
 
-        /* int access_flags = */in.readUnsignedShort(); // access
+        int access_flags = in.readUnsignedShort(); // access
         int this_class = in.readUnsignedShort();
-        int super_class = in.readUnsignedShort();
-        zuper = (String) pool[intPool[super_class]];
-        if (zuper != null) {
-            addReference(zuper);
-        }
         className = (String) pool[intPool[this_class]];
+        cd.classBegin(access_flags, className);
 
-        int interfacesCount = in.readUnsignedShort();
-        if (interfacesCount > 0) {
-            interfaces = new String[interfacesCount];
-            for (int i = 0; i < interfacesCount; i++)
-                interfaces[i] = (String) pool[intPool[in.readUnsignedShort()]];
-        }
-        
-        int fieldsCount = in.readUnsignedShort();
-        for (int i = 0; i < fieldsCount; i++) {
-            /* access_flags = */in.readUnsignedShort(); // skip access flags
-            int name_index = in.readUnsignedShort();
-            int descriptor_index = in.readUnsignedShort();
+        try {
 
-            // Java prior to 1.5 used a weird
-            // static variable to hold the com.X.class
-            // result construct. If it did not find it
-            // it would create a variable class$com$X
-            // that would be used to hold the class
-            // object gotten with Class.forName ...
-            // Stupidly, they did not actively use the
-            // class name for the field type, so bnd
-            // would not see a reference. We detect
-            // this case and add an artificial descriptor
-            String name = pool[name_index].toString(); // name_index
-            if (name.startsWith("class$")) {
-                crawl = true;
+            int super_class = in.readUnsignedShort();
+            zuper = (String) pool[intPool[super_class]];
+            if (zuper != null) {
+                addReference(zuper);
+                cd.extendsClass(zuper);
             }
 
-            descriptors.add(new Integer(descriptor_index));
+            int interfacesCount = in.readUnsignedShort();
+            if (interfacesCount > 0) {
+                interfaces = new String[interfacesCount];
+                for (int i = 0; i < interfacesCount; i++)
+                    interfaces[i] = (String) pool[intPool[in
+                            .readUnsignedShort()]];
+                cd.implementsInterfaces(interfaces);
+            }
+
+            int fieldsCount = in.readUnsignedShort();
+            for (int i = 0; i < fieldsCount; i++) {
+                access_flags = in.readUnsignedShort(); // skip access flags
+                int name_index = in.readUnsignedShort();
+                int descriptor_index = in.readUnsignedShort();
+
+                // Java prior to 1.5 used a weird
+                // static variable to hold the com.X.class
+                // result construct. If it did not find it
+                // it would create a variable class$com$X
+                // that would be used to hold the class
+                // object gotten with Class.forName ...
+                // Stupidly, they did not actively use the
+                // class name for the field type, so bnd
+                // would not see a reference. We detect
+                // this case and add an artificial descriptor
+                String name = pool[name_index].toString(); // name_index
+                if (name.startsWith("class$")) {
+                    crawl = true;
+                }
+                cd.field(access_flags, pool[descriptor_index].toString());
+                descriptors.add(new Integer(descriptor_index));
+                doAttributes(in, false);
+            }
+
+            //
+            // Check if we have to crawl the code to find
+            // the ldc(_w) <string constant> invokestatic Class.forName
+            // if so, calculate the method ref index so we
+            // can do this efficiently
+            //
+            if (crawl) {
+                forName = findMethod("java/lang/Class", "forName",
+                        "(Ljava/lang/String;)Ljava/lang/Class;");
+                class$ = findMethod(className, "class$",
+                        "(Ljava/lang/String;)Ljava/lang/Class;");
+            }
+
+            //
+            // Handle the methods
+            //
+            int methodCount = in.readUnsignedShort();
+            for (int i = 0; i < methodCount; i++) {
+                access_flags = in.readUnsignedShort();
+                /* int name_index = */in.readUnsignedShort();
+                int descriptor_index = in.readUnsignedShort();
+                // String s = (String) pool[name_index];
+                descriptors.add(new Integer(descriptor_index));
+                cd.method(access_flags, pool[descriptor_index].toString());
+                doAttributes(in, crawl);
+            }
+
             doAttributes(in, false);
+
+            //
+            // Now iterate over all classes we found and
+            // parse those as well. We skip duplicates
+            //
+
+            for (Iterator<Integer> e = classes.iterator(); e.hasNext();) {
+                int class_index = e.next().shortValue();
+                doClassReference((String) pool[class_index]);
+            }
+
+            //
+            // Parse all the descriptors we found
+            //
+
+            for (Iterator<Integer> e = descriptors.iterator(); e.hasNext();) {
+                Integer index = e.next();
+                String prototype = (String) pool[index.intValue()];
+                if (prototype != null)
+                    parseDescriptor(prototype);
+                else
+                    System.err.println("Unrecognized descriptor: " + index);
+            }
+            Set<String> xref = this.xref;
+            reset();
+            return xref;
+        } finally {
+            cd.classEnd();
         }
-
-        //
-        // Check if we have to crawl the code to find
-        // the ldc(_w) <string constant> invokestatic Class.forName
-        // if so, calculate the method ref index so we
-        // can do this efficiently
-        //
-        if (crawl) {
-            forName = findMethod("java/lang/Class", "forName",
-                    "(Ljava/lang/String;)Ljava/lang/Class;");
-            class$ = findMethod(className, "class$",
-                    "(Ljava/lang/String;)Ljava/lang/Class;");
-        }
-
-        //
-        // Handle the methods
-        //
-        int methodCount = in.readUnsignedShort();
-        for (int i = 0; i < methodCount; i++) {
-            /* access_flags = */in.readUnsignedShort();
-            /* int name_index = */in.readUnsignedShort();
-            int descriptor_index = in.readUnsignedShort();
-            // String s = (String) pool[name_index];
-            descriptors.add(new Integer(descriptor_index));
-            doAttributes(in, crawl);
-        }
-
-        doAttributes(in, false);
-
-        //
-        // Now iterate over all classes we found and
-        // parse those as well. We skip duplicates
-        //
-
-        for (Iterator<Integer> e = classes.iterator(); e.hasNext();) {
-            int class_index = e.next().shortValue();
-            doClassReference((String) pool[class_index]);
-        }
-
-        //
-        // Parse all the descriptors we found
-        //
-
-        for (Iterator<Integer> e = descriptors.iterator(); e.hasNext();) {
-            Integer index = e.next();
-            String prototype = (String) pool[index.intValue()];
-            if (prototype != null)
-                parseDescriptor(prototype);
-            else
-                System.err.println("Unrecognized descriptor: " + index);
-        }
-        Set<String> xref = this.xref;
-        reset();
-        return xref;
     }
 
     protected void pool(Object[] pool, int[] intPool) {
@@ -365,6 +408,7 @@ public class Clazz {
         if (next != null) {
             String normalized = normalize(next);
             if (normalized != null) {
+                cd.addReference(next);
                 String pack = getPackage(normalized);
                 packageReference(pack);
             }
@@ -601,23 +645,32 @@ public class Clazz {
             imports.put(pack, new LinkedHashMap<String, String>());
     }
 
-    void parseDescriptor(String prototype) {
-        addReference(prototype);
-        StringTokenizer st = new StringTokenizer(prototype, "(;)", true);
-        while (st.hasMoreTokens()) {
-            if (st.nextToken().equals("(")) {
-                String token = st.nextToken();
-                while (!token.equals(")")) {
-                    addReference(token);
-                    token = st.nextToken();
-                }
-                token = st.nextToken();
-                addReference(token);
+    public void parseDescriptor(String prototype) {
+        if (prototype.startsWith("("))
+            parseMethodDescriptor(prototype);
+        else
+            addReference(prototype);
+    }
+
+    void parseMethodDescriptor(String prototype) {
+        int last = prototype.indexOf(')');
+        if (last < 0)
+            throw new IllegalArgumentException(
+                    "Invalid method descriptor in class file: " + className
+                            + " " + prototype);
+
+        for (int i = 1; i < last; i++) {
+            if (prototype.charAt(i) == 'L') {
+                int next = prototype.indexOf(';', i);
+                addReference(prototype.substring(i, next));
+                i = next;
             }
         }
+        addReference(prototype.substring(last + 1));
     }
 
     private void addReference(String token) {
+        cd.addReference(token);
         while (token.startsWith("["))
             token = token.substring(1);
 
@@ -697,45 +750,45 @@ public class Clazz {
         descriptors = null;
     }
 
-    public boolean is(QUERY query, Instruction instr, Map<String, Clazz> classspace) {
+    public boolean is(QUERY query, Instruction instr,
+            Map<String, Clazz> classspace) {
         switch (query) {
         case ANY:
             return true;
 
         case NAMED:
-            if ( instr.matches(getClassName()))
+            if (instr.matches(getClassName()))
                 return !instr.isNegated();
             return false;
-            
+
         case VERSION:
             String v = major + "/" + minor;
-            if ( instr.matches(v))
+            if (instr.matches(v))
                 return !instr.isNegated();
             return false;
-            
-            
+
         case IMPLEMENTS:
-            for ( int i=0; interfaces != null && i<interfaces.length; i++ ) {
-                if ( instr.matches(interfaces[i]))
+            for (int i = 0; interfaces != null && i < interfaces.length; i++) {
+                if (instr.matches(interfaces[i]))
                     return !instr.isNegated();
             }
             break;
         case EXTENDS:
-            if ( zuper == null )
+            if (zuper == null)
                 return false;
-            
-            if ( instr.matches(zuper))
+
+            if (instr.matches(zuper))
                 return !instr.isNegated();
             break;
-            
+
         case IMPORTS:
-            for ( String imp : imports.keySet() ) {
-                if ( instr.matches(imp.replace('.', '/')))
-                    return !instr.isNegated();                    
+            for (String imp : imports.keySet()) {
+                if (instr.matches(imp.replace('.', '/')))
+                    return !instr.isNegated();
             }
         }
-        
-        if ( zuper == null || classspace == null)
+
+        if (zuper == null || classspace == null)
             return false;
 
         Clazz clazz = classspace.get(zuper);
@@ -751,5 +804,9 @@ public class Clazz {
 
     public String getFQN() {
         return getClassName().replace('/', '.');
+    }
+
+    public void setClassDataCollector(ClassDataCollector cd) {
+        this.cd = cd;
     }
 }
