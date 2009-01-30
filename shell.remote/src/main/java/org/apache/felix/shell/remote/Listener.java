@@ -19,6 +19,7 @@ package org.apache.felix.shell.remote;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -33,6 +34,7 @@ class Listener
 {
 
     private int m_Port;
+    private String m_Ip;
     private Thread m_ListenerThread;
     private boolean m_Stop = false;
     private ServerSocket m_ServerSocket;
@@ -46,6 +48,7 @@ class Listener
     public void activate( BundleContext bundleContext )
     {
         //configure from framework property
+        m_Ip = getProperty( bundleContext, "osgi.shell.telnet.ip", "127.0.0.1" );
         m_Port = getProperty( bundleContext, "osgi.shell.telnet.port", 6666 );
         m_MaxConnections = getProperty( bundleContext, "osgi.shell.telnet.maxconn", 2 );
         m_UseCounter = new AtomicInteger( 0 );
@@ -101,7 +104,7 @@ class Listener
                     should be handled properly, but denial of service attacks via massive parallel
                     program logins should be prevented with this.
                 */
-                m_ServerSocket = new ServerSocket( m_Port, 1 );
+                m_ServerSocket = new ServerSocket( m_Port, 1, InetAddress.getByName(m_Ip) );
                 do
                 {
                     try
@@ -157,6 +160,17 @@ class Listener
             {
                 Activator.getServices().error( "Listener::activate()", ex );
             }
+        }
+
+        return defaultValue;
+    }
+
+    private String getProperty( BundleContext bundleContext, String propName, String defaultValue )
+    {
+        String propValue = bundleContext.getProperty( propName );
+        if ( propValue != null )
+        {
+           return propValue;
         }
 
         return defaultValue;
