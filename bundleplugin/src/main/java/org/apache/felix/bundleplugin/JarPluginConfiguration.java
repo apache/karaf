@@ -49,10 +49,26 @@ public final class JarPluginConfiguration
             ExpressionEvaluator evaluator = new DefaultExpressionEvaluator();
             ConverterLookup converters = new DefaultConverterLookup();
 
-            PlexusConfiguration pluginSettings = getCorePluginConfiguration( project, "jar" );
-            PlexusConfiguration archiveSettings = pluginSettings.getChild( "archive" );
+            PlexusConfiguration settings = null;
 
-            converter.processConfiguration( converters, archiveConfig, loader, archiveSettings, evaluator, null );
+            try
+            {
+                // first look for bundle specific archive settings
+                settings = getPluginConfiguration( project, "org.apache.felix", "maven-bundle-plugin" );
+                settings = settings.getChild( "archive" );
+            }
+            catch ( Exception e )
+            {
+            }
+
+            // if it's empty fall back to the jar archive settings
+            if ( null == settings || settings.getChildCount() == 0 )
+            {
+                settings = getCorePluginConfiguration( project, "jar" );
+                settings = settings.getChild( "archive" );
+            }
+
+            converter.processConfiguration( converters, archiveConfig, loader, settings, evaluator, null );
         }
         catch ( Exception e )
         {

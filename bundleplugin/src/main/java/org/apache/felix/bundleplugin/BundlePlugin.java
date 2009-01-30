@@ -174,6 +174,13 @@ public class BundlePlugin extends AbstractMojo
      */
     private Maven2OsgiConverter m_maven2OsgiConverter;
 
+    /**
+     * The archive configuration to use.
+     *
+     * @parameter
+     */
+    private MavenArchiveConfiguration archive; // accessed indirectly in JarPluginConfiguration
+
     private static final String MAVEN_RESOURCES = "{maven-resources}";
 
     private static final String[] EMPTY_STRING_ARRAY =
@@ -400,7 +407,6 @@ public class BundlePlugin extends AbstractMojo
 
         String[] removeHeaders = builder.getProperty( Analyzer.REMOVE_HEADERS, "" ).split( "," );
 
-        doMavenMetadata( currentProject, jar );
         mergeMavenManifest( currentProject, jar, removeHeaders, getLog() );
         builder.setJar( jar );
 
@@ -418,7 +424,7 @@ public class BundlePlugin extends AbstractMojo
             log.debug( "------------------------------------------------------------------------" );
             for ( Enumeration e = properties.propertyNames(); e.hasMoreElements(); )
             {
-                String key = (String) e.nextElement();
+                String key = ( String ) e.nextElement();
                 log.debug( key + ": " + properties.getProperty( key ) );
             }
             log.debug( "------------------------------------------------------------------------" );
@@ -434,7 +440,7 @@ public class BundlePlugin extends AbstractMojo
             log.debug( "------------------------------------------------------------------------" );
             for ( Iterator i = classpath.iterator(); i.hasNext(); )
             {
-                File path = ((Jar)i.next()).getSource();
+                File path = ( ( Jar ) i.next() ).getSource();
                 log.debug( null == path ? "null" : path.toString() );
             }
             log.debug( "------------------------------------------------------------------------" );
@@ -450,7 +456,7 @@ public class BundlePlugin extends AbstractMojo
             log.debug( "------------------------------------------------------------------------" );
             for ( Iterator i = manifest.getMainAttributes().entrySet().iterator(); i.hasNext(); )
             {
-                Map.Entry entry = (Map.Entry) i.next();
+                Map.Entry entry = ( Map.Entry ) i.next();
                 log.debug( entry.getKey() + ": " + entry.getValue() );
             }
             log.debug( "------------------------------------------------------------------------" );
@@ -501,8 +507,11 @@ public class BundlePlugin extends AbstractMojo
     }
 
 
-    protected static void mergeMavenManifest( MavenProject currentProject, Jar jar, String[] removeHeaders, Log log )
+    protected void mergeMavenManifest( MavenProject currentProject, Jar jar, String[] removeHeaders, Log log )
+        throws IOException
     {
+        boolean addMavenDescriptor = true;
+
         try
         {
             /*
@@ -510,6 +519,8 @@ public class BundlePlugin extends AbstractMojo
              */
             MavenArchiveConfiguration archiveConfig = JarPluginConfiguration.getArchiveConfiguration( currentProject );
             String mavenManifestText = new MavenArchiver().getManifest( currentProject, archiveConfig ).toString();
+            addMavenDescriptor = archiveConfig.isAddMavenDescriptor();
+
             Manifest mavenManifest = new Manifest();
 
             // First grab the external manifest file (if specified)
@@ -575,6 +586,11 @@ public class BundlePlugin extends AbstractMojo
         catch ( Exception e )
         {
             log.warn( "Unable to merge Maven manifest: " + e.getLocalizedMessage() );
+        }
+
+        if ( addMavenDescriptor )
+        {
+            doMavenMetadata( currentProject, jar );
         }
     }
 
