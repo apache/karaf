@@ -25,7 +25,6 @@ import java.security.*;
 import java.util.Hashtable;
 import java.util.jar.JarFile;
 
-import org.apache.felix.framework.searchpolicy.ModuleClassLoader;
 import org.apache.felix.framework.searchpolicy.ModuleImpl;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -540,7 +539,8 @@ public class SecureAction
             return new JarFileX(file);
         }
     }
-
+// TODO: REFACTOR - SecureAction fix needed.
+/*
     public ModuleClassLoader createModuleClassLoader(ModuleImpl impl)
     {
         return createModuleClassLoader(impl, null);
@@ -567,7 +567,7 @@ public class SecureAction
             return new ModuleClassLoader(impl, protectionDomain);
         }
     }
-
+*/
     public void startActivator(BundleActivator activator, BundleContext context)
         throws Exception
     {
@@ -1104,10 +1104,11 @@ public class SecureAction
             {
                 return ((URLConnection) arg1).getInputStream();
             }
-            else if (action == CREATE_MODULECLASSLOADER_ACTION)
-            {
-                return new ModuleClassLoader((ModuleImpl) arg1, (ProtectionDomain) arg2);
-            }
+// TODO: REFACTOR - SecureAction fix needed.
+//            else if (action == CREATE_MODULECLASSLOADER_ACTION)
+//            {
+//                return new ModuleClassLoader((ModuleImpl) arg1, (ProtectionDomain) arg2);
+//            }
             else if (action == START_ACTIVATOR_ACTION)
             {
                 ((BundleActivator) arg1).start((BundleContext) arg2);

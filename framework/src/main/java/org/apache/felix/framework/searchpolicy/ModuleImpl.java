@@ -21,18 +21,25 @@ package org.apache.felix.framework.searchpolicy;
 import org.apache.felix.moduleloader.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
 import java.security.ProtectionDomain;
+import java.security.SecureClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import org.apache.felix.framework.Felix.FelixResolver;
 import org.apache.felix.framework.Logger;
+import org.apache.felix.framework.cache.JarContent;
 import org.apache.felix.framework.util.CompoundEnumeration;
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.SecureAction;
@@ -40,9 +47,11 @@ import org.apache.felix.framework.util.SecurityManagerEx;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.framework.util.manifestparser.ManifestParser;
 import org.apache.felix.framework.util.manifestparser.R4Library;
+import org.apache.felix.framework.util.manifestparser.Requirement;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
 
 public class ModuleImpl implements IModule
@@ -62,8 +71,7 @@ public class ModuleImpl implements IModule
     private final IRequirement[] m_requirements;
     private final IRequirement[] m_dynamicRequirements;
     private final R4Library[] m_nativeLibraries;
-
-    private Bundle m_bundle = null;
+    private final Bundle m_bundle;
 
     private IModule[] m_fragments = null;
     private IWire[] m_wires = null;
@@ -86,12 +94,18 @@ public class ModuleImpl implements IModule
     // Re-usable security manager for accessing class context.
     private static SecurityManagerEx m_sm = new SecurityManagerEx();
 
-    public ModuleImpl(Logger logger, Map configMap, FelixResolver resolver,
-        String id, Map headerMap, IContent content) throws BundleException
+    // Thread local to detect class loading cycles.
+    private final ThreadLocal m_cycleCheck = new ThreadLocal();
+
+    public ModuleImpl(
+        Logger logger, Map configMap, FelixResolver resolver,
+        Bundle bundle, String id, Map headerMap, IContent content)
+        throws BundleException
     {
         m_logger = logger;
         m_configMap = configMap;
         m_resolver = resolver;
+        m_bundle = bundle;
         m_id = id;
         m_headerMap = headerMap;
         m_content = content;
@@ -190,32 +204,18 @@ public class ModuleImpl implements IModule
         }
    }
 
-    Logger getLogger()
+    //
+    // Metadata access methods.
+    //
+
+    public Map getHeaders()
     {
-        return m_logger;
+        return m_headerMap;
     }
 
-    FelixResolver getResolver()
+    public String getSymbolicName()
     {
-        return m_resolver;
-    }
-
-    public synchronized Bundle getBundle()
-    {
-        return m_bundle;
-    }
-
-    public synchronized void setBundle(Bundle bundle)
-    {
-        if (m_bundle == null)
-        {
-            m_bundle = bundle;
-        }
-    }
-
-    public String getId()
-    {
-        return m_id;
+        return m_symbolicName;
     }
 
     public String getManifestVersion()
@@ -226,16 +226,6 @@ public class ModuleImpl implements IModule
     public Version getVersion()
     {
         return m_version;
-    }
-
-    public String getSymbolicName()
-    {
-        return m_symbolicName;
-    }
-
-    public Map getHeaders()
-    {
-        return m_headerMap;
     }
 
     public ICapability[] getCapabilities()
@@ -258,63 +248,18 @@ public class ModuleImpl implements IModule
         return m_nativeLibraries;
     }
 
-    public synchronized IModule[] getFragments()
+    //
+    // Run-time data access.
+    //
+
+    public Bundle getBundle()
     {
-        return m_fragments;
+        return m_bundle;
     }
 
-    public synchronized void attachFragments(IModule[] fragments) throws Exception
+    public String getId()
     {
-        // Remove module from old fragment dependencies.
-        // We will generally only remove module fragment
-        // dependencies when we are uninstalling the module.
-        for (int i = 0; (m_fragments != null) && (i < m_fragments.length); i++)
-        {
-            ((ModuleImpl) m_fragments[i]).removeDependentHost(this);
-        }
-
-        // Update the dependencies on the new fragments.
-        m_fragments = fragments;
-
-        // We need to add ourself as a dependent of each fragment
-        // module. We also need to create an array of fragment contents
-        // to attach to our content loader.
-        if (m_fragments != null)
-        {
-            IContent[] fragmentContents = new IContent[m_fragments.length];
-            for (int i = 0; (m_fragments != null) && (i < m_fragments.length); i++)
-            {
-                ((ModuleImpl) m_fragments[i]).addDependentHost(this);
-                fragmentContents[i] =
-                    m_fragments[i].getContent()
-                        .getEntryAsContent(FelixConstants.CLASS_PATH_DOT);
-            }
-            // Now attach the fragment contents to our content loader.
-            attachFragmentContents(fragmentContents);
-        }
-    }
-
-    private void attachFragmentContents(IContent[] fragmentContents)
-        throws Exception
-    {
-        // Close existing fragment contents.
-        if (m_fragmentContents != null)
-        {
-            for (int i = 0; i < m_fragmentContents.length; i++)
-            {
-                m_fragmentContents[i].close();
-            }
-        }
-        m_fragmentContents = fragmentContents;
-
-        if (m_contentPath != null)
-        {
-            for (int i = 0; i < m_contentPath.length; i++)
-            {
-                m_contentPath[i].close();
-            }
-        }
-        m_contentPath = initializeContentPath();
+        return m_id;
     }
 
     public synchronized IWire[] getWires()
@@ -355,263 +300,6 @@ public class ModuleImpl implements IModule
         }
     }
 
-    public synchronized IModule[] getDependentHosts()
-    {
-        return m_dependentHosts;
-    }
-
-    public synchronized void addDependentHost(IModule module)
-    {
-        m_dependentHosts = addDependent(m_dependentHosts, module);
-    }
-
-    public synchronized void removeDependentHost(IModule module)
-    {
-        m_dependentHosts = removeDependent(m_dependentHosts, module);
-    }
-
-    public synchronized IModule[] getDependentImporters()
-    {
-        return m_dependentImporters;
-    }
-
-    public synchronized void addDependentImporter(IModule module)
-    {
-        m_dependentImporters = addDependent(m_dependentImporters, module);
-    }
-
-    public synchronized void removeDependentImporter(IModule module)
-    {
-        m_dependentImporters = removeDependent(m_dependentImporters, module);
-    }
-
-    public synchronized IModule[] getDependentRequirers()
-    {
-        return m_dependentRequirers;
-    }
-
-    public synchronized void addDependentRequirer(IModule module)
-    {
-        m_dependentRequirers = addDependent(m_dependentRequirers, module);
-    }
-
-    public synchronized void removeDependentRequirer(IModule module)
-    {
-        m_dependentRequirers = removeDependent(m_dependentRequirers, module);
-    }
-
-    public synchronized IModule[] getDependents()
-    {
-        IModule[] dependents = new IModule[
-            m_dependentHosts.length + m_dependentImporters.length + m_dependentRequirers.length];
-        System.arraycopy(
-            m_dependentHosts,
-            0,
-            dependents,
-            0,
-            m_dependentHosts.length);
-        System.arraycopy(
-            m_dependentImporters,
-            0,
-            dependents,
-            m_dependentHosts.length,
-            m_dependentImporters.length);
-        System.arraycopy(
-            m_dependentRequirers,
-            0,
-            dependents,
-            m_dependentHosts.length + m_dependentImporters.length,
-            m_dependentRequirers.length);
-        return dependents;
-    }
-
-    public Class getClassByDelegation(String name) throws ClassNotFoundException
-    {
-        try
-        {
-            return getClassLoader().loadClass(name);
-        }
-        catch (ClassNotFoundException ex)
-        {
-// TODO: REFACTOR - Should this log?
-            m_logger.log(
-                Logger.LOG_WARNING,
-                ex.getMessage(),
-                ex);
-            throw ex;
-        }
-    }
-
-    public URL getResourceByDelegation(String name)
-    {
-        return getClassLoader().getResource(name);
-    }
-
-    public Enumeration getResourcesByDelegation(String name)
-    {
-        Enumeration urls = null;
-        List enums = new ArrayList();
-
-        // First, try to resolve the originating module.
-// TODO: FRAMEWORK - Consider opimizing this call to resolve, since it is called
-// for each class load.
-        try
-        {
-            m_resolver.resolve(this);
-        }
-        catch (ResolveException ex)
-        {
-            // The spec states that if the bundle cannot be resolved, then
-            // only the local bundle's resources should be searched. So we
-            // will ask the module's own class path.
-            urls = getResourcesFromModule(name);
-            return urls;
-        }
-
-        // Get the package of the target class/resource.
-        String pkgName = Util.getResourcePackage(name);
-
-        // Delegate any packages listed in the boot delegation
-        // property to the parent class loader.
-        // NOTE for the default package:
-        // Only consider delegation if we have a package name, since
-        // we don't want to promote the default package. The spec does
-        // not take a stand on this issue.
-        if (pkgName.length() > 0)
-        {
-            for (int i = 0; i < m_bootPkgs.length; i++)
-            {
-                // A wildcarded boot delegation package will be in the form of
-                // "foo.", so if the package is wildcarded do a startsWith() or a
-                // regionMatches() to ignore the trailing "." to determine if the
-                // request should be delegated to the parent class loader. If the
-                // package is not wildcarded, then simply do an equals() test to
-                // see if the request should be delegated to the parent class loader.
-                if ((m_bootPkgWildcards[i] &&
-                    (pkgName.startsWith(m_bootPkgs[i]) ||
-                    m_bootPkgs[i].regionMatches(0, pkgName, 0, pkgName.length())))
-                    || (!m_bootPkgWildcards[i] && m_bootPkgs[i].equals(pkgName)))
-                {
-                    try
-                    {
-                        urls = getClass().getClassLoader().getResources(name);
-                    }
-                    catch (IOException ex)
-                    {
-                        // This shouldn't happen and even if it does, there
-                        // is nothing we can do, so just ignore it.
-                    }
-                    // If this is a java.* package, then always terminate the
-                    // search; otherwise, continue to look locally.
-                    if (m_bootPkgs[i].startsWith("java."))
-                    {
-                        return urls;
-                    }
-
-                    enums.add(urls);
-                    break;
-                }
-            }
-        }
-
-        // Look in the module's imports.
-        // We delegate to the module's wires for the resources.
-        // If any resources are found, this means that the package of these
-        // resources is imported, we must not keep looking since we do not
-        // support split-packages.
-
-        // Note that the search may be aborted if this method throws an
-        // exception, otherwise it continues if a null is returned.
-        IWire[] wires = getWires();
-        for (int i = 0; (wires != null) && (i < wires.length); i++)
-        {
-            if (wires[i] instanceof R4Wire)
-            {
-                try
-                {
-                    // If we find the class or resource, then return it.
-                    urls = wires[i].getResources(name);
-                }
-                catch (ResourceNotFoundException ex)
-                {
-                    urls = null;
-                }
-                if (urls != null)
-                {
-                    enums.add(urls);
-                    return new CompoundEnumeration((Enumeration[])
-                        enums.toArray(new Enumeration[enums.size()]));
-                }
-            }
-        }
-
-        // See whether we can get the resource from the required bundles and
-        // regardless of whether or not this is the case continue to the next
-        // step potentially passing on the result of this search (if any).
-        for (int i = 0; (wires != null) && (i < wires.length); i++)
-        {
-            if (wires[i] instanceof R4WireModule)
-            {
-                try
-                {
-                    // If we find the class or resource, then add it.
-                    urls = wires[i].getResources(name);
-                }
-                catch (ResourceNotFoundException ex)
-                {
-                    urls = null;
-                }
-                if (urls != null)
-                {
-                    enums.add(urls);
-                }
-            }
-        }
-
-        // Try the module's own class path. If we can find the resource then
-        // return it together with the results from the other searches else
-        // try to look into the dynamic imports.
-        urls = getResourcesFromModule(name);
-        if (urls != null)
-        {
-            enums.add(urls);
-        }
-        else
-        {
-            // If not found, then try the module's dynamic imports.
-            // At this point, the module's imports were searched and so was the
-            // the module's content. Now we make an attempt to load the
-            // class/resource via a dynamic import, if possible.
-            IWire wire = null;
-            try
-            {
-                wire = m_resolver.resolveDynamicImport(this, pkgName);
-            }
-            catch (ResolveException ex)
-            {
-                // Ignore this since it is likely normal.
-            }
-            if (wire != null)
-            {
-                try
-                {
-                    urls = wire.getResources(name);
-                }
-                catch (ResourceNotFoundException ex)
-                {
-                    urls = null;
-                }
-                if (urls != null)
-                {
-                    enums.add(urls);
-                }
-            }
-        }
-
-        return new CompoundEnumeration((Enumeration[])
-            enums.toArray(new Enumeration[enums.size()]));
-    }
-
     public boolean isResolved()
     {
         return m_isResolved;
@@ -622,78 +310,16 @@ public class ModuleImpl implements IModule
         m_isResolved = true;
     }
 
-    public String toString()
-    {
-        return m_id;
-    }
-
-    private static IModule[] addDependent(IModule[] modules, IModule module)
-    {
-        // Make sure the dependent module is not already present.
-        for (int i = 0; i < modules.length; i++)
-        {
-            if (modules[i].equals(module))
-            {
-                return modules;
-            }
-        }
-        IModule[] tmp = new IModule[modules.length + 1];
-        System.arraycopy(modules, 0, tmp, 0, modules.length);
-        tmp[modules.length] = module;
-        return tmp;
-    }
-
-    private static IModule[] removeDependent(IModule[] modules, IModule module)
-    {
-        IModule[] tmp = modules;
-
-        // Make sure the dependent module is present.
-        for (int i = 0; i < modules.length; i++)
-        {
-            if (modules[i].equals(module))
-            {
-                // If this is the module, then point to empty list.
-                if ((modules.length - 1) == 0)
-                {
-                    tmp = new IModule[0];
-                }
-                // Otherwise, we need to do some array copying.
-                else
-                {
-                    tmp = new IModule[modules.length - 1];
-                    System.arraycopy(modules, 0, tmp, 0, i);
-                    if (i < tmp.length)
-                    {
-                        System.arraycopy(modules, i + 1, tmp, i, tmp.length - i);
-                    }
-                }
-                break;
-            }
-        }
-
-        return tmp;
-    }
-
-    public synchronized void close()
-    {
-        m_content.close();
-        for (int i = 0; (m_contentPath != null) && (i < m_contentPath.length); i++)
-        {
-            m_contentPath[i].close();
-        }
-        for (int i = 0; (m_fragmentContents != null) && (i < m_fragmentContents.length); i++)
-        {
-            m_fragmentContents[i].close();
-        }
-        m_classLoader = null;
-    }
+    //
+    // Content access methods.
+    //
 
     public IContent getContent()
     {
         return m_content;
     }
 
-    synchronized IContent[] getClassPath()
+    private synchronized IContent[] getContentPath()
     {
         if (m_contentPath == null)
         {
@@ -707,185 +333,6 @@ public class ModuleImpl implements IModule
             }
         }
         return m_contentPath;
-    }
-
-    public synchronized void setURLPolicy(IURLPolicy urlPolicy)
-    {
-        m_urlPolicy = urlPolicy;
-    }
-
-    public synchronized IURLPolicy getURLPolicy()
-    {
-        return m_urlPolicy;
-    }
-
-    public synchronized void setSecurityContext(Object securityContext)
-    {
-        m_protectionDomain = (ProtectionDomain) securityContext;
-    }
-
-    public synchronized Object getSecurityContext()
-    {
-        return m_protectionDomain;
-    }
-
-    public Class getClassFromModule(String name) throws ClassNotFoundException
-    {
-        try
-        {
-            return getClassLoader().findClass(name);
-        }
-        catch (ClassNotFoundException ex)
-        {
-            m_logger.log(
-                Logger.LOG_WARNING,
-                ex.getMessage(),
-                ex);
-            throw ex;
-        }
-    }
-
-    public URL getResourceFromModule(String name)
-    {
-        URL url = null;
-
-        // Remove leading slash, if present, but special case
-        // "/" so that it returns a root URL...this isn't very
-        // clean or meaninful, but the Spring guys want it.
-        if (name.equals("/"))
-        {
-            // Just pick a class path index since it doesn't really matter.
-            url = getURLPolicy().createURL(1, name);
-        }
-        else if (name.startsWith("/"))
-        {
-            name = name.substring(1);
-        }
-
-        // Check the module class path.
-        IContent[] contentPath = getClassPath();
-        for (int i = 0;
-            (url == null) &&
-            (i < contentPath.length); i++)
-        {
-            if (contentPath[i].hasEntry(name))
-            {
-                url = getURLPolicy().createURL(i + 1, name);
-            }
-        }
-
-        return url;
-    }
-
-    public Enumeration getResourcesFromModule(String name)
-    {
-        Vector v = new Vector();
-
-        // Special case "/" so that it returns a root URLs for
-        // each bundle class path entry...this isn't very
-        // clean or meaningful, but the Spring guys want it.
-        if (name.equals("/"))
-        {
-            for (int i = 0; i < getClassPath().length; i++)
-            {
-                v.addElement(getURLPolicy().createURL(i + 1, name));
-            }
-        }
-        else
-        {
-            // Remove leading slash, if present.
-            if (name.startsWith("/"))
-            {
-                name = name.substring(1);
-            }
-
-            // Check the module class path.
-            IContent[] contentPath = getClassPath();
-            for (int i = 0; i < contentPath.length; i++)
-            {
-                if (contentPath[i].hasEntry(name))
-                {
-                    // Use the class path index + 1 for creating the path so
-                    // that we can differentiate between module content URLs
-                    // (where the path will start with 0) and module class
-                    // path URLs.
-                    v.addElement(getURLPolicy().createURL(i + 1, name));
-                }
-            }
-        }
-
-        return v.elements();
-    }
-
-    // TODO: API: Investigate how to handle this better, perhaps we need
-    // multiple URL policies, one for content -- one for class path.
-    public URL getResourceFromContent(String name)
-    {
-        URL url = null;
-
-        // Check for the special case of "/", which represents
-        // the root of the bundle according to the spec.
-        if (name.equals("/"))
-        {
-            url = getURLPolicy().createURL(0, "/");
-        }
-
-        if (url == null)
-        {
-            // Remove leading slash, if present.
-            if (name.startsWith("/"))
-            {
-                name = name.substring(1);
-            }
-
-            // Check the module content.
-            if (getContent().hasEntry(name))
-            {
-                // Module content URLs start with 0, whereas module
-                // class path URLs start with the index into the class
-                // path + 1.
-                url = getURLPolicy().createURL(0, name);
-            }
-        }
-
-        return url;
-    }
-
-    public boolean hasInputStream(int index, String urlPath)
-    {
-        if (urlPath.startsWith("/"))
-        {
-            urlPath = urlPath.substring(1);
-        }
-        if (index == 0)
-        {
-            return m_content.hasEntry(urlPath);
-        }
-        return getClassPath()[index - 1].hasEntry(urlPath);
-    }
-
-    public InputStream getInputStream(int index, String urlPath)
-        throws IOException
-    {
-        if (urlPath.startsWith("/"))
-        {
-            urlPath = urlPath.substring(1);
-        }
-        if (index == 0)
-        {
-            return m_content.getEntryAsStream(urlPath);
-        }
-        return getClassPath()[index - 1].getEntryAsStream(urlPath);
-    }
-
-    private synchronized ModuleClassLoader getClassLoader()
-    {
-        if (m_classLoader == null)
-        {
-            m_classLoader = m_secureAction.createModuleClassLoader(
-                this, m_protectionDomain);
-        }
-        return m_classLoader;
     }
 
     private IContent[] initializeContentPath() throws Exception
@@ -979,9 +426,70 @@ public class ModuleImpl implements IModule
         return contentList;
     }
 
-// From ModuleClassLoader
+    public Class getClassByDelegation(String name) throws ClassNotFoundException
+    {
+        Set pkgCycleSet = (Set) m_cycleCheck.get();
+        if (pkgCycleSet == null)
+        {
+            pkgCycleSet = new HashSet();
+            m_cycleCheck.set(pkgCycleSet);
+        }
+        if (!pkgCycleSet.contains(name))
+        {
+            pkgCycleSet.add(name);
+            try
+            {
+                return getClassLoader().loadClass(name);
+            }
+            catch (ClassNotFoundException ex)
+            {
+// TODO: REFACTOR - Should this log?
+                m_logger.log(
+                    Logger.LOG_WARNING,
+                    ex.getMessage(),
+                    ex);
+                throw ex;
+            }
+            finally
+            {
+                pkgCycleSet.remove(name);
+            }
+        }
+        return null;
+    }
 
-    Object findClassOrResourceByDelegation(String name, boolean isClass)
+    public URL getResourceByDelegation(String name)
+    {
+        Set pkgCycleSet = (Set) m_cycleCheck.get();
+        if (pkgCycleSet == null)
+        {
+            pkgCycleSet = new HashSet();
+            m_cycleCheck.set(pkgCycleSet);
+        }
+        if (!pkgCycleSet.contains(name))
+        {
+            pkgCycleSet.add(name);
+            try
+            {
+                return (URL) findClassOrResourceByDelegation(name, false);
+            }
+            catch (ClassNotFoundException ex)
+            {
+            }
+            catch (ResourceNotFoundException ex)
+            {
+// TODO: REFACTOR - Should this log?
+            }
+            finally
+            {
+                pkgCycleSet.remove(name);
+            }
+        }
+
+        return null;
+    }
+
+    private Object findClassOrResourceByDelegation(String name, boolean isClass)
         throws ClassNotFoundException, ResourceNotFoundException
     {
         // First, try to resolve the originating module.
@@ -1007,7 +515,7 @@ public class ModuleImpl implements IModule
                 // The spec states that if the bundle cannot be resolved, then
                 // only the local bundle's resources should be searched. So we
                 // will ask the module's own class path.
-                URL url = getResourceFromModule(name);
+                URL url = getResourceLocal(name);
                 if (url != null)
                 {
                     return url;
@@ -1084,8 +592,8 @@ public class ModuleImpl implements IModule
         if (result == null)
         {
             result = (isClass)
-                ? (Object) getClassFromModule(name)
-                : (Object) getResourceFromModule(name);
+                ? (Object) getClassLoader().findClass(name)
+                : (Object) getResourceLocal(name);
 
             // If still not found, then try the module's dynamic imports.
             if (result == null)
@@ -1107,6 +615,559 @@ public class ModuleImpl implements IModule
         }
 
         return result;
+    }
+
+    private URL getResourceLocal(String name)
+    {
+        URL url = null;
+
+        // Remove leading slash, if present, but special case
+        // "/" so that it returns a root URL...this isn't very
+        // clean or meaninful, but the Spring guys want it.
+        if (name.equals("/"))
+        {
+            // Just pick a class path index since it doesn't really matter.
+            url = getURLPolicy().createURL(1, name);
+        }
+        else if (name.startsWith("/"))
+        {
+            name = name.substring(1);
+        }
+
+        // Check the module class path.
+        IContent[] contentPath = getContentPath();
+        for (int i = 0;
+            (url == null) &&
+            (i < contentPath.length); i++)
+        {
+            if (contentPath[i].hasEntry(name))
+            {
+                url = getURLPolicy().createURL(i + 1, name);
+            }
+        }
+
+        return url;
+    }
+
+    public Enumeration getResourcesByDelegation(String name)
+    {
+        Set pkgCycleSet = (Set) m_cycleCheck.get();
+        if (pkgCycleSet == null)
+        {
+            pkgCycleSet = new HashSet();
+            m_cycleCheck.set(pkgCycleSet);
+        }
+        if (!pkgCycleSet.contains(name))
+        {
+            pkgCycleSet.add(name);
+            try
+            {
+                return findResourcesByDelegation(name);
+            }
+            finally
+            {
+                pkgCycleSet.remove(name);
+            }
+        }
+
+        return null;
+    }
+
+    private Enumeration findResourcesByDelegation(String name)
+    {
+        Enumeration urls = null;
+        List completeUrlList = new ArrayList();
+
+        // First, try to resolve the originating module.
+// TODO: FRAMEWORK - Consider opimizing this call to resolve, since it is called
+// for each class load.
+        try
+        {
+            m_resolver.resolve(this);
+        }
+        catch (ResolveException ex)
+        {
+            // The spec states that if the bundle cannot be resolved, then
+            // only the local bundle's resources should be searched. So we
+            // will ask the module's own class path.
+            urls = getResourcesLocal(name);
+            return urls;
+        }
+
+        // Get the package of the target class/resource.
+        String pkgName = Util.getResourcePackage(name);
+
+        // Delegate any packages listed in the boot delegation
+        // property to the parent class loader.
+        // NOTE for the default package:
+        // Only consider delegation if we have a package name, since
+        // we don't want to promote the default package. The spec does
+        // not take a stand on this issue.
+        if (pkgName.length() > 0)
+        {
+            for (int i = 0; i < m_bootPkgs.length; i++)
+            {
+                // A wildcarded boot delegation package will be in the form of
+                // "foo.", so if the package is wildcarded do a startsWith() or a
+                // regionMatches() to ignore the trailing "." to determine if the
+                // request should be delegated to the parent class loader. If the
+                // package is not wildcarded, then simply do an equals() test to
+                // see if the request should be delegated to the parent class loader.
+                if ((m_bootPkgWildcards[i] &&
+                    (pkgName.startsWith(m_bootPkgs[i]) ||
+                    m_bootPkgs[i].regionMatches(0, pkgName, 0, pkgName.length())))
+                    || (!m_bootPkgWildcards[i] && m_bootPkgs[i].equals(pkgName)))
+                {
+                    try
+                    {
+                        urls = getClass().getClassLoader().getResources(name);
+                    }
+                    catch (IOException ex)
+                    {
+                        // This shouldn't happen and even if it does, there
+                        // is nothing we can do, so just ignore it.
+                    }
+                    // If this is a java.* package, then always terminate the
+                    // search; otherwise, continue to look locally.
+                    if (m_bootPkgs[i].startsWith("java."))
+                    {
+                        return urls;
+                    }
+
+                    completeUrlList.add(urls);
+                    break;
+                }
+            }
+        }
+
+        // Look in the module's imports.
+        // We delegate to the module's wires for the resources.
+        // If any resources are found, this means that the package of these
+        // resources is imported, we must not keep looking since we do not
+        // support split-packages.
+
+        // Note that the search may be aborted if this method throws an
+        // exception, otherwise it continues if a null is returned.
+        IWire[] wires = getWires();
+        for (int i = 0; (wires != null) && (i < wires.length); i++)
+        {
+            if (wires[i] instanceof R4Wire)
+            {
+                try
+                {
+                    // If we find the class or resource, then return it.
+                    urls = wires[i].getResources(name);
+                }
+                catch (ResourceNotFoundException ex)
+                {
+                    urls = null;
+                }
+                if (urls != null)
+                {
+                    completeUrlList.add(urls);
+                    return new CompoundEnumeration((Enumeration[])
+                        completeUrlList.toArray(new Enumeration[completeUrlList.size()]));
+                }
+            }
+        }
+
+        // See whether we can get the resource from the required bundles and
+        // regardless of whether or not this is the case continue to the next
+        // step potentially passing on the result of this search (if any).
+        for (int i = 0; (wires != null) && (i < wires.length); i++)
+        {
+            if (wires[i] instanceof R4WireModule)
+            {
+                try
+                {
+                    // If we find the class or resource, then add it.
+                    urls = wires[i].getResources(name);
+                }
+                catch (ResourceNotFoundException ex)
+                {
+                    urls = null;
+                }
+                if (urls != null)
+                {
+                    completeUrlList.add(urls);
+                }
+            }
+        }
+
+        // Try the module's own class path. If we can find the resource then
+        // return it together with the results from the other searches else
+        // try to look into the dynamic imports.
+        urls = getResourcesLocal(name);
+        if (urls != null)
+        {
+            completeUrlList.add(urls);
+        }
+        else
+        {
+            // If not found, then try the module's dynamic imports.
+            // At this point, the module's imports were searched and so was the
+            // the module's content. Now we make an attempt to load the
+            // class/resource via a dynamic import, if possible.
+            IWire wire = null;
+            try
+            {
+                wire = m_resolver.resolveDynamicImport(this, pkgName);
+            }
+            catch (ResolveException ex)
+            {
+                // Ignore this since it is likely normal.
+            }
+            if (wire != null)
+            {
+                try
+                {
+                    urls = wire.getResources(name);
+                }
+                catch (ResourceNotFoundException ex)
+                {
+                    urls = null;
+                }
+                if (urls != null)
+                {
+                    completeUrlList.add(urls);
+                }
+            }
+        }
+
+        return new CompoundEnumeration((Enumeration[])
+            completeUrlList.toArray(new Enumeration[completeUrlList.size()]));
+    }
+
+    private Enumeration getResourcesLocal(String name)
+    {
+        Vector v = new Vector();
+
+        // Special case "/" so that it returns a root URLs for
+        // each bundle class path entry...this isn't very
+        // clean or meaningful, but the Spring guys want it.
+        final IContent[] contentPath = getContentPath();
+        if (name.equals("/"))
+        {
+            for (int i = 0; i < contentPath.length; i++)
+            {
+                v.addElement(getURLPolicy().createURL(i + 1, name));
+            }
+        }
+        else
+        {
+            // Remove leading slash, if present.
+            if (name.startsWith("/"))
+            {
+                name = name.substring(1);
+            }
+
+            // Check the module class path.
+            for (int i = 0; i < contentPath.length; i++)
+            {
+                if (contentPath[i].hasEntry(name))
+                {
+                    // Use the class path index + 1 for creating the path so
+                    // that we can differentiate between module content URLs
+                    // (where the path will start with 0) and module class
+                    // path URLs.
+                    v.addElement(getURLPolicy().createURL(i + 1, name));
+                }
+            }
+        }
+
+        return v.elements();
+    }
+
+    // TODO: API: Investigate how to handle this better, perhaps we need
+    // multiple URL policies, one for content -- one for class path.
+    public URL getEntry(String name)
+    {
+        URL url = null;
+
+        // Check for the special case of "/", which represents
+        // the root of the bundle according to the spec.
+        if (name.equals("/"))
+        {
+            url = getURLPolicy().createURL(0, "/");
+        }
+
+        if (url == null)
+        {
+            // Remove leading slash, if present.
+            if (name.startsWith("/"))
+            {
+                name = name.substring(1);
+            }
+
+            // Check the module content.
+            if (getContent().hasEntry(name))
+            {
+                // Module content URLs start with 0, whereas module
+                // class path URLs start with the index into the class
+                // path + 1.
+                url = getURLPolicy().createURL(0, name);
+            }
+        }
+
+        return url;
+    }
+
+    public boolean hasInputStream(int index, String urlPath)
+    {
+        if (urlPath.startsWith("/"))
+        {
+            urlPath = urlPath.substring(1);
+        }
+        if (index == 0)
+        {
+            return m_content.hasEntry(urlPath);
+        }
+        return getContentPath()[index - 1].hasEntry(urlPath);
+    }
+
+    public InputStream getInputStream(int index, String urlPath)
+        throws IOException
+    {
+        if (urlPath.startsWith("/"))
+        {
+            urlPath = urlPath.substring(1);
+        }
+        if (index == 0)
+        {
+            return m_content.getEntryAsStream(urlPath);
+        }
+        return getContentPath()[index - 1].getEntryAsStream(urlPath);
+    }
+
+    //
+    // Fragment and dependency management methods.
+    //
+
+    public synchronized IModule[] getFragments()
+    {
+        return m_fragments;
+    }
+
+    public synchronized void attachFragments(IModule[] fragments) throws Exception
+    {
+        // Remove module from old fragment dependencies.
+        // We will generally only remove module fragment
+        // dependencies when we are uninstalling the module.
+        for (int i = 0; (m_fragments != null) && (i < m_fragments.length); i++)
+        {
+            ((ModuleImpl) m_fragments[i]).removeDependentHost(this);
+        }
+
+        // Update the dependencies on the new fragments.
+        m_fragments = fragments;
+
+        // We need to add ourself as a dependent of each fragment
+        // module. We also need to create an array of fragment contents
+        // to attach to our content loader.
+        if (m_fragments != null)
+        {
+            IContent[] fragmentContents = new IContent[m_fragments.length];
+            for (int i = 0; (m_fragments != null) && (i < m_fragments.length); i++)
+            {
+                ((ModuleImpl) m_fragments[i]).addDependentHost(this);
+                fragmentContents[i] =
+                    m_fragments[i].getContent()
+                        .getEntryAsContent(FelixConstants.CLASS_PATH_DOT);
+            }
+            // Now attach the fragment contents to our content loader.
+            attachFragmentContents(fragmentContents);
+        }
+    }
+
+    private void attachFragmentContents(IContent[] fragmentContents)
+        throws Exception
+    {
+        // Close existing fragment contents.
+        if (m_fragmentContents != null)
+        {
+            for (int i = 0; i < m_fragmentContents.length; i++)
+            {
+                m_fragmentContents[i].close();
+            }
+        }
+        m_fragmentContents = fragmentContents;
+
+        if (m_contentPath != null)
+        {
+            for (int i = 0; i < m_contentPath.length; i++)
+            {
+                m_contentPath[i].close();
+            }
+        }
+        m_contentPath = initializeContentPath();
+    }
+
+    public synchronized IModule[] getDependentHosts()
+    {
+        return m_dependentHosts;
+    }
+
+    public synchronized void addDependentHost(IModule module)
+    {
+        m_dependentHosts = addDependent(m_dependentHosts, module);
+    }
+
+    public synchronized void removeDependentHost(IModule module)
+    {
+        m_dependentHosts = removeDependent(m_dependentHosts, module);
+    }
+
+    public synchronized IModule[] getDependentImporters()
+    {
+        return m_dependentImporters;
+    }
+
+    public synchronized void addDependentImporter(IModule module)
+    {
+        m_dependentImporters = addDependent(m_dependentImporters, module);
+    }
+
+    public synchronized void removeDependentImporter(IModule module)
+    {
+        m_dependentImporters = removeDependent(m_dependentImporters, module);
+    }
+
+    public synchronized IModule[] getDependentRequirers()
+    {
+        return m_dependentRequirers;
+    }
+
+    public synchronized void addDependentRequirer(IModule module)
+    {
+        m_dependentRequirers = addDependent(m_dependentRequirers, module);
+    }
+
+    public synchronized void removeDependentRequirer(IModule module)
+    {
+        m_dependentRequirers = removeDependent(m_dependentRequirers, module);
+    }
+
+    public synchronized IModule[] getDependents()
+    {
+        IModule[] dependents = new IModule[
+            m_dependentHosts.length + m_dependentImporters.length + m_dependentRequirers.length];
+        System.arraycopy(
+            m_dependentHosts,
+            0,
+            dependents,
+            0,
+            m_dependentHosts.length);
+        System.arraycopy(
+            m_dependentImporters,
+            0,
+            dependents,
+            m_dependentHosts.length,
+            m_dependentImporters.length);
+        System.arraycopy(
+            m_dependentRequirers,
+            0,
+            dependents,
+            m_dependentHosts.length + m_dependentImporters.length,
+            m_dependentRequirers.length);
+        return dependents;
+    }
+
+    private static IModule[] addDependent(IModule[] modules, IModule module)
+    {
+        // Make sure the dependent module is not already present.
+        for (int i = 0; i < modules.length; i++)
+        {
+            if (modules[i].equals(module))
+            {
+                return modules;
+            }
+        }
+        IModule[] tmp = new IModule[modules.length + 1];
+        System.arraycopy(modules, 0, tmp, 0, modules.length);
+        tmp[modules.length] = module;
+        return tmp;
+    }
+
+    private static IModule[] removeDependent(IModule[] modules, IModule module)
+    {
+        IModule[] tmp = modules;
+
+        // Make sure the dependent module is present.
+        for (int i = 0; i < modules.length; i++)
+        {
+            if (modules[i].equals(module))
+            {
+                // If this is the module, then point to empty list.
+                if ((modules.length - 1) == 0)
+                {
+                    tmp = new IModule[0];
+                }
+                // Otherwise, we need to do some array copying.
+                else
+                {
+                    tmp = new IModule[modules.length - 1];
+                    System.arraycopy(modules, 0, tmp, 0, i);
+                    if (i < tmp.length)
+                    {
+                        System.arraycopy(modules, i + 1, tmp, i, tmp.length - i);
+                    }
+                }
+                break;
+            }
+        }
+
+        return tmp;
+    }
+
+    public synchronized void close()
+    {
+        m_content.close();
+        for (int i = 0; (m_contentPath != null) && (i < m_contentPath.length); i++)
+        {
+            m_contentPath[i].close();
+        }
+        for (int i = 0; (m_fragmentContents != null) && (i < m_fragmentContents.length); i++)
+        {
+            m_fragmentContents[i].close();
+        }
+        m_classLoader = null;
+    }
+
+    public synchronized void setURLPolicy(IURLPolicy urlPolicy)
+    {
+        m_urlPolicy = urlPolicy;
+    }
+
+    public synchronized IURLPolicy getURLPolicy()
+    {
+        return m_urlPolicy;
+    }
+
+    public synchronized void setSecurityContext(Object securityContext)
+    {
+        m_protectionDomain = (ProtectionDomain) securityContext;
+    }
+
+    public synchronized Object getSecurityContext()
+    {
+        return m_protectionDomain;
+    }
+
+    public String toString()
+    {
+        return m_id;
+    }
+
+    private synchronized ModuleClassLoader getClassLoader()
+    {
+        if (m_classLoader == null)
+        {
+// TODO: REFACTOR - SecureAction fix needed.
+              m_classLoader = new ModuleClassLoader();
+//            m_classLoader = m_secureAction.createModuleClassLoader(
+//                this, m_protectionDomain);
+        }
+        return m_classLoader;
     }
 
     private Object searchImports(String name, boolean isClass)
@@ -1243,5 +1304,593 @@ public class ModuleImpl implements IModule
         }
 
         return null;
+    }
+
+    private static final Constructor m_dexFileClassConstructor;
+    private static final Method m_dexFileClassLoadClass;
+    static
+    {
+        Constructor dexFileClassConstructor = null;
+        Method dexFileClassLoadClass = null;
+        try
+        {
+            Class dexFileClass;
+            try
+            {
+                dexFileClass = Class.forName("dalvik.system.DexFile");
+            }
+            catch (Exception ex)
+            {
+                dexFileClass = Class.forName("android.dalvik.DexFile");
+            }
+
+            dexFileClassConstructor = dexFileClass.getConstructor(
+                new Class[] { java.io.File.class });
+            dexFileClassLoadClass = dexFileClass.getMethod("loadClass",
+                new Class[] { String.class, ClassLoader.class });
+        }
+        catch (Exception ex)
+        {
+           dexFileClassConstructor = null;
+           dexFileClassLoadClass = null;
+        }
+        m_dexFileClassConstructor = dexFileClassConstructor;
+        m_dexFileClassLoadClass = dexFileClassLoadClass;
+    }
+
+    public class ModuleClassLoader extends SecureClassLoader
+    {
+        private final Map m_jarContentToDexFile;
+
+        public ModuleClassLoader()
+        {
+            if (m_dexFileClassConstructor != null)
+            {
+                m_jarContentToDexFile = new HashMap();
+            }
+            else
+            {
+                m_jarContentToDexFile = null;
+            }
+        }
+
+        public IModule getModule()
+        {
+            return ModuleImpl.this;
+        }
+
+        protected Class loadClass(String name, boolean resolve)
+            throws ClassNotFoundException
+        {
+            Class clazz = null;
+
+            // Make sure the class was not already loaded.
+            synchronized (this)
+            {
+                clazz = findLoadedClass(name);
+            }
+
+            if (clazz == null)
+            {
+                try
+                {
+                    return (Class) findClassOrResourceByDelegation(name, true);
+                }
+                catch (ResourceNotFoundException ex)
+                {
+                    // This should never happen since we are asking for a class,
+                    // so just ignore it.
+                }
+                catch (ClassNotFoundException cnfe)
+                {
+                    ClassNotFoundException ex = cnfe;
+                    String msg = name;
+                    if (m_logger.getLogLevel() >= Logger.LOG_DEBUG)
+                    {
+                        msg = diagnoseClassLoadError(m_resolver, ModuleImpl.this, name);
+                        ex = new ClassNotFoundException(msg, cnfe);
+                    }
+                    throw ex;
+                }
+            }
+
+            // Resolve the class and return it.
+            if (resolve)
+            {
+                resolveClass(clazz);
+            }
+            return clazz;
+        }
+
+        protected Class findClass(String name) throws ClassNotFoundException
+        {
+            // Do a quick check here to see if we can short-circuit this
+            // entire process if the class was already loaded.
+            Class clazz = null;
+            synchronized (this)
+            {
+                clazz = findLoadedClass(name);
+            }
+
+            // Search for class in module.
+            if (clazz == null)
+            {
+                String actual = name.replace('.', '/') + ".class";
+
+                byte[] bytes = null;
+
+                // Check the module class path.
+                IContent[] contentPath = getContentPath();
+                IContent content = null;
+                for (int i = 0;
+                    (bytes == null) &&
+                    (i < contentPath.length); i++)
+                {
+                    bytes = contentPath[i].getEntryAsBytes(actual);
+                    content = contentPath[i];
+                }
+
+                if (bytes != null)
+                {
+                    // Before we actually attempt to define the class, grab
+                    // the lock for this class loader and make sure than no
+                    // other thread has defined this class in the meantime.
+                    synchronized (this)
+                    {
+                        clazz = findLoadedClass(name);
+
+                        if (clazz == null)
+                        {
+                            // We need to try to define a Package object for the class
+                            // before we call defineClass(). Get the package name and
+                            // see if we have already created the package.
+                            String pkgName = Util.getClassPackage(name);
+                            if (pkgName.length() > 0)
+                            {
+                                if (getPackage(pkgName) == null)
+                                {
+                                    Object[] params = definePackage(pkgName);
+                                    if (params != null)
+                                    {
+                                        definePackage(
+                                            pkgName,
+                                            (String) params[0],
+                                            (String) params[1],
+                                            (String) params[2],
+                                            (String) params[3],
+                                            (String) params[4],
+                                            (String) params[5],
+                                            null);
+                                    }
+                                    else
+                                    {
+                                        definePackage(pkgName, null, null,
+                                            null, null, null, null, null);
+                                    }
+                                }
+                            }
+
+                            // If we can load the class from a dex file do so
+                            if (content instanceof JarContent)
+                            {
+                                try
+                                {
+                                    clazz = getDexFileClass((JarContent) content, name, this);
+                                }
+                                catch (Exception ex)
+                                {
+                                    // Looks like we can't
+                                }
+                            }
+
+                            if (clazz == null)
+                            {
+                                // If we have a security context, then use it to
+                                // define the class with it for security purposes,
+                                // otherwise define the class without a protection domain.
+                                if (m_protectionDomain != null)
+                                {
+                                    clazz = defineClass(name, bytes, 0, bytes.length,
+                                        m_protectionDomain);
+                                }
+                                else
+                                {
+                                    clazz = defineClass(name, bytes, 0, bytes.length);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return clazz;
+        }
+
+        private Object[] definePackage(String pkgName)
+        {
+            String spectitle = (String) m_headerMap.get("Specification-Title");
+            String specversion = (String) m_headerMap.get("Specification-Version");
+            String specvendor = (String) m_headerMap.get("Specification-Vendor");
+            String impltitle = (String) m_headerMap.get("Implementation-Title");
+            String implversion = (String) m_headerMap.get("Implementation-Version");
+            String implvendor = (String) m_headerMap.get("Implementation-Vendor");
+            if ((spectitle != null)
+                || (specversion != null)
+                || (specvendor != null)
+                || (impltitle != null)
+                || (implversion != null)
+                || (implvendor != null))
+            {
+                return new Object[] {
+                    spectitle, specversion, specvendor, impltitle, implversion, implvendor
+                };
+            }
+            return null;
+        }
+
+        private Class getDexFileClass(JarContent content, String name, ClassLoader loader)
+            throws Exception
+        {
+            if (m_jarContentToDexFile == null)
+            {
+                return null;
+            }
+
+            Object dexFile = null;
+
+            if (!m_jarContentToDexFile.containsKey(content))
+            {
+                try
+                {
+                    dexFile = m_dexFileClassConstructor.newInstance(
+                        new Object[] { content.getFile() });
+                }
+                finally
+                {
+                    m_jarContentToDexFile.put(content, dexFile);
+                }
+            }
+            else
+            {
+                dexFile = m_jarContentToDexFile.get(content);
+            }
+
+            if (dexFile != null)
+            {
+                return (Class) m_dexFileClassLoadClass.invoke(dexFile,
+                    new Object[] { name.replace('.','/'), loader });
+            }
+            return null;
+        }
+
+        public URL getResource(String name)
+        {
+            return ModuleImpl.this.getResourceByDelegation(name);
+        }
+
+        protected URL findResource(String name)
+        {
+            return getResourceLocal(name);
+        }
+
+        // The findResources() method should only look at the module itself, but
+        // instead it tries to delegate because in Java version prior to 1.5 the
+        // getResources() method was final and could not be overridden. We should
+        // override getResources() like getResource() to make it delegate, but we
+        // can't. As a workaround, we make findResources() delegate instead.
+        protected Enumeration findResources(String name)
+        {
+            return getResourcesByDelegation(name);
+        }
+
+        protected String findLibrary(String name)
+        {
+            // Remove leading slash, if present.
+            if (name.startsWith("/"))
+            {
+                name = name.substring(1);
+            }
+
+            R4Library[] libs = getNativeLibraries();
+            for (int i = 0; (libs != null) && (i < libs.length); i++)
+            {
+                if (libs[i].match(name))
+                {
+                    return getContent().getEntryAsNativeLibrary(libs[i].getEntryName());
+                }
+            }
+
+            return null;
+        }
+
+        public String toString()
+        {
+            return ModuleImpl.this.toString();
+        }
+    }
+
+    private static String diagnoseClassLoadError(
+        FelixResolver resolver, ModuleImpl module, String name)
+    {
+        // We will try to do some diagnostics here to help the developer
+        // deal with this exception.
+
+        // Get package name.
+        String pkgName = Util.getClassPackage(name);
+
+        // First, get the bundle ID of the module doing the class loader.
+        long impId = Util.getBundleIdFromModuleId(module.getId());
+
+        // Next, check to see if the module imports the package.
+        IWire[] wires = module.getWires();
+        for (int i = 0; (wires != null) && (i < wires.length); i++)
+        {
+            if (wires[i].getCapability().getNamespace().equals(ICapability.PACKAGE_NAMESPACE) &&
+                wires[i].getCapability().getProperties().get(ICapability.PACKAGE_PROPERTY).equals(pkgName))
+            {
+                long expId = Util.getBundleIdFromModuleId(wires[i].getExporter().getId());
+
+                StringBuffer sb = new StringBuffer("*** Package '");
+                sb.append(pkgName);
+                sb.append("' is imported by bundle ");
+                sb.append(impId);
+                sb.append(" from bundle ");
+                sb.append(expId);
+                sb.append(", but the exported package from bundle ");
+                sb.append(expId);
+                sb.append(" does not contain the requested class '");
+                sb.append(name);
+                sb.append("'. Please verify that the class name is correct in the importing bundle ");
+                sb.append(impId);
+                sb.append(" and/or that the exported package is correctly bundled in ");
+                sb.append(expId);
+                sb.append(". ***");
+
+                return sb.toString();
+            }
+        }
+
+        // Next, check to see if the package was optionally imported and
+        // whether or not there is an exporter available.
+        IRequirement[] reqs = module.getRequirements();
+/*
+* TODO: RB - Fix diagnostic message for optional imports.
+        for (int i = 0; (reqs != null) && (i < reqs.length); i++)
+        {
+            if (reqs[i].getName().equals(pkgName) && reqs[i].isOptional())
+            {
+                // Try to see if there is an exporter available.
+                IModule[] exporters = getResolvedExporters(reqs[i], true);
+                exporters = (exporters.length == 0)
+                    ? getUnresolvedExporters(reqs[i], true) : exporters;
+
+                // An exporter might be available, but it may have attributes
+                // that do not match the importer's required attributes, so
+                // check that case by simply looking for an exporter of the
+                // desired package without any attributes.
+                if (exporters.length == 0)
+                {
+                    IRequirement pkgReq = new Requirement(
+                        ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")");
+                    exporters = getResolvedExporters(pkgReq, true);
+                    exporters = (exporters.length == 0)
+                        ? getUnresolvedExporters(pkgReq, true) : exporters;
+                }
+
+                long expId = (exporters.length == 0)
+                    ? -1 : Util.getBundleIdFromModuleId(exporters[0].getId());
+
+                StringBuffer sb = new StringBuffer("*** Class '");
+                sb.append(name);
+                sb.append("' was not found, but this is likely normal since package '");
+                sb.append(pkgName);
+                sb.append("' is optionally imported by bundle ");
+                sb.append(impId);
+                sb.append(".");
+                if (exporters.length > 0)
+                {
+                    sb.append(" However, bundle ");
+                    sb.append(expId);
+                    if (reqs[i].isSatisfied(
+                        Util.getExportPackage(exporters[0], reqs[i].getName())))
+                    {
+                        sb.append(" does export this package. Bundle ");
+                        sb.append(expId);
+                        sb.append(" must be installed before bundle ");
+                        sb.append(impId);
+                        sb.append(" is resolved or else the optional import will be ignored.");
+                    }
+                    else
+                    {
+                        sb.append(" does export this package with attributes that do not match.");
+                    }
+                }
+                sb.append(" ***");
+
+                return sb.toString();
+            }
+        }
+*/
+        // Next, check to see if the package is dynamically imported by the module.
+/* TODO: RESOLVER: Need to fix this too.
+        IRequirement[] dynamics = module.getDefinition().getDynamicRequirements();
+        for (int dynIdx = 0; dynIdx < dynamics.length; dynIdx++)
+        {
+            IRequirement target = createDynamicRequirement(dynamics[dynIdx], pkgName);
+            if (target != null)
+            {
+                // Try to see if there is an exporter available.
+                PackageSource[] exporters = getResolvedCandidates(target);
+                exporters = (exporters.length == 0)
+                    ? getUnresolvedCandidates(target) : exporters;
+
+                // An exporter might be available, but it may have attributes
+                // that do not match the importer's required attributes, so
+                // check that case by simply looking for an exporter of the
+                // desired package without any attributes.
+                if (exporters.length == 0)
+                {
+                    try
+                    {
+                        IRequirement pkgReq = new Requirement(
+                            ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")");
+                        exporters = getResolvedCandidates(pkgReq);
+                        exporters = (exporters.length == 0)
+                            ? getUnresolvedCandidates(pkgReq) : exporters;
+                    }
+                    catch (InvalidSyntaxException ex)
+                    {
+                        // This should never happen.
+                    }
+                }
+
+                long expId = (exporters.length == 0)
+                    ? -1 : Util.getBundleIdFromModuleId(exporters[0].m_module.getId());
+
+                StringBuffer sb = new StringBuffer("*** Class '");
+                sb.append(name);
+                sb.append("' was not found, but this is likely normal since package '");
+                sb.append(pkgName);
+                sb.append("' is dynamically imported by bundle ");
+                sb.append(impId);
+                sb.append(".");
+                if (exporters.length > 0)
+                {
+                    try
+                    {
+                        if (!target.isSatisfied(
+                            Util.getSatisfyingCapability(exporters[0].m_module,
+                                new Requirement(ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")"))))
+                        {
+                            sb.append(" However, bundle ");
+                            sb.append(expId);
+                            sb.append(" does export this package with attributes that do not match.");
+                        }
+                    }
+                    catch (InvalidSyntaxException ex)
+                    {
+                        // This should never happen.
+                    }
+                }
+                sb.append(" ***");
+
+                return sb.toString();
+            }
+        }
+*/
+        IRequirement pkgReq = null;
+        try
+        {
+            pkgReq = new Requirement(ICapability.PACKAGE_NAMESPACE, "(package=" + pkgName + ")");
+        }
+        catch (InvalidSyntaxException ex)
+        {
+            // This should never happen.
+        }
+        PackageSource[] exporters =
+            resolver.getResolvedCandidates(pkgReq);
+        exporters = (exporters.length == 0)
+            ? resolver.getUnresolvedCandidates(pkgReq)
+            : exporters;
+        if (exporters.length > 0)
+        {
+            boolean classpath = false;
+            try
+            {
+                ModuleClassLoader.class.getClassLoader().loadClass(name);
+                classpath = true;
+            }
+            catch (NoClassDefFoundError err)
+            {
+                // Ignore
+            }
+            catch (Exception ex)
+            {
+                // Ignore
+            }
+
+            long expId = Util.getBundleIdFromModuleId(exporters[0].m_module.getId());
+
+            StringBuffer sb = new StringBuffer("*** Class '");
+            sb.append(name);
+            sb.append("' was not found because bundle ");
+            sb.append(impId);
+            sb.append(" does not import '");
+            sb.append(pkgName);
+            sb.append("' even though bundle ");
+            sb.append(expId);
+            sb.append(" does export it.");
+            if (classpath)
+            {
+                sb.append(" Additionally, the class is also available from the system class loader. There are two fixes: 1) Add an import for '");
+                sb.append(pkgName);
+                sb.append("' to bundle ");
+                sb.append(impId);
+                sb.append("; imports are necessary for each class directly touched by bundle code or indirectly touched, such as super classes if their methods are used. ");
+                sb.append("2) Add package '");
+                sb.append(pkgName);
+                sb.append("' to the '");
+                sb.append(Constants.FRAMEWORK_BOOTDELEGATION);
+                sb.append("' property; a library or VM bug can cause classes to be loaded by the wrong class loader. The first approach is preferable for preserving modularity.");
+            }
+            else
+            {
+                sb.append(" To resolve this issue, add an import for '");
+                sb.append(pkgName);
+                sb.append("' to bundle ");
+                sb.append(impId);
+                sb.append(".");
+            }
+            sb.append(" ***");
+
+            return sb.toString();
+        }
+
+        // Next, try to see if the class is available from the system
+        // class loader.
+        try
+        {
+            ModuleClassLoader.class.getClassLoader().loadClass(name);
+
+            StringBuffer sb = new StringBuffer("*** Package '");
+            sb.append(pkgName);
+            sb.append("' is not imported by bundle ");
+            sb.append(impId);
+            sb.append(", nor is there any bundle that exports package '");
+            sb.append(pkgName);
+            sb.append("'. However, the class '");
+            sb.append(name);
+            sb.append("' is available from the system class loader. There are two fixes: 1) Add package '");
+            sb.append(pkgName);
+            sb.append("' to the '");
+            sb.append(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA);
+            sb.append("' property and modify bundle ");
+            sb.append(impId);
+            sb.append(" to import this package; this causes the system bundle to export class path packages. 2) Add package '");
+            sb.append(pkgName);
+            sb.append("' to the '");
+            sb.append(Constants.FRAMEWORK_BOOTDELEGATION);
+            sb.append("' property; a library or VM bug can cause classes to be loaded by the wrong class loader. The first approach is preferable for preserving modularity.");
+            sb.append(" ***");
+
+            return sb.toString();
+        }
+        catch (Exception ex2)
+        {
+        }
+
+        // Finally, if there are no imports or exports for the package
+        // and it is not available on the system class path, simply
+        // log a message saying so.
+        StringBuffer sb = new StringBuffer("*** Class '");
+        sb.append(name);
+        sb.append("' was not found. Bundle ");
+        sb.append(impId);
+        sb.append(" does not import package '");
+        sb.append(pkgName);
+        sb.append("', nor is the package exported by any other bundle or available from the system class loader.");
+        sb.append(" ***");
+
+        return sb.toString();
     }
 }

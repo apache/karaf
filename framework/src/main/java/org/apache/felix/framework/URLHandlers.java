@@ -18,7 +18,6 @@
  */
 package org.apache.felix.framework;
 
-import java.io.IOException;
 import java.net.ContentHandler;
 import java.net.ContentHandlerFactory;
 import java.net.MalformedURLException;
@@ -33,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.apache.felix.framework.searchpolicy.ModuleClassLoader;
+import org.apache.felix.framework.searchpolicy.ModuleImpl.ModuleClassLoader;
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.SecureAction;
 import org.apache.felix.framework.util.SecurityManagerEx;

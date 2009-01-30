@@ -28,35 +28,31 @@ import org.osgi.framework.Bundle;
 
 public interface IModule
 {
-    Bundle getBundle();
-
     void setURLPolicy(IURLPolicy urlPolicy);
     IURLPolicy getURLPolicy();
     void setSecurityContext(Object securityContext);
     Object getSecurityContext();
 
-    // Metadata access
+    // Metadata access methods.
     Map getHeaders();
+    String getSymbolicName();
     ICapability[] getCapabilities();
     IRequirement[] getRequirements();
     IRequirement[] getDynamicRequirements();
     R4Library[] getNativeLibraries();
 
-    // Run-time data access.
+    // Run-time data access methods.
+    Bundle getBundle();
     String getId();
-    String getSymbolicName();
     IWire[] getWires();
     boolean isResolved();
 
-    // Content access.
+    // Content access methods.
     IContent getContent();
     Class getClassByDelegation(String name) throws ClassNotFoundException;
     URL getResourceByDelegation(String name);
     Enumeration getResourcesByDelegation(String name);
-    Class getClassFromModule(String name) throws ClassNotFoundException;
-    URL getResourceFromModule(String name);
-    Enumeration getResourcesFromModule(String name);
-    URL getResourceFromContent(String name);
+    URL getEntry(String name);
 
     // TODO: ML - For expediency, the index argument was added to these methods
     // but it is not clear that this makes sense in the long run. This needs to

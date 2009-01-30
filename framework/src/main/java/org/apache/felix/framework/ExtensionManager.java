@@ -139,9 +139,9 @@ class ExtensionManager extends URLStreamHandler implements IContent
      * @param config the configuration to read properties from.
      * @param systemBundleInfo the info to change if we need to add exports.
      */
-    ExtensionManager(Logger logger, Map configMap) throws BundleException
+    ExtensionManager(Logger logger, Felix felix) throws BundleException
     {
-        m_module = new ExtensionManagerModule();
+        m_module = new ExtensionManagerModule(felix);
         m_extensions = null;
         m_names = null;
         m_sourceToExtensions = null;
@@ -150,7 +150,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
 // TODO: FRAMEWORK - Not all of this stuff really belongs here, probably only exports.
         // Populate system bundle header map.
         m_headerMap.put(FelixConstants.BUNDLE_VERSION,
-            configMap.get(FelixConstants.FELIX_VERSION_PROPERTY));
+            felix.getConfig().get(FelixConstants.FELIX_VERSION_PROPERTY));
         m_headerMap.put(FelixConstants.BUNDLE_SYMBOLICNAME,
             FelixConstants.SYSTEM_BUNDLE_SYMBOLICNAME);
         m_headerMap.put(FelixConstants.BUNDLE_NAME, "System Bundle");
@@ -166,11 +166,11 @@ class ExtensionManager extends URLStreamHandler implements IContent
         // We must construct the system bundle's export metadata.
         // Get configuration property that specifies which class path
         // packages should be exported by the system bundle.
-        String syspkgs = (String) configMap.get(Constants.FRAMEWORK_SYSTEMPACKAGES);
+        String syspkgs = (String) felix.getConfig().get(Constants.FRAMEWORK_SYSTEMPACKAGES);
         // If no system packages were specified, load our default value.
         syspkgs = (syspkgs == null) ? loadDefaultSystemPackages(m_logger) : syspkgs;
         // If any extra packages are specified, then append them.
-        String extra = (String) configMap.get(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA);
+        String extra = (String) felix.getConfig().get(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA);
         syspkgs = (extra == null) ? syspkgs : syspkgs + "," + extra;
         try
         {
@@ -453,7 +453,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
 
         for (Iterator iter = m_extensions.iterator(); iter.hasNext();)
         {
-            URL result = ((BundleImpl) iter.next()).getCurrentModule().getResourceFromContent(path);
+            URL result = ((BundleImpl) iter.next()).getCurrentModule().getEntry(path);
 
             if (result != null)
             {
@@ -613,9 +613,9 @@ class ExtensionManager extends URLStreamHandler implements IContent
 
     class ExtensionManagerModule extends ModuleImpl
     {
-        ExtensionManagerModule() throws BundleException
+        ExtensionManagerModule(Felix felix) throws BundleException
         {
-            super(m_logger, null, null, "0", null, null);
+            super(m_logger, null, null, felix, "0", null, null);
         }
 
         public Map getHeaders()
@@ -635,20 +635,40 @@ class ExtensionManager extends URLStreamHandler implements IContent
 
         public Class getClassByDelegation(String name) throws ClassNotFoundException
         {
-            // System bundle does not delegate to other modules.
-            return getClassFromModule(name);
+            if (!m_exportNames.contains(Util.getClassPackage(name)))
+            {
+                return null;
+            }
+
+            try
+            {
+                return getClass().getClassLoader().loadClass(name);
+            }
+            catch (ClassNotFoundException ex)
+            {
+                m_logger.log(
+                    Logger.LOG_WARNING,
+                    ex.getMessage(),
+                    ex);
+            }
+            return null;
         }
 
         public URL getResourceByDelegation(String name)
         {
-            // System bundle does not delegate to other modules.
-            return getResourceFromModule(name);
+            return getClass().getClassLoader().getResource(name);
         }
 
         public Enumeration getResourcesByDelegation(String name)
         {
-            // System bundle does not delegate to other modules.
-            return getResourcesFromModule(name);
+           try
+           {
+               return getClass().getClassLoader().getResources(name);
+           }
+           catch (IOException ex)
+           {
+               return null;
+           }
         }
 
         public Logger getLogger()
@@ -666,12 +686,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
             return null;
         }
 
-        public synchronized IContent[] getClassPath()
-        {
-            throw new UnsupportedOperationException("Should not be used!");
-        }
-
-        public synchronized void attachFragmentContents(IContent[] fragmentContents)
+        public void attachFragmentContents(IContent[] fragmentContents)
             throws Exception
         {
             throw new UnsupportedOperationException("Should not be used!");
@@ -697,60 +712,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
             return m_urlPolicy;
         }
 
-        public Class findClassByDelegation(String name) throws ClassNotFoundException
-        {
-            return getClassFromModule(name);
-        }
-
-        public URL findResourceByDelegation(String name) throws ResourceNotFoundException
-        {
-            return getResourceFromModule(name);
-        }
-
-        public Enumeration findResourcesByDelegation(String name) throws ResourceNotFoundException
-        {
-            return getResourcesFromModule(name);
-        }
-
-        public Class getClassFromModule(String name)
-        {
-            if (!m_exportNames.contains(Util.getClassPackage(name)))
-            {
-                return null;
-            }
-
-            try
-            {
-                return getClass().getClassLoader().loadClass(name);
-            }
-            catch (ClassNotFoundException ex)
-            {
-                m_logger.log(
-                    Logger.LOG_WARNING,
-                    ex.getMessage(),
-                    ex);
-            }
-            return null;
-        }
-
-        public URL getResourceFromModule(String name)
-        {
-            return getClass().getClassLoader().getResource(name);
-        }
-
-        public Enumeration getResourcesFromModule(String name)
-        {
-           try
-           {
-               return getClass().getClassLoader().getResources(name);
-           }
-           catch (IOException ex)
-           {
-               return null;
-           }
-        }
-
-        public URL getResourceFromContent(String name)
+        public URL getEntry(String name)
         {
             // There is no content for the system bundle, so return null.
             return null;

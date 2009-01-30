@@ -27,7 +27,7 @@ import java.util.*;
 import org.apache.felix.framework.cache.*;
 import org.apache.felix.framework.ext.SecurityProvider;
 import org.apache.felix.framework.searchpolicy.*;
-import org.apache.felix.framework.searchpolicy.PackageSource;
+import org.apache.felix.framework.searchpolicy.ModuleImpl.ModuleClassLoader;
 import org.apache.felix.framework.util.*;
 import org.apache.felix.framework.util.manifestparser.*;
 import org.apache.felix.moduleloader.*;
@@ -295,7 +295,7 @@ public class Felix extends BundleImpl implements Framework
 
         // Create the extension manager, which we will use as the module
         // definition for creating the system bundle module.
-        m_extensionManager = new ExtensionManager(m_logger, m_configMap);
+        m_extensionManager = new ExtensionManager(m_logger, this);
         addModule(m_extensionManager.getModule());
     }
 
@@ -1168,7 +1168,7 @@ ex.printStackTrace();
         {
             throw new IllegalStateException("The bundle is uninstalled.");
         }
-        return bundle.getCurrentModule().getResourceFromContent(name);
+        return bundle.getCurrentModule().getEntry(name);
     }
 
     /**

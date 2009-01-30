@@ -97,31 +97,19 @@ public class R4WireModule implements IWire
         ResolvedPackage rp = (ResolvedPackage) m_pkgMap.get(pkgName);
         if (rp != null)
         {
-            for (int srcIdx = 0; srcIdx < rp.m_sourceList.size(); srcIdx++)
+            try
             {
-                PackageSource ps = (PackageSource) rp.m_sourceList.get(srcIdx);
-// TODO: REFACTOR - Module's shouldn't depend on themself.
-                if ((ps.m_module == m_importer) ||
-                    ((ps.m_capability instanceof Capability) &&
-                    ((Capability) ps.m_capability).isIncluded(name)))
+                Class clazz = m_exporter.getClassByDelegation(name);
+                if (clazz != null)
                 {
-// TODO: REFACTOR - It seems like we should be able to use getClassByDelegation()
-//       here once we don't allow modules to require themself above.
-                    try
-                    {
-                        Class clazz = ps.m_module.getClassFromModule(name);
-                        if (clazz != null)
-                        {
-                            return clazz;
-                        }
-                    }
-                    catch (ClassNotFoundException ex)
-                    {
-                        // Do not throw the exception here, since we want
-                        // to continue search other package sources and
-                        // ultimately the module's own content.
-                    }
+                    return clazz;
                 }
+            }
+            catch (ClassNotFoundException ex)
+            {
+                // Do not throw the exception here, since we want
+                // to continue search other package sources and
+                // ultimately the module's own content.
             }
         }
 
@@ -139,16 +127,10 @@ public class R4WireModule implements IWire
         ResolvedPackage rp = (ResolvedPackage) m_pkgMap.get(pkgName);
         if (rp != null)
         {
-            for (int srcIdx = 0; srcIdx < rp.m_sourceList.size(); srcIdx++)
+            URL url = m_exporter.getResourceByDelegation(name);
+            if (url != null)
             {
-                PackageSource ps = (PackageSource) rp.m_sourceList.get(srcIdx);
-// TODO: REFACTOR - It seems like we should be able to use getClassByDelegation()
-//       here once we don't allow modules to require themself above.
-                URL url = ps.m_module.getResourceFromModule(name);
-                if (url != null)
-                {
-                    return url;
-                }
+                return url;
             }
 
             // Don't throw ResourceNotFoundException because module
@@ -163,9 +145,6 @@ public class R4WireModule implements IWire
      */
     public Enumeration getResources(String name) throws ResourceNotFoundException
     {
-        // List to hold all enumerations from all package sources.
-        List enums = new ArrayList();
-
         // Get the package of the target class.
         String pkgName = Util.getResourcePackage(name);
 
@@ -175,27 +154,17 @@ public class R4WireModule implements IWire
         ResolvedPackage rp = (ResolvedPackage) m_pkgMap.get(pkgName);
         if (rp != null)
         {
-            for (int srcIdx = 0; srcIdx < rp.m_sourceList.size(); srcIdx++)
+            Enumeration urls = m_exporter.getResourcesByDelegation(name);
+            if (urls != null)
             {
-                PackageSource ps = (PackageSource) rp.m_sourceList.get(srcIdx);
-// TODO: REFACTOR - It seems like we should be able to use getClassByDelegation()
-//       here once we don't allow modules to require themself above.
-                Enumeration urls = ps.m_module.getResourcesFromModule(name);
-                if (urls != null)
-                {
-                    enums.add(urls);
-                }
+                return urls;
             }
 
             // Don't throw ResourceNotFoundException because module
             // dependencies support split packages.
         }
 
-        return (enums.size() == 0)
-            ? null
-            : new CompoundEnumeration(
-                (Enumeration[]) enums.toArray(new Enumeration[enums.size()]));
-
+        return null;
     }
 
     public String toString()

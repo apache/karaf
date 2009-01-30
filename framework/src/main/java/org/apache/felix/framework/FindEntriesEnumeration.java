@@ -113,8 +113,7 @@ class FindEntriesEnumeration implements Enumeration
                     if (checkSubstring(m_filePattern, lastElement))
                     {
                         // Convert entry name into an entry URL.
-                        return m_bundle.getCurrentModule()
-                            .getResourceFromContent(entryName);
+                        return m_bundle.getCurrentModule().getEntry(entryName);
                     }
                 }
             }

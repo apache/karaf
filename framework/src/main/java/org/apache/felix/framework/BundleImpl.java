@@ -294,7 +294,7 @@ class BundleImpl implements Bundle
         Properties mergedProperties = new Properties();
         for (Iterator it = resourceList.iterator(); it.hasNext(); )
         {
-            URL temp = this.getCurrentModule().getResourceFromModule(it.next() + ".properties");
+            URL temp = this.getCurrentModule().getResourceByDelegation(it.next() + ".properties");
             if (temp == null)
             {
                 continue;
@@ -923,8 +923,6 @@ class BundleImpl implements Bundle
         }
         module.setSecurityContext(new BundleProtectionDomain(getFramework(), this));
 
-        ((ModuleImpl) module).setBundle(this);
-
         IModule[] dest = new IModule[m_modules.length + 1];
         System.arraycopy(m_modules, 0, dest, 0, m_modules.length);
         dest[m_modules.length] = module;
@@ -947,6 +945,7 @@ class BundleImpl implements Bundle
             getFramework().getLogger(),
             getFramework().getConfig(),
             getFramework().getResolver(),
+            this,
             Long.toString(getBundleId()) + "." + Integer.toString(revision),
             headerMap,
             m_archive.getRevision(revision).getContent());
