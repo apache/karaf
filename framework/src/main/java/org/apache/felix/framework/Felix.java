@@ -622,15 +622,14 @@ ex.printStackTrace();
 
         synchronized (this)
         {
-            final int state = getState();
             // Initialize if necessary.
-            if ((state == Bundle.INSTALLED) || (state == Bundle.RESOLVED))
+            if ((getState() == Bundle.INSTALLED) || (getState() == Bundle.RESOLVED))
             {
                 init();
             }
 
             // If the current state is STARTING, then the system bundle can be started.
-            if (state == Bundle.STARTING)
+            if (getState() == Bundle.STARTING)
             {
                 // Get the framework's default start level.
                 String s = (String) m_configMap.get(Constants.FRAMEWORK_BEGINNING_STARTLEVEL);
