@@ -441,15 +441,6 @@ public class ModuleImpl implements IModule
             {
                 return getClassLoader().loadClass(name);
             }
-            catch (ClassNotFoundException ex)
-            {
-// TODO: REFACTOR - Should this log?
-                m_logger.log(
-                    Logger.LOG_WARNING,
-                    ex.getMessage(),
-                    ex);
-                throw ex;
-            }
             finally
             {
                 pkgCycleSet.remove(name);
@@ -475,10 +466,14 @@ public class ModuleImpl implements IModule
             }
             catch (ClassNotFoundException ex)
             {
+                // This should never be thrown because we are loading resources.
             }
             catch (ResourceNotFoundException ex)
             {
-// TODO: REFACTOR - Should this log?
+                m_logger.log(
+                    Logger.LOG_DEBUG,
+                    ex.getMessage(),
+                    ex);
             }
             finally
             {
