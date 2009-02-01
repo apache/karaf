@@ -158,6 +158,12 @@ public class OsgiManager extends GenericServlet
 
     private String webManagerRoot;
 
+    // true if the OsgiManager is registered as a Servlet with the HttpService
+    private boolean httpServletRegistered;
+
+    // true if the resources have been registered with the HttpService
+    private boolean httpResourcesRegistered;
+
     private Dictionary configuration;
 
 
@@ -423,12 +429,12 @@ public class OsgiManager extends GenericServlet
 
         public Object addingService( ServiceReference reference )
         {
-            Object operation = super.addingService( reference );
-            if ( operation instanceof HttpService )
+            Object service = super.addingService( reference );
+            if ( service instanceof HttpService )
             {
-                osgiManager.bindHttpService( ( HttpService ) operation );
+                osgiManager.bindHttpService( ( HttpService ) service );
             }
-            return operation;
+            return service;
         }
 
 
@@ -560,6 +566,14 @@ public class OsgiManager extends GenericServlet
 
     protected synchronized void bindHttpService( HttpService httpService )
     {
+        // do not bind service, when we are already bound
+        if ( this.httpService != null )
+        {
+            log.log( LogService.LOG_DEBUG,
+                "bindHttpService: Already bound to an HTTP Service, ignoring further services" );
+            return;
+        }
+        
         Dictionary config = getConfiguration();
 
         // get authentication details
@@ -574,13 +588,18 @@ public class OsgiManager extends GenericServlet
 
             Dictionary servletConfig = toStringConfig( config );
 
+            // register this servlet and take note of this
             httpService.registerServlet( this.webManagerRoot, this, servletConfig, httpContext );
+            httpServletRegistered = true;
+
+            // register resources and take of this
             httpService.registerResources( this.webManagerRoot + "/res", "/res", httpContext );
+            httpResourcesRegistered = true;
 
         }
         catch ( Exception e )
         {
-            log.log( LogService.LOG_ERROR, "Problem setting up", e );
+            log.log( LogService.LOG_ERROR, "bindHttpService: Problem setting up", e );
         }
 
         this.httpService = httpService;
@@ -589,12 +608,40 @@ public class OsgiManager extends GenericServlet
 
     protected synchronized void unbindHttpService( HttpService httpService )
     {
-        httpService.unregister( this.webManagerRoot + "/res" );
-        httpService.unregister( this.webManagerRoot );
-
-        if ( this.httpService == httpService )
+        if ( this.httpService != httpService )
         {
-            this.httpService = null;
+            log.log( LogService.LOG_DEBUG,
+                "unbindHttpService: Ignoring unbind of an HttpService to which we are not registered" );
+            return;
+        }
+
+        // drop the service reference
+        this.httpService = null;
+
+        if ( httpResourcesRegistered )
+        {
+            try
+            {
+                httpService.unregister( this.webManagerRoot + "/res" );
+            }
+            catch ( Throwable t )
+            {
+                log.log( LogService.LOG_WARNING, "unbindHttpService: Failed unregistering Resources", t );
+            }
+            httpResourcesRegistered = false;
+        }
+
+        if ( httpServletRegistered )
+        {
+            try
+            {
+                httpService.unregister( this.webManagerRoot );
+            }
+            catch ( Throwable t )
+            {
+                log.log( LogService.LOG_WARNING, "unbindHttpService: Failed unregistering Servlet", t );
+            }
+            httpServletRegistered = false;
         }
     }
 
