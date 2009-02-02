@@ -23,6 +23,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 
 import org.osgi.framework.BundleContext;
 
@@ -40,6 +41,7 @@ class Listener
     private ServerSocket m_ServerSocket;
     private AtomicInteger m_UseCounter;
     private int m_MaxConnections;
+    private int m_SoTimeout;
 
 
     /**
@@ -50,6 +52,7 @@ class Listener
         //configure from framework property
         m_Ip = getProperty( bundleContext, "osgi.shell.telnet.ip", "127.0.0.1" );
         m_Port = getProperty( bundleContext, "osgi.shell.telnet.port", 6666 );
+        m_SoTimeout = getProperty( bundleContext, "osgi.shell.telnet.socketTimeout", 0 );
         m_MaxConnections = getProperty( bundleContext, "osgi.shell.telnet.maxconn", 2 );
         m_UseCounter = new AtomicInteger( 0 );
         m_ListenerThread = new Thread( new Acceptor(), "telnetconsole.Listener" );
@@ -104,7 +107,8 @@ class Listener
                     should be handled properly, but denial of service attacks via massive parallel
                     program logins should be prevented with this.
                 */
-                m_ServerSocket = new ServerSocket( m_Port, 1, InetAddress.getByName(m_Ip) );
+                m_ServerSocket = new ServerSocket( m_Port, 1, InetAddress.getByName( m_Ip ) );
+                m_ServerSocket.setSoTimeout( m_SoTimeout );
                 do
                 {
                     try
@@ -130,6 +134,9 @@ class Listener
                     }
                     catch ( SocketException ex )
                     {
+                    }
+                    catch ( SocketTimeoutException ste) {
+                        // Caught socket timeout exception. continue
                     }
                 }
                 while ( !m_Stop );
