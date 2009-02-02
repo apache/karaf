@@ -24,6 +24,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.osgi.framework.BundleContext;
 
@@ -42,6 +44,7 @@ class Listener
     private AtomicInteger m_UseCounter;
     private int m_MaxConnections;
     private int m_SoTimeout;
+    private Set m_connections;
 
 
     /**
@@ -55,6 +58,7 @@ class Listener
         m_SoTimeout = getProperty( bundleContext, "osgi.shell.telnet.socketTimeout", 0 );
         m_MaxConnections = getProperty( bundleContext, "osgi.shell.telnet.maxconn", 2 );
         m_UseCounter = new AtomicInteger( 0 );
+        m_connections = new HashSet();
         m_ListenerThread = new Thread( new Acceptor(), "telnetconsole.Listener" );
         m_ListenerThread.start();
     }//activate
@@ -79,6 +83,23 @@ class Listener
         catch ( Exception ex )
         {
             Activator.getServices().error( "Listener::deactivate()", ex );
+        }
+        
+        // get the active connections (and clear the list)
+        // we have to work on a copy, since stopping any active connection
+        // will try to remove itself from the set, which might cause a
+        // ConcurrentModificationException if we would iterate over the list
+        Shell[] connections;
+        synchronized ( m_connections )
+        {
+            connections = ( Shell[] ) m_connections.toArray( new Shell[m_connections.size()] );
+            m_connections.clear();
+        }
+
+        // now terminate all active connections
+        for ( int i = 0; i < connections.length; i++ )
+        {
+            connections[i].terminate();
         }
     }//deactivate
 
@@ -128,7 +149,8 @@ class Listener
                         {
                             m_UseCounter.increment();
                             //run on the connection thread
-                            Thread connectionThread = new Thread( new Shell( s, m_UseCounter ) );
+                            Thread connectionThread = new Thread( new Shell( Listener.this, s, m_UseCounter ) );
+                            connectionThread.setName( "telnetconsole.shell remote=" + s.getRemoteSocketAddress() );
                             connectionThread.start();
                         }
                     }
@@ -177,10 +199,46 @@ class Listener
         String propValue = bundleContext.getProperty( propName );
         if ( propValue != null )
         {
-           return propValue;
+            return propValue;
         }
 
         return defaultValue;
     }
 
+    /**
+     * Registers the given {@link Shell} instance handling a remote connection
+     * to this listener.
+     * <p>
+     * This method is called by the {@link Shell#run()} method to register the
+     * remote connection for it to be terminated in case this listener is
+     * {@link #deactivate() deactivated} before the remote connection is
+     * terminated.
+     * 
+     * @param connection The {@link Shell} connection to register
+     */
+    void registerConnection( Shell connection )
+    {
+        synchronized ( m_connections )
+        {
+            m_connections.add( connection );
+        }
+    }
+
+    /**
+     * Unregisters the given {@link Shell} instance handling a remote connection
+     * from this listener.
+     * <p>
+     * This method is called when the {@link Shell#run()} method terminates to
+     * inform this listener instance that the remote connection has ended and
+     * thus does not need to be cleaned up when this listener terminates.
+     * 
+     * @param connection The {@link Shell} connection to unregister
+     */
+    void unregisterConnection( Shell connection )
+    {
+        synchronized ( m_connections )
+        {
+            m_connections.remove( connection );
+        }
+    }
 }//class Listener
