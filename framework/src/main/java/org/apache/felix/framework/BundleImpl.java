@@ -38,7 +38,7 @@ class BundleImpl implements Bundle
 
     private final BundleArchive m_archive;
     private IModule[] m_modules = new IModule[0];
-    private int m_state;
+    private volatile int m_state;
     private BundleActivator m_activator = null;
     private BundleContext m_context = null;
     private final Map m_cachedHeaders = new HashMap();
@@ -581,12 +581,12 @@ class BundleImpl implements Bundle
         return getFramework().getBundleServicesInUse(this);
     }
 
-    public synchronized int getState()
+    public int getState()
     {
         return m_state;
     }
 
-    synchronized void setState(int i)
+    void setState(int i)
     {
         m_state = i;
     }
