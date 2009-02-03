@@ -66,6 +66,7 @@
                             ../system/com/google/code/sshd/sshd/${sshd.version}/sshd-${sshd.version}.jar
                             ../system/org/apache/servicemix/kernel/gshell/org.apache.servicemix.kernel.gshell.core/${pom.version}/org.apache.servicemix.kernel.gshell.core-${pom.version}.jar
                             ../system/org/apache/servicemix/bundles/org.apache.servicemix.bundles.mina/${mina.version}/org.apache.servicemix.bundles.mina-${mina.version}.jar
+                            ../system/org/apache/servicemix/bundles/org.apache.servicemix.bundles.jline/${jline.version}/org.apache.servicemix.bundles.jline-${jline.version}.jar
                         </Class-Path>
                         <Bundle-Name>Apache ServiceMix Shell Client</Bundle-Name>
                         <Bundle-Description>Shell client bundle for Apache ServiceMix Kernel.</Bundle-Description>
