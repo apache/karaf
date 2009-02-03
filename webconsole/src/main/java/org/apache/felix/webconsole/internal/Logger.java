@@ -27,12 +27,14 @@ import org.osgi.util.tracker.ServiceTracker;
 public class Logger
 {
 
+    private static final String LOGSERVICE_NAME = "org.osgi.service.log.LogService";
+    
     private ServiceTracker logTracker;
 
 
     public Logger( BundleContext bundleContext )
     {
-        logTracker = new ServiceTracker( bundleContext, LogService.class.getName(), null );
+        logTracker = new ServiceTracker( bundleContext, LOGSERVICE_NAME, null );
         logTracker.open();
     }
 
