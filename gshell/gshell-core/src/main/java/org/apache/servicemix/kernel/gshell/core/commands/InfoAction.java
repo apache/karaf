@@ -74,7 +74,7 @@ public class InfoAction implements CommandAction {
         io.out.println("ServiceMix");
         printValue("ServiceMix home", maxNameLen, System.getProperty("servicemix.home"));
         printValue("ServiceMix base", maxNameLen, System.getProperty("servicemix.base"));
-        printValue("ServiceMix kernel version", maxNameLen, branding.getParent().getVersion());
+        printValue("ServiceMix Kernel version", maxNameLen, branding.getParent().getVersion());
 
         if (branding.getApplicationName() != null && branding.getApplicationVersion() != null) {
             printValue(branding.getApplicationName() + " version", maxNameLen, branding.getApplicationVersion());
