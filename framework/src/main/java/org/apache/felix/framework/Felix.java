@@ -2641,7 +2641,15 @@ ex.printStackTrace();
                 }
             }
         }
-        return null;
+        try
+        {
+            return (m_extensionManager.getModule().getClassByDelegation(clazz.getName()) == clazz)
+                ? this : null;
+        }
+        catch(ClassNotFoundException ex)
+        {
+            return null;
+        }
     }
 
     /**
