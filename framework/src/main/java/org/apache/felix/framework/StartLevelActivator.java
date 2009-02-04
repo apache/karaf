@@ -35,7 +35,7 @@ class StartLevelActivator implements BundleActivator
 
     public void start(BundleContext context) throws Exception
     {
-        m_startLevel = new StartLevelImpl(m_logger, m_felix);
+        m_startLevel = new StartLevelImpl(m_felix);
         m_reg = context.registerService(
             org.osgi.service.startlevel.StartLevel.class.getName(),
             m_startLevel, null);
