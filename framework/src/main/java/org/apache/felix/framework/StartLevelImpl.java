@@ -36,14 +36,12 @@ public class StartLevelImpl implements StartLevel, Runnable
     private static final int BUNDLE_IDX = 0;
     private static final int STARTLEVEL_IDX = 1;
 
-    private Logger m_logger = null;
-    private Felix m_felix = null;
+    private final Felix m_felix;
     private final List m_requestList = new ArrayList();
     private Thread m_thread = null;
 
-    public StartLevelImpl(Logger logger, Felix felix)
+    public StartLevelImpl(Felix felix)
     {
-        m_logger = logger;
         m_felix = felix;
         // Start a thread to perform asynchronous package refreshes.
         m_thread = new Thread(this, "FelixStartLevel");
@@ -135,7 +133,7 @@ public class StartLevelImpl implements StartLevel, Runnable
             catch (InterruptedException ex)
             {
                 // Log it and ignore since it won't cause much of an issue.
-                m_logger.log(
+                m_felix.getLogger().log(
                     Logger.LOG_WARNING,
                     "Wait for start level change during shutdown interrupted.",
                     ex);
@@ -256,6 +254,9 @@ public class StartLevelImpl implements StartLevel, Runnable
             // is to set the framework start level. If the request is
             // an Object array, then the request is to set the start
             // level for a bundle.
+            // NOTE: We don't catch any exceptions here, because
+            // the invoked methods shield us from exceptions by
+            // catching Throwables when they invoke callbacks.
             if (request instanceof Integer)
             {
                 // Set the new framework start level.

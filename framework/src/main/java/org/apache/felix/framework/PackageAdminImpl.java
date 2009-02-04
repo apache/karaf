@@ -331,6 +331,9 @@ class PackageAdminImpl implements PackageAdmin, Runnable
             }
 
             // Perform refresh.
+            // NOTE: We don't catch any exceptions here, because
+            // the invoked method shields us from exceptions by
+            // catching Throwables when its invokes callbacks.
             m_felix.refreshPackages(bundles);
 
             // Remove the first request since it is now completed.

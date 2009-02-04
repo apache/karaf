@@ -3699,7 +3699,7 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
                 {
                     stopBundle(m_bundle, false);
                 }
-                catch (BundleException ex)
+                catch (Throwable ex)
                 {
                     fireFrameworkEvent(FrameworkEvent.ERROR, m_bundle, ex);
                 }
@@ -3728,7 +3728,7 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
                     refreshBundle(m_bundle);
                 }
             }
-            catch (Exception ex)
+            catch (Throwable ex)
             {
                 fireFrameworkEvent(FrameworkEvent.ERROR, m_bundle, ex);
             }
@@ -3742,7 +3742,7 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
                 {
                     startBundle(m_bundle, false);
                 }
-                catch (BundleException ex)
+                catch (Throwable ex)
                 {
                     fireFrameworkEvent(FrameworkEvent.ERROR, m_bundle, ex);
                 }

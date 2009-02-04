@@ -868,6 +868,9 @@ public class EventDispatcher
             // Deliver event outside of synchronized block
             // so that we don't block other requests from being
             // queued during event processing.
+            // NOTE: We don't catch any exceptions here, because
+            // the invoked method shields us from exceptions by
+            // catching Throwables when it invokes callbacks.
             fireEventImmediately(req.m_logger, req.m_type, req.m_listeners, req.m_event);
 
             // Put dispatch request in cache.
