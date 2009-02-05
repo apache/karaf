@@ -205,7 +205,7 @@ function renderBundles(data) {
 	$(document).ready(function(){
     	renderView( ["Id", "Name", "Status", "Actions"],
         		"<input type='hidden' name='action' value='install'/>" +
-                "<input class='input' type='file' name='bundlefile' size='50' style='margin-left:10px'/>" +
+                "<input class='fileinput' type='file' name='bundlefile' style='margin-left:10px'/>" +
          		" - Start <input class='checkradio' type='checkbox' name='bundlestart' value='start' style='vertical-align:middle;'/>" +
         		" - Start Level <input class='input' type='input' name='bundlestartlevel' value='" + startLevel + "' size='4'/>" +
          		"<input type='submit' value='Install or Update' style='margin-left:60px'/>" +

@@ -490,6 +490,13 @@ select,textarea {
     border-right: 1px solid #cccccc;
 }
 
+.fileinput {
+    font-family: Verdana, Arial, Helvetica, san-serif;
+    font-size: 9px;
+    font-weight: normal;
+    color: #184054;
+}
+
 .submit {
     cursor: default;
     width: 60px;
