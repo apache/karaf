@@ -29,34 +29,104 @@ public class Test extends TestCase {
         System.setProperty("startLocalConsole", "true");
         System.setProperty("servicemix.name", "root");
 
-        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
-                new String[] { "META-INF/spring/gshell.xml",
-                               "META-INF/spring/gshell-vfs.xml",
-                               "META-INF/spring/gshell-commands.xml",
-                               "org/apache/servicemix/kernel/gshell/core/gshell-test.xml" });
-        ApplicationManager appMgr = (ApplicationManager) context.getBean("applicationManager");
-        assertNotNull(appMgr);
-        Shell shell = appMgr.create();
-        assertNotNull(shell);
-        shell.execute("help");
+        ClassPathXmlApplicationContext context = null;
+        try {
+            context = new ClassPathXmlApplicationContext(
+                    new String[] { "META-INF/spring/gshell.xml",
+                                   "META-INF/spring/gshell-vfs.xml",
+                                   "META-INF/spring/gshell-commands.xml",
+                                   "org/apache/servicemix/kernel/gshell/core/gshell-test.xml" });
+            ApplicationManager appMgr = (ApplicationManager) context.getBean("applicationManager");
+            assertNotNull(appMgr);
+            Shell shell = appMgr.create();
+            assertNotNull(shell);
+            shell.execute("help");
+        } finally {
+            if (context != null) {
+                context.destroy();
+            }
+        }
     }
 
     public void testBanner() throws Exception {
         System.setProperty("startLocalConsole", "true");
         System.setProperty("servicemix.name", "root");
 
-        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
-                new String[] { "META-INF/spring/gshell.xml",
-                               "META-INF/spring/gshell-vfs.xml",                               
-                               "META-INF/spring/gshell-commands.xml",
-                               "org/apache/servicemix/kernel/gshell/core/gshell-test.xml"});
-        ApplicationManager appMgr = (ApplicationManager) context.getBean("applicationManager");
-        assertNotNull(appMgr);
-        Shell shell = appMgr.create();
-        ServiceMixBranding smxBrandng = (ServiceMixBranding)appMgr.getApplication().getModel().getBranding();
-        assertNotNull(smxBrandng.getWelcomeMessage());
-        System.out.println(smxBrandng.getWelcomeMessage());
-        assertNotNull(shell);        
-        shell.execute("about");
+        ClassPathXmlApplicationContext context = null;
+        try {
+            context = new ClassPathXmlApplicationContext(
+                    new String[] { "META-INF/spring/gshell.xml",
+                                   "META-INF/spring/gshell-vfs.xml",
+                                   "META-INF/spring/gshell-commands.xml",
+                                   "org/apache/servicemix/kernel/gshell/core/gshell-test.xml"});
+            ApplicationManager appMgr = (ApplicationManager) context.getBean("applicationManager");
+            assertNotNull(appMgr);
+            Shell shell = appMgr.create();
+            ServiceMixBranding smxBrandng = (ServiceMixBranding)appMgr.getApplication().getModel().getBranding();
+            assertNotNull(smxBrandng.getWelcomeMessage());
+            System.out.println(smxBrandng.getWelcomeMessage());
+            assertNotNull(shell);
+            shell.execute("about");
+        } finally {
+            if (context != null) {
+                context.destroy();
+            }
+        }
     }
+
+    public void testLs() throws Exception {
+        System.setProperty("startLocalConsole", "true");
+        System.setProperty("servicemix.name", "root");
+
+        ClassPathXmlApplicationContext context = null;
+        try {
+            context = new ClassPathXmlApplicationContext(
+                    new String[] { "META-INF/spring/gshell.xml",
+                                   "META-INF/spring/gshell-vfs.xml",
+                                   "META-INF/spring/gshell-commands.xml",
+                                   "org/apache/servicemix/kernel/gshell/core/gshell-test.xml"});
+            ApplicationManager appMgr = (ApplicationManager) context.getBean("applicationManager");
+            assertNotNull(appMgr);
+            Shell shell = appMgr.create();
+            ServiceMixBranding smxBrandng = (ServiceMixBranding)appMgr.getApplication().getModel().getBranding();
+            assertNotNull(smxBrandng.getWelcomeMessage());
+            System.out.println(smxBrandng.getWelcomeMessage());
+            assertNotNull(shell);
+            shell.execute("vfs/ls meta:/commands/");
+        } finally {
+            if (context != null) {
+                context.destroy();
+            }
+        }
+    }
+
+    public void testCommandGroups() throws Exception {
+        System.setProperty("startLocalConsole", "true");
+        System.setProperty("servicemix.name", "root");
+
+        ClassPathXmlApplicationContext context = null;
+        try {
+            context = new ClassPathXmlApplicationContext(
+                    new String[] { "META-INF/spring/gshell.xml",
+                                   "META-INF/spring/gshell-vfs.xml",
+                                   "META-INF/spring/gshell-commands.xml",
+                                   "org/apache/servicemix/kernel/gshell/core/gshell-test.xml"});
+            ApplicationManager appMgr = (ApplicationManager) context.getBean("applicationManager");
+            assertNotNull(appMgr);
+            Shell shell = appMgr.create();
+            ServiceMixBranding smxBrandng = (ServiceMixBranding)appMgr.getApplication().getModel().getBranding();
+            assertNotNull(smxBrandng.getWelcomeMessage());
+            System.out.println(smxBrandng.getWelcomeMessage());
+            assertNotNull(shell);
+
+            shell.execute("vfs");
+            shell.execute("help");
+            shell.execute("..");
+        } finally {
+            if (context != null) {
+                context.destroy();
+            }
+        }
+    }
+
 }

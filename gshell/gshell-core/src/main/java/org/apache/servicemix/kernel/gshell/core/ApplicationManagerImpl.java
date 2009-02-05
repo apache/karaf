@@ -25,10 +25,12 @@ import org.apache.geronimo.gshell.event.EventPublisher;
 import org.apache.geronimo.gshell.io.SystemOutputHijacker;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.DisposableBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ApplicationManagerImpl implements ApplicationManager, ApplicationContextAware {
+public class ApplicationManagerImpl implements ApplicationManager, ApplicationContextAware, InitializingBean, DisposableBean {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -43,11 +45,15 @@ public class ApplicationManagerImpl implements ApplicationManager, ApplicationCo
         this.application = application;
     }
 
-    public void init() throws Exception {
+    public void afterPropertiesSet() throws Exception {
         if (!SystemOutputHijacker.isInstalled()) {
             SystemOutputHijacker.install();
         }
-        SystemOutputHijacker.register(application.getIo().outputStream, application.getIo().errorStream);
+        //SystemOutputHijacker.register(application.getIo().outputStream, application.getIo().errorStream);
+    }
+
+    public void destroy() {
+        SystemOutputHijacker.uninstall();
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) {

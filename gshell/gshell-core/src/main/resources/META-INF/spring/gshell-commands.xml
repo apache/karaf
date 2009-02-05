@@ -35,15 +35,19 @@
 
     <import resource="classpath:org/apache/servicemix/kernel/gshell/core/commands.xml" />
 
+    <bean id="vfsCommandActionTemplate" abstract="true">
+        <property name="fileSystemAccess" ref="fileSystemAccess"/>
+    </bean>
+
     <gshell:command-bundle>
         <gshell:command name="about">
-            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.AboutAction">
-                <constructor-arg ref="applicationManager"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtin.AboutAction">
+                <constructor-arg ref="application"/>
             </gshell:action>
         </gshell:command>
 
         <gshell:command name="help">
-            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.HelpAction">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtin.HelpAction">
                 <constructor-arg ref="commandResolver"/>
             </gshell:action>
             <gshell:completers>
@@ -60,27 +64,27 @@
         </gshell:command>
 
         <gshell:command name="exit">
-            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.ExitAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtin.ExitAction"/>
         </gshell:command>
 
         <gshell:link name="quit" target="exit"/>
 
         <gshell:command name="echo">
-            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.EchoAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtin.EchoAction"/>
         </gshell:command>
 
         <gshell:link name="print" target="echo"/>
 
         <gshell:command name="printf">
-            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.PrintfAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.text.PrintfAction"/>
         </gshell:command>
 
         <gshell:command name="clear" type="stateless">
-            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.ClearAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtin.ClearAction"/>
         </gshell:command>
 
         <gshell:command name="source">
-            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.SourceAction">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtin.SourceAction">
                 <constructor-arg ref="commandLineExecutor"/>
                 <constructor-arg ref="fileSystemAccess"/>
             </gshell:action>
@@ -91,11 +95,11 @@
         </gshell:command>
 
         <gshell:command name="set">
-            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.SetAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtin.SetAction"/>
         </gshell:command>
 
         <gshell:command name="unset">
-            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.UnsetAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtin.UnsetAction"/>
             <gshell:completers>
                 <ref bean="variableNameCompleter"/>
                 <null/>
@@ -103,13 +107,13 @@
         </gshell:command>
 
         <gshell:command name="alias">
-            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.AliasAction">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtin.AliasAction">
                 <constructor-arg ref="aliasRegistry"/>
             </gshell:action>
         </gshell:command>
 
         <gshell:command name="unalias">
-            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.UnaliasAction">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtin.UnaliasAction">
                 <constructor-arg ref="aliasRegistry"/>
             </gshell:action>
             <gshell:completers>
@@ -119,7 +123,7 @@
         </gshell:command>
 
         <gshell:command name="history">
-            <gshell:action class="org.apache.geronimo.gshell.commands.builtins.HistoryAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtin.HistoryAction"/>
         </gshell:command>
 
         <gshell:command name="info">
@@ -141,27 +145,27 @@
 
     <gshell:command-bundle>
         <gshell:command name="optional/exec">
-            <gshell:action class="org.apache.geronimo.gshell.commands.optional.ExecuteAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.shell.ExecuteAction"/>
         </gshell:command>
 
         <gshell:command name="optional/java">
-            <gshell:action class="org.apache.geronimo.gshell.commands.optional.JavaAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.shell.JavaAction"/>
         </gshell:command>
 
         <gshell:command name="optional/sleep">
-            <gshell:action class="org.apache.geronimo.gshell.commands.optional.SleepAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.shell.SleepAction"/>
         </gshell:command>
 
         <gshell:command name="optional/date">
-            <gshell:action class="org.apache.geronimo.gshell.commands.optional.DateAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.shell.DateAction"/>
         </gshell:command>
 
         <gshell:command name="optional/hostname">
-            <gshell:action class="org.apache.geronimo.gshell.commands.optional.HostnameAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.network.HostnameAction"/>
         </gshell:command>
 
         <gshell:command name="optional/cat">
-            <gshell:action class="org.apache.geronimo.gshell.commands.optional.CatAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.text.CatAction"/>
             <gshell:completers>
                 <ref bean="fileObjectNameCompleter"/>
                 <null/>
@@ -169,7 +173,7 @@
         </gshell:command>
 
         <gshell:command name="optional/edit">
-            <gshell:action class="org.apache.geronimo.gshell.commands.optional.EditAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.shell.EditAction"/>
             <gshell:completers>
                 <ref bean="fileObjectNameCompleter"/>
                 <null/>
@@ -177,7 +181,7 @@
         </gshell:command>
 
         <gshell:command name="optional/touch">
-            <gshell:action class="org.apache.geronimo.gshell.commands.optional.TouchAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.file.TouchAction" parent="vfsCommandActionTemplate"/>
             <gshell:completers>
                 <ref bean="fileObjectNameCompleter"/>
                 <null/>
@@ -185,7 +189,7 @@
         </gshell:command>
 
         <gshell:command name="optional/find">
-            <gshell:action class="org.apache.geronimo.gshell.commands.optional.FindAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.shell.FindAction"/>
             <gshell:completers>
                 <ref bean="fileObjectNameCompleter"/>
                 <null/>
@@ -193,13 +197,13 @@
         </gshell:command>
 
         <gshell:command name="optional/grep">
-            <gshell:action class="org.apache.geronimo.gshell.commands.optional.GrepAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.text.GrepAction"/>
         </gshell:command>
     </gshell:command-bundle>
 
     <gshell:command-bundle>
         <gshell:command name="vfs/cd">
-            <gshell:action class="org.apache.geronimo.gshell.commands.vfs.ChangeDirectoryAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.file.ChangeDirectoryAction" parent="vfsCommandActionTemplate"/>
             <gshell:completers>
                 <ref bean="fileObjectNameCompleter"/>
                 <null/>
@@ -207,11 +211,11 @@
         </gshell:command>
 
         <gshell:command name="vfs/pwd" type="stateless">
-            <gshell:action class="org.apache.geronimo.gshell.commands.vfs.CurrentDirectoryAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.file.CurrentDirectoryAction" parent="vfsCommandActionTemplate"/>
         </gshell:command>
 
         <gshell:command name="vfs/ls">
-            <gshell:action class="org.apache.geronimo.gshell.commands.vfs.ListDirectoryAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.file.ListDirectoryAction" parent="vfsCommandActionTemplate"/>
             <gshell:completers>
                 <ref bean="fileObjectNameCompleter"/>
                 <null/>
@@ -221,7 +225,7 @@
         <gshell:link name="vfs/dir" target="vfs/ls"/>
 
         <gshell:command name="vfs/cp">
-            <gshell:action class="org.apache.geronimo.gshell.commands.vfs.CopyAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.file.CopyAction" parent="vfsCommandActionTemplate"/>
             <gshell:completers>
                 <ref bean="fileObjectNameCompleter"/>
                 <ref bean="fileObjectNameCompleter"/>
@@ -232,7 +236,7 @@
         <gshell:link name="vfs/copy" target="vfs/cp"/>
 
         <gshell:command name="vfs/rm">
-            <gshell:action class="org.apache.geronimo.gshell.commands.vfs.RemoveAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.file.RemoveAction" parent="vfsCommandActionTemplate"/>
             <gshell:completers>
                 <ref bean="fileObjectNameCompleter"/>
                 <null/>
@@ -242,7 +246,7 @@
         <gshell:link name="vfs/del" target="vfs/rm"/>
 
         <gshell:command name="vfs/fileinfo">
-            <gshell:action class="org.apache.geronimo.gshell.commands.vfs.FileInfoAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.file.FileInfoAction" parent="vfsCommandActionTemplate"/>
             <gshell:completers>
                 <ref bean="fileObjectNameCompleter"/>
                 <null/>

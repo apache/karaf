@@ -94,7 +94,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell.commands</groupId>
-            <artifactId>gshell-builtins</artifactId>
+            <artifactId>gshell-builtin</artifactId>
             <version>${gshell.version}</version>
             <exclusions>
                 <exclusion>
@@ -109,17 +109,27 @@
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell.commands</groupId>
-            <artifactId>gshell-optional</artifactId>
+            <artifactId>gshell-file</artifactId>
             <version>${gshell.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell.commands</groupId>
-            <artifactId>gshell-vfs</artifactId>
+            <artifactId>gshell-network</artifactId>
+            <version>${gshell.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.gshell.commands</groupId>
+            <artifactId>gshell-shell</artifactId>
             <version>${gshell.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell.commands</groupId>
             <artifactId>gshell-ssh</artifactId>
+            <version>${gshell.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.gshell.commands</groupId>
+            <artifactId>gshell-text</artifactId>
             <version>${gshell.version}</version>
         </dependency>
         <dependency>
@@ -269,10 +279,12 @@
                                     <include>org.apache.geronimo.gshell:gshell-api</include>
                                     <include>org.apache.geronimo.gshell:gshell-application</include>
                                     <include>org.apache.geronimo.gshell:gshell-parser</include>
-                                    <include>org.apache.geronimo.gshell.commands:gshell-builtins</include>
-                                    <include>org.apache.geronimo.gshell.commands:gshell-optional</include>
-                                    <include>org.apache.geronimo.gshell.commands:gshell-remote</include>
-                                    <include>org.apache.geronimo.gshell.commands:gshell-vfs</include>
+                                    <include>org.apache.geronimo.gshell.commands:gshell-builtin</include>
+                                    <include>org.apache.geronimo.gshell.commands:gshell-file</include>
+                                    <include>org.apache.geronimo.gshell.commands:gshell-network</include>
+                                    <include>org.apache.geronimo.gshell.commands:gshell-shell</include>
+                                    <include>org.apache.geronimo.gshell.commands:gshell-ssh</include>
+                                    <include>org.apache.geronimo.gshell.commands:gshell-text</include>
                                     <include>org.apache.geronimo.gshell.support:gshell-ansi</include>
                                     <include>org.apache.geronimo.gshell.support:gshell-artifact</include>
                                     <include>org.apache.geronimo.gshell.support:gshell-chronos</include>
@@ -319,25 +331,37 @@
                                     </excludes>
                                 </filter>
                                 <filter>
-                                    <artifact>org.apache.geronimo.gshell.commands:gshell-builtins</artifact>
+                                    <artifact>org.apache.geronimo.gshell.commands:gshell-builtin</artifact>
                                     <excludes>
                                         <exclude>org/apache/geronimo/gshell/**</exclude>
                                     </excludes>
                                 </filter>
                                 <filter>
-                                    <artifact>org.apache.geronimo.gshell.commands:gshell-optional</artifact>
+                                    <artifact>org.apache.geronimo.gshell.commands:gshell-file</artifact>
                                     <excludes>
                                         <exclude>org/apache/geronimo/gshell/**</exclude>
                                     </excludes>
                                 </filter>
                                 <filter>
-                                    <artifact>org.apache.geronimo.gshell.commands:gshell-remote</artifact>
+                                    <artifact>org.apache.geronimo.gshell.commands:gshell-network</artifact>
                                     <excludes>
                                         <exclude>org/apache/geronimo/gshell/**</exclude>
                                     </excludes>
                                 </filter>
                                 <filter>
-                                    <artifact>org.apache.geronimo.gshell.commands:gshell-vfs</artifact>
+                                    <artifact>org.apache.geronimo.gshell.commands:gshell-shell</artifact>
+                                    <excludes>
+                                        <exclude>org/apache/geronimo/gshell/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.apache.geronimo.gshell.commands:gshell-ssh</artifact>
+                                    <excludes>
+                                        <exclude>org/apache/geronimo/gshell/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.apache.geronimo.gshell.commands:gshell-text</artifact>
                                     <excludes>
                                         <exclude>org/apache/geronimo/gshell/**</exclude>
                                     </excludes>

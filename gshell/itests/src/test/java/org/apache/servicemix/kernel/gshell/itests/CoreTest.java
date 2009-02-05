@@ -75,4 +75,11 @@ public class CoreTest extends AbstractIntegrationTest {
         }
     }
 
+    public void testCommandGroup() throws Exception {
+        Shell shell = getOsgiService(Shell.class);
+        shell.execute("vfs");
+        shell.execute("help");
+        shell.execute("..");
+    }
+
 }
