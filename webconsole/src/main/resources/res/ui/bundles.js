@@ -201,8 +201,8 @@ function renderDetails( data ) {
 	}
 }
 
-function renderBundles(data) {	
-    $(document).ready(function(){
+function renderBundles(data) {
+	$(document).ready(function(){
     	renderView( ["Id", "Name", "Status", "Actions"],
         		"<input type='hidden' name='action' value='install' style='margin-left:20px;'/>" +
                 "<input class='input' type='file' name='bundlefile' size='50' style='margin-left:10px;'/>" +
@@ -214,10 +214,20 @@ function renderBundles(data) {
         $("#refreshPackages").click(refreshPackages);
         renderData(data);
         
+        var extractMethod = function(node) {
+        	var link = node.getElementsByTagName("a");
+            if ( link && link.length == 1 ) {
+            	return link[0].innerHTML;
+            }
+            return node.innerHTML;
+        };
         $("#bundles").tablesorter({
-            headers: { 
+            headers: {
+        	    0: { sorter:"digit"},
                 3: { sorter: false }
-            } 
+            },
+            sortList: [[1,0]],
+            textExtraction:extractMethod 
         });
     });
 }
