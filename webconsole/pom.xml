@@ -48,7 +48,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
-                <version>1.0.6</version>
+                <version>1.0.8</version>
                 <executions>
                     <execution>
                         <id>generate-scr-scrdescriptor</id>
@@ -84,16 +84,6 @@
                         <Private-Package>
                             !org.apache.felix.webconsole,
                             org.apache.felix.webconsole.*,
-
-                            <!-- File Upload functionality -->
-                            org.apache.commons.fileupload,
-                            org.apache.commons.fileupload.disk,
-                            org.apache.commons.fileupload.servlet,
-
-                            <!-- Required by FileUpload and Util -->
-                            org.apache.commons.io,
-                            org.apache.commons.io.filefilter,
-                            org.apache.commons.io.output
                         </Private-Package>
                         <Import-Package>
                             org.apache.felix.scr;
@@ -106,7 +96,13 @@
                             org.apache.felix.bundlerepository,
                             
                             <!-- Required for JSON data transfer -->
-                            json
+                            json,
+                            
+                            <!-- File Upload functionality -->
+                            commons-fileupload,
+
+                            <!-- Required by FileUpload and Util -->
+                            commons-io
                         </Embed-Dependency>
                     </instructions>
                 </configuration>
@@ -122,12 +118,19 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- This adds commons-io transitively -->
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
             <version>1.1.1</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>1.4</version>
+            <scope>provided</scope>
             <optional>true</optional>
         </dependency>
 
