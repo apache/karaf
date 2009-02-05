@@ -637,3 +637,12 @@ table.tablelayout thead tr .headerSortDown {
 table.tablelayout thead tr .headerSortDown, table.tablelayout thead tr .headerSortUp {
 background-color: #8dbdd8;
 }
+.col_Id {
+    width: 40px;
+}
+.col_Status {
+	width: 50px;
+}
+.col_Actions {
+    width: 95px;
+}

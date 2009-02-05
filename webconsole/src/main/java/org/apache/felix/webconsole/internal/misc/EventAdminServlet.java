@@ -233,11 +233,10 @@ public class EventAdminServlet extends BaseWebConsolePlugin implements EventHand
     {
         final PrintWriter pw = response.getWriter();
 
-        String appRoot = ( String ) request.getAttribute( OsgiManager.ATTR_APP_ROOT );
-        pw.println( "<script src='" + appRoot + "/res/ui/jquery-1.2.6.min.js' language='JavaScript'></script>" );
-        pw.println( "<script src='" + appRoot
-            + "/res/ui/jquery.tablesorter-2.0.3.min.js' language='JavaScript'></script>" );
-        pw.println( "<script src='" + appRoot + "/res/ui/events.js' language='JavaScript'></script>" );
+        final String appRoot = ( String ) request.getAttribute( OsgiManager.ATTR_APP_ROOT );
+        Util.script(pw, appRoot, "jquery-1.3.1.min.js");
+        Util.script(pw, appRoot, "jquery.tablesorter-2.0.3.min.js");
+        Util.script(pw, appRoot, "events.js");
 
         Util.startScript( pw );
         pw.println( "renderEvents( );" );

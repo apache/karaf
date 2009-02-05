@@ -29,13 +29,11 @@ import org.apache.felix.bundlerepository.*;
 import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.apache.felix.webconsole.internal.Util;
 import org.apache.felix.webconsole.internal.servlet.OsgiManager;
-import org.json.JSONException;
-import org.json.JSONWriter;
+import org.json.*;
 import org.osgi.framework.*;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.log.LogService;
-import org.osgi.service.obr.RepositoryAdmin;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
@@ -52,8 +50,6 @@ public class BundlesServlet extends BaseWebConsolePlugin
     public static final String LABEL = "Bundles";
 
     public static final String BUNDLE_ID = "bundleId";
-
-    private static final String REPOSITORY_ADMIN_NAME = RepositoryAdmin.class.getName();
 
     // bootdelegation property entries. wildcards are converted to package
     // name prefixes. whether an entry is a wildcard or not is set as a flag
@@ -105,41 +101,19 @@ public class BundlesServlet extends BaseWebConsolePlugin
     protected void doGet( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
         IOException
     {
-
-        String info = request.getPathInfo();
-        if ( info.endsWith( ".json" ) )
+        final RequestInfo reqInfo = new RequestInfo(request);
+        if ( reqInfo.bundle == null && reqInfo.bundleRequested ) {
+            response.setStatus(404);
+            return;
+        }
+        if ( reqInfo.extension.equals("json")  )
         {
-            info = info.substring( 0, info.length() - 5 );
-            if ( getLabel().equals( info.substring( 1 ) ) )
-            {
-                // should return info on all bundles
-            }
-            else
-            {
-                Bundle bundle = getBundle( info );
-                if ( bundle != null )
-                {
-                    // bundle properties
-
-                    response.setContentType( "application/json" );
-                    response.setCharacterEncoding( "UTF-8" );
-
-                    PrintWriter pw = response.getWriter();
-                    JSONWriter jw = new JSONWriter( pw );
-                    try
-                    {
-                        performAction( jw, bundle );
-                    }
-                    catch ( JSONException je )
-                    {
-                        throw new IOException( je.toString() );
-                    }
-                }
-            }
+            this.renderJSON(response, reqInfo.bundle);
 
             // nothing more to do
             return;
         }
+
 
         super.doGet( request, response );
     }
@@ -147,19 +121,20 @@ public class BundlesServlet extends BaseWebConsolePlugin
 
     protected void doPost( HttpServletRequest req, HttpServletResponse resp ) throws ServletException, IOException
     {
-        String action = req.getParameter( "action" );
-        if ( "refreshPackages".equals( action ) )
-        {
-            getPackageAdmin().refreshPackages( null );
+        final RequestInfo reqInfo = new RequestInfo(req);
+        if ( reqInfo.bundle == null && reqInfo.bundleRequested ) {
+            resp.setStatus(404);
+            return;
         }
 
         boolean success = false;
+
+        final String action = req.getParameter( "action" );
+
         Bundle bundle = getBundle( req.getPathInfo() );
-        long bundleId = -1;
 
         if ( bundle != null )
         {
-            bundleId = bundle.getBundleId();
             if ( action == null )
             {
                 success = true;
@@ -214,46 +189,20 @@ public class BundlesServlet extends BaseWebConsolePlugin
 
         if ( "refreshPackages".equals( action ) )
         {
-            success = true;
             getPackageAdmin().refreshPackages( null );
-
-            // refresh completely
-            bundle = null;
-            bundleId = -1;
+            success = true;
         }
 
         if ( success )
         {
-            // redirect or 200
-            resp.setStatus( HttpServletResponse.SC_OK );
-            resp.setContentType( "application/json" );
-            resp.setCharacterEncoding( "UTF-8" );
-            JSONWriter jw = new JSONWriter( resp.getWriter() );
-            try
-            {
-                if ( bundle != null )
-                {
-                    bundleInfo( jw, bundle, true );
-                }
-                else if ( bundleId >= 0 )
-                {
-                    jw.object();
-                    jw.key( "bundleId" );
-                    jw.value( bundleId );
-                    jw.endObject();
-                }
-                else
-                {
-                    jw.object();
-                    jw.key( "reload" );
-                    jw.value( true );
-                    jw.endObject();
-                }
+            // let's wait a little bit to give the framework time
+            // to process our request
+            try {
+                Thread.sleep(800);
+            } catch (InterruptedException e) {
+                // we ignore this
             }
-            catch ( JSONException je )
-            {
-                throw new IOException( je.toString() );
-            }
+            this.renderJSON(resp, null);
         }
         else
         {
@@ -311,95 +260,79 @@ public class BundlesServlet extends BaseWebConsolePlugin
     }
 
 
-    private void renderBundleInfoCount( final PrintWriter pw, String msg, int count )
+    private void appendBundleInfoCount( final StringBuffer buf, String msg, int count )
     {
-        pw.print( "<td class='content'>" );
-        pw.print( msg );
-        pw.print( " : " );
-        pw.print( count );
-        pw.print( " Bundle" );
+        buf.append(count);
+        buf.append(" Bundle");
         if ( count != 1 )
-            pw.print( 's' );
-        pw.println( "</td>" );
+            buf.append( 's' );
+        buf.append(' ');
+        buf.append(msg);
     }
-
 
     protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
-        Bundle bundle = getBundle( request.getPathInfo() );
-        Bundle[] bundles = ( bundle != null ) ? new Bundle[]
-            { bundle } : this.getBundles();
+        // get request info from request attribute
+        final RequestInfo reqInfo = getRequestInfo(request);
+        final PrintWriter pw = response.getWriter();
 
-        PrintWriter pw = response.getWriter();
-
-        String appRoot = ( String ) request.getAttribute( OsgiManager.ATTR_APP_ROOT );
-        pw.println( "<script src='" + appRoot + "/res/ui/datatable.js' language='JavaScript'></script>" );
-        pw.println( "<script src='" + appRoot + "/res/ui/bundles.js' language='JavaScript'></script>" );
-
-        if ( bundles != null )
-        {
-            int active = 0, installed = 0, resolved = 0;
-            for ( int i = 0; i < bundles.length; i++ )
-            {
-                switch ( bundles[i].getState() )
-                {
-                    case Bundle.ACTIVE:
-                        active++;
-                        break;
-                    case Bundle.INSTALLED:
-                        installed++;
-                        break;
-                    case Bundle.RESOLVED:
-                        resolved++;
-                        break;
-                }
-            }
-
-            pw.println( "<table class='content' cellpadding='0' cellspacing='0' width='100%'><tbody>" );
-            pw.println( "<tr class='content'>" );
-            renderBundleInfoCount( pw, "Total", bundles.length );
-            renderBundleInfoCount( pw, "Active", active );
-            renderBundleInfoCount( pw, "Resolved", resolved );
-            renderBundleInfoCount( pw, "Installed", installed );
-            pw.println( "</tr></tbody></table>" );
-        }
+        final String appRoot = ( String ) request.getAttribute( OsgiManager.ATTR_APP_ROOT );
+        Util.script(pw, appRoot, "jquery-1.3.1.min.js");
+        Util.script(pw, appRoot, "jquery.tablesorter-2.0.3.min.js");
+        Util.script(pw, appRoot, "bundles.js");
 
         Util.startScript( pw );
-        pw.println( "var bundleListData = " );
-        JSONWriter jw = new JSONWriter( pw );
+        pw.println( "var imgRoot = '" + appRoot + "/res/imgs';");
+        pw.println( "var startLevel = " + getStartLevel().getInitialBundleStartLevel() + ";");
+        pw.println( "var drawDetails = " + reqInfo.bundleRequested + ";");
+        Util.endScript( pw );
+
+        Util.script(pw, appRoot, "bundles.js");
+
+        pw.println( "<div id='plugin_content'/>");
+        Util.startScript( pw );
+        pw.print( "renderBundles(");
+        writeJSON(pw, reqInfo.bundle);
+        pw.println(");" );
+        Util.endScript( pw );
+    }
+
+    private void renderJSON( final HttpServletResponse response, final Bundle bundle ) throws IOException
+    {
+        response.setContentType( "application/json" );
+        response.setCharacterEncoding( "UTF-8" );
+
+        final PrintWriter pw = response.getWriter();
+        writeJSON(pw, bundle);
+    }
+
+    private void writeJSON( final PrintWriter pw, final Bundle bundle) throws IOException
+    {
+        final Bundle[] allBundles = this.getBundles();
+        final String statusLine = this.getStatusLine(allBundles);
+        final Bundle[] bundles = ( bundle != null ) ? new Bundle[]
+            { bundle } : allBundles;
+        Util.sort( bundles );
+
+        final JSONWriter jw = new JSONWriter( pw );
+
         try
         {
             jw.object();
 
-            jw.key( "startLevel" );
-            jw.value( getStartLevel().getInitialBundleStartLevel() );
+            jw.key( "status" );
+            jw.value( statusLine );
 
-            jw.key( "numActions" );
-            jw.value( 4 );
+            jw.key( "data" );
 
-            boolean details = ( bundle != null );
+            jw.array();
 
-            if ( bundles != null && bundles.length > 0 )
+            for ( int i = 0; i < bundles.length; i++ )
             {
-                Util.sort( bundles );
-
-                jw.key( "data" );
-
-                jw.array();
-
-                for ( int i = 0; i < bundles.length; i++ )
-                {
-                    bundleInfo( jw, bundles[i], details );
-                }
-
-                jw.endArray();
-
+                bundleInfo( jw, bundles[i], bundle != null );
             }
-            else
-            {
-                jw.key( "error" );
-                jw.value( "No Bundles installed currently" );
-            }
+
+            jw.endArray();
 
             jw.endObject();
 
@@ -409,11 +342,54 @@ public class BundlesServlet extends BaseWebConsolePlugin
             throw new IOException( je.toString() );
         }
 
-        pw.println( ";" );
-        pw.println( "renderBundle( bundleListData );" );
-        Util.endScript( pw );
     }
 
+    private String getStatusLine(final Bundle[] bundles)
+    {
+        int active = 0, installed = 0, resolved = 0;
+        for ( int i = 0; i < bundles.length; i++ )
+        {
+            switch ( bundles[i].getState() )
+            {
+                case Bundle.ACTIVE:
+                    active++;
+                    break;
+                case Bundle.INSTALLED:
+                    installed++;
+                    break;
+                case Bundle.RESOLVED:
+                    resolved++;
+                    break;
+            }
+        }
+        final StringBuffer buffer = new StringBuffer();
+        buffer.append("Bundle information: ");
+        appendBundleInfoCount(buffer, "in total", bundles.length);
+        if ( active == bundles.length )
+        {
+            buffer.append(" - all active.");
+        }
+        else
+        {
+            if ( active != 0 )
+            {
+                buffer.append(", ");
+                appendBundleInfoCount(buffer, "active", active);
+            }
+            if ( resolved != 0 )
+            {
+                buffer.append(", ");
+                appendBundleInfoCount(buffer, "resolved", resolved);
+            }
+            if ( installed != 0 )
+            {
+                buffer.append(", ");
+                appendBundleInfoCount(buffer, "installed", installed);
+            }
+            buffer.append('.');
+        }
+        return buffer.toString();
+    }
 
     private void bundleInfo( JSONWriter jw, Bundle bundle, boolean details ) throws JSONException
     {
@@ -428,19 +404,18 @@ public class BundlesServlet extends BaseWebConsolePlugin
         jw.key( "actions" );
         jw.array();
 
-        if ( bundle.getBundleId() == 0 )
+        if ( bundle.getBundleId() != 0 )
         {
-            jw.value( false );
-            jw.value( false );
-            jw.value( false );
-            jw.value( false );
-        }
-        else
-        {
-            action( jw, hasStart( bundle ), "start", "Start", null );
-            action( jw, hasStop( bundle ), "stop", "Stop", null );
-            action( jw, true, "refresh", "Refresh", "Refresh Package Imports" );
-            action( jw, hasUninstall( bundle ), "uninstall", "Uninstall", null );
+            if ( hasStart(bundle) )
+            {
+                action( jw, hasStart( bundle ), "start", "Start", "start" );
+            }
+            else
+            {
+                action( jw, hasStop( bundle ), "stop", "Stop", "stop" );
+            }
+            action( jw, true, "refresh", "Refresh Package Imports", "refresh" );
+            action( jw, hasUninstall( bundle ), "uninstall", "Uninstall", "delete" );
         }
         jw.endArray();
 
@@ -481,15 +456,13 @@ public class BundlesServlet extends BaseWebConsolePlugin
     }
 
 
-    private void action( JSONWriter jw, boolean enabled, String op, String opLabel, String title ) throws JSONException
+    private void action( JSONWriter jw, boolean enabled, String op, String opLabel, String image ) throws JSONException
     {
         jw.object();
         jw.key( "enabled" ).value( enabled );
         jw.key( "name" ).value( opLabel );
         jw.key( "link" ).value( op );
-        if (title != null) {
-            jw.key( "title" ).value( title );
-        }
+        jw.key( "image" ).value( image );
         jw.endObject();
     }
 
@@ -514,18 +487,6 @@ public class BundlesServlet extends BaseWebConsolePlugin
     }
 
 
-    private void performAction( JSONWriter jw, Bundle bundle ) throws JSONException
-    {
-        jw.object();
-        jw.key( BUNDLE_ID );
-        jw.value( bundle.getBundleId() );
-
-        bundleDetails( jw, bundle );
-
-        jw.endObject();
-    }
-
-
     private void bundleDetails( JSONWriter jw, Bundle bundle ) throws JSONException
     {
         Dictionary headers = bundle.getHeaders();
@@ -540,7 +501,6 @@ public class BundlesServlet extends BaseWebConsolePlugin
         String docUrl = ( String ) headers.get( Constants.BUNDLE_DOCURL );
         if ( docUrl != null )
         {
-            docUrl = "<a href=\"" + docUrl + "\" target=\"_blank\">" + docUrl + "</a>";
             keyVal( jw, "Bundle Documentation", docUrl );
         }
 
@@ -602,11 +562,11 @@ public class BundlesServlet extends BaseWebConsolePlugin
                 }
             } );
 
-            StringBuffer val = new StringBuffer();
+            JSONArray val = new JSONArray();
             for ( int j = 0; j < exports.length; j++ )
             {
                 ExportedPackage export = exports[j];
-                printExport( val, export.getName(), export.getVersion() );
+                collectExport( val, export.getName(), export.getVersion() );
                 Bundle[] ubList = export.getImportingBundles();
                 if ( ubList != null )
                 {
@@ -617,7 +577,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
                     }
                 }
             }
-            keyVal( jw, "Exported Packages", val.toString() );
+            keyVal( jw, "Exported Packages", val );
         }
         else
         {
@@ -644,7 +604,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
                 }
             }
             // now sort
-            StringBuffer val = new StringBuffer();
+            JSONArray val = new JSONArray();
             if ( imports.size() > 0 )
             {
                 final ExportedPackage[] packages = ( ExportedPackage[] ) imports.toArray( new ExportedPackage[imports
@@ -666,28 +626,27 @@ public class BundlesServlet extends BaseWebConsolePlugin
                 for ( int i = 0; i < packages.length; i++ )
                 {
                     ExportedPackage ep = packages[i];
-                    printImport( val, ep.getName(), ep.getVersion(), false, ep );
+                    collectImport( val, ep.getName(), ep.getVersion(), false, ep );
                 }
             }
             else
             {
                 // add description if there are no imports
-                val.append( "None" );
+                val.put( "None" );
             }
 
-            keyVal( jw, "Imported Packages", val.toString() );
+            keyVal( jw, "Imported Packages", val );
         }
 
         if ( !usingBundles.isEmpty() )
         {
-            StringBuffer val = new StringBuffer();
+            JSONArray val = new JSONArray();
             for ( Iterator ui = usingBundles.values().iterator(); ui.hasNext(); )
             {
                 Bundle usingBundle = ( Bundle ) ui.next();
-                val.append( getBundleDescriptor( usingBundle ) );
-                val.append( "<br />" );
+                val.put( getBundleDescriptor( usingBundle ) );
             }
-            keyVal( jw, "Importing Bundles", val.toString() );
+            keyVal( jw, "Importing Bundles", val );
         }
     }
 
@@ -717,13 +676,13 @@ public class BundlesServlet extends BaseWebConsolePlugin
                     }
                 } );
 
-                StringBuffer val = new StringBuffer();
+                JSONArray val = new JSONArray();
                 for ( int i = 0; i < pkgs.length; i++ )
                 {
                     R4Export export = new R4Export( pkgs[i] );
-                    printExport( val, export.getName(), export.getVersion() );
+                    collectExport( val, export.getName(), export.getVersion() );
                 }
-                keyVal( jw, "Exported Packages", val.toString() );
+                keyVal( jw, "Exported Packages", val );
             }
             else
             {
@@ -767,7 +726,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
                 }
 
                 // now sort
-                StringBuffer val = new StringBuffer();
+                JSONArray val = new JSONArray();
                 if ( imports.size() > 0 )
                 {
                     for ( Iterator ii = imports.values().iterator(); ii.hasNext(); )
@@ -786,16 +745,16 @@ public class BundlesServlet extends BaseWebConsolePlugin
                             }
                         }
 
-                        printImport( val, r4Import.getName(), r4Import.getVersion(), r4Import.isOptional(), ep );
+                        collectImport( val, r4Import.getName(), r4Import.getVersion(), r4Import.isOptional(), ep );
                     }
                 }
                 else
                 {
                     // add description if there are no imports
-                    val.append( "None" );
+                    val.put( "None" );
                 }
 
-                keyVal( jw, "Imported Packages", val.toString() );
+                keyVal( jw, "Imported Packages", val );
             }
         }
     }
@@ -813,7 +772,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
         {
             String key = "Service ID " + refs[i].getProperty( Constants.SERVICE_ID );
 
-            StringBuffer val = new StringBuffer();
+            JSONArray val = new JSONArray();
 
             appendProperty( val, refs[i], Constants.OBJECTCLASS, "Types" );
             appendProperty( val, refs[i], Constants.SERVICE_PID, "PID" );
@@ -824,13 +783,14 @@ public class BundlesServlet extends BaseWebConsolePlugin
             appendProperty( val, refs[i], Constants.SERVICE_DESCRIPTION, "Description" );
             appendProperty( val, refs[i], Constants.SERVICE_VENDOR, "Vendor" );
 
-            keyVal( jw, key, val.toString() );
+            keyVal( jw, key, val);
         }
     }
 
 
-    private void appendProperty( StringBuffer dest, ServiceReference ref, String name, String label )
+    private void appendProperty( JSONArray array, ServiceReference ref, String name, String label )
     {
+        StringBuffer dest = new StringBuffer();
         Object value = ref.getProperty( name );
         if ( value instanceof Object[] )
         {
@@ -842,11 +802,12 @@ public class BundlesServlet extends BaseWebConsolePlugin
                     dest.append( ", " );
                 dest.append( values[j] );
             }
-            dest.append( "<br />" ); // assume HTML use of result
+            array.put(dest.toString());
         }
         else if ( value != null )
         {
-            dest.append( label ).append( ": " ).append( value ).append( "<br />" );
+            dest.append( label ).append( ": " ).append( value );
+            array.put(dest.toString());
         }
     }
 
@@ -865,8 +826,9 @@ public class BundlesServlet extends BaseWebConsolePlugin
     }
 
 
-    private void printExport( StringBuffer val, String name, Version version )
+    private void collectExport( JSONArray array, String name, Version version )
     {
+        StringBuffer val = new StringBuffer();
         boolean bootDel = isBootDelegated( name );
         if ( bootDel )
         {
@@ -882,12 +844,13 @@ public class BundlesServlet extends BaseWebConsolePlugin
             val.append( " -- Overwritten by Boot Delegation" );
         }
 
-        val.append( "<br />" );
+        array.put(val.toString());
     }
 
 
-    private void printImport( StringBuffer val, String name, Version version, boolean optional, ExportedPackage export )
+    private void collectImport( JSONArray array, String name, Version version, boolean optional, ExportedPackage export )
     {
+        StringBuffer val = new StringBuffer();
         boolean bootDel = isBootDelegated( name );
         boolean isSpan = bootDel || export == null;
 
@@ -924,7 +887,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
             }
         }
 
-        val.append( "<br />" );
+        array.put(val);
     }
 
 
@@ -1004,5 +967,54 @@ public class BundlesServlet extends BaseWebConsolePlugin
     {
         getPackageAdmin().refreshPackages( new Bundle[]
             { bundle } );
+    }
+
+    private final class RequestInfo
+    {
+        public final String extension;
+        public final Bundle bundle;
+        public final boolean bundleRequested;
+
+        protected RequestInfo( final HttpServletRequest request )
+        {
+            String info = request.getPathInfo();
+            // remove label and starting slash
+            info = info.substring(getLabel().length() + 1);
+
+            // get extension
+            if ( info.endsWith(".json") )
+            {
+                extension = "json";
+                info = info.substring(0, info.length() - 5);
+            }
+            else
+            {
+                extension = "html";
+            }
+
+            // we only accept direct requests to a bundle if they have a slash after the label
+            String bundleInfo = null;
+            if (info.startsWith("/") )
+            {
+                bundleInfo = info.substring(1);
+            }
+            if ( bundleInfo == null )
+            {
+                bundle = null;
+                bundleRequested = false;
+            }
+            else
+            {
+                bundle = getBundle(bundleInfo);
+                bundleRequested = true;
+            }
+            request.setAttribute(BundlesServlet.class.getName(), this);
+        }
+
+    }
+
+    public static RequestInfo getRequestInfo(final HttpServletRequest request)
+    {
+        return (RequestInfo)request.getAttribute(BundlesServlet.class.getName());
     }
 }

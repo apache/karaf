@@ -17,18 +17,14 @@
 package org.apache.felix.webconsole.internal;
 
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Comparator;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Version;
+import org.osgi.framework.*;
 
 
 /**
@@ -72,6 +68,10 @@ public class Util
         pw.println( "</script>" );
     }
 
+    public static void script( PrintWriter pw, String appRoot, String scriptName )
+    {
+        pw.println( "<script src='" + appRoot + "/res/ui/" + scriptName + "' language='JavaScript'></script>" );
+    }
 
     public static void spool( String res, HttpServletResponse resp ) throws IOException
     {

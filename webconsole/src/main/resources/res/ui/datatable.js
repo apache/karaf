@@ -144,18 +144,25 @@ function entryInternal( /* Element */ parent, /* Object */ dataEntry, /* boolean
     var buttonTd = td( "content", { align: "right" } );
     if ( op )
     {
-        var input = createElement( "input", "submit", {
-                type: 'button',
-                value: opLabel,
+    	var input;
+    	if ( title ) {
+	        input = createElement( "input", null, {
+                type: 'image',
+                alt: opLabel,
+                src: imgRoot + '/bundle_' + title + '.gif', 
                 onClick: 'changeDataEntryState(' + id + ', "' + op + '");'
             });
+    		
+    	} else {
+	        var input = createElement( "input", "submit", {
+	                type: 'button',
+	                value: opLabel,
+	                onClick: 'changeDataEntryState(' + id + ', "' + op + '");'
+	            });
+    	}
         if (!enabled)
         {
             input.setAttribute( "disabled", true );
-        }
-        if (title)
-        {
-            input.setAttribute( "title", title );
         }
         buttonTd.appendChild( input );
     }
