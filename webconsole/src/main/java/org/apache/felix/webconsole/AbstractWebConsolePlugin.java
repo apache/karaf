@@ -300,4 +300,31 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         // no valid string parameter, fail
         return null;
     }
+
+    /**
+     * Utility method to handle relative redirects.
+     * Some app servers like web sphere handle relative redirects differently
+     * therefore we should make an absolute url before invoking send redirect.
+     */
+    protected void sendRedirect(final HttpServletRequest request,
+                                final HttpServletResponse response,
+                                String redirectUrl) throws IOException {
+        // check for relative url
+        if ( !redirectUrl.startsWith("/") ) {
+            String base = request.getContextPath() + request.getServletPath() + request.getPathInfo();
+            int i = base.lastIndexOf('/');
+            if (i > -1) {
+                base = base.substring(0, i);
+            } else {
+                i = base.indexOf(':');
+                base = (i > -1) ? base.substring(i + 1, base.length()) : "";
+            }
+            if (!base.startsWith("/")) {
+                base = '/' + base;
+            }
+            redirectUrl = base + '/' + redirectUrl;
+
+        }
+        response.sendRedirect(redirectUrl);
+    }
 }

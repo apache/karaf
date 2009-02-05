@@ -106,7 +106,7 @@ public class ConfigManager extends ConfigManagerBase
                     redirect += "?" + PID_FILTER + "=" + pidFilter;
                 }
 
-                response.sendRedirect( redirect );
+                this.sendRedirect(request, response, redirect);
             }
 
             return;
