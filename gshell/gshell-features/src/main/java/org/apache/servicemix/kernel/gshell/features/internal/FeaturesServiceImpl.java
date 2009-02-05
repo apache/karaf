@@ -142,7 +142,17 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     }
 
     public void installFeature(String name) throws Exception {
-    	installFeature(name, FeatureImpl.DEFAULT_VERSION);//install feature with default version
+    	//if not specify the features version, then use the latest version
+    	String latestVersion = FeatureImpl.DEFAULT_VERSION;
+    	Set<String> allVersions = getFeatures().get(name).keySet();
+    	for (String version : allVersions) {
+    		Version verlatest = new Version(latestVersion.replace('-', '.'));
+    		Version ver = new Version(version.replace('-', '.'));
+    		if (verlatest.compareTo(ver) < 0) {
+    			latestVersion = version;
+    		}
+    	}
+    	installFeature(name, latestVersion);
     }
 
     public void installFeature(String name, String version) throws Exception {
