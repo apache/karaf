@@ -22,6 +22,6 @@
     </feature>
     <feature name="obr" version="${version}">
         <bundle>mvn:org.apache.felix/org.apache.felix.bundlerepository/${felix.bundlerepository.version}</bundle>
-        <bundle>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.obr/${version}</bundle>
+        <bundle>mvn:org.apache.servicemix.kernel.gshell/org.apache.servicemix.kernel.gshell.obr/${version}</bundle>
     </feature>
 </features>
