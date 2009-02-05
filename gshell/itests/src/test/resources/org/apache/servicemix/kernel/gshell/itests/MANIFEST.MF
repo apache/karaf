@@ -25,4 +25,6 @@ Import-Package: junit.framework,
  org.springframework.core.io,
  org.springframework.osgi.test,
  org.apache.servicemix.kernel.testing.support,
+ org.apache.geronimo.gshell.commandline,
+ org.apache.geronimo.gshell.registry,
  org.apache.geronimo.gshell.shell

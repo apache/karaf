@@ -18,6 +18,9 @@ package org.apache.servicemix.kernel.gshell.itests;
 
 import org.apache.servicemix.kernel.testing.support.AbstractIntegrationTest;
 import org.apache.geronimo.gshell.shell.Shell;
+import org.apache.geronimo.gshell.commandline.CommandLineExecutionFailed;
+import org.apache.geronimo.gshell.registry.NoSuchCommandException;
+import org.osgi.framework.Bundle;
 
 public class CoreTest extends AbstractIntegrationTest {
 
@@ -44,6 +47,32 @@ public class CoreTest extends AbstractIntegrationTest {
     public void testHelp() throws Exception {
         Shell shell = getOsgiService(Shell.class);
         shell.execute("help");
+    }
+
+    public void testInstallCommand() throws Exception {
+        Shell shell = getOsgiService(Shell.class);
+
+        try {
+            shell.execute("log/display");
+            fail("command should not exist");
+        } catch (CommandLineExecutionFailed e) {
+            assertNotNull(e.getCause());
+            assertTrue(e.getCause() instanceof NoSuchCommandException);
+        }
+
+        Bundle b = installBundle("org.apache.servicemix.kernel.gshell", "org.apache.servicemix.kernel.gshell.log", null, "jar");
+
+        shell.execute("log/display");
+
+        b.uninstall();
+
+        try {
+            shell.execute("log/display");
+            fail("command should not exist");
+        } catch (CommandLineExecutionFailed e) {
+            assertNotNull(e.getCause());
+            assertTrue(e.getCause() instanceof NoSuchCommandException);
+        }
     }
 
 }
