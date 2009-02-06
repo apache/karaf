@@ -291,6 +291,12 @@ class DependencyManager implements ServiceListener, Reference
                 {
                     invokeUnbindMethod( instance, reference );
                 }
+
+                // ensure the service is not cached anymore, we call it here
+                // since there might be a bind method (or the locateService
+                // method might have been called) but there is no unbind
+                // method to actually unbind the service (see FELIX-832)
+                ungetService( reference );
             }
         }
     }
@@ -674,21 +680,25 @@ class DependencyManager implements ServiceListener, Reference
      */
     void unbind( Object instance )
     {
-        // if the instance is null, we do nothing actually
-        // the instance might be null in the delayed component situation.
-        // Additionally, we do nothing here in case there is no configured
-        // unbind method.
-        if ( instance == null || m_dependencyMetadata.getUnbind() == null )
-        {
-            return;
-        }
+        // only invoke the unbind method if there is an instance (might be null
+        // in the delayed component situation) and the unbind method is declared.
+        boolean doUnbind = instance != null && m_dependencyMetadata.getUnbind() != null;
 
         ServiceReference[] boundRefs = getBoundServiceReferences();
         if ( boundRefs != null )
         {
             for ( int i = 0; i < boundRefs.length; i++ )
             {
-                invokeUnbindMethod( instance, boundRefs[i] );
+                if ( doUnbind )
+                {
+                    invokeUnbindMethod( instance, boundRefs[i] );
+                }
+
+                // unget the service, we call it here since there might be a
+                // bind method (or the locateService method might have been
+                // called) but there is no unbind method to actually unbind
+                // the service (see FELIX-832)
+                ungetService( boundRefs[i] );
             }
         }
     }
@@ -996,11 +1006,6 @@ class DependencyManager implements ServiceListener, Reference
                         + m_dependencyMetadata.getUnbind() + "()", m_componentManager.getComponentMetadata(), ex
                         .getCause() );
                 return true;
-            }
-            finally
-            {
-                // ensure the service is not cached anymore
-                ungetService( ref );
             }
 
         }
