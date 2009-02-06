@@ -63,7 +63,7 @@
                         <Export-Package>org.apache.servicemix.kernel.main.spi.*;version=${pom.version}</Export-Package>
                         <Private-Package>
                             org.apache.servicemix.kernel.main;-split-package:=merge-first,
-                            org.apache.felix.moduleloader.*,
+                            org.apache.felix.moduleloader.*;-split-package:=merge-first,
                             org.apache.felix.framework.*;-split-package:=merge-first,
                             org.osgi.framework;-split-package:=merge-first,
                             org.osgi.service.packageadmin;-split-package:=merge-first,

@@ -17,7 +17,12 @@
 package org.apache.servicemix.kernel.gshell.features;
 
 import java.net.URI;
+import java.net.URL;
 import java.io.InputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 
 import static org.easymock.EasyMock.*;
 
@@ -28,12 +33,28 @@ import org.osgi.service.prefs.PreferencesService;
 import org.osgi.service.prefs.Preferences;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Bundle;
+import org.springframework.context.ApplicationContext;
 import junit.framework.TestCase;
 
 public class FeaturesServiceTest extends TestCase {
 
     public void testInstallFeature() throws Exception {
-        URI uri = getClass().getResource("repo2.xml").toURI();
+
+        String name = ApplicationContext.class.getName();
+        name = name.replace(".", "/")  + ".class";
+        name = getClass().getClassLoader().getResource(name).toString();
+        name = name.substring("jar:".length(), name.indexOf('!'));
+
+        File tmp = File.createTempFile("smx", ".feature");
+        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
+        pw.println("<features>");
+        pw.println("  <feature name=\"f1\">");
+        pw.println("    <bundle>" + name + "</bundle>");
+        pw.println("  </feature>");
+        pw.println("</features>");
+        pw.close();
+
+        URI uri = tmp.toURI();
 
         Preferences prefs = EasyMock.createMock(Preferences.class);
         PreferencesService preferencesService = EasyMock.createMock(PreferencesService.class);
@@ -72,7 +93,7 @@ public class FeaturesServiceTest extends TestCase {
         assertEquals(0, features[0].getDependencies().size());
         assertNotNull(features[0].getBundles());
         assertEquals(1, features[0].getBundles().size());
-        assertEquals("http://repo1.maven.org/maven2/org/apache/geronimo/specs/geronimo-stax-api_1.0_spec/1.0.1/geronimo-stax-api_1.0_spec-1.0.1.jar", features[0].getBundles().get(0));
+        assertEquals(name, features[0].getBundles().get(0));
 
         verify(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle);
 
