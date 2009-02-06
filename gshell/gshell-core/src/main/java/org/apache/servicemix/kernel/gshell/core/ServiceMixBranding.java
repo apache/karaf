@@ -51,7 +51,7 @@ public class ServiceMixBranding extends Branding {
 
     public ServiceMixBranding() {
     	banner = kernelBanner;
-    	displayName = "Servicemix Kernel";
+    	displayName = "ServiceMix Kernel";
     	displayLocation = "http://servicemix.apache.org/kernel/";    	
     }
     
