@@ -88,7 +88,8 @@
                         <Import-Package>
                             org.apache.felix.scr;
                             org.apache.felix.shell;
-                            org.osgi.service.*;resolution:=optional,*
+                            org.osgi.service.*;resolution:=optional,
+                            javax.portlet;resolution:=optional,*;
                         </Import-Package>
                         
                         <Embed-Dependency>
