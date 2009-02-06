@@ -21,6 +21,7 @@ package org.apache.felix.scr.impl;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -159,6 +160,9 @@ public class ComponentMetadata {
      * @param newReference a new ReferenceMetadata to be added
      */
     public void addDependency(ReferenceMetadata newReference) {
+        if(m_validated) {
+            return;
+        }
     	if(newReference == null) {
     		throw new IllegalArgumentException ("Cannot add a null ReferenceMetadata");
     	}
@@ -267,7 +271,11 @@ public class ComponentMetadata {
      */
     void validate()
     {
-
+        // nothing to do if already validated
+        if (m_validated) {
+            return;
+        }
+        
         // 112.10 The name of the component is required
         if ( m_name == null )
         {
@@ -297,10 +305,18 @@ public class ComponentMetadata {
         }
 
         // Check that the references are ok
+        HashSet refs = new HashSet();
         Iterator referenceIterator = m_references.iterator();
         while ( referenceIterator.hasNext() )
         {
-            ( ( ReferenceMetadata ) referenceIterator.next() ).validate( this );
+            ReferenceMetadata refMeta = ( ReferenceMetadata ) referenceIterator.next();
+            refMeta.validate( this );
+            
+            // flag duplicates
+            if ( !refs.add( refMeta.getName() ) )
+            {
+                throw validationFailure( "Detected duplicate reference name: \"" + refMeta.getName() + "\"" );
+            }
         }
 
         // verify value of immediate attribute if set
