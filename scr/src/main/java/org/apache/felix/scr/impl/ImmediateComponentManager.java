@@ -21,7 +21,10 @@ package org.apache.felix.scr.impl;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
@@ -330,8 +333,6 @@ class ImmediateComponentManager extends AbstractComponentManager
     public Dictionary getProperties()
     {
 
-        // TODO: Currently on ManagedService style configuration is supported, ManagedServiceFactory style is missing
-
         if ( m_properties == null )
         {
 
@@ -370,6 +371,14 @@ class ImmediateComponentManager extends AbstractComponentManager
     /**
      * Called by the Configuration Admin Service to update the component with
      * Configuration properties.
+     * <p>
+     * This causes the component to be reactivated with the new configuration
+     * unless no configuration has ever been set on this component and the
+     * <code>configuration</code> parameter is <code>null</code>. In this case
+     * nothing is to be done. If a configuration has previously been set and
+     * now the configuration is deleted, the <code>configuration</code>
+     * parameter is <code>null</code> and the component has to be reactivated
+     * with the default configuration.
      *
      * @param configuration The configuration properties for the component from
      *      the Configuration Admin Service or <code>null</code> if there is
@@ -377,6 +386,14 @@ class ImmediateComponentManager extends AbstractComponentManager
      */
     public void reconfigure( Dictionary configuration )
     {
+        // nothing to do if there is no configuration (see FELIX-714)
+        if ( configuration == null && m_configurationProperties == null )
+        {
+            log( LogService.LOG_DEBUG, "No configuration provided (or deleted), nothing to do", getComponentMetadata(),
+                null );
+            return;
+        }
+
         // store the properties
         m_configurationProperties = configuration;
 
