@@ -86,7 +86,6 @@
         <dependency>
             <groupId>org.apache.geronimo.gshell.commands</groupId>
             <artifactId>gshell-builtin</artifactId>
-            <version>${gshell.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>oro</groupId>
@@ -101,32 +100,26 @@
         <dependency>
             <groupId>org.apache.geronimo.gshell.commands</groupId>
             <artifactId>gshell-file</artifactId>
-            <version>${gshell.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell.commands</groupId>
             <artifactId>gshell-network</artifactId>
-            <version>${gshell.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell.commands</groupId>
             <artifactId>gshell-shell</artifactId>
-            <version>${gshell.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell.commands</groupId>
             <artifactId>gshell-ssh</artifactId>
-            <version>${gshell.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell.commands</groupId>
             <artifactId>gshell-text</artifactId>
-            <version>${gshell.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell.wisdom</groupId>
             <artifactId>gshell-wisdom-core</artifactId>
-            <version>${gshell.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.geronimo.gshell.support</groupId>

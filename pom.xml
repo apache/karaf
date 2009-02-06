@@ -279,6 +279,22 @@
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.servicemix.kernel.demos</groupId>
+                <artifactId>smx4web</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.kernel</groupId>
+                <artifactId>apache-servicemix-kernel</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.kernel</groupId>
+                <artifactId>apache-servicemix-kernel</artifactId>
+                <type>zip</type>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.framework</artifactId>
                 <version>${felix.framework.version}</version>
@@ -510,64 +526,63 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.apache.geronimo.gshell</groupId>
-                <artifactId>gshell-core</artifactId>
-                <version>${gshell.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.gshell</groupId>
-                <artifactId>gshell-command-api</artifactId>
-                <version>${gshell.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.gshell</groupId>
-                <artifactId>gshell-model</artifactId>
-                <version>${gshell.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.gshell.support</groupId>
-                <artifactId>gshell-common</artifactId>
-                <version>${gshell.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.gshell.support</groupId>
-                <artifactId>gshell-ansi</artifactId>
-                <version>${gshell.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.gshell.support</groupId>
-                <artifactId>gshell-i18n</artifactId>
-                <version>${gshell.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.gshell.support</groupId>
-                <artifactId>gshell-clp</artifactId>
-                <version>${gshell.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.gshell</groupId>
-                <artifactId>gshell-parser</artifactId>
-                <version>${gshell.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.gshell.remote</groupId>
-                <artifactId>gshell-whisper</artifactId>
+                <groupId>org.apache.geronimo.gshell.commands</groupId>
+                <artifactId>gshell-builtin</artifactId>
                 <version>${gshell.version}</version>
                 <exclusions>
                     <exclusion>
-                        <groupId>org.apache.mina</groupId>
-                        <artifactId>mina-filter-ssl</artifactId>
+                        <groupId>oro</groupId>
+                        <artifactId>oro</artifactId>
                     </exclusion>
                     <exclusion>
-                        <groupId>org.apache.mina</groupId>
-                        <artifactId>mina-core</artifactId>
+                        <groupId>commons-vfs</groupId>
+                        <artifactId>commons-vfs</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.geronimo.gshell.commands</groupId>
+                <artifactId>gshell-file</artifactId>
+                <version>${gshell.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.geronimo.gshell.commands</groupId>
+                <artifactId>gshell-network</artifactId>
+                <version>${gshell.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.geronimo.gshell.commands</groupId>
+                <artifactId>gshell-shell</artifactId>
+                <version>${gshell.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.geronimo.gshell.commands</groupId>
                 <artifactId>gshell-ssh</artifactId>
                 <version>${gshell.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.geronimo.gshell.commands</groupId>
+                <artifactId>gshell-text</artifactId>
+                <version>${gshell.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.geronimo.gshell.wisdom</groupId>
+                <artifactId>gshell-wisdom-core</artifactId>
+                <version>${gshell.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.geronimo.gshell.support</groupId>
+                        <artifactId>gshell-ivy</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.geronimo.gshell.support</groupId>
+                        <artifactId>gshell-xstore</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-jexl</groupId>
+                        <artifactId>commons-jexl</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.codehaus.plexus</groupId>
@@ -742,6 +757,21 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
                     <version>2.3</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.servicemix.tooling</groupId>
+                    <artifactId>depends-maven-plugin</artifactId>
+                    <version>${depends.maven.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>2.0.4</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>2.2-beta-3</version>
                 </plugin>
             </plugins>
         </pluginManagement>

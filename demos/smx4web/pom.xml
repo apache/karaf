@@ -43,12 +43,10 @@
     <dependency>
       <groupId>org.apache.servicemix.kernel</groupId>
       <artifactId>org.apache.servicemix.kernel.main</artifactId>
-      <version>${servicemix.kernel.version}</version>
     </dependency>
     <dependency>
         <groupId>org.apache.servicemix.kernel</groupId>
         <artifactId>apache-servicemix-kernel</artifactId>
-        <version>${servicemix.kernel.version}</version>
         <type>zip</type>
         <exclusions>
             <exclusion>
@@ -184,7 +182,6 @@
     <dependency>
       <groupId>org.apache.geronimo.specs</groupId>
       <artifactId>geronimo-servlet_2.5_spec</artifactId>
-      <version>${geronimo.servlet.version}</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
@@ -249,7 +246,6 @@
                           <artifactItem>
                               <groupId>org.apache.servicemix.kernel</groupId>
                               <artifactId>apache-servicemix-kernel</artifactId>
-                              <version>${servicemix.kernel.version}</version>
                               <type>zip</type>
                               <outputDirectory>${project.build.directory}/kernel/WEB-INF</outputDirectory>
                               <excludes>**/lib/*,**/*.txt,**/bin/*,**/lib,**/bin</excludes>

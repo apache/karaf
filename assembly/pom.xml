@@ -266,21 +266,18 @@
                                 <artifactItem>
                                     <groupId>org.apache.servicemix.kernel</groupId>
                                     <artifactId>org.apache.servicemix.kernel.main</artifactId>
-                                    <version>${pom.version}</version>
                                     <outputDirectory>target/dependencies</outputDirectory>
                                     <destFileName>servicemix.jar</destFileName>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.servicemix.kernel</groupId>
                                     <artifactId>org.apache.servicemix.kernel.client</artifactId>
-                                    <version>${pom.version}</version>
                                     <outputDirectory>target/dependencies</outputDirectory>
                                     <destFileName>servicemix-client.jar</destFileName>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.servicemix.kernel.jaas</groupId>
                                     <artifactId>org.apache.servicemix.kernel.jaas.boot</artifactId>
-                                    <version>${pom.version}</version>
                                     <outputDirectory>target/dependencies</outputDirectory>
                                     <destFileName>servicemix-jaas-boot.jar</destFileName>
                                 </artifactItem>
@@ -314,7 +311,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.2-beta-3</version>
                 <executions>
                     <execution>
                         <id>unix-bin</id>
@@ -372,12 +368,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <artifactId>maven-remote-resources-plugin</artifactId>
-                <version>1.0-beta-2</version>
-                <executions>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 
@@ -389,7 +379,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
-                        <version>2.2-beta-2</version>
                         <executions>
                             <execution>
                                 <id>unix-src</id>
