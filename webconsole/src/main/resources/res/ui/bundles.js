@@ -183,7 +183,7 @@ function renderDetails( data ) {
 		                if (i > 0) { txt = txt + "<br/>"; }
 		                var span;
 		                if (value.substring(0, 2) == "!!") {
-		                	txt = txt + "<span style='{color: \"red\"}'>" + value + "</span>";
+		                	txt = txt + "<span style='color: red;'>" + value + "</span>";
 		                } else {
 		                	txt = txt + value;
 		                }
