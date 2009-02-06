@@ -42,7 +42,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * a single bundle. It will read information from the metadata.xml file
  * descriptors and create the corresponding managers.
  */
-class BundleComponentActivator
+class BundleComponentActivator implements Logger
 {
     // global component registration
     private ComponentRegistry m_componentRegistry;
@@ -146,7 +146,7 @@ class BundleComponentActivator
                 stream = descriptorURL.openStream();
 
                 BufferedReader in = new BufferedReader( new InputStreamReader( stream ) );
-                XmlHandler handler = new XmlHandler( m_context.getBundle() );
+                XmlHandler handler = new XmlHandler( m_context.getBundle(), this );
                 KXml2SAXParser parser;
 
                 parser = new KXml2SAXParser( in );
@@ -489,7 +489,7 @@ class BundleComponentActivator
      * @param ex An optional <code>Throwable</code> whose stack trace is written,
      *      or <code>null</code> to not log a stack trace.
      */
-    void log( int level, String message, ComponentMetadata metadata, Throwable ex )
+    public void log( int level, String message, ComponentMetadata metadata, Throwable ex )
     {
 
         if ( m_logLevel >= level )

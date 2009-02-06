@@ -27,6 +27,7 @@ import java.util.*;
 import org.apache.felix.scr.impl.parser.KXml2SAXHandler;
 import org.apache.felix.scr.impl.parser.ParseException;
 import org.osgi.framework.Bundle;
+import org.osgi.service.log.LogService;
 
 
 /**
@@ -39,7 +40,10 @@ public class XmlHandler implements KXml2SAXHandler
     public static final String NAMESPACE_URI = "http://www.osgi.org/xmlns/scr/v1.0.0";
 
     // the bundle containing the XML resource being parsed
-    private Bundle m_bundle;
+    private final Bundle m_bundle;
+
+    // logger for any messages
+    private final Logger m_logger;
 
     // A reference to the current component
     private ComponentMetadata m_currentComponent;
@@ -65,9 +69,10 @@ public class XmlHandler implements KXml2SAXHandler
 
     // creates an instance with the bundle owning the component descriptor
     // file parsed by this instance
-    XmlHandler( Bundle bundle )
+    XmlHandler( Bundle bundle, Logger logger )
     {
         m_bundle = bundle;
+        m_logger = logger;
     }
 
 
@@ -226,12 +231,26 @@ public class XmlHandler implements KXml2SAXHandler
 
                     m_currentComponent.addDependency( ref );
                 }
+                
+                // unexpected element
+                else
+                {
+                    m_logger.log( LogService.LOG_INFO, "Ignoring unsupported element " + localName + " (bundle "
+                        + m_bundle.getLocation() + ")", null, null );
+                }
             }
             catch ( Exception ex )
             {
                 ex.printStackTrace();
                 throw new ParseException( "Exception during parsing", ex );
             }
+        }
+        
+        // unexpected namespace
+        else
+        {
+            m_logger.log( LogService.LOG_INFO, "Ignoring unsupported element {" + uri + "}" + localName + " (bundle "
+                + m_bundle.getLocation() + ")", null, null );
         }
     }
 

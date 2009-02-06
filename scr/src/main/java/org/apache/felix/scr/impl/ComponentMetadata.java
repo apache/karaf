@@ -69,7 +69,6 @@ public class ComponentMetadata
     // Flag that is set once the component is verified (its properties cannot be changed)
     private boolean m_validated = false;
 
-
     /////////////////////////////////////////// SETTERS //////////////////////////////////////
 
     /**
@@ -317,16 +316,7 @@ public class ComponentMetadata
     /**
      * Method used to verify if the semantics of this metadata are correct
      */
-    void validate()
-    {
-        validate( null );
-    }
-
-
-    /**
-     * Method used to verify if the semantics of this metadata are correct
-     */
-    void validate( BundleComponentActivator bundleComponentActivator )
+    void validate( Logger logger )
     {
         // nothing to do if already validated
         if ( m_validated )
@@ -373,11 +363,8 @@ public class ComponentMetadata
             // flag duplicates
             if ( !refs.add( refMeta.getName() ) )
             {
-                if ( bundleComponentActivator != null )
-                {
-                    bundleComponentActivator.log( LogService.LOG_WARNING, "Detected duplicate reference name: \""
-                        + refMeta.getName() + "\"", this, null );
-                }
+                logger.log( LogService.LOG_WARNING, "Detected duplicate reference name: \"" + refMeta.getName() + "\"",
+                    this, null );
             }
         }
 
