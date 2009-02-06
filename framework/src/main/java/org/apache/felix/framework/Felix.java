@@ -580,7 +580,7 @@ ex.printStackTrace();
             });
 
             // The framework is now in its startup sequence.
-            setState(Bundle.STARTING);
+            setBundleStateAndNotify(this, Bundle.STARTING);
 
             // Now it is possible for threads to wait for the framework to stop,
             // so create a gate for that purpose.
@@ -674,7 +674,7 @@ ex.printStackTrace();
         synchronized (this)
         {
             // The framework is now running.
-            setState(Bundle.ACTIVE);
+            setBundleStateAndNotify(this, Bundle.ACTIVE);
         }
 
         // Fire started event for system bundle.
@@ -909,7 +909,20 @@ ex.printStackTrace();
             }
 
             // Lock the current bundle.
-            acquireBundleLock(impl);
+            try
+            {
+                acquireBundleLock(impl,
+                    Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE
+                    | Bundle.STARTING | Bundle.STOPPING);
+            }
+            catch (IllegalStateException ex)
+            {
+                fireFrameworkEvent(FrameworkEvent.ERROR, impl, ex);
+                m_logger.log(
+                    Logger.LOG_ERROR,
+                    "Error locking " + impl._getLocation(), ex);
+                continue;
+            }
 
             try
             {
@@ -1045,7 +1058,20 @@ ex.printStackTrace();
     {
         // Acquire bundle lock.
         BundleImpl impl = (BundleImpl) bundle;
-        acquireBundleLock(impl);
+        try
+        {
+            acquireBundleLock(impl,
+                Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE
+                | Bundle.STARTING | Bundle.STOPPING);
+        }
+        catch (IllegalStateException ex)
+        {
+            fireFrameworkEvent(FrameworkEvent.ERROR, impl, ex);
+            m_logger.log(
+                Logger.LOG_ERROR,
+                "Error locking " + impl._getLocation(), ex);
+            return;
+        }
 
         Throwable rethrow = null;
 
@@ -1315,7 +1341,23 @@ ex.printStackTrace();
         // theory.
 
         // Acquire bundle lock.
-        acquireBundleLock(bundle);
+        try
+        {
+            acquireBundleLock(bundle, Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE);
+        }
+        catch (IllegalStateException ex)
+        {
+            if (bundle.getState() == Bundle.UNINSTALLED)
+            {
+                throw new IllegalStateException("Cannot start an uninstalled bundle.");
+            }
+            else
+            {
+                throw new BundleException(
+                    "Bundle " + bundle
+                    + " cannot be started, since it is either starting or stopping.");
+            }
+        }
 
         try
         {
@@ -1372,7 +1414,7 @@ ex.printStackTrace();
                     _resolveBundle(bundle);
                     // No break.
                 case Bundle.RESOLVED:
-                    bundle.setState(Bundle.STARTING);
+                    setBundleStateAndNotify(bundle, Bundle.STARTING);
                     fireBundleEvent(BundleEvent.STARTING, bundle);
                     break;
             }
@@ -1392,7 +1434,7 @@ ex.printStackTrace();
                         bundle.getActivator(), bundle.getBundleContext());
                 }
 
-                bundle.setState(Bundle.ACTIVE);
+                setBundleStateAndNotify(bundle, Bundle.ACTIVE);
 
                 // We still need to fire the STARTED event, but we will do
                 // it later so we can release the bundle lock.
@@ -1401,7 +1443,7 @@ ex.printStackTrace();
             {
                 // If there was an error starting the bundle,
                 // then reset its state to RESOLVED.
-                bundle.setState(Bundle.RESOLVED);
+                setBundleStateAndNotify(bundle, Bundle.RESOLVED);
 
                 // Clean up the bundle context.
                 ((BundleContextImpl) bundle.getBundleContext()).invalidate();
@@ -1535,7 +1577,23 @@ ex.printStackTrace();
         throws BundleException
     {
         // Acquire bundle lock.
-        acquireBundleLock(bundle);
+        try
+        {
+            acquireBundleLock(bundle, Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE);
+        }
+        catch (IllegalStateException ex)
+        {
+            if (bundle.getState() == Bundle.UNINSTALLED)
+            {
+                throw new IllegalStateException("Cannot update an uninstalled bundle.");
+            }
+            else
+            {
+                throw new BundleException(
+                    "Bundle " + bundle
+                    + " cannot be update, since it is either starting or stopping.");
+            }
+        }
 
         // We must release the lock and close the input stream, so do both
         // in a finally block.
@@ -1600,11 +1658,11 @@ ex.printStackTrace();
 // TODO: REFACTOR - Perhaps we could move this into extension manager.
                         m_resolverState.refreshSystemBundleModule(bundle.getCurrentModule());
 // TODO: REFACTOR - Not clear why this is here. We should look at all of these steps more closely.
-                        bundle.setState(Bundle.RESOLVED);
+                        setBundleStateAndNotify(bundle, Bundle.RESOLVED);
                     }
                     else if (bundle.isExtension())
                     {
-                        bundle.setState(Bundle.INSTALLED);
+                        setBundleStateAndNotify(bundle, Bundle.INSTALLED);
                     }
                 }
                 catch (Throwable ex)
@@ -1635,7 +1693,7 @@ ex.printStackTrace();
 
                 if (!bundle.isExtension())
                 {
-                    bundle.setState(Bundle.INSTALLED);
+                    setBundleStateAndNotify(bundle, Bundle.INSTALLED);
                 }
 
                 fireBundleEvent(BundleEvent.UNRESOLVED, bundle);
@@ -1711,7 +1769,23 @@ ex.printStackTrace();
         throws BundleException
     {
         // Acquire bundle lock.
-        acquireBundleLock(bundle);
+        try
+        {
+            acquireBundleLock(bundle, Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE);
+        }
+        catch (IllegalStateException ex)
+        {
+            if (bundle.getState() == Bundle.UNINSTALLED)
+            {
+                throw new IllegalStateException("Cannot stop an uninstalled bundle.");
+            }
+            else
+            {
+                throw new BundleException(
+                    "Bundle " + bundle
+                    + " cannot be stopped, since it is either starting or stopping.");
+            }
+        }
 
         try
         {
@@ -1743,7 +1817,7 @@ ex.printStackTrace();
                     return;
                 case Bundle.ACTIVE:
                     // Set bundle state..
-                    bundle.setState(Bundle.STOPPING);
+                    setBundleStateAndNotify(bundle, Bundle.STOPPING);
                     fireBundleEvent(BundleEvent.STOPPING, bundle);
                     break;
             }
@@ -1782,7 +1856,7 @@ ex.printStackTrace();
                 // listeners for a bundle when it is stopped.
                 m_dispatcher.removeListeners(bundle);
 
-                bundle.setState(Bundle.RESOLVED);
+                setBundleStateAndNotify(bundle, Bundle.RESOLVED);
 
                 // We still need to fire the STOPPED event, but we will do
                 // it later so we can release the bundle lock.
@@ -1826,7 +1900,23 @@ ex.printStackTrace();
     void uninstallBundle(BundleImpl bundle) throws BundleException
     {
         // Acquire bundle lock.
-        acquireBundleLock(bundle);
+        try
+        {
+            acquireBundleLock(bundle, Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE);
+        }
+        catch (IllegalStateException ex)
+        {
+            if (bundle.getState() == Bundle.UNINSTALLED)
+            {
+                throw new IllegalStateException("Cannot uninstall an uninstalled bundle.");
+            }
+            else
+            {
+                throw new BundleException(
+                    "Bundle " + bundle
+                    + " cannot be uninstalled, since it is either starting or stopping.");
+            }
+        }
 
         try
         {
@@ -1839,7 +1929,7 @@ ex.printStackTrace();
             if (bundle.isExtension())
             {
                 bundle.setPersistentStateUninstalled();
-                bundle.setState(Bundle.INSTALLED);
+                setBundleStateAndNotify(bundle, Bundle.INSTALLED);
                 return;
             }
 
@@ -1886,7 +1976,7 @@ ex.printStackTrace();
             }
 
             // Set state to uninstalled.
-            bundle.setState(Bundle.UNINSTALLED);
+            setBundleStateAndNotify(bundle, Bundle.UNINSTALLED);
             bundle.setLastModified(System.currentTimeMillis());
         }
         finally
@@ -1899,7 +1989,17 @@ ex.printStackTrace();
         fireBundleEvent(BundleEvent.UNINSTALLED, bundle);
 
         // Acquire bundle lock again to check if we can auto-refresh.
-        acquireBundleLock(bundle);
+        try
+        {
+            acquireBundleLock(bundle, Bundle.UNINSTALLED);
+        }
+        catch (IllegalStateException ex)
+        {
+            // Auto-refreshing is not required, so if we get an exception
+            // here, we should probably just return, but this should never
+            // happen.
+            return;
+        }
 
         try
         {
@@ -2106,7 +2206,16 @@ ex.printStackTrace();
 
             if (bundle.isExtension())
             {
-                acquireBundleLock(this);
+                // Acquire bundle lock.
+                try
+                {
+                    acquireBundleLock(this, Bundle.STARTING | Bundle.ACTIVE);
+                }
+                catch (IllegalStateException ex)
+                {
+                    throw new BundleException(
+                        "System bundle must be active to attach an extension.");
+                }
 
                 try
                 {
@@ -2401,20 +2510,28 @@ ex.printStackTrace();
         }
 
         // Acquire bundle lock.
-        acquireBundleLock(bundle);
+        try
+        {
+            if (bundle.isExtension())
+            {
+// TODO: EXTENSIONMANAGER - Verify this.
+                acquireBundleLock(bundle, Bundle.RESOLVED | Bundle.STARTING | Bundle.ACTIVE);
+            }
+            else
+            {
+                acquireBundleLock(bundle, Bundle.STARTING | Bundle.ACTIVE);
+            }
+        }
+        catch (IllegalStateException ex)
+        {
+            throw new IllegalStateException(
+                "Can only register services while bundle is active or activating.");
+        }
 
         ServiceRegistration reg = null;
 
         try
         {
-            // Can only register services if starting or active.
-            if (((bundle.getState() & (Bundle.STARTING | Bundle.ACTIVE)) == 0)
-                && !bundle.isExtension())
-            {
-                throw new IllegalStateException(
-                    "Can only register services while bundle is active or activating.");
-            }
-
             // Check to make sure that the service object is
             // an instance of all service classes; ignore if
             // service object is a service factory.
@@ -3099,7 +3216,15 @@ ex.printStackTrace();
     private void refreshBundle(BundleImpl bundle) throws Exception
     {
         // Acquire bundle lock.
-        acquireBundleLock(bundle);
+        try
+        {
+            acquireBundleLock(bundle, Bundle.INSTALLED);
+        }
+        catch (IllegalStateException ex)
+        {
+            throw new BundleException(
+                "Bundle state has changed unexpectedly during refresh.");
+        }
 
         try
         {
@@ -3505,7 +3630,15 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
             try
             {
 // TODO: RESOLVER - Seems like we should release the lock before we fire the event.
-                acquireBundleLock(bundle);
+                // Acquire bundle lock.
+                try
+                {
+                    acquireBundleLock(bundle, Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE);
+                }
+                catch (IllegalStateException ex)
+                {
+                    // There is nothing we can do.
+                }
                 if (bundle.getCurrentModule() == module)
                 {
                     if (bundle.getState() != Bundle.INSTALLED)
@@ -3516,7 +3649,7 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
                     }
                     else
                     {
-                        bundle.setState(Bundle.RESOLVED);
+                        setBundleStateAndNotify(bundle, Bundle.RESOLVED);
                         fireBundleEvent(BundleEvent.RESOLVED, bundle);
                     }
                 }
@@ -3667,7 +3800,7 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
             // Set the framework state to resolved.
             synchronized (Felix.this)
             {
-                setState(Bundle.RESOLVED);
+                setBundleStateAndNotify(Felix.this, Bundle.RESOLVED);
                 m_shutdownGate.open();
                 m_shutdownGate = null;
                 m_shutdownThread = null;
@@ -3859,7 +3992,17 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
         }
     }
 
-    void acquireBundleLock(BundleImpl bundle)
+    void setBundleStateAndNotify(BundleImpl bundle, int state)
+    {
+        synchronized (m_bundleLock)
+        {
+            bundle.setState(state);
+            m_bundleLock.notifyAll();
+        }
+    }
+
+    void acquireBundleLock(BundleImpl bundle, int desiredStates)
+        throws IllegalStateException
     {
         synchronized (m_bundleLock)
         {
@@ -3870,11 +4013,17 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
                 ((m_globalLockCount > 0)
                 && !m_lockingThreadMap.containsKey(Thread.currentThread())))
             {
+                // Check to make sure the bundle is in a desired state.
+                // If so, keep waiting. If not, throw an exception.
+                if ((desiredStates & bundle.getState()) == 0)
+                {
+                    throw new IllegalStateException("Bundle in unexpected state.");
+                }
                 try
                 {
                     m_bundleLock.wait();
                 }
-                catch (InterruptedException e)
+                catch (InterruptedException ex)
                 {
                     // Ignore and just keep waiting.
                 }
@@ -3950,7 +4099,7 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
                 {
                     m_bundleLock.wait();
                 }
-                catch (InterruptedException e)
+                catch (InterruptedException ex)
                 {
                     // Ignore
                 }
@@ -4023,7 +4172,7 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
                 {
                     m_bundleLock.wait();
                 }
-                catch (InterruptedException e)
+                catch (InterruptedException ex)
                 {
                     // Ignore
                 }

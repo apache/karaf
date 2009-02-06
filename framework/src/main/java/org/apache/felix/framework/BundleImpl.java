@@ -1038,10 +1038,4 @@ class BundleImpl implements Bundle
             m_lockThread = null;
         }
     }
-
-    synchronized void syncLock(BundleImpl impl)
-    {
-        m_lockCount = impl.m_lockCount;
-        m_lockThread = impl.m_lockThread;
-    }
 }

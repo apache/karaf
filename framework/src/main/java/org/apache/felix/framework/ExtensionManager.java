@@ -283,7 +283,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
         }
 
         // Not sure whether this is a good place to do it but we need to lock
-        felix.acquireBundleLock(felix);
+        felix.acquireBundleLock(felix, Bundle.ACTIVE);
 
         try
         {
@@ -334,7 +334,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
             felix.releaseBundleLock(felix);
         }
 
-        bundle.setState(Bundle.RESOLVED);
+        felix.setBundleStateAndNotify(bundle, Bundle.RESOLVED);
     }
 
     /**
