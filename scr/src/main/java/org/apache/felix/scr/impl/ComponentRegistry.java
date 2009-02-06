@@ -138,7 +138,24 @@ public class ComponentRegistry implements ScrService
     {
         if ( m_componentsByName.containsKey( name ) )
         {
-            throw new ComponentException( "The component name '" + name + "' has already been registered." );
+            String message = "The component name '" + name + "' has already been registered";
+
+            Object co = m_componentsByName.get( name );
+            if ( co instanceof ComponentManager )
+            {
+                ComponentManager c = ( ComponentManager ) co;
+                StringBuffer buf = new StringBuffer( message );
+                buf.append( " by Bundle " ).append( c.getBundle().getBundleId() );
+                if ( c.getBundle().getSymbolicName() != null )
+                {
+                    buf.append( " (" ).append( c.getBundle().getSymbolicName() ).append( ")" );
+                }
+                buf.append( " as Component " ).append( c.getId() );
+                buf.append( " of Class " ).append( c.getClassName() );
+                message = buf.toString();
+            }
+
+            throw new ComponentException( message );
         }
 
         // reserve the name
