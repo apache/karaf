@@ -447,7 +447,7 @@ class BundleComponentActivator
      *
      * @param task The component task to execute
      */
-    void schedule( Runnable task )
+    void schedule( ComponentActivatorTask task )
     {
         if ( isActive() )
         {
