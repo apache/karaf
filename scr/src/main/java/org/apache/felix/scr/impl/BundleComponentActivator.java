@@ -165,7 +165,7 @@ class BundleComponentActivator
                         m_componentRegistry.checkComponentName( metadata.getName() );
 
                         // validate the component metadata
-                        metadata.validate();
+                        metadata.validate( this );
 
                         // Request creation of the component manager
                         ComponentManager manager;

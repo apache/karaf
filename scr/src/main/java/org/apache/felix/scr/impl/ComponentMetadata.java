@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.osgi.service.component.ComponentException;
+import org.osgi.service.log.LogService;
 
 
 /**
@@ -318,6 +319,15 @@ public class ComponentMetadata
      */
     void validate()
     {
+        validate( null );
+    }
+
+
+    /**
+     * Method used to verify if the semantics of this metadata are correct
+     */
+    void validate( BundleComponentActivator bundleComponentActivator )
+    {
         // nothing to do if already validated
         if ( m_validated )
         {
@@ -363,7 +373,11 @@ public class ComponentMetadata
             // flag duplicates
             if ( !refs.add( refMeta.getName() ) )
             {
-                throw validationFailure( "Detected duplicate reference name: \"" + refMeta.getName() + "\"" );
+                if ( bundleComponentActivator != null )
+                {
+                    bundleComponentActivator.log( LogService.LOG_WARNING, "Detected duplicate reference name: \""
+                        + refMeta.getName() + "\"", this, null );
+                }
             }
         }
 

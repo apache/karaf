@@ -259,9 +259,6 @@ public class XmlHandler implements KXml2SAXHandler
             if ( localName.equals( "component" ) )
             {
                 this.isComponent = false;
-                // When the closing tag for a component is found, the component is validated to check if
-                // the implementation class has been set
-                m_currentComponent.validate();
             }
             else if ( localName.equals( "property" ) && m_pendingProperty != null )
             {
