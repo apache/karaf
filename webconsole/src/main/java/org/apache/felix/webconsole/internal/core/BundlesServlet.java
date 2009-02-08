@@ -263,7 +263,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
     private void appendBundleInfoCount( final StringBuffer buf, String msg, int count )
     {
         buf.append(count);
-        buf.append(" Bundle");
+        buf.append(" bundle");
         if ( count != 1 )
             buf.append( 's' );
         buf.append(' ');
@@ -367,7 +367,8 @@ public class BundlesServlet extends BaseWebConsolePlugin
         appendBundleInfoCount(buffer, "in total", bundles.length);
         if ( active == bundles.length )
         {
-            buffer.append(" - all active.");
+            buffer.append(" - all ");
+            appendBundleInfoCount(buffer, "active.", bundles.length);
         }
         else
         {
