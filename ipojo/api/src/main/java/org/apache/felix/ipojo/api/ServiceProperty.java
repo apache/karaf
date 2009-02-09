@@ -141,10 +141,10 @@ public class ServiceProperty {
             element.addAttribute(new Attribute("field", m_field));
         }
         if (m_mandatory) {
-            element.addAttribute(new Attribute("mandatory", Boolean.toString(m_mandatory)));
+            element.addAttribute(new Attribute("mandatory", new Boolean(m_mandatory).toString()));
         }
         if (m_immutable) {
-            element.addAttribute(new Attribute("immutable", Boolean.toString(m_immutable)));
+            element.addAttribute(new Attribute("immutable", new Boolean(m_immutable).toString()));
         }
         return element;
     }
