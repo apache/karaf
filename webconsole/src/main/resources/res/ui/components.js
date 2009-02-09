@@ -21,7 +21,7 @@ function renderStatusLine() {
 function renderView( /* Array of String */ columns, /* Array of String */ buttons ) {
     renderStatusLine();
     renderButtons(buttons);
-    var txt = "<div class='table'><table id='bundles' class='tablelayout'><thead><tr>";
+    var txt = "<div class='table'><table id='plugin_table' class='tablelayout'><thead><tr>";
     for ( var name in columns ) {
     	txt = txt + "<th class='col_" + columns[name] + "'>" + columns[name] + "</th>";
     }
@@ -38,11 +38,11 @@ function renderButtons( buttons ) {
 
 function renderData( eventData )  {
 	$(".statusline").empty().append(eventData.status);
-	$("#bundles > tbody > tr").remove();
+	$("#plugin_table > tbody > tr").remove();
     for ( var idx in eventData.data ) {
         entry( eventData.data[idx] );
     }
-    $("#bundles").trigger("update");
+    $("#plugin_table").trigger("update");
     if ( drawDetails ) {
 	    renderDetails(eventData);
     }
@@ -51,21 +51,25 @@ function renderData( eventData )  {
 function entry( /* Object */ dataEntry ) {
     var trElement = tr( null, { id: "entry" + dataEntry.id } );
     entryInternal( trElement,  dataEntry );
-	$("#bundles > tbody").append(trElement);	
+	$("#plugin_table > tbody").append(trElement);	
 }
 
-function actionButton( /* Element */ parent, /* string */ id, /* Obj */ action ) {
+function actionButton( /* Element */ parent, /* string */ id, /* Obj */ action, /* string */ pid ) {
 	var enabled = action.enabled;
 	var op = action.link;
 	var opLabel = action.name;
 	var img = action.image;
 	
+	var arg = id;
+	if ( op == "edit" ) {
+		arg = pid
+	}
 	var input = createElement( "input", null, {
             type: 'image',
             title: opLabel,
             alt: opLabel,
-            src: imgRoot + '/bundle_' + img + '.png',
-            onClick: 'changeDataEntryState(' + id + ', "' + op + '");'
+            src: imgRoot + '/component_' + img + '.png',
+            onClick: 'changeDataEntryState("' + arg + '", "' + op + '");'
         });
 		
     if (!enabled) {
@@ -108,25 +112,17 @@ function entryInternal( /* Element */ parent, /* Object */ dataEntry ) {
     var actionsTd = td( null, null );
     
     for ( var a in dataEntry.actions ) {
-    	actionButton( actionsTd, id, dataEntry.actions[a] );
+    	actionButton( actionsTd, id, dataEntry.actions[a], dataEntry.pid );
     }
     parent.appendChild( actionsTd );
 }
 
-function loadData() {
-	$.get(pluginRoot + "/.json", null, function(data) {
-	    renderData(data);
-	}, "json");	
-}
-
 function changeDataEntryState(/* long */ id, /* String */ action) {
+	if ( action == "edit") {
+		window.location = appRoot + "/configMgr/" + id;
+		return;
+	}
 	$.post(pluginRoot + "/" + id, {"action":action}, function(data) {
-	    renderData(data);
-	}, "json");	
-}
-
-function refreshPackages() {
-	$.post(window.location.pathname, {"action": "refreshPackages"}, function(data) {
 	    renderData(data);
 	}, "json");	
 }
@@ -137,9 +133,15 @@ function showDetails( id ) {
     }, "json");
 }
 
+function loadData() {
+	$.get(pluginRoot + "/.json", null, function(data) {
+	    renderData(data);
+	}, "json");	
+}
+
 function hideDetails( id ) {
 	$("#img" + id).each(function() {
-		$("#bundleInlineDetails").remove();
+		$("#pluginInlineDetails").remove();
         this.setAttribute("src", appRoot + "/res/imgs/arrow_right.png");
         this.setAttribute("onClick", "showDetails('" + id + "')");
         this.setAttribute("title", "Details");
@@ -149,7 +151,7 @@ function hideDetails( id ) {
 
 function renderDetails( data ) {
 	data = data.data[0];
-	$("#entry" + data.id + " > td").eq(1).append("<div id='bundleInlineDetails'/>");
+	$("#entry" + data.id + " > td").eq(1).append("<div id='pluginInlineDetails'/>");
 	$("#img" + data.id).each(function() {
 		if ( drawDetails ) {
             this.setAttribute("src", appRoot + "/res/imgs/arrow_left.png");
@@ -165,54 +167,45 @@ function renderDetails( data ) {
             this.setAttribute("alt", "Hide Details");
 		}
 	});
-	$("#bundleInlineDetails").append("<table border='0'><tbody></tbody></table>");
+	$("#pluginInlineDetails").append("<table border='0'><tbody></tbody></table>");
     var details = data.props;
     for (var idx in details) {
         var prop = details[idx];
         
         var txt = "<tr><td class='aligntop' noWrap='true' style='border:0px none'>" + prop.key + "</td><td class='aligntop' style='border:0px none'>";	        
         if (prop.value) {
-        	if ( prop.key == 'Bundle Documentation' )  {
-        		txt = txt + "<a href='" + prop.value + "' target='_blank'>" + prop.value + "</a>";
-        	} else  {
-        		if ( $.isArray(prop.value) ) {
-	        		var i = 0;
-	        		for(var pi in prop.value) {
-	        			var value = prop.value[pi];
-		                if (i > 0) { txt = txt + "<br/>"; }
-		                var span;
-		                if (value.substring(0, 2) == "!!") {
-		                	txt = txt + "<span style='color: red;'>" + value + "</span>";
-		                } else {
-		                	txt = txt + value;
-		                }
-		                i++;
-	        		}
-        		} else {
-        			txt = txt + prop.value;
+    		if ( $.isArray(prop.value) ) {
+        		var i = 0;
+        		for(var pi in prop.value) {
+        			var value = prop.value[pi];
+	                if (i > 0) { txt = txt + "<br/>"; }
+	                var span;
+	                if (value.substring(0, 2) == "!!") {
+	                	txt = txt + "<span style='color: red;'>" + value + "</span>";
+	                } else {
+	                	txt = txt + value;
+	                }
+	                i++;
         		}
-        	}
+    		} else {
+    			txt = txt + prop.value;
+    		}
         } else {
         	txt = txt + "\u00a0";
         }
         txt = txt + "</td></tr>";
-        $("#bundleInlineDetails > table > tbody").append(txt);
+        $("#pluginInlineDetails > table > tbody").append(txt);
 	}
 }
 
-function renderBundles(data) {
+function renderComponents(data) {
 	$(document).ready(function(){
     	renderView( ["Id", "Name", "Status", "Actions"],
-        		"<input type='hidden' name='action' value='install'/>" +
-                "<input class='fileinput' type='file' name='bundlefile' style='margin-left:10px'/>" +
-         		" - Start <input class='checkradio' type='checkbox' name='bundlestart' value='start' style='vertical-align:middle;'/>" +
-        		" - Start Level <input class='input' type='input' name='bundlestartlevel' value='" + startLevel + "' size='4'/>" +
-         		"<input type='submit' value='Install or Update' style='margin-left:60px'/>" +
-        		"<button id='refreshPackages' type='button' name='refresh' style='margin-left:10px'>Refresh Packages</button>"
-        		 );
-        $("#refreshPackages").click(refreshPackages);
+        		"<div class='button'><button class='reloadButton' type='button' name='reload'>Reload</button></div>");
         renderData(data);
         
+        $(".reloadButton").click(loadData);
+
         var extractMethod = function(node) {
         	var link = node.getElementsByTagName("a");
             if ( link && link.length == 1 ) {
@@ -220,7 +213,7 @@ function renderBundles(data) {
             }
             return node.innerHTML;
         };
-        $("#bundles").tablesorter({
+        $("#plugin_table").tablesorter({
             headers: {
         	    0: { sorter:"digit"},
                 3: { sorter: false }
@@ -230,3 +223,4 @@ function renderBundles(data) {
         });
     });
 }
+ 

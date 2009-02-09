@@ -108,14 +108,14 @@ function loadData() {
 
 function renderEvents() {
     renderView( ["Received", "Topic", "Properties"],
-    		["<button id='reloadButton' type='button' name='reload'>Reload</button>",
-    		 "<button id='clearButton' type='button' name='clear'>Clear List</button>"]);
+    		["<button class='clearButton' type='button' name='clear'>Clear List</button>",
+    		 "<button class='reloadButton' type='button' name='reload'>Reload</button>"]);
 	
     loadData();
     
     $("#events").tablesorter();
-    $("#reloadButton").click(loadData);
-    $("#clearButton").click(function () {
+    $(".reloadButton").click(loadData);
+    $(".clearButton").click(function () {
     	$("#events > tbody > tr").remove();
     	$.post(pluginRoot, { "action":"clear" }, function(data) {
     	    renderData(data);

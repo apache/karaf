@@ -568,11 +568,14 @@ textarea {
 div.buttons {
     background-color: #6181A9;
     height: 30px;
+    text-align: right;
+    vertical-align: middle;
+    padding-right: 10px;
+    padding-top: 8px;
 }
 div.button {
-	float:right;
-    margin-top: 5px;
-	margin-right: 10px;
+    display: inline-block;
+    margin-left: 10px;
 }
 div.fullwidth {
     width: 100%;
@@ -582,7 +585,9 @@ div.statusline {
     background-color: #F5F5F5;
     padding-left: 10px;
     border: 1px solid #CCCCCC;
-    font-size: 13px;
+    font-family: Verdana, Arial, Helvetica, san-serif;
+    font-size: 11px;
+    font-weight: normal;
     color: #222222;
     line-height: 19px;
     margin-bottom: 10px;

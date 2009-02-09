@@ -114,7 +114,6 @@ public class BundlesServlet extends BaseWebConsolePlugin
             return;
         }
 
-
         super.doGet( request, response );
     }
 
