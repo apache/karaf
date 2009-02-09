@@ -20,7 +20,7 @@ package org.apache.felix.fileinstall;
 
 /**
  * -DirectoryWatcher-
- * 
+ *
  * This class runs a background task that checks a directory for new files or
  * removed files. These files can be configuration files or jars.
  */
@@ -38,9 +38,12 @@ public class DirectoryWatcher extends Thread
     public final static String POLL = "felix.fileinstall.poll";
     public final static String DIR = "felix.fileinstall.dir";
     public final static String DEBUG = "felix.fileinstall.debug";
+    public final static String START_NEW_BUNDLES =
+        "felix.fileinstall.bundles.new.start";
     File watchedDirectory;
     long poll = 2000;
     long debug;
+    boolean startBundles = true; // by default, we start bundles.
     BundleContext context;
     boolean reported;
 
@@ -58,12 +61,17 @@ public class DirectoryWatcher extends Thread
         }
         this.watchedDirectory = new File(dir);
         this.watchedDirectory.mkdirs();
+        Object value = properties.get(START_NEW_BUNDLES);
+        if (value != null)
+        {
+            startBundles = Boolean.parseBoolean((String) value);
+        }
     }
 
     /**
      * Main run loop, will traverse the directory, and then handle the delta
      * between installed and newly found/lost bundles and configurations.
-     * 
+     *
      */
     public void run()
     {
@@ -98,7 +106,7 @@ public class DirectoryWatcher extends Thread
     /**
      * Handle the changes between the configurations already installed and the
      * newly found/lost configurations.
-     * 
+     *
      * @param current
      *            Existing installed configurations abspath -> File
      * @param discovered
@@ -164,7 +172,7 @@ public class DirectoryWatcher extends Thread
 
     /**
      * Set the configuration based on the config file.
-     * 
+     *
      * @param f
      *            Configuration file
      * @return
@@ -207,7 +215,7 @@ public class DirectoryWatcher extends Thread
 
     /**
      * Remove the configuration.
-     * 
+     *
      * @param f
      *            File where the configuration in whas defined.
      * @return
@@ -269,7 +277,7 @@ public class DirectoryWatcher extends Thread
     /**
      * Install bundles that were discovered and uninstall bundles that are gone
      * from the current state.
-     * 
+     *
      * @param current
      *            A map location -> path that holds the current state
      * @param discovered
@@ -319,9 +327,11 @@ public class DirectoryWatcher extends Thread
                 }
 
                 // Fragments can not be started. All other
-                // bundles are always started because OSGi treats this
+                // bundles are started only if user has asked us to
+                // start bundles. No need to check status of bundles
+                // before starting, because OSGi treats this
                 // as a noop when the bundle is already started
-                if (!isFragment(bundle))
+                if (startBundles && !isFragment(bundle))
                 {
                     try
                     {
@@ -335,11 +345,10 @@ public class DirectoryWatcher extends Thread
             }
             else
             {
-                // Hmm. We found a bundlethat looks like it came from our
+                // Hmm. We found a bundle that looks like it came from our
                 // watched directory but we did not find it this round.
                 // Just remove it.
-                if (bundle.getLocation().startsWith(
-                    watchedDirectory.getAbsolutePath()))
+                if (bundle.getLocation().startsWith(watchedDirectory.getAbsolutePath()))
                 {
                     try
                     {
@@ -365,12 +374,13 @@ public class DirectoryWatcher extends Thread
                 InputStream in = new FileInputStream(file);
                 Bundle bundle = context.installBundle(path, in);
                 in.close();
-
-                // We do not start this bundle yet. We wait after
-                // refresh because this will minimize the disruption
-                // as well as temporary unresolved errors.
-                starters.add(bundle);
-
+                if (startBundles)
+                {
+                    // We do not start this bundle yet. We wait after
+                    // refresh because this will minimize the disruption
+                    // as well as temporary unresolved errors.
+                    starters.add(bundle);
+                }
                 log("Installed " + file.getAbsolutePath(), null);
             }
             catch (Exception e)
@@ -403,7 +413,7 @@ public class DirectoryWatcher extends Thread
     /**
      * Log a message and optional throwable. If there is a log service we use
      * it, otherwise we log to the console
-     * 
+     *
      * @param message
      *            The message to log
      * @param e
@@ -435,7 +445,7 @@ public class DirectoryWatcher extends Thread
 
     /**
      * Answer the Log Service
-     * 
+     *
      * @return
      */
     LogService getLogService()
@@ -452,7 +462,7 @@ public class DirectoryWatcher extends Thread
     /**
      * Traverse the directory and fill the map with the found jars and
      * configurations keyed by the abs file path.
-     * 
+     *
      * @param jars
      *            Returns the abspath -> file for found jars
      * @param configs
@@ -479,7 +489,7 @@ public class DirectoryWatcher extends Thread
 
     /**
      * Check if a bundle is a fragment.
-     * 
+     *
      * @param bundle
      * @return
      */
@@ -525,7 +535,7 @@ public class DirectoryWatcher extends Thread
 
     /**
      * Answer the long from a property.
-     * 
+     *
      * @param property
      * @param dflt
      * @return
