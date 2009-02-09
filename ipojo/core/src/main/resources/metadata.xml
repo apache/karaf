@@ -25,7 +25,7 @@
 		name="controller" architecture="false"/>
 	<handler
 		classname="org.apache.felix.ipojo.handlers.lifecycle.callback.LifecycleCallbackHandler"
-		name="callback" level="1" architecture="false" />
+		name="callback" level="2" architecture="false" />
 	<handler
 		classname="org.apache.felix.ipojo.handlers.dependency.DependencyHandler"
 		name="requires" level="0" architecture="false">
