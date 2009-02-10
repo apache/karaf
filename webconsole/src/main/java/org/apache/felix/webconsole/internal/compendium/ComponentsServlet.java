@@ -30,9 +30,11 @@ import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.apache.felix.webconsole.internal.Util;
 import org.apache.felix.webconsole.internal.servlet.OsgiManager;
 import org.json.*;
-import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.*;
+import org.osgi.service.cm.*;
 import org.osgi.service.component.ComponentConstants;
+import org.osgi.service.metatype.MetaTypeInformation;
+import org.osgi.service.metatype.MetaTypeService;
 
 
 public class ComponentsServlet extends BaseWebConsolePlugin
@@ -50,10 +52,13 @@ public class ComponentsServlet extends BaseWebConsolePlugin
 
     public static final String OPERATION_DISABLE = "disable";
 
-    public static final String OPERATION_EDIT = "edit";
+    public static final String OPERATION_CONFIGURE = "configure";
 
     private static final String SCR_SERVICE = ScrService.class.getName();
 
+    private static final String META_TYPE_NAME = MetaTypeService.class.getName();
+
+    private static final String CONFIGURATION_ADMIN_NAME = ConfigurationAdmin.class.getName();
 
     public String getTitle()
     {
@@ -246,7 +251,10 @@ public class ComponentsServlet extends BaseWebConsolePlugin
         }
         if ( pid != null )
         {
-            action(jw, true, OPERATION_EDIT, "Edit", "edit" );
+            if ( isConfigurable( pid ) )
+            {
+                action(jw, true, OPERATION_CONFIGURE, "Configure", "configure" );
+            }
         }
 
         jw.endArray();
@@ -441,10 +449,82 @@ public class ComponentsServlet extends BaseWebConsolePlugin
         }
     }
 
+    /**
+     * Check if the component with the specified pid is
+     * configurable
+     * @param pid A non null pid
+     * @return <code>true</code> if the component is configurable.
+     */
+    private boolean isConfigurable( final String pid )
+    {
+        // we first check if the config admin has something for this pid
+        final ConfigurationAdmin ca = this.getConfigurationAdmin();
+        if ( ca != null )
+        {
+            try
+            {
+                // we use listConfigurations to not create configuration
+                // objects persistently without the user providing actual
+                // configuration
+                String filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
+                Configuration[] configs = ca.listConfigurations( filter );
+                if ( configs != null && configs.length > 0 )
+                {
+                    return true;
+                }
+            }
+            catch ( InvalidSyntaxException ise )
+            {
+                // should print message
+            }
+            catch ( IOException ioe )
+            {
+                // should print message
+            }
+        }
+        // second check is using the meta type service
+        final MetaTypeService mts = this.getMetaTypeService();
+        if ( mts != null )
+        {
+            try
+            {
+                final ServiceReference[] refs = this.getBundleContext().getServiceReferences( ManagedService.class.getName(),
+                        '(' + "service.pid" + '=' + pid  + ')' );
+                for ( int i = 0; refs != null && i < refs.length; i++ )
+                {
+                    if ( refs[i].getBundle() != null )
+                    {
+                        final MetaTypeInformation mti = mts.getMetaTypeInformation( refs[i].getBundle() );
+                        if ( mti != null )
+                        {
+                            return mti.getObjectClassDefinition(pid, null) != null;
+                        }
+                    }
+                }
+
+            }
+            catch ( InvalidSyntaxException ise )
+            {
+                // we just ignore this for now
+            }
+
+        }
+        return false;
+    }
+
+    protected ConfigurationAdmin getConfigurationAdmin()
+    {
+        return ( ConfigurationAdmin ) getService( CONFIGURATION_ADMIN_NAME );
+    }
 
     private ScrService getScrService()
     {
         return ( ScrService ) getService( SCR_SERVICE );
+    }
+
+    protected MetaTypeService getMetaTypeService()
+    {
+        return ( MetaTypeService ) getService( META_TYPE_NAME );
     }
 
     private final class RequestInfo

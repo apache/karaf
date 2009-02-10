@@ -61,7 +61,7 @@ function actionButton( /* Element */ parent, /* string */ id, /* Obj */ action, 
 	var img = action.image;
 	
 	var arg = id;
-	if ( op == "edit" ) {
+	if ( op == "configure" ) {
 		arg = pid
 	}
 	var input = createElement( "input", null, {
@@ -118,7 +118,7 @@ function entryInternal( /* Element */ parent, /* Object */ dataEntry ) {
 }
 
 function changeDataEntryState(/* long */ id, /* String */ action) {
-	if ( action == "edit") {
+	if ( action == "configure") {
 		window.location = appRoot + "/configMgr/" + id;
 		return;
 	}
