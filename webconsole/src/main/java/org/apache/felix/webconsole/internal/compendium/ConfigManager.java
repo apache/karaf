@@ -277,7 +277,7 @@ public class ConfigManager extends ConfigManagerBase
         pw.println( "</table>" );
 
         // if a configuration is addressed, display it immediately
-        Configuration config;
+        final Configuration config;
         if ( request.getParameter( "create" ) != null && pid != null )
         {
             config = new PlaceholderConfiguration( pid );
@@ -288,12 +288,12 @@ public class ConfigManager extends ConfigManagerBase
             config = getConfiguration( ca, pid );
         }
 
-        if ( config != null )
+        if ( pid != null )
         {
             Util.startScript( pw );
 
             pw.println( "var configuration=" );
-            printConfigurationJson( pw, config.getPid(), config, pidFilter, locale );
+            printConfigurationJson( pw, pid, config, pidFilter, locale );
             pw.println( ";" );
 
             pw.println( "displayConfigForm(configuration);" );
