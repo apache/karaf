@@ -181,8 +181,10 @@ function renderDetails( data ) {
 	        			var value = prop.value[pi];
 		                if (i > 0) { txt = txt + "<br/>"; }
 		                var span;
-		                if (value.substring(0, 2) == "!!") {
-		                	txt = txt + "<span style='color: red;'>" + value + "</span>";
+		                if (value.substring(0, 6) == "INFO: ") {
+		                	txt = txt + "<span style='color: grey;'>!!" + value.substring(5) + "</span>";
+		                } else if (value.substring(0, 7) == "ERROR: ") {
+		                	txt = txt + "<span style='color: red;'>!!" + value.substring(6) + "</span>";
 		                } else {
 		                	txt = txt + value;
 		                }

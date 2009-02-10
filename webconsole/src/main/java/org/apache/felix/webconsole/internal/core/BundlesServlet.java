@@ -852,13 +852,8 @@ public class BundlesServlet extends BaseWebConsolePlugin
     {
         StringBuffer val = new StringBuffer();
         boolean bootDel = isBootDelegated( name );
-        boolean isSpan = bootDel || export == null;
 
-        if ( isSpan )
-        {
-            val.append( "!! " );
-        }
-
+        String marker = null;
         val.append( name );
         val.append( ",version=" ).append( version );
         val.append( " from " );
@@ -870,11 +865,13 @@ public class BundlesServlet extends BaseWebConsolePlugin
             if ( bootDel )
             {
                 val.append( " -- Overwritten by Boot Delegation" );
+                marker = "INFO";
             }
         }
         else
         {
             val.append( " -- Cannot be resolved" );
+            marker = "ERROR";
 
             if ( optional )
             {
@@ -885,6 +882,11 @@ public class BundlesServlet extends BaseWebConsolePlugin
             {
                 val.append( " and overwritten by Boot Delegation" );
             }
+        }
+
+        if ( marker != null ) {
+            val.insert(0, ": ");
+            val.insert(0, marker);
         }
 
         array.put(val);
