@@ -26,6 +26,22 @@ import org.apache.felix.ipojo.metadata.Element;
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class TemporalDependency {
+    
+    /**
+     * OnTimeout policy: nullable object.
+     */
+    public static final String NULLABLE = "nullable";
+    
+    /**
+     * OnTimeout policy: empty array or collection.
+     */
+    public static final String EMPTY = "empty";
+    
+    /**
+     * OnTimeout policy: inject null.
+     */
+    public static final String NULL = "null";
+
 
     /**
      * The required specification.
@@ -137,6 +153,16 @@ public class TemporalDependency {
      */
     public TemporalDependency setTimeout(String time) {
         m_timeout = time;
+        return this;
+    }
+    
+    /**
+     * Sets the dependency timeout.
+     * @param time the dependency timeout in ms
+     * @return the current dependency object
+     */
+    public TemporalDependency setTimeout(long time) {
+        m_timeout = new Long(time).toString();
         return this;
     }
     

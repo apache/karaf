@@ -370,6 +370,7 @@ public class PrimitiveComponentType extends ComponentType {
         meta.addElement(m_manipulation);
         try {
             m_factory = new ComponentFactory(m_context, clazz, meta);
+            m_factory.start();
         } catch (ConfigurationException e) {
             throw new IllegalStateException("An exception occurs during factory initialization : " + e.getMessage());
         }

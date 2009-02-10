@@ -36,6 +36,26 @@ import org.apache.felix.ipojo.metadata.Element;
 public class Service {
     
     /**
+     * Creation strategy : singleton (default).
+     */
+    public static final int SINGLETON_STRATEGY = ProvidedService.SINGLETON_STRATEGY;
+    
+    /**
+     * Creation strategy : delegate on the static factory method.
+     */
+    public static final int STATIC_STRATEGY = ProvidedService.STATIC_STRATEGY;
+    
+    /**
+     * Creation strategy : one service object per instance.
+     */
+    public static final int INSTANCE_STRATEGY = ProvidedService.INSTANCE_STRATEGY;
+    
+    /**
+     * Creation strategy : one service object per bundle (OSGi service factory).
+     */
+    public static final int  SERVICE_STRATEGY = ProvidedService.SERVICE_STRATEGY;
+    
+    /**
      * The provided service specification. 
      */
     private List m_specifications; // null be default computed. 
