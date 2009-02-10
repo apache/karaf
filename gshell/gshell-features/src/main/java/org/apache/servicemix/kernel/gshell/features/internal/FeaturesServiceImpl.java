@@ -31,6 +31,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
@@ -146,8 +148,8 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     	String latestVersion = FeatureImpl.DEFAULT_VERSION;
     	Set<String> allVersions = getFeatures().get(name).keySet();
     	for (String version : allVersions) {
-    		Version verlatest = new Version(latestVersion.replace('-', '.'));
-    		Version ver = new Version(version.replace('-', '.'));
+    		Version verlatest = new Version(cleanupVersion(latestVersion));
+    		Version ver = new Version(cleanupVersion(version));
     		if (verlatest.compareTo(ver) < 0) {
     			latestVersion = version;
     		}
@@ -463,6 +465,67 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
             set.add(Long.parseLong(str));
         }
         return set;
+    }
+
+    /**
+     * Clean up version parameters. Other builders use more fuzzy definitions of
+     * the version syntax. This method cleans up such a version to match an OSGi
+     * version.
+     *
+     * @param version
+     * @return
+     */
+    static Pattern fuzzyVersion  = Pattern.compile("(\\d+)(\\.(\\d+)(\\.(\\d+))?)?([^a-zA-Z0-9](.*))?",
+                                                   Pattern.DOTALL);
+    static Pattern fuzzyModifier = Pattern.compile("(\\d+[.-])*(.*)",
+                                                   Pattern.DOTALL);
+
+    static public String cleanupVersion(String version) {
+        Matcher m = fuzzyVersion.matcher(version);
+        if (m.matches()) {
+            StringBuffer result = new StringBuffer();
+            String d1 = m.group(1);
+            String d2 = m.group(3);
+            String d3 = m.group(5);
+            String qualifier = m.group(7);
+
+            if (d1 != null) {
+                result.append(d1);
+                if (d2 != null) {
+                    result.append(".");
+                    result.append(d2);
+                    if (d3 != null) {
+                        result.append(".");
+                        result.append(d3);
+                        if (qualifier != null) {
+                            result.append(".");
+                            cleanupModifier(result, qualifier);
+                        }
+                    } else if (qualifier != null) {
+                        result.append(".0.");
+                        cleanupModifier(result, qualifier);
+                    }
+                } else if (qualifier != null) {
+                    result.append(".0.0.");
+                    cleanupModifier(result, qualifier);
+                }
+                return result.toString();
+            }
+        }
+        return version;
+    }
+
+    static void cleanupModifier(StringBuffer result, String modifier) {
+        Matcher m = fuzzyModifier.matcher(modifier);
+        if (m.matches())
+            modifier = m.group(2);
+
+        for (int i = 0; i < modifier.length(); i++) {
+            char c = modifier.charAt(i);
+            if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z')
+                    || (c >= 'A' && c <= 'Z') || c == '_' || c == '-')
+                result.append(c);
+        }
     }
 
 }
