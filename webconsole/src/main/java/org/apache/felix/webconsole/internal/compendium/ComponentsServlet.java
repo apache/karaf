@@ -71,11 +71,11 @@ public class ComponentsServlet extends BaseWebConsolePlugin
     {
         final RequestInfo reqInfo = new RequestInfo(request);
         if ( reqInfo.component == null && reqInfo.componentRequested ) {
-            response.setStatus(404);
+            response.sendError(404);
             return;
         }
         if ( !reqInfo.componentRequested ) {
-            response.setStatus(500);
+            response.sendError(500);
             return;
         }
         String op = request.getParameter( OPERATION );
@@ -99,7 +99,7 @@ public class ComponentsServlet extends BaseWebConsolePlugin
     IOException {
         final RequestInfo reqInfo = new RequestInfo(request);
         if ( reqInfo.component == null && reqInfo.componentRequested ) {
-            response.setStatus(404);
+            response.sendError(404);
             return;
         }
         if ( reqInfo.extension.equals("json")  )

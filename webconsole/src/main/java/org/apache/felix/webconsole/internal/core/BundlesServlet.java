@@ -103,7 +103,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
     {
         final RequestInfo reqInfo = new RequestInfo(request);
         if ( reqInfo.bundle == null && reqInfo.bundleRequested ) {
-            response.setStatus(404);
+            response.sendError(404);
             return;
         }
         if ( reqInfo.extension.equals("json")  )
@@ -122,7 +122,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
     {
         final RequestInfo reqInfo = new RequestInfo(req);
         if ( reqInfo.bundle == null && reqInfo.bundleRequested ) {
-            resp.setStatus(404);
+            resp.sendError(404);
             return;
         }
 
