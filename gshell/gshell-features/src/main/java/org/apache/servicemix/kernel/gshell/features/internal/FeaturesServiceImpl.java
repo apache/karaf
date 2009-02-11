@@ -231,7 +231,27 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     }
 
     public void uninstallFeature(String name) throws Exception {
-        uninstallFeature(name, FeatureImpl.DEFAULT_VERSION);//uninstall feature with default version
+        List<String> versions = new ArrayList<String>();
+        for (Feature f : installed.keySet()) {
+            if (name.equals(f.getName())) {
+                versions.add(f.getVersion());
+            }
+        }
+        if (versions.size() == 0) {
+            throw new Exception("Feature named '" + name + "' is not installed");
+        } else if (versions.size() > 1) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Feature named '" + name + "' has multiple versions installed (");
+            for (int i = 0; i < versions.size(); i++) {
+                if (i > 0) {
+                    sb.append(", ");
+                }
+                sb.append(versions.get(i));
+            }
+            sb.append("). Please specify the version to uninstall.");
+            throw new Exception(sb.toString());
+        }
+        uninstallFeature(name, versions.get(0));
     }
     
     public void uninstallFeature(String name, String version) throws Exception {

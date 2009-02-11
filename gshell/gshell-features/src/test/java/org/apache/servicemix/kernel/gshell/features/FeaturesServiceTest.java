@@ -27,6 +27,7 @@ import static org.easymock.EasyMock.*;
 import org.apache.servicemix.kernel.gshell.features.internal.FeatureImpl;
 import org.apache.servicemix.kernel.gshell.features.internal.FeaturesServiceImpl;
 import org.apache.servicemix.kernel.gshell.features.FeaturesRegistry;
+import org.apache.servicemix.kernel.gshell.features.management.ManagedFeaturesRegistry;
 import org.easymock.EasyMock;
 import org.osgi.service.prefs.PreferencesService;
 import org.osgi.service.prefs.Preferences;
@@ -121,5 +122,47 @@ public class FeaturesServiceTest extends TestCase {
         replay(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle);
 
         svc.installFeature("f1");
+    }
+
+    public void testUninstallFeature() throws Exception {
+        File tmp = File.createTempFile("smx", ".feature");
+        PrintWriter pw = new PrintWriter(new FileWriter(tmp));
+        pw.println("<features>");
+        pw.println("  <feature name=\"f1\" version=\"0.1\">");
+        pw.println("  </feature>");
+        pw.println("  <feature name=\"f1\" version=\"0.2\">");
+        pw.println("  </feature>");
+        pw.println("</features>");
+        pw.close();
+
+        URI uri = tmp.toURI();
+
+        BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        Bundle installedBundle = EasyMock.createMock(Bundle.class);
+
+        FeaturesServiceImpl svc = new FeaturesServiceImpl();
+        svc.setBundleContext(bundleContext);
+        svc.setFeaturesServiceRegistry(new ManagedFeaturesRegistry());
+        svc.addRepository(uri);
+
+        try {
+            svc.uninstallFeature("f1");
+            fail("Uninstall should have failed as feature is not installed");
+        } catch (Exception e) {
+            // ok
+        }
+
+        svc.installFeature("f1", "0.1");
+        svc.installFeature("f1", "0.2");
+
+        try {
+            svc.uninstallFeature("f1");
+            fail("Uninstall should have failed as feature is installed in multiple versions");
+        } catch (Exception e) {
+            // ok
+        }
+
+        svc.uninstallFeature("f1", "0.1");
+        svc.uninstallFeature("f1");
     }
 }
