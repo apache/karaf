@@ -58,6 +58,7 @@
             <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Export-Package>org.apache.felix.dependencymanager</Export-Package>
             <Import-Package>!org.apache.felix.dependencymanager,*</Import-Package>
+            <Include-Resource>META-INF/LICENCE=LICENSE,META-INF/NOTICE=NOTICE</Include-Resource>
           </instructions>
         </configuration>
       </plugin>
