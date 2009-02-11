@@ -78,6 +78,7 @@ public class DirectoryWatcher extends Thread
         log(POLL + "  (ms)   " + poll, null);
         log(DIR + "            " + watchedDirectory.getAbsolutePath(), null);
         log(DEBUG + "          " + debug, null);
+        log(START_NEW_BUNDLES + "          " + startBundles, null);
         Map currentManagedBundles = new HashMap(); // location -> Long(time)
         Map currentManagedConfigs = new HashMap(); // location -> Long(time)
 
