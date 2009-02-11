@@ -51,8 +51,8 @@ public class DirectoryWatcher extends Thread
     {
         super(properties.toString());
         this.context = context;
-        poll = getLong(POLL, poll);
-        debug = getLong(DEBUG, -1);
+        poll = getLong(properties, POLL, poll);
+        debug = getLong(properties, DEBUG, -1);
 
         String dir = (String) properties.get(DIR);
         if (dir == null)
@@ -541,9 +541,9 @@ public class DirectoryWatcher extends Thread
      * @param dflt
      * @return
      */
-    long getLong(String property, long dflt)
+    long getLong(Dictionary properties, String property, long dflt)
     {
-        String value = context.getProperty(property);
+        String value = (String) properties.getProperty(property);
         if (value != null)
         {
             try
