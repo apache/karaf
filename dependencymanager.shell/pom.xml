@@ -67,7 +67,6 @@
             <Bundle-Name>Apache Felix Dependency Manager Shell</Bundle-Name>
             <Bundle-Description>Shell command for the dependency manager.</Bundle-Description>
             <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
-            <Include-Resource>META-INF/LICENCE=LICENSE,META-INF/NOTICE=NOTICE</Include-Resource>
           </instructions>
         </configuration>
       </plugin>
