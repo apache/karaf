@@ -412,6 +412,9 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
                     internalAddRepository(repo);
                 }
                 installed = loadMap(prefs.node("features"));
+                for (Feature f : installed.keySet()) {
+                    featuresRegistry.registerInstalled(f);
+                }
                 bootFeaturesInstalled = prefs.getBoolean("bootFeaturesInstalled", false);
                 return true;
             }

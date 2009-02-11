@@ -193,6 +193,10 @@ public class ManagedFeaturesRegistry implements InitializingBean, FeaturesRegist
             managementAgent.register(feature, namingStrategy.getObjectName(feature));
         }
 
+        for (ManagedFeature feature : installedFeatures.values()) {
+            managementAgent.register(feature, namingStrategy.getObjectName(feature, true));
+        }
+
     }
 
     
