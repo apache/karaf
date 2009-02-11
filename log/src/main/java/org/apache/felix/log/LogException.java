@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.log.impl;
+package org.apache.felix.log;
 
 /**
  * Implementation dependent exception class used to avoid references to any
