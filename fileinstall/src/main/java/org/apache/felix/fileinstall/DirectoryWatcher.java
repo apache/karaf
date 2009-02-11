@@ -543,7 +543,7 @@ public class DirectoryWatcher extends Thread
      */
     long getLong(Dictionary properties, String property, long dflt)
     {
-        String value = (String) properties.getProperty(property);
+        String value = (String) properties.get(property);
         if (value != null)
         {
             try
