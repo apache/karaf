@@ -17,10 +17,8 @@
 package org.apache.servicemix.kernel.gshell.features;
 
 import java.net.URI;
-import java.net.URL;
 import java.io.InputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 
@@ -28,6 +26,7 @@ import static org.easymock.EasyMock.*;
 
 import org.apache.servicemix.kernel.gshell.features.internal.FeatureImpl;
 import org.apache.servicemix.kernel.gshell.features.internal.FeaturesServiceImpl;
+import org.apache.servicemix.kernel.gshell.features.FeaturesRegistry;
 import org.easymock.EasyMock;
 import org.osgi.service.prefs.PreferencesService;
 import org.osgi.service.prefs.Preferences;
@@ -62,6 +61,7 @@ public class FeaturesServiceTest extends TestCase {
         Preferences featuresNode = EasyMock.createMock(Preferences.class);
         BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
         Bundle installedBundle = EasyMock.createMock(Bundle.class);
+        FeaturesRegistry featuresRegistry = EasyMock.createNiceMock(FeaturesRegistry.class);
 
         expect(preferencesService.getUserPreferences("FeaturesServiceState")).andStubReturn(prefs);
         expect(prefs.node("repositories")).andReturn(repositoriesNode);
@@ -72,12 +72,14 @@ public class FeaturesServiceTest extends TestCase {
         featuresNode.clear();
         prefs.putBoolean("bootFeaturesInstalled", false);
         prefs.flush();
+        featuresRegistry.register(isA(Repository.class));
 
-        replay(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle);
+        replay(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle, featuresRegistry);
 
         FeaturesServiceImpl svc = new FeaturesServiceImpl();
         svc.setPreferences(preferencesService);
         svc.setBundleContext(bundleContext);
+        svc.setFeaturesServiceRegistry(featuresRegistry);
         svc.addRepository(uri);
         
         Repository[] repositories = svc.listRepositories();
@@ -95,9 +97,9 @@ public class FeaturesServiceTest extends TestCase {
         assertEquals(1, features[0].getBundles().size());
         assertEquals(name, features[0].getBundles().get(0));
 
-        verify(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle);
+        verify(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle, featuresRegistry);
 
-        reset(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle);
+        reset(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle, featuresRegistry);
 
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
         expect(bundleContext.installBundle(isA(String.class),

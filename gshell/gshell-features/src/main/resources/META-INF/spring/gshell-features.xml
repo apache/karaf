@@ -69,6 +69,21 @@
         <property name="boot" value="${featuresBoot}" />
         <property name="configAdmin" ref="configAdmin" />
         <property name="preferences" ref="preferences" />
+        <property name="featuresServiceRegistry" ref="featureServiceRegistry" />
+    </bean>
+
+    <bean id="namingStrategy" class="org.apache.servicemix.kernel.gshell.features.management.DefaultNamingStrategy">
+        <property name="jmxDomainName" value="org.apache.servicemix" />
+    </bean>
+
+    <bean id="managementAgent" class="org.apache.servicemix.kernel.gshell.features.management.ManagementAgent">
+        <property name="mbeanServer" ref="mbeanServer" />
+    </bean>
+
+    <bean id="featureServiceRegistry" class="org.apache.servicemix.kernel.gshell.features.management.ManagedFeaturesRegistry">
+        <property name="managementAgent" ref="managementAgent" />
+        <property name="namingStrategy" ref="namingStrategy" />
+        <property name="featuresService" ref="featuresService" />
     </bean>
 
     <osgi:reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" />
@@ -83,5 +98,11 @@
     </osgix:cm-properties>
 
     <ctx:property-placeholder properties-ref="cmProps" />
+
+    <osgi:reference id="mbeanServer"
+                    interface="javax.management.MBeanServer"
+                    cardinality="0..1" >
+        <osgi:listener ref="featureServiceRegistry" bind-method="registerMBeanServer" />
+    </osgi:reference>
 
 </beans>

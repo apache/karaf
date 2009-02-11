@@ -37,10 +37,14 @@ import org.w3c.dom.Node;
 import org.apache.servicemix.kernel.gshell.features.Feature;
 import org.apache.servicemix.kernel.gshell.features.Repository;
 import org.xml.sax.SAXException;
+import org.springframework.jmx.export.annotation.ManagedResource;
+import org.springframework.jmx.export.annotation.ManagedAttribute;
+import org.springframework.jmx.export.annotation.ManagedOperation;
 
 /**
  * The repository implementation.
  */
+@ManagedResource
 public class RepositoryImpl implements Repository {
 
     private URI uri;
@@ -51,10 +55,12 @@ public class RepositoryImpl implements Repository {
         this.uri = uri;
     }
 
+    @ManagedAttribute
     public URI getURI() {
         return uri;
     }
 
+    @ManagedOperation
     public URI[] getRepositories() throws Exception {
         if (repositories == null) {
             load();
@@ -62,6 +68,7 @@ public class RepositoryImpl implements Repository {
         return repositories.toArray(new URI[repositories.size()]);
     }
 
+    @ManagedOperation(description = "List of Features provided by this repository")
     public Feature[] getFeatures() throws Exception {
         if (features == null) {
             load();

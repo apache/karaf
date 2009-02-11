@@ -14,31 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.servicemix.kernel.gshell.features;
+package org.apache.servicemix.kernel.gshell.features.management;
 
-import java.net.URI;
+import javax.management.ObjectName;
+import javax.management.MalformedObjectNameException;
 
-/**
- * The service managing features repositories.
- */
-public interface FeaturesService {
+import org.apache.servicemix.kernel.gshell.features.FeaturesRegistry;
 
-    void addRepository(URI url) throws Exception;
+public interface NamingStrategy {
 
-    void removeRepository(URI url);
+    ObjectName getObjectName(ManagedFeature feature) throws MalformedObjectNameException;
 
-    Repository[] listRepositories();
+    ObjectName getObjectName(ManagedFeature feature, boolean installed) throws MalformedObjectNameException;
 
-    void installFeature(String name) throws Exception;
-    
-    void installFeature(String name, String version) throws Exception;
+    ObjectName getObjectName(ManagedRepository component) throws MalformedObjectNameException;
 
-    void uninstallFeature(String name) throws Exception;
-    
-    void uninstallFeature(String name, String version) throws Exception;
+    String getJmxDomainName();
 
-    String[] listFeatures() throws Exception;
-
-    String[] listInstalledFeatures();
-
+    ObjectName getObjectName(FeaturesRegistry features) throws MalformedObjectNameException;
 }

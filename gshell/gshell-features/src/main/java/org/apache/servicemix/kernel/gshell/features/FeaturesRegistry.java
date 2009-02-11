@@ -16,29 +16,20 @@
  */
 package org.apache.servicemix.kernel.gshell.features;
 
-import java.net.URI;
-
 /**
- * The service managing features repositories.
+ * Main interface for a Feature Registry which tracks available and installed features.
+ * Tracks features and repositories.
  */
-public interface FeaturesService {
+public interface FeaturesRegistry {
+    void register(Feature feature);
 
-    void addRepository(URI url) throws Exception;
+    void unregister(Feature feature);
 
-    void removeRepository(URI url);
+    void registerInstalled(Feature feature);
 
-    Repository[] listRepositories();
+    void unregisterInstalled(Feature feature);
 
-    void installFeature(String name) throws Exception;
-    
-    void installFeature(String name, String version) throws Exception;
+    void register(Repository repository);
 
-    void uninstallFeature(String name) throws Exception;
-    
-    void uninstallFeature(String name, String version) throws Exception;
-
-    String[] listFeatures() throws Exception;
-
-    String[] listInstalledFeatures();
-
+    void unregister(Repository repository);
 }

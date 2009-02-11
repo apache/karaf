@@ -24,6 +24,8 @@ import java.util.Map;
  */
 public interface Feature {
 
+    String getId();
+
     String getName();
 
     String getVersion();

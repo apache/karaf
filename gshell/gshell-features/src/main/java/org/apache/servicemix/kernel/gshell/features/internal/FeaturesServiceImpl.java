@@ -41,6 +41,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.servicemix.kernel.gshell.features.Feature;
 import org.apache.servicemix.kernel.gshell.features.FeaturesService;
 import org.apache.servicemix.kernel.gshell.features.Repository;
+import org.apache.servicemix.kernel.gshell.features.FeaturesRegistry;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -76,6 +77,7 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     private Map<Feature, Set<Long>> installed = new HashMap<Feature, Set<Long>>();
     private String boot;
     private boolean bootFeaturesInstalled;
+    private FeaturesRegistry featuresRegistry;
 
     public BundleContext getBundleContext() {
         return bundleContext;
@@ -101,6 +103,10 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
         this.preferences = preferences;
     }
 
+    public void setFeaturesServiceRegistry(FeaturesRegistry featuresRegistry) {
+        this.featuresRegistry = featuresRegistry;
+    }
+
     public void setUrls(String uris) throws URISyntaxException {
         String[] s = uris.split(",");
         this.uris = new HashSet<URI>();
@@ -123,6 +129,7 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     protected void internalAddRepository(URI uri) throws Exception {
         RepositoryImpl repo = new RepositoryImpl(uri);
         repositories.put(uri, repo);
+        featuresRegistry.register(repo);
         features = null;
     }
 
@@ -134,6 +141,7 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     }
 
     public void internalRemoveRepository(URI uri) {
+        featuresRegistry.unregister(repositories.get(uri));
         repositories.remove(uri);
         features = null;
     }
@@ -184,7 +192,8 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
             b.start();
             bundles.add(b.getBundleId());
         }
-        
+
+        featuresRegistry.registerInstalled(f);
         installed.put(f, bundles);
         saveState();
     }
@@ -241,6 +250,7 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
         for (long bundleId : bundles) {
             getBundleContext().getBundle(bundleId).uninstall();
         }
+        featuresRegistry.unregisterInstalled(feature);
         saveState();
     }
 
