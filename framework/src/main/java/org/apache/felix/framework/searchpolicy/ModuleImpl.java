@@ -531,49 +531,27 @@ public class ModuleImpl implements IModule
         // Delegate any packages listed in the boot delegation
         // property to the parent class loader.
         Object result = null;
-        for (int i = 0; i < m_bootPkgs.length; i++)
+        if (shouldBootDelegate(pkgName))
         {
-            // A wildcarded boot delegation package will be in the form of "foo.",
-            // so if the package is wildcarded do a startsWith() or a regionMatches()
-            // to ignore the trailing "." to determine if the request should be
-            // delegated to the parent class loader. If the package is not wildcarded,
-            // then simply do an equals() test to see if the request should be
-            // delegated to the parent class loader.
-            if (pkgName.length() > 0)
+            try
             {
-                // Only consider delegation if we have a package name, since
-                // we don't want to promote the default package. The spec does
-                // not take a stand on this issue.
-                if ((m_bootPkgWildcards[i] &&
-                    (pkgName.startsWith(m_bootPkgs[i]) ||
-                    m_bootPkgs[i].regionMatches(0, pkgName, 0, pkgName.length())))
-                    || (!m_bootPkgWildcards[i] && m_bootPkgs[i].equals(pkgName)))
+                result = (isClass)
+                    ? (Object) getClass().getClassLoader().loadClass(name)
+                    : (Object) getClass().getClassLoader().getResource(name);
+                // If this is a java.* package, then always terminate the
+                // search; otherwise, continue to look locally if not found.
+                if (pkgName.startsWith("java.") || (result != null))
                 {
-                    try
-                    {
-                        result = (isClass)
-                            ? (Object) getClass().getClassLoader().loadClass(name)
-                            : (Object) getClass().getClassLoader().getResource(name);
-                        // If this is a java.* package, then always terminate the
-                        // search; otherwise, continue to look locally if not found.
-                        if (m_bootPkgs[i].startsWith("java.") || (result != null))
-                        {
-                            return result;
-                        }
-                    }
-                    catch (ClassNotFoundException ex)
-                    {
-                        // If this is a java.* package, then always terminate the
-                        // search; otherwise, continue to look locally if not found.
-                        if (m_bootPkgs[i].startsWith("java."))
-                        {
-                            throw ex;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
+                    return result;
+                }
+            }
+            catch (ClassNotFoundException ex)
+            {
+                // If this is a java.* package, then always terminate the
+                // search; otherwise, continue to look locally if not found.
+                if (pkgName.startsWith("java."))
+                {
+                    throw ex;
                 }
             }
         }
@@ -694,45 +672,25 @@ public class ModuleImpl implements IModule
 
         // Delegate any packages listed in the boot delegation
         // property to the parent class loader.
-        // NOTE for the default package:
-        // Only consider delegation if we have a package name, since
-        // we don't want to promote the default package. The spec does
-        // not take a stand on this issue.
-        if (pkgName.length() > 0)
+        if (shouldBootDelegate(pkgName))
         {
-            for (int i = 0; i < m_bootPkgs.length; i++)
+            try
             {
-                // A wildcarded boot delegation package will be in the form of
-                // "foo.", so if the package is wildcarded do a startsWith() or a
-                // regionMatches() to ignore the trailing "." to determine if the
-                // request should be delegated to the parent class loader. If the
-                // package is not wildcarded, then simply do an equals() test to
-                // see if the request should be delegated to the parent class loader.
-                if ((m_bootPkgWildcards[i] &&
-                    (pkgName.startsWith(m_bootPkgs[i]) ||
-                    m_bootPkgs[i].regionMatches(0, pkgName, 0, pkgName.length())))
-                    || (!m_bootPkgWildcards[i] && m_bootPkgs[i].equals(pkgName)))
-                {
-                    try
-                    {
-                        urls = getClass().getClassLoader().getResources(name);
-                    }
-                    catch (IOException ex)
-                    {
-                        // This shouldn't happen and even if it does, there
-                        // is nothing we can do, so just ignore it.
-                    }
-                    // If this is a java.* package, then always terminate the
-                    // search; otherwise, continue to look locally.
-                    if (m_bootPkgs[i].startsWith("java."))
-                    {
-                        return urls;
-                    }
-
-                    completeUrlList.add(urls);
-                    break;
-                }
+                urls = getClass().getClassLoader().getResources(name);
             }
+            catch (IOException ex)
+            {
+                // This shouldn't happen and even if it does, there
+                // is nothing we can do, so just ignore it.
+            }
+            // If this is a java.* package, then always terminate the
+            // search; otherwise, continue to look locally.
+            if (pkgName.startsWith("java."))
+            {
+                return urls;
+            }
+
+            completeUrlList.add(urls);
         }
 
         // Look in the module's imports.
@@ -1299,6 +1257,36 @@ public class ModuleImpl implements IModule
         }
 
         return null;
+    }
+
+    private boolean shouldBootDelegate(String pkgName)
+    {
+        boolean result = false;
+
+        // Only consider delegation if we have a package name, since
+        // we don't want to promote the default package. The spec does
+        // not take a stand on this issue.
+        if (pkgName.length() > 0)
+        {
+            for (int i = 0; !result && (i < m_bootPkgs.length); i++)
+            {
+                // A wildcarded boot delegation package will be in the form of "foo.",
+                // so if the package is wildcarded do a startsWith() to check for
+                // subpackages or a regionMatches() to check for an exact match
+                // without the trailing ".". If the package is not wildcarded,
+                // then simply do an equals() test to see if the request should be
+                // delegated to the parent class loader.
+                if ((m_bootPkgWildcards[i] &&
+                    (pkgName.startsWith(m_bootPkgs[i]) ||
+                    pkgName.regionMatches(0, m_bootPkgs[i], 0, m_bootPkgs[i].length() - 1)))
+                    || (!m_bootPkgWildcards[i] && m_bootPkgs[i].equals(pkgName)))
+                {
+                    result = true;
+                }
+            }
+        }
+
+        return result;
     }
 
     private static final Constructor m_dexFileClassConstructor;
