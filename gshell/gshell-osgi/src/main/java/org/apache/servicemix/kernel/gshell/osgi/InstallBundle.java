@@ -39,8 +39,8 @@ public class InstallBundle extends OsgiCommandSupport {
         StringBuffer sb = new StringBuffer();
         for (String url : urls) {
             Bundle bundle = install(url, io.out, io.err);
-            bundles.add(bundle);
             if (bundle != null) {
+                bundles.add(bundle);
                 if (sb.length() > 0) {
                     sb.append(", ");
                 }
