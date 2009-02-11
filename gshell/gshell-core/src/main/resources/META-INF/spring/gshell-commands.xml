@@ -165,7 +165,9 @@
         </gshell:command>
 
         <gshell:command name="optional/cat">
-            <gshell:action class="org.apache.geronimo.gshell.commands.text.CatAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.text.CatAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </gshell:action>
             <gshell:completers>
                 <ref bean="fileObjectNameCompleter"/>
                 <null/>
@@ -173,7 +175,9 @@
         </gshell:command>
 
         <gshell:command name="optional/edit">
-            <gshell:action class="org.apache.geronimo.gshell.commands.shell.EditAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.shell.EditAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </gshell:action>
             <gshell:completers>
                 <ref bean="fileObjectNameCompleter"/>
                 <null/>
@@ -189,7 +193,9 @@
         </gshell:command>
 
         <gshell:command name="optional/find">
-            <gshell:action class="org.apache.geronimo.gshell.commands.shell.FindAction"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.shell.FindAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </gshell:action>
             <gshell:completers>
                 <ref bean="fileObjectNameCompleter"/>
                 <null/>

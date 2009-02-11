@@ -129,4 +129,28 @@ public class Test extends TestCase {
         }
     }
 
+    public void testFileAccessCommands() throws Exception {
+        System.setProperty("startLocalConsole", "true");
+        System.setProperty("servicemix.name", "root");
+
+        ClassPathXmlApplicationContext context = null;
+        try {
+            context = new ClassPathXmlApplicationContext(
+                    new String[] { "META-INF/spring/gshell.xml",
+                                   "META-INF/spring/gshell-vfs.xml",
+                                   "META-INF/spring/gshell-commands.xml",
+                                   "org/apache/servicemix/kernel/gshell/core/gshell-test.xml"});
+            ApplicationManager appMgr = (ApplicationManager) context.getBean("applicationManager");
+            assertNotNull(appMgr);
+            Shell shell = appMgr.create();            
+            assertNotNull(shell);
+            shell.execute("optional/cat src/test/resources/org/apache/servicemix/kernel/gshell/core/gshell-test.xml");
+            shell.execute("optional/find src/test/resources/org/apache/servicemix/kernel/gshell/core/gshell-test.xml");
+        } finally {
+            if (context != null) {
+                context.destroy();
+            }
+        }
+    }
+
 }
