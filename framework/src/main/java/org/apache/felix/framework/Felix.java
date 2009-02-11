@@ -52,7 +52,6 @@ public class Felix extends BundleImpl implements Framework
     private final Map m_configMutableMap;
 
     // MODULE FACTORY.
-    private final Resolver m_resolver;
     private final FelixResolverState m_resolverState;
     private final FelixResolver m_felixResolver;
 
@@ -289,9 +288,8 @@ public class Felix extends BundleImpl implements Framework
         m_bundleStreamHandler = new URLHandlersBundleStreamHandler(this);
 
         // Create a resolver and its state.
-        m_resolver = new Resolver(m_logger);
         m_resolverState = new FelixResolverState(m_logger);
-        m_felixResolver = new FelixResolver(m_resolver, m_resolverState);
+        m_felixResolver = new FelixResolver(new Resolver(m_logger), m_resolverState);
 
         // Create the extension manager, which we will use as the module
         // definition for creating the system bundle module.
@@ -1297,7 +1295,7 @@ ex.printStackTrace();
         {
             try
             {
-                _resolveBundle(bundle);
+                resolveBundle(bundle);
             }
             catch (BundleException ex)
             {
@@ -1411,7 +1409,7 @@ ex.printStackTrace();
                 case Bundle.ACTIVE:
                     return;
                 case Bundle.INSTALLED:
-                    _resolveBundle(bundle);
+                    resolveBundle(bundle);
                     // No break.
                 case Bundle.RESOLVED:
                     setBundleStateAndNotify(bundle, Bundle.STARTING);
@@ -1490,87 +1488,6 @@ ex.printStackTrace();
         // If there was no exception, then we should fire the STARTED event
         // here without holding the lock.
         fireBundleEvent(BundleEvent.STARTED, bundle);
-    }
-
-// TODO: REFACTOR - Need to make sure all callers of this method acquire global lock,
-//       further get rid of the _ method, since we should not resolve without the global lock.
-    protected void _resolveBundle(BundleImpl bundle)
-        throws BundleException
-    {
-        if (bundle.isExtension())
-        {
-            return;
-        }
-        // If a security manager is installed, then check for permission
-        // to import the necessary packages.
-        if (System.getSecurityManager() != null)
-        {
-            BundleProtectionDomain pd = (BundleProtectionDomain)
-                bundle.getProtectionDomain();
-
-/*
- TODO: RB - We need to fix this import check by looking at the wire
-            associated with it, not the import since we don't know the
-            package name associated with the import since it is a filter.
-
-            IRequirement[] imports = bundle.getInfo().getCurrentModule().getRequirements();
-            for (int i = 0; i < imports.length; i++)
-            {
-                if (imports[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
-                {
-                    PackagePermission perm = new PackagePermission(
-                        imports[i].???,
-                        PackagePermission.IMPORT);
-
-                    if (!pd.impliesDirect(perm))
-                    {
-                        throw new java.security.AccessControlException(
-                            "PackagePermission.IMPORT denied for import: " +
-                            imports[i].getName(), perm);
-                    }
-                }
-            }
-*/
-            // Check export permission for all exports of the current module.
-            ICapability[] exports = bundle.getCurrentModule().getCapabilities();
-            for (int i = 0; i < exports.length; i++)
-            {
-                if (exports[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
-                {
-                    PackagePermission perm = new PackagePermission(
-                        (String) exports[i].getProperties().get(ICapability.PACKAGE_PROPERTY), PackagePermission.EXPORT);
-
-                    if (!pd.impliesDirect(perm))
-                    {
-                        throw new java.security.AccessControlException(
-                            "PackagePermission.EXPORT denied for export: " +
-                            exports[i].getProperties().get(ICapability.PACKAGE_PROPERTY), perm);
-                    }
-                }
-            }
-        }
-
-        verifyExecutionEnvironment(bundle);
-
-        IModule module = bundle.getCurrentModule();
-        try
-        {
-            m_felixResolver.resolve(module);
-        }
-        catch (ResolveException ex)
-        {
-            if (ex.getModule() != null)
-            {
-                throw new BundleException(
-                    "Unresolved constraint in bundle "
-                    + Util.getBundleIdFromModuleId(ex.getModule().getId())
-                    + ": " + ex.getRequirement());
-            }
-            else
-            {
-                throw new BundleException(ex.getMessage());
-            }
-        }
     }
 
     void updateBundle(BundleImpl bundle, InputStream is)
@@ -1709,7 +1626,7 @@ ex.printStackTrace();
                 {
                     try
                     {
-                        _refreshPackages(new BundleImpl[] { bundle });
+                        refreshPackages(new BundleImpl[] { bundle });
                     }
                     catch (Exception ex)
                     {
@@ -2009,7 +1926,7 @@ ex.printStackTrace();
             {
                 try
                 {
-                    _refreshPackages(new BundleImpl[] { bundle });
+                    refreshPackages(new BundleImpl[] { bundle });
                 }
                 catch (Exception ex)
                 {
@@ -2261,7 +2178,7 @@ ex.printStackTrace();
      *         not match the current execution environment.
     **/
     private void verifyExecutionEnvironment(BundleImpl bundle)
-        throws BundleException
+        throws ResolveException
     {
         String bundleEnvironment = (String)
             bundle.getCurrentModule().getHeaders().get(
@@ -2273,7 +2190,8 @@ ex.printStackTrace();
             {
                 if (!isMatchingExecutionEnvironment(bundleEnvironment))
                 {
-                    throw new BundleException("Execution Environment not supported: " + bundleEnvironment);
+                    throw new ResolveException(
+                        "Execution Environment not supported: " + bundleEnvironment, null, null);
                 }
             }
         }
@@ -2993,32 +2911,57 @@ ex.printStackTrace();
         return null;
     }
 
-    protected boolean resolveBundles(Bundle[] targets)
+    boolean resolveBundles(Bundle[] targets)
     {
-        // Acquire locks for all bundles to be resolved.
-        BundleImpl[] bundles = acquireBundleResolveLocks(targets);
+        // Acquire global lock.
+        acquireGlobalLock();
 
+        // Determine set of bundles to be resolved, which is either the
+        // specified bundles or all bundles if null.
+        if (targets == null)
+        {
+            List list = new ArrayList();
+
+            // Add all unresolved bundles to the list.
+            synchronized (m_installedBundleLock_Priority2)
+            {
+                Iterator iter = m_installedBundleMap.values().iterator();
+                while (iter.hasNext())
+                {
+                    BundleImpl bundle = (BundleImpl) iter.next();
+                    if (bundle.getState() == Bundle.INSTALLED)
+                    {
+                        list.add(bundle);
+                    }
+                }
+            }
+
+            // Create an array.
+            if (list.size() > 0)
+            {
+                targets = (Bundle[]) list.toArray(new BundleImpl[list.size()]);
+            }
+        }
+
+        // Now resolve each target bundle.
         try
         {
             boolean result = true;
 
             // If there are targets, then resolve each one.
-            if (bundles != null)
+            for (int i = 0; (targets != null) && (i < targets.length); i++)
             {
-                for (int i = 0; i < bundles.length; i++)
+                try
                 {
-                    try
-                    {
-                        _resolveBundle(bundles[i]);
-                    }
-                    catch (BundleException ex)
-                    {
-                        result = false;
-                        m_logger.log(
-                            Logger.LOG_WARNING,
-                            "Unable to resolve bundle " + bundles[i].getBundleId(),
-                            ex);
-                    }
+                    resolveBundle((BundleImpl) targets[i]);
+                }
+                catch (BundleException ex)
+                {
+                    result = false;
+                    m_logger.log(
+                        Logger.LOG_WARNING,
+                        "Unable to resolve bundle " + targets[i].getBundleId(),
+                        ex);
                 }
             }
 
@@ -3026,103 +2969,182 @@ ex.printStackTrace();
         }
         finally
         {
-            // Always release all bundle locks.
-            releaseBundleLocks(bundles);
+            // Always release the global lock.
+            releaseGlobalLock();
         }
     }
 
-    protected void refreshPackages(Bundle[] targets)
+    private void resolveBundle(BundleImpl bundle) throws BundleException
     {
-        BundleImpl[] bundles = acquireBundleRefreshLocks(targets);
         try
         {
-            _refreshPackages(bundles);
+            m_felixResolver.resolve(bundle.getCurrentModule());
         }
-        finally
+        catch (ResolveException ex)
         {
-            // Always release all bundle locks.
-            releaseBundleLocks(bundles);
+            if (ex.getModule() != null)
+            {
+                throw new BundleException(
+                    "Unresolved constraint in bundle "
+                    + Util.getBundleIdFromModuleId(ex.getModule().getId())
+                    + ": " + ex.getRequirement());
+            }
+            else
+            {
+                throw new BundleException(ex.getMessage());
+            }
         }
     }
 
-// REFACTOR - Get rid of _ method, since we should always acquire global lock to refresh.
-    protected void _refreshPackages(BundleImpl[] bundles)
+    void refreshPackages(Bundle[] targets)
     {
-        boolean restart = false;
+        // Acquire global lock.
+        acquireGlobalLock();
 
-        Bundle systemBundle = this;
-
-        // We need to restart the framework if either an extension bundle is
-        // refreshed or the system bundle is refreshed and any extension bundle
-        // has been updated or uninstalled.
-        for (int i = 0; (bundles != null) && !restart && (i < bundles.length); i++)
+        // Determine set of bundles to refresh, which is all transitive
+        // dependencies of specified set or all transitive dependencies
+        // of all bundles if null is specified.
+        Bundle[] newTargets = targets;
+        if (newTargets == null)
         {
-            if (bundles[i].isExtension())
+            List list = new ArrayList();
+
+            // First add all uninstalled bundles.
+            synchronized (m_uninstalledBundlesLock_Priority3)
             {
-                restart = true;
-            }
-            else if (systemBundle == bundles[i])
-            {
-                Bundle[] allBundles = getBundles();
-                for (int j = 0; !restart && j < allBundles.length; j++)
+                for (int i = 0;
+                    (m_uninstalledBundles != null) && (i < m_uninstalledBundles.length);
+                    i++)
                 {
-                    if (((BundleImpl) allBundles[j]).isExtension() &&
-                        (allBundles[j].getState() == Bundle.INSTALLED))
+                    list.add(m_uninstalledBundles[i]);
+                }
+            }
+
+            // Then add all updated bundles.
+            synchronized (m_installedBundleLock_Priority2)
+            {
+                Iterator iter = m_installedBundleMap.values().iterator();
+                while (iter.hasNext())
+                {
+                    BundleImpl bundle = (BundleImpl) iter.next();
+                    if (bundle.isRemovalPending())
                     {
-                        restart = true;
+                        list.add(bundle);
+                    }
+                }
+            }
+
+            // Create an array.
+            if (list.size() > 0)
+            {
+                newTargets = (Bundle[]) list.toArray(new Bundle[list.size()]);
+            }
+        }
+
+        // If there are targets, then find all dependencies for each one.
+        BundleImpl[] bundles = null;
+        if (newTargets != null)
+        {
+            // Create map of bundles that import the packages
+            // from the target bundles.
+            Map map = new HashMap();
+            for (int targetIdx = 0; targetIdx < newTargets.length; targetIdx++)
+            {
+                // Add the current target bundle to the map of
+                // bundles to be refreshed.
+                BundleImpl target = (BundleImpl) newTargets[targetIdx];
+                map.put(target, target);
+                // Add all importing bundles to map.
+                populateDependentGraph(target, map);
+            }
+
+            bundles = (BundleImpl[]) map.values().toArray(new BundleImpl[map.size()]);
+        }
+
+        // Now refresh each bundle.
+        try
+        {
+            boolean restart = false;
+
+            Bundle systemBundle = this;
+
+            // We need to restart the framework if either an extension bundle is
+            // refreshed or the system bundle is refreshed and any extension bundle
+            // has been updated or uninstalled.
+            for (int i = 0; (bundles != null) && !restart && (i < bundles.length); i++)
+            {
+                if (bundles[i].isExtension())
+                {
+                    restart = true;
+                }
+                else if (systemBundle == bundles[i])
+                {
+                    Bundle[] allBundles = getBundles();
+                    for (int j = 0; !restart && j < allBundles.length; j++)
+                    {
+                        if (((BundleImpl) allBundles[j]).isExtension() &&
+                            (allBundles[j].getState() == Bundle.INSTALLED))
+                        {
+                            restart = true;
+                        }
+                    }
+                }
+            }
+
+            if (restart)
+            {
+// TODO: Extension Bundle - We need a way to restart the framework
+                m_logger.log(Logger.LOG_WARNING, "Framework restart not implemented.");
+            }
+
+            // Remove any targeted bundles from the uninstalled bundles
+            // array, since they will be removed from the system after
+            // the refresh.
+            for (int i = 0; (bundles != null) && (i < bundles.length); i++)
+            {
+                forgetUninstalledBundle(bundles[i]);
+            }
+            // If there are targets, then refresh each one.
+            if (bundles != null)
+            {
+                // At this point the map contains every bundle that has been
+                // updated and/or removed as well as all bundles that import
+                // packages from these bundles.
+
+                // Create refresh helpers for each bundle.
+                RefreshHelper[] helpers = new RefreshHelper[bundles.length];
+                for (int i = 0; i < bundles.length; i++)
+                {
+                    if (!bundles[i].isExtension())
+                    {
+                        helpers[i] = new RefreshHelper(bundles[i]);
+                    }
+                }
+
+                // Stop, purge or remove, and reinitialize all bundles first.
+                for (int i = 0; i < helpers.length; i++)
+                {
+                    if (helpers[i] != null)
+                    {
+                        helpers[i].stop();
+                        helpers[i].refreshOrRemove();
+                    }
+                }
+
+                // Then restart all bundles that were previously running.
+                for (int i = 0; i < helpers.length; i++)
+                {
+                    if (helpers[i] != null)
+                    {
+                        helpers[i].restart();
                     }
                 }
             }
         }
-
-        if (restart)
+        finally
         {
-// TODO: Extension Bundle - We need a way to restart the framework
-            m_logger.log(Logger.LOG_WARNING, "Framework restart not implemented.");
-        }
-
-        // Remove any targeted bundles from the uninstalled bundles
-        // array, since they will be removed from the system after
-        // the refresh.
-        for (int i = 0; (bundles != null) && (i < bundles.length); i++)
-        {
-            forgetUninstalledBundle(bundles[i]);
-        }
-        // If there are targets, then refresh each one.
-        if (bundles != null)
-        {
-            // At this point the map contains every bundle that has been
-            // updated and/or removed as well as all bundles that import
-            // packages from these bundles.
-
-            // Create refresh helpers for each bundle.
-            RefreshHelper[] helpers = new RefreshHelper[bundles.length];
-            for (int i = 0; i < bundles.length; i++)
-            {
-                if (!bundles[i].isExtension())
-                {
-                    helpers[i] = new RefreshHelper(bundles[i]);
-                }
-            }
-
-            // Stop, purge or remove, and reinitialize all bundles first.
-            for (int i = 0; i < helpers.length; i++)
-            {
-                if (helpers[i] != null)
-                {
-                    helpers[i].stop();
-                    helpers[i].refreshOrRemove();
-                }
-            }
-
-            // Then restart all bundles that were previously running.
-            for (int i = 0; i < helpers.length; i++)
-            {
-                if (helpers[i] != null)
-                {
-                    helpers[i].restart();
-                }
-            }
+            // Always release the global lock.
+            releaseGlobalLock();
         }
 
         fireFrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, this, null);
@@ -3228,16 +3250,13 @@ ex.printStackTrace();
 
         try
         {
-            try
-            {
-                // Reset the bundle object and fire UNRESOLVED event.
-                ((BundleImpl) bundle).refresh();
-                fireBundleEvent(BundleEvent.UNRESOLVED, bundle);
-            }
-            catch (Exception ex)
-            {
-                fireFrameworkEvent(FrameworkEvent.ERROR, bundle, ex);
-            }
+            // Reset the bundle object and fire UNRESOLVED event.
+            ((BundleImpl) bundle).refresh();
+            fireBundleEvent(BundleEvent.UNRESOLVED, bundle);
+        }
+        catch (Exception ex)
+        {
+            fireFrameworkEvent(FrameworkEvent.ERROR, bundle, ex);
         }
         finally
         {
@@ -3483,12 +3502,87 @@ ex.printStackTrace();
 
         public void resolve(IModule rootModule) throws ResolveException
         {
+            // Although there is a race condition to check the bundle state
+            // then lock it, we do this because we don't want to acquire the
+            // a lock just to check if the module is resolved, which itself
+            // is a safe read. If the module isn't resolved, we end up double
+            // check the resolved status later.
             if (!rootModule.isResolved())
             {
-                Map resolvedModuleWireMap = m_resolver.resolve(m_resolverState, rootModule);
+                // Acquire global lock.
+                acquireGlobalLock();
 
-                // Mark all modules as resolved.
-                markResolvedModules(resolvedModuleWireMap);
+                try
+                {
+                    BundleImpl bundle = (BundleImpl) rootModule.getBundle();
+
+                    // Extensions are resolved differently.
+                    if (bundle.isExtension())
+                    {
+                        return;
+                    }
+
+                    // If a security manager is installed, then check for permission
+                    // to import the necessary packages.
+                    if (System.getSecurityManager() != null)
+                    {
+                        BundleProtectionDomain pd = (BundleProtectionDomain)
+                            bundle.getProtectionDomain();
+
+/*
+ TODO: SECURITY - We need to fix this import check by looking at the wire
+            associated with it, not the import since we don't know the
+            package name associated with the import since it is a filter.
+
+                    IRequirement[] imports = bundle.getInfo().getCurrentModule().getRequirements();
+                    for (int i = 0; i < imports.length; i++)
+                    {
+                        if (imports[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                        {
+                            PackagePermission perm = new PackagePermission(
+                                imports[i].???,
+                                PackagePermission.IMPORT);
+
+                            if (!pd.impliesDirect(perm))
+                            {
+                                throw new java.security.AccessControlException(
+                                    "PackagePermission.IMPORT denied for import: " +
+                                    imports[i].getName(), perm);
+                            }
+                        }
+                    }
+*/
+                        // Check export permission for all exports of the current module.
+                        ICapability[] exports = rootModule.getCapabilities();
+                        for (int i = 0; i < exports.length; i++)
+                        {
+                            if (exports[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                            {
+                                PackagePermission perm = new PackagePermission(
+                                    (String) exports[i].getProperties().get(ICapability.PACKAGE_PROPERTY), PackagePermission.EXPORT);
+
+                                if (!pd.impliesDirect(perm))
+                                {
+                                    throw new java.security.AccessControlException(
+                                        "PackagePermission.EXPORT denied for export: " +
+                                        exports[i].getProperties().get(ICapability.PACKAGE_PROPERTY), perm);
+                                }
+                            }
+                        }
+                    }
+
+                    verifyExecutionEnvironment(bundle);
+
+                    Map resolvedModuleWireMap = m_resolver.resolve(m_resolverState, rootModule);
+
+                    // Mark all modules as resolved.
+                    markResolvedModules(resolvedModuleWireMap);
+                }
+                finally
+                {
+                    // Always release the global lock.
+                    releaseGlobalLock();
+                }
             }
         }
 
@@ -3498,34 +3592,45 @@ ex.printStackTrace();
 
             if (importer.isResolved())
             {
-                Object[] result = m_resolver.resolveDynamicImport(m_resolverState, importer, pkgName);
-                if (result != null)
+                // Acquire global lock.
+                acquireGlobalLock();
+
+                try
                 {
-                    candidateWire = (IWire) result[0];
-                    Map resolvedModuleWireMap = (Map) result[1];
-
-                    // Mark all modules as resolved.
-                    markResolvedModules(resolvedModuleWireMap);
-
-                    // Dynamically add new wire to importing module.
-                    if (candidateWire != null)
+                    Object[] result = m_resolver.resolveDynamicImport(m_resolverState, importer, pkgName);
+                    if (result != null)
                     {
-                        IWire[] wires = importer.getWires();
-                        IWire[] newWires = null;
-                        if (wires == null)
-                        {
-                            newWires = new IWire[1];
-                        }
-                        else
-                        {
-                            newWires = new IWire[wires.length + 1];
-                            System.arraycopy(wires, 0, newWires, 0, wires.length);
-                        }
+                        candidateWire = (IWire) result[0];
+                        Map resolvedModuleWireMap = (Map) result[1];
 
-                        newWires[newWires.length - 1] = candidateWire;
-                        ((ModuleImpl) importer).setWires(newWires);
+                        // Mark all modules as resolved.
+                        markResolvedModules(resolvedModuleWireMap);
+
+                        // Dynamically add new wire to importing module.
+                        if (candidateWire != null)
+                        {
+                            IWire[] wires = importer.getWires();
+                            IWire[] newWires = null;
+                            if (wires == null)
+                            {
+                                newWires = new IWire[1];
+                            }
+                            else
+                            {
+                                newWires = new IWire[wires.length + 1];
+                                System.arraycopy(wires, 0, newWires, 0, wires.length);
+                            }
+
+                            newWires[newWires.length - 1] = candidateWire;
+                            ((ModuleImpl) importer).setWires(newWires);
 m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1]);
+                        }
                     }
+                }
+                finally
+                {
+                    // Always release the global lock.
+                    releaseGlobalLock();
                 }
             }
 
@@ -3544,49 +3649,52 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1])
 
         private void markResolvedModules(Map resolvedModuleWireMap)
         {
-            Iterator iter = resolvedModuleWireMap.entrySet().iterator();
-            // Iterate over the map to mark the modules as resolved and
-            // update our resolver data structures.
-            List fragmentList = new ArrayList();
-            List wireList = new ArrayList();
-            while (iter.hasNext())
+            if (resolvedModuleWireMap != null)
             {
-                fragmentList.clear();
-                wireList.clear();
-
-                Map.Entry entry = (Map.Entry) iter.next();
-                IModule module = (IModule) entry.getKey();
-                IWire[] wires = (IWire[]) entry.getValue();
-
-                // Only add wires attribute if some exist; export
-                // only modules may not have wires.
-// TODO: RESOLVER - Seems stupid that we package these up as wires to tear them apart.
-                if (wires.length > 0)
+                Iterator iter = resolvedModuleWireMap.entrySet().iterator();
+                // Iterate over the map to mark the modules as resolved and
+                // update our resolver data structures.
+                List fragmentList = new ArrayList();
+                List wireList = new ArrayList();
+                while (iter.hasNext())
                 {
-                    for (int wireIdx = 0; wireIdx < wires.length; wireIdx++)
+                    fragmentList.clear();
+                    wireList.clear();
+
+                    Map.Entry entry = (Map.Entry) iter.next();
+                    IModule module = (IModule) entry.getKey();
+                    IWire[] wires = (IWire[]) entry.getValue();
+
+                    // Only add wires attribute if some exist; export
+                    // only modules may not have wires.
+// TODO: RESOLVER - Seems stupid that we package these up as wires to tear them apart.
+                    if (wires.length > 0)
                     {
-                        if (wires[wireIdx] instanceof R4WireFragment)
+                        for (int wireIdx = 0; wireIdx < wires.length; wireIdx++)
                         {
-                            fragmentList.add(wires[wireIdx].getExporter());
-                        }
-                        else
-                        {
+                            if (wires[wireIdx] instanceof R4WireFragment)
+                            {
+                                fragmentList.add(wires[wireIdx].getExporter());
+                            }
+                            else
+                            {
 m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
-                            wireList.add(wires[wireIdx]);
+                                wireList.add(wires[wireIdx]);
+                            }
                         }
+                        wires = (IWire[]) wireList.toArray(new IWire[wireList.size()]);
+                        ((ModuleImpl) module).setWires(wires);
                     }
-                    wires = (IWire[]) wireList.toArray(new IWire[wireList.size()]);
-                    ((ModuleImpl) module).setWires(wires);
+
+                    // Update the resolver state to show the module as resolved.
+                    ((ModuleImpl) module).setResolved();
+                    m_resolverState.moduleResolved(module);
+                    // Update the state of the module's bundle to resolved as well.
+                    markBundleResolved(module);
+
+                    // Attach and mark all fragments as resolved.
+                    attachFragments(module, fragmentList);
                 }
-
-                // Update the resolver state to show the module as resolved.
-                ((ModuleImpl) module).setResolved();
-                m_resolverState.moduleResolved(module);
-                // Update the state of the module's bundle to resolved as well.
-                markBundleResolved(module);
-
-                // Attach and mark all fragments as resolved.
-                attachFragments(module, fragmentList);
             }
         }
 
@@ -4072,20 +4180,8 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
         }
     }
 
-    private BundleImpl[] acquireBundleResolveLocks(Bundle[] targets)
+    private void acquireGlobalLock()
     {
-        // Hold bundles to be locked.
-        BundleImpl[] bundles = null;
-        // Convert existing target bundle array to bundle impl array.
-        if (targets != null)
-        {
-            bundles = new BundleImpl[targets.length];
-            for (int i = 0; i < targets.length; i++)
-            {
-                bundles[i] = (BundleImpl) targets[i];
-            }
-        }
-
         synchronized (m_bundleLock)
         {
             // Wait as long as there are multiple threads holding locks,
@@ -4116,150 +4212,10 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
 
             // Increment the current thread's global lock count.
             m_globalLockCount++;
-
-            // If targets is null, then resolve all unresolved bundles.
-            if (targets == null)
-            {
-                List list = new ArrayList();
-
-                // Add all unresolved bundles to the list.
-                synchronized (m_installedBundleLock_Priority2)
-                {
-                    Iterator iter = m_installedBundleMap.values().iterator();
-                    while (iter.hasNext())
-                    {
-                        BundleImpl bundle = (BundleImpl) iter.next();
-                        if (bundle.getState() == Bundle.INSTALLED)
-                        {
-                            list.add(bundle);
-                        }
-                    }
-                }
-
-                // Create an array.
-                if (list.size() > 0)
-                {
-                    bundles = (BundleImpl[]) list.toArray(new BundleImpl[list.size()]);
-                }
-            }
-
-            // Lock all needed bundles; this is not strictly
-            // necessary since we hold the global lock.
-            for (int i = 0; (bundles != null) && (i < bundles.length); i++)
-            {
-                bundles[i].lock();
-            }
         }
-
-        return bundles;
     }
 
-    private BundleImpl[] acquireBundleRefreshLocks(Bundle[] targets)
-    {
-        // Hold bundles to be locked.
-        BundleImpl[] bundles = null;
-
-        synchronized (m_bundleLock)
-        {
-            // Wait as long as there are multiple threads holding locks,
-            // but proceed if there are no lock holders or the current thread
-            // is the only lock holder.
-            while ((m_lockingThreadMap.size() > 1)
-               || ((m_lockingThreadMap.size() == 1)
-                   && !m_lockingThreadMap.containsKey(Thread.currentThread())))
-            {
-                try
-                {
-                    m_bundleLock.wait();
-                }
-                catch (InterruptedException ex)
-                {
-                    // Ignore
-                }
-            }
-
-            // Increment the current thread's lock count.
-            int[] counter = (int[]) m_lockingThreadMap.get(Thread.currentThread());
-            if (counter == null)
-            {
-                counter = new int[] { 0 };
-            }
-            counter[0]++;
-            m_lockingThreadMap.put(Thread.currentThread(), counter);
-
-            // Increment the current thread's global lock count.
-            m_globalLockCount++;
-
-            // If targets is null, then refresh all pending bundles.
-            Bundle[] newTargets = targets;
-            if (newTargets == null)
-            {
-                List list = new ArrayList();
-
-                // First add all uninstalled bundles.
-                synchronized (m_uninstalledBundlesLock_Priority3)
-                {
-                    for (int i = 0;
-                        (m_uninstalledBundles != null) && (i < m_uninstalledBundles.length);
-                        i++)
-                    {
-                        list.add(m_uninstalledBundles[i]);
-                    }
-                }
-
-                // Then add all updated bundles.
-                synchronized (m_installedBundleLock_Priority2)
-                {
-                    Iterator iter = m_installedBundleMap.values().iterator();
-                    while (iter.hasNext())
-                    {
-                        BundleImpl bundle = (BundleImpl) iter.next();
-                        if (bundle.isRemovalPending())
-                        {
-                            list.add(bundle);
-                        }
-                    }
-                }
-
-                // Create an array.
-                if (list.size() > 0)
-                {
-                    newTargets = (Bundle[]) list.toArray(new Bundle[list.size()]);
-                }
-            }
-
-            // If there are targets, then find all dependencies
-            // for each one.
-            if (newTargets != null)
-            {
-                // Create map of bundles that import the packages
-                // from the target bundles.
-                Map map = new HashMap();
-                for (int targetIdx = 0; targetIdx < newTargets.length; targetIdx++)
-                {
-                    // Add the current target bundle to the map of
-                    // bundles to be refreshed.
-                    BundleImpl target = (BundleImpl) newTargets[targetIdx];
-                    map.put(target, target);
-                    // Add all importing bundles to map.
-                    populateDependentGraph(target, map);
-                }
-
-                bundles = (BundleImpl[]) map.values().toArray(new BundleImpl[map.size()]);
-            }
-
-            // Lock all needed bundles; this is not strictly
-            // necessary since we hold the global lock.
-            for (int i = 0; (bundles != null) && (i < bundles.length); i++)
-            {
-                bundles[i].lock();
-            }
-        }
-
-        return bundles;
-    }
-
-    private void releaseBundleLocks(BundleImpl[] bundles)
+    private void releaseGlobalLock()
     {
         // Always unlock any locked bundles.
         synchronized (m_bundleLock)
@@ -4286,12 +4242,6 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
 
             // Decrement the current thread's global lock count;
             m_globalLockCount--;
-
-            // Unlock all the bundles.
-            for (int i = 0; (bundles != null) && (i < bundles.length); i++)
-            {
-                bundles[i].unlock();
-            }
             m_bundleLock.notifyAll();
         }
     }
