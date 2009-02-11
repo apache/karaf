@@ -111,4 +111,22 @@ public class FeatureImpl implements Feature {
     			
     	
     }
+
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FeatureImpl feature = (FeatureImpl) o;
+
+        if (!name.equals(feature.name)) return false;
+        if (!version.equals(feature.version)) return false;
+
+        return true;
+    }
+
+    public int hashCode() {
+        int result = name.hashCode();
+        result = 31 * result + version.hashCode();
+        return result;
+    }
 }
