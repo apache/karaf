@@ -63,7 +63,7 @@ public class SpringDeploymentListener implements DeploymentListener {
                 }
             }
         } catch (Exception e) {
-            // Ignore
+            LOGGER.error("Unable to parse deployed file " + artifact.getAbsolutePath(), e);
         }
         return false;
     }
@@ -76,7 +76,7 @@ public class SpringDeploymentListener implements DeploymentListener {
             os.close();
             return destFile;
         } catch (Exception e) {
-            LOGGER.info("Unable to build spring application bundle", e);
+            LOGGER.error("Unable to build spring application bundle", e);
             return null;
         }
     }
