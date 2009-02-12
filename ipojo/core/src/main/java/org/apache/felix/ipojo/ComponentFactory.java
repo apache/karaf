@@ -463,7 +463,7 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
          * Creates a PrimitiveTypeDescription object.
          * @param factory the factory attached to this component type description.
          */
-        public PrimitiveTypeDescription(Factory factory) {
+        public PrimitiveTypeDescription(IPojoFactory factory) {
             super(factory);
         }
 

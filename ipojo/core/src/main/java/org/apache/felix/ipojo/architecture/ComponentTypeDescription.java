@@ -23,6 +23,7 @@ import java.util.Properties;
 
 import org.apache.felix.ipojo.ComponentFactory;
 import org.apache.felix.ipojo.Factory;
+import org.apache.felix.ipojo.IPojoFactory;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 import org.osgi.framework.BundleContext;
@@ -48,14 +49,22 @@ public class ComponentTypeDescription {
     /**
      * Represented factory.
      */
-    private final Factory m_factory;
+    private final IPojoFactory m_factory;
     
     /**
      * Constructor.
      * @param factory : represented factory.
      */
-    public ComponentTypeDescription(Factory factory) {
+    public ComponentTypeDescription(IPojoFactory factory) {
         m_factory = factory;
+    }
+    
+    /**
+     * Gets the attached factory.
+     * @return the factory
+     */
+    public IPojoFactory getFactory() {
+        return m_factory;
     }
 
     /**
@@ -109,10 +118,7 @@ public class ComponentTypeDescription {
      * @param pd : the property to add
      */
     public void addProperty(PropertyDescription pd) { //NOPMD remove the instance name of the 'name' property.
-        String name = pd.getName();
-//        if ("name".equals(name)) {
-//            pd = new PropertyDescription(name, pd.getType(), null); //NOPMD Instance name case.
-//        } 
+        String name = pd.getName(); 
         
         // Check if the property is not already in the array
         for (int i = 0; i < m_properties.length; i++) {

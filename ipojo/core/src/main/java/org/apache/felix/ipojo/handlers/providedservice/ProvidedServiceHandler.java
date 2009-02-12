@@ -41,6 +41,7 @@ import org.apache.felix.ipojo.parser.ManifestMetadataParser;
 import org.apache.felix.ipojo.parser.ParseException;
 import org.apache.felix.ipojo.parser.ParseUtils;
 import org.apache.felix.ipojo.parser.PojoMetadata;
+import org.apache.felix.ipojo.util.Logger;
 import org.apache.felix.ipojo.util.Property;
 import org.osgi.framework.Bundle;
 
@@ -511,7 +512,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
         PojoMetadata manipulation = getFactory().getPojoMetadata();
 
         for (int i = 0; i < provides.length; i++) {
-         // First : create the serviceSpecification list
+            // First : create the serviceSpecification list
             String[] serviceSpecification = manipulation.getInterfaces();
             String parent = manipulation.getSuperClass();
             Set all = null;
@@ -532,8 +533,9 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
             if (serviceSpecificationStr != null) {
                 List itfs = ParseUtils.parseArraysAsList(serviceSpecificationStr);
                 for (int j = 0; j < itfs.size(); j++) {
-                    if (! all.contains(itfs.get(j))) {
-                        throw new ConfigurationException("The specification " + itfs.get(j) + " is not implemented by " + metadata.getAttribute("classname"));
+                    if (! all.contains(itfs.get(j)) && ! parent.equals((String) itfs.get(i))) {
+                        desc.getFactory().getLogger().log(Logger.WARNING, "The specification " + itfs.get(j) + " is not implemented by " + metadata.getAttribute("classname") + 
+                                " it might be a superclass.");
                     }
                 }
                 all = new HashSet(itfs);
