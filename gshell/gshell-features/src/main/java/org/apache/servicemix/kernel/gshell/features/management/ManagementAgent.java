@@ -118,9 +118,7 @@ public class ManagementAgent implements DisposableBean {
             if (forceRegistration) {
                 mbeanServer.unregisterMBean(name);
                 instance = mbeanServer.registerMBean(obj, name);
-            } else {
-                throw e;
-            }
+            } 
         } catch (NotCompliantMBeanException e) {
             throw e;
         }
