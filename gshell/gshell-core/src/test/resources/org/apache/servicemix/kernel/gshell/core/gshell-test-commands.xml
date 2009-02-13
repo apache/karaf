@@ -128,67 +128,17 @@
     </gshell:command-bundle>
 
     <gshell:command-bundle>
-        <gshell:command name="ssh">
-            <gshell:action class="org.apache.geronimo.gshell.commands.ssh.SshAction"/>
-        </gshell:command>
-
-        <gshell:command name="sshd">
-            <gshell:action class="org.apache.geronimo.gshell.commands.ssh.SshServerAction"/>
-        </gshell:command>
-    </gshell:command-bundle>
-
-    <gshell:command-bundle>
-        <gshell:command name="exec">
-            <gshell:action class="org.apache.geronimo.gshell.commands.shell.ExecuteAction"/>
-        </gshell:command>
-
-        <gshell:command name="java">
-            <gshell:action class="org.apache.geronimo.gshell.commands.shell.JavaAction"/>
-        </gshell:command>
-
-        <gshell:command name="sleep">
-            <gshell:action class="org.apache.geronimo.gshell.commands.shell.SleepAction"/>
-        </gshell:command>
-
-        <gshell:command name="date">
-            <gshell:action class="org.apache.geronimo.gshell.commands.shell.DateAction"/>
-        </gshell:command>
-
-        <gshell:command name="edit">
-            <gshell:action class="org.apache.geronimo.gshell.commands.shell.EditAction">
-                <property name="fileSystemAccess" ref="fileSystemAccess"/>
-            </gshell:action>
+        <gshell:command name="vfs/ls">
+            <gshell:action class="org.apache.geronimo.gshell.commands.file.ListDirectoryAction" parent="vfsCommandActionTemplate"/>
             <gshell:completers>
                 <ref bean="fileObjectNameCompleter"/>
                 <null/>
             </gshell:completers>
         </gshell:command>
-
-        <gshell:command name="find">
-            <gshell:action class="org.apache.geronimo.gshell.commands.shell.FindAction">
-                <property name="fileSystemAccess" ref="fileSystemAccess"/>
-            </gshell:action>
-            <gshell:completers>
-                <ref bean="fileObjectNameCompleter"/>
-                <null/>
-            </gshell:completers>
-        </gshell:command>
-    </gshell:command-bundle>
+   </gshell:command-bundle>
 
     <gshell:command-bundle>
-        <gshell:command name="hostname">
-            <gshell:action class="org.apache.geronimo.gshell.commands.network.HostnameAction"/>
-        </gshell:command>
-    </gshell:command-bundle>
-
-    <gshell:command-bundle>
-        <gshell:link name="print" target="echo"/>
-
-        <gshell:command name="printf">
-            <gshell:action class="org.apache.geronimo.gshell.commands.text.PrintfAction"/>
-        </gshell:command>
-
-        <gshell:command name="cat">
+        <gshell:command name="optional/cat">
             <gshell:action class="org.apache.geronimo.gshell.commands.text.CatAction">
                 <property name="fileSystemAccess" ref="fileSystemAccess"/>
             </gshell:action>
@@ -198,65 +148,10 @@
             </gshell:completers>
         </gshell:command>
 
-        <gshell:command name="grep">
-            <gshell:action class="org.apache.geronimo.gshell.commands.text.GrepAction"/>
-        </gshell:command>
-    </gshell:command-bundle>
-
-    <gshell:command-bundle>
-        <gshell:command name="cd">
-            <gshell:action class="org.apache.geronimo.gshell.commands.file.ChangeDirectoryAction" parent="vfsCommandActionTemplate"/>
-            <gshell:completers>
-                <ref bean="fileObjectNameCompleter"/>
-                <null/>
-            </gshell:completers>
-        </gshell:command>
-
-        <gshell:command name="pwd" type="stateless">
-            <gshell:action class="org.apache.geronimo.gshell.commands.file.CurrentDirectoryAction" parent="vfsCommandActionTemplate"/>
-        </gshell:command>
-
-        <gshell:command name="ls">
-            <gshell:action class="org.apache.geronimo.gshell.commands.file.ListDirectoryAction" parent="vfsCommandActionTemplate"/>
-            <gshell:completers>
-                <ref bean="fileObjectNameCompleter"/>
-                <null/>
-            </gshell:completers>
-        </gshell:command>
-
-        <gshell:link name="dir" target="ls"/>
-
-        <gshell:command name="cp">
-            <gshell:action class="org.apache.geronimo.gshell.commands.file.CopyAction" parent="vfsCommandActionTemplate"/>
-            <gshell:completers>
-                <ref bean="fileObjectNameCompleter"/>
-                <ref bean="fileObjectNameCompleter"/>
-                <null/>
-            </gshell:completers>
-        </gshell:command>
-
-        <gshell:link name="copy" target="cp"/>
-
-        <gshell:command name="rm">
-            <gshell:action class="org.apache.geronimo.gshell.commands.file.RemoveAction" parent="vfsCommandActionTemplate"/>
-            <gshell:completers>
-                <ref bean="fileObjectNameCompleter"/>
-                <null/>
-            </gshell:completers>
-        </gshell:command>
-
-        <gshell:link name="del" target="rm"/>
-
-        <gshell:command name="fileinfo">
-            <gshell:action class="org.apache.geronimo.gshell.commands.file.FileInfoAction" parent="vfsCommandActionTemplate"/>
-            <gshell:completers>
-                <ref bean="fileObjectNameCompleter"/>
-                <null/>
-            </gshell:completers>
-        </gshell:command>
-
-        <gshell:command name="touch">
-            <gshell:action class="org.apache.geronimo.gshell.commands.file.TouchAction" parent="vfsCommandActionTemplate"/>
+        <gshell:command name="optional/find">
+            <gshell:action class="org.apache.geronimo.gshell.commands.shell.FindAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </gshell:action>
             <gshell:completers>
                 <ref bean="fileObjectNameCompleter"/>
                 <null/>
