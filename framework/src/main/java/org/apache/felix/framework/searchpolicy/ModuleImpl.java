@@ -1270,18 +1270,31 @@ public class ModuleImpl implements IModule
         {
             for (int i = 0; !result && (i < m_bootPkgs.length); i++)
             {
-                // A wildcarded boot delegation package will be in the form of "foo.",
-                // so if the package is wildcarded do a startsWith() to check for
-                // subpackages or a regionMatches() to check for an exact match
-                // without the trailing ".". If the package is not wildcarded,
-                // then simply do an equals() test to see if the request should be
-                // delegated to the parent class loader.
-                if ((m_bootPkgWildcards[i] &&
-                    (pkgName.startsWith(m_bootPkgs[i]) ||
-                    pkgName.regionMatches(0, m_bootPkgs[i], 0, m_bootPkgs[i].length() - 1)))
-                    || (!m_bootPkgWildcards[i] && m_bootPkgs[i].equals(pkgName)))
+                // Check if the boot package is wildcarded.
+                if (m_bootPkgWildcards[i])
                 {
-                    result = true;
+                    // A wildcarded boot package will be in the form "foo.",
+                    // so a matching subpackage will start with "foo.", e.g.,
+                    // "foo.bar".
+                    if (pkgName.startsWith(m_bootPkgs[i]))
+                    {
+                        return true;
+                    }
+                    // If we have "foo." as our wildcarded boot package, then
+                    // the package "foo" should be delegated too, but we don't
+                    // want to delegate "foobar", so we check to make sure the
+                    // package names are the same length and then perform a
+                    // region match to ignore the "." on "foo.".
+                    else if ((pkgName.length() == m_bootPkgs[i].length() - 1)
+                        && pkgName.regionMatches(0, m_bootPkgs[i], 0, m_bootPkgs[i].length() - 1))
+                    {
+                        return true;
+                    }
+                }
+                // If not wildcarded, then check for an exact match.
+                else if (m_bootPkgs[i].equals(pkgName))
+                {
+                    return true;
                 }
             }
         }
