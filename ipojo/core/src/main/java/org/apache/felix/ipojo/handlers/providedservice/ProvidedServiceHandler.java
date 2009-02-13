@@ -28,6 +28,7 @@ import java.util.Set;
 import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.HandlerFactory;
 import org.apache.felix.ipojo.InstanceManager;
+import org.apache.felix.ipojo.Pojo;
 import org.apache.felix.ipojo.PrimitiveHandler;
 import org.apache.felix.ipojo.architecture.ComponentTypeDescription;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
@@ -533,9 +534,11 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
             if (serviceSpecificationStr != null) {
                 List itfs = ParseUtils.parseArraysAsList(serviceSpecificationStr);
                 for (int j = 0; j < itfs.size(); j++) {
-                    if (! all.contains(itfs.get(j)) && ! parent.equals((String) itfs.get(i))) {
-                        desc.getFactory().getLogger().log(Logger.WARNING, "The specification " + itfs.get(j) + " is not implemented by " + metadata.getAttribute("classname") + 
-                                " it might be a superclass.");
+                    if (! all.contains(itfs.get(j))) {
+                        if (parent == null || (parent != null && ! parent.equals((String) itfs.get(j)))) {
+                            desc.getFactory().getLogger().log(Logger.WARNING, "The specification " + itfs.get(j) + " is not implemented by " + metadata.getAttribute("classname") + 
+                                " it might be a superclass or the class itself.");
+                        }
                     }
                 }
                 all = new HashSet(itfs);
@@ -547,6 +550,7 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
 
             StringBuffer specs = null;
             Set set = new HashSet(all);
+            set.remove(Pojo.class.getName()); // Remove POJO.
             Iterator iterator = set.iterator(); 
             while (iterator.hasNext()) {
                 String spec = (String) iterator.next();

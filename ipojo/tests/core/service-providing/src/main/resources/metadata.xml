@@ -136,4 +136,27 @@
 		name="PS-PI3" architecture="true">
 		<provides />
 	</component>
+	
+	<!-- Concrete and abstract class -->
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessParentImplementation"
+		name="PS-PI4" architecture="true">
+		<provides specifications="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessParentImplementation"/>
+	</component>
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessImplementation2"
+		name="PS-PI5" architecture="true">
+		<provides specifications="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessParentImplementation"/>
+	</component>
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessImplementation4"
+		name="PS-PI6" architecture="true">
+		<provides specifications="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessParentImplementation"/>
+	</component>
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessImplementation3"
+		name="PS-PI7" architecture="true">
+		<provides specifications="[org.apache.felix.ipojo.test.scenarios.component.inherited.ProcessParentImplementation, 
+					org.apache.felix.ipojo.test.scenarios.ps.service.FooService]"/>
+	</component>
 </ipojo>

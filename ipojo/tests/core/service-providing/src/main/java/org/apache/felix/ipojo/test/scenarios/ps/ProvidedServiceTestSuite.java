@@ -36,6 +36,7 @@ public class ProvidedServiceTestSuite extends TestSuite {
 		ots.addTestSuite(DynamicPropsReconfiguration.class);
 		ots.addTestSuite(InheritedTest.class);
 		ots.addTestSuite(ProvidedServiceArchitectureTest.class);
+		ots.addTestSuite(ClassTest.class);
 		return ots;
 	}
 
