@@ -24,7 +24,9 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLStreamHandler;
 import java.security.ProtectionDomain;
 import java.security.SecureClassLoader;
 import java.util.ArrayList;
@@ -62,6 +64,7 @@ public class ModuleImpl implements IModule
     private final String m_id;
     private final IContent m_content;
     private final Map m_headerMap;
+    private final URLStreamHandler m_streamHandler;
 
     private final String m_manifestVersion;
     private final Version m_version;
@@ -82,7 +85,6 @@ public class ModuleImpl implements IModule
 
     private IContent[] m_contentPath;
     private IContent[] m_fragmentContents = null;
-    private IURLPolicy m_urlPolicy = null;
     private ModuleClassLoader m_classLoader;
     private ProtectionDomain m_protectionDomain = null;
     private static SecureAction m_secureAction = new SecureAction();
@@ -99,7 +101,8 @@ public class ModuleImpl implements IModule
 
     public ModuleImpl(
         Logger logger, Map configMap, FelixResolver resolver,
-        Bundle bundle, String id, Map headerMap, IContent content)
+        Bundle bundle, String id, Map headerMap, IContent content,
+        URLStreamHandler streamHandler)
         throws BundleException
     {
         m_logger = logger;
@@ -109,6 +112,7 @@ public class ModuleImpl implements IModule
         m_id = id;
         m_headerMap = headerMap;
         m_content = content;
+        m_streamHandler = streamHandler;
 
         // We need to special case the system bundle module, which does not
         // have a content.
@@ -600,7 +604,7 @@ public class ModuleImpl implements IModule
         if (name.equals("/"))
         {
             // Just pick a class path index since it doesn't really matter.
-            url = getURLPolicy().createURL(1, name);
+            url = createURL(1, name);
         }
         else if (name.startsWith("/"))
         {
@@ -615,7 +619,7 @@ public class ModuleImpl implements IModule
         {
             if (contentPath[i].hasEntry(name))
             {
-                url = getURLPolicy().createURL(i + 1, name);
+                url = createURL(i + 1, name);
             }
         }
 
@@ -803,7 +807,7 @@ public class ModuleImpl implements IModule
         {
             for (int i = 0; i < contentPath.length; i++)
             {
-                v.addElement(getURLPolicy().createURL(i + 1, name));
+                v.addElement(createURL(i + 1, name));
             }
         }
         else
@@ -823,7 +827,7 @@ public class ModuleImpl implements IModule
                     // that we can differentiate between module content URLs
                     // (where the path will start with 0) and module class
                     // path URLs.
-                    v.addElement(getURLPolicy().createURL(i + 1, name));
+                    v.addElement(createURL(i + 1, name));
                 }
             }
         }
@@ -841,7 +845,7 @@ public class ModuleImpl implements IModule
         // the root of the bundle according to the spec.
         if (name.equals("/"))
         {
-            url = getURLPolicy().createURL(0, "/");
+            url = createURL(0, "/");
         }
 
         if (url == null)
@@ -858,7 +862,7 @@ public class ModuleImpl implements IModule
                 // Module content URLs start with 0, whereas module
                 // class path URLs start with the index into the class
                 // path + 1.
-                url = getURLPolicy().createURL(0, name);
+                url = createURL(0, name);
             }
         }
 
@@ -890,6 +894,32 @@ public class ModuleImpl implements IModule
             return m_content.getEntryAsStream(urlPath);
         }
         return getContentPath()[index - 1].getEntryAsStream(urlPath);
+    }
+
+    private URL createURL(int port, String path)
+    {
+         // Add a slash if there is one already, otherwise
+         // the is no slash separating the host from the file
+         // in the resulting URL.
+         if (!path.startsWith("/"))
+         {
+             path = "/" + path;
+         }
+
+         try
+         {
+             return m_secureAction.createURL(
+                 FelixConstants.BUNDLE_URL_PROTOCOL,
+                 m_id, port, path, m_streamHandler);
+         }
+         catch (MalformedURLException ex)
+         {
+             m_logger.log(
+                 Logger.LOG_ERROR,
+                 "Unable to create resource URL.",
+                 ex);
+         }
+         return null;
     }
 
     //
@@ -1084,16 +1114,6 @@ public class ModuleImpl implements IModule
             m_fragmentContents[i].close();
         }
         m_classLoader = null;
-    }
-
-    public synchronized void setURLPolicy(IURLPolicy urlPolicy)
-    {
-        m_urlPolicy = urlPolicy;
-    }
-
-    public synchronized IURLPolicy getURLPolicy()
-    {
-        return m_urlPolicy;
     }
 
     public synchronized void setSecurityContext(Object securityContext)

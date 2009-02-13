@@ -51,8 +51,6 @@ public class Resolver
 
     // Returns a map of resolved bundles where the key is the module
     // and the value is an array of wires.
-    // TODO: RESOLVER - The caller must ensure this is not called currently;
-    //       this may not be important if no state is shared.
     public Map resolve(ResolverState state, IModule rootModule) throws ResolveException
     {
         // If the module is already resolved, then we can just return.

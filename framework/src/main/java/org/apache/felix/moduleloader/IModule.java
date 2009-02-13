@@ -28,8 +28,6 @@ import org.osgi.framework.Bundle;
 
 public interface IModule
 {
-    void setURLPolicy(IURLPolicy urlPolicy);
-    IURLPolicy getURLPolicy();
     void setSecurityContext(Object securityContext);
     Object getSecurityContext();
 

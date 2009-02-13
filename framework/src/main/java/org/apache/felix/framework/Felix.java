@@ -4104,7 +4104,7 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
     {
         synchronized (m_bundleLock)
         {
-            bundle.setState(state);
+            bundle.__setState(state);
             m_bundleLock.notifyAll();
         }
     }

@@ -27,7 +27,6 @@ import java.util.*;
 import org.apache.felix.framework.cache.BundleArchive;
 import org.apache.felix.framework.ext.SecurityProvider;
 import org.apache.felix.framework.searchpolicy.ModuleImpl;
-import org.apache.felix.framework.searchpolicy.URLPolicyImpl;
 import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.*;
 
@@ -586,7 +585,8 @@ class BundleImpl implements Bundle
         return m_state;
     }
 
-    void setState(int i)
+    // This method should not be called directly.
+    void __setState(int i)
     {
         m_state = i;
     }
@@ -940,6 +940,7 @@ class BundleImpl implements Bundle
         Map headerMap = m_archive.getRevision(
             m_archive.getRevisionCount() - 1).getManifestHeader();
 
+        // Create the module instance.
         final int revision = m_archive.getRevisionCount() - 1;
         ModuleImpl module = new ModuleImpl(
             getFramework().getLogger(),
@@ -948,7 +949,8 @@ class BundleImpl implements Bundle
             this,
             Long.toString(getBundleId()) + "." + Integer.toString(revision),
             headerMap,
-            m_archive.getRevision(revision).getContent());
+            m_archive.getRevision(revision).getContent(),
+            getFramework().getBundleStreamHandler());
 
         // Verify that the bundle symbolic name + version is unique.
         if (module.getManifestVersion().equals("2"))
@@ -973,15 +975,6 @@ class BundleImpl implements Bundle
                 }
             }
         }
-
-        // Set the module's URL policy.
-// TODO: REFACTOR - Pass into constructor?
-        module.setURLPolicy(
-// TODO: REFACTOR - SUCKS NEEDING URL POLICY PER MODULE.
-            new URLPolicyImpl(
-                getFramework().getLogger(),
-                getFramework().getBundleStreamHandler(),
-                module));
 
         return module;
     }

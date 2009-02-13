@@ -615,7 +615,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
     {
         ExtensionManagerModule(Felix felix) throws BundleException
         {
-            super(m_logger, null, null, felix, "0", null, null);
+            super(m_logger, null, null, felix, "0", null, null, null);
         }
 
         public Map getHeaders()
@@ -700,16 +700,6 @@ class ExtensionManager extends URLStreamHandler implements IContent
         public IContent getContent()
         {
             return ExtensionManager.this;
-        }
-
-        public synchronized void setURLPolicy(IURLPolicy urlPolicy)
-        {
-            m_urlPolicy = urlPolicy;
-        }
-
-        public synchronized IURLPolicy getURLPolicy()
-        {
-            return m_urlPolicy;
         }
 
         public URL getEntry(String name)
