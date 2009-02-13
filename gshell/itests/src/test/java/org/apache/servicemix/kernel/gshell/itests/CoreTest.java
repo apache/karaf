@@ -40,7 +40,8 @@ public class CoreTest extends AbstractIntegrationTest {
             getBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.oro"),
             getBundle("org.apache.servicemix.kernel.jaas", "org.apache.servicemix.kernel.jaas.config"),
             getBundle("com.google.code.sshd", "sshd"),
-            getBundle("org.apache.servicemix.kernel.gshell", "org.apache.servicemix.kernel.gshell.core")
+            getBundle("org.apache.servicemix.kernel.gshell", "org.apache.servicemix.kernel.gshell.core"),
+            getBundle("org.apache.servicemix.kernel.gshell", "org.apache.servicemix.kernel.gshell.osgi")
         };
     }
 
@@ -77,9 +78,22 @@ public class CoreTest extends AbstractIntegrationTest {
 
     public void testCommandGroup() throws Exception {
         Shell shell = getOsgiService(Shell.class);
-        shell.execute("vfs");
+        shell.execute("osgi");
         shell.execute("help");
         shell.execute("..");
     }
+
+    /**
+     * TODO: This test seems to fail, there must be a timing issue somewhere
+     *
+    public void testCommandGroupAfterInstall() throws Exception {
+        Bundle b = installBundle("org.apache.servicemix.kernel.gshell", "org.apache.servicemix.kernel.gshell.log", null, "jar");
+        Shell shell = getOsgiService(Shell.class);
+        shell.execute("log");
+        shell.execute("help");
+        shell.execute("..");
+    }
+     */
+
 
 }
