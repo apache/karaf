@@ -24,6 +24,10 @@ import org.osgi.framework.Bundle;
 
 public class CoreTest extends AbstractIntegrationTest {
 
+    static {
+        System.setProperty("jline.terminal", "org.apache.geronimo.gshell.terminal.AutoDetectedTerminal");
+    }
+
     @Override
     protected String getManifestLocation() {
         return "classpath:org/apache/servicemix/kernel/gshell/itests/MANIFEST.MF";
