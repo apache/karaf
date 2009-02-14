@@ -87,11 +87,11 @@
         <geronimo.annotation.version>1.1.1</geronimo.annotation.version>
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
         <gshell.version>1.0-alpha-2-SNAPSHOT</gshell.version>
-        <jaxp.ri.version>1.4.2_1-SNAPSHOT</jaxp.ri.version>
-        <junit.version>3.8.2_1-SNAPSHOT</junit.version>
+        <jaxp.ri.version>1.4.2_1</jaxp.ri.version>
+        <junit.version>3.8.2_1</junit.version>
         <jline.version>0.9.94_1</jline.version>
         <log4j.version>1.2.14</log4j.version>
-        <mina.version>1.1.7_1-SNAPSHOT</mina.version>
+        <mina.version>1.1.7_1</mina.version>
         <oro.version>2.0.8_1</oro.version>
         <pax.logging.version>1.2.1</pax.logging.version>
         <pax.url.version>0.3.3</pax.url.version>
