@@ -17,7 +17,16 @@ package org.apache.servicemix.kernel.filemonitor;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,19 +34,19 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Scanner
  * <p/>
- * Utility for scanning a directory for added, removed and changed
- * files and reporting these events via registered Listeners.
+ * Utility for scanning a directory for added, removed and changed files and
+ * reporting these events via registered Listeners.
  * <p/>
  * From the <a href="http://jetty.codehaus.org/">Jetty Util project</a>
- *
+ * 
  * @version $Revision: 1.1 $
  */
 public class Scanner {
-    
+
     private static Log logger = LogFactory.getLog(Scanner.class);
     private long _scanInterval;
     private List<Listener> _listeners = Collections.synchronizedList(new ArrayList<Listener>());
-    private Map<String, Long> _prevScan = Collections.emptyMap();
+    private Map<String, Long> _prevScan = new HashMap<String, Long>();
     private FilenameFilter _filter;
     private List<File> _scanDirs;
     private volatile boolean _running = false;
@@ -73,7 +82,7 @@ public class Scanner {
 
     /**
      * Get the scan interval
-     *
+     * 
      * @return interval between scans in millis
      */
     public long getScanInterval() {
@@ -82,7 +91,7 @@ public class Scanner {
 
     /**
      * Set the scan interval
-     *
+     * 
      * @param scanInterval pause between scans in millis
      */
     public synchronized void setScanInterval(long scanInterval) {
@@ -101,7 +110,7 @@ public class Scanner {
 
     /**
      * Set the location of the directory to scan.
-     *
+     * 
      * @param dir
      * @deprecated use setScanDirs(List dirs) instead
      */
@@ -112,12 +121,12 @@ public class Scanner {
 
     /**
      * Get the location of the directory to scan
-     *
+     * 
      * @return
      * @deprecated use getScanDirs() instead
      */
     public File getScanDir() {
-        return (_scanDirs == null ? null : (File) _scanDirs.get(0));
+        return (_scanDirs == null ? null : (File)_scanDirs.get(0));
     }
 
     public void setScanDirs(List<File> dirs) {
@@ -129,9 +138,9 @@ public class Scanner {
     }
 
     /**
-     * Apply a filter to files found in the scan directory.
-     * Only files matching the filter will be reported as added/changed/removed.
-     *
+     * Apply a filter to files found in the scan directory. Only files matching
+     * the filter will be reported as added/changed/removed.
+     * 
      * @param filter
      */
     public void setFilenameFilter(FilenameFilter filter) {
@@ -140,7 +149,7 @@ public class Scanner {
 
     /**
      * Get any filter applied to files in the scan dir.
-     *
+     * 
      * @return
      */
     public FilenameFilter getFilenameFilter() {
@@ -148,11 +157,10 @@ public class Scanner {
     }
 
     /**
-     * Whether or not an initial scan will report all files as being
-     * added.
-     *
+     * Whether or not an initial scan will report all files as being added.
+     * 
      * @param reportExisting if true, all files found on initial scan will be
-     *                       reported as being added, otherwise not
+     *            reported as being added, otherwise not
      */
     public void setReportExistingFilesOnStartup(boolean reportExisting) {
         this._reportExisting = reportExisting;
@@ -160,7 +168,7 @@ public class Scanner {
 
     /**
      * Add an added/removed/changed listener
-     *
+     * 
      * @param listener
      */
     public synchronized void addListener(Listener listener) {
@@ -173,7 +181,7 @@ public class Scanner {
 
     /**
      * Remove a registered listener
-     *
+     * 
      * @param listener the Listener to be removed
      */
     public synchronized void removeListener(Listener listener) {
@@ -196,9 +204,8 @@ public class Scanner {
         if (_reportExisting) {
             // if files exist at startup, report them
             scan();
-        }
-        else {
-            //just register the list of existing files and only report changes
+        } else {
+            // just register the list of existing files and only report changes
             _prevScan = scanFiles();
         }
 
@@ -257,7 +264,7 @@ public class Scanner {
 
     /**
      * Recursively scan all files in the designated directories.
-     *
+     * 
      * @return Map of name of file to last modified time
      */
     public Map<String, Long> scanFiles() {
@@ -268,7 +275,7 @@ public class Scanner {
         HashMap<String, Long> scanInfo = new HashMap<String, Long>();
         Iterator<File> itor = _scanDirs.iterator();
         while (itor.hasNext()) {
-            File dir = (File) itor.next();
+            File dir = (File)itor.next();
 
             if ((dir != null) && (dir.exists())) {
                 scanFile(dir, scanInfo);
@@ -280,9 +287,9 @@ public class Scanner {
 
     /**
      * Report the adds/changes/removes to the registered listeners
-     *
+     * 
      * @param currentScan the info from the most recent pass
-     * @param oldScan     info from the previous pass
+     * @param oldScan info from the previous pass
      */
     public void reportDifferences(Map<String, Long> currentScan, Map<String, Long> oldScan) {
         List<String> bulkChanges = new ArrayList<String>();
@@ -295,14 +302,12 @@ public class Scanner {
                 logger.debug("File added: " + entry.getKey());
                 reportAddition(entry.getKey());
                 bulkChanges.add(entry.getKey());
-            }
-            else if (!oldScan.get(entry.getKey()).equals(entry.getValue())) {
+            } else if (!oldScan.get(entry.getKey()).equals(entry.getValue())) {
                 logger.debug("File changed: " + entry.getKey());
                 reportChange(entry.getKey());
                 oldScanKeys.remove(entry.getKey());
                 bulkChanges.add(entry.getKey());
-            }
-            else {
+            } else {
                 oldScanKeys.remove(entry.getKey());
             }
         }
@@ -324,10 +329,10 @@ public class Scanner {
     }
 
     /**
-     * Get last modified time on a single file or recurse if
-     * the file is a directory.
-     *
-     * @param f           file or directory
+     * Get last modified time on a single file or recurse if the file is a
+     * directory.
+     * 
+     * @param f file or directory
      * @param scanInfoMap map of filenames to last modified times
      */
     private void scanFile(File f, Map<String, Long> scanInfoMap) {
@@ -337,27 +342,26 @@ public class Scanner {
             }
 
             if (f.isFile()) {
-                if ((_filter == null) || ((_filter != null) && _filter.accept(f.getParentFile(), f.getName()))) {
+                if ((_filter == null)
+                    || ((_filter != null) && _filter.accept(f.getParentFile(), f.getName()))) {
                     String name = f.getCanonicalPath();
                     long lastModified = f.lastModified();
                     scanInfoMap.put(name, new Long(lastModified));
                 }
-            }
-            else if (f.isDirectory()) {
+            } else if (f.isDirectory()) {
                 File[] files = f.listFiles();
                 for (int i = 0; i < files.length; i++) {
                     scanFile(files[i], scanInfoMap);
                 }
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             logger.warn("Error scanning watched files", e);
         }
     }
 
     /**
      * Report a file addition to the registered FileAddedListeners
-     *
+     * 
      * @param filename
      */
     private void reportAddition(String filename) {
@@ -366,13 +370,11 @@ public class Scanner {
             try {
                 Listener l = itor.next();
                 if (l instanceof DiscreteListener) {
-                    ((DiscreteListener) l).fileAdded(filename);
+                    ((DiscreteListener)l).fileAdded(filename);
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 logger.warn(e);
-            }
-            catch (Error e) {
+            } catch (Error e) {
                 logger.warn(e);
             }
         }
@@ -380,7 +382,7 @@ public class Scanner {
 
     /**
      * Report a file removal to the FileRemovedListeners
-     *
+     * 
      * @param filename
      */
     private void reportRemoval(String filename) {
@@ -389,13 +391,11 @@ public class Scanner {
             try {
                 Listener l = itor.next();
                 if (l instanceof DiscreteListener) {
-                    ((DiscreteListener) l).fileRemoved(filename);
+                    ((DiscreteListener)l).fileRemoved(filename);
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 logger.warn(e);
-            }
-            catch (Error e) {
+            } catch (Error e) {
                 logger.warn(e);
             }
         }
@@ -403,7 +403,7 @@ public class Scanner {
 
     /**
      * Report a file change to the FileChangedListeners
-     *
+     * 
      * @param filename
      */
     private void reportChange(String filename) {
@@ -412,13 +412,11 @@ public class Scanner {
             try {
                 Listener l = itor.next();
                 if (l instanceof DiscreteListener) {
-                    ((DiscreteListener) l).fileChanged(filename);
+                    ((DiscreteListener)l).fileChanged(filename);
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 logger.warn(e);
-            }
-            catch (Error e) {
+            } catch (Error e) {
                 logger.warn(e);
             }
         }
@@ -430,16 +428,28 @@ public class Scanner {
             try {
                 Listener l = itor.next();
                 if (l instanceof BulkListener) {
-                    ((BulkListener) l).filesChanged(filenames);
+                    ((BulkListener)l).filesChanged(filenames);
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 logger.warn(e);
-            }
-            catch (Error e) {
+            } catch (Error e) {
                 logger.warn(e);
             }
         }
     }
-    
+
+    protected Map<String, Long> getLastScanResults() {
+        Map<String, Long> result = new HashMap<String, Long>();
+        synchronized (_prevScan) {
+            result.putAll(_prevScan);
+        }
+        return result;
+    }
+
+    protected void setLastScanResults(Map<String, Long> results) {
+        synchronized (_prevScan) {
+            _prevScan.clear();
+            _prevScan.putAll(results);
+        }
+    }
 }

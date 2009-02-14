@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -30,21 +32,26 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedServiceFactory;
 import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.service.prefs.PreferencesService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
- * Inspired by <a href="http://www.aqute.biz/Code/FileInstall">FileInstall</a> by Peter Kriens.
+ * Inspired by <a href="http://www.aqute.biz/Code/FileInstall">FileInstall</a>
+ * by Peter Kriens.
  * 
  * @version $Revision: 1.1 $
  */
 public class FileMonitorActivator implements BundleActivator, ManagedServiceFactory {
+    private static final Log LOGGER = LogFactory.getLog(FileMonitorActivator.class);
+
     private BundleContext context;
     private ServiceTracker packageAdminTracker;
     private ServiceTracker configurationAdminTracker;
+    private ServiceTracker preferenceServiceTracker;
     private Map<String, FileMonitor> fileMonitors = new HashMap<String, FileMonitor>();
 
     // BundleActivator interface
-    //-------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     public void start(BundleContext context) throws Exception {
         this.context = context;
 
@@ -58,13 +65,12 @@ public class FileMonitorActivator implements BundleActivator, ManagedServiceFact
         configurationAdminTracker = new ServiceTracker(context, ConfigurationAdmin.class.getName(), null);
         configurationAdminTracker.open();
 
+        preferenceServiceTracker = new ServiceTracker(context, PreferencesService.class.getName(), null);
+        preferenceServiceTracker.open();
+
         Hashtable initialProperties = new Hashtable();
-        setPropertiesFromContext(initialProperties,
-                FileMonitor.CONFIG_DIR,
-                FileMonitor.DEPLOY_DIR,
-                FileMonitor.GENERATED_JAR_DIR,
-                FileMonitor.SCAN_INTERVAL
-        );
+        setPropertiesFromContext(initialProperties, FileMonitor.CONFIG_DIR, FileMonitor.DEPLOY_DIR,
+                                 FileMonitor.GENERATED_JAR_DIR, FileMonitor.SCAN_INTERVAL);
         updated("initialPid", initialProperties);
     }
 
@@ -72,27 +78,28 @@ public class FileMonitorActivator implements BundleActivator, ManagedServiceFact
         Collection<FileMonitor> fileMonitors = this.fileMonitors.values();
         for (FileMonitor monitor : fileMonitors) {
             try {
+                // stop the monitor
                 monitor.stop();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }
         this.fileMonitors.clear();
 
+        preferenceServiceTracker.close();
         configurationAdminTracker.close();
         packageAdminTracker.close();
     }
 
     // ManagedServiceFactory interface
-    //-------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     public String getName() {
         return "org.apache.servicemix.kernel.filemonitor.FileMonitor";
     }
 
     public void updated(String pid, Dictionary properties) throws ConfigurationException {
         deleted(pid);
-        FileMonitor monitor = new FileMonitor(this, properties);
+        FileMonitor monitor = new FileMonitor(this, properties, pid);
         fileMonitors.put(pid, monitor);
         monitor.start();
     }
@@ -105,7 +112,7 @@ public class FileMonitorActivator implements BundleActivator, ManagedServiceFact
     }
 
     // Properties
-    //-------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     public BundleContext getContext() {
         return context;
     }
@@ -119,11 +126,15 @@ public class FileMonitorActivator implements BundleActivator, ManagedServiceFact
     }
 
     public ConfigurationAdmin getConfigurationAdmin() {
-        return (ConfigurationAdmin) getConfigurationAdminTracker().getService();
+        return (ConfigurationAdmin)getConfigurationAdminTracker().getService();
+    }
+
+    public ServiceTracker getPreferenceServiceTracker() {
+        return preferenceServiceTracker;
     }
 
     // Implementation methods
-    //-------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     protected void setPropertiesFromContext(Hashtable properties, String... keys) {
         for (String key : keys) {
             Object value = context.getProperty(key);

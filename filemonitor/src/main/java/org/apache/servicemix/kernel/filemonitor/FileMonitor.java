@@ -25,51 +25,56 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.Enumeration;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.BundleListener;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.BundleListener;
-import org.osgi.framework.BundleEvent;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.service.prefs.Preferences;
+import org.osgi.service.prefs.PreferencesService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
- * Watches a deploy directory for files that are added, updated or removed then processing them.
- * Currently we support OSGi bundles, OSGi configuration files and expanded directories of OSGi bundles.
- *
+ * Watches a deploy directory for files that are added, updated or removed then
+ * processing them. Currently we support OSGi bundles, OSGi configuration files
+ * and expanded directories of OSGi bundles.
+ * 
  * @version $Revision: 1.1 $
  */
 public class FileMonitor {
-	
+
     public final static String CONFIG_DIR = "org.apache.servicemix.filemonitor.configDir";
     public final static String DEPLOY_DIR = "org.apache.servicemix.filemonitor.monitorDir";
     public final static String GENERATED_JAR_DIR = "org.apache.servicemix.filemonitor.generatedJarDir";
     public final static String SCAN_INTERVAL = "org.apache.servicemix.filemonitor.scanInterval";
+    public final static String PREFERENCE_KEY = "FileMonitor";
 
     protected static final String ALIAS_KEY = "_alias_factory_pid";
 
@@ -90,6 +95,7 @@ public class FileMonitor {
     private ServiceListener deployerListener;
     private BundleListener bundleListener;
     private Executor executor;
+    private String pid;
 
     public FileMonitor() {
         String base = System.getProperty("servicemix.base", ".");
@@ -99,10 +105,11 @@ public class FileMonitor {
     }
 
     @SuppressWarnings("unchecked")
-    public FileMonitor(FileMonitorActivator activator, Dictionary properties) {
+    public FileMonitor(FileMonitorActivator activator, Dictionary properties, String pid) {
         this();
-        
+
         this.activator = activator;
+        this.pid = pid;
 
         File value = getFileValue(properties, CONFIG_DIR);
         if (value != null) {
@@ -137,14 +144,16 @@ public class FileMonitor {
         dirs.add(deployDir);
         scanner.setScanDirs(dirs);
         scanner.setScanInterval(scanInterval);
-
+        // load the scan results for this monitor
+        loadScannerState();
         scanner.addListener(new Scanner.BulkListener() {
             public void filesChanged(List<String> filenames) throws Exception {
                 onFilesChanged(filenames);
             }
         });
 
-        LOGGER.info("Starting to monitor the deploy directory: " + deployDir + " every " + scanInterval + " millis");
+        LOGGER.info("Starting to monitor the deploy directory: " + deployDir + " every " + scanInterval
+                    + " millis");
         if (configDir != null) {
             LOGGER.info("Config directory is at: " + configDir);
         }
@@ -158,11 +167,14 @@ public class FileMonitor {
     }
 
     public void stop() {
+        // first stop the scanner
         scanner.stop();
+        // load the scan results for this monitor
+        saveScannerState();
     }
 
     // Properties
-    //-------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     public BundleContext getContext() {
         return activator.getContext();
@@ -209,7 +221,7 @@ public class FileMonitor {
     }
 
     // Implementation methods
-    //-------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     protected synchronized void onFilesChanged(Collection<String> filenames) {
         bundlesToStart.clear();
@@ -225,8 +237,7 @@ public class FileMonitor {
                 if (isValidConfigFile(file)) {
                     if (file.exists()) {
                         updateConfiguration(file);
-                    }
-                    else {
+                    } else {
                         deleteConfiguration(file);
                     }
                     continue;
@@ -264,26 +275,24 @@ public class FileMonitor {
                     }
                     file = f;
                 } else {
-                	String transformedFile = artifactToBundle.get(filename);
-                	if (transformedFile != null) {
-                		file = new File(transformedFile);
-                		if (file.exists()) {
-                			file.delete();
-                		}
-                	}
+                    String transformedFile = artifactToBundle.get(filename);
+                    if (transformedFile != null) {
+                        file = new File(transformedFile);
+                        if (file.exists()) {
+                            file.delete();
+                        }
+                    }
                 }
 
                 // Handle final bundles
                 if (isValidArtifactFile(file)) {
                     if (file.exists()) {
                         deployBundle(file);
-                    }
-                    else {
+                    } else {
                         undeployBundle(file);
                     }
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 LOGGER.warn("Failed to process: " + file + ". Reason: " + e, e);
             }
         }
@@ -320,33 +329,35 @@ public class FileMonitor {
 
     private File transformArtifact(File file) throws Exception {
         // Check registered deployers
-        ServiceReference[] srvRefs = getContext().getAllServiceReferences(DeploymentListener.class.getName(), null);
-		if(srvRefs != null) {
-		    for(ServiceReference sr : srvRefs) {
-		    	try {
-		    		DeploymentListener deploymentListener = (DeploymentListener) getContext().getService(sr);
-		    		if (deploymentListener.canHandle(file)) {
-		    			File transformedFile = deploymentListener.handle(file, getGenerateDir());
-		    			artifactToBundle.put(file.getAbsolutePath(), transformedFile.getAbsolutePath());
-		    			return transformedFile;
-		    		}
-		    	} finally {
-		    		getContext().ungetService(sr);
-		    	}
-		    }
-		}
+        ServiceReference[] srvRefs = getContext().getAllServiceReferences(DeploymentListener.class.getName(),
+                                                                          null);
+        if (srvRefs != null) {
+            for (ServiceReference sr : srvRefs) {
+                try {
+                    DeploymentListener deploymentListener = (DeploymentListener)getContext().getService(sr);
+                    if (deploymentListener.canHandle(file)) {
+                        File transformedFile = deploymentListener.handle(file, getGenerateDir());
+                        artifactToBundle.put(file.getAbsolutePath(), transformedFile.getAbsolutePath());
+                        return transformedFile;
+                    }
+                } finally {
+                    getContext().ungetService(sr);
+                }
+            }
+        }
         JarFile jar = null;
         try {
             // Handle OSGi bundles with the default deployer
             if (file.getName().endsWith("txt") || file.getName().endsWith("xml")
-            		|| file.getName().endsWith("properties")) {
-            	// that's file type which is not supported as bundle and avoid exception in the log
+                || file.getName().endsWith("properties")) {
+                // that's file type which is not supported as bundle and avoid
+                // exception in the log
                 return null;
             }
             jar = new JarFile(file);
             Manifest m = jar.getManifest();
-            if (m.getMainAttributes().getValue(new Attributes.Name("Bundle-SymbolicName")) != null &&
-                m.getMainAttributes().getValue(new Attributes.Name("Bundle-Version")) != null) {
+            if (m.getMainAttributes().getValue(new Attributes.Name("Bundle-SymbolicName")) != null
+                && m.getMainAttributes().getValue(new Attributes.Name("Bundle-Version")) != null) {
                 return file;
             }
         } catch (Exception e) {
@@ -357,7 +368,7 @@ public class FileMonitor {
             }
         }
         return null;
-	}
+    }
 
     protected void deployBundle(File file) throws IOException, BundleException {
         LOGGER.info("Deploying: " + file.getCanonicalPath());
@@ -368,15 +379,13 @@ public class FileMonitor {
             Bundle bundle = getBundleForJarFile(file);
             if (bundle != null) {
                 bundlesToUpdate.add(bundle);
-            }
-            else {
+            } else {
                 bundle = getContext().installBundle(file.getCanonicalFile().toURI().toString(), in);
                 if (!isBundleFragment(bundle)) {
                     bundlesToStart.add(bundle);
                 }
             }
-        }
-        finally {
+        } finally {
             closeQuietly(in);
         }
     }
@@ -387,8 +396,7 @@ public class FileMonitor {
 
         if (bundle == null) {
             LOGGER.warn("Could not find Bundle for file: " + file.getCanonicalPath());
-        }
-        else {
+        } else {
             bundle.stop();
             bundle.uninstall();
         }
@@ -412,7 +420,7 @@ public class FileMonitor {
         return (p1 != null && p1.equalsIgnoreCase(p2));
     }
 
-    protected static String normalizeFilePath( String path ) {
+    protected static String normalizeFilePath(String path) {
         if (path != null) {
             path = path.replaceFirst("file:/*", "");
             path = path.replaceAll("[\\\\/]+", "/");
@@ -427,8 +435,7 @@ public class FileMonitor {
                 LOGGER.warn("No ConfigurationAdmin so cannot deploy configurations");
                 loggedConfigAdminWarning = true;
             }
-        }
-        else {
+        } else {
             Properties properties = new Properties();
             InputStream in = new FileInputStream(file);
             try {
@@ -447,8 +454,7 @@ public class FileMonitor {
                     config.setBundleLocation(null);
                 }
                 config.update(hashtable);
-            }
-            finally {
+            } finally {
                 closeQuietly(in);
             }
         }
@@ -456,9 +462,9 @@ public class FileMonitor {
 
     protected void interpolation(Properties properties) {
         for (Enumeration e = properties.propertyNames(); e.hasMoreElements();) {
-            String key = (String) e.nextElement();
+            String key = (String)e.nextElement();
             String val = properties.getProperty(key);
-            Matcher matcher = Pattern.compile( "\\$\\{([^}]+)\\}" ).matcher(val);
+            Matcher matcher = Pattern.compile("\\$\\{([^}]+)\\}").matcher(val);
             while (matcher.find()) {
                 String rep = System.getProperty(matcher.group(1));
                 if (rep != null) {
@@ -476,18 +482,19 @@ public class FileMonitor {
         config.delete();
     }
 
-    protected Configuration getConfiguration(String pid, String factoryPid) throws IOException, InvalidSyntaxException {
+    protected Configuration getConfiguration(String pid, String factoryPid) throws IOException,
+        InvalidSyntaxException {
         ConfigurationAdmin configurationAdmin = activator.getConfigurationAdmin();
         if (factoryPid != null) {
-            Configuration[] configs = configurationAdmin.listConfigurations("(|(" + ALIAS_KEY + "=" + pid + ")(.alias_factory_pid=" + factoryPid + "))");
+            Configuration[] configs = configurationAdmin.listConfigurations("(|(" + ALIAS_KEY + "=" + pid
+                                                                            + ")(.alias_factory_pid="
+                                                                            + factoryPid + "))");
             if (configs == null || configs.length == 0) {
                 return configurationAdmin.createFactoryConfiguration(pid, null);
-            }
-            else {
+            } else {
                 return configs[0];
             }
-        }
-        else {
+        } else {
             return configurationAdmin.getConfiguration(pid, null);
         }
     }
@@ -499,10 +506,9 @@ public class FileMonitor {
         if (n > 0) {
             String factoryPid = pid.substring(n + 1);
             pid = pid.substring(0, n);
-            return new String[]{pid, factoryPid};
-        }
-        else {
-            return new String[]{pid, null};
+            return new String[] {pid, factoryPid};
+        } else {
+            return new String[] {pid, null};
         }
     }
 
@@ -510,9 +516,8 @@ public class FileMonitor {
         ServiceTracker packageAdminTracker = activator.getPackageAdminTracker();
         if (packageAdminTracker != null) {
             try {
-                return (PackageAdmin) packageAdminTracker.waitForService(5000L);
-            }
-            catch (InterruptedException e) {
+                return (PackageAdmin)packageAdminTracker.waitForService(5000L);
+            } catch (InterruptedException e) {
                 // ignore
             }
         }
@@ -532,8 +537,7 @@ public class FileMonitor {
             try {
                 bundle.update();
                 LOGGER.info("Updated: " + bundle);
-            }
-            catch (BundleException e) {
+            } catch (BundleException e) {
                 LOGGER.warn("Failed to update bundle: " + bundle + ". Reason: " + e, e);
             }
         }
@@ -542,8 +546,7 @@ public class FileMonitor {
             try {
                 bundle.start();
                 LOGGER.info("Started: " + bundle);
-            }
-            catch (BundleException e) {
+            } catch (BundleException e) {
                 LOGGER.warn("Failed to start bundle: " + bundle + ". Reason: " + e, e);
                 rescheduleStart(bundle);
             }
@@ -586,8 +589,7 @@ public class FileMonitor {
                     bundle.start();
                     LOGGER.info("Pending bundle started: " + bundle);
                     success = true;
-                }
-                catch (BundleException e) {
+                } catch (BundleException e) {
                     LOGGER.info("Pending bundle not started: " + bundle);
                     pendingStartBundles.add(bundle);
                 }
@@ -612,8 +614,8 @@ public class FileMonitor {
     }
 
     /**
-     * Returns the root directory of the expanded OSGi bundle if the file is part of an expanded OSGi bundle
-     * or null if it is not
+     * Returns the root directory of the expanded OSGi bundle if the file is
+     * part of an expanded OSGi bundle or null if it is not
      */
     protected File getExpandedBundleRootDirectory(File file) throws IOException {
         File parent = file.getParentFile();
@@ -633,21 +635,22 @@ public class FileMonitor {
     }
 
     /**
-     * Returns true if the given directory is a valid child directory within the {@link #deployDir}
+     * Returns true if the given directory is a valid child directory within the
+     * {@link #deployDir}
      */
     protected boolean isValidBundleSourceDirectory(File dir) throws IOException {
         if (dir != null) {
             String parentPath = dir.getCanonicalPath();
             String rootPath = deployDir.getCanonicalPath();
             return !parentPath.equals(rootPath) && parentPath.startsWith(rootPath);
-        }
-        else {
+        } else {
             return false;
         }
     }
 
     /**
-     * Returns true if the given directory is a valid child file within the {@link #deployDir} or a child of {@link #generateDir}
+     * Returns true if the given directory is a valid child file within the
+     * {@link #deployDir} or a child of {@link #generateDir}
      */
     protected boolean isValidArtifactFile(File file) throws IOException {
         if (file != null) {
@@ -655,22 +658,21 @@ public class FileMonitor {
             String deployPath = deployDir.getCanonicalPath();
             String generatePath = generateDir.getCanonicalPath();
             return filePath.equals(deployPath) || filePath.startsWith(generatePath);
-        }
-        else {
+        } else {
             return false;
         }
     }
 
     /**
-     * Returns true if the given directory is a valid child file within the {@link #configDir}
+     * Returns true if the given directory is a valid child file within the
+     * {@link #configDir}
      */
     protected boolean isValidConfigFile(File file) throws IOException {
         if (file != null && file.getName().endsWith(".cfg")) {
             String filePath = file.getParentFile().getCanonicalPath();
             String configPath = configDir.getCanonicalPath();
             return filePath.equals(configPath);
-        }
-        else {
+        } else {
             return false;
         }
     }
@@ -691,9 +693,8 @@ public class FileMonitor {
     protected File getFileValue(Dictionary properties, String key) {
         Object value = properties.get(key);
         if (value instanceof File) {
-            return (File) value;
-        }
-        else if (value != null) {
+            return (File)value;
+        } else if (value != null) {
             return new File(value.toString());
         }
         return null;
@@ -703,9 +704,8 @@ public class FileMonitor {
     protected Long getLongValue(Dictionary properties, String key) {
         Object value = properties.get(key);
         if (value instanceof Long) {
-            return (Long) value;
-        }
-        else if (value != null) {
+            return (Long)value;
+        } else if (value != null) {
             return Long.parseLong(value.toString());
         }
         return null;
@@ -714,10 +714,48 @@ public class FileMonitor {
     protected void closeQuietly(Closeable in) {
         try {
             in.close();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOGGER.warn("Failed to close stream. " + e, e);
         }
     }
 
+    protected PreferencesService getPreferenceService() {
+        if (activator.getPreferenceServiceTracker() != null) {
+            try {
+                return (PreferencesService)activator.getPreferenceServiceTracker().waitForService(5000L);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
+        return null;
+    }
+
+    protected void saveScannerState() {
+        try {
+            Map<String, Long> results = scanner.getLastScanResults();
+            Preferences prefs = getPreferenceService().getUserPreferences(PREFERENCE_KEY).node(pid);
+            Iterator<String> it = results.keySet().iterator();
+            while (it.hasNext()) {
+                String key = it.next();
+                Long value = results.get(key);
+                prefs.putLong(key, value);
+            }
+            prefs.flush();
+        } catch (Exception e) {
+            LOGGER.error("Error persisting FileMonitor state", e);
+        }
+    }
+
+    protected void loadScannerState() {
+        try {
+            Preferences prefs = getPreferenceService().getUserPreferences(PREFERENCE_KEY).node(pid);
+            Map<String, Long> lastResult = new HashMap<String, Long>();
+            for (String key : prefs.keys()) {
+                lastResult.put(key, prefs.getLong(key, -1));
+            }
+            scanner.setLastScanResults(lastResult);
+        } catch (Exception e) {
+            LOGGER.error("Error loading FileMonitor state", e);
+        }
+    }
 }
