@@ -738,8 +738,9 @@ public class Main implements MainService, BundleActivator {
      * </p>
      *
      * @return A <tt>Properties</tt> instance or <tt>null</tt> if there was an error.
+     * @throws Exception 
      */
-    private Properties loadConfigProperties() {
+    private Properties loadConfigProperties() throws Exception {
         // The config properties file is either specified by a system
         // property or it is in the conf/ directory of the Felix
         // installation directory.  Try to load it from one of these
@@ -811,7 +812,7 @@ public class Main implements MainService, BundleActivator {
         return configProps;
     }
 
-    private static Properties loadPropertiesFile(URL configPropURL) {
+    private static Properties loadPropertiesFile(URL configPropURL) throws Exception {
         // Read the properties file.
         Properties configProps = new Properties();
         InputStream is = null;
@@ -821,7 +822,9 @@ public class Main implements MainService, BundleActivator {
             is.close();
         }
         catch (FileNotFoundException ex) {
-            // Ignore file not found.
+        	if (configPropURL.getFile().lastIndexOf(STARTUP_PROPERTIES_FILE_NAME) != -1) {
+        		throw ex;
+        	}
         }
         catch (Exception ex) {
             System.err.println(
