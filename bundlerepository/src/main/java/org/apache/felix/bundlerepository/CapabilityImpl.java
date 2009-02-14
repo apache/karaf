@@ -56,4 +56,9 @@ public class CapabilityImpl implements Capability
     {
         m_map.put(prop.getN(), prop.getV());
     }
+
+    protected void addP(String name, Object value)
+    {
+        m_map.put(name, value);
+    }
 }

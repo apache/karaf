@@ -19,13 +19,16 @@
 package org.apache.felix.bundlerepository;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import org.osgi.framework.AllServiceListener;
 import org.osgi.framework.Bundle;
@@ -214,6 +217,27 @@ public class LocalRepositoryImpl implements Repository, SynchronousBundleListene
             // For the system bundle, add a special platform capability.
             if (m_bundle.getBundleId() == 0)
             {
+                // set the execution environment(s) as Capability ee of the
+                // system bundle to resolve bundles with specifc requirements
+                String ee = m_bundle.getBundleContext().getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
+                if (ee != null)
+                {
+                    StringTokenizer tokener = new StringTokenizer(ee, ",");
+                    List eeList = new ArrayList();
+                    while (tokener.hasMoreTokens())
+                    {
+                        String eeName = tokener.nextToken().trim();
+                        if (eeName.length() > 0)
+                        {
+                            eeList.add(eeName);
+                        }
+                    }
+                    CapabilityImpl cap = new CapabilityImpl();
+                    cap.setName("ee");
+                    cap.addP("ee", eeList);
+                    addCapability(cap);
+                }
+                
 /* TODO: OBR - Fix system capabilities.
                 // Create a case-insensitive map.
                 Map map = new TreeMap(new Comparator() {
