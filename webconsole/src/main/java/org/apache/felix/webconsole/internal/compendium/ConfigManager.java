@@ -208,9 +208,12 @@ public class ConfigManager extends ConfigManagerBase
     {
 
         // extract the configuration pid from the request path
-        String pid = request.getPathInfo();
-        pid = pid.substring( pid.lastIndexOf( '/' ) + 1 );
-
+        String pid = request.getPathInfo().substring(this.getLabel().length() + 1);
+        if ( pid.length() == 0 ) {
+            pid = null;
+        } else {
+            pid = pid.substring( pid.lastIndexOf( '/' ) + 1 );
+        }
         // check whether the pid is actually a filter for the selection
         // of configurations to display, if the filter correctly converts
         // into an OSGi filter, we use it to select configurations
