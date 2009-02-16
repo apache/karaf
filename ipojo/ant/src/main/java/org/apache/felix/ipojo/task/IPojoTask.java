@@ -39,6 +39,12 @@ public class IPojoTask extends Task {
     
     /** Output bundle. */
     private File m_output;
+    
+    /** Input directory. */
+    private File m_directory;
+    
+    /** Input manifest. */
+    private File m_manifest;
 
     /** Flag describing if we need to ignore annotation of not. */
     private boolean m_ignoreAnnotations = false;
@@ -59,11 +65,27 @@ public class IPojoTask extends Task {
     }
     
     /**
+     * Set the manifest file.
+     * @param manifest : the manifest file.
+     */
+    public void setManifest(File manifest) {
+        m_manifest = manifest;
+    }
+    
+    /**
      * Set the input bundle.
      * @param in : the input bundle
      */
     public void setInput(File in) {
         m_input = in;
+    }
+    
+    /**
+     * Set the input directory.
+     * @param dir : the input directory
+     */
+    public void setDir(File dir) {
+        m_directory  = dir;
     }
     
     /**
@@ -96,14 +118,36 @@ public class IPojoTask extends Task {
      */
     public void execute() {
         
-        if (m_input == null) {
-            throw new BuildException("No input bundle specified");
+        if (m_input == null  && m_directory == null) {
+            throw new BuildException("Neither input bundle nor directory specified");
         }
-        if (!m_input.exists()) {
+        
+        if (m_input != null && !m_input.exists()) {
             throw new BuildException("The input bundle " + m_input.getAbsolutePath() + " does not exist");
         }
         
-        log("Input bundle file : " + m_input.getAbsolutePath());
+        if (m_directory != null && !m_directory.exists()) {
+            throw new BuildException("The input directory " + m_directory.getAbsolutePath() + " does not exist");
+        }
+        if (m_directory != null && !m_directory.isDirectory()) {
+            throw new BuildException("The input directory " + m_directory.getAbsolutePath() + " is not a directory");
+        }
+        
+        
+        if (m_input != null) {
+            log("Input bundle file : " + m_input.getAbsolutePath());
+        } else {
+            log("Input directory : " + m_directory.getAbsolutePath());
+        }
+        
+        if (m_manifest != null) {
+            if (m_input != null) {
+                throw new BuildException("The manifest location cannot be used when manipulating an existing bundle");
+            }
+            if (! m_manifest.exists()) {
+                throw new BuildException("The manifest file " + m_manifest.getAbsolutePath() + " does not exist");
+            }
+        }
         
         // Get metadata file
         if (m_metadata == null) {
@@ -128,18 +172,20 @@ public class IPojoTask extends Task {
                 log("Metadata file : " + m_metadata.getAbsolutePath());
             }
         }
+        
 
-        log("Start bundle manipulation");
+        log("Start manipulation");
         
-        if (m_output == null) {
-            m_output = new File("./_out.jar");
+        if (m_input != null) { // Prepare output file
+            if (m_output == null) {
+                m_output = new File("./_out.jar");
+            }
+            if (m_output.exists()) {
+                boolean r = m_output.delete();
+                if (!r) { throw new BuildException("The file " + m_output.getAbsolutePath() + " cannot be deleted"); }
+            }
         }
-        
-        if (m_output.exists()) {
-            boolean r = m_output.delete();
-            if (!r) { throw new BuildException("The file " + m_output.getAbsolutePath() + " cannot be deleted"); }
-        }
-        
+       
         Pojoization pojo = new Pojoization();
         if (! m_ignoreAnnotations) {
             pojo.setAnnotationProcessing();
@@ -147,28 +193,41 @@ public class IPojoTask extends Task {
         if (! m_ignoreLocalXSD) {
             pojo.setUseLocalXSD();
         }
-        pojo.pojoization(m_input, m_output, m_metadata);
+        if (m_input != null) {
+            pojo.pojoization(m_input, m_output, m_metadata);
+        } else {
+            pojo.directoryPojoization(m_directory,m_metadata, m_manifest);
+        }
         for (int i = 0; i < pojo.getWarnings().size(); i++) {
             log((String) pojo.getWarnings().get(i), Project.MSG_WARN);
         }
         if (pojo.getErrors().size() > 0) { throw new BuildException((String) pojo.getErrors().get(0)); }
         
-        String out;
-        if (m_output.getName().equals("_out.jar")) {
-            if (m_input.delete()) {
-                if (! m_output.renameTo(m_input)) {
-                    log("Cannot rename the output jar to " + m_input.getAbsolutePath(), Project.MSG_WARN);
-                }   
+        if (m_input != null) {
+            String out;
+            if (m_output.getName().equals("_out.jar")) {
+                if (m_input.delete()) {
+                    if (! m_output.renameTo(m_input)) {
+                        log("Cannot rename the output jar to " + m_input.getAbsolutePath(), Project.MSG_WARN);
+                    }   
+                } else {
+                    log("Cannot delete the input file : " + m_input.getAbsolutePath(), Project.MSG_WARN);
+                }
+                out = m_input.getAbsolutePath();
             } else {
-                log("Cannot delete the input file : " + m_input.getAbsolutePath(), Project.MSG_WARN);
+                out = m_output.getAbsolutePath();
             }
-            out = m_input.getAbsolutePath();
-        } else {
-            out = m_output.getAbsolutePath();
-        }
         
-        log("Bundle manipulation - SUCCESS");
-        log("Output file : " + out);
+            log("Bundle manipulation - SUCCESS");
+            log("Output file : " + out);
+        } else {
+            log("Manipulation - SUCCESS");
+            log("Output files : " + m_directory.getAbsolutePath());
+            if (m_manifest != null) {
+                log("Manifest : " + m_manifest.getAbsolutePath());
+            }
+
+        }
         
     }
     

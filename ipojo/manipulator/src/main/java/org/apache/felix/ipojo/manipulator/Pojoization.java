@@ -19,10 +19,12 @@
 package org.apache.felix.ipojo.manipulator;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -33,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.Vector;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -62,7 +65,7 @@ public class Pojoization {
     /**
      * iPOJO Imported Package Version.
      */
-    public static final String IPOJO_PACKAGE_VERSION = " 1.2.0";
+    public static final String IPOJO_PACKAGE_VERSION = " 1.3.0";
 
     /**
      * List of component types.
@@ -85,7 +88,7 @@ public class Pojoization {
     private List m_warnings = new ArrayList();
 
     /**
-     * Class map (jar entry, byte[]).
+     * Class map (class name, byte[]).
      */
     private Map m_classes = new HashMap();
 
@@ -105,6 +108,21 @@ public class Pojoization {
      * If <code>true</code> the local XSD are not used.
      */
     private boolean m_ignoreLocalXSD;
+    
+    /**
+     * Input jar file.
+     */
+    private JarFile m_inputJar;
+    
+    /**
+     * The manipulated directory.
+     */
+    private File m_dir;
+    
+    /**
+     * The manifest location.
+     */
+    private File m_manifest;
 
     /**
      * Add an error in the error list.
@@ -150,7 +168,7 @@ public class Pojoization {
      * @param metadata the iPOJO metadata input stream. 
      */
     public void pojoization(File in, File out, InputStream metadata) {
-        m_metadata = parseXMLMetadata(metadata);
+        parseXMLMetadata(metadata);
         if (m_metadata == null) { // An error occurs during the parsing.
             return;
         }
@@ -158,19 +176,18 @@ public class Pojoization {
         // array with component type description. It also can be null
         // if no metadata file is given.
         
-        JarFile inputJar;
         try {
-            inputJar = new JarFile(in);
+            m_inputJar = new JarFile(in);
         } catch (IOException e) {
             error("The input file " + in.getAbsolutePath() + " is not a Jar file");
             return;
         }
 
         // Get the list of declared component
-        m_components = getDeclaredComponents(m_metadata);
+        computeDeclaredComponents();
 
         // Start the manipulation
-        manipulation(inputJar, out);
+        manipulateJarFile(out);
 
         // Check that all declared components are manipulated
         for (int i = 0; i < m_components.size(); i++) {
@@ -192,46 +209,21 @@ public class Pojoization {
     public void pojoization(File in, File out, File metadataFile) {
         // Get the metadata.xml location if not null
         if (metadataFile != null) {
-            try {
-                InputStream stream = null;
-                URL url = metadataFile.toURL();
-                if (url == null) {
-                    warn("Cannot find the metadata file : " + metadataFile.getAbsolutePath());
-                    m_metadata = new Element[0];
-                } else {
-                    stream = url.openStream();
-                    m_metadata = parseXMLMetadata(stream);
-                }
-            } catch (MalformedURLException e) {
-                error("Cannot open the metadata input stream from " + metadataFile.getAbsolutePath() + ": " + e.getMessage());
-                m_metadata = null;
-            } catch (IOException e) {
-                error("Cannot open the metadata input stream: " + metadataFile.getAbsolutePath() + ": " + e.getMessage());
-                m_metadata = null;
-            }
-            
-            if (m_metadata == null) { // An error occurs during the parsing.
-                return;
-            }
-            
-            // m_metadata can be either an empty array or an Element
-            // array with component type description. It also can be null
-            // if no metadata file is given.
+            parseXMLMetadata(metadataFile);
         }
         
-        JarFile inputJar;
         try {
-            inputJar = new JarFile(in);
+            m_inputJar = new JarFile(in);
         } catch (IOException e) {
             error("The input file " + in.getAbsolutePath() + " is not a Jar file");
             return;
         }
 
         // Get the list of declared component
-        m_components = getDeclaredComponents(m_metadata);
+        computeDeclaredComponents();
 
         // Start the manipulation
-        manipulation(inputJar, out);
+        manipulateJarFile(out);
 
         // Check that all declared components are manipulated
         for (int i = 0; i < m_components.size(); i++) {
@@ -241,10 +233,56 @@ public class Pojoization {
             }
         }
     }
+    
+    /**
+     * Manipulates an expanded bundles.
+     * Classes are in the specified directory.
+     * this method allows to update a customized manifest.
+     * @param directory the directory containing classes
+     * @param metadataFile the metadata file
+     * @param manifestFile the manifest file. <code>null</code> to use directory/META-INF/MANIFEST.mf
+     */
+    public void directoryPojoization(File directory, File metadataFile, File manifestFile) {
+     // Get the metadata.xml location if not null
+        if (metadataFile != null) {
+            parseXMLMetadata(metadataFile);
+        }
+        
+        if (directory.exists() && directory.isDirectory()) {
+            m_dir = directory;
+        } else {
+            error("The directory " + directory.getAbsolutePath() + " does not exist or is not a directory.");
+        }
+        
+        
+        if (manifestFile != null) {
+            if (manifestFile.exists()) {
+                m_manifest = manifestFile;
+            } else {
+                error("The manifest file " + manifestFile.getAbsolutePath() + " does not exist");
+            }
+        } 
+        // If the manifest is not specified, the m_dir/META-INF/MANIFEST.MF is used.
+        
+        // Get the list of declared component
+        computeDeclaredComponents();
+
+        // Start the manipulation
+        manipulateDirectory();
+
+        // Check that all declared components are manipulated
+        for (int i = 0; i < m_components.size(); i++) {
+            ComponentInfo ci = (ComponentInfo) m_components.get(i);
+            if (!ci.m_isManipulated) {
+                error("The component " + ci.m_classname + " is declared but not in the bundle");
+            }
+        }
+        
+    }
 
     /**
-     * Parse the content of the input Jar file to detect annotated classes.
-     * @param inC : the class to inspect.
+     * Parse the content of the class to detect annotated classes.
+     * @param inC the class to inspect.
      */
     private void computeAnnotations(byte[] inC) {
         ClassReader cr = new ClassReader(inC);
@@ -278,14 +316,13 @@ public class Pojoization {
     }
 
     /**
-     * Manipulate the Bundle.
-     * @param inputJar : original bundle (JarFile)
-     * @param out : final bundle
+     * Manipulate the input bundle.
+     * @param out final bundle
      */
-    private void manipulation(JarFile inputJar, File out) {
-        manipulateComponents(inputJar); // Manipulate classes
+    private void manipulateJarFile(File out) {
+        manipulateComponents(); // Manipulate classes
         m_referredPackages = getReferredPackages();
-        Manifest mf = doManifest(inputJar); // Compute the manifest
+        Manifest mf = doManifest(); // Compute the manifest
 
         // Create a new Jar file
         FileOutputStream fos = null;
@@ -303,7 +340,7 @@ public class Pojoization {
 
         try {
             // Copy classes and resources
-            Enumeration entries = inputJar.entries();
+            Enumeration entries = m_inputJar.entries();
             while (entries.hasMoreElements()) {
                 JarEntry curEntry = (JarEntry) entries.nextElement();
                 // Check if we need to manipulate the class
@@ -316,7 +353,7 @@ public class Pojoization {
                         jos.closeEntry();
                     } else { // The class is already manipulated
                         jos.putNextEntry(curEntry);
-                        InputStream currIn = inputJar.getInputStream(curEntry);
+                        InputStream currIn = m_inputJar.getInputStream(curEntry);
                         int c;
                         int i = 0;
                         while ((c = currIn.read()) >= 0) {
@@ -331,7 +368,7 @@ public class Pojoization {
                     if (!curEntry.getName().equals("META-INF/MANIFEST.MF")) {
                         // copy the entry header to jos
                         jos.putNextEntry(curEntry);
-                        InputStream currIn = inputJar.getInputStream(curEntry);
+                        InputStream currIn = m_inputJar.getInputStream(curEntry);
                         int c;
                         int i = 0;
                         while ((c = currIn.read()) >= 0) {
@@ -349,7 +386,7 @@ public class Pojoization {
         }
 
         try {
-            inputJar.close();
+            m_inputJar.close();
             jos.close();
             fos.close();
             jos = null;
@@ -359,93 +396,279 @@ public class Pojoization {
             return;
         }
     }
+    
+    /**
+     * Manipulate the input directory.
+     */
+    private void manipulateDirectory() {
+        manipulateComponents(); // Manipulate classes
+        m_referredPackages = getReferredPackages();
+        Manifest mf = doManifest(); // Compute the manifest
+        if (mf == null) {
+            error("Cannot found input manifest");
+            return;
+        }
+
+        // Write every manipulated file.
+        Iterator it = m_classes.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry entry = (Map.Entry) it.next();
+            String classname = (String) entry.getKey();
+            byte[] clazz = (byte[]) entry.getValue();
+            // The class name is already a path
+            File classFile = new File(m_dir, classname);
+            try {
+                OutputStream os = new FileOutputStream(classFile);
+                os.write(clazz);
+                os.close();
+            } catch (IOException e) {
+                error("Cannot manipulate the file : the output file " +  classname + " is not found");
+                return;
+            }
+        }
+        
+        // Write manifest
+        if (m_manifest == null) {
+            m_manifest = new File(m_dir, "META-INF/MANIFEST.MF");
+            if (! m_manifest.exists()) {
+                error("Cannot find the manifest file : " + m_manifest.getAbsolutePath());
+                return;
+            }
+        } else {
+            if (! m_manifest.exists()) {
+                error("Cannot find the manifest file : " + m_manifest.getAbsolutePath());
+                return;
+            }
+        }
+        try {
+            mf.write(new FileOutputStream(m_manifest));
+        } catch (IOException e) {
+            error("Cannot write the manifest file : " + e.getMessage());
+        }
+            
+    }
 
     /**
      * Manipulate classes of the input Jar.
-     * @param inputJar : input bundle.
      */
-    private void manipulateComponents(JarFile inputJar) {
-        Enumeration entries = inputJar.entries();
+    private void manipulateComponents() {
+        //Enumeration entries = inputJar.entries();
+        Enumeration entries = getClassFiles();
+        
         while (entries.hasMoreElements()) {
-            JarEntry curEntry = (JarEntry) entries.nextElement();
-            if (curEntry.getName().endsWith(".class")) {
-                try {
-                    InputStream currIn = inputJar.getInputStream(curEntry);
-                    byte[] in = new byte[0];
-                    int c;
-                    while ((c = currIn.read()) >= 0) {
-                        byte[] in2 = new byte[in.length + 1];
-                        System.arraycopy(in, 0, in2, 0, in.length);
-                        in2[in.length] = (byte) c;
-                        in = in2;
-                    }
-                    currIn.close();
-                    if (! m_ignoreAnnotations) {
-                        computeAnnotations(in);
-                    }
-                    // Check if we need to manipulate the class
-                    for (int i = 0; i < m_components.size(); i++) {
-                        ComponentInfo ci = (ComponentInfo) m_components.get(i);
-                        if (ci.m_classname.equals(curEntry.getName())) {
-                            byte[] outClazz = manipulateComponent(in, curEntry, ci);
-                            m_classes.put(curEntry.getName(), outClazz);
-                            
-                            // Manipulate inner classes ?
-                            if (!ci.m_inners.isEmpty()) {
-                                for (int k = 0; k < ci.m_inners.size(); k++) {
-                                    JarEntry inner = inputJar.getJarEntry((String) ci.m_inners.get(k) + ".class");
-                                    manipulateInnerClass(inputJar, inner, (String) ci.m_inners.get(k), ci);
-                                }
+            String curName = (String) entries.nextElement();
+            try {
+                InputStream currIn = getInputStream(curName);
+                byte[] in = new byte[0];
+                int c;
+                while ((c = currIn.read()) >= 0) {
+                    byte[] in2 = new byte[in.length + 1];
+                    System.arraycopy(in, 0, in2, 0, in.length);
+                    in2[in.length] = (byte) c;
+                    in = in2;
+                }
+                currIn.close();
+                if (!m_ignoreAnnotations) {
+                    computeAnnotations(in); // This method adds the class to the
+                                            // component list.
+                }
+                // Check if we need to manipulate the class
+                for (int i = 0; i < m_components.size(); i++) {
+                    ComponentInfo ci = (ComponentInfo) m_components.get(i);
+                    if (ci.m_classname.equals(curName)) {
+                        byte[] outClazz = manipulateComponent(in, ci);
+                        m_classes.put(ci.m_classname, outClazz);
+
+                        // Manipulate inner classes ?
+                        if (!ci.m_inners.isEmpty()) {
+                            for (int k = 0; k < ci.m_inners.size(); k++) {
+                                String innerCN = (String) ci.m_inners.get(k)
+                                        + ".class";
+                                InputStream innerStream = getInputStream(innerCN);
+                                // manipulateInnerClass(inputJar, inner,
+                                // (String) ci.m_inners.get(k), ci);
+                                manipulateInnerClass(innerStream, innerCN, ci);
                             }
                         }
                     }
-                } catch (IOException e) {
-                    error("Cannot read the class : " + curEntry.getName());
-                    return;
                 }
+            } catch (IOException e) {
+                error("Cannot read the class : " + curName);
+                return;
             }
+
         }
     }
     
     /**
+     * Gets an input stream on the given class.
+     * This methods manages Jar files and directories.
+     * @param classname the class name
+     * @return the input stream
+     * @throws IOException if the file cannot be read
+     */
+    private InputStream getInputStream(String classname) throws IOException {
+        if (m_inputJar != null) {
+            if (! classname.endsWith(".class")) {
+                classname += ".class";
+            }
+            JarEntry je = m_inputJar.getJarEntry(classname); 
+            if (je == null) {
+                throw new IOException("The class " + classname + " connot be found in the input Jar file"); 
+            } else {
+                return m_inputJar.getInputStream(je);
+            }
+        } else {
+            // Directory
+            File file = new File(m_dir, classname);
+            return new FileInputStream(file);
+        }
+    }
+    
+    /**
+     * Gets the list of class files.
+     * The content of the returned enumeration contains file names.
+     * It is possible to get input stream on those file by using the
+     * {@link Pojoization#getInputStream(String)} method.
+     * @return the list of class files.
+     */
+    private Enumeration getClassFiles() {
+        Vector files = new Vector();
+        if (m_inputJar != null) {
+            Enumeration enumeration = m_inputJar.entries();
+            while (enumeration.hasMoreElements()) {
+                JarEntry je = (JarEntry) enumeration.nextElement();
+                if (je.getName().endsWith(".class")) {
+                    files.add(je.getName());
+                }
+            }
+        } else {
+            searchClassFiles(m_dir, files);
+        }
+        return files.elements();
+    }
+    
+    /**
+     * Navigates across directories to find class files.
+     * @param dir the directory to analyze
+     * @param classes discovered classes
+     */
+    private void searchClassFiles(File dir, List classes) {
+        File[] files = dir.listFiles();
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].isDirectory()) {
+                searchClassFiles(files[i], classes);
+            } else if (files[i].getName().endsWith(".class")) {
+                classes.add(computeRelativePath(files[i].getAbsolutePath()));
+            }
+        }
+    }
+    
+//    /**
+//     * Manipulates an inner class.
+//     * @param inputJar input jar
+//     * @param je inner class jar entry
+//     * @param innerClassName inner class name
+//     * @param ci component info of the component owning the inner class
+//     * @throws IOException the inner class cannot be read
+//     */
+//    private void manipulateInnerClass(JarFile inputJar, JarEntry je, String innerClassName, ComponentInfo ci) throws IOException {
+//        InputStream currIn = inputJar.getInputStream(je);
+//        byte[] in = new byte[0];
+//        int c;
+//        while ((c = currIn.read()) >= 0) {
+//            byte[] in2 = new byte[in.length + 1];
+//            System.arraycopy(in, 0, in2, 0, in.length);
+//            in2[in.length] = (byte) c;
+//            in = in2;
+//        }
+//        // Remove '.class' from class name.
+//        InnerClassManipulator man = new InnerClassManipulator(ci.m_classname.substring(0, ci.m_classname.length() - 6), ci.m_fields);
+//        byte[] out = man.manipulate(in);
+//        
+//        m_classes.put(je.getName(), out);
+//        
+//    }
+    
+    /**
+     * Computes a relative path for the given absolute path.
+     * This methods computes the relative path according to the directory
+     * containing classes for the given class path.
+     * @param absolutePath the absolute path of the class
+     * @return the relative path of the class based on the directory containing
+     * classes. 
+     */
+    private String computeRelativePath(String absolutePath) {
+        String root = m_dir.getAbsolutePath();
+        return absolutePath.substring(root.length() + 1);
+    }
+
+    /**
      * Manipulates an inner class.
-     * @param inputJar input jar
-     * @param je inner class jar entry
-     * @param innerClassName inner class name
+     * @param clazz input stream on the inner file to manipulate
+     * @param cn the inner class name (ends with .class)
      * @param ci component info of the component owning the inner class
      * @throws IOException the inner class cannot be read
      */
-    private void manipulateInnerClass(JarFile inputJar, JarEntry je, String innerClassName, ComponentInfo ci) throws IOException {
-        InputStream currIn = inputJar.getInputStream(je);
+    private void manipulateInnerClass(InputStream clazz, String cn, ComponentInfo ci) throws IOException {
         byte[] in = new byte[0];
         int c;
-        while ((c = currIn.read()) >= 0) {
+        while ((c = clazz.read()) >= 0) {
             byte[] in2 = new byte[in.length + 1];
             System.arraycopy(in, 0, in2, 0, in.length);
             in2[in.length] = (byte) c;
             in = in2;
         }
-        
+        // Remove '.class' from class name.
         InnerClassManipulator man = new InnerClassManipulator(ci.m_classname.substring(0, ci.m_classname.length() - 6), ci.m_fields);
         byte[] out = man.manipulate(in);
         
-        m_classes.put(je.getName(), out);
+        m_classes.put(cn, out);
         
+    }
+    
+    /**
+     * Gets the manifest.
+     * This method handles Jar and directories.
+     * For Jar file, the input jar manifest is returned.
+     * For directories, if specified the specifies manifest is returned.
+     * Otherwise, try directory/META-INF/MANIFEST.MF
+     * @return the Manifest.
+     * @throws IOException if the manifest cannot be found
+     */
+    private Manifest getManifest() throws IOException {
+        if (m_inputJar != null) {
+            return m_inputJar.getManifest();
+        } else {
+            if (m_manifest == null) {
+                File manFile = new File(m_dir, "META-INF/MANIFEST.MF");
+                if (manFile.exists()) {
+                    return new Manifest(new FileInputStream(manFile));
+                } else {
+                    throw new IOException("Cannot find the manifest file : " + manFile.getAbsolutePath());
+                }
+            } else {
+                if (m_manifest.exists()) {
+                    return  new Manifest(new FileInputStream(m_manifest));
+                } else {
+                    throw new IOException("Cannot find the manifest file : " + m_manifest.getAbsolutePath());
+                }
+            }
+        }
     }
 
     /**
      * Create the manifest.
-     * Set the bundle activator, imports, iPOJO-components clauses
-     * @param initial : initial Jar file.
+     * Set the bundle imports and iPOJO-components clauses
      * @return the generated manifest.
      */
-    private Manifest doManifest(JarFile initial) {
+    private Manifest doManifest() {
         Manifest mf = null;
         try {
-            mf = initial.getManifest(); // Get the initial manifest
+            mf = getManifest();
         } catch (IOException e) {
             // Could not happen, the input bundle is a bundle so must have a manifest.
-            error("Cannot get the manifest from the input bundle : " + e.getMessage());
+            error("Cannot get the manifest : " + e.getMessage());
             return null;
         }
         Attributes att = mf.getMainAttributes();
@@ -458,11 +681,10 @@ public class Pojoization {
     /**
      * Manipulate a component class.
      * @param in : the byte array of the class to manipulate
-     * @param je : Jar entry of the classes
      * @param ci : attached component info (containing metadata and manipulation metadata)
      * @return the generated class (byte array)
      */
-    private byte[] manipulateComponent(byte[] in, JarEntry je, ComponentInfo ci) {
+    private byte[] manipulateComponent(byte[] in, ComponentInfo ci) {
         Manipulator man = new Manipulator();
         try {
             byte[] out = man.manipulate(in); // iPOJO manipulation
@@ -474,27 +696,25 @@ public class Pojoization {
             ci.m_fields = man.getFields().keySet();
             return out;
         } catch (IOException e) {
-            error("Cannot manipulate the class " + je.getName() + " : " + e.getMessage());
+            error("Cannot manipulate the class " + ci.m_classname + " : " + e.getMessage());
             return null;
         }
     }
 
     /**
      * Return the list of "concrete" component.
-     * @param meta : metadata.
-     * @return the list of component info requiring a manipulation.
      */
-    private List getDeclaredComponents(Element[] meta) {
+    private void computeDeclaredComponents() {
         List componentClazzes = new ArrayList();
-        for (int i = 0; i < meta.length; i++) {
-            String name = meta[i].getAttribute("classname");
+        for (int i = 0; i < m_metadata.length; i++) {
+            String name = m_metadata[i].getAttribute("classname");
             if (name != null) { // Only handler and component have a classname attribute 
                 name = name.replace('.', '/');
                 name += ".class";
-                componentClazzes.add(new ComponentInfo(name, meta[i]));
+                componentClazzes.add(new ComponentInfo(name, m_metadata[i]));
             }
         }
-        return componentClazzes;
+        m_components = componentClazzes;
     }
 
     /**
@@ -581,7 +801,9 @@ public class Pojoization {
      */
     private void setCreatedBy(Attributes att) {
         String prev = att.getValue("Created-By");
-        att.putValue("Created-By", prev + " & iPOJO");
+        if (! prev.contains("iPOJO")) { // Avoid appending iPOJO several times
+            att.putValue("Created-By", prev + " & iPOJO");
+        }
     }
 
     /**
@@ -719,13 +941,40 @@ public class Pojoization {
         }
         return sb.toString();
     }
+    
+    /**
+     * Parse the XML metadata from the given file.
+     * @param metadataFile the metadata file
+     */
+    private void parseXMLMetadata(File metadataFile) {
+        try {
+            InputStream stream = null;
+            URL url = metadataFile.toURL();
+            if (url == null) {
+                warn("Cannot find the metadata file : " + metadataFile.getAbsolutePath());
+                m_metadata = new Element[0];
+            } else {
+                stream = url.openStream();
+                parseXMLMetadata(stream); // m_metadata is set by the method.
+            }
+        } catch (MalformedURLException e) {
+            error("Cannot open the metadata input stream from " + metadataFile.getAbsolutePath() + ": " + e.getMessage());
+            m_metadata = null;
+        } catch (IOException e) {
+            error("Cannot open the metadata input stream: " + metadataFile.getAbsolutePath() + ": " + e.getMessage());
+            m_metadata = null;
+        }
+        
+        // m_metadata can be either an empty array or an Element
+        // array with component type description. It also can be null
+        // if no metadata file is given.
+    }
 
     /**
      * Parse XML Metadata.
      * @param stream metadata input stream.
-     * @return the parsed element array.
      */
-    private Element[] parseXMLMetadata(InputStream stream) {
+    private void parseXMLMetadata(InputStream stream) {
         Element[] meta = null;
         try {
             XMLReader parser = (XMLReader) Class.forName("org.apache.xerces.parsers.SAXParser").newInstance();
@@ -749,32 +998,25 @@ public class Pojoization {
 
         } catch (IOException e) {
             error("Cannot open the metadata input stream: " + e.getMessage());
-            return null;
         } catch (ParseException e) {
             error("Parsing error when parsing the XML file: " + e.getMessage());
-            return null;
         } catch (SAXParseException e) {
             error("Error during metadata parsing at line " + e.getLineNumber() + " : " + e.getMessage());
-            return null;
         } catch (SAXException e) {
             error("Parsing error when parsing (Sax Error) the XML file: " + e.getMessage());
-            return null;
         } catch (InstantiationException e) {
             error("Cannot instantiate the SAX parser for the XML file: " + e.getMessage());
-            return null;
         } catch (IllegalAccessException e) {
             error("Cannot instantiate  the SAX parser (IllegalAccess) to the XML file: " + e.getMessage());
-            return null;
         } catch (ClassNotFoundException e) {
             error("Cannot load the SAX Parser : " + e.getMessage());
-            return null;
         }
 
         if (meta == null || meta.length == 0) {
             warn("Neither component types, nor instances in the metadata");
         }
 
-        return meta;
+        m_metadata = meta;
     }
     
     /**

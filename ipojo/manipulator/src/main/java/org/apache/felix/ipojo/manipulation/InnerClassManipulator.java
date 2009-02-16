@@ -34,7 +34,7 @@ import org.objectweb.asm.ClassWriter;
 public class InnerClassManipulator {
 
     /**
-     * Component implementation class name.
+     * Outer class class name.
      */
     private String m_outer;
     
