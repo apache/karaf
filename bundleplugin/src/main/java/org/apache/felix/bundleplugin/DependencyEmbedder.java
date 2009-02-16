@@ -30,7 +30,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.plexus.util.StringUtils;
 
 import aQute.lib.osgi.Analyzer;
-import aQute.lib.osgi.Instruction;
 import aQute.libg.header.OSGiHeader;
 
 
@@ -39,7 +38,7 @@ import aQute.libg.header.OSGiHeader;
  * 
  * @author stuart.mcculloch@jayway.net (Stuart McCulloch)
  */
-public final class DependencyEmbedder
+public final class DependencyEmbedder extends AbstractDependencyFilter
 {
     public static final String EMBED_DEPENDENCY = "Embed-Dependency";
     public static final String EMBED_DIRECTORY = "Embed-Directory";
@@ -54,11 +53,6 @@ public final class DependencyEmbedder
     private String m_embedStripVersion;
 
     /**
-     * Dependency artifacts.
-     */
-    private final Collection m_dependencyArtifacts;
-
-    /**
      * Inlined paths.
      */
     private final Collection m_inlinedPaths;
@@ -71,7 +65,7 @@ public final class DependencyEmbedder
 
     public DependencyEmbedder( Collection dependencyArtifacts )
     {
-        m_dependencyArtifacts = dependencyArtifacts;
+        super( dependencyArtifacts );
 
         m_inlinedPaths = new HashSet();
         m_embeddedArtifacts = new HashSet();
@@ -94,7 +88,7 @@ public final class DependencyEmbedder
             m_embedStripVersion = analyzer.getProperty( EMBED_STRIP_VERSION );
 
             Map embedInstructions = OSGiHeader.parseHeader( embedDependencyHeader );
-            processEmbedInstructions( embedInstructions );
+            processInstructions( embedInstructions );
 
             for ( Iterator i = m_inlinedPaths.iterator(); i.hasNext(); )
             {
@@ -119,189 +113,19 @@ public final class DependencyEmbedder
         appendDependencies( analyzer, Analyzer.BUNDLE_CLASSPATH, bundleClassPath.toString() );
     }
 
-    protected static abstract class DependencyFilter
+
+    @Override
+    protected void processDependencies( String inline, Collection filteredDependencies )
     {
-        private final Instruction m_instruction;
-        private final String m_defaultValue;
-
-
-        public DependencyFilter( String expression )
+        if ( null == inline || "false".equalsIgnoreCase( inline ) )
         {
-            this( expression, "" );
+            m_embeddedArtifacts.addAll( filteredDependencies );
         }
-
-
-        public DependencyFilter( String expression, String defaultValue )
+        else
         {
-            m_instruction = Instruction.getPattern( expression );
-            m_defaultValue = defaultValue;
-        }
-
-
-        public void filter( Collection dependencies )
-        {
-            for ( Iterator i = dependencies.iterator(); i.hasNext(); )
+            for ( Iterator i = filteredDependencies.iterator(); i.hasNext(); )
             {
-                if ( false == matches( ( Artifact ) i.next() ) )
-                {
-                    i.remove();
-                }
-            }
-        }
-
-
-        abstract boolean matches( Artifact dependency );
-
-
-        boolean matches( String text )
-        {
-            boolean result;
-
-            if ( null == text )
-            {
-                result = m_instruction.matches( m_defaultValue );
-            }
-            else
-            {
-                result = m_instruction.matches( text );
-            }
-
-            return m_instruction.isNegated() ? !result : result;
-        }
-    }
-
-
-    private void processEmbedInstructions( Map embedInstructions ) throws MojoExecutionException
-    {
-        DependencyFilter filter;
-        for ( Iterator clauseIterator = embedInstructions.entrySet().iterator(); clauseIterator.hasNext(); )
-        {
-            String inline = "false";
-
-            // must use a fresh *modifiable* collection for each unique clause
-            Collection filteredDependencies = new HashSet( m_dependencyArtifacts );
-
-            // CLAUSE: REGEXP --> { ATTRIBUTE MAP }
-            Map.Entry clause = ( Map.Entry ) clauseIterator.next();
-
-            filter = new DependencyFilter( ( String ) clause.getKey() )
-            {
-                boolean matches( Artifact dependency )
-                {
-                    return super.matches( dependency.getArtifactId() );
-                }
-            };
-
-            // FILTER ON MAIN CLAUSE
-            filter.filter( filteredDependencies );
-
-            for ( Iterator attrIterator = ( ( Map ) clause.getValue() ).entrySet().iterator(); attrIterator.hasNext(); )
-            {
-                // ATTRIBUTE: KEY --> REGEXP
-                Map.Entry attr = ( Map.Entry ) attrIterator.next();
-
-                if ( "groupId".equals( attr.getKey() ) )
-                {
-                    filter = new DependencyFilter( ( String ) attr.getValue() )
-                    {
-                        boolean matches( Artifact dependency )
-                        {
-                            return super.matches( dependency.getGroupId() );
-                        }
-                    };
-                }
-                else if ( "artifactId".equals( attr.getKey() ) )
-                {
-                    filter = new DependencyFilter( ( String ) attr.getValue() )
-                    {
-                        boolean matches( Artifact dependency )
-                        {
-                            return super.matches( dependency.getArtifactId() );
-                        }
-                    };
-                }
-                else if ( "version".equals( attr.getKey() ) )
-                {
-                    filter = new DependencyFilter( ( String ) attr.getValue() )
-                    {
-                        boolean matches( Artifact dependency )
-                        {
-                            try
-                            {
-                                // use the symbolic version if available (ie. 1.0.0-SNAPSHOT)
-                                return super.matches( dependency.getSelectedVersion().toString() );
-                            }
-                            catch ( Exception e )
-                            {
-                                return super.matches( dependency.getVersion() );
-                            }
-                        }
-                    };
-                }
-                else if ( "scope".equals( attr.getKey() ) )
-                {
-                    filter = new DependencyFilter( ( String ) attr.getValue(), "compile" )
-                    {
-                        boolean matches( Artifact dependency )
-                        {
-                            return super.matches( dependency.getScope() );
-                        }
-                    };
-                }
-                else if ( "type".equals( attr.getKey() ) )
-                {
-                    filter = new DependencyFilter( ( String ) attr.getValue(), "jar" )
-                    {
-                        boolean matches( Artifact dependency )
-                        {
-                            return super.matches( dependency.getType() );
-                        }
-                    };
-                }
-                else if ( "classifier".equals( attr.getKey() ) )
-                {
-                    filter = new DependencyFilter( ( String ) attr.getValue() )
-                    {
-                        boolean matches( Artifact dependency )
-                        {
-                            return super.matches( dependency.getClassifier() );
-                        }
-                    };
-                }
-                else if ( "optional".equals( attr.getKey() ) )
-                {
-                    filter = new DependencyFilter( ( String ) attr.getValue(), "false" )
-                    {
-                        boolean matches( Artifact dependency )
-                        {
-                            return super.matches( "" + dependency.isOptional() );
-                        }
-                    };
-                }
-                else if ( "inline".equals( attr.getKey() ) )
-                {
-                    inline = ( String ) attr.getValue();
-                    continue;
-                }
-                else
-                {
-                    throw new MojoExecutionException( "Unexpected attribute " + attr.getKey() );
-                }
-
-                // FILTER ON EACH ATTRIBUTE
-                filter.filter( filteredDependencies );
-            }
-
-            if ( null == inline || "false".equalsIgnoreCase( inline ) )
-            {
-                m_embeddedArtifacts.addAll( filteredDependencies );
-            }
-            else
-            {
-                for ( Iterator i = filteredDependencies.iterator(); i.hasNext(); )
-                {
-                    addInlinedPaths( ( Artifact ) i.next(), inline, m_inlinedPaths );
-                }
+                addInlinedPaths( ( Artifact ) i.next(), inline, m_inlinedPaths );
             }
         }
     }
