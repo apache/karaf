@@ -181,6 +181,7 @@ public class BundlePlugin extends AbstractMojo
      */
     private MavenArchiveConfiguration archive; // accessed indirectly in JarPluginConfiguration
 
+    private static final String MAVEN_SYMBOLICNAME = "maven-symbolicname";
     private static final String MAVEN_RESOURCES = "{maven-resources}";
 
     private static final String[] EMPTY_STRING_ARRAY =
@@ -869,6 +870,7 @@ public class BundlePlugin extends AbstractMojo
         }
 
         // Setup defaults
+        properties.put( MAVEN_SYMBOLICNAME, bsn );
         properties.put( Analyzer.BUNDLE_SYMBOLICNAME, bsn );
         properties.put( Analyzer.IMPORT_PACKAGE, "*" );
         properties.put( Analyzer.BUNDLE_VERSION, currentProject.getVersion() );
