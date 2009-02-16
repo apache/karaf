@@ -952,6 +952,9 @@
         </profile>
         <profile>
             <id>deploy</id>
+            <properties>
+                <createSourcesJar>true</createSourcesJar>
+            </properties>
             <build>
                 <defaultGoal>deploy</defaultGoal>
                 <plugins>

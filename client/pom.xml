@@ -135,13 +135,5 @@
         </resources>
     </build>
     
-    <profiles>
-        <profile>
-            <id>deploy</id>
-            <properties>
-                <createSourcesJar>true</createSourcesJar>
-            </properties>
-        </profile>
-    </profiles>
 
 </project>
