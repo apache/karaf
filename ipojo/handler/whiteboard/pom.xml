@@ -60,8 +60,6 @@
 						<Private-Package> org.apache.felix.ipojo.handler.wbp 
 						</Private-Package>
 						<Bundle-Name>${pom.name}</Bundle-Name>
-						<Bundle-SymbolicName> ipojo.event.admin.handler.wbp 
-						</Bundle-SymbolicName>
 						<Include-Resource> META-INF/LICENCE=LICENSE,
 							META-INF/NOTICE=NOTICE </Include-Resource>
 					</instructions>

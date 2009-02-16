@@ -536,8 +536,8 @@ public class ProvidedServiceHandler extends PrimitiveHandler {
                 for (int j = 0; j < itfs.size(); j++) {
                     if (! all.contains(itfs.get(j))) {
                         if (parent == null || (parent != null && ! parent.equals((String) itfs.get(j)))) {
-                            desc.getFactory().getLogger().log(Logger.WARNING, "The specification " + itfs.get(j) + " is not implemented by " + metadata.getAttribute("classname") + 
-                                " it might be a superclass or the class itself.");
+                            desc.getFactory().getLogger().log(Logger.WARNING, "The specification " + itfs.get(j) + " is not implemented by " + metadata.getAttribute("classname") 
+                                    + " it might be a superclass or the class itself.");
                         }
                     }
                 }

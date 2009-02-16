@@ -44,6 +44,7 @@
 		<module>handler/eventadmin</module>
 		<module>handler/whiteboard</module>
 		<module>api</module>
+		<module>junit4osgi</module>
 	</modules>
 		
 	
