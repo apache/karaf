@@ -292,6 +292,8 @@
                                     -->
                                     <include>org.apache.geronimo.gshell.wisdom:gshell-wisdom-core</include>
                                     <include>org.apache.geronimo.gshell.wisdom:gshell-wisdom-bootstrap</include>
+                                    <include>org.codehaus.plexus:plexus-utils</include>
+                                    <include>org.codehaus.plexus:plexus-interpolation</include>
                                     <include>${project.groupId}:${project.artifactId}</include>
                                 </includes>
                             </artifactSet>
