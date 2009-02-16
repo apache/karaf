@@ -386,10 +386,7 @@ public class BundlePlugin extends AbstractMojo
             }
             else
             {
-                String bsn = builder.getProperty( Analyzer.BUNDLE_SYMBOLICNAME );
-                String namespace = bsn.replaceAll( "\\W", "." );
-
-                builder.setProperty( Analyzer.EXPORT_PACKAGE, namespace + ".*" );
+                addLocalPackages( builder, currentProject );
             }
         }
 
@@ -912,6 +909,52 @@ public class BundlePlugin extends AbstractMojo
     protected void setOutputDirectory( File _outputDirectory )
     {
         outputDirectory = _outputDirectory;
+    }
+
+
+    private static void addLocalPackages( Analyzer analyzer, MavenProject project )
+    {
+        DirectoryScanner scanner = new DirectoryScanner();
+        scanner.setBasedir( project.getBuild().getSourceDirectory() );
+        scanner.setIncludes( new String[]
+            { "**/*.java" } );
+
+        scanner.addDefaultExcludes();
+        scanner.scan();
+
+        Collection packages = new HashSet();
+
+        String[] paths = scanner.getIncludedFiles();
+        for ( int i = 0; i < paths.length; i++ )
+        {
+            packages.add( getPackageName( paths[i] ) );
+        }
+
+        StringBuffer exportPackage = new StringBuffer();
+        StringBuffer privatePackage = new StringBuffer();
+
+        for ( Iterator i = packages.iterator(); i.hasNext(); )
+        {
+            String pkg = ( String ) i.next();
+            if ( ".".equals( pkg ) || pkg.contains( ".internal" ) || pkg.contains( ".impl" ) )
+            {
+                privatePackage.append( pkg ).append( ',' );
+            }
+            else
+            {
+                exportPackage.append( pkg ).append( ',' );
+            }
+        }
+
+        analyzer.setProperty( Analyzer.EXPORT_PACKAGE, exportPackage.toString() );
+        analyzer.setProperty( Analyzer.PRIVATE_PACKAGE, privatePackage.toString() );
+    }
+
+
+    public static String getPackageName( String filename )
+    {
+        int n = filename.lastIndexOf( File.separatorChar );
+        return n < 0 ? "." : filename.substring( 0, n ).replace( File.separatorChar, '.' );
     }
 
 
