@@ -31,14 +31,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
-import java.util.zip.ZipException;
 
 import org.apache.maven.archiver.ManifestSection;
 import org.apache.maven.archiver.MavenArchiveConfiguration;
@@ -374,8 +373,8 @@ public class BundlePlugin extends AbstractMojo
         // update BND instructions to add included Maven resources
         includeMavenResources( currentProject, builder, getLog() );
 
-        if ( builder.getProperty( Analyzer.EXPORT_PACKAGE ) == null &&
-             builder.getProperty( Analyzer.PRIVATE_PACKAGE ) == null )
+        if ( builder.getProperty( Analyzer.EXPORT_PACKAGE ) == null
+            && builder.getProperty( Analyzer.PRIVATE_PACKAGE ) == null )
         {
             if ( builder.getProperty( Analyzer.EXPORT_CONTENTS ) != null )
             {
@@ -725,12 +724,7 @@ public class BundlePlugin extends AbstractMojo
     }
 
 
-    /**
-     * @return
-     * @throws ZipException
-     * @throws IOException
-     */
-    protected Jar[] getClasspath( MavenProject currentProject ) throws ZipException, IOException
+    protected Jar[] getClasspath( MavenProject currentProject ) throws IOException, MojoExecutionException
     {
         List list = new ArrayList();
 
@@ -766,7 +760,7 @@ public class BundlePlugin extends AbstractMojo
     }
 
 
-    private Collection getSelectedDependencies( Set artifacts )
+    private Collection getSelectedDependencies( Collection artifacts ) throws MojoExecutionException
     {
         if ( null == excludeDependencies || excludeDependencies.length() == 0 )
         {
@@ -777,19 +771,12 @@ public class BundlePlugin extends AbstractMojo
             return Collections.EMPTY_LIST;
         }
 
-        List excludes = Arrays.asList( excludeDependencies.trim().split( "\\s*,\\s*" ) );
+        Collection selectedDependencies = new HashSet( artifacts );
+        DependencyExcluder excluder = new DependencyExcluder( artifacts );
+        excluder.processHeaders( excludeDependencies );
+        selectedDependencies.removeAll( excluder.getExcludedArtifacts() );
 
-        Collection classpath = new ArrayList();
-        for ( Iterator i = artifacts.iterator(); i.hasNext(); )
-        {
-            Artifact artifact = ( Artifact ) i.next();
-            if ( !excludes.contains( artifact.getArtifactId() ) )
-            {
-                classpath.add( artifact );
-            }
-        }
-
-        return classpath;
+        return selectedDependencies;
     }
 
 
@@ -1021,16 +1008,23 @@ public class BundlePlugin extends AbstractMojo
     }
 
 
-    protected static Collection getEmbeddableArtifacts( MavenProject project, Analyzer analyzer )
+    protected Collection getEmbeddableArtifacts( MavenProject project, Analyzer analyzer )
+        throws MojoExecutionException
     {
+        final Collection artifacts;
+
         String embedTransitive = analyzer.getProperty( DependencyEmbedder.EMBED_TRANSITIVE );
         if ( Boolean.valueOf( embedTransitive ).booleanValue() )
         {
             // includes transitive dependencies
-            return project.getArtifacts();
+            artifacts = project.getArtifacts();
+        }
+        else
+        {
+            // only includes direct dependencies
+            artifacts = project.getDependencyArtifacts();
         }
 
-        // only includes direct dependencies
-        return project.getDependencyArtifacts();
+        return getSelectedDependencies( artifacts );
     }
 }
