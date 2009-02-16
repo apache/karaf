@@ -1,7 +1,25 @@
+Changes from 1.4.3 to 2.0.0
+---------------------------
+
+ * [2009-02-16] FELIX-807,FELIX-782,FELIX-660,FELIX-549,FELIX-546,FELIX-545: Use latest version of the Bnd Tool (0.0.311)
+ * [2009-02-16] FELIX-941: store the generated default symbolicname in $(maven-symbolicname) property
+ * [2009-02-16] FELIX-912: set default Export-Package based on local source files
+ * [2009-02-16] FELIX-684: support filters in excludeDependencies, such as *;scope=runtime
+ * [2009-02-16] FELIX-684: separate out dependency filtering code so we can re-use it when excluding
+ * [2009-01-30] FELIX-806: pickup <archive> settings in bundleplugin configuration (otherwise fall back to the jarplugin settings) and enable support of the addMavenDescriptor setting
+ * [2009-01-30] FELIX-850: local fix for MSHARED-86 (should use isFile instead of exists)
+ * [2009-01-29] FELIX-899: update to latest editions of Bnd and Bindex
+ * [2009-01-29] FELIX-899: first step, widen dependency resolution and pass everything except test dependencies onto BND
+ * [2008-12-05] Additional debug to help with problem determination
+ * [2008-12-03] FELIX-760: commit latest bindex code
+ * [2008-12-03] FELIX-831,FELIX-677: update to version 0.0.295 of the Bnd tool
+ * [2008-08-27] FELIX-699: set analyzer base before loading properties in manifest goal
+
+
 Changes from 1.4.2 to 1.4.3
 ---------------------------
 
- * [2008-08-07] FELIX-661: maven bundle plugin does not close the accessed fie /jar streams
+ * [2008-08-07] FELIX-661: maven bundle plugin does not close the accessed zip/jar streams
 
 Changes from 1.4.1 to 1.4.2
 ---------------------------
