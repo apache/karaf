@@ -100,6 +100,8 @@
                                     <include>org.apache.felix:org.apache.felix.framework</include>
                                     <include>org.apache.felix:org.osgi.core</include>
                                     <include>${project.groupId}:${project.artifactId}</include>
+                                    <include>org.slf4j:slf4j-api</include>
+                                    <include>org.slf4j:slf4j-nop</include>
                                 </includes>
                             </artifactSet>
                             <filters>
@@ -132,5 +134,14 @@
             </resource>
         </resources>
     </build>
+    
+    <profiles>
+        <profile>
+            <id>deploy</id>
+            <properties>
+                <createSourcesJar>true</createSourcesJar>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>
