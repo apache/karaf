@@ -90,7 +90,6 @@ public class ManagementAgent implements DisposableBean {
         } catch (NotCompliantMBeanException e) {
             // If this is not a "normal" MBean, then try to deploy it using JMX
             // annotations
-            LOG.info("It's not a normal MBean");
             ModelMBeanInfo mbi = assembler.getMBeanInfo(obj, name.toString());
             RequiredModelMBean mbean = (RequiredModelMBean) mbeanServer.instantiate(RequiredModelMBean.class.getName());
             mbean.setModelMBeanInfo(mbi);

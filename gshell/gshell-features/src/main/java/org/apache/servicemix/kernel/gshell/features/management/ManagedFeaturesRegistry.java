@@ -84,7 +84,6 @@ public class ManagedFeaturesRegistry implements InitializingBean, FeaturesRegist
 
     public void register(Feature feature) {
         try {
-            LOG.info("Registering feature: " + feature);
             ManagedFeature mf = new ManagedFeature(feature, featuresService);
             availableFeatures.put(feature.getId(), mf);
             if ( mbeanServerInitialized ) {
@@ -97,7 +96,6 @@ public class ManagedFeaturesRegistry implements InitializingBean, FeaturesRegist
 
     public void unregister(Feature feature) {
         try {
-            LOG.info("Unregistering feature: " + feature);
             ManagedFeature mf = availableFeatures.remove(feature.getId());
             if ( mbeanServerInitialized ) {
                 managementAgent.unregister(namingStrategy.getObjectName(mf));
@@ -109,7 +107,6 @@ public class ManagedFeaturesRegistry implements InitializingBean, FeaturesRegist
 
     public void registerInstalled(Feature feature) {
         try {
-            LOG.info("Registering installed feature: " + feature);
             ManagedFeature mf = new ManagedFeature(feature, featuresService);
             installedFeatures.put(feature.getId(), mf);
             if ( mbeanServerInitialized ) {
@@ -122,7 +119,6 @@ public class ManagedFeaturesRegistry implements InitializingBean, FeaturesRegist
 
     public void unregisterInstalled(Feature feature) {
         try {
-            LOG.info("Unregistering installed feature: " + feature);
             ManagedFeature mf = installedFeatures.remove(feature.getId());
             if ( mbeanServerInitialized ) {
                 managementAgent.unregister(namingStrategy.getObjectName(mf, true));
@@ -134,7 +130,6 @@ public class ManagedFeaturesRegistry implements InitializingBean, FeaturesRegist
 
     public void register(Repository repository) {
         try {
-            LOG.info("Registering repository: " + repository);
             ManagedRepository mr = new ManagedRepository(repository, featuresService);
             repositories.put(repository.getURI().toString(), mr);
 
@@ -153,7 +148,6 @@ public class ManagedFeaturesRegistry implements InitializingBean, FeaturesRegist
 
     public void unregister(Repository repository) {
         try {
-            LOG.info("Unregistering repository: " + repository);
             ManagedRepository mr = repositories.remove(repository.getURI().toString());
 
             for (Feature f : repository.getFeatures()) {
