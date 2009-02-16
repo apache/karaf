@@ -151,6 +151,7 @@ function hideDetails( id ) {
 
 function renderDetails( data ) {
 	data = data.data[0];
+	$("#pluginInlineDetails").remove();
 	$("#entry" + data.id + " > td").eq(1).append("<div id='pluginInlineDetails'/>");
 	$("#img" + data.id).each(function() {
 		if ( drawDetails ) {

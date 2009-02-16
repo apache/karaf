@@ -139,7 +139,7 @@ function showDetails( id ) {
 
 function hideDetails( id ) {
 	$("#img" + id).each(function() {
-		$("#bundleInlineDetails").remove();
+		$("#pluginInlineDetails").remove();
         this.setAttribute("src", appRoot + "/res/imgs/arrow_right.png");
         this.setAttribute("onClick", "showDetails('" + id + "')");
         this.setAttribute("title", "Details");
@@ -149,7 +149,8 @@ function hideDetails( id ) {
 
 function renderDetails( data ) {
 	data = data.data[0];
-	$("#entry" + data.id + " > td").eq(1).append("<div id='bundleInlineDetails'/>");
+	$("#pluginInlineDetails").remove();
+	$("#entry" + data.id + " > td").eq(1).append("<div id='pluginInlineDetails'/>");
 	$("#img" + data.id).each(function() {
 		if ( drawDetails ) {
             this.setAttribute("src", appRoot + "/res/imgs/arrow_left.png");
@@ -165,7 +166,7 @@ function renderDetails( data ) {
             this.setAttribute("alt", "Hide Details");
 		}
 	});
-	$("#bundleInlineDetails").append("<table border='0'><tbody></tbody></table>");
+	$("#pluginInlineDetails").append("<table border='0'><tbody></tbody></table>");
     var details = data.props;
     for (var idx in details) {
         var prop = details[idx];
@@ -198,7 +199,7 @@ function renderDetails( data ) {
         	txt = txt + "\u00a0";
         }
         txt = txt + "</td></tr>";
-        $("#bundleInlineDetails > table > tbody").append(txt);
+        $("#pluginInlineDetails > table > tbody").append(txt);
 	}
 }
 
