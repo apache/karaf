@@ -102,7 +102,8 @@ public class ModuleImpl implements IModule
     public ModuleImpl(
         Logger logger, Map configMap, FelixResolver resolver,
         Bundle bundle, String id, Map headerMap, IContent content,
-        URLStreamHandler streamHandler)
+        URLStreamHandler streamHandler, String[] bootPkgs,
+        boolean[] bootPkgWildcards)
         throws BundleException
     {
         m_logger = logger;
@@ -113,6 +114,8 @@ public class ModuleImpl implements IModule
         m_headerMap = headerMap;
         m_content = content;
         m_streamHandler = streamHandler;
+        m_bootPkgs = bootPkgs;
+        m_bootPkgWildcards = bootPkgWildcards;
 
         // We need to special case the system bundle module, which does not
         // have a content.
@@ -185,28 +188,7 @@ public class ModuleImpl implements IModule
             m_nativeLibraries = null;
             m_symbolicName = null;
         }
-
-        // Read the boot delegation property and parse it.
-// TODO: REFACTOR - This used to be per framework, now it is per module
-//       which doesn't really make sense. Maybe pass in the arrays.
-        String s = (m_configMap == null)
-            ? null
-            : (String) m_configMap.get(Constants.FRAMEWORK_BOOTDELEGATION);
-        s = (s == null) ? "java.*" : s + ",java.*";
-        StringTokenizer st = new StringTokenizer(s, " ,");
-        m_bootPkgs = new String[st.countTokens()];
-        m_bootPkgWildcards = new boolean[m_bootPkgs.length];
-        for (int i = 0; i < m_bootPkgs.length; i++)
-        {
-            s = st.nextToken();
-            if (s.endsWith("*"))
-            {
-                m_bootPkgWildcards[i] = true;
-                s = s.substring(0, s.length() - 1);
-            }
-            m_bootPkgs[i] = s;
-        }
-   }
+    }
 
     //
     // Metadata access methods.
@@ -492,8 +474,6 @@ public class ModuleImpl implements IModule
         throws ClassNotFoundException, ResourceNotFoundException
     {
         // First, try to resolve the originating module.
-// TODO: FRAMEWORK - Consider opimizing this call to resolve, since it is called
-// for each class load.
         try
         {
             m_resolver.resolve(this);
@@ -656,8 +636,6 @@ public class ModuleImpl implements IModule
         List completeUrlList = new ArrayList();
 
         // First, try to resolve the originating module.
-// TODO: FRAMEWORK - Consider opimizing this call to resolve, since it is called
-// for each class load.
         try
         {
             m_resolver.resolve(this);

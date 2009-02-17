@@ -49,13 +49,13 @@ import org.apache.felix.moduleloader.ICapability;
 import org.apache.felix.moduleloader.IContent;
 import org.apache.felix.moduleloader.IModule;
 import org.apache.felix.moduleloader.IURLPolicy;
-import org.apache.felix.moduleloader.ResourceNotFoundException;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.Version;
 
 /**
  * The ExtensionManager class is used in several ways.
@@ -613,9 +613,13 @@ class ExtensionManager extends URLStreamHandler implements IContent
 
     class ExtensionManagerModule extends ModuleImpl
     {
+        private final Version m_version;
         ExtensionManagerModule(Felix felix) throws BundleException
         {
-            super(m_logger, null, null, felix, "0", null, null, null);
+            super(m_logger, null, null, felix, "0", null, null, null,
+                felix.getBootPackages(), felix.getBootPackageWildcards());
+            m_version = new Version((String)
+                felix.getConfig().get(FelixConstants.FELIX_VERSION_PROPERTY));
         }
 
         public Map getHeaders()
@@ -631,6 +635,11 @@ class ExtensionManager extends URLStreamHandler implements IContent
         public String getSymbolicName()
         {
             return FelixConstants.SYSTEM_BUNDLE_SYMBOLICNAME;
+        }
+
+        public Version getVersion()
+        {
+            return m_version;
         }
 
         public Class getClassByDelegation(String name) throws ClassNotFoundException

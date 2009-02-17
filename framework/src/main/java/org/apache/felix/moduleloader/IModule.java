@@ -25,6 +25,7 @@ import java.util.Enumeration;
 import java.util.Map;
 import org.apache.felix.framework.util.manifestparser.R4Library;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Version;
 
 public interface IModule
 {
@@ -34,6 +35,7 @@ public interface IModule
     // Metadata access methods.
     Map getHeaders();
     String getSymbolicName();
+    Version getVersion();
     ICapability[] getCapabilities();
     IRequirement[] getRequirements();
     IRequirement[] getDynamicRequirements();

@@ -58,12 +58,11 @@ public class Felix extends BundleImpl implements Framework
     // Lock object used to determine if an individual bundle
     // lock or the global lock can be acquired.
     private final Object[] m_bundleLock = new Object[0];
-    // Maps a thread object to a single-element int array to
-    // keep track of how many locks the thread has acquired.
-    private final Map m_lockingThreadMap = new HashMap();
-    // Separately keeps track of how many times the global
-    // lock was acquired by a given thread; if this value is
-    // zero, then it means the global lock is free.
+    // The thread currently holding the global lock.
+    private Thread m_globalLockThread = null;
+    // How many times the global lock was acquired by the thread holding
+    // the global lock; if this value is zero, then it means the global
+    // lock is free.
     private int m_globalLockCount = 0;
 
     // Maps a bundle location to a bundle location;
@@ -114,6 +113,10 @@ public class Felix extends BundleImpl implements Framework
     // Execution environment.
     private String m_executionEnvironment = "";
     private Set m_executionEnvironmentCache = new HashSet();
+
+    // Boot package delegation.
+    private final String[] m_bootPkgs;
+    private final boolean[] m_bootPkgWildcards;
 
     // Shutdown thread.
     private Thread m_shutdownThread = null;
@@ -295,6 +298,26 @@ public class Felix extends BundleImpl implements Framework
         // definition for creating the system bundle module.
         m_extensionManager = new ExtensionManager(m_logger, this);
         addModule(m_extensionManager.getModule());
+
+
+        // Read the boot delegation property and parse it.
+        String s = (m_configMap == null)
+            ? null
+            : (String) m_configMap.get(Constants.FRAMEWORK_BOOTDELEGATION);
+        s = (s == null) ? "java.*" : s + ",java.*";
+        StringTokenizer st = new StringTokenizer(s, " ,");
+        m_bootPkgs = new String[st.countTokens()];
+        m_bootPkgWildcards = new boolean[m_bootPkgs.length];
+        for (int i = 0; i < m_bootPkgs.length; i++)
+        {
+            s = st.nextToken();
+            if (s.endsWith("*"))
+            {
+                m_bootPkgWildcards[i] = true;
+                s = s.substring(0, s.length() - 1);
+            }
+            m_bootPkgs[i] = s;
+        }
     }
 
     Logger getLogger()
@@ -320,6 +343,16 @@ public class Felix extends BundleImpl implements Framework
     URLStreamHandler getBundleStreamHandler()
     {
         return m_bundleStreamHandler;
+    }
+
+    String[] getBootPackages()
+    {
+        return m_bootPkgs;
+    }
+
+    boolean[] getBootPackageWildcards()
+    {
+        return m_bootPkgWildcards;
     }
 
     private Map createUnmodifiableMap(Map mutableMap)
@@ -1075,11 +1108,6 @@ ex.printStackTrace();
 
         try
         {
-            if (bundle.getState() == Bundle.UNINSTALLED)
-            {
-                throw new IllegalArgumentException("Bundle is uninstalled.");
-            }
-
             if (startLevel >= 1)
             {
                 impl.setStartLevel(startLevel);
@@ -1314,29 +1342,11 @@ ex.printStackTrace();
     void startBundle(BundleImpl bundle, boolean record) throws BundleException
     {
         // CONCURRENCY NOTE:
-// TODO: REFACTOR - This concurrency note will no longer be accurate.
-        // Starting a bundle may actually impact many bundles, since
-        // the bundle being started my need to be resolved, which in
-        // turn may need to resolve other bundles. Despite this fact,
-        // we only acquire the lock for the bundle being started, because
-        // when resolve is called on this bundle, it will eventually
-        // call resolve on the module loader search policy, which does
-        // its own locking on the module factory instance. Since the
-        // resolve algorithm is locking the module factory instance, it
-        // is not possible for other bundles to be installed or removed,
-        // so we don't have to worry about these possibilities.
-        //
-        // Further, if other bundles are started during this operation,
-        // then either they will resolve first because they got the lock
-        // on the module factory or we will resolve first since we got
-        // the lock on the module factory, so there should be no interference.
-        // If other bundles are stopped or uninstalled, this should pose
-        // no problems, since this does not impact their resolved state.
-        // If a refresh occurs, then the refresh algorithm ulimately has
-        // to acquire the module factory instance lock too before it can
-        // completely purge old modules, so it should also complete either
-        // before or after this bundle is started. At least that's the
-        // theory.
+        // We will first acquire the bundle lock for the specific bundle
+        // as long as the bundle is INSTALLED, RESOLVED, or ACTIVE. If this
+        // bundle is not yet resolved, then it will be resolved too. In
+        // that case, the global lock will be acquired to make sure no
+        // bundles can be installed or uninstalled during the resolve.
 
         // Acquire bundle lock.
         try
@@ -1356,7 +1366,6 @@ ex.printStackTrace();
                     + " cannot be started, since it is either starting or stopping.");
             }
         }
-
         try
         {
             // The spec doesn't say whether it is possible to start an extension
@@ -1519,12 +1528,7 @@ ex.printStackTrace();
             // Variable to indicate whether bundle is active or not.
             Throwable rethrow = null;
 
-            // Cannot update an uninstalled bundle.
             final int oldState = bundle.getState();
-            if (oldState == Bundle.UNINSTALLED)
-            {
-                throw new IllegalStateException("The bundle is uninstalled.");
-            }
 
             // First get the update-URL from our header.
             String updateLocation = (String)
@@ -1837,11 +1841,6 @@ ex.printStackTrace();
 
         try
         {
-            if (bundle.getState() == Bundle.UNINSTALLED)
-            {
-                throw new IllegalStateException("Bundle " + bundle + " is uninstalled.");
-            }
-
             // Extension Bundles are not removed until the framework is shutdown
             if (bundle.isExtension())
             {
@@ -1905,18 +1904,8 @@ ex.printStackTrace();
         // Fire UNINSTALLED event without holding the lock.
         fireBundleEvent(BundleEvent.UNINSTALLED, bundle);
 
-        // Acquire bundle lock again to check if we can auto-refresh.
-        try
-        {
-            acquireBundleLock(bundle, Bundle.UNINSTALLED);
-        }
-        catch (IllegalStateException ex)
-        {
-            // Auto-refreshing is not required, so if we get an exception
-            // here, we should probably just return, but this should never
-            // happen.
-            return;
-        }
+        // Acquire global lock to check if we should auto-refresh.
+        acquireGlobalLock();
 
         try
         {
@@ -1938,8 +1927,8 @@ ex.printStackTrace();
         }
         finally
         {
-            // Always release bundle lock.
-            releaseBundleLock(bundle);
+            // Always release the global lock.
+            releaseGlobalLock();
         }
     }
 
@@ -3240,7 +3229,7 @@ ex.printStackTrace();
         // Acquire bundle lock.
         try
         {
-            acquireBundleLock(bundle, Bundle.INSTALLED);
+            acquireBundleLock(bundle, Bundle.INSTALLED | Bundle.RESOLVED);
         }
         catch (IllegalStateException ex)
         {
@@ -4109,6 +4098,15 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
         }
     }
 
+    /**
+     * This method acquires the lock for the specified bundle as long as the
+     * bundle is in one of the specified states. If it is not, an exception
+     * is thrown. Bundle state changes will be monitored to avoid deadlocks.
+     * @param bundle The bundle to lock.
+     * @param desiredStates Logically OR'ed desired bundle states.
+     * @throws java.lang.IllegalStateException If the bundle is not in one of the
+     *         specified desired states.
+    **/
     void acquireBundleLock(BundleImpl bundle, int desiredStates)
         throws IllegalStateException
     {
@@ -4118,8 +4116,7 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
             // or if any thread has the global lock, unless the current thread
             // holds the global lock.
             while (!bundle.isLockable() ||
-                ((m_globalLockCount > 0)
-                && !m_lockingThreadMap.containsKey(Thread.currentThread())))
+                ((m_globalLockThread != null) && (m_globalLockThread != Thread.currentThread())))
             {
                 // Check to make sure the bundle is in a desired state.
                 // If so, keep waiting. If not, throw an exception.
@@ -4137,59 +4134,46 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
                 }
             }
 
-            // Increment the current thread's lock count.
-            int[] counter = (int[]) m_lockingThreadMap.get(Thread.currentThread());
-            if (counter == null)
+            // Now that we can acquire the bundle lock, let's check to make sure
+            // it is in a desired state; if not, throw an exception and do not
+            // lock it.
+            if ((desiredStates & bundle.getState()) == 0)
             {
-                counter = new int[] { 0 };
+                throw new IllegalStateException("Bundle in unexpected state.");
             }
-            counter[0]++;
-            m_lockingThreadMap.put(Thread.currentThread(), counter);
 
             // Acquire the bundle lock.
             bundle.lock();
         }
     }
 
+    /**
+     * Releases the bundle's lock.
+     * @param bundle The bundle whose lock is to be released.
+     * @throws java.lang.IllegalStateException If the calling thread does not
+     *         own the bundle lock.
+    **/
     void releaseBundleLock(BundleImpl bundle)
     {
         synchronized (m_bundleLock)
         {
-            // Decrement the current thread's lock count.
-            int[] counter = (int[]) m_lockingThreadMap.get(Thread.currentThread());
-            if (counter != null)
-            {
-                counter[0]--;
-                if (counter[0] == 0)
-                {
-                    m_lockingThreadMap.remove(Thread.currentThread());
-                }
-                else
-                {
-                    m_lockingThreadMap.put(Thread.currentThread(), counter);
-                }
-            }
-            else
-            {
-                m_logger.log(Logger.LOG_ERROR, "Thread released a lock it doesn't own: " + bundle);
-            }
-
             // Unlock the bundle.
             bundle.unlock();
             m_bundleLock.notifyAll();
         }
     }
 
+    /**
+     * Acquires the global lock, which is necessary for multi-bundle operations
+     * like refreshing and resolving.
+    **/
     private void acquireGlobalLock()
     {
         synchronized (m_bundleLock)
         {
-            // Wait as long as there are multiple threads holding locks,
-            // but proceed if there are no lock holders or the current thread
-            // is the only lock holder.
-            while ((m_lockingThreadMap.size() > 1)
-               || ((m_lockingThreadMap.size() == 1)
-                   && !m_lockingThreadMap.containsKey(Thread.currentThread())))
+            // Wait as long as some other thread holds the global lock.
+            while ((m_globalLockThread != null)
+                && (m_globalLockThread != Thread.currentThread()))
             {
                 try
                 {
@@ -4201,48 +4185,36 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
                 }
             }
 
-            // Increment the current thread's lock count.
-            int[] counter = (int[]) m_lockingThreadMap.get(Thread.currentThread());
-            if (counter == null)
-            {
-                counter = new int[] { 0 };
-            }
-            counter[0]++;
-            m_lockingThreadMap.put(Thread.currentThread(), counter);
-
             // Increment the current thread's global lock count.
             m_globalLockCount++;
+            m_globalLockThread = Thread.currentThread();
         }
     }
 
+    /**
+     * Releases the global lock.
+     * @throws java.lang.IllegalStateException If the calling thread does not
+     *         own the global lock.
+    **/
     private void releaseGlobalLock()
     {
-        // Always unlock any locked bundles.
         synchronized (m_bundleLock)
         {
-            // Decrement the current thread's lock count.
-            int[] counter = (int[]) m_lockingThreadMap.get(Thread.currentThread());
-            if (counter != null)
+            // Decrement the current thread's global lock count;
+            if (m_globalLockThread == Thread.currentThread())
             {
-                counter[0]--;
-                if (counter[0] == 0)
+                m_globalLockCount--;
+                if (m_globalLockCount == 0)
                 {
-                    m_lockingThreadMap.remove(Thread.currentThread());
+                    m_globalLockThread = null;
+                    m_bundleLock.notifyAll();
                 }
-                else
-                {
-                    m_lockingThreadMap.put(Thread.currentThread(), counter);
-                }
-                counter = new int[] { 0 };
             }
             else
             {
-                m_logger.log(Logger.LOG_ERROR, "Thread release a lock it doesn't own.");
+                throw new IllegalStateException(
+                    "The current thread doesn't own the global lock.");
             }
-
-            // Decrement the current thread's global lock count;
-            m_globalLockCount--;
-            m_bundleLock.notifyAll();
         }
     }
 }

@@ -1707,7 +1707,6 @@ public class Resolver
     public static interface ResolverState
     {
         IModule[] getModules();
-        // TODO: RESOLVER - This should be on module.
         Map getPotentialFragments(IModule module);
         List getPotentialHosts(IModule module);
         PackageSource[] getResolvedCandidates(IRequirement req);

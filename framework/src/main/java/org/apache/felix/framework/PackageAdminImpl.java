@@ -101,9 +101,7 @@ class PackageAdminImpl implements PackageAdmin, Runnable
     **/
     public Bundle[] getBundles(String symbolicName, String versionRange)
     {
-// TODO: PACKAGEADMIN - This could be made more efficient by reducing object creation.
-        VersionRange vr = (versionRange == null)
-            ? null : VersionRange.parse(versionRange);
+        VersionRange vr = (versionRange == null) ? null : VersionRange.parse(versionRange);
         Bundle[] bundles = m_felix.getBundles();
         List list = new ArrayList();
         for (int i = 0; (bundles != null) && (i < bundles.length); i++)
@@ -111,9 +109,7 @@ class PackageAdminImpl implements PackageAdmin, Runnable
             String sym = bundles[i].getSymbolicName();
             if ((sym != null) && sym.equals(symbolicName))
             {
-                String s = (String) ((BundleImpl) bundles[i])
-                    .getCurrentModule().getHeaders().get(Constants.BUNDLE_VERSION);
-                Version v = (s == null) ? new Version("0.0.0") : new Version(s);
+                Version v = ((BundleImpl) bundles[i]).getCurrentModule().getVersion();
                 if ((vr == null) || vr.isInRange(v))
                 {
                     list.add(bundles[i]);
@@ -128,12 +124,8 @@ class PackageAdminImpl implements PackageAdmin, Runnable
         Arrays.sort(bundles,new Comparator() {
             public int compare(Object o1, Object o2)
             {
-                String s1 = (String) ((BundleImpl) o1)
-                    .getCurrentModule().getHeaders().get(Constants.BUNDLE_VERSION);
-                String s2 = (String) ((BundleImpl) o2)
-                    .getCurrentModule().getHeaders().get(Constants.BUNDLE_VERSION);
-                Version v1 = (s1 == null) ? new Version("0.0.0") : new Version(s1);
-                Version v2 = (s2 == null) ? new Version("0.0.0") : new Version(s2);
+                Version v1 = ((BundleImpl) o1).getCurrentModule().getVersion();
+                Version v2 = ((BundleImpl) o2).getCurrentModule().getVersion();
                 // Compare in reverse order to get descending sort.
                 return v2.compareTo(v1);
             }

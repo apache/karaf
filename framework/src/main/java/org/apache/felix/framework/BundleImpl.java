@@ -33,7 +33,7 @@ import org.osgi.framework.*;
 class BundleImpl implements Bundle
 {
     // No one should use this field directly, use getFramework() instead.
-    private final Felix _m_felix;
+    private final Felix __m_felix;
 
     private final BundleArchive m_archive;
     private IModule[] m_modules = new IModule[0];
@@ -61,7 +61,7 @@ class BundleImpl implements Bundle
 
     BundleImpl(Felix felix, BundleArchive archive) throws Exception
     {
-        _m_felix = felix;
+        __m_felix = felix;
         m_archive = archive;
         m_state = Bundle.INSTALLED;
         m_stale = false;
@@ -83,7 +83,7 @@ class BundleImpl implements Bundle
     // not access the field directly.
     Felix getFramework()
     {
-        return _m_felix;
+        return __m_felix;
     }
 
     synchronized void dispose()
@@ -950,7 +950,9 @@ class BundleImpl implements Bundle
             Long.toString(getBundleId()) + "." + Integer.toString(revision),
             headerMap,
             m_archive.getRevision(revision).getContent(),
-            getFramework().getBundleStreamHandler());
+            getFramework().getBundleStreamHandler(),
+            getFramework().getBootPackages(),
+            getFramework().getBootPackageWildcards());
 
         // Verify that the bundle symbolic name + version is unique.
         if (module.getManifestVersion().equals("2"))
