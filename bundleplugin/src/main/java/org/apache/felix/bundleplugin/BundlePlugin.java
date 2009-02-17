@@ -52,6 +52,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
+import org.apache.maven.shared.osgi.DefaultMaven2OsgiConverter;
 import org.apache.maven.shared.osgi.Maven2OsgiConverter;
 import org.codehaus.plexus.archiver.UnArchiver;
 import org.codehaus.plexus.archiver.manager.ArchiverManager;
@@ -169,9 +170,9 @@ public class BundlePlugin extends AbstractMojo
     private Map instructions = new HashMap();
 
     /**
-     * @component
+     * Use locally patched version for now.
      */
-    private Maven2OsgiConverter m_maven2OsgiConverter;
+    private Maven2OsgiConverter m_maven2OsgiConverter = new DefaultMaven2OsgiConverter();
 
     /**
      * The archive configuration to use.
