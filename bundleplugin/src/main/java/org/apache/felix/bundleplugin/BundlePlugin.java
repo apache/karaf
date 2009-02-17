@@ -373,21 +373,11 @@ public class BundlePlugin extends AbstractMojo
         // update BND instructions to add included Maven resources
         includeMavenResources( currentProject, builder, getLog() );
 
-        if ( builder.getProperty( Analyzer.EXPORT_PACKAGE ) == null
-            && builder.getProperty( Analyzer.PRIVATE_PACKAGE ) == null )
+        // calculate default export/private settings based on sources
+        if ( builder.getProperty( Analyzer.PRIVATE_PACKAGE ) == null
+            || builder.getProperty( Analyzer.EXPORT_PACKAGE ) == null )
         {
-            if ( builder.getProperty( Analyzer.EXPORT_CONTENTS ) != null )
-            {
-                /*
-                 * if we have exportcontents but no export packages or private packages then we're probably embedding or
-                 * inlining one or more jars, so set private package to a non-null (but empty) value to keep Bnd happy.
-                 */
-                builder.setProperty( Analyzer.PRIVATE_PACKAGE, "!*" );
-            }
-            else
-            {
-                addLocalPackages( builder, currentProject );
-            }
+            addLocalPackages( currentProject.getBuild().getSourceDirectory(), builder );
         }
 
         // update BND instructions to embed selected Maven dependencies
@@ -912,46 +902,68 @@ public class BundlePlugin extends AbstractMojo
     }
 
 
-    private static void addLocalPackages( Analyzer analyzer, MavenProject project )
+    private static void addLocalPackages( String sourceDirectory, Analyzer analyzer )
     {
-        DirectoryScanner scanner = new DirectoryScanner();
-        scanner.setBasedir( project.getBuild().getSourceDirectory() );
-        scanner.setIncludes( new String[]
-            { "**/*.java" } );
-
-        scanner.addDefaultExcludes();
-        scanner.scan();
-
         Collection packages = new HashSet();
 
-        String[] paths = scanner.getIncludedFiles();
-        for ( int i = 0; i < paths.length; i++ )
+        if ( sourceDirectory != null && new File( sourceDirectory ).isDirectory() )
         {
-            packages.add( getPackageName( paths[i] ) );
+            // scan local Java sources for potential packages
+            DirectoryScanner scanner = new DirectoryScanner();
+            scanner.setBasedir( sourceDirectory );
+            scanner.setIncludes( new String[]
+                { "**/*.java" } );
+
+            scanner.addDefaultExcludes();
+            scanner.scan();
+
+            String[] paths = scanner.getIncludedFiles();
+            for ( int i = 0; i < paths.length; i++ )
+            {
+                packages.add( getPackageName( paths[i] ) );
+            }
         }
 
-        StringBuffer exportPackage = new StringBuffer();
-        StringBuffer privatePackage = new StringBuffer();
+        StringBuffer exportedPkgs = new StringBuffer();
+        StringBuffer privatePkgs = new StringBuffer();
 
         for ( Iterator i = packages.iterator(); i.hasNext(); )
         {
             String pkg = ( String ) i.next();
-            if ( ".".equals( pkg ) || pkg.contains( ".internal" ) || pkg.contains( ".impl" ) )
+
+            // mark all source packages as private by default (can be overridden by export list)
+            privatePkgs.append( pkg ).append( ',' );
+
+            // we can't export the default package (".") and we shouldn't export internal packages 
+            if ( !( ".".equals( pkg ) || pkg.contains( ".internal" ) || pkg.contains( ".impl" ) ) )
             {
-                privatePackage.append( pkg ).append( ',' );
-            }
-            else
-            {
-                exportPackage.append( pkg ).append( ',' );
+                exportedPkgs.append( pkg ).append( ',' );
             }
         }
 
-        analyzer.setProperty( Analyzer.EXPORT_PACKAGE, exportPackage.toString() );
-        analyzer.setProperty( Analyzer.PRIVATE_PACKAGE, privatePackage.toString() );
+        if ( analyzer.getProperty( Analyzer.EXPORT_PACKAGE ) == null )
+        {
+            if ( analyzer.getProperty( Analyzer.EXPORT_CONTENTS ) == null )
+            {
+                // no -exportcontents overriding the exports, so use our computed list
+                analyzer.setProperty( Analyzer.EXPORT_PACKAGE, exportedPkgs.toString() );
+            }
+            else
+            {
+                // leave Export-Package empty (but non-null) as we have -exportcontents
+                analyzer.setProperty( Analyzer.EXPORT_PACKAGE, "" );
+            }
+        }
+
+        if ( analyzer.getProperty( Analyzer.PRIVATE_PACKAGE ) == null )
+        {
+            // if there are really no private packages then use "!*" as this will keep the Bnd Tool happy
+            analyzer.setProperty( Analyzer.PRIVATE_PACKAGE, privatePkgs.length() == 0 ? "!*" : privatePkgs.toString() );
+        }
     }
 
 
-    public static String getPackageName( String filename )
+    private static String getPackageName( String filename )
     {
         int n = filename.lastIndexOf( File.separatorChar );
         return n < 0 ? "." : filename.substring( 0, n ).replace( File.separatorChar, '.' );
