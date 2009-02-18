@@ -30,6 +30,11 @@
   http://servicemix.apache.org/schema/servicemix-jaas.xsd">
 
     <!--
+      - The following beans define an alternate realm which uses the OSGi Configuration Admin service
+      - to obtain passwords.  However, this realm is not really secure as there is no access restriction
+      - on this service, which means any bundle could access all the passwords.
+      -->
+    <!--
     <bean id="configAdminHolder" class="org.apache.servicemix.kernel.jaas.modules.osgi.ConfigAdminHolder">
         <property name="service" ref="configAdmin" />
     </bean>
