@@ -320,11 +320,11 @@ class ServiceRegistrationImpl implements ServiceRegistration
             return null;
         }
     }
-    
+
     class ServiceReferenceImpl implements ServiceReference
     {
         private ServiceReferenceImpl() {}
-    
+
         ServiceRegistrationImpl getServiceRegistration()
         {
             return ServiceRegistrationImpl.this;
@@ -406,7 +406,7 @@ class ServiceRegistrationImpl implements ServiceRegistration
             // Get package wiring from service provider.
             IModule providerModule = ((BundleImpl) m_bundle).getCurrentModule();
             IWire providerWire = Util.getWire(providerModule, pkgName);
-            
+
             // Case 2: Only include service reference if the service
             // object uses the same class as the requester.
             if (providerWire == null)
@@ -461,8 +461,8 @@ class ServiceRegistrationImpl implements ServiceRegistration
                 return 0; // same service
             }
 
-            Object rankObj = (Integer) getProperty(Constants.SERVICE_RANKING);
-            Object otherRankObj = (Integer) other.getProperty(Constants.SERVICE_RANKING);
+            Object rankObj = getProperty(Constants.SERVICE_RANKING);
+            Object otherRankObj = other.getProperty(Constants.SERVICE_RANKING);
 
             // If no rank, then spec says it defaults to zero.
             rankObj = (rankObj == null) ? new Integer(0) : rankObj;
