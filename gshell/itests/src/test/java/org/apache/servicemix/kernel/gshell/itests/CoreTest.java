@@ -25,7 +25,8 @@ import org.osgi.framework.Bundle;
 public class CoreTest extends AbstractIntegrationTest {
 
     static {
-        System.setProperty("jline.terminal", "org.apache.geronimo.gshell.terminal.AutoDetectedTerminal");
+        System.setProperty("servicemix.startLocalConsole", "false");
+        System.setProperty("servicemix.startRemoteShell", "false");
     }
 
     @Override
