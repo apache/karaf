@@ -105,8 +105,9 @@ public class FeaturesServiceTest extends TestCase {
         expect(bundleContext.getBundles()).andReturn(new Bundle[0]);
         expect(bundleContext.installBundle(isA(String.class),
                                            isA(InputStream.class))).andReturn(installedBundle);
-        installedBundle.start();
         expect(installedBundle.getBundleId()).andReturn(12345L);
+        expect(bundleContext.getBundle(12345L)).andReturn(installedBundle);
+        installedBundle.start();
 
         expect(preferencesService.getUserPreferences("FeaturesServiceState")).andStubReturn(prefs);
         expect(prefs.node("repositories")).andReturn(repositoriesNode);

@@ -189,8 +189,10 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
         Set<Long> bundles = new HashSet<Long>();
         for (String bundleLocation : f.getBundles()) {
             Bundle b = installBundleIfNeeded(bundleLocation);
-            b.start();
             bundles.add(b.getBundleId());
+        }
+        for (long id : bundles) {
+            bundleContext.getBundle(id).start();
         }
 
         featuresRegistry.registerInstalled(f);
