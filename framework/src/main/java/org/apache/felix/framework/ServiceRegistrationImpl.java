@@ -461,12 +461,18 @@ class ServiceRegistrationImpl implements ServiceRegistration
                 return 0; // same service
             }
 
-            Integer rank = (Integer) getProperty(Constants.SERVICE_RANKING);
-            Integer otherRank = (Integer) other.getProperty(Constants.SERVICE_RANKING);
+            Object rankObj = (Integer) getProperty(Constants.SERVICE_RANKING);
+            Object otherRankObj = (Integer) other.getProperty(Constants.SERVICE_RANKING);
 
             // If no rank, then spec says it defaults to zero.
-            rank = (rank == null) ? new Integer(0) : rank;
-            otherRank = (otherRank == null) ? new Integer(0) : otherRank;
+            rankObj = (rankObj == null) ? new Integer(0) : rankObj;
+            otherRankObj = (otherRankObj == null) ? new Integer(0) : otherRankObj;
+
+            // If rank is not Integer, then spec says it defaults to zero.
+            Integer rank = (rankObj instanceof Integer)
+                ? new Integer(0) : (Integer) rankObj;
+            Integer otherRank = (otherRankObj instanceof Integer)
+                ? new Integer(0) : (Integer) otherRankObj;
 
             // Sort by rank in ascending order.
             if (rank.compareTo(otherRank) < 0)
