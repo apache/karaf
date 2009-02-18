@@ -50,6 +50,7 @@ public class Main {
                     System.out.println("  --help        shows this help message");
                     System.out.println("  [commands]    commands to run");
                     System.out.println("If no commands are specified, the client will be put in an interactive mode");
+                    System.exit(0);
                 } else {
                     System.err.println("Unknown option: " + args[i]);
                     System.err.println("Run with --help for usage");
