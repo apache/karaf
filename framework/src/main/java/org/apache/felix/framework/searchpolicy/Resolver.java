@@ -1553,6 +1553,13 @@ public class Resolver
             // Instead of creating wires for the fragment, we will create them
             // for the host.
             importer = host;
+
+            // Make sure we haven't already seen the host to avoid a cycle.
+            if (wireMap.get(importer) != null)
+            {
+                return wireMap;
+            }
+
             // Now add the fragments candidates to the host.
             candSetList = (List) candidatesMap.get(host);
             for (int csIdx = 0; (host == null) && (csIdx < candSetList.size()); csIdx++)
