@@ -18,6 +18,7 @@
  */
 package org.apache.felix.http.jetty;
 
+import java.util.Dictionary;
 import java.util.Properties;
 
 import org.mortbay.component.LifeCycle;
@@ -36,8 +37,11 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedService;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
@@ -65,14 +69,16 @@ import org.osgi.util.tracker.ServiceTracker;
  *        just describes "returning the contents of the URL to the client" which
  *        doesn't state what other HTTP handling might be compliant or desirable
  */
-public class Activator implements BundleActivator
-{
+public class Activator implements BundleActivator, ManagedService, Runnable {
+    private static final Properties EMPTY_PROPS = new Properties();
+    
     public static final boolean DEFAULT_HTTP_ENABLE = true;
     public static final boolean DEFAULT_HTTPS_ENABLE = false;
     public static final boolean DEFAULT_USE_NIO = true;
     public static final int DEFAULT_HTTPS_PORT = 443;
     public static final int DEFAULT_HTTP_PORT = 80;
     public static final String DEFAULT_SSL_PROVIDER = "org.mortbay.http.SunJsseListener";
+    public static final String DEFAULT_HTTPS_CLIENT_CERT = "none";
     
     /** Felix specific property to override the SSL provider. */
     public static final String FELIX_SSL_PROVIDER = "org.apache.felix.https.provider";
@@ -121,6 +127,18 @@ public class Activator implements BundleActivator
     /** Felix specific property to control whether to enable HTTP. */
     public static final String FELIX_HTTP_ENABLE = "org.apache.felix.http.enable";
     
+    /** Felix specific property to control whether to want or require HTTPS client certificates. Valid values are "none", "wants", "needs". Default is "none". */
+    public static final String FELIX_HTTPS_CLIENT_CERT = "org.apache.felix.https.clientcertificate";
+
+    /** Felix specific property to override the truststore file location. */
+    public static final String FELIX_TRUSTSTORE = "org.apache.felix.https.truststore";
+    
+    /** Felix specific property to override the truststore password. */
+    public static final String FELIX_TRUSTSTORE_PASSWORD = "org.apache.felix.https.truststore.password";
+    
+    /** PID for configuration of the HTTP service. */
+    protected static final String PID = "org.apache.felix.http";
+    
     protected static boolean debug = false;
     private static ServiceTracker m_logTracker = null;
 
@@ -140,38 +158,48 @@ public class Activator implements BundleActivator
     private String m_keyPasswd;
     private boolean m_useHttps;
     private String m_httpPortProperty;
+    private String m_truststore;
+    private String m_trustpasswd;
 
     private Properties m_svcProperties = new Properties();
     private boolean m_useHttp;
+    private String m_clientcert;
+    private ServiceRegistration m_configSvcReg;
+    private volatile boolean m_running;
+    private volatile Thread m_thread;
 
-    //
-    // Main class instance code
-    //
-
-    public void start( BundleContext bundleContext ) throws BundleException
-    {
+    public void start(BundleContext bundleContext) throws BundleException {
         m_bundleContext = bundleContext;
-
-
-        setConfiguration();
 
         m_logTracker = new ServiceTracker( bundleContext, LogService.class.getName(), null );
         m_logTracker.open();
 
-        // org.mortbay.util.Loader needs this (used for JDK 1.4 log classes)
-        Thread.currentThread().setContextClassLoader( this.getClass().getClassLoader() );
-        // set the Jetty logger to be LogService based
-        initializeJettyLogger();
-
-        try
-        {
-            initializeJetty();
-
+        setConfiguration(EMPTY_PROPS);
+        
+        m_running = true;
+        m_thread = new Thread(this, "Jetty HTTP Service Launcher");
+        m_thread.start();
+        
+        m_configSvcReg = m_bundleContext.registerService(ManagedService.class.getName(), this, new Properties() {{ put(Constants.SERVICE_PID, PID); }} );
+    }
+    
+    public void stop(BundleContext bundleContext) throws BundleException {
+        if (m_configSvcReg != null) {
+            m_configSvcReg.unregister();
         }
-        catch ( Exception ex )
-        {
-            //TODO: maybe throw a bundle exception in here?
-            log( LogService.LOG_INFO, "Http2", ex );
+        
+        m_running = false;
+        m_thread.interrupt();
+        
+        m_logTracker.close();
+    }
+    
+    private void startJetty() {
+        try {
+            initializeJetty();
+        }
+        catch (Exception ex) {
+            log(LogService.LOG_ERROR, "Exception while initializing Jetty.", ex);
             return;
         }
 
@@ -182,102 +210,125 @@ public class Activator implements BundleActivator
         m_svcProperties = new Properties(m_svcProperties);
     }
 
-
-    private void setConfiguration() {
-        debug = getBooleanProperty(FELIX_HTTP_DEBUG, getBooleanProperty(HTTP_DEBUG, false));
-        
-        // get default HTTP and HTTPS ports as per the OSGi spec
-        m_httpPort = getIntProperty(HTTP_PORT, DEFAULT_HTTP_PORT);
-        m_httpsPort = getIntProperty(HTTPS_PORT, DEFAULT_HTTPS_PORT);
-        // collect other properties, default to legacy names only if new ones are not available
-        m_useNIO = getBooleanProperty(HTTP_NIO, DEFAULT_USE_NIO);
-        m_sslProvider = getStringProperty(FELIX_SSL_PROVIDER, getStringProperty(OSCAR_SSL_PROVIDER, DEFAULT_SSL_PROVIDER));
-        m_httpsPortProperty = getStringProperty(HTTPS_SVCPROP_PORT, HTTPS_PORT);
-        m_keystore = getStringProperty(FELIX_KEYSTORE, m_bundleContext.getProperty(OSCAR_KEYSTORE));
-        m_passwd = getStringProperty(FELIX_KEYSTORE_PASSWORD, m_bundleContext.getProperty(OSCAR_KEYSTORE_PASSWORD));
-        m_keyPasswd = getStringProperty(FELIX_KEYSTORE_KEY_PASSWORD, m_bundleContext.getProperty(OSCAR_KEYSTORE_KEY_PASSWORD));
-        m_useHttps = getBooleanProperty(FELIX_HTTPS_ENABLE, getBooleanProperty(OSCAR_HTTPS_ENABLE, DEFAULT_HTTPS_ENABLE));
-        m_httpPortProperty = getStringProperty(HTTP_SVCPROP_PORT, HTTP_PORT);
-        m_useHttp = getBooleanProperty(FELIX_HTTP_ENABLE, DEFAULT_HTTP_ENABLE);
-    }
-
-
-    public void stop( BundleContext bundleContext ) throws BundleException
-    {
-        //TODO: wonder if we need to closedown service factory ???
-
-        if ( m_svcReg != null )
-        {
+    private void stopJetty() {
+        if (m_svcReg != null) {
             m_svcReg.unregister();
+            // null the registration, because the listener assumes a non-null registration is valid
+            m_svcReg = null;
         }
 
-        try
-        {
+        try {
             m_server.stop();
         }
-        catch ( Exception e )
-        {
-            //TODO: log some form of error
+        catch (Exception e) {
+            log(LogService.LOG_ERROR, "Exception while stopping Jetty.", e);
         }
-
-        // replace non-LogService logger for jetty
-        Log.setLog( new StdErrLog() );
-        
-        m_logTracker.close();
     }
 
-    
-    public int getIntProperty(String name, int dflt_val)
-    {
-        int retval = dflt_val;
+    /**
+     * The main loop for running Jetty. We run Jetty in its own thread now because we need to
+     * modify this thread's context classloader. The main loop starts Jetty and then waits until
+     * it is interrupted. Then it stops Jetty, and either quits or restarts (depending on the
+     * reason why the thread was interrupted, because the bundle was stopped or the configuration
+     * was updated).
+     */
+    public void run() {
+        // org.mortbay.util.Loader needs this (used for JDK 1.4 log classes)
+        Thread.currentThread().setContextClassLoader( this.getClass().getClassLoader() );
         
-        try
-        {
-            retval = Integer.parseInt( m_bundleContext.getProperty( name ) );
+        while (m_running) {
+            // start jetty
+            initializeJettyLogger();
+            startJetty();
+            
+            // wait
+            synchronized (this) {
+                try {
+                    wait();
+                }
+                catch (InterruptedException e) {
+                    // we will definitely be interrupted
+                }
+            }
+            
+            // stop jetty
+            stopJetty();
+            destroyJettyLogger();
         }
-        catch ( Exception e )
-        {
-            // maybe log a message saying using default?
+    }
+    
+    
+    public void updated(Dictionary props) throws ConfigurationException {
+        if (props == null) {
+            // fall back to default configuration
+            setConfiguration(EMPTY_PROPS);
+        }
+        else {
+            // let's see what we've got
+            setConfiguration(props);
+        }
+        // notify the thread that the configuration was updated, causing Jetty to
+        // restart
+        if (m_thread != null) {
+            m_thread.interrupt();
+        }
+    }
+    
+    private void setConfiguration(Dictionary props) {
+        debug = getBooleanProperty(props, FELIX_HTTP_DEBUG, getBooleanProperty(props, HTTP_DEBUG, false));
+        
+        // get default HTTP and HTTPS ports as per the OSGi spec
+        m_httpPort = getIntProperty(props, HTTP_PORT, DEFAULT_HTTP_PORT);
+        m_httpsPort = getIntProperty(props, HTTPS_PORT, DEFAULT_HTTPS_PORT);
+        // collect other properties, default to legacy names only if new ones are not available
+        m_useNIO = getBooleanProperty(props, HTTP_NIO, DEFAULT_USE_NIO);
+        m_sslProvider = getStringProperty(props, FELIX_SSL_PROVIDER, getStringProperty(props, OSCAR_SSL_PROVIDER, DEFAULT_SSL_PROVIDER));
+        m_httpsPortProperty = getStringProperty(props, HTTPS_SVCPROP_PORT, HTTPS_PORT);
+        m_keystore = getStringProperty(props, FELIX_KEYSTORE, m_bundleContext.getProperty(OSCAR_KEYSTORE));
+        m_passwd = getStringProperty(props, FELIX_KEYSTORE_PASSWORD, m_bundleContext.getProperty(OSCAR_KEYSTORE_PASSWORD));
+        m_keyPasswd = getStringProperty(props, FELIX_KEYSTORE_KEY_PASSWORD, m_bundleContext.getProperty(OSCAR_KEYSTORE_KEY_PASSWORD));
+        m_useHttps = getBooleanProperty(props, FELIX_HTTPS_ENABLE, getBooleanProperty(props, OSCAR_HTTPS_ENABLE, DEFAULT_HTTPS_ENABLE));
+        m_httpPortProperty = getStringProperty(props, HTTP_SVCPROP_PORT, HTTP_PORT);
+        m_useHttp = getBooleanProperty(props, FELIX_HTTP_ENABLE, DEFAULT_HTTP_ENABLE);
+        m_truststore = getStringProperty(props, FELIX_TRUSTSTORE, null);
+        m_trustpasswd = getStringProperty(props, FELIX_TRUSTSTORE_PASSWORD, null);
+        m_clientcert = getStringProperty(props, FELIX_HTTPS_CLIENT_CERT, DEFAULT_HTTPS_CLIENT_CERT);
+    }
+
+    private String getProperty(Dictionary props, String name) {
+        String result = (String) props.get(name);
+        if (result == null) {
+            result = m_bundleContext.getProperty(name);
+        }
+        return result;
+    }
+    
+    private int getIntProperty(Dictionary props, String name, int dflt_val) {
+        int retval = dflt_val;
+        try {
+            retval = Integer.parseInt(getProperty(props, name));
+        }
+        catch (Exception e) {
             retval = dflt_val;
         }
-        
         return retval;
     }
-    
-    
-    public boolean getBooleanProperty(String name, boolean dflt_val)
-    {
+        
+    private boolean getBooleanProperty(Dictionary props, String name, boolean dflt_val) {
         boolean retval = dflt_val;
-        
-        String strval = m_bundleContext.getProperty( name );
-        if ( strval != null)
-        {
-            if (strval.toLowerCase().equals( "true" ) ||
-                strval.toLowerCase().equals( "yes" ))
-            {
-                retval = true;
-            }
-            else
-            {
-                // poss should raise error/warn here
-                retval = false;
-            }
+        String strval = getProperty(props, name);
+        if (strval != null) {
+            retval = (strval.toLowerCase().equals("true") || strval.toLowerCase().equals("yes"));
         }
-        
         return retval;
     }
-    
-    
-    public String getStringProperty(String name, String dflt_val)
-    {
+   
+    private String getStringProperty(Dictionary props, String name, String dflt_val) {
         String retval = dflt_val;
-        
-        String strval = m_bundleContext.getProperty( name );
-        if ( strval != null)
-        {
+        String strval = getProperty(props, name);
+        if (strval != null) {
             retval = strval;
         }
-        
         return retval;
     }
 
@@ -294,6 +345,11 @@ public class Activator implements BundleActivator
         if (oldProperty != null) {
             System.setProperty( "org.mortbay.log.class", oldProperty );
         }
+    }
+    
+    private void destroyJettyLogger() {
+        // replace non-LogService logger for jetty
+        Log.setLog( new StdErrLog() );
     }
     
     protected void initializeJetty() throws Exception
@@ -337,7 +393,6 @@ public class Activator implements BundleActivator
         m_server.start();
     }
 
-
     private void initializeHTTP() {
         Connector connector = m_useNIO ? 
                               (Connector) new SelectChannelConnector() : (Connector) new SocketConnector();
@@ -350,15 +405,12 @@ public class Activator implements BundleActivator
         m_server.addConnector( connector );
     }
 
-
     //TODO: Just a basic implementation to give us a working HTTPS port. A better
     //      long-term solution may be to separate out the SSL provider handling,
     //      keystore, passwords etc. into it's own pluggable service
     protected void initializeHTTPS() throws Exception
     {
         if (m_useNIO) {
-            // we do not want to create a compile time dependency on Java 5 classes
-            // so we use a bit of reflection here
             SelectChannelConnector s_listener = (SelectChannelConnector) Class.forName("org.mortbay.jetty.security.SslSelectChannelConnector").newInstance();
             s_listener.addLifeCycleListener(new ConnectorListener(m_httpsPortProperty));
             s_listener.setPort(m_httpsPort);
@@ -373,6 +425,18 @@ public class Activator implements BundleActivator
             if (m_keyPasswd != null) {
                 System.setProperty("jetty.ssl.keypassword" /* SslSelectChannelConnector.KEYPASSWORD_PROPERTY */, m_keyPasswd);
                 s_listener.getClass().getMethod("setKeyPassword", new Class[] {String.class}).invoke(s_listener, new Object[] { m_keyPasswd });
+            }
+            if (m_truststore != null) {
+                s_listener.getClass().getMethod("setTruststore", new Class[] {String.class}).invoke(s_listener, new Object[] { m_truststore });
+            }
+            if (m_trustpasswd != null) {
+                s_listener.getClass().getMethod("setTrustPassword", new Class[] {String.class}).invoke(s_listener, new Object[] { m_trustpasswd });
+            }
+            if ("wants".equals(m_clientcert)) {
+                s_listener.getClass().getMethod("setWantClientAuth", new Class[] { Boolean.TYPE }).invoke(s_listener, new Object[] { Boolean.TRUE });
+            }
+            else if ("needs".equals(m_clientcert)) {
+                s_listener.getClass().getMethod("setNeedClientAuth", new Class[] { Boolean.TYPE }).invoke(s_listener, new Object[] { Boolean.TRUE });
             }
             m_server.addConnector(s_listener);
         }
@@ -392,10 +456,22 @@ public class Activator implements BundleActivator
                 System.setProperty(SslSocketConnector.KEYPASSWORD_PROPERTY, m_keyPasswd);
                 s_listener.setKeyPassword(m_keyPasswd);
             }
+            if (m_truststore != null) {
+                s_listener.setTruststore(m_truststore);
+            }
+            if (m_trustpasswd != null) {
+                s_listener.setTrustPassword(m_trustpasswd);
+            }
+            if ("wants".equals(m_clientcert)) {
+                s_listener.setWantClientAuth(true);
+                s_listener.getClass().getMethod("setWantClientAuth", new Class[] {Boolean.class}).invoke(s_listener, new Object[] { Boolean.TRUE });
+            }
+            else if ("needs".equals(m_clientcert)) {
+                s_listener.setNeedClientAuth(true);
+            }
             m_server.addConnector(s_listener);
         }
     }
-
 
     public static void debug( String txt )
     {
@@ -404,7 +480,6 @@ public class Activator implements BundleActivator
             log( LogService.LOG_DEBUG, ">>Felix HTTP: " + txt, null );
         }
     }
-
 
     public static void log( int level, String message, Throwable throwable )
     {
@@ -424,7 +499,6 @@ public class Activator implements BundleActivator
     }
 
     // Inner class to provide basic service factory functionality
-
     public class HttpServiceFactory implements ServiceFactory
     {
         public HttpServiceFactory()
@@ -433,14 +507,12 @@ public class Activator implements BundleActivator
             HttpServiceImpl.initializeStatics();
         }
 
-
         public Object getService( Bundle bundle, ServiceRegistration registration )
         {
             Object srv = new HttpServiceImpl( bundle, m_server, m_hdlr );
             debug( "** http service get:" + bundle + ", service: " + srv );
             return srv;
         }
-
 
         public void ungetService( Bundle bundle, ServiceRegistration registration, Object service )
         {
@@ -452,7 +524,6 @@ public class Activator implements BundleActivator
     // Innner class to listen for connector startup and register service
     // properties for actual ports used. Possible connections may have deferred
     // startup, so this should ensure "port" is retrieved once available
-    
     public class ConnectorListener implements LifeCycle.Listener
     {
         String m_svcPropName;
@@ -479,13 +550,11 @@ public class Activator implements BundleActivator
                 m_svcProperties = new Properties(m_svcProperties);
             }
         }
-           
+        
         public void lifeCycleStarting(LifeCycle event) {}
            
         public void lifeCycleStopped(LifeCycle event) {}
            
         public void lifeCycleStopping(LifeCycle event) {}         
-        
     }
-
 }
