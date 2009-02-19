@@ -184,15 +184,34 @@ class DependencyManager implements ServiceListener, Reference
 
             // otherwise bind if we have a bind method and the service needs
             // be bound
-            else if ( m_dependencyMetadata.getBind() != null && ( m_dependencyMetadata.isMultiple() || !isBound() ) )
+            else if ( m_dependencyMetadata.getBind() != null )
             {
-                // bind the service, getting it if required
-                invokeBindMethod( m_componentManager.getInstance(), reference );
+                // multiple bindings or not bound at all yet
+                if ( m_dependencyMetadata.isMultiple() || !isBound() )
+                {
+                    // bind the service, getting it if required
+                    invokeBindMethod( m_componentManager.getInstance(), reference );
+                }
+                else
+                {
+                    // single service binding only which already exists
+                    // we have to check whether the bound service is to be
+                    // replaced
+                    ServiceReference[] boundRefs = getBoundServiceReferences();
+                    if ( isHigher( reference, boundRefs[0] ) )
+                    {
+                        // bind the service, getting it if required
+                        invokeBindMethod( m_componentManager.getInstance(), reference );
+
+                        // unbind the old service reference
+                        unbind( m_componentManager.getInstance(), boundRefs );
+                    }
+                }
             }
         }
     }
-
-
+    
+    
     /**
      * Called by the {@link #serviceChanged(ServiceEvent)} method if an existing
      * service is unregistered from the system or if a registered service has
@@ -404,18 +423,6 @@ class DependencyManager implements ServiceListener, Reference
 
 
     /**
-     * Returns the first service reference returned by the
-     * {@link #getFrameworkServiceReferences()} method or <code>null</code> if no
-     * matching service can be found.
-     */
-    ServiceReference getServiceReference()
-    {
-        ServiceReference[] sr = getFrameworkServiceReferences();
-        return ( sr != null && sr.length > 0 ) ? sr[0] : null;
-    }
-
-
-    /**
      * Returns an array of <code>ServiceReference</code> instances for services
      * implementing the interface and complying to the (optional) target filter
      * declared for this dependency. If no matching service can be found
@@ -443,24 +450,74 @@ class DependencyManager implements ServiceListener, Reference
 
 
     /**
+     * Returns a <code>ServiceReference</code> instances for a service
+     * implementing the interface and complying to the (optional) target filter
+     * declared for this dependency. If no matching service can be found
+     * <code>null</code> is returned. If the configured target filter is
+     * syntactically incorrect an error message is logged with the LogService
+     * and <code>null</code> is returned. If multiple matching services are
+     * registered the service with the highest service.ranking value is
+     * returned. If multiple matching services have the same service.ranking
+     * value, the service with the lowest service.id is returned.
+     * <p>
+     * This method always directly accesses the framework's service registry
+     * and ignores the services bound by this dependency manager.
+     */
+    ServiceReference getFrameworkServiceReference()
+    {
+        // get the framework registered services and short cut
+        ServiceReference[] refs = getFrameworkServiceReferences();
+        if ( refs == null )
+        {
+            return null;
+        }
+        else if ( refs.length == 1 )
+        {
+            return refs[0];
+        }
+
+        // is it correct to assume an ordered bound services set ?
+        int maxRanking = Integer.MIN_VALUE;
+        long minId = Long.MAX_VALUE;
+        ServiceReference selectedRef = null;
+
+        // find the service with the highest ranking
+        for ( int i = 0; refs != null && i < refs.length; i++ )
+        {
+            ServiceReference ref = refs[i];
+            int ranking = getServiceRanking( ref );
+            long id = getServiceId( ref );
+            if ( maxRanking < ranking || ( maxRanking == ranking && id < minId ) )
+            {
+                maxRanking = ranking;
+                minId = id;
+                selectedRef = ref;
+            }
+        }
+
+        return selectedRef;
+    }
+
+
+    /**
      * Returns the service instance for the service reference returned by the
-     * {@link #getServiceReference()} method. If this returns a
+     * {@link #getFrameworkServiceReference()} method. If this returns a
      * non-<code>null</code> service instance the service is then considered
      * bound to this instance.
      */
     Object getService()
     {
-        ServiceReference sr = getServiceReference();
+        ServiceReference sr = getFrameworkServiceReference();
         return ( sr != null ) ? getService( sr ) : null;
     }
 
 
     /**
      * Returns an array of service instances for the service references returned
-     * by the {@link #getFrameworkServiceReferences()} method. If no services match the
-     * criteria configured for this dependency <code>null</code> is returned.
-     * All services returned by this method will be considered bound after this
-     * method returns.
+     * by the {@link #getFrameworkServiceReferences()} method. If no services
+     * match the criteria configured for this dependency <code>null</code> is
+     * returned. All services returned by this method will be considered bound
+     * after this method returns.
      */
     Object[] getServices()
     {
@@ -481,6 +538,96 @@ class DependencyManager implements ServiceListener, Reference
         }
 
         return ( services.size() > 0 ) ? services.toArray() : null;
+    }
+
+
+    /**
+     * Returns <code>true</code> if the <code>newReference</code> has a higher
+     * ranking than the <code>oldReference</code>, otherwise <code>false</code>
+     * is returned.
+     * <p>
+     * The higher ranking of a service reference is defined in the OSGi
+     * Compendium Services Specification as the service with the highest service
+     * ranking as specified by the service.ranking property. If both services
+     * have the same service ranking, then the service with the lowest service
+     * ID as specified by the service.id property is chosen.
+     * 
+     * @param newReference The ServiceReference representing the newly added
+     *      Service
+     * @param oldReference The ServiceReference representing the service which
+     *      is already bound to the component
+     *      
+     * @return <code>true</code> if <code>newReference</code> has higher ranking
+     */
+    private boolean isHigher( ServiceReference newReference, ServiceReference oldReference )
+    {
+        // get and compare the service.ranking properties
+        int nrRank = getServiceRanking( newReference );
+        int orRank = getServiceRanking( oldReference );
+        if ( nrRank > orRank )
+        {
+            return true;
+        }
+        else if ( nrRank < orRank )
+        {
+            return false;
+        }
+
+        // no ranks are equal, compare the service ids. These ids are never equal,
+        // so unless a problem exists, this should be decisive
+        try
+        {
+            return getServiceId( newReference ) < getServiceId( oldReference );
+        }
+        catch ( Exception e )
+        {
+            // ignore, we don't expect an exception, since the servid.id
+            // property is set by the framework as a Long value; so we neither
+            // expect this property to be null nor to be anything else than Long
+        }
+
+        // fall back to newReference not being higher
+        return false;
+    }
+
+
+    /**
+     * Returns the value of the <code>service.ranking</code> service property
+     * if the property exists and is of type <code>java.lang.Integer</code>. If
+     * the property does not exist or is of another type, zero is returned as
+     * the default value for service ranking.
+     * 
+     * @param serviceReference The Service reference whose ranking is to be
+     *          returned.
+     */
+    private int getServiceRanking( ServiceReference serviceReference )
+    {
+        Object nrRankObj = serviceReference.getProperty( Constants.SERVICE_RANKING );
+        if ( nrRankObj instanceof Integer )
+        {
+            return ( ( Integer ) nrRankObj ).intValue();
+        }
+        return 0;
+    }
+
+
+    /**
+     * Returns the value of the <code>service.id</code> service property.
+     * 
+     * @param serviceReference The Service reference whose service id is to be
+     *          returned.
+     *          
+     * @throws ClassCastException if the <code>service.id</code> property exists
+     *          but is not a <code>java.lang.Long</code> value. This is not
+     *          expected since the framework should guarantee this property and
+     *          its type.
+     * @throws NullPointerException if the <code>service.id</code> property
+     *          does not exist. This is not expected since the framework should
+     *          guarantee this property and its type.
+     */
+    private long getServiceId( ServiceReference serviceReference )
+    {
+        return ( ( Long ) serviceReference.getProperty( Constants.SERVICE_ID ) ).longValue();
     }
 
 
@@ -635,35 +782,38 @@ class DependencyManager implements ServiceListener, Reference
             return true;
         }
 
-        // Get service references
-        ServiceReference refs[] = getFrameworkServiceReferences();
-
-        // refs can be null if the dependency is optional
-        if ( refs == null )
-        {
-            return true;
-        }
-
         // assume success to begin with: if the dependency is optional,
         // we don't care, whether we can bind a service. Otherwise, we
         // require at least one service to be bound, thus we require
         // flag being set in the loop below
         boolean success = m_dependencyMetadata.isOptional();
 
-        // number of services to bind
-        for ( int index = 0; index < refs.length; index++ )
+        // Get service reference(s)
+        if ( m_dependencyMetadata.isMultiple() )
         {
-            // success is if we have the minimal required number of services bound
-            if ( invokeBindMethod( instance, refs[index] ) )
+            // bind all registered services
+            ServiceReference[] refs = getFrameworkServiceReferences();
+            if ( refs != null )
+            {
+                for ( int index = 0; index < refs.length; index++ )
+                {
+                    // success is if we have the minimal required number of services bound
+                    if ( invokeBindMethod( instance, refs[index] ) )
+                    {
+                        // of course, we have success if the service is bound
+                        success = true;
+                    }
+                }
+            }
+        }
+        else
+        {
+            // bind best matching service
+            ServiceReference ref = getFrameworkServiceReference();
+            if ( ref != null && invokeBindMethod( instance, ref ) )
             {
                 // of course, we have success if the service is bound
                 success = true;
-
-                // if the reference is not multiple, we are already done
-                if ( !m_dependencyMetadata.isMultiple() )
-                {
-                    break;
-                }
             }
         }
 
@@ -680,11 +830,20 @@ class DependencyManager implements ServiceListener, Reference
      */
     void unbind( Object instance )
     {
+        unbind( instance, getBoundServiceReferences() );
+    }
+
+
+    /**
+     * Revoke the given bindings. This method cannot throw an exception since
+     * it must try to complete all that it can
+     */
+    private void unbind( Object instance, ServiceReference[] boundRefs )
+    {
         // only invoke the unbind method if there is an instance (might be null
         // in the delayed component situation) and the unbind method is declared.
         boolean doUnbind = instance != null && m_dependencyMetadata.getUnbind() != null;
 
-        ServiceReference[] boundRefs = getBoundServiceReferences();
         if ( boundRefs != null )
         {
             for ( int i = 0; i < boundRefs.length; i++ )

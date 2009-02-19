@@ -60,49 +60,7 @@ class ComponentContextImpl implements ComponentContext
     public Object locateService( String name )
     {
         DependencyManager dm = m_componentManager.getDependencyManager( name );
-        if ( dm == null )
-        {
-            return null;
-        }
-
-        ServiceReference selectedRef;
-        if ( dm.size() == 1 )
-        {
-            // short cut for single bound service
-            selectedRef = dm.getServiceReference();
-        }
-        else
-        {
-            // is it correct to assume an ordered bound services set ?
-            int maxRanking = Integer.MIN_VALUE;
-            long minId = Long.MAX_VALUE;
-            selectedRef = null;
-
-            ServiceReference[] refs = dm.getFrameworkServiceReferences();
-            for ( int i = 0; refs != null && i < refs.length; i++ )
-            {
-                ServiceReference ref = refs[i];
-                Integer rank = ( Integer ) ref.getProperty( Constants.SERVICE_RANKING );
-                int ranking = ( rank == null ) ? Integer.MIN_VALUE : rank.intValue();
-                long id = ( ( Long ) ref.getProperty( Constants.SERVICE_ID ) ).longValue();
-                if ( maxRanking < ranking || ( maxRanking == ranking && id < minId ) )
-                {
-                    maxRanking = ranking;
-                    minId = id;
-                    selectedRef = ref;
-                }
-            }
-        }
-
-        // this is not realistic, as at least one service is available
-        // whose service id is smaller than Long.MAX_VALUE, still be sure
-        if ( selectedRef == null )
-        {
-            return null;
-        }
-
-        // return the service for the selected reference
-        return dm.getService( selectedRef );
+        return ( dm != null ) ? dm.getService() : null;
     }
 
 
