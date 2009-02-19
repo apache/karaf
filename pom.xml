@@ -86,7 +86,7 @@
         <felix.prefs.version>1.0.2</felix.prefs.version>
         <geronimo.annotation.version>1.1.1</geronimo.annotation.version>
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
-        <gshell.version>1.0-alpha-2-SNAPSHOT</gshell.version>
+        <gshell.version>1.0-alpha-2</gshell.version>
         <jaxp.ri.version>1.4.2_1</jaxp.ri.version>
         <junit.version>3.8.2_1</junit.version>
         <jline.version>0.9.94_1</jline.version>
