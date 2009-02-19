@@ -46,7 +46,9 @@ public class OsgiConfiguration extends Configuration {
     }
 
     public void unregister(JaasRealm realm, Map<String,?> properties) {
-        realms.remove(realm);
+        if (realms != null) {
+            realms.remove(realm);
+        }
     }
 
     public AppConfigurationEntry[] getAppConfigurationEntry(String name) {
