@@ -97,8 +97,6 @@
                         <configuration>
                             <artifactSet>
                                 <includes>
-                                    <include>org.apache.felix:org.apache.felix.framework</include>
-                                    <include>org.apache.felix:org.osgi.core</include>
                                     <include>${project.groupId}:${project.artifactId}</include>
                                     <include>org.slf4j:slf4j-api</include>
                                     <include>org.slf4j:slf4j-nop</include>
@@ -106,16 +104,15 @@
                             </artifactSet>
                             <filters>
                                 <filter>
-                                    <artifact>org.apache.felix:org.apache.felix.framework</artifact>
+                                    <artifact>org.slf4j:slf4j-api</artifact>
                                     <excludes>
-                                        <exclude>org/apache/felix/**</exclude>
-                                        <exclude>org/osgi/**</exclude>
+                                        <exclude>org/slf4j/**</exclude>
                                     </excludes>
                                 </filter>
                                 <filter>
-                                    <artifact>org.apache.felix:org.osgi.core</artifact>
+                                    <artifact>org.slf4j:slf4j-nop</artifact>
                                     <excludes>
-                                        <exclude>org/osgi/**</exclude>
+                                        <exclude>org/slf4j/**</exclude>
                                     </excludes>
                                 </filter>
                             </filters>

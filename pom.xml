@@ -120,6 +120,7 @@
             </snapshots>
         </repository>
         <!-- Apache snapshots -->
+        <!--
         <repository>
             <id>apache.snapshots</id>
             <name>Apache Snapshots Repository</name>
@@ -131,6 +132,7 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
+        -->
         <!-- ServiceMix repo -->
         <repository>
             <id>servicemix</id>
