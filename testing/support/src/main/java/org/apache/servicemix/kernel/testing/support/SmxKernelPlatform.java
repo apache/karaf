@@ -40,6 +40,7 @@ import org.springframework.osgi.test.platform.OsgiPlatform;
 import org.springframework.util.ClassUtils;
 import org.apache.felix.framework.Felix;
 import org.apache.felix.framework.util.CompoundEnumeration;
+import org.apache.felix.framework.util.FelixConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.servicemix.kernel.main.Main;
@@ -130,16 +131,19 @@ public class SmxKernelPlatform implements OsgiPlatform {
         List<BundleActivator> activations = new ArrayList<BundleActivator>();
         activations.add(activator);
 
+        Properties props = getConfigurationProperties();
+        props.put(FelixConstants.SYSTEMBUNDLE_ACTIVATORS_PROP, activations);
+
         Thread.currentThread().setContextClassLoader(classLoader);
         Class cl = classLoader.loadClass(Felix.class.getName());
-        Constructor cns = cl.getConstructor(Map.class, List.class);
-        platform = cns.newInstance(getConfigurationProperties(), activations);
+        Constructor cns = cl.getConstructor(Map.class);
+        platform = cns.newInstance(props);
         platform.getClass().getMethod("start").invoke(platform);
 
         Bundle systemBundle = (Bundle) platform;
 
         // call getBundleContext
-        final Method getContext = systemBundle.getClass().getDeclaredMethod("getBundleContext", null);
+        final Method getContext = systemBundle.getClass().getMethod("getBundleContext", null);
 
         AccessController.doPrivileged(new PrivilegedAction() {
 
