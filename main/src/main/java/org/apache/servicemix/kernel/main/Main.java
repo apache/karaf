@@ -48,6 +48,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.Constants;
 import org.osgi.service.startlevel.StartLevel;
 
 /**
@@ -167,14 +168,8 @@ public class Main implements MainService, BundleActivator {
 
         processSecurityProperties(m_configProps);
 
-        String profileName = m_configProps.getProperty(BundleCache.CACHE_PROFILE_PROP);
-        String profileDirName = m_configProps.getProperty(BundleCache.CACHE_PROFILE_DIR_PROP);
-
-        // A profile directory or name must be specified.
-        if ((profileDirName == null) && (profileName == null || profileName.length() == 0)) {
-            setExitCode(-1);
-            throw new Exception("Invalid " + CONFIG_PROPERTIES_FILE_NAME + " configuration.  The profile directory was not specified.");
-        }
+        m_configProps.setProperty(BundleCache.CACHE_ROOTDIR_PROP, servicemixBase.getPath() + "/data");
+        m_configProps.setProperty(Constants.FRAMEWORK_STORAGE, "cache");
 
         // Register the Main class so that other bundles can inspect the command line args.
         BundleActivator activator = new BundleActivator() {
@@ -193,13 +188,15 @@ public class Main implements MainService, BundleActivator {
         activations.add(this);
         activations.add(activator);
 
+        m_configProps.put(FelixConstants.SYSTEMBUNDLE_ACTIVATORS_PROP, activations);
+
         try {
-            defaultStartLevel = Integer.parseInt(m_configProps.getProperty(FelixConstants.FRAMEWORK_STARTLEVEL_PROP));
+            defaultStartLevel = Integer.parseInt(m_configProps.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
             lockStartLevel = Integer.parseInt(m_configProps.getProperty(PROPERTY_LOCK_LEVEL, Integer.toString(lockStartLevel)));
             lockDelay = Integer.parseInt(m_configProps.getProperty(PROPERTY_LOCK_DELAY, Integer.toString(lockDelay)));
-            m_configProps.setProperty(FelixConstants.FRAMEWORK_STARTLEVEL_PROP, Integer.toString(lockStartLevel));
+            m_configProps.setProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(lockStartLevel));
             // Start up the OSGI framework
-            m_felix = new Felix(new StringMap(m_configProps, false), activations);
+            m_felix = new Felix(new StringMap(m_configProps, false));
             m_felix.start();
             // Start lock monitor
             new Thread() {
@@ -219,7 +216,7 @@ public class Main implements MainService, BundleActivator {
             if (await) {
                 shutdown.await();
             }
-            m_felix.stopAndWait();
+            m_felix.stop();
         } finally {
             unlock();
         }
