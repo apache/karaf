@@ -49,6 +49,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.Constants;
 
 public class SmxKernelPlatform implements OsgiPlatform {
 
@@ -58,7 +59,7 @@ public class SmxKernelPlatform implements OsgiPlatform {
 
     private static final String FELIX_CONFIG_PROPERTY = "config.properties";
 
-    private static final String FELIX_PROFILE_DIR_PROPERTY = "felix.cache.profiledir";
+    public final static String	FRAMEWORK_STORAGE = "org.osgi.framework.storage";
 
     private BundleContext context;
 
@@ -198,7 +199,7 @@ public class SmxKernelPlatform implements OsgiPlatform {
     private Properties getLocalConfiguration() {
         Properties props = new Properties();
         felixStorageDir = createTempDir("felix");
-        props.setProperty(FELIX_PROFILE_DIR_PROPERTY, this.felixStorageDir.getAbsolutePath());
+        props.setProperty(FRAMEWORK_STORAGE, this.felixStorageDir.getAbsolutePath());
         if (log.isTraceEnabled())
             log.trace("felix storage dir is " + felixStorageDir.getAbsolutePath());
 
