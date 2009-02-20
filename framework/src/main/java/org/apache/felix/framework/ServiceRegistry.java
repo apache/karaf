@@ -141,7 +141,10 @@ public class ServiceRegistry
         // Unregister each service.
         for (int i = 0; (regs != null) && (i < regs.length); i++)
         {
-            regs[i].unregister();
+            if (((ServiceRegistrationImpl) regs[i]).isValid())
+            {
+                regs[i].unregister();
+            }
         }
 
         // Now remove the bundle itself.
