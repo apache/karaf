@@ -1629,20 +1629,29 @@ ex.printStackTrace();
 
                 fireBundleEvent(BundleEvent.UPDATED, bundle);
 
-                // If the bundle is not used by anyone, then garbage
-                // collect it now.
-                if (!bundle.isUsed())
+                // Acquire global lock to check if we should auto-refresh.
+                acquireGlobalLock();
+
+                try
                 {
-                    try
+                    if (!bundle.isUsed())
                     {
-                        refreshPackages(new BundleImpl[] { bundle });
+                        try
+                        {
+                            refreshPackages(new BundleImpl[] { bundle });
+                        }
+                        catch (Exception ex)
+                        {
+                            m_logger.log(
+                                Logger.LOG_ERROR,
+                                "Unable to immediately purge the bundle revisions.", ex);
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        m_logger.log(
-                            Logger.LOG_ERROR,
-                            "Unable to immediately purge the bundle revisions.", ex);
-                    }
+                }
+                finally
+                {
+                    // Always release the global lock.
+                    releaseGlobalLock();
                 }
             }
 
