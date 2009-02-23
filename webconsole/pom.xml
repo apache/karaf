@@ -78,7 +78,7 @@
                             org.apache.felix.webconsole.internal.OsgiManagerActivator
                         </Bundle-Activator>
                         <Export-Package>
-                            org.apache.felix.webconsole,
+                            org.apache.felix.webconsole;version=${project.version},
                             org.osgi.service.obr
                         </Export-Package>
                         <Private-Package>
