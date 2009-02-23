@@ -21,14 +21,85 @@ package org.apache.felix.moduleloader;
 import java.net.URL;
 import java.util.Enumeration;
 
+/**
+ * This interface represents a directed class/resource loading dependency
+ * between two modules, which result when the framework resolves
+ * <tt>Import-Package</tt> or <tt>Require-Bundle</tt> declarations. A wire is
+ * the means by which a dependent module makes a class/resource request on
+ * the providing module.
+**/
 public interface IWire
 {
+    /**
+     * Returns the importing module.
+     * @return The importing module.
+    **/
     public IModule getImporter();
+    /**
+     * Returns the associated requirement from the importing module that
+     * resulted in the creation of this wire.
+     * @return
+    **/
     public IRequirement getRequirement();
+    /**
+     * Returns the exporting module.
+     * @return The exporting module.
+    **/
     public IModule getExporter();
+    /**
+     * Returns the associated capability from the exporting module that
+     * satisfies the requirement of the importing module.
+     * @return
+    **/
     public ICapability getCapability();
+    /**
+     * Returns whether or not the wire has a given package name. For some
+     * wires, such as ones for Require-Bundle, there may be many packages.
+     * This method is necessary since the set of packages attained by wires
+     * restrict which packages can be dynamically imported (i.e., you cannot
+     * dynamically import a package that is already attainable from an
+     * existing wire).
+     * @return <tt>true</tt> if the package name is attainable from this wire,
+     *         <tt>false</tt> otherwise.
+    **/
     public boolean hasPackage(String pkgName);
+    /**
+     * Requests a class from the exporting module. If the class is found, then
+     * it is returned. If the class is not found, then this method may or may
+     * not throw an exception depending on the wire type (e.g., for an
+     * imported package or a required bundle). Throwing an exception indicates
+     * that the search should be aborted, while returning a <tt>null</tt>
+     * indicates that the search should continue.
+     * @return The class if found or <tt>null</tt> if not found and the search
+     *         should continue.
+     * @throws java.lang.ClassNotFoundException If the class was not found and
+     *         the search should be aborted.
+    **/
     public Class getClass(String name) throws ClassNotFoundException;
+    /**
+     * Requests a resource from the exporting module. If the resource is found,
+     * then an URL is returned. If the resource is not found, then this method may
+     * or may not throw an exception depending on the wire type (e.g., for an
+     * imported package or a required bundle). Throwing an exception indicates
+     * that the search should be aborted, while returning a <tt>null</tt>
+     * indicates that the search should continue.
+     * @return An URL to the resource if found or <tt>null</tt> if not found
+     *         and the search should continue.
+     * @throws ResourceNotFoundException If the resource was not found and
+     *         the search should be aborted.
+    **/
     public URL getResource(String name) throws ResourceNotFoundException;
+    /**
+     * Requests resources from the exporting module. If the resources are found,
+     * then an enumeration of URLs is returned. If the resources are not found,
+     * then this method may or may not throw an exception depending on the wire
+     * type (e.g., for an imported package or a required bundle). Throwing an
+     * exception indicates that the search should be aborted, while returning a
+     * <tt>null</tt> indicates that the search should continue.
+     * @return An enumeration of URLs for the resource if found or <tt>null</tt>
+     *         if not found and the search should continue.
+     * @throws ResourceNotFoundException If the resource was not found and
+     *         the search should be aborted.
+    **/
     public Enumeration getResources(String name) throws ResourceNotFoundException;
 }
