@@ -152,17 +152,7 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     }
 
     public void installFeature(String name) throws Exception {
-    	//if not specify the features version, then use the latest version
-    	String latestVersion = FeatureImpl.DEFAULT_VERSION;
-    	Set<String> allVersions = getFeatures().get(name).keySet();
-    	for (String version : allVersions) {
-    		Version verlatest = new Version(cleanupVersion(latestVersion));
-    		Version ver = new Version(cleanupVersion(version));
-    		if (verlatest.compareTo(ver) < 0) {
-    			latestVersion = version;
-    		}
-    	}
-    	installFeature(name, latestVersion);
+    	installFeature(name, FeatureImpl.DEFAULT_VERSION);
     }
 
     public void installFeature(String name, String version) throws Exception {
@@ -312,7 +302,23 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     }
 
     protected Feature getFeature(String name, String version) throws Exception {
-        return getFeatures().get(name).get(version);
+        Map<String, Feature> versions = getFeatures().get(name);
+        if (versions == null || versions.isEmpty()) {
+            return null;
+        } else {
+            Feature feature = versions.get(version);
+            if (feature == null && FeatureImpl.DEFAULT_VERSION.equals(version)) {
+                Version latest = new Version(cleanupVersion(version));
+                for (String available : versions.keySet()) {
+                    Version availableVersion = new Version(cleanupVersion(available));
+                    if (availableVersion.compareTo(latest) > 0) {
+                        feature = versions.get(available);
+                        latest = availableVersion;
+                    }
+                }
+            }
+            return feature;
+        }
     }
 
     protected Map<String, Map<String, Feature>> getFeatures() throws Exception {
