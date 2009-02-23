@@ -470,9 +470,9 @@ class ServiceRegistrationImpl implements ServiceRegistration
 
             // If rank is not Integer, then spec says it defaults to zero.
             Integer rank = (rankObj instanceof Integer)
-                ? new Integer(0) : (Integer) rankObj;
+                ? (Integer) rankObj : new Integer(0);
             Integer otherRank = (otherRankObj instanceof Integer)
-                ? new Integer(0) : (Integer) otherRankObj;
+                ? (Integer) otherRankObj : new Integer(0);
 
             // Sort by rank in ascending order.
             if (rank.compareTo(otherRank) < 0)
