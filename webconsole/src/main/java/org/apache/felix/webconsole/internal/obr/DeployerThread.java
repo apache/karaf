@@ -97,7 +97,12 @@ public class DeployerThread extends Thread
         logger.log( LogService.LOG_ERROR, message );
         for ( int i = 0; req != null && i < req.length; i++ )
         {
-            logger.log( LogService.LOG_ERROR, "  " + i + ": " + req[i].getName() + " (" + req[i].getComment() + ")" );
+            String moreInfo = req[i].getComment();
+            if ( moreInfo == null )
+            {
+                moreInfo = req[i].getFilter().toString();
+            }
+            logger.log( LogService.LOG_ERROR, "  " + i + ": " + req[i].getName() + " (" + moreInfo + ")" );
         }
     }
 
