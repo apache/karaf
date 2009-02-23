@@ -414,22 +414,22 @@ public class ModuleImpl implements IModule
 
     public Class getClassByDelegation(String name) throws ClassNotFoundException
     {
-        Set pkgCycleSet = (Set) m_cycleCheck.get();
-        if (pkgCycleSet == null)
+        Set requestSet = (Set) m_cycleCheck.get();
+        if (requestSet == null)
         {
-            pkgCycleSet = new HashSet();
-            m_cycleCheck.set(pkgCycleSet);
+            requestSet = new HashSet();
+            m_cycleCheck.set(requestSet);
         }
-        if (!pkgCycleSet.contains(name))
+        if (!requestSet.contains(name))
         {
-            pkgCycleSet.add(name);
+            requestSet.add(name);
             try
             {
                 return getClassLoader().loadClass(name);
             }
             finally
             {
-                pkgCycleSet.remove(name);
+                requestSet.remove(name);
             }
         }
         return null;
@@ -437,15 +437,15 @@ public class ModuleImpl implements IModule
 
     public URL getResourceByDelegation(String name)
     {
-        Set pkgCycleSet = (Set) m_cycleCheck.get();
-        if (pkgCycleSet == null)
+        Set requestSet = (Set) m_cycleCheck.get();
+        if (requestSet == null)
         {
-            pkgCycleSet = new HashSet();
-            m_cycleCheck.set(pkgCycleSet);
+            requestSet = new HashSet();
+            m_cycleCheck.set(requestSet);
         }
-        if (!pkgCycleSet.contains(name))
+        if (!requestSet.contains(name))
         {
-            pkgCycleSet.add(name);
+            requestSet.add(name);
             try
             {
                 return (URL) findClassOrResourceByDelegation(name, false);
@@ -463,7 +463,7 @@ public class ModuleImpl implements IModule
             }
             finally
             {
-                pkgCycleSet.remove(name);
+                requestSet.remove(name);
             }
         }
 
@@ -608,22 +608,22 @@ public class ModuleImpl implements IModule
 
     public Enumeration getResourcesByDelegation(String name)
     {
-        Set pkgCycleSet = (Set) m_cycleCheck.get();
-        if (pkgCycleSet == null)
+        Set requestSet = (Set) m_cycleCheck.get();
+        if (requestSet == null)
         {
-            pkgCycleSet = new HashSet();
-            m_cycleCheck.set(pkgCycleSet);
+            requestSet = new HashSet();
+            m_cycleCheck.set(requestSet);
         }
-        if (!pkgCycleSet.contains(name))
+        if (!requestSet.contains(name))
         {
-            pkgCycleSet.add(name);
+            requestSet.add(name);
             try
             {
                 return findResourcesByDelegation(name);
             }
             finally
             {
-                pkgCycleSet.remove(name);
+                requestSet.remove(name);
             }
         }
 
@@ -1368,7 +1368,7 @@ public class ModuleImpl implements IModule
             {
                 try
                 {
-                    return (Class) findClassOrResourceByDelegation(name, true);
+                    clazz = (Class) findClassOrResourceByDelegation(name, true);
                 }
                 catch (ResourceNotFoundException ex)
                 {
@@ -1398,13 +1398,7 @@ public class ModuleImpl implements IModule
 
         protected Class findClass(String name) throws ClassNotFoundException
         {
-            // Do a quick check here to see if we can short-circuit this
-            // entire process if the class was already loaded.
             Class clazz = null;
-            synchronized (this)
-            {
-                clazz = findLoadedClass(name);
-            }
 
             // Search for class in module.
             if (clazz == null)

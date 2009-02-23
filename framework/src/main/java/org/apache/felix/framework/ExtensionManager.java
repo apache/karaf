@@ -649,18 +649,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
                 return null;
             }
 
-            try
-            {
-                return getClass().getClassLoader().loadClass(name);
-            }
-            catch (ClassNotFoundException ex)
-            {
-                m_logger.log(
-                    Logger.LOG_WARNING,
-                    ex.getMessage(),
-                    ex);
-            }
-            return null;
+            return getClass().getClassLoader().loadClass(name);
         }
 
         public URL getResourceByDelegation(String name)
