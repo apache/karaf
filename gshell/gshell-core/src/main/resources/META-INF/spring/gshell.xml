@@ -92,7 +92,7 @@
         <constructor-arg ref="groupDirResolver"/>
     </bean>
 
-    <bean class="org.apache.geronimo.gshell.wisdom.command.AliasCommand" scope="prototype">
+    <bean class="org.apache.servicemix.kernel.gshell.core.WorkAroundAliasCommand" scope="prototype">
         <constructor-arg ref="commandLineExecutor"/>
     </bean>
 
