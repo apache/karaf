@@ -49,6 +49,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Element;
 
+import org.osgi.framework.Constants;
+
 public class SpringTransformer {
 
     static Transformer transformer;
@@ -69,14 +71,15 @@ public class SpringTransformer {
         // Create manifest
         Manifest m = new Manifest();
         m.getMainAttributes().putValue("Manifest-Version", "2");
-        m.getMainAttributes().putValue("Bundle-SymbolicName", str[0]);
-        m.getMainAttributes().putValue("Bundle-Version", str[1]);
+        m.getMainAttributes().putValue(Constants.BUNDLE_MANIFESTVERSION, "2");
+        m.getMainAttributes().putValue(Constants.BUNDLE_SYMBOLICNAME, str[0]);
+        m.getMainAttributes().putValue(Constants.BUNDLE_VERSION, str[1]);
         m.getMainAttributes().putValue("Spring-Context", "*;publish-context:=false;create-asynchronously:=true");
         String importPkgs = getImportPackages(analyze(new DOMSource(doc)));
         if (importPkgs != null && importPkgs.length() > 0) {
-            m.getMainAttributes().putValue("Import-Package", importPkgs);
+            m.getMainAttributes().putValue(Constants.IMPORT_PACKAGE, importPkgs);
         }
-        m.getMainAttributes().putValue("DynamicImport-Package", "*");
+        m.getMainAttributes().putValue(Constants.DYNAMICIMPORT_PACKAGE, "*");
         // Extract manifest entries from the DOM
         NodeList l = doc.getElementsByTagName("manifest");
         if (l != null) {
