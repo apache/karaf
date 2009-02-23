@@ -72,6 +72,11 @@ public class InstallFromRepoAction extends AbstractObrPlugin implements Action
             for ( int i = 0; i < bundles.length; i++ )
             {
                 String bundle = bundles[i];
+                if ( bundle == null || bundle.equals( DONT_INSTALL_OPTION ) )
+                {
+                    continue;
+                }
+                
                 int comma = bundle.indexOf( ',' );
                 String name = ( comma > 0 ) ? bundle.substring( 0, comma ) : bundle;
                 String version = ( comma < bundle.length() - 1 ) ? bundle.substring( comma + 1 ) : null;

@@ -20,6 +20,7 @@ package org.apache.felix.webconsole.internal.obr;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,8 +29,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletRequest;
@@ -58,6 +61,10 @@ public class BundleRepositoryRender extends AbstractObrPlugin implements Render
     public static final String PARAM_REPO_URL = "repositoryURL";
 
     private static final String REPOSITORY_PROPERTY = "obr.repository.url";
+
+    private static final String ALL_CATEGORIES_OPTION = "*";
+
+    private static final String PAR_CATEGORIES = "category";
 
     private String[] repoURLs;
 
@@ -111,7 +118,7 @@ public class BundleRepositoryRender extends AbstractObrPlugin implements Render
 
             return;
         }
-        
+
         Repository[] repos = repoAdmin.listRepositories();
         Set activeURLs = new HashSet();
         if ( repos == null || repos.length == 0 )
@@ -131,8 +138,8 @@ public class BundleRepositoryRender extends AbstractObrPlugin implements Render
                 pw.println( "<tr class='content'>" );
                 pw.println( "<td class='content'>" + repo.getName() + "</td>" );
 
-                pw.print ( "<td class='content'>" );
-                pw.print ( "<a href='" + repo.getURL() + "' target='_blank' title='Show Repository " + repo.getURL()
+                pw.print( "<td class='content'>" );
+                pw.print( "<a href='" + repo.getURL() + "' target='_blank' title='Show Repository " + repo.getURL()
                     + "'>" + repo.getURL() + "</a>" );
                 pw.println( "</td>" );
 
@@ -178,7 +185,8 @@ public class BundleRepositoryRender extends AbstractObrPlugin implements Render
         pw.println( "<tr class='content'>" );
         pw.println( "<td class='content'>&nbsp;</td>" );
         pw.println( "<td class='content' colspan='2'>" );
-        pw.println( "  <input class='input' type='text' name='" + RefreshRepoAction.PARAM_REPO + "' value='' size='80'>" );
+        pw.println( "  <input class='input' type='text' name='" + RefreshRepoAction.PARAM_REPO
+            + "' value='' size='80'>" );
         pw.println( "</td>" );
         pw.println( "<td class='content'>" );
         pw.println( "<input type='hidden' name='" + Util.PARAM_ACTION + "' value='" + RefreshRepoAction.NAME + "'>" );
@@ -189,7 +197,7 @@ public class BundleRepositoryRender extends AbstractObrPlugin implements Render
 
         this.footer( pw );
 
-        this.listResources( pw, repos );
+        this.listResources( pw, repos, request.getParameter( PAR_CATEGORIES ) );
     }
 
 
@@ -214,7 +222,79 @@ public class BundleRepositoryRender extends AbstractObrPlugin implements Render
     }
 
 
-    private void resourcesHeader( PrintWriter pw, boolean doForm )
+    private void listResources( PrintWriter pw, Repository[] repos, String category )
+    {
+
+        // assume no category if the all option
+        if ( ALL_CATEGORIES_OPTION.equals( category ) )
+        {
+            category = null;
+        }
+
+        Map bundles = this.getBundles();
+
+        Map resSet = new HashMap();
+        SortedSet categories = new TreeSet();
+        SortedSet labels = new TreeSet();
+
+        for ( int i = 0; i < repos.length; i++ )
+        {
+            Resource[] resources = repos[i].getResources();
+            for ( int j = 0; resources != null && j < resources.length; j++ )
+            {
+                Resource res = resources[j];
+
+                // get categories and check whether we should actually
+                // ignore this resource
+                boolean useResource = false;
+                String[] cats = res.getCategories();
+                for ( int ci = 0; cats != null && ci < cats.length; ci++ )
+                {
+                    String cat = cats[ci];
+                    categories.add( cat );
+                    useResource |= ( category == null || cat.equals( category ) );
+                }
+
+                if ( useResource )
+                {
+                    String symbolicName = res.getSymbolicName();
+                    Version version = res.getVersion();
+                    Version installedVersion = ( Version ) bundles.get( symbolicName );
+                    if ( installedVersion == null || installedVersion.compareTo( version ) < 0 )
+                    {
+                        Collection versions = ( Collection ) resSet.get( symbolicName );
+                        if ( versions == null )
+                        {
+                            // order versions, hence use a TreeSet
+                            versions = new TreeSet();
+                            resSet.put( symbolicName, versions );
+                        }
+                        versions.add( version );
+
+                        labels.add( res.getPresentationName() + "§" + symbolicName );
+                    }
+                }
+            }
+        }
+
+        boolean doForm = !resSet.isEmpty();
+        this.resourcesHeader( pw, doForm, category, categories );
+
+        for ( Iterator ri = labels.iterator(); ri.hasNext(); )
+        {
+            String label = (String) ri.next();
+            String[] parts = label.split( "§" );
+            Collection versions = (Collection) resSet.remove(parts[1]);
+            if (versions != null) {
+                this.printResource( pw, parts[1], parts[0], versions );
+            }
+        }
+
+        this.resourcesFooter( pw, doForm );
+    }
+
+
+    private void resourcesHeader( PrintWriter pw, boolean doForm, String currentCategory, Collection categories )
     {
 
         if ( doForm )
@@ -226,91 +306,68 @@ public class BundleRepositoryRender extends AbstractObrPlugin implements Render
 
         pw.println( "<table class='content' cellpadding='0' cellspacing='0' width='100%'>" );
         pw.println( "<tr class='content'>" );
-        pw.println( "<th class='content container' colspan='3'>Available Resources</th>" );
+        pw.println( "<th class='content container'>Available Resources</th>" );
+
+        if ( categories != null && !categories.isEmpty() )
+        {
+            pw.println( "<th class='content container' style='text-align:right'>Limit to Bundle Category:</th>" );
+            pw.println( "<th class='content container'>" );
+            Util.startScript( pw );
+            pw.println( "function reloadWithCat(field) {" );
+            pw.println( "  var query = '?" + PAR_CATEGORIES + "=' + field.value;" );
+            pw
+                .println( "  var dest = document.location.protocol + '//' + document.location.host + document.location.pathname + query;" );
+            pw.println( "  document.location = dest;" );
+            pw.println( "}" );
+            Util.endScript( pw );
+            pw.println( "<select class='select' name='__ignoreoption__' onChange='reloadWithCat(this);'>" );
+            pw.print( "<option value='" + ALL_CATEGORIES_OPTION + "'>all</option>" );
+            for ( Iterator ci = categories.iterator(); ci.hasNext(); )
+            {
+                String category = ( String ) ci.next();
+                pw.print( "<option value='" + category + "'" );
+                if ( category.equals( currentCategory ) )
+                {
+                    pw.print( " selected" );
+                }
+                pw.print( '>' );
+                pw.print( category );
+                pw.println( "</option>" );
+            }
+            pw.println( "</select>" );
+            pw.println( "</th>" );
+        }
+        else
+        {
+            pw.println( "<th class='content container'>&nbsp;</th>" );
+        }
+
         pw.println( "</tr>" );
         pw.println( "<tr class='content'>" );
-        pw.println( "<th class='content'>Deploy</th>" );
-        pw.println( "<th class='content'>Name</th>" );
-        pw.println( "<th class='content'>Version</th>" );
+        pw.println( "<th class='content'>Deploy Version</th>" );
+        pw.println( "<th class='content' colspan='2'>Name</th>" );
         pw.println( "</tr>" );
     }
 
 
-    private void listResources( PrintWriter pw, Repository[] repos )
-    {
-
-        Map bundles = this.getBundles();
-
-        SortedSet resSet = new TreeSet( new Comparator()
-        {
-            public int compare( Object arg0, Object arg1 )
-            {
-                return compare( ( Resource ) arg0, ( Resource ) arg1 );
-            }
-
-
-            public int compare( Resource o1, Resource o2 )
-            {
-                if ( o1 == o2 || o1.equals( o2 ) )
-                {
-                    return 0;
-                }
-
-                if ( o1.getPresentationName().equals( o2.getPresentationName() ) )
-                {
-                    return o1.getVersion().compareTo( o2.getVersion() );
-                }
-
-                return o1.getPresentationName().compareTo( o2.getPresentationName() );
-            }
-        } );
-
-        for ( int i = 0; i < repos.length; i++ )
-        {
-            Resource[] resources = repos[i].getResources();
-            for ( int j = 0; resources != null && j < resources.length; j++ )
-            {
-                Resource res = resources[j];
-                Version ver = ( Version ) bundles.get( res.getSymbolicName() );
-                if ( ver == null || ver.compareTo( res.getVersion() ) < 0 )
-                {
-                    resSet.add( res );
-                }
-            }
-        }
-
-        this.resourcesHeader( pw, !resSet.isEmpty() );
-
-        for ( Iterator ri = resSet.iterator(); ri.hasNext(); )
-        {
-            Resource resource = ( Resource ) ri.next();
-            this.printResource( pw, resource );
-        }
-
-        this.resourcesFooter( pw, !resSet.isEmpty() );
-    }
-
-
-    private void printResource( PrintWriter pw, Resource res )
+    private void printResource( PrintWriter pw, String symbolicName, String presentationName, Collection versions )
     {
         pw.println( "<tr class='content'>" );
-        pw
-            .println( "<td class='content' valign='top' align='center'><input class='checkradio' type='checkbox' name='bundle' value='"
-                + res.getSymbolicName() + "," + res.getVersion() + "'></td>" );
 
-        // check whether the resource is an assembly (category name)
-        String style = "";
-        String[] cat = res.getCategories();
-        for ( int i = 0; cat != null && i < cat.length; i++ )
+        pw.println( "<td class='content' valign='top' align='center'>" );
+        pw.println( "<select class='select' name='bundle'>" );
+        pw.print( "<option value='" + DONT_INSTALL_OPTION + "'>Select Version...</option>" );
+        for ( Iterator vi = versions.iterator(); vi.hasNext(); )
         {
-            if ( "assembly".equals( cat[i] ) )
-            {
-                style = "style='font-weight:bold'";
-            }
+            Version version = ( Version ) vi.next();
+            pw.print( "<option value='" + symbolicName + "," + version + "'>" );
+            pw.print( version );
+            pw.println( "</option>" );
         }
-        pw.println( "<td class='content' " + style + ">" + res.getPresentationName() + " (" + res.getSymbolicName()
-            + ")</td>" );
-        pw.println( "<td class='content' " + style + " valign='top'>" + res.getVersion() + "</td>" );
+        pw.println( "</select>" );
+        pw.println( "</td>" );
+
+        pw.println( "<td class='content'  colspan='2'>" + presentationName + " (" + symbolicName + ")</td>" );
 
         pw.println( "</tr>" );
     }
@@ -320,7 +377,7 @@ public class BundleRepositoryRender extends AbstractObrPlugin implements Render
     {
         pw.println( "<tr class='content'>" );
         pw.println( "<td class='content'>&nbsp;</td>" );
-        pw.println( "<td class='content' colspan='2'>" );
+        pw.println( "<td class='content'>" );
         pw.println( "<input class='submit' style='width:auto' type='submit' name='deploy' value='Deploy Selected'>" );
         pw.println( "&nbsp;&nbsp;&nbsp;" );
         pw

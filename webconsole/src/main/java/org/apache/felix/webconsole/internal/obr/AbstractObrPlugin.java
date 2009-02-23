@@ -30,6 +30,8 @@ public class AbstractObrPlugin extends BaseManagementPlugin
     // track the optional installer service manually
     private ServiceTracker repositoryAdmin;
 
+    // marker indicating a special version to not install anything
+    protected static final String DONT_INSTALL_OPTION = "-";
 
     protected RepositoryAdmin getRepositoryAdmin()
     {
