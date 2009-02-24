@@ -646,7 +646,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
         {
             if (!m_exportNames.contains(Util.getClassPackage(name)))
             {
-                return null;
+                throw new ClassNotFoundException(name);
             }
 
             return getClass().getClassLoader().loadClass(name);
