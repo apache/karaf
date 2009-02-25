@@ -745,6 +745,12 @@
                 <groupId>com.google.code.sshd</groupId>
                 <artifactId>sshd</artifactId>
                 <version>${sshd.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.mina</groupId>
+                        <artifactId>mina-core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.osgi</groupId>
