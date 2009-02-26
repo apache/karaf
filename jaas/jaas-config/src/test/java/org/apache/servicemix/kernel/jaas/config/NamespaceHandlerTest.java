@@ -16,6 +16,8 @@
  */
 package org.apache.servicemix.kernel.jaas.config;
 
+import static org.easymock.EasyMock.*;
+
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
@@ -29,35 +31,33 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
-import org.jmock.Mockery;
-import org.jmock.Expectations;
+import org.osgi.framework.ServiceRegistration;
 import org.apache.servicemix.kernel.jaas.boot.ProxyLoginModule;
 import org.apache.servicemix.kernel.jaas.config.impl.Config;
+import org.easymock.EasyMock;
 import junit.framework.TestCase;
 
 public class NamespaceHandlerTest extends TestCase {
 
-    Mockery context = new Mockery();
-
     public void testConfig() throws Exception {
         final Dictionary headers = new Hashtable();
         headers.put(Constants.BUNDLE_VERSION, "1.0.0.SNAPSHOT");
-        final BundleContext bundleContext = context.mock(BundleContext.class);
-        final Bundle bundle = context.mock(Bundle.class);
 
-        context.checking(new Expectations() {{
-            allowing(bundleContext).getBundle(); will(returnValue(bundle));
-            allowing(bundle).getSymbolicName(); will(returnValue("symbolic-name"));
-            allowing(bundle).getBundleId(); will(returnValue(Long.valueOf(32)));
-            allowing(bundle).getHeaders(); will(returnValue(headers));
-            one(bundleContext).registerService(with(any(String[].class)),
-                                               with(any(Config.class)),
-                                               with(any(Dictionary.class)));
-            one(bundleContext).registerService(with(any(String[].class)),
-                                               with(any(Config.class)),
-                                               with(any(Dictionary.class)));
-        }});
-        
+        final BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+        final Bundle bundle = EasyMock.createMock(Bundle.class);
+        final ServiceRegistration reg = EasyMock.createMock(ServiceRegistration.class);
+
+        expect(bundleContext.getBundle()).andReturn(bundle).anyTimes();
+        expect(bundle.getSymbolicName()).andReturn("symbolic-name").anyTimes();
+        expect(bundle.getBundleId()).andReturn(Long.valueOf(32)).anyTimes();
+        expect(bundle.getHeaders()).andReturn(headers).anyTimes();
+        expect(bundleContext.registerService(aryEq(new String[] { JaasRealm.class.getName() }),
+                                             anyObject(), EasyMock.<Dictionary>anyObject())).andReturn(reg);
+        expect(bundleContext.registerService(aryEq(new String[] { KeystoreInstance.class.getName() }),
+                                             anyObject(), EasyMock.<Dictionary>anyObject())).andReturn(reg);
+
+        replay(bundleContext, bundle);
+
         AbstractApplicationContext ctx = new ClassPathXmlApplicationContext(new String[] { "classpath:config.xml" }, false) {
             protected DefaultListableBeanFactory createBeanFactory() {
                 DefaultListableBeanFactory f = super.createBeanFactory();
@@ -66,6 +66,8 @@ public class NamespaceHandlerTest extends TestCase {
             }
         };
         ctx.refresh();
+
+        verify(bundleContext, bundle);
 
         // Test realm
         Object obj = ctx.getBean("realm");

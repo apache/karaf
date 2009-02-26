@@ -67,8 +67,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.jmock</groupId>
-            <artifactId>jmock</artifactId>
+            <groupId>org.easymock</groupId>
+            <artifactId>easymock</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
