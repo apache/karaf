@@ -141,17 +141,4 @@
   </dependency>
  </dependencies>
 
- <repositories>
-  <repository>
-   <id>aQute</id>
-   <url>http://www.aQute.biz/repo</url>
-   <releases>
-    <updatePolicy>never</updatePolicy>
-   </releases>
-   <snapshots>
-    <enabled>false</enabled>
-   </snapshots>
-  </repository>
- </repositories>
-
 </project>
