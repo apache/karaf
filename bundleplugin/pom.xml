@@ -21,14 +21,14 @@
  <parent>
    <artifactId>felix</artifactId>
    <groupId>org.apache.felix</groupId>
-   <version>1.0.3</version>
+   <version>1.0.2</version>
    <relativePath>../pom/pom.xml</relativePath>
  </parent>
 
  <modelVersion>4.0.0</modelVersion>
 
  <artifactId>maven-bundle-plugin</artifactId>
- <version>2.1.0-SNAPSHOT</version>
+ <version>1.5.0-SNAPSHOT</version>
  <packaging>maven-plugin</packaging>
  
  <name>Maven Bundle Plugin</name>
@@ -140,4 +140,5 @@
    <scope>test</scope>
   </dependency>
  </dependencies>
+
 </project>
