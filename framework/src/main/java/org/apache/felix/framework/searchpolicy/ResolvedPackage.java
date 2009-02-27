@@ -30,13 +30,15 @@ import java.util.List;
  */
 class ResolvedPackage
 {
-    public String m_name = null;
-    public List m_sourceList = new ArrayList();
+    public final String m_name;
+    public final CandidateSet m_cs;
+    public final List m_sourceList = new ArrayList();
 
-    public ResolvedPackage(String name)
+    public ResolvedPackage(String name, CandidateSet cs)
     {
         super();
         m_name = name;
+        m_cs = cs;
     }
 
     public boolean isSubset(ResolvedPackage rp)
@@ -55,7 +57,7 @@ class ResolvedPackage
 
     public Object clone()
     {
-        ResolvedPackage rp = new ResolvedPackage(m_name);
+        ResolvedPackage rp = new ResolvedPackage(m_name, m_cs);
         rp.m_sourceList.addAll(m_sourceList);
         return rp;
     }

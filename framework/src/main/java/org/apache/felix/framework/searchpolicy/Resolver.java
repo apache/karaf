@@ -19,6 +19,8 @@
 package org.apache.felix.framework.searchpolicy;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -538,6 +540,12 @@ public class Resolver
         }
     }
 
+    // This flag indicates whether candidates have been rotated due to a
+    // "uses" constraint conflict. If so, then it is not necessary to perform
+    // a permutation, since rotating the candidates selected a new permutation.
+    // This part of an attempt to perform smarter permutations.
+    private boolean m_candidatesRotated = false;
+
     private void findConsistentClassSpace(
         ResolverState state, Map candidatesMap, IModule rootModule)
         throws ResolveException
@@ -569,12 +577,59 @@ public class Resolver
                 for (Iterator iter = candidatesMap.entrySet().iterator();
                     iter.hasNext(); )
                 {
-                    candidatesList.add(((Map.Entry) iter.next()).getValue());
+                    Map.Entry entry = (Map.Entry) iter.next();
+                    candidatesList.add(entry.getValue());
                 }
+
+                // Sort the bundles candidate sets according to a weighting
+                // based on how many multi-candidate requirements each has.
+                // The idea is to push bundles with more potential candidate
+                // permutations to the front so we can permutate over them
+                // more quickly, since they are likely to have more issues.
+                Collections.sort(candidatesList, new Comparator() {
+                    public int compare(Object o1, Object o2)
+                    {
+                        int w1 = calculateWeight((List) o1);
+                        int w2 = calculateWeight((List) o2);
+                        if (w1 < w2)
+                        {
+                            return -1;
+                        }
+                        else if (w1 > w2)
+                        {
+                            return 1;
+                        }
+                        return 0;
+                    }
+
+                    private int calculateWeight(List candSetList)
+                    {
+                        int weight = 0;
+                        for (int csIdx = 0; csIdx < candSetList.size(); csIdx++)
+                        {
+                            CandidateSet cs = (CandidateSet) candSetList.get(csIdx);
+                            if ((cs.m_candidates != null) && (cs.m_candidates.length > 1))
+                            {
+                                weight += cs.m_candidates.length;
+                            }
+                        }
+                        return -weight;
+                    }
+                });
             }
 
-            // Increment the candidate configuration so we can test again.
-            incrementCandidateConfiguration(candidatesList);
+            // Increment the candidate configuration to a new permutation so
+            // we can test again, unless some candidates have been rotated.
+            // In that case, we re-test the current permutation, since rotating
+            // the candidates effectively selects a new permutation.
+            if (!m_candidatesRotated)
+            {
+                incrementCandidateConfiguration(candidatesList);
+            }
+            else
+            {
+                m_candidatesRotated = false;
+            }
 
             // Clear the module map.
             moduleMap.clear();
@@ -840,6 +895,29 @@ public class Resolver
                             "Constraint violation for " + targetModule
                             + " detected; module can see "
                             + rp + " and " + rpUses);
+
+                        // If the resolved package has a candidate set, then
+                        // attempt to directly rotate the candidates to fix the
+                        // "uses" constraint conflict. The idea is rather than
+                        // blinding incrementing to the next permutation, we will
+                        // try to target the permutation to the bundle with a
+                        // conflict, which in some cases will be smarter. Only
+                        // rotate the candidates if we have more than one and we
+                        // haven't already rotated them completely.
+                        if ((rp.m_cs != null) && (rp.m_cs.m_candidates.length > 1)
+                            && (rp.m_cs.m_rotated < rp.m_cs.m_candidates.length))
+                        {
+                            // Rotate candidates.
+                            PackageSource first = rp.m_cs.m_candidates[0];
+                            for (int i = 1; i < rp.m_cs.m_candidates.length; i++)
+                            {
+                                rp.m_cs.m_candidates[i - 1] = rp.m_cs.m_candidates[i];
+                            }
+                            rp.m_cs.m_candidates[rp.m_cs.m_candidates.length - 1] = first;
+                            rp.m_cs.m_rotated++;
+                            m_candidatesRotated = true;
+                        }
+
                         return false;
                     }
                 }
@@ -1056,7 +1134,7 @@ public class Resolver
                 String pkgName = (String)
                     ps.m_capability.getProperties().get(ICapability.PACKAGE_PROPERTY);
 
-                ResolvedPackage rp = new ResolvedPackage(pkgName);
+                ResolvedPackage rp = new ResolvedPackage(pkgName, cs);
                 rp.m_sourceList.add(ps);
                 pkgMap.put(rp.m_name, rp);
             }
@@ -1082,7 +1160,7 @@ public class Resolver
                 String pkgName = (String)
                     wires[wireIdx].getCapability().getProperties().get(ICapability.PACKAGE_PROPERTY);
                 ResolvedPackage rp = (ResolvedPackage) pkgMap.get(pkgName);
-                rp = (rp == null) ? new ResolvedPackage(pkgName) : rp;
+                rp = (rp == null) ? new ResolvedPackage(pkgName, null) : rp;
                 rp.m_sourceList.add(new PackageSource(wires[wireIdx].getExporter(), wires[wireIdx].getCapability()));
                 pkgMap.put(rp.m_name, rp);
             }
@@ -1106,7 +1184,7 @@ public class Resolver
                 String pkgName = (String)
                     caps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY);
                 ResolvedPackage rp = (ResolvedPackage) pkgMap.get(pkgName);
-                rp = (rp == null) ? new ResolvedPackage(pkgName) : rp;
+                rp = (rp == null) ? new ResolvedPackage(pkgName, null) : rp;
                 rp.m_sourceList.add(new PackageSource(targetModule, caps[capIdx]));
                 pkgMap.put(rp.m_name, rp);
             }
@@ -1361,7 +1439,7 @@ public class Resolver
                 String pkgName = (String)
                     candCaps[capIdx].getProperties().get(ICapability.PACKAGE_PROPERTY);
                 ResolvedPackage rp = (ResolvedPackage) pkgMap.get(pkgName);
-                rp = (rp == null) ? new ResolvedPackage(pkgName) : rp;
+                rp = (rp == null) ? new ResolvedPackage(pkgName, null) : rp;
                 rp.m_sourceList.add(new PackageSource(psTarget.m_module, candCaps[capIdx]));
                 pkgMap.put(rp.m_name, rp);
             }
@@ -1477,7 +1555,7 @@ public class Resolver
                 String pkgName = (String)
                     caps[i].getProperties().get(ICapability.PACKAGE_PROPERTY);
                 ResolvedPackage rp = (ResolvedPackage) pkgMap.get(pkgName);
-                rp = (rp == null) ? new ResolvedPackage(pkgName) : rp;
+                rp = (rp == null) ? new ResolvedPackage(pkgName, null) : rp;
                 rp.m_sourceList.add(new PackageSource(targetModule, caps[i]));
                 pkgMap.put(rp.m_name, rp);
             }
@@ -1718,37 +1796,5 @@ public class Resolver
         List getPotentialHosts(IModule module);
         PackageSource[] getResolvedCandidates(IRequirement req);
         PackageSource[] getUnresolvedCandidates(IRequirement req);
-    }
-
-    private static class CandidateSet
-    {
-        public static final int NORMAL = 0;
-        public static final int FRAGMENT = 1;
-        public static final int HOST = 2;
-
-        public final int m_type;
-        public final IModule m_module;
-        public final IRequirement m_requirement;
-        public final PackageSource[] m_candidates;
-        public final IModule[] m_modules;
-        public int m_idx = 0;
-
-        public CandidateSet(int type, IModule module, IRequirement requirement, PackageSource[] candidates)
-        {
-            m_type = type;
-            m_module = module;
-            m_requirement = requirement;
-            m_candidates = candidates;
-            m_modules = null;
-        }
-
-        public CandidateSet(int type, IModule module, IRequirement requirement, IModule[] fragments)
-        {
-            m_type = type;
-            m_module = module;
-            m_requirement = requirement;
-            m_candidates = null;
-            m_modules = fragments;
-        }
     }
 }
