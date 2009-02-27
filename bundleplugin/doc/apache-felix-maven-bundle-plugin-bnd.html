@@ -36,7 +36,7 @@ This plugin wraps BND to make it work specifically with the Maven 2
 project structure and to provide it with reasonable default behavior
 for Maven 2 projects.</p>
 
-<p><em>NOTE: only compile, runtime and system scoped dependencies are passed to BND. Provided and test dependencies are <b>not</b> included in the classpath seen by BND.</em></p>
+<p><em>NOTE: test scoped dependencies are <b>not</b> included in the classpath seen by BND.</em></p>
 
 <p>Since the 1.4.0 release, this plugin also aims to automate OBR (OSGi
 Bundle Repository) management. It helps manage a local OBR for your
@@ -209,12 +209,19 @@ commons-logging:commons-logging -&gt; org.apache.commons.logging</li>
 		<li>if artifactId is equal to last section of groupId then groupId is returned. eg. org.apache.maven:maven -&gt; org.apache.maven</li>
 		<li>if
 artifactId starts with last section of groupId that portion is removed.
-eg. org.apache.maven:maven-core -&gt; org.apache.maven.core</li>
+eg. org.apache.maven:maven-core -&gt; org.apache.maven.core<br>
+The computed symbolic name is also stored in the <tt>$(maven-symbolicname)</tt> property in case you want to add attributes or directives to it.</li>
 	</ul>
 	</li>
-	<li><tt>&lt;Export-Package&gt;</tt> is assumed to be "<tt>&lt;Bundle-SymbolicName&gt;.*</tt>", unless <tt>&lt;Private-Package&gt;</tt> is specified, then <tt>&lt;Export-Package&gt;</tt> is assumed to be empty.</li>
-	<li><tt>&lt;Private-Package&gt;</tt> is assumed to be empty by default.</li>
-	<li><tt>&lt;Import-Package&gt;</tt> is assumed to be "<tt>*</tt>", which imports everything referred to by the bundle content, but not contained in the bundle.</li>
+	<li><tt>&lt;Export-Package&gt;</tt>
+is now assumed to be the set of packages in your local Java sources,
+excluding the default package '.' and any packages containing 'impl' or
+'internal'.<br>
+<em>(before version 2 of the bundleplugin it was based on the symbolic name)</em></li>
+	<li><tt>&lt;Private-Package&gt;</tt> is now assumed to be the set of packages in your local Java sources (note that any packages in both <tt>&lt;Export-Package&gt;</tt> and <tt>&lt;Private-Package&gt;</tt> will be exported).<br>
+<em>(before version 2 of the bundleplugin it was assumed to be empty by default)</em></li>
+	<li><tt>&lt;Import-Package&gt;</tt> is assumed to be "<tt>*</tt>", which imports everything referred to by the bundle content, but not contained in the bundle.<br>
+<em>Any exported packages are also imported by default, to ensure a consistent class space.</em></li>
 	<li><tt>&lt;Include-Resource&gt;</tt> is generated from the project's Maven resources, typically "<tt>src/main/resources/</tt>",
 which will copy the specified project directory hierarchy into the
 resulting bundle JAR file, mirroring standard Maven behavior.</li>
@@ -270,7 +277,6 @@ Below is an example of a simple OSGi bundle POM for Maven2:</p>
       &lt;plugin&gt;    &lt;!-- (2) START --&gt;
         &lt;groupId&gt;org.apache.felix&lt;/groupId&gt;
         &lt;artifactId&gt;maven-bundle-plugin&lt;/artifactId&gt;
-
         &lt;extensions&gt;true&lt;/extensions&gt;
         &lt;configuration&gt;
           &lt;instructions&gt;
@@ -518,7 +524,8 @@ configuration options:
 	<ul>
 		<li><em><tt>manifestLocation</tt></em> defaults to ${project.build.outputDirectory}/META-INF</li>
 		<li><em><tt>unpackBundle</tt></em> unpack bundle contents to output directory, defaults to false</li>
-		<li><em><tt>excludeDependencies</tt></em> comma-separated list of dependency artifactIds to exclude from the classpath passed to Bnd (use "true" to exclude everything)</li>
+		<li><em><tt>excludeDependencies</tt></em> comma-separated list of dependency artifactIds to exclude from the classpath passed to Bnd, use "true" to exclude everything.<br>
+Version 2 of the bundleplugin now supports the same style of filter clauses in <tt>excludeDependencies</tt> as <tt>Embed-Dependency</tt>.</li>
 		<li><em><tt>classifier</tt></em> attach bundle to the project using the given classifier</li>
 		<li><em><tt>supportedProjectTypes</tt></em> defaults to "jar","bundle"</li>
 	</ul>
@@ -651,7 +658,6 @@ configuration options:
 	</ul>
 	</li>
 </ul>
-
 
 
 <ul>
@@ -1069,6 +1075,7 @@ found by querying the <tt>&lt;distributionManagement&gt;</tt> section of the pro
 	<li><em>obrXml</em> optional additional properties for the bundle</li>
 	<li><em>ignoreLock</em> ignore remote locking when updating the OBR</li>
 </ul>
+
 
 
 <p>Example:</p>
