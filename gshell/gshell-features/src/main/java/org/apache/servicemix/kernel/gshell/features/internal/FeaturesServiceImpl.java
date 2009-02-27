@@ -126,11 +126,12 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
         }
     }
 
-    protected void internalAddRepository(URI uri) throws Exception {
+    protected RepositoryImpl internalAddRepository(URI uri) throws Exception {
         RepositoryImpl repo = new RepositoryImpl(uri);
         repositories.put(uri, repo);
         featuresRegistry.register(repo);
         features = null;
+        return repo;
     }
 
     public void removeRepository(URI uri) {

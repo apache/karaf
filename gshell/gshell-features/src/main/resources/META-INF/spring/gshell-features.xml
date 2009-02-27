@@ -72,6 +72,10 @@
         <property name="featuresServiceRegistry" ref="featureServiceRegistry" />
     </bean>
 
+    <bean id="featureDeploymentListener" class="org.apache.servicemix.kernel.gshell.features.internal.FeatureDeploymentListener">
+        <property name="featuresService" ref="featuresService" />
+    </bean>
+
     <bean id="namingStrategy" class="org.apache.servicemix.kernel.gshell.features.management.DefaultNamingStrategy">
         <property name="jmxDomainName" value="org.apache.servicemix" />
     </bean>
@@ -91,6 +95,8 @@
     <osgi:reference id="preferences" interface="org.osgi.service.prefs.PreferencesService" cardinality="0..1" />
 
     <osgi:service ref="featuresService" interface="org.apache.servicemix.kernel.gshell.features.FeaturesService" />
+
+    <osgi:service ref="featureDeploymentListener" interface="org.apache.servicemix.kernel.filemonitor.DeploymentListener" />
 
     <osgix:cm-properties id="cmProps" persistent-id="org.apache.servicemix.features">
         <prop key="featuresRepositories"></prop>
