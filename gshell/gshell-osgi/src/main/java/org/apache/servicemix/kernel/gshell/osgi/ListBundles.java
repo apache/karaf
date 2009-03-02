@@ -22,6 +22,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.startlevel.StartLevel;
+import org.osgi.service.packageadmin.PackageAdmin;
+import org.springframework.util.StringUtils;
 
 public class ListBundles extends OsgiCommandSupport {
 
@@ -53,6 +55,16 @@ public class ListBundles extends OsgiCommandSupport {
         if (sl == null) {
             io.out.println("StartLevel service is unavailable.");
         }
+
+        ServiceReference pkgref = getBundleContext().getServiceReference(PackageAdmin.class.getName());
+        PackageAdmin admin = null;
+        if (pkgref != null) {
+            admin = (PackageAdmin) getBundleContext().getService(pkgref);
+            if (admin == null) {
+                io.out.println("PackageAdmin service is unavailable.");
+            }
+        }
+
         Bundle[] bundles = getBundleContext().getBundles();
         if (bundles != null) {
             // Display active start level.
@@ -115,11 +127,47 @@ public class ListBundles extends OsgiCommandSupport {
                     + getStateString(bundles[i])
                     + "] [" + getSpringStateString(bundles[i])
                     + "] [" + level + "] " + name);
+
+                if (admin != null) {
+                    Bundle[] fragments = admin.getFragments(bundles[i]);
+                    Bundle[] hosts = admin.getHosts(bundles[i]);
+
+                    if (fragments != null) {
+                        io.out.print("                                       Fragments: ");
+                        int ii = 0;
+                        for (Bundle fragment : fragments) {
+                            ii++;
+                            io.out.print(fragment.getBundleId());
+                            if ((fragments.length > 1) && ii < (fragments.length)) {
+                                io.out.print(",");
+                            }
+                        }
+                        io.out.println();
+                    }
+
+                    if (hosts != null) {
+                        io.out.print("                                       Hosts: ");
+                        int ii = 0;
+                        for (Bundle host : hosts) {
+                            ii++;
+                            io.out.print(host.getBundleId());
+                            if ((hosts.length > 1) && ii < (hosts.length)) {
+                                io.out.print(",");
+                            }
+                        }
+                        io.out.println();
+                    }
+
+                }
             }
         }
         else {
             io.out.println("There are no installed bundles.");
         }
+
+        getBundleContext().ungetService(ref);
+        getBundleContext().ungetService(pkgref);
+
         return Result.SUCCESS;
     }
 
