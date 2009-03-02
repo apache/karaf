@@ -397,7 +397,9 @@ public class FileMonitor {
         if (bundle == null) {
             LOGGER.warn("Could not find Bundle for file: " + file.getCanonicalPath());
         } else {
-            bundle.stop();
+            if (!isBundleFragment(bundle)) {
+                bundle.stop();
+            }
             bundle.uninstall();
         }
     }
