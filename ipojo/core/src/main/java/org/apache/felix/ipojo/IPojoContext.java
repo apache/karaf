@@ -248,6 +248,8 @@ public class IPojoContext implements BundleContext, ServiceContext {
      * where the service is get.
      * This method uses the service context if specified, the bundle
      * context otherwise.
+     * This method may throw {@link IllegalStateException} if the used bundle
+     * context is no more valid (because we're leaving).
      * @param reference the required service reference 
      * @return the service object or <code>null</code> if the service reference 
      * is no more valid or if the service object is not accessible.

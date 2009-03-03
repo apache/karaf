@@ -509,6 +509,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
     public ServiceReference[] getServiceReferences() {
         synchronized (this) {
             if (m_matchingRefs.isEmpty()) { return null; }
+            // TODO Consider sorting the array (on a copy of matching ref) if dynamic priority used.
             return (ServiceReference[]) m_matchingRefs.toArray(new ServiceReference[m_matchingRefs.size()]);
         }
     }

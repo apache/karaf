@@ -167,6 +167,13 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
 
         // Add the name
         m_name = (String) configuration.get("instance.name");
+        
+        // Check if an object is injected in the instance
+        Object obj = configuration.get("instance.object");
+        if (obj != null) {
+            m_pojoObjects = new ArrayList(1);
+            m_pojoObjects.add(obj);
+        }
 
         // Get the factory method if presents.
         m_factoryMethod = (String) metadata.getAttribute("factory-method");
@@ -298,6 +305,11 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
                 stop();
                 throw e;
             }
+        }
+        
+        // Is an object already contained (i.e. injected)
+        if (m_pojoObjects != null && ! m_pojoObjects.isEmpty()) {
+            managedInjectedObject();
         }
         
         for (int i = 0; i < m_handlers.length; i++) {
@@ -773,7 +785,9 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
         for (int i = 0; newPOJO && i < m_handlers.length; i++) {
             ((PrimitiveHandler) m_handlers[i].getHandler()).onCreation(pojo);
         } 
-        //NOTE this method allows returning a POJO object before calling the onCreation on handler.
+        //NOTE this method allows returning a POJO object before calling the onCreation on handler:
+        // a second thread get the created object before the first one (which created the object),
+        // call onCreation.
 
         return pojo;
     }
@@ -789,6 +803,42 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
             load();
         }
         return m_clazz;
+    }
+    
+    /**
+     * Configures an injected object in this container.
+     */
+    private void managedInjectedObject() {
+        Object obj = m_pojoObjects.get(0); // Get first object.
+   
+        if (! (obj instanceof Pojo)) {
+            // Error, the injected object is not a POJO.
+            throw new RuntimeException("The injected object in " + m_name + " is not a POJO");
+        }
+        
+        load(); // Load the class.
+
+        if (! m_clazz.isInstance(obj)) {
+            throw new RuntimeException("The injected object in " + m_name + " is not an instance of " + m_className);
+        }
+        
+        // Call _setInstanceManager
+        try {
+            Method setIM = m_clazz.getDeclaredMethod("_setInstanceManager", new Class[] {this.getClass()});
+            setIM.setAccessible(true); // Necessary as the method is private
+            setIM.invoke(obj, new Object[] {this});
+        } catch (Exception e) {
+            // If anything wrong happened... 
+            throw new RuntimeException("Cannot attach the injected object with the container of " + m_name + " : " + e.getMessage());
+        }
+        
+        // Call createInstance on Handlers :
+        for (int i = 0; i < m_handlers.length; i++) {
+            // This methods must be call without the monitor lock.
+            ((PrimitiveHandler) m_handlers[i].getHandler()).onCreation(obj);
+        }
+        
+        
     }
 
     /**
