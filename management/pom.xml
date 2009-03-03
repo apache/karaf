@@ -72,11 +72,12 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-                        <Import-Package>*</Import-Package>
+                        <Import-Package>
+                            javax.management,
+                            org.springframework.jmx.support,
+                            *
+                        </Import-Package>
                         <Export-Package>org.apache.servicemix.management*</Export-Package>
-                        <DynamicImport-Package>*</DynamicImport-Package>
-                        <Private-Package>
-                        </Private-Package>
                         <Spring-Context>*;publish-context:=false</Spring-Context>
                     </instructions>
                 </configuration>
