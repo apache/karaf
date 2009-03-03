@@ -58,6 +58,8 @@ public class Felix extends BundleImpl implements Framework
     // Lock object used to determine if an individual bundle
     // lock or the global lock can be acquired.
     private final Object[] m_bundleLock = new Object[0];
+    // Keeps track of threads wanting to acquire the global lock.
+    private final List m_globalLockWaitersList = new ArrayList();
     // The thread currently holding the global lock.
     private Thread m_globalLockThread = null;
     // How many times the global lock was acquired by the thread holding
@@ -1555,13 +1557,28 @@ ex.printStackTrace();
 
             try
             {
+                // Revising the bundle creates a new module, which modifies
+                // the global state, so we need to acquire the global lock
+                // before revising.
+                boolean locked = acquireGlobalLock();
+                if (!locked)
+                {
+                    throw new BundleException(
+                        "Cannot acquire global lock to update the bundle.");
+                }
+                try
+                {
 // REFACTOR - This adds the module to the resolver state, but should we do the
 //            security check first?
-                bundle.revise(updateLocation, is);
+                    bundle.revise(updateLocation, is);
+                }
+                finally
+                {
+                    // Always release the global lock.
+                    releaseGlobalLock();
+                }
 
-                // Create a module for the new revision; the revision is
-                // base zero, so subtract one from the revision count to
-                // get the revision of the new update.
+                // Verify updated bundle.
                 try
                 {
                     Object sm = System.getSecurityManager();
@@ -1630,28 +1647,32 @@ ex.printStackTrace();
                 fireBundleEvent(BundleEvent.UPDATED, bundle);
 
                 // Acquire global lock to check if we should auto-refresh.
-                acquireGlobalLock();
-
-                try
+                boolean locked = acquireGlobalLock();
+                // If we did not get the global lock, then do not try to
+                // auto-refresh.
+                if (locked)
                 {
-                    if (!bundle.isUsed())
+                    try
                     {
-                        try
+                        if (!bundle.isUsed())
                         {
-                            refreshPackages(new BundleImpl[] { bundle });
-                        }
-                        catch (Exception ex)
-                        {
-                            m_logger.log(
-                                Logger.LOG_ERROR,
-                                "Unable to immediately purge the bundle revisions.", ex);
+                            try
+                            {
+                                refreshPackages(new BundleImpl[] { bundle });
+                            }
+                            catch (Exception ex)
+                            {
+                                m_logger.log(
+                                    Logger.LOG_ERROR,
+                                    "Unable to immediately purge the bundle revisions.", ex);
+                            }
                         }
                     }
-                }
-                finally
-                {
-                    // Always release the global lock.
-                    releaseGlobalLock();
+                    finally
+                    {
+                        // Always release the global lock.
+                        releaseGlobalLock();
+                    }
                 }
             }
 
@@ -1919,30 +1940,32 @@ ex.printStackTrace();
         fireBundleEvent(BundleEvent.UNINSTALLED, bundle);
 
         // Acquire global lock to check if we should auto-refresh.
-        acquireGlobalLock();
-
-        try
+        boolean locked = acquireGlobalLock();
+        if (locked)
         {
-            // If the bundle is not used by anyone, then garbage
-            // collect it now.
-            if (!bundle.isUsed())
+            try
             {
-                try
+                // If the bundle is not used by anyone, then garbage
+                // collect it now.
+                if (!bundle.isUsed())
                 {
-                    refreshPackages(new BundleImpl[] { bundle });
-                }
-                catch (Exception ex)
-                {
-                    m_logger.log(
-                        Logger.LOG_ERROR,
-                        "Unable to immediately garbage collect the bundle.", ex);
+                    try
+                    {
+                        refreshPackages(new BundleImpl[] { bundle });
+                    }
+                    catch (Exception ex)
+                    {
+                        m_logger.log(
+                            Logger.LOG_ERROR,
+                            "Unable to immediately garbage collect the bundle.", ex);
+                    }
                 }
             }
-        }
-        finally
-        {
-            // Always release the global lock.
-            releaseGlobalLock();
+            finally
+            {
+                // Always release the global lock.
+                releaseGlobalLock();
+            }
         }
     }
 
@@ -2055,8 +2078,23 @@ ex.printStackTrace();
             {
                 BundleArchive archive = m_cache.getArchive(id);
 
-                // Create bundle.
-                bundle = new BundleImpl(this, archive);
+                // Acquire the global lock to create the bundle,
+                // since this impacts the global state.
+                boolean locked = acquireGlobalLock();
+                if (!locked)
+                {
+                    throw new BundleException(
+                        "Unable to acquire the global lock to install the bundle.");
+                }
+                try
+                {
+                    bundle = new BundleImpl(this, archive);
+                }
+                finally
+                {
+                    // Always release the global lock.
+                    releaseGlobalLock();
+                }
 
                 verifyExecutionEnvironment(bundle);
 
@@ -2917,38 +2955,46 @@ ex.printStackTrace();
     boolean resolveBundles(Bundle[] targets)
     {
         // Acquire global lock.
-        acquireGlobalLock();
-
-        // Determine set of bundles to be resolved, which is either the
-        // specified bundles or all bundles if null.
-        if (targets == null)
+        boolean locked = acquireGlobalLock();
+        if (!locked)
         {
-            List list = new ArrayList();
+            m_logger.log(
+                Logger.LOG_WARNING,
+                "Unable to acquire global lock to perform resolve.",
+                null);
+            return false;
+        }
 
-            // Add all unresolved bundles to the list.
-            synchronized (m_installedBundleLock_Priority2)
+        try
+        {
+            // Determine set of bundles to be resolved, which is either the
+            // specified bundles or all bundles if null.
+            if (targets == null)
             {
-                Iterator iter = m_installedBundleMap.values().iterator();
-                while (iter.hasNext())
+                List list = new ArrayList();
+
+                // Add all unresolved bundles to the list.
+                synchronized (m_installedBundleLock_Priority2)
                 {
-                    BundleImpl bundle = (BundleImpl) iter.next();
-                    if (bundle.getState() == Bundle.INSTALLED)
+                    Iterator iter = m_installedBundleMap.values().iterator();
+                    while (iter.hasNext())
                     {
-                        list.add(bundle);
+                        BundleImpl bundle = (BundleImpl) iter.next();
+                        if (bundle.getState() == Bundle.INSTALLED)
+                        {
+                            list.add(bundle);
+                        }
                     }
+                }
+
+                // Create an array.
+                if (list.size() > 0)
+                {
+                    targets = (Bundle[]) list.toArray(new BundleImpl[list.size()]);
                 }
             }
 
-            // Create an array.
-            if (list.size() > 0)
-            {
-                targets = (Bundle[]) list.toArray(new BundleImpl[list.size()]);
-            }
-        }
-
-        // Now resolve each target bundle.
-        try
-        {
+            // Now resolve each target bundle.
             boolean result = true;
 
             // If there are targets, then resolve each one.
@@ -3002,7 +3048,17 @@ ex.printStackTrace();
     void refreshPackages(Bundle[] targets)
     {
         // Acquire global lock.
-        acquireGlobalLock();
+        boolean locked = acquireGlobalLock();
+        if (!locked)
+        {
+            // If the thread calling holds bundle locks, then we might not
+            // be able to get the global lock. However, in practice this
+            // should not happen since the calls to this method have either
+            // already acquired the global lock or it is PackageAdmin which
+            // doesn't hold bundle locks.
+            throw new IllegalStateException(
+                "Unable to acquire global lock for refresh.");
+        }
 
         // Determine set of bundles to refresh, which is all transitive
         // dependencies of specified set or all transitive dependencies
@@ -3513,7 +3569,12 @@ ex.printStackTrace();
             if (!rootModule.isResolved())
             {
                 // Acquire global lock.
-                acquireGlobalLock();
+                boolean locked = acquireGlobalLock();
+                if (!locked)
+                {
+                    throw new ResolveException(
+                        "Unable to acquire global lock for resolve.", rootModule, null);
+                }
 
                 try
                 {
@@ -3596,7 +3657,12 @@ ex.printStackTrace();
             if (importer.isResolved())
             {
                 // Acquire global lock.
-                acquireGlobalLock();
+                boolean locked = acquireGlobalLock();
+                if (!locked)
+                {
+                    throw new ResolveException(
+                        "Unable to acquire global lock for resolve.", importer, null);
+                }
 
                 try
                 {
@@ -4138,6 +4204,16 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
                 {
                     throw new IllegalStateException("Bundle in unexpected state.");
                 }
+                // If the calling thread already owns the global lock, then make
+                // sure no other thread is trying to promote a bundle lock to a
+                // global lock. If so, interrupt the other thread to avoid deadlock.
+                else if (m_globalLockThread == Thread.currentThread()
+                    && (bundle.getLockingThread() != null)
+                    && m_globalLockWaitersList.contains(bundle.getLockingThread()))
+                {
+                    bundle.getLockingThread().interrupt();
+                }
+
                 try
                 {
                     m_bundleLock.wait();
@@ -4173,35 +4249,73 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
         {
             // Unlock the bundle.
             bundle.unlock();
-            m_bundleLock.notifyAll();
+            // If the thread no longer holds the bundle lock,
+            // then remove it from the held lock map.
+            if (bundle.getLockingThread() == null)
+            {
+                m_bundleLock.notifyAll();
+            }
         }
     }
 
     /**
-     * Acquires the global lock, which is necessary for multi-bundle operations
-     * like refreshing and resolving.
+     * Promotes a bundle lock to the global lock. This is called by a thread
+     * wanting the global lock, but already holding a bundle lock (currently
+     * only when updating a bundle). Since it is possible to deadlock when
+     * trying to acquire the global lock while holding a bundle lock, this
+     * method may fail if a potential deadlock is detected.
+     * @param bundle The bundle already locked by the calling thread.
+     * @return <tt>true</tt> if the global lock was successfully acquired,
+     *         <tt>false</tt> otherwise.
     **/
-    private void acquireGlobalLock()
+    private boolean acquireGlobalLock()
     {
         synchronized (m_bundleLock)
         {
-            // Wait as long as some other thread holds the global lock.
-            while ((m_globalLockThread != null)
+            // Wait as long as some other thread holds the global lock
+            // and the current thread is not interrupted.
+            boolean interrupted = false;
+            while (!interrupted
+                && (m_globalLockThread != null)
                 && (m_globalLockThread != Thread.currentThread()))
             {
+                // Add calling thread to global lock waiters list.
+                m_globalLockWaitersList.add(Thread.currentThread());
+                // We need to wake up all waiting threads so we can
+                // recheck for potential deadlock in acquireBundleLock()
+                // if this thread was holding a bundle lock and is now
+                // trying to promote it to a global lock.
+                m_bundleLock.notifyAll();
+                // Now wait for the global lock.
                 try
                 {
                     m_bundleLock.wait();
                 }
                 catch (InterruptedException ex)
                 {
-                    // Ignore
+                    interrupted = true;
                 }
+                // At this point we are either interrupted or will get the
+                // global lock, so remove the thread from the waiters list.
+                m_globalLockWaitersList.remove(Thread.currentThread());
             }
 
-            // Increment the current thread's global lock count.
-            m_globalLockCount++;
-            m_globalLockThread = Thread.currentThread();
+            // Check to see if we were interrupted, which means someone
+            // with the global lock wants our bundle lock, so we should
+            // fail gracefully.
+            if (!interrupted)
+            {
+                // Increment the current thread's global lock count.
+                m_globalLockCount++;
+                m_globalLockThread = Thread.currentThread();
+            }
+
+            // Note: If the thread was interrupted, there is no reason to notify
+            // anyone, since the thread was likely interrupted to force it to give
+            // up a bundle lock it is holding. When it does give up the bundle
+            // lock, it will do a notifyAll() in there.
+
+            return !interrupted;
         }
     }
 

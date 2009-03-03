@@ -1007,6 +1007,11 @@ class BundleImpl implements Bundle
         return (m_lockCount == 0) || (m_lockThread == Thread.currentThread());
     }
 
+    synchronized Thread getLockingThread()
+    {
+        return m_lockThread;
+    }
+
     synchronized void lock()
     {
         if ((m_lockCount > 0) && (m_lockThread != Thread.currentThread()))
