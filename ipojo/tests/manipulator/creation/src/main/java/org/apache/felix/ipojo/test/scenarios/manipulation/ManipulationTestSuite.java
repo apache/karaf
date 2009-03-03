@@ -28,6 +28,7 @@ public class ManipulationTestSuite {
 	public static Test suite(BundleContext bc) {
 		OSGiTestSuite ots = new OSGiTestSuite("Manipulation Creation Test Suite", bc);
         ots.addTestSuite(POJOCreation.class);
+        ots.addTestSuite(SeveralConstructorTest.class);
 		return ots;
 	}
 
