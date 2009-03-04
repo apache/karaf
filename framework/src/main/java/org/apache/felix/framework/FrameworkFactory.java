@@ -23,7 +23,7 @@ import org.osgi.framework.launch.Framework;
 
 public class FrameworkFactory implements org.osgi.framework.launch.FrameworkFactory
 {
-    public Framework newFramework(Map configuration) throws Exception
+    public Framework newFramework(Map configuration)
     {
         return new Felix(configuration);
     }

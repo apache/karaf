@@ -99,6 +99,39 @@ public class ModuleImpl implements IModule
     // Thread local to detect class loading cycles.
     private final ThreadLocal m_cycleCheck = new ThreadLocal();
 
+    /**
+     * This constructor is used by the extension manager, since it needs
+     * a constructor that does not throw an exception.
+     * @param logger
+     * @param bundle
+     * @param id
+     * @param bootPkgs
+     * @param bootPkgWildcards
+     * @throws org.osgi.framework.BundleException
+     */
+    public ModuleImpl(
+        Logger logger, Bundle bundle, String id,
+        String[] bootPkgs, boolean[] bootPkgWildcards)
+    {
+        m_logger = logger;
+        m_configMap = null;
+        m_resolver = null;
+        m_bundle = bundle;
+        m_id = id;
+        m_headerMap = null;
+        m_content = null;
+        m_streamHandler = null;
+        m_bootPkgs = bootPkgs;
+        m_bootPkgWildcards = bootPkgWildcards;
+        m_manifestVersion = null;
+        m_symbolicName = null;
+        m_version = null;
+        m_capabilities = null;
+        m_requirements = null;
+        m_dynamicRequirements = null;
+        m_nativeLibraries = null;
+    }
+
     public ModuleImpl(
         Logger logger, Map configMap, FelixResolver resolver,
         Bundle bundle, String id, Map headerMap, IContent content,
@@ -117,76 +150,61 @@ public class ModuleImpl implements IModule
         m_bootPkgs = bootPkgs;
         m_bootPkgWildcards = bootPkgWildcards;
 
-        // We need to special case the system bundle module, which does not
-        // have a content.
-        if (m_content != null)
+        ManifestParser mp = new ManifestParser(m_logger, m_configMap, m_headerMap);
+
+        // Record some of the parsed metadata. Note, if this is an extension
+        // bundle it's exports are removed, since they will be added to the
+        // system bundle directly later on.
+        m_manifestVersion = mp.getManifestVersion();
+        m_version = mp.getBundleVersion();
+        m_capabilities = (Util.isExtensionBundle(m_headerMap))
+            ? null : mp.getCapabilities();
+        m_requirements = mp.getRequirements();
+        m_dynamicRequirements = mp.getDynamicRequirements();
+        m_nativeLibraries = mp.getLibraries();
+
+        // Get symbolic name.
+        String symName = null;
+        for (int capIdx = 0;
+            (m_capabilities != null) && (capIdx < m_capabilities.length);
+            capIdx++)
         {
-            ManifestParser mp = new ManifestParser(m_logger, m_configMap, m_headerMap);
-
-            // Record some of the parsed metadata. Note, if this is an extension
-            // bundle it's exports are removed, since they will be added to the
-            // system bundle directly later on.
-            m_manifestVersion = mp.getManifestVersion();
-            m_version = mp.getBundleVersion();
-            m_capabilities = (Util.isExtensionBundle(m_headerMap))
-                ? null : mp.getCapabilities();
-            m_requirements = mp.getRequirements();
-            m_dynamicRequirements = mp.getDynamicRequirements();
-            m_nativeLibraries = mp.getLibraries();
-
-            // Get symbolic name.
-            String symName = null;
-            for (int capIdx = 0;
-                (m_capabilities != null) && (capIdx < m_capabilities.length);
-                capIdx++)
+            if (m_capabilities[capIdx].getNamespace().equals(ICapability.MODULE_NAMESPACE))
             {
-                if (m_capabilities[capIdx].getNamespace().equals(ICapability.MODULE_NAMESPACE))
-                {
-                    symName = (String) m_capabilities[capIdx].getProperties().get(
-                        Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE);
-                    break;
-                }
+                symName = (String) m_capabilities[capIdx].getProperties().get(
+                    Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE);
+                break;
             }
-            m_symbolicName = symName;
+        }
+        m_symbolicName = symName;
 
-            // Verify that all native libraries exist in advance; this will
-            // throw an exception if the native library does not exist.
-            try
+        // Verify that all native libraries exist in advance; this will
+        // throw an exception if the native library does not exist.
+        try
+        {
+            for (int i = 0;
+                (m_nativeLibraries != null) && (i < m_nativeLibraries.length);
+                i++)
             {
-                for (int i = 0;
-                    (m_nativeLibraries != null) && (i < m_nativeLibraries.length);
-                    i++)
+                String entryName = m_nativeLibraries[i].getEntryName();
+                if (entryName != null)
                 {
-                    String entryName = m_nativeLibraries[i].getEntryName();
-                    if (entryName != null)
+                    if (m_content.getEntryAsNativeLibrary(entryName) == null)
                     {
-                        if (m_content.getEntryAsNativeLibrary(entryName) == null)
-                        {
-                            throw new BundleException("Native library does not exist: " + entryName);
-                        }
+                        throw new BundleException("Native library does not exist: " + entryName);
                     }
                 }
             }
-            finally
-            {
-                // We close the module content here to make sure it is closed
-                // to avoid having to close it if there is an exception during
-                // the entire module creation process.
+        }
+        finally
+        {
+            // We close the module content here to make sure it is closed
+            // to avoid having to close it if there is an exception during
+            // the entire module creation process.
 // TODO: REFACTOR - If we do the above check here, then we open the module's content
 //       immediately every time, which means we must close it here so we don't have
 //       to remember to close it if there are other failures during module init.
-                m_content.close();
-            }
-        }
-        else
-        {
-            m_manifestVersion = null;
-            m_version = null;
-            m_capabilities = null;
-            m_requirements = null;
-            m_dynamicRequirements = null;
-            m_nativeLibraries = null;
-            m_symbolicName = null;
+            m_content.close();
         }
     }
 

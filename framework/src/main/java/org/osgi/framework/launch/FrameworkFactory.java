@@ -68,5 +68,5 @@ public interface FrameworkFactory {
 	 *         <code>AllPermission</code>, and the Java Runtime Environment
 	 *         supports permissions.
 	 */
-	Framework newFramework(Map configuration) throws Exception;
+	Framework newFramework(Map configuration);
 }

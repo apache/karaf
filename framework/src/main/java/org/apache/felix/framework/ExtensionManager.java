@@ -139,7 +139,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
      * @param config the configuration to read properties from.
      * @param systemBundleInfo the info to change if we need to add exports.
      */
-    ExtensionManager(Logger logger, Felix felix) throws BundleException
+    ExtensionManager(Logger logger, Felix felix)
     {
         m_module = new ExtensionManagerModule(felix);
         m_extensions = null;
@@ -614,9 +614,9 @@ class ExtensionManager extends URLStreamHandler implements IContent
     class ExtensionManagerModule extends ModuleImpl
     {
         private final Version m_version;
-        ExtensionManagerModule(Felix felix) throws BundleException
+        ExtensionManagerModule(Felix felix)
         {
-            super(m_logger, null, null, felix, "0", null, null, null,
+            super(m_logger, felix, "0",
                 felix.getBootPackages(), felix.getBootPackageWildcards());
             m_version = new Version((String)
                 felix.getConfig().get(FelixConstants.FELIX_VERSION_PROPERTY));

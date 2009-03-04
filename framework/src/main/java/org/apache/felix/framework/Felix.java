@@ -246,9 +246,9 @@ public class Felix extends BundleImpl implements Framework
      * @param configMap A map for obtaining configuration properties,
      *        may be <tt>null</tt>.
     **/
-    public Felix(Map configMap) throws Exception
+    public Felix(Map configMap)
     {
-        super(null, null);
+        super();
         // Copy the configuration properties; convert keys to strings.
         m_configMutableMap = new StringMap(false);
         if (configMap != null)
@@ -299,7 +299,16 @@ public class Felix extends BundleImpl implements Framework
         // Create the extension manager, which we will use as the module
         // definition for creating the system bundle module.
         m_extensionManager = new ExtensionManager(m_logger, this);
-        addModule(m_extensionManager.getModule());
+        try
+        {
+            addModule(m_extensionManager.getModule());
+        }
+        catch (Exception ex)
+        {
+            // This should not throw an exception, but if so, lets convert it to
+            // a runtime exception.
+            throw new RuntimeException(ex.getMessage());
+        }
 
 
         // Read the boot delegation property and parse it.

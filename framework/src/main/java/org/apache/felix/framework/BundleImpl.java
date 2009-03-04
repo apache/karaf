@@ -59,6 +59,20 @@ class BundleImpl implements Bundle
     private int m_lockCount = 0;
     private Thread m_lockThread = null;
 
+    /**
+     * This constructor is used by the system bundle (i.e., the framework),
+     * since it needs a constructor that does not throw an exception.
+    **/
+    BundleImpl()
+    {
+        __m_felix = null;
+        m_archive = null;
+        m_state = Bundle.INSTALLED;
+        m_stale = false;
+        m_activator = null;
+        m_context = null;
+    }
+
     BundleImpl(Felix felix, BundleArchive archive) throws Exception
     {
         __m_felix = felix;
@@ -68,13 +82,8 @@ class BundleImpl implements Bundle
         m_activator = null;
         m_context = null;
 
-        // We have to check for null here because the framework/system bundle
-        // extends BundleImpl and it doesn't have an archive.
-        if (m_archive != null)
-        {
-            IModule module = createModule();
-            addModule(module);
-        }
+        IModule module = createModule();
+        addModule(module);
     }
 
     // This method exists because the system bundle extends BundleImpl
