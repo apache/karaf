@@ -120,20 +120,27 @@ public class SCRDescriptorMojo extends AbstractMojo {
             final JavaTag tag = javaSources[i].getTagByName(Constants.COMPONENT);
             if (tag != null) {
                 this.getLog().debug("Processing service class " + javaSources[i].getName());
-                final Component comp = this.createComponent(javaSources[i], tag, metaData);
-                if (comp != null) {
-                    if ( !comp.isDs() ) {
-                        getLog().debug("Not adding descriptor " + comp);
-                    } else if ( comp.isAbstract() ) {
-                        this.getLog().debug("Adding abstract descriptor " + comp);
-                        abstractComponents.addComponent(comp);
-                    } else {
-                        this.getLog().debug("Adding descriptor " + comp);
-                        components.addComponent(comp);
-                        abstractComponents.addComponent(comp);
-                    }
-                } else {
+                // check if there is more than one component tag!
+                if ( javaSources[i].getTagsByName(Constants.COMPONENT, false).length > 1 ) {
                     hasFailures = true;
+                    this.getLog().error("Class " + javaSources[i].getName() + " has more than one " + Constants.COMPONENT + " tag." +
+                            " Merge the tags to a single tag.");
+                } else {
+                    final Component comp = this.createComponent(javaSources[i], tag, metaData);
+                    if (comp != null) {
+                        if ( !comp.isDs() ) {
+                            getLog().debug("Not adding descriptor " + comp);
+                        } else if ( comp.isAbstract() ) {
+                            this.getLog().debug("Adding abstract descriptor " + comp);
+                            abstractComponents.addComponent(comp);
+                        } else {
+                            this.getLog().debug("Adding descriptor " + comp);
+                            components.addComponent(comp);
+                            abstractComponents.addComponent(comp);
+                        }
+                    } else {
+                        hasFailures = true;
+                    }
                 }
             }
         }
@@ -574,7 +581,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
         if ( strategy != null ) {
             ref.setStrategy(strategy);
         }
-        
+
         // if this is a field with a single cardinality,
         // we look for the bind/unbind methods
         // and create them if they are not availabe
