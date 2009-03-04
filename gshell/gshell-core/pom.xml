@@ -241,7 +241,6 @@
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
                         <Import-Package>${gshell.osgi.import}</Import-Package>
-                        <DynamicImport-Package>sun.misc.*</DynamicImport-Package>
                         <Export-Package>${gshell.osgi.export}</Export-Package>
                         <Spring-Context>*;publish-context:=false;create-asynchronously:=false</Spring-Context>
                     </instructions>
