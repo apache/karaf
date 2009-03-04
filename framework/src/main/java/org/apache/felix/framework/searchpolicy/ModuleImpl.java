@@ -37,7 +37,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.Vector;
 import org.apache.felix.framework.Felix.FelixResolver;
 import org.apache.felix.framework.Logger;
@@ -432,149 +431,137 @@ public class ModuleImpl implements IModule
 
     public Class getClassByDelegation(String name) throws ClassNotFoundException
     {
-        Set requestSet = (Set) m_cycleCheck.get();
-        if (requestSet == null)
-        {
-            requestSet = new HashSet();
-            m_cycleCheck.set(requestSet);
-        }
-        if (!requestSet.contains(name))
-        {
-            requestSet.add(name);
-            try
-            {
-                return getClassLoader().loadClass(name);
-            }
-            finally
-            {
-                requestSet.remove(name);
-            }
-        }
-        return null;
+        return getClassLoader().loadClass(name);
     }
 
     public URL getResourceByDelegation(String name)
     {
-        Set requestSet = (Set) m_cycleCheck.get();
-        if (requestSet == null)
+        try
         {
-            requestSet = new HashSet();
-            m_cycleCheck.set(requestSet);
+            return (URL) findClassOrResourceByDelegation(name, false);
         }
-        if (!requestSet.contains(name))
+        catch (ClassNotFoundException ex)
         {
-            requestSet.add(name);
-            try
-            {
-                return (URL) findClassOrResourceByDelegation(name, false);
-            }
-            catch (ClassNotFoundException ex)
-            {
-                // This should never be thrown because we are loading resources.
-            }
-            catch (ResourceNotFoundException ex)
-            {
-                m_logger.log(
-                    Logger.LOG_DEBUG,
-                    ex.getMessage(),
-                    ex);
-            }
-            finally
-            {
-                requestSet.remove(name);
-            }
+            // This should never be thrown because we are loading resources.
         }
-
+        catch (ResourceNotFoundException ex)
+        {
+            m_logger.log(
+                Logger.LOG_DEBUG,
+                ex.getMessage(),
+                ex);
+        }
         return null;
     }
 
     private Object findClassOrResourceByDelegation(String name, boolean isClass)
         throws ClassNotFoundException, ResourceNotFoundException
     {
-        // First, try to resolve the originating module.
-        try
-        {
-            m_resolver.resolve(this);
-        }
-        catch (ResolveException ex)
-        {
-            if (isClass)
-            {
-                // We do not use the resolve exception as the
-                // cause of the exception, since this would
-                // potentially leak internal module information.
-                throw new ClassNotFoundException(
-                    name + ": cannot resolve package "
-                    + ex.getRequirement());
-            }
-            else
-            {
-                // The spec states that if the bundle cannot be resolved, then
-                // only the local bundle's resources should be searched. So we
-                // will ask the module's own class path.
-                URL url = getResourceLocal(name);
-                if (url != null)
-                {
-                    return url;
-                }
-
-                // We need to throw a resource not found exception.
-                throw new ResourceNotFoundException(
-                    name + ": cannot resolve package "
-                    + ex.getRequirement());
-            }
-        }
-
-        // Get the package of the target class/resource.
-        String pkgName = (isClass)
-            ? Util.getClassPackage(name)
-            : Util.getResourcePackage(name);
-
-        // Delegate any packages listed in the boot delegation
-        // property to the parent class loader.
         Object result = null;
-        if (shouldBootDelegate(pkgName))
+
+        Set requestSet = (Set) m_cycleCheck.get();
+        if (requestSet == null)
+        {
+            requestSet = new HashSet();
+            m_cycleCheck.set(requestSet);
+        }
+        if (requestSet.add(name))
         {
             try
             {
-                result = (isClass)
-                    ? (Object) getClass().getClassLoader().loadClass(name)
-                    : (Object) getClass().getClassLoader().getResource(name);
-                // If this is a java.* package, then always terminate the
-                // search; otherwise, continue to look locally if not found.
-                if (pkgName.startsWith("java.") || (result != null))
+                // First, try to resolve the originating module.
+                m_resolver.resolve(this);
+
+                // Get the package of the target class/resource.
+                String pkgName = (isClass)
+                    ? Util.getClassPackage(name)
+                    : Util.getResourcePackage(name);
+
+                // Delegate any packages listed in the boot delegation
+                // property to the parent class loader.
+                if (shouldBootDelegate(pkgName))
                 {
-                    return result;
+                    try
+                    {
+                        result = (isClass)
+                            ? (Object) getClass().getClassLoader().loadClass(name)
+                            : (Object) getClass().getClassLoader().getResource(name);
+                        // If this is a java.* package, then always terminate the
+                        // search; otherwise, continue to look locally if not found.
+                        if (pkgName.startsWith("java.") || (result != null))
+                        {
+                            return result;
+                        }
+                    }
+                    catch (ClassNotFoundException ex)
+                    {
+                        // If this is a java.* package, then always terminate the
+                        // search; otherwise, continue to look locally if not found.
+                        if (pkgName.startsWith("java."))
+                        {
+                            throw ex;
+                        }
+                    }
+                }
+
+                // Look in the module's imports. Note that the search may
+                // be aborted if this method throws an exception, otherwise
+                // it continues if a null is returned.
+                result = searchImports(name, isClass);
+
+                // If not found, try the module's own class path.
+                if (result == null)
+                {
+                    result = (isClass)
+                        ? (Object) getClassLoader().findClass(name)
+                        : (Object) getResourceLocal(name);
+
+                    // If still not found, then try the module's dynamic imports.
+                    if (result == null)
+                    {
+                        result = searchDynamicImports(name, pkgName, isClass);
+                    }
                 }
             }
-            catch (ClassNotFoundException ex)
+            catch (ResolveException ex)
             {
-                // If this is a java.* package, then always terminate the
-                // search; otherwise, continue to look locally if not found.
-                if (pkgName.startsWith("java."))
+                if (isClass)
                 {
-                    throw ex;
+                    // We do not use the resolve exception as the
+                    // cause of the exception, since this would
+                    // potentially leak internal module information.
+                    throw new ClassNotFoundException(
+                        name + ": cannot resolve package "
+                        + ex.getRequirement());
                 }
+                else
+                {
+                    // The spec states that if the bundle cannot be resolved, then
+                    // only the local bundle's resources should be searched. So we
+                    // will ask the module's own class path.
+                    URL url = getResourceLocal(name);
+                    if (url != null)
+                    {
+                        return url;
+                    }
+
+                    // We need to throw a resource not found exception.
+                    throw new ResourceNotFoundException(
+                        name + ": cannot resolve package "
+                        + ex.getRequirement());
+                }
+            }
+            finally
+            {
+                requestSet.remove(name);
             }
         }
-
-        // Look in the module's imports. Note that the search may
-        // be aborted if this method throws an exception, otherwise
-        // it continues if a null is returned.
-        result = searchImports(name, isClass);
-
-        // If not found, try the module's own class path.
-        if (result == null)
+        else
         {
-            result = (isClass)
-                ? (Object) getClassLoader().findClass(name)
-                : (Object) getResourceLocal(name);
-
-            // If still not found, then try the module's dynamic imports.
-            if (result == null)
-            {
-                result = searchDynamicImports(name, pkgName, isClass);
-            }
+            // If a cycle is detected, we should return null to break the
+            // cycle. This should only ever be return to internal class
+            // loading code and not to the actual instigator of the class load.
+            return null;
         }
 
         if (result == null)
@@ -1217,28 +1204,27 @@ public class ModuleImpl implements IModule
             // a class loader or class itself, because we want to ignore
             // calls to ClassLoader.loadClass() and Class.forName() since
             // we are trying to find out who instigated the class load.
-            // Also since Felix uses threads for changing the start level
+            // Also ignore inner classes of class loaders, since we can
+            // assume they are a class loader too.
+
+// TODO: FRAMEWORK - This check is a hack and we should see if we can think
+// of another way to do it, since it won't necessarily work in all situations.
+            // Since Felix uses threads for changing the start level
             // and refreshing packages, it is possible that there is no
             // module classes on the call stack; therefore, as soon as we
             // see Thread on the call stack we exit this loop. Other cases
             // where modules actually use threads are not an issue because
             // the module classes will be on the call stack before the
             // Thread class.
-// TODO: FRAMEWORK - This check is a hack and we should see if we can think
-// of another way to do it, since it won't necessarily work in all situations.
             if (Thread.class.equals(classes[i]))
             {
                 break;
             }
-            else if ((this.getClass().getClassLoader() != classes[i].getClassLoader())
-                && !ClassLoader.class.isAssignableFrom(classes[i])
-                && !Class.class.equals(classes[i])
-                && !Proxy.class.equals(classes[i]))
+            else if (isClassNotLoadedFromBundle(classes[i]))
             {
-                // If there are no bundles providing exports for this
-                // package and if the instigating class was not from a
-                // bundle, then delegate to the parent class loader.
-                // Otherwise, break out of loop and return null.
+                // If the instigating class was not from a bundle,
+                // then delegate to the parent class loader; otherwise,
+                // break out of loop and return null.
                 boolean delegate = true;
                 for (ClassLoader cl = classes[i].getClassLoader(); cl != null; cl = cl.getClass().getClassLoader())
                 {
@@ -1248,12 +1234,9 @@ public class ModuleImpl implements IModule
                         break;
                     }
                 }
-                // If delegate is true then there are no bundles
-                // providing exports for this package and the instigating
-                // class was not from a bundle. Therefore,
-                // delegate to the parent class loader in case
-                // that this is not due to outside code calling a method
-                // on the bundle interface (e.g., Bundle.loadClass()).
+                // Delegate to the parent class loader unless this call
+                // is due to outside code calling a method on the bundle
+                // interface (e.g., Bundle.loadClass()).
                 if (delegate && !Bundle.class.isInstance(classes[i - 1]))
                 {
                     try
@@ -1273,6 +1256,27 @@ public class ModuleImpl implements IModule
         }
 
         return null;
+    }
+
+    private boolean isClassNotLoadedFromBundle(Class clazz) throws ClassNotFoundException
+    {
+        int idx = clazz.getName().lastIndexOf('$');
+        if (idx > 0)
+        {
+            if (clazz.getClassLoader() != null)
+            {
+                Class outerClass = clazz.getClassLoader().loadClass(
+                    clazz.getName().substring(0, idx));
+                if (outerClass != null)
+                {
+                    clazz = outerClass;
+                }
+            }
+        }
+        return this.getClass().getClassLoader() != clazz.getClassLoader()
+            && !ClassLoader.class.isAssignableFrom(clazz)
+            && !Class.class.equals(clazz)
+            && !Proxy.class.equals(clazz);
     }
 
     private boolean shouldBootDelegate(String pkgName)
@@ -1320,6 +1324,7 @@ public class ModuleImpl implements IModule
 
     private static final Constructor m_dexFileClassConstructor;
     private static final Method m_dexFileClassLoadClass;
+
     static
     {
         Constructor dexFileClassConstructor = null;
