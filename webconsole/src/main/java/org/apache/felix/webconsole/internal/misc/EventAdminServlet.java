@@ -236,6 +236,8 @@ public class EventAdminServlet extends BaseWebConsolePlugin implements EventHand
         final String appRoot = ( String ) request.getAttribute( OsgiManager.ATTR_APP_ROOT );
         Util.script(pw, appRoot, "events.js");
 
+        pw.println( "<div id='plugin_content'/>");
+
         Util.startScript( pw );
         pw.println( "renderEvents( );" );
         Util.endScript( pw );

@@ -18,10 +18,10 @@ function renderStatusLine() {
 	$("#plugin_content").append( "<div class='fullwidth'><div class='statusline'/></div>" );
 }
 
-function renderView( /* Array of String */ columns, /* Array of String */ buttons ) {
+function renderView( /* Array of String */ columns, /* String */ buttons ) {
     renderStatusLine();
     renderButtons(buttons);
-    var txt = "<div class='table'><table id='bundles' class='tablelayout'><thead><tr>";
+    var txt = "<div class='table'><table id='plugin_table' class='tablelayout'><thead><tr>";
     for ( var name in columns ) {
     	txt = txt + "<th class='col_" + columns[name] + "'>" + columns[name] + "</th>";
     }
@@ -38,11 +38,11 @@ function renderButtons( buttons ) {
 
 function renderData( eventData )  {
 	$(".statusline").empty().append(eventData.status);
-	$("#bundles > tbody > tr").remove();
+	$("#plugin_table > tbody > tr").remove();
     for ( var idx in eventData.data ) {
         entry( eventData.data[idx] );
     }
-    $("#bundles").trigger("update");
+    $("#plugin_table").trigger("update");
     if ( drawDetails ) {
 	    renderDetails(eventData);
     }
@@ -51,7 +51,7 @@ function renderData( eventData )  {
 function entry( /* Object */ dataEntry ) {
     var trElement = tr( null, { id: "entry" + dataEntry.id } );
     entryInternal( trElement,  dataEntry );
-	$("#bundles > tbody").append(trElement);	
+	$("#plugin_table > tbody").append(trElement);	
 }
 
 function actionButton( /* Element */ parent, /* string */ id, /* Obj */ action ) {
@@ -225,7 +225,7 @@ function renderBundles(data) {
             }
             return node.innerHTML;
         };
-        $("#bundles").tablesorter({
+        $("#plugin_table").tablesorter({
             headers: {
         	    0: { sorter:"digit"},
                 3: { sorter: false }

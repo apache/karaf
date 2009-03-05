@@ -15,53 +15,40 @@
  * limitations under the License.
  */
 function renderStatusLine() {
-    document.write( "<div class='fullwidth'>");
-    document.write( "<div class='statusline'></div>" );
-    document.write( "</div>" );
+	$("#plugin_content").append( "<div class='fullwidth'><div class='statusline'/></div>" );
 }
 
-function renderView( /* Array of String */ columns, /* Array of String */ buttons ) {
+function renderView( /* Array of String */ columns, /* String */ buttons ) {
     renderStatusLine();
     renderButtons(buttons);
-	document.write( "<div class='table'>");
-    document.write( "<table id='events' class='tablelayout'>" );
-
-    document.write( "<thead><tr>" );
+    var txt = "<div class='table'><table id='plugin_table' class='tablelayout'><thead><tr>";
     for ( var name in columns ) {
-        document.write( "<th>" + columns[name] + "</th>" );
+    	txt = txt + "<th class='col_" + columns[name] + "'>" + columns[name] + "</th>";
     }
-    document.write( "</tr></thead><tbody>" );
-    document.write( "</tbody></table>" );
-    document.write( "</div>");
+    txt = txt + "</tr></thead><tbody></tbody></table></div>";
+    $("#plugin_content").append( txt );
     renderButtons(buttons);
     renderStatusLine();	
 }
 
 function renderButtons( buttons ) {
-	document.write( "<div class='fullwidth'>");
-    document.write( "<div class='buttons'>" );
-    for( var b in buttons ) {
-    	document.write( "<div class='button'>");
-    	document.write(buttons[b]);
-    	document.write( "</div>");
-    }
-    document.write( "</div>" );
-    document.write( "</div>" );
+	$("#plugin_content").append( "<form method='post' enctype='multipart/form-data'><div class='fullwidth'><div class='buttons'>" +
+	                             buttons + "</div></div></form>" );
 }
 
 function renderData( eventData )  {
 	$(".statusline").empty().append(eventData.status);
-	$("#events > tbody > tr").remove();	
+	$("#plugin_table > tbody > tr").remove();	
     for ( var idx in eventData.data ) {
         entry( eventData.data[idx] );
     }
-    $("#events").trigger("update");
+    $("#plugin_table").trigger("update");
 }
 
 function entry( /* Object */ dataEntry ) {
     var trElement = tr( null, { id: "entry" + dataEntry.id } );
     entryInternal( trElement,  dataEntry );
-	$("#events > tbody").append(trElement);	
+	$("#plugin_table > tbody").append(trElement);	
 }
 
 
@@ -107,18 +94,19 @@ function loadData() {
 }
 
 function renderEvents() {
-    renderView( ["Received", "Topic", "Properties"],
-    		["<button class='clearButton' type='button' name='clear'>Clear List</button>",
-    		 "<button class='reloadButton' type='button' name='reload'>Reload</button>"]);
-	
-    loadData();
-    
-    $("#events").tablesorter();
-    $(".reloadButton").click(loadData);
-    $(".clearButton").click(function () {
-    	$("#events > tbody > tr").remove();
-    	$.post(pluginRoot, { "action":"clear" }, function(data) {
-    	    renderData(data);
-    	}, "json");
-    });
+	$(document).ready(function(){
+	    renderView( ["Received", "Topic", "Properties"],
+	    		 "<button class='clearButton' type='button' name='clear'>Clear List</button>" +
+	    		 "<button class='reloadButton' type='button' name='reload'>Reload</button>");
+	    loadData();
+	    
+	    $("#plugin_table").tablesorter();
+	    $(".reloadButton").click(loadData);
+	    $(".clearButton").click(function () {
+	    	$("#plugin_table > tbody > tr").remove();
+	    	$.post(pluginRoot, { "action":"clear" }, function(data) {
+	    	    renderData(data);
+	    	}, "json");
+	    });
+	});
 }
