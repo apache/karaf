@@ -63,8 +63,6 @@
     </osgi:service>
 
     <osgix:cm-properties id="cmProps" persistent-id="org.apache.servicemix.shell">
-        <prop key="startLocalConsole">${servicemix.startLocalConsole}</prop>
-        <prop key="startRemoteShell">${servicemix.startRemoteShell}</prop>
         <prop key="sshPort">8101</prop>
         <prop key="sshRealm">servicemix</prop>
         <prop key="hostKey">${servicemix.base}/etc/host.key</prop>

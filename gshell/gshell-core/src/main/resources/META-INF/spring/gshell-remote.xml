@@ -79,7 +79,7 @@
 
     <bean id="sshServerFactory" class="org.apache.servicemix.kernel.gshell.core.sshd.SshServerFactory" init-method="start" destroy-method="stop">
         <constructor-arg ref="sshServer" />
-        <property name="start" value="${startRemoteShell}" />
+        <property name="start" value="${servicemix.startRemoteShell}" />
     </bean>
 
     <!--
