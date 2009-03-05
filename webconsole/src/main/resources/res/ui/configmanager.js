@@ -220,9 +220,9 @@ function printForm( /* Element */ parent, obj ) {
         }
         else
         {
-            for (var vidx in attr.values)
+            for (var i=0;i<attr.values.length;i++)
             {
-                tdEl.appendChild( createSpan( prop, attr.values[vidx], attr.type ) );
+                tdEl.appendChild( createSpan( prop, attr.values[i], attr.type ) );
             }
         }
         
@@ -301,16 +301,24 @@ var spanCounter = 0;
     spanCounter++;
     var newId = prop + spanCounter;
     
+    var addButton = createElement("input", "input",
+    		{   type: "button",
+    	        style: {width : "5%"},
+    	        value: "+"
+    	    }
+      );
+    $(addButton).click(function() {addValue(prop, newId)});
+    var remButton = createElement("input", "input",
+    		{   type: "button",
+    	        style: {width : "5%"},
+    	        value: "-"
+    	    }
+      );
+    $(remButton).click(function() {removeValue(newId)});
     var spanEl = createElement( "span", null, { id: newId }, [
-        createInput( prop, value, type, '89%' )
+        createInput( prop, value, type, '89%' ), addButton, remButton,
+        createElement("br")
     ]);
-    
-    // define this SPAN as innerHTML otherwise the onClick event handler
-    // of the buttons is not accepted by IE...    
-    var innerHTML = "<input type='button' class='input' style='width:\"5%\"' value='+' onClick='addValue(\"" + prop + "\", \"" + newId + "\")' />";
-    innerHTML += "<input type='button' class='input' style='width:\"5%\"' value='-' onClick='removeValue(\"" + newId + "\")' />";
-    innerHTML += "<br />";
-    spanEl.innerHTML += innerHTML;
     
     return spanEl;
 }
@@ -368,7 +376,6 @@ var spanCounter = 0;
     	return selectEl;
         
     } else { // Simple 
-    
         return createElement( "input", "input", {
                 type: "text",
                 name: prop,
