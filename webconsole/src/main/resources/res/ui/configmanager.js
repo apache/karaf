@@ -244,6 +244,8 @@ function printForm( /* Element */ parent, obj ) {
             value: propList
         })
     );
+    // FIX for IE6 and above: checkbox can only be checked after it is in the DOM
+    $(".checked_box").attr("checked", true).removeClass("checked_box");
 }
 
 function printConfigurationInfo( /* Element */ parent, obj )
@@ -329,7 +331,7 @@ var spanCounter = 0;
         var inputEl = createElement( "input", "input", {
                 type: "checkbox",
                 name: prop,
-                value: true
+                value: "true"
             });
             
         if (value && typeof(value) != "boolean")
@@ -338,16 +340,14 @@ var spanCounter = 0;
         }
         if (value)
         {
-            inputEl.setAttribute( "checked", true );
+        	$(inputEl).addClass("checked_box");
         }
-
         var hiddenEl = createElement( "input", "input", {
             type: "hidden",
             name: prop,
-            value: false
+            value: "false"
         });
-        
-        var divEl = createElement("div", "div");
+        var divEl = createElement("div");
         divEl.appendChild(inputEl);
         divEl.appendChild(hiddenEl);
         return divEl;
@@ -425,6 +425,8 @@ function addValue(prop, vidx)
     }
     var newSpan = createSpan(prop, '');
     span.parentNode.insertBefore(newSpan, span.nextSibling);
+    // FIX for IE6 and above: checkbox can only be checked after it is in the DOM
+    $(".checked_box").attr("checked", true).removeClass("checked_box");
 }
 
 function removeValue(vidx)
