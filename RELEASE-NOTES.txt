@@ -16,6 +16,160 @@
  */
 
 
+                    Apache ServiceMix Kernel 1.1.0
+                    ==============================
+
+  Overview
+  --------
+
+ The Apache ServiceMix Kernel 1.1.0 release brings a lot of new features enhancements and bug fixes:
+  * remote connection using SSH protocol
+  * provisioning enhancements: versioning / hot deployment of features
+  * new commands, including OSGi related commands for the Configuration Admin and Package Admin services
+  * improved spring integration: upgrade to spring 2.5.6 and spring-dm 1.2.0-m2, the osgi/list command
+       now displays spring applications status
+  * container level locking for master / slave deployments
+  * support for JAXP 1.4 on all platforms
+  * improved JMX support for managing the OSGi framework and features
+ Note that the commands syntax has changed due to the upgrade to the latest gshell version.
+
+  Changelog
+  ---------
+
+  The following list shows the bug fixes and enhancements included in this release:
+
+ ** Bug
+     * [SMX4KNL-72] - If there is no etc/startup.properties, the kernel hangs without displaying any error
+     * [SMX4KNL-79] - When starting the kernel, a log entry states "Can not install feature ''"
+     * [SMX4KNL-86] - When running integration tests, the container classpath contains all the test bundles which may cause problems
+     * [SMX4KNL-87] - Problems with batch files on windows
+     * [SMX4KNL-95] - kernel build failed in testing/itests
+     * [SMX4KNL-96] - package missing for felix.config.properties
+     * [SMX4KNL-97] - Dissociate the name and the location of ServiceMix Kernel instances managed by the admin shell
+     * [SMX4KNL-100] - The client does not close when running "osgi shutdown" command
+     * [SMX4KNL-102] - The file monitor should use ${servicemix.base} for default polling locations
+     * [SMX4KNL-104] - When using a remote connection, errors are not reported correctly
+     * [SMX4KNL-105] - Features are reinstalled on restart of servicemix
+     * [SMX4KNL-112] - gshell pom needs to include gshell-config and gshell-packages modules
+     * [SMX4KNL-115] - config.properties for SMX-Kernel needs to be updated
+     * [SMX4KNL-117] - The Smx testing platform should take into account the boot delegation packages specified in the configuration file
+     * [SMX4KNL-118] - The configuration file for felix comes from 3 different places in the svn tree, only one copy should be used
+     * [SMX4KNL-122] - When using the client and trying to connect to another instance using the "admin connect" command, the console hangs
+     * [SMX4KNL-123] - XML parsing does not work on non Sun JVMs and Sun's SAAJ bundle requires Sun's JAXP implementation
+     * [SMX4KNL-124] - Issuing command "log d" fails with NullPointerException on AIX.
+     * [SMX4KNL-126] - The user is no more authenticated with the new gshell integration
+     * [SMX4KNL-128] - Remove OBR support from default distribution
+     * [SMX4KNL-132] - osgi/list command should display the spring application state
+     * [SMX4KNL-133] - jaxp-ri bundle miss javax.xml.datatype.DatatypeFactory factoryId under META-INF/services
+     * [SMX4KNL-134] - XPathFactoryFinder in jaxp api should use factoryId to load the spi class in osgi enviroment
+     * [SMX4KNL-135] - Remote shell missing help resources
+     * [SMX4KNL-138] - No command history with GShell console
+     * [SMX4KNL-140] - GShell commands references not cleaned up when bundle uninstalled
+     * [SMX4KNL-142] - Starting a new instance that was created with admin on windows fails to start
+     * [SMX4KNL-145] - java.lang.IllegalStateException: Streams not registered for thread
+     * [SMX4KNL-148] - OPS4J maven repo missing form default search list
+     * [SMX4KNL-149] - Build failure due to new sshd snapshot
+     * [SMX4KNL-150] - GShell group name variable doesn't resolve
+     * [SMX4KNL-151] - Update displayed version in GShell to be 1.1.0-SNAPSHOT for trunk
+     * [SMX4KNL-153] - Stopping one of the "core" bundles of the servicemix engine block the server
+     * [SMX4KNL-155] - Error changing manifest while bundle is deployed
+     * [SMX4KNL-162] - The default jaas realm uses the config admin to store clear password
+     * [SMX4KNL-164] - features/removeUrl does not remove the repository
+     * [SMX4KNL-165] - Initial provisioning using features is very slow especially when using snapshots
+     * [SMX4KNL-170] - Unknown protocol: org.apache.servicemix.kernel.gshell
+     * [SMX4KNL-172] - the new command optional/cat from gshell can't support mvn/http protocol
+     * [SMX4KNL-174] - NoClassDefFoundError jline/ConsoleReader when invoking servicemix-client
+     * [SMX4KNL-176] - 'features/install xxx' tries to install version 0.0.0 instead of the latest one
+     * [SMX4KNL-177] - Some of the Optional commands have moved to different packages in the latest snapshot of geronimo gshell
+     * [SMX4KNL-178] - Remove debug log statements when booting
+     * [SMX4KNL-180] - features/install xxx barfs when using non osgi compliant versions
+     * [SMX4KNL-181] - osgi/install -s throws a NPE if the bundle can not be resolved
+     * [SMX4KNL-182] - Upon restart, the list of previously  installed features is not available anymore
+     * [SMX4KNL-185] - Features JMX view does not reload persistent state on restart
+     * [SMX4KNL-187] - Features JMX view making too much log noise
+     * [SMX4KNL-188] - Gshell itests fail on windows
+     * [SMX4KNL-190] - Deployment / Startup of spring xml configurations doesn't work correctly
+     * [SMX4KNL-192] - ServiceMix Kernel startup blocks
+     * [SMX4KNL-198] - The console / server / client arguments to servicemix shell script are broken
+     * [SMX4KNL-199] - Missing resource bundle for obr shell
+     * [SMX4KNL-201] - The client jar does not exit when running with --help argument
+     * [SMX4KNL-202] - Startup of a pending to deploy Spring config file fails when all required bundles got installed
+     * [SMX4KNL-204] - OsgiConfiguration.unregister() throw NPE when exit smx
+     * [SMX4KNL-205] - "ld | grep WARN" does not filter while "log/display | grep WARN" does
+     * [SMX4KNL-207] - features/install should install latest feature version for any dependency that does not explicitly specify a dependency
+     * [SMX4KNL-208] - Bundle#loadClass sometimes return null instead of throwing a CNFE
+     * [SMX4KNL-212] - Exceptions are displayed in the console when trying to load default xml catalogs
+     * [SMX4KNL-215] - Don't attempt to stop fragments in filemonitor
+     * [SMX4KNL-218] - Can't find bundle for base name org.apache.servicemix.kernel.gshell.wrapper.InstallCommand, locale fr_BE
+     * [SMX4KNL-220] - The org.apache.servicemix.kernel.management bundle should not use DynamicImport-Package=*
+
+ ** Improvement
+     * [SMX4KNL-36] - Investigate having a different bootstrap mechanism for a remote client to not start all the bundles installed (maybe by not using osgi)
+     * [SMX4KNL-62] - Enhance admin shell create command to allocate unique ports to new instances.
+     * [SMX4KNL-74] - When using the spring deployer, allow the customization of the OSGi manifest entries
+     * [SMX4KNL-78] - Small refactoring of the Feature interface
+     * [SMX4KNL-85] - Extend GShell#waitForFrameworkToStart to wait 60 seconds instead of 5 seconds.
+     * [SMX4KNL-101] - Reduce the amount of logging issued by mina
+     * [SMX4KNL-106] - Support for container level lock to support master/slave deployments
+     * [SMX4KNL-114] - prompt should print username@instance-name when using remote shell
+     * [SMX4KNL-119] - Use boot delegation instead of listing sun packages for jaxp / url handlers
+     * [SMX4KNL-120] - The ServiceMix Kernel testing platform should use the servicemix kernel main jar instead of the felix one
+     * [SMX4KNL-121] - Improve the Main class to easily embed the whole ServiceMix Kernel distribution in another web application
+     * [SMX4KNL-125] - Show command environment in kernel shell
+     * [SMX4KNL-127] - Add the update command in the osgi shell
+     * [SMX4KNL-130] - Support configurable lock directory for container level locking (for master/slave deployments).
+     * [SMX4KNL-136] - Upgrade to pax logging 1.2.0
+     * [SMX4KNL-154] - some Action moved from to another package cause kernel start up failed
+     * [SMX4KNL-158] - Move jline into its own bundle instead of using a private package in gshell-core
+     * [SMX4KNL-169] - Use the start level to implement the container level locking
+     * [SMX4KNL-184] - Align the commands name with the gshell ones
+     * [SMX4KNL-186] - features/uninstall should select the right version if only one version has been installed
+     * [SMX4KNL-191] - Upgrade to pax-logging 1.3.0
+     * [SMX4KNL-203] - When installing a feature, the service should first install all bundles, then start them all in order
+     * [SMX4KNL-206] - Felix version in servicemix-kernel-1.1.0-snapshot doesn't seem to support fragment bundles.
+     * [SMX4KNL-216] - Display fragments informations in the osgi list command
+
+ ** New Feature
+     * [SMX4KNL-28] - Create a config command to administer the ConfigAdmin service
+     * [SMX4KNL-33] - Enhance admin shell to provide commands to start / stop / list / connect to known ServiceMix instances
+     * [SMX4KNL-60] - Versionning of features
+     * [SMX4KNL-76] - support to install/uninstall different version of features
+     * [SMX4KNL-90] - Create new commands to leverage the PackageAdmin OSGi service
+     * [SMX4KNL-94] - Provide a JMX frontend on top of the features service
+     * [SMX4KNL-107] - Create a new "admin connect" command to easily connect to a named instance of servicemix
+     * [SMX4KNL-108] - Add a new 'log de' command that displays the last exception from the log
+     * [SMX4KNL-109] - Include the pax wrapper url handler in the kernel for ease of use of non osgi third party dependencies
+     * [SMX4KNL-111] - Add a "starting" state to the admin list command
+     * [SMX4KNL-113] - Upgrade to Felix 1.2.1
+     * [SMX4KNL-116] - Allow repository descriptors to reference other repository descriptors
+     * [SMX4KNL-131] - Include JAXP 1.4 API
+     * [SMX4KNL-143] - Provide a way to make BouncyCastle work in ServiceMix Kernel
+     * [SMX4KNL-144] - Use SSH as a remoting protocol to connect to a servicemix kernel
+     * [SMX4KNL-147] - Upgrade to spring-DM 1.2.0-m2
+     * [SMX4KNL-152] - The version number displayed in the console should be extract from resources (using maven filtering + properties file) but the branding should be easy to change so that people embedding the Kernel can define their own
+     * [SMX4KNL-156] - Move core management feature to the kernel
+     * [SMX4KNL-157] - Add a JAAS realm for authenticating users from SSH and JMX
+     * [SMX4KNL-163] - Provide default jdbc lock impl for master/slave deployments
+     * [SMX4KNL-167] - Upgrade to spring 2.5.6
+     * [SMX4KNL-171] - Include RFC0139 (JMX management of OSGi)
+     * [SMX4KNL-179] - Upgrade to felix 1.5.0-SNAPSHOT
+     * [SMX4KNL-214] - Hot deployment of features through the deploy folder
+
+ ** Task
+     * [SMX4KNL-43] - Upgrade to latest gshell
+     * [SMX4KNL-93] - Extract the admin commands in their own module
+     * [SMX4KNL-98] - Use dependency management section for all dependencies
+     * [SMX4KNL-99] - Remove ant from the kernel distribution and replace its use in the filemonitor
+     * [SMX4KNL-129] - Make sure aliases and links commands work with the new gshell integration
+     * [SMX4KNL-166] - Move the embedded smx demo into trunk
+     * [SMX4KNL-168] - Downgrade to junit 3.8
+     * [SMX4KNL-196] - gshell-core source jar should use the shade plugin to include the gshell sources
+     * [SMX4KNL-197] - The client source jar should include the slf4j sources using the shade plugin
+     * [SMX4KNL-211] - Remove one of jmock or easymock from the kernel
+
+
+
+
                     Apache ServiceMix Kernel 1.0.0
                     ==============================
 

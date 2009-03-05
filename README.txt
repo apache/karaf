@@ -21,13 +21,29 @@ Apache ServiceMix Kernel is a small OSGi based kernel which provides a
 lightweight container onto which various bundles can be deployed.
 
 The following features are included:
-  * Hot deployment of OSGi bundles
-  * Dynamic reloadable configuration
-  * Provisioning
-  * Native OS integration
-  * Extensible Shell console
-  * Remote access
-  * Managing multiple instances
+    * Hot deployment: ServiceMix Kernel supports hot deployment of OSGi bundles by monitoring
+      jar files inside the [home]/deploy directory. Each time a jar is copied in this folder,
+      it will be installed inside the runtime. You can then update or delete it and changes will
+      be handled automatically. In addition, the Kernel also supports exploded bundles and custom
+      deployers (a spring one is included by default).
+    * Dynamic configuration: Services are usually configured through the ConfigurationAdmin OSGi
+      service. Such configuration can be defined in ServiceMix Kernel using property files inside
+      the [home]/etc directory. These configurations are monitored and changes on the properties
+      files will be propagated to the services.
+    * Logging System: using a centralized logging back end supported by Log4J, ServiceMix Kernel
+      supports a number of different APIs (JDK 1.4, JCL, SLF4J, Avalon, Tomcat, OSGi)
+    * Provisioning: Provisioning of libraries or applications can be done through a number of
+      different ways, by which they will be downloaded locally, installed and started.
+    * Native OS integration: ServiceMix Kernel can be integrated into your own Operating System as
+      a service so that the lifecycle will be bound to your Operating System.
+    * Extensible Shell console: ServiceMix features a nice text console where you can manage the
+      services, install new applications or libraries and manage their state. This shell is easily
+      extensible by deploying new commands dynamically along with new features or applications.
+    * Remote access: use any SSH client to connect to the kernel and issue commands in the console
+    * Security framework based on JAAS
+    * Managing instances: ServiceMix Kernel provides simple commands for managing instances of
+      ServiceMix Kernel. You can easily create, delete, start and stop instances of ServiceMix
+      Kernel through the console.
 
 Getting Started
 ===============
