@@ -142,6 +142,7 @@ public class Main implements MainService, BundleActivator {
     private int defaultStartLevel = 100;
     private int lockStartLevel = 0;
     private int lockDelay = 1000;
+    private boolean exiting = false;
 
     public Main(String[] args) {
         this.args = args;
@@ -216,7 +217,10 @@ public class Main implements MainService, BundleActivator {
             if (await) {
                 shutdown.await();
             }
-            m_felix.stop();
+            exiting = true;
+            if (m_felix.getState() == Bundle.ACTIVE) {
+                m_felix.stop();
+            }
         } finally {
             unlock();
         }
@@ -1113,8 +1117,10 @@ public class Main implements MainService, BundleActivator {
                             }
                             Thread.sleep(lockDelay);
                         }
-                        System.out.println("Lost the lock, stopping this instance ...");
-                        setStartLevel(lockStartLevel);
+                        if (m_felix.getState() == Bundle.ACTIVE && !exiting) {
+                            System.out.println("Lost the lock, stopping this instance ...");
+                            setStartLevel(lockStartLevel);
+                        }
                         break;
                     } else if (!lockLogged) {
                         System.out.println("Waiting for the lock ...");
