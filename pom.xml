@@ -986,6 +986,7 @@
                                 <!-- Eclipse files -->
                                 <exclude>**/.*</exclude>
                                 <exclude>**/eclipse-classes/**/*</exclude>
+                                <exclude>**/dependency-reduced-pom.xml</exclude>
                             </excludes>
                         </configuration>
                     </plugin>
