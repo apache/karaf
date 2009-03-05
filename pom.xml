@@ -77,9 +77,8 @@
         <depends.maven.plugin.version>1.0</depends.maven.plugin.version>
         <easymock.version>2.4</easymock.version>
         <felix.configadmin.version>1.0.4</felix.configadmin.version>
-        <felix.main.version>1.5.0-SNAPSHOT</felix.main.version>
         <felix.plugin.version>1.4.3</felix.plugin.version>
-        <felix.framework.version>1.5.0-SNAPSHOT</felix.framework.version>
+        <felix.framework.version>1.5.0-r750407</felix.framework.version>
         <felix.osgi.version>1.2.0</felix.osgi.version>
         <felix.compendium.version>1.2.0</felix.compendium.version>
         <felix.bundlerepository.version>1.2.1</felix.bundlerepository.version>
@@ -317,11 +316,6 @@
                         <artifactId>javax.servlet</artifactId>
                     </exclusion>
                 </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.main</artifactId>
-                <version>${felix.main.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
