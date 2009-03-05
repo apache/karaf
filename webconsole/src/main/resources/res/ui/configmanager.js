@@ -74,7 +74,7 @@ function displayConfigForm(obj) {
     trEl.appendChild( tdEl );
     
     var formEl = createElement( "form", null, {
-            method: "post",
+            method: "POST",
             action: pluginRoot + "/" + obj.pid
         });
     tdEl.appendChild( formEl );
