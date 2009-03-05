@@ -127,8 +127,6 @@ public class ComponentsServlet extends BaseWebConsolePlugin
         final PrintWriter pw = response.getWriter();
 
         final String appRoot = ( String ) request.getAttribute( OsgiManager.ATTR_APP_ROOT );
-        Util.script(pw, appRoot, "jquery-1.3.2.min.js");
-        Util.script(pw, appRoot, "jquery.tablesorter-2.0.3.min.js");
 
         Util.startScript( pw );
         pw.println( "var imgRoot = '" + appRoot + "/res/imgs';");

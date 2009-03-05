@@ -93,8 +93,7 @@
     
     if (cssClass)
     {
-        element.setAttribute( "class", cssClass ); // non-IE
-        element.setAttribute( "className", cssClass ); // IE
+    	$(element).addClass(cssClass);
     }
     
     if (attrs)
@@ -106,12 +105,12 @@
                 var styles = attrs[lab];
                 for (var styleName in styles)
                 {
-                    element.style[styleName] = styles[styleName];
+                	$(element).css(styleName, styles[styleName]);
                 }
             }
             else
             {
-                element.setAttribute( lab, attrs[lab] );
+            	$(element).attr( lab, attrs[lab] );
             }
         }
     }

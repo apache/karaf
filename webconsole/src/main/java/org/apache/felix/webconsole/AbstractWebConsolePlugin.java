@@ -51,6 +51,8 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         + "<meta http-equiv=\"Content-Type\" content=\"text/html; utf-8\">"
         + "<link rel=\"icon\" href=\"{6}/res/imgs/favicon.ico\">"
         + "<title>{0} - {2}</title>"
+        + "<script src=\"{5}/res/ui/jquery-1.3.2.min.js\" language=\"JavaScript\"></script>"
+        + "<script src=\"{5}/res/ui/jquery.tablesorter-2.0.3.min.js\" language=\"JavaScript\"></script>"
         + "<script src=\"{5}/res/ui/admin.js\" language=\"JavaScript\"></script>"
         + "<script src=\"{5}/res/ui/ui.js\" language=\"JavaScript\"></script>"
         + "<script language=\"JavaScript\">"

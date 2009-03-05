@@ -62,19 +62,17 @@ function actionButton( /* Element */ parent, /* string */ id, /* Obj */ action )
 	
 	var input = createElement( "input", null, {
             type: 'image',
+            style: {"margin-left": "10px"},
             title: opLabel,
             alt: opLabel,
-            src: imgRoot + '/bundle_' + img + '.png',
-            onClick: 'changeDataEntryState(' + id + ', "' + op + '");'
+            src: imgRoot + '/bundle_' + img + '.png'
         });
+	$(input).click(function() {changeDataEntryState(id, op)});
 		
     if (!enabled) {
-        input.setAttribute( "disabled", true );
+    	$(input).attr("disabled", true);
     }
-    var div = createElement("div");
-    div.setAttribute("style", "float:left; margin-left:10px;");
-    div.appendChild(input);
-    parent.appendChild( div );
+    parent.appendChild( input );
 }
 
 function entryInternal( /* Element */ parent, /* Object */ dataEntry ) {
@@ -84,14 +82,14 @@ function entryInternal( /* Element */ parent, /* Object */ dataEntry ) {
     
     var inputElement = createElement("img", "rightButton", {
     	src: appRoot + "/res/imgs/arrow_right.png",
-    	border: "none",
+    	style: {border: "none"},
     	id: 'img' + id,
     	title: "Details",
     	alt: "Details",
     	width: 14,
-    	height: 14,
-        onClick: 'showDetails(' + id + ');'
+    	height: 14
     });
+    $(inputElement).click(function() {showDetails(id)});
     var titleElement;
     if ( drawDetails ) {
     	titleElement = text(name);
@@ -106,9 +104,13 @@ function entryInternal( /* Element */ parent, /* Object */ dataEntry ) {
     parent.appendChild( td( null, null, [ inputElement, text(" "), titleElement ] ) );
     parent.appendChild( td( null, null, [ text( state ) ] ) );
     var actionsTd = td( null, null );
+    var div = createElement("div", null, {
+    	style: { "text-align" : "left"}
+    });
+    actionsTd.appendChild(div);
     
     for ( var a in dataEntry.actions ) {
-    	actionButton( actionsTd, id, dataEntry.actions[a] );
+    	actionButton( div, id, dataEntry.actions[a] );
     }
     parent.appendChild( actionsTd );
 }
@@ -140,10 +142,10 @@ function showDetails( id ) {
 function hideDetails( id ) {
 	$("#img" + id).each(function() {
 		$("#pluginInlineDetails").remove();
-        this.setAttribute("src", appRoot + "/res/imgs/arrow_right.png");
-        this.setAttribute("onClick", "showDetails('" + id + "')");
-        this.setAttribute("title", "Details");
-        this.setAttribute("alt", "Details");
+		$(this).attr("src", appRoot + "/res/imgs/arrow_right.png");
+		$(this).attr("title", "Details");
+		$(this).attr("alt", "Details");
+		$(this).unbind('click').click(function() {showDetails(id)});
 	});
 }
 
@@ -153,17 +155,17 @@ function renderDetails( data ) {
 	$("#entry" + data.id + " > td").eq(1).append("<div id='pluginInlineDetails'/>");
 	$("#img" + data.id).each(function() {
 		if ( drawDetails ) {
-            this.setAttribute("src", appRoot + "/res/imgs/arrow_left.png");
+			$(this).attr("src", appRoot + "/res/imgs/arrow_left.png");
+			$(this).attr("title", "Back");
+			$(this).attr("alt", "Back");
     	    var ref = window.location.pathname;
     	    ref = ref.substring(0, ref.lastIndexOf('/'));
-            this.setAttribute("onClick", "window.location = '" + ref + "';");
-            this.setAttribute("title", "Back");
-            this.setAttribute("alt", "Back");
+			$(this).unbind('click').click(function() {window.location = ref;});
 		} else {
-            this.setAttribute("src", appRoot + "/res/imgs/arrow_down.png");
-            this.setAttribute("onClick", "hideDetails('" + data.id + "')");
-            this.setAttribute("title", "Hide Details");
-            this.setAttribute("alt", "Hide Details");
+			$(this).attr("src", appRoot + "/res/imgs/arrow_down.png");
+			$(this).attr("title", "Hide Details");
+			$(this).attr("alt", "Hide Details");
+			$(this).unbind('click').click(function() {hideDetails(data.id)});
 		}
 	});
 	$("#pluginInlineDetails").append("<table border='0'><tbody></tbody></table>");
