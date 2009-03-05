@@ -103,20 +103,20 @@
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
-                    <id>copy-resources</id>
-                    <!-- here the phase you need -->
-                    <phase>compile</phase>
-                    <goals>
-                        <goal>copy-resources</goal>
-                    </goals>
-                    <configuration>
-                            <outputDirectory>${basedir}/target/classes</outputDirectory>
+                        <id>copy-resources</id>
+                        <!-- here the phase you need -->
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/target/classes/org/apache/servicemix/kernel/gshell/admin/etc</outputDirectory>
                             <resources>          
                                 <resource>
                                     <directory>../../${config.location}</directory>
-                                        <includes>
-                                            <include>config.properties</include>
-                                        </includes>
+                                    <includes>
+                                        <include>config.properties</include>
+                                    </includes>
                                 </resource>
                             </resources>              
                         </configuration>            
