@@ -79,11 +79,14 @@ public class BadFactories extends OSGiTestCase {
             Factory factory = Utils.getFactoryByName(getContext(), "BAD-BadConstructor");
             ComponentInstance ci;
             try {
+                // Change in Felix-966, now throws a runtime exception
                 ci = factory.createComponentInstance(null);
-                assertEquals("Check ci create error", ComponentInstance.STOPPED, ci.getState());
+                //assertEquals("Check ci create error", ComponentInstance.STOPPED, ci.getState());
                 ci.dispose();
+                fail("Exception expected");
             } catch (Throwable e) {
-               fail("Exception unexpected : " + e.getMessage());
+               //fail("Exception unexpected : " + e.getMessage());
+               // OK
             }
     }
     
@@ -91,11 +94,14 @@ public class BadFactories extends OSGiTestCase {
         Factory factory = Utils.getFactoryByName(getContext(), "BAD-BadFactory");
         ComponentInstance ci;
         try {
+            // Change in Felix-966, now throw a runtime exception
             ci = factory.createComponentInstance(null);
-            assertEquals("Check ci create error", ComponentInstance.STOPPED, ci.getState());
+            //assertEquals("Check ci create error", ComponentInstance.STOPPED, ci.getState());
             ci.dispose();
+            fail("Exception expected");
         } catch (Throwable e) {
-           fail("Exception unexpected : " + e.getMessage());
+           //fail("Exception unexpected : " + e.getMessage());
+            //OK
         }
     }
     
@@ -103,11 +109,14 @@ public class BadFactories extends OSGiTestCase {
         Factory factory = Utils.getFactoryByName(getContext(), "BAD-BadFactory2");
         ComponentInstance ci;
         try {
+            // Change in Felix-966, now throw a runtime exception
             ci = factory.createComponentInstance(null);
-            assertEquals("Check ci create error", ComponentInstance.STOPPED, ci.getState());
+            //assertEquals("Check ci create error", ComponentInstance.STOPPED, ci.getState());
             ci.dispose();
+            fail("Exception expected");
         } catch (Throwable e) {
-           fail("Exception unexpected : " + e.getMessage());
+           //fail("Exception unexpected : " + e.getMessage());
+            //Ok
         }
     }
     

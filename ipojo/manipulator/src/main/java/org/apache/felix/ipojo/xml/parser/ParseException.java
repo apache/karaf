@@ -31,7 +31,7 @@ public class ParseException extends Exception {
 
     /**
      * Parsing error.
-     * @param msg : the error emssage.
+     * @param msg : the error message.
      */
     public ParseException(String msg) {
         super(msg);

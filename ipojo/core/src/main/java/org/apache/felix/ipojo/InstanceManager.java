@@ -605,7 +605,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
                 m_factory.getLogger().log(Logger.ERROR,
                                           "[" + m_name + "] createInstance -> The POJO constructor is not accessible : " + e.getMessage());
                 stop();
-                return null;
+                throw new RuntimeException("Cannot create a POJO instance, the POJO constructor is not accessible : " + e.getMessage());
             } catch (SecurityException e) {
                 m_factory.getLogger().log(
                                           Logger.ERROR,
@@ -614,7 +614,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
                                                   + "] createInstance -> The POJO constructor is not accessible (security reason) : "
                                                   + e.getMessage());
                 stop();
-                return null;
+                throw new RuntimeException("Cannot create a POJO instance, the POJO constructor is not accessible : " + e.getMessage());
             } catch (InvocationTargetException e) {
                 m_factory.getLogger().log(
                                           Logger.ERROR,
@@ -624,18 +624,18 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
                                                   + e.getTargetException().getMessage());
                 onError(null, m_className, e.getTargetException());
                 stop();
-                return null;
+                throw new RuntimeException("Cannot create a POJO instance, the POJO constructor has thrown an exception: " + e.getTargetException().getMessage());
             } catch (NoSuchMethodException e) {
                 m_factory.getLogger().log(Logger.ERROR,
                                           "[" + m_name + "] createInstance -> Cannot invoke the constructor (method not found) : " + e.getMessage());
                 stop();
-                return null;
+                throw new RuntimeException("Cannot create a POJO instance, the POJO constructor cannot be found : " + e.getMessage());
             } catch (Throwable e) {
                 // Catch every other possible error and runtime exception.
                 m_factory.getLogger().log(Logger.ERROR,
                         "[" + m_name + "] createInstance -> The POJO constructor invocation failed : " + e.getMessage());
                 stop();
-                return null;
+                throw new RuntimeException("Cannot create a POJO instance, the POJO constructor invocation has thrown an exception : " + e.getMessage());
             }
         } else {
             try {
@@ -669,7 +669,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
                                                           + "] createInstance -> Cannot invoke the factory-method (method not found) : "
                                                           + e2.getMessage());
                         stop();
-                        return null;
+                        throw new RuntimeException("Cannot create a POJO instance, the factory-method cannot be found : " + e2.getMessage());
                     }
                 }
 
@@ -687,7 +687,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
                                           "[" + m_name + "] createInstance -> The factory-method throws an exception : " + e.getTargetException());
                 onError(null, m_className, e.getTargetException());
                 stop();
-                return null;
+                throw new RuntimeException("Cannot create a POJO instance, the factory-method has thrown an exception: " + e.getTargetException().getMessage());
             } catch (NoSuchMethodException e) {
                 // Error : _setInstanceManager method is missing
                 m_factory.getLogger()
@@ -698,13 +698,13 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
                                      + "] createInstance -> Cannot invoke the factory-method (the _setInstanceManager method does not exist) : "
                                      + e.getMessage());
                 stop();
-                return null;
+                throw new RuntimeException("Cannot create a POJO instance, the factory-method cannot be found : " + e.getMessage());
             } catch (Throwable e) {
                 // Catch every other possible error and runtime exception.
                 m_factory.getLogger().log(Logger.ERROR,
                         "[" + m_name + "] createInstance -> The factory-method invocation failed : " + e.getMessage());
                 stop();
-                return null;
+                throw new RuntimeException("Cannot create a POJO instance, the factory-method invocation has thrown an exception : " + e.getMessage());
             }
         }
         return instance;
