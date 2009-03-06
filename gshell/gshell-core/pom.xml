@@ -283,12 +283,6 @@
                                     <include>org.apache.geronimo.gshell.support:gshell-vfs</include>
                                     <include>org.apache.geronimo.gshell.support:gshell-vfs-meta</include>
                                     <include>org.apache.geronimo.gshell.support:gshell-yarn</include>
-                                    <!--
-                                    <include>org.apache.geronimo.gshell.remote:gshell-remote-client</include>
-                                    <include>org.apache.geronimo.gshell.remote:gshell-remote-common</include>
-                                    <include>org.apache.geronimo.gshell.remote:gshell-remote-server</include>
-                                    <include>org.apache.geronimo.gshell.remote:gshell-whisper</include>
-                                    -->
                                     <include>org.apache.geronimo.gshell.wisdom:gshell-wisdom-core</include>
                                     <include>org.apache.geronimo.gshell.wisdom:gshell-wisdom-bootstrap</include>
                                     <include>org.codehaus.plexus:plexus-utils</include>
@@ -441,32 +435,6 @@
                                         <exclude>org/apache/geronimo/gshell/**</exclude>
                                     </excludes>
                                 </filter>
-                                <!--
-                                <filter>
-                                    <artifact>org.apache.geronimo.gshell.remote:gshell-remote-client</artifact>
-                                    <excludes>
-                                        <exclude>org/apache/geronimo/gshell/**</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.apache.geronimo.gshell.remote:gshell-remote-common</artifact>
-                                    <excludes>
-                                        <exclude>org/apache/geronimo/gshell/**</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.apache.geronimo.gshell.remote:gshell-remote-server</artifact>
-                                    <excludes>
-                                        <exclude>org/apache/geronimo/gshell/**</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.apache.geronimo.gshell.remote:gshell-whisper</artifact>
-                                    <excludes>
-                                        <exclude>org/apache/geronimo/gshell/**</exclude>
-                                    </excludes>
-                                </filter>
-                                -->
                                 <filter>
                                     <artifact>org.apache.geronimo.gshell.wisdom:gshell-wisdom-core</artifact>
                                     <excludes>
@@ -477,6 +445,18 @@
                                     <artifact>org.apache.geronimo.gshell.wisdom:gshell-wisdom-bootstrap</artifact>
                                     <excludes>
                                         <exclude>org/apache/geronimo/gshell/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.codehaus.plexus:plexus-utils</artifact>
+                                    <excludes>
+                                        <exclude>org/codehaus/plexus/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.codehaus.plexus:plexus-interpolation</artifact>
+                                    <excludes>
+                                        <exclude>org/codehaus/plexus/**</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
