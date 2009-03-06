@@ -185,6 +185,22 @@ public class Requirement implements IRequirement
                             return false;
                         }
                     }
+                    else if (capAttr.getValue() instanceof Object[])
+                    {
+                        Object[] values = (Object[]) capAttr.getValue();
+                        boolean matched = false;
+                        for (int valIdx = 0; !matched && (valIdx < values.length); valIdx++)
+                        {
+                            if (reqAttr.getValue().equals(values[valIdx]))
+                            {
+                                matched = true;
+                            }
+                        }
+                        if (!matched)
+                        {
+                            return false;
+                        }
+                    }
                     else if (!reqAttr.getValue().equals(capAttr.getValue()))
                     {
                         return false;

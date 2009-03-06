@@ -164,17 +164,19 @@ class ExtensionManager extends URLStreamHandler implements IContent
         // We must construct the system bundle's export metadata.
         // Get configuration property that specifies which class path
         // packages should be exported by the system bundle.
-        String syspkgs = (String) felix.getConfig().get(Constants.FRAMEWORK_SYSTEMPACKAGES);
+        String syspkgs = (String) felix.getConfig().get(FelixConstants.FRAMEWORK_SYSTEMPACKAGES);
         // If no system packages were specified, load our default value.
         syspkgs = (syspkgs == null) ? loadDefaultSystemPackages(m_logger) : syspkgs;
         // If any extra packages are specified, then append them.
-        String extra = (String) felix.getConfig().get(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA);
+        String extra = (String) felix.getConfig().get(FelixConstants.FRAMEWORK_SYSTEMPACKAGES_EXTRA);
         syspkgs = (extra == null) ? syspkgs : syspkgs + "," + extra;
+        m_headerMap.put(FelixConstants.BUNDLE_MANIFESTVERSION, "2");
+        m_headerMap.put(FelixConstants.EXPORT_PACKAGE, syspkgs);
         try
         {
-            setCapabilities(
-                addModuleCapability(m_headerMap,
-                    ManifestParser.parseExportHeader(syspkgs)));
+            ManifestParser mp = new ManifestParser(m_logger, felix.getConfig(), m_headerMap);
+            ICapability[] caps = aliasSymbolicName(mp.getCapabilities());
+            setCapabilities(caps);
         }
         catch (Exception ex)
         {
@@ -191,43 +193,45 @@ class ExtensionManager extends URLStreamHandler implements IContent
         return m_module;
     }
 
-    private ICapability[] addModuleCapability(Map headerMap, ICapability[] caps)
+    private ICapability[] aliasSymbolicName(ICapability[] caps)
     {
-        try
+        if (caps == null)
         {
-            // First parse the symbolic name header.
-            ICapability moduleCap = ManifestParser.parseBundleSymbolicName(headerMap);
-            // Create a copy of the module capability with the standard
-            // alias for the bundle symbolic name.
-            R4Directive[] dirs = ((Capability) moduleCap).getDirectives();
-            R4Attribute[] attrs = ((Capability) moduleCap).getAttributes();
-            R4Attribute[] attrsAlias = new R4Attribute[attrs.length];
-            System.arraycopy(attrs, 0, attrsAlias, 0, attrs.length);
-            // Modify the alias attributes to have the standard symbolic name.
-            for (int i = 0; i < attrsAlias.length; i++)
+            return new ICapability[0];
+        }
+
+        ICapability[] aliasCaps = new ICapability[caps.length];
+        System.arraycopy(caps, 0, aliasCaps, 0, caps.length);
+
+        for (int capIdx = 0; capIdx < aliasCaps.length; capIdx++)
+        {
+            // Get the attributes and search for bundle symbolic name.
+            R4Attribute[] attrs = ((Capability) aliasCaps[capIdx]).getAttributes();
+            for (int i = 0; i < attrs.length; i++)
             {
-                if (attrsAlias[i].getName().equalsIgnoreCase(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE))
+                // If there is a bundle symbolic name attribute, add the
+                // standard alias as a value.
+                if (attrs[i].getName().equalsIgnoreCase(FelixConstants.BUNDLE_SYMBOLICNAME_ATTRIBUTE))
                 {
-                    attrsAlias[i] = new R4Attribute(
-                        Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, Constants.SYSTEM_BUNDLE_SYMBOLICNAME, false);
+                    // Make a copy of the attribute array.
+                    R4Attribute[] aliasAttrs = new R4Attribute[attrs.length];
+                    System.arraycopy(attrs, 0, aliasAttrs, 0, attrs.length);
+                    // Add the aliased value.
+                    aliasAttrs[i] = new R4Attribute(
+                        FelixConstants.BUNDLE_SYMBOLICNAME_ATTRIBUTE,
+                        new String[] { (String) attrs[i].getValue(), Constants.SYSTEM_BUNDLE_SYMBOLICNAME }, false);
+                    // Create the aliased capability to replace the old capability.
+                    aliasCaps[capIdx] = new Capability(
+                        caps[capIdx].getNamespace(),
+                        ((Capability) caps[capIdx]).getDirectives(),
+                        aliasAttrs);
+                    // Continue with the next capability.
+                    break;
                 }
             }
-            // Create the alias capability.
-            ICapability aliasCap = new Capability(ICapability.MODULE_NAMESPACE, dirs, attrsAlias);
-            // Finally, add the module and alias capabilities to the
-            // existing capabilities.
-            ICapability[] temp = new ICapability[caps.length + 2];
-            System.arraycopy(caps, 0, temp, 2, caps.length);
-            temp[0] = moduleCap;
-            temp[1] = aliasCap;
-            return temp;
         }
-        catch (BundleException ex)
-        {
-            // This should not happen, but in case it does, then just
-            // return the original array of capabilities.
-            return caps;
-        }
+
+        return aliasCaps;
     }
 
     public synchronized Object getSecurityContext()
@@ -270,10 +274,10 @@ class ExtensionManager extends URLStreamHandler implements IContent
         }
 
         R4Directive dir = ManifestParser.parseExtensionBundleHeader((String)
-            bundle.getCurrentModule().getHeaders().get(Constants.FRAGMENT_HOST));
+            bundle.getCurrentModule().getHeaders().get(FelixConstants.FRAGMENT_HOST));
 
         // We only support classpath extensions (not bootclasspath).
-        if (!Constants.EXTENSION_FRAMEWORK.equals(dir.getValue()))
+        if (!FelixConstants.EXTENSION_FRAMEWORK.equals(dir.getValue()))
         {
             throw new BundleException("Unsupported Extension Bundle type: " +
                 dir.getValue(), new UnsupportedOperationException(
@@ -292,14 +296,14 @@ class ExtensionManager extends URLStreamHandler implements IContent
             try
             {
                 exports = ManifestParser.parseExportHeader((String)
-                    bundle.getCurrentModule().getHeaders().get(Constants.EXPORT_PACKAGE));
+                    bundle.getCurrentModule().getHeaders().get(FelixConstants.EXPORT_PACKAGE));
             }
             catch (Exception ex)
             {
                 m_logger.log(
                     Logger.LOG_ERROR,
                     "Error parsing extension bundle export statement: "
-                    + bundle.getCurrentModule().getHeaders().get(Constants.EXPORT_PACKAGE), ex);
+                    + bundle.getCurrentModule().getHeaders().get(FelixConstants.EXPORT_PACKAGE), ex);
                 return;
             }
 
@@ -395,10 +399,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
     void setCapabilities(ICapability[] capabilities)
     {
         m_capabilities = capabilities;
-
-        // Note: This is a reference to the actual header map,
-        // so these changes are saved. Kind of hacky.
-        m_headerMap.put(Constants.EXPORT_PACKAGE, convertCapabilitiesToHeaders(m_headerMap));
+        m_headerMap.put(FelixConstants.EXPORT_PACKAGE, convertCapabilitiesToHeaders(m_headerMap));
     }
 
     private String convertCapabilitiesToHeaders(Map headers)
@@ -589,7 +590,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
                     Util.substVars(props.getProperty(name), name, null, props));
             }
             // Return system packages property.
-            return props.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES);
+            return props.getProperty(FelixConstants.FRAMEWORK_SYSTEMPACKAGES);
         }
         catch (Exception ex)
         {
