@@ -22,7 +22,7 @@ import java.util.*;
 
 import org.apache.felix.framework.util.FelixConstants;
 import org.osgi.framework.*;
-import org.osgi.framework.hooks.service.ListenerHook;
+import org.osgi.framework.hooks.service.*;
 
 public class ServiceRegistry
 {
@@ -39,7 +39,12 @@ public class ServiceRegistry
 
     private ServiceListener m_serviceListener = null;
 
-    private final List m_listenerHooks = new ArrayList();
+    private final Object m_eventHookLock = new Object();
+    private Object[] m_eventHooks = new Object[0];
+    private final Object m_findHookLock = new Object();
+    private Object[] m_findHooks = new Object[0];
+    private final Object m_listenerHookLock = new Object();
+    private Object[] m_listenerHooks = new Object[0];
 
     public ServiceRegistry(Logger logger)
     {
@@ -728,13 +733,37 @@ public class ServiceRegistry
 
     private void addHooks(String[] classNames, Object svcObj)
     {
-        if (isHook(classNames, ListenerHook.class, svcObj))
+        if (isHook(classNames, EventHook.class, svcObj))
         {
-            synchronized (m_listenerHooks)
+            synchronized (m_eventHookLock)
             {
-                m_listenerHooks.add(svcObj);
+                m_eventHooks = addToArray(m_eventHooks, svcObj);
             }
         }
+
+        if (isHook(classNames, FindHook.class, svcObj))
+        {
+            synchronized (m_findHookLock)
+            {
+                m_findHooks = addToArray(m_findHooks, svcObj);
+            }
+        }
+
+        if (isHook(classNames, ListenerHook.class, svcObj))
+        {
+            synchronized (m_listenerHookLock)
+            {
+                m_listenerHooks = addToArray(m_listenerHooks, svcObj);
+            }
+        }
+    }
+
+    private static Object[] addToArray(Object[] src, Object svcObj)
+    {
+        Object[] dst = new Object[src.length + 1];
+        System.arraycopy(src, 0, dst, 0, src.length);
+        dst[src.length] = svcObj;
+        return dst;
     }
 
     boolean isHook(String[] classNames, Class hookClass, Object svcObj)
@@ -755,21 +784,87 @@ public class ServiceRegistry
 
     private void removeHook(Object svcObj)
     {
+        if (svcObj instanceof EventHook)
+        {
+            synchronized (m_eventHookLock)
+            {
+                m_eventHooks = removeFromArray(m_eventHooks, svcObj);
+            }
+        }
+
+        if (svcObj instanceof FindHook)
+        {
+            synchronized (m_findHookLock)
+            {
+                m_findHooks = removeFromArray(m_findHooks, svcObj);
+            }
+        }
+
         if (svcObj instanceof ListenerHook)
         {
-            synchronized (m_listenerHooks)
+            synchronized (m_listenerHookLock)
             {
-                m_listenerHooks.remove(svcObj);
+                m_listenerHooks = removeFromArray(m_listenerHooks, svcObj);
             }
         }
     }
 
-    ListenerHook[] getListenerHooks()
+    private static Object[] removeFromArray(Object[] src, Object svcObj)
+    {
+        Object[] dst = src;
+
+        int idx = -1;
+        for (int i = 0; i < src.length; i++)
+        {
+            if (src[i].equals(svcObj))
+            {
+                idx = i;
+                break;
+            }
+        }
+
+        if (idx >= 0)
+        {
+            if (src.length == 1)
+            {
+                dst = new Object[0];
+            }
+            else
+            {
+                dst = new Object[src.length - 1];
+                System.arraycopy(dst, 0, src, 0, idx);
+                if (idx < dst.length)
+                {
+                    System.arraycopy(
+                        src, idx + 1, dst, idx, dst.length - idx);
+                }
+            }
+        }
+
+        return dst;
+    }
+
+    public List getEventHooks()
+    {
+        synchronized (m_eventHooks)
+        {
+            return Collections.unmodifiableList(Arrays.asList(m_eventHooks));
+        }
+    }
+
+    List getFindHooks()
+    {
+        synchronized (m_findHooks)
+        {
+            return Collections.unmodifiableList(Arrays.asList(m_findHooks));
+        }
+    }
+
+    List getListenerHooks()
     {
         synchronized (m_listenerHooks)
         {
-            return (ListenerHook[])
-                m_listenerHooks.toArray(new ListenerHook[m_listenerHooks.size()]);
+            return Collections.unmodifiableList(Arrays.asList(m_listenerHooks));
         }
     }
 

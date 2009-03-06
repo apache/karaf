@@ -24,11 +24,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EventListener;
 import java.util.EventObject;
-
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
+
 import org.apache.felix.framework.Logger;
+import org.apache.felix.framework.ServiceRegistry;
 import org.osgi.framework.AllServiceListener;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.Constants;
@@ -41,6 +45,7 @@ import org.osgi.framework.ServicePermission;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.framework.hooks.service.ListenerHook;
+import org.osgi.framework.hooks.service.EventHook;
 
 public class EventDispatcher
 {
@@ -51,8 +56,8 @@ public class EventDispatcher
     private static final int LISTENER_SECURITY_OFFSET = 4;
     private static final int LISTENER_ARRAY_INCREMENT = 5;
 
-    // Framework instance for this dispatcher.
     private Logger m_logger = null;
+    private volatile ServiceRegistry m_serviceRegistry = null;
 
     // Representation of an empty listener list.
     private static final Object[] m_emptyList = new Object[0];
@@ -118,6 +123,11 @@ public class EventDispatcher
         }
 
         return eventDispatcher;
+    }
+
+    public void setServiceRegistry(ServiceRegistry sr)
+    {
+        m_serviceRegistry = sr;
     }
 
     public static void shutdown()
@@ -605,6 +615,22 @@ public class EventDispatcher
             listeners = m_serviceListeners;
         }
 
+        if (m_serviceRegistry != null)
+        {
+            List eventHooks = m_serviceRegistry.getEventHooks();
+            if ((eventHooks != null) && (eventHooks.size() > 0))
+            {
+                ListenerBundleContextCollectionWrapper wrapper =
+                    new ListenerBundleContextCollectionWrapper(listeners);
+                for (int i = 0; i < eventHooks.size(); i++)
+                {
+                    ((EventHook) eventHooks.get(i)).event(event, wrapper);
+                }
+
+                listeners = wrapper.getListeners();
+            }
+        }
+
         // Fire all service events immediately on the calling thread.
         fireEventImmediately(m_logger, Request.SERVICE_EVENT, listeners, event);
     }
@@ -881,6 +907,201 @@ public class EventDispatcher
                 req.m_listeners = null;
                 req.m_event = null;
                 m_requestPool.add(req);
+            }
+        }
+    }
+
+    static class ListenerBundleContextCollectionWrapper implements Collection
+    {
+        private Object[] m_listeners;
+
+        ListenerBundleContextCollectionWrapper(Object [] listeners)
+        {
+            m_listeners = listeners;
+        }
+
+        Object [] getListeners()
+        {
+            return m_listeners;
+        }
+
+        public boolean add(Object o)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        public boolean addAll(Collection c)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        public void clear()
+        {
+            m_listeners = new Object[0];
+        }
+
+        public boolean contains(Object o)
+        {
+            return indexOf(o) >= 0;
+        }
+
+        public boolean containsAll(Collection c)
+        {
+            for (Iterator it = c.iterator(); it.hasNext(); )
+            {
+                if (!contains(it.next()))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private int indexOf(Object o)
+        {
+            if (!(o instanceof BundleContext))
+            {
+                return -1;
+            }
+
+            for (int i = m_listeners.length - LISTENER_ARRAY_INCREMENT;
+                i >= 0;
+                i -= LISTENER_ARRAY_INCREMENT)
+            {
+                Bundle bundle = (Bundle) m_listeners[i + LISTENER_BUNDLE_OFFSET];
+                if (bundle != null)
+                {
+                    if (bundle.getBundleContext().equals(o))
+                    {
+                        return i;
+                    }
+                }
+            }
+            return -1;
+        }
+
+        public boolean isEmpty()
+        {
+            return m_listeners.length == 0;
+        }
+
+        public Iterator iterator()
+        {
+            return new WrapperIterator();
+        }
+
+        public boolean remove(Object o)
+        {
+            return removeIndex(indexOf(o));
+        }
+
+        private boolean removeIndex(int idx)
+        {
+            if (idx < 0)
+            {
+                return false;
+            }
+
+            Object [] newListeners = new Object[m_listeners.length - LISTENER_ARRAY_INCREMENT];
+            System.arraycopy(m_listeners, 0, newListeners, 0, idx);
+            System.arraycopy(m_listeners, idx + LISTENER_ARRAY_INCREMENT,
+                    newListeners, idx, newListeners.length - idx);
+            m_listeners = newListeners;
+
+            return true;
+        }
+
+        public boolean removeAll(Collection c)
+        {
+            boolean rv = false;
+
+            for (Iterator it = c.iterator(); it.hasNext(); )
+            {
+                if (remove(it.next()))
+                {
+                    rv = true;
+                }
+            }
+
+            return rv;
+        }
+
+        public boolean retainAll(Collection c)
+        {
+            boolean rv = false;
+
+            for (Iterator it = iterator(); it.hasNext(); )
+            {
+                if (!(c.contains(it.next())))
+                {
+                    it.remove();
+                    rv = true;
+                }
+            }
+
+            return rv;
+        }
+
+        public int size()
+        {
+            return m_listeners.length / LISTENER_ARRAY_INCREMENT;
+        }
+
+        public Object[] toArray()
+        {
+            Object [] array = new Object[size()];
+            int idx = 0;
+            for (Iterator it = iterator(); it.hasNext(); )
+            {
+                array[idx++] = it.next();
+            }
+            return array;
+        }
+
+        public Object[] toArray(Object[] a)
+        {
+            if (!(a.getClass().equals(Object[].class)))
+            {
+                throw new ArrayStoreException();
+            }
+            return toArray();
+        }
+
+        private class WrapperIterator implements Iterator
+        {
+            int curIdx = 0;
+            int lastIdx = -1;
+
+            private WrapperIterator() {}
+
+            public boolean hasNext()
+            {
+                return curIdx < m_listeners.length;
+            }
+
+            public Object next()
+            {
+                if (!hasNext())
+                {
+                    throw new NoSuchElementException();
+                }
+
+                Bundle b = (Bundle) m_listeners[curIdx + LISTENER_BUNDLE_OFFSET];
+                lastIdx = curIdx;
+                curIdx += LISTENER_ARRAY_INCREMENT;
+                return b.getBundleContext();
+            }
+
+            public void remove()
+            {
+                if (lastIdx < 0)
+                {
+                    throw new IllegalStateException();
+                }
+                removeIndex(lastIdx);
+
+                curIdx = lastIdx;
+                lastIdx = -1;
             }
         }
     }

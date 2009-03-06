@@ -32,7 +32,7 @@ import org.apache.felix.framework.util.*;
 import org.apache.felix.framework.util.manifestparser.*;
 import org.apache.felix.moduleloader.*;
 import org.osgi.framework.*;
-import org.osgi.framework.hooks.service.ListenerHook;
+import org.osgi.framework.hooks.service.*;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.startlevel.StartLevel;
 
@@ -611,6 +611,8 @@ ex.printStackTrace();
 
             // Create service registry.
             m_registry = new ServiceRegistry(m_logger);
+            m_dispatcher.setServiceRegistry(m_registry);
+
             // Add a listener to the service registry; this is
             // used to distribute service registry events to
             // service listeners.
@@ -2412,11 +2414,11 @@ ex.printStackTrace();
             bundle, ServiceListener.class, l, (f == null) ? null : new FilterImpl(m_logger, f));
 
         // Invoke the ListenerHook.added() on all hooks.
-        ListenerHook[] hooks = m_registry.getListenerHooks();
+        List listenerHooks = m_registry.getListenerHooks();
         Collection c = Collections.singleton(new ListenerHookInfoImpl(bundle.getBundleContext(), f));
-        for (int i = 0; i < hooks.length; i++)
+        for (int i = 0; i < listenerHooks.size(); i++)
         {
-            hooks[i].added(c);
+            ((ListenerHook) listenerHooks.get(i)).added(c);
         }
     }
 
@@ -2435,11 +2437,11 @@ ex.printStackTrace();
         if (listener != null)
         {
             // Invoke the ListenerHook.removed() on all hooks.
-            ListenerHook[] hooks = m_registry.getListenerHooks();
+            List listenerHooks = m_registry.getListenerHooks();
             Collection c = Collections.singleton(listener);
-            for (int i = 0; i < hooks.length; i++)
+            for (int i = 0; i < listenerHooks.size(); i++)
             {
-                hooks[i].removed(c);
+                ((ListenerHook) listenerHooks.get(i)).removed(c);
             }
         }
     }
@@ -2591,6 +2593,18 @@ ex.printStackTrace();
 
         if (refList.size() > 0)
         {
+            // activate findhooks
+            List findHooks = m_registry.getFindHooks();
+            for (int i = 0; i < findHooks.size(); i++)
+            {
+                ((FindHook) findHooks.get(i)).find(
+                    bundle.getBundleContext(),
+                    className,
+                    expr,
+                    !checkAssignable,
+                    new ShrinkableCollection(refList));
+            }
+
             return (ServiceReference[]) refList.toArray(new ServiceReference[refList.size()]);
         }
 
