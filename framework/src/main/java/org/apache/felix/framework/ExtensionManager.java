@@ -48,7 +48,6 @@ import org.apache.felix.framework.util.manifestparser.R4Directive;
 import org.apache.felix.moduleloader.ICapability;
 import org.apache.felix.moduleloader.IContent;
 import org.apache.felix.moduleloader.IModule;
-import org.apache.felix.moduleloader.IURLPolicy;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -112,7 +111,6 @@ class ExtensionManager extends URLStreamHandler implements IContent
     private final IModule m_module;
     private ICapability[] m_capabilities = null;
     private Set m_exportNames = null;
-    private IURLPolicy m_urlPolicy = null;
     private Object m_securityContext = null;
     private final List m_extensions;
     private final Set m_names;
