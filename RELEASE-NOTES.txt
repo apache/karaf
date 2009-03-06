@@ -43,6 +43,7 @@
      * [SMX4KNL-227] - Full support of fragment bundles
      * [SMX4KNL-228] - Warning messages when using OpenSSH 5.1 to connect to ServiceMix Kernel
      * [SMX4KNL-231] - Unable to log into ServiceMix Kernel using OpenSolaris SSH client
+     * [SMX4KNL-232] - Unable to log into ServiceMix Kernel using Windows putty SSH client
 
   Changelog
   ---------
