@@ -33,6 +33,17 @@
   * improved JMX support for managing the OSGi framework and features
  Note that the commands syntax has changed due to the upgrade to the latest gshell version.
 
+  Known issues
+  ============
+
+     * [SMX4KNL-141] - The config/edit command changes does not takes precedence over configuration files in the etc folder at restart
+     * [SMX4KNL-183] - features/uninstall behaves different in version selection than features/install
+     * [SMX4KNL-189] - Shell completion works only in the root shell
+     * [SMX4KNL-200] - The client jar / ssh daemon should support direct commands
+     * [SMX4KNL-227] - Full support of fragment bundles
+     * [SMX4KNL-228] - Warning messages when using OpenSSH 5.1 to connect to ServiceMix Kernel
+     * [SMX4KNL-231] - Unable to log into ServiceMix Kernel using OpenSolaris SSH client
+
   Changelog
   ---------
 
@@ -128,6 +139,7 @@
      * [SMX4KNL-203] - When installing a feature, the service should first install all bundles, then start them all in order
      * [SMX4KNL-206] - Felix version in servicemix-kernel-1.1.0-snapshot doesn't seem to support fragment bundles.
      * [SMX4KNL-216] - Display fragments informations in the osgi list command
+     * [SMX4KNL-230] - Log statements using java.util.logging are logged into both stderr and data/log/servicemix.log file
 
  ** New Feature
      * [SMX4KNL-28] - Create a config command to administer the ConfigAdmin service
