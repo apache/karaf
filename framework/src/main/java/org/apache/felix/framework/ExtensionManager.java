@@ -188,11 +188,6 @@ class ExtensionManager extends URLStreamHandler implements IContent
         }
     }
 
-    public IModule getModule()
-    {
-        return m_module;
-    }
-
     private ICapability[] aliasSymbolicName(ICapability[] caps)
     {
         if (caps == null)
@@ -232,6 +227,11 @@ class ExtensionManager extends URLStreamHandler implements IContent
         }
 
         return aliasCaps;
+    }
+
+    public IModule getModule()
+    {
+        return m_module;
     }
 
     public synchronized Object getSecurityContext()
