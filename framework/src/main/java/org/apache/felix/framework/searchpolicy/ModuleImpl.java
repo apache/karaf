@@ -161,21 +161,7 @@ public class ModuleImpl implements IModule
         m_requirements = mp.getRequirements();
         m_dynamicRequirements = mp.getDynamicRequirements();
         m_nativeLibraries = mp.getLibraries();
-
-        // Get symbolic name.
-        String symName = null;
-        for (int capIdx = 0;
-            (m_capabilities != null) && (capIdx < m_capabilities.length);
-            capIdx++)
-        {
-            if (m_capabilities[capIdx].getNamespace().equals(ICapability.MODULE_NAMESPACE))
-            {
-                symName = (String) m_capabilities[capIdx].getProperties().get(
-                    Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE);
-                break;
-            }
-        }
-        m_symbolicName = symName;
+        m_symbolicName = mp.getSymbolicName();
 
         // Verify that all native libraries exist in advance; this will
         // throw an exception if the native library does not exist.
