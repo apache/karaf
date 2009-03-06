@@ -18,9 +18,9 @@ package org.apache.servicemix.kernel.jaas.config;
 
 import java.security.GeneralSecurityException;
 
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.SSLContext;
 
 /**
  * Based on http://svn.apache.org/repos/asf/geronimo/trunk/modules/management/

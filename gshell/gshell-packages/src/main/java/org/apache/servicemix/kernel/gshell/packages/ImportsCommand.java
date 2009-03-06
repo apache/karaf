@@ -16,17 +16,17 @@
  */
 package org.apache.servicemix.kernel.gshell.packages;
 
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.io.PrintWriter;
 
-import org.osgi.service.packageadmin.PackageAdmin;
-import org.osgi.service.packageadmin.ExportedPackage;
+import org.apache.geronimo.gshell.clp.Argument;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
-import org.apache.geronimo.gshell.clp.Argument;
+import org.osgi.service.packageadmin.ExportedPackage;
+import org.osgi.service.packageadmin.PackageAdmin;
 
 public class ImportsCommand extends PackageCommandSupport {
 

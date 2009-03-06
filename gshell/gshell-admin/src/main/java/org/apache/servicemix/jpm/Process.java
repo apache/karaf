@@ -16,8 +16,6 @@
  */
 package org.apache.servicemix.jpm;
 
-import java.io.InputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 

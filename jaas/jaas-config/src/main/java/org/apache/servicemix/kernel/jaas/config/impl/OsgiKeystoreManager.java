@@ -16,19 +16,19 @@
  */
 package org.apache.servicemix.kernel.jaas.config.impl;
 
-import java.util.Map;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocketFactory;
 
 import org.apache.servicemix.kernel.jaas.config.KeystoreInstance;
-import org.apache.servicemix.kernel.jaas.config.KeystoreManager;
 import org.apache.servicemix.kernel.jaas.config.KeystoreIsLocked;
+import org.apache.servicemix.kernel.jaas.config.KeystoreManager;
 
 /**
  * Implementation of KeystoreManager

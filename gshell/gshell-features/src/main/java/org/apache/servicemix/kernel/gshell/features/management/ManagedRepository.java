@@ -22,8 +22,8 @@ import org.apache.servicemix.kernel.gshell.features.Feature;
 import org.apache.servicemix.kernel.gshell.features.FeaturesService;
 import org.apache.servicemix.kernel.gshell.features.Repository;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
-import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.jmx.export.annotation.ManagedOperation;
+import org.springframework.jmx.export.annotation.ManagedResource;
 
 @ManagedResource(description = "Features Repository")
 public class ManagedRepository {

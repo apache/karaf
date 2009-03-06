@@ -16,40 +16,40 @@
  */
 package org.apache.servicemix.kernel.gshell.features.internal;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.OutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-import java.util.jar.Manifest;
-import java.util.jar.JarOutputStream;
-import java.util.jar.JarFile;
-import java.util.zip.ZipEntry;
-import java.util.Enumeration;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
+import java.util.Enumeration;
+import java.util.jar.JarFile;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
 
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
 
-import org.apache.servicemix.kernel.filemonitor.DeploymentListener;
-import org.apache.servicemix.kernel.gshell.features.Feature;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.SynchronousBundleListener;
+import org.apache.servicemix.kernel.filemonitor.DeploymentListener;
+import org.apache.servicemix.kernel.gshell.features.Feature;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.Constants;
-import org.osgi.framework.BundleContext;
-import org.springframework.osgi.context.BundleContextAware;
-import org.springframework.beans.factory.InitializingBean;
+import org.osgi.framework.SynchronousBundleListener;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.osgi.context.BundleContextAware;
 
 /**
  * A deployment listener able to hot deploy a feature descriptor

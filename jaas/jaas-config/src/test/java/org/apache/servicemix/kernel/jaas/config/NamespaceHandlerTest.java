@@ -16,26 +16,29 @@
  */
 package org.apache.servicemix.kernel.jaas.config;
 
-import static org.easymock.EasyMock.*;
-
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
 
 import javax.security.auth.login.AppConfigurationEntry;
 
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.context.support.AbstractApplicationContext;
-import org.springframework.osgi.context.support.BundleContextAwareProcessor;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceRegistration;
+import junit.framework.TestCase;
 import org.apache.servicemix.kernel.jaas.boot.ProxyLoginModule;
 import org.apache.servicemix.kernel.jaas.config.impl.Config;
 import org.easymock.EasyMock;
-import junit.framework.TestCase;
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.aryEq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceRegistration;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.osgi.context.support.BundleContextAwareProcessor;
 
 public class NamespaceHandlerTest extends TestCase {
 

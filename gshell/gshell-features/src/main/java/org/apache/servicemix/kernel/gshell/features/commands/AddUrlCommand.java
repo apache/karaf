@@ -16,8 +16,8 @@
  */
 package org.apache.servicemix.kernel.gshell.features.commands;
 
-import java.util.List;
 import java.net.URI;
+import java.util.List;
 
 import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.servicemix.kernel.gshell.features.FeaturesService;

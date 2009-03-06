@@ -18,9 +18,6 @@
  */
 package org.apache.servicemix.kernel.gshell.log;
 
-import java.util.AbstractList;
-import java.util.List;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 /**

@@ -17,7 +17,6 @@
 package org.apache.servicemix.kernel.gshell.admin.internal.commands;
 
 import org.apache.geronimo.gshell.clp.Argument;
-import org.apache.geronimo.gshell.clp.Option;
 
 /**
  * Creates a new servicemix instance

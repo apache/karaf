@@ -16,26 +16,26 @@
  */
 package org.apache.servicemix.kernel.gshell.admin.internal;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Scanner;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
-import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.net.ServerSocket;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
 
-import org.apache.servicemix.kernel.gshell.admin.AdminService;
-import org.apache.servicemix.kernel.gshell.admin.Instance;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.geronimo.gshell.shell.ShellContextHolder;
 import org.apache.geronimo.gshell.shell.ShellContext;
-import org.osgi.service.prefs.PreferencesService;
-import org.osgi.service.prefs.Preferences;
+import org.apache.geronimo.gshell.shell.ShellContextHolder;
+import org.apache.servicemix.kernel.gshell.admin.AdminService;
+import org.apache.servicemix.kernel.gshell.admin.Instance;
 import org.osgi.service.prefs.BackingStoreException;
+import org.osgi.service.prefs.Preferences;
+import org.osgi.service.prefs.PreferencesService;
 import org.springframework.beans.factory.InitializingBean;
 
 public class AdminServiceImpl implements AdminService, InitializingBean {

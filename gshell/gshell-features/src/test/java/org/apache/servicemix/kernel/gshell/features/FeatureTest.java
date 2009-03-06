@@ -16,9 +16,8 @@
  */
 package org.apache.servicemix.kernel.gshell.features;
 
-import org.apache.servicemix.kernel.gshell.features.internal.FeatureImpl;
-
 import junit.framework.TestCase;
+import org.apache.servicemix.kernel.gshell.features.internal.FeatureImpl;
 
 public class FeatureTest extends TestCase {
 	

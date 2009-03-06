@@ -18,36 +18,33 @@
  */
 package org.apache.servicemix.kernel.gshell.core.config;
 
-import java.util.List;
-import java.util.Map;
-import java.util.LinkedHashMap;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.w3c.dom.Element;
 
-import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
-import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.ManagedList;
-import org.springframework.beans.factory.support.ManagedMap;
-import org.springframework.beans.factory.support.GenericBeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.util.StringUtils;
-import org.springframework.util.xml.DomUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.geronimo.gshell.command.Alias;
+import org.apache.geronimo.gshell.command.Link;
+import org.apache.geronimo.gshell.wisdom.command.AliasImpl;
 import org.apache.geronimo.gshell.wisdom.command.ConfigurableCommandCompleter;
 import org.apache.geronimo.gshell.wisdom.command.LinkImpl;
-import org.apache.geronimo.gshell.wisdom.command.AliasImpl;
 import org.apache.geronimo.gshell.wisdom.registry.CommandLocationImpl;
-import org.apache.geronimo.gshell.command.Link;
-import org.apache.geronimo.gshell.command.Alias;
 import org.apache.servicemix.kernel.gshell.core.CommandBundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.beans.factory.support.ManagedList;
+import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
+import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
+import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.util.StringUtils;
+import org.springframework.util.xml.DomUtils;
 
 public class CommandParser extends AbstractBeanDefinitionParser {
 

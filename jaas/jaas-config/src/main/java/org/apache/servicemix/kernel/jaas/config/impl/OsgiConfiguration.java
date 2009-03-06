@@ -16,13 +16,12 @@
  */
 package org.apache.servicemix.kernel.jaas.config.impl;
 
-import java.util.Map;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import javax.security.auth.login.Configuration;
 import javax.security.auth.login.AppConfigurationEntry;
+import javax.security.auth.login.Configuration;
 
 import org.apache.servicemix.kernel.jaas.config.JaasRealm;
 

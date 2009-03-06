@@ -16,16 +16,16 @@
  */
 package org.apache.servicemix.kernel.jaas.boot;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
-import javax.security.auth.spi.LoginModule;
 import javax.security.auth.Subject;
-import javax.security.auth.login.LoginException;
 import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.login.LoginException;
+import javax.security.auth.spi.LoginModule;
 
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 
 /**
  * An OSGi proxy login module that should be used instead of a plain reference to

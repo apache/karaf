@@ -19,8 +19,6 @@ package org.apache.servicemix.kernel.gshell.admin.internal.commands;
 import org.apache.servicemix.kernel.gshell.admin.AdminService;
 import org.apache.servicemix.kernel.gshell.admin.Instance;
 import org.apache.servicemix.kernel.gshell.core.OsgiCommandSupport;
-import org.apache.geronimo.gshell.command.CommandContext;
-import org.osgi.framework.ServiceReference;
 
 public abstract class AdminCommandSupport extends OsgiCommandSupport {
 

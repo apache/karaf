@@ -18,9 +18,7 @@ package org.apache.servicemix.kernel.gshell.osgi;
 
 import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.servicemix.kernel.gshell.core.OsgiCommandSupport;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.packageadmin.PackageAdmin;
 
 public class StartLevel extends OsgiCommandSupport {
 

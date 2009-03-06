@@ -16,12 +16,12 @@
  */
 package org.apache.servicemix.kernel.gshell.log.layout;
 
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.Date;
+import java.text.DateFormatSymbols;
 import java.text.FieldPosition;
 import java.text.ParsePosition;
-import java.text.DateFormatSymbols;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * Copied from log4j

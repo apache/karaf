@@ -16,10 +16,10 @@
  */
 package org.apache.servicemix.kernel.gshell.itests;
 
-import org.apache.servicemix.kernel.testing.support.AbstractIntegrationTest;
-import org.apache.geronimo.gshell.shell.Shell;
 import org.apache.geronimo.gshell.commandline.CommandLineExecutionFailed;
 import org.apache.geronimo.gshell.registry.NoSuchCommandException;
+import org.apache.geronimo.gshell.shell.Shell;
+import org.apache.servicemix.kernel.testing.support.AbstractIntegrationTest;
 import org.osgi.framework.Bundle;
 
 public class CoreTest extends AbstractIntegrationTest {

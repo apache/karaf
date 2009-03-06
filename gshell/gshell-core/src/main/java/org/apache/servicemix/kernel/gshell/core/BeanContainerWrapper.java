@@ -18,16 +18,16 @@
  */
 package org.apache.servicemix.kernel.gshell.core;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Collection;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 
 import org.apache.geronimo.gshell.spring.BeanContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.context.ApplicationContext;
 
 public class BeanContainerWrapper implements BeanContainer {
 

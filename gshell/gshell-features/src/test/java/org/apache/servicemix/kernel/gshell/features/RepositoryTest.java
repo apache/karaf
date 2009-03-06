@@ -18,9 +18,9 @@ package org.apache.servicemix.kernel.gshell.features;
 
 import java.net.URI;
 
+import junit.framework.TestCase;
 import org.apache.servicemix.kernel.gshell.features.internal.FeatureImpl;
 import org.apache.servicemix.kernel.gshell.features.internal.RepositoryImpl;
-import junit.framework.TestCase;
 
 
 public class RepositoryTest extends TestCase {

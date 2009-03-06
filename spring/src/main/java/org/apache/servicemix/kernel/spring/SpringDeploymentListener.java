@@ -18,24 +18,12 @@
 package org.apache.servicemix.kernel.spring;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.jar.JarOutputStream;
-import java.util.jar.Manifest;
-import java.util.jar.JarFile;
-import java.util.zip.ZipEntry;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

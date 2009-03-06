@@ -16,8 +16,8 @@
  */
 package org.apache.servicemix.kernel.gshell.features.commands;
 
-import org.apache.servicemix.kernel.gshell.features.FeaturesService;
 import org.apache.servicemix.kernel.gshell.core.OsgiCommandSupport;
+import org.apache.servicemix.kernel.gshell.features.FeaturesService;
 import org.osgi.framework.ServiceReference;
 
 public abstract class FeaturesCommandSupport extends OsgiCommandSupport {

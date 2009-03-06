@@ -16,8 +16,8 @@
  */
 package org.apache.servicemix.kernel.gshell.admin.internal;
 
-import org.apache.servicemix.kernel.gshell.admin.AdminServiceMBean;
 import org.apache.servicemix.kernel.gshell.admin.AdminService;
+import org.apache.servicemix.kernel.gshell.admin.AdminServiceMBean;
 import org.apache.servicemix.kernel.gshell.admin.Instance;
 
 public class AdminServiceMBeanImpl implements AdminServiceMBean {

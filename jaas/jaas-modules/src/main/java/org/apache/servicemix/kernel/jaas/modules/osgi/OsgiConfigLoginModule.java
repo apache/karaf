@@ -16,26 +16,26 @@
  */
 package org.apache.servicemix.kernel.jaas.modules.osgi;
 
-import java.util.Map;
-import java.util.Dictionary;
-import java.util.Set;
-import java.util.HashSet;
 import java.io.IOException;
 import java.security.Principal;
+import java.util.Dictionary;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-import javax.security.auth.spi.LoginModule;
 import javax.security.auth.Subject;
-import javax.security.auth.login.LoginException;
-import javax.security.auth.login.FailedLoginException;
+import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.auth.login.FailedLoginException;
+import javax.security.auth.login.LoginException;
+import javax.security.auth.spi.LoginModule;
 
-import org.osgi.service.cm.Configuration;
-import org.apache.servicemix.kernel.jaas.modules.UserPrincipal;
 import org.apache.servicemix.kernel.jaas.modules.RolePrincipal;
+import org.apache.servicemix.kernel.jaas.modules.UserPrincipal;
+import org.osgi.service.cm.Configuration;
 
 public class OsgiConfigLoginModule implements LoginModule {
 

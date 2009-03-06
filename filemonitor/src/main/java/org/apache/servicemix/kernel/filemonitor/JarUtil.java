@@ -17,17 +17,17 @@
  */
 package org.apache.servicemix.kernel.filemonitor;
 
-import java.io.FileOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.FileInputStream;
 import java.io.BufferedOutputStream;
-import java.util.zip.ZipOutputStream;
-import java.util.zip.ZipEntry;
-import java.util.jar.JarOutputStream;
-import java.util.jar.JarFile;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
+import java.util.jar.JarFile;
+import java.util.jar.JarOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class JarUtil {
 

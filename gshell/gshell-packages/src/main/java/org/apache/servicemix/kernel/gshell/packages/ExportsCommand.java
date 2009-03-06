@@ -16,15 +16,15 @@
  */
 package org.apache.servicemix.kernel.gshell.packages;
 
-import java.util.List;
 import java.io.PrintWriter;
+import java.util.List;
 
-import org.osgi.service.packageadmin.PackageAdmin;
-import org.osgi.service.packageadmin.ExportedPackage;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
 import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.geronimo.gshell.clp.Option;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
+import org.osgi.service.packageadmin.ExportedPackage;
+import org.osgi.service.packageadmin.PackageAdmin;
 
 public class ExportsCommand extends PackageCommandSupport {
 

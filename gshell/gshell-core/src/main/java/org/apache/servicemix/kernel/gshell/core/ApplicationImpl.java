@@ -24,11 +24,10 @@ import java.util.Properties;
 
 import org.apache.geronimo.gshell.application.Application;
 import org.apache.geronimo.gshell.application.ClassPath;
-import org.apache.geronimo.gshell.io.IO;
-import org.apache.geronimo.gshell.command.Variables;
 import org.apache.geronimo.gshell.application.model.ApplicationModel;
 import org.apache.geronimo.gshell.artifact.Artifact;
-
+import org.apache.geronimo.gshell.command.Variables;
+import org.apache.geronimo.gshell.io.IO;
 import org.springframework.beans.factory.InitializingBean; 
 
 public class ApplicationImpl implements Application, InitializingBean  {

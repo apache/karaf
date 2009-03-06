@@ -28,7 +28,6 @@ import java.net.URLConnection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.servicemix.kernel.spring.SpringTransformer;
 import org.osgi.service.url.AbstractURLStreamHandlerService;
 
 /**

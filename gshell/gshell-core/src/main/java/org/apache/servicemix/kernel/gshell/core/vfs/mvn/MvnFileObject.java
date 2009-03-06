@@ -18,14 +18,14 @@
  */
 package org.apache.servicemix.kernel.gshell.core.vfs.mvn;
 
-import java.net.URL;
 import java.net.MalformedURLException;
+import java.net.URL;
 
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.vfs.FileName;
 import org.apache.commons.vfs.FileSystemException;
-import org.apache.commons.vfs.provider.url.UrlFileObject;
 import org.apache.commons.vfs.provider.URLFileName;
+import org.apache.commons.vfs.provider.url.UrlFileObject;
 
 public class MvnFileObject extends UrlFileObject {
 

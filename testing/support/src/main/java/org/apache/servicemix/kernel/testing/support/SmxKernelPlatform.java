@@ -16,40 +16,39 @@
  */
 package org.apache.servicemix.kernel.testing.support;
 
-import java.util.Properties;
-import java.util.Set;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Enumeration;
-import java.util.ArrayList;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.net.MalformedURLException;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.FileNotFoundException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Constructor;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
+import java.util.Properties;
+import java.util.Set;
 
-import org.springframework.osgi.test.platform.FelixPlatform;
-import org.springframework.osgi.test.platform.OsgiPlatform;
-import org.springframework.util.ClassUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.felix.framework.Felix;
 import org.apache.felix.framework.util.CompoundEnumeration;
 import org.apache.felix.framework.util.FelixConstants;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.servicemix.kernel.main.Main;
 import org.apache.servicemix.kernel.main.spi.MainService;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.framework.Constants;
+import org.springframework.osgi.test.platform.FelixPlatform;
+import org.springframework.osgi.test.platform.OsgiPlatform;
+import org.springframework.util.ClassUtils;
 
 public class SmxKernelPlatform implements OsgiPlatform {
 

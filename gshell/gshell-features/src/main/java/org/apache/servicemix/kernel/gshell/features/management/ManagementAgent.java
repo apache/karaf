@@ -16,24 +16,24 @@
  */
 package org.apache.servicemix.kernel.gshell.features.management;
 
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
 
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
+import javax.management.InstanceAlreadyExistsException;
 import javax.management.JMException;
+import javax.management.MBeanServer;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectInstance;
-import javax.management.InstanceAlreadyExistsException;
+import javax.management.ObjectName;
+import javax.management.modelmbean.InvalidTargetObjectTypeException;
 import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.RequiredModelMBean;
-import javax.management.modelmbean.InvalidTargetObjectTypeException;
 
-import org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler;
-import org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource;
-import org.springframework.beans.factory.DisposableBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource;
+import org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler;
 
 /**
  * Management Agent that registers MBeans with JMX MBeanServer.

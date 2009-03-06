@@ -20,9 +20,7 @@ package org.apache.servicemix.kernel.gshell.admin.internal.commands;
 
 import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.geronimo.gshell.clp.Option;
-import org.apache.geronimo.gshell.shell.Shell;
 import org.apache.geronimo.gshell.shell.ShellContextHolder;
-import org.osgi.framework.ServiceReference;
 
 public class ConnectCommand extends AdminCommandSupport {
 

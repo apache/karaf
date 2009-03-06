@@ -19,6 +19,7 @@ package org.apache.servicemix.kernel.gshell.obr;
 import java.io.PrintWriter;
 import java.util.List;
 
+import org.apache.servicemix.kernel.gshell.core.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
@@ -26,7 +27,6 @@ import org.osgi.service.obr.RepositoryAdmin;
 import org.osgi.service.obr.Requirement;
 import org.osgi.service.obr.Resolver;
 import org.osgi.service.obr.Resource;
-import org.apache.servicemix.kernel.gshell.core.OsgiCommandSupport;
 
 public abstract class ObrCommandSupport extends OsgiCommandSupport {
 

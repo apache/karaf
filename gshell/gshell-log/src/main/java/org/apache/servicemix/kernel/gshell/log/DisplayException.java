@@ -16,8 +16,8 @@
  */
 package org.apache.servicemix.kernel.gshell.log;
 
-import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 import org.apache.servicemix.kernel.gshell.core.OsgiCommandSupport;
+import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
 public class DisplayException extends OsgiCommandSupport {
 

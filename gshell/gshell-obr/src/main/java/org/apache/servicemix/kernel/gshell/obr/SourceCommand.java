@@ -16,7 +16,6 @@
  */
 package org.apache.servicemix.kernel.gshell.obr;
 
-import java.io.File;
 import java.net.URL;
 import java.util.List;
 

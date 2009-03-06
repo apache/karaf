@@ -16,8 +16,6 @@
  */
 package org.apache.servicemix.kernel.gshell.features;
 
-import java.io.IOException;
-import java.net.URL;
 import java.net.URI;
 
 /**

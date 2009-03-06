@@ -16,22 +16,22 @@
  */
 package org.apache.servicemix.kernel.gshell.admin.internal;
 
-import java.io.InputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.io.FilenameFilter;
-import java.util.Properties;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.servicemix.jpm.Process;
 import org.apache.servicemix.jpm.ProcessBuilderFactory;
 import org.apache.servicemix.jpm.impl.ScriptUtils;
 import org.apache.servicemix.kernel.gshell.admin.Instance;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class InstanceImpl implements Instance {
 

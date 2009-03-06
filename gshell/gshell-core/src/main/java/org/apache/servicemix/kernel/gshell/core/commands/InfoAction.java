@@ -18,30 +18,26 @@
  */
 package org.apache.servicemix.kernel.gshell.core.commands;
 
-import java.lang.management.ThreadMXBean;
-import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.ClassLoadingMXBean;
+import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
+import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
-import java.lang.management.GarbageCollectorMXBean;
+import java.lang.management.ThreadMXBean;
 import java.lang.reflect.Method;
-import java.text.NumberFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.util.Locale;
-import java.util.HashMap;
-import java.util.Map;
 
-import org.apache.geronimo.gshell.ansi.AnsiRenderer;
 import org.apache.geronimo.gshell.ansi.AnsiCode;
-import org.apache.geronimo.gshell.application.model.Branding;
+import org.apache.geronimo.gshell.ansi.AnsiRenderer;
 import org.apache.geronimo.gshell.command.CommandAction;
 import org.apache.geronimo.gshell.command.CommandContext;
 import org.apache.geronimo.gshell.io.IO;
-import org.codehaus.plexus.util.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.apache.servicemix.kernel.gshell.core.ServiceMixBranding;
+import org.codehaus.plexus.util.StringUtils;
 
 public class InfoAction implements CommandAction {
 

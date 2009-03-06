@@ -17,9 +17,9 @@
 package org.apache.servicemix.kernel.gshell.log;
 
 import org.apache.geronimo.gshell.clp.Option;
+import org.apache.servicemix.kernel.gshell.core.OsgiCommandSupport;
 import org.apache.servicemix.kernel.gshell.log.layout.PatternConverter;
 import org.apache.servicemix.kernel.gshell.log.layout.PatternParser;
-import org.apache.servicemix.kernel.gshell.core.OsgiCommandSupport;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
 /**

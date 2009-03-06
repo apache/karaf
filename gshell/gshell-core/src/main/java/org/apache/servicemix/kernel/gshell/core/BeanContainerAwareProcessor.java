@@ -20,11 +20,11 @@ package org.apache.servicemix.kernel.gshell.core;
 
 import org.apache.geronimo.gshell.spring.BeanContainer;
 import org.apache.geronimo.gshell.spring.BeanContainerAware;
-import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 public class BeanContainerAwareProcessor implements InitializingBean, BeanPostProcessor, ApplicationContextAware {
 

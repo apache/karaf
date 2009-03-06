@@ -18,9 +18,9 @@
  */
 package org.apache.servicemix.kernel.main;
 
-import java.io.RandomAccessFile;
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
 import java.util.Properties;
 

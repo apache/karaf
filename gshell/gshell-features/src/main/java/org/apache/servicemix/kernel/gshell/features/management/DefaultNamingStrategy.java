@@ -16,8 +16,8 @@
  */
 package org.apache.servicemix.kernel.gshell.features.management;
 
-import javax.management.ObjectName;
 import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
 
 import org.apache.servicemix.kernel.gshell.features.FeaturesRegistry;
 

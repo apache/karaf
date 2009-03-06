@@ -16,14 +16,8 @@
  */
 package org.apache.servicemix.jpm.impl;
 
-import java.io.IOException;
 import java.io.File;
-import java.io.InputStreamReader;
-import java.io.FileInputStream;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
 
 import org.apache.servicemix.jpm.Process;
 import org.apache.servicemix.jpm.ProcessBuilder;

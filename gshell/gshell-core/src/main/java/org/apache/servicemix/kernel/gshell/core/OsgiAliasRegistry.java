@@ -20,8 +20,8 @@ package org.apache.servicemix.kernel.gshell.core;
 
 import java.util.Map;
 
-import org.apache.geronimo.gshell.registry.AliasRegistry;
 import org.apache.geronimo.gshell.command.Alias;
+import org.apache.geronimo.gshell.registry.AliasRegistry;
 
 public class OsgiAliasRegistry {
 

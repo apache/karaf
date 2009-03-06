@@ -16,19 +16,19 @@
  */
 package org.apache.servicemix.kernel.gshell.core;
 
-import org.apache.geronimo.gshell.application.ApplicationManager;
-import org.apache.geronimo.gshell.application.ApplicationConfiguration;
 import org.apache.geronimo.gshell.application.Application;
-import org.apache.geronimo.gshell.shell.Shell;
-import org.apache.geronimo.gshell.wisdom.application.ShellCreatedEvent;
+import org.apache.geronimo.gshell.application.ApplicationConfiguration;
+import org.apache.geronimo.gshell.application.ApplicationManager;
 import org.apache.geronimo.gshell.event.EventPublisher;
 import org.apache.geronimo.gshell.io.SystemOutputHijacker;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.DisposableBean;
+import org.apache.geronimo.gshell.shell.Shell;
+import org.apache.geronimo.gshell.wisdom.application.ShellCreatedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 public class ApplicationManagerImpl implements ApplicationManager, ApplicationContextAware, InitializingBean, DisposableBean {
 

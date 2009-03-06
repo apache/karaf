@@ -16,17 +16,16 @@
  */
 package org.apache.servicemix.kernel.gshell.log;
 
-import java.util.List;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.Enumeration;
 
 import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.servicemix.kernel.gshell.core.OsgiCommandSupport;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * Get the log level for a given logger

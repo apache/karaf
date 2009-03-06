@@ -16,15 +16,15 @@
  */
 package org.apache.servicemix.kernel.jaas.config.impl;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.security.auth.login.AppConfigurationEntry;
 
 import org.apache.servicemix.kernel.jaas.boot.ProxyLoginModule;
 import org.apache.servicemix.kernel.jaas.config.JaasRealm;
-import org.springframework.osgi.context.BundleContextAware;
 import org.osgi.framework.BundleContext;
+import org.springframework.osgi.context.BundleContextAware;
 
 /**
  * An implementation of JaasRealm which is created

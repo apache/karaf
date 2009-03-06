@@ -16,8 +16,8 @@
  */
 package org.apache.servicemix.kernel.gshell.features.commands;
 
-import org.apache.servicemix.kernel.gshell.features.FeaturesService;
 import org.apache.geronimo.gshell.clp.Option;
+import org.apache.servicemix.kernel.gshell.features.FeaturesService;
 
 public class ListFeaturesCommand extends FeaturesCommandSupport {
 

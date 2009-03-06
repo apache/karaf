@@ -25,8 +25,6 @@ import java.security.cert.Certificate;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.TrustManager;
 
-import org.apache.servicemix.kernel.jaas.config.KeystoreIsLocked;
-
 /**
  * Based on http://svn.apache.org/repos/asf/geronimo/trunk/modules/management/
  *              src/java/org/apache/geronimo/management/geronimo/KeystoreInstance.java

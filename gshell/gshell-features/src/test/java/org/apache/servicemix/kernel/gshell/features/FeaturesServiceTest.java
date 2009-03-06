@@ -16,25 +16,27 @@
  */
 package org.apache.servicemix.kernel.gshell.features;
 
-import java.net.URI;
-import java.io.InputStream;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.InputStream;
 import java.io.PrintWriter;
+import java.net.URI;
 
-import static org.easymock.EasyMock.*;
-
+import junit.framework.TestCase;
 import org.apache.servicemix.kernel.gshell.features.internal.FeatureImpl;
 import org.apache.servicemix.kernel.gshell.features.internal.FeaturesServiceImpl;
-import org.apache.servicemix.kernel.gshell.features.FeaturesRegistry;
 import org.apache.servicemix.kernel.gshell.features.management.ManagedFeaturesRegistry;
 import org.easymock.EasyMock;
-import org.osgi.service.prefs.PreferencesService;
-import org.osgi.service.prefs.Preferences;
-import org.osgi.framework.BundleContext;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.reset;
+import static org.easymock.EasyMock.verify;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.prefs.Preferences;
+import org.osgi.service.prefs.PreferencesService;
 import org.springframework.context.ApplicationContext;
-import junit.framework.TestCase;
 
 public class FeaturesServiceTest extends TestCase {
 

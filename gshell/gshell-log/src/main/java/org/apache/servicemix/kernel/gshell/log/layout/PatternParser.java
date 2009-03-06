@@ -16,14 +16,13 @@
  */
 package org.apache.servicemix.kernel.gshell.log.layout;
 
-import org.apache.log4j.spi.LoggingEvent;
-import org.apache.log4j.spi.LocationInfo;
-import org.ops4j.pax.logging.spi.PaxLoggingEvent;
-import org.ops4j.pax.logging.spi.PaxLocationInfo;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import org.apache.log4j.spi.LoggingEvent;
+import org.ops4j.pax.logging.spi.PaxLocationInfo;
+import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
 /**
  * Copied from log4j

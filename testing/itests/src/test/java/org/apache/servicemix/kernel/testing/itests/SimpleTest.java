@@ -16,8 +16,8 @@
  */
 package org.apache.servicemix.kernel.testing.itests;
 
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.validation.SchemaFactory;
 

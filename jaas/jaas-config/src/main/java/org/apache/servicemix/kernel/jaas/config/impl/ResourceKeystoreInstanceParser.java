@@ -16,20 +16,16 @@
  */
 package org.apache.servicemix.kernel.jaas.config.impl;
 
-import java.util.Map;
-import java.util.HashMap;
-
 import org.w3c.dom.Element;
 
-import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
-import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.apache.servicemix.kernel.jaas.config.KeystoreInstance;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
+import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.osgi.service.exporter.support.OsgiServiceFactoryBean;
-import org.apache.servicemix.kernel.jaas.config.KeystoreInstance;
-import org.apache.servicemix.kernel.jaas.boot.ProxyLoginModule;
 
 /**
  * Spring parser for a keystore instance

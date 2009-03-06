@@ -21,7 +21,6 @@ import org.apache.geronimo.gshell.clp.Option;
 import org.apache.servicemix.kernel.gshell.core.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.startlevel.*;
 import org.osgi.service.startlevel.StartLevel;
 
 public abstract class BundleCommand extends OsgiCommandSupport {

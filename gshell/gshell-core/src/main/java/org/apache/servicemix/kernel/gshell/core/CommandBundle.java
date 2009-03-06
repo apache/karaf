@@ -18,27 +18,27 @@
  */
 package org.apache.servicemix.kernel.gshell.core;
 
-import java.util.Dictionary;
-import java.util.Properties;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.List;
+import java.util.Properties;
 
-import org.springframework.osgi.context.BundleContextAware;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ApplicationContext;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import org.apache.geronimo.gshell.command.Alias;
 import org.apache.geronimo.gshell.command.Command;
 import org.apache.geronimo.gshell.command.Link;
-import org.apache.geronimo.gshell.command.Alias;
-import org.apache.geronimo.gshell.registry.CommandRegistry;
 import org.apache.geronimo.gshell.registry.AliasRegistry;
+import org.apache.geronimo.gshell.registry.CommandRegistry;
 import org.apache.geronimo.gshell.wisdom.command.LinkCommand;
 import org.apache.geronimo.gshell.wisdom.registry.CommandLocationImpl;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.osgi.context.BundleContextAware;
 
 public class CommandBundle implements BundleContextAware, InitializingBean, DisposableBean, ApplicationContextAware {
 

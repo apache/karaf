@@ -18,8 +18,8 @@ package org.apache.servicemix.smx4webex;
 
 import java.io.File;
 
-import javax.servlet.ServletContextListener;
 import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 
 import org.apache.servicemix.kernel.main.Main;
 

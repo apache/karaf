@@ -18,9 +18,9 @@ package org.apache.servicemix.kernel.gshell.config;
 
 import java.util.Dictionary;
 
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.geronimo.gshell.clp.Option;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 public class EditCommand extends ConfigCommandSupport {
 

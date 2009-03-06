@@ -19,9 +19,8 @@ package org.apache.servicemix.kernel.gshell.features.internal;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.servicemix.kernel.gshell.features.Feature;
-
 import junit.framework.TestCase;
+import org.apache.servicemix.kernel.gshell.features.Feature;
 
 /**
  * Test cases for {@link FeaturesServiceImpl}

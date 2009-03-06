@@ -17,11 +17,9 @@
 package org.apache.servicemix.kernel.gshell.core;
 
 import junit.framework.TestCase;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.apache.geronimo.gshell.shell.Shell;
 import org.apache.geronimo.gshell.application.ApplicationManager;
-import org.apache.geronimo.gshell.io.SystemOutputHijacker;
-import org.apache.servicemix.kernel.gshell.core.ServiceMixBranding;
+import org.apache.geronimo.gshell.shell.Shell;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class Test extends TestCase {
 

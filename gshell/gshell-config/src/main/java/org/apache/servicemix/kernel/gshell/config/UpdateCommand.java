@@ -18,8 +18,8 @@ package org.apache.servicemix.kernel.gshell.config;
 
 import java.util.Dictionary;
 
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 public class UpdateCommand extends ConfigCommandSupport {
 

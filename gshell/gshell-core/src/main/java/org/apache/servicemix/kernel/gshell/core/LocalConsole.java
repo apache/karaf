@@ -18,20 +18,20 @@
  */
 package org.apache.servicemix.kernel.gshell.core;
 
+import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.Arrays;
 
-import org.apache.geronimo.gshell.shell.Shell;
 import org.apache.geronimo.gshell.notification.ExitNotification;
+import org.apache.geronimo.gshell.shell.Shell;
 import org.apache.servicemix.kernel.main.spi.MainService;
-import org.springframework.osgi.context.BundleContextAware;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.osgi.context.BundleContextAware;
 
 public class LocalConsole implements Runnable, BundleContextAware {
 

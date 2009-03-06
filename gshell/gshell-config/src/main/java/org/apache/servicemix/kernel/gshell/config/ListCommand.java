@@ -16,12 +16,12 @@
  */
 package org.apache.servicemix.kernel.gshell.config;
 
-import java.util.Enumeration;
 import java.util.Dictionary;
+import java.util.Enumeration;
 
-import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.cm.Configuration;
 import org.apache.geronimo.gshell.clp.Argument;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 public class ListCommand extends ConfigCommandSupport {
 

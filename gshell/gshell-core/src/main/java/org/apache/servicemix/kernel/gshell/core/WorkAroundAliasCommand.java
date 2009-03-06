@@ -16,20 +16,20 @@
  */
 package org.apache.servicemix.kernel.gshell.core;
 
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 
-import org.apache.geronimo.gshell.wisdom.command.AliasCommand;
-import org.apache.geronimo.gshell.commandline.CommandLineExecutor;
+import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.geronimo.gshell.command.CommandAction;
 import org.apache.geronimo.gshell.command.CommandContext;
-import org.apache.geronimo.gshell.command.Variables;
 import org.apache.geronimo.gshell.command.CommandResult;
-import org.apache.geronimo.gshell.clp.Argument;
-import org.apache.geronimo.gshell.shell.ShellContextHolder;
-import org.apache.geronimo.gshell.shell.ShellContext;
-import org.apache.geronimo.gshell.shell.Shell;
+import org.apache.geronimo.gshell.command.Variables;
+import org.apache.geronimo.gshell.commandline.CommandLineExecutor;
 import org.apache.geronimo.gshell.io.IO;
+import org.apache.geronimo.gshell.shell.Shell;
+import org.apache.geronimo.gshell.shell.ShellContext;
+import org.apache.geronimo.gshell.shell.ShellContextHolder;
+import org.apache.geronimo.gshell.wisdom.command.AliasCommand;
 
 public class WorkAroundAliasCommand extends AliasCommand {
 

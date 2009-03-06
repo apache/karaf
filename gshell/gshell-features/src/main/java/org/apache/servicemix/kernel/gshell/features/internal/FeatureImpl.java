@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.servicemix.kernel.gshell.features.Feature;
-import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
+import org.springframework.jmx.export.annotation.ManagedResource;
 
 /**
  * A feature

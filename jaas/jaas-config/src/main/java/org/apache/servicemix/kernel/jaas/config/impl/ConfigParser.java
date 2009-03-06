@@ -16,26 +16,26 @@
  */
 package org.apache.servicemix.kernel.jaas.config.impl;
 
-import java.util.List;
-import java.util.Properties;
-import java.util.Map;
-import java.util.HashMap;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import org.w3c.dom.Element;
 
-import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
-import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.ManagedList;
+import org.apache.servicemix.kernel.jaas.boot.ProxyLoginModule;
+import org.apache.servicemix.kernel.jaas.config.JaasRealm;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
-import org.springframework.util.xml.DomUtils;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.ManagedList;
+import org.springframework.beans.factory.xml.AbstractSingleBeanDefinitionParser;
+import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.osgi.service.exporter.support.OsgiServiceFactoryBean;
-import org.apache.servicemix.kernel.jaas.boot.ProxyLoginModule;
-import org.apache.servicemix.kernel.jaas.config.JaasRealm;
+import org.springframework.util.xml.DomUtils;
 
 public class ConfigParser extends AbstractSingleBeanDefinitionParser {
 

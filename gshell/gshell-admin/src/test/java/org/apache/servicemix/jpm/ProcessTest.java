@@ -18,8 +18,8 @@ package org.apache.servicemix.jpm;
 
 import java.io.File;
 
-import org.apache.servicemix.jpm.impl.ScriptUtils;
 import junit.framework.TestCase;
+import org.apache.servicemix.jpm.impl.ScriptUtils;
 
 public class ProcessTest extends TestCase {
 

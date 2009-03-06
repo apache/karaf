@@ -18,12 +18,11 @@ package org.apache.servicemix.kernel.jaas.modules.properties;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Enumeration;
+import java.security.Principal;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.security.Principal;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -37,8 +36,8 @@ import javax.security.auth.spi.LoginModule;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.servicemix.kernel.jaas.modules.UserPrincipal;
 import org.apache.servicemix.kernel.jaas.modules.RolePrincipal;
+import org.apache.servicemix.kernel.jaas.modules.UserPrincipal;
 
 /**
  * JAAS Login module for user / password, based on two properties files.
