@@ -19,7 +19,6 @@
 
 package org.apache.servicemix.kernel.gshell.config.completers;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -28,14 +27,10 @@ import javax.annotation.PostConstruct;
 
 import jline.Completor;
 import org.apache.geronimo.gshell.console.completer.StringsCompleter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.cm.ConfigurationListener;
 import org.osgi.service.cm.ConfigurationEvent;
-import org.springframework.osgi.context.BundleContextAware;
+import org.osgi.service.cm.ConfigurationListener;
 
 /**
  * {@link jline.Completor} for Configuration Admin configurations.

@@ -16,16 +16,13 @@
  */
 package org.apache.servicemix.kernel.gshell.features.completers;
 
-import java.util.List;
 import java.util.Collection;
+import java.util.List;
 
-import org.apache.servicemix.kernel.gshell.core.OsgiCommandSupport;
-import org.apache.servicemix.kernel.gshell.features.FeaturesService;
-import org.apache.servicemix.kernel.gshell.features.management.ManagedFeaturesRegistry;
-import org.apache.servicemix.kernel.gshell.features.management.ManagedFeature;
-import org.apache.geronimo.gshell.console.completer.StringsCompleter;
-import org.osgi.framework.ServiceReference;
 import jline.Completor;
+import org.apache.geronimo.gshell.console.completer.StringsCompleter;
+import org.apache.servicemix.kernel.gshell.features.management.ManagedFeature;
+import org.apache.servicemix.kernel.gshell.features.management.ManagedFeaturesRegistry;
 
 /**
  * {@link jline.Completor} for installed features.
