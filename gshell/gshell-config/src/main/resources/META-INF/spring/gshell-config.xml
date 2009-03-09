@@ -42,7 +42,10 @@
             <gshell:action class="org.apache.servicemix.kernel.gshell.config.CancelCommand" />
         </gshell:command>
         <gshell:command name="config/edit">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.config.EditCommand" />
+            <gshell:action class="org.apache.servicemix.kernel.gshell.config.EditCommand"/>
+            <gshell:completers>
+                <ref bean="configCompleter" /> 
+            </gshell:completers>
         </gshell:command>
         <gshell:command name="config/list">
             <gshell:action class="org.apache.servicemix.kernel.gshell.config.ListCommand" />
@@ -60,5 +63,13 @@
             <gshell:action class="org.apache.servicemix.kernel.gshell.config.UpdateCommand" />
         </gshell:command>
     </gshell:command-bundle>
+
+    <bean id="configCompleter" class="org.apache.servicemix.kernel.gshell.config.completers.ConfigurationCompleter" init-method="init">
+        <property name="admin" ref="configAdmin"/>
+    </bean>
+
+    <osgi:reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"  />
+
+    <osgi:service ref="configCompleter" interface="org.osgi.service.cm.ConfigurationListener" /> 
 
 </beans>
