@@ -70,6 +70,18 @@ public class ManagedFeaturesRegistry implements InitializingBean, FeaturesRegist
         repositories = new ConcurrentHashMap<String, ManagedRepository>();
     }
 
+    public Map<String, ManagedFeature> getAvailableFeatures() {
+        return availableFeatures;
+    }
+
+    public Map<String, ManagedFeature> getInstalledFeatures() {
+        return installedFeatures;
+    }
+
+    public Map<String, ManagedRepository> getRepositories() {
+        return repositories;
+    }
+
     public void setFeaturesService(FeaturesService featuresService) {
         this.featuresService = featuresService;
     }

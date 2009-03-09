@@ -49,15 +49,24 @@
         </gshell:command>
         <gshell:command name="features/removeUrl">
             <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.RemoveUrlCommand" />
+            <gshell:completers>
+                <ref bean="removeUrlCompleter" />
+            </gshell:completers>
         </gshell:command>
         <gshell:command name="features/refreshUrl">
             <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.RefreshUrlCommand" />
         </gshell:command>
         <gshell:command name="features/install">
             <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.InstallFeatureCommand" />
+            <gshell:completers>
+                <ref bean="installFeatureCompleter" /> 
+            </gshell:completers>
         </gshell:command>
         <gshell:command name="features/uninstall">
             <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.UninstallFeatureCommand" />
+            <gshell:completers>
+                <ref bean="uninstallFeatureCompleter" />
+            </gshell:completers>
         </gshell:command>
         <gshell:command name="features/list">
             <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.ListFeaturesCommand" />
@@ -110,5 +119,17 @@
                     cardinality="0..1" >
         <osgi:listener ref="featureServiceRegistry" bind-method="registerMBeanServer" />
     </osgi:reference>
+
+    <bean id="installFeatureCompleter" class="org.apache.servicemix.kernel.gshell.features.completers.AvailableFeatureCompleter">
+        <property name="featuresRegistry" ref="featureServiceRegistry" />
+    </bean>
+
+    <bean id="uninstallFeatureCompleter" class="org.apache.servicemix.kernel.gshell.features.completers.InstalledFeatureCompleter">
+        <property name="featuresRegistry" ref="featureServiceRegistry" />
+    </bean>
+
+    <bean id="removeUrlCompleter" class="org.apache.servicemix.kernel.gshell.features.completers.FeatureRepositoryCompleter">
+        <property name="featuresRegistry" ref="featureServiceRegistry" />
+    </bean>
 
 </beans>
