@@ -1470,10 +1470,6 @@ ex.printStackTrace();
                 // then reset its state to RESOLVED.
                 setBundleStateAndNotify(bundle, Bundle.RESOLVED);
 
-                // Clean up the bundle context.
-                ((BundleContextImpl) bundle.getBundleContext()).invalidate();
-                bundle.setBundleContext(null);
-
                 // Clean up the bundle activator
                 bundle.setActivator(null);
 
@@ -1485,6 +1481,10 @@ ex.printStackTrace();
 
                 // Remove any listeners registered by this bundle.
                 m_dispatcher.removeListeners(bundle);
+
+                // Clean up the bundle context.
+                ((BundleContextImpl) bundle.getBundleContext()).invalidate();
+                bundle.setBundleContext(null);
 
                 // The spec says to expect BundleException or
                 // SecurityException, so rethrow these exceptions.
@@ -1806,10 +1806,6 @@ ex.printStackTrace();
             // clean up after itself.
             if (bundle.getBundleId() != 0)
             {
-                // Clean up the bundle context.
-                ((BundleContextImpl) bundle.getBundleContext()).invalidate();
-                bundle.setBundleContext(null);
-
                 // Clean up the bundle activator.
                 bundle.setActivator(null);
 
@@ -1822,6 +1818,10 @@ ex.printStackTrace();
                 // The spec says that we must remove all event
                 // listeners for a bundle when it is stopped.
                 m_dispatcher.removeListeners(bundle);
+
+                // Clean up the bundle context.
+                ((BundleContextImpl) bundle.getBundleContext()).invalidate();
+                bundle.setBundleContext(null);
 
                 setBundleStateAndNotify(bundle, Bundle.RESOLVED);
 
