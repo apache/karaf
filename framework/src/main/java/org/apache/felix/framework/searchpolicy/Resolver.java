@@ -515,6 +515,11 @@ public class Resolver
                 // resolve exception unless the import is optional.
                 if ((candidates.length == 0) && !reqs[reqIdx].isOptional())
                 {
+                    // Since the target module cannot resolve, remove its
+                    // candidates set list from the candidates map, since
+                    // it is invalid.
+                    candidatesMap.remove(targetModule);
+
                     // If we have received an exception while trying to populate
                     // the candidates map, rethrow that exception since it might
                     // be useful. NOTE: This is not necessarily the "only"
