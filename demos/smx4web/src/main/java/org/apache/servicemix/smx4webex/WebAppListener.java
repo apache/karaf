@@ -30,7 +30,7 @@ public class WebAppListener implements ServletContextListener {
 	public void contextInitialized(ServletContextEvent sce) {
 		try {
 			System.err.println("contextInitialized");
-			String root = new File(sce.getServletContext().getRealPath("/") + "WEB-INF/apache-servicemix-kernel-1.1.0-SNAPSHOT").getAbsolutePath();
+			String root = new File(sce.getServletContext().getRealPath("/") + "WEB-INF/servicemix").getAbsolutePath();
 			System.err.println("Root: " + root);
 			System.setProperty("servicemix.home", root);
 			System.setProperty("servicemix.base", root);

@@ -35,7 +35,6 @@
   <properties>
     <jetty.port>8080</jetty.port>
     <jetty.version>6.1.12rc1</jetty.version>
-    <servicemix.kernel.version>1.1.0-SNAPSHOT</servicemix.kernel.version>
     <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
   </properties>
 
@@ -247,6 +246,7 @@
                               <groupId>org.apache.servicemix.kernel</groupId>
                               <artifactId>apache-servicemix-kernel</artifactId>
                               <type>zip</type>
+                              <overWrite>true</overWrite>
                               <outputDirectory>${project.build.directory}/kernel/WEB-INF</outputDirectory>
                               <excludes>**/lib/*,**/*.txt,**/bin/*,**/lib,**/bin</excludes>
                           </artifactItem>
@@ -254,6 +254,27 @@
                   </configuration>
               </execution>
         </executions>
+      </plugin>
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>1.3</version>
+          <executions>
+              <execution>
+                  <id>copy-kernel</id>
+                  <phase>process-resources</phase>
+                  <goals>
+                      <goal>run</goal>
+                  </goals>
+                  <configuration>
+                      <tasks>
+                          <move todir="${project.build.directory}/kernel/WEB-INF/servicemix">
+                              <fileset dir="${project.build.directory}/kernel/WEB-INF/apache-servicemix-kernel-${pom.version}"/>
+                          </move>
+                      </tasks>
+                  </configuration>
+              </execution>
+          </executions>
       </plugin>
     </plugins>
   </build>
