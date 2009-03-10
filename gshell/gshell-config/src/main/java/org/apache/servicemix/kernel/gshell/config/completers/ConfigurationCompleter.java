@@ -38,9 +38,8 @@ import org.osgi.service.cm.ConfigurationListener;
  * Displays a list of existing config admin configurations for completion.
  *
  */
-public class ConfigurationCompleter
-    implements Completor, ConfigurationListener
-{
+public class ConfigurationCompleter implements Completor, ConfigurationListener {
+
     private final StringsCompleter delegate = new StringsCompleter();
 
     private ConfigurationAdmin admin;
@@ -72,12 +71,10 @@ public class ConfigurationCompleter
 
     }
 
-    @Override
     public int complete(final String buffer, final int cursor, final List candidates) {
         return delegate.complete(buffer, cursor, candidates);
     }
 
-    @Override
     public void configurationEvent(ConfigurationEvent configurationEvent) {
         String pid = configurationEvent.getFactoryPid()!=null ? configurationEvent.getFactoryPid() : configurationEvent.getPid();
         if (configurationEvent.getType() == ConfigurationEvent.CM_DELETED) {

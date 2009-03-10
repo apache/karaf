@@ -39,7 +39,6 @@ public class InstalledFeatureCompleter implements Completor {
         this.featuresRegistry = featuresRegistry;
     }
 
-    @Override
     public int complete(final String buffer, final int cursor, final List candidates) {
         Collection<ManagedFeature> features = featuresRegistry.getInstalledFeatures().values();
         delegate = new StringsCompleter();

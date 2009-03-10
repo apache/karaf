@@ -37,11 +37,9 @@ public class FeatureRepositoryCompleter implements Completor {
         this.featuresRegistry = featuresRegistry;
     }
 
-    @Override
     public int complete(final String buffer, final int cursor, final List candidates) {
         StringsCompleter delegate = new StringsCompleter(featuresRegistry.getRepositories().keySet());
         return delegate.complete(buffer, cursor, candidates);
     }
-
 
 }
