@@ -16,7 +16,7 @@
  specific language governing permissions and limitations
  under the License.
 -->
-<project default="all" basedir="pom">
+<project default="all" basedir=".">
     <target name="init">
         <condition property="mvn" value="mvn.bat">
             <os family="dos" />

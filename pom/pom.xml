@@ -32,7 +32,7 @@
   <version>1.0.5-SNAPSHOT</version>
   <url>http://felix.apache.org/</url>
   <inceptionYear>2006</inceptionYear>
-  <description>Apache felix is an OSGi implementation.</description>
+  <description>Apache Felix is an OSGi implementation.</description>
 
   <issueManagement>
     <system>Jira</system>
