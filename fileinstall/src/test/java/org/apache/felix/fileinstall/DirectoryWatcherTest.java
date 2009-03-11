@@ -176,9 +176,6 @@ public class DirectoryWatcherTest extends TestCase
     public void testGetNewFactoryConfiguration() throws Exception
     {
         mockConfigurationControl.replay();
-        mockConfigurationAdmin.listConfigurations( "" );
-        mockConfigurationAdminControl.setMatcher( MockControl.ALWAYS_MATCHER );
-        mockConfigurationAdminControl.setReturnValue( null );
         mockConfigurationAdmin.createFactoryConfiguration( "pid", null );
         mockConfigurationAdminControl.setReturnValue( mockConfiguration );
         mockConfigurationAdminControl.replay();
@@ -201,10 +198,8 @@ public class DirectoryWatcherTest extends TestCase
     public void testGetExistentFactoryConfiguration() throws Exception
     {
         mockConfigurationControl.replay();
-        mockConfigurationAdmin.listConfigurations( "" );
-        mockConfigurationAdminControl.setMatcher( MockControl.ALWAYS_MATCHER );
-        mockConfigurationAdminControl.setReturnValue( new Configuration[]
-            { mockConfiguration } );
+        mockConfigurationAdmin.createFactoryConfiguration( "pid", null );
+        mockConfigurationAdminControl.setReturnValue( mockConfiguration );
         mockConfigurationAdminControl.replay();
         mockBundleContext.createFilter( "" );
         mockBundleContextControl.setMatcher( MockControl.ALWAYS_MATCHER );

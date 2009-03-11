@@ -73,6 +73,8 @@ public class DirectoryWatcher extends Thread
 
     // Represents jars that could not be installed
     Set/* <Bundle> */ startupFailures = new HashSet();
+    
+    Map /*<ConfigurationKey, Configuration>*/ configurations = new HashMap();
 
     public DirectoryWatcher(Dictionary properties, BundleContext context)
     {
@@ -227,10 +229,6 @@ public class DirectoryWatcher extends Thread
         String pid[] = parsePid(f.getName());
         Hashtable ht = new Hashtable();
         ht.putAll(p);
-        if (pid[1] != null)
-        {
-            ht.put(ALIAS_KEY, pid[1]);
-        }
         Configuration config = getConfiguration(pid[0], pid[1]);
         if (config.getBundleLocation() != null)
         {
@@ -253,6 +251,7 @@ public class DirectoryWatcher extends Thread
         String pid[] = parsePid(f.getName());
         Configuration config = getConfiguration(pid[0], pid[1]);
         config.delete();
+        configurations.remove(new ConfigurationKey(pid[0], pid[1]));
         return true;
     }
 
@@ -281,26 +280,28 @@ public class DirectoryWatcher extends Thread
     Configuration getConfiguration(String pid, String factoryPid)
         throws Exception
     {
-        ConfigurationAdmin cm = (ConfigurationAdmin) FileInstall.cmTracker.getService();
-        if (factoryPid != null)
-        {
-            String filter = "(|(" + ALIAS_KEY + "=" + factoryPid + ")(.alias_factory_pid=" + factoryPid + "))";
-            Configuration configs[] = cm.listConfigurations(filter);
-            if (configs == null || configs.length == 0)
-            {
-                return cm.createFactoryConfiguration(pid, null);
-            }
-            else
-            {
-                return configs[0];
-            }
-        }
-        else
-        {
-            return cm.getConfiguration(pid, null);
-        }
+    	ConfigurationKey ck = new ConfigurationKey(pid, factoryPid);
+    	if (configurations.containsKey(ck))
+    	{
+    		return (Configuration) configurations.get(ck);
+    	}
+    	else
+    	{
+    		ConfigurationAdmin cm = (ConfigurationAdmin) FileInstall.cmTracker.getService();
+    		Configuration newConfiguration = null;
+    		if (factoryPid!=null)
+    		{
+    			newConfiguration = cm.createFactoryConfiguration(pid, null);
+    		}
+    		else
+    		{
+    			newConfiguration = cm.getConfiguration(pid, null);
+    		}
+    		configurations.put(ck, newConfiguration);
+    		return newConfiguration;
+    	}
     }
-
+    
     /**
      * This is the core of this class.
      * Install bundles that were discovered, uninstall bundles that are gone
