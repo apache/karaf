@@ -248,7 +248,7 @@
                               <type>zip</type>
                               <overWrite>true</overWrite>
                               <outputDirectory>${project.build.directory}/kernel/WEB-INF</outputDirectory>
-                              <excludes>**/lib/*,**/*.txt,**/bin/*,**/lib,**/bin</excludes>
+                              <excludes>**/lib/*,**/*.txt,**/bin/*,**/demos/**,**/lib,**/bin,**/demos</excludes>
                           </artifactItem>
                       </artifactItems>
                   </configuration>
