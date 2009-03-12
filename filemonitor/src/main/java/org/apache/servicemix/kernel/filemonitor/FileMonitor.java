@@ -572,6 +572,10 @@ public class FileMonitor {
                                     retryPendingStartBundles();
                                 }
                             });
+                        } else if (event.getType() == BundleEvent.UNINSTALLED) {
+                        	// bundle was uninstalled meanwhile, so remove
+                        	// it from the list of pending bundles
+                        	pendingStartBundles.remove(event.getBundle());
                         }
                     }
                 };
