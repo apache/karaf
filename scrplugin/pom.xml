@@ -22,7 +22,7 @@
     <parent>
         <artifactId>felix</artifactId>
         <groupId>org.apache.felix</groupId>
-        <version>1.0.3</version>
+        <version>1.0.4</version>
     </parent>
 
     <groupId>org.apache.felix</groupId>
