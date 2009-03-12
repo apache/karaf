@@ -19,6 +19,7 @@ package org.apache.servicemix.kernel.testing.support;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -35,6 +36,7 @@ import org.springframework.osgi.util.OsgiFilterUtils;
 import org.springframework.osgi.util.OsgiListenerUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
 
 public class AbstractIntegrationTest extends AbstractConfigurableBundleCreatorTests {
 
@@ -55,6 +57,7 @@ public class AbstractIntegrationTest extends AbstractConfigurableBundleCreatorTe
     }
 
     private Properties dependencies;
+    private FeatureInstaller featureInstaller;
 
     @Override
     protected String getPlatformName() {
@@ -109,8 +112,9 @@ public class AbstractIntegrationTest extends AbstractConfigurableBundleCreatorTe
             getBundle("org.springframework.osgi", "spring-osgi-extender"),
             getBundle("org.springframework.osgi", "spring-osgi-test"),
             getBundle("org.springframework.osgi", "spring-osgi-annotation"),
+            getBundle("org.ops4j.pax.url", "pax-url-mvn"),
             getBundle("org.apache.servicemix.kernel.testing", "org.apache.servicemix.kernel.testing.support"),
-		};
+        };
     }
 
     protected Bundle installBundle(String groupId, String artifactId, String classifier, String type) throws Exception {
@@ -120,7 +124,28 @@ public class AbstractIntegrationTest extends AbstractConfigurableBundleCreatorTe
         bundle.start();
         return bundle;
     }
+    
+    protected void addFeatureRepo(String url) throws Exception {
+        if (featureInstaller == null) {
+            featureInstaller = new FeatureInstaller();
+            featureInstaller.setBundleContext(bundleContext);
+        }
+        featureInstaller.addRepository(new URI(url));
+    }
+    
+    protected void installFeature(String name) throws Exception {
+        installFeature(name, FeatureImpl.DEFAULT_VERSION);
+    }
 
+    protected void installFeature(String name, String version) throws Exception {
+        if (featureInstaller == null) {
+            featureInstaller = new FeatureInstaller();
+            featureInstaller.setBundleContext(bundleContext);
+            
+        }
+        featureInstaller.installFeature(name, version);
+    }
+    
     protected Resource locateBundle(String bundleId) {
         Assert.hasText(bundleId, "bundleId should not be empty");
 

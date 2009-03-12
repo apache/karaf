@@ -87,6 +87,31 @@ public class CoreTest extends AbstractIntegrationTest {
         shell.execute("help");
         shell.execute("..");
     }
+    
+    public void testInstallFeature() throws Exception {
+        Shell shell = getOsgiService(Shell.class);
+
+        try {
+            shell.execute("obr");
+            fail("command should not exist");
+        } catch (CommandLineExecutionFailed e) {
+            assertNotNull(e.getCause());
+            assertTrue(e.getCause() instanceof NoSuchCommandException);
+        }
+        try {
+            shell.execute("wrapper");
+            fail("command should not exist");
+        } catch (CommandLineExecutionFailed e) {
+            assertNotNull(e.getCause());
+            assertTrue(e.getCause() instanceof NoSuchCommandException);
+        }
+        String url = getClass().getClassLoader().getResource("features.xml").toString();
+        addFeatureRepo(url);
+        installFeature("obr");
+        installFeature("wrapper");
+        shell.execute("obr");
+        shell.execute("wrapper");
+    }
 
     /**
      * TODO: This test seems to fail, there must be a timing issue somewhere

@@ -72,6 +72,27 @@
 
     <build>
         <plugins>
+            <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-resources</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${pom.basedir}/target/test-classes/</outputDirectory>
+              <resources>          
+                <resource>
+                  <directory>${pom.basedir}/src/test/filtered-resources</directory>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>              
+            </configuration>            
+          </execution>
+        </executions>
+      </plugin>
             <!-- generate dependencies versions -->
             <plugin>
                 <groupId>org.apache.servicemix.tooling</groupId>
