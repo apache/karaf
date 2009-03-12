@@ -18,6 +18,7 @@
  */
 package org.apache.felix.framework.searchpolicy;
 
+import java.lang.reflect.InvocationTargetException;
 import org.apache.felix.moduleloader.*;
 import java.io.IOException;
 import java.io.InputStream;
@@ -1244,25 +1245,71 @@ public class ModuleImpl implements IModule
         return null;
     }
 
-    private boolean isClassNotLoadedFromBundle(Class clazz) throws ClassNotFoundException
+    private boolean isClassNotLoadedFromBundle(Class clazz)
     {
-        int idx = clazz.getName().lastIndexOf('$');
-        if (idx > 0)
-        {
-            if (clazz.getClassLoader() != null)
-            {
-                Class outerClass = clazz.getClassLoader().loadClass(
-                    clazz.getName().substring(0, idx));
-                if (outerClass != null)
-                {
-                    clazz = outerClass;
-                }
-            }
-        }
-        return this.getClass().getClassLoader() != clazz.getClassLoader()
+        // If this is an inner class, try to get the enclosing class
+        // because we can assume that inner classes of class loaders
+        // are really just the class loader and we should ignore them.
+        clazz = getEnclosingClass(clazz);
+        return (this.getClass().getClassLoader() != clazz.getClassLoader())
             && !ClassLoader.class.isAssignableFrom(clazz)
             && !Class.class.equals(clazz)
             && !Proxy.class.equals(clazz);
+    }
+
+    private volatile static Method getEnclosingClassMethod = null;
+    private volatile static boolean getEnclosingClassMethodInitialized = false;
+
+    private static Class getEnclosingClass(Class clazz)
+    {
+        if (!getEnclosingClassMethodInitialized)
+        {
+	        // Check if we have the getEnclosingClass() method available from
+	        // JDK 1.5.
+	        try
+	        {
+	            getEnclosingClassMethod =
+                    Class.class.getDeclaredMethod("getEnclosingClass", null);
+	        }
+	        catch (NoSuchMethodException ex)
+	        {
+	            // Ignore it then.
+	        }
+			getEnclosingClassMethodInitialized = true;
+		}
+        if (getEnclosingClassMethod != null)
+        {
+            try
+            {
+                Class enclosing = (Class) getEnclosingClassMethod.invoke(clazz, null);
+                clazz = (enclosing != null) ? enclosing : clazz;
+            }
+            catch (Throwable t)
+            {
+                // Ignore everything and use original class.
+            }
+        }
+        else
+        {
+            // If we are not on JDK 1.5, try to figure out enclosing class.
+            int idx = clazz.getName().lastIndexOf('$');
+            if (idx > 0)
+            {
+                ClassLoader cl = clazz.getClassLoader() != null ? clazz.getClassLoader() : ClassLoader.getSystemClassLoader();
+                try
+                {
+                    Class enclosing = cl.loadClass(clazz.getName().substring(0, idx));
+                    clazz = (enclosing != null) ? enclosing : clazz;
+                }
+                catch (Throwable t)
+                {
+                    // Ignore all problems since we are trying to load a class
+                    // inside the class loader and this can lead to
+                    // ClassCircularityError, for example.
+                }
+            }
+        }
+        return clazz;
     }
 
     private boolean shouldBootDelegate(String pkgName)
