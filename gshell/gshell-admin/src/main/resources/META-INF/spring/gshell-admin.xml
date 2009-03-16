@@ -49,6 +49,10 @@
         <gshell:command name="admin/connect">
             <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.ConnectCommand"
                            parent="adminCommandBundleSupport" />
+            <gshell:completers>
+                <ref bean="instanceCompleter" />
+                <null/>
+            </gshell:completers>
         </gshell:command>
         <gshell:command name="admin/list">
             <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.ListCommand"
@@ -57,18 +61,34 @@
         <gshell:command name="admin/start">
             <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.StartCommand"
                            parent="adminCommandBundleSupport" />
+            <gshell:completers>
+                <ref bean="instanceCompleter" />
+                <null/>
+            </gshell:completers>
         </gshell:command>
         <gshell:command name="admin/stop">
             <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.StopCommand"
                            parent="adminCommandBundleSupport" />
+            <gshell:completers>
+                <ref bean="instanceCompleter" />
+                <null/>
+            </gshell:completers>
         </gshell:command>
         <gshell:command name="admin/destroy">
             <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.DestroyCommand"
                            parent="adminCommandBundleSupport" />
+            <gshell:completers>
+                <ref bean="instanceCompleter" />
+                <null/>
+            </gshell:completers>
         </gshell:command>
         <gshell:command name="admin/change-port">
             <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.ChangePortCommand"
                            parent="adminCommandBundleSupport" />
+            <gshell:completers>
+                <ref bean="instanceCompleter" />
+                <null/>
+            </gshell:completers>
         </gshell:command>
     </gshell:command-bundle>
 
@@ -77,5 +97,10 @@
     <bean id="adminService" class="org.apache.servicemix.kernel.gshell.admin.internal.AdminServiceImpl">
         <property name="preferences" ref="preferences" />
     </bean>
+
+    <bean id="instanceCompleter" class="org.apache.servicemix.kernel.gshell.admin.internal.completers.InstanceCompleter">
+        <property name="adminService" ref="adminService" />
+    </bean>
+
 
 </beans>
