@@ -44,7 +44,8 @@
         <gshell:command name="config/edit">
             <gshell:action class="org.apache.servicemix.kernel.gshell.config.EditCommand"/>
             <gshell:completers>
-                <ref bean="configCompleter" /> 
+                <ref bean="configCompleter" />
+                <null/>
             </gshell:completers>
         </gshell:command>
         <gshell:command name="config/list">
@@ -52,12 +53,20 @@
         </gshell:command>
         <gshell:command name="config/propdel">
             <gshell:action class="org.apache.servicemix.kernel.gshell.config.PropDelCommand" />
+            <gshell:completers>
+                <ref bean="configPropertyCompleter" />
+                <null/>
+            </gshell:completers>
         </gshell:command>
         <gshell:command name="config/proplist">
             <gshell:action class="org.apache.servicemix.kernel.gshell.config.PropListCommand" />
         </gshell:command>
         <gshell:command name="config/propset">
             <gshell:action class="org.apache.servicemix.kernel.gshell.config.PropSetCommand" />
+            <gshell:completers>
+                <ref bean="configPropertyCompleter" />
+                <null/>
+            </gshell:completers>
         </gshell:command>
         <gshell:command name="config/update">
             <gshell:action class="org.apache.servicemix.kernel.gshell.config.UpdateCommand" />
@@ -67,6 +76,8 @@
     <bean id="configCompleter" class="org.apache.servicemix.kernel.gshell.config.completers.ConfigurationCompleter" init-method="init">
         <property name="admin" ref="configAdmin"/>
     </bean>
+
+    <bean id="configPropertyCompleter" class="org.apache.servicemix.kernel.gshell.config.completers.ConfigurationPropertyCompleter" />
 
     <osgi:reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"  />
 
