@@ -83,6 +83,4 @@ public class JarFileX extends JarFile
         }
         return entry;
     }
-
-
 }

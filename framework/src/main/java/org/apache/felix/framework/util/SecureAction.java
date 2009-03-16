@@ -515,15 +515,15 @@ public class SecureAction
         }
     }
 
-    public JarFile openJAR(File file, boolean verify) throws IOException
+    public JarFileX openJAR(File file, boolean verify) throws IOException
     {
         if (System.getSecurityManager() != null)
         {
             try
             {
                 Actions actions = (Actions) m_actions.get();
-                actions.set(Actions.OPEN_JAR_ACTION, file, (verify ? Boolean.TRUE : Boolean.FALSE));
-                return (JarFile) AccessController.doPrivileged(actions, m_acc);
+                actions.set(Actions.OPEN_JARX_VERIFY_ACTION, file, (verify ? Boolean.TRUE : Boolean.FALSE));
+                return (JarFileX) AccessController.doPrivileged(actions, m_acc);
             }
             catch (PrivilegedActionException ex)
             {
@@ -947,7 +947,7 @@ public class SecureAction
         public static final int START_ACTIVATOR_ACTION = 17;
         public static final int STOP_ACTIVATOR_ACTION = 18;
         public static final int SYSTEM_EXIT_ACTION = 19;
-        public static final int OPEN_JAR_ACTION= 20;
+        public static final int OPEN_JARX_VERIFY_ACTION = 20;
         public static final int GET_POLICY_ACTION = 21;
         public static final int CREATE_TMPFILE_ACTION = 22;
         public static final int OPEN_URLCONNECTION_ACTION = 23;
@@ -1096,7 +1096,7 @@ public class SecureAction
             {
                 return new JarFileX((File) arg1);
             }
-            else if (action == OPEN_JAR_ACTION)
+            else if (action == OPEN_JARX_VERIFY_ACTION)
             {
                 return new JarFile((File) arg1, ((Boolean) arg2).booleanValue());
             }

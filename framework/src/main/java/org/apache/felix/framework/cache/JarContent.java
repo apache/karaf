@@ -468,7 +468,7 @@ public class JarContent implements IContent
     {
         if (m_jarFile == null)
         {
-            m_jarFile = BundleCache.getSecureAction().openJAR(m_file);
+            m_jarFile = BundleCache.getSecureAction().openJAR(m_file, false);
         }
     }
 
