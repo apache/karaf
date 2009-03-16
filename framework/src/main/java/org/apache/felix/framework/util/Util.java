@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.felix.framework.util.manifestparser.Capability;
-import org.apache.felix.framework.util.manifestparser.ManifestParser;
 import org.apache.felix.moduleloader.*;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
@@ -35,15 +34,6 @@ import org.osgi.framework.ServiceReference;
 
 public class Util
 {
-    /**
-     * Check whether the given manifest headers are from an extension bundle.
-     */
-    public static boolean isExtensionBundle(Map headers)
-    {
-        return (ManifestParser.parseExtensionBundleHeader((String)
-                headers.get(Constants.FRAGMENT_HOST)) != null);
-    }
-
     /**
      * Converts a module identifier to a bundle identifier. Module IDs
      * are typically <tt>&lt;bundle-id&gt;.&lt;revision&gt;</tt>; this

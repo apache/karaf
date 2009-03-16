@@ -29,16 +29,17 @@ import org.osgi.framework.*;
 
 public class ManifestParser
 {
-    private Logger m_logger;
-    private Map m_configMap;
-    private Map m_headerMap;
-    private String m_bundleSymbolicName;
-    private Version m_bundleVersion;
-    private ICapability[] m_capabilities;
-    private IRequirement[] m_requirements;
-    private IRequirement[] m_dynamicRequirements;
-    private R4LibraryClause[] m_libraryHeaders;
-    private boolean m_libraryHeadersOptional = false;
+    private final Logger m_logger;
+    private final Map m_configMap;
+    private final Map m_headerMap;
+    private volatile boolean m_isExtension = false;
+    private volatile String m_bundleSymbolicName;
+    private volatile Version m_bundleVersion;
+    private volatile ICapability[] m_capabilities;
+    private volatile IRequirement[] m_requirements;
+    private volatile IRequirement[] m_dynamicRequirements;
+    private volatile R4LibraryClause[] m_libraryHeaders;
+    private volatile boolean m_libraryHeadersOptional = false;
 
     public ManifestParser(Logger logger, Map configMap, Map headerMap)
         throws BundleException
@@ -298,6 +299,11 @@ public class ManifestParser
     {
         String manifestVersion = (String) m_headerMap.get(Constants.BUNDLE_MANIFESTVERSION);
         return (manifestVersion == null) ? "1" : manifestVersion.trim();
+    }
+
+    public boolean isExtension()
+    {
+        return m_isExtension;
     }
 
     public String getSymbolicName()
@@ -785,7 +791,7 @@ public class ManifestParser
 
         R4Directive extension = parseExtensionBundleHeader((String)
             m_headerMap.get(Constants.FRAGMENT_HOST));
-        
+
         if (extension != null)
         {
             if (!(Constants.EXTENSION_FRAMEWORK.equals(extension.getValue()) || 
@@ -795,6 +801,7 @@ public class ManifestParser
                     "Extension bundle must have either 'extension:=framework' or 'extension:=bootclasspath'");
             }
             checkExtensionBundle();
+            m_isExtension = true;
         }
     }
 
@@ -806,7 +813,7 @@ public class ManifestParser
             m_headerMap.containsKey(Constants.DYNAMICIMPORT_PACKAGE) ||
             m_headerMap.containsKey(Constants.BUNDLE_ACTIVATOR))
         {
-            throw new BundleException("Invalid Extension Bundle Manifest");
+            throw new BundleException("Invalid extension bundle manifest");
         }
     }
 

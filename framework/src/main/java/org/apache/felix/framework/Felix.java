@@ -1577,6 +1577,7 @@ ex.printStackTrace();
                     throw new BundleException(
                         "Cannot acquire global lock to update the bundle.");
                 }
+                boolean wasExtension = bundle.isExtension();
                 try
                 {
 // REFACTOR - This adds the module to the resolver state, but should we do the
@@ -1601,20 +1602,16 @@ ex.printStackTrace();
                     }
 
                     // If this is an update from a normal to an extension bundle
-                    // then attach the extension or else if this already is
-                    // an extension bundle then don't allow it to be resolved
-                    // again as per spec.
-                    if (!bundle.isExtension() &&
-                        Util.isExtensionBundle(
-                            bundle.getCurrentModule().getHeaders()))
+                    // then attach the extension
+                    if (!wasExtension && bundle.isExtension())
                     {
                         m_extensionManager.addExtensionBundle(this, bundle);
 // TODO: REFACTOR - Perhaps we could move this into extension manager.
-                        m_resolverState.refreshSystemBundleModule(bundle.getCurrentModule());
+                        m_resolverState.refreshSystemBundleModule(m_extensionManager.getModule());
 // TODO: REFACTOR - Not clear why this is here. We should look at all of these steps more closely.
                         setBundleStateAndNotify(bundle, Bundle.RESOLVED);
                     }
-                    else if (bundle.isExtension())
+                    else if (wasExtension)
                     {
                         setBundleStateAndNotify(bundle, Bundle.INSTALLED);
                     }
@@ -1649,6 +1646,28 @@ ex.printStackTrace();
                 {
                     setBundleStateAndNotify(bundle, Bundle.INSTALLED);
                 }
+                else
+                {
+                    // Acquire bundle lock.
+                    try
+                    {
+                        acquireBundleLock(this, Bundle.RESOLVED | Bundle.STARTING | Bundle.ACTIVE);
+                    }
+                    catch (IllegalStateException ex)
+                    {
+                        throw new BundleException(
+                            "System bundle must be active to attach an extension.");
+                    }
+
+                    try
+                    {
+                        m_extensionManager.startExtensionBundle(this, bundle);
+                    }
+                    finally
+                    {
+                        releaseBundleLock(this);
+                    }
+                }
 
                 fireBundleEvent(BundleEvent.UNRESOLVED, bundle);
 
@@ -1665,7 +1684,7 @@ ex.printStackTrace();
                 {
                     try
                     {
-                        if (!bundle.isUsed())
+                        if (!bundle.isUsed() && !bundle.isExtension())
                         {
                             try
                             {
@@ -1891,6 +1910,8 @@ ex.printStackTrace();
             if (bundle.isExtension())
             {
                 bundle.setPersistentStateUninstalled();
+                bundle.setRemovalPending(true);
+                rememberUninstalledBundle(bundle);
                 setBundleStateAndNotify(bundle, Bundle.INSTALLED);
                 return;
             }
@@ -2178,7 +2199,7 @@ ex.printStackTrace();
                 // Acquire bundle lock.
                 try
                 {
-                    acquireBundleLock(this, Bundle.STARTING | Bundle.ACTIVE);
+                    acquireBundleLock(this, Bundle.RESOLVED | Bundle.STARTING | Bundle.ACTIVE);
                 }
                 catch (IllegalStateException ex)
                 {
@@ -3155,11 +3176,7 @@ ex.printStackTrace();
             // has been updated or uninstalled.
             for (int i = 0; (bundles != null) && !restart && (i < bundles.length); i++)
             {
-                if (bundles[i].isExtension())
-                {
-                    restart = true;
-                }
-                else if (systemBundle == bundles[i])
+                if (systemBundle == bundles[i])
                 {
                     Bundle[] allBundles = getBundles();
                     for (int j = 0; !restart && j < allBundles.length; j++)
@@ -3182,6 +3199,7 @@ ex.printStackTrace();
             // Remove any targeted bundles from the uninstalled bundles
             // array, since they will be removed from the system after
             // the refresh.
+            // TODO: FRAMEWORK - Is this correct?
             for (int i = 0; (bundles != null) && (i < bundles.length); i++)
             {
                 forgetUninstalledBundle(bundles[i]);
@@ -3197,13 +3215,12 @@ ex.printStackTrace();
                 RefreshHelper[] helpers = new RefreshHelper[bundles.length];
                 for (int i = 0; i < bundles.length; i++)
                 {
-                    if (!bundles[i].isExtension())
-                    {
-                        helpers[i] = new RefreshHelper(bundles[i]);
-                    }
+                    helpers[i] = new RefreshHelper(bundles[i]);
                 }
 
                 // Stop, purge or remove, and reinitialize all bundles first.
+                // TODO: FRAMEWORK - this will stop the system bundle if
+                // somebody called refresh 0. Is this what we want?
                 for (int i = 0; i < helpers.length; i++)
                 {
                     if (helpers[i] != null)

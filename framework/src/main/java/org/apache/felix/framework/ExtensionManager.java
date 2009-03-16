@@ -285,11 +285,12 @@ class ExtensionManager extends URLStreamHandler implements IContent
         }
 
         // Not sure whether this is a good place to do it but we need to lock
-        felix.acquireBundleLock(felix, Bundle.ACTIVE);
+        felix.acquireBundleLock(felix, Bundle.RESOLVED | Bundle.STARTING | Bundle.ACTIVE);
 
         try
         {
-            bundle.setExtension(true);
+// TODO: EXTENSIONMANAGER - Should we be setting this?
+//            bundle.setExtension(true);
 
             // Merge the exported packages with the exported packages of the systembundle.
             ICapability[] exports = null;
@@ -328,7 +329,8 @@ class ExtensionManager extends URLStreamHandler implements IContent
         }
         catch (Exception ex)
         {
-            bundle.setExtension(false);
+// TODO: EXTENSIONMANAGER - Should we be setting this?
+//            bundle.setExtension(false);
             throw ex;
         }
         finally

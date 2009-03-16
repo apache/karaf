@@ -67,8 +67,9 @@ public class ModuleImpl implements IModule
     private final URLStreamHandler m_streamHandler;
 
     private final String m_manifestVersion;
-    private final Version m_version;
+    private final boolean m_isExtension;
     private final String m_symbolicName;
+    private final Version m_version;
 
     private final ICapability[] m_capabilities;
     private final IRequirement[] m_requirements;
@@ -125,6 +126,7 @@ public class ModuleImpl implements IModule
         m_bootPkgWildcards = bootPkgWildcards;
         m_manifestVersion = null;
         m_symbolicName = null;
+        m_isExtension = false;
         m_version = null;
         m_capabilities = null;
         m_requirements = null;
@@ -157,12 +159,12 @@ public class ModuleImpl implements IModule
         // system bundle directly later on.
         m_manifestVersion = mp.getManifestVersion();
         m_version = mp.getBundleVersion();
-        m_capabilities = (Util.isExtensionBundle(m_headerMap))
-            ? null : mp.getCapabilities();
+        m_capabilities = mp.isExtension() ? null : mp.getCapabilities();
         m_requirements = mp.getRequirements();
         m_dynamicRequirements = mp.getDynamicRequirements();
         m_nativeLibraries = mp.getLibraries();
         m_symbolicName = mp.getSymbolicName();
+        m_isExtension = mp.isExtension();
 
         // Verify that all native libraries exist in advance; this will
         // throw an exception if the native library does not exist.
@@ -201,6 +203,11 @@ public class ModuleImpl implements IModule
     public Map getHeaders()
     {
         return m_headerMap;
+    }
+
+    public boolean isExtension()
+    {
+        return m_isExtension;
     }
 
     public String getSymbolicName()

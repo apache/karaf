@@ -34,6 +34,7 @@ public interface IModule
 
     // Metadata access methods.
     Map getHeaders();
+    boolean isExtension();
     String getSymbolicName();
     Version getVersion();
     ICapability[] getCapabilities();

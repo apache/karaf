@@ -49,12 +49,6 @@ class BundleImpl implements Bundle
     // Indicates whether the bundle is stale, meaning that it has
     // been refreshed and completely removed from the framework.
     private boolean m_stale = false;
-
-    // Indicates whether the bundle is an extension, meaning that it is
-    // installed as an extension bundle to the framework (i.e., can not be
-    // removed or updated until a framework restart.
-    private boolean m_extension = false;
-
     // Used for bundle locking.
     private int m_lockCount = 0;
     private Thread m_lockThread = null;
@@ -108,22 +102,30 @@ class BundleImpl implements Bundle
 
     synchronized void refresh() throws Exception
     {
-        // Dispose of the current modules.
-        dispose();
+        if (isExtension() && (getFramework().getState() != Bundle.STOPPING))
+        {
+            getFramework().getLogger().log(Logger.LOG_WARNING,
+                "Framework restart on extension bundle refresh not implemented.");
+        }
+        else
+        {
+            // Dispose of the current modules.
+            dispose();
 
-        // Now we will purge all old revisions, only keeping the newest one.
-        m_archive.purge();
+            // Now we will purge all old revisions, only keeping the newest one.
+            m_archive.purge();
 
-        // Lastly, we want to reset our bundle be reinitializing our state
-        // and recreating a module for the newest revision.
-        m_modules = new IModule[0];
-        final IModule module = createModule();
-        addModule(module);
-        m_state = Bundle.INSTALLED;
-        m_stale = false;
-        m_cachedHeaders.clear();
-        m_cachedHeadersTimestamp = 0;
-        m_removalPending = false;
+            // Lastly, we want to reset our bundle be reinitializing our state
+            // and recreating a module for the newest revision.
+            m_modules = new IModule[0];
+            final IModule module = createModule();
+            addModule(module);
+            m_state = Bundle.INSTALLED;
+            m_stale = false;
+            m_cachedHeaders.clear();
+            m_cachedHeadersTimestamp = 0;
+            m_removalPending = false;
+        }
     }
 
     synchronized BundleActivator getActivator()
@@ -703,12 +705,14 @@ class BundleImpl implements Bundle
 
     synchronized boolean isExtension()
     {
-        return m_extension;
-    }
-
-    synchronized void setExtension(boolean extension)
-    {
-        m_extension = extension;
+        for (int i = (m_modules.length - 1); i > -1; i--)
+        {
+            if (m_modules[i].isExtension())
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     public String getSymbolicName()
@@ -928,7 +932,8 @@ class BundleImpl implements Bundle
         SecurityProvider sp = getFramework().getSecurityProvider();
         if (sp != null)
         {
-            sp.checkBundle(this);
+            // TODO: Security
+            // sp.checkBundle(this);
         }
         module.setSecurityContext(new BundleProtectionDomain(getFramework(), this));
 
@@ -937,9 +942,15 @@ class BundleImpl implements Bundle
         dest[m_modules.length] = module;
         m_modules = dest;
 
-        // Now that the module is added to the bundle, we can update
-        // the resolver's module state.
-        getFramework().getResolverState().addModule(module);
+        // TODO: REFACTOR - consider moving ModuleImpl into the framework package
+        // so we can null module capabilities for extension bundles so we don't
+        // need this check anymore.
+        if (!isExtension())
+        {
+            // Now that the module is added to the bundle, we can update
+            // the resolver's module state.
+            getFramework().getResolverState().addModule(module);
+        }
     }
 
     private IModule createModule() throws Exception
