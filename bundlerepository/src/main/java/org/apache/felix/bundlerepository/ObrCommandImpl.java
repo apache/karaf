@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -85,7 +85,7 @@ public class ObrCommandImpl implements Command
             {
                 // Ignore.
             }
-            
+
             // Perform the specified command.
             if ((command == null) || (command.equals(HELP_CMD)))
             {
@@ -247,7 +247,14 @@ public class ObrCommandImpl implements Command
             Resource[] revisions = (Resource[]) entry.getValue();
             String name = revisions[0].getPresentationName();
             name = (name == null) ? revisions[0].getSymbolicName() : name;
-            out.print(name + " (");
+            out.print(name);
+
+            if (pc.isVerbose() && revisions[0].getPresentationName() != null)
+            {
+                out.print(" [" + revisions[0].getSymbolicName() + "]");
+            }
+
+            out.print(" (");
             int revIdx = 0;
             do
             {
@@ -265,7 +272,7 @@ public class ObrCommandImpl implements Command
             }
             out.println(")");
         }
-    
+
         if ((resources == null) || (resources.length == 0))
         {
             out.println("No matching bundles.");
@@ -277,7 +284,7 @@ public class ObrCommandImpl implements Command
         throws IOException, InvalidSyntaxException
     {
         ParsedCommand pc = parseInfo(commandLine);
-        for (int cmdIdx = 0; (pc != null) && (cmdIdx < pc.getTargetCount()); cmdIdx++)                
+        for (int cmdIdx = 0; (pc != null) && (cmdIdx < pc.getTargetCount()); cmdIdx++)
         {
             // Find the target's bundle resource.
             Resource[] resources = searchRepository(pc.getTargetId(cmdIdx), pc.getTargetVersion(cmdIdx));
@@ -313,7 +320,7 @@ public class ObrCommandImpl implements Command
         throws IOException, InvalidSyntaxException
     {
         Resolver resolver = m_repoAdmin.resolver();
-        for (int i = 0; (pc != null) && (i < pc.getTargetCount()); i++)                
+        for (int i = 0; (pc != null) && (i < pc.getTargetCount()); i++)
         {
             // Find the target's bundle resource.
             Resource resource = selectNewestVersion(
@@ -363,7 +370,7 @@ public class ObrCommandImpl implements Command
                             + " (" + resources[resIdx].getVersion() + ")");
                     }
                 }
-    
+
                 try
                 {
                     out.print("\nDeploying...");
@@ -540,7 +547,7 @@ public class ObrCommandImpl implements Command
                 out.println(entry.getKey() + ": " + entry.getValue());
             }
         }
- 
+
         Requirement[] reqs = resource.getRequirements();
         if ((reqs != null) && (reqs.length > 0))
         {
@@ -550,7 +557,7 @@ public class ObrCommandImpl implements Command
                 out.println("   " + reqs[i].getFilter());
             }
         }
-        
+
         Capability[] caps = resource.getCapabilities();
         if ((caps != null) && (caps.length > 0))
         {
@@ -684,11 +691,11 @@ public class ObrCommandImpl implements Command
         tokenizer.wordChars('.', '.');
         tokenizer.wordChars('-', '-');
         tokenizer.wordChars('_', '_');
-    
+
         // Ignore the invoking command name and the OBR command.
         int type = tokenizer.nextToken();
         type = tokenizer.nextToken();
-    
+
         int EOF = 1;
         int SWITCH = 2;
         int TARGET = 4;
@@ -786,11 +793,11 @@ public class ObrCommandImpl implements Command
         tokenizer.wordChars('.', '.');
         tokenizer.wordChars('-', '-');
         tokenizer.wordChars('_', '_');
-    
+
         // Ignore the invoking command name and the OBR command.
         int type = tokenizer.nextToken();
         type = tokenizer.nextToken();
-    
+
         int EOF = 1;
         int SWITCH = 2;
         int TARGET = 4;
@@ -891,11 +898,11 @@ public class ObrCommandImpl implements Command
         tokenizer.wordChars('/', '/');
         tokenizer.wordChars('\\', '\\');
         tokenizer.wordChars(':', ':');
-    
+
         // Ignore the invoking command name and the OBR command.
         int type = tokenizer.nextToken();
         type = tokenizer.nextToken();
-    
+
         int EOF = 1;
         int SWITCH = 2;
         int DIRECTORY = 4;
@@ -1223,12 +1230,12 @@ public class ObrCommandImpl implements Command
         private String m_tokens = null;
         private String m_dir = null;
         private String[][] m_targets = new String[0][];
-        
+
         public boolean isResolve()
         {
             return m_isResolve;
         }
-        
+
         public void setResolve(boolean b)
         {
             m_isResolve = b;
@@ -1238,7 +1245,7 @@ public class ObrCommandImpl implements Command
         {
             return m_isCheck;
         }
-        
+
         public void setCheck(boolean b)
         {
             m_isCheck = b;
@@ -1278,7 +1285,7 @@ public class ObrCommandImpl implements Command
         {
             return m_dir;
         }
-        
+
         public void setDirectory(String s)
         {
             m_dir = s;
@@ -1288,7 +1295,7 @@ public class ObrCommandImpl implements Command
         {
             return m_targets.length;
         }
-        
+
         public String getTargetId(int i)
         {
             if ((i < 0) || (i >= getTargetCount()))
@@ -1297,7 +1304,7 @@ public class ObrCommandImpl implements Command
             }
             return m_targets[i][NAME_IDX];
         }
-        
+
         public String getTargetVersion(int i)
         {
             if ((i < 0) || (i >= getTargetCount()))
