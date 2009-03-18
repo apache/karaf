@@ -172,7 +172,7 @@ public class QDoxJavaClassDescription
                         return jcd.getFieldByName(constantName);
                     }
                 }
-                final JavaClassDescription jcd = this.manager.getJavaClassDescription(this.javaClass.getSource().getPackage() + '.' + className);
+                final JavaClassDescription jcd = this.manager.getJavaClassDescription(this.javaClass.getSource().getPackage().getName() + '.' + className);
                 if ( jcd != null ) {
                     return jcd.getFieldByName(constantName);
                 }
@@ -215,7 +215,7 @@ public class QDoxJavaClassDescription
             if ( pos != -1 ) {
                 return null;
             }
-            className = this.javaClass.getSource().getPackage() + '.' + referencedName;
+            className = this.javaClass.getSource().getPackage().getName() + '.' + referencedName;
         }
         try {
             return this.manager.getJavaClassDescription(className);

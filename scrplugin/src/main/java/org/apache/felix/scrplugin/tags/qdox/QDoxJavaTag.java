@@ -20,9 +20,7 @@ package org.apache.felix.scrplugin.tags.qdox;
 
 import java.util.Map;
 
-import org.apache.felix.scrplugin.tags.JavaClassDescription;
-import org.apache.felix.scrplugin.tags.JavaField;
-import org.apache.felix.scrplugin.tags.JavaTag;
+import org.apache.felix.scrplugin.tags.*;
 
 import com.thoughtworks.qdox.model.DocletTag;
 
@@ -73,7 +71,7 @@ public class QDoxJavaTag implements JavaTag {
      * @see org.apache.felix.scrplugin.tags.JavaTag#getSourceLocation()
      */
     public String getSourceLocation() {
-        return this.docletTag.getContext().getSource().getURL() + ", line " + this.docletTag.getLineNumber();
+        return this.docletTag.getContext().getParent().getParentSource().getURL() + ", line " + this.docletTag.getLineNumber();
     }
 
     /**
