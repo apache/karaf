@@ -78,7 +78,7 @@ public class Junit4osgiPlugin extends AbstractMojo {
     /**
      * Base directory where all reports are written to.
      * 
-     * @parameter expression="${project.build.directory}/junit4osgi-reports"
+     * @parameter expression="${project.build.directory}/surefire-reports"
      */
     private File m_reportsDirectory;
     
@@ -99,9 +99,16 @@ public class Junit4osgiPlugin extends AbstractMojo {
     /**
      * Required bundles.
      * 
-     * @parameter expression="${bundles}"
+     * @parameter
      */
-    private ArrayList m_bundles;
+    private List bundles;
+    
+    /**
+     * Felix configuration.
+     * 
+     * @parameter
+     */
+    private Map configuration;
     
     /**
      * Enables / Disables the log service provided by the plugin.
@@ -145,6 +152,35 @@ public class Junit4osgiPlugin extends AbstractMojo {
      */
     private LogServiceImpl m_logService;
     
+    /**
+     * Set this to 'true' to bypass unit tests entirely. Its use is NOT RECOMMENDED, especially if you
+     * enable it using the "maven.test.skip" property, because maven.test.skip disables both running the
+     * tests and compiling the tests.  Consider using the skipTests parameter instead.
+     * 
+     * @parameter expression="${maven.test.skip}"
+     */
+    private boolean skip;
+    
+    /**
+     * Set this to true to ignore a failure during testing. Its use is NOT RECOMMENDED, but quite convenient on
+     * occasion.
+     * 
+     * @parameter expression="${maven.test.failure.ignore}"
+     */
+    private boolean testFailureIgnore;
+    
+    /**
+     * Set this to avoid printing test execution trace on System.out and System.err. This will be written in the
+     * reports.
+     * @parameter 
+     */
+    private boolean hideOutputs;
+    
+    /**
+     * Felix configuration.
+     */
+    private Map felixConf;
+    
    
     /**
      * Executes the plug-in.
@@ -152,6 +188,12 @@ public class Junit4osgiPlugin extends AbstractMojo {
      * @see org.apache.maven.plugin.AbstractMojo#execute()
      */
     public void execute() throws MojoFailureException {
+        
+        if (skip) {
+            getLog().info("Tests are skipped");
+            return;
+        }
+       
         
         List bundles = parseBundleList();
         bundles.addAll(getTestBundle());
@@ -164,24 +206,40 @@ public class Junit4osgiPlugin extends AbstractMojo {
             getLog().info("Log Service disabled");
         }
         activators.add(new Installer(m_pluginArtifacts, bundles, m_project, m_deployProjectArtifact));
-        Map map = new HashMap();
-        map.put("felix.systembundle.activators", activators);
-        map.put("org.osgi.framework.storage.clean", "onFirstInit");
-        map.put("ipojo.log.level", "WARNING");
+        felixConf = new HashMap();
+        felixConf.put("felix.systembundle.activators", activators);
+        felixConf.put("org.osgi.framework.storage.clean", "onFirstInit");
+        felixConf.put("ipojo.log.level", "WARNING");
         // Use a boot delagation to share classes between the host and the embedded Felix.
         // The junit.framework package is boot delegated to execute tests
         // The log service package is also boot delegated as the host publish a log service
         // The cobertura package is used during code coverage collection
-        map.put("org.osgi.framework.bootdelegation", "junit.framework, org.osgi.service.log, net.sourceforge.cobertura.coveragedata"); 
+        felixConf.put("org.osgi.framework.bootdelegation", "junit.framework, org.osgi.service.log, net.sourceforge.cobertura.coveragedata"); 
         
-        map.put("org.osgi.framework.storage", m_targetDir.getAbsolutePath() + "/felix-cache"); 
+        felixConf.put("org.osgi.framework.storage", m_targetDir.getAbsolutePath() + "/felix-cache"); 
+        
+        
+        if (configuration != null) {
+            felixConf.putAll(configuration);
+            // Check boot delegation
+            String bd = (String) felixConf.get("org.osgi.framework.bootdelegation");
+            if (bd.indexOf("junit.framework") == -1) {
+                bd.concat(", junit.framework");
+            }
+            if (bd.indexOf("org.osgi.service.log") == -1) {
+                bd.concat(", org.osgi.service.log");
+            }
+            if (bd.indexOf("net.sourceforge.cobertura.coveragedata") == -1) {
+                bd.concat(", net.sourceforge.cobertura.coveragedata");
+            }
+        }
         
         System.out.println("");
         System.out.println("-------------------------------------------------------");
         System.out.println(" T E S T S");        
         System.out.println("-------------------------------------------------------");
         
-        Felix felix = new Felix(map);
+        Felix felix = new Felix(felixConf);
         try {
             felix.start();
         } catch (BundleException e) {
@@ -197,14 +255,23 @@ public class Junit4osgiPlugin extends AbstractMojo {
         try {
             felix.stop();
             felix.waitForStop(5000);
+            // Delete felix-cache
+            File cache = new File(m_targetDir.getAbsolutePath() + "/felix-cache");
+            cache.delete();
         } catch (Exception e) {
             getLog().error(e);
         }
         
         if (m_totalErrors > 0 || m_totalFailures > 0) {
+            if (! testFailureIgnore) {
             throw new MojoFailureException("There are test failures. \n\n"
                     + "Please refer to " + m_reportsDirectory.getAbsolutePath()
                     + " for the individual test results.");
+            } else {
+                getLog().warn("There are test failures. \n\n"
+                    + "Please refer to " + m_reportsDirectory.getAbsolutePath()
+                    + " for the individual test results.");
+            }
         }
 
     }
@@ -289,12 +356,12 @@ public class Junit4osgiPlugin extends AbstractMojo {
      */
     private List parseBundleList() {
         List toDeploy = new ArrayList();
-        if (m_bundles == null) {
+        if (bundles == null) {
             return toDeploy;
         }
-        
-        for (int i = 0; i < m_bundles.size(); i++) {
-            String bundle = (String) m_bundles.get(i);
+        System.out.println("Deploy URL bundles " + bundles); // TODO
+        for (int i = 0; i < bundles.size(); i++) {
+            String bundle = (String) bundles.get(i);
             try {
                 URL url = new URL(bundle);
                 toDeploy.add(url);
@@ -317,7 +384,7 @@ public class Junit4osgiPlugin extends AbstractMojo {
         Set dependencies = m_project.getDependencyArtifacts();
         for (Iterator artifactIterator = dependencies.iterator(); artifactIterator.hasNext();) {
             Artifact artifact = (Artifact) artifactIterator.next();
-            if (Artifact.SCOPE_TEST.equals(artifact.getScope())) { // Select scope=test.
+            if (artifact.getScope() != null) { // Select not null scope... [Select every bundles with a scope TEST, COMPILE and RUNTIME]
                 File file = artifact.getFile();
                 try {
                     if (file.exists()) {
@@ -326,11 +393,11 @@ public class Junit4osgiPlugin extends AbstractMojo {
                             if (jar.getManifest().getMainAttributes().getValue("Bundle-ManifestVersion") != null) {
                                 toDeploy.add(file.toURL());
                             }
-                        } else {
-                            getLog().info("The test artifact " + artifact.getFile().getName() + " is not a Jar file.");
-                        }
+                        } // else {
+//                            getLog().info("The artifact " + artifact.getFile().getName() + " is not a Jar file.");
+//                        }
                     } else {
-                        getLog().info("The test artifact " + artifact.getFile().getName() + " does not exist.");
+                        getLog().info("The artifact " + artifact.getFile().getName() + " does not exist.");
                     }
                 } catch (Exception e) {
                     getLog().error(file + " is not a valid bundle, this artifact is ignored");
@@ -503,7 +570,7 @@ public class Junit4osgiPlugin extends AbstractMojo {
             m_totalFailures += tr.failureCount();
             m_totalErrors += tr.errorCount();
 
-            report.generateReport(test, tr, m_reportsDirectory, bc);
+            report.generateReport(test, tr, m_reportsDirectory, bc, felixConf);
 
         } catch (Exception e) {
             getLog().error(e);
@@ -615,8 +682,8 @@ public class Junit4osgiPlugin extends AbstractMojo {
         public void startTest(Test test) {
             m_abort = false;
             m_report.testStarting();
-            System.setErr(new PrintStream(m_err));
-            System.setOut(new PrintStream(m_out));
+            System.setErr(new ReportPrintStream(m_err,m_errBackup, hideOutputs));
+            System.setOut(new ReportPrintStream(m_out, m_outBackup, hideOutputs));
             getLogService().enableOutputStream();
         }
         

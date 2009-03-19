@@ -126,7 +126,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
                 break;
             case BundleEvent.STOPPING:
                 m_thread.removeBundle(event.getBundle());
-                closeManagementFor(event.getBundle());
+                closeManagementFor(event.getBundle()); //TODO Should be done in another thread
                 break;
             default:
                 break;
@@ -300,7 +300,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
             // compute already started bundles.
             for (int i = 0; i < context.getBundles().length; i++) {
                 if (context.getBundles()[i].getState() == Bundle.ACTIVE) {
-                    startManagementFor(context.getBundles()[i]);
+                    m_thread.addBundle(context.getBundles()[i]); // Bundles are processed in another thread.
                 }
             }
         }

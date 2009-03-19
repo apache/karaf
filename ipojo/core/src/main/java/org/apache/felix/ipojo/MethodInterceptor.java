@@ -34,7 +34,8 @@ import java.lang.reflect.Method;
 public interface MethodInterceptor {
     
     /**
-     * This method is called when the execution enters in a method.
+     * This method is called when a thread enters in a method.
+     * The given argument array is created from the method argument.
      * @param pojo the pojo on which the method is called.
      * @param method the invoked method.
      * @param args the arguments array.
@@ -46,7 +47,7 @@ public interface MethodInterceptor {
      * before a <code>return</code>.
      * If the given returned object is <code>null</code>, either the method is 
      * <code>void</code>, or it returns <code>null</code>.
-     * You must not modified the returned object.
+     * This method must not modify the returned object.
      * @param pojo the pojo on which the method exits.
      * @param method the exiting method.
      * @param returnedObj the the returned object (boxed for primitive type)

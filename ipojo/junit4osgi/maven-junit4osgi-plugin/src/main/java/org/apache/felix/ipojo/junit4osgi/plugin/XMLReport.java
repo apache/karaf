@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
@@ -153,15 +154,16 @@ public class XMLReport extends Report {
      * @param tr the test result
      * @param reportsDirectory the directory in which reports are created.
      * @param bc the bundle context (to get installed bundles)
+     * @param configuration the Felix configuration
      * @throws Exception when the XML report cannot be generated correctly
      */
     public void generateReport(Test test, TestResult tr, File reportsDirectory,
-            BundleContext bc) throws Exception {
+            BundleContext bc, Map configuration) throws Exception {
         long runTime = this.m_endTime - this.m_startTime;
 
         Xpp3Dom testSuite = createTestSuiteElement(test, runTime);
 
-        showProperties(testSuite, bc);
+        showProperties(testSuite, bc, configuration);
 
         testSuite.setAttribute("tests", String.valueOf(tr.runCount()));
 
@@ -258,10 +260,11 @@ public class XMLReport extends Report {
      * This method also adds installed bundles.
      * @param testSuite the XML element.
      * @param bc the bundle context
+     * @param configuration the configuration of the underlying OSGi platform
      */
-    private void showProperties(Xpp3Dom testSuite, BundleContext bc) {
+    private void showProperties(Xpp3Dom testSuite, BundleContext bc, Map configuration) {
         Xpp3Dom properties = createElement(testSuite, "properties");
-
+        
         Properties systemProperties = System.getProperties();
 
         if (systemProperties != null) {
@@ -274,6 +277,31 @@ public class XMLReport extends Report {
 
                 if (value == null) {
                     value = "null";
+                }
+
+                Xpp3Dom property = createElement(properties, "property");
+
+                property.setAttribute("name", key);
+
+                property.setAttribute("value", value);
+
+            }
+        }
+        
+        if (configuration != null) {
+            Iterator it = configuration.keySet().iterator();
+
+            while (it.hasNext()) {
+                String key = (String) it.next();
+
+                Object obj = (Object) configuration.get(key);
+                String value = null;
+                if (obj == null) {
+                    value = "null";
+                } else if (obj instanceof String) {
+                    value = (String) obj;
+                } else {
+                    value  = obj.toString();
                 }
 
                 Xpp3Dom property = createElement(properties, "property");

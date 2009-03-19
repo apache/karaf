@@ -29,6 +29,7 @@ import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.IPojoContext;
 import org.apache.felix.ipojo.ServiceContext;
+import org.apache.felix.ipojo.context.ServiceReferenceImpl;
 import org.apache.felix.ipojo.context.ServiceRegistry;
 import org.apache.felix.ipojo.util.Tracker;
 import org.apache.felix.ipojo.util.TrackerCustomizer;
@@ -160,7 +161,11 @@ public class CompositeServiceContext implements ServiceContext, TrackerCustomize
      * @see org.apache.felix.ipojo.ServiceContext#getService(org.osgi.framework.ServiceReference)
      */
     public Object getService(ServiceReference arg0) {
-        return m_registry.getService(m_instance, arg0);
+        if (arg0 instanceof ServiceReferenceImpl) {
+            return m_registry.getService(m_instance, arg0);
+        } else {
+            throw new RuntimeException("Cannot get a global service from the local registry");
+        }
     }
 
     

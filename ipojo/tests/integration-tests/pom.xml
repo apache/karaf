@@ -22,10 +22,15 @@
 						<goals>
 							<goal>test</goal>
 						</goals>
+						<configuration>
+							<hideOutputs>true</hideOutputs>
+							<configuration>
+							<org.osgi.http.port>8083</org.osgi.http.port>
+							</configuration>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
-			
 		</plugins>
 	</build>
 	<reporting>
