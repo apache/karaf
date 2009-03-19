@@ -62,8 +62,7 @@
 					<instructions>
 						<Bundle-Name>Apache Felix iPOJO</Bundle-Name>
 						<Bundle-Vendor> The Apache Software Foundation </Bundle-Vendor>
-						<Bundle-SymbolicName> org.apache.felix.ipojo 
-						</Bundle-SymbolicName>
+						<Bundle-SymbolicName>org.apache.felix.ipojo;singleton:=true</Bundle-SymbolicName>
 						<Bundle-Description> iPOJO Core Framework </Bundle-Description>
 						<Bundle-Activator> org.apache.felix.ipojo.Extender 
 						</Bundle-Activator>
