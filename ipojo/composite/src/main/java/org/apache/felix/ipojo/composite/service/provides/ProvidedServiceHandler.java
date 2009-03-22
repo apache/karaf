@@ -169,7 +169,7 @@ public class ProvidedServiceHandler extends CompositeHandler implements Dependen
             } // Others case cannot happen. The test was already made during the factory initialization.
         }
         
-        m_description = new ProvidedServiceHandlerDescription(this, m_services, m_exporters);
+        m_description = new ProvidedServiceHandlerDescription(this, m_managedServices, m_exporters);
 
     }
 
