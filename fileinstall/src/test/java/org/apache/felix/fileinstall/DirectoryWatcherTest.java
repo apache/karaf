@@ -114,7 +114,7 @@ public class DirectoryWatcherTest extends TestCase
         assertEquals( "POLL parameter correctly read", 500l, dw.poll );
         assertEquals( "DEBUG parameter correctly read", 1l, dw.debug );
         assertTrue( "DIR parameter correctly read", dw.watchedDirectory.getAbsolutePath().endsWith(
-            "src/test/resources" ) );
+            "src" + File.separatorChar + "test" + File.separatorChar + "resources" ) );
         assertEquals( "START_NEW_BUNDLES parameter correctly read", false, dw.startBundles );
     }
 
