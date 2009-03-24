@@ -197,13 +197,20 @@ public class ArchCommandImpl implements Command {
      * @param err : error print stream (if the factory is not found)
      */
     private void printFactory(String name, PrintStream out, PrintStream err) {
+        boolean found = false;
         for (int i = 0; i < m_factories.length; i++) {
             if (m_factories[i].getName().equalsIgnoreCase(name)) {
+                // Skip a line if already found
+                if (found) {
+                    out.println();
+                }
                 out.println(m_factories[i].getDescription());
-                return;
+                found = true;
             }
         }
-        err.println("Factory " + name + " not found");
+        if (! found) {
+            err.println("Factory " + name + " not found");
+        }
     }
     
     /**
