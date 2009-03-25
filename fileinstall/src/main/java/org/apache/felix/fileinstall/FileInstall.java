@@ -20,6 +20,7 @@ package org.apache.felix.fileinstall;
 
 import java.util.*;
 
+import org.apache.felix.fileinstall.util.Util;
 import org.osgi.framework.*;
 import org.osgi.service.cm.*;
 import org.osgi.service.packageadmin.*;
@@ -113,8 +114,20 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory
         throws ConfigurationException
     {
         deleted(pid);
+        performSubstitution( properties );    
+        
         DirectoryWatcher watcher = new DirectoryWatcher(properties, context);
         watchers.put(pid, watcher);
         watcher.start();
+    }
+
+    private void performSubstitution( Dictionary properties )
+    {
+        for (Enumeration e = properties.keys(); e.hasMoreElements(); )
+        {
+            String name = (String) e.nextElement();
+            properties.put(name,
+                Util.substVars(( String ) properties.get(name), name, null, properties));
+        }
     }
 }
