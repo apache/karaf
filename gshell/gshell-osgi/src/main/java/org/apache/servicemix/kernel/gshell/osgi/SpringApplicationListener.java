@@ -58,7 +58,7 @@ public class SpringApplicationListener implements OsgiBundleApplicationContextLi
 
     public SpringState getSpringState(Bundle bundle) {
         SpringState state = states.get(bundle.getBundleId());
-        if (state == null) {
+        if (state == null || bundle.getState() != Bundle.ACTIVE) {
             state = SpringState.Unknown;
         }
         return state;
