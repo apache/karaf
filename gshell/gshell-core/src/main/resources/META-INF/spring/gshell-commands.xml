@@ -173,6 +173,16 @@
                 <null/>
             </gshell:completers>
         </gshell:command>
+
+        <gshell:command name="sort">
+            <gshell:action class="org.apache.geronimo.gshell.commands.text.SortAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </gshell:action>
+            <gshell:completers>
+                <ref bean="fileObjectNameCompleter"/>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
     </gshell:command-bundle>
 
     <gshell:command-bundle>
