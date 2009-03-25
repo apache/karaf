@@ -62,6 +62,9 @@
     <osgi:service ref="localShell" interface="org.apache.geronimo.gshell.shell.Shell">
     </osgi:service>
 
+    <osgi:service ref="commandLineExecutor" interface="org.apache.geronimo.gshell.commandline.CommandLineExecutor">
+    </osgi:service>
+
     <osgix:cm-properties id="cmProps" persistent-id="org.apache.servicemix.shell">
         <prop key="sshPort">8101</prop>
         <prop key="sshRealm">servicemix</prop>
