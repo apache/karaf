@@ -61,6 +61,9 @@
         <gshell:command name="osgi/resolve">
             <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.ResolveBundle" />
         </gshell:command>
+        <gshell:command name="osgi/restart">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.RestartBundle" />
+        </gshell:command>
         <gshell:command name="osgi/shutdown">
             <gshell:action class="org.apache.servicemix.kernel.gshell.osgi.Shutdown" />
         </gshell:command>
