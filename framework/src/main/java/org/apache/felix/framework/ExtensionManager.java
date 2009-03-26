@@ -443,7 +443,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
      * See whether any registered extension provides the class requested. If not
      * throw an IOException.
      */
-    protected synchronized URLConnection openConnection(URL url) throws IOException
+    public synchronized URLConnection openConnection(URL url) throws IOException
     {
         String path = url.getPath();
 
