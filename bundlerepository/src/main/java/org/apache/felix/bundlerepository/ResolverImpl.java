@@ -496,7 +496,11 @@ public class ResolverImpl implements Resolver
                         // started later.
                         if (doStartBundle)
                         {
-                            startList.add(localResource.getBundle());
+                            Bundle bundle = localResource.getBundle();
+                            if (!isFragmentBundle(bundle)) 
+                            {
+                                startList.add(bundle);
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -531,7 +535,10 @@ public class ResolverImpl implements Resolver
                         // started later.
                         if (start)
                         {
-                            startList.add(bundle);
+                            if (!isFragmentBundle(bundle)) 
+                            {
+                                startList.add(bundle);    
+                            }
                         }
                     }
                 }
@@ -562,6 +569,17 @@ public class ResolverImpl implements Resolver
         }
     }
 
+    /**
+     * Determines if the given bundle is a fragement bundle.
+     * 
+     * @param bundle bundle to check
+     * @return flag indicating if the given bundle is a fragement
+     */
+    private boolean isFragmentBundle(Bundle bundle) 
+    {
+        return bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null;
+    }
+    
     private void addReason(Resource resource, Requirement req)
     {
         Requirement[] reasons = (Requirement[]) m_reasonMap.get(resource);
