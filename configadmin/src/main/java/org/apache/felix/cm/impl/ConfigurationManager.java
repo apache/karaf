@@ -142,6 +142,9 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
     // the maximum log level when no LogService is available
     private int logLevel = CM_LOG_LEVEL_DEFAULT;
+    
+    // flag indicating whether BundleChange events should be consumed (FELIX-979)
+    private volatile boolean handleBundleEvents;
 
     public void start( BundleContext bundleContext )
     {
@@ -198,6 +201,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         }
 
         // register as bundle and service listener
+        handleBundleEvents = true;
         bundleContext.addBundleListener( this );
 
         // get all persistence managers to begin with
@@ -242,6 +246,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
         // stop listening for events
         bundleContext.removeBundleListener( this );
+        handleBundleEvents = false;
 
         if ( configurationListenerTracker != null )
         {
@@ -489,7 +494,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
     public void bundleChanged( BundleEvent event )
     {
-        if ( event.getType() == BundleEvent.UNINSTALLED )
+        if ( event.getType() == BundleEvent.UNINSTALLED && handleBundleEvents )
         {
             String location = event.getBundle().getLocation();
 
