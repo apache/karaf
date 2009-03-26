@@ -99,6 +99,7 @@ public class MethodSimpleDependencies extends OSGiTestCase {
 		
 		fooProvider.stop();
 		
+		arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance3.getInstanceName());
 		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance invalidity - 2", id.getState() == ComponentInstance.INVALID);
 		
@@ -136,6 +137,7 @@ public class MethodSimpleDependencies extends OSGiTestCase {
 		
 		fooProvider.stop();
 		
+		arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance4.getInstanceName());
 		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance invalidity - 2", id.getState() == ComponentInstance.INVALID);
 		
@@ -173,6 +175,7 @@ public class MethodSimpleDependencies extends OSGiTestCase {
         
         fooProvider.stop();
         
+        arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance5.getInstanceName());
         id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 2", id.getState() == ComponentInstance.INVALID);
         

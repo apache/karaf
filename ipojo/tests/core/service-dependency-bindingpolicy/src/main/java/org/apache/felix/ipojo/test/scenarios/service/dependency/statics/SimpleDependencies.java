@@ -24,10 +24,9 @@ import org.apache.felix.ipojo.ComponentInstance;
 import org.apache.felix.ipojo.architecture.Architecture;
 import org.apache.felix.ipojo.architecture.InstanceDescription;
 import org.apache.felix.ipojo.junit4osgi.OSGiTestCase;
+import org.apache.felix.ipojo.test.scenarios.service.dependency.service.CheckService;
 import org.apache.felix.ipojo.test.scenarios.util.Utils;
 import org.osgi.framework.ServiceReference;
-
-import org.apache.felix.ipojo.test.scenarios.service.dependency.service.CheckService;
 
 public class SimpleDependencies extends OSGiTestCase {
 	
@@ -98,22 +97,29 @@ public class SimpleDependencies extends OSGiTestCase {
 		assertTrue("check CheckService invocation", cs.check());
 		
 		fooProvider.stop();
+		// instance1 has to be stopped and restarted.
+
 		
+		arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance1.getInstanceName());
 		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance invalidity - 2", id.getState() == ComponentInstance.INVALID);
 		
 		fooProvider.start();
 		
+	    arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance1.getInstanceName());
 		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
-		assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.INVALID);
+		assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID); // The instance was invalidated and revalidated.
 		
 		cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance1.getInstanceName());
-		assertNull("Check CheckService availability", cs_ref);
+		assertNotNull("Check CheckService availability", cs_ref);
+		cs = (CheckService) getContext().getService(cs_ref);
+        assertTrue("check CheckService invocation", cs.check());
 		
 		fooProvider.stop();
 		
+		arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance1.getInstanceName());
 		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
-		assertTrue("Check instance invalidity - 2", id.getState() == ComponentInstance.INVALID);
+		assertTrue("Check instance invalidity - 3", id.getState() == ComponentInstance.INVALID);
 		
 		id = null;
 		cs = null;
@@ -148,20 +154,23 @@ public class SimpleDependencies extends OSGiTestCase {
         assertEquals("check both unbind callback invocation -1", ((Integer)props.get("bothU")).intValue(), 0);
         
 		fooProvider.stop();
-		
+        
+        arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance2.getInstanceName());
 		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance invalidity - 2", id.getState() == ComponentInstance.INVALID);
 		
 		fooProvider.start();
         
+		arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance2.getInstanceName());
         id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
-        assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.INVALID);
+        assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID); // The instance was revalidated.
         
         cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance2.getInstanceName());
-        assertNull("Check CheckService availability - 2", cs_ref);
+        assertNotNull("Check CheckService availability - 2", cs_ref);
         
         fooProvider.stop();
         
+        arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance2.getInstanceName());
         id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 2", id.getState() == ComponentInstance.INVALID);
 		
@@ -198,19 +207,22 @@ public class SimpleDependencies extends OSGiTestCase {
         
         fooProvider.stop();
         
+        arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance3.getInstanceName());
         id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 2", id.getState() == ComponentInstance.INVALID);
         
         fooProvider.start();
         
+        arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance3.getInstanceName());
         id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
-        assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.INVALID);
+        assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
         
         cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance3.getInstanceName());
-        assertNull("Check CheckService availability - 2", cs_ref);
+        assertNotNull("Check CheckService availability - 2", cs_ref);
         
         fooProvider.stop();
         
+        arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance3.getInstanceName());
         id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 2", id.getState() == ComponentInstance.INVALID);
         
@@ -247,19 +259,23 @@ public class SimpleDependencies extends OSGiTestCase {
         
         fooProvider.stop();
         
+        arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance4.getInstanceName());
         id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 2", id.getState() == ComponentInstance.INVALID);
         
         fooProvider.start();
         
+        arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance4.getInstanceName());
         id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
-        assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.INVALID);
+        assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
+        
         
         cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance4.getInstanceName());
-        assertNull("Check CheckService availability - 2", cs_ref);
+        assertNotNull("Check CheckService availability - 2", cs_ref);
         
         fooProvider.stop();
         
+        arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance4.getInstanceName());
         id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 2", id.getState() == ComponentInstance.INVALID);
         
@@ -296,19 +312,22 @@ public class SimpleDependencies extends OSGiTestCase {
         
         fooProvider.stop();
         
+        arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance4.getInstanceName());
         id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 2", id.getState() == ComponentInstance.INVALID);
         
         fooProvider.start();
         
+        arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance4.getInstanceName());
         id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
-        assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.INVALID);
+        assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
         
         cs_ref = Utils.getServiceReferenceByName(getContext(), CheckService.class.getName(), instance5.getInstanceName());
-        assertNull("Check CheckService availability - 2", cs_ref);
+        assertNotNull("Check CheckService availability - 2", cs_ref);
         
         fooProvider.stop();
         
+        arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance4.getInstanceName());
         id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
         assertTrue("Check instance invalidity - 2", id.getState() == ComponentInstance.INVALID);
         

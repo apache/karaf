@@ -190,6 +190,13 @@ public class ServiceImporter extends DependencyModel {
     public void freeze() {
         m_isFrozen = true;
     }
+    
+    /**
+     * Unfreezes.
+     */
+    public void unfreeze() {
+        m_isFrozen = false;
+    }
 
     public boolean isFrozen() {
         return m_isFrozen;

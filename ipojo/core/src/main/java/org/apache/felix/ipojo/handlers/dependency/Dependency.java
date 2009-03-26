@@ -202,6 +202,14 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
     public synchronized boolean isFrozen() {
         return m_isFrozen;
     }
+    
+    /**
+     * Unfreeze the dependency.
+     * @see org.apache.felix.ipojo.util.DependencyModel#unfreeze()
+     */
+    public synchronized void unfreeze() {
+        m_isFrozen = false;
+    }
 
     /**
      * Call the bind method.

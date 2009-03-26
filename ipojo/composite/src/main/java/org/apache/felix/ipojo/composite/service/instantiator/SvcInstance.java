@@ -124,6 +124,14 @@ public class SvcInstance extends DependencyModel {
     public void freeze() {
         m_isFrozen = true;
     }
+    
+    /**
+     * Unfreezes.
+     */
+    public void unfreeze() {
+        m_isFrozen = false;
+    }
+
 
     /**
      * Create an instance for the given reference. The instance is not added inside the map.

@@ -81,7 +81,7 @@ public class OptionalDependencies extends OSGiTestCase {
 		fooProvider = null;
 	}
 	
-	public void atestSimple() {
+	public void testSimple() {
 		ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance1.getInstanceName());
 		assertNotNull("Check architecture availability", arch_ref);
 		InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
@@ -107,6 +107,7 @@ public class OptionalDependencies extends OSGiTestCase {
 		
 		fooProvider.start();
 		
+		arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance1.getInstanceName());
 		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
 		
@@ -129,6 +130,7 @@ public class OptionalDependencies extends OSGiTestCase {
 		
 		fooProvider.stop();
 		
+		arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance1.getInstanceName());
 		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
 		
@@ -138,7 +140,7 @@ public class OptionalDependencies extends OSGiTestCase {
 		getContext().ungetService(cs_ref);		
 	}
 	
-	public void atestDelayedSimple() throws UnacceptableConfiguration, MissingHandlerException, ConfigurationException {
+	public void testDelayedSimple() throws UnacceptableConfiguration, MissingHandlerException, ConfigurationException {
 	    instance1.stop();
 	    fooProvider.start();
 	    instance1.start();
@@ -167,9 +169,9 @@ public class OptionalDependencies extends OSGiTestCase {
         assertEquals("Check FS invocation (double) - 2", ((Double)props.get("double")).doubleValue(), 1.0);
         
         fooProvider.stop();
-        
+        arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance1.getInstanceName());
         id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
-        assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.INVALID); // Dependency broken
+        assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID); // Dependency broken,re started with no service.
         
         id = null;
         cs = null;
@@ -177,7 +179,7 @@ public class OptionalDependencies extends OSGiTestCase {
         getContext().ungetService(cs_ref);       
     }
 	
-	public void atestVoid() {
+	public void testVoid() {
 		ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance2.getInstanceName());
 		assertNotNull("Check architecture availability", arch_ref);
 		InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
@@ -202,6 +204,7 @@ public class OptionalDependencies extends OSGiTestCase {
 		
 		fooProvider.start();
 		
+		arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance2.getInstanceName());
 		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
 		
@@ -223,6 +226,7 @@ public class OptionalDependencies extends OSGiTestCase {
 		
 		fooProvider.stop();
 		
+		arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance2.getInstanceName());
 		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
 		
@@ -276,9 +280,11 @@ public class OptionalDependencies extends OSGiTestCase {
         assertEquals("Check FS invocation (double) - 2", ((Double)props.get("double")).doubleValue(), 1.0);
         
         fooProvider.stop();
+        // The instance is restarted.
         
+        arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance2.getInstanceName());
         id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
-        assertTrue("Check instance validity - 3 (" + id.getState() + ")", id.getState() == ComponentInstance.INVALID); // Dependency broken
+        assertTrue("Check instance validity - 3 (" + id.getState() + ")", id.getState() == ComponentInstance.VALID); // Dependency broken and then (no service injected) restarted
         
         id = null;
         cs = null;
@@ -286,7 +292,7 @@ public class OptionalDependencies extends OSGiTestCase {
         getContext().ungetService(cs_ref);       
     }
 	
-	public void atestObject() {
+	public void testObject() {
 		ServiceReference arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance3.getInstanceName());
 		assertNotNull("Check architecture availability", arch_ref);
 		InstanceDescription id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
@@ -307,6 +313,7 @@ public class OptionalDependencies extends OSGiTestCase {
 		
 		fooProvider.start();
 		
+		arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance3.getInstanceName());
 		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 2", id.getState() == ComponentInstance.VALID);
 		
@@ -324,6 +331,7 @@ public class OptionalDependencies extends OSGiTestCase {
 		
 		fooProvider.stop();
 		
+		arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance3.getInstanceName());
 		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
 		
@@ -344,7 +352,7 @@ public class OptionalDependencies extends OSGiTestCase {
 		getContext().ungetService(cs_ref);		
 	}
 	
-	public void atestDelayedObject() throws UnacceptableConfiguration, MissingHandlerException, ConfigurationException {
+	public void testDelayedObject() throws UnacceptableConfiguration, MissingHandlerException, ConfigurationException {
         instance3.stop();
         fooProvider.start();
         instance3.start();
@@ -374,8 +382,9 @@ public class OptionalDependencies extends OSGiTestCase {
         
         fooProvider.stop();
         
+        arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance3.getInstanceName());
         id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
-        assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.INVALID); // Dependency broken
+        assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID); // Dependency broken and restarted with no service
         
         id = null;
         cs = null;

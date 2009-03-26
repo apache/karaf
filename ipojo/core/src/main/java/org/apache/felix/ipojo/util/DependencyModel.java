@@ -201,6 +201,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
      * @see DependencyModel#computeDependencyState()
      */
     public void start() {
+        m_state = UNRESOLVED;
         m_tracker = new Tracker(m_context, m_specification.getName(), this);
         m_tracker.open();
         computeDependencyState();
@@ -216,6 +217,7 @@ public abstract class DependencyModel implements TrackerCustomizer {
             m_tracker.close();
             m_tracker = null;
         }
+        m_matchingRefs.clear();
         ungetAllServices();
         m_state = UNRESOLVED;
     }
@@ -252,6 +254,16 @@ public abstract class DependencyModel implements TrackerCustomizer {
      */
     public boolean isFrozen() {
         return false;
+    }
+    
+    
+    /**
+     * Unfreezes the dependency.
+     * This method must be overide by concrete dependency to support
+     * the static binding policy. This method is called after tracking restarting.
+     */
+    public void unfreeze() {
+        // nothing to do
     }
 
     /**
@@ -353,7 +365,6 @@ public abstract class DependencyModel implements TrackerCustomizer {
      * @param ref the new reference
      */
     private void manageArrival(ServiceReference ref) {
-
         // Create a local copy of the state and of the list size.
         int state = m_state;
         int size;
@@ -427,7 +438,15 @@ public abstract class DependencyModel implements TrackerCustomizer {
         if (isFrozen() && obj != null) {
             if (m_state != BROKEN) {
                 m_state = BROKEN;
-                invalidate();
+                invalidate();  // This will invalidate the instance.
+                // Reinitialize the dependency tracking
+                ComponentInstance instance = null;
+                synchronized (this) {
+                    instance = m_instance;
+                }
+                instance.stop(); // Stop the instance
+                unfreeze();
+                instance.start();
             }
         } else {
             synchronized (this) {

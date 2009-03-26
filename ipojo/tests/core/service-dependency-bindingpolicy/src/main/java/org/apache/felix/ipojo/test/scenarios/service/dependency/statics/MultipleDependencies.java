@@ -108,6 +108,7 @@ public class MultipleDependencies extends OSGiTestCase {
 		assertEquals("Check FS invocation (double) - 1", ((Double)props.get("double")).doubleValue(), 1.0);
 		
 		fooProvider2.start();
+		Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance1.getInstanceName());
 		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
 		assertTrue("Check instance validity - 3", id.getState() == ComponentInstance.VALID);
 		
@@ -126,9 +127,10 @@ public class MultipleDependencies extends OSGiTestCase {
 		assertEquals("Check FS invocation (double) - 2", ((Double)props.get("double")).doubleValue(), 1.0);
 		
 		fooProvider1.stop();
-		
+		// instance is stopped and then restarted, so bound to fooprovider 2.
+		arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance1.getInstanceName());
 		id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
-		assertTrue("Check instance validity - 5", id.getState() == ComponentInstance.INVALID);
+		assertTrue("Check instance validity - 5", id.getState() == ComponentInstance.VALID); 
 		
 		id = null;
 		cs = null;
@@ -182,9 +184,10 @@ public class MultipleDependencies extends OSGiTestCase {
         assertEquals("Check FS invocation (double) - 2", ((Double) props.get("double")).doubleValue(), 1.0);
 
         fooProvider1.stop();
-
+        
+        arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance2.getInstanceName());
         id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
-        assertTrue("Check instance validity - 5", id.getState() == ComponentInstance.INVALID);
+        assertTrue("Check instance validity - 5", id.getState() == ComponentInstance.VALID);
 
         id = null;
         cs = null;
@@ -238,9 +241,10 @@ public class MultipleDependencies extends OSGiTestCase {
         assertEquals("Check FS invocation (double) - 2", ((Double) props.get("double")).doubleValue(), 1.0);
 
         fooProvider1.stop();
-
+        // Instance stopped and then restarted, bound to foo provider 2.
+        arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance3.getInstanceName());
         id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
-        assertTrue("Check instance validity - 5", id.getState() == ComponentInstance.INVALID);
+        assertTrue("Check instance validity - 5", id.getState() == ComponentInstance.VALID);
 
         id = null;
         cs = null;
@@ -294,9 +298,10 @@ public class MultipleDependencies extends OSGiTestCase {
         assertEquals("Check FS invocation (double) - 2", ((Double) props.get("double")).doubleValue(), 1.0);
 
         fooProvider1.stop();
-
+        // Stop and then restarted, bound to foo provider 2.
+        arch_ref = Utils.getServiceReferenceByName(getContext(), Architecture.class.getName(), instance4.getInstanceName());
         id = ((Architecture) getContext().getService(arch_ref)).getInstanceDescription();
-        assertTrue("Check instance validity - 5", id.getState() == ComponentInstance.INVALID);
+        assertTrue("Check instance validity - 5", id.getState() == ComponentInstance.VALID);
 
         id = null;
         cs = null;
