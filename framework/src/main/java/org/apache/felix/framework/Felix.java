@@ -2975,10 +2975,20 @@ ex.printStackTrace();
         IModule[] expModules = exporter.getModules();
         for (int expIdx = 0; (expModules != null) && (expIdx < expModules.length); expIdx++)
         {
+            // Include any importers that have wires to the specific
+            // exported package.
             IModule[] dependents = ((ModuleImpl) expModules[expIdx]).getDependentImporters();
             for (int depIdx = 0; (dependents != null) && (depIdx < dependents.length); depIdx++)
             {
-                list.add(dependents[depIdx].getBundle());
+                IWire[] wires = dependents[depIdx].getWires();
+                for (int wireIdx = 0; (wires != null) && (wireIdx < wires.length); wireIdx++)
+                {
+                    if ((wires[wireIdx].getExporter() == expModules[expIdx])
+                        && (wires[wireIdx].hasPackage(ep.getName())))
+                    {
+                        list.add(dependents[depIdx].getBundle());
+                    }
+                }
             }
             dependents = ((ModuleImpl) expModules[expIdx]).getDependentRequirers();
             for (int depIdx = 0; (dependents != null) && (depIdx < dependents.length); depIdx++)
@@ -4042,6 +4052,7 @@ m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fr
 
         public void stop()
         {
+// TODO: LOCKING - This is not really correct.
             if (m_bundle.getState() == Bundle.ACTIVE)
             {
                 m_oldState = Bundle.ACTIVE;
