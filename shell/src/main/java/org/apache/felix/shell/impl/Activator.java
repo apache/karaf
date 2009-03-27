@@ -107,6 +107,11 @@ public class Activator implements BundleActivator
             org.apache.felix.shell.Command.class.getName(),
             new HelpCommandImpl(m_context), null);
 
+        // Register "imports" command service.
+        context.registerService(
+            org.apache.felix.shell.Command.class.getName(),
+            new ImportsCommandImpl(m_context), null);
+
         // Register "install" command service.
         context.registerService(
             org.apache.felix.shell.Command.class.getName(),
