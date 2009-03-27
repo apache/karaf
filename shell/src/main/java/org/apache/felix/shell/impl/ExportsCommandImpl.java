@@ -26,23 +26,23 @@ import org.osgi.framework.*;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 
-public class PackagesCommandImpl implements Command
+public class ExportsCommandImpl implements Command
 {
     private BundleContext m_context = null;
 
-    public PackagesCommandImpl(BundleContext context)
+    public ExportsCommandImpl(BundleContext context)
     {
         m_context = context;
     }
 
     public String getName()
     {
-        return "packages";
+        return "exports";
     }
 
     public String getUsage()
     {
-        return "packages [<id> ...]";
+        return "exports <id> ...";
     }
 
     public String getShortDescription()
@@ -76,6 +76,7 @@ public class PackagesCommandImpl implements Command
 
         if (st.hasMoreTokens())
         {
+            boolean separatorNeeded = false;
             while (st.hasMoreTokens())
             {
                 String id = st.nextToken();
@@ -84,7 +85,12 @@ public class PackagesCommandImpl implements Command
                     long l = Long.parseLong(id);
                     Bundle bundle = m_context.getBundle(l);
                     ExportedPackage[] exports = pa.getExportedPackages(bundle);
+                    if (separatorNeeded)
+                    {
+                        out.println("");
+                    }
                     printExports(out, bundle, exports);
+                    separatorNeeded = true;
                 }
                 catch (NumberFormatException ex)
                 {
@@ -96,28 +102,23 @@ public class PackagesCommandImpl implements Command
                 }
             }
         }
-        else
-        {
-            ExportedPackage[] exports = pa.getExportedPackages((Bundle) null);
-            printExports(out, null, exports);
-        }
     }
 
     private void printExports(PrintStream out, Bundle target, ExportedPackage[] exports)
     {
+        String title = target + " exports:";
+        out.println(title);
+        out.println(Util.getUnderlineString(title));
         if ((exports != null) && (exports.length > 0))
         {
             for (int i = 0; i < exports.length; i++)
             {
-                Bundle bundle = exports[i].getExportingBundle();
-                out.print(Util.getBundleName(bundle));
-                out.println(": " + exports[i]);
+                out.println(exports[i]);
             }
         }
         else
         {
-            out.println(Util.getBundleName(target)
-                + ": No active exported packages.");
+            out.println("Nothing");
         }
     }
 }

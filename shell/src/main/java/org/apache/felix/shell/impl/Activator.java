@@ -95,7 +95,7 @@ public class Activator implements BundleActivator
         // Register "exports" command service.
         context.registerService(
             org.apache.felix.shell.Command.class.getName(),
-            new PackagesCommandImpl(m_context), null);
+            new ExportsCommandImpl(m_context), null);
 
         // Register "headers" command service.
         context.registerService(
