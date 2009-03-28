@@ -190,6 +190,12 @@ public class Activator implements BundleActivator, ManagedService, Runnable {
         
         m_running = false;
         m_thread.interrupt();
+        try {
+            m_thread.join(3000);
+        }
+        catch (InterruptedException e) {
+            // not much we can do here
+        }
         
         m_logTracker.close();
     }
