@@ -18,6 +18,7 @@
  */
 package org.apache.felix.ipojo.junit4osgi;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,8 +26,10 @@ import junit.framework.TestCase;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
  * OSGi Test Case. 
@@ -623,5 +626,157 @@ public class OSGiTestCase extends TestCase {
     public ServiceReference[] getServiceReferences(String itf, String filter) {
         return getServiceReferences(context.getBundle(), itf, filter);
     }
+    
+    /**
+     * Gets the package admin exposed by the framework.
+     * Fails if the package admin is not available. 
+     * @return the package admin service.
+     */
+    public PackageAdmin getPackageAdmin() {
+        PackageAdmin pa = (PackageAdmin) getServiceObject(PackageAdmin.class.getName(), null);
+        if (pa == null) {
+            fail("No package admin available");
+        }
+        return pa;
+    }
+    
+    /**
+     * Refresh the packages.
+     * Fails if the package admin service is not available.
+     */
+    public void refresh() {
+        getPackageAdmin().refreshPackages(null);
+    }
+    
+    /**
+     * Waits for a service. Fails on timeout.
+     * If timeout is set to 0, it sets the timeout to 10s.
+     * @param itf the service interface
+     * @param filter  the filter
+     * @param timeout the timeout
+     */
+    public void waitForService(String itf, String filter, long timeout) {
+        if (timeout == 0) {
+            timeout = 10000; // Default 10 secondes.
+        }
+        ServiceReference[] refs = getServiceReferences(itf, filter);
+        long begin = System.currentTimeMillis();
+        if (refs.length != 0) {
+            return;
+        } else {
+            while(refs.length == 0) {
+                try {
+                    Thread.sleep(5);
+                } catch (InterruptedException e) {
+                    // Interrupted
+                }
+                long now = System.currentTimeMillis();
+                
+                if ((now - begin) > timeout) {
+                    fail("Timeout ... no services matching with the request after " + timeout + "ms");
+                }
+                refs = getServiceReferences(itf, filter);
+            }
+        }
+    }
+    
+    
+    /**
+     * Installs a bundle.
+     * Fails if the bundle cannot be installed.
+     * Be aware that you have to uninstall the bundle yourself.
+     * @param url bundle url
+     * @return the installed bundle
+     */
+    public Bundle installBundle(String url) {
+        try {
+            return context.installBundle(url);
+        } catch (BundleException e) {
+            fail("Cannot install the bundle " + url + " : " + e.getMessage());
+        }
+        return null; // Can not happen
+    }
+    
+    /**
+     * Installs a bundle.
+     * Fails if the bundle cannot be installed.
+     * Be aware that you have to uninstall the bundle yourself.
+     * @param url bundle url
+     * @param stream input stream containing the bundle
+     * @return the installed bundle
+     */
+    public Bundle installBundle(String url, InputStream stream) {
+        try {
+            return context.installBundle(url, stream);
+        } catch (BundleException e) {
+            fail("Cannot install the bundle " + url + " : " + e.getMessage());
+        }
+        return null; // Can not happen
+    }
+    
+    /**
+     * Installs and starts a bundle.
+     * Fails if the bundle cannot be installed or an error occurs
+     * during startup. Be aware that you have to uninstall the bundle
+     * yourself.
+     * @param url the bundle url
+     * @return the Bundle object.
+     */
+    public Bundle installAndStart(String url) {
+        Bundle bundle = installBundle(url);
+        try {
+            bundle.start();
+        } catch (BundleException e) {
+           fail("Cannot start the bundle " + url + " : " + e.getMessage());
+        }
+        return bundle;
+    }
+    
+    /**
+     * Installs and starts a bundle.
+     * Fails if the bundle cannot be installed or an error occurs
+     * during startup. Be aware that you have to uninstall the bundle
+     * yourself.
+     * @param url the bundle url
+     * @param stream input stream containing the bundle
+     * @return the Bundle object.
+     */
+    public Bundle installAndStart(String url, InputStream stream) {
+        Bundle bundle = installBundle(url, stream);
+        try {
+            bundle.start();
+        } catch (BundleException e) {
+           fail("Cannot start the bundle " + url + " : " + e.getMessage());
+        }
+        return bundle;
+    }
+    
+    /**
+     * Get the bundle by its id.
+     * @param bundleId the bundle id.
+     * @return the bundle with the given id.
+     */
+    public Bundle getBundle(long bundleId) {
+        return context.getBundle(bundleId);
+    }
+    
+    /**
+     * Gets a bundle by its symbolic name.
+     * Fails if no bundle matches.
+     * @param name the symbolic name of the bundle
+     * @return the bundle object.
+     */
+    public Bundle getBundle(String name) {
+        Bundle[] bundles = context.getBundles();
+        for (int i = 0; i < bundles.length; i++) {
+            if (name.equals(bundles[i].getSymbolicName())) {
+                return bundles[i];
+            }
+        }
+        fail("No bundles with the given symbolic name " + name);
+        return null; // should not happen
+    }
+    
+    
 
 }
