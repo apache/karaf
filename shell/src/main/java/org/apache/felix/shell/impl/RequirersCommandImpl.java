@@ -23,31 +23,31 @@ import java.util.StringTokenizer;
 
 import org.apache.felix.shell.Command;
 import org.osgi.framework.*;
-import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.service.packageadmin.RequiredBundle;
 
-public class ExportsCommandImpl implements Command
+public class RequirersCommandImpl implements Command
 {
     private BundleContext m_context = null;
 
-    public ExportsCommandImpl(BundleContext context)
+    public RequirersCommandImpl(BundleContext context)
     {
         m_context = context;
     }
 
     public String getName()
     {
-        return "exports";
+        return "requirers";
     }
 
     public String getUsage()
     {
-        return "exports <id> ...";
+        return "requirers <id> ...";
     }
 
     public String getShortDescription()
     {
-        return "list exported packages.";
+        return "list requiring bundles.";
     }
 
     public void execute(String s, PrintStream out, PrintStream err)
@@ -78,13 +78,19 @@ public class ExportsCommandImpl implements Command
                 {
                     long l = Long.parseLong(id);
                     Bundle bundle = m_context.getBundle(l);
-                    ExportedPackage[] exports = pa.getExportedPackages(bundle);
-                    if (separatorNeeded)
+                    RequiredBundle[] rbs = pa.getRequiredBundles(bundle.getSymbolicName());
+                    for (int i = 0; (rbs != null) && (i < rbs.length); i++)
                     {
-                        out.println("");
+                        if (rbs[i].getBundle() == bundle)
+                        {
+                            if (separatorNeeded)
+                            {
+                                out.println("");
+                            }
+                            printRequiredBundles(out, bundle, rbs[i].getRequiringBundles());
+                            separatorNeeded = true;
+                        }
                     }
-                    printExports(out, bundle, exports);
-                    separatorNeeded = true;
                 }
                 catch (NumberFormatException ex)
                 {
@@ -98,16 +104,16 @@ public class ExportsCommandImpl implements Command
         }
     }
 
-    private void printExports(PrintStream out, Bundle target, ExportedPackage[] exports)
+    private void printRequiredBundles(PrintStream out, Bundle target, Bundle[] requirers)
     {
-        String title = target + " exports:";
+        String title = target + " required by:";
         out.println(title);
         out.println(Util.getUnderlineString(title));
-        if ((exports != null) && (exports.length > 0))
+        if ((requirers != null) && (requirers.length > 0))
         {
-            for (int i = 0; i < exports.length; i++)
+            for (int i = 0; i < requirers.length; i++)
             {
-                out.println(exports[i]);
+                out.println(requirers[i]);
             }
         }
         else

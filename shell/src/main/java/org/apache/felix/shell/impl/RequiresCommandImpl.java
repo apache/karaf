@@ -25,32 +25,32 @@ import org.apache.felix.shell.Command;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.service.packageadmin.RequiredBundle;
 
-public class ImportsCommandImpl implements Command
+public class RequiresCommandImpl implements Command
 {
     private final BundleContext m_context;
     private ServiceReference m_ref = null;
 
-    public ImportsCommandImpl(BundleContext context)
+    public RequiresCommandImpl(BundleContext context)
     {
         m_context = context;
     }
 
     public String getName()
     {
-        return "imports";
+        return "requires";
     }
 
     public String getUsage()
     {
-        return "imports <id> ...";
+        return "requires <id> ...";
     }
 
     public String getShortDescription()
     {
-        return "list imported packages.";
+        return "list required bundles.";
     }
 
     public void execute(String s, PrintStream out, PrintStream err)
@@ -107,20 +107,19 @@ public class ImportsCommandImpl implements Command
         }
         else
         {
-            ExportedPackage[] exports = pa.getExportedPackages((Bundle) null);
-            String title = bundle + " imports:";
+            RequiredBundle[] rbs = pa.getRequiredBundles(null);
+            String title = bundle + " requires:";
             out.println(title);
             out.println(Util.getUnderlineString(title));
             boolean found = false;
-            for (int expIdx = 0; expIdx < exports.length; expIdx++)
+            for (int rbIdx = 0; rbIdx < rbs.length; rbIdx++)
             {
-                Bundle[] importers = exports[expIdx].getImportingBundles();
-                for (int impIdx = 0; (importers != null) && (impIdx < importers.length); impIdx++)
+                Bundle[] requirers = rbs[rbIdx].getRequiringBundles();
+                for (int reqIdx = 0; (requirers != null) && (reqIdx < requirers.length); reqIdx++)
                 {
-                    if (importers[impIdx] == bundle)
+                    if (requirers[reqIdx] == bundle)
                     {
-                        out.println(exports[expIdx]
-                            + " -> " + exports[expIdx].getExportingBundle());
+                        out.println(rbs[reqIdx]);
                         found = true;
                     }
                 }

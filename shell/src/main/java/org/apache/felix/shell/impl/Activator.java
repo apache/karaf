@@ -80,7 +80,7 @@ public class Activator implements BundleActivator
         // been registered (i.e., we didn't see their service events).
         initializeCommands();
 
-        // Register "exports" command service.
+        // Register "bundlelevel" command service.
         context.registerService(
             org.apache.felix.shell.Command.class.getName(),
             new BundleLevelCommandImpl(m_context), null);
@@ -126,6 +126,16 @@ public class Activator implements BundleActivator
         context.registerService(
             org.apache.felix.shell.Command.class.getName(),
             new RefreshCommandImpl(m_context), null);
+
+        // Register "requires" command service.
+        context.registerService(
+            org.apache.felix.shell.Command.class.getName(),
+            new RequiresCommandImpl(m_context), null);
+
+        // Register "requirers" command service.
+        context.registerService(
+            org.apache.felix.shell.Command.class.getName(),
+            new RequirersCommandImpl(m_context), null);
 
         // Register "resolve" command service.
         context.registerService(
