@@ -121,7 +121,7 @@ public class ManipulatorMojo extends AbstractMojo {
     }
     
     private boolean isXML() {
-        return m_metadata != null && m_metadata.contains("<");
+        return m_metadata != null && (m_metadata.indexOf('<') > -1);
     }
 
     /**

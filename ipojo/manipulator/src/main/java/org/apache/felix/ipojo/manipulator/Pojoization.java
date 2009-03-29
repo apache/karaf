@@ -801,7 +801,7 @@ public class Pojoization {
      */
     private void setCreatedBy(Attributes att) {
         String prev = att.getValue("Created-By");
-        if (! prev.contains("iPOJO")) { // Avoid appending iPOJO several times
+        if (prev.indexOf("iPOJO") == -1) { // Avoid appending iPOJO several times
             att.putValue("Created-By", prev + " & iPOJO");
         }
     }
