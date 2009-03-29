@@ -33,6 +33,7 @@ public class ObrCommandImpl implements Command
     private static final String ADDURL_CMD = "add-url";
     private static final String REMOVEURL_CMD = "remove-url";
     private static final String LISTURL_CMD = "list-url";
+    private static final String REFRESHURL_CMD = "refresh-url";
     private static final String LIST_CMD = "list";
     private static final String INFO_CMD = "info";
     private static final String DEPLOY_CMD = "deploy";
@@ -94,6 +95,7 @@ public class ObrCommandImpl implements Command
             else
             {
                 if (command.equals(ADDURL_CMD) ||
+                    command.equals(REFRESHURL_CMD) ||
                     command.equals(REMOVEURL_CMD) ||
                     command.equals(LISTURL_CMD))
                 {
@@ -156,6 +158,19 @@ public class ObrCommandImpl implements Command
                     try
                     {
                         m_repoAdmin.addRepository(new URL(st.nextToken()));
+                    }
+                    catch (Exception ex)
+                    {
+                        ex.printStackTrace(err);
+                    }
+                } 
+                else if (command.equals(REFRESHURL_CMD))
+                {
+                    try
+                    {
+                        URL url = new URL(st.nextToken());
+                        m_repoAdmin.removeRepository(url);
+                        m_repoAdmin.addRepository(url);
                     }
                     catch (Exception ex)
                     {
@@ -1007,17 +1022,29 @@ public class ObrCommandImpl implements Command
         if (command.equals(ADDURL_CMD))
         {
             out.println("");
-            out.println("obr " + ADDURL_CMD + " [<repository-url> ...]");
+            out.println("obr " + ADDURL_CMD + " <repository-url> ...");
             out.println("");
             out.println(
                 "This command adds the space-delimited list of repository URLs to\n" +
                 "the repository service.");
             out.println("");
         }
+        else if (command.equals(REFRESHURL_CMD))
+        {
+            out.println("");
+            out.println("obr " + REFRESHURL_CMD + " <repository-url> ...");
+            out.println("");
+            out.println(
+                "This command refreshes the space-delimited list of repository URLs\n" +
+                "within the repository service.\n" +
+                "(The command internally removes and adds the specified URLs from the\n" +
+                "repository service.)");
+            out.println("");
+        }
         else if (command.equals(REMOVEURL_CMD))
         {
             out.println("");
-            out.println("obr " + REMOVEURL_CMD + " [<repository-url> ...]");
+            out.println("obr " + REMOVEURL_CMD + " <repository-url> ...");
             out.println("");
             out.println(
                 "This command removes the space-delimited list of repository URLs\n" +
@@ -1158,6 +1185,7 @@ public class ObrCommandImpl implements Command
                 + " | " + DEPLOY_CMD + " | " + START_CMD
                 + " | " + SOURCE_CMD + " | " + JAVADOC_CMD + "]");
             out.println("obr " + ADDURL_CMD + " [<repository-file-url> ...]");
+            out.println("obr " + REFRESHURL_CMD + " [<repository-file-url> ...]");
             out.println("obr " + REMOVEURL_CMD + " [<repository-file-url> ...]");
             out.println("obr " + LISTURL_CMD);
             out.println("obr " + LIST_CMD + " [" + VERBOSE_SWITCH + "] [<string> ...]");
