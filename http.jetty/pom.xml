@@ -83,15 +83,6 @@
                         <Bundle-Activator>
                             ${pom.artifactId}.Activator
                         </Bundle-Activator>
-                        <Bundle-DocURL>
-                            http://oscar-osgi.sf.net/obr2/${pom.artifactId}/
-                        </Bundle-DocURL>
-                        <Bundle-URL>
-                            http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}.jar
-                        </Bundle-URL>
-                        <Bundle-Source>
-                            http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}-src.jar
-                        </Bundle-Source>
                         <Bundle-SymbolicName>
                             ${pom.artifactId}
                         </Bundle-SymbolicName>
