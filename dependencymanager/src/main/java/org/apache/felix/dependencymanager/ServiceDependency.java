@@ -22,15 +22,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
+import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
  * Service dependency that can track an OSGi service.
@@ -40,14 +42,14 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, ServiceComponentDependency {
     private boolean m_isRequired;
     private Service m_service;
-    private ServiceTracker m_tracker;
+    private volatile ServiceTracker m_tracker;
     private BundleContext m_context;
     private boolean m_isAvailable;
-    private Class m_trackedServiceName;
+    private volatile Class m_trackedServiceName;
     private Object m_nullObject;
-    private String m_trackedServiceFilter;
-    private ServiceReference m_trackedServiceReference;
-    private boolean m_isStarted;
+    private volatile String m_trackedServiceFilter;
+    private volatile ServiceReference m_trackedServiceReference;
+    private volatile boolean m_isStarted;
     private Object m_callbackInstance;
     private String m_callbackAdded;
     private String m_callbackChanged;
@@ -82,6 +84,78 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
             return 0;
         }
     };
+    
+    // Class used to wrap service properties behing a Map
+    private final static class ServicePropertiesMapEntry implements Map.Entry {
+        private final String m_key;
+        private Object m_value;
+
+        public ServicePropertiesMapEntry(String key, Object value) {
+            m_key = key;
+            m_value = value;
+        }
+
+        public Object getKey() {
+            return m_key;
+        }
+
+        public Object getValue() {
+            return m_value;
+        }
+
+        public String toString() {
+            return m_key + "=" + m_value;
+        }
+
+        public Object setValue(Object value) {
+            Object oldValue = m_value;
+            m_value = value;
+            return oldValue;
+        }
+
+        public boolean equals(Object o) {
+            if (!(o instanceof Map.Entry)) {
+                return false;
+            }
+            Map.Entry e = (Map.Entry) o;
+            return eq(m_key, e.getKey()) && eq(m_value, e.getValue());
+        }
+
+        public int hashCode() {
+            return ((m_key == null) ? 0 : m_key.hashCode()) ^ ((m_value == null) ? 0 : m_value.hashCode());
+        }
+
+        private static final boolean eq(Object o1, Object o2) {
+            return (o1 == null ? o2 == null : o1.equals(o2));
+        }
+    }
+
+    // Class used to wrap service properties behing a Map
+    private final static class ServicePropertiesMap extends AbstractMap {
+        private final ServiceReference m_ref;
+
+        public ServicePropertiesMap(ServiceReference ref) {
+            m_ref = ref;
+        }
+
+        public Object get(Object key) {
+            return m_ref.getProperty(key.toString());
+        }
+
+        public int size() {
+            return m_ref.getPropertyKeys().length;
+        }
+
+        public Set entrySet() {
+            Set set = new HashSet();
+            String[] keys = m_ref.getPropertyKeys();
+            for (int i = 0; i < keys.length; i++) {
+                set.add(new ServicePropertiesMapEntry(keys[i], m_ref.getProperty(keys[i])));
+            }
+            return set;
+        }
+    }
+    
     
     /**
      * Creates a new service dependency.
@@ -377,8 +451,8 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
                 trackedServiceName = m_trackedServiceName;
             }
             done = invokeMethod(instance, currentClazz, methodName,
-                new Class[][] {{ServiceReference.class, trackedServiceName}, {ServiceReference.class, Object.class}, {ServiceReference.class}, {trackedServiceName}, {Object.class}, {}},
-                new Object[][] {{reference, service}, {reference, service}, {reference}, {service}, {service}, {}},
+                new Class[][] {{ServiceReference.class, trackedServiceName}, {ServiceReference.class, Object.class}, {ServiceReference.class}, {trackedServiceName}, {Object.class}, {}, {Map.class}},
+                new Object[][] {{reference, service}, {reference, service}, {reference}, {service}, {service}, {}, {new ServicePropertiesMap(reference)}},
                 false);
             if (!done) {
                 currentClazz = currentClazz.getSuperclass();

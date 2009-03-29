@@ -26,9 +26,11 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.osgi.framework.BundleContext;
@@ -86,6 +88,8 @@ public class ServiceImpl implements Service, ServiceComponent {
 	// internal logging
     private final Logger m_logger;
     private ServiceRegistration m_serviceRegistration;
+    private Map m_autoConfig = new HashMap();
+    private Map m_autoConfigInstance = new HashMap();
 
     public ServiceImpl(BundleContext context, DependencyManager manager, Logger logger) {
     	m_logger = logger;
@@ -97,6 +101,9 @@ public class ServiceImpl implements Service, ServiceComponent {
         m_callbackStop = "stop";
         m_callbackDestroy = "destroy";
         m_implementation = null;
+        m_autoConfig.put(BundleContext.class, Boolean.TRUE);
+        m_autoConfig.put(ServiceRegistration.class, Boolean.TRUE);
+        m_autoConfig.put(DependencyManager.class, Boolean.TRUE);
     }
 
     private void calculateStateChanges(final State oldState, final State newState) {
@@ -575,13 +582,15 @@ public class ServiceImpl implements Service, ServiceComponent {
 		        	if (factory == null) {
                         m_logger.log(Logger.LOG_ERROR, "Factory cannot be null.");
 		        	}
-		        	try {
-						Method m = factory.getClass().getDeclaredMethod(m_instanceFactoryCreateMethod, null);
-						m_serviceInstance = m.invoke(factory, null);
-					}
-		        	catch (Exception e) {
-	                    m_logger.log(Logger.LOG_ERROR, "Could not create service instance using factory " + factory + " method " + m_instanceFactoryCreateMethod + ".", e);
-					}
+		        	else {
+    		        	try {
+    						Method m = factory.getClass().getDeclaredMethod(m_instanceFactoryCreateMethod, null);
+    						m_serviceInstance = m.invoke(factory, null);
+    					}
+    		        	catch (Exception e) {
+    	                    m_logger.log(Logger.LOG_ERROR, "Could not create service instance using factory " + factory + " method " + m_instanceFactoryCreateMethod + ".", e);
+    					}
+		        	}
 	        	}
 	        	if (m_implementation == null) {
                     m_logger.log(Logger.LOG_ERROR, "Implementation cannot be null.");
@@ -591,12 +600,27 @@ public class ServiceImpl implements Service, ServiceComponent {
 	        	}
 	        }
 	        // configure the bundle context
-	        configureImplementation(BundleContext.class, m_context);
-	        configureImplementation(ServiceRegistration.class, NULL_REGISTRATION);
-	        configureImplementation(DependencyManager.class, m_manager);
+	        if (((Boolean) m_autoConfig.get(BundleContext.class)).booleanValue()) {
+	            configureImplementation(BundleContext.class, m_context, (String) m_autoConfigInstance.get(BundleContext.class));
+	        }
+            if (((Boolean) m_autoConfig.get(ServiceRegistration.class)).booleanValue()) {
+                configureImplementation(ServiceRegistration.class, NULL_REGISTRATION, (String) m_autoConfigInstance.get(ServiceRegistration.class));
+            }
+            if (((Boolean) m_autoConfig.get(DependencyManager.class)).booleanValue()) {
+                configureImplementation(DependencyManager.class, m_manager, (String) m_autoConfigInstance.get(DependencyManager.class));
+            }
     	}
     }
 
+    public void setAutoConfig(Class clazz, boolean autoConfig) {
+        m_autoConfig.put(clazz, Boolean.valueOf(autoConfig));
+    }
+    
+    public void setAutoConfig(Class clazz, String instanceName) {
+        m_autoConfig.put(clazz, Boolean.valueOf(instanceName != null));
+        m_autoConfigInstance.put(clazz, instanceName);
+    }
+    
     private void configureService(State state) {
         // configure all services (the optional dependencies might be configured
         // as null objects but that's what we want at this point)
@@ -612,7 +636,10 @@ public class ServiceImpl implements Service, ServiceComponent {
         if (m_serviceName != null) {
             ServiceRegistrationImpl wrapper = new ServiceRegistrationImpl();
             m_registration = wrapper;
-            configureImplementation(ServiceRegistration.class, wrapper);
+            if (((Boolean) m_autoConfig.get(ServiceRegistration.class)).booleanValue()) {
+                configureImplementation(ServiceRegistration.class, m_registration, (String) m_autoConfigInstance.get(ServiceRegistration.class));
+            }
+            
             // service name can either be a string or an array of strings
             ServiceRegistration registration;
 

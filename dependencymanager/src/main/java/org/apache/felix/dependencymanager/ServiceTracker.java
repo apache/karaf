@@ -162,7 +162,7 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
         this.trackReference = null;
         this.trackClass = clazz;
         this.customizer = (customizer == null) ? this : customizer;
-        this.listenerFilter = "(" + Constants.OBJECTCLASS + "=" + clazz.toString() + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        this.listenerFilter = "(" + Constants.OBJECTCLASS + "=" + clazz + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         try {
             this.filter = context.createFilter(listenerFilter);
         }

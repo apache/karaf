@@ -143,7 +143,7 @@ public class Logger implements ServiceListener {
      * there will never be a log service present since the system bundle is
      * started before every other bundle.
      */
-    private void startListeningForLogService() {
+    private synchronized void startListeningForLogService() {
         // Add a service listener for log services.
         try {
             m_context.addServiceListener(this, "(objectClass=org.osgi.service.log.LogService)");
