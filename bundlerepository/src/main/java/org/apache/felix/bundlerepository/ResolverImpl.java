@@ -31,12 +31,13 @@ public class ResolverImpl implements Resolver
     private final RepositoryAdmin m_admin;
     private final Logger m_logger;
     private final LocalRepositoryImpl m_local;
-    private Set m_addedSet = new HashSet();
-    private Set m_resolveSet = new HashSet();
-    private Set m_requiredSet = new HashSet();
-    private Set m_optionalSet = new HashSet();
-    private Map m_reasonMap = new HashMap();
-    private Map m_unsatisfiedMap = new HashMap();
+    private final Set m_addedSet = new HashSet();
+    private final Set m_failedSet = new HashSet();
+    private final Set m_resolveSet = new HashSet();
+    private final Set m_requiredSet = new HashSet();
+    private final Set m_optionalSet = new HashSet();
+    private final Map m_reasonMap = new HashMap();
+    private final Map m_unsatisfiedMap = new HashMap();
     private boolean m_resolved = false;
     private long m_resolveTimeStamp;
 
@@ -116,6 +117,7 @@ public class ResolverImpl implements Resolver
         m_resolveTimeStamp = m_local.getLastModified();
 
         // Reset instance values.
+        m_failedSet.clear();
         m_resolveSet.clear();
         m_requiredSet.clear();
         m_optionalSet.clear();
@@ -155,7 +157,11 @@ public class ResolverImpl implements Resolver
         // Check for cycles.
         if (m_resolveSet.contains(resource))
         {
-            return result;
+            return true;
+        }
+        else if (m_failedSet.contains(resource))
+        {
+            return false;
         }
 
         // Add to resolve map to avoid cycles.
@@ -224,22 +230,25 @@ public class ResolverImpl implements Resolver
                 }
                 else if (candidate != null)
                 {
-                    // The resolved succeeded; record the candidate
-                    // as either optional or required.
-                    if (reqs[reqIdx].isOptional())
-                    {
-                        m_optionalSet.add(candidate);
-                    }
-                    else
-                    {
-                        m_requiredSet.add(candidate);
-                    }
-
-                    // Add the reason why the candidate was selected.
-                    addReason(candidate, reqs[reqIdx]);
 
                     // Try to resolve the candidate.
-                    if (!resolve(candidate))
+                    if (resolve(candidate))
+                    {
+                        // The resolved succeeded; record the candidate
+                        // as either optional or required.
+                        if (reqs[reqIdx].isOptional())
+                        {
+                            m_optionalSet.add(candidate);
+                        }
+                        else
+                        {
+                            m_requiredSet.add(candidate);
+                        }
+
+                        // Add the reason why the candidate was selected.
+                        addReason(candidate, reqs[reqIdx]);
+                    }
+                    else
                     {
                         result = false;
                     }
@@ -247,13 +256,12 @@ public class ResolverImpl implements Resolver
             }
         }
 
-        // If the resource did not resolve, then remove it from
-        // the resolve set, since to keep it consistent for iterative
-        // resolving, such as what happens when determining the best
-        // available candidate.
+        // If the resolve failed, remove the resource from the resolve set and
+        // add it to the failed set to avoid trying to resolve it again.
         if (!result)
         {
             m_resolveSet.remove(resource);
+            m_failedSet.add(resource);
         }
 
         return result;
@@ -282,17 +290,16 @@ public class ResolverImpl implements Resolver
 
     private Resource searchResolvingResources(Requirement req)
     {
-        Resource[] resources = (Resource[])
-            m_resolveSet.toArray(new Resource[m_resolveSet.size()]);
-        for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++)
+        for (Iterator iterator = m_resolveSet.iterator(); iterator.hasNext(); )
         {
-            Capability[] caps = resources[resIdx].getCapabilities();
+            Resource resource = (Resource) iterator.next();
+            Capability[] caps = resource.getCapabilities();
             for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
             {
                 if (caps[capIdx].getName().equals(req.getName())
                     && req.isSatisfied(caps[capIdx]))
                 {
-                    return resources[resIdx];
+                    return resource;
                 }
             }
         }
@@ -311,13 +318,18 @@ public class ResolverImpl implements Resolver
         Resource[] resources = m_local.getResources();
         for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++)
         {
-            Capability[] caps = resources[resIdx].getCapabilities();
-            for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
+            // We don't need to look at resources we've already looked at.
+            if (!m_failedSet.contains(resources[resIdx])
+                && !m_resolveSet.contains(resources[resIdx]))
             {
-                if (caps[capIdx].getName().equals(req.getName())
-                    && req.isSatisfied(caps[capIdx]))
+                Capability[] caps = resources[resIdx].getCapabilities();
+                for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
                 {
-                    matchingCandidates.add(resources[resIdx]);
+                    if (caps[capIdx].getName().equals(req.getName())
+                        && req.isSatisfied(caps[capIdx]))
+                    {
+                        matchingCandidates.add(resources[resIdx]);
+                    }
                 }
             }
         }
@@ -340,13 +352,18 @@ public class ResolverImpl implements Resolver
             Resource[] resources = repos[repoIdx].getResources();
             for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++)
             {
-                Capability[] caps = resources[resIdx].getCapabilities();
-                for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
+                // We don't need to look at resources we've already looked at.
+                if (!m_failedSet.contains(resources[resIdx])
+                    && !m_resolveSet.contains(resources[resIdx]))
                 {
-                    if (caps[capIdx].getName().equals(req.getName())
-                        && req.isSatisfied(caps[capIdx]))
+                    Capability[] caps = resources[resIdx].getCapabilities();
+                    for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
                     {
-                        matchingCandidates.add(resources[resIdx]);
+                        if (caps[capIdx].getName().equals(req.getName())
+                                && req.isSatisfied(caps[capIdx]))
+                        {
+                            matchingCandidates.add(resources[resIdx]);
+                        }
                     }
                 }
             }
@@ -362,7 +379,8 @@ public class ResolverImpl implements Resolver
      * @param resources
      * @return
      */
-    private Resource getBestResource(List resources) {
+    private Resource getBestResource(List resources)
+    {
         Version bestVersion = null;
         Resource best = null;
 
