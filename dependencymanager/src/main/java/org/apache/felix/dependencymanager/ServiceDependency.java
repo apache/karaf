@@ -85,7 +85,9 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
         }
     };
     
-    // Class used to wrap service properties behing a Map
+    /**
+     * Entry to wrap service properties behind a Map.
+     */
     private final static class ServicePropertiesMapEntry implements Map.Entry {
         private final String m_key;
         private Object m_value;
@@ -130,7 +132,9 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
         }
     }
 
-    // Class used to wrap service properties behing a Map
+    /**
+     * Wraps service properties behind a Map.
+     */
     private final static class ServicePropertiesMap extends AbstractMap {
         private final ServiceReference m_ref;
 
@@ -155,13 +159,12 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
             return set;
         }
     }
-    
-    
+        
     /**
      * Creates a new service dependency.
      * 
      * @param context the bundle context
-     * @param logger 
+     * @param logger the logger
      */
     public ServiceDependency(BundleContext context, Logger logger) {
         m_context = context;
@@ -451,8 +454,8 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
                 trackedServiceName = m_trackedServiceName;
             }
             done = invokeMethod(instance, currentClazz, methodName,
-                new Class[][] {{ServiceReference.class, trackedServiceName}, {ServiceReference.class, Object.class}, {ServiceReference.class}, {trackedServiceName}, {Object.class}, {}, {Map.class}},
-                new Object[][] {{reference, service}, {reference, service}, {reference}, {service}, {service}, {}, {new ServicePropertiesMap(reference)}},
+                new Class[][] {{ServiceReference.class, trackedServiceName}, {ServiceReference.class, Object.class}, {ServiceReference.class}, {trackedServiceName}, {Object.class}, {}, {Map.class, trackedServiceName}},
+                new Object[][] {{reference, service}, {reference, service}, {reference}, {service}, {service}, {}, {new ServicePropertiesMap(reference), service}},
                 false);
             if (!done) {
                 currentClazz = currentClazz.getSuperclass();
