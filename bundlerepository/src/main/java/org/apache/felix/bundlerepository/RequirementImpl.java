@@ -52,9 +52,9 @@ public class RequirementImpl implements Requirement
         return m_filter.toString();
     }
 
-    public synchronized void setFilter(String filter) throws InvalidSyntaxException
+    public synchronized void setFilter(String filter)
     {
-        m_filter = RepositoryAdminImpl.m_context.createFilter(filter);
+        m_filter = new FilterImpl(filter);
     }
 
     public synchronized boolean isSatisfied(Capability capability)
