@@ -41,4 +41,9 @@ public class ListenerHookInfoImpl implements ListenerHook.ListenerInfo
     {
         return m_filter;
     }
+
+    public boolean isRemoved()
+    {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

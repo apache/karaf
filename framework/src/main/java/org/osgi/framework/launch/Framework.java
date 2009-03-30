@@ -32,7 +32,7 @@ import org.osgi.framework.FrameworkEvent;
  * instance.
  * 
  * @ThreadSafe
- * @version $Revision: 6361 $
+ * @version $Revision: 6542 $
  */
 public interface Framework extends Bundle {
 
@@ -104,8 +104,9 @@ public interface Framework extends Bundle {
 	 *         encountered an error while shutting down or an error has occurred
 	 *         which forced the framework to shutdown. </li>
 	 * 
-	 *         <li> {@link FrameworkEvent#INFO INFO} - This method has timed out
-	 *         and returned before this Framework has stopped.</li>
+	 *         <li> {@link FrameworkEvent#WAIT_TIMEDOUT WAIT_TIMEDOUT} - This
+	 *         method has timed out and returned before this Framework has
+	 *         stopped.</li>
 	 *         </ul>
 	 * @throws InterruptedException If another thread interrupted the current
 	 *         thread before or while the current thread was waiting for this
