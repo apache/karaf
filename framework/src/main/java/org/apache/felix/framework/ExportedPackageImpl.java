@@ -30,8 +30,8 @@ class ExportedPackageImpl implements ExportedPackage
     private final BundleImpl m_exportingBundle;
     private final IModule m_exportingModule;
     private final Capability m_export;
-    private String m_toString = null;
-    private String m_versionString = null;
+    private volatile String m_toString = null;
+    private volatile String m_versionString = null;
 
     public ExportedPackageImpl(
         Felix felix, BundleImpl exporter, IModule module, Capability export)

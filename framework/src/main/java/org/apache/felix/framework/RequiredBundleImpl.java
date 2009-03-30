@@ -35,6 +35,8 @@ class RequiredBundleImpl implements RequiredBundle
 {
     private final Felix m_felix;
     private final BundleImpl m_bundle;
+    private volatile String m_toString = null;
+    private volatile String m_versionString = null;
 
     public RequiredBundleImpl(Felix felix, BundleImpl bundle)
     {
@@ -91,18 +93,21 @@ class RequiredBundleImpl implements RequiredBundle
 
     public Version getVersion()
     {
-        ICapability[] caps = 
-            Util.getCapabilityByNamespace(
-                m_bundle.getCurrentModule(), ICapability.MODULE_NAMESPACE);
-        if ((caps != null) && (caps.length > 0))
-        {
-            return (Version) caps[0].getProperties().get(Constants.BUNDLE_VERSION_ATTRIBUTE);
-        }
-        return null;
+        return m_bundle.getCurrentModule().getVersion();
     }
 
     public boolean isRemovalPending()
     {
         return m_bundle.isRemovalPending();
+    }
+
+    public String toString()
+    {
+        if (m_toString == null)
+        {
+            m_toString = m_bundle.getSymbolicName()
+                + "; version=" + m_bundle.getCurrentModule().getVersion();
+        }
+        return m_toString;
     }
 }
