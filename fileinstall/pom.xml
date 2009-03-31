@@ -57,6 +57,21 @@
           </instructions>
         </configuration>
       </plugin>
+       <plugin>
+		<groupId>org.codehaus.mojo</groupId>
+		<artifactId>rat-maven-plugin</artifactId>
+		<configuration>
+			<excludeSubProjects>false</excludeSubProjects>
+			<useEclipseDefaultExcludes>true</useEclipseDefaultExcludes>
+			<useMavenDefaultExcludes>true</useMavenDefaultExcludes>
+			<excludes>
+				<param>doc/*</param>
+				<param>maven-eclipse.xml</param>
+				<param>.checkstyle</param>
+				<param>.externalToolBuilders/*</param>
+			</excludes>
+		</configuration>
+	   </plugin>
     </plugins>
   </build>
 </project>
