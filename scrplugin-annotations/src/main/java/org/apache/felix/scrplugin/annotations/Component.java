@@ -18,10 +18,7 @@
  */
 package org.apache.felix.scrplugin.annotations;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * The <code>Component</code> annotation is the only required annotation. If
@@ -37,7 +34,7 @@ import java.lang.annotation.Target;
  * </p>
  */
 @Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RetentionPolicy.SOURCE)
 public @interface Component {
 
     /**

@@ -66,6 +66,7 @@
       <modules>
         <module>maven-obr-plugin</module>
         <module>bundleplugin</module>
+        <module>scrplugin-annotations</module>
         <module>scrplugin</module>
         <module>tools/maven2/maven-osgi-plugin</module>
 <!--        <module>tools/maven2/maven-felix-plugin</module> -->

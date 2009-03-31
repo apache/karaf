@@ -18,11 +18,7 @@
  */
 package org.apache.felix.scrplugin.annotations;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * The <code>Service</code> annotation defines whether and which service
@@ -34,7 +30,7 @@ import java.lang.annotation.Target;
  * information.
  */
 @Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RetentionPolicy.SOURCE)
 @Documented
 public @interface Service {
 
