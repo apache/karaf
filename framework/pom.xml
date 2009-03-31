@@ -20,7 +20,7 @@
   <parent>
     <groupId>org.apache.felix</groupId>
     <artifactId>felix</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.4</version>
     <relativePath>../pom/pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -67,6 +67,21 @@
             <Import-Package>!*</Import-Package>
             <Include-Resource>META-INF/LICENSE=LICENSE,META-INF/NOTICE=NOTICE,{src/main/resources/},org/osgi/framework/=target/classes/org/osgi/framework/</Include-Resource> 
           </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>rat-maven-plugin</artifactId>
+        <configuration>
+          <excludeSubProjects>false</excludeSubProjects>
+          <useEclipseDefaultExcludes>true</useEclipseDefaultExcludes>
+          <useMavenDefaultExcludes>true</useMavenDefaultExcludes>
+          <excludes>
+            <param>doc/*</param>
+            <param>maven-eclipse.xml</param>
+            <param>.checkstyle</param>
+            <param>.externalToolBuilders/*</param>
+          </excludes>
         </configuration>
       </plugin>
     </plugins>

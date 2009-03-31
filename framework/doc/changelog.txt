@@ -1,3 +1,40 @@
+Changes from 1.4.1 to 1.6.0
+---------------------------
+
+** Bug
+    * [FELIX-737] - Resolver does not correctly discard export when module imports the same package (part 2)
+    * [FELIX-852] - Fragment support is currently limited to directly resolved hosts
+    * [FELIX-869] - SCR throws exception on invalidating a component with a reference to a service that was already unregistered
+    * [FELIX-891] - Bundle lock acquisition should not record lock until it verifies the bundle is lockable
+    * [FELIX-892] - ServiceReferenceImpl improper implementation of equals and hashcode
+    * [FELIX-893] - Felix fails to start using J9 JVM
+    * [FELIX-897] - Empty system package is exported when a semicolon is present in "extra" configuration
+    * [FELIX-902] - Empty bundle.state file produces NPE
+    * [FELIX-910] - Framework may ignore framework startlevel on startup
+    * [FELIX-911] - Potential deadlock between Bundle.stop() and BundleContext.registerService()
+    * [FELIX-915] - PackageAdmin returns null on getBundle(...) with system classes
+    * [FELIX-934] - Bootdelegation bug
+    * [FELIX-947] - Behaviour of startlevel comman doesn't adhere to spec
+    * [FELIX-948] - ServiceReferenceImpl.compareTo should handle other types than integer for service ranking
+    * [FELIX-951] - Deadlock in iPojo when stopping Felix
+    * [FELIX-952] - Exception thrown when unregistering services because the bundle is stopped
+    * [FELIX-953] - Bundle#loadClass sometimes return null instead of throwing a CNFE
+    * [FELIX-961] - 100% CPU looping inside uses calculation
+    * [FELIX-962] - Erroneous class loading delegation to the application launcher classloader in some cases
+    * [FELIX-969] - system bundle does not correctly handle (export) package attributes
+    * [FELIX-971] - Exception thrown in ServiceTracker at shutdown 
+    * [FELIX-978] - Resolver does not clean up properly on a failed recursive attempt to resolve
+    * [FELIX-1004] - Extensionmanager openConnection(URL) method should be public
+    * [FELIX-1005] - Strange list of imported packages returned by the package admin
+
+** Improvement
+    * [FELIX-681] - Modify daemon threads to catch all exceptions and log them to avoid premature thread death
+    * [FELIX-851] - Refactor the module abstraction layer to align more closely to OSGi concepts
+    * [FELIX-872] - JarContent swallows exception when opening manifest, it should log it
+    * [FELIX-883] - JarContent logs and then swallows exceptions when reading from JAR file, should probably throw an exception
+    * [FELIX-894] - Loosen locking when starting/stopping/uninstalling a bundle by firing event without holding a lock
+    * [FELIX-908] - Unsynchronize access to bundle state inside BundleInfo by making the variable volatile
+
 Changes from 1.4.0 to 1.4.1
 ---------------------------
 
