@@ -1,3 +1,9 @@
+Changes from 1.0.2 to 1.2.0
+---------------------------
+
+** Bug
+    * [FELIX-729] - Shell-TUI causes 100% CPU load when using javaw launcher
+
 Changes from 1.0.1 to 1.0.2
 ---------------------------
 
