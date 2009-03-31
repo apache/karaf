@@ -38,7 +38,7 @@
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.shell</artifactId>
-      <version>1.2.0</version>
+      <version>1.0.2</version>
     </dependency>
     <dependency>
       <groupId>net.sf.kxml</groupId>
