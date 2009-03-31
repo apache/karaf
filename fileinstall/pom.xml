@@ -27,7 +27,7 @@
   <packaging>bundle</packaging>
   <name>Apache Felix File Install</name>
   <description>A utility to automatically install bundles from a directory.</description>
-  <version>0.9.2</version>
+  <version>0.9.3-SNAPSHOT</version>
   <artifactId>org.apache.felix.fileinstall</artifactId>
   <dependencies>
     <dependency>
@@ -74,10 +74,4 @@
 	   </plugin>
     </plugins>
   </build>
-
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.fileinstall-0.9.2</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.fileinstall-0.9.2</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.fileinstall-0.9.2</url>
-  </scm>
 </project>
