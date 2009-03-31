@@ -38,7 +38,7 @@ public class AttributeDefinition {
 
     protected Integer cardinality;
 
-    protected Map options;
+    protected Map<String, String> options;
 
     public String getId() {
         return this.id;
@@ -108,11 +108,11 @@ public class AttributeDefinition {
         this.cardinality = cardinality;
     }
 
-    public Map getOptions() {
+    public Map<String, String> getOptions() {
         return this.options;
     }
 
-    public void setOptions(Map options) {
+    public void setOptions(Map<String, String> options) {
         this.options = options;
     }
 }

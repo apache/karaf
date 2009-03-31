@@ -39,7 +39,7 @@ public class PropertyHandler {
      * This is a map using the property name as the key and
      * {@link PropertyDescription} as values.
      */
-    final private Map properties = new LinkedHashMap();
+    final private Map<String, PropertyDescription> properties = new LinkedHashMap<String, PropertyDescription>();
 
     /** The component. */
     final private Component component;
@@ -76,15 +76,15 @@ public class PropertyHandler {
                 this.setPropertyValueRef(tag, prop, valueRef);
             } else {
                 // check for multivalue - these can either be values or value refs
-                final List values = new ArrayList();
-                final Map valueMap = tag.getNamedParameterMap();
-                for (Iterator vi = valueMap.entrySet().iterator(); vi.hasNext();) {
-                    final Map.Entry entry = (Map.Entry) vi.next();
-                    final String key = (String) entry.getKey();
+                final List<String> values = new ArrayList<String>();
+                final Map<String, String> valueMap = tag.getNamedParameterMap();
+                for (Iterator<Map.Entry<String, String>> vi = valueMap.entrySet().iterator(); vi.hasNext();) {
+                    final Map.Entry<String, String> entry = vi.next();
+                    final String key = entry.getKey();
                     if (key.startsWith(Constants.PROPERTY_MULTIVALUE_PREFIX) ) {
                         values.add(entry.getValue());
                     } else if ( key.startsWith(Constants.PROPERTY_MULTIVALUE_REF_PREFIX) ) {
-                        final String[] stringValues = this.getPropertyValueRef(tag, prop, (String)entry.getValue());
+                        final String[] stringValues = this.getPropertyValueRef(tag, prop, entry.getValue());
                         if ( stringValues != null ) {
                             for(int i=0; i<stringValues.length; i++) {
                                 values.add(stringValues[i]);
@@ -93,7 +93,7 @@ public class PropertyHandler {
                     }
                 }
                 if ( values.size() > 0 ) {
-                    prop.setMultiValue((String[])values.toArray(new String[values.size()]));
+                    prop.setMultiValue(values.toArray(new String[values.size()]));
                 } else {
                     // we have no value, valueRef or values so let's try to
                     // get the value of the field if a name attribute is specified
@@ -166,10 +166,10 @@ public class PropertyHandler {
 
             // check options
             String[] parameters = tag.getParameters();
-            Map options = null;
+            Map<String, String> options = null;
             for (int j=0; j < parameters.length; j++) {
                 if (Constants.PROPERTY_OPTIONS.equals(parameters[j])) {
-                    options = new LinkedHashMap();
+                    options = new LinkedHashMap<String, String>();
                 } else if (options != null) {
                     String optionLabel = parameters[j];
                     String optionValue = (j < parameters.length-2) ? parameters[j+2] : null;
@@ -334,25 +334,25 @@ public class PropertyHandler {
      * Process all found properties for the component.
      * @throws MojoExecutionException
      */
-    public void processProperties(final Map globalProperties)
+    public void processProperties(final Map<String, String> globalProperties)
     throws MojoExecutionException {
-        final Iterator propIter = properties.entrySet().iterator();
+        final Iterator<Map.Entry<String, PropertyDescription>> propIter = properties.entrySet().iterator();
         while ( propIter.hasNext() ) {
-            final Map.Entry entry = (Map.Entry)propIter.next();
-            final String propName = entry.getKey().toString();
-            final PropertyDescription desc = (PropertyDescription)entry.getValue();
+            final Map.Entry<String, PropertyDescription> entry = propIter.next();
+            final String propName = entry.getKey();
+            final PropertyDescription desc = entry.getValue();
             this.processProperty(desc.propertyTag, propName, desc.field);
         }
         // apply pre configured global properties
         if ( globalProperties != null ) {
-            final Iterator globalPropIter = globalProperties.entrySet().iterator();
+            final Iterator<Map.Entry<String, String>> globalPropIter = globalProperties.entrySet().iterator();
             while ( globalPropIter.hasNext() ) {
-                final Map.Entry entry = (Map.Entry)globalPropIter.next();
-                final String name = entry.getKey().toString();
+                final Map.Entry<String, String> entry = globalPropIter.next();
+                final String name = entry.getKey();
 
                 // check if the service already provides this property
                 if ( !properties.containsKey(name) && entry.getValue() != null ) {
-                    final String value = entry.getValue().toString();
+                    final String value = entry.getValue();
 
                     final Property p = new Property();
                     p.setName(name);

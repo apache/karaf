@@ -91,7 +91,7 @@ public class Property extends AbstractObject {
      * If errors occur a message is added to the issues list,
      * warnings can be added to the warnings list.
      */
-    public void validate(List issues, List warnings) {
+    public void validate(List<String> issues, List<String> warnings) {
         if ( name == null || name.trim().length() == 0 ) {
             issues.add(this.getMessage("Property name can not be empty."));
         }

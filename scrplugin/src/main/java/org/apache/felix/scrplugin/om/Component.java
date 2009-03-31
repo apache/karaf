@@ -18,7 +18,8 @@
  */
 package org.apache.felix.scrplugin.om;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.felix.scrplugin.tags.*;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -46,13 +47,13 @@ public class Component extends AbstractObject {
     protected Implementation implementation;
 
     /** All properties. */
-    protected List properties = new ArrayList();
+    protected List<Property> properties = new ArrayList<Property>();
 
     /** The corresponding service. */
     protected Service service;
 
     /** The references. */
-    protected List references = new ArrayList();
+    protected List<Reference> references = new ArrayList<Reference>();
 
     /** Is this an abstract description? */
     protected boolean isAbstract;
@@ -87,11 +88,11 @@ public class Component extends AbstractObject {
     /**
      * @return All properties of this component.
      */
-    public List getProperties() {
+    public List<Property> getProperties() {
         return this.properties;
     }
 
-    public void setProperties(List properties) {
+    public void setProperties(List<Property> properties) {
         this.properties = properties;
     }
 
@@ -147,11 +148,11 @@ public class Component extends AbstractObject {
         this.service = service;
     }
 
-    public List getReferences() {
+    public List<Reference> getReferences() {
         return this.references;
     }
 
-    public void setReferences(List references) {
+    public void setReferences(List<Reference> references) {
         this.references = references;
     }
 
@@ -180,7 +181,7 @@ public class Component extends AbstractObject {
      * If errors occur a message is added to the issues list,
      * warnings can be added to the warnings list.
      */
-    public void validate(List issues, List warnings)
+    public void validate(List<String> issues, List<String> warnings)
     throws MojoExecutionException {
         final int currentIssueCount = issues.size();
 
@@ -231,8 +232,7 @@ public class Component extends AbstractObject {
                     }
 
                     // verify properties
-                    for (Iterator pi = this.getProperties().iterator(); pi.hasNext();) {
-                        Property prop = (Property) pi.next();
+                    for(final Property prop : this.getProperties()) {
                         prop.validate(issues, warnings);
                     }
 
@@ -259,8 +259,7 @@ public class Component extends AbstractObject {
             }
             if ( issues.size() == currentIssueCount ) {
                 // verify references
-                for (Iterator ri = this.getReferences().iterator(); ri.hasNext();) {
-                    final Reference ref = (Reference) ri.next();
+                for(final Reference ref : this.getReferences()) {
                     ref.validate(issues, warnings, this.isAbstract);
                 }
             }
@@ -273,7 +272,7 @@ public class Component extends AbstractObject {
      * @param methodName The method name.
      * @param warnings The list of warnings used to add new warnings.
      */
-    protected void checkLifecycleMethod(JavaClassDescription javaClass, String methodName, List warnings)
+    protected void checkLifecycleMethod(JavaClassDescription javaClass, String methodName, List<String> warnings)
     throws MojoExecutionException {
         final JavaMethod method = javaClass.getMethodBySignature(methodName, new String[] {"org.osgi.service.component.ComponentContext"});
         if ( method != null ) {

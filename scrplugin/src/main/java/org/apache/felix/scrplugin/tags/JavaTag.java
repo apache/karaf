@@ -38,5 +38,5 @@ public interface JavaTag {
 
     JavaField getField();
 
-    Map getNamedParameterMap();
+    Map<String, String> getNamedParameterMap();
 }

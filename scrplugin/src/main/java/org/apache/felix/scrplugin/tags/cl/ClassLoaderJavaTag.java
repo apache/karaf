@@ -92,9 +92,9 @@ public class ClassLoaderJavaTag implements JavaTag {
      * @see org.apache.felix.scrplugin.tags.JavaTag#getNamedParameter(java.lang.String)
      */
     public String getNamedParameter(String name) {
-        final Map map = this.getNamedParameterMap();
+        final Map<String, String> map = this.getNamedParameterMap();
         if ( map != null ) {
-            return (String)map.get(name);
+            return map.get(name);
         }
         return null;
     }
@@ -102,9 +102,9 @@ public class ClassLoaderJavaTag implements JavaTag {
     /**
      * @see org.apache.felix.scrplugin.tags.JavaTag#getNamedParameterMap()
      */
-    public Map getNamedParameterMap() {
+    public Map<String, String> getNamedParameterMap() {
         if ( this.reference != null ) {
-            final Map map = new HashMap();
+            final Map<String, String> map = new HashMap<String, String>();
             map.put(Constants.REFERENCE_BIND, this.reference.getBind());
             map.put(Constants.REFERENCE_CARDINALITY, this.reference.getCardinality());
             map.put(Constants.REFERENCE_INTERFACE, this.reference.getInterfacename());
@@ -116,7 +116,7 @@ public class ClassLoaderJavaTag implements JavaTag {
             map.put(Constants.REFERENCE_STRATEGY, this.reference.getStrategy());
             return map;
         } else if ( this.property != null ) {
-            final Map map = new HashMap();
+            final Map<String, String> map = new HashMap<String, String>();
             map.put(Constants.PROPERTY_TYPE, this.property.getType());
             map.put(Constants.PROPERTY_NAME, this.property.getName());
             final String[] values = this.property.getMultiValue();
@@ -139,7 +139,7 @@ public class ClassLoaderJavaTag implements JavaTag {
             }
             return map;
         } else if ( this.interf != null ) {
-            final Map map = new HashMap();
+            final Map<String, String> map = new HashMap<String, String>();
             map.put(Constants.SERVICE_INTERFACE, this.interf.getInterfacename());
             if ( this.isServiceFactory ) {
                 map.put(Constants.SERVICE_FACTORY, "true");
@@ -153,9 +153,9 @@ public class ClassLoaderJavaTag implements JavaTag {
      * @see org.apache.felix.scrplugin.tags.JavaTag#getParameters()
      */
     public String[] getParameters() {
-        final Map map = this.getNamedParameterMap();
+        final Map<String, String> map = this.getNamedParameterMap();
         if ( map != null ) {
-            return (String[])map.keySet().toArray(new String[5]);
+            return map.keySet().toArray(new String[5]);
         }
         return new String[0];
     }

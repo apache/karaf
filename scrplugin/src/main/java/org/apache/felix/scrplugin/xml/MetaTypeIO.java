@@ -95,15 +95,13 @@ public class MetaTypeIO {
         contentHandler.startElement(NAMESPACE_URI, METADATA_ELEMENT, METADATA_ELEMENT_QNAME, ai);
         IOUtils.newline(contentHandler);
 
-        final Iterator i = metaData.getDescriptors().iterator();
-        while ( i.hasNext() ) {
-            final Object obj = i.next();
-            if ( obj instanceof OCD ) {
-                generateXML((OCD)obj, contentHandler);
-            } else {
-                generateXML((Designate)obj, contentHandler);
-            }
+        for(final OCD ocd : metaData.getOCDs()) {
+            generateXML(ocd, contentHandler);
         }
+        for(final Designate d : metaData.getDesignates()) {
+            generateXML(d, contentHandler);
+        }
+
         // end wrapper element
         contentHandler.endElement(NAMESPACE_URI, METADATA_ELEMENT, METADATA_ELEMENT_QNAME);
         IOUtils.newline(contentHandler);
@@ -122,9 +120,9 @@ public class MetaTypeIO {
 
         if ( ocd.getProperties().size() > 0 ) {
             IOUtils.newline(contentHandler);
-            final Iterator i = ocd.getProperties().iterator();
+            final Iterator<AttributeDefinition> i = ocd.getProperties().iterator();
             while ( i.hasNext() ) {
-                final AttributeDefinition ad = (AttributeDefinition) i.next();
+                final AttributeDefinition ad = i.next();
                 generateXML(ad, contentHandler);
             }
             IOUtils.indent(contentHandler, 1);
@@ -159,11 +157,11 @@ public class MetaTypeIO {
 
         if (ad.getOptions() != null && ad.getOptions().size() > 0) {
             IOUtils.newline(contentHandler);
-            for (Iterator oi=ad.getOptions().entrySet().iterator(); oi.hasNext(); ) {
-                final Map.Entry entry = (Map.Entry) oi.next();
+            for (Iterator<Map.Entry<String, String>> oi=ad.getOptions().entrySet().iterator(); oi.hasNext(); ) {
+                final Map.Entry<String, String> entry = oi.next();
                 ai.clear();
-                IOUtils.addAttribute(ai, "value", String.valueOf(entry.getKey()));
-                IOUtils.addAttribute(ai, "label", String.valueOf(entry.getValue()));
+                IOUtils.addAttribute(ai, "value", entry.getKey());
+                IOUtils.addAttribute(ai, "label", entry.getValue());
                 IOUtils.indent(contentHandler, 3);
                 contentHandler.startElement(INNER_NAMESPACE_URI, OPTION_ELEMENT, OPTION_ELEMENT_QNAME, ai);
                 contentHandler.endElement(INNER_NAMESPACE_URI, OPTION_ELEMENT, OPTION_ELEMENT_QNAME);

@@ -18,14 +18,16 @@
  */
 package org.apache.felix.scrplugin.om.metatype;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MetaData {
 
     protected String localization;
 
-    protected List descriptors = new ArrayList();
+    protected List<OCD> ocds = new ArrayList<OCD>();
+
+    protected List<Designate> designates = new ArrayList<Designate>();
 
     public String getLocalization() {
         return this.localization;
@@ -35,15 +37,19 @@ public class MetaData {
         this.localization = localization;
     }
 
-    public List getDescriptors() {
-        return this.descriptors;
+    public List<OCD> getOCDs() {
+        return this.ocds;
+    }
+
+    public List<Designate> getDesignates() {
+        return this.designates;
     }
 
     public void addOCD(OCD ocd) {
-        this.descriptors.add(ocd);
+        this.ocds.add(ocd);
     }
 
     public void addDesignate(Designate d) {
-        this.descriptors.add(d);
+        this.designates.add(d);
     }
 }

@@ -31,7 +31,7 @@ public class Service {
     protected boolean isServicefactory;
 
     /** The list of implemented interfaces. */
-    protected final List interfaces = new ArrayList();
+    protected final List<Interface> interfaces = new ArrayList<Interface>();
 
     /**
      * Default constructor.
@@ -54,7 +54,7 @@ public class Service {
         this.isServicefactory = flag;
     }
 
-    public List getInterfaces() {
+    public List<Interface> getInterfaces() {
         return this.interfaces;
     }
 
@@ -64,9 +64,9 @@ public class Service {
      * @return The interface if it is implemented by this service or null.
      */
     public Interface findInterface(String name) {
-        final Iterator i = this.interfaces.iterator();
+        final Iterator<Interface> i = this.getInterfaces().iterator();
         while ( i.hasNext() ) {
-            final Interface current = (Interface)i.next();
+            final Interface current = i.next();
             if ( current.getInterfacename().equals(name) ) {
                 return current;
             }
@@ -90,11 +90,9 @@ public class Service {
      * If errors occur a message is added to the issues list,
      * warnings can be added to the warnings list.
      */
-    public void validate(List issues, List warnings)
+    public void validate(List<String> issues, List<String> warnings)
     throws MojoExecutionException {
-        final Iterator i = this.interfaces.iterator();
-        while ( i.hasNext() ) {
-            final Interface interf = (Interface)i.next();
+        for(final Interface interf : this.getInterfaces()) {
             interf.validate(issues, warnings);
         }
     }

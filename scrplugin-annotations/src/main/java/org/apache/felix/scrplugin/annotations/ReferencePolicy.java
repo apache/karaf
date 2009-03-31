@@ -16,39 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scrplugin.om;
-
-import java.util.ArrayList;
-import java.util.List;
+package org.apache.felix.scrplugin.annotations;
 
 /**
- * <code>Components</code>...
- *
- * Components is just a collection of {@link Component}s.
+ * Options for {@link Reference#policy()} property.
  */
-public class Components {
-
-    /** The list of {@link Component}s. */
-    protected List<Component> components = new ArrayList<Component>();
+public enum ReferencePolicy {
 
     /**
-     * Return the list of {@link Component}s.
+     * The component will be deactivated and re-activated if the service comes
+     * and/or goes away.
      */
-    public List<Component> getComponents() {
-        return this.components;
-    }
+    STATIC,
 
     /**
-     * Set the list of {@link Component}s.
+     * The service will be made available to the component as it comes and goes.
      */
-    public void setComponents(List<Component> components) {
-        this.components = components;
-    }
+    DYNAMIC;
 
     /**
-     * Add a component to the list.
+     * @return String representation of policy
      */
-    public void addComponent(Component component) {
-        this.components.add(component);
+    public String getPolicyString() {
+        return this.name().toLowerCase();
     }
+
 }

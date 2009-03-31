@@ -37,7 +37,7 @@ public class Reference extends AbstractObject {
     protected String policy;
     protected String bind;
     protected String unbind;
-    
+
     /** @since 1.0.9 */
     protected String strategy;
 
@@ -128,7 +128,7 @@ public class Reference extends AbstractObject {
     public void setChecked(boolean checked) {
         this.checked = checked;
     }
-    
+
     /** @since 1.0.9 */
     public String getStrategy() {
         return strategy;
@@ -138,7 +138,7 @@ public class Reference extends AbstractObject {
     public void setStrategy(String strategy) {
         this.strategy = strategy;
     }
-    
+
     /** @since 1.0.9 */
     public boolean isLookupStrategy() {
         return "lookup".equals(getStrategy());
@@ -149,7 +149,7 @@ public class Reference extends AbstractObject {
      * If errors occur a message is added to the issues list,
      * warnings can be added to the warnings list.
      */
-    public void validate(List issues, List warnings, boolean componentIsAbstract)
+    public void validate(List<String> issues, List<String> warnings, boolean componentIsAbstract)
     throws MojoExecutionException {
         // if this reference is already checked, return immediately
         if ( this.checked ) {
@@ -181,7 +181,7 @@ public class Reference extends AbstractObject {
         } else if (!"static".equals(this.policy) && !"dynamic".equals(this.policy)) {
             issues.add(this.getMessage("Invalid Policy specification " + this.policy));
         }
-        
+
         // validate strategy
         if (this.strategy == null) {
             this.strategy = "event";
@@ -214,9 +214,9 @@ public class Reference extends AbstractObject {
         }
     }
 
-    protected String validateMethod(String  methodName,
-                                    List    issues,
-                                    List    warnings,
+    protected String validateMethod(String       methodName,
+                                    List<String> issues,
+                                    List<String> warnings,
                                     boolean componentIsAbstract)
     throws MojoExecutionException {
         final JavaMethod method = this.findMethod(methodName);

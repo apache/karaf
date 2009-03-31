@@ -102,9 +102,9 @@ public class QDoxJavaClassDescription
         if ( inherited && this.getSuperClass() != null ) {
             final JavaTag[] superTags = this.getSuperClass().getTagsByName(name, inherited);
             if ( superTags.length > 0 ) {
-                final List list = new ArrayList(Arrays.asList(javaTags));
+                final List<JavaTag> list = new ArrayList<JavaTag>(Arrays.asList(javaTags));
                 list.addAll(Arrays.asList(superTags));
-                javaTags = (JavaTag[]) list.toArray(new JavaTag[list.size()]);
+                javaTags = list.toArray(new JavaTag[list.size()]);
             }
         }
         return javaTags;

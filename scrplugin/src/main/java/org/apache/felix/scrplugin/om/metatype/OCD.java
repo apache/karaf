@@ -29,7 +29,7 @@ public class OCD {
 
     protected String description;
 
-    protected List properties = new ArrayList();
+    protected List<AttributeDefinition> properties = new ArrayList<AttributeDefinition>();
 
     public String getId() {
         return this.id;
@@ -55,11 +55,11 @@ public class OCD {
         this.description = description;
     }
 
-    public List getProperties() {
+    public List<AttributeDefinition> getProperties() {
         return this.properties;
     }
 
-    public void setProperties(List properties) {
+    public void setProperties(List<AttributeDefinition> properties) {
         this.properties = properties;
     }
 }

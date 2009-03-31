@@ -133,19 +133,19 @@ public class IOUtils {
         /**
          * The prefixes of startPrefixMapping() declarations for the coming element.
          */
-        private List prefixList = new ArrayList();
+        private List<String> prefixList = new ArrayList<String>();
 
         /**
          * The URIs of startPrefixMapping() declarations for the coming element.
          */
-        private List uriList = new ArrayList();
+        private List<String> uriList = new ArrayList<String>();
 
         /**
          * Maps of URI<->prefix mappings. Used to work around a bug in the Xalan
          * serializer.
          */
-        private Map uriToPrefixMap = new HashMap();
-        private Map prefixToUriMap = new HashMap();
+        private Map<String, String> uriToPrefixMap = new HashMap<String, String>();
+        private Map<String, String> prefixToUriMap = new HashMap<String, String>();
 
         /**
          * True if there has been some startPrefixMapping() for the coming element.
@@ -215,8 +215,8 @@ public class IOUtils {
                 for (int mapping = 0; mapping < mappingCount; mapping++) {
 
                     // Build infos for this namespace
-                    String uri = (String) this.uriList.get(mapping);
-                    String prefix = (String) this.prefixList.get(mapping);
+                    String uri = this.uriList.get(mapping);
+                    String prefix = this.prefixList.get(mapping);
                     String qName = prefix.length() == 0 ? "xmlns" : ("xmlns:" + prefix);
 
                     // Search for the corresponding xmlns* attribute

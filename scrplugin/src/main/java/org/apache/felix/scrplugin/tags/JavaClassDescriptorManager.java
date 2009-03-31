@@ -27,6 +27,8 @@ import java.util.jar.*;
 import org.apache.felix.scrplugin.Constants;
 import org.apache.felix.scrplugin.om.Component;
 import org.apache.felix.scrplugin.om.Components;
+import org.apache.felix.scrplugin.tags.annotation.AnnotationJavaClassDescription;
+import org.apache.felix.scrplugin.tags.annotation.AnnotationTagProviderManager;
 import org.apache.felix.scrplugin.tags.cl.ClassLoaderJavaClassDescription;
 import org.apache.felix.scrplugin.tags.qdox.QDoxJavaClassDescription;
 import org.apache.felix.scrplugin.xml.ComponentDescriptorIO;
@@ -59,41 +61,50 @@ public class JavaClassDescriptorManager {
     protected final ClassLoader classloader;
 
     /** A cache containing the java class descriptions hashed by classname. */
-    protected final Map javaClassDescriptions = new HashMap();
+    protected final Map<String, JavaClassDescription> javaClassDescriptions = new HashMap<String, JavaClassDescription>();
 
     /** The component definitions from other bundles hashed by classname. */
-    protected final Map componentDescriptions = new HashMap();
+    protected final Map<String, Component> componentDescriptions = new HashMap<String, Component>();
 
     /** The maven project. */
     protected final MavenProject project;
 
     /**
+     * Supports mapping of built-in and custom java anntoations to {@link JavaTag} implementations.
+     */
+    protected final AnnotationTagProviderManager annotationTagProviderManager;
+
+    /**
      * Construct a new manager.
      * @param log
      * @param project
+     * @param annotationTagProviders List of annotation tag providers
      * @throws MojoFailureException
      * @throws MojoExecutionException
      */
     public JavaClassDescriptorManager(final Log          log,
                                       final MavenProject project,
+                                      final String[] annotationTagProviders,
                                       final String       excludeString)
     throws MojoFailureException, MojoExecutionException {
         this.log = log;
         this.project = project;
+        this.annotationTagProviderManager = new AnnotationTagProviderManager(annotationTagProviders);
         this.classloader = this.getCompileClassLoader();
 
         // get all the class sources through qdox
         this.log.debug("Setting up QDox");
         JavaDocBuilder builder = new JavaDocBuilder();
         builder.getClassLibrary().addClassLoader(this.classloader);
-        final Iterator i = project.getCompileSourceRoots().iterator();
+        @SuppressWarnings("unchecked")
+        final Iterator<String> i = project.getCompileSourceRoots().iterator();
         // FELIX-509: check for excludes
         if ( excludeString != null ) {
             final String[] excludes = StringUtils.split(excludeString, ",");
             final String[] includes = new String[] {"**/*.java"};
 
             while ( i.hasNext() ) {
-                final String tree = (String)i.next();
+                final String tree = i.next();
                 this.log.debug("Scanning source tree " + tree);
                 final File directory = new File(tree);
                 final DirectoryScanner scanner = new DirectoryScanner();
@@ -123,7 +134,7 @@ public class JavaClassDescriptorManager {
             }
         } else {
             while ( i.hasNext() ) {
-                final String tree = (String)i.next();
+                final String tree = i.next();
                 this.log.debug("Adding source tree " + tree);
                 final File directory = new File(tree);
                 builder.addSourceTree(directory);
@@ -132,19 +143,21 @@ public class JavaClassDescriptorManager {
         this.sources = builder.getSources();
 
         // and now scan artifacts
-        final List components = new ArrayList();
-        final Map resolved = project.getArtifactMap();
-        final Set artifacts = project.getDependencyArtifacts();
-        final Iterator it = artifacts.iterator();
+        final List<Component> components = new ArrayList<Component>();
+        @SuppressWarnings("unchecked")
+        final Map<String, Artifact> resolved = project.getArtifactMap();
+        @SuppressWarnings("unchecked")
+        final Set<Artifact> artifacts = project.getDependencyArtifacts();
+        final Iterator<Artifact> it = artifacts.iterator();
         while ( it.hasNext() ) {
-            final Artifact declared = (Artifact) it.next();
+            final Artifact declared = it.next();
             this.log.debug("Checking artifact " + declared);
             if ( this.isJavaArtifact(declared)) {
                 if (Artifact.SCOPE_COMPILE.equals(declared.getScope())
                     || Artifact.SCOPE_RUNTIME.equals(declared.getScope())
                     || Artifact.SCOPE_PROVIDED.equals(declared.getScope())) {
                     this.log.debug("Resolving artifact " + declared);
-                    final Artifact artifact = (Artifact) resolved.get(ArtifactUtils.versionlessKey(declared));
+                    final Artifact artifact = resolved.get(ArtifactUtils.versionlessKey(declared));
                     if (artifact != null) {
                         this.log.debug("Trying to get manifest from artifact " + artifact);
                         try {
@@ -197,9 +210,7 @@ public class JavaClassDescriptorManager {
             }
         }
         // now create map with component descriptions
-        final Iterator cI = components.iterator();
-        while ( cI.hasNext() ) {
-            final Component component = (Component) cI.next();
+        for(final Component component : components) {
             this.componentDescriptions.put(component.getImplementation().getClassame(), component);
         }
     }
@@ -239,6 +250,13 @@ public class JavaClassDescriptorManager {
     }
 
     /**
+     * @return Annotation tag provider manager
+     */
+    public AnnotationTagProviderManager getAnnotationTagProviderManager() {
+        return this.annotationTagProviderManager;
+    }
+
+    /**
      * Read the service component description.
      * @param artifact
      * @param entry
@@ -272,11 +290,12 @@ public class JavaClassDescriptorManager {
 
     protected ClassLoader getCompileClassLoader()
     throws MojoFailureException {
-        List artifacts = this.getProject().getCompileArtifacts();
+        @SuppressWarnings("unchecked")
+        List<Artifact> artifacts = this.getProject().getCompileArtifacts();
         URL[] path = new URL[artifacts.size() + 1];
         int i = 0;
-        for (Iterator ai=artifacts.iterator(); ai.hasNext(); ) {
-            Artifact a = (Artifact) ai.next();
+        for (Iterator<Artifact> ai=artifacts.iterator(); ai.hasNext(); ) {
+            Artifact a = ai.next();
             try {
                 path[i++] = a.getFile().toURI().toURL();
             } catch (IOException ioe) {
@@ -343,7 +362,13 @@ public class JavaClassDescriptorManager {
         for(int i=0; i<this.sources.length; i++) {
             final String className = this.sources[i].getClasses()[0].getFullyQualifiedName();
             try {
-                descs[i] = new QDoxJavaClassDescription(this.classloader.loadClass(className), this.sources[i], this);
+                // check for java annotation descriptions - fallback to QDox if none found
+                Class clazz = this.classloader.loadClass(className);
+                if (getAnnotationTagProviderManager().hasScrPluginAnnotation(clazz)) {
+                    descs[i] = new AnnotationJavaClassDescription(clazz, this.sources[i], this);
+                } else {
+                    descs[i] = new QDoxJavaClassDescription(clazz, this.sources[i], this);
+                }
             } catch (ClassNotFoundException e) {
                 throw new MojoExecutionException("Unable to load class " + className);
             }
@@ -359,15 +384,22 @@ public class JavaClassDescriptorManager {
      */
     public JavaClassDescription getJavaClassDescription(String className)
     throws MojoExecutionException {
-        JavaClassDescription result = (JavaClassDescription) this.javaClassDescriptions.get(className);
+        JavaClassDescription result = this.javaClassDescriptions.get(className);
         if ( result == null ) {
             this.log.debug("Searching description for: " + className);
             int index = 0;
             while ( result == null && index < this.sources.length) {
                 if ( this.sources[index].getClasses()[0].getFullyQualifiedName().equals(className) ) {
                     try {
-                        this.log.debug("Found qdox description for: " + className);
-                        result = new QDoxJavaClassDescription(this.classloader.loadClass(className), this.sources[index], this);
+                        // check for java annotation descriptions - fallback to QDox if none found
+                        Class clazz = this.classloader.loadClass(className);
+                        if (getAnnotationTagProviderManager().hasScrPluginAnnotation(clazz)) {
+                            this.log.debug("Found java annotation description for: " + className);
+                            result = new AnnotationJavaClassDescription(clazz, this.sources[index], this);
+                        } else {
+                            this.log.debug("Found qdox description for: " + className);
+                            result = new QDoxJavaClassDescription(clazz, this.sources[index], this);
+                        }
                     } catch (ClassNotFoundException e) {
                         throw new MojoExecutionException("Unable to load class " + className);
                     }
@@ -378,7 +410,7 @@ public class JavaClassDescriptorManager {
             if ( result == null ) {
                 try {
                     this.log.debug("Generating classloader description for: " + className);
-                    result = new ClassLoaderJavaClassDescription(this.classloader.loadClass(className), (Component)this.componentDescriptions.get(className), this);
+                    result = new ClassLoaderJavaClassDescription(this.classloader.loadClass(className), this.componentDescriptions.get(className), this);
                 } catch (ClassNotFoundException e) {
                     throw new MojoExecutionException("Unable to load class " + className);
                 }

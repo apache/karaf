@@ -20,7 +20,6 @@ package org.apache.felix.scrplugin.xml;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.StringTokenizer;
 
 import javax.xml.transform.TransformerException;
@@ -119,9 +118,7 @@ public class ComponentDescriptorIO {
         contentHandler.startElement("", ComponentDescriptorIO.COMPONENTS, ComponentDescriptorIO.COMPONENTS, new AttributesImpl());
         IOUtils.newline(contentHandler);
 
-        final Iterator i = components.getComponents().iterator();
-        while ( i.hasNext() ) {
-            final Component component = (Component)i.next();
+        for(final Component component : components.getComponents()) {
             generateXML(component, contentHandler, isScrPrivateFile);
         }
         // end wrapper element
@@ -153,16 +150,12 @@ public class ComponentDescriptorIO {
             generateXML(component.getService(), contentHandler);
         }
         if ( component.getProperties() != null ) {
-            final Iterator i = component.getProperties().iterator();
-            while ( i.hasNext() ) {
-                final Property property = (Property)i.next();
+            for(final Property property : component.getProperties()) {
                 generateXML(property, contentHandler, isScrPrivateFile);
             }
         }
         if ( component.getReferences() != null ) {
-            final Iterator i = component.getReferences().iterator();
-            while ( i.hasNext() ) {
-                final Reference reference = (Reference)i.next();
+            for(final Reference reference : component.getReferences()) {
                 generateXML(reference, contentHandler, isScrPrivateFile);
             }
         }
@@ -201,9 +194,7 @@ public class ComponentDescriptorIO {
         contentHandler.startElement(INNER_NAMESPACE_URI, ComponentDescriptorIO.SERVICE, ComponentDescriptorIO.SERVICE_QNAME, ai);
         if ( service.getInterfaces() != null && service.getInterfaces().size() > 0 ) {
             IOUtils.newline(contentHandler);
-            final Iterator i = service.getInterfaces().iterator();
-            while ( i.hasNext() ) {
-                final Interface interf = (Interface)i.next();
+            for(final Interface interf : service.getInterfaces()) {
                 generateXML(interf, contentHandler);
             }
             IOUtils.indent(contentHandler, 2);

@@ -92,7 +92,18 @@ public class SCRDescriptorMojo extends AbstractMojo {
      *
      * @parameter
      */
-    private Map properties = new HashMap();
+    private Map<String, String> properties = new HashMap<String, String>();
+
+    /**
+     * Allows to define additional implementations of the interface
+     * {@link org.apache.felix.scrplugin.tags.annotation.AnnotationTagProvider}
+     * that provide mappings from custom annotations to
+     * {@link org.apache.felix.scrplugin.tags.JavaTag} implementations.
+     * List of full qualified class file names.
+     *
+     * @parameter
+     */
+    private String[] annotationTagProviders = {};
 
     /**
      * @see org.apache.maven.plugin.AbstractMojo#execute()
@@ -105,6 +116,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
 
         JavaClassDescriptorManager jManager = new JavaClassDescriptorManager(this.getLog(),
                                                                              this.project,
+                                                                             this.annotationTagProviders,
                                                                              this.sourceExcludes);
         // iterate through all source classes and check for component tag
         final JavaClassDescription[] javaSources = jManager.getSourceDescriptions();
@@ -154,9 +166,10 @@ public class SCRDescriptorMojo extends AbstractMojo {
         // write meta type info if there is a file name
         if (!StringUtils.isEmpty(this.metaTypeName)) {
             File mtFile = new File(this.outputDirectory, "OSGI-INF" + File.separator + "metatype" + File.separator + this.metaTypeName);
-            if ( metaData.getDescriptors().size() > 0 ) {
+            final int size = metaData.getOCDs().size() + metaData.getDesignates().size();
+            if (size > 0 ) {
                 this.getLog().info("Generating "
-                    + metaData.getDescriptors().size()
+                    + size
                     + " MetaType Descriptors to " + mtFile);
                 mtFile.getParentFile().mkdirs();
                 MetaTypeIO.write(metaData, mtFile);
@@ -223,9 +236,10 @@ public class SCRDescriptorMojo extends AbstractMojo {
         if (addResources) {
             final String ourRsrcPath = this.outputDirectory.getAbsolutePath();
             boolean found = false;
-            final Iterator rsrcIterator = this.project.getResources().iterator();
+            @SuppressWarnings("unchecked")
+            final Iterator<Resource> rsrcIterator = this.project.getResources().iterator();
             while ( !found && rsrcIterator.hasNext() ) {
-                final Resource rsrc = (Resource)rsrcIterator.next();
+                final Resource rsrc = rsrcIterator.next();
                 found = rsrc.getDirectory().equals(ourRsrcPath);
             }
             if ( !found ) {
@@ -256,7 +270,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
         this.doServices(description.getTagsByName(Constants.SERVICE, inherited), component, description);
 
         // collect references from class tags and fields
-        final Map references = new HashMap();
+        final Map<String, Object[]> references = new HashMap<String, Object[]>();
         // Utility handler for propertie
         final PropertyHandler propertyHandler = new PropertyHandler(component, ocd);
 
@@ -292,11 +306,11 @@ public class SCRDescriptorMojo extends AbstractMojo {
         propertyHandler.processProperties(this.properties);
 
         // process references
-        final Iterator refIter = references.entrySet().iterator();
+        final Iterator<Map.Entry<String, Object[]>> refIter = references.entrySet().iterator();
         while ( refIter.hasNext() ) {
-            final Map.Entry entry = (Map.Entry)refIter.next();
-            final String refName = entry.getKey().toString();
-            final Object[] values = (Object[])entry.getValue();
+            final Map.Entry<String, Object[]> entry = refIter.next();
+            final String refName = entry.getKey();
+            final Object[] values = entry.getValue();
             final JavaTag tag = (JavaTag)values[0];
             this.doReference(tag, refName, component, values[1].toString());
         }
@@ -306,9 +320,9 @@ public class SCRDescriptorMojo extends AbstractMojo {
         if ( createPid ) {
             // check for an existing pid first
             boolean found = false;
-            final Iterator iter = component.getProperties().iterator();
+            final Iterator<Property> iter = component.getProperties().iterator();
             while ( !found && iter.hasNext() ) {
-                final Property prop = (Property)iter.next();
+                final Property prop = iter.next();
                 found = org.osgi.framework.Constants.SERVICE_PID.equals( prop.getName() );
             }
             if ( !found ) {
@@ -319,18 +333,18 @@ public class SCRDescriptorMojo extends AbstractMojo {
             }
         }
 
-        final List issues = new ArrayList();
-        final List warnings = new ArrayList();
+        final List<String> issues = new ArrayList<String>();
+        final List<String> warnings = new ArrayList<String>();
         component.validate(issues, warnings);
 
         // now log warnings and errors (warnings first)
-        Iterator i = warnings.iterator();
+        Iterator<String> i = warnings.iterator();
         while ( i.hasNext() ) {
-            this.getLog().warn((String)i.next());
+            this.getLog().warn(i.next());
         }
         i = issues.iterator();
         while ( i.hasNext() ) {
-            this.getLog().error((String)i.next());
+            this.getLog().error(i.next());
         }
 
         // return nothing if validation fails
@@ -475,7 +489,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
      * @param isInspectedClass
      * @throws MojoExecutionException
      */
-    protected void testReference(Map references, JavaTag reference, String defaultName, boolean isInspectedClass)
+    protected void testReference(Map<String, Object[]> references, JavaTag reference, String defaultName, boolean isInspectedClass)
     throws MojoExecutionException {
         final String refName = this.getReferenceName(reference, defaultName);
 

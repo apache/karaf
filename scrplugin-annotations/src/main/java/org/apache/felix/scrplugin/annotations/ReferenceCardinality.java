@@ -16,39 +16,44 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scrplugin.om;
-
-import java.util.ArrayList;
-import java.util.List;
+package org.apache.felix.scrplugin.annotations;
 
 /**
- * <code>Components</code>...
- *
- * Components is just a collection of {@link Component}s.
+ * Options for {@link Reference#cardinality()} property.
  */
-public class Components {
-
-    /** The list of {@link Component}s. */
-    protected List<Component> components = new ArrayList<Component>();
+public enum ReferenceCardinality {
 
     /**
-     * Return the list of {@link Component}s.
+     * Cardinality 0..1
      */
-    public List<Component> getComponents() {
-        return this.components;
+    ZERO_TO_ONE("0..1"),
+
+    /**
+     * Cardinality 1..1
+     */
+    ONE_TO_ONE("1..1"),
+
+    /**
+     * Cardinality 0..n
+     */
+    ZERO_TO_MANY("0..n"),
+
+    /**
+     * Cardinality 1..n
+     */
+    ONE_TO_MANY("1..n");
+
+    private final String cardinalityString;
+
+    private ReferenceCardinality(final String cardinalityString) {
+        this.cardinalityString = cardinalityString;
     }
 
     /**
-     * Set the list of {@link Component}s.
+     * @return String representation of cardinality
      */
-    public void setComponents(List<Component> components) {
-        this.components = components;
+    public String getCardinalityString() {
+        return this.cardinalityString;
     }
 
-    /**
-     * Add a component to the list.
-     */
-    public void addComponent(Component component) {
-        this.components.add(component);
-    }
 }

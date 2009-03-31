@@ -22,7 +22,7 @@ import java.lang.reflect.*;
 import java.util.*;
 
 import org.apache.felix.scrplugin.Constants;
-import org.apache.felix.scrplugin.om.*;
+import org.apache.felix.scrplugin.om.Component;
 import org.apache.felix.scrplugin.tags.*;
 import org.apache.maven.plugin.MojoExecutionException;
 
@@ -194,7 +194,7 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
                      this.component.getService().getInterfaces().size() > 0 ) {
                     javaTags = new JavaTag[this.component.getService().getInterfaces().size()];
                     for(int i=0; i<this.component.getService().getInterfaces().size(); i++) {
-                        javaTags[i] = new ClassLoaderJavaTag(this, (Interface)this.component.getService().getInterfaces().get(i),
+                        javaTags[i] = new ClassLoaderJavaTag(this, this.component.getService().getInterfaces().get(i),
                                                              this.component.getService().isServicefactory());
                     }
                 }
@@ -202,14 +202,14 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
                 if ( this.component.getProperties().size() > 0 ) {
                     javaTags = new JavaTag[this.component.getProperties().size()];
                     for(int i=0; i<this.component.getProperties().size(); i++) {
-                        javaTags[i] = new ClassLoaderJavaTag(this, (Property)this.component.getProperties().get(i));
+                        javaTags[i] = new ClassLoaderJavaTag(this, this.component.getProperties().get(i));
                     }
                 }
             } else if ( Constants.REFERENCE.equals(name) ) {
                 if ( this.component.getReferences().size() > 0 ) {
                     javaTags = new JavaTag[this.component.getReferences().size()];
                     for(int i=0; i<this.component.getReferences().size(); i++) {
-                        javaTags[i] = new ClassLoaderJavaTag(this, (Reference)this.component.getReferences().get(i));
+                        javaTags[i] = new ClassLoaderJavaTag(this, this.component.getReferences().get(i));
                     }
                 }
             }
@@ -217,9 +217,9 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
         if ( inherited && this.getSuperClass() != null ) {
             final JavaTag[] superTags = this.getSuperClass().getTagsByName(name, inherited);
             if ( superTags.length > 0 ) {
-                final List list = new ArrayList(Arrays.asList(javaTags));
+                final List<JavaTag> list = new ArrayList<JavaTag>(Arrays.asList(javaTags));
                 list.addAll(Arrays.asList(superTags));
-                javaTags = (JavaTag[]) list.toArray(new JavaTag[list.size()]);
+                javaTags = list.toArray(new JavaTag[list.size()]);
             }
         }
         return javaTags;

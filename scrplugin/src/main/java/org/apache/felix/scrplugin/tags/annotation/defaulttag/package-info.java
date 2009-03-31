@@ -16,39 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scrplugin.om;
-
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * <code>Components</code>...
- *
- * Components is just a collection of {@link Component}s.
+ * SCR plugin annotation tag provider default implementation for annotations provided in package
+ * <code>org.apache.felix.scrplugin.annotations</code>.
  */
-public class Components {
+package org.apache.felix.scrplugin.tags.annotation.defaulttag;
 
-    /** The list of {@link Component}s. */
-    protected List<Component> components = new ArrayList<Component>();
-
-    /**
-     * Return the list of {@link Component}s.
-     */
-    public List<Component> getComponents() {
-        return this.components;
-    }
-
-    /**
-     * Set the list of {@link Component}s.
-     */
-    public void setComponents(List<Component> components) {
-        this.components = components;
-    }
-
-    /**
-     * Add a component to the list.
-     */
-    public void addComponent(Component component) {
-        this.components.add(component);
-    }
-}

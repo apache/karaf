@@ -16,39 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scrplugin.om;
+package org.apache.felix.scrplugin.annotations;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * <code>Components</code>...
- *
- * Components is just a collection of {@link Component}s.
+ * Allows to define multiple {@link Service} annotations for one type.
  */
-public class Components {
-
-    /** The list of {@link Component}s. */
-    protected List<Component> components = new ArrayList<Component>();
-
-    /**
-     * Return the list of {@link Component}s.
-     */
-    public List<Component> getComponents() {
-        return this.components;
-    }
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface Services {
 
     /**
-     * Set the list of {@link Component}s.
+     * List of {@link Service} annotations.
      */
-    public void setComponents(List<Component> components) {
-        this.components = components;
-    }
+    Service[] value();
 
-    /**
-     * Add a component to the list.
-     */
-    public void addComponent(Component component) {
-        this.components.add(component);
-    }
 }

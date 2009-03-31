@@ -84,7 +84,8 @@ public class QDoxJavaTag implements JavaTag {
     /**
      * @see org.apache.felix.scrplugin.tags.JavaTag#getNamedParameterMap()
      */
-    public Map getNamedParameterMap() {
+    @SuppressWarnings("unchecked")
+    public Map<String, String> getNamedParameterMap() {
         return this.docletTag.getNamedParameterMap();
     }
 

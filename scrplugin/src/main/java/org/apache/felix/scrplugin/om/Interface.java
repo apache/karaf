@@ -59,7 +59,7 @@ public class Interface extends AbstractObject {
      * If errors occur a message is added to the issues list,
      * warnings can be added to the warnings list.
      */
-    public void validate(List issues, List warnings)
+    public void validate(List<String> issues, List<String> warnings)
     throws MojoExecutionException {
         final JavaClassDescription javaClass = this.tag.getJavaClassDescription();
         if (javaClass == null) {

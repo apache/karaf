@@ -37,14 +37,11 @@ import org.apache.maven.plugin.MojoExecutionException;
  * <li>Finally, the natural order of the class names is returned
  * </ol>
  */
-public class JavaClassDescriptionInheritanceComparator implements Comparator
+public class JavaClassDescriptionInheritanceComparator implements Comparator<JavaClassDescription>
 {
 
-    public int compare( Object o1, Object o2 )
+    public int compare( JavaClassDescription cd1, JavaClassDescription cd2 )
     {
-        JavaClassDescription cd1 = ( JavaClassDescription ) o1;
-        JavaClassDescription cd2 = ( JavaClassDescription ) o2;
-
         // the descriptors are the same
         if ( equals( cd1, cd2 ) )
         {
