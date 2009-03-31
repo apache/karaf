@@ -20,7 +20,7 @@
   <parent>
     <groupId>org.apache.felix</groupId>
     <artifactId>felix</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.4</version>
     <relativePath>../pom/pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -38,7 +38,7 @@
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.shell</artifactId>
-      <version>1.0.2</version>
+      <version>1.2.0</version>
     </dependency>
     <dependency>
       <groupId>net.sf.kxml</groupId>
@@ -73,6 +73,21 @@
             <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Export-Service>org.osgi.service.obr.RepositoryAdmin</Export-Service>
           </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>rat-maven-plugin</artifactId>
+        <configuration>
+          <excludeSubProjects>false</excludeSubProjects>
+          <useEclipseDefaultExcludes>true</useEclipseDefaultExcludes>
+          <useMavenDefaultExcludes>true</useMavenDefaultExcludes>
+          <excludes>
+            <param>doc/*</param>
+            <param>maven-eclipse.xml</param>
+            <param>.checkstyle</param>
+            <param>.externalToolBuilders/*</param>
+          </excludes>
         </configuration>
       </plugin>
     </plugins>

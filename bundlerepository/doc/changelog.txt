@@ -1,3 +1,19 @@
+Changes from 1.2.1 to 1.2.2
+---------------------------
+** Bug
+    * [FELIX-973] - FilterImpl from Felix Framework does not support none LDAP operators
+    * [FELIX-977] - Bundle resolving runs extreme long
+    * [FELIX-999] - The OBR ResolverImpl shouldn't try to start fragment bundles
+
+** Improvement
+    * [FELIX-884] - OBR should expose registered services as capabilities of local repository
+    * [FELIX-887] - Ensure BundleListeners are not forgotten about
+    * [FELIX-940] - Add support for execution environment
+    * [FELIX-986] - Include the symbolicname in the output of obr list -v
+
+** New Feature
+    * [FELIX-976] - OBR update-url shell command
+
 Changes from 1.2.0 to 1.2.1
 ---------------------------
 * [2008-10-24] Fixed potential NPE when comparing resources. (FELIX-789)
