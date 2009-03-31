@@ -1,3 +1,9 @@
+Changes from 1.4.1 to 1.6.0
+---------------------------
+
+** Improvement
+    * Update to latest framework version 1.6.0
+
 Changes from 1.4.0 to 1.4.1
 ---------------------------
 
