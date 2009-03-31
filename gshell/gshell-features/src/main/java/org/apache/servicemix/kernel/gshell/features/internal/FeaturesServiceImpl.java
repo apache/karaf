@@ -152,6 +152,22 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
         return repos.toArray(new Repository[repos.size()]);
     }
 
+    public void installAllFeatures(URI uri) throws Exception {
+        RepositoryImpl repo = internalAddRepository(uri);
+        for (Feature f : repo.getFeatures()) {
+            installFeature(f.getName(), f.getVersion());
+        }
+        internalRemoveRepository(uri);            
+    }
+
+    public void uninstallAllFeatures(URI uri) throws Exception {
+        RepositoryImpl repo = internalAddRepository(uri);
+        for (Feature f : repo.getFeatures()) {
+            uninstallFeature(f.getName(), f.getVersion());
+        }
+        internalRemoveRepository(uri);            
+    }
+
     public void installFeature(String name) throws Exception {
     	installFeature(name, FeatureImpl.DEFAULT_VERSION);
     }
