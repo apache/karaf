@@ -20,7 +20,7 @@
   <parent>
     <groupId>org.apache.felix</groupId>
     <artifactId>felix</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.4</version>
     <relativePath>../pom/pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -53,6 +53,21 @@
             <Export-Service>org.apache.felix.shell.ShellService, org.ungoverned.osgi.service.shell.ShellService</Export-Service>
             <Import-Service>org.osgi.service.startlevel.StartLevel, org.osgi.service.packageadmin.PackageAdmin</Import-Service>
           </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>rat-maven-plugin</artifactId>
+        <configuration>
+          <excludeSubProjects>false</excludeSubProjects>
+          <useEclipseDefaultExcludes>true</useEclipseDefaultExcludes>
+          <useMavenDefaultExcludes>true</useMavenDefaultExcludes>
+          <excludes>
+            <param>doc/*</param>
+            <param>maven-eclipse.xml</param>
+            <param>.checkstyle</param>
+            <param>.externalToolBuilders/*</param>
+          </excludes>
         </configuration>
       </plugin>
     </plugins>

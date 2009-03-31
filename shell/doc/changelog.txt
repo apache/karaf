@@ -1,3 +1,18 @@
+Changes from 1.0.2 to 1.2.0
+---------------------------
+
+** Bug
+    * [FELIX-703] - Cannot install ShellGUIPlugin with OBR
+
+** Improvement
+    * [FELIX-669] - Shell & Shell TUI OBR descriptions
+    * [FELIX-1008] - Rename "packages" command to "exports" to match better with new "imports" command
+
+** New Feature
+    * [FELIX-741] - Modify shell start/stop commands to support transient starting/stopping of bundles
+    * [FELIX-1006] - Add command to shell to list a bundles imported packages
+    * [FELIX-1009] - Add requires/requirers commands to shell
+
 Changes from 1.0.1 to 1.0.2
 ---------------------------
 
