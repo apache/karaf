@@ -96,7 +96,7 @@
         <pax.url.version>0.3.3</pax.url.version>
         <servicemix.legal.version>1.0</servicemix.legal.version>
         <servicemix.specs.version>1.4-SNAPSHOT</servicemix.specs.version>
-        <spring.osgi.version>1.2.0-m2</spring.osgi.version>
+        <spring.osgi.version>1.2.0-rc1</spring.osgi.version>
         <spring.version>2.5.6</spring.version>
         <sshd.version>0.1</sshd.version>
         <woodstox.version>3.2.7_1</woodstox.version>
