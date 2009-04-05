@@ -195,7 +195,7 @@ public class ClassChecker extends EmptyVisitor implements ClassVisitor, Opcodes 
                     return new AnnotationCollector(md); 
                 }
             } else {
-                // Avoid constructors.
+                // no constructors.
                 if (!(name.startsWith("_get") || // Avoid getter method
                         name.startsWith("_set") || // Avoid setter method
                         name.equals("_setComponentManager") || // Avoid the set method

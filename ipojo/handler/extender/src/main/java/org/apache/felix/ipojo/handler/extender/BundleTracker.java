@@ -100,20 +100,23 @@ public abstract class BundleTracker {
     /**
      * Call this method to start the tracking of active bundles.
      **/
-    public synchronized void open() {
-        if (!m_open) {
-            m_open = true;
+    public void open() {
+        synchronized (this) {
+            if (!m_open) {
+                m_open = true;
 
-            m_context.addBundleListener(m_listener);
+                m_context.addBundleListener(m_listener);
+            }
+           }
 
             Bundle[] bundles = m_context.getBundles();
             for (int i = 0; i < bundles.length; i++) {
                 if (bundles[i].getState() == Bundle.ACTIVE) {
-                    m_bundleSet.add(bundles[i]);
-                    addedBundle(bundles[i]);
+                    if (m_bundleSet.add(bundles[i])) {
+                        addedBundle(bundles[i]);
+                    }
                 }
             }
-        }
     }
 
     /**

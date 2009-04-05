@@ -63,4 +63,11 @@
 	 <component classname="org.apache.felix.ipojo.test.scenarios.component.SeveralConstructors">
 	 	<provides/>
 	 </component>
+	 <!--  No Empty constructor -->
+	 <component classname="org.apache.felix.ipojo.test.scenarios.component.NoEmptyConstructor">
+	 	<provides/>
+	 </component>
+	 <component classname="org.apache.felix.ipojo.test.scenarios.component.NoEmptyConstructorWithParentClass">
+	 	<provides/>
+	 </component>
 </ipojo>
