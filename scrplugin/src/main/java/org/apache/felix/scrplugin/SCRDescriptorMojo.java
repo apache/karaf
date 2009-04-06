@@ -95,6 +95,12 @@ public class SCRDescriptorMojo extends AbstractMojo {
     protected boolean processAnnotations;
 
     /**
+     * In strict mode the plugin even fails on warnings.
+     * @parameter default-value="false"
+     */
+    protected boolean strictMode;
+
+    /**
      * The comma separated list of tokens to exclude when processing sources.
      *
      * @parameter alias="excludes"
@@ -356,13 +362,16 @@ public class SCRDescriptorMojo extends AbstractMojo {
         component.validate(issues, warnings);
 
         // now log warnings and errors (warnings first)
-        Iterator<String> i = warnings.iterator();
-        while ( i.hasNext() ) {
-            this.getLog().warn(i.next());
+        // FELIX-997: In strictMode all warnings are regarded as errors
+        if ( this.strictMode ) {
+            issues.addAll(warnings);
+            warnings.clear();
         }
-        i = issues.iterator();
-        while ( i.hasNext() ) {
-            this.getLog().error(i.next());
+        for(String warn : warnings) {
+            this.getLog().warn(warn);
+        }
+        for(String err : issues) {
+            this.getLog().error(err);
         }
 
         // return nothing if validation fails
