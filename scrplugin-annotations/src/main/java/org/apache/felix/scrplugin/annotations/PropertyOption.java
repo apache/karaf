@@ -24,7 +24,7 @@ import java.lang.annotation.*;
  * Defines a {@link Property} option.
  */
 @Target(ElementType.ANNOTATION_TYPE)
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface PropertyOption {
 

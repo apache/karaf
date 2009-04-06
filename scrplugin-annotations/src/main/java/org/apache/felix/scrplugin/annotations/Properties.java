@@ -24,7 +24,7 @@ import java.lang.annotation.*;
  * Allows to define multiple {@link Property} annotations for one type.
  */
 @Target(ElementType.TYPE)
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Properties {
 

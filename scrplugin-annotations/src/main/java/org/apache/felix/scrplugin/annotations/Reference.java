@@ -33,7 +33,7 @@ import java.lang.annotation.*;
  * Service Platform Service Compendium Specification for more information.
  */
 @Target( { ElementType.TYPE, ElementType.FIELD })
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Reference {
 

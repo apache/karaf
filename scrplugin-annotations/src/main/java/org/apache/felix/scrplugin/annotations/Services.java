@@ -24,7 +24,7 @@ import java.lang.annotation.*;
  * Allows to define multiple {@link Service} annotations for one type.
  */
 @Target(ElementType.TYPE)
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Services {
 

@@ -34,7 +34,7 @@ import java.lang.annotation.*;
  * </p>
  */
 @Target(ElementType.TYPE)
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Component {
 
     /**
