@@ -74,19 +74,32 @@ public class JavaClassDescriptorManager {
      */
     protected final AnnotationTagProviderManager annotationTagProviderManager;
 
+    /** Parse Javadocs? */
+    protected final boolean parseJavadocs;
+
+    /** Process Annotations? */
+    protected final boolean processAnnotations;
+
     /**
      * Construct a new manager.
      * @param log
      * @param project
      * @param annotationTagProviders List of annotation tag providers
+     * @param excludeString The exclude information for sources
+     * @param parseJavadocs Should the javadocs be parsed?
+     * @param processAnnotations Should the annotations be processed?
      * @throws MojoFailureException
      * @throws MojoExecutionException
      */
     public JavaClassDescriptorManager(final Log          log,
                                       final MavenProject project,
-                                      final String[] annotationTagProviders,
-                                      final String       excludeString)
+                                      final String[]     annotationTagProviders,
+                                      final String       excludeString,
+                                      final boolean      parseJavadocs,
+                                      final boolean      processAnnotations)
     throws MojoFailureException, MojoExecutionException {
+        this.processAnnotations = processAnnotations;
+        this.parseJavadocs = parseJavadocs;
         this.log = log;
         this.project = project;
         this.annotationTagProviderManager = new AnnotationTagProviderManager(annotationTagProviders);
@@ -361,17 +374,7 @@ public class JavaClassDescriptorManager {
         final JavaClassDescription[] descs = new JavaClassDescription[this.sources.length];
         for(int i=0; i<this.sources.length; i++) {
             final String className = this.sources[i].getClasses()[0].getFullyQualifiedName();
-            try {
-                // check for java annotation descriptions - fallback to QDox if none found
-                Class clazz = this.classloader.loadClass(className);
-                if (getAnnotationTagProviderManager().hasScrPluginAnnotation(clazz)) {
-                    descs[i] = new AnnotationJavaClassDescription(clazz, this.sources[i], this);
-                } else {
-                    descs[i] = new QDoxJavaClassDescription(clazz, this.sources[i], this);
-                }
-            } catch (ClassNotFoundException e) {
-                throw new MojoExecutionException("Unable to load class " + className);
-            }
+            descs[i] = this.getJavaClassDescription(className);
         }
         return descs;
     }
@@ -393,10 +396,10 @@ public class JavaClassDescriptorManager {
                     try {
                         // check for java annotation descriptions - fallback to QDox if none found
                         Class clazz = this.classloader.loadClass(className);
-                        if (getAnnotationTagProviderManager().hasScrPluginAnnotation(clazz)) {
+                        if (this.processAnnotations && getAnnotationTagProviderManager().hasScrPluginAnnotation(clazz)) {
                             this.log.debug("Found java annotation description for: " + className);
                             result = new AnnotationJavaClassDescription(clazz, this.sources[index], this);
-                        } else {
+                        } else if ( this.parseJavadocs ) {
                             this.log.debug("Found qdox description for: " + className);
                             result = new QDoxJavaClassDescription(clazz, this.sources[index], this);
                         }

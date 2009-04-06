@@ -81,6 +81,20 @@ public class SCRDescriptorMojo extends AbstractMojo {
     private boolean generateAccessors;
 
     /**
+     * This flag controls whether the javadoc source code will be scanned for
+     * tags.
+     * @parameter default-value="true"
+     */
+    protected boolean parseJavadoc;
+
+    /**
+     * This flag controls whether the annotations in the sources will be
+     * processed.
+     * @parameter default-value="true"
+     */
+    protected boolean processAnnotations;
+
+    /**
      * The comma separated list of tokens to exclude when processing sources.
      *
      * @parameter alias="excludes"
@@ -111,13 +125,17 @@ public class SCRDescriptorMojo extends AbstractMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         this.getLog().debug("Starting SCRDescriptorMojo....");
         this.getLog().debug("..generating accessors: " + this.generateAccessors);
+        this.getLog().debug("..parsing javadocs: " + this.parseJavadoc);
+        this.getLog().debug("..processing annotations: " + this.processAnnotations);
 
         boolean hasFailures = false;
 
         JavaClassDescriptorManager jManager = new JavaClassDescriptorManager(this.getLog(),
                                                                              this.project,
                                                                              this.annotationTagProviders,
-                                                                             this.sourceExcludes);
+                                                                             this.sourceExcludes,
+                                                                             this.parseJavadoc,
+                                                                             this.processAnnotations);
         // iterate through all source classes and check for component tag
         final JavaClassDescription[] javaSources = jManager.getSourceDescriptions();
         Arrays.sort(javaSources, new JavaClassDescriptionInheritanceComparator());
