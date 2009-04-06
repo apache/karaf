@@ -84,7 +84,7 @@ public @interface Component {
      * <code>metatype.xml</code> file for this component. Otherwise no Metatype
      * Service data is generated for this component.
      */
-    boolean metatype() default true;
+    boolean metatype() default false;
 
     /**
      * This marks an abstract service description which is not added to the
