@@ -27,6 +27,8 @@ import org.apache.felix.scrplugin.tags.JavaTag;
 import org.apache.felix.scrplugin.tags.annotation.defaulttag.DefaultAnnotationTagProvider;
 import org.apache.maven.plugin.MojoFailureException;
 
+import com.thoughtworks.qdox.model.JavaClass;
+
 /**
  * Supports mapping of built-in and custom java anntoations to {@link JavaTag}
  * implementations.
@@ -77,7 +79,7 @@ public class AnnotationTagProviderManager {
 
     /**
      * Converts a java annotation to {@link JavaTag} if a mapping can be found.
-     * 
+     *
      * @param annotation Java annotation
      * @param description Description
      * @return Tag declaration or null if no mapping found
@@ -88,13 +90,42 @@ public class AnnotationTagProviderManager {
 
     /**
      * Converts a java annotation to {@link JavaTag} if a mapping can be found.
-     * 
+     *
+     * @param annotation Java annotation
+     * @param description Description
+     * @return Tag declaration or null if no mapping found
+     */
+    public List<JavaTag> getTags(com.thoughtworks.qdox.model.Annotation annotation, AnnotationJavaClassDescription description) {
+        return getTags(annotation, description, null);
+    }
+
+    /**
+     * Converts a java annotation to {@link JavaTag} if a mapping can be found.
+     *
      * @param annotation Java annotation
      * @param description Description
      * @param field Field
      * @return Tag declaration or null if no mapping found
      */
     public List<JavaTag> getTags(Annotation annotation, AnnotationJavaClassDescription description, JavaField field) {
+        List<JavaTag> tags = new ArrayList<JavaTag>();
+
+        for (AnnotationTagProvider provider : this.annotationTagProviders) {
+            tags.addAll(provider.getTags(annotation, description, field));
+        }
+
+        return tags;
+    }
+
+    /**
+     * Converts a java annotation to {@link JavaTag} if a mapping can be found.
+     *
+     * @param annotation Java annotation
+     * @param description Description
+     * @param field Field
+     * @return Tag declaration or null if no mapping found
+     */
+    public List<JavaTag> getTags(com.thoughtworks.qdox.model.Annotation annotation, AnnotationJavaClassDescription description, JavaField field) {
         List<JavaTag> tags = new ArrayList<JavaTag>();
 
         for (AnnotationTagProvider provider : this.annotationTagProviders) {
@@ -118,4 +149,17 @@ public class AnnotationTagProviderManager {
         return false;
     }
 
+    /**
+     * Checks if the given class has any SCR plugin java annotations defined.
+     * @param pClass Class
+     * @return true if SCR plugin java annotation found
+     */
+    public boolean hasScrPluginAnnotation(JavaClass pClass) {
+        for (com.thoughtworks.qdox.model.Annotation annotation : pClass.getAnnotations()) {
+            if (getTags(annotation, null).size() > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

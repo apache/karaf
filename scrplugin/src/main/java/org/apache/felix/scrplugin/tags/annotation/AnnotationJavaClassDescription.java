@@ -20,14 +20,9 @@ package org.apache.felix.scrplugin.tags.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
-import org.apache.felix.scrplugin.tags.JavaClassDescription;
-import org.apache.felix.scrplugin.tags.JavaClassDescriptorManager;
-import org.apache.felix.scrplugin.tags.JavaField;
-import org.apache.felix.scrplugin.tags.JavaTag;
+import org.apache.felix.scrplugin.tags.*;
 import org.apache.felix.scrplugin.tags.qdox.QDoxJavaClassDescription;
 import org.apache.maven.plugin.MojoExecutionException;
 
@@ -55,6 +50,14 @@ public class AnnotationJavaClassDescription extends QDoxJavaClassDescription {
     @Override
     public JavaTag getTagByName(String name) {
         for (Annotation annotation : this.clazz.getAnnotations()) {
+            List<JavaTag> tags = manager.getAnnotationTagProviderManager().getTags(annotation, this);
+            for (JavaTag tag : tags) {
+                if (tag.getName().equals(name)) {
+                    return tag;
+                }
+            }
+        }
+        for(com.thoughtworks.qdox.model.Annotation annotation : this.javaClass.getAnnotations()) {
             List<JavaTag> tags = manager.getAnnotationTagProviderManager().getTags(annotation, this);
             for (JavaTag tag : tags) {
                 if (tag.getName().equals(name)) {

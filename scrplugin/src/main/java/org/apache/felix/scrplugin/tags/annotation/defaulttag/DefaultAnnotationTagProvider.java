@@ -22,13 +22,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.felix.scrplugin.annotations.Component;
-import org.apache.felix.scrplugin.annotations.Properties;
-import org.apache.felix.scrplugin.annotations.Property;
-import org.apache.felix.scrplugin.annotations.Reference;
-import org.apache.felix.scrplugin.annotations.References;
-import org.apache.felix.scrplugin.annotations.Service;
-import org.apache.felix.scrplugin.annotations.Services;
+import org.apache.felix.scrplugin.annotations.*;
 import org.apache.felix.scrplugin.tags.JavaField;
 import org.apache.felix.scrplugin.tags.JavaTag;
 import org.apache.felix.scrplugin.tags.annotation.AnnotationJavaClassDescription;
@@ -70,6 +64,42 @@ public class DefaultAnnotationTagProvider implements AnnotationTagProvider {
             for (Reference reference : ((References) annotation).value()) {
                 tags.add(new ReferenceTag(reference, description, field));
             }
+        }
+
+        return tags;
+    }
+
+    /**
+     * @see org.apache.felix.scrplugin.tags.annotation.AnnotationTagProvider#getTags(java.lang.annotation.Annotation, org.apache.felix.scrplugin.tags.annotation.AnnotationJavaClassDescription, org.apache.felix.scrplugin.tags.JavaField)
+     */
+    public List<JavaTag> getTags(com.thoughtworks.qdox.model.Annotation annotation,
+                                 AnnotationJavaClassDescription description, JavaField field) {
+        List<JavaTag> tags = new ArrayList<JavaTag>();
+
+        // check for single annotations
+        if (annotation.getType().getJavaClass().getFullyQualifiedName().equals(Component.class.getName())) {
+            tags.add(new ComponentTag(annotation, description));
+        } else if (annotation.getType().getJavaClass().getFullyQualifiedName().equals(Property.class.getName())) {
+            //tags.add(new PropertyTag(annotation, description));
+        } else if (annotation.getType().getJavaClass().getFullyQualifiedName().equals(Service.class.getName())) {
+            //tags.add(new ServiceTag(annotation, description));
+        } else if (annotation.getType().getJavaClass().getFullyQualifiedName().equals(Reference.class.getName())) {
+            //tags.add(new ReferenceTag(annotation, description, field));
+        }
+
+        // check for multi-annotations
+        else if (annotation.getType().getJavaClass().getFullyQualifiedName().equals(Properties.class.getName())) {
+            //for (Property property : ((Properties) annotation).value()) {
+            //    tags.add(new PropertyTag(property, description));
+            //}
+        } else if (annotation.getType().getJavaClass().getFullyQualifiedName().equals(Services.class.getName())) {
+            //for (Service service : ((Services) annotation).value()) {
+            //    tags.add(new ServiceTag(service, description));
+            //}
+        } else if (annotation.getType().getJavaClass().getFullyQualifiedName().equals(References.class.getName())) {
+            //for (Reference reference : ((References) annotation).value()) {
+            //    tags.add(new ReferenceTag(reference, description, field));
+            //}
         }
 
         return tags;

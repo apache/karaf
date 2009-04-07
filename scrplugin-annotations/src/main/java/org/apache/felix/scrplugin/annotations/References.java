@@ -24,7 +24,7 @@ import java.lang.annotation.*;
  * Allows to define multiple {@link Reference} annotations for one type.
  */
 @Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RetentionPolicy.SOURCE)
 @Documented
 public @interface References {
 

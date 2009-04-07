@@ -25,6 +25,8 @@ import org.apache.felix.scrplugin.Constants;
 import org.apache.felix.scrplugin.annotations.Component;
 import org.apache.felix.scrplugin.tags.JavaClassDescription;
 
+import com.thoughtworks.qdox.model.Annotation;
+
 /**
  * Description of a java tag for components.
  */
@@ -39,6 +41,64 @@ public class ComponentTag extends AbstractTag {
     public ComponentTag(Component annotation, JavaClassDescription desc) {
         super(desc, null);
         this.annotation = annotation;
+    }
+
+    /**
+     * @param annotation Annotation
+     * @param desc Description
+     */
+    public ComponentTag(final Annotation annotation, JavaClassDescription desc) {
+        super(desc, null);
+        this.annotation = new Component() {
+
+            public boolean componentAbstract() {
+                return Util.getValue(annotation, "componentAbstract", false);
+            }
+
+            public boolean createPid() {
+                return Util.getValue(annotation, "createPid", true);
+            }
+
+            public String description() {
+                return Util.getValue(annotation, "description", "");
+            }
+
+            public boolean ds() {
+                return Util.getValue(annotation, "ds", true);
+            }
+
+            public boolean enabled() {
+                return Util.getValue(annotation, "enabled", true);
+            }
+
+            public String factory() {
+                return Util.getValue(annotation, "factory", "");
+            }
+
+            public boolean immediate() {
+                return Util.getValue(annotation, "immediate", false);
+            }
+
+            public boolean inherit() {
+                return Util.getValue(annotation, "inherit", true);
+            }
+
+            public String label() {
+                return Util.getValue(annotation, "label", "");
+            }
+
+            public boolean metatype() {
+                return Util.getValue(annotation, "metatype", false);
+            }
+
+            public String name() {
+                return Util.getValue(annotation, "name", "");
+            }
+
+            public Class<? extends java.lang.annotation.Annotation> annotationType() {
+                return null;
+            }
+        };
     }
 
     @Override

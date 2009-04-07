@@ -30,7 +30,7 @@ import java.lang.annotation.*;
  * information.
  */
 @Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RetentionPolicy.SOURCE)
 @Documented
 public @interface Service {
 

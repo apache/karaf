@@ -41,6 +41,7 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.*;
 
 import com.thoughtworks.qdox.JavaDocBuilder;
+import com.thoughtworks.qdox.model.JavaClass;
 import com.thoughtworks.qdox.model.JavaSource;
 
 /**
@@ -392,11 +393,12 @@ public class JavaClassDescriptorManager {
             this.log.debug("Searching description for: " + className);
             int index = 0;
             while ( result == null && index < this.sources.length) {
-                if ( this.sources[index].getClasses()[0].getFullyQualifiedName().equals(className) ) {
+                final JavaClass javaClass = this.sources[index].getClasses()[0];
+                if ( javaClass.getFullyQualifiedName().equals(className) ) {
                     try {
                         // check for java annotation descriptions - fallback to QDox if none found
                         Class clazz = this.classloader.loadClass(className);
-                        if (this.processAnnotations && getAnnotationTagProviderManager().hasScrPluginAnnotation(clazz)) {
+                        if (this.processAnnotations && getAnnotationTagProviderManager().hasScrPluginAnnotation(javaClass)) {
                             this.log.debug("Found java annotation description for: " + className);
                             result = new AnnotationJavaClassDescription(clazz, this.sources[index], this);
                         } else if ( this.parseJavadocs ) {
