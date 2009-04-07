@@ -37,6 +37,8 @@ public class Main {
             if (args[i].charAt(0) == '-') {
                 if (args[i].equals("-a")) {
                     port = Integer.parseInt(args[++i]);
+                } else if (args[i].equals("-h")) {
+                    host = args[++i];
                 } else if (args[i].equals("-u")) {
                     user = args[++i];
                 } else if (args[i].equals("-p")) {
