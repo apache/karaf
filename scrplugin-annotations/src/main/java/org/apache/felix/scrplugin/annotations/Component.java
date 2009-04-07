@@ -80,7 +80,7 @@ public @interface Component {
 
     /**
      * Whether Metatype Service data is generated or not. If this parameter is
-     * not set or set to true Metatype Service data is generated in the
+     * set to true Metatype Service data is generated in the
      * <code>metatype.xml</code> file for this component. Otherwise no Metatype
      * Service data is generated for this component.
      */
