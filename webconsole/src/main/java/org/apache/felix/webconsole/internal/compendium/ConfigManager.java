@@ -223,20 +223,23 @@ public class ConfigManager extends ConfigManagerBase
         {
             pidFilter = pid;
         }
-        try
+        if ( pidFilter != null )
         {
-            getBundleContext().createFilter( pidFilter );
-
-            // if the pidFilter was set from the pid, clear the pid
-            if ( pid == pidFilter )
+            try
             {
-                pid = null;
+                getBundleContext().createFilter( pidFilter );
+
+                // if the pidFilter was set from the pid, clear the pid
+                if ( pid == pidFilter )
+                {
+                    pid = null;
+                }
             }
-        }
-        catch ( InvalidSyntaxException ise )
-        {
-            // its ok, if the pid is just a single PID
-            pidFilter = null;
+            catch ( InvalidSyntaxException ise )
+            {
+                // its ok, if the pid is just a single PID
+                pidFilter = null;
+            }
         }
 
         final ConfigurationAdmin ca = this.getConfigurationAdmin();
