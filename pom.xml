@@ -33,15 +33,13 @@
   <version>1</version>
   <description>Apache Felix Reactor POM</description>
   <!-- 
-  Felix contains 3 custom maven packaging plugins. Each creates a jar file
+  Felix contains 2 custom maven packaging plugins. Each creates a jar file
   as an artifact. 
   
   maven-bundle-plugin 
     (bundle packaging - latest prefered plugin for generating OSGi bundles.)
   maven-osgi-plugin 
     (osgi-bundle packaging - old plugin for generating OSGi bundles.)
-  org.apache.felix.ipojo.plugin 
-    (plugin for generating iPOJO OSGi bundles.)
     
   But with maven bug https://issues.apache.org/jira/browse/FELIX-198 files
   are not always created with the correct extension in the repository.
@@ -128,6 +126,8 @@
 
         <module>mosgi</module> 
         <module>jmood</module> 
+        
+        <module>transaction</module>
 
         <module>examples</module>
       </modules>

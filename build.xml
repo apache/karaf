@@ -38,9 +38,6 @@
             <arg line="-Dpackaging=osgi-bundle clean" />
         </exec>
         <exec executable="${mvn}" failonerror="true">
-            <arg line="-Dpackaging=ipojo-bundle clean" />
-        </exec>
-        <exec executable="${mvn}" failonerror="true">
             <arg line="-Dpackaging=osgi-bundle-mosgi clean" />
         </exec>
     </target>
