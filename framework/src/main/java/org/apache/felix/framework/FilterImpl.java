@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,8 +20,8 @@ package org.apache.felix.framework;
 
 import java.io.CharArrayReader;
 import java.io.IOException;
-import java.util.*;
 import java.lang.ref.SoftReference;
+import java.util.*;
 
 import org.apache.felix.framework.util.StringMap;
 import org.apache.felix.framework.util.ldap.*;
@@ -56,7 +56,7 @@ public class FilterImpl implements Filter
         m_logger = logger;
         if (expr == null)
         {
-            throw new InvalidSyntaxException("Filter cannot be null", null);
+            throw new NullPointerException("Filter cannot be null");
         }
         Object[] program = null;
         synchronized (m_programCache)
@@ -127,7 +127,7 @@ public class FilterImpl implements Filter
         return toString().hashCode();
     }
 
-    private boolean match(Dictionary dict, ServiceReference ref, boolean caseSensitive) 
+    private boolean match(Dictionary dict, ServiceReference ref, boolean caseSensitive)
         throws IllegalArgumentException
     {
         SoftReference tupleRef = (SoftReference) m_cache.get();
@@ -135,36 +135,36 @@ public class FilterImpl implements Filter
         SimpleMapper mapper = null;
         Object[] tuple = null;
 
-        if (tupleRef != null) 
+        if (tupleRef != null)
         {
             tuple = (Object[]) tupleRef.get();
         }
 
-        if (tuple == null) 
+        if (tuple == null)
         {
             evaluator = new Evaluator(m_program);
             mapper = new SimpleMapper();
         }
-        else 
+        else
         {
             evaluator = (Evaluator) tuple[0];
             mapper = (SimpleMapper) tuple[1];
             m_cache.set(null);
         }
 
-        try 
+        try
         {
-            if (dict != null) 
+            if (dict != null)
             {
                 mapper.setSource(dict, caseSensitive);
             }
-            else 
+            else
             {
                 mapper.setSource(ref);
             }
 
             return evaluator.evaluate(mapper);
-        } 
+        }
         catch (AttributeNotFoundException ex)
         {
             log(Logger.LOG_DEBUG, "FilterImpl: Attribute not found.", ex);
@@ -173,18 +173,18 @@ public class FilterImpl implements Filter
         {
             log(Logger.LOG_ERROR, "FilterImpl: " + toString(), ex);
         }
-        finally 
+        finally
         {
-            if (dict != null) 
+            if (dict != null)
             {
                 mapper.setSource(null, caseSensitive);
             }
-            else 
+            else
             {
                 mapper.setSource(null);
             }
-            
-            if (tuple == null) 
+
+            if (tuple == null)
             {
                 m_cache.set(new SoftReference(new Object[] {evaluator, mapper}));
             }
