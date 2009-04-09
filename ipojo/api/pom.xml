@@ -46,7 +46,7 @@
 							org.apache.felix.ipojo.manipulation.annotations,
 							org.objectweb.asm.commons, org.objectweb.asm</Private-Package>
 						<Include-Resource> META-INF/LICENCE=LICENSE,
-							META-INF/NOTICE=NOTICE, META-INF/LICENCE.asm=LICENSE.asm
+							META-INF/NOTICE=NOTICE, META-INF/LICENSE.asm=LICENSE.asm
 						</Include-Resource>
 					</instructions>
 				</configuration>
