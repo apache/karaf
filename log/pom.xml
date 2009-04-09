@@ -20,7 +20,7 @@
   <parent>
     <groupId>org.apache.felix</groupId>
     <artifactId>felix</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.4</version>
     <relativePath>../pom/pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -57,10 +57,6 @@
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Bundle-Activator>${pom.artifactId}.Activator</Bundle-Activator>
             <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
-            <Include-Resource> 
-                        	META-INF/LICENSE=LICENSE,
-							META-INF/NOTICE=NOTICE 
-			</Include-Resource>
             <Export-Service>org.osgi.service.log.LogService,org.osgi.service.log.LogReaderService</Export-Service>
           </instructions>
         </configuration>
