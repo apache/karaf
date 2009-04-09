@@ -1098,7 +1098,7 @@ public class SecureAction
             }
             else if (action == OPEN_JARX_VERIFY_ACTION)
             {
-                return new JarFile((File) arg1, ((Boolean) arg2).booleanValue());
+                return new JarFileX((File) arg1, ((Boolean) arg2).booleanValue());
             }
             else if (action == GET_URL_INPUT_ACTION)
             {
