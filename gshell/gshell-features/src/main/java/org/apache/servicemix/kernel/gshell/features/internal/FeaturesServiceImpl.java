@@ -208,7 +208,13 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     }
     protected Bundle installBundleIfNeeded(String bundleLocation) throws IOException, BundleException {
         LOGGER.debug("Checking " + bundleLocation);
-        InputStream is = new BufferedInputStream(new URL(bundleLocation).openStream());
+        InputStream is = null;
+        try {
+            is = new BufferedInputStream(new URL(bundleLocation).openStream());
+        } catch (RuntimeException e) {
+            LOGGER.error(e.getMessage());
+            throw e;
+        }
         try {
             is.mark(256 * 1024);
             JarInputStream jar = new JarInputStream(is);
