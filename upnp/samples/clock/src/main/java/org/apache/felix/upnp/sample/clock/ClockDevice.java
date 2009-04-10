@@ -22,6 +22,7 @@ package org.apache.felix.upnp.sample.clock;
 
 import java.beans.PropertyChangeEvent;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -143,9 +144,9 @@ public class ClockDevice implements UPnPDevice {
 	public void update() {
 		Clock clock = Clock.getInstance();
 		Calendar cal = clock.getCalendar();
-        long time = cal.getTime().getTime();
+        Date date = cal.getTime();
         UPnPStateVariable variable =  timerService.getStateVariable("Time");
-		notifier.propertyChange(new PropertyChangeEvent(variable,"Time",new Long(time-1000),new Long(time)));
+		notifier.propertyChange(new PropertyChangeEvent(variable,"Time",null,date));
 	}
 	
 }

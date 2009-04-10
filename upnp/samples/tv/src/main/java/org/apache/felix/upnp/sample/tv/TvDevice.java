@@ -260,8 +260,8 @@ public class TvDevice implements UPnPDevice,UPnPEventListener,ServiceListener  {
 		if( !LinkedDevices.contains(deviceId))
 			LinkedDevices.add(deviceId);
 		if (deviceId.indexOf("Clock") != -1){
-				Long time = (Long) events.get("Time");
-				clockTime = new Date(time.longValue()).toString();				
+				Date date = (Date) events.get("Time");
+				clockTime = date.toString();				
 		}
 		else if (deviceId.indexOf("AirCon") != -1)
 				airconTemp = (String) events.get("Temp");

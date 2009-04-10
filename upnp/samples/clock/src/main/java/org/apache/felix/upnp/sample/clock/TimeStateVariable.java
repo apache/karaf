@@ -44,14 +44,14 @@ public class TimeStateVariable implements UPnPLocalStateVariable{
 	 * @see org.osgi.service.upnp.UPnPStateVariable#getJavaDataType()
 	 */
 	public Class getJavaDataType() {
-		return Long.class;
+		return Date.class;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.osgi.service.upnp.UPnPStateVariable#getUPnPDataType()
 	 */
 	public String getUPnPDataType() {
-		return TYPE_TIME;
+		return TYPE_DATETIME;
 	}
 
 	/* (non-Javadoc)
@@ -105,6 +105,6 @@ public class TimeStateVariable implements UPnPLocalStateVariable{
 	}
 
 	public Object getCurrentValue() {
-		return new Long(clock.getCalendar().getTime().getTime());
+		return clock.getCalendar().getTime();
 	}
 }
