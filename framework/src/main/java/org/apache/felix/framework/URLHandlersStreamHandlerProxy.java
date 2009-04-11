@@ -437,9 +437,9 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
                 // Create a simple service tracker for the framework.
                 tracker = m_action.invoke(m_action.getConstructor(
                     framework.getClass().getClassLoader().loadClass(
-                    URLHandlersServiceTracker.class.getName()), 
+                    "org.apache.felix.framework.URLHandlersServiceTracker"), 
                     new Class[]{framework.getClass().getClassLoader().loadClass(
-                    Felix.class.getName()), String.class}), 
+                    "org.apache.felix.framework.Felix"), String.class}), 
                     new Object[]{framework, filter});
 
                 // Cache the simple service tracker.
