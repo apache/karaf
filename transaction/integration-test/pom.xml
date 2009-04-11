@@ -75,4 +75,18 @@
         </plugins>
     </build>
 
+    <repositories>
+        <repository>
+            <id>spring-milestone</id>
+            <name>Spring Portfolio Milestone Repository</name>
+            <url>http://s3.amazonaws.com/maven.springframework.org/milestone</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
 </project>
