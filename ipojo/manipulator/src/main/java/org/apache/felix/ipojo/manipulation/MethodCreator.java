@@ -214,7 +214,11 @@ public class MethodCreator extends ClassAdapter implements Opcodes {
         if ((access & ACC_STATIC) == ACC_STATIC) { return super.visitMethod(access, name, desc, signature, exceptions); }
 
         MethodDescriptor md = getMethodDescriptor(name, desc);
-        generateMethodHeader(access, name, desc, signature, exceptions, md.getAnnotations());
+        if (md == null) {
+            generateMethodHeader(access, name, desc, signature, exceptions, new ArrayList(0));
+        } else {
+            generateMethodHeader(access, name, desc, signature, exceptions, md.getAnnotations());
+        }
         
         String id = generateMethodFlag(name, desc);
         if (! m_methodFlags.contains(id)) {
