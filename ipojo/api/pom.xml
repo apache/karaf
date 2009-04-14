@@ -39,15 +39,22 @@
 					<instructions>
 						<Bundle-SymbolicName>${pom.artifactId}
 						</Bundle-SymbolicName>
-						<Import-Package>!org.objectweb.asm.tree, *</Import-Package>
-						<Export-Package>org.apache.felix.ipojo.api
-						</Export-Package>
-						<Private-Package>org.apache.felix.ipojo.manipulation,
+						<Import-Package>
+							!org.objectweb.asm.tree, 
+							org.apache.felix.ipojo.composite;resolution:=optional,
+							*
+						</Import-Package>
+						<Export-Package>
+							org.apache.felix.ipojo.api,
+							org.apache.felix.ipojo.api.composite,
+							org.apache.felix.ipojo.manipulation,
 							org.apache.felix.ipojo.manipulation.annotations,
-							org.objectweb.asm.commons, org.objectweb.asm</Private-Package>
+							org.objectweb.asm.commons, org.objectweb.asm
+						</Export-Package>
 						<Include-Resource> META-INF/LICENCE=LICENSE,
 							META-INF/NOTICE=NOTICE, META-INF/LICENSE.asm=LICENSE.asm
 						</Include-Resource>
+						
 					</instructions>
 				</configuration>
 			</plugin>
@@ -83,6 +90,11 @@
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.ipojo</artifactId>
+			<version>1.3.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.ipojo.composite</artifactId>
 			<version>1.3.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>

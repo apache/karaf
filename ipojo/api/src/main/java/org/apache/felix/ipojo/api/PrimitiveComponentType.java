@@ -122,7 +122,7 @@ public class PrimitiveComponentType extends ComponentType {
     /**
      * The temporal dependencies.
      */
-    private ArrayList m_temporals = new ArrayList();;
+    private ArrayList m_temporals = new ArrayList();
     
     /**
      * Checks that the component type is not already
