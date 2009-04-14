@@ -60,7 +60,8 @@ public class PropertyHandler {
      */
     protected void processProperty(JavaTag   tag,
                                    String    name,
-                                   JavaField javaField)
+                                   JavaField javaField,
+                                   final List<String> warnings)
     throws MojoExecutionException {
         final Property prop = new Property(tag);
         prop.setName(name);
@@ -83,7 +84,14 @@ public class PropertyHandler {
                     final String key = entry.getKey();
                     if (key.startsWith(Constants.PROPERTY_MULTIVALUE_PREFIX) ) {
                         values.add(entry.getValue());
-                    } else if ( key.startsWith(Constants.PROPERTY_MULTIVALUE_REF_PREFIX) ) {
+                    } else if ( key.startsWith(Constants.PROPERTY_MULTIVALUE_REF_PREFIX)
+                        || key.startsWith(Constants.OLD_PROPERTY_MULTIVALUE_REF_PREFIX) ) {
+                        if ( key.startsWith(Constants.OLD_PROPERTY_MULTIVALUE_REF_PREFIX) ) {
+                            warnings.add("@" + tag.getName() + ": " + "Deprecated attribute '" +
+                                    Constants.OLD_PROPERTY_MULTIVALUE_REF_PREFIX + "' used, use '" +
+                                    Constants.PROPERTY_MULTIVALUE_REF_PREFIX + "' instead "
+                                    + " (" + tag.getSourceLocation() + ")");
+                        }
                         final String[] stringValues = this.getPropertyValueRef(tag, prop, entry.getValue());
                         if ( stringValues != null ) {
                             for(int i=0; i<stringValues.length; i++) {
@@ -332,16 +340,21 @@ public class PropertyHandler {
 
     /**
      * Process all found properties for the component.
+     * @param globalProperties Global properties are set on all components.
+     * @param errors List of occured errors.
+     * @param warnings List of occured warnings
      * @throws MojoExecutionException
      */
-    public void processProperties(final Map<String, String> globalProperties)
+    public void processProperties(final Map<String, String> globalProperties,
+                                  final List<String> errors,
+                                  final List<String> warnings)
     throws MojoExecutionException {
         final Iterator<Map.Entry<String, PropertyDescription>> propIter = properties.entrySet().iterator();
         while ( propIter.hasNext() ) {
             final Map.Entry<String, PropertyDescription> entry = propIter.next();
             final String propName = entry.getKey();
             final PropertyDescription desc = entry.getValue();
-            this.processProperty(desc.propertyTag, propName, desc.field);
+            this.processProperty(desc.propertyTag, propName, desc.field, warnings);
         }
         // apply pre configured global properties
         if ( globalProperties != null ) {

@@ -65,7 +65,11 @@ public class Constants {
 
     public static final String PROPERTY_VALUE_REF = "valueRef";
 
-    public static final String PROPERTY_MULTIVALUE_REF_PREFIX = "refValues";
+    /** Property for multi value fields using references. */
+    public static final String PROPERTY_MULTIVALUE_REF_PREFIX = "valueRefs";
+
+    /** @deprecated */
+    public static final String OLD_PROPERTY_MULTIVALUE_REF_PREFIX = "refValues";
 
     public static final String PROPERTY_TYPE = "type";
 
@@ -100,7 +104,7 @@ public class Constants {
     public static final String REFERENCE_UNDBIND = "unbind";
 
     public static final String REFERENCE_CHECKED = "checked";
-    
+
     /** @since 1.0.9 */
     public static final String REFERENCE_STRATEGY = "strategy";
 

@@ -282,6 +282,9 @@ public class SCRDescriptorMojo extends AbstractMojo {
      */
     protected Component createComponent(JavaClassDescription description, JavaTag componentTag, MetaData metaData)
     throws MojoExecutionException {
+        // two lists for errors and warnings
+        final List<String> errors = new ArrayList<String>();
+        final List<String> warnings = new ArrayList<String>();
         // create a new component
         final Component component = new Component(componentTag);
 
@@ -327,7 +330,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
         } while (inherited && currentDescription != null);
 
         // process properties
-        propertyHandler.processProperties(this.properties);
+        propertyHandler.processProperties(this.properties, errors, warnings);
 
         // process references
         final Iterator<Map.Entry<String, Object[]>> refIter = references.entrySet().iterator();
@@ -357,25 +360,23 @@ public class SCRDescriptorMojo extends AbstractMojo {
             }
         }
 
-        final List<String> issues = new ArrayList<String>();
-        final List<String> warnings = new ArrayList<String>();
-        component.validate(issues, warnings);
+        component.validate(errors, warnings);
 
         // now log warnings and errors (warnings first)
         // FELIX-997: In strictMode all warnings are regarded as errors
         if ( this.strictMode ) {
-            issues.addAll(warnings);
+            errors.addAll(warnings);
             warnings.clear();
         }
         for(String warn : warnings) {
             this.getLog().warn(warn);
         }
-        for(String err : issues) {
+        for(String err : errors) {
             this.getLog().error(err);
         }
 
         // return nothing if validation fails
-        return issues.size() == 0 ? component : null;
+        return errors.size() == 0 ? component : null;
     }
 
     /**
