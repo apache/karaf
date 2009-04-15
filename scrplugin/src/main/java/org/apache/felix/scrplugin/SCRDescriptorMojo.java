@@ -534,6 +534,8 @@ public class SCRDescriptorMojo extends AbstractMojo {
                 if (StringUtils.isEmpty(type)) {
                     if ( reference.getField() != null ) {
                         type = reference.getField().getType();
+                    } else {
+                        throw new MojoExecutionException("Interface missing for reference " + refName + " in class " + reference.getJavaClassDescription().getName());
                     }
                 } else if ( isInspectedClass ) {
                     // check if the value points to a class/interface

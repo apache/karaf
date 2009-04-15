@@ -26,13 +26,15 @@ import java.lang.reflect.Field;
  */
 public class ClassUtil {
 
+    public static ClassLoader classLoader;
+
     /**
      * Try to get the initial value of a static field
      * @param clazz     The class.
      * @param fieldName The name of the field.
      * @return The initial value or null.
      */
-    public static String[] getInitializationExpression(Class clazz, String fieldName) {
+    public static String[] getInitializationExpression(Class<?> clazz, String fieldName) {
         try {
             final Field field = clazz.getDeclaredField(fieldName);
             field.setAccessible(true);
@@ -54,5 +56,22 @@ public class ClassUtil {
             // ignore and just return null
         }
         return null;
+    }
+
+    /**
+     * Get the compiled class.
+     */
+    public static Class<?> getClass(String name) {
+        if ( classLoader == null ) {
+            return null;
+        }
+        try {
+            if ( name.endsWith(".class") ) {
+                name = name.substring(0, name.length() - 6);
+            }
+            return classLoader.loadClass(name);
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
     }
 }

@@ -52,47 +52,47 @@ public class ComponentTag extends AbstractTag {
         this.annotation = new Component() {
 
             public boolean componentAbstract() {
-                return Util.getValue(annotation, "componentAbstract", false);
+                return Util.getBooleanValue(annotation, "componentAbstract", Component.class);
             }
 
             public boolean createPid() {
-                return Util.getValue(annotation, "createPid", true);
+                return Util.getBooleanValue(annotation, "createPid", Component.class);
             }
 
             public String description() {
-                return Util.getValue(annotation, "description", "");
+                return Util.getStringValue(annotation, "description", Component.class);
             }
 
             public boolean ds() {
-                return Util.getValue(annotation, "ds", true);
+                return Util.getBooleanValue(annotation, "ds", Component.class);
             }
 
             public boolean enabled() {
-                return Util.getValue(annotation, "enabled", true);
+                return Util.getBooleanValue(annotation, "enabled", Component.class);
             }
 
             public String factory() {
-                return Util.getValue(annotation, "factory", "");
+                return Util.getStringValue(annotation, "factory", Component.class);
             }
 
             public boolean immediate() {
-                return Util.getValue(annotation, "immediate", false);
+                return Util.getBooleanValue(annotation, "immediate", Component.class);
             }
 
             public boolean inherit() {
-                return Util.getValue(annotation, "inherit", true);
+                return Util.getBooleanValue(annotation, "inherit", Component.class);
             }
 
             public String label() {
-                return Util.getValue(annotation, "label", "");
+                return Util.getStringValue(annotation, "label", Component.class);
             }
 
             public boolean metatype() {
-                return Util.getValue(annotation, "metatype", false);
+                return Util.getBooleanValue(annotation, "metatype", Component.class);
             }
 
             public String name() {
-                return Util.getValue(annotation, "name", "");
+                return Util.getStringValue(annotation, "name", Component.class);
             }
 
             public Class<? extends java.lang.annotation.Annotation> annotationType() {

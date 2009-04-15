@@ -19,7 +19,6 @@
 package org.apache.felix.scrplugin.tags.annotation;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.util.*;
 
 import org.apache.felix.scrplugin.tags.*;
@@ -40,7 +39,7 @@ public class AnnotationJavaClassDescription extends QDoxJavaClassDescription {
      * @param source QDox source
      * @param manager description manager
      */
-    public AnnotationJavaClassDescription(Class clazz, JavaSource source, JavaClassDescriptorManager manager) {
+    public AnnotationJavaClassDescription(Class<?> clazz, JavaSource source, JavaClassDescriptorManager manager) {
         super(clazz, source, manager);
     }
 
@@ -84,6 +83,14 @@ public class AnnotationJavaClassDescription extends QDoxJavaClassDescription {
                 }
             }
         }
+        for(com.thoughtworks.qdox.model.Annotation annotation : this.javaClass.getAnnotations()) {
+            List<JavaTag> annotationTags = manager.getAnnotationTagProviderManager().getTags(annotation, this);
+            for (JavaTag tag : annotationTags) {
+                if (tag.getName().equals(name)) {
+                    tags.add(tag);
+                }
+            }
+        }
 
         if (inherited && this.getSuperClass() != null) {
             final JavaTag[] superTags = this.getSuperClass().getTagsByName(name, inherited);
@@ -100,7 +107,10 @@ public class AnnotationJavaClassDescription extends QDoxJavaClassDescription {
      */
     @Override
     public JavaField[] getFields() {
-        final Field[] fields = this.clazz.getDeclaredFields();
+        final com.thoughtworks.qdox.model.JavaField fields[] = this.javaClass.getFields();
+        if ( fields == null || fields.length == 0 ) {
+            return new JavaField[0];
+        }
         final JavaField[] javaFields = new JavaField[fields.length];
         for (int i = 0; i < fields.length; i++) {
             javaFields[i] = new AnnotationJavaField(fields[i], this);
@@ -113,14 +123,7 @@ public class AnnotationJavaClassDescription extends QDoxJavaClassDescription {
      */
     @Override
     public JavaField getFieldByName(String name) throws MojoExecutionException {
-        Field field = null;
-        try {
-            field = this.clazz.getField(name);
-        } catch (SecurityException e) {
-            // ignore
-        } catch (NoSuchFieldException e) {
-            // ignore
-        }
+        final com.thoughtworks.qdox.model.JavaField field = this.javaClass.getFieldByName(name);
         if (field != null) {
             return new AnnotationJavaField(field, this);
         }

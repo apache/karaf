@@ -18,11 +18,13 @@
  */
 package org.apache.felix.scrplugin.tags.annotation.defaulttag;
 
+import org.apache.felix.scrplugin.tags.ClassUtil;
+
 import com.thoughtworks.qdox.model.Annotation;
 
 public abstract class Util {
 
-    public static boolean getValue(Annotation annotation, String name, boolean defaultValue) {
+    public static boolean getBooleanValue(Annotation annotation, String name, final Class<?> clazz) {
         final Object obj = annotation.getNamedParameter(name);
         if ( obj != null ) {
             if ( obj instanceof String ) {
@@ -32,10 +34,46 @@ public abstract class Util {
             }
             return Boolean.valueOf(obj.toString());
         }
-        return defaultValue;
+        try {
+            return (Boolean) clazz.getMethod(name).getDefaultValue();
+        } catch( NoSuchMethodException mnfe) {
+            // we ignore this
+            return true;
+        }
     }
 
-    public static String getValue(Annotation annotation, String name, String defaultValue) {
+    public static int getIntValue(Annotation annotation, String name, final Class<?> clazz) {
+        final Object obj = annotation.getNamedParameter(name);
+        if ( obj != null ) {
+            if ( obj instanceof String ) {
+                return Integer.valueOf((String)obj);
+            } else if ( obj instanceof Number ) {
+                return ((Number)obj).intValue();
+            }
+            return Integer.valueOf(obj.toString());
+        }
+        try {
+            return (Integer) clazz.getMethod(name).getDefaultValue();
+        } catch( NoSuchMethodException mnfe) {
+            // we ignore this
+            return 0;
+        }
+    }
+
+    public static String[] getStringValues(Annotation annotation, String name, final Class<?> clazz) {
+        final Object obj = annotation.getNamedParameter(name);
+        if ( obj != null ) {
+            return (String[])obj;
+        }
+        try {
+            return (String[]) clazz.getMethod(name).getDefaultValue();
+        } catch( NoSuchMethodException mnfe) {
+            // we ignore this
+            return null;
+        }
+    }
+
+    public static String getStringValue(Annotation annotation, String name, final Class<?> clazz) {
         final Object obj = annotation.getNamedParameter(name);
         if ( obj != null ) {
             if ( obj instanceof String ) {
@@ -43,6 +81,27 @@ public abstract class Util {
             }
             return obj.toString();
         }
-        return defaultValue;
+        try {
+            return (String) clazz.getMethod(name).getDefaultValue();
+        } catch( NoSuchMethodException mnfe) {
+            // we ignore this
+            return "";
+        }
+    }
+
+    public static Class<?> getClassValue(Annotation annotation, String name, final Class<?> clazz) {
+        final Object obj = annotation.getNamedParameter(name);
+        if ( obj != null ) {
+            if ( obj instanceof Class ) {
+                return (Class<?>)obj;
+            }
+            return ClassUtil.getClass(obj.toString());
+        }
+        try {
+            return (Class<?>) clazz.getMethod(name).getDefaultValue();
+        } catch( NoSuchMethodException mnfe) {
+            // we ignore this
+            return null;
+        }
     }
 }

@@ -22,10 +22,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.felix.scrplugin.Constants;
-import org.apache.felix.scrplugin.annotations.AutoDetect;
-import org.apache.felix.scrplugin.annotations.Reference;
+import org.apache.felix.scrplugin.annotations.*;
 import org.apache.felix.scrplugin.tags.JavaClassDescription;
 import org.apache.felix.scrplugin.tags.JavaField;
+
+import com.thoughtworks.qdox.model.Annotation;
 
 /**
  * Description of a java tag for components.
@@ -44,6 +45,81 @@ public class ReferenceTag extends AbstractTag {
         this.annotation = annotation;
     }
 
+    /**
+     * @param annotation Annotation
+     * @param desc Description
+     */
+    public ReferenceTag(final Annotation annotation, JavaClassDescription desc, JavaField field) {
+        super(desc, field);
+
+        this.annotation = new Reference() {
+
+            public String bind() {
+                return Util.getStringValue(annotation, "bind", Reference.class);
+            }
+
+            public ReferenceCardinality cardinality() {
+                final Object obj = annotation.getNamedParameter("cardinality");
+                if ( obj != null ) {
+                    if ( obj instanceof ReferenceCardinality ) {
+                        return (ReferenceCardinality)obj;
+                    }
+                    return ReferenceCardinality.values()[(Integer)obj];
+                }
+                try {
+                    return (ReferenceCardinality) Reference.class.getMethod("cardinality").getDefaultValue();
+                } catch( NoSuchMethodException mnfe) {
+                    // we ignore this
+                    return null;
+                }
+            }
+
+            public boolean checked() {
+                return Util.getBooleanValue(annotation, "checked", Reference.class);
+            }
+
+            public String name() {
+                return Util.getStringValue(annotation, "name", Reference.class);
+            }
+
+            public ReferencePolicy policy() {
+                final Object obj = annotation.getNamedParameter("policy");
+                if ( obj != null ) {
+                    if ( obj instanceof ReferencePolicy ) {
+                        return (ReferencePolicy)obj;
+                    }
+                    return ReferencePolicy.values()[(Integer)obj];
+                }
+                try {
+                    return (ReferencePolicy) Reference.class.getMethod("policy").getDefaultValue();
+                } catch( NoSuchMethodException mnfe) {
+                    // we ignore this
+                    return null;
+                }
+            }
+
+            public Class<?> referenceInterface() {
+                return Util.getClassValue(annotation, "referenceInterface", Reference.class);
+            }
+
+            public String strategy() {
+                return Util.getStringValue(annotation, "strategy", Reference.class);
+            }
+
+            public String target() {
+                return Util.getStringValue(annotation, "target", Reference.class);
+            }
+
+            public String unbind() {
+                return Util.getStringValue(annotation, "unbind", Reference.class);
+            }
+
+            public Class<? extends java.lang.annotation.Annotation> annotationType() {
+                return null;
+            }
+        };
+    }
+
     @Override
     public String getName() {
         return Constants.REFERENCE;
@@ -55,11 +131,10 @@ public class ReferenceTag extends AbstractTag {
 
         map.put(Constants.REFERENCE_NAME, emptyToNull(this.annotation.name()));
 
-        String referenceInterface = null;
         if (this.annotation.referenceInterface() != AutoDetect.class) {
-            referenceInterface = this.annotation.referenceInterface().getName();
+            String referenceInterface = this.annotation.referenceInterface().getName();
+            map.put(Constants.REFERENCE_INTERFACE, referenceInterface);
         }
-        map.put(Constants.REFERENCE_INTERFACE, referenceInterface);
 
         map.put(Constants.REFERENCE_CARDINALITY, this.annotation.cardinality().getCardinalityString());
         map.put(Constants.REFERENCE_POLICY, this.annotation.policy().getPolicyString());

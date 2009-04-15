@@ -24,6 +24,8 @@ import org.apache.felix.scrplugin.Constants;
 import org.apache.felix.scrplugin.annotations.*;
 import org.apache.felix.scrplugin.tags.JavaClassDescription;
 
+import com.thoughtworks.qdox.model.Annotation;
+
 /**
  * Description of a java tag for components.
  */
@@ -38,6 +40,61 @@ public class PropertyTag extends AbstractTag {
     public PropertyTag(Property annotation, JavaClassDescription desc) {
         super(desc, null);
         this.annotation = annotation;
+    }
+
+    /**
+     * @param annotation Annotation
+     * @param desc Description
+     */
+    public PropertyTag(final Annotation annotation, JavaClassDescription desc) {
+        super(desc, null);
+        this.annotation = new Property() {
+
+            public int cardinality() {
+                return Util.getIntValue(annotation, "cardinality", Property.class);
+            }
+
+            public String description() {
+                return Util.getStringValue(annotation, "description", Property.class);
+            }
+
+            public String label() {
+                return Util.getStringValue(annotation, "label", Property.class);
+            }
+
+            public String name() {
+                return Util.getStringValue(annotation, "name", Property.class);
+            }
+
+            public PropertyOption[] options() {
+                final Object obj = annotation.getNamedParameter("options");
+                if ( obj != null ) {
+                    return (PropertyOption[])obj;
+                }
+                try {
+                    return (PropertyOption[]) Property.class.getMethod("options").getDefaultValue();
+                } catch( NoSuchMethodException mnfe) {
+                    // we ignore this
+                    return null;
+                }
+            }
+
+            public boolean propertyPrivate() {
+                return Util.getBooleanValue(annotation, "propertyPrivate", Property.class);
+            }
+
+            public Class<?> type() {
+                return Util.getClassValue(annotation, "type", Property.class);
+            }
+
+            public String[] value() {
+                return Util.getStringValues(annotation, "value", Property.class);
+            }
+
+            public Class<? extends java.lang.annotation.Annotation> annotationType() {
+                return null;
+            }
+        };
     }
 
     @Override

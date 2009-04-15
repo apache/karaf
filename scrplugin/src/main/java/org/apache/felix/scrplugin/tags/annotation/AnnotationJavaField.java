@@ -18,20 +18,16 @@
  */
 package org.apache.felix.scrplugin.tags.annotation;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.util.List;
 
-import org.apache.felix.scrplugin.tags.ClassUtil;
-import org.apache.felix.scrplugin.tags.JavaField;
-import org.apache.felix.scrplugin.tags.JavaTag;
+import org.apache.felix.scrplugin.tags.*;
 
 /**
  * Description of a java field
  */
 public class AnnotationJavaField implements JavaField {
 
-    protected final Field field;
+    protected final com.thoughtworks.qdox.model.JavaField field;
 
     protected final AnnotationJavaClassDescription description;
 
@@ -39,7 +35,7 @@ public class AnnotationJavaField implements JavaField {
      * @param field Field
      * @param description description
      */
-    public AnnotationJavaField(Field field, AnnotationJavaClassDescription description) {
+    public AnnotationJavaField(com.thoughtworks.qdox.model.JavaField field, AnnotationJavaClassDescription description) {
         this.field = field;
         this.description = description;
     }
@@ -62,16 +58,15 @@ public class AnnotationJavaField implements JavaField {
      * @see JavaField#getTagByName(String)
      */
     public JavaTag getTagByName(String name) {
-        for (Annotation annotation : this.field.getAnnotations()) {
-            List<JavaTag> tags = description.getManager().getAnnotationTagProviderManager().getTags(annotation,
-                    this.description, this);
+        for(com.thoughtworks.qdox.model.Annotation annotation : this.field.getAnnotations()) {
+            List<JavaTag> tags =  description.getManager().getAnnotationTagProviderManager().getTags(annotation, this.description, this);
             for (JavaTag tag : tags) {
                 if (tag.getName().equals(name)) {
                     return tag;
                 }
-
             }
         }
+
         return null;
     }
 
@@ -79,7 +74,7 @@ public class AnnotationJavaField implements JavaField {
      * @see JavaField#getType()
      */
     public String getType() {
-        return this.field.getType().getName();
+        return this.field.getType().getValue();
     }
 
 }

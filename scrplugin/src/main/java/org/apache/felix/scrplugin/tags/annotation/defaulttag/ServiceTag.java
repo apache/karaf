@@ -26,6 +26,8 @@ import org.apache.felix.scrplugin.annotations.AutoDetect;
 import org.apache.felix.scrplugin.annotations.Service;
 import org.apache.felix.scrplugin.tags.JavaClassDescription;
 
+import com.thoughtworks.qdox.model.Annotation;
+
 /**
  * Description of a java tag for components.
  */
@@ -40,6 +42,28 @@ public class ServiceTag extends AbstractTag {
     public ServiceTag(Service annotation, JavaClassDescription desc) {
         super(desc, null);
         this.annotation = annotation;
+    }
+
+    /**
+     * @param annotation Annotation
+     * @param desc Description
+     */
+    public ServiceTag(final Annotation annotation, JavaClassDescription desc) {
+        super(desc, null);
+        this.annotation = new Service() {
+
+            public boolean serviceFactory() {
+                return Util.getBooleanValue(annotation, "serviceFactory", Service.class);
+            }
+
+            public Class<?> value() {
+                return Util.getClassValue(annotation, "value", Service.class);
+            }
+
+            public Class<? extends java.lang.annotation.Annotation> annotationType() {
+                return null;
+            }
+        };
     }
 
     @Override

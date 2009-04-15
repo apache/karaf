@@ -56,7 +56,7 @@ public class AnnotationTagProviderManager {
         // add custom providers defined in pom
         for (int i = 0; i < annotationTagProviderClasses.length; i++) {
             try {
-                Class clazz = Class.forName(annotationTagProviderClasses[i]);
+                Class<?> clazz = Class.forName(annotationTagProviderClasses[i]);
                 try {
                     annotationTagProviders.add((AnnotationTagProvider) clazz.newInstance());
                 } catch (ClassCastException e) {
@@ -140,7 +140,7 @@ public class AnnotationTagProviderManager {
      * @param pClass Class
      * @return true if SCR plugin java annotation found
      */
-    public boolean hasScrPluginAnnotation(Class pClass) {
+    public boolean hasScrPluginAnnotation(Class<?> pClass) {
         for (Annotation annotation : pClass.getAnnotations()) {
             if (getTags(annotation, null).size() > 0) {
                 return true;

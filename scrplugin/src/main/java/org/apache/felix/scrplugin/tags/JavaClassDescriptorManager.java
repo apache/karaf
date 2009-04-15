@@ -105,6 +105,7 @@ public class JavaClassDescriptorManager {
         this.project = project;
         this.annotationTagProviderManager = new AnnotationTagProviderManager(annotationTagProviders);
         this.classloader = this.getCompileClassLoader();
+        ClassUtil.classLoader = this.classloader;
 
         // get all the class sources through qdox
         this.log.debug("Setting up QDox");
@@ -302,6 +303,25 @@ public class JavaClassDescriptorManager {
         return list;
     }
 
+    /**
+     * Get the url for the target directory
+     */
+    protected URL getOutputDirectory()
+    throws MojoFailureException {
+        final String targetDirectory = this.getProject().getBuild().getOutputDirectory();
+        try {
+            return new File(targetDirectory).toURI().toURL();
+        } catch (IOException ioe) {
+            throw new MojoFailureException("Unable to add target directory to classloader.");
+        }
+    }
+
+    /**
+     * Create a class loader containing all compile artifacts including
+     * the target/class directory of the current project
+     * @return The class loader
+     * @throws MojoFailureException
+     */
     protected ClassLoader getCompileClassLoader()
     throws MojoFailureException {
         @SuppressWarnings("unchecked")
@@ -316,12 +336,8 @@ public class JavaClassDescriptorManager {
                 throw new MojoFailureException("Unable to get compile class loader.");
             }
         }
-        final String targetDirectory = this.getProject().getBuild().getOutputDirectory();
-        try {
-            path[path.length - 1] = new File(targetDirectory).toURI().toURL();
-        } catch (IOException ioe) {
-            throw new MojoFailureException("Unable to add target directory to classloader.");
-        }
+        path[path.length - 1] = this.getOutputDirectory();
+
         return new URLClassLoader(path, this.getClass().getClassLoader());
     }
 
@@ -397,7 +413,7 @@ public class JavaClassDescriptorManager {
                 if ( javaClass.getFullyQualifiedName().equals(className) ) {
                     try {
                         // check for java annotation descriptions - fallback to QDox if none found
-                        Class clazz = this.classloader.loadClass(className);
+                        Class<?> clazz = this.classloader.loadClass(className);
                         if (this.processAnnotations && getAnnotationTagProviderManager().hasScrPluginAnnotation(javaClass)) {
                             this.log.debug("Found java annotation description for: " + className);
                             result = new AnnotationJavaClassDescription(clazz, this.sources[index], this);

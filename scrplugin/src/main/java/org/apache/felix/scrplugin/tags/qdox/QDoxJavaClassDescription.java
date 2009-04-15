@@ -46,9 +46,9 @@ public class QDoxJavaClassDescription
     protected final JavaSource source;
 
     /** The compiled class. */
-    protected final Class clazz;
+    protected final Class<?> clazz;
 
-    public QDoxJavaClassDescription(Class clazz, JavaSource source, JavaClassDescriptorManager m) {
+    public QDoxJavaClassDescription(Class<?> clazz, JavaSource source, JavaClassDescriptorManager m) {
         this.javaClass = source.getClasses()[0];
         this.manager = m;
         this.source = source;
@@ -419,7 +419,7 @@ public class QDoxJavaClassDescription
         return getName();
     }
 
-    public Class getCompiledClass() {
+    public Class<?> getCompiledClass() {
         return this.clazz;
     }
 }
