@@ -99,7 +99,7 @@ public class CompositeComponentType extends ComponentType {
      */
     private void ensureValidity() {
         if (m_context == null) {
-            throw new IllegalStateException("The primitive component type has no bundle context");
+            throw new IllegalStateException("The composite component type has no bundle context");
         }
     }
 
@@ -221,6 +221,14 @@ public class CompositeComponentType extends ComponentType {
         }
         for (int i = 0; i < m_instantiated.size(); i++) {
             InstantiatedService inst = (InstantiatedService) m_instantiated.get(i);
+            element.addElement(inst.getElement());
+        }
+        for (int i = 0; i < m_exported.size(); i++) {
+            ExportedService inst = (ExportedService) m_exported.get(i);
+            element.addElement(inst.getElement());
+        }
+        for (int i = 0; i < m_provided.size(); i++) {
+            ProvidedService inst = (ProvidedService) m_provided.get(i);
             element.addElement(inst.getElement());
         }
         return element;

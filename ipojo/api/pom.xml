@@ -84,6 +84,7 @@
 					<configLocation>http://felix.apache.org/ipojo/dev/checkstyle_ipojo.xml</configLocation>
 				</configuration>
 			</plugin>
+			
 		</plugins>
 	</build>
 	<dependencies>

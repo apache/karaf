@@ -49,6 +49,7 @@
 	<module>handler/whiteboard</module>
 	<module>handler/eventadmin</module>
 	<module>core/configadmin</module>
+	<module>api</module>
    </modules>
    
    <profiles>

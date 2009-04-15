@@ -57,7 +57,7 @@ public class DummyCreationStrategy extends CreationStrategy implements Invocatio
         
         throw new UnsupportedOperationException("This service requires an advanced creation policy. "
                 + "Before calling the service, call the getService(ComponentInstance) method to get "
-                + "the service object. " + arg1.getName()); // TODO DEBUG
+                + "the service object. " + arg1.getName()); 
     }
 
     /**

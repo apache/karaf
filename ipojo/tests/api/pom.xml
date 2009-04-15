@@ -1,0 +1,114 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>ipojo.tests</groupId>
+  <artifactId>org.apache.felix.ipojo.tests.api</artifactId>
+  <packaging>jar</packaging>
+  <version>1.3.0-SNAPSHOT</version>
+  <name>org.apache.felix.ipojo.tests.api</name>
+  
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
+			<!--  <plugin>
+				<groupId>org.ops4j.pax.exam</groupId>
+				<artifactId>maven-paxexam-plugin</artifactId>
+				<executions>
+					<execution>
+					<id>generate-paxexam-config</id>
+					<goals>
+						<goal>generate-paxexam-config</goal>
+					</goals>
+					</execution>
+				</executions>
+				<configuration>
+				<settings>
+					<platform>felix</platform>
+				</settings>
+				</configuration>
+			</plugin> -->
+		</plugins>
+	</build>	
+	
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.ipojo</artifactId>
+			<version>1.3.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.ipojo.api</artifactId>
+			<version>1.3.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.ipojo.composite</artifactId>
+			<version>1.3.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.ipojo.manipulator</artifactId>
+			<version>1.3.0-SNAPSHOT</version>
+		</dependency>
+		
+		
+	<!--
+		Pax Exam API:
+	-->
+	<dependency>
+		<groupId>org.ops4j.pax.exam</groupId>
+		<artifactId>pax-exam</artifactId>
+		<version>0.4.0</version>
+	</dependency>
+	<!--
+		During runtime Pax Exam will discover the OSGi container to use by
+		searching metadata available into classpath. Pax Exam comes with a
+		default container that uses [Pax Runner] for implementing the
+		container requirements:
+	-->
+	<dependency>
+		<groupId>org.ops4j.pax.exam</groupId>
+		<artifactId>pax-exam-container-default
+		</artifactId>
+		<version>0.4.0</version>
+	</dependency>
+	<!--
+		If your test code is based on JUnit you will have to have the Junit
+		support artifact:
+	-->
+	<dependency>
+		<groupId>org.ops4j.pax.exam</groupId>
+		<artifactId>pax-exam-junit</artifactId>
+		<version>0.4.0</version>
+	</dependency>
+	<dependency>
+		<groupId>junit</groupId>
+		<artifactId>junit</artifactId>
+		<version>4.5</version>
+		<type>jar</type>
+		<scope>test</scope>
+	</dependency>	
+	</dependencies>
+	
+	<repositories>
+		<repository>
+			<id>ops4j.releases</id>
+			<name>OPS4J Release</name>
+			<url> http://repository.ops4j.org/maven2/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+</project>
