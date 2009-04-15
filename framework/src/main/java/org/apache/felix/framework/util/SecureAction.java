@@ -536,7 +536,7 @@ public class SecureAction
         }
         else
         {
-            return new JarFileX(file);
+            return new JarFileX(file, verify);
         }
     }
 // TODO: REFACTOR - SecureAction fix needed.
