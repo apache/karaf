@@ -10,6 +10,9 @@ import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
 
 import org.apache.felix.ipojo.ComponentInstance;
+import org.apache.felix.ipojo.ConfigurationException;
+import org.apache.felix.ipojo.MissingHandlerException;
+import org.apache.felix.ipojo.UnacceptableConfiguration;
 import org.apache.felix.ipojo.api.Dependency;
 import org.apache.felix.ipojo.api.PrimitiveComponentType;
 import org.apache.felix.ipojo.api.Service;
@@ -28,7 +31,7 @@ import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-
+import static org.ops4j.pax.exam.MavenUtils.*;
 
 
 @RunWith( JUnit4TestRunner.class )
@@ -57,65 +60,56 @@ public class SingletonComponentTest {
     public static Option[] configure() {    
         Option[] opt =  options(
                 provision(
-                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version("1.3.0-SNAPSHOT"),
-                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.api").version("1.3.0-SNAPSHOT")
+                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
+                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.api").version(asInProject())
                     )
                 );
         return opt;
     }
 
     @Test
-    public void createAServiceProvider()
+    public void createAServiceProvider() throws UnacceptableConfiguration, MissingHandlerException, ConfigurationException
     {
         assertThat( context, is( notNullValue() ) );
         ComponentInstance ci = null;
-        
-        try {
-            SingletonComponentType type = createAProvider();
-            ci = type.create();
-            assertThat("Ci is valid", ci.getState(), is(ComponentInstance.VALID));
-            ServiceReference ref = ipojo.getServiceReferenceByName(Foo.class.getName(), ci.getInstanceName());
-            assertThat( ref, is( notNullValue() ) );
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
+
+        SingletonComponentType type = createAProvider();
+        ci = type.create();
+        assertThat("Ci is valid", ci.getState(), is(ComponentInstance.VALID));
+        ServiceReference ref = ipojo.getServiceReferenceByName(Foo.class
+                .getName(), ci.getInstanceName());
+        assertThat(ref, is(notNullValue()));
+
     }
     
     @Test
-    public void killTheFactory()
-    {
+    public void killTheFactory() throws Exception {
         assertThat( context, is( notNullValue() ) );
         ComponentInstance ci = null;
-        
-        try {
-            SingletonComponentType type = createAProvider();
-            ci = type.create();
-            assertThat("Ci is valid", ci.getState(), is(ComponentInstance.VALID));
-            ServiceReference ref = ipojo.getServiceReferenceByName(Foo.class.getName(), ci.getInstanceName());
-            assertThat( ref, is( notNullValue() ) );
-            type.stop();
-            assertThat("Ci is disposed", ci.getState(), is(ComponentInstance.DISPOSED));
-            ref = ipojo.getServiceReferenceByName(Foo.class.getName(), ci.getInstanceName());
-            assertThat( ref, is( nullValue() ) );
-            
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
+        SingletonComponentType type = createAProvider();
+        ci = type.create();
+        assertThat("Ci is valid", ci.getState(), is(ComponentInstance.VALID));
+        ServiceReference ref = ipojo.getServiceReferenceByName(Foo.class
+                .getName(), ci.getInstanceName());
+        assertThat(ref, is(notNullValue()));
+        type.stop();
+        assertThat("Ci is disposed", ci.getState(),
+                is(ComponentInstance.DISPOSED));
+        ref = ipojo.getServiceReferenceByName(Foo.class.getName(), ci
+                .getInstanceName());
+        assertThat(ref, is(nullValue()));
     }
     
     @Test
-    public void createAServiceCons()
-    {
+    public void createAServiceCons() throws Exception {
         assertThat( context, is( notNullValue() ) );
         ComponentInstance ci = null;
-        
-        try {
-            SingletonComponentType type = createAConsumer();
-            ci = type.create();
-            assertThat("Ci is invalid", ci.getState(), is(ComponentInstance.INVALID));
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
+
+        SingletonComponentType type = createAConsumer();
+        ci = type.create();
+        assertThat("Ci is invalid", ci.getState(),
+                is(ComponentInstance.INVALID));
+
     }
     
     @Test

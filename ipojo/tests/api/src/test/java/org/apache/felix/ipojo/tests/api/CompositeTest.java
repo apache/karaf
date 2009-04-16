@@ -32,7 +32,7 @@ import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-
+import static org.ops4j.pax.exam.MavenUtils.*;
 
 
 @RunWith( JUnit4TestRunner.class )
@@ -61,9 +61,9 @@ public class CompositeTest {
     public static Option[] configure() {    
         Option[] opt =  options(
                 provision(
-                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version("1.3.0-SNAPSHOT"),
-                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.composite").version("1.3.0-SNAPSHOT"),
-                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.api").version("1.3.0-SNAPSHOT")
+                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
+                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.composite").version(asInProject()),
+                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.api").version(asInProject())
                     )
                 );
         return opt;
@@ -143,9 +143,7 @@ public class CompositeTest {
            .addSubService(new InstantiatedService().setSpecification(Foo.class.getName()).setOptional(true));
        
        ComponentInstance ci = type.createInstance();
-       
-       System.out.println(ci.getInstanceDescription().getDescription());
-       
+              
        assertThat("ci is valid", ci.getState(), is(ComponentInstance.VALID));
        
        // Stop prov
@@ -204,9 +202,7 @@ public class CompositeTest {
            .addSubService(new ImportedService().setSpecification(Foo.class.getName()).setOptional(true));
        
        ComponentInstance ci = type.createInstance();
-       
-       System.out.println(ci.getInstanceDescription().getDescription());
-       
+              
        assertThat("ci is valid", ci.getState(), is(ComponentInstance.VALID));
        
        // Stop prov
@@ -236,8 +232,6 @@ public class CompositeTest {
        
        ComponentInstance ci = type.createInstance();
        
-       System.out.println(ci.getInstanceDescription().getDescription());
-
        assertThat("ci is valid", ci.getState(), is(ComponentInstance.VALID));
        assertThat("c is valid", c.getState(), is(ComponentInstance.VALID));
        
@@ -269,14 +263,6 @@ public class CompositeTest {
         .setBundleContext(context)
         .setClassName(org.example.service.impl.MyComponentImpl.class.getName())
         .addDependency(new Dependency().setField("myFoo"))
-        .setValidateMethod("start");
-    }
-    
-    private PrimitiveComponentType createAnOptionalConsumer() {
-        return new PrimitiveComponentType()
-        .setBundleContext(context)
-        .setClassName(org.example.service.impl.MyComponentImpl.class.getName())
-        .addDependency(new Dependency().setField("myFoo").setOptional(true))
         .setValidateMethod("start");
     }
 
