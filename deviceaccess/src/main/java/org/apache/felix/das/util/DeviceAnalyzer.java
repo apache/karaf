@@ -84,6 +84,7 @@ public class DeviceAnalyzer
             if ( !String[].class.isInstance( cat ) )
             {
                 m_log.log( LogService.LOG_ERROR, "invalid device: invalid device category: " + Util.showDevice( ref ) );
+                return;
             }
             if ( String[].class.cast( cat ).length == 0 )
             {

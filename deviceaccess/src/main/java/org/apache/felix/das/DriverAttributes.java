@@ -86,7 +86,7 @@ public class DriverAttributes
 
         for ( ServiceReference ref : used )
         {
-            if ( Util.isDeviceInstance( ref ) )
+            if ( Util.isDevice( ref ) )
             {
                 return true;
             }
@@ -103,13 +103,11 @@ public class DriverAttributes
 
     public void tryUninstall() throws BundleException
     {
-        if ( !isInUse() )
+    	
+        // only install if _we_ loaded the driver
+        if ( !isInUse() && m_dynamic )
         {
-            // only install if _we_ loaded the driver
-            if ( m_dynamic )
-            {
-                m_bundle.uninstall();
-            }
+        	m_bundle.uninstall();
         }
     }
 

@@ -424,9 +424,11 @@ public class DeviceManager implements Log
                     {
                         info( "used by driver: " + bundle.getSymbolicName() );
                         debug( "not idle: " + ref.getBundle().getSymbolicName() );
-                        list.add( ref );
                         break;
                     }
+                    
+                    list.add( ref );
+
                 }
             }
             return list;

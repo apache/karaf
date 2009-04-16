@@ -64,7 +64,25 @@ public class Util
         return buffer.toString();
     }
 
-
+    public static boolean isDevice( ServiceReference ref )
+    {
+        try
+        {
+            Filter device = createFilter( "(|(%s=%s)(%s=%s))", new Object[]
+                { 
+            		Constants.OBJECTCLASS, Device.class.getName(),
+            		org.osgi.service.device.Constants.DEVICE_CATEGORY, "*" 
+            		}
+            );
+            return device.match( ref );
+        }
+        catch ( Exception e )
+        {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
     public static boolean isDeviceInstance( ServiceReference ref )
     {
         try
