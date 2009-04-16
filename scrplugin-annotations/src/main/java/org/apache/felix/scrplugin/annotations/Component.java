@@ -53,7 +53,7 @@ public @interface Component {
     /**
      * This is generally used as a description for the object described by the
      * meta type. This name may be localized by prepending a % sign to the name.
-     * Default value: %&lt;name&gt;.name
+     * Default value: %&lt;name&gt;.description
      */
     String description() default "";
 

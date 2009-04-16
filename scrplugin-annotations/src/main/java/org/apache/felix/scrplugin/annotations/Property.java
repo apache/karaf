@@ -32,7 +32,7 @@ import java.lang.annotation.*;
  * declaration. See section 112.4.5, Properties and Property Elements, in the
  * OSGi Service Platform Service Compendium Specification for more information.
  */
-@Target(ElementType.TYPE)
+@Target( { ElementType.TYPE, ElementType.FIELD })
 @Retention(RetentionPolicy.SOURCE)
 @Documented
 public @interface Property {
@@ -68,7 +68,7 @@ public @interface Property {
      * {@link Long}, {@link Double}, {@link Float}, {@link Integer},
      * {@link Byte}, {@link Character}, {@link Boolean} and {@link Short}.
      */
-    Class type() default AutoDetect.class;
+    Class<?> type() default AutoDetect.class;
 
     /**
      * Defines the cardinality of the property and its collection type. If the

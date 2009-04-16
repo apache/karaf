@@ -51,13 +51,13 @@ public @interface Reference {
      * the annotation is declared for a field, the default value for the
      * interface parameter is the type of the field.
      */
-    Class referenceInterface() default AutoDetect.class;
+    Class<?> referenceInterface() default AutoDetect.class;
 
     /**
      * The cardinality of the service reference. This must be one of 0..1, 1..1,
      * 0..n, and 1..n.
      */
-    ReferenceCardinality cardinality() default ReferenceCardinality.ONE_TO_ONE;
+    ReferenceCardinality cardinality() default ReferenceCardinality.MANDATORY_UNARY;
 
     /**
      * The dynamicity policy of the reference. If dynamic the service will be

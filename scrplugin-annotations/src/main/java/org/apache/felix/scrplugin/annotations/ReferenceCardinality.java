@@ -24,24 +24,32 @@ package org.apache.felix.scrplugin.annotations;
 public enum ReferenceCardinality {
 
     /**
-     * Cardinality 0..1
+     * Optional, unary reference: No service required to be available for the
+     * refernce to be satisfied. Only a single service is available through this
+     * reference.
      */
-    ZERO_TO_ONE("0..1"),
+    OPTIONAL_UNARY("0..1"),
 
     /**
-     * Cardinality 1..1
+     * Mandatory, unary reference: At least one service must be available for
+     * the reference to be satisfied. Only a single service is available through
+     * this reference.
      */
-    ONE_TO_ONE("1..1"),
+    MANDATORY_UNARY("1..1"),
 
     /**
-     * Cardinality 0..n
+     * Optional, multiple reference: No service required to be available for the
+     * refernce to be satisfied. All matching services are available through
+     * this reference.
      */
-    ZERO_TO_MANY("0..n"),
+    OPTIONAL_MULTIPLE("0..n"),
 
     /**
-     * Cardinality 1..n
+     * Mandatory, multiple reference: At least one service must be available for
+     * the reference to be satisified. All matching services are available
+     * through this reference.
      */
-    ONE_TO_MANY("1..n");
+    MANDATORY_MULTIPLE("1..n");
 
     private final String cardinalityString;
 
