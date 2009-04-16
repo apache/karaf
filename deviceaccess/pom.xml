@@ -18,23 +18,33 @@
  under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>felix</artifactId>
-        <version>1.0.4</version>
-        <relativePath>../pom/pom.xml</relativePath>
-    </parent>
 
-    <artifactId>org.apache.felix.devicemanager</artifactId>
-    <version>0.9.0-SNAPSHOT</version>
-    <packaging>bundle</packaging>
+  <modelVersion>4.0.0</modelVersion>
 
-    <name>Apache Felix Device Manager</name>
-    <description>
-        Implementation of the OSGi Device Access Specification 1.1
-    </description>
+  <parent>
+    <groupId>org.apache.felix</groupId>
+    <artifactId>felix</artifactId>
+    <version>1.0.5-SNAPSHOT</version>
+    <relativePath>../pom/pom.xml</relativePath>
+  </parent>
+
+  <artifactId>org.apache.felix.devicemanager</artifactId>
+  <version>0.9.0-SNAPSHOT</version>
+  <packaging>bundle</packaging>
+
+  <name>Apache Felix Device Manager</name>
+
+  <description>
+      Implementation of the OSGi Device Access Specification 1.1
+  </description>
+
   <dependencies>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.apache.felix.framework</artifactId>
+      <version>1.6.0</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.osgi.core</artifactId>
@@ -50,16 +60,13 @@
     <dependency>
       <groupId>${pom.groupId}</groupId>
       <artifactId>org.apache.felix.dependencymanager</artifactId>
-      <version>2.0.1-SNAPSHOT</version>
+      <version>2.0.2-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
-    </dependencies>
+  </dependencies>
+
   <build>
     <plugins>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.3</version>
-      </plugin>
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
