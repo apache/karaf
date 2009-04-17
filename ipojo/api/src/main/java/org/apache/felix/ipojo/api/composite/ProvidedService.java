@@ -21,10 +21,11 @@ package org.apache.felix.ipojo.api.composite;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.felix.ipojo.api.HandlerConfiguration;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 
-public class ProvidedService {
+public class ProvidedService implements HandlerConfiguration {
     public static final String ALL_POLICY = "all";
     public static final String ONE_POLICY = "one";
     

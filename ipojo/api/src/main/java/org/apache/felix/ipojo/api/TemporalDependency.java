@@ -25,7 +25,7 @@ import org.apache.felix.ipojo.metadata.Element;
  * Allows configuring a service dependencies.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class TemporalDependency {
+public class TemporalDependency implements HandlerConfiguration {
     
     /**
      * OnTimeout policy: nullable object.

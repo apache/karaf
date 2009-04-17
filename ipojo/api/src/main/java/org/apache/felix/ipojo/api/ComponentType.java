@@ -43,6 +43,7 @@ public abstract class ComponentType {
      * current component type.
      */
     private List m_instances = new ArrayList();
+   
     
     /**
      * Gets the factory attached to the current
@@ -64,7 +65,7 @@ public abstract class ComponentType {
      * component type.
      */
     public abstract void stop();
-    
+
     
     /**
      * Creates a component instance from the current type 
@@ -189,9 +190,6 @@ public abstract class ComponentType {
             }
         }
     }
-    
-    
-    
 
 
 }

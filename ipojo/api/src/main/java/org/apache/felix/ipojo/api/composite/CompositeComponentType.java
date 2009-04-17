@@ -25,6 +25,7 @@ import org.apache.felix.ipojo.ComponentFactory;
 import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.Factory;
 import org.apache.felix.ipojo.api.ComponentType;
+import org.apache.felix.ipojo.api.HandlerConfiguration;
 import org.apache.felix.ipojo.composite.CompositeFactory;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
@@ -82,7 +83,16 @@ public class CompositeComponentType extends ComponentType {
      */
     private boolean m_public = true;
 
+    /**
+     * Component type name.
+     */
     private String m_name;
+    
+    /**
+     * List of Handler representing external
+     * handler configuration
+     */
+    private List m_handlers = new ArrayList();
 
     /**
      * Checks that the component type is not already
@@ -199,6 +209,17 @@ public class CompositeComponentType extends ComponentType {
     }
     
     /**
+     * Adds an HandlerConfiguration to the component type. Each component type
+     * implementation must uses the populated list (m_handlers) when generating
+     * the component metadata.
+     * @param handler the handler configuration to add
+     * @return the current component type.
+     */
+    public void CompositeComponentType(HandlerConfiguration handler) {
+        m_handlers.add(handler);
+    }
+    
+    /**
      * Generates the component description.
      * @return the component type description of 
      * the current component type
@@ -231,6 +252,13 @@ public class CompositeComponentType extends ComponentType {
             ProvidedService inst = (ProvidedService) m_provided.get(i);
             element.addElement(inst.getElement());
         }
+        
+        // External handlers
+        for (int i = 0; i < m_handlers.size(); i++) {
+            HandlerConfiguration hc = (HandlerConfiguration) m_handlers.get(i);
+            element.addElement(hc.getElement());
+        }
+        
         return element;
     }
     

@@ -28,10 +28,11 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.Map.Entry;
 
+import org.apache.felix.ipojo.api.HandlerConfiguration;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 
-public class Instance {
+public class Instance implements HandlerConfiguration {
     private String m_type;
     private List m_conf = new ArrayList();
     

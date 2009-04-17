@@ -33,7 +33,7 @@ import org.apache.felix.ipojo.metadata.Element;
  * Allows configuring a provided service.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
-public class Service {
+public class Service implements HandlerConfiguration {
     
     /**
      * Creation strategy : singleton (default).

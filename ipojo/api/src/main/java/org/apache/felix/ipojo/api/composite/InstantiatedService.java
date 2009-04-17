@@ -28,11 +28,12 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.Map.Entry;
 
+import org.apache.felix.ipojo.api.HandlerConfiguration;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.util.DependencyModel;
 
-public class InstantiatedService {
+public class InstantiatedService implements HandlerConfiguration {
     
     /**
      * The required specification.

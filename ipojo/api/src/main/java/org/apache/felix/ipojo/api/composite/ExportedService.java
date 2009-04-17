@@ -18,11 +18,12 @@
  */
 package org.apache.felix.ipojo.api.composite;
 
+import org.apache.felix.ipojo.api.HandlerConfiguration;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.util.DependencyModel;
 
-public class ExportedService {
+public class ExportedService implements HandlerConfiguration {
     
     /**
      * The required specification.

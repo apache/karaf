@@ -125,6 +125,12 @@ public class PrimitiveComponentType extends ComponentType {
     private ArrayList m_temporals = new ArrayList();
     
     /**
+     * List of Handler representing external
+     * handler configuration
+     */
+    private List m_handlers = new ArrayList();
+    
+    /**
      * Checks that the component type is not already
      * started.
      */
@@ -356,7 +362,26 @@ public class PrimitiveComponentType extends ComponentType {
             element.addElement(properties);
         }
         
+        // External handlers
+        for (int i = 0; i < m_handlers.size(); i++) {
+            HandlerConfiguration hc = (HandlerConfiguration) m_handlers.get(i);
+            element.addElement(hc.getElement());
+        }
+        
         return element;
+    }
+    
+
+    /**
+     * Adds an HandlerConfiguration to the component type. Each component type
+     * implementation must uses the populated list (m_handlers) when generating
+     * the component metadata.
+     * @param handler the handler configuration to add
+     * @return the current component type
+     */
+    public PrimitiveComponentType addHandler(HandlerConfiguration handler) {
+        m_handlers.add(handler);
+        return this;
     }
     
     /**
