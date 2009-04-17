@@ -23,12 +23,10 @@ import java.net.ContentHandler;
 import java.net.ContentHandlerFactory;
 import java.net.URLConnection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.apache.felix.framework.util.SecureAction;
-import org.osgi.service.url.URLConstants;
 
 /**
  * <p>
@@ -54,6 +52,11 @@ import org.osgi.service.url.URLConstants;
 **/
 class URLHandlersContentHandlerProxy extends ContentHandler
 {
+    private static final Object[] SERVICE_RANKING_PARAMS = new Object[]{"service.ranking"};
+    private static final Object[] SERVICE_ID_PARAMS = new Object[]{"service.id"};
+    private static final Class[] STRING_TYPES = new Class[]{String.class};
+    private static final Class[] STRING_STRING_TYPES = new Class[]{String.class, String.class};
+
     private static final String CONTENT_HANDLER_PACKAGE_PROP = "java.content.handler.pkgs";
     private static final String DEFAULT_CONTENT_HANDLER_PACKAGE = "sun.net.www.content|com.ibm.oti.net.www.content|gnu.java.net.content|org.apache.harmony.luni.internal.net.www.content|COM.newmonics.www.content";
     
@@ -70,9 +73,9 @@ class URLHandlersContentHandlerProxy extends ContentHandler
 
     private final ContentHandlerFactory m_factory;
 
-    private final Map m_trackerMap = new HashMap();
     private final String m_mimeType;
     private final SecureAction m_action;
+    private final Object[] m_filter;
 
     public URLHandlersContentHandlerProxy(String mimeType, SecureAction action, 
         ContentHandlerFactory factory)
@@ -80,7 +83,11 @@ class URLHandlersContentHandlerProxy extends ContentHandler
         m_mimeType = mimeType;
         m_action = action;
         m_factory = factory;
-    }
+        m_filter = new Object[]{"java.net.ContentHandler", 
+            "(&(objectClass=java.net.ContentHandler)(url.content.mimetype="
+            + mimeType
+            + "))"};
+    } 
 
     //
     // ContentHandler interface method.
@@ -116,101 +123,71 @@ class URLHandlersContentHandlerProxy extends ContentHandler
         {
             return getBuiltIn();
         }
-
-        // Get the service tracker for the framework instance or create one.
-        Object tracker;
-        synchronized (m_trackerMap)
+        try 
         {
-            tracker = m_trackerMap.get(framework);
-        }
-        try
-        {
-            if (tracker == null)
+            Object context = m_action.invoke(
+                    m_action.getMethod(framework.getClass(), "getBundleContext", null),framework, null);
+                
+            Class contextClass = context.getClass();
+            
+            Object[] refs = (Object[]) m_action.invoke(
+                m_action.getMethod(contextClass, "getServiceReferences", STRING_STRING_TYPES), 
+                context, m_filter);
+            
+            Object ref = null;
+            int highestRank = -1;
+            long currentId = -1;
+            if (refs != null) 
             {
-                // Create a filter for the mime type.
-                String filter = 
-                    "(&(objectClass="
-                    + ContentHandler.class.getName()
-                    + ")("
-                    + URLConstants.URL_CONTENT_MIMETYPE
-                    + "="
-                    + m_mimeType
-                    + "))";
-                // Create a simple service tracker for the framework.
-                tracker = m_action.invoke(m_action.getConstructor(
-                    framework.getClass().getClassLoader().loadClass(
-                    URLHandlersServiceTracker.class.getName()),
-                    new Class[]{framework.getClass().getClassLoader().loadClass(
-                    Felix.class.getName()), String.class}), 
-                    new Object[]{framework, filter});
-                // Cache the simple service tracker.
-                synchronized (m_trackerMap) 
+                // Loop through all service references and select the reference
+                // with the highest ranking and lower service identifier.
+                for (int i = 0; (refs != null) && (i < refs.length); i++)
                 {
-                    if (!m_trackerMap.containsKey(framework))
+                    Class refClass = refs[i].getClass();
+                    Long idObj = (Long) m_action.invoke(m_action.getMethod(refClass, 
+                        "getProperty", STRING_TYPES), refs[i], SERVICE_ID_PARAMS);
+                    Integer rankObj = (Integer)  m_action.invoke(m_action.getMethod(refClass, 
+                    "getProperty", STRING_TYPES), refs[i], SERVICE_RANKING_PARAMS);
+                    // Ranking value defaults to zero.
+                    int rank = (rankObj == null) ? 0 : rankObj.intValue();
+                    if ((rank > highestRank) ||
+                        ((rank == highestRank) && (idObj.longValue() < currentId)))
                     {
-                        m_trackerMap.put(framework, tracker);
-                    }
-                    else
-                    {
-                        tracker = m_trackerMap.get(framework);
+                        ref = refs[i];
+                        highestRank = rank;
+                        currentId = idObj.longValue();
                     }
                 }
             }
-            ContentHandler result;
-            if (tracker instanceof URLHandlersServiceTracker)
+            ContentHandler service = null;
+            if (ref != null) 
             {
-                result = (ContentHandler) 
-                    ((URLHandlersServiceTracker) tracker).getService();
+                Class serviceRef = null;
+                Class[] interfaces = ref.getClass().getInterfaces();
+                for (int i = 0;i < interfaces.length; i++) 
+                {
+                    if ("org.osgi.framework.ServiceReference".equals(interfaces[i].getName()))
+                    {
+                        serviceRef = interfaces[i];
+                        break;
+                    }
+                }
+                service = (ContentHandler) m_action.invoke(
+                    m_action.getMethod(contextClass, "getService", new Class[]{serviceRef}), 
+                    context, new Object[]{ref});
             }
-            else
+        
+            if (service == null)
             {
-                result = (ContentHandler) m_action.invokeDirect(
-                    m_action.getMethod(tracker.getClass(), "getService", null), 
-                    tracker, null);
+                service = getBuiltIn();
             }
-            if (result == null)
-            {
-                result = getBuiltIn();
-            }
-            return result;
+            return service;
         }
         catch (Exception ex)
         {
             // TODO: log this or something
             ex.printStackTrace();
             return null;
-        }
-    }
-
-    void flush()
-    {
-        synchronized (m_trackerMap)
-        {
-            for (Iterator iter = m_trackerMap.values().iterator(); iter.hasNext();)
-            {
-                unregister(iter.next());
-            }
-            m_trackerMap.clear();
-        }
-    }
-
-    private void unregister(Object tracker)
-    {
-        if (tracker instanceof URLHandlersServiceTracker)
-        {
-            ((URLHandlersServiceTracker) tracker).unregister();
-        }
-        else
-        {
-            try
-            {
-                m_action.invokeDirect(m_action.getMethod(tracker.getClass(), 
-                    "unregister", null), tracker, null);
-            }
-            catch (Exception e)
-            {
-                // Not much we can do - log this or something
-            }
         }
     }
 

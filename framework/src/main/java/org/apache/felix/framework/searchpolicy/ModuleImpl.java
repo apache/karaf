@@ -18,7 +18,6 @@
  */
 package org.apache.felix.framework.searchpolicy;
 
-import java.lang.reflect.InvocationTargetException;
 import org.apache.felix.moduleloader.*;
 import java.io.IOException;
 import java.io.InputStream;

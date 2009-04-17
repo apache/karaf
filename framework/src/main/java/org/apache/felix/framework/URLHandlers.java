@@ -20,19 +20,16 @@ package org.apache.felix.framework;
 
 import java.net.ContentHandler;
 import java.net.ContentHandlerFactory;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.apache.felix.framework.searchpolicy.ModuleImpl.ModuleClassLoader;
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.SecureAction;
 import org.apache.felix.framework.util.SecurityManagerEx;
@@ -79,6 +76,10 @@ import org.osgi.service.url.URLStreamHandlerService;
 **/
 class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
 {
+    private static final Class[] CLASS_TYPE = new Class[]{Class.class};
+
+    private static final Class URLHANDLERS_CLASS = URLHandlers.class;
+
     private static final SecureAction m_secureAction = new SecureAction();
 
     private static volatile SecurityManagerEx m_sm = null;
@@ -122,7 +123,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
         {
             m_handlerToURL.put(getBuiltInStreamHandler(protocol, null), new URL(protocol + ":") );
         }
-        catch (MalformedURLException ex)
+        catch (Throwable ex)
         {
             ex.printStackTrace();
             // Ignore, this is a best effort (maybe log it or something).
@@ -143,7 +144,15 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
         init("ftp");
         init("http");
         init("https");
-        getBuiltInStreamHandler("jar", null);
+        try 
+        {
+            getBuiltInStreamHandler("jar", null);
+        }
+        catch (Throwable ex)
+        {
+            ex.printStackTrace();
+            // Ignore, this is a best effort (maybe log it or something)
+        }
         m_sm = new SecurityManagerEx();
         synchronized (URL.class)
         {
@@ -160,18 +169,18 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
                     // there already is a factory set so try to swap it with ours.
                     m_streamHandlerFactory = (URLStreamHandlerFactory)
                         m_secureAction.swapStaticFieldIfNotClass(URL.class, 
-                        URLStreamHandlerFactory.class, URLHandlers.class, "streamHandlerLock");
+                        URLStreamHandlerFactory.class, URLHANDLERS_CLASS, "streamHandlerLock");
                     
                     if (m_streamHandlerFactory == null)
                     {
                         throw err;
                     }
-                    if (!m_streamHandlerFactory.getClass().getName().equals(URLHandlers.class.getName()))
+                    if (!m_streamHandlerFactory.getClass().getName().equals(URLHANDLERS_CLASS.getName()))
                     {
                         URL.setURLStreamHandlerFactory(this);
                         m_rootURLHandlers = this;
                     }
-                    else if (URLHandlers.class != m_streamHandlerFactory.getClass())
+                    else if (URLHANDLERS_CLASS != m_streamHandlerFactory.getClass())
                     {
                         try
                         {
@@ -179,7 +188,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
                                 m_secureAction.getDeclaredMethod(m_streamHandlerFactory.getClass(), 
                                 "registerFrameworkListsForContextSearch", 
                                 new Class[]{ClassLoader.class, List.class}), 
-                                m_streamHandlerFactory, new Object[]{ URLHandlers.class.getClassLoader(), 
+                                m_streamHandlerFactory, new Object[]{ URLHANDLERS_CLASS.getClassLoader(), 
                                     m_frameworks });
                             m_rootURLHandlers = m_streamHandlerFactory;
                         }
@@ -208,13 +217,13 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
                     m_contentHandlerFactory = (ContentHandlerFactory) 
                         m_secureAction.swapStaticFieldIfNotClass(
                             URLConnection.class, ContentHandlerFactory.class, 
-                            URLHandlers.class, null);
+                            URLHANDLERS_CLASS, null);
                     if (m_contentHandlerFactory == null)
                     {
                         throw err;
                     }
                     if (!m_contentHandlerFactory.getClass().getName().equals(
-                        URLHandlers.class.getName()))
+                        URLHANDLERS_CLASS.getName()))
                     {
                         URLConnection.setContentHandlerFactory(this);
                     }
@@ -226,7 +235,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
             }
         }
         // are we not the new root?
-        if (!((m_streamHandlerFactory == this) || !URLHandlers.class.getName().equals(
+        if (!((m_streamHandlerFactory == this) || !URLHANDLERS_CLASS.getName().equals(
             m_streamHandlerFactory.getClass().getName())))
         {
             m_sm = null;
@@ -271,7 +280,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
                                 ex.printStackTrace();
                             }
                             
-                            if (m_streamHandlerFactory.getClass() != URLHandlers.class)
+                            if (m_streamHandlerFactory.getClass() != URLHANDLERS_CLASS)
                             {
                                 URL.setURLStreamHandlerFactory(m_streamHandlerFactory);
                             }
@@ -287,7 +296,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
                                 ex.printStackTrace();
                             }
                             
-                            if (m_contentHandlerFactory.getClass() != URLHandlers.class)
+                            if (m_contentHandlerFactory.getClass() != URLHANDLERS_CLASS)
                             {
                                 URLConnection.setContentHandlerFactory(m_contentHandlerFactory);
                             }
@@ -471,31 +480,6 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
         return result;
     }
 
-    synchronized void flush()
-    {
-        if (m_streamHandlerCache != null)
-        {
-            for (Iterator iter = m_streamHandlerCache.values().iterator();iter.hasNext();)
-            {
-                Object proxy = iter.next();
-                if (proxy instanceof URLHandlersStreamHandlerProxy)
-                {
-                    ((URLHandlersStreamHandlerProxy) proxy).flush();
-                }
-            }
-        }
-        if (m_contentHandlerCache != null)
-        {
-            for (Iterator iter = m_contentHandlerCache.values().iterator();iter.hasNext();)
-            {
-                Object proxy = iter.next();
-                if (proxy instanceof URLHandlersContentHandlerProxy)
-                {
-                    ((URLHandlersContentHandlerProxy) proxy).flush();
-                }
-            }
-        }
-    }
     /**
      * <p>
      * Static method that adds a framework instance to the centralized
@@ -542,18 +526,6 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
             m_counter--;
             if (m_frameworks.remove(framework))
             {    
-                try
-                {
-                    m_secureAction.invoke(m_secureAction.getDeclaredMethod(
-                        m_rootURLHandlers.getClass(), 
-                       "flush", null), 
-                       m_rootURLHandlers, null);
-                }
-                catch (Exception e)
-                {
-                    // TODO: this should not happen
-                    e.printStackTrace();
-                }
                 if (m_frameworks.isEmpty())
                 {
                     try
@@ -563,7 +535,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
                             "unregisterFrameworkListsForContextSearch", 
                             new Class[]{ ClassLoader.class}), 
                             m_rootURLHandlers,
-                            new Object[] {URLHandlers.class.getClassLoader()});
+                            new Object[] {URLHANDLERS_CLASS.getClassLoader()});
                     }
                     catch (Exception e)
                     {
@@ -610,7 +582,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
         for (int i = 0; i < stack.length; i++)
         {
             if ((stack[i].getClassLoader() != null) && 
-                ModuleClassLoader.class.getName().equals(
+                "org.apache.felix.framework.searchpolicy.ModuleImpl.ModuleClassLoader".equals(
                 stack[i].getClassLoader().getClass().getName()))
             {
                 targetClass = stack[i];
@@ -630,7 +602,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
                 List frameworks = (List) m_classloaderToFrameworkLists.get(
                     index);
                 
-                if ((frameworks == null) && (index == URLHandlers.class.getClassLoader())) 
+                if ((frameworks == null) && (index == URLHANDLERS_CLASS.getClassLoader())) 
                 {
                     frameworks = m_frameworks;
                 }
@@ -646,7 +618,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
                             {
                                 if (m_secureAction.invoke(
                                     m_secureAction.getDeclaredMethod(framework.getClass(), 
-                                    "getBundle", new Class[]{Class.class}),
+                                    "getBundle", CLASS_TYPE),
                                     framework, new Object[]{targetClass}) != null)
                                 {
                                     return framework;

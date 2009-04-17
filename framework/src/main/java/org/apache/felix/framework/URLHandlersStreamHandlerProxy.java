@@ -23,13 +23,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.*;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.StringTokenizer;
-
 import org.apache.felix.framework.util.SecureAction;
-import org.osgi.service.url.URLConstants;
 import org.osgi.service.url.URLStreamHandlerService;
 import org.osgi.service.url.URLStreamHandlerSetter;
 
@@ -58,6 +52,10 @@ import org.osgi.service.url.URLStreamHandlerSetter;
 public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
     implements URLStreamHandlerSetter, InvocationHandler
 {
+    private static final Object[] SERVICE_RANKING_PARAMS = new Object[]{"service.ranking"};
+    private static final Object[] SERVICE_ID_PARAMS = new Object[]{"service.id"};
+    private static final Class[] STRING_TYPES = new Class[]{String.class};
+    private static final Class[] STRING_STRING_TYPES = new Class[]{String.class, String.class};
     private static final Method EQUALS;
     private static final Method GET_DEFAULT_PORT;
     private static final Method GET_HOST_ADDRESS;
@@ -102,31 +100,33 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
             throw new RuntimeException(ex.getMessage());
         }
     }
-    
-    private final Map m_trackerMap = new HashMap();
-    private final String m_protocol;
+
     private final Object m_service;
     private final SecureAction m_action;
     private final URLStreamHandler m_builtIn;
     private final URL m_builtInURL;
+    private final Object[] m_filter;
 
     public URLHandlersStreamHandlerProxy(String protocol, 
         SecureAction action, URLStreamHandler builtIn, URL builtInURL)
     {
-        m_protocol = protocol;
         m_service = null;
         m_action = action;
         m_builtIn = builtIn;
         m_builtInURL = builtInURL;
+        m_filter = new Object[]{"org.osgi.service.url.URLStreamHandlerService", 
+            "(&(objectClass=org.osgi.service.url.URLStreamHandlerService)(url.handler.protocol="
+            + protocol
+            + "))"};
     }
     
     private URLHandlersStreamHandlerProxy(Object service, SecureAction action)
     {
-        m_protocol = null;
         m_service = service;
         m_action = action;
         m_builtIn = null;
         m_builtInURL = null;
+        m_filter = null;
     }
 
     //
@@ -416,55 +416,56 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
             {
                 return m_builtIn;
             }
-    
-            // Get the service tracker for the framework instance or create one.
-            Object tracker;
-            synchronized (m_trackerMap)
+            Object context = m_action.invoke(
+                m_action.getMethod(framework.getClass(), "getBundleContext", null),framework, null);
+            
+            Class contextClass = context.getClass();
+            
+            Object[] refs = (Object[]) m_action.invoke(
+                m_action.getMethod(contextClass, "getServiceReferences", STRING_STRING_TYPES), 
+                context, m_filter);
+            
+            Object ref = null;
+            int highestRank = -1;
+            long currentId = -1;
+            if (refs != null) 
             {
-                tracker = m_trackerMap.get(framework);
-            }
-            if (tracker == null)
-            {
-                // Create a filter for the protocol.
-                String filter = 
-                    "(&(objectClass="
-                    + URLStreamHandlerService.class.getName()
-                    + ")("
-                    + URLConstants.URL_HANDLER_PROTOCOL
-                    + "="
-                    + m_protocol
-                    + "))";
-                // Create a simple service tracker for the framework.
-                tracker = m_action.invoke(m_action.getConstructor(
-                    framework.getClass().getClassLoader().loadClass(
-                    "org.apache.felix.framework.URLHandlersServiceTracker"), 
-                    new Class[]{framework.getClass().getClassLoader().loadClass(
-                    "org.apache.felix.framework.Felix"), String.class}), 
-                    new Object[]{framework, filter});
-
-                // Cache the simple service tracker.
-                synchronized (m_trackerMap) 
+                // Loop through all service references and select the reference
+                // with the highest ranking and lower service identifier.
+                for (int i = 0; (refs != null) && (i < refs.length); i++)
                 {
-                    if (!m_trackerMap.containsKey(framework))
+                    Class refClass = refs[i].getClass();
+                    Long idObj = (Long) m_action.invoke(m_action.getMethod(refClass, 
+                        "getProperty", STRING_TYPES), refs[i], SERVICE_ID_PARAMS);
+                    Integer rankObj = (Integer)  m_action.invoke(m_action.getMethod(refClass, 
+                        "getProperty", STRING_TYPES), refs[i], SERVICE_RANKING_PARAMS);
+                    // Ranking value defaults to zero.
+                    int rank = (rankObj == null) ? 0 : rankObj.intValue();
+                    if ((rank > highestRank) ||
+                        ((rank == highestRank) && (idObj.longValue() < currentId)))
                     {
-                        m_trackerMap.put(framework, tracker);
-                    }
-                    else
-                    {
-                        unregister(tracker);
-                        tracker = m_trackerMap.get(framework);
+                        ref = refs[i];
+                        highestRank = rank;
+                        currentId = idObj.longValue();
                     }
                 }
             }
-            Object service;
-            if (tracker instanceof URLHandlersServiceTracker)
+            Object service = null;
+            if (ref != null) 
             {
-                service = ((URLHandlersServiceTracker) tracker).getService();
-            }
-            else
-            {
-                service = m_action.invokeDirect(m_action.getMethod(
-                    tracker.getClass(), "getService", null), tracker, null);
+                Class serviceRef = null;
+                Class[] interfaces = ref.getClass().getInterfaces();
+                for (int i = 0;i < interfaces.length; i++) 
+                {
+                    if ("org.osgi.framework.ServiceReference".equals(interfaces[i].getName()))
+                    {
+                        serviceRef = interfaces[i];
+                        break;
+                    }
+                }
+                service = m_action.invoke(
+                    m_action.getMethod(contextClass, "getService", new Class[]{serviceRef}), 
+                    context, new Object[]{ref});
             }
             if (service == null) 
             {
@@ -485,40 +486,7 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
         }
         catch (Throwable t)
         {
-         //   t.printStackTrace();
             return m_builtIn;
-        }
-    }
-
-    void flush()
-    {
-        synchronized (m_trackerMap)
-        {
-            for (Iterator iter = m_trackerMap.values().iterator(); iter.hasNext();)
-            {
-                unregister(iter.next());
-            }
-            m_trackerMap.clear();
-        }
-    }
-
-    private void unregister(Object tracker)
-    {
-        if (tracker instanceof URLHandlersServiceTracker)
-        {
-            ((URLHandlersServiceTracker) tracker).unregister();
-        }
-        else
-        {
-            try
-            {
-                m_action.invokeDirect(m_action.getMethod(tracker.getClass(), 
-                    "unregister", null), tracker, null);
-            }
-            catch (Exception e)
-            {
-                // Not much we can do - log this or something
-            }
         }
     }
 
