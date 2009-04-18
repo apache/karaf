@@ -21,9 +21,9 @@ package org.apache.felix.scrplugin.tags.annotation.defaulttag;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.felix.scr.annotations.AutoDetect;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.felix.scrplugin.Constants;
-import org.apache.felix.scrplugin.annotations.AutoDetect;
-import org.apache.felix.scrplugin.annotations.Service;
 import org.apache.felix.scrplugin.tags.JavaClassDescription;
 
 import com.thoughtworks.qdox.model.Annotation;

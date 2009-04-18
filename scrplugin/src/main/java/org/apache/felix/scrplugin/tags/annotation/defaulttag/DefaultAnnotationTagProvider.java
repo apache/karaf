@@ -22,7 +22,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.felix.scrplugin.annotations.*;
+import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scrplugin.tags.JavaField;
 import org.apache.felix.scrplugin.tags.JavaTag;
 import org.apache.felix.scrplugin.tags.annotation.AnnotationJavaClassDescription;

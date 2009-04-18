@@ -20,8 +20,8 @@ package org.apache.felix.scrplugin.tags.annotation.defaulttag;
 
 import java.util.*;
 
+import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scrplugin.Constants;
-import org.apache.felix.scrplugin.annotations.*;
 import org.apache.felix.scrplugin.tags.JavaClassDescription;
 
 import com.thoughtworks.qdox.model.Annotation;

@@ -101,7 +101,7 @@
         
 		<dependency>
 			<groupId>org.apache.felix</groupId>
-			<artifactId>maven-scr-plugin-annotations</artifactId>
+			<artifactId>org.apache.felix.scr.annotations</artifactId>
 			<version>0.9.0-SNAPSHOT</version>
 		</dependency>
 		

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scrplugin.annotations;
+package org.apache.felix.scr.annotations;
 
 /**
  * Placeholder class for default value of annotation properties with

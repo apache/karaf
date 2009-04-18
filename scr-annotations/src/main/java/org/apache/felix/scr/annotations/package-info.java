@@ -18,7 +18,7 @@
  */
 /**
  * The scr goal of the maven-scr-plugin looks for the annotations defined in the package when building component descriptors.
- * The annotations are not interpreted in runtime.   
+ * The annotations are not interpreted in runtime.
  */
-package org.apache.felix.scrplugin.annotations;
+package org.apache.felix.scr.annotations;
 
