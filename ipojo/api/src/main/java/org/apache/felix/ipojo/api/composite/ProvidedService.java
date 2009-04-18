@@ -25,13 +25,25 @@ import org.apache.felix.ipojo.api.HandlerConfiguration;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 
+/**
+ * Allows defining a provided service. A provided service is a service
+ * 'implemented' by the composite. This implementations relies (by 
+ * delegation) on contained instances and services. 
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
+ */
 public class ProvidedService implements HandlerConfiguration {
+    /**
+     * Delegation policy: all.
+     */
     public static final String ALL_POLICY = "all";
-    public static final String ONE_POLICY = "one";
-    
     
     /**
-     * The required specification.
+     * Delegation policy: one. 
+     */
+    public static final String ONE_POLICY = "one";
+    
+    /**
+     * The provided specification.
      */
     private String m_specification;
     
@@ -41,12 +53,11 @@ public class ProvidedService implements HandlerConfiguration {
      */
     private List m_delegation = new ArrayList();
 
-    
-   
+
     /**
-     * Gets the dependency metadata.
-     * @return the 'requires' element describing
-     * the current dependency.
+     * Gets the provided element.
+     * @return the 'provides' element describing
+     * the current provided service.
      */
     public Element getElement() {
         ensureValidity();
@@ -64,9 +75,9 @@ public class ProvidedService implements HandlerConfiguration {
     }
     
     /**
-     * Sets the required service specification.
+     * Sets the provided service specification.
      * @param spec the specification
-     * @return the current exported service.
+     * @return the current provided service.
      */
     public ProvidedService setSpecification(String spec) {
         m_specification = spec;
@@ -74,7 +85,7 @@ public class ProvidedService implements HandlerConfiguration {
     }
     
     /**
-     * Sets the delegation policy of the given method
+     * Sets the delegation policy of the given method.
      * @param method  the method name
      * @param policy the delegation policy
      * @return the current exported service.
@@ -89,7 +100,7 @@ public class ProvidedService implements HandlerConfiguration {
 
     
     /**
-     * Checks dependency configuration validity.
+     * Checks provided service configuration validity.
      */
     private void ensureValidity() {
         // Check specification

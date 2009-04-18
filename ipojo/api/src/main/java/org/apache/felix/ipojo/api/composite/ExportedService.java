@@ -23,15 +23,24 @@ import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.util.DependencyModel;
 
+/**
+ * Allows defining an exported service. A service export is the 
+ * publication of service from the composite to the parent composite
+ * or global registry. The service export relies on a service dependency
+ * inside the composite. Matching services will be exported. 
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
+ */
 public class ExportedService implements HandlerConfiguration {
     
     /**
-     * The required specification.
+     * The exported specification.
      */
     private String m_specification;
     
     /**
-     * The LDAP filter of the dependency. 
+     * The LDAP filter of the service dependency
+     * used to select the adequate service provider from
+     * the composite. 
      */
     private String m_filter;
     
@@ -56,12 +65,10 @@ public class ExportedService implements HandlerConfiguration {
      * (used to compare service providers) 
      */
     private String m_comparator;
-
-    
    
     /**
-     * Gets the dependency metadata.
-     * @return the 'requires' element describing
+     * Gets the exported service metadata.
+     * @return the 'provides' element describing
      * the current dependency.
      */
     public Element getElement() {

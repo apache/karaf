@@ -24,22 +24,45 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Vector;
-import java.util.Map.Entry;
 
 import org.apache.felix.ipojo.api.HandlerConfiguration;
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 
+/**
+ * Allows defining a contained instance. A contained instance is like
+ * an instance declaration but the instance is created in the composite.
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
+ */
 public class Instance implements HandlerConfiguration {
-    private String m_type;
-    private List m_conf = new ArrayList();
     
+    /**
+     * Targeted component type.
+     */
+    private String m_type;
+    
+    /**
+     * Configuration.
+     */
+    private List m_conf = new ArrayList();
+
+    /**
+     * Creates a Instance.
+     * @param type the targeted type.
+     */
     public Instance(String type) {
         m_type = type;
     }
-    
+
+    /**
+     * Adds the string property.
+     * @param name property name
+     * @param value property value
+     * @return the current instance
+     */
     public Instance addProperty(String name, String value) {
         Element elem = new Element("property", "");
         m_conf.add(elem);
@@ -47,14 +70,20 @@ public class Instance implements HandlerConfiguration {
         elem.addAttribute(new Attribute("value", value));
         return this;
     }
-    
+
+    /**
+     * Adds a list property.
+     * @param name property name
+     * @param values the list
+     * @return the current instance
+     */
     public Instance addProperty(String name, List values) {
         Element elem = new Element("property", "");
         elem.addAttribute(new Attribute("name", name));
         elem.addAttribute(new Attribute("type", "list"));
 
         m_conf.add(elem);
-        
+
         for (int i = 0; i < values.size(); i++) {
             Object obj = values.get(i);
             Element e = new Element("property", "");
@@ -62,31 +91,44 @@ public class Instance implements HandlerConfiguration {
             if (obj instanceof String) {
                 e.addAttribute(new Attribute("value", obj.toString()));
             } else {
-                // TODO 
-               throw new UnsupportedOperationException("Complex properties are not supported yet");
+                // TODO
+                throw new UnsupportedOperationException(
+                        "Complex properties are not supported yet");
             }
         }
-        
+
         return this;
-   }
-    
+    }
+
+    /**
+     * Adds an array property.
+     * @param name the property name
+     * @param values the array
+     * @return the current instance
+     */
     public Instance addProperty(String name, String[] values) {
         Element elem = new Element("property", "");
         elem.addAttribute(new Attribute("name", name));
         elem.addAttribute(new Attribute("type", "array"));
 
         m_conf.add(elem);
-        
+
         for (int i = 0; i < values.length; i++) {
             Object obj = values[i];
             Element e = new Element("property", "");
             elem.addElement(e);
             e.addAttribute(new Attribute("value", obj.toString()));
         }
-        
+
         return this;
-   }
-    
+    }
+
+    /**
+     * Adds a vector property.
+     * @param name the property name
+     * @param values the vector
+     * @return the current instance
+     */
     public Instance addProperty(String name, Vector values) {
         Element elem = new Element("property", "");
         elem.addAttribute(new Attribute("name", name));
@@ -101,14 +143,21 @@ public class Instance implements HandlerConfiguration {
             if (obj instanceof String) {
                 e.addAttribute(new Attribute("value", obj.toString()));
             } else {
-                // TODO 
-               throw new UnsupportedOperationException("Complex properties are not supported yet");
+                // TODO
+                throw new UnsupportedOperationException(
+                        "Complex properties are not supported yet");
             }
         }
-        
+
         return this;
-   }
-    
+    }
+
+    /**
+     * Adds a map property.
+     * @param name the property name
+     * @param values the map
+     * @return the current instance
+     */
     public Instance addProperty(String name, Map values) {
         Element elem = new Element("property", "");
         elem.addAttribute(new Attribute("name", name));
@@ -117,7 +166,7 @@ public class Instance implements HandlerConfiguration {
         m_conf.add(elem);
         Set entries = values.entrySet();
         Iterator it = entries.iterator();
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             Map.Entry entry = (Entry) it.next();
             Element e = new Element("property", "");
             elem.addElement(e);
@@ -128,14 +177,21 @@ public class Instance implements HandlerConfiguration {
                 e.addAttribute(new Attribute("name", n));
                 e.addAttribute(new Attribute("value", v.toString()));
             } else {
-                // TODO 
-               throw new UnsupportedOperationException("Complex properties are not supported yet");
+                // TODO
+                throw new UnsupportedOperationException(
+                        "Complex properties are not supported yet");
             }
         }
-        
+
         return this;
-   }
-    
+    }
+
+    /**
+     * Adds a dictionary property.
+     * @param name the property name
+     * @param values the dictionary
+     * @return the current instance
+     */
     public Instance addProperty(String name, Dictionary values) {
         Element elem = new Element("property", "");
         elem.addAttribute(new Attribute("name", name));
@@ -143,7 +199,7 @@ public class Instance implements HandlerConfiguration {
 
         m_conf.add(elem);
         Enumeration e = values.keys();
-        while(e.hasMoreElements()) {
+        while (e.hasMoreElements()) {
             Element el = new Element("property", "");
             elem.addElement(el);
 
@@ -153,20 +209,30 @@ public class Instance implements HandlerConfiguration {
                 el.addAttribute(new Attribute("name", n));
                 el.addAttribute(new Attribute("value", v.toString()));
             } else {
-                // TODO 
-               throw new UnsupportedOperationException("Complex properties are not supported yet");
+                // TODO
+                throw new UnsupportedOperationException(
+                        "Complex properties are not supported yet");
             }
         }
-        
-        return this;
-   }
 
+        return this;
+    }
+
+    /**
+     * Ensures the validity of the instance description.
+     */
     private void ensureValidity() {
-        if(m_type == null) {
-            throw new IllegalStateException("Invalid containted instance configuration : the component type is not set");
+        if (m_type == null) {
+            throw new IllegalStateException(
+                    "Invalid containted instance configuration : the component type is not set");
         }
     }
-    
+
+    /**
+     * Gets the instance description in the Element-Attribute form.
+     * @return the root Element of the instance description 
+     * @see org.apache.felix.ipojo.api.HandlerConfiguration#getElement()
+     */
     public Element getElement() {
         ensureValidity();
         Element instance = new Element("instance", "");

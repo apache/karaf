@@ -30,8 +30,15 @@ import junit.framework.TestCase;
 
 import org.apache.felix.ipojo.metadata.Element;
 
+/**
+ * Tests about {@link Instance}.
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
+ */
 public class InstanceTest extends TestCase {
     
+    /**
+     * One simple instance.
+     */
     public void testJustComponent() {
         Instance inst = new Instance("mycmp");
         Element elem = inst.getElement();
@@ -39,6 +46,9 @@ public class InstanceTest extends TestCase {
         assertEquals("Check component attribute", "mycmp", cmp);
     }
     
+    /**
+     * Sting property.
+     */
     public void testStringProp() {
         Instance inst = new Instance("mycmp");
         inst.addProperty("p1", "v1");
@@ -59,6 +69,9 @@ public class InstanceTest extends TestCase {
 
     }
     
+    /**
+     * Several properties.
+     */
     public void testStringProps() {
         Instance inst = new Instance("mycmp");
         inst.addProperty("p1", "v1");
@@ -79,6 +92,9 @@ public class InstanceTest extends TestCase {
         assertEquals("Check property 1 - value", "v2", v);
     }
     
+    /**
+     * List property.
+     */
     public void testListProp() {
         Instance inst = new Instance("mycmp");
         List list = new ArrayList();
@@ -112,6 +128,9 @@ public class InstanceTest extends TestCase {
         }
     }
     
+    /**
+     * Array property.
+     */
     public void testArrayProp() {
         Instance inst = new Instance("mycmp");
         String[] list = new String[] {"a", "a", "a"};
@@ -142,6 +161,9 @@ public class InstanceTest extends TestCase {
         }
     }
     
+    /**
+     * Vector property.
+     */
     public void testVectorProp() {
         Instance inst = new Instance("mycmp");
         Vector list = new Vector();
@@ -176,6 +198,9 @@ public class InstanceTest extends TestCase {
         }
     }
     
+    /**
+     * Map property.
+     */
     public void testMapProp() {
         Instance inst = new Instance("mycmp");
         Map map = new HashMap();
@@ -209,6 +234,9 @@ public class InstanceTest extends TestCase {
         }
     }
     
+    /**
+     * Dictionary property.
+     */
     public void testDictProp() {
         Instance inst = new Instance("mycmp");
         Dictionary map = new Properties();

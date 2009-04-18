@@ -23,12 +23,27 @@ import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.util.DependencyModel;
 
+/**
+ * Allows defining an imported service. A service import is the 
+ * publication of service from the parent composite
+ * or global registry inside the composite. 
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
+ */
 public class ImportedService implements HandlerConfiguration {
     
+    /**
+     * Scoping policy: composite.
+     */
     public static final String COMPOSITE_SCOPE = "composite";
     
+    /**
+     * Scoping policy: global.
+     */
     public static final String GLOBAL_SCOPE = "global";
     
+    /**
+     * Scoping policy: composite+global.
+     */
     public static final String COMPOSITE_AND_GLOBAL_SCOPE = "composite+global";
     
     
@@ -70,7 +85,7 @@ public class ImportedService implements HandlerConfiguration {
     private String m_id;
     
     /**
-     * Dependency scope
+     * Dependency scope.
      */
     private String m_scope = COMPOSITE_SCOPE;
    

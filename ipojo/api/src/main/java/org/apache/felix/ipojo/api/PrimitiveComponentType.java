@@ -126,7 +126,7 @@ public class PrimitiveComponentType extends ComponentType {
     
     /**
      * List of Handler representing external
-     * handler configuration
+     * handler configuration.
      */
     private List m_handlers = new ArrayList();
     

@@ -31,6 +31,6 @@ public interface HandlerConfiguration {
      * @return the Element-Attribute structure containing the handler
      * configuration.
      */
-    public Element getElement();
+    Element getElement();
 
 }

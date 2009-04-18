@@ -33,6 +33,10 @@ import org.apache.felix.ipojo.UnacceptableConfiguration;
  */
 public class SingletonComponentType extends PrimitiveComponentType {
     
+    /**
+     * The POJO object to inject through the
+     * instance configuration.
+     */
     private Object m_pojo;
     
     /**
@@ -44,10 +48,11 @@ public class SingletonComponentType extends PrimitiveComponentType {
     }
     
     /**
-     * Set the pojo object used by the instance.
+     * Sets the pojo object used by the instance.
      * The object must be compatible with the 
      * implementation class. 
      * @param obj the object.
+     * @return the current singleton component type.
      */
     public SingletonComponentType setObject(Object obj) {
         m_pojo = obj;
@@ -59,6 +64,7 @@ public class SingletonComponentType extends PrimitiveComponentType {
      * instance. This method has to be called in place of the
      * {@link PrimitiveComponentType#start()} and the
      * {@link PrimitiveComponentType#createInstance()}  methods.
+     * @return the created component instance.
      * @throws ConfigurationException occurs if the type description is
      * incorrect
      * @throws MissingHandlerException occurs if a handler is not available 
@@ -84,6 +90,7 @@ public class SingletonComponentType extends PrimitiveComponentType {
      * {@link PrimitiveComponentType#start()} and the
      * {@link PrimitiveComponentType#createInstance()}  methods.
      * @param conf the instance configuration
+     * @return the created component instance
      * @throws ConfigurationException occurs if the type description is
      * incorrect
      * @throws MissingHandlerException occurs if a handler is not available 
@@ -105,6 +112,9 @@ public class SingletonComponentType extends PrimitiveComponentType {
      * instance. This method has to be called in place of the
      * {@link PrimitiveComponentType#start()} and the
      * {@link PrimitiveComponentType#createInstance()}  methods.
+     * @param name  the name of the instance to create. This parameter will
+     * be used as the <code>instance.name</code> property.
+     * @return the created component instance.
      * @throws ConfigurationException occurs if the type description is
      * incorrect
      * @throws MissingHandlerException occurs if a handler is not available 

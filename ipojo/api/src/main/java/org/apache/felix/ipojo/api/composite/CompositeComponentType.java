@@ -74,7 +74,7 @@ public class CompositeComponentType extends ComponentType {
     private List m_instantiated = new ArrayList();
     
     /**
-     * List of contained instance:
+     * List of contained instance.
      */
     private List m_contained = new ArrayList(); 
     
@@ -89,7 +89,7 @@ public class CompositeComponentType extends ComponentType {
     private String m_name;
     
     /**
-     * List of Handler representing external
+     * List of Handler representing external.
      * handler configuration
      */
     private List m_handlers = new ArrayList();
@@ -183,26 +183,51 @@ public class CompositeComponentType extends ComponentType {
         return this;
     }
     
+    /**
+     * Adds a contained instance.
+     * @param inst the instance to add
+     * @return the current composite component type
+     */
     public CompositeComponentType addInstance(Instance inst) {
         m_contained.add(inst);
         return this;
     }
     
+    /**
+     * Adds an imported (sub-)service.
+     * @param is the imported service to add
+     * @return the current composite component type
+     */
     public CompositeComponentType addSubService(ImportedService is) {
         m_imported.add(is);
         return this;
     }
     
+    /**
+     * Adds an instantiated sub-service.
+     * @param is the instantiated service to add
+     * @return the current composite component type
+     */
     public CompositeComponentType addSubService(InstantiatedService is) {
         m_instantiated.add(is);
         return this;
     }
     
+    /**
+     * Adds an exported service.
+     * @param es the exported service to add
+     * @return the current composite component type
+     */
     public CompositeComponentType addService(ExportedService es) {
         m_exported.add(es);
         return this;
     }
     
+    /**
+     * Adds a provided service.
+     * @param es the provided service to add
+     * @return the current composite component type
+     */
     public CompositeComponentType addService(ProvidedService es) {
         m_provided.add(es);
         return this;
@@ -215,8 +240,9 @@ public class CompositeComponentType extends ComponentType {
      * @param handler the handler configuration to add
      * @return the current component type.
      */
-    public void CompositeComponentType(HandlerConfiguration handler) {
+    public CompositeComponentType addHandler(HandlerConfiguration handler) {
         m_handlers.add(handler);
+        return this;
     }
     
     /**
@@ -269,7 +295,7 @@ public class CompositeComponentType extends ComponentType {
         ensureValidity();
         m_metadata = generateComponentMetadata();
         try {
-           m_factory = new CompositeFactory(m_context, m_metadata);
+            m_factory = new CompositeFactory(m_context, m_metadata);
             m_factory.start();
         } catch (ConfigurationException e) {
             throw new IllegalStateException("An exception occurs during factory initialization : " + e.getMessage());
