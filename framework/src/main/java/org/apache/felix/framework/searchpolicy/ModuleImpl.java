@@ -1270,19 +1270,19 @@ public class ModuleImpl implements IModule
     {
         if (!getEnclosingClassMethodInitialized)
         {
-	        // Check if we have the getEnclosingClass() method available from
-	        // JDK 1.5.
-	        try
-	        {
-	            getEnclosingClassMethod =
+            // Check if we have the getEnclosingClass() method available from
+            // JDK 1.5.
+            try
+            {
+                getEnclosingClassMethod =
                     Class.class.getDeclaredMethod("getEnclosingClass", null);
-	        }
-	        catch (NoSuchMethodException ex)
-	        {
-	            // Ignore it then.
-	        }
-			getEnclosingClassMethodInitialized = true;
-		}
+            }
+            catch (NoSuchMethodException ex)
+            {
+                // Ignore it then.
+            }
+            getEnclosingClassMethodInitialized = true;
+        }
         if (getEnclosingClassMethod != null)
         {
             try
