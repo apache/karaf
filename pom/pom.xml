@@ -29,7 +29,7 @@
   <artifactId>felix</artifactId>
   <packaging>pom</packaging>
   <name>Apache Felix</name>
-  <version>1.2.1-SNAPSHOT</version>
+  <version>1.2.0-SNAPSHOT</version>
   <url>http://felix.apache.org/</url>
   <inceptionYear>2006</inceptionYear>
   <description>Apache Felix is an OSGi implementation.</description>
@@ -108,8 +108,11 @@
                 <id>make-assembly</id>
                 <phase>package</phase>
                 <goals>
-                  <goal>attached</goal>
+                  <goal>single</goal>
                 </goals>
+                <configuration>
+                  <attach>false</attach>
+                </configuration>
               </execution>
             </executions>
           </plugin>
@@ -289,6 +292,7 @@
         <configuration>
           <tagBase>https://svn.apache.org/repos/asf/felix/releases</tagBase>
           <useReleaseProfile>false</useReleaseProfile>
+          <arguments>-Prelease</arguments> 
           <goals>deploy</goals>
         </configuration>
       </plugin>
