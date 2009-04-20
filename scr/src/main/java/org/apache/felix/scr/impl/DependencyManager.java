@@ -264,15 +264,6 @@ class DependencyManager implements ServiceListener, Reference
      */
     private void serviceRemoved( ServiceReference reference )
     {
-        // ignore the service, if it does not match the target filter
-        if ( !targetFilterMatch( reference ) )
-        {
-            m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Ignoring removed Service for "
-                + m_dependencyMetadata.getName() + " : Service " + reference.getProperty( Constants.SERVICE_ID )
-                + " does not match target filter " + getTarget(), m_componentManager.getComponentMetadata(), null );
-            return;
-        }
-
         // decrement the number of services
         m_size--;
 
