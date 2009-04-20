@@ -19,11 +19,24 @@
 package org.apache.felix.scr.impl;
 
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.felix.scr.Reference;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
 
 
@@ -57,6 +70,9 @@ class DependencyManager implements ServiceListener, Reference
     // the number of matching services registered in the system
     private int m_size;
 
+    // the object on which the bind/undind methods are to be called
+    private transient Object m_componentInstance;
+    
     // the bind method
     private Method m_bind;
 
@@ -74,7 +90,7 @@ class DependencyManager implements ServiceListener, Reference
 
     // the target service filter
     private Filter m_targetFilter;
-
+    
 
     /**
      * Constructor that receives several parameters.
@@ -98,6 +114,10 @@ class DependencyManager implements ServiceListener, Reference
         // get the current number of registered services available
         ServiceReference refs[] = getFrameworkServiceReferences();
         m_size = ( refs == null ) ? 0 : refs.length;
+        
+        m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager " + getName() + " created: filter="
+            + getTarget() + ", interface=" + m_dependencyMetadata.getInterface() + ",matching services=" + m_size,
+            m_componentManager.getComponentMetadata(), null );
     }
 
 
@@ -109,19 +129,29 @@ class DependencyManager implements ServiceListener, Reference
      */
     public void serviceChanged( ServiceEvent event )
     {
+        final ServiceReference ref = event.getServiceReference();
+        final String serviceString = "Service " + m_dependencyMetadata.getInterface() + "/"
+            + ref.getProperty( Constants.SERVICE_ID );
+
         switch ( event.getType() )
         {
             case ServiceEvent.REGISTERED:
-                serviceAdded( event.getServiceReference() );
+                m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Adding " + serviceString,
+                    m_componentManager.getComponentMetadata(), null );
+                serviceAdded( ref );
                 break;
 
             case ServiceEvent.MODIFIED:
-                serviceRemoved( event.getServiceReference() );
-                serviceAdded( event.getServiceReference() );
+                m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Updating " + serviceString,
+                    m_componentManager.getComponentMetadata(), null );
+                serviceRemoved( ref );
+                serviceAdded( ref );
                 break;
 
             case ServiceEvent.UNREGISTERING:
-                serviceRemoved( event.getServiceReference() );
+                m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Removing " + serviceString,
+                    m_componentManager.getComponentMetadata(), null );
+                serviceRemoved( ref );
                 break;
         }
     }
@@ -166,6 +196,7 @@ class DependencyManager implements ServiceListener, Reference
         // otherwise check whether the component is in a state to handle the event
         else if ( handleServiceEvent() )
         {
+
             // if the dependency is static and adding the service has an
             // influence on service binding because the dependency is multiple
             // or optional and unbound, the component needs to be reactivated
@@ -177,11 +208,11 @@ class DependencyManager implements ServiceListener, Reference
                     m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Service "
                         + m_dependencyMetadata.getName() + " registered, reactivate component", m_componentManager
                         .getComponentMetadata(), null );
-
+    
                     m_componentManager.reactivate();
                 }
             }
-
+    
             // otherwise bind if we have a bind method and the service needs
             // be bound
             else if ( m_dependencyMetadata.getBind() != null )
@@ -190,7 +221,7 @@ class DependencyManager implements ServiceListener, Reference
                 if ( m_dependencyMetadata.isMultiple() || !isBound() )
                 {
                     // bind the service, getting it if required
-                    invokeBindMethod( m_componentManager.getInstance(), reference );
+                    invokeBindMethod( reference );
                 }
                 else
                 {
@@ -201,13 +232,20 @@ class DependencyManager implements ServiceListener, Reference
                     if ( isHigher( reference, boundRefs[0] ) )
                     {
                         // bind the service, getting it if required
-                        invokeBindMethod( m_componentManager.getInstance(), reference );
-
+                        invokeBindMethod( reference );
+    
                         // unbind the old service reference
-                        unbind( m_componentManager.getInstance(), boundRefs );
+                        unbind( boundRefs );
                     }
                 }
             }
+        }
+        
+        else 
+        {
+            m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Ignoring service addition, wrong state "
+                + m_componentManager.stateToString( m_componentManager.getState() ), m_componentManager
+                .getComponentMetadata(), null );
         }
     }
     
@@ -230,8 +268,8 @@ class DependencyManager implements ServiceListener, Reference
         if ( !targetFilterMatch( reference ) )
         {
             m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Ignoring removed Service for "
-                + m_dependencyMetadata.getName() + " : does not match target filter " + getTarget(), m_componentManager
-                .getComponentMetadata(), null );
+                + m_dependencyMetadata.getName() + " : Service " + reference.getProperty( Constants.SERVICE_ID )
+                + " does not match target filter " + getTarget(), m_componentManager.getComponentMetadata(), null );
             return;
         }
 
@@ -241,11 +279,16 @@ class DependencyManager implements ServiceListener, Reference
         // check whether we are bound to that service, do nothing if not
         if ( getBoundService( reference ) == null )
         {
+            m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Ignoring removed Service for "
+                + m_dependencyMetadata.getName() + " : Service " + reference.getProperty( Constants.SERVICE_ID )
+                + " not bound", m_componentManager.getComponentMetadata(), null );
             return;
         }
 
-        if ( handleServiceEvent() )
+        // otherwise check whether the component is in a state to handle the event
+        else if ( handleServiceEvent() )
         {
+
             // if the dependency is not satisfied anymore, we have to
             // deactivate the component
             if ( !isSatisfied() )
@@ -256,11 +299,11 @@ class DependencyManager implements ServiceListener, Reference
                         "Dependency Manager: Deactivating component due to mandatory dependency on "
                             + m_dependencyMetadata.getName() + "/" + m_dependencyMetadata.getInterface()
                             + " not satisfied", m_componentManager.getComponentMetadata(), null );
-
+    
                 // deactivate the component now
                 m_componentManager.deactivate();
             }
-
+    
             // if the dependency is static, we have to reactivate the component
             // to "remove" the dependency
             else if ( m_dependencyMetadata.isStatic() )
@@ -278,56 +321,50 @@ class DependencyManager implements ServiceListener, Reference
                         m_componentManager.getComponentMetadata(), ex );
                 }
             }
-
+    
             // dynamic dependency, multiple or single but this service is the bound one
             else
             {
-
-                // the component instance to unbind/bind services
-                Object instance = m_componentManager.getInstance();
-
+    
                 // try to bind a replacement service first if this is a unary
                 // cardinality reference and a replacement is available.
                 if ( !m_dependencyMetadata.isMultiple() )
                 {
                     // if the dependency is mandatory and no replacement is
                     // available, bind returns false and we deactivate
-                    if ( !bind( instance ) )
+                    if ( !bind() )
                     {
                         m_componentManager.log( LogService.LOG_DEBUG,
                             "Dependency Manager: Deactivating component due to mandatory dependency on "
                                 + m_dependencyMetadata.getName() + "/" + m_dependencyMetadata.getInterface()
                                 + " not satisfied", m_componentManager.getComponentMetadata(), null );
                         m_componentManager.deactivate();
-
+    
                         // abort here we do not need to do more
                         return;
                     }
                 }
-
+    
                 // call the unbind method if one is defined
                 if ( m_dependencyMetadata.getUnbind() != null )
                 {
-                    invokeUnbindMethod( instance, reference );
+                    invokeUnbindMethod( reference );
                 }
-
-                // ensure the service is not cached anymore, we call it here
-                // since there might be a bind method (or the locateService
-                // method might have been called) but there is no unbind
-                // method to actually unbind the service (see FELIX-832)
-                ungetService( reference );
             }
         }
+        
+        else 
+        {
+            m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Ignoring service removal, wrong state "
+                + m_componentManager.stateToString( m_componentManager.getState() ), m_componentManager
+                .getComponentMetadata(), null );
+        }
     }
-
-
+    
+    
     private boolean handleServiceEvent()
     {
         return ( m_componentManager.getState() & STATE_MASK ) != 0;
-        //        return state != AbstractComponentManager.INSTANCE_DESTROYING
-        //            && state != AbstractComponentManager.INSTANCE_DESTROYED
-        //            && state != AbstractComponentManager.INSTANCE_CREATING
-        //            && state != AbstractComponentManager.INSTANCE_CREATED;
     }
 
 
@@ -383,7 +420,7 @@ class DependencyManager implements ServiceListener, Reference
      * bound services. This list will not be empty if the service lookup
      * method is used by the component to access the service.
      */
-    void close()
+    void dispose()
     {
         BundleContext context = m_componentManager.getActivator().getBundleContext();
         context.removeServiceListener( this );
@@ -759,6 +796,30 @@ class DependencyManager implements ServiceListener, Reference
     }
 
 
+    boolean open( Object instance )
+    {
+        m_componentInstance = instance;
+        return bind();
+    }
+
+
+    /**
+     * Revoke all bindings. This method cannot throw an exception since it must
+     * try to complete all that it can
+     */
+    void close( )
+    {
+        try
+        {
+            unbind( getBoundServiceReferences() );
+        }
+        finally
+        {
+            m_componentInstance = null;
+        }
+    }
+
+
     /**
      * initializes a dependency. This method binds all of the service
      * occurrences to the instance object
@@ -766,7 +827,7 @@ class DependencyManager implements ServiceListener, Reference
      * @return true if the dependency is satisfied and at least the minimum
      *      number of services could be bound. Otherwise false is returned.
      */
-    boolean bind( Object instance )
+    private boolean bind()
     {
         // If no references were received, we have to check if the dependency
         // is optional, if it is not then the dependency is invalid
@@ -777,7 +838,7 @@ class DependencyManager implements ServiceListener, Reference
 
         // if no bind method is configured or if this is a delayed component,
         // we have nothing to do and just signal success
-        if ( instance == null || m_dependencyMetadata.getBind() == null )
+        if ( m_componentInstance == null || m_dependencyMetadata.getBind() == null )
         {
             return true;
         }
@@ -798,7 +859,7 @@ class DependencyManager implements ServiceListener, Reference
                 for ( int index = 0; index < refs.length; index++ )
                 {
                     // success is if we have the minimal required number of services bound
-                    if ( invokeBindMethod( instance, refs[index] ) )
+                    if ( invokeBindMethod( refs[index] ) )
                     {
                         // of course, we have success if the service is bound
                         success = true;
@@ -810,7 +871,7 @@ class DependencyManager implements ServiceListener, Reference
         {
             // bind best matching service
             ServiceReference ref = getFrameworkServiceReference();
-            if ( ref != null && invokeBindMethod( instance, ref ) )
+            if ( ref != null && invokeBindMethod( ref ) )
             {
                 // of course, we have success if the service is bound
                 success = true;
@@ -825,24 +886,14 @@ class DependencyManager implements ServiceListener, Reference
 
 
     /**
-     * Revoke all bindings. This method cannot throw an exception since it must
-     * try to complete all that it can
-     */
-    void unbind( Object instance )
-    {
-        unbind( instance, getBoundServiceReferences() );
-    }
-
-
-    /**
      * Revoke the given bindings. This method cannot throw an exception since
      * it must try to complete all that it can
      */
-    private void unbind( Object instance, ServiceReference[] boundRefs )
+    private void unbind( ServiceReference[] boundRefs )
     {
         // only invoke the unbind method if there is an instance (might be null
         // in the delayed component situation) and the unbind method is declared.
-        boolean doUnbind = instance != null && m_dependencyMetadata.getUnbind() != null;
+        boolean doUnbind = m_componentInstance != null && m_dependencyMetadata.getUnbind() != null;
 
         if ( boundRefs != null )
         {
@@ -850,7 +901,7 @@ class DependencyManager implements ServiceListener, Reference
             {
                 if ( doUnbind )
                 {
-                    invokeUnbindMethod( instance, boundRefs[i] );
+                    invokeUnbindMethod( boundRefs[i] );
                 }
 
                 // unget the service, we call it here since there might be a
@@ -980,7 +1031,6 @@ class DependencyManager implements ServiceListener, Reference
      * If the reference is singular and a service has already been bound to the
      * component this method has no effect and just returns <code>true</code>.
      *
-     * @param implementationObject The object to which the service is bound
      * @param ref A ServiceReference with the service that will be bound to the
      *            instance object
      * @return true if the service should be considered bound. If no bind
@@ -989,11 +1039,11 @@ class DependencyManager implements ServiceListener, Reference
      *      be handed over to the bind method but the service cannot be
      *      retrieved using the service reference.
      */
-    private boolean invokeBindMethod( Object implementationObject, ServiceReference ref )
+    private boolean invokeBindMethod( ServiceReference ref )
     {
         // The bind method is only invoked if the implementation object is not
         // null. This is valid for both immediate and delayed components
-        if ( implementationObject != null )
+        if ( m_componentInstance != null )
         {
             try
             {
@@ -1002,7 +1052,7 @@ class DependencyManager implements ServiceListener, Reference
                     m_componentManager.getComponentMetadata(), null );
                 if ( m_bind == null )
                 {
-                    m_bind = getBindingMethod( m_dependencyMetadata.getBind(), implementationObject.getClass(),
+                    m_bind = getBindingMethod( m_dependencyMetadata.getBind(), m_componentInstance.getClass(),
                         m_dependencyMetadata.getInterface() );
 
                     // 112.3.1 If the method is not found , SCR must log an error
@@ -1042,11 +1092,11 @@ class DependencyManager implements ServiceListener, Reference
                 }
 
                 // Invoke the method
-                m_bind.invoke( implementationObject, new Object[]
+                m_bind.invoke( m_componentInstance, new Object[]
                     { parameter } );
 
-                m_componentManager.log( LogService.LOG_DEBUG, "bound: " + getName(), m_componentManager
-                    .getComponentMetadata(), null );
+                m_componentManager.log( LogService.LOG_DEBUG, "bound: " + getName() + "/"
+                    + ref.getProperty( Constants.SERVICE_ID ), m_componentManager.getComponentMetadata(), null );
 
                 return true;
             }
@@ -1070,12 +1120,32 @@ class DependencyManager implements ServiceListener, Reference
         }
         else if ( m_componentManager.getComponentMetadata().isImmediate() == false )
         {
+            m_componentManager.log( LogService.LOG_DEBUG,
+                "DependencyManager : Delayed component not yet created, assuming bind method call succeeded",
+                m_componentManager.getComponentMetadata(), null );
+
+            return true;
+        }
+        else if ( m_componentManager.getState() == AbstractComponentManager.STATE_ACTIVATING )
+        {
+            // when activating the method, events may be handled before the
+            // open(Object) method has been called on this instance. This is
+            // not a problem, because the open(Object) method will catch up
+            // this services any way
+            m_componentManager.log( LogService.LOG_DEBUG, "DependencyManager : Not yet open for activating component",
+                m_componentManager.getComponentMetadata(), null );
+
             return true;
         }
         else
         {
             // this is not expected: if the component is immediate the
             // implementationObject is not null (asserted by the caller)
+
+            m_componentManager.log( LogService.LOG_ERROR,
+                "DependencyManager : Immediate component not yet created, bind method cannot be called",
+                m_componentManager.getComponentMetadata(), null );
+
             return false;
         }
     }
@@ -1088,16 +1158,15 @@ class DependencyManager implements ServiceListener, Reference
      * to the component this method has no effect and just returns
      * <code>true</code>.
      *
-     * @param implementationObject The object from which the service is unbound
      * @param ref A service reference corresponding to the service that will be
      *            unbound
      * @return true if the call was successful, false otherwise
      */
-    private boolean invokeUnbindMethod( Object implementationObject, ServiceReference ref )
+    private void invokeUnbindMethod( ServiceReference ref )
     {
         // The unbind method is only invoked if the implementation object is not
         // null. This is valid for both immediate and delayed components
-        if ( implementationObject != null )
+        if ( m_componentInstance != null )
         {
             try
             {
@@ -1106,7 +1175,7 @@ class DependencyManager implements ServiceListener, Reference
                     m_componentManager.getComponentMetadata(), null );
                 if ( m_unbind == null )
                 {
-                    m_unbind = getBindingMethod( m_dependencyMetadata.getUnbind(), implementationObject.getClass(),
+                    m_unbind = getBindingMethod( m_dependencyMetadata.getUnbind(), m_componentInstance.getClass(),
                         m_dependencyMetadata.getInterface() );
 
                     if ( m_unbind == null )
@@ -1116,7 +1185,6 @@ class DependencyManager implements ServiceListener, Reference
                         // method
                         m_componentManager.log( LogService.LOG_ERROR, "unbind() method not found", m_componentManager
                             .getComponentMetadata(), null );
-                        return true;
                     }
                     // cache whether the unbind method takes a reference
                     m_unbindUsesReference = SERVICE_REFERENCE_CLASS.equals( m_unbind.getParameterTypes()[0] );
@@ -1135,17 +1203,14 @@ class DependencyManager implements ServiceListener, Reference
                     {
                         m_componentManager.log( LogService.LOG_INFO, "Dependency Manager: Service " + ref
                             + " has already gone, not unbinding", m_componentManager.getComponentMetadata(), null );
-                        return false;
                     }
                 }
 
-                m_unbind.invoke( implementationObject, new Object[]
+                m_unbind.invoke( m_componentInstance, new Object[]
                     { parameter } );
 
-                m_componentManager.log( LogService.LOG_DEBUG, "unbound: " + getName(), m_componentManager
-                    .getComponentMetadata(), null );
-
-                return true;
+                m_componentManager.log( LogService.LOG_DEBUG, "unbound: " + getName() + "/"
+                    + ref.getProperty( Constants.SERVICE_ID ), m_componentManager.getComponentMetadata(), null );
             }
             catch ( IllegalAccessException ex )
             {
@@ -1154,7 +1219,6 @@ class DependencyManager implements ServiceListener, Reference
                 // if present, and ignore the method
                 m_componentManager.log( LogService.LOG_ERROR, "unbind() method cannot be called", m_componentManager
                     .getComponentMetadata(), ex );
-                return false;
             }
             catch ( InvocationTargetException ex )
             {
@@ -1164,23 +1228,21 @@ class DependencyManager implements ServiceListener, Reference
                     .log( LogService.LOG_ERROR, "DependencyManager : exception while invoking "
                         + m_dependencyMetadata.getUnbind() + "()", m_componentManager.getComponentMetadata(), ex
                         .getCause() );
-                return true;
             }
 
         }
-        else if ( m_componentManager.getComponentMetadata().isImmediate() == false )
-        {
-            return true;
-        }
         else
         {
-            // this is not expected: if the component is immediate the
-            // implementationObject is not null (asserted by the caller)
-            return false;
+            // don't care whether we can or cannot call the unbind method
+            // if the component instance has already been cleared by the
+            // close() method
+            m_componentManager.log( LogService.LOG_DEBUG,
+                "DependencyManager : Component not set, no need to call unbind method", m_componentManager
+                    .getComponentMetadata(), null );
         }
     }
 
-
+    
     //------------- Service target filter support -----------------------------
 
     /**

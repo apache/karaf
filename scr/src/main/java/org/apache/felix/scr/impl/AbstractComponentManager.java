@@ -553,7 +553,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         while ( it.hasNext() )
         {
             DependencyManager dm = ( DependencyManager ) it.next();
-            dm.close();
+            dm.dispose();
         }
         m_dependencyManagers.clear();
 

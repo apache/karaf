@@ -200,7 +200,7 @@ class ImmediateComponentManager extends AbstractComponentManager
             // creating the instance fails here, so we deactivate and return
             // null.
             DependencyManager dm = ( DependencyManager ) it.next();
-            if ( !dm.bind( implementationObject ) )
+            if ( !dm.open( implementationObject ) )
             {
                 log( LogService.LOG_ERROR, "Cannot create component instance due to failure to bind reference "
                     + dm.getName(), getComponentMetadata(), null );
@@ -210,7 +210,7 @@ class ImmediateComponentManager extends AbstractComponentManager
                 while ( it.hasNext() )
                 {
                     dm = ( DependencyManager ) it.next();
-                    dm.unbind( implementationObject );
+                    dm.close();
                 }
 
                 return null;
@@ -248,7 +248,7 @@ class ImmediateComponentManager extends AbstractComponentManager
             while ( it.hasNext() )
             {
                 DependencyManager dm = ( DependencyManager ) it.next();
-                dm.unbind( implementationObject );
+                dm.close();
             }
 
             return null;
@@ -293,7 +293,7 @@ class ImmediateComponentManager extends AbstractComponentManager
         while ( it.hasNext() )
         {
             DependencyManager dm = ( DependencyManager ) it.next();
-            dm.unbind( implementationObject );
+            dm.close();
         }
 
         // 3. Release all references
