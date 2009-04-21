@@ -36,10 +36,10 @@
        default-init-method="init"
        default-destroy-method="destroy">
 
-    <bean name="sshClient" class="com.google.code.sshd.SshClient" factory-method="setUpDefaultClient" init-method="start" destroy-method="stop">
+    <bean name="sshClient" class="org.apache.sshd.SshClient" factory-method="setUpDefaultClient" init-method="start" destroy-method="stop">
     </bean>
 
-    <bean name="sshServer" class="com.google.code.sshd.SshServer" factory-method="setUpDefaultServer" scope="prototype">
+    <bean name="sshServer" class="org.apache.sshd.SshServer" factory-method="setUpDefaultServer" scope="prototype">
         <property name="port" value="${sshPort}" />
         <property name="shellFactory">
             <bean class="org.apache.geronimo.gshell.commands.ssh.ShellFactoryImpl">
@@ -70,10 +70,10 @@
         <property name="passwordAuthenticator" ref="passwordAuthenticator" />
     </bean>
 
-    <bean name="keyPairProvider" class="com.google.code.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider">
+    <bean name="keyPairProvider" class="org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider">
         <property name="path" value="${hostKey}" />
     </bean>
-    <bean name="passwordAuthenticator" class="com.google.code.sshd.server.jaas.JaasPasswordAuthenticator">
+    <bean name="passwordAuthenticator" class="org.apache.sshd.server.jaas.JaasPasswordAuthenticator">
         <property name="domain" value="${sshRealm}" />
     </bean>
 

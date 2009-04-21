@@ -41,10 +41,10 @@ public class CoreTest extends AbstractIntegrationTest {
             getBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.commons-httpclient"),
             getBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.commons-jexl"),
             getBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.commons-vfs"),
-            getBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.mina"),
+            getBundle("org.apache.mina", "mina-core"),
             getBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.oro"),
             getBundle("org.apache.servicemix.kernel.jaas", "org.apache.servicemix.kernel.jaas.config"),
-            getBundle("com.google.code.sshd", "sshd"),
+            getBundle("org.apache.sshd", "sshd-core"),
             getBundle("org.apache.servicemix.kernel.gshell", "org.apache.servicemix.kernel.gshell.core"),
             getBundle("org.apache.servicemix.kernel.gshell", "org.apache.servicemix.kernel.gshell.osgi")
         };

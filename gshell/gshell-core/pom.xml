@@ -52,8 +52,8 @@
             org.apache.servicemix.kernel.version;resolution:=optional, 
             org.apache.servicemix.kernel.main.spi;resolution:=optional;version="1.0.0",
             org.codehaus.plexus*;resolution:=optional,
-            com.google.code.sshd.server.keyprovider,
-            com.google.code.sshd.server.jaas,
+            org.apache.sshd.server.keyprovider,
+            org.apache.sshd.server.jaas,
             org.jsecurity*;resolution:=optional,
             *
         </gshell.osgi.import>
@@ -157,10 +157,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.mina</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.commons-httpclient</artifactId>
             <exclusions>
                 <exclusion>
@@ -192,12 +188,12 @@
             <artifactId>org.apache.servicemix.bundles.oro</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.mina</artifactId>
+            <groupId>org.apache.mina</groupId>
+            <artifactId>mina-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.code.sshd</groupId>
-            <artifactId>sshd</artifactId>
+            <groupId>org.apache.sshd</groupId>
+            <artifactId>sshd-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
@@ -207,6 +203,19 @@
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.jline</artifactId>
+        </dependency>
+        
+        <!-- jsecurity is a dependency for the ssh commands -->
+        <dependency>
+            <groupId>org.jsecurity</groupId>
+            <artifactId>jsecurity</artifactId>
+            <version>0.9.0-RC2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
@@ -266,7 +275,6 @@
                                     <include>org.apache.geronimo.gshell.commands:gshell-file</include>
                                     <include>org.apache.geronimo.gshell.commands:gshell-network</include>
                                     <include>org.apache.geronimo.gshell.commands:gshell-shell</include>
-                                    <include>org.apache.geronimo.gshell.commands:gshell-ssh</include>
                                     <include>org.apache.geronimo.gshell.commands:gshell-text</include>
                                     <include>org.apache.geronimo.gshell.support:gshell-ansi</include>
                                     <include>org.apache.geronimo.gshell.support:gshell-artifact</include>

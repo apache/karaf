@@ -16,9 +16,11 @@
  */
 package org.apache.servicemix.kernel.client;
 
-import com.google.code.sshd.ClientChannel;
-import com.google.code.sshd.ClientSession;
-import com.google.code.sshd.SshClient;
+import org.apache.sshd.ClientChannel;
+import org.apache.sshd.ClientSession;
+import org.apache.sshd.SshClient;
+import org.apache.sshd.client.future.ConnectFuture;
+
 import jline.ConsoleReader;
 
 /**
@@ -70,7 +72,9 @@ public class Main {
         try {
             client = SshClient.setUpDefaultClient();
             client.start();
-            ClientSession session = client.connect(host, port);
+            ConnectFuture future = client.connect(host, port);
+            future.await();
+            ClientSession session = future.getSession();
             session.authPassword(user, password);
             ClientChannel channel = session.createChannel("shell");
             channel.setIn(new ConsoleReader().getInput());

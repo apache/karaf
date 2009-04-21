@@ -139,8 +139,8 @@
             <artifactId>org.apache.servicemix.bundles.jaxp-ri</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.mina</artifactId>
+            <groupId>org.apache.mina</groupId>
+            <artifactId>mina-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
@@ -211,8 +211,8 @@
             <artifactId>geronimo-annotation_1.0_spec</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.code.sshd</groupId>
-            <artifactId>sshd</artifactId>
+            <groupId>org.apache.sshd</groupId>
+            <artifactId>sshd-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>

@@ -18,13 +18,11 @@
  */
 package org.apache.servicemix.kernel.gshell.core.sshd;
 
-import com.google.code.sshd.SshServer;
+import org.apache.sshd.SshServer;
 
 public class SshServerFactory {
 
     private SshServer server;
-
-    private String location;
 
     private boolean start;
 

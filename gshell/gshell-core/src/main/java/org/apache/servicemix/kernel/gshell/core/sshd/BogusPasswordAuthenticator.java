@@ -18,7 +18,7 @@
  */
 package org.apache.servicemix.kernel.gshell.core.sshd;
 
-import com.google.code.sshd.server.PasswordAuthenticator;
+import org.apache.sshd.server.PasswordAuthenticator;
 
 public class BogusPasswordAuthenticator implements PasswordAuthenticator {
 
