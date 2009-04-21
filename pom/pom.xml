@@ -26,7 +26,7 @@
   </parent>
 
   <groupId>org.apache.felix</groupId>
-  <artifactId>felix</artifactId>
+  <artifactId>felix-parent</artifactId>
   <packaging>pom</packaging>
   <name>Apache Felix</name>
   <version>1.2.0-SNAPSHOT</version>
