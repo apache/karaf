@@ -120,12 +120,14 @@
                   <goal>single</goal>
                 </goals>
                 <configuration>
+                  <!-- we don't want to attach all the assemblies, such as bz2 -->
                   <attach>false</attach>
                 </configuration>
               </execution>
             </executions>
           </plugin>
           <plugin>
+            <!-- only attach the project and bin assemblies, in tar.gz and zip flavors -->
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>build-helper-maven-plugin</artifactId>
             <executions>
