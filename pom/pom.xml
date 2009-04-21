@@ -29,7 +29,7 @@
   <artifactId>felix-parent</artifactId>
   <packaging>pom</packaging>
   <name>Apache Felix</name>
-  <version>1.2.1-SNAPSHOT</version>
+  <version>1.2.0-SNAPSHOT</version>
   <url>http://felix.apache.org/</url>
   <inceptionYear>2006</inceptionYear>
   <description>Apache Felix is an OSGi implementation.</description>
@@ -80,6 +80,15 @@
                 </goals>
               </execution>
             </executions>
+          </plugin>
+          <!-- We want to deploy the artifact to a staging location for perusal -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-deploy-plugin</artifactId>
+            <inherited>true</inherited>
+            <configuration>
+              <updateReleaseInfo>true</updateReleaseInfo>
+            </configuration>
           </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
