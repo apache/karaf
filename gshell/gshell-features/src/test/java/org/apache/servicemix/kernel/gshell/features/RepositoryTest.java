@@ -60,4 +60,14 @@ public class RepositoryTest extends TestCase {
         assertEquals(1, features[1].getBundles().size());
         assertEquals("b3", features[1].getBundles().get(0));
     }
+    
+    public void testShowWrongUriInException() throws Exception {
+        String uri = "src/test/resources/org/apache/servicemix/kernel/gshell/features/repo1.xml";
+        RepositoryImpl r = new RepositoryImpl(new URI(uri));
+        try {
+            r.load();
+        } catch (Exception e) {
+            assertTrue(e.getMessage().contains(uri));
+        }
+    }
 }

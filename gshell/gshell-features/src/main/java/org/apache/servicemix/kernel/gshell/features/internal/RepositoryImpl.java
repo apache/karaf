@@ -139,7 +139,9 @@ public class RepositoryImpl implements Repository {
         } catch (ParserConfigurationException e) {
             throw (IOException) new IOException().initCause(e);
         } catch (URISyntaxException e) {
-            throw (IOException) new IOException().initCause(e);
+            throw new IOException(e.getMessage() + " : " + uri, e);
+        } catch (IllegalArgumentException e) {
+            throw new IOException(e.getMessage() + " : " + uri, e);
         }
     }
 
