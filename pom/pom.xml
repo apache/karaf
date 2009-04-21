@@ -29,7 +29,7 @@
   <artifactId>felix</artifactId>
   <packaging>pom</packaging>
   <name>Apache Felix</name>
-  <version>1.2.1-SNAPSHOT</version>
+  <version>1.2.0-SNAPSHOT</version>
   <url>http://felix.apache.org/</url>
   <inceptionYear>2006</inceptionYear>
   <description>Apache Felix is an OSGi implementation.</description>
@@ -112,6 +112,43 @@
                 </goals>
                 <configuration>
                   <attach>false</attach>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-assemblies</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>attach-artifact</goal>
+                </goals>
+                <configuration>
+                  <artifacts>
+                    <artifact>
+                      <file>${project.build.directory}/${project.artifactId}-${project.version}-project.tar.gz</file>
+                      <classifier>project</classifier>
+                      <type>tar.gz</type>
+                    </artifact>
+                    <artifact>
+                      <file>${project.build.directory}/${project.artifactId}-${project.version}-project.zip</file>
+                      <classifier>project</classifier>
+                      <type>zip</type>
+                    </artifact>
+                    <artifact>
+                      <file>${project.build.directory}/${project.artifactId}-${project.version}-bin.tar.gz</file>
+                      <classifier>bin</classifier>
+                      <type>tar.gz</type>
+                    </artifact>
+                    <artifact>
+                      <file>${project.build.directory}/${project.artifactId}-${project.version}-bin.zip</file>
+                      <classifier>bin</classifier>
+                      <type>zip</type>
+                    </artifact>
+                  </artifacts>
                 </configuration>
               </execution>
             </executions>
@@ -226,11 +263,6 @@
           <artifactId>maven-source-plugin</artifactId>
           <version>2.0.4</version>
         </plugin>
-<!--     <plugin>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>maven-bundle-plugin</artifactId>
-          <version>1.1.0-SNAPSHOT</version>
-        </plugin> -->
 <!--        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-remote-resources-plugin</artifactId>
@@ -251,6 +283,11 @@
           <artifactId>maven-assembly-plugin</artifactId>
           <version>2.2-beta-1</version>
         </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>1.2</version>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
@@ -259,6 +296,13 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
           <target>1.3</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <configuration>
+          <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
       <plugin>
