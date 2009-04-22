@@ -1,53 +1,94 @@
-<project>
-  <modelVersion>4.0.0</modelVersion>
-  <packaging>bundle</packaging>
-  <groupId>org.apache.felix</groupId>
-  <artifactId>org.apache.felix.ipojo.online.manipulator</artifactId>
-  <version>1.3.0-SNAPSHOT</version>
-  <name>Apache Felix iPOJO URL Handler</name>
-  
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <version>1.4.3</version>
-        <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-            <Private-Package>org.apache.felix.org.apache.felix.ipojo.online.manipulator</Private-Package>
-            <Export-Package>
-            				org.apache.felix.ipojo.manipulator,
-            				org.apache.felix.ipojo.xml.parser,
-            				org.apache.felix.ipojo.manipulation,
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<parent>
+		<groupId>org.apache.felix</groupId>
+		<artifactId>felix</artifactId>
+		<version>1.0.4</version>
+		<relativePath>../../pom/pom.xml</relativePath>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<packaging>bundle</packaging>
+	<artifactId>org.apache.felix.ipojo.online.manipulator</artifactId>
+	<version>1.3.0-SNAPSHOT</version>
+	<name>Apache Felix iPOJO URL Handler</name>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>1.4.3</version>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+						<Private-Package>org.apache.felix.org.apache.felix.ipojo.online.manipulator</Private-Package>
+						<Export-Package> org.apache.felix.ipojo.manipulator,
+							org.apache.felix.ipojo.xml.parser,
+							org.apache.felix.ipojo.manipulation,
 							org.apache.felix.ipojo.manipulation.annotations,
-							org.objectweb.asm.commons, org.objectweb.asm
-			</Export-Package>
-			<Import-Package>
-			!org.objectweb.asm.tree, !sun.io,
-							*
+							org.objectweb.asm.commons, org.objectweb.asm </Export-Package>
+						<Import-Package> !org.objectweb.asm.tree, !sun.io, * 
 						</Import-Package>
 						<Embed-Dependency>xercesImpl|xml-resolver</Embed-Dependency>
-          </instructions>
-        </configuration>
-      </plugin>
-      <plugin>
-	      <groupId>org.apache.felix</groupId>
-	      <artifactId>maven-ipojo-plugin</artifactId>
-	       <version>1.3.0-SNAPSHOT</version>
-		  <executions>
-          	<execution>
-            	<goals>
-	              <goal>ipojo-bundle</goal>
-               </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
-  <dependencies>
-  			<dependency>
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-ipojo-plugin</artifactId>
+				<version>1.3.0-SNAPSHOT</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>ipojo-bundle</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>rat-maven-plugin</artifactId>
+				<configuration>
+					<excludeSubProjects>false</excludeSubProjects>
+					<useEclipseDefaultExcludes>true</useEclipseDefaultExcludes>
+					<useMavenDefaultExcludes>true</useMavenDefaultExcludes>
+					<excludes>
+						<param>doc/*</param>
+						<param>maven-eclipse.xml</param>
+						<param>.checkstyle</param>
+						<param>.externalToolBuilders/*</param>
+					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<configuration>
+					<configLocation>http://felix.apache.org/ipojo/dev/checkstyle_ipojo.xml</configLocation>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.ipojo.manipulator</artifactId>
 			<version>1.3.0-SNAPSHOT</version>
@@ -63,20 +104,20 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-  	<dependency>
-  		<groupId>org.apache.felix</groupId>
-  		<artifactId>org.osgi.core</artifactId>
-  		<version>1.2.0</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>xerces</groupId>
-  		<artifactId>xercesImpl</artifactId>
-  		<version>2.9.1</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>xml-resolver</groupId>
-  		<artifactId>xml-resolver</artifactId>
-  		<version>1.2</version>
-  	</dependency>
-  </dependencies>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<version>1.2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xercesImpl</artifactId>
+			<version>2.9.1</version>
+		</dependency>
+		<dependency>
+			<groupId>xml-resolver</groupId>
+			<artifactId>xml-resolver</artifactId>
+			<version>1.2</version>
+		</dependency>
+	</dependencies>
 </project>

@@ -1,0 +1,4 @@
+<ipojo>
+<instance component="org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.impl.Consumer"
+	name="cons"/>
+</ipojo>

@@ -801,8 +801,12 @@ public class Pojoization {
      */
     private void setCreatedBy(Attributes att) {
         String prev = att.getValue("Created-By");
-        if (prev.indexOf("iPOJO") == -1) { // Avoid appending iPOJO several times
-            att.putValue("Created-By", prev + " & iPOJO");
+        if (prev == null) {
+            att.putValue("Created-By", "iPOJO " + IPOJO_PACKAGE_VERSION);
+        } else {
+            if (prev.indexOf("iPOJO") == -1) { // Avoid appending iPOJO several times
+                att.putValue("Created-By", prev + " & iPOJO " + IPOJO_PACKAGE_VERSION);
+            }
         }
     }
 

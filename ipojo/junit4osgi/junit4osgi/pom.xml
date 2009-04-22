@@ -83,8 +83,11 @@
 							org.apache.felix.ipojo.junit4osgi.test.TestTestSuite,
 							org.apache.felix.ipojo.junit4osgi.test.TestOSGiTestSuite,
 						</Test-Suite>  -->
-						<Include-Resource> META-INF/LICENCE=LICENSE,
-							META-INF/NOTICE=NOTICE </Include-Resource>
+						<Include-Resource> 
+							META-INF/LICENSE=LICENSE,
+							META-INF/LICENSE.junit=LICENSE.junit,
+							META-INF/NOTICE=NOTICE
+						</Include-Resource>
 					</instructions>
 				</configuration>
 			</plugin>

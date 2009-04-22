@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
-import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestFailure;
 import junit.framework.TestResult;
