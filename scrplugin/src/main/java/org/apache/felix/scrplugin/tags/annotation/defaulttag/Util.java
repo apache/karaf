@@ -18,6 +18,7 @@
  */
 package org.apache.felix.scrplugin.tags.annotation.defaulttag;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -66,7 +67,14 @@ public abstract class Util {
     public static String[] getStringValues(Annotation annotation, String name, final Class<?> clazz) {
         final Object obj = annotation.getNamedParameter(name);
         if ( obj != null ) {
-            List<String> list = (List<String>)obj;
+            List<String> list;
+            if (obj instanceof String) {
+                list = new ArrayList<String>();
+                list.add((String)obj);
+            }
+            else {
+                list = (List<String>)obj;
+            }
             String[] values = new String[list.size()];
             for (int i=0; i<values.length; i++) {
                 values[i] = stripQuotes(list.get(i));
@@ -144,7 +152,7 @@ public abstract class Util {
                 if (dotPos >= 0) {
                     enumName = enumName.substring(dotPos+1);
                 }
-                return Enum.valueOf(enumClass, enumName);
+                return (T)Enum.valueOf(enumClass, enumName);
             }
         }
         return null;

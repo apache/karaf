@@ -90,12 +90,7 @@ public class PropertyTag extends AbstractTag {
             public String[] value() {
                 // value property can be used as String[] or String property
                 Object obj = annotation.getNamedParameter("value");
-                if (obj instanceof List) {
-                    return Util.getStringValues(annotation, "value", Property.class);
-                }
-                else {
-                    return new String[] { Util.getStringValue(annotation, "value", Property.class) };
-                }
+                return Util.getStringValues(annotation, "value", Property.class);
             }
 
             public Class<? extends java.lang.annotation.Annotation> annotationType() {
