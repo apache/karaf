@@ -21,10 +21,13 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -119,6 +122,7 @@ public class RepositoryImpl implements Repository {
                         String data = c.getTextContent();
                         Properties properties = new Properties();
                         properties.load(new ByteArrayInputStream(data.getBytes()));
+                        interpolation(properties);
                         Map<String, String> hashtable = new Hashtable<String, String>();
                         for (Object key : properties.keySet()) {
                             String n = key.toString();
@@ -142,6 +146,22 @@ public class RepositoryImpl implements Repository {
             throw (IOException) new IOException(e.getMessage() + " : " + uri).initCause(e);
         } catch (IllegalArgumentException e) {
             throw (IOException) new IOException(e.getMessage() + " : " + uri).initCause(e);
+        }
+    }
+
+    protected void interpolation(Properties properties) {
+        for (Enumeration e = properties.propertyNames(); e.hasMoreElements();) {
+            String key = (String)e.nextElement();
+            String val = properties.getProperty(key);
+            Matcher matcher = Pattern.compile("\\$\\{([^}]+)\\}").matcher(val);
+            while (matcher.find()) {
+                String rep = System.getProperty(matcher.group(1));
+                if (rep != null) {
+                    val = val.replace(matcher.group(0), rep);
+                    matcher.reset(val);
+                }
+            }
+            properties.put(key, val);
         }
     }
 
