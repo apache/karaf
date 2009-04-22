@@ -77,7 +77,11 @@ public abstract class Util {
         final Object obj = annotation.getNamedParameter(name);
         if ( obj != null ) {
             if ( obj instanceof String ) {
-                return (String)obj;
+                final String s = (String)obj;
+                if ( s.startsWith("\"") && s.endsWith("\"")) {
+                    return s.substring(1, s.length() - 1);
+                }
+                return s;
             }
             return obj.toString();
         }
