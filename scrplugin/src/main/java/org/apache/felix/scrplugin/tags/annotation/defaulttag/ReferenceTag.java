@@ -59,19 +59,7 @@ public class ReferenceTag extends AbstractTag {
             }
 
             public ReferenceCardinality cardinality() {
-                final Object obj = annotation.getNamedParameter("cardinality");
-                if ( obj != null ) {
-                    if ( obj instanceof ReferenceCardinality ) {
-                        return (ReferenceCardinality)obj;
-                    }
-                    return ReferenceCardinality.values()[(Integer)obj];
-                }
-                try {
-                    return (ReferenceCardinality) Reference.class.getMethod("cardinality").getDefaultValue();
-                } catch( NoSuchMethodException mnfe) {
-                    // we ignore this
-                    return null;
-                }
+                return Util.getEnumValue(annotation, "cardinality", ReferenceCardinality.class, Reference.class);
             }
 
             public boolean checked() {
@@ -83,19 +71,7 @@ public class ReferenceTag extends AbstractTag {
             }
 
             public ReferencePolicy policy() {
-                final Object obj = annotation.getNamedParameter("policy");
-                if ( obj != null ) {
-                    if ( obj instanceof ReferencePolicy ) {
-                        return (ReferencePolicy)obj;
-                    }
-                    return ReferencePolicy.values()[(Integer)obj];
-                }
-                try {
-                    return (ReferencePolicy) Reference.class.getMethod("policy").getDefaultValue();
-                } catch( NoSuchMethodException mnfe) {
-                    // we ignore this
-                    return null;
-                }
+                return Util.getEnumValue(annotation, "policy", ReferencePolicy.class, Reference.class);
             }
 
             public Class<?> referenceInterface() {

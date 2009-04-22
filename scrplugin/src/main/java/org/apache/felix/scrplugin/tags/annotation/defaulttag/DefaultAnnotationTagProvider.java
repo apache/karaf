@@ -89,17 +89,17 @@ public class DefaultAnnotationTagProvider implements AnnotationTagProvider {
 
         // check for multi-annotations
         else if (annotation.getType().getJavaClass().getFullyQualifiedName().equals(Properties.class.getName())) {
-            final com.thoughtworks.qdox.model.Annotation[] properties = (com.thoughtworks.qdox.model.Annotation[])annotation.getNamedParameter("value");
+            final List<com.thoughtworks.qdox.model.Annotation> properties = (List<com.thoughtworks.qdox.model.Annotation>)annotation.getNamedParameter("value");
             for (com.thoughtworks.qdox.model.Annotation property : properties) {
                 tags.add(new PropertyTag(property, description));
             }
         } else if (annotation.getType().getJavaClass().getFullyQualifiedName().equals(Services.class.getName())) {
-            final com.thoughtworks.qdox.model.Annotation[] services = (com.thoughtworks.qdox.model.Annotation[])annotation.getNamedParameter("value");
+            final List<com.thoughtworks.qdox.model.Annotation> services = (List<com.thoughtworks.qdox.model.Annotation>)annotation.getNamedParameter("value");
             for (com.thoughtworks.qdox.model.Annotation service : services) {
                 tags.add(new ServiceTag(service, description));
             }
         } else if (annotation.getType().getJavaClass().getFullyQualifiedName().equals(References.class.getName())) {
-            final com.thoughtworks.qdox.model.Annotation[] references = (com.thoughtworks.qdox.model.Annotation[])annotation.getNamedParameter("value");
+            final List<com.thoughtworks.qdox.model.Annotation> references = (List<com.thoughtworks.qdox.model.Annotation>)annotation.getNamedParameter("value");
             for (com.thoughtworks.qdox.model.Annotation reference : references) {
                 tags.add(new ReferenceTag(reference, description, field));
             }

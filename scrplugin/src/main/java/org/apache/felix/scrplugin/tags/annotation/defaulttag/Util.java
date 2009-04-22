@@ -18,6 +18,9 @@
  */
 package org.apache.felix.scrplugin.tags.annotation.defaulttag;
 
+import java.util.EnumSet;
+import java.util.List;
+
 import org.apache.felix.scrplugin.tags.ClassUtil;
 
 import com.thoughtworks.qdox.model.Annotation;
@@ -63,7 +66,12 @@ public abstract class Util {
     public static String[] getStringValues(Annotation annotation, String name, final Class<?> clazz) {
         final Object obj = annotation.getNamedParameter(name);
         if ( obj != null ) {
-            return (String[])obj;
+            List<String> list = (List<String>)obj;
+            String[] values = new String[list.size()];
+            for (int i=0; i<values.length; i++) {
+                values[i] = stripQuotes(list.get(i));
+            }
+            return values;
         }
         try {
             return (String[]) clazz.getMethod(name).getDefaultValue();
@@ -77,11 +85,7 @@ public abstract class Util {
         final Object obj = annotation.getNamedParameter(name);
         if ( obj != null ) {
             if ( obj instanceof String ) {
-                final String s = (String)obj;
-                if ( s.startsWith("\"") && s.endsWith("\"")) {
-                    return s.substring(1, s.length() - 1);
-                }
-                return s;
+                return stripQuotes((String)obj);
             }
             return obj.toString();
         }
@@ -91,6 +95,18 @@ public abstract class Util {
             // we ignore this
             return "";
         }
+    }
+    
+    /**
+     * QDox annotations seemt to return annotation values always with quotes - remove them
+     * @param s String with our without quotes
+     * @return String without quotes
+     */
+    private static String stripQuotes(String s) {
+        if (s.startsWith("\"") && s.endsWith("\"")) {
+            return s.substring(1, s.length() - 1);
+        }
+        return s;
     }
 
     public static Class<?> getClassValue(Annotation annotation, String name, final Class<?> clazz) {
@@ -108,4 +124,30 @@ public abstract class Util {
             return null;
         }
     }
+
+    public static <T extends Enum> T getEnumValue(Annotation annotation, String name, final Class<T> enumClass, final Class<?> clazz) {
+        Object obj = annotation.getNamedParameter(name);
+        if (obj == null) {
+            try {
+                obj = clazz.getMethod(name).getDefaultValue();
+            } catch( NoSuchMethodException mnfe) {
+                // we ignore this
+            }
+        }
+        if ( obj != null ) {
+            if (enumClass.isAssignableFrom(obj.getClass())) {
+                return (T)obj;
+            }
+            else if ( obj instanceof String ) {
+                String enumName = (String)obj;
+                int dotPos = enumName.lastIndexOf('.');
+                if (dotPos >= 0) {
+                    enumName = enumName.substring(dotPos+1);
+                }
+                return Enum.valueOf(enumClass, enumName);
+            }
+        }
+        return null;
+    }
+
 }
