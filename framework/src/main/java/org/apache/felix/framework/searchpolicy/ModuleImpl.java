@@ -1263,58 +1263,30 @@ public class ModuleImpl implements IModule
             && !Proxy.class.equals(clazz);
     }
 
-    private volatile static Method getEnclosingClassMethod = null;
-    private volatile static boolean getEnclosingClassMethodInitialized = false;
-
     private static Class getEnclosingClass(Class clazz)
     {
-        if (!getEnclosingClassMethodInitialized)
+        // This code determines if the class is an inner class and if so
+        // returns the enclosing class. At one point in time this code used
+        // Class.getEnclosingClass() for JDKs > 1.5, but due to a bug in the
+        // JDK which caused  invalid ClassCircularityErrors we had to remove it.
+        int idx = clazz.getName().lastIndexOf('$');
+        if (idx > 0)
         {
-            // Check if we have the getEnclosingClass() method available from
-            // JDK 1.5.
+            ClassLoader cl = (clazz.getClassLoader() != null)
+                ? clazz.getClassLoader() : ClassLoader.getSystemClassLoader();
             try
             {
-                getEnclosingClassMethod =
-                    Class.class.getDeclaredMethod("getEnclosingClass", null);
-            }
-            catch (NoSuchMethodException ex)
-            {
-                // Ignore it then.
-            }
-            getEnclosingClassMethodInitialized = true;
-        }
-        if (getEnclosingClassMethod != null)
-        {
-            try
-            {
-                Class enclosing = (Class) getEnclosingClassMethod.invoke(clazz, null);
+                Class enclosing = cl.loadClass(clazz.getName().substring(0, idx));
                 clazz = (enclosing != null) ? enclosing : clazz;
             }
             catch (Throwable t)
             {
-                // Ignore everything and use original class.
+                // Ignore all problems since we are trying to load a class
+                // inside the class loader and this can lead to
+                // ClassCircularityError, for example.
             }
         }
-        else
-        {
-            // If we are not on JDK 1.5, try to figure out enclosing class.
-            int idx = clazz.getName().lastIndexOf('$');
-            if (idx > 0)
-            {
-                ClassLoader cl = clazz.getClassLoader() != null ? clazz.getClassLoader() : ClassLoader.getSystemClassLoader();
-                try
-                {
-                    Class enclosing = cl.loadClass(clazz.getName().substring(0, idx));
-                    clazz = (enclosing != null) ? enclosing : clazz;
-                }
-                catch (Throwable t)
-                {
-                    // Ignore all problems since we are trying to load a class
-                    // inside the class loader and this can lead to
-                    // ClassCircularityError, for example.
-                }
-            }
-        }
+
         return clazz;
     }
 
