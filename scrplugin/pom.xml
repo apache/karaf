@@ -55,6 +55,13 @@
 			<artifactId>org.osgi.compendium</artifactId>
 			<version>1.0.0</version>
 			<scope>compile</scope>
+			<exclusions>
+			  <!-- exclude foundation jar, conflicts with JDK 1.5 library classes -->
+			  <exclusion>
+			    <groupId>org.apache.felix</groupId>
+			    <artifactId>org.osgi.foundation</artifactId>
+			  </exclusion>
+			</exclusions>
 		</dependency>
 		
 		<dependency>
