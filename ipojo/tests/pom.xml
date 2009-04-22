@@ -50,6 +50,7 @@
 	<module>handler/eventadmin</module>
 	<module>core/configadmin</module>
 	<module>api</module>
+	<module>online-manipulator</module>
    </modules>
    
    <profiles>
