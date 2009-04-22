@@ -176,6 +176,9 @@ public class DirectoryWatcherTest extends TestCase
     public void testGetNewFactoryConfiguration() throws Exception
     {
         mockConfigurationControl.replay();
+        mockConfigurationAdmin.listConfigurations( null );
+        mockConfigurationAdminControl.setMatcher( MockControl.ALWAYS_MATCHER );
+        mockConfigurationAdminControl.setReturnValue( null );
         mockConfigurationAdmin.createFactoryConfiguration( "pid", null );
         mockConfigurationAdminControl.setReturnValue( mockConfiguration );
         mockConfigurationAdminControl.replay();
@@ -198,6 +201,9 @@ public class DirectoryWatcherTest extends TestCase
     public void testGetExistentFactoryConfiguration() throws Exception
     {
         mockConfigurationControl.replay();
+        mockConfigurationAdmin.listConfigurations( null );
+        mockConfigurationAdminControl.setMatcher( MockControl.ALWAYS_MATCHER );
+        mockConfigurationAdminControl.setReturnValue( null );
         mockConfigurationAdmin.createFactoryConfiguration( "pid", null );
         mockConfigurationAdminControl.setReturnValue( mockConfiguration );
         mockConfigurationAdminControl.replay();
@@ -220,6 +226,9 @@ public class DirectoryWatcherTest extends TestCase
     public void testGetExistentNoFactoryConfiguration() throws Exception
     {
         mockConfigurationControl.replay();
+        mockConfigurationAdmin.listConfigurations( null );
+        mockConfigurationAdminControl.setMatcher( MockControl.ALWAYS_MATCHER );
+        mockConfigurationAdminControl.setReturnValue( null );
         mockConfigurationAdmin.getConfiguration( "pid", null );
         mockConfigurationAdminControl.setReturnValue( mockConfiguration );
         mockConfigurationAdminControl.replay();
@@ -243,6 +252,9 @@ public class DirectoryWatcherTest extends TestCase
     {
         mockConfiguration.delete();
         mockConfigurationControl.replay();
+        mockConfigurationAdmin.listConfigurations( null );
+        mockConfigurationAdminControl.setMatcher( MockControl.ALWAYS_MATCHER );
+        mockConfigurationAdminControl.setReturnValue( null );
         mockConfigurationAdmin.getConfiguration( "pid", null );
         mockConfigurationAdminControl.setReturnValue( mockConfiguration );
         mockConfigurationAdminControl.replay();
@@ -281,6 +293,9 @@ public class DirectoryWatcherTest extends TestCase
             }
         } );
         mockConfigurationControl.replay();
+        mockConfigurationAdmin.listConfigurations( null );
+        mockConfigurationAdminControl.setMatcher( MockControl.ALWAYS_MATCHER );
+        mockConfigurationAdminControl.setReturnValue( null );
         mockConfigurationAdmin.getConfiguration( "firstcfg", null );
         mockConfigurationAdminControl.setReturnValue( mockConfiguration );
         mockConfigurationAdminControl.replay();

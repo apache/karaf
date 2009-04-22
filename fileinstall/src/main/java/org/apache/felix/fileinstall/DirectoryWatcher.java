@@ -54,7 +54,7 @@ import org.osgi.service.packageadmin.*;
  */
 public class DirectoryWatcher extends Thread
 {
-    final static String ALIAS_KEY = "_alias_factory_pid";
+	public final static String FILENAME = "felix.fileinstall.filename";
     public final static String POLL = "felix.fileinstall.poll";
     public final static String DIR = "felix.fileinstall.dir";
     public final static String DEBUG = "felix.fileinstall.debug";
@@ -66,6 +66,8 @@ public class DirectoryWatcher extends Thread
     boolean startBundles = true; // by default, we start bundles.
     BundleContext context;
     boolean reported;
+    String originatingFileName;
+    
     Map/* <String, Jar> */ currentManagedBundles = new HashMap();
 
     // Represents jars that could not be installed
@@ -74,15 +76,14 @@ public class DirectoryWatcher extends Thread
     // Represents jars that could not be installed
     Set/* <Bundle> */ startupFailures = new HashSet();
     
-    Map /*<ConfigurationKey, Configuration>*/ configurations = new HashMap();
-
     public DirectoryWatcher(Dictionary properties, BundleContext context)
     {
         super(properties.toString());
         this.context = context;
         poll = getLong(properties, POLL, poll);
         debug = getLong(properties, DEBUG, -1);
-
+        originatingFileName = ( String ) properties.get( FILENAME );
+        
         String dir = (String) properties.get(DIR);
         if (dir == null)
         {
@@ -229,6 +230,7 @@ public class DirectoryWatcher extends Thread
         String pid[] = parsePid(f.getName());
         Hashtable ht = new Hashtable();
         ht.putAll(p);
+        ht.put(FILENAME, f.getName());
         Configuration config = getConfiguration(pid[0], pid[1]);
         if (config.getBundleLocation() != null)
         {
@@ -251,7 +253,6 @@ public class DirectoryWatcher extends Thread
         String pid[] = parsePid(f.getName());
         Configuration config = getConfiguration(pid[0], pid[1]);
         config.delete();
-        configurations.remove(new ConfigurationKey(pid[0], pid[1]));
         return true;
     }
 
@@ -280,28 +281,45 @@ public class DirectoryWatcher extends Thread
     Configuration getConfiguration(String pid, String factoryPid)
         throws Exception
     {
-    	ConfigurationKey ck = new ConfigurationKey(pid, factoryPid);
-    	if (configurations.containsKey(ck))
-    	{
-    		return (Configuration) configurations.get(ck);
-    	}
-    	else
-    	{
-    		ConfigurationAdmin cm = (ConfigurationAdmin) FileInstall.cmTracker.getService();
-    		Configuration newConfiguration = null;
-    		if (factoryPid!=null)
-    		{
-    			newConfiguration = cm.createFactoryConfiguration(pid, null);
-    		}
-    		else
-    		{
-    			newConfiguration = cm.getConfiguration(pid, null);
-    		}
-    		configurations.put(ck, newConfiguration);
-    		return newConfiguration;
-    	}
+	    Configuration oldConfiguration = findExistingConfiguration( pid, factoryPid );
+        if ( oldConfiguration != null )
+        {
+            log( "Updating configuration from " + pid + ( factoryPid == null ? "" : "-" + factoryPid ) + ".cfg", null );
+            return oldConfiguration;
+        }
+        else
+        {
+            ConfigurationAdmin cm = ( ConfigurationAdmin ) FileInstall.cmTracker.getService();
+            Configuration newConfiguration = null;
+            if ( factoryPid != null )
+            {
+                newConfiguration = cm.createFactoryConfiguration( pid, null );
+            }
+            else
+            {
+                newConfiguration = cm.getConfiguration( pid, null );
+            }
+            return newConfiguration;
+        }
     }
     
+    Configuration findExistingConfiguration( String pid, String factoryPid ) throws Exception
+    {
+        String suffix = factoryPid == null ? ".cfg" : "-" + factoryPid + ".cfg";
+
+        ConfigurationAdmin cm = ( ConfigurationAdmin ) FileInstall.cmTracker.getService();
+        String filter = "(" + FILENAME + "=" + pid + suffix + ")";
+        Configuration[] configurations = cm.listConfigurations( filter );
+        if ( configurations != null && configurations.length > 0 )
+        {
+            return configurations[0];
+        }
+        else
+        {
+            return null;
+        }
+    }
+
     /**
      * This is the core of this class.
      * Install bundles that were discovered, uninstall bundles that are gone
