@@ -101,6 +101,7 @@
                             org.apache.geronimo.gshell.wisdom.command,
                             org.apache.servicemix.kernel.gshell.core,
                             org.apache.geronimo.gshell.wisdom.registry,
+                            org.springframework.beans.factory.config,
                             *
                         </Import-Package>
                         <Private-Package>!*</Private-Package>

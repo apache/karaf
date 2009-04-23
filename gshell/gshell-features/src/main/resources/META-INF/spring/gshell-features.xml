@@ -39,6 +39,10 @@
   http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
     <import resource="classpath:org/apache/servicemix/kernel/gshell/core/commands.xml" />
+    
+    <bean id="placeholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+      <property name="location" value="file:${servicemix.home}/etc/org.apache.servicemix.features.cfg"/>
+    </bean>
 
     <gshell:command-bundle>
         <gshell:command name="features/addUrl">
@@ -112,7 +116,7 @@
         <prop key="featuresBoot"></prop>
     </osgix:cm-properties>
 
-    <ctx:property-placeholder properties-ref="cmProps" />
+    <!-- <ctx:property-placeholder properties-ref="cmProps" /> -->
 
     <osgi:reference id="mbeanServer"
                     interface="javax.management.MBeanServer"
