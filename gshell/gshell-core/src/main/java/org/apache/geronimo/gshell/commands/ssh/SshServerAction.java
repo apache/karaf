@@ -44,7 +44,7 @@ public class SshServerAction
     private int port=8022;
 
     @Option(name="-b", aliases={ "--background"})
-    private boolean background;
+    private boolean background = true;
 
     private BeanContainer container;
 
