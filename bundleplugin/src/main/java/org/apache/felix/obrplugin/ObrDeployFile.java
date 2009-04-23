@@ -186,12 +186,16 @@ public final class ObrDeployFile extends AbstractFileMojo
             if ( null != bundleUrl )
             {
                 // public URL differs from the bundle file location
-                userConfig.setRemoteBundle( URI.create( bundleUrl ) );
+                URI uri = URI.create( bundleUrl );
+                log.info("Computed bundle uri: " + uri);
+                userConfig.setRemoteBundle( uri );
             }
             else if ( null != file )
             {
                 // assume file will be deployed in remote repository, so find the remote relative location
-                userConfig.setRemoteBundle( URI.create( localRepository.pathOf( project.getArtifact() ) ) );
+                URI uri = URI.create( localRepository.pathOf( project.getArtifact() ) );
+                log.info("Computed bundle uri: " + uri);
+                userConfig.setRemoteBundle( uri );
             }
 
             update = new ObrUpdate( repositoryXml, obrXmlFile, project, mavenRepository, userConfig, log );

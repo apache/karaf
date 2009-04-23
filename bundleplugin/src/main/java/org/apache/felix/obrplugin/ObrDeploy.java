@@ -231,7 +231,9 @@ public final class ObrDeploy extends AbstractMojo
             if ( bundleUrl != null )
             {
                 // public URL differs from the bundle file location
-                userConfig.setRemoteBundle( URI.create( bundleUrl ) );
+                URI uri = URI.create( bundleUrl );
+                log.info("Computed bundle uri: " + uri);
+                userConfig.setRemoteBundle( uri );
             }
             else if ( prefixUrl != null )
             {
@@ -240,7 +242,9 @@ public final class ObrDeploy extends AbstractMojo
                 String relative = ObrUtils.getRelativeURI( ObrUtils.toFileURI( mavenRepository ), bundleJar )
                     .toASCIIString();
                 URL resourceURL = new URL( new URL( prefixUrl + '/' ), relative );
-                userConfig.setRemoteBundle( URI.create( resourceURL.toString() ) );
+                URI uri = URI.create( resourceURL.toString() );
+                log.info("Computed bundle uri: " + uri);
+                userConfig.setRemoteBundle( uri );
             }
 
             update = new ObrUpdate( repositoryXml, obrXmlFile, project, mavenRepository, userConfig, log );
