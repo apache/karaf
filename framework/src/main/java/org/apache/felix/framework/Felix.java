@@ -3716,6 +3716,19 @@ ex.printStackTrace();
 
                 try
                 {
+                    // Double check to make sure that someone hasn't beaten us to
+                    // dynamically importing the package, which can happen if two
+                    // threads are racing to do so. If we have an existing wire,
+                    // then just return it instead.
+                    IWire[] wires = importer.getWires();
+                    for (int i = 0; (wires != null) && (i < wires.length); i++)
+                    {
+                        if (wires[i].hasPackage(pkgName))
+                        {
+                            return wires[i];
+                        }
+                    }
+
                     Object[] result = m_resolver.resolveDynamicImport(m_resolverState, importer, pkgName);
                     if (result != null)
                     {
@@ -3728,7 +3741,7 @@ ex.printStackTrace();
                         // Dynamically add new wire to importing module.
                         if (candidateWire != null)
                         {
-                            IWire[] wires = importer.getWires();
+                            wires = importer.getWires();
                             IWire[] newWires = null;
                             if (wires == null)
                             {
