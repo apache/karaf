@@ -23,6 +23,7 @@ import java.util.*;
 import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scrplugin.Constants;
 import org.apache.felix.scrplugin.tags.JavaClassDescription;
+import org.apache.felix.scrplugin.tags.JavaField;
 
 import com.thoughtworks.qdox.model.Annotation;
 
@@ -37,17 +38,8 @@ public class PropertyTag extends AbstractTag {
      * @param annotation Annotation
      * @param desc Description
      */
-    public PropertyTag(Property annotation, JavaClassDescription desc) {
-        super(desc, null);
-        this.annotation = annotation;
-    }
-
-    /**
-     * @param annotation Annotation
-     * @param desc Description
-     */
-    public PropertyTag(final Annotation annotation, JavaClassDescription desc) {
-        super(desc, null);
+    public PropertyTag(final Annotation annotation, final JavaClassDescription desc, JavaField field) {
+        super(desc, field);
         this.annotation = new Property() {
 
             public int cardinality() {
@@ -55,15 +47,15 @@ public class PropertyTag extends AbstractTag {
             }
 
             public String description() {
-                return Util.getStringValue(annotation, "description", Property.class);
+                return Util.getStringValue(annotation, desc, "description", Property.class);
             }
 
             public String label() {
-                return Util.getStringValue(annotation, "label", Property.class);
+                return Util.getStringValue(annotation, desc, "label", Property.class);
             }
 
             public String name() {
-                return Util.getStringValue(annotation, "name", Property.class);
+                return Util.getStringValue(annotation, desc, "name", Property.class);
             }
 
             public PropertyOption[] options() {
@@ -89,8 +81,7 @@ public class PropertyTag extends AbstractTag {
 
             public String[] value() {
                 // value property can be used as String[] or String property
-                Object obj = annotation.getNamedParameter("value");
-                return Util.getStringValues(annotation, "value", Property.class);
+                return Util.getStringValues(annotation, desc, "value", Property.class);
             }
 
             public Class<? extends java.lang.annotation.Annotation> annotationType() {

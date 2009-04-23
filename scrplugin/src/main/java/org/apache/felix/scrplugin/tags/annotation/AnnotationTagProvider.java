@@ -18,11 +18,12 @@
  */
 package org.apache.felix.scrplugin.tags.annotation;
 
-import java.lang.annotation.Annotation;
 import java.util.List;
 
 import org.apache.felix.scrplugin.tags.JavaField;
 import org.apache.felix.scrplugin.tags.JavaTag;
+
+import com.thoughtworks.qdox.model.Annotation;
 
 /**
  * Interface for provider classes, that map java annotations to {@link JavaTag}
@@ -40,15 +41,4 @@ public interface AnnotationTagProvider {
      *         cannot map the annotation to any tag instance.
      */
     List<JavaTag> getTags(Annotation pAnnotation, AnnotationJavaClassDescription description, JavaField field);
-
-    /**
-     * Maps a annotation to one or many {@link JavaTag} implementations.
-     * @param pAnnotation Java annotation
-     * @param description Annotations-based java class description
-     * @param field Reference to field (set on field-level annotations, null on
-     *            other annotations)
-     * @return List of tag implementations. Return empty list if this provider
-     *         cannot map the annotation to any tag instance.
-     */
-    List<JavaTag> getTags(com.thoughtworks.qdox.model.Annotation pAnnotation, AnnotationJavaClassDescription description, JavaField field);
 }

@@ -19,23 +19,28 @@
 package org.apache.felix.scrplugin.tags.annotation.defaulttag;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 
-import org.apache.felix.scrplugin.tags.ClassUtil;
+import org.apache.felix.scrplugin.tags.*;
+import org.apache.maven.plugin.MojoExecutionException;
 
 import com.thoughtworks.qdox.model.Annotation;
 
+/**
+ * Helper class for getting values from annotations.
+ */
 public abstract class Util {
 
+    /**
+     * Get a boolean value from an annotation.
+     * @param annotation The annotation.
+     * @param name The name of the attribute.
+     * @param clazz The annotation class.
+     * @return The boolean value.
+     */
     public static boolean getBooleanValue(Annotation annotation, String name, final Class<?> clazz) {
         final Object obj = annotation.getNamedParameter(name);
         if ( obj != null ) {
-            if ( obj instanceof String ) {
-                return Boolean.valueOf((String)obj);
-            } else if ( obj instanceof Boolean ) {
-                return (Boolean)obj;
-            }
             return Boolean.valueOf(obj.toString());
         }
         try {
@@ -64,7 +69,7 @@ public abstract class Util {
         }
     }
 
-    public static String[] getStringValues(Annotation annotation, String name, final Class<?> clazz) {
+    public static String[] getStringValues(Annotation annotation, JavaClassDescription desc, String name, final Class<?> clazz) {
         final Object obj = annotation.getNamedParameter(name);
         if ( obj != null ) {
             List<String> list;
@@ -77,7 +82,7 @@ public abstract class Util {
             }
             String[] values = new String[list.size()];
             for (int i=0; i<values.length; i++) {
-                values[i] = stripQuotes(list.get(i));
+                values[i] = stripQuotes(desc, list.get(i));
             }
             return values;
         }
@@ -89,11 +94,11 @@ public abstract class Util {
         }
     }
 
-    public static String getStringValue(Annotation annotation, String name, final Class<?> clazz) {
+    public static String getStringValue(Annotation annotation, JavaClassDescription desc, String name, final Class<?> clazz) {
         final Object obj = annotation.getNamedParameter(name);
         if ( obj != null ) {
             if ( obj instanceof String ) {
-                return stripQuotes((String)obj);
+                return stripQuotes(desc, (String)obj);
             }
             return obj.toString();
         }
@@ -104,17 +109,40 @@ public abstract class Util {
             return "";
         }
     }
-    
+
     /**
-     * QDox annotations seemt to return annotation values always with quotes - remove them
+     * QDox annotations seem to return annotation values always with quotes - remove them.
+     * If the string value does not contain a string, it's a reference to a field!
      * @param s String with our without quotes
      * @return String without quotes
      */
-    private static String stripQuotes(String s) {
-        if (s.startsWith("\"") && s.endsWith("\"")) {
-            return s.substring(1, s.length() - 1);
+    private static String stripQuotes(final JavaClassDescription desc, String s)
+    throws IllegalArgumentException {
+        try {
+            s = s.trim();
+            if (s.startsWith("\"") && s.endsWith("\"")) {
+                return s.substring(1, s.length() - 1);
+            }
+            int classSep = s.lastIndexOf('.');
+            JavaField field = null;
+            if ( classSep == -1 ) {
+                // local variable
+                field = desc.getFieldByName(s);
+            }
+            if ( field == null ) {
+                field = desc.getExternalFieldByName(s);
+            }
+            if ( field == null ) {
+                throw new IllegalArgumentException("Property references unknown field " + s + " in class " + desc.getName());
+            }
+            String[] values = field.getInitializationExpression();
+            if ( values != null && values.length == 1 ) {
+                return values[0];
+            }
+            throw new IllegalArgumentException("Something is wrong.");
+        } catch (MojoExecutionException mee) {
+            throw new IllegalArgumentException(mee);
         }
-        return s;
     }
 
     public static Class<?> getClassValue(Annotation annotation, String name, final Class<?> clazz) {
@@ -152,7 +180,8 @@ public abstract class Util {
                 if (dotPos >= 0) {
                     enumName = enumName.substring(dotPos+1);
                 }
-                return (T)Enum.valueOf(enumClass, enumName);
+                Object o = Enum.valueOf(enumClass, enumName);
+                return (T)o;
             }
         }
         return null;

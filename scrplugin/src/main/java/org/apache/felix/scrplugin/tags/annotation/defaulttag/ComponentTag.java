@@ -34,21 +34,15 @@ public class ComponentTag extends AbstractTag {
 
     protected final Component annotation;
 
-    /**
-     * @param annotation Annotation
-     * @param desc Description
-     */
-    public ComponentTag(Component annotation, JavaClassDescription desc) {
-        super(desc, null);
-        this.annotation = annotation;
-    }
+    protected final Annotation sourceAnnotation;
 
     /**
      * @param annotation Annotation
      * @param desc Description
      */
-    public ComponentTag(final Annotation annotation, JavaClassDescription desc) {
+    public ComponentTag(final Annotation annotation, final JavaClassDescription desc) {
         super(desc, null);
+        this.sourceAnnotation = annotation;
         this.annotation = new Component() {
 
             public boolean componentAbstract() {
@@ -60,7 +54,7 @@ public class ComponentTag extends AbstractTag {
             }
 
             public String description() {
-                return Util.getStringValue(annotation, "description", Component.class);
+                return Util.getStringValue(annotation, desc, "description", Component.class);
             }
 
             public boolean ds() {
@@ -72,7 +66,7 @@ public class ComponentTag extends AbstractTag {
             }
 
             public String factory() {
-                return Util.getStringValue(annotation, "factory", Component.class);
+                return Util.getStringValue(annotation, desc, "factory", Component.class);
             }
 
             public boolean immediate() {
@@ -84,7 +78,7 @@ public class ComponentTag extends AbstractTag {
             }
 
             public String label() {
-                return Util.getStringValue(annotation, "label", Component.class);
+                return Util.getStringValue(annotation, desc, "label", Component.class);
             }
 
             public boolean metatype() {
@@ -92,7 +86,7 @@ public class ComponentTag extends AbstractTag {
             }
 
             public String name() {
-                return Util.getStringValue(annotation, "name", Component.class);
+                return Util.getStringValue(annotation, desc, "name", Component.class);
             }
 
             public Class<? extends java.lang.annotation.Annotation> annotationType() {
@@ -115,7 +109,11 @@ public class ComponentTag extends AbstractTag {
         map.put(Constants.COMPONENT_DESCRIPTION, emptyToNull(this.annotation.description()));
         map.put(Constants.COMPONENT_ENABLED, String.valueOf(this.annotation.enabled()));
         map.put(Constants.COMPONENT_FACTORY, emptyToNull(this.annotation.factory()));
-        map.put(Constants.COMPONENT_IMMEDIATE, String.valueOf(this.annotation.immediate()));
+        // FELIX-593: immediate attribute does not default to true all the
+        // times hence we only set it if declared in the tag
+        if ( this.sourceAnnotation.getNamedParameter("immediate") != null) {
+            map.put(Constants.COMPONENT_IMMEDIATE, this.sourceAnnotation.getNamedParameter("immediate").toString());
+        }
         map.put(Constants.COMPONENT_INHERIT, String.valueOf(this.annotation.inherit()));
         map.put(Constants.COMPONENT_METATYPE, String.valueOf(this.annotation.metatype()));
         map.put(Constants.COMPONENT_ABSTRACT, String.valueOf(this.annotation.componentAbstract()));

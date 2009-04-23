@@ -38,24 +38,14 @@ public class ReferenceTag extends AbstractTag {
     /**
      * @param annotation Annotation
      * @param desc Description
-     * @param field Field
      */
-    public ReferenceTag(Reference annotation, JavaClassDescription desc, JavaField field) {
-        super(desc, field);
-        this.annotation = annotation;
-    }
-
-    /**
-     * @param annotation Annotation
-     * @param desc Description
-     */
-    public ReferenceTag(final Annotation annotation, JavaClassDescription desc, JavaField field) {
+    public ReferenceTag(final Annotation annotation, final JavaClassDescription desc, JavaField field) {
         super(desc, field);
 
         this.annotation = new Reference() {
 
             public String bind() {
-                return Util.getStringValue(annotation, "bind", Reference.class);
+                return Util.getStringValue(annotation, desc, "bind", Reference.class);
             }
 
             public ReferenceCardinality cardinality() {
@@ -67,7 +57,7 @@ public class ReferenceTag extends AbstractTag {
             }
 
             public String name() {
-                return Util.getStringValue(annotation, "name", Reference.class);
+                return Util.getStringValue(annotation, desc, "name", Reference.class);
             }
 
             public ReferencePolicy policy() {
@@ -79,15 +69,15 @@ public class ReferenceTag extends AbstractTag {
             }
 
             public String strategy() {
-                return Util.getStringValue(annotation, "strategy", Reference.class);
+                return Util.getStringValue(annotation, desc, "strategy", Reference.class);
             }
 
             public String target() {
-                return Util.getStringValue(annotation, "target", Reference.class);
+                return Util.getStringValue(annotation, desc, "target", Reference.class);
             }
 
             public String unbind() {
-                return Util.getStringValue(annotation, "unbind", Reference.class);
+                return Util.getStringValue(annotation, desc, "unbind", Reference.class);
             }
 
             public Class<? extends java.lang.annotation.Annotation> annotationType() {

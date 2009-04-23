@@ -39,15 +39,6 @@ public class ServiceTag extends AbstractTag {
      * @param annotation Annotation
      * @param desc Description
      */
-    public ServiceTag(Service annotation, JavaClassDescription desc) {
-        super(desc, null);
-        this.annotation = annotation;
-    }
-
-    /**
-     * @param annotation Annotation
-     * @param desc Description
-     */
     public ServiceTag(final Annotation annotation, JavaClassDescription desc) {
         super(desc, null);
         this.annotation = new Service() {

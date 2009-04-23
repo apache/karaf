@@ -18,7 +18,6 @@
  */
 package org.apache.felix.scrplugin.tags.annotation;
 
-import java.lang.annotation.Annotation;
 import java.util.*;
 
 import org.apache.felix.scrplugin.tags.*;
@@ -48,14 +47,6 @@ public class AnnotationJavaClassDescription extends QDoxJavaClassDescription {
      */
     @Override
     public JavaTag getTagByName(String name) {
-        for (Annotation annotation : this.clazz.getAnnotations()) {
-            List<JavaTag> tags = manager.getAnnotationTagProviderManager().getTags(annotation, this);
-            for (JavaTag tag : tags) {
-                if (tag.getName().equals(name)) {
-                    return tag;
-                }
-            }
-        }
         for(com.thoughtworks.qdox.model.Annotation annotation : this.javaClass.getAnnotations()) {
             List<JavaTag> tags = manager.getAnnotationTagProviderManager().getTags(annotation, this);
             for (JavaTag tag : tags) {
@@ -74,15 +65,6 @@ public class AnnotationJavaClassDescription extends QDoxJavaClassDescription {
     public JavaTag[] getTagsByName(String name, boolean inherited) throws MojoExecutionException {
 
         List<JavaTag> tags = new ArrayList<JavaTag>();
-
-        for (Annotation annotation : this.clazz.getAnnotations()) {
-            List<JavaTag> annotationTags = manager.getAnnotationTagProviderManager().getTags(annotation, this);
-            for (JavaTag tag : annotationTags) {
-                if (tag.getName().equals(name)) {
-                    tags.add(tag);
-                }
-            }
-        }
         for(com.thoughtworks.qdox.model.Annotation annotation : this.javaClass.getAnnotations()) {
             List<JavaTag> annotationTags = manager.getAnnotationTagProviderManager().getTags(annotation, this);
             for (JavaTag tag : annotationTags) {

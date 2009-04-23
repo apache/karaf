@@ -40,7 +40,7 @@ public @interface Property {
     /**
      * The name of the property
      */
-    String name();
+    String name() default "";
 
     /**
      * The label to display in a form to configure this property. This name may
@@ -61,7 +61,7 @@ public @interface Property {
      * of the value is done using the valueOf(String) method of the class
      * defined by the property type.
      */
-    String[] value();
+    String[] value() default "";
 
     /**
      * The type of the property value. This must be one of {@link String},
