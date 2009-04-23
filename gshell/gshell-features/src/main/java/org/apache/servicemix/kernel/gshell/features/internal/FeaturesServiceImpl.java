@@ -321,7 +321,11 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
     }
 
     public String[] listInstalledFeatures() {
-        return installed.keySet().toArray(new String[installed.size()]);
+        List<String> result = new ArrayList<String>();
+        for (Feature feature : installed.keySet()) {
+            result.add(feature.getName());
+        }
+        return result.toArray(new String[result.size()]);
     }
 
     protected Feature getFeature(String name, String version) throws Exception {

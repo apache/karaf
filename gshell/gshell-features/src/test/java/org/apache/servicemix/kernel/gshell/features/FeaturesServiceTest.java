@@ -125,6 +125,10 @@ public class FeaturesServiceTest extends TestCase {
         replay(preferencesService, prefs, repositoriesNode, featuresNode, bundleContext, installedBundle);
 
         svc.installFeature("f1");
+        
+        String[] installed = svc.listInstalledFeatures();
+        assertEquals(1, installed.length);
+        assertEquals("f1", installed[0]);
     }
 
     public void testUninstallFeature() throws Exception {
