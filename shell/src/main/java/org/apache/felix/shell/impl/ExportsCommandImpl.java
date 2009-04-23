@@ -78,13 +78,20 @@ public class ExportsCommandImpl implements Command
                 {
                     long l = Long.parseLong(id);
                     Bundle bundle = m_context.getBundle(l);
-                    ExportedPackage[] exports = pa.getExportedPackages(bundle);
-                    if (separatorNeeded)
+                    if (bundle != null)
                     {
-                        out.println("");
+                        ExportedPackage[] exports = pa.getExportedPackages(bundle);
+                        if (separatorNeeded)
+                        {
+                            out.println("");
+                        }
+                        printExports(out, bundle, exports);
+                        separatorNeeded = true;
                     }
-                    printExports(out, bundle, exports);
-                    separatorNeeded = true;
+                    else
+                    {
+                        err.println("Bundle ID " + id + " is invalid.");
+                    }
                 }
                 catch (NumberFormatException ex)
                 {

@@ -78,18 +78,25 @@ public class RequirersCommandImpl implements Command
                 {
                     long l = Long.parseLong(id);
                     Bundle bundle = m_context.getBundle(l);
-                    RequiredBundle[] rbs = pa.getRequiredBundles(bundle.getSymbolicName());
-                    for (int i = 0; (rbs != null) && (i < rbs.length); i++)
+                    if (bundle != null)
                     {
-                        if (rbs[i].getBundle() == bundle)
+                        RequiredBundle[] rbs = pa.getRequiredBundles(bundle.getSymbolicName());
+                        for (int i = 0; (rbs != null) && (i < rbs.length); i++)
                         {
-                            if (separatorNeeded)
+                            if (rbs[i].getBundle() == bundle)
                             {
-                                out.println("");
+                                if (separatorNeeded)
+                                {
+                                    out.println("");
+                                }
+                                printRequiredBundles(out, bundle, rbs[i].getRequiringBundles());
+                                separatorNeeded = true;
                             }
-                            printRequiredBundles(out, bundle, rbs[i].getRequiringBundles());
-                            separatorNeeded = true;
                         }
+                    }
+                    else
+                    {
+                        err.println("Bundle ID " + id + " is invalid.");
                     }
                 }
                 catch (NumberFormatException ex)
