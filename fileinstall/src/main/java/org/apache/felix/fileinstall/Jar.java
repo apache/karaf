@@ -18,12 +18,11 @@
  */
 package org.apache.felix.fileinstall;
 
-import org.osgi.framework.Bundle;
-
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import org.osgi.framework.Bundle;
 
 /**
  * This class is used to cache vital information of a jar file

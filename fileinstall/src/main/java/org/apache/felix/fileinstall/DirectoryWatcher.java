@@ -94,7 +94,7 @@ public class DirectoryWatcher extends Thread
         Object value = properties.get(START_NEW_BUNDLES);
         if (value != null)
         {
-            startBundles = Boolean.parseBoolean((String) value);
+            startBundles = "true".equalsIgnoreCase((String)value);
         }
     }
 

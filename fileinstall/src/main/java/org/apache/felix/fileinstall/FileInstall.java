@@ -68,7 +68,7 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory
         Object o = context.getProperty(key);
         if (o == null)
         {
-            o = System.getenv(key.toUpperCase().replaceAll(".", "_"));
+           o = System.getProperty(key.toUpperCase().replace('.', '_'));
             if (o == null)
             {
                 return;
