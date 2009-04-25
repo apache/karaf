@@ -24,41 +24,29 @@ import org.osgi.framework.BundleContext;
  */
 public class Activator implements BundleActivator
 {
-    private static ServiceMediator c_services;
+    private ServiceMediator m_services;
     private Listener m_listener;
 
-    public void start(BundleContext bundleContext) throws Exception
+    public void start(BundleContext context) throws Exception
     {
         //1. Prepare mediator
-        c_services = new ServiceMediator();
-        c_services.activate(bundleContext);
+        m_services = new ServiceMediator(context);
 
         //2. Prepare the listener
-        m_listener = new Listener();
-        m_listener.activate(bundleContext);
+        m_listener = new Listener(context, m_services);
     }
 
-    public void stop(BundleContext bundleContext) throws Exception
+    public void stop(BundleContext context) throws Exception
     {
         if (m_listener != null)
         {
             m_listener.deactivate();
             m_listener = null;
         }
-        if (c_services != null)
+        if (m_services != null)
         {
-            c_services.deactivate();
-            c_services = null;
+            m_services.deactivate();
+            m_services = null;
         }
-    }
-
-    /**
-     * Returns a reference to the {@link ServiceMediator} instance used in this bundle.
-     *
-     * @return a {@link ServiceMediator} instance.
-     */
-    static ServiceMediator getServices()
-    {
-        return c_services;
     }
 }

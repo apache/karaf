@@ -25,17 +25,42 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Implements a mediator pattern class for services from the OSGi container.
  */
 class ServiceMediator
 {
-    private BundleContext m_bundleContext;
-    private ShellService m_felixShellService;
-    private Latch m_felixShellServiceLatch;
-    private LogService m_logService;
-    private Latch m_logServiceLatch;
+    private final String m_bundleName;
+    private final long m_bundleId;
+    private final BundleContext m_context;
+    private final ServiceTracker m_logTracker;
+    private final ServiceTracker m_shellTracker;
+
+    ServiceMediator(BundleContext context)
+    {
+        m_context = context;
+        m_bundleName = (m_context.getBundle().getSymbolicName() == null)
+            ? m_context.getBundle().getLocation()
+            : m_context.getBundle().getSymbolicName();
+        m_bundleId = m_context.getBundle().getBundleId();
+        ServiceTracker logTracker = null;
+        try
+        {
+            logTracker = new ServiceTracker(m_context, LogService.class.getName(), null);
+            logTracker.open();
+        }
+        catch (Throwable ex)
+        {
+            // This means we don't have access to the log service package since it
+            // is optional, so don't track log services.
+            logTracker = null;
+        }
+        m_logTracker = logTracker;
+        m_shellTracker = new ServiceTracker(m_context, ShellService.class.getName(), null);
+        m_shellTracker.open();
+    }
 
     /**
      * Returns a reference to the <tt>ShellService</tt> (Felix).
@@ -45,15 +70,16 @@ class ServiceMediator
      */
     public ShellService getFelixShellService(long wait)
     {
+        ShellService shell = null;
         try
         {
             if (wait < 0)
             {
-                m_felixShellServiceLatch.acquire();
+                shell = (ShellService) m_shellTracker.getService();
             }
-            else if (wait > 0)
+            else
             {
-                m_felixShellServiceLatch.attempt(wait);
+                shell = (ShellService) m_shellTracker.waitForService(wait);
             }
         }
         catch (InterruptedException e)
@@ -61,34 +87,39 @@ class ServiceMediator
             e.printStackTrace(System.err);
         }
 
-        return m_felixShellService;
+        return shell;
     }//getFelixShellService
 
-    public LogService getLogServiceLatch(long wait)
+    public Object getLogServiceLatch(long wait)
     {
-        try
+        Object log = null;
+        if (m_logTracker != null)
         {
-            if (wait < 0)
+            try
             {
-                m_logServiceLatch.acquire();
+                if (wait < 0)
+                {
+                    log = m_logTracker.getService();
+                }
+                else
+                {
+                    log = m_logTracker.waitForService(wait);
+                }
             }
-            else if (wait > 0)
+            catch (InterruptedException e)
             {
-                m_logServiceLatch.attempt(wait);
+                e.printStackTrace(System.err);
             }
         }
-        catch (InterruptedException e)
-        {
-            e.printStackTrace(System.err);
-        }
-        return m_logService;
+        return log;
     }//getLogService
 
     public void info(String msg)
     {
-        if (m_logService != null)
+        Object log = getLogServiceLatch(NO_WAIT);
+        if (log != null)
         {
-            m_logService.log(LogService.LOG_INFO, msg);
+            ((LogService) log).log(LogService.LOG_INFO, msg);
         }
         else
         {
@@ -98,9 +129,10 @@ class ServiceMediator
 
     public void error(String msg, Throwable t)
     {
-        if (m_logService != null)
+        Object log = getLogServiceLatch(NO_WAIT);
+        if (log != null)
         {
-            m_logService.log(LogService.LOG_ERROR, msg, t);
+            ((LogService) log).log(LogService.LOG_ERROR, msg);
         }
         else
         {
@@ -110,9 +142,10 @@ class ServiceMediator
 
     public void error(String msg)
     {
-        if (m_logService != null)
+        Object log = getLogServiceLatch(NO_WAIT);
+        if (log != null)
         {
-            m_logService.log(LogService.LOG_ERROR, msg);
+            ((LogService) log).log(LogService.LOG_ERROR, msg);
         }
         else
         {
@@ -122,9 +155,10 @@ class ServiceMediator
 
     public void debug(String msg)
     {
-        if (m_logService != null)
+        Object log = getLogServiceLatch(NO_WAIT);
+        if (log != null)
         {
-            m_logService.log(LogService.LOG_DEBUG, msg);
+            ((LogService) log).log(LogService.LOG_DEBUG, msg);
         }
         else
         {
@@ -134,9 +168,10 @@ class ServiceMediator
 
     public void warn(String msg)
     {
-        if (m_logService != null)
+        Object log = getLogServiceLatch(NO_WAIT);
+        if (log != null)
         {
-            m_logService.log(LogService.LOG_WARNING, msg);
+            ((LogService) log).log(LogService.LOG_WARNING, msg);
         }
         else
         {
@@ -148,10 +183,9 @@ class ServiceMediator
     {
         //Assemble String
         StringBuffer sbuf = new StringBuffer();
-        Bundle b = m_bundleContext.getBundle();
-        sbuf.append(b.getHeaders().get(Constants.BUNDLE_NAME));
+        sbuf.append(m_bundleName);
         sbuf.append(" [");
-        sbuf.append(b.getBundleId());
+        sbuf.append(m_bundleId);
         sbuf.append("] ");
         sbuf.append(msg);
         System.out.println(sbuf.toString());
@@ -161,10 +195,9 @@ class ServiceMediator
     {
         //Assemble String
         StringBuffer sbuf = new StringBuffer();
-        Bundle b = m_bundleContext.getBundle();
-        sbuf.append(b.getHeaders().get(Constants.BUNDLE_NAME));
+        sbuf.append(m_bundleName);
         sbuf.append(" [");
-        sbuf.append(b.getBundleId());
+        sbuf.append(m_bundleId);
         sbuf.append("] ");
         sbuf.append(msg);
         System.err.println(sbuf.toString());
@@ -175,136 +208,19 @@ class ServiceMediator
     }//logToSystem
 
     /**
-     * Activates this mediator to start tracking the required services using the
-     * OSGi service layer.
-     *
-     * @param bc the bundle's context.
-     * @return true if activated successfully, false otherwise.
-     */
-    public boolean activate(BundleContext bc)
-    {
-        //get the context
-        m_bundleContext = bc;
-
-        m_felixShellServiceLatch = createWaitLatch();
-        m_logServiceLatch = createWaitLatch();
-
-        //prepareDefinitions listener
-        ServiceListener serviceListener = new ServiceListenerImpl();
-
-        //prepareDefinitions the filter, ShellService is required,
-        //LogService may be missing, in which case we only use the
-        // ShellService part of the filter
-        String filter = "(objectclass=" + ShellService.class.getName() + ")";
-        try
-        {
-            filter = "(|" + filter + "(objectclass=" + LogService.class.getName() + "))";
-        }
-        catch (Throwable t)
-        {
-            // ignore
-        }
-
-        try
-        {
-            //add the listener to the bundle context.
-            bc.addServiceListener(serviceListener, filter);
-
-            //ensure that already registered Service instances are registered with
-            //the manager
-            ServiceReference[] srl = bc.getServiceReferences(null, filter);
-            for (int i = 0; srl != null && i < srl.length; i++)
-            {
-                serviceListener.serviceChanged(new ServiceEvent(ServiceEvent.REGISTERED, srl[i]));
-            }
-        }
-        catch (InvalidSyntaxException ex)
-        {
-            ex.printStackTrace(System.err);
-            return false;
-        }
-        return true;
-    }//activate
-
-    /**
      * Deactivates this mediator, nulling out all references.
      * If called when the bundle is stopped, the framework should actually take
      * care of unregistering the <tt>ServiceListener</tt>.
      */
     public void deactivate()
     {
-        m_felixShellService = null;
-        m_felixShellServiceLatch = null;
-        m_bundleContext = null;
+        if (m_logTracker != null)
+        {
+            m_logTracker.close();
+        }
+        m_shellTracker.close();
     }//deactivate
 
-    /**
-     * Creates a simple wait latch to be used for the mechanism that allows entities
-     * in the bundles to wait for references.
-     *
-     * @return a new Latch instance.
-     */
-    private Latch createWaitLatch()
-    {
-        return new Latch();
-    }//createWaitLatch
-
-    /**
-     * The <tt>ServiceListener</tt> implementation.
-     */
-    private class ServiceListenerImpl implements ServiceListener
-    {
-        public void serviceChanged(ServiceEvent ev)
-        {
-            ServiceReference sr = ev.getServiceReference();
-            Object o = null;
-            switch (ev.getType())
-            {
-                case ServiceEvent.REGISTERED:
-                    o = m_bundleContext.getService(sr);
-                    if (o == null)
-                    {
-                        return;
-                    }
-                    else if (o instanceof ShellService)
-                    {
-                        m_felixShellService = (ShellService) o;
-                        m_felixShellServiceLatch.release();
-                    }
-                    else if (o instanceof LogService)
-                    {
-                        m_logService = (LogService) o;
-                        m_logServiceLatch.release();
-                    }
-                    else
-                    {
-                        m_bundleContext.ungetService(sr);
-                    }
-                    break;
-                case ServiceEvent.UNREGISTERING:
-                    o = m_bundleContext.getService(sr);
-                    if (o == null)
-                    {
-                        return;
-                    }
-                    else if (o instanceof ShellService)
-                    {
-                        m_felixShellService = null;
-                        m_felixShellServiceLatch = createWaitLatch();
-                    }
-                    else if (o instanceof LogService)
-                    {
-                        m_logService = null;
-                        m_logServiceLatch = createWaitLatch();
-                    }
-                    else
-                    {
-                        m_bundleContext.ungetService(sr);
-                    }
-                    break;
-            }
-        }
-    }//inner class ServiceListenerImpl
-    public static long WAIT_UNLIMITED = -1;
-    public static long NO_WAIT = 0;
+    public static long WAIT_UNLIMITED = 0;
+    public static long NO_WAIT = -1;
 }//class ServiceMediator

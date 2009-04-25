@@ -37,9 +37,10 @@ import org.apache.felix.shell.ShellService;
  */
 class Shell implements Runnable
 {
-    private Listener m_owner;
-    private Socket m_socket;
-    private AtomicInteger m_useCounter;
+    private final Listener m_owner;
+    private final Socket m_socket;
+    private final AtomicInteger m_useCounter;
+    private volatile TerminalPrintStream m_out;
 
     public Shell(Listener owner, Socket s, AtomicInteger counter)
     {
@@ -63,27 +64,29 @@ class Shell implements Runnable
 
         try
         {
-            PrintStream out = new TerminalPrintStream(m_socket.getOutputStream());
-            BufferedReader in = new BufferedReader(new TerminalReader(m_socket.getInputStream(), out));
+            m_out = new TerminalPrintStream(
+                m_owner.getServices(), m_socket.getOutputStream());
+            BufferedReader in = new BufferedReader(
+                new TerminalReader(m_socket.getInputStream(), m_out));
             ReentrantLock lock = new ReentrantLock();
 
             // Print welcome banner.
-            out.println();
-            out.println("Felix Remote Shell Console:");
-            out.println("============================");
-            out.println("");
+            m_out.println();
+            m_out.println("Felix Remote Shell Console:");
+            m_out.println("============================");
+            m_out.println("");
 
             do
             {
-                out.print("-> ");
                 String line = "";
                 try
                 {
+                    m_out.print("-> ");
                     line = in.readLine();
                     //make sure to capture end of stream
                     if (line == null)
                     {
-                        out.println("exit");
+                        m_out.println("exit");
                         return;
                     }
                 }
@@ -98,15 +101,15 @@ class Shell implements Runnable
                     return;
                 }
 
-                ShellService shs = Activator.getServices().getFelixShellService(ServiceMediator.NO_WAIT);
+                ShellService shs = m_owner.getServices().getFelixShellService(ServiceMediator.NO_WAIT);
                 try
                 {
                     lock.acquire();
-                    shs.executeCommand(line, out, out);
+                    shs.executeCommand(line, m_out, m_out);
                 }
                 catch (Exception ex)
                 {
-                    Activator.getServices().error("Shell::run()", ex);
+                    m_owner.getServices().error("Shell::run()", ex);
                 }
                 finally
                 {
@@ -117,7 +120,7 @@ class Shell implements Runnable
         }
         catch (IOException ex)
         {
-            Activator.getServices().error("Shell::run()", ex);
+            m_owner.getServices().error("Shell::run()", ex);
         }
         finally
         {
@@ -129,20 +132,12 @@ class Shell implements Runnable
     private void exit(String message)
     {
         // farewell message
-        try
+        if (message != null)
         {
-            PrintStream out = new TerminalPrintStream(m_socket.getOutputStream());
-            if (message != null)
-            {
-                out.println(message);
-            }
-            out.println("Good Bye!");
-            out.close();
+            m_out.println(message);
         }
-        catch (IOException ioe)
-        {
-            // ignore
-        }
+        m_out.println("Good Bye!");
+        m_out.close();
 
         try
         {
@@ -150,7 +145,7 @@ class Shell implements Runnable
         }
         catch (IOException ex)
         {
-            Activator.getServices().error("Shell::exit()", ex);
+            m_owner.getServices().error("Shell::exit()", ex);
         }
         m_owner.unregisterConnection(this);
         m_useCounter.decrement();

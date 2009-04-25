@@ -19,20 +19,25 @@ package org.apache.felix.shell.remote;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.SocketException;
 
 /**
  * Class implementing a <tt>TerminalPrintStream</tt>.
  */
 class TerminalPrintStream extends PrintStream
 {
+    private final ServiceMediator m_services;
+    private volatile boolean m_isClosed = false;
+
     /**
      * Constructs a new instance wrapping the given <tt>OutputStream</tt>.
      *
      * @param tout the <tt>OutputStream</tt> to be wrapped.
      */
-    public TerminalPrintStream(OutputStream tout)
+    public TerminalPrintStream(ServiceMediator services, OutputStream tout)
     {
         super(tout);
+        m_services = services;
     }//constructor
 
     public void print(String str)
@@ -43,9 +48,12 @@ class TerminalPrintStream extends PrintStream
             out.write(bytes, 0, bytes.length);
             flush();
         }
-        catch (IOException ex)
+        catch (Exception ex)
         {
-            Activator.getServices().error("TerminalPrintStream::print()", ex);
+            if (!m_isClosed)
+            {
+                m_services.error("TerminalPrintStream::print()", ex);
+            }
         }
     }//print
 
@@ -62,7 +70,13 @@ class TerminalPrintStream extends PrintStream
         }
         catch (IOException ex)
         {
-            Activator.getServices().error("TerminalPrintStream::println()", ex);
+            m_services.error("TerminalPrintStream::println()", ex);
         }
     }//flush
+
+    public void close()
+    {
+        m_isClosed = true;
+        super.close();
+    }
 }//class TerminalPrintStream

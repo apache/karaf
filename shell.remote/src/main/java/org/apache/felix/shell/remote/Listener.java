@@ -33,31 +33,37 @@ import org.osgi.framework.BundleContext;
  */
 class Listener
 {
-    private int m_port;
-    private String m_ip;
-    private Thread m_listenerThread;
-    private boolean m_stop = false;
-    private ServerSocket m_serverSocket;
-    private AtomicInteger m_useCounter;
-    private int m_maxConnections;
-    private int m_soTimeout;
-    private Set m_connections;
+    private final int m_port;
+    private final String m_ip;
+    private final Thread m_listenerThread;
+    private final Acceptor m_acceptor;
+    private final AtomicInteger m_useCounter;
+    private final int m_maxConnections;
+    private final int m_soTimeout;
+    private final Set m_connections;
+    private final ServiceMediator m_services;
 
     /**
      * Activates this listener on a listener thread (telnetconsole.Listener).
      */
-    public void activate(BundleContext bundleContext)
+    public Listener(BundleContext context, ServiceMediator services) throws IOException
     {
+        m_services = services;
         //configure from framework property
-        m_ip = getProperty(bundleContext, "osgi.shell.telnet.ip", "127.0.0.1");
-        m_port = getProperty(bundleContext, "osgi.shell.telnet.port", 6666);
-        m_soTimeout = getProperty(bundleContext, "osgi.shell.telnet.socketTimeout", 0);
-        m_maxConnections = getProperty(bundleContext, "osgi.shell.telnet.maxconn", 2);
+        m_ip = getProperty(context, "osgi.shell.telnet.ip", "127.0.0.1");
+        m_port = getProperty(context, "osgi.shell.telnet.port", 6666);
+        m_soTimeout = getProperty(context, "osgi.shell.telnet.socketTimeout", 0);
+        m_maxConnections = getProperty(context, "osgi.shell.telnet.maxconn", 2);
         m_useCounter = new AtomicInteger(0);
         m_connections = new HashSet();
-        m_listenerThread = new Thread(new Acceptor(), "telnetconsole.Listener");
+        m_acceptor = new Acceptor();
+        m_listenerThread = new Thread(m_acceptor, "telnetconsole.Listener");
         m_listenerThread.start();
     }//activate
+    public ServiceMediator getServices()
+    {
+        return m_services;
+    }
 
     /**
      * Deactivates this listener.
@@ -70,14 +76,13 @@ class Listener
     {
         try
         {
-            m_stop = true;
             //wait for the listener thread
-            m_serverSocket.close();
+            m_acceptor.close();
             m_listenerThread.join();
         }
         catch (Exception ex)
         {
-            Activator.getServices().error("Listener::deactivate()", ex);
+            m_services.error("Listener::deactivate()", ex);
         }
 
         // get the active connections (and clear the list)
@@ -103,6 +108,21 @@ class Listener
      */
     private class Acceptor implements Runnable
     {
+        private volatile boolean m_stop = false;
+        private final ServerSocket m_serverSocket;
+
+        Acceptor() throws IOException
+        {
+            m_serverSocket = new ServerSocket(m_port, 1, InetAddress.getByName(m_ip));
+            m_serverSocket.setSoTimeout(m_soTimeout);
+        }
+
+        public void close() throws IOException
+        {
+            m_stop = true;
+            m_serverSocket.close();
+        }
+
         /**
          * Listens constantly to a server socket and handles incoming connections.
          * One connection will be accepted and routed into the shell, all others will
@@ -122,8 +142,6 @@ class Listener
                 should be handled properly, but denial of service attacks via massive parallel
                 program logins should be prevented with this.
                  */
-                m_serverSocket = new ServerSocket(m_port, 1, InetAddress.getByName(m_ip));
-                m_serverSocket.setSoTimeout(m_soTimeout);
                 do
                 {
                     try
@@ -161,7 +179,7 @@ class Listener
             }
             catch (IOException e)
             {
-                Activator.getServices().error("Listener.Acceptor::activate()", e);
+                m_services.error("Listener.Acceptor::run()", e);
             }
         }//run
     }//inner class Acceptor
@@ -179,7 +197,7 @@ class Listener
             }
             catch (NumberFormatException ex)
             {
-                Activator.getServices().error("Listener::activate()", ex);
+                m_services.error("Listener::activate()", ex);
             }
         }
 
