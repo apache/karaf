@@ -1,21 +1,20 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.felix.shell.remote;
-
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,7 +22,6 @@ import java.io.PrintStream;
 import java.net.Socket;
 
 import org.apache.felix.shell.ShellService;
-
 
 /**
  * Implements the shell.
@@ -39,126 +37,122 @@ import org.apache.felix.shell.ShellService;
  */
 class Shell implements Runnable
 {
-
     private Listener m_owner;
-    private Socket m_Socket;
-    private AtomicInteger m_UseCounter;
+    private Socket m_socket;
+    private AtomicInteger m_useCounter;
 
-
-    public Shell( Listener owner, Socket s, AtomicInteger counter )
+    public Shell(Listener owner, Socket s, AtomicInteger counter)
     {
         m_owner = owner;
-        m_Socket = s;
-        m_UseCounter = counter;
+        m_socket = s;
+        m_useCounter = counter;
     }//constructor
 
     void terminate()
     {
         // called by Listener.deactivate() to terminate this session
-        exit( "\r\nFelix Remote Shell Console Terminating" );
+        exit("\r\nFelix Remote Shell Console Terminating");
     }//terminate
-    
+
     /**
      * Runs the shell.
      */
     public void run()
     {
-        m_owner.registerConnection( this );
-        
+        m_owner.registerConnection(this);
+
         try
         {
-            PrintStream out = new TerminalPrintStream( m_Socket.getOutputStream() );
-            BufferedReader in = new BufferedReader( new TerminalReader( m_Socket.getInputStream(), out ) );
+            PrintStream out = new TerminalPrintStream(m_socket.getOutputStream());
+            BufferedReader in = new BufferedReader(new TerminalReader(m_socket.getInputStream(), out));
             ReentrantLock lock = new ReentrantLock();
 
             // Print welcome banner.
             out.println();
-            out.println( "Felix Remote Shell Console:" );
-            out.println( "============================" );
-            out.println( "" );
+            out.println("Felix Remote Shell Console:");
+            out.println("============================");
+            out.println("");
 
             do
             {
-                out.print( "-> " );
+                out.print("-> ");
                 String line = "";
                 try
                 {
                     line = in.readLine();
                     //make sure to capture end of stream
-                    if ( line == null )
+                    if (line == null)
                     {
-                        out.println( "exit" );
+                        out.println("exit");
                         return;
                     }
                 }
-                catch ( Exception ex )
+                catch (Exception ex)
                 {
                     return;
                 }
 
                 line = line.trim();
-                if ( line.equalsIgnoreCase( "exit" ) || line.equalsIgnoreCase( "disconnect" ) )
+                if (line.equalsIgnoreCase("exit") || line.equalsIgnoreCase("disconnect"))
                 {
                     return;
                 }
 
-                ShellService shs = Activator.getServices().getFelixShellService( ServiceMediator.NO_WAIT );
+                ShellService shs = Activator.getServices().getFelixShellService(ServiceMediator.NO_WAIT);
                 try
                 {
                     lock.acquire();
-                    shs.executeCommand( line, out, out );
+                    shs.executeCommand(line, out, out);
                 }
-                catch ( Exception ex )
+                catch (Exception ex)
                 {
-                    Activator.getServices().error( "Shell::run()", ex );
+                    Activator.getServices().error("Shell::run()", ex);
                 }
                 finally
                 {
                     lock.release();
                 }
             }
-            while ( true );
+            while (true);
         }
-        catch ( IOException ex )
+        catch (IOException ex)
         {
-            Activator.getServices().error( "Shell::run()", ex );
+            Activator.getServices().error("Shell::run()", ex);
         }
         finally
         {
             // no need to clean up in/out, since exit does it all
-            exit( null );
+            exit(null);
         }
     }//run
-
 
     private void exit(String message)
     {
         // farewell message
         try
         {
-            PrintStream out = new TerminalPrintStream( m_Socket.getOutputStream() );
-            if ( message != null )
+            PrintStream out = new TerminalPrintStream(m_socket.getOutputStream());
+            if (message != null)
             {
-                out.println( message );
+                out.println(message);
             }
-            out.println( "Good Bye!" );
+            out.println("Good Bye!");
             out.close();
         }
-        catch ( IOException ioe )
+        catch (IOException ioe)
         {
             // ignore
         }
 
         try
         {
-            m_Socket.close();
+            m_socket.close();
         }
-        catch ( IOException ex )
+        catch (IOException ex)
         {
-            Activator.getServices().error( "Shell::exit()", ex );
+            Activator.getServices().error("Shell::exit()", ex);
         }
-        m_owner.unregisterConnection( this );
-        m_UseCounter.decrement();
+        m_owner.unregisterConnection(this);
+        m_useCounter.decrement();
     }//exit
-
 }//class Shell

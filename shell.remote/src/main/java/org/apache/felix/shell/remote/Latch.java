@@ -1,21 +1,20 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.felix.shell.remote;
-
 
 /**
  * A latch is a boolean condition that is set at most once, ever.
@@ -48,71 +47,78 @@ package org.apache.felix.shell.remote;
  */
 class Latch
 {
-
-    protected boolean latched_ = false;
-
+    private boolean m_latched = false;
 
     /*
-      This could use double-check, but doesn't.
-      If the latch is being used as an indicator of
-      the presence or state of an object, the user would
-      not necessarily get the memory barrier that comes with synch
-      that would be needed to correctly use that object. This
-      would lead to errors that users would be very hard to track down. So, to
-      be conservative, we always use synch.
-    */
-
+    This could use double-check, but doesn't.
+    If the latch is being used as an indicator of
+    the presence or state of an object, the user would
+    not necessarily get the memory barrier that comes with synch
+    that would be needed to correctly use that object. This
+    would lead to errors that users would be very hard to track down. So, to
+    be conservative, we always use synch.
+     */
     public void acquire() throws InterruptedException
     {
-        if ( Thread.interrupted() )
-            throw new InterruptedException();
-        synchronized ( this )
+        if (Thread.interrupted())
         {
-            while ( !latched_ )
+            throw new InterruptedException();
+        }
+        synchronized (this)
+        {
+            while (!m_latched)
+            {
                 wait();
+            }
         }
     }//acquire
 
-
-    public boolean attempt( long msecs ) throws InterruptedException
+    public boolean attempt(long msecs) throws InterruptedException
     {
-        if ( Thread.interrupted() )
-            throw new InterruptedException();
-        synchronized ( this )
+        if (Thread.interrupted())
         {
-            if ( latched_ )
+            throw new InterruptedException();
+        }
+        synchronized (this)
+        {
+            if (m_latched)
+            {
                 return true;
-            else if ( msecs <= 0 )
+            }
+            else if (msecs <= 0)
+            {
                 return false;
+            }
             else
             {
                 long waitTime = msecs;
                 long start = System.currentTimeMillis();
-                for ( ;; )
+                for (;;)
                 {
-                    wait( waitTime );
-                    if ( latched_ )
+                    wait(waitTime);
+                    if (m_latched)
+                    {
                         return true;
+                    }
                     else
                     {
-                        waitTime = msecs - ( System.currentTimeMillis() - start );
-                        if ( waitTime <= 0 )
+                        waitTime = msecs - (System.currentTimeMillis() - start);
+                        if (waitTime <= 0)
+                        {
                             return false;
+                        }
                     }
                 }
             }
         }
     }//attempt
 
-
     /**
      * Enable all current and future acquires to pass *
      */
     public synchronized void release()
     {
-        latched_ = true;
+        m_latched = true;
         notifyAll();
     }//release
-
 }//class Latch
-

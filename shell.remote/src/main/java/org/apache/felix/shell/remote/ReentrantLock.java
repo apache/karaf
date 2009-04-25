@@ -1,21 +1,20 @@
 /*
-* Licensed to the Apache Software Foundation (ASF) under one or more
-* contributor license agreements.  See the NOTICE file distributed with
-* this work for additional information regarding copyright ownership.
-* The ASF licenses this file to You under the Apache License, Version 2.0
-* (the "License"); you may not use this file except in compliance with
-* the License.  You may obtain a copy of the License at
-*
-*      http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.felix.shell.remote;
-
 
 /**
  * Implements a reentrant lock.
@@ -24,31 +23,35 @@ package org.apache.felix.shell.remote;
  */
 class ReentrantLock
 {
-
-    protected Thread m_Owner = null;
-    protected long m_Holds = 0;
-
+    protected Thread m_owner = null;
+    protected long m_holds = 0;
 
     public void acquire() throws InterruptedException
     {
         //log.debug("acquire()::" + Thread.currentThread().toString());
-        if ( Thread.interrupted() )
-            throw new InterruptedException();
-        Thread caller = Thread.currentThread();
-        synchronized ( this )
+        if (Thread.interrupted())
         {
-            if ( caller == m_Owner )
-                ++m_Holds;
+            throw new InterruptedException();
+        }
+        Thread caller = Thread.currentThread();
+        synchronized (this)
+        {
+            if (caller == m_owner)
+            {
+                ++m_holds;
+            }
             else
             {
                 try
                 {
-                    while ( m_Owner != null )
+                    while (m_owner != null)
+                    {
                         wait();
-                    m_Owner = caller;
-                    m_Holds = 1;
+                    }
+                    m_owner = caller;
+                    m_holds = 1;
                 }
-                catch ( InterruptedException ex )
+                catch (InterruptedException ex)
                 {
                     notify();
                     throw ex;
@@ -57,57 +60,62 @@ class ReentrantLock
         }
     }//acquire
 
-
-    public boolean attempt( long msecs ) throws InterruptedException
+    public boolean attempt(long msecs) throws InterruptedException
     {
         //log.debug("attempt()::" + Thread.currentThread().toString());
-        if ( Thread.interrupted() )
-            throw new InterruptedException();
-        Thread caller = Thread.currentThread();
-        synchronized ( this )
+        if (Thread.interrupted())
         {
-            if ( caller == m_Owner )
+            throw new InterruptedException();
+        }
+        Thread caller = Thread.currentThread();
+        synchronized (this)
+        {
+            if (caller == m_owner)
             {
-                ++m_Holds;
+                ++m_holds;
                 return true;
             }
-            else if ( m_Owner == null )
+            else if (m_owner == null)
             {
-                m_Owner = caller;
-                m_Holds = 1;
+                m_owner = caller;
+                m_holds = 1;
                 return true;
             }
-            else if ( msecs <= 0 )
+            else if (msecs <= 0)
+            {
                 return false;
+            }
             else
             {
                 long waitTime = msecs;
                 long start = System.currentTimeMillis();
                 try
                 {
-                    for ( ;; )
+                    for (;;)
                     {
-                        wait( waitTime );
-                        if ( caller == m_Owner )
+                        wait(waitTime);
+                        if (caller == m_owner)
                         {
-                            ++m_Holds;
+                            ++m_holds;
                             return true;
                         }
-                        else if ( m_Owner == null )
+                        else if (m_owner == null)
                         {
-                            m_Owner = caller;
-                            m_Holds = 1;
+                            m_owner = caller;
+                            m_holds = 1;
                             return true;
                         }
                         else
                         {
-                            waitTime = msecs - ( System.currentTimeMillis() - start );
-                            if ( waitTime <= 0 )
+                            waitTime = msecs - (System.currentTimeMillis() - start);
+                            if (waitTime <= 0)
+                            {
                                 return false;
+                            }
                         }
                     }
                 }
-                catch ( InterruptedException ex )
+                catch (InterruptedException ex)
                 {
                     notify();
                     throw ex;
@@ -115,7 +123,6 @@ class ReentrantLock
             }
         }
     }//attempt
-
 
     /**
      * Release the lock.
@@ -125,16 +132,17 @@ class ReentrantLock
     public synchronized void release()
     {
         //log.debug("release()::" + Thread.currentThread().toString());
-        if ( Thread.currentThread() != m_Owner )
-            throw new Error( "Illegal Lock usage" );
-
-        if ( --m_Holds == 0 )
+        if (Thread.currentThread() != m_owner)
         {
-            m_Owner = null;
+            throw new Error("Illegal Lock usage");
+        }
+
+        if (--m_holds == 0)
+        {
+            m_owner = null;
             notify();
         }
     }//release
-
 
     /**
      * Release the lock N times. <code>release(n)</code> is
@@ -148,19 +156,20 @@ class ReentrantLock
      * @throws Error thrown if not current owner of lock
      *               or has fewer than N holds on the lock
      */
-    public synchronized void release( long n )
+    public synchronized void release(long n)
     {
-        if ( Thread.currentThread() != m_Owner || n > m_Holds )
-            throw new Error( "Illegal Lock usage" );
-
-        m_Holds -= n;
-        if ( m_Holds == 0 )
+        if (Thread.currentThread() != m_owner || n > m_holds)
         {
-            m_Owner = null;
+            throw new Error("Illegal Lock usage");
+        }
+
+        m_holds -= n;
+        if (m_holds == 0)
+        {
+            m_owner = null;
             notify();
         }
     }//release
-
 
     /**
      * Return the number of unreleased acquires performed
@@ -171,9 +180,10 @@ class ReentrantLock
      */
     public synchronized long holds()
     {
-        if ( Thread.currentThread() != m_Owner )
+        if (Thread.currentThread() != m_owner)
+        {
             return 0;
-        return m_Holds;
+        }
+        return m_holds;
     }//holds
-
 }//class ReentrantLock
