@@ -1,3 +1,12 @@
+Changes from 1.6.0 to 1.6.1
+---------------------------
+** Bug
+    * [FELIX-1027] - deadlock with felix 1.6.0 ?
+    * [FELIX-1028] - NPE in configuration view when running webconsole with Equinox
+    * [FELIX-1033] - Exceptions when Felix is started with security manager
+    * [FELIX-1035] - deadlock observed while using fileinstall to monitor multiple directories
+    * [FELIX-1045] - Felix 1.6.0 fails with ClassCircularityError
+
 Changes from 1.4.1 to 1.6.0
 ---------------------------
 
