@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -96,6 +96,11 @@ public class Activator implements BundleActivator
         context.registerService(
             org.apache.felix.shell.Command.class.getName(),
             new ExportsCommandImpl(m_context), null);
+
+        // Register "find" command service.
+        context.registerService(
+            org.apache.felix.shell.Command.class.getName(),
+            new FindCommandImpl(m_context), null);
 
         // Register "headers" command service.
         context.registerService(
