@@ -124,7 +124,19 @@ public class Util
         return name;
     }
 
-
+    /**
+     * Returns the value of the header or the empty string if the header
+     * is not available.
+     */
+    public static String getHeaderValue( Bundle bundle, String headerName )
+    {
+       Object value = bundle.getHeaders().get(headerName);
+       if ( value != null )
+       {
+           return value.toString();
+       }
+       return "";
+    }
     /**
      * Orders the bundles according to their name as returned by
      * {@link #getName(Bundle)}, with the exception that the system bundle is

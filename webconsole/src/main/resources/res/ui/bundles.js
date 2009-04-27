@@ -105,6 +105,8 @@ function entryInternal( /* Element */ parent, /* Object */ dataEntry ) {
     
     parent.appendChild( td( null, null, [ text( id ) ] ) );
     parent.appendChild( td( null, null, [ inputElement, text(" "), titleElement ] ) );
+    parent.appendChild( td( null, null, [ text( dataEntry.version ) ] ) );
+    parent.appendChild( td( null, null, [ text( dataEntry.symbolicName ) ] ) );
     parent.appendChild( td( null, null, [ text( state ) ] ) );
     var actionsTd = td( null, null );
     var div = createElement("div", null, {
@@ -210,7 +212,7 @@ function renderDetails( data ) {
 
 function renderBundles(data) {
 	$(document).ready(function(){
-    	renderView( ["Id", "Name", "Status", "Actions"],
+    	renderView( ["Id", "Name", "Version", "Symbolic Name", "Status", "Actions"],
         		"<input type='hidden' name='action' value='install'/>" +
                 "<input class='fileinput' type='file' name='bundlefile' style='margin-left:10px'/>" +
          		" - Start <input class='checkradio' type='checkbox' name='bundlestart' value='start' style='vertical-align:middle;'/>" +
@@ -231,7 +233,7 @@ function renderBundles(data) {
         $("#plugin_table").tablesorter({
             headers: {
         	    0: { sorter:"digit"},
-                3: { sorter: false }
+                5: { sorter: false }
             },
             sortList: [[1,0]],
             textExtraction:extractMethod 

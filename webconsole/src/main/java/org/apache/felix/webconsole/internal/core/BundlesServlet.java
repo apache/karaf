@@ -410,6 +410,10 @@ public class BundlesServlet extends BaseWebConsolePlugin
         jw.value( Util.getName( bundle ) );
         jw.key( "state" );
         jw.value( toStateString( bundle ) );
+        jw.key( "version" );
+        jw.value( Util.getHeaderValue(bundle, Constants.BUNDLE_VERSION) );
+        jw.key( "symbolicName" );
+        jw.value( Util.getHeaderValue(bundle, Constants.BUNDLE_SYMBOLICNAME) );
 
         jw.key( "actions" );
         jw.array();
