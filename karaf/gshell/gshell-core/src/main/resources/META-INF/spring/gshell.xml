@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util" xmlns:osgi="http://www.springframework.org/schema/osgi"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+  http://www.springframework.org/schema/beans/spring-beans.xsd
+  http://www.springframework.org/schema/util
+  http://www.springframework.org/schema/util/spring-util.xsd
+  http://servicemix.apache.org/schema/servicemix-gshell
+  http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd
+  http://www.springframework.org/schema/osgi
+  http://www.springframework.org/schema/osgi/spring-osgi-1.0.xsd"
+       default-autowire="no"
+       default-dependency-check="none"
+       default-init-method="init"
+       default-destroy-method="destroy">
+
+    <bean id="io" class="org.apache.geronimo.gshell.io.IO">
+        <property name="verbosity" value="DEBUG"/>
+    </bean>
+
+    <bean id="branding" class="org.apache.servicemix.kernel.gshell.core.ServiceMixBranding">
+        <property name="prompt" value="@|bold %{gshell.username}|@%{application.id}:@|bold %{gshell.group}|> " />
+    </bean>
+
+    <bean id="application" class="org.apache.servicemix.kernel.gshell.core.ApplicationImpl">
+        <property name="id" value="${servicemix.name}"/>
+        <property name="io" ref="io"/>
+        <property name="model">
+            <bean class="org.apache.geronimo.gshell.application.model.ApplicationModel">
+                <property name="branding" ref="branding"/>
+            </bean>
+        </property>
+        <property name="variables">
+            <bean class="org.apache.geronimo.gshell.command.Variables"/>
+        </property>
+    </bean>
+
+    <bean id="eventManager" class="org.apache.geronimo.gshell.event.EventManagerImpl"/>
+
+    <bean id="applicationManager" class="org.apache.servicemix.kernel.gshell.core.ApplicationManagerImpl">
+        <constructor-arg ref="eventManager" />
+        <constructor-arg ref="application" />
+    </bean>
+
+    <bean id="commandLineParser" class="org.apache.geronimo.gshell.parser.CommandLineParser"/>
+
+    <bean id="aliasRegistry" class="org.apache.geronimo.gshell.wisdom.registry.AliasRegistryImpl">
+        <constructor-arg ref="eventManager"/>
+    </bean>
+
+    <bean id="aliasMetaMapper" class="org.apache.geronimo.gshell.wisdom.registry.AliasMetaMapper">
+        <constructor-arg ref="eventManager"/>
+        <constructor-arg ref="metaDataRegistry"/>
+        <constructor-arg ref="aliasRegistry"/>
+    </bean>
+
+    <bean id="commandRegistry" class="org.apache.geronimo.gshell.wisdom.registry.CommandRegistryImpl">
+        <constructor-arg ref="eventManager"/>
+    </bean>
+
+    <bean id="commandMetaMapper" class="org.apache.geronimo.gshell.wisdom.registry.CommandMetaMapper">
+        <constructor-arg ref="eventManager"/>
+        <constructor-arg ref="metaDataRegistry"/>
+        <constructor-arg ref="commandRegistry"/>
+    </bean>
+
+    <bean id="groupDirResolver" class="org.apache.geronimo.gshell.wisdom.registry.GroupDirectoryResolver">
+        <constructor-arg ref="fileSystemAccess"/>
+    </bean>
+
+    <bean id="commandResolver" class="org.apache.geronimo.gshell.wisdom.registry.CommandResolverImpl">
+        <constructor-arg ref="fileSystemAccess"/>
+        <constructor-arg ref="groupDirResolver"/>
+    </bean>
+
+    <bean class="org.apache.servicemix.kernel.gshell.core.WorkAroundAliasCommand" scope="prototype">
+        <constructor-arg ref="commandLineExecutor"/>
+    </bean>
+
+    <bean class="org.apache.geronimo.gshell.wisdom.command.GroupCommand" scope="prototype"/>
+
+    <bean id="commandLineBuilder" class="org.apache.geronimo.gshell.wisdom.shell.CommandLineBuilderImpl">
+        <constructor-arg ref="commandLineParser"/>
+    </bean>
+
+    <bean id="commandLineExecutor" class="org.apache.geronimo.gshell.wisdom.shell.CommandLineExecutorImpl">
+        <constructor-arg ref="commandResolver"/>
+        <constructor-arg ref="commandLineBuilder"/>
+    </bean>
+
+    <bean id="shell" class="org.apache.geronimo.gshell.wisdom.shell.ShellImpl" scope="prototype" init-method="init" destroy-method="close">
+        <constructor-arg ref="application"/>
+        <constructor-arg ref="commandLineExecutor"/>
+
+        <property name="completers">
+            <list>
+                <ref bean="commandsCompleter"/>
+                <ref bean="aliasNameCompleter"/>
+            </list>
+        </property>
+        <property name="prompter">
+            <bean class="org.apache.geronimo.gshell.wisdom.shell.ConsolePrompterImpl">
+                <constructor-arg ref="application"/>
+            </bean>
+        </property>
+        <property name="errorHandler">
+            <bean class="org.apache.geronimo.gshell.wisdom.shell.ConsoleErrorHandlerImpl" />
+        </property>
+        <property name="history">
+            <bean class="org.apache.geronimo.gshell.wisdom.shell.HistoryImpl">
+                <constructor-arg ref="application"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="commandNameCompleter" class="org.apache.geronimo.gshell.wisdom.completer.CommandNameCompleter"
+          lazy-init="true">
+        <constructor-arg ref="eventManager"/>
+        <constructor-arg ref="commandRegistry"/>
+    </bean>
+
+    <bean id="aliasNameCompleter" class="org.apache.geronimo.gshell.wisdom.completer.AliasNameCompleter"
+          lazy-init="true">
+        <constructor-arg ref="eventManager"/>
+        <constructor-arg ref="aliasRegistry"/>
+    </bean>
+
+    <bean id="commandsCompleter" class="org.apache.geronimo.gshell.wisdom.completer.CommandsCompleter" lazy-init="true">
+        <constructor-arg ref="eventManager"/>
+        <constructor-arg ref="commandRegistry"/>
+    </bean>
+
+    <bean id="variableNameCompleter" class="org.apache.geronimo.gshell.wisdom.completer.VariableNameCompleter" lazy-init="true">
+    </bean>
+
+</beans>

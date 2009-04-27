@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:ctx="http://www.springframework.org/schema/context"
+       xmlns:osgi="http://www.springframework.org/schema/osgi"
+       xmlns:osgix="http://www.springframework.org/schema/osgi-compendium"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+  http://www.springframework.org/schema/beans
+  http://www.springframework.org/schema/beans/spring-beans.xsd
+  http://www.springframework.org/schema/context
+  http://www.springframework.org/schema/context/spring-context.xsd
+  http://www.springframework.org/schema/util
+  http://www.springframework.org/schema/util/spring-util.xsd
+  http://www.springframework.org/schema/osgi
+  http://www.springframework.org/schema/osgi/spring-osgi.xsd
+  http://www.springframework.org/schema/osgi-compendium
+  http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd">
+
+    <!-- MBeanServer bean -->
+    <bean id="mbeanServer" class="org.springframework.jmx.support.MBeanServerFactoryBean">
+        <property name="locateExistingServerIfPossible" value="true"/>
+    </bean>
+
+    <!-- Export the MBeanServer as an OSGi service -->
+    <osgi:service ref="mbeanServer">
+        <osgi:interfaces>
+            <value>javax.management.MBeanServer</value>
+        </osgi:interfaces>
+    </osgi:service>
+
+    <!-- Create a RMI registry -->
+    <bean id="rmiRegistry" class="org.apache.servicemix.management.RmiRegistryFactoryBean">
+        <property name="create" value="true" />
+        <property name="locate" value="true" />
+        <property name="port" value="${rmiRegistryPort}" />
+    </bean>
+
+    <!-- Create a JMX connector ServiceFactory -->
+    <bean id="jmxConnectorService" class="org.springframework.jmx.support.ConnectorServerFactoryBean">
+        <property name="server" ref="mbeanServer" />
+        <property name="serviceUrl" value="${serviceUrl}" />
+        <property name="daemon" value="${daemon}" />
+        <property name="threaded" value="${threaded}" />
+        <property name="objectName" value="${objectName}" />
+        <property name="environment" ref="jmxConnectorEnvironment" />
+    </bean>
+
+    <!-- Environment map for connectors -->
+    <util:map id="jmxConnectorEnvironment">
+        <entry key="jmx.remote.authenticator" value-ref="jaasAuthenticator" />
+    </util:map>
+
+    <!-- JAAS authenticator -->
+    <bean id="jaasAuthenticator" class="org.apache.servicemix.management.JaasAuthenticator">
+        <property name="realm" value="${jmxRealm}" />
+    </bean>
+
+    <!-- Property place holder -->
+    <osgix:cm-properties id="cmProps" persistent-id="org.apache.servicemix.management">
+        <prop key="rmiRegistryPort">1099</prop>
+        <prop key="jmxRealm">servicemix</prop>
+        <prop key="serviceUrl">service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi</prop>
+        <prop key="daemon">true</prop>
+        <prop key="threaded">true</prop>
+        <prop key="objectName">connector:name=rmi</prop>
+    </osgix:cm-properties>
+
+    <ctx:property-placeholder properties-ref="cmProps" />
+
+</beans>
+

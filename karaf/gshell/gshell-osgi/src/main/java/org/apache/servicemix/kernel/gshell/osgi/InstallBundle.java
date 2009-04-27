@@ -1,0 +1,80 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.servicemix.kernel.gshell.osgi;
+
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.geronimo.gshell.clp.Argument;
+import org.apache.geronimo.gshell.clp.Option;
+import org.apache.servicemix.kernel.gshell.core.OsgiCommandSupport;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
+
+public class InstallBundle extends OsgiCommandSupport {
+
+    @Argument(required = true, multiValued = true, description = "Bundle URLs")
+    List<String> urls;
+
+    @Option(name = "-s", aliases={"--start"}, description="Start the bundles after installation")
+    boolean start;
+
+    protected Object doExecute() throws Exception {
+        List<Bundle> bundles = new ArrayList<Bundle>();
+        StringBuffer sb = new StringBuffer();
+        for (String url : urls) {
+            Bundle bundle = install(url, io.out, io.err);
+            if (bundle != null) {
+                bundles.add(bundle);
+                if (sb.length() > 0) {
+                    sb.append(", ");
+                }
+                sb.append(bundle.getBundleId());
+            }
+        }
+        if (start) {
+            for (Bundle bundle : bundles) {
+                bundle.start();
+            }
+        }
+        if (sb.toString().indexOf(',') > 0) {
+            io.out.println("Bundle IDs: " + sb.toString());
+        } else if (sb.length() > 0) {
+            io.out.println("Bundle ID: " + sb.toString());
+        }
+        return Result.SUCCESS;
+    }
+
+    protected Bundle install(String location, PrintWriter out, PrintWriter err) {
+        try {
+            return getBundleContext().installBundle(location, null);
+        } catch (IllegalStateException ex) {
+            err.println(ex.toString());
+        } catch (BundleException ex) {
+            if (ex.getNestedException() != null) {
+                err.println(ex.getNestedException().toString());
+            } else {
+                err.println(ex.toString());
+            }
+        } catch (Exception ex) {
+            err.println(ex.toString());
+        }
+        return null;
+    }
+
+}

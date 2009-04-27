@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:osgi="http://www.springframework.org/schema/osgi"
+       xmlns:osgix="http://www.springframework.org/schema/osgi-compendium"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:gshell="http://servicemix.apache.org/schema/servicemix-gshell"
+       xsi:schemaLocation="
+  http://www.springframework.org/schema/beans
+  http://www.springframework.org/schema/beans/spring-beans.xsd
+  http://www.springframework.org/schema/osgi
+  http://www.springframework.org/schema/osgi/spring-osgi.xsd
+  http://www.springframework.org/schema/osgi-compendium
+  http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd
+  http://www.springframework.org/schema/util
+  http://www.springframework.org/schema/util/spring-util.xsd
+  http://servicemix.apache.org/schema/servicemix-gshell
+  http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
+
+    <import resource="classpath:org/apache/servicemix/kernel/gshell/core/commands.xml" />
+
+    <bean id="adminCommandBundleSupport" scope="prototype">
+        <property name="adminService" ref="adminService" />
+    </bean>
+
+    <gshell:command-bundle>
+        <gshell:command name="admin/create">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.CreateCommand"
+                           parent="adminCommandBundleSupport" />
+        </gshell:command>
+        <gshell:command name="admin/connect">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.ConnectCommand"
+                           parent="adminCommandBundleSupport" />
+            <gshell:completers>
+                <ref bean="instanceCompleter" />
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+        <gshell:command name="admin/list">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.ListCommand"
+                           parent="adminCommandBundleSupport" />
+        </gshell:command>
+        <gshell:command name="admin/start">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.StartCommand"
+                           parent="adminCommandBundleSupport" />
+            <gshell:completers>
+                <ref bean="instanceCompleter" />
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+        <gshell:command name="admin/stop">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.StopCommand"
+                           parent="adminCommandBundleSupport" />
+            <gshell:completers>
+                <ref bean="instanceCompleter" />
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+        <gshell:command name="admin/destroy">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.DestroyCommand"
+                           parent="adminCommandBundleSupport" />
+            <gshell:completers>
+                <ref bean="instanceCompleter" />
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+        <gshell:command name="admin/change-port">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.ChangePortCommand"
+                           parent="adminCommandBundleSupport" />
+            <gshell:completers>
+                <ref bean="instanceCompleter" />
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+    </gshell:command-bundle>
+
+    <osgi:reference id="preferences" interface="org.osgi.service.prefs.PreferencesService" cardinality="0..1" />
+
+    <bean id="adminService" class="org.apache.servicemix.kernel.gshell.admin.internal.AdminServiceImpl">
+        <property name="preferences" ref="preferences" />
+    </bean>
+
+    <bean id="instanceCompleter" class="org.apache.servicemix.kernel.gshell.admin.internal.completers.InstanceCompleter">
+        <property name="adminService" ref="adminService" />
+    </bean>
+
+
+</beans>

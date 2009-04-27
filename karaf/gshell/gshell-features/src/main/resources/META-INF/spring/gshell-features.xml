@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:ctx="http://www.springframework.org/schema/context"
+       xmlns:osgi="http://www.springframework.org/schema/osgi"
+       xmlns:osgix="http://www.springframework.org/schema/osgi-compendium"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:gshell="http://servicemix.apache.org/schema/servicemix-gshell"
+       xsi:schemaLocation="
+  http://www.springframework.org/schema/beans
+  http://www.springframework.org/schema/beans/spring-beans.xsd
+  http://www.springframework.org/schema/context
+  http://www.springframework.org/schema/context/spring-context.xsd
+  http://www.springframework.org/schema/osgi
+  http://www.springframework.org/schema/osgi/spring-osgi.xsd
+  http://www.springframework.org/schema/osgi-compendium
+  http://www.springframework.org/schema/osgi-compendium/spring-osgi-compendium.xsd
+  http://www.springframework.org/schema/util
+  http://www.springframework.org/schema/util/spring-util.xsd
+  http://servicemix.apache.org/schema/servicemix-gshell
+  http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
+
+    <import resource="classpath:org/apache/servicemix/kernel/gshell/core/commands.xml" />
+    
+    <bean id="placeholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+      <property name="location" value="file:${servicemix.home}/etc/org.apache.servicemix.features.cfg"/>
+    </bean>
+
+    <gshell:command-bundle>
+        <gshell:command name="features/addUrl">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.AddUrlCommand" />
+        </gshell:command>
+        <gshell:command name="features/listUrl">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.ListUrlCommand" />
+        </gshell:command>
+        <gshell:command name="features/removeUrl">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.RemoveUrlCommand" />
+            <gshell:completers>
+                <ref bean="removeUrlCompleter" />
+            </gshell:completers>
+        </gshell:command>
+        <gshell:command name="features/refreshUrl">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.RefreshUrlCommand" />
+        </gshell:command>
+        <gshell:command name="features/install">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.InstallFeatureCommand" />
+            <gshell:completers>
+                <ref bean="installFeatureCompleter" /> 
+            </gshell:completers>
+        </gshell:command>
+        <gshell:command name="features/uninstall">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.UninstallFeatureCommand" />
+            <gshell:completers>
+                <ref bean="uninstallFeatureCompleter" />
+            </gshell:completers>
+        </gshell:command>
+        <gshell:command name="features/list">
+            <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.ListFeaturesCommand" />
+        </gshell:command>
+    </gshell:command-bundle>
+
+    <bean id="featuresService" class="org.apache.servicemix.kernel.gshell.features.internal.FeaturesServiceImpl" init-method="start" destroy-method="stop">
+        <property name="urls" value="${featuresRepositories}" />
+        <property name="boot" value="${featuresBoot}" />
+        <property name="configAdmin" ref="configAdmin" />
+        <property name="preferences" ref="preferences" />
+        <property name="featuresServiceRegistry" ref="featureServiceRegistry" />
+    </bean>
+
+    <bean id="featureDeploymentListener" class="org.apache.servicemix.kernel.gshell.features.internal.FeatureDeploymentListener">
+        <property name="featuresService" ref="featuresService" />
+    </bean>
+
+    <bean id="namingStrategy" class="org.apache.servicemix.kernel.gshell.features.management.DefaultNamingStrategy">
+        <property name="jmxDomainName" value="org.apache.servicemix" />
+    </bean>
+
+    <bean id="managementAgent" class="org.apache.servicemix.kernel.gshell.features.management.ManagementAgent">
+        <property name="mbeanServer" ref="mbeanServer" />
+    </bean>
+
+    <bean id="featureServiceRegistry" class="org.apache.servicemix.kernel.gshell.features.management.ManagedFeaturesRegistry">
+        <property name="managementAgent" ref="managementAgent" />
+        <property name="namingStrategy" ref="namingStrategy" />
+        <property name="featuresService" ref="featuresService" />
+    </bean>
+
+    <osgi:reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" />
+
+    <osgi:reference id="preferences" interface="org.osgi.service.prefs.PreferencesService" cardinality="0..1" />
+
+    <osgi:service ref="featuresService" interface="org.apache.servicemix.kernel.gshell.features.FeaturesService" />
+
+    <osgi:service ref="featureDeploymentListener" interface="org.apache.servicemix.kernel.filemonitor.DeploymentListener" />
+
+    <osgix:cm-properties id="cmProps" persistent-id="org.apache.servicemix.features">
+        <prop key="featuresRepositories"></prop>
+        <prop key="featuresBoot"></prop>
+    </osgix:cm-properties>
+
+    <!-- <ctx:property-placeholder properties-ref="cmProps" /> -->
+
+    <osgi:reference id="mbeanServer"
+                    interface="javax.management.MBeanServer"
+                    cardinality="0..1" >
+        <osgi:listener ref="featureServiceRegistry" bind-method="registerMBeanServer" />
+    </osgi:reference>
+
+    <bean id="installFeatureCompleter" class="org.apache.servicemix.kernel.gshell.features.completers.AvailableFeatureCompleter">
+        <property name="featuresRegistry" ref="featureServiceRegistry" />
+    </bean>
+
+    <bean id="uninstallFeatureCompleter" class="org.apache.servicemix.kernel.gshell.features.completers.InstalledFeatureCompleter">
+        <property name="featuresRegistry" ref="featureServiceRegistry" />
+    </bean>
+
+    <bean id="removeUrlCompleter" class="org.apache.servicemix.kernel.gshell.features.completers.FeatureRepositoryCompleter">
+        <property name="featuresRegistry" ref="featureServiceRegistry" />
+    </bean>
+
+</beans>
