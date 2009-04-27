@@ -1302,25 +1302,12 @@ public class ModuleImpl implements IModule
             for (int i = 0; !result && (i < m_bootPkgs.length); i++)
             {
                 // Check if the boot package is wildcarded.
-                if (m_bootPkgWildcards[i])
+                // A wildcarded boot package will be in the form "foo.",
+                // so a matching subpackage will start with "foo.", e.g.,
+                // "foo.bar".
+                if (m_bootPkgWildcards[i] && pkgName.startsWith(m_bootPkgs[i]))
                 {
-                    // A wildcarded boot package will be in the form "foo.",
-                    // so a matching subpackage will start with "foo.", e.g.,
-                    // "foo.bar".
-                    if (pkgName.startsWith(m_bootPkgs[i]))
-                    {
-                        return true;
-                    }
-                    // If we have "foo." as our wildcarded boot package, then
-                    // the package "foo" should be delegated too, but we don't
-                    // want to delegate "foobar", so we check to make sure the
-                    // package names are the same length and then perform a
-                    // region match to ignore the "." on "foo.".
-                    else if ((pkgName.length() == m_bootPkgs[i].length() - 1)
-                        && pkgName.regionMatches(0, m_bootPkgs[i], 0, m_bootPkgs[i].length() - 1))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
                 // If not wildcarded, then check for an exact match.
                 else if (m_bootPkgs[i].equals(pkgName))
