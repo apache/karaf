@@ -138,20 +138,59 @@ class DependencyManager implements ServiceListener, Reference
             case ServiceEvent.REGISTERED:
                 m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Adding " + serviceString,
                     m_componentManager.getComponentMetadata(), null );
-                serviceAdded( ref );
+                
+                // consider the service if the filter matches
+                if ( targetFilterMatch( ref ) )
+                {
+                    m_size++;
+                    serviceAdded( ref );
+                }
+                else
+                {
+                    m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Ignoring added Service for "
+                        + m_dependencyMetadata.getName() + " : does not match target filter " + getTarget(),
+                        m_componentManager.getComponentMetadata(), null );
+                }
                 break;
 
             case ServiceEvent.MODIFIED:
                 m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Updating " + serviceString,
                     m_componentManager.getComponentMetadata(), null );
+                
+                // remove the service first
                 serviceRemoved( ref );
+                
+                // recalculate the number of services matching the filter
+                // because we don't know whether this service previously matched
+                // or not
+                ServiceReference refs[] = getFrameworkServiceReferences();
+                m_size = ( refs == null ) ? 0 : refs.length;
+
+                // now try to bind the service
                 serviceAdded( ref );
                 break;
 
             case ServiceEvent.UNREGISTERING:
                 m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Removing " + serviceString,
                     m_componentManager.getComponentMetadata(), null );
+                
+                // manage the service counter if the filter matchs
+                if ( targetFilterMatch( ref ) )
+                {
+                    m_size--;
+                }
+                else
+                {
+                    m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Not counting Service for "
+                        + m_dependencyMetadata.getName() + " : Service " + ref.getProperty( Constants.SERVICE_ID )
+                        + " does not match target filter " + getTarget(), m_componentManager.getComponentMetadata(),
+                        null );
+                }
+
+                // remove the service ignoring the filter match because if the
+                // service is bound, it has to be removed no matter what
                 serviceRemoved( ref );
+                
                 break;
         }
     }
@@ -170,18 +209,6 @@ class DependencyManager implements ServiceListener, Reference
      */
     private void serviceAdded( ServiceReference reference )
     {
-        // ignore the service, if it does not match the target filter
-        if ( !targetFilterMatch( reference ) )
-        {
-            m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Ignoring added Service for "
-                + m_dependencyMetadata.getName() + " : does not match target filter " + getTarget(), m_componentManager
-                .getComponentMetadata(), null );
-            return;
-        }
-
-        // increment the number of services
-        m_size++;
-
         // if the component is currently unsatisfied, it may become satisfied
         // by adding this service, try to activate
         if ( m_componentManager.getState() == AbstractComponentManager.STATE_UNSATISFIED )
@@ -264,9 +291,6 @@ class DependencyManager implements ServiceListener, Reference
      */
     private void serviceRemoved( ServiceReference reference )
     {
-        // decrement the number of services
-        m_size--;
-
         // check whether we are bound to that service, do nothing if not
         if ( getBoundService( reference ) == null )
         {
@@ -1305,7 +1329,8 @@ class DependencyManager implements ServiceListener, Reference
             }
         }
 
-        // check for new services to be added
+        // check for new services to be added and set the number of
+        // matching services
         ServiceReference[] refs = getFrameworkServiceReferences();
         if ( refs != null )
         {
@@ -1317,6 +1342,12 @@ class DependencyManager implements ServiceListener, Reference
                     serviceAdded( refs[i] );
                 }
             }
+            m_size = refs.length;
+        }
+        else
+        {
+            // no services currently match the filter
+            m_size = 0;
         }
     }
 
