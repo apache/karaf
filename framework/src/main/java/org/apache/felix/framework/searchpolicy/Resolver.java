@@ -218,13 +218,14 @@ public class Resolver
         // package name; this means we have to do wildcard matching.
         String dynPkgName = ((Requirement) dynReq).getPackageName();
         boolean wildcard = (dynPkgName.lastIndexOf(".*") >= 0);
+        // Remove the "*", but keep the "." if wildcarded.
         dynPkgName = (wildcard)
-            ? dynPkgName.substring(0, dynPkgName.length() - 2) : dynPkgName;
+            ? dynPkgName.substring(0, dynPkgName.length() - 1) : dynPkgName;
         // If the dynamic requirement matches the package name, then
         // create a new requirement for the specific package.
         if (dynPkgName.equals("*") ||
             pkgName.equals(dynPkgName) ||
-            (wildcard && pkgName.startsWith(dynPkgName + ".")))
+            (wildcard && pkgName.startsWith(dynPkgName)))
         {
             // Create a new requirement based on the dynamic requirement,
             // but substitute the precise package name for which we are
