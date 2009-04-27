@@ -55,6 +55,9 @@ function entry( /* Object */ dataEntry ) {
 }
 
 function actionButton( /* Element */ parent, /* string */ id, /* Obj */ action ) {
+	if ( !action.enabled ) {
+		return;
+	}
 	var enabled = action.enabled;
 	var op = action.link;
 	var opLabel = action.name;

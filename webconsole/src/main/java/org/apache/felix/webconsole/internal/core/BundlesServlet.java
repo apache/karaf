@@ -343,7 +343,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
 
     private String getStatusLine(final Bundle[] bundles)
     {
-        int active = 0, installed = 0, resolved = 0;
+        int active = 0, installed = 0, resolved = 0, fragments = 0;
         for ( int i = 0; i < bundles.length; i++ )
         {
             switch ( bundles[i].getState() )
@@ -355,14 +355,21 @@ public class BundlesServlet extends BaseWebConsolePlugin
                     installed++;
                     break;
                 case Bundle.RESOLVED:
-                    resolved++;
+                    if ( bundles[i].getHeaders().get(Constants.FRAGMENT_HOST) != null )
+                    {
+                        fragments++;
+                    }
+                    else
+                    {
+                        resolved++;
+                    }
                     break;
             }
         }
         final StringBuffer buffer = new StringBuffer();
         buffer.append("Bundle information: ");
         appendBundleInfoCount(buffer, "in total", bundles.length);
-        if ( active == bundles.length )
+        if ( active == bundles.length || active + fragments == bundles.length )
         {
             buffer.append(" - all ");
             appendBundleInfoCount(buffer, "active.", bundles.length);
@@ -373,6 +380,11 @@ public class BundlesServlet extends BaseWebConsolePlugin
             {
                 buffer.append(", ");
                 appendBundleInfoCount(buffer, "active", active);
+            }
+            if ( fragments != 0 )
+            {
+                buffer.append(", ");
+                appendBundleInfoCount(buffer, "active fragments", fragments);
             }
             if ( resolved != 0 )
             {
@@ -397,7 +409,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
         jw.key( "name" );
         jw.value( Util.getName( bundle ) );
         jw.key( "state" );
-        jw.value( toStateString( bundle.getState() ) );
+        jw.value( toStateString( bundle ) );
 
         jw.key( "actions" );
         jw.array();
@@ -432,13 +444,17 @@ public class BundlesServlet extends BaseWebConsolePlugin
     }
 
 
-    private String toStateString( int bundleState )
+    private String toStateString( final Bundle bundle )
     {
-        switch ( bundleState )
+        switch ( bundle.getState() )
         {
             case Bundle.INSTALLED:
                 return "Installed";
             case Bundle.RESOLVED:
+                if ( bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null )
+                {
+                    return "Fragment";
+                }
                 return "Resolved";
             case Bundle.STARTING:
                 return "Starting";
@@ -449,7 +465,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
             case Bundle.UNINSTALLED:
                 return "Uninstalled";
             default:
-                return "Unknown: " + bundleState;
+                return "Unknown: " + bundle.getState();
         }
     }
 
@@ -467,12 +483,20 @@ public class BundlesServlet extends BaseWebConsolePlugin
 
     private boolean hasStart( Bundle bundle )
     {
+        if ( bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null )
+        {
+            return false;
+        }
         return bundle.getState() == Bundle.INSTALLED || bundle.getState() == Bundle.RESOLVED;
     }
 
 
     private boolean hasStop( Bundle bundle )
     {
+        if ( bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null )
+        {
+            return false;
+        }
         return bundle.getState() == Bundle.ACTIVE;
     }
 
