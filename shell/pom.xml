@@ -35,6 +35,11 @@
       <artifactId>org.osgi.core</artifactId>
       <version>1.2.0</version>
     </dependency>
+    <dependency>
+      <groupId>${pom.groupId}</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <version>1.2.0</version>
+    </dependency>    
   </dependencies>
   <build>
     <plugins>
@@ -45,7 +50,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>org.apache.felix.shell; org.ungoverned.osgi.service.shell; version=1.0.0</Export-Package>
+            <Export-Package>org.osgi.service.log, org.apache.felix.shell; org.ungoverned.osgi.service.shell; version=1.0.0</Export-Package>
             <Private-Package>org.apache.felix.*</Private-Package>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Bundle-Activator>org.apache.felix.shell.impl.Activator</Bundle-Activator>
