@@ -48,9 +48,9 @@
     </modules>
 
     <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/servicemix/smx4/kernel/trunk</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/servicemix/smx4/kernel/trunk</developerConnection>
-        <url>http://svn.apache.org/viewvc/servicemix/smx4/kernel/trunk/</url>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/felix/trunk/karaf</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/trunk/karaf</developerConnection>
+        <url>http://svn.apache.org/viewvc/felix/trunk/karaf/</url>
     </scm>
 
     <issueManagement>
