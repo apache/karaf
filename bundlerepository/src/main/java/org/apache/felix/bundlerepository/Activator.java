@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,9 +18,13 @@
  */
 package org.apache.felix.bundlerepository;
 
+import java.util.Hashtable;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.obr.RepositoryAdmin;
+import org.osgi.service.url.URLConstants;
+import org.osgi.service.url.URLStreamHandlerService;
 
 public class Activator implements BundleActivator
 {
@@ -52,6 +56,19 @@ public class Activator implements BundleActivator
         {
             // Ignore.
         }
+
+        try
+        {
+			Hashtable dict = new Hashtable();
+			dict.put(URLConstants.URL_HANDLER_PROTOCOL, "obr");
+			context.registerService(URLStreamHandlerService.class.getName(),
+					new ObrURLStreamHandlerService(m_context, m_repoAdmin), dict);
+		}
+        catch (Exception e)
+		{
+			throw new RuntimeException("could not register obr url handler");
+		}
+
     }
 
     public void stop(BundleContext context)
