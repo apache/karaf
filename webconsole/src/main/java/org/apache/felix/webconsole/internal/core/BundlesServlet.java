@@ -455,7 +455,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
             case Bundle.INSTALLED:
                 return "Installed";
             case Bundle.RESOLVED:
-                if ( bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null )
+                if ( isFragmentBundle(bundle) )
                 {
                     return "Fragment";
                 }
@@ -484,10 +484,14 @@ public class BundlesServlet extends BaseWebConsolePlugin
         jw.endObject();
     }
 
+    private boolean isFragmentBundle( Bundle bundle)
+    {
+        return bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null;
+    }
 
     private boolean hasStart( Bundle bundle )
     {
-        if ( bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null )
+        if ( isFragmentBundle(bundle) )
         {
             return false;
         }
@@ -497,7 +501,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
 
     private boolean hasStop( Bundle bundle )
     {
-        if ( bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null )
+        if ( isFragmentBundle(bundle) )
         {
             return false;
         }
