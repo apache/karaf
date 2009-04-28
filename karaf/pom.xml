@@ -81,7 +81,7 @@
         <felix.framework.version>1.6.0</felix.framework.version>
         <felix.osgi.version>1.2.0</felix.osgi.version>
         <felix.compendium.version>1.2.0</felix.compendium.version>
-        <felix.bundlerepository.version>1.2.1</felix.bundlerepository.version>
+        <felix.bundlerepository.version>1.4.0</felix.bundlerepository.version>
         <felix.prefs.version>1.0.2</felix.prefs.version>
         <geronimo.annotation.version>1.1.1</geronimo.annotation.version>
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
