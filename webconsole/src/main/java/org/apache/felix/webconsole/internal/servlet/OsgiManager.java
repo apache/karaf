@@ -359,7 +359,7 @@ public class OsgiManager extends GenericServlet
 
     //---------- internal
 
-    protected boolean handleAction( HttpServletRequest req, HttpServletResponse resp ) throws IOException
+    protected boolean handleAction( HttpServletRequest req, HttpServletResponse resp ) throws IOException, ServletException
     {
         // check action
         String actionName = AbstractWebConsolePlugin.getParameter( req, Util.PARAM_ACTION );
@@ -376,10 +376,12 @@ public class OsgiManager extends GenericServlet
                 catch ( IOException ioe )
                 {
                     log.log( LogService.LOG_WARNING, ioe.getMessage(), ioe );
+                    throw ioe;
                 }
                 catch ( ServletException se )
                 {
                     log.log( LogService.LOG_WARNING, se.getMessage(), se.getRootCause() );
+                    throw se;
                 }
 
                 // maybe overwrite redirect

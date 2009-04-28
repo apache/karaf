@@ -68,6 +68,7 @@ public class InstallAction extends BaseManagementPlugin implements Action
 
 
     public boolean performAction( HttpServletRequest request, HttpServletResponse response )
+    throws IOException
     {
 
         // get the uploaded data
@@ -162,6 +163,7 @@ public class InstallAction extends BaseManagementPlugin implements Action
 
 
     private void installBundle( String location, File bundleFile, int startLevel, boolean start, boolean refreshPackages )
+    throws IOException
     {
         if ( bundleFile != null )
         {
@@ -171,7 +173,7 @@ public class InstallAction extends BaseManagementPlugin implements Action
             if ( symbolicName == null )
             {
                 bundleFile.delete();
-                return;
+                throw new IOException(Constants.BUNDLE_SYMBOLICNAME + " header missing, cannot install bundle");
             }
 
             // check for existing bundle first
