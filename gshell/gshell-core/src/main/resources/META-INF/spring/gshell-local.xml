@@ -39,12 +39,9 @@
         <constructor-arg ref="localShellWrapped" />
     </bean>
 
-    <osgi:reference id="mainService" interface="org.apache.servicemix.kernel.main.spi.MainService"/>
-
     <bean id="localConsole" class="org.apache.servicemix.kernel.gshell.core.LocalConsole">
         <property name="createLocalShell" value="${servicemix.startLocalConsole}"/>
         <property name="shell" ref="localShell"/>
-        <property name="mainService" ref="mainService" />
     </bean>
 
 </beans>
