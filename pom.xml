@@ -39,10 +39,10 @@
         <module>filemonitor</module>
         <module>gshell</module>
         <module>spring</module>
-        <module>testing</module>
         <module>jaas</module>
         <module>client</module>
         <module>management</module>
+        <module>itests</module>
         <module>assembly</module>
         <module>demos</module>
     </modules>
@@ -92,6 +92,7 @@
         <log4j.version>1.2.14</log4j.version>
         <mina.version>2.0.0-M5</mina.version>
         <oro.version>2.0.8_1</oro.version>
+        <pax.exam.version>0.5.0</pax.exam.version>
         <pax.logging.version>1.3.0</pax.logging.version>
         <pax.url.version>0.3.3</pax.url.version>
         <servicemix.legal.version>1.0</servicemix.legal.version>
@@ -786,6 +787,26 @@
                         <artifactId>easymock</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.exam</groupId>
+                <artifactId>pax-exam</artifactId>
+                <version>${pax.exam.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.exam</groupId>
+                <artifactId>pax-exam-junit</artifactId>
+                <version>${pax.exam.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.exam</groupId>
+                <artifactId>pax-exam-container-default</artifactId>
+                <version>${pax.exam.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ops4j.pax.exam</groupId>
+                <artifactId>pax-exam-junit-extender-impl</artifactId>
+                <version>${pax.exam.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
