@@ -21,14 +21,15 @@ package org.apache.servicemix.kernel.gshell.core;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.lang.reflect.Method;
 
 import org.apache.geronimo.gshell.notification.ExitNotification;
 import org.apache.geronimo.gshell.shell.Shell;
-import org.apache.servicemix.kernel.main.spi.MainService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.osgi.context.BundleContextAware;
@@ -43,9 +44,9 @@ public class LocalConsole implements Runnable, BundleContextAware {
 
     private BundleContext bundleContext;
 
-    private MainService mainService;
-
     private CountDownLatch frameworkStarted;
+
+    private ServiceTracker mainServiceTracker;
     
     public BundleContext getBundleContext() {
         return bundleContext;
@@ -53,14 +54,6 @@ public class LocalConsole implements Runnable, BundleContextAware {
 
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
-    }
-
-    public MainService getMainService() {
-        return mainService;
-    }
-
-    public void setMainService(MainService mainService) {
-        this.mainService = mainService;
     }
 
     public Shell getShell() {
@@ -80,6 +73,9 @@ public class LocalConsole implements Runnable, BundleContextAware {
     }
 
     public void init() {
+        mainServiceTracker = new ServiceTracker(bundleContext, "org.apache.servicemix.kernel.main.spi.MainService", null);
+        mainServiceTracker.open();
+
         shell.getContext().getVariables().set("gshell.username", "smx");
         frameworkStarted = new CountDownLatch(1);
 		getBundleContext().addFrameworkListener(new FrameworkListener(){
@@ -96,6 +92,7 @@ public class LocalConsole implements Runnable, BundleContextAware {
     }
 
     public void destroy() {
+        mainServiceTracker.close();
         if (createLocalShell) {
             shell.close();
         }
@@ -103,7 +100,7 @@ public class LocalConsole implements Runnable, BundleContextAware {
 
     public void run() {
         try {
-            String[] args = mainService.getArgs();
+            String[] args = getMainServiceArgs();
             // If a command was specified on the command line, then just execute that command.
             if (args != null && args.length > 0) {
                 waitForFrameworkToStart();
@@ -113,32 +110,51 @@ public class LocalConsole implements Runnable, BundleContextAware {
                     sb.append(arg).append(" ");
                 }
                 Object value = shell.execute(sb.toString());
-                if (mainService != null) {
-                    if (value instanceof Number) {
-                        mainService.setExitCode(((Number) value).intValue());
-                    } else {
-                        mainService.setExitCode(value != null ? 1 : 0);
-                    }
-                    log.info("Exiting shell due to terminated command");
+                if (value instanceof Number) {
+                    setMainServiceExitCode(((Number) value).intValue());
+                } else {
+                    setMainServiceExitCode(value != null ? 1 : 0);
                 }
+                log.info("Exiting shell due to terminated command");
             } else {
                 shell.run();
             }
         } catch (ExitNotification e) {
-            if (mainService != null) {
-                mainService.setExitCode(0);
-            }
+            setMainServiceExitCode(0);
             log.info("Exiting shell due received exit notification");
         } catch (Throwable e) {
-            if (mainService != null) {
-                mainService.setExitCode(-1);
-            }
+            setMainServiceExitCode(-1);
             log.error("Exiting shell due to caught exception " + e, e);
         } finally {
             try {
                 shell.close();
             } catch (Throwable t) {}
             asyncShutdown();
+        }
+    }
+
+    private String[] getMainServiceArgs() {
+        try {
+            Object mainService = mainServiceTracker.getService();
+            if (mainService != null) {
+                Method mth = mainService.getClass().getMethod("getArgs");
+                return (String[]) mth.invoke(mainService);
+            }
+        } catch (Throwable t) {
+            log.debug("Error getting MainService args", t);
+        }
+        return null;
+    }
+
+    private void setMainServiceExitCode(int exitCode) {
+        try {
+            Object mainService = mainServiceTracker.getService();
+            if (mainService != null) {
+                Method mth = mainService.getClass().getMethod("setExitCode", int.class);
+                mth.invoke(mainService, exitCode);
+            }
+        } catch (Throwable t) {
+            log.debug("Error setting MainService exit code", t);
         }
     }
 
