@@ -42,9 +42,9 @@
         <module>jaas</module>
         <module>client</module>
         <module>management</module>
-        <module>itests</module>
         <module>assembly</module>
         <module>demos</module>
+        <module>itests</module>
     </modules>
 
     <scm>
@@ -267,16 +267,6 @@
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.servicemix.kernel.testing</groupId>
-                <artifactId>org.apache.servicemix.kernel.testing.support</artifactId>
-                <version>${pom.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.servicemix.kernel.testing</groupId>
-                <artifactId>org.apache.servicemix.kernel.testing.itests</artifactId>
-                <version>${pom.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.servicemix.kernel.demos</groupId>
                 <artifactId>smx4web</artifactId>
                 <version>${pom.version}</version>
@@ -290,6 +280,13 @@
                 <groupId>org.apache.servicemix.kernel</groupId>
                 <artifactId>apache-servicemix-kernel</artifactId>
                 <type>zip</type>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.kernel</groupId>
+                <artifactId>apache-servicemix-kernel</artifactId>
+                <classifier>features</classifier>
+                <type>xml</type>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>

@@ -22,12 +22,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.servicemix.kernel.gshell</groupId>
-        <artifactId>gshell</artifactId>
+        <groupId>org.apache.servicemix.kernel</groupId>
+        <artifactId>kernel</artifactId>
         <version>1.2.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.servicemix.kernel.gshell</groupId>
+    <groupId>org.apache.servicemix.kernel</groupId>
     <artifactId>itests</artifactId>
     <packaging>jar</packaging>
     <version>1.2.0-SNAPSHOT</version>
@@ -38,31 +38,31 @@
     </description>
 
     <dependencies>
+        <!-- This is required to be first so that pax-exam classloader is not messed up with a newer version of felix
+              which would lead to java.lang.NoSuchMethodError: org.apache.felix.framework.Logger.<init>(I)V -->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.framework</artifactId>
             <version>1.0.0</version>
         </dependency>
+        <!-- This is required to be first so that pax-exam classloader is not messed up with a newer version of felix
+              which would lead to java.lang.RuntimeException: Could not create [service.obr] -->
         <dependency>
-            <groupId>org.apache.servicemix.kernel.gshell</groupId>
-            <artifactId>org.apache.servicemix.kernel.gshell.core</artifactId>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.bundlerepository</artifactId>
+            <version>1.2.1</version>
+        </dependency>
+
+        <!-- The assembly and all the dependencies -->
+        <dependency>
+            <groupId>org.apache.servicemix.kernel</groupId>
+            <artifactId>apache-servicemix-kernel</artifactId>
+            <type>xml</type>
+            <classifier>features</classifier>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.kernel.gshell</groupId>
-            <artifactId>org.apache.servicemix.kernel.gshell.log</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.kernel.gshell</groupId>
-            <artifactId>org.apache.servicemix.kernel.gshell.osgi</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.kernel.jaas</groupId>
-            <artifactId>org.apache.servicemix.kernel.jaas.boot</artifactId>
-            <scope>test</scope>
-        </dependency>
+
+        <!-- Pax EXAM -->
         <dependency>
             <groupId>org.ops4j.pax.exam</groupId>
             <artifactId>pax-exam</artifactId>
@@ -87,6 +87,7 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.5</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -112,27 +113,6 @@
 
     <build>
         <plugins>
-            <plugin>
-        <artifactId>maven-resources-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy-resources</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${pom.basedir}/target/test-classes/</outputDirectory>
-              <resources>          
-                <resource>
-                  <directory>${pom.basedir}/src/test/filtered-resources</directory>
-                  <filtering>true</filtering>
-                </resource>
-              </resources>              
-            </configuration>            
-          </execution>
-        </executions>
-      </plugin>
             <!-- generate dependencies versions -->
             <plugin>
                 <groupId>org.apache.servicemix.tooling</groupId>
