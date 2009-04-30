@@ -143,6 +143,7 @@
             <plugin>
                 <groupId>org.apache.servicemix.tooling</groupId>
                 <artifactId>depends-maven-plugin</artifactId>
+                <version>1.2-SNAPSHOT</version>
                 <executions>
                     <execution>
                         <id>generate-depends-file</id>
