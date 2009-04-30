@@ -43,12 +43,20 @@
             <artifactId>org.apache.servicemix.kernel.client</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.kernel</groupId>
-            <artifactId>org.apache.servicemix.kernel.filemonitor</artifactId>
+            <groupId>org.apache.servicemix.kernel.deployer</groupId>
+            <artifactId>org.apache.servicemix.kernel.deployer.filemonitor</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.kernel</groupId>
-            <artifactId>org.apache.servicemix.kernel.spring</artifactId>
+            <groupId>org.apache.servicemix.kernel.deployer</groupId>
+            <artifactId>org.apache.servicemix.kernel.deployer.spring</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.kernel.deployer</groupId>
+            <artifactId>org.apache.servicemix.kernel.deployer.blueprint</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.kernel.deployer</groupId>
+            <artifactId>org.apache.servicemix.kernel.deployer.features</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.kernel.gshell</groupId>

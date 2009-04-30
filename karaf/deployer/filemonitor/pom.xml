@@ -22,19 +22,19 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.servicemix.kernel.gshell</groupId>
-        <artifactId>gshell</artifactId>
+        <groupId>org.apache.servicemix.kernel.deployer</groupId>
+        <artifactId>deployer</artifactId>
         <version>1.2.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.servicemix.kernel.gshell</groupId>
-    <artifactId>org.apache.servicemix.kernel.gshell.features</artifactId>
+    <groupId>org.apache.servicemix.kernel.deployer</groupId>
+    <artifactId>org.apache.servicemix.kernel.deployer.filemonitor</artifactId>
     <packaging>bundle</packaging>
     <version>1.2.0-SNAPSHOT</version>
-    <name>Apache ServiceMix Kernel :: GShell Features</name>
+    <name>Apache ServiceMix Kernel :: File Monitor</name>
 
-    <description>
-        Provides Features in GShell
+    <description>This bundle monitors the deploy directory for new OSGi bundles in jar form, expanded form or for
+        configuration file changes and undeploys/redeploys them
     </description>
 
     <dependencies>
@@ -43,43 +43,27 @@
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.osgi.compendium</artifactId>
-            <scope>provided</scope>
         </dependency>
 
+        <!-- testing -->
         <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.bundlerepository</artifactId>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.commons-io</artifactId>
+            <scope>test</scope>
         </dependency>
-
-        <dependency>
-            <groupId>org.apache.servicemix.kernel.gshell</groupId>
-            <artifactId>org.apache.servicemix.kernel.gshell.core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.servicemix.kernel.gshell</groupId>
-            <artifactId>org.apache.servicemix.kernel.gshell.obr</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.osgi</groupId>
-            <artifactId>spring-osgi-core</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.junit</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.easymock</groupId>
-            <artifactId>easymock</artifactId>
-            <scope>test</scope>
-        </dependency>
+
     </dependencies>
 
     <build>
@@ -89,21 +73,14 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
-                        <Export-Package>org.apache.servicemix.kernel.gshell.features*;version=${project.version}
-                        </Export-Package>
-                        <Import-Package>
-                            org.apache.geronimo.gshell.wisdom.command,
-                            org.apache.servicemix.kernel.gshell.core,
-                            org.apache.geronimo.gshell.wisdom.registry,
-                            org.springframework.beans.factory.config,
-                            *
-                        </Import-Package>
-                        <Private-Package>!*</Private-Package>
-                        <Spring-Context>*;publish-context:=false;create-asynchronously:=false</Spring-Context>
+                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+                        <Export-Package>${pom.artifactId}</Export-Package>
+                        <Bundle-Activator>org.apache.servicemix.kernel.deployer.filemonitor.FileMonitorActivator
+                        </Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
 </project>
