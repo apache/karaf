@@ -635,6 +635,7 @@ public class InstanceManager implements ComponentInstance, InstanceStateListener
                 m_factory.getLogger().log(Logger.ERROR,
                         "[" + m_name + "] createInstance -> The POJO constructor invocation failed : " + e.getMessage());
                 stop();
+                e.printStackTrace();
                 throw new RuntimeException("Cannot create a POJO instance, the POJO constructor invocation has thrown an exception : " + e.getMessage());
             }
         } else {

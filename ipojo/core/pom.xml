@@ -19,8 +19,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
 		<groupId>org.apache.felix</groupId>
-		<artifactId>felix</artifactId>
-		<version>1.0.4</version>
+		<artifactId>felix-parent</artifactId>
+		<version>1.2.0</version>
 		<relativePath>../../pom/pom.xml</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
@@ -49,6 +49,17 @@
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.ipojo.metadata</artifactId>
 			<version>1.3.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>asm</groupId>
+			<artifactId>asm-all</artifactId>
+			<version>3.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>asm</groupId>
+					<artifactId>asm-tree</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 	<build>
@@ -82,7 +93,8 @@
 						<Private-Package> 
 							org.apache.felix.ipojo.handlers.architecture,
 							org.apache.felix.ipojo.handlers.lifecycle.callback,
-							org.apache.felix.ipojo.handlers.lifecycle.controller 
+							org.apache.felix.ipojo.handlers.lifecycle.controller,
+							org.objectweb.asm
 						</Private-Package>
 						<Export-Package> 
 							org.apache.felix.ipojo; version="${ipojo.package.version}",
@@ -97,8 +109,10 @@
 							org.osgi.service.cm, 
 							org.osgi.service.log 
 						</Export-Package>
-						<Include-Resource> META-INF/LICENCE=LICENSE,
-							META-INF/NOTICE=NOTICE </Include-Resource>
+						<Include-Resource> 
+							META-INF/LICENCE=LICENSE,
+							META-INF/NOTICE=NOTICE 
+						</Include-Resource>
 						<_donotcopy> (CVS|.svn|.+.bak|~.+|metadata.xml) </_donotcopy>
 					</instructions>
 				</configuration>
