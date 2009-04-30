@@ -36,9 +36,8 @@
 
     <modules>
         <module>main</module>
-        <module>filemonitor</module>
+        <module>deployer</module>
         <module>gshell</module>
-        <module>spring</module>
         <module>jaas</module>
         <module>client</module>
         <module>management</module>
@@ -192,13 +191,23 @@
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.servicemix.kernel</groupId>
-                <artifactId>org.apache.servicemix.kernel.filemonitor</artifactId>
+                <groupId>org.apache.servicemix.kernel.deployer</groupId>
+                <artifactId>org.apache.servicemix.kernel.deployer.filemonitor</artifactId>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.servicemix.kernel</groupId>
-                <artifactId>org.apache.servicemix.kernel.spring</artifactId>
+                <groupId>org.apache.servicemix.kernel.deployer</groupId>
+                <artifactId>org.apache.servicemix.kernel.deployer.spring</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.kernel.deployer</groupId>
+                <artifactId>org.apache.servicemix.kernel.deployer.blueprint</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.kernel.deployer</groupId>
+                <artifactId>org.apache.servicemix.kernel.deployer.features</artifactId>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>

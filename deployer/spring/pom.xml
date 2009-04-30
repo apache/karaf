@@ -22,20 +22,18 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.servicemix.kernel.gshell</groupId>
-        <artifactId>gshell</artifactId>
+        <groupId>org.apache.servicemix.kernel</groupId>
+        <artifactId>kernel</artifactId>
         <version>1.2.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.servicemix.kernel.gshell</groupId>
-    <artifactId>org.apache.servicemix.kernel.gshell.features</artifactId>
+    <groupId>org.apache.servicemix.kernel.deployer</groupId>
+    <artifactId>org.apache.servicemix.kernel.deployer.spring</artifactId>
     <packaging>bundle</packaging>
     <version>1.2.0-SNAPSHOT</version>
-    <name>Apache ServiceMix Kernel :: GShell Features</name>
+    <name>Apache ServiceMix Kernel :: Spring Deployer</name>
 
-    <description>
-        Provides Features in GShell
-    </description>
+    <description>This deployer transforms a plain spring xml file to a deployable bundle</description>
 
     <dependencies>
         <dependency>
@@ -43,42 +41,17 @@
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
         </dependency>
-
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.bundlerepository</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.servicemix.kernel.gshell</groupId>
-            <artifactId>org.apache.servicemix.kernel.gshell.core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.servicemix.kernel.gshell</groupId>
-            <artifactId>org.apache.servicemix.kernel.gshell.obr</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.springframework.osgi</groupId>
             <artifactId>spring-osgi-core</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.servicemix.kernel.deployer</groupId>
+            <artifactId>org.apache.servicemix.kernel.deployer.filemonitor</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.easymock</groupId>
-            <artifactId>easymock</artifactId>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -89,21 +62,13 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
-                        <Export-Package>org.apache.servicemix.kernel.gshell.features*;version=${project.version}
-                        </Export-Package>
-                        <Import-Package>
-                            org.apache.geronimo.gshell.wisdom.command,
-                            org.apache.servicemix.kernel.gshell.core,
-                            org.apache.geronimo.gshell.wisdom.registry,
-                            org.springframework.beans.factory.config,
-                            *
-                        </Import-Package>
-                        <Private-Package>!*</Private-Package>
+                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+                        <Private-Package>org.apache.servicemix.kernel.spring</Private-Package>
                         <Spring-Context>*;publish-context:=false;create-asynchronously:=false</Spring-Context>
                     </instructions>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
 </project>
