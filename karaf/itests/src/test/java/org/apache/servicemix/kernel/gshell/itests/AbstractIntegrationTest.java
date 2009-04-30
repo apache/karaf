@@ -108,8 +108,8 @@ public abstract class AbstractIntegrationTest {
     public static Option[] configuration() {
         Option[] options = options(
             // install log service using pax runners profile abstraction (there are more profiles, like DS)
-            logProfile(),
-            configProfile(),
+            profile("log").version("1.3.0"),
+            profile("felix.config").version("1.0.10"),
             profile("spring.dm").version("1.2.0-rc1"),
 
             // this is how you set the default log level when using pax logging (logProfile)
