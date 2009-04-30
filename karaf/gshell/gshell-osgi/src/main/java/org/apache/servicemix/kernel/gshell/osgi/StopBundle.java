@@ -16,12 +16,17 @@
  */
 package org.apache.servicemix.kernel.gshell.osgi;
 
+import java.util.List;
+
+import org.apache.geronimo.gshell.clp.Option;
 import org.osgi.framework.Bundle;
 
-public class StopBundle extends BundleCommand {
-
-    protected void doExecute(Bundle bundle) throws Exception {
-        bundle.stop();
+public class StopBundle extends BundlesCommand {
+	
+	protected void doExecute(List<Bundle> bundles) throws Exception {
+        for (Bundle bundle : bundles) {
+            bundle.stop();
+        }
     }
 
 }

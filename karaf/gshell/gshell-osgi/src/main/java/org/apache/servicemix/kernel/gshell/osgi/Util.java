@@ -18,8 +18,14 @@
  */
 package org.apache.servicemix.kernel.gshell.osgi;
 
+import java.io.IOException;
+
+import org.apache.geronimo.gshell.io.IO;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.startlevel.StartLevel;
 
 public class Util
 {
@@ -106,4 +112,61 @@ public class Util
             }
         }
     }
+
+    /**
+     * Check if a bundle is a system bundle (start level < 50)
+     * 
+     * @param bundleContext
+     * @param bundle
+     * @return true if the bundle has start level minor than 50
+     */
+    public static boolean isASystemBundle(BundleContext bundleContext, Bundle bundle) {
+        ServiceReference ref = bundleContext.getServiceReference(StartLevel.class.getName());
+        if (ref != null) {
+            StartLevel sl = (StartLevel) bundleContext.getService(ref);
+            if (sl != null) {
+                int level = sl.getBundleStartLevel(bundle);
+                if (level < 50)
+                    return true;
+                else
+                    return false;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Ask the user to confirm the access to a system bundle
+     * 
+     * @param bundleId
+     * @param io
+     * @return true if the user confirm
+     * @throws IOException
+     */
+    public static boolean accessToSystemBundleIsAllowed(long bundleId, IO io) throws IOException {
+        for (;;) {
+            StringBuffer sb = new StringBuffer();
+            io.err.print("You are about to access system bundle " + bundleId + ".  Do you want to continue (yes/no): ");
+            io.err.flush();
+            for (;;) {
+                int c = io.in.read();
+                if (c < 0) {
+                    return false;
+                }
+                io.err.print((char) c);
+                if (c == '\r' || c == '\n') {
+                    break;
+                }
+                sb.append((char) c);
+            }
+            String str = sb.toString();
+            if ("yes".equals(str)) {
+                return true;
+            }
+            if ("no".equals(str)) {
+                return false;
+            }
+        }
+    }
+
 }
