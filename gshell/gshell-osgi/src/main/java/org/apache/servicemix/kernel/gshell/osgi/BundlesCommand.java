@@ -20,13 +20,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.geronimo.gshell.clp.Argument;
+import org.apache.geronimo.gshell.clp.Option;
 import org.apache.servicemix.kernel.gshell.core.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
 
 public abstract class BundlesCommand extends OsgiCommandSupport {
 
-    @Argument(required = false, multiValued = true, description = "Bundle IDs")
+    @Argument(required = true, multiValued = true, description = "Bundle IDs")
     List<Long> ids;
+
+    @Option(name = "--force")
+    boolean force;
 
     protected Object doExecute() throws Exception {
         List<Bundle> bundles = new ArrayList<Bundle>();
@@ -36,7 +40,9 @@ public abstract class BundlesCommand extends OsgiCommandSupport {
                 if (bundle == null) {
                     io.err.println("Bundle ID" + id + " is invalid");
                 } else {
-                    bundles.add(bundle);
+                    if (force || !Util.isASystemBundle(getBundleContext(), bundle) || Util.accessToSystemBundleIsAllowed(bundle.getBundleId(), io)) {
+                        bundles.add(bundle);
+                    }
                 }
             }
         }

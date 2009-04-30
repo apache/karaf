@@ -16,13 +16,17 @@
  */
 package org.apache.servicemix.kernel.gshell.osgi;
 
+import java.util.List;
+
 import org.osgi.framework.Bundle;
 
-public class RestartBundle extends BundleCommand {
+public class RestartBundle extends BundlesCommand {
 
-    protected void doExecute(Bundle bundle) throws Exception {
-        bundle.stop();
-        bundle.start();
+    protected void doExecute(List<Bundle> bundles) throws Exception {
+        for (Bundle bundle : bundles) {
+            bundle.stop();
+            bundle.start();
+        }
     }
 
 }
