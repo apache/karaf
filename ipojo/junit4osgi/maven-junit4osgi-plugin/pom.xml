@@ -25,7 +25,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>maven-junit4osgi-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
-	<version>1.0.0</version>
+	<version>1.1.0-SNAPSHOT</version>
 	<name>Junit4OSGi Maven Plugin</name>
 	<dependencies>
 		<dependency>
@@ -111,10 +111,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/maven-junit4osgi-plugin-1.0.0</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/maven-junit4osgi-plugin-1.0.0</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/maven-junit4osgi-plugin-1.0.0</url>
-  </scm>
 </project>
