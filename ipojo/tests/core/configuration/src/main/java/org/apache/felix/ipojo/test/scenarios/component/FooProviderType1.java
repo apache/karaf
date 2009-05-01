@@ -18,6 +18,7 @@
  */
 package org.apache.felix.ipojo.test.scenarios.component;
 
+import java.util.Dictionary;
 import java.util.Properties;
 
 import org.apache.felix.ipojo.test.scenarios.configuration.service.FooService;
@@ -32,6 +33,9 @@ public class FooProviderType1 implements FooService {
     
     private static FooProviderType1 singleton;
     private static int count = 0;
+    
+    private int updated;
+    private Dictionary lastupdated;
     
     private static FooProviderType1 singleton(BundleContext bc) {
         if (singleton == null) {
@@ -66,6 +70,13 @@ public class FooProviderType1 implements FooService {
         p.put("context", m_context);
         
         p.put("count", new Integer(count));
+        
+        p.put("updated", new Integer(updated));
+        if (lastupdated != null) {
+            p.put("lastupdated", lastupdated);
+        }
+        
+        
 		return p;
 	}
     
@@ -113,5 +124,10 @@ public class FooProviderType1 implements FooService {
 	    m_foo = foo;
 	    m_context = bc;
 	}
+	
+	public void updated(Dictionary props) {
+        updated++;
+        lastupdated = props;
+    }
 
 }

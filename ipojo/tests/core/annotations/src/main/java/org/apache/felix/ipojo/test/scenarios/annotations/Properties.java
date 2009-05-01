@@ -119,6 +119,33 @@ public class Properties extends OSGiTestCase {
         assertEquals("Propagation value", "true", att);
     }
     
+    public void testUpdatedAndPID() {
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.UpdatedWithManagedService");
+        Element[] provs = meta.getElements("properties");
+        assertNotNull("Properties exists ", provs);
+        Element prov = provs[0];
+        String att = prov.getAttribute("pid");
+        assertNotNull("PID", att);
+        assertEquals("PID Value", "MyPID", att);
+        
+        att = prov.getAttribute("updated");
+        assertNotNull("att", att);
+        assertEquals("Updated Value", "after", att);
+    }
+    
+    public void testUpdatedAndProperties() {
+        Element meta = helper.getMetadata("org.apache.felix.ipojo.test.scenarios.component.UpdatedWithProperties");
+        Element[] provs = meta.getElements("properties");
+        assertNotNull("Properties exists ", provs);
+        Element prov = provs[0];
+        String att = prov.getAttribute("pid");
+        assertNull("PID", att);
+        
+        att = prov.getAttribute("updated");
+        assertNotNull("att", att);
+        assertEquals("Updated Value", "after", att);
+    }
+    
     private Element getPropertyByName(Element[] props, String name) {
         for (int i = 0; i < props.length; i++) {
             String na = props[i].getAttribute("name");

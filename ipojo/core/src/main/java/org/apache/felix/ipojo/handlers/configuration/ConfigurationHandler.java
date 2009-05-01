@@ -18,6 +18,7 @@
  */
 package org.apache.felix.ipojo.handlers.configuration;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -36,6 +37,7 @@ import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.parser.FieldMetadata;
 import org.apache.felix.ipojo.parser.MethodMetadata;
 import org.apache.felix.ipojo.parser.PojoMetadata;
+import org.apache.felix.ipojo.util.Callback;
 import org.apache.felix.ipojo.util.Property;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
@@ -99,6 +101,12 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
      * the handler description. 
      */
     private ConfigurationHandlerDescription m_description;
+    
+    /**
+     * Updated method.
+     * This method is called when a reconfiguration is completed.
+     */
+    private Callback m_updated;
    
 
     /**
@@ -209,6 +217,12 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
         String instanceMSPID = (String) configuration.get("managed.service.pid"); // Look inside the instance configuration.
         if (instanceMSPID != null) {
             m_managedServicePID = instanceMSPID;
+        }
+        
+        // updated method
+        String upd = confs[0].getAttribute("updated");
+        if (upd != null) {
+            m_updated = new Callback(upd, new Class[] {Dictionary.class}, false, getInstanceManager());
         }
         
         for (int i = 0; configurables != null && i < configurables.length; i++) {
@@ -325,7 +339,8 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
 
     /**
      * Reconfigure the component instance.
-     * Check if the new configuration modify the current configuration.
+     * Check if the new configuration modifies the current configuration.
+     * Invokes the updated method is needed.
      * @param configuration : the new configuration
      * @see org.apache.felix.ipojo.Handler#reconfigure(java.util.Dictionary)
      */
@@ -334,6 +349,17 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
         Properties props = reconfigureProperties(configuration);
         propagate(props, m_propagatedFromInstance);
         m_propagatedFromInstance = props;
+        
+        if (getInstanceManager().getPojoObjects() != null) {
+            try {
+                notifyUpdated(null);
+            } catch (Throwable e) {
+                System.out.println("=========");
+                e.printStackTrace();
+
+                System.out.println("=========");
+            }
+        }
     }
     
     /**
@@ -415,6 +441,7 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
     /**
      * Handler createInstance method.
      * This method is override to allow delayed callback invocation.
+     * Invokes the updated method is needed.
      * @param instance : the created object
      * @see org.apache.felix.ipojo.Handler#onCreation(java.lang.Object)
      */
@@ -424,6 +451,45 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
             if (prop.hasMethod()) {
                 prop.invoke(instance);
             }
+        }
+        
+        try {
+            notifyUpdated(instance);
+        } catch (Throwable e) {
+            System.out.println("=========");
+            e.printStackTrace();
+
+            System.out.println("=========");
+        }
+    }
+    
+    /**
+     * Invokes the updated method.
+     * This method build the dictionary containing all valued properties.
+     * @param instance the instance on which the callback must be called.
+     * If <code>null</code> the callback is called on all the exisiting
+     * object.
+     */
+    private void notifyUpdated(Object instance) {
+        if (m_updated == null) {
+            return;
+        }
+        Properties props = new Properties();
+        for (int i = 0; i <m_configurableProperties.size(); i++) {
+            String n = ((Property) m_configurableProperties.get(i)).getName();
+            Object v = ((Property) m_configurableProperties.get(i)).getValue();
+            if (v != Property.NO_VALUE) {
+                props.put(n, v);
+            }
+        }
+        try {
+            if (instance == null) {
+                m_updated.call(new Object[] {props});
+            } else {
+                m_updated.call(instance, new Object[] {props} );
+            }
+        } catch (Exception e) {
+            error("Cannot call the updated method " + m_updated.getMethod() + " : " + e.getMessage());
         }
     }
 

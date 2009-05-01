@@ -79,7 +79,9 @@ public class Utils {
             return fact.createComponentInstance(configuration);
         } catch (Exception e) {
             e.printStackTrace();
+          
             Assert.fail("Cannot create the instance from " + factoryName + " : " + e.getMessage());
+
             return null;
         }
         // }

@@ -397,7 +397,7 @@ The 'instance.name' property has a special semantic as it will be used as the in
     <xs:element name="properties" type="PropertiesType" id="properties"></xs:element>
 	<xs:complexType name="PropertiesType">
         <xs:annotation>
-        	<xs:documentation>List of component, instance or service properties. This field will receive the property value.</xs:documentation>
+        	<xs:documentation>List configuration properties. This field will receive the property value.</xs:documentation>
         </xs:annotation>
         <xs:sequence minOccurs="0" maxOccurs="unbounded">
 			<xs:element name="property" type="PropertyType">
@@ -412,6 +412,10 @@ The 'instance.name' property has a special semantic as it will be used as the in
 		<xs:attribute name="pid" type="xs:string" use="optional">
 			<xs:annotation>
 				<xs:documentation>Unique identifier used to reconfigure components properties (via  Managed Services) with the Configuration Admin.</xs:documentation>
+			</xs:annotation></xs:attribute>
+		<xs:attribute name="updated" type="xs:string" use="optional">
+			<xs:annotation>
+				<xs:documentation>Updated method called when a reconfiguration is done</xs:documentation>
 			</xs:annotation></xs:attribute>
 	</xs:complexType>
 	

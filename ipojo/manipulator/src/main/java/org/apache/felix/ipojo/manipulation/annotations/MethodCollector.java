@@ -67,6 +67,9 @@ public class MethodCollector extends EmptyVisitor {
         if (arg0.equals("Lorg/apache/felix/ipojo/annotations/Invalidate;")) {
             return processInvalidate();
         }
+        if (arg0.equals("Lorg/apache/felix/ipojo/annotations/Updated;")) {
+            return processUpdated();
+        }
         if (arg0.equals("Lorg/apache/felix/ipojo/annotations/Bind;")) {
             return processBind("bind");
         }
@@ -79,6 +82,25 @@ public class MethodCollector extends EmptyVisitor {
             elem.addAttribute(new Attribute("method", m_name));
             return new CustomAnnotationVisitor(elem, m_collector, true, false);
         }
+        
+        return null;
+    }
+
+    /**
+     * Process @Updated annotation.
+     * @return null.
+     */
+    private AnnotationVisitor processUpdated() {
+        Element parent = null;
+        if (! m_collector.getIds().containsKey("properties")) {
+            parent = new Element("Properties", "");
+            m_collector.getIds().put("properties", parent);
+            m_collector.getElements().put(parent, null);
+        } else {
+            parent = (Element) m_collector.getIds().get("properties");
+        }
+        
+        parent.addAttribute(new Attribute("updated", m_name));
         
         return null;
     }

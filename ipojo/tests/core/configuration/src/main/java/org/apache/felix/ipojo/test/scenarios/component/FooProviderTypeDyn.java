@@ -18,6 +18,7 @@
  */
 package org.apache.felix.ipojo.test.scenarios.component;
 
+import java.util.Dictionary;
 import java.util.Properties;
 
 import org.apache.felix.ipojo.test.scenarios.configuration.service.FooService;
@@ -29,6 +30,8 @@ public class FooProviderTypeDyn implements FooService {
 	private String[] strAProp;
 	private int[] intAProp;
 	private boolean boolProp;
+    private int updated;
+    private Dictionary lastUpdate;
 
 	public boolean foo() {
 		intProp = 3;
@@ -53,6 +56,12 @@ public class FooProviderTypeDyn implements FooService {
 		if (intAProp != null) {
 		    p.put("intAProp", intAProp);
 		}
+		
+		p.put("updated", new Integer(updated));
+		if (lastUpdate != null) {
+		    p.put("lastupdated", lastUpdate);
+		}
+		
 		return p;
 	}
 	
@@ -65,5 +74,10 @@ public class FooProviderTypeDyn implements FooService {
 	public long getLong() { return 1; }
 
 	public Boolean getObject() { return new Boolean(true); }
+	
+	public void updated(Dictionary props) {
+	    updated++;
+	    lastUpdate = props;
+	}
 
 }

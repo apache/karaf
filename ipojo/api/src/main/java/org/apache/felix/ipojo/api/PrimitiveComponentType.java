@@ -100,6 +100,11 @@ public class PrimitiveComponentType extends ComponentType {
     private String m_invalidate;
     
     /**
+     * The udpated callback.
+     */
+    private String m_updated;
+    
+    /**
      * Are the properties propagated to provided services? 
      */
     private boolean m_propagation;
@@ -301,6 +306,17 @@ public class PrimitiveComponentType extends ComponentType {
     }
     
     /**
+     * Sets the updated method.
+     * @param method the updated method
+     * @return the current component type
+     */
+    public PrimitiveComponentType setUpdatedMethod(String method) {
+        ensureNotInitialized();
+        m_updated = method;
+        return this;
+    }
+    
+    /**
      * Generates the component description.
      * @return the component type description of 
      * the current component type
@@ -354,6 +370,9 @@ public class PrimitiveComponentType extends ComponentType {
             }
             if (m_msPID != null) {
                 properties.addAttribute(new Attribute("pid", m_msPID));
+            }
+            if (m_updated != null) {
+                properties.addAttribute(new Attribute("updated", m_updated));
             }
             for (int i = 0; i < m_properties.size(); i++) {
                 Property prop = (Property) m_properties.get(i);

@@ -248,4 +248,60 @@
 		</properties>
 	</component>
 	
+	<!--  updated -->
+	 <component
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn"
+		name="CONFIG-FooProviderType-ConfUpdated" architecture="true">
+		<provides />
+		<properties updated="updated">
+			<property name="int" field="intProp" value="2" />
+			<property name="boolean" field="boolProp" value="false" />
+			<property name="string" field="strProp" value="foo" />
+			<property name="strAProp" field="strAProp"
+				value="{foo, bar}" />
+			<property name="intAProp" field="intAProp" value="{1,2, 3}" />
+		</properties>
+	</component>
+	
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn"
+		name="CONFIG-FooProviderType-ConfNoValueUpdated" architecture="true">
+		<provides />
+		<properties updated="updated">
+			<property name="int" field="intProp"/>
+			<property name="boolean" field="boolProp"/>
+			<property name="string" field="strProp"/>
+			<property name="strAProp" field="strAProp"/>
+			<property name="intAProp" field="intAProp"/>
+		</properties>
+	</component>
+	
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		name="CONFIG-FooProviderType-4Updated" architecture="true">
+		<provides>
+			<property name="foo" field="m_foo" />
+			<property name="bar" field="m_bar" />
+			<property name="baz" type="java.lang.String" />
+		</provides>
+		<properties propagation="true" pid="FooProvider-3" updated="updated">
+			<property name="foo" field="m_foo" />
+			<property name="bar" field="m_bar" />
+		</properties>
+	</component>
+	
+	<component
+		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
+		name="CONFIG-FooProviderType-3Updated" architecture="true">
+		<provides>
+			<property name="foo" field="m_foo" />
+			<property name="bar" field="m_bar" />
+			<property name="baz" type="java.lang.String" />
+		</provides>
+		<properties propagation="true" updated="updated">
+			<property name="foo" field="m_foo" />
+			<property name="bar" field="m_bar" />
+		</properties>
+	</component>
+	
 </ipojo>
