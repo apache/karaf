@@ -216,7 +216,7 @@ public class Resolver
 
         // First check to see if the dynamic requirement matches the
         // package name; this means we have to do wildcard matching.
-        String dynPkgName = ((Requirement) dynReq).getPackageName();
+        String dynPkgName = ((Requirement) dynReq).getTargetName();
         boolean wildcard = (dynPkgName.lastIndexOf(".*") >= 0);
         // Remove the "*", but keep the "." if wildcarded.
         dynPkgName = (wildcard)
@@ -354,194 +354,82 @@ public class Resolver
         // detect cycles.
         candidatesMap.put(targetModule, candSetList);
 
-        // Loop through potential fragments and add each set to the
-        // candidate set; if the targetModule is a fragment then there
-        // will be no potential fragments here.
-        Map fragmentMap = state.getPotentialFragments(targetModule);
-        for (Iterator it = fragmentMap.entrySet().iterator(); it.hasNext(); )
-        {
-            Map.Entry entry = (Map.Entry) it.next();
-            IModule[] fragments = (IModule[]) entry.getValue();
-
-            // If we have fragment candidates, then we need to recursively populate
-            // the resolver map with each of them.
-            if (fragments.length > 0)
-            {
-                for (int fragIdx = 0; fragIdx < fragments.length; fragIdx++)
-                {
-                    try
-                    {
-                        // We still need to populate the candidates for the
-                        // fragment even if it is resolved, because fragments
-                        // can be attached to multiple hosts and each host
-                        // may end up with different wires for the fragments
-                        // dependencies.
-                        populateCandidatesMap(state, candidatesMap, fragments[fragIdx]);
-                    }
-                    catch (ResolveException ex)
-                    {
-                        // If we received a resolve exception, then the
-                        // current fragment is not resolvable for some
-                        // reason and should be removed from the list of
-                        // fragments. For now, just null it.
-                        fragments[fragIdx] = null;
-                    }
-                }
-
-                // Remove any nulled fragments to create the final list
-                // of potential fragment candidates.
-                fragments = shrinkModuleArray(fragments);
-            }
-
-            // All fragments, by definition, are optional so we if none of the
-            // candidates could be resolved, then just ignore them; otherwise,
-            // add the resolvable fragments to the host's candidate set.
-            if (fragments.length > 0)
-            {
-                candSetList.add(
-                    new CandidateSet(CandidateSet.FRAGMENT, targetModule, null, fragments));
-            }
-        }
-
         // Loop through each requirement and calculate its resolving
         // set of candidates.
         IRequirement[] reqs = targetModule.getRequirements();
         for (int reqIdx = 0; (reqs != null) && (reqIdx < reqs.length); reqIdx++)
         {
-            if (reqs[reqIdx].getNamespace().equals(ICapability.HOST_NAMESPACE))
+            // Get the candidates from the "resolved" and "unresolved"
+            // package maps. The "resolved" candidates have higher priority
+            // than "unresolved" ones, so put the "resolved" candidates
+            // at the front of the list of candidates.
+            PackageSource[] resolved = state.getResolvedCandidates(reqs[reqIdx]);
+            PackageSource[] unresolved = state.getUnresolvedCandidates(reqs[reqIdx]);
+            PackageSource[] candidates = new PackageSource[resolved.length + unresolved.length];
+            System.arraycopy(resolved, 0, candidates, 0, resolved.length);
+            System.arraycopy(unresolved, 0, candidates, resolved.length, unresolved.length);
+
+            // If we have candidates, then we need to recursively populate
+            // the resolver map with each of them.
+            ResolveException rethrow = null;
+            if (candidates.length > 0)
             {
-                List hostList = state.getPotentialHosts(targetModule);
-                IModule[] hosts = (IModule[]) hostList.toArray(new IModule[hostList.size()]);
-                // If we have host candidates, then we need to recursively populate
-                // the resolver map with each of them.
-                ResolveException rethrow = null;
-                if (hosts.length > 0)
+                for (int candIdx = 0; candIdx < candidates.length; candIdx++)
                 {
-                    for (int hostIdx = 0; hostIdx < hosts.length; hostIdx++)
+                    try
                     {
-                        try
+                        // Only populate the resolver map with modules that
+                        // are not already resolved.
+                        if (!candidates[candIdx].m_module.isResolved())
                         {
-                            // Only populate the resolver map with hosts that
-                            // are not already resolved.
-                            if (!hosts[hostIdx].isResolved())
-                            {
-                                populateCandidatesMap(state, candidatesMap, hosts[hostIdx]);
-                            }
-                        }
-                        catch (ResolveException ex)
-                        {
-                            // If we received a resolve exception, then the
-                            // current host is not resolvable for some
-                            // reason and should be removed from the list of
-                            // hosts. For now, just null it.
-                            hosts[hostIdx] = null;
-                            rethrow = ex;
+                            populateCandidatesMap(state, candidatesMap, candidates[candIdx].m_module);
                         }
                     }
-
-                    // Remove any nulled hosts to create the final list
-                    // of potential host candidates.
-                    hosts = shrinkModuleArray(hosts);
-                }
-
-                // If no host candidates exist at this point, then throw a
-                // resolve exception since all fragments must have a host.
-                if (hosts.length == 0)
-                {
-                    // If we have received an exception while trying to populate
-                    // the candidates map, rethrow that exception since it might
-                    // be useful. NOTE: This is not necessarily the "only"
-                    // correct exception, since it is possible that multiple
-                    // candidates were not resolvable, but it is better than
-                    // nothing.
-                    if (rethrow != null)
+                    catch (ResolveException ex)
                     {
-                        throw rethrow;
-                    }
-                    else
-                    {
-                        throw new ResolveException(
-                            "Unable to find host for fragment.",
-                            targetModule, reqs[reqIdx]);
+                        // If we received a resolve exception, then the
+                        // current candidate is not resolvable for some
+                        // reason and should be removed from the list of
+                        // candidates. For now, just null it.
+                        candidates[candIdx] = null;
+                        rethrow = ex;
                     }
                 }
-                candSetList.add(
-                    new CandidateSet(CandidateSet.HOST, targetModule, reqs[reqIdx], hosts));
+
+                // Remove any nulled candidates to create the final list
+                // of available candidates.
+                candidates = shrinkCandidateArray(candidates);
             }
-            else
+
+            // If no candidates exist at this point, then throw a
+            // resolve exception unless the import is optional.
+            if ((candidates.length == 0) && !reqs[reqIdx].isOptional())
             {
-                // Get the candidates from the "resolved" and "unresolved"
-                // package maps. The "resolved" candidates have higher priority
-                // than "unresolved" ones, so put the "resolved" candidates
-                // at the front of the list of candidates.
-                PackageSource[] resolved = state.getResolvedCandidates(reqs[reqIdx]);
-                PackageSource[] unresolved = state.getUnresolvedCandidates(reqs[reqIdx]);
-                PackageSource[] candidates = new PackageSource[resolved.length + unresolved.length];
-                System.arraycopy(resolved, 0, candidates, 0, resolved.length);
-                System.arraycopy(unresolved, 0, candidates, resolved.length, unresolved.length);
+                // Since the target module cannot resolve, remove its
+                // candidates set list from the candidates map, since
+                // it is invalid.
+                candidatesMap.remove(targetModule);
 
-                // If we have candidates, then we need to recursively populate
-                // the resolver map with each of them.
-                ResolveException rethrow = null;
-                if (candidates.length > 0)
+                // If we have received an exception while trying to populate
+                // the candidates map, rethrow that exception since it might
+                // be useful. NOTE: This is not necessarily the "only"
+                // correct exception, since it is possible that multiple
+                // candidates were not resolvable, but it is better than
+                // nothing.
+                if (rethrow != null)
                 {
-                    for (int candIdx = 0; candIdx < candidates.length; candIdx++)
-                    {
-                        try
-                        {
-                            // Only populate the resolver map with modules that
-                            // are not already resolved.
-                            if (!candidates[candIdx].m_module.isResolved())
-                            {
-                                populateCandidatesMap(state, candidatesMap, candidates[candIdx].m_module);
-                            }
-                        }
-                        catch (ResolveException ex)
-                        {
-                            // If we received a resolve exception, then the
-                            // current candidate is not resolvable for some
-                            // reason and should be removed from the list of
-                            // candidates. For now, just null it.
-                            candidates[candIdx] = null;
-                            rethrow = ex;
-                        }
-                    }
-
-                    // Remove any nulled candidates to create the final list
-                    // of available candidates.
-                    candidates = shrinkCandidateArray(candidates);
+                    throw rethrow;
                 }
-
-                // If no candidates exist at this point, then throw a
-                // resolve exception unless the import is optional.
-                if ((candidates.length == 0) && !reqs[reqIdx].isOptional())
+                else
                 {
-                    // Since the target module cannot resolve, remove its
-                    // candidates set list from the candidates map, since
-                    // it is invalid.
-                    candidatesMap.remove(targetModule);
-
-                    // If we have received an exception while trying to populate
-                    // the candidates map, rethrow that exception since it might
-                    // be useful. NOTE: This is not necessarily the "only"
-                    // correct exception, since it is possible that multiple
-                    // candidates were not resolvable, but it is better than
-                    // nothing.
-                    if (rethrow != null)
-                    {
-                        throw rethrow;
-                    }
-                    else
-                    {
-                        throw new ResolveException(
-                            "Unable to resolve.", targetModule, reqs[reqIdx]);
-                    }
+                    throw new ResolveException(
+                        "Unable to resolve.", targetModule, reqs[reqIdx]);
                 }
-                else if (candidates.length > 0)
-                {
-                    candSetList.add(
-                        new CandidateSet(CandidateSet.NORMAL, targetModule, reqs[reqIdx], candidates));
-                }
+            }
+            else if (candidates.length > 0)
+            {
+                candSetList.add(
+                    new CandidateSet(CandidateSet.NORMAL, targetModule, reqs[reqIdx], candidates));
             }
         }
     }
@@ -1121,18 +1009,6 @@ public class Resolver
         for (int candSetIdx = 0; (candSetList != null) && (candSetIdx < candSetList.size()); candSetIdx++)
         {
             CandidateSet cs = (CandidateSet) candSetList.get(candSetIdx);
-// TODO: FRAGMENT - Eventually fragments will import, so the imports of a fragment
-//                  will need to be added to the imports of the host.
-            if (cs.m_type == CandidateSet.FRAGMENT)
-            {
-                continue;
-            }
-            else if (cs.m_type == CandidateSet.HOST)
-            {
-                // We can ignore the host candidates, since they will be
-                // taken care of when resolving the host module.
-                continue;
-            }
             PackageSource ps = cs.m_candidates[cs.m_idx];
 
             if (ps.m_capability.getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
@@ -1217,18 +1093,6 @@ public class Resolver
         for (int candSetIdx = 0; (candSetList != null) && (candSetIdx < candSetList.size()); candSetIdx++)
         {
             CandidateSet cs = (CandidateSet) candSetList.get(candSetIdx);
-// TODO: FRAGMENT - Eventually fragments will require bundles, so the required
-//                  packages of the fragment will need to be added to the host.
-            if (cs.m_type == CandidateSet.FRAGMENT)
-            {
-                continue;
-            }
-            else if (cs.m_type == CandidateSet.HOST)
-            {
-                // We can ignore the host candidates, since they will be
-                // taken care of when resolving the host module.
-                continue;
-            }
             PackageSource ps = cs.m_candidates[cs.m_idx];
 
             // If the capabaility is a module dependency, then flatten it to packages.
@@ -1345,18 +1209,6 @@ public class Resolver
         for (int candSetIdx = 0; candSetIdx < candSetList.size(); candSetIdx++)
         {
             CandidateSet cs = (CandidateSet) candSetList.get(candSetIdx);
-// TODO: FRAGMENT - Eventually fragments will export, so the exports of the
-//                  fragment will need to be added to the host.
-            if (cs.m_type == CandidateSet.FRAGMENT)
-            {
-                continue;
-            }
-            else if (cs.m_type == CandidateSet.HOST)
-            {
-                // We can ignore the host candidates, since they will be
-                // taken care of when resolving the host module.
-                continue;
-            }
             PackageSource ps = cs.m_candidates[cs.m_idx];
 
             // If the candidate is resolving a module dependency, then
@@ -1620,59 +1472,6 @@ public class Resolver
         // Get the candidate set list for the importer.
         List candSetList = (List) candidatesMap.get(importer);
 
-        // Check if the importer is a fragment, if so we actually want
-        // to get the host and add all fragments candidates to it.
-        if (Util.isFragment(importer))
-        {
-            // Get host candidate for the fragment.
-            IModule host = null;
-            for (int csIdx = 0; (host == null) && (csIdx < candSetList.size()); csIdx++)
-            {
-                CandidateSet cs = (CandidateSet) candSetList.get(csIdx);
-                if (cs.m_type == CandidateSet.HOST)
-                {
-                    host = cs.m_modules[cs.m_idx];
-                }
-            }
-            // Instead of creating wires for the fragment, we will create them
-            // for the host.
-            importer = host;
-
-            // Make sure we haven't already seen the host to avoid a cycle.
-            if (wireMap.get(importer) != null)
-            {
-                return wireMap;
-            }
-
-            // Now add the fragments candidates to the host.
-            candSetList = (List) candidatesMap.get(host);
-            for (int csIdx = 0; (host == null) && (csIdx < candSetList.size()); csIdx++)
-            {
-                CandidateSet cs = (CandidateSet) candSetList.get(csIdx);
-                if (cs.m_type == CandidateSet.FRAGMENT)
-                {
-                    // Add the candidate fragment module to the cycle map
-                    // with no wires, since only its host will have wires.
-                    wireMap.put(cs.m_modules[cs.m_idx], new IWire[0]);
-
-                    // Get the candidate fragment and loop through its candidates
-                    // for resolving its dependencies.
-                    List fragmentCandSetList = (List) candidatesMap.get(cs.m_modules[cs.m_idx]);
-                    for (int csFragIdx = 0; csFragIdx < fragmentCandSetList.size(); csFragIdx++)
-                    {
-                        // Add all non-HOST candidates to the host candidate set,
-                        // since the resulting wires will be for the host not
-                        // the fragment.
-                        CandidateSet csFrag = (CandidateSet) fragmentCandSetList.get(csFragIdx);
-                        if (csFrag.m_type != CandidateSet.HOST)
-                        {
-                            candSetList.add(csFrag);
-                        }
-                    }
-                }
-            }
-        }
-
         List moduleWires = new ArrayList();
         List packageWires = new ArrayList();
 
@@ -1687,42 +1486,33 @@ public class Resolver
             // Get the current candidate set.
             CandidateSet cs = (CandidateSet) candSetList.get(candSetIdx);
 
-            // Create a wire for the current candidate based on the type
-            // of requirement it resolves.
-            if (cs.m_type == CandidateSet.FRAGMENT)
+            // Create a module wire for module dependencies.
+            if (cs.m_requirement.getNamespace().equals(ICapability.MODULE_NAMESPACE))
             {
-                moduleWires.add(new R4WireFragment(importer, cs.m_modules[cs.m_idx]));
+                moduleWires.add(new R4WireModule(
+                    importer,
+                    cs.m_requirement,
+                    cs.m_candidates[cs.m_idx].m_module,
+                    cs.m_candidates[cs.m_idx].m_capability,
+                    calculateCandidateRequiredPackages(importer, cs.m_candidates[cs.m_idx], candidatesMap)));
             }
-            else
+            // Create a package wire for package dependencies.
+            // Filter out the case where a module imports from
+            // itself, since the module should simply load from
+            // its internal class path in this case.
+            else if (importer != cs.m_candidates[cs.m_idx].m_module)
             {
-                // Create a module wire for module dependencies.
-                if (cs.m_requirement.getNamespace().equals(ICapability.MODULE_NAMESPACE))
-                {
-                    moduleWires.add(new R4WireModule(
-                        importer,
-                        cs.m_requirement,
-                        cs.m_candidates[cs.m_idx].m_module,
-                        cs.m_candidates[cs.m_idx].m_capability,
-                        calculateCandidateRequiredPackages(importer, cs.m_candidates[cs.m_idx], candidatesMap)));
-                }
-                // Create a package wire for package dependencies.
-                // Filter out the case where a module imports from
-                // itself, since the module should simply load from
-                // its internal class path in this case.
-                else if (importer != cs.m_candidates[cs.m_idx].m_module)
-                {
-                    // Add wire for imported package.
-                    packageWires.add(new R4Wire(
-                        importer,
-                        cs.m_requirement,
-                        cs.m_candidates[cs.m_idx].m_module,
-                        cs.m_candidates[cs.m_idx].m_capability));
-                }
+                // Add wire for imported package.
+                packageWires.add(new R4Wire(
+                    importer,
+                    cs.m_requirement,
+                    cs.m_candidates[cs.m_idx].m_module,
+                    cs.m_candidates[cs.m_idx].m_capability));
+            }
 
-                // Create any necessary wires for the selected candidate module.
-                wireMap = populateWireMap(
-                    state, candidatesMap, cs.m_candidates[cs.m_idx].m_module, wireMap);
-            }
+            // Create any necessary wires for the selected candidate module.
+            wireMap = populateWireMap(
+                state, candidatesMap, cs.m_candidates[cs.m_idx].m_module, wireMap);
         }
 
         packageWires.addAll(moduleWires);
@@ -1798,8 +1588,6 @@ public class Resolver
     public static interface ResolverState
     {
         IModule[] getModules();
-        Map getPotentialFragments(IModule module);
-        List getPotentialHosts(IModule module);
         PackageSource[] getResolvedCandidates(IRequirement req);
         PackageSource[] getUnresolvedCandidates(IRequirement req);
     }

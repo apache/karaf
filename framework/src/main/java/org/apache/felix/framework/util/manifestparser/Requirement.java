@@ -28,18 +28,23 @@ import org.osgi.framework.*;
 public class Requirement implements IRequirement
 {
     private final String m_namespace;
-    private R4Directive[] m_directives;
-    private R4Attribute[] m_attributes;
-    private boolean m_isOptional = false;
+    private final R4Directive[] m_directives;
+    private final R4Attribute[] m_attributes;
+    private final boolean m_isOptional;
 
-    private String m_pkgName;
-    private VersionRange m_pkgVersionRange;
-    private Filter m_filter;
+    private final String m_targetName;
+    private final VersionRange m_targetVersionRange;
+    private volatile Filter m_filter;
 
     public Requirement(String namespace, String filterStr) throws InvalidSyntaxException
     {
         m_namespace = namespace;
         m_filter = new FilterImpl(filterStr);
+        m_directives = null;
+        m_attributes = null;
+        m_isOptional = false;
+        m_targetName = null;
+        m_targetVersionRange = null;
     }
 
     public Requirement(String namespace, R4Directive[] directives, R4Attribute[] attributes)
@@ -47,33 +52,59 @@ public class Requirement implements IRequirement
         m_namespace = namespace;
         m_directives = directives;
         m_attributes = attributes;
+        m_filter = null;
 
         // Find all import directives: resolution.
+        boolean optional = false;
         for (int i = 0; (m_directives != null) && (i < m_directives.length); i++)
         {
             if (m_directives[i].getName().equals(Constants.RESOLUTION_DIRECTIVE))
             {
-                m_isOptional = m_directives[i].getValue().equals(Constants.RESOLUTION_OPTIONAL);
+                optional = m_directives[i].getValue().equals(Constants.RESOLUTION_OPTIONAL);
             }
         }
+        m_isOptional = optional;
 
+        String targetName = null;
+        VersionRange targetVersionRange = VersionRange.infiniteRange;
         for (int i = 0; i < m_attributes.length; i++)
         {
-            if (m_attributes[i].getName().equals(ICapability.PACKAGE_PROPERTY))
+            if (m_namespace.equals(ICapability.MODULE_NAMESPACE))
             {
-                m_pkgName = (String) m_attributes[i].getValue();
+                if (m_attributes[i].getName().equals(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE))
+                {
+                    targetName = (String) m_attributes[i].getValue();
+                }
+                else if (m_attributes[i].getName().equals(Constants.BUNDLE_VERSION_ATTRIBUTE))
+                {
+                    targetVersionRange = (VersionRange) m_attributes[i].getValue();
+                }
             }
-            else if (m_namespace.equals(ICapability.PACKAGE_NAMESPACE) &&
-                     m_attributes[i].getName().equals(ICapability.VERSION_PROPERTY))
+            else if (m_namespace.equals(ICapability.PACKAGE_NAMESPACE))
             {
-                m_pkgVersionRange = (VersionRange) m_attributes[i].getValue();
+                if (m_attributes[i].getName().equals(ICapability.PACKAGE_PROPERTY))
+                {
+                    targetName = (String) m_attributes[i].getValue();
+                }
+                else if (m_attributes[i].getName().equals(ICapability.VERSION_PROPERTY))
+                {
+                    targetVersionRange = (VersionRange) m_attributes[i].getValue();
+                }
+            }
+            else if (m_namespace.equals(ICapability.HOST_NAMESPACE))
+            {
+                if (m_attributes[i].getName().equals(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE))
+                {
+                    targetName = (String) m_attributes[i].getValue();
+                }
+                else if (m_attributes[i].getName().equals(Constants.BUNDLE_VERSION_ATTRIBUTE))
+                {
+                    targetVersionRange = (VersionRange) m_attributes[i].getValue();
+                }
             }
         }
-
-        if (m_pkgVersionRange == null)
-        {
-            m_pkgVersionRange = VersionRange.infiniteRange;
-        }
+        m_targetName = targetName;
+        m_targetVersionRange = targetVersionRange;
     }
 
     public String getNamespace()
@@ -93,14 +124,14 @@ public class Requirement implements IRequirement
 // TODO: RB - We need to verify that the resolver code does not
 // touch these implementation-specific methods.
 
-    public String getPackageName()
+    public String getTargetName()
     {
-        return m_pkgName;
+        return m_targetName;
     }
 
-    public VersionRange getPackageVersionRange()
+    public VersionRange getTargetVersionRange()
     {
-        return m_pkgVersionRange;
+        return m_targetVersionRange;
     }
 
     public R4Directive[] getDirectives()

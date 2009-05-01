@@ -183,7 +183,7 @@ public class ManifestParser
         for (int reqIdx = 0; reqIdx < importReqs.length; reqIdx++)
         {
             // Verify that the named package has not already been declared.
-            String pkgName = ((Requirement) importReqs[reqIdx]).getPackageName();
+            String pkgName = ((Requirement) importReqs[reqIdx]).getTargetName();
 
             if (dupeMap.get(pkgName) == null)
             {
@@ -221,7 +221,7 @@ public class ManifestParser
         for (int reqIdx = 0; reqIdx < m_dynamicRequirements.length; reqIdx++)
         {
             // Verify that java.* packages are not imported.
-            String pkgName = ((Requirement) m_dynamicRequirements[reqIdx]).getPackageName();
+            String pkgName = ((Requirement) m_dynamicRequirements[reqIdx]).getTargetName();
             if (pkgName.startsWith("java."))
             {
                 throw new BundleException(
@@ -275,21 +275,19 @@ public class ManifestParser
         String fragmentHost = (String) headerMap.get(Constants.FRAGMENT_HOST);
         if ((fragmentHost != null) && (parseExtensionBundleHeader(fragmentHost) == null))
         {
-            if ((headerMap.get(Constants.IMPORT_PACKAGE) != null)
-                || (headerMap.get(Constants.EXPORT_PACKAGE) != null)
-                || (headerMap.get(Constants.BUNDLE_NATIVECODE) != null))
+            if (headerMap.get(Constants.BUNDLE_NATIVECODE) != null)
             {
                 String s = (String) m_configMap.get(FelixConstants.FRAGMENT_VALIDATION_PROP);
                 s = (s == null) ? FelixConstants.FRAGMENT_VALIDATION_EXCEPTION_VALUE : s;
                 if (s.equalsIgnoreCase(FelixConstants.FRAGMENT_VALIDATION_WARNING_VALUE))
                 {
                     m_logger.log(Logger.LOG_WARNING,
-                        "Fragments with exports, imports, or native code are not currently supported.");
+                        "Fragments with native code are not currently supported.");
                 }
                 else
                 {
                     throw new BundleException(
-                        "Fragments with exports, imports, or native code are not currently supported.");
+                        "Fragments native code are not currently supported.");
                 }
             }
         }
@@ -671,7 +669,7 @@ public class ManifestParser
             if (m_requirements[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
             {
                 map.put(
-                    ((Requirement) m_requirements[i]).getPackageName(),
+                    ((Requirement) m_requirements[i]).getTargetName(),
                     m_requirements[i]);
             }
         }
@@ -714,7 +712,7 @@ public class ManifestParser
             {
                 usesValue = usesValue
                     + ((usesValue.length() > 0) ? "," : "")
-                    + ((Requirement) m_requirements[i]).getPackageName();
+                    + ((Requirement) m_requirements[i]).getTargetName();
             }
         }
         R4Directive uses = new R4Directive(
@@ -1119,6 +1117,7 @@ public class ManifestParser
     }
 
     public static R4Directive parseExtensionBundleHeader(String header)
+        throws BundleException
     {
         Object[][][] clauses = parseStandardHeader(header);
 
@@ -1126,15 +1125,25 @@ public class ManifestParser
 
         if (clauses.length == 1)
         {
-            if (FelixConstants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(clauses[0][CLAUSE_PATHS_INDEX][0]) ||
-                Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(clauses[0][CLAUSE_PATHS_INDEX][0]))
+            // See if there is the "extension" directive.
+            for (int i = 0;
+                (result == null) && (i < clauses[0][CLAUSE_DIRECTIVES_INDEX].length);
+                i++)
             {
-                if (clauses[0][CLAUSE_DIRECTIVES_INDEX].length == 1)
+                if (Constants.EXTENSION_DIRECTIVE.equals(((R4Directive)
+                    clauses[0][CLAUSE_DIRECTIVES_INDEX][i]).getName()))
                 {
-                    if (Constants.EXTENSION_DIRECTIVE.equals(((R4Directive)
-                        clauses[0][CLAUSE_DIRECTIVES_INDEX][0]).getName()))
+                    // If the extension directive is specified, make sure
+                    // the target is the system bundle.
+                    if (FelixConstants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(clauses[0][CLAUSE_PATHS_INDEX][0]) ||
+                        Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(clauses[0][CLAUSE_PATHS_INDEX][0]))
                     {
-                        result = (R4Directive) clauses[0][CLAUSE_DIRECTIVES_INDEX][0];
+                        result = (R4Directive) clauses[0][CLAUSE_DIRECTIVES_INDEX][i];
+                    }
+                    else
+                    {
+                        throw new BundleException(
+                            "Only the system bundle can have extension bundles.");
                     }
                 }
             }

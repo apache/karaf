@@ -2176,7 +2176,14 @@ ex.printStackTrace();
 
                 ex.printStackTrace();
 
-                throw new BundleException("Could not create bundle object.", ex);
+                if (ex instanceof BundleException)
+                {
+                    throw (BundleException) ex;
+                }
+                else
+                {
+                    throw new BundleException("Could not create bundle object.", ex);
+                }
             }
 
             // If the bundle is new, then set its start level; existing
@@ -3090,7 +3097,9 @@ ex.printStackTrace();
                 throw new BundleException(
                     "Unresolved constraint in bundle "
                     + Util.getBundleIdFromModuleId(ex.getModule().getId())
-                    + ": " + ex.getRequirement());
+                    + ": "
+                    + ((ex.getRequirement() == null)
+                        ? ex.getMessage() : ex.getRequirement().toString()));
             }
             else
             {
@@ -3448,6 +3457,9 @@ ex.printStackTrace();
         m_configMutableMap.put(
             FelixConstants.SUPPORTS_FRAMEWORK_REQUIREBUNDLE,
             "true");
+        m_configMutableMap.put(
+            FelixConstants.SUPPORTS_BOOTCLASSPATH_EXTENSION,
+            "false");
 
         String s = null;
         s = R4LibraryClause.normalizeOSName(System.getProperty("os.name"));
@@ -3687,10 +3699,28 @@ ex.printStackTrace();
 
                     verifyExecutionEnvironment(bundle);
 
-                    Map resolvedModuleWireMap = m_resolver.resolve(m_resolverState, rootModule);
+                    // Before trying to resolve, tell the resolver state to
+                    // merge all fragments into host, which may result in the
+                    // rootModule changing if the real root is a module.
+                    IModule newRootModule;
+                    try
+                    {
+                        newRootModule = m_resolverState.mergeFragments(rootModule);
+                    }
+                    catch (Exception ex)
+                    {
+                        ex.printStackTrace();
+                        throw new ResolveException("Unable to merge fragments", rootModule, null);
+                    }
 
-                    // Mark all modules as resolved.
-                    markResolvedModules(resolvedModuleWireMap);
+                    if (!Util.isFragment(newRootModule))
+                    {
+                        // Resolve the module.
+                        Map resolvedModuleWireMap = m_resolver.resolve(m_resolverState, newRootModule);
+
+                        // Mark all modules as resolved.
+                        markResolvedModules(resolvedModuleWireMap);
+                    }
                 }
                 finally
                 {
@@ -3786,11 +3816,9 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1])
                 Iterator iter = resolvedModuleWireMap.entrySet().iterator();
                 // Iterate over the map to mark the modules as resolved and
                 // update our resolver data structures.
-                List fragmentList = new ArrayList();
                 List wireList = new ArrayList();
                 while (iter.hasNext())
                 {
-                    fragmentList.clear();
                     wireList.clear();
 
                     Map.Entry entry = (Map.Entry) iter.next();
@@ -3804,55 +3832,31 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1])
                     {
                         for (int wireIdx = 0; wireIdx < wires.length; wireIdx++)
                         {
-                            if (wires[wireIdx] instanceof R4WireFragment)
-                            {
-                                fragmentList.add(wires[wireIdx].getExporter());
-                            }
-                            else
-                            {
-m_logger.log(Logger.LOG_DEBUG, "WIRE: " + wires[wireIdx]);
-                                wireList.add(wires[wireIdx]);
-                            }
+                            wireList.add(wires[wireIdx]);
+                            m_logger.log(
+                                Logger.LOG_DEBUG,
+                                "WIRE: " + wires[wireIdx]);
                         }
                         wires = (IWire[]) wireList.toArray(new IWire[wireList.size()]);
                         ((ModuleImpl) module).setWires(wires);
                     }
 
+                    // Resolve all attached fragments.
+                    IModule[] fragments = ((ModuleImpl) module).getFragments();
+                    for (int i = 0; (fragments != null) && (i < fragments.length); i++)
+                    {
+                        ((ModuleImpl) fragments[i]).setResolved();
+                        // Update the state of the module's bundle to resolved as well.
+                        markBundleResolved(fragments[i]);
+                        m_logger.log(
+                            Logger.LOG_DEBUG,
+                            "FRAGMENT WIRE: " + fragments[i] + " -> hosted by -> " + module);
+                    }
                     // Update the resolver state to show the module as resolved.
                     ((ModuleImpl) module).setResolved();
                     m_resolverState.moduleResolved(module);
                     // Update the state of the module's bundle to resolved as well.
                     markBundleResolved(module);
-
-                    // Attach and mark all fragments as resolved.
-                    attachFragments(module, fragmentList);
-                }
-            }
-        }
-
-        private void attachFragments(IModule host, List fragmentList)
-        {
-            // Attach fragments to host module.
-            if (fragmentList.size() > 0)
-            {
-                for (int i = 0; i < fragmentList.size(); i++)
-                {
-m_logger.log(Logger.LOG_DEBUG, "(FRAGMENT) WIRE: " + host + " -> hosts -> " + fragmentList.get(i));
-
-                    // Update the resolver state to show the module as resolved.
-                    ((ModuleImpl) fragmentList.get(i)).setResolved();
-                    m_resolverState.moduleResolved((IModule) fragmentList.get(i));
-                    // Update the state of the module's bundle to resolved as well.
-                    markBundleResolved((IModule) fragmentList.get(i));
-                }
-                try
-                {
-                    ((ModuleImpl) host).attachFragments(
-                        (IModule[]) fragmentList.toArray(new IModule[fragmentList.size()]));
-                }
-                catch (Exception ex)
-                {
-                    m_logger.log(Logger.LOG_ERROR, "Unable to attach fragments", ex);
                 }
             }
         }

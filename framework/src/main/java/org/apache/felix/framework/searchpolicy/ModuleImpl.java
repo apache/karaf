@@ -30,6 +30,7 @@ import java.net.URLStreamHandler;
 import java.security.ProtectionDomain;
 import java.security.SecureClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 
 import java.util.HashMap;
@@ -224,19 +225,71 @@ public class ModuleImpl implements IModule
         return m_version;
     }
 
-    public ICapability[] getCapabilities()
+    public synchronized ICapability[] getCapabilities()
     {
-        return m_capabilities;
+        List capList = (m_capabilities == null)
+            ? new ArrayList() : new ArrayList(Arrays.asList(m_capabilities));
+        for (int fragIdx = 0;
+            (m_fragments != null) && (fragIdx < m_fragments.length);
+            fragIdx++)
+        {
+            ICapability[] caps = m_fragments[fragIdx].getCapabilities();
+            for (int capIdx = 0;
+                (caps != null) && (capIdx < caps.length);
+                capIdx++)
+            {
+                if (caps[capIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                {
+                    capList.add(caps[capIdx]);
+                }
+            }
+        }
+        return (ICapability[]) capList.toArray(new ICapability[capList.size()]);
     }
 
-    public IRequirement[] getRequirements()
+    public synchronized IRequirement[] getRequirements()
     {
-        return m_requirements;
+        List reqList = (m_requirements == null)
+            ? new ArrayList() : new ArrayList(Arrays.asList(m_requirements));
+        for (int fragIdx = 0;
+            (m_fragments != null) && (fragIdx < m_fragments.length);
+            fragIdx++)
+        {
+            IRequirement[] reqs = m_fragments[fragIdx].getRequirements();
+            for (int reqIdx = 0;
+                (reqs != null) && (reqIdx < reqs.length);
+                reqIdx++)
+            {
+                if (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE)
+                    || reqs[reqIdx].getNamespace().equals(ICapability.MODULE_NAMESPACE))
+                {
+                    reqList.add(reqs[reqIdx]);
+                }
+            }
+        }
+        return (IRequirement[]) reqList.toArray(new IRequirement[reqList.size()]);
     }
 
-    public IRequirement[] getDynamicRequirements()
+    public synchronized IRequirement[] getDynamicRequirements()
     {
-        return m_dynamicRequirements;
+        List reqList = (m_dynamicRequirements == null)
+            ? new ArrayList() : new ArrayList(Arrays.asList(m_dynamicRequirements));
+        for (int fragIdx = 0;
+            (m_fragments != null) && (fragIdx < m_fragments.length);
+            fragIdx++)
+        {
+            IRequirement[] reqs = m_fragments[fragIdx].getDynamicRequirements();
+            for (int reqIdx = 0;
+                (reqs != null) && (reqIdx < reqs.length);
+                reqIdx++)
+            {
+                if (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                {
+                    reqList.add(reqs[reqIdx]);
+                }
+            }
+        }
+        return (IRequirement[]) reqList.toArray(new IRequirement[reqList.size()]);
     }
 
     public R4Library[] getNativeLibraries()
@@ -334,15 +387,16 @@ public class ModuleImpl implements IModule
     private IContent[] initializeContentPath() throws Exception
     {
         List contentList = new ArrayList();
-        calculateContentPath(m_content, contentList, true);
+        calculateContentPath(this, m_content, contentList, true);
         for (int i = 0; (m_fragmentContents != null) && (i < m_fragmentContents.length); i++)
         {
-            calculateContentPath(m_fragmentContents[i], contentList, false);
+            calculateContentPath(m_fragments[i], m_fragmentContents[i], contentList, false);
         }
         return (IContent[]) contentList.toArray(new IContent[contentList.size()]);
     }
 
-    private List calculateContentPath(IContent content, List contentList, boolean searchFragments)
+    private List calculateContentPath(
+        IModule module, IContent content, List contentList, boolean searchFragments)
         throws Exception
     {
         // Creating the content path entails examining the bundle's
@@ -354,7 +408,7 @@ public class ModuleImpl implements IModule
         List localContentList = new ArrayList();
 
         // Find class path meta-data.
-        String classPath = (String) m_headerMap.get(FelixConstants.BUNDLE_CLASSPATH);
+        String classPath = (String) module.getHeaders().get(FelixConstants.BUNDLE_CLASSPATH);
         // Parse the class path into strings.
         String[] classPathStrings = ManifestParser.parseDelimitedString(
             classPath, FelixConstants.CLASS_PATH_SEPARATOR);

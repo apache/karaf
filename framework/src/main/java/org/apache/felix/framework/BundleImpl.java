@@ -732,6 +732,11 @@ class BundleImpl implements Bundle
 
     public Class loadClass(String name) throws ClassNotFoundException
     {
+        if (isExtension())
+        {
+            throw new ClassNotFoundException("Extension bundles cannot load classes.");
+        }
+
         Object sm = System.getSecurityManager();
 
         if (sm != null)
