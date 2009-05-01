@@ -115,7 +115,7 @@
         <module>metatype</module>
         <module>dependencymanager</module>
         <module>dependencymanager.shell</module>
-	    <module>deploymentadmin</module>
+        <module>deploymentadmin</module>
         <module>servicebinder</module>
         <module>wireadmin</module>
         <module>prefs</module>
