@@ -22,16 +22,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.servicemix.kernel.gshell</groupId>
+        <groupId>org.apache.felix.karaf.gshell</groupId>
         <artifactId>gshell</artifactId>
         <version>1.2.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.servicemix.kernel.gshell</groupId>
-    <artifactId>org.apache.servicemix.kernel.gshell.obr</artifactId>
+    <groupId>org.apache.felix.karaf.gshell</groupId>
+    <artifactId>org.apache.felix.karaf.gshell.obr</artifactId>
     <packaging>bundle</packaging>
     <version>1.2.0-SNAPSHOT</version>
-    <name>Apache ServiceMix Kernel :: GShell OBR Commands</name>
+    <name>Apache Felix Karaf :: GShell OBR Commands</name>
 
     <description>
         Provides the OBR GShell commands
@@ -50,8 +50,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.servicemix.kernel.gshell</groupId>
-            <artifactId>org.apache.servicemix.kernel.gshell.core</artifactId>
+            <groupId>org.apache.felix.karaf.gshell</groupId>
+            <artifactId>org.apache.felix.karaf.gshell.core</artifactId>
         </dependency>
 
         <dependency>
@@ -68,11 +68,11 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
-                        <Export-Package>org.apache.servicemix.kernel.gshell.obr*;version=${project.version}</Export-Package>
+                        <Export-Package>org.apache.felix.karaf.gshell.obr*;version=${project.version}</Export-Package>
                         <Import-Package>
                             org.apache.geronimo.gshell.wisdom.command,
                             org.apache.geronimo.gshell.wisdom.registry,
-                            org.apache.servicemix.kernel.gshell.core,
+                            org.apache.felix.karaf.gshell.core,
                             *
                         </Import-Package>
                         <Private-Package>!*</Private-Package>

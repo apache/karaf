@@ -35,7 +35,7 @@
   http://servicemix.apache.org/schema/servicemix-gshell
   http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
-    <import resource="classpath:org/apache/servicemix/kernel/gshell/core/commands.xml" />
+    <import resource="classpath:org/apache/felix/karaf/gshell/core/commands.xml" />
 
     <bean id="adminCommandBundleSupport" scope="prototype">
         <property name="adminService" ref="adminService" />
@@ -43,11 +43,11 @@
 
     <gshell:command-bundle>
         <gshell:command name="admin/create">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.CreateCommand"
+            <gshell:action class="org.apache.felix.karaf.gshell.admin.internal.commands.CreateCommand"
                            parent="adminCommandBundleSupport" />
         </gshell:command>
         <gshell:command name="admin/connect">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.ConnectCommand"
+            <gshell:action class="org.apache.felix.karaf.gshell.admin.internal.commands.ConnectCommand"
                            parent="adminCommandBundleSupport" />
             <gshell:completers>
                 <ref bean="instanceCompleter" />
@@ -55,11 +55,11 @@
             </gshell:completers>
         </gshell:command>
         <gshell:command name="admin/list">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.ListCommand"
+            <gshell:action class="org.apache.felix.karaf.gshell.admin.internal.commands.ListCommand"
                            parent="adminCommandBundleSupport" />
         </gshell:command>
         <gshell:command name="admin/start">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.StartCommand"
+            <gshell:action class="org.apache.felix.karaf.gshell.admin.internal.commands.StartCommand"
                            parent="adminCommandBundleSupport" />
             <gshell:completers>
                 <ref bean="instanceCompleter" />
@@ -67,7 +67,7 @@
             </gshell:completers>
         </gshell:command>
         <gshell:command name="admin/stop">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.StopCommand"
+            <gshell:action class="org.apache.felix.karaf.gshell.admin.internal.commands.StopCommand"
                            parent="adminCommandBundleSupport" />
             <gshell:completers>
                 <ref bean="instanceCompleter" />
@@ -75,7 +75,7 @@
             </gshell:completers>
         </gshell:command>
         <gshell:command name="admin/destroy">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.DestroyCommand"
+            <gshell:action class="org.apache.felix.karaf.gshell.admin.internal.commands.DestroyCommand"
                            parent="adminCommandBundleSupport" />
             <gshell:completers>
                 <ref bean="instanceCompleter" />
@@ -83,7 +83,7 @@
             </gshell:completers>
         </gshell:command>
         <gshell:command name="admin/change-port">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.admin.internal.commands.ChangePortCommand"
+            <gshell:action class="org.apache.felix.karaf.gshell.admin.internal.commands.ChangePortCommand"
                            parent="adminCommandBundleSupport" />
             <gshell:completers>
                 <ref bean="instanceCompleter" />
@@ -94,11 +94,11 @@
 
     <osgi:reference id="preferences" interface="org.osgi.service.prefs.PreferencesService" cardinality="0..1" />
 
-    <bean id="adminService" class="org.apache.servicemix.kernel.gshell.admin.internal.AdminServiceImpl">
+    <bean id="adminService" class="org.apache.felix.karaf.gshell.admin.internal.AdminServiceImpl">
         <property name="preferences" ref="preferences" />
     </bean>
 
-    <bean id="instanceCompleter" class="org.apache.servicemix.kernel.gshell.admin.internal.completers.InstanceCompleter">
+    <bean id="instanceCompleter" class="org.apache.felix.karaf.gshell.admin.internal.completers.InstanceCompleter">
         <property name="adminService" ref="adminService" />
     </bean>
 

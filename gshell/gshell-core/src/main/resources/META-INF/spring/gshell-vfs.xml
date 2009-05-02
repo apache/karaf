@@ -112,7 +112,7 @@
         <property name="fileSystemManager" ref="fileSystemManager"/>
         <property name="scheme" value="mvn"/>
         <property name="provider">
-            <bean class="org.apache.servicemix.kernel.gshell.core.vfs.mvn.MvnFileProvider"/>
+            <bean class="org.apache.felix.karaf.gshell.core.vfs.mvn.MvnFileProvider"/>
         </property>
     </bean>
 

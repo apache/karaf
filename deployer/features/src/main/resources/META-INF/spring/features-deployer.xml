@@ -38,12 +38,12 @@
   http://servicemix.apache.org/schema/servicemix-gshell
   http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
-    <osgi:reference id="featuresService" interface="org.apache.servicemix.kernel.gshell.features.FeaturesService" cardinality="1..1"/>
+    <osgi:reference id="featuresService" interface="org.apache.felix.karaf.gshell.features.FeaturesService" cardinality="1..1"/>
 
-    <bean id="featureDeploymentListener" class="org.apache.servicemix.kernel.deployer.features.FeatureDeploymentListener">
+    <bean id="featureDeploymentListener" class="org.apache.felix.karaf.deployer.features.FeatureDeploymentListener">
         <property name="featuresService" ref="featuresService" />
     </bean>
 
-    <osgi:service ref="featureDeploymentListener" interface="org.apache.servicemix.kernel.deployer.filemonitor.DeploymentListener" />
+    <osgi:service ref="featureDeploymentListener" interface="org.apache.felix.karaf.deployer.filemonitor.DeploymentListener" />
 
 </beans>

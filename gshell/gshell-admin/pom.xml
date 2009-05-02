@@ -22,16 +22,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.servicemix.kernel.gshell</groupId>
+        <groupId>org.apache.felix.karaf.gshell</groupId>
         <artifactId>gshell</artifactId>
         <version>1.2.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.servicemix.kernel.gshell</groupId>
-    <artifactId>org.apache.servicemix.kernel.gshell.admin</artifactId>
+    <groupId>org.apache.felix.karaf.gshell</groupId>
+    <artifactId>org.apache.felix.karaf.gshell.admin</artifactId>
     <packaging>bundle</packaging>
     <version>1.2.0-SNAPSHOT</version>
-    <name>Apache ServiceMix Kernel :: GShell Admin</name>
+    <name>Apache Felix Karaf :: GShell Admin</name>
 
     <description>
         Provides administration commands
@@ -39,22 +39,22 @@
 
     <properties>
         <gshell.osgi.import>
-            org.apache.servicemix.kernel.main.spi.*;resolution:=optional,
+            org.apache.felix.karaf.main.spi.*;resolution:=optional,
             org.apache.geronimo.gshell*,
         </gshell.osgi.import>
         <gshell.osgi.export>
             org.apache.servicemix.jpm
         </gshell.osgi.export>
         <gshell.osgi.private>
-            org.apache.servicemix.kernel.gshell.admin.*,
+            org.apache.felix.karaf.gshell.admin.*,
             org.apache.servicemix.jpm.impl
         </gshell.osgi.private>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.servicemix.kernel.gshell</groupId>
-            <artifactId>org.apache.servicemix.kernel.gshell.core</artifactId>
+            <groupId>org.apache.felix.karaf.gshell</groupId>
+            <artifactId>org.apache.felix.karaf.gshell.core</artifactId>
         </dependency>
 
         <dependency>
@@ -110,7 +110,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${basedir}/target/classes/org/apache/servicemix/kernel/gshell/admin/etc</outputDirectory>
+                            <outputDirectory>${basedir}/target/classes/org/apache/felix/karaf/gshell/admin/etc</outputDirectory>
                             <resources>          
                                 <resource>
                                     <directory>../../${config.location}</directory>
@@ -136,12 +136,12 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
-                        <Export-Package>org.apache.servicemix.kernel.gshell.admin.*;version=${project.version}
+                        <Export-Package>org.apache.felix.karaf.gshell.admin.*;version=${project.version}
                         </Export-Package>
                         <Import-Package>
                             org.apache.geronimo.gshell.wisdom.command,
                             org.apache.geronimo.gshell.wisdom.registry,
-                            org.apache.servicemix.kernel.gshell.core,
+                            org.apache.felix.karaf.gshell.core,
                             *
                         </Import-Package>
                         <Private-Package>org.apache.servicemix.jpm.*</Private-Package>

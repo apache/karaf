@@ -22,16 +22,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.servicemix.kernel.gshell</groupId>
+        <groupId>org.apache.felix.karaf.gshell</groupId>
         <artifactId>gshell</artifactId>
         <version>1.2.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.servicemix.kernel.gshell</groupId>
-    <artifactId>org.apache.servicemix.kernel.gshell.features</artifactId>
+    <groupId>org.apache.felix.karaf.gshell</groupId>
+    <artifactId>org.apache.felix.karaf.gshell.features</artifactId>
     <packaging>bundle</packaging>
     <version>1.2.0-SNAPSHOT</version>
-    <name>Apache ServiceMix Kernel :: GShell Features</name>
+    <name>Apache Felix Karaf :: GShell Features</name>
 
     <description>
         Provides Features in GShell
@@ -56,13 +56,13 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.servicemix.kernel.gshell</groupId>
-            <artifactId>org.apache.servicemix.kernel.gshell.core</artifactId>
+            <groupId>org.apache.felix.karaf.gshell</groupId>
+            <artifactId>org.apache.felix.karaf.gshell.core</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.apache.servicemix.kernel.gshell</groupId>
-            <artifactId>org.apache.servicemix.kernel.gshell.obr</artifactId>
+            <groupId>org.apache.felix.karaf.gshell</groupId>
+            <artifactId>org.apache.felix.karaf.gshell.obr</artifactId>
         </dependency>
 
         <dependency>
@@ -90,11 +90,11 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
-                        <Export-Package>org.apache.servicemix.kernel.gshell.features*;version=${project.version}
+                        <Export-Package>org.apache.felix.karaf.gshell.features*;version=${project.version}
                         </Export-Package>
                         <Import-Package>
                             org.apache.geronimo.gshell.wisdom.command,
-                            org.apache.servicemix.kernel.gshell.core,
+                            org.apache.felix.karaf.gshell.core,
                             org.apache.geronimo.gshell.wisdom.registry,
                             org.springframework.beans.factory.config,
                             *

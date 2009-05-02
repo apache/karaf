@@ -18,10 +18,10 @@
 -->
 <features>
     <feature name="wrapper" version="${version}">
-        <bundle>mvn:org.apache.servicemix.kernel.gshell/org.apache.servicemix.kernel.gshell.wrapper/${version}</bundle>
+        <bundle>mvn:org.apache.felix.karaf.gshell/org.apache.felix.karaf.gshell.wrapper/${version}</bundle>
     </feature>
     <feature name="obr" version="${version}">
         <bundle>mvn:org.apache.felix/org.apache.felix.bundlerepository/${felix.bundlerepository.version}</bundle>
-        <bundle>mvn:org.apache.servicemix.kernel.gshell/org.apache.servicemix.kernel.gshell.obr/${version}</bundle>
+        <bundle>mvn:org.apache.felix.karaf.gshell/org.apache.felix.karaf.gshell.obr/${version}</bundle>
     </feature>
 </features>

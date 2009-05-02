@@ -22,16 +22,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.servicemix.kernel.deployer</groupId>
+        <groupId>org.apache.felix.karaf.deployer</groupId>
         <artifactId>deployer</artifactId>
         <version>1.2.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.servicemix.kernel.deployer</groupId>
-    <artifactId>org.apache.servicemix.kernel.deployer.features</artifactId>
+    <groupId>org.apache.felix.karaf.deployer</groupId>
+    <artifactId>org.apache.felix.karaf.deployer.features</artifactId>
     <packaging>bundle</packaging>
     <version>1.2.0-SNAPSHOT</version>
-    <name>Apache ServiceMix Kernel :: Features Deployer</name>
+    <name>Apache Felix Karaf :: Features Deployer</name>
 
     <description>This deployer can deploy features descriptor on the fly</description>
 
@@ -46,12 +46,12 @@
             <artifactId>spring-osgi-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.kernel.gshell</groupId>
-            <artifactId>org.apache.servicemix.kernel.gshell.features</artifactId>
+            <groupId>org.apache.felix.karaf.gshell</groupId>
+            <artifactId>org.apache.felix.karaf.gshell.features</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.kernel.deployer</groupId>
-            <artifactId>org.apache.servicemix.kernel.deployer.filemonitor</artifactId>
+            <groupId>org.apache.felix.karaf.deployer</groupId>
+            <artifactId>org.apache.felix.karaf.deployer.filemonitor</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
@@ -67,7 +67,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-                        <Private-Package>org.apache.servicemix.kernel.deployer.blueprint</Private-Package>
+                        <Private-Package>org.apache.felix.karaf.deployer.blueprint</Private-Package>
                         <Spring-Context>*;publish-context:=false;create-asynchronously:=false</Spring-Context>
                     </instructions>
                 </configuration>

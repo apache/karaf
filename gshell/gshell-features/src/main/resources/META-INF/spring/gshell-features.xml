@@ -38,7 +38,7 @@
   http://servicemix.apache.org/schema/servicemix-gshell
   http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
-    <import resource="classpath:org/apache/servicemix/kernel/gshell/core/commands.xml" />
+    <import resource="classpath:org/apache/felix/karaf/gshell/core/commands.xml" />
     
     <bean id="placeholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
       <property name="location" value="file:${servicemix.home}/etc/org.apache.servicemix.features.cfg"/>
@@ -46,38 +46,38 @@
 
     <gshell:command-bundle>
         <gshell:command name="features/addUrl">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.AddUrlCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.features.commands.AddUrlCommand" />
         </gshell:command>
         <gshell:command name="features/listUrl">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.ListUrlCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.features.commands.ListUrlCommand" />
         </gshell:command>
         <gshell:command name="features/removeUrl">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.RemoveUrlCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.features.commands.RemoveUrlCommand" />
             <gshell:completers>
                 <ref bean="removeUrlCompleter" />
             </gshell:completers>
         </gshell:command>
         <gshell:command name="features/refreshUrl">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.RefreshUrlCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.features.commands.RefreshUrlCommand" />
         </gshell:command>
         <gshell:command name="features/install">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.InstallFeatureCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.features.commands.InstallFeatureCommand" />
             <gshell:completers>
                 <ref bean="installFeatureCompleter" /> 
             </gshell:completers>
         </gshell:command>
         <gshell:command name="features/uninstall">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.UninstallFeatureCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.features.commands.UninstallFeatureCommand" />
             <gshell:completers>
                 <ref bean="uninstallFeatureCompleter" />
             </gshell:completers>
         </gshell:command>
         <gshell:command name="features/list">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.features.commands.ListFeaturesCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.features.commands.ListFeaturesCommand" />
         </gshell:command>
     </gshell:command-bundle>
 
-    <bean id="featuresService" class="org.apache.servicemix.kernel.gshell.features.internal.FeaturesServiceImpl" init-method="start" destroy-method="stop">
+    <bean id="featuresService" class="org.apache.felix.karaf.gshell.features.internal.FeaturesServiceImpl" init-method="start" destroy-method="stop">
         <property name="urls" value="${featuresRepositories}" />
         <property name="boot" value="${featuresBoot}" />
         <property name="configAdmin" ref="configAdmin" />
@@ -85,15 +85,15 @@
         <property name="featuresServiceRegistry" ref="featureServiceRegistry" />
     </bean>
 
-    <bean id="namingStrategy" class="org.apache.servicemix.kernel.gshell.features.management.DefaultNamingStrategy">
+    <bean id="namingStrategy" class="org.apache.felix.karaf.gshell.features.management.DefaultNamingStrategy">
         <property name="jmxDomainName" value="org.apache.servicemix" />
     </bean>
 
-    <bean id="managementAgent" class="org.apache.servicemix.kernel.gshell.features.management.ManagementAgent">
+    <bean id="managementAgent" class="org.apache.felix.karaf.gshell.features.management.ManagementAgent">
         <property name="mbeanServer" ref="mbeanServer" />
     </bean>
 
-    <bean id="featureServiceRegistry" class="org.apache.servicemix.kernel.gshell.features.management.ManagedFeaturesRegistry">
+    <bean id="featureServiceRegistry" class="org.apache.felix.karaf.gshell.features.management.ManagedFeaturesRegistry">
         <property name="managementAgent" ref="managementAgent" />
         <property name="namingStrategy" ref="namingStrategy" />
         <property name="featuresService" ref="featuresService" />
@@ -103,7 +103,7 @@
 
     <osgi:reference id="preferences" interface="org.osgi.service.prefs.PreferencesService" cardinality="0..1" />
 
-    <osgi:service ref="featuresService" interface="org.apache.servicemix.kernel.gshell.features.FeaturesService" />
+    <osgi:service ref="featuresService" interface="org.apache.felix.karaf.gshell.features.FeaturesService" />
 
     <osgix:cm-properties id="cmProps" persistent-id="org.apache.servicemix.features">
         <prop key="featuresRepositories"></prop>
@@ -118,15 +118,15 @@
         <osgi:listener ref="featureServiceRegistry" bind-method="registerMBeanServer" />
     </osgi:reference>
 
-    <bean id="installFeatureCompleter" class="org.apache.servicemix.kernel.gshell.features.completers.AvailableFeatureCompleter">
+    <bean id="installFeatureCompleter" class="org.apache.felix.karaf.gshell.features.completers.AvailableFeatureCompleter">
         <property name="featuresRegistry" ref="featureServiceRegistry" />
     </bean>
 
-    <bean id="uninstallFeatureCompleter" class="org.apache.servicemix.kernel.gshell.features.completers.InstalledFeatureCompleter">
+    <bean id="uninstallFeatureCompleter" class="org.apache.felix.karaf.gshell.features.completers.InstalledFeatureCompleter">
         <property name="featuresRegistry" ref="featureServiceRegistry" />
     </bean>
 
-    <bean id="removeUrlCompleter" class="org.apache.servicemix.kernel.gshell.features.completers.FeatureRepositoryCompleter">
+    <bean id="removeUrlCompleter" class="org.apache.felix.karaf.gshell.features.completers.FeatureRepositoryCompleter">
         <property name="featuresRegistry" ref="featureServiceRegistry" />
     </bean>
 

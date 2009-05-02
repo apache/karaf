@@ -35,11 +35,11 @@
 
     <bean id="localShellWrapped" parent="shell" init-method="init" destroy-method="close"/>
 
-    <bean id="localShell" class="org.apache.servicemix.kernel.gshell.core.ShellWrapper">
+    <bean id="localShell" class="org.apache.felix.karaf.gshell.core.ShellWrapper">
         <constructor-arg ref="localShellWrapped" />
     </bean>
 
-    <bean id="localConsole" class="org.apache.servicemix.kernel.gshell.core.LocalConsole">
+    <bean id="localConsole" class="org.apache.felix.karaf.gshell.core.LocalConsole">
         <property name="createLocalShell" value="${servicemix.startLocalConsole}"/>
         <property name="shell" ref="localShell"/>
     </bean>

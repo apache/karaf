@@ -37,11 +37,11 @@
         <property name="verbosity" value="DEBUG"/>
     </bean>
 
-    <bean id="branding" class="org.apache.servicemix.kernel.gshell.core.ServiceMixBranding">
+    <bean id="branding" class="org.apache.felix.karaf.gshell.core.ServiceMixBranding">
         <property name="prompt" value="@|bold %{gshell.username}|@%{application.id}:@|bold %{gshell.group}|> " />
     </bean>
 
-    <bean id="application" class="org.apache.servicemix.kernel.gshell.core.ApplicationImpl">
+    <bean id="application" class="org.apache.felix.karaf.gshell.core.ApplicationImpl">
         <property name="id" value="${servicemix.name}"/>
         <property name="io" ref="io"/>
         <property name="model">
@@ -56,7 +56,7 @@
 
     <bean id="eventManager" class="org.apache.geronimo.gshell.event.EventManagerImpl"/>
 
-    <bean id="applicationManager" class="org.apache.servicemix.kernel.gshell.core.ApplicationManagerImpl">
+    <bean id="applicationManager" class="org.apache.felix.karaf.gshell.core.ApplicationManagerImpl">
         <constructor-arg ref="eventManager" />
         <constructor-arg ref="application" />
     </bean>
@@ -92,7 +92,7 @@
         <constructor-arg ref="groupDirResolver"/>
     </bean>
 
-    <bean class="org.apache.servicemix.kernel.gshell.core.WorkAroundAliasCommand" scope="prototype">
+    <bean class="org.apache.felix.karaf.gshell.core.WorkAroundAliasCommand" scope="prototype">
         <constructor-arg ref="commandLineExecutor"/>
     </bean>
 

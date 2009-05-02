@@ -22,16 +22,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.servicemix.kernel.jaas</groupId>
+        <groupId>org.apache.felix.karaf.jaas</groupId>
         <artifactId>jaas</artifactId>
         <version>1.2.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.servicemix.kernel.jaas</groupId>
-    <artifactId>org.apache.servicemix.kernel.jaas.modules</artifactId>
+    <groupId>org.apache.felix.karaf.jaas</groupId>
+    <artifactId>org.apache.felix.karaf.jaas.modules</artifactId>
     <packaging>bundle</packaging>
     <version>1.2.0-SNAPSHOT</version>
-    <name>Apache ServiceMix Kernel :: JAAS Modules</name>
+    <name>Apache Felix Karaf :: JAAS Modules</name>
 
     <description>
         Provides the JAAS Config
@@ -39,8 +39,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.servicemix.kernel.jaas</groupId>
-            <artifactId>org.apache.servicemix.kernel.jaas.config</artifactId>
+            <groupId>org.apache.felix.karaf.jaas</groupId>
+            <artifactId>org.apache.felix.karaf.jaas.config</artifactId>
         </dependency>
 
         <dependency>
@@ -75,10 +75,10 @@
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
                         <Export-Package>
-                            org.apache.servicemix.kernel.jaas.modules*;version=${project.version};-split-package:=merge-first
+                            org.apache.felix.karaf.jaas.modules*;version=${project.version};-split-package:=merge-first
                         </Export-Package>
                         <Import-Package>
-                            org.apache.servicemix.kernel.jaas.config,
+                            org.apache.felix.karaf.jaas.config,
                             org.springframework.beans.factory.config,
                             *
                         </Import-Package>

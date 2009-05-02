@@ -77,7 +77,7 @@
         <property name="domain" value="${sshRealm}" />
     </bean>
 
-    <bean id="sshServerFactory" class="org.apache.servicemix.kernel.gshell.core.sshd.SshServerFactory" init-method="start" destroy-method="stop">
+    <bean id="sshServerFactory" class="org.apache.felix.karaf.gshell.core.sshd.SshServerFactory" init-method="start" destroy-method="stop">
         <constructor-arg ref="sshServer" />
         <property name="start" value="${servicemix.startRemoteShell}" />
     </bean>

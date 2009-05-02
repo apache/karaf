@@ -22,16 +22,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.servicemix.kernel.jaas</groupId>
+        <groupId>org.apache.felix.karaf.jaas</groupId>
         <artifactId>jaas</artifactId>
         <version>1.2.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.servicemix.kernel.jaas</groupId>
-    <artifactId>org.apache.servicemix.kernel.jaas.config</artifactId>
+    <groupId>org.apache.felix.karaf.jaas</groupId>
+    <artifactId>org.apache.felix.karaf.jaas.config</artifactId>
     <packaging>bundle</packaging>
     <version>1.2.0-SNAPSHOT</version>
-    <name>Apache ServiceMix Kernel :: JAAS Config</name>
+    <name>Apache Felix Karaf :: JAAS Config</name>
 
     <description>
         Provides the JAAS Config
@@ -39,8 +39,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.servicemix.kernel.jaas</groupId>
-            <artifactId>org.apache.servicemix.kernel.jaas.boot</artifactId>
+            <groupId>org.apache.felix.karaf.jaas</groupId>
+            <artifactId>org.apache.felix.karaf.jaas.boot</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

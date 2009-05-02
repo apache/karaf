@@ -83,13 +83,6 @@
 
     <files>
         <file>
-            <source>${basedir}/../etc/config.properties</source>          
-            <outputDirectory>/etc/</outputDirectory>
-            <destName>config.properties</destName>
-            <fileMode>0644</fileMode>
-            <lineEnding>dos</lineEnding>
-        </file>
-        <file>
             <source>${basedir}/target/maven-shared-archive-resources/META-INF/LICENSE</source>
             <outputDirectory>/</outputDirectory>
             <destName>LICENSE.txt</destName>
@@ -105,8 +98,8 @@
         </file>
         <file>
             <source>${basedir}/target/classes/features.xml</source>
-            <outputDirectory>/system/org/apache/servicemix/kernel/apache-servicemix-kernel/${version}</outputDirectory>
-            <destName>apache-servicemix-kernel-${version}-features.xml</destName>
+            <outputDirectory>/system/org/apache/felix/karaf/apache-felix-karaf/${version}</outputDirectory>
+            <destName>apache-felix-karaf-${version}-features.xml</destName>
             <fileMode>0644</fileMode>
             <lineEnding>dos</lineEnding>
         </file>
@@ -208,46 +201,46 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/servicemix/kernel/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>org/apache/felix/karaf/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
-                <include>org.apache.servicemix.kernel:org.apache.servicemix.kernel.management</include>
+                <include>org.apache.felix.karaf:org.apache.felix.karaf.management</include>
             </includes>
         </dependencySet>
         <dependencySet>
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/servicemix/kernel/deployer/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>org/apache/felix/karaf/deployer/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
-                <include>org.apache.servicemix.kernel.deployer:org.apache.servicemix.kernel.deployer.filemonitor</include>
-                <include>org.apache.servicemix.kernel.deployer:org.apache.servicemix.kernel.deployer.spring</include>
-                <include>org.apache.servicemix.kernel.deployer:org.apache.servicemix.kernel.deployer.blueprint</include>
-                <include>org.apache.servicemix.kernel.deployer:org.apache.servicemix.kernel.deployer.features</include>
+                <include>org.apache.felix.karaf.deployer:org.apache.felix.karaf.deployer.filemonitor</include>
+                <include>org.apache.felix.karaf.deployer:org.apache.felix.karaf.deployer.spring</include>
+                <include>org.apache.felix.karaf.deployer:org.apache.felix.karaf.deployer.blueprint</include>
+                <include>org.apache.felix.karaf.deployer:org.apache.felix.karaf.deployer.features</include>
             </includes>
         </dependencySet>
         <dependencySet>
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/servicemix/kernel/gshell/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>org/apache/felix/karaf/gshell/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
-                <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.core</include>
-                <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.admin</include>
-                <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.osgi</include>
-                <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.log</include>
-                <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.features</include>
-                <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.config</include>
-                <include>org.apache.servicemix.kernel.gshell:org.apache.servicemix.kernel.gshell.packages</include>
+                <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.core</include>
+                <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.admin</include>
+                <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.osgi</include>
+                <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.log</include>
+                <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.features</include>
+                <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.config</include>
+                <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.packages</include>
             </includes>
         </dependencySet>
         <dependencySet>
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/servicemix/kernel/jaas/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>org/apache/felix/karaf/jaas/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
-                <include>org.apache.servicemix.kernel.jaas:org.apache.servicemix.kernel.jaas.config</include>
-                <include>org.apache.servicemix.kernel.jaas:org.apache.servicemix.kernel.jaas.modules</include>
+                <include>org.apache.felix.karaf.jaas:org.apache.felix.karaf.jaas.config</include>
+                <include>org.apache.felix.karaf.jaas:org.apache.felix.karaf.jaas.modules</include>
             </includes>
         </dependencySet>
         <dependencySet>

@@ -32,14 +32,14 @@
   http://servicemix.apache.org/schema/servicemix-gshell
   http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
-    <import resource="classpath:org/apache/servicemix/kernel/gshell/core/commands.xml" />
+    <import resource="classpath:org/apache/felix/karaf/gshell/core/commands.xml" />
 
     <gshell:command-bundle>
         <gshell:command name="packages/exports">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.packages.ExportsCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.packages.ExportsCommand" />
         </gshell:command>
         <gshell:command name="packages/imports">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.packages.ImportsCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.packages.ImportsCommand" />
         </gshell:command>
     </gshell:command-bundle>
 

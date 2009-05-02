@@ -33,7 +33,7 @@
        default-init-method="init"
        default-destroy-method="destroy">
 
-    <import resource="classpath:org/apache/servicemix/kernel/gshell/core/commands.xml" />
+    <import resource="classpath:org/apache/felix/karaf/gshell/core/commands.xml" />
 
     <bean id="vfsCommandActionTemplate" abstract="true">
         <property name="fileSystemAccess" ref="fileSystemAccess"/>
@@ -121,7 +121,7 @@
         </gshell:command>
 
         <gshell:command name="info">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.core.commands.InfoAction">
+            <gshell:action class="org.apache.felix.karaf.gshell.core.commands.InfoAction">
                 <constructor-arg ref="branding" />
             </gshell:action>
         </gshell:command>

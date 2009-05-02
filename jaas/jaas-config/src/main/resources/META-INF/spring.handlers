@@ -16,5 +16,5 @@
 #    limitations under the License.
 #
 ################################################################################
-http\://servicemix.apache.org/jaas = org.apache.servicemix.kernel.jaas.config.impl.NamespaceHandler
+http\://servicemix.apache.org/jaas = org.apache.felix.karaf.jaas.config.impl.NamespaceHandler
  
