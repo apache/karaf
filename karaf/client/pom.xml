@@ -22,21 +22,21 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.servicemix.kernel</groupId>
+        <groupId>org.apache.felix.karaf</groupId>
         <artifactId>kernel</artifactId>
         <version>1.2.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.servicemix.kernel</groupId>
-    <artifactId>org.apache.servicemix.kernel.client</artifactId>
+    <groupId>org.apache.felix.karaf</groupId>
+    <artifactId>org.apache.felix.karaf.client</artifactId>
     <packaging>bundle</packaging>
     <version>1.2.0-SNAPSHOT</version>
-    <name>Apache ServiceMix Kernel :: Client</name>
+    <name>Apache Felix Karaf :: Client</name>
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.servicemix.kernel.gshell</groupId>
-            <artifactId>org.apache.servicemix.kernel.gshell.core</artifactId>
+            <groupId>org.apache.felix.karaf.gshell</groupId>
+            <artifactId>org.apache.felix.karaf.gshell.core</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -61,19 +61,19 @@
                 <configuration>
                     <instructions>
                         <_donotcopy>(CVS|.svn|config.properties)</_donotcopy>
-                        <Main-Class>org.apache.servicemix.kernel.client.Main</Main-Class>
+                        <Main-Class>org.apache.felix.karaf.client.Main</Main-Class>
                         <Class-Path>
                             ../system/com/google/code/sshd/sshd/${sshd.version}/sshd-${sshd.version}.jar
-                            ../system/org/apache/servicemix/kernel/gshell/org.apache.servicemix.kernel.gshell.core/${pom.version}/org.apache.servicemix.kernel.gshell.core-${pom.version}.jar
+                            ../system/org/apache/felix/karaf/gshell/org.apache.felix.karaf.gshell.core/${pom.version}/org.apache.felix.karaf.gshell.core-${pom.version}.jar
                             ../system/org/apache/servicemix/bundles/org.apache.servicemix.bundles.mina/${mina.version}/org.apache.servicemix.bundles.mina-${mina.version}.jar
                             ../system/org/apache/servicemix/bundles/org.apache.servicemix.bundles.jline/${jline.version}/org.apache.servicemix.bundles.jline-${jline.version}.jar
                         </Class-Path>
                         <Bundle-Name>Apache ServiceMix Shell Client</Bundle-Name>
-                        <Bundle-Description>Shell client bundle for Apache ServiceMix Kernel.</Bundle-Description>
+                        <Bundle-Description>Shell client bundle for Apache Felix Karaf.</Bundle-Description>
                         <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-                        <Export-Package>org.apache.servicemix.kernel.client</Export-Package>
+                        <Export-Package>org.apache.felix.karaf.client</Export-Package>
                         <Private-Package>
-                            org.apache.servicemix.kernel.client;-split-package:=merge-first,
+                            org.apache.felix.karaf.client;-split-package:=merge-first,
                             org.slf4j;-split-package:=merge-first,
                             org.slf4j.spi;-split-package:=merge-first,
                             org.slf4j.helpers;-split-package:=merge-first,

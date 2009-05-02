@@ -281,7 +281,7 @@ run() {
         SERVICEMIX_HOME=`cygpath --path --windows "$SERVICEMIX_HOME"`
         SERVICEMIX_BASE=`cygpath --path --windows "$SERVICEMIX_BASE"`
     fi
-    exec $JAVA $JAVA_OPTS -Dservicemix.home="$SERVICEMIX_HOME" -Dservicemix.base="$SERVICEMIX_BASE" -Djava.util.logging.config.file=$SERVICEMIX_BASE/etc/java.util.logging.properties $OPTS -classpath "$CLASSPATH" org.apache.servicemix.kernel.main.Main $*
+    exec $JAVA $JAVA_OPTS -Dservicemix.home="$SERVICEMIX_HOME" -Dservicemix.base="$SERVICEMIX_BASE" -Djava.util.logging.config.file=$SERVICEMIX_BASE/etc/java.util.logging.properties $OPTS -classpath "$CLASSPATH" org.apache.felix.karaf.main.Main $*
 }
 
 main() {

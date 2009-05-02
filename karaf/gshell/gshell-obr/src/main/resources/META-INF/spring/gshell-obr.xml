@@ -35,35 +35,35 @@
   http://servicemix.apache.org/schema/servicemix-gshell
   http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
-    <import resource="classpath:org/apache/servicemix/kernel/gshell/core/commands.xml" />
+    <import resource="classpath:org/apache/felix/karaf/gshell/core/commands.xml" />
 
     <gshell:command-bundle>
         <gshell:command name="obr/addUrl">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.obr.AddUrlCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.obr.AddUrlCommand" />
         </gshell:command>
         <gshell:command name="obr/deploy">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.obr.DeployCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.obr.DeployCommand" />
         </gshell:command>
         <gshell:command name="obr/info">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.obr.InfoCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.obr.InfoCommand" />
         </gshell:command>
         <gshell:command name="obr/list">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.obr.ListCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.obr.ListCommand" />
         </gshell:command>
         <gshell:command name="obr/listUrl">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.obr.ListUrlCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.obr.ListUrlCommand" />
         </gshell:command>
         <gshell:command name="obr/removeUrl">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.obr.RemoveUrlCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.obr.RemoveUrlCommand" />
         </gshell:command>
         <gshell:command name="obr/refreshUrl">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.obr.RefreshUrlCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.obr.RefreshUrlCommand" />
         </gshell:command>
         <gshell:command name="obr/source">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.obr.SourceCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.obr.SourceCommand" />
         </gshell:command>
         <gshell:command name="obr/start">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.obr.StartCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.obr.StartCommand" />
         </gshell:command>
     </gshell:command-bundle>
 

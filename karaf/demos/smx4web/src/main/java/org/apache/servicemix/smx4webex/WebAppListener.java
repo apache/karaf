@@ -21,7 +21,7 @@ import java.io.File;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import org.apache.servicemix.kernel.main.Main;
+import org.apache.felix.karaf.main.Main;
 
 public class WebAppListener implements ServletContextListener {
 	

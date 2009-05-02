@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:gshell="http://servicemix.apache.org/schema/servicemix-gshell"
+       xsi:schemaLocation="
+  http://www.springframework.org/schema/beans
+  http://www.springframework.org/schema/beans/spring-beans.xsd
+  http://www.springframework.org/schema/util
+  http://www.springframework.org/schema/util/spring-util.xsd
+  http://servicemix.apache.org/schema/servicemix-gshell
+  http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd"
+       default-autowire="no"
+       default-dependency-check="none"
+       default-init-method="init"
+       default-destroy-method="destroy">
+
+    <import resource="classpath:org/apache/felix/karaf/gshell/core/commands.xml" />
+
+    <bean id="vfsCommandActionTemplate" abstract="true">
+        <property name="fileSystemAccess" ref="fileSystemAccess"/>
+    </bean>
+
+    <gshell:command-bundle>
+        <gshell:command name="about">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtin.AboutAction">
+                <constructor-arg ref="application"/>
+            </gshell:action>
+        </gshell:command>
+
+        <gshell:command name="help">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtin.HelpAction">
+                <constructor-arg ref="commandResolver"/>
+            </gshell:action>
+            <gshell:completers>
+                <bean class="org.apache.geronimo.gshell.console.completer.AggregateCompleter">
+                    <constructor-arg>
+                        <list>
+                            <ref bean="aliasNameCompleter"/>
+                            <ref bean="commandNameCompleter"/>
+                        </list>
+                    </constructor-arg>
+                </bean>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+
+        <gshell:command name="exit">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtin.ExitAction"/>
+        </gshell:command>
+
+        <gshell:link name="quit" target="exit"/>
+
+        <gshell:command name="echo">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtin.EchoAction"/>
+        </gshell:command>
+
+        <gshell:command name="clear" type="stateless">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtin.ClearAction"/>
+        </gshell:command>
+
+        <gshell:command name="source">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtin.SourceAction">
+                <constructor-arg ref="commandLineExecutor"/>
+                <constructor-arg ref="fileSystemAccess"/>
+            </gshell:action>
+            <gshell:completers>
+                <ref bean="fileObjectNameCompleter"/>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+
+        <gshell:command name="set">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtin.SetAction"/>
+        </gshell:command>
+
+        <gshell:command name="unset">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtin.UnsetAction"/>
+            <gshell:completers>
+                <ref bean="variableNameCompleter"/>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+
+        <gshell:command name="alias">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtin.AliasAction">
+                <constructor-arg ref="aliasRegistry"/>
+            </gshell:action>
+        </gshell:command>
+
+        <gshell:command name="unalias">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtin.UnaliasAction">
+                <constructor-arg ref="aliasRegistry"/>
+            </gshell:action>
+            <gshell:completers>
+                <ref bean="aliasNameCompleter"/>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+
+        <gshell:command name="history">
+            <gshell:action class="org.apache.geronimo.gshell.commands.builtin.HistoryAction"/>
+        </gshell:command>
+
+        <gshell:command name="info">
+            <gshell:action class="org.apache.felix.karaf.gshell.core.commands.InfoAction">
+                <constructor-arg ref="branding" />
+            </gshell:action>
+        </gshell:command>
+    </gshell:command-bundle>
+
+    <gshell:command-bundle>
+        <gshell:command name="vfs/ls">
+            <gshell:action class="org.apache.geronimo.gshell.commands.file.ListDirectoryAction" parent="vfsCommandActionTemplate"/>
+            <gshell:completers>
+                <ref bean="fileObjectNameCompleter"/>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+   </gshell:command-bundle>
+
+    <gshell:command-bundle>
+        <gshell:command name="optional/cat">
+            <gshell:action class="org.apache.geronimo.gshell.commands.text.CatAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </gshell:action>
+            <gshell:completers>
+                <ref bean="fileObjectNameCompleter"/>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+
+        <gshell:command name="optional/find">
+            <gshell:action class="org.apache.geronimo.gshell.commands.shell.FindAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </gshell:action>
+            <gshell:completers>
+                <ref bean="fileObjectNameCompleter"/>
+                <null/>
+            </gshell:completers>
+        </gshell:command>
+    </gshell:command-bundle>
+
+</beans>

@@ -34,17 +34,17 @@
         Header=value
     </manifest>
 
-    <bean id="springDeploymentListener" class="org.apache.servicemix.kernel.deployer.spring.SpringDeploymentListener">
+    <bean id="springDeploymentListener" class="org.apache.felix.karaf.deployer.spring.SpringDeploymentListener">
 
     </bean>
 
     <osgi:service ref="springDeploymentListener">
         <osgi:interfaces>
-            <value>org.apache.servicemix.kernel.deployer.filemonitor.DeploymentListener</value>
+            <value>org.apache.felix.karaf.deployer.filemonitor.DeploymentListener</value>
         </osgi:interfaces>
     </osgi:service>
 
-    <bean id="springHandler" class="org.apache.servicemix.kernel.deployer.spring.SpringURLHandler" />
+    <bean id="springHandler" class="org.apache.felix.karaf.deployer.spring.SpringURLHandler" />
 
     <osgi:service ref="springHandler" interface="org.osgi.service.url.URLStreamHandlerService">
     	<osgi:service-properties>

@@ -33,7 +33,7 @@
   http://servicemix.apache.org/schema/servicemix-jaas.xsd">
 
     <jaas:config id="realm">
-        <jaas:module className="org.apache.servicemix.kernel.jaas.config.SimpleLoginModule" flags="required">
+        <jaas:module className="org.apache.felix.karaf.jaas.config.SimpleLoginModule" flags="required">
             key=value
         </jaas:module>
     </jaas:config>

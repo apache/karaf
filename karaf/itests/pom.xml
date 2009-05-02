@@ -22,16 +22,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.servicemix.kernel</groupId>
+        <groupId>org.apache.felix.karaf</groupId>
         <artifactId>kernel</artifactId>
         <version>1.2.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.servicemix.kernel</groupId>
+    <groupId>org.apache.felix.karaf</groupId>
     <artifactId>itests</artifactId>
     <packaging>jar</packaging>
     <version>1.2.0-SNAPSHOT</version>
-    <name>Apache ServiceMix Kernel :: ITests</name>
+    <name>Apache Felix Karaf :: ITests</name>
 
     <description>
         Integration tests
@@ -55,8 +55,8 @@
 
         <!-- The assembly and all the dependencies -->
         <dependency>
-            <groupId>org.apache.servicemix.kernel</groupId>
-            <artifactId>apache-servicemix-kernel</artifactId>
+            <groupId>org.apache.felix.karaf</groupId>
+            <artifactId>apache-felix-karaf</artifactId>
             <type>xml</type>
             <classifier>features</classifier>
             <scope>test</scope>

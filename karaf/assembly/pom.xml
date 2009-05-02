@@ -22,89 +22,89 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.servicemix.kernel</groupId>
+        <groupId>org.apache.felix.karaf</groupId>
         <artifactId>kernel</artifactId>
         <version>1.2.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.servicemix.kernel</groupId>
-    <artifactId>apache-servicemix-kernel</artifactId>
+    <groupId>org.apache.felix.karaf</groupId>
+    <artifactId>apache-felix-karaf</artifactId>
     <packaging>pom</packaging>
     <version>1.2.0-SNAPSHOT</version>
-    <name>Apache ServiceMix Kernel :: Assembly</name>
+    <name>Apache Felix Karaf :: Assembly</name>
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.servicemix.kernel</groupId>
-            <artifactId>org.apache.servicemix.kernel.main</artifactId>
+            <groupId>org.apache.felix.karaf</groupId>
+            <artifactId>org.apache.felix.karaf.main</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.kernel</groupId>
-            <artifactId>org.apache.servicemix.kernel.client</artifactId>
+            <groupId>org.apache.felix.karaf</groupId>
+            <artifactId>org.apache.felix.karaf.client</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.kernel.deployer</groupId>
-            <artifactId>org.apache.servicemix.kernel.deployer.filemonitor</artifactId>
+            <groupId>org.apache.felix.karaf.deployer</groupId>
+            <artifactId>org.apache.felix.karaf.deployer.filemonitor</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.kernel.deployer</groupId>
-            <artifactId>org.apache.servicemix.kernel.deployer.spring</artifactId>
+            <groupId>org.apache.felix.karaf.deployer</groupId>
+            <artifactId>org.apache.felix.karaf.deployer.spring</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.kernel.deployer</groupId>
-            <artifactId>org.apache.servicemix.kernel.deployer.blueprint</artifactId>
+            <groupId>org.apache.felix.karaf.deployer</groupId>
+            <artifactId>org.apache.felix.karaf.deployer.blueprint</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.kernel.deployer</groupId>
-            <artifactId>org.apache.servicemix.kernel.deployer.features</artifactId>
+            <groupId>org.apache.felix.karaf.deployer</groupId>
+            <artifactId>org.apache.felix.karaf.deployer.features</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.kernel.gshell</groupId>
-            <artifactId>org.apache.servicemix.kernel.gshell.core</artifactId>
+            <groupId>org.apache.felix.karaf.gshell</groupId>
+            <artifactId>org.apache.felix.karaf.gshell.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.kernel.gshell</groupId>
-            <artifactId>org.apache.servicemix.kernel.gshell.admin</artifactId>
+            <groupId>org.apache.felix.karaf.gshell</groupId>
+            <artifactId>org.apache.felix.karaf.gshell.admin</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.kernel.gshell</groupId>
-            <artifactId>org.apache.servicemix.kernel.gshell.obr</artifactId>
+            <groupId>org.apache.felix.karaf.gshell</groupId>
+            <artifactId>org.apache.felix.karaf.gshell.obr</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.kernel.gshell</groupId>
-            <artifactId>org.apache.servicemix.kernel.gshell.osgi</artifactId>
+            <groupId>org.apache.felix.karaf.gshell</groupId>
+            <artifactId>org.apache.felix.karaf.gshell.osgi</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.kernel.gshell</groupId>
-            <artifactId>org.apache.servicemix.kernel.gshell.log</artifactId>
+            <groupId>org.apache.felix.karaf.gshell</groupId>
+            <artifactId>org.apache.felix.karaf.gshell.log</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.kernel.gshell</groupId>
-            <artifactId>org.apache.servicemix.kernel.gshell.features</artifactId>
+            <groupId>org.apache.felix.karaf.gshell</groupId>
+            <artifactId>org.apache.felix.karaf.gshell.features</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.kernel.gshell</groupId>
-            <artifactId>org.apache.servicemix.kernel.gshell.config</artifactId>
+            <groupId>org.apache.felix.karaf.gshell</groupId>
+            <artifactId>org.apache.felix.karaf.gshell.config</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.kernel.gshell</groupId>
-            <artifactId>org.apache.servicemix.kernel.gshell.packages</artifactId>
+            <groupId>org.apache.felix.karaf.gshell</groupId>
+            <artifactId>org.apache.felix.karaf.gshell.packages</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.kernel.jaas</groupId>
-            <artifactId>org.apache.servicemix.kernel.jaas.boot</artifactId>
+            <groupId>org.apache.felix.karaf.jaas</groupId>
+            <artifactId>org.apache.felix.karaf.jaas.boot</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.kernel.jaas</groupId>
-            <artifactId>org.apache.servicemix.kernel.jaas.config</artifactId>
+            <groupId>org.apache.felix.karaf.jaas</groupId>
+            <artifactId>org.apache.felix.karaf.jaas.config</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.kernel.jaas</groupId>
-            <artifactId>org.apache.servicemix.kernel.jaas.modules</artifactId>
+            <groupId>org.apache.felix.karaf.jaas</groupId>
+            <artifactId>org.apache.felix.karaf.jaas.modules</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.kernel</groupId>
-            <artifactId>org.apache.servicemix.kernel.management</artifactId>
+            <groupId>org.apache.felix.karaf</groupId>
+            <artifactId>org.apache.felix.karaf.management</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.osgi</groupId>
@@ -268,20 +268,20 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.apache.servicemix.kernel</groupId>
-                                    <artifactId>org.apache.servicemix.kernel.main</artifactId>
+                                    <groupId>org.apache.felix.karaf</groupId>
+                                    <artifactId>org.apache.felix.karaf.main</artifactId>
                                     <outputDirectory>target/dependencies</outputDirectory>
                                     <destFileName>servicemix.jar</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.apache.servicemix.kernel</groupId>
-                                    <artifactId>org.apache.servicemix.kernel.client</artifactId>
+                                    <groupId>org.apache.felix.karaf</groupId>
+                                    <artifactId>org.apache.felix.karaf.client</artifactId>
                                     <outputDirectory>target/dependencies</outputDirectory>
                                     <destFileName>servicemix-client.jar</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.apache.servicemix.kernel.jaas</groupId>
-                                    <artifactId>org.apache.servicemix.kernel.jaas.boot</artifactId>
+                                    <groupId>org.apache.felix.karaf.jaas</groupId>
+                                    <artifactId>org.apache.felix.karaf.jaas.boot</artifactId>
                                     <outputDirectory>target/dependencies</outputDirectory>
                                     <destFileName>servicemix-jaas-boot.jar</destFileName>
                                 </artifactItem>

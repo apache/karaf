@@ -22,16 +22,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.servicemix.kernel.gshell</groupId>
+        <groupId>org.apache.felix.karaf.gshell</groupId>
         <artifactId>gshell</artifactId>
         <version>1.2.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.servicemix.kernel.gshell</groupId>
-    <artifactId>org.apache.servicemix.kernel.gshell.wrapper</artifactId>
+    <groupId>org.apache.felix.karaf.gshell</groupId>
+    <artifactId>org.apache.felix.karaf.gshell.wrapper</artifactId>
     <packaging>bundle</packaging>
     <version>1.2.0-SNAPSHOT</version>
-    <name>Apache ServiceMix Kernel :: GShell Service Wrapper</name>
+    <name>Apache Felix Karaf :: GShell Service Wrapper</name>
 
     <description>
         Provides the Service Wrapper GShell integration
@@ -39,20 +39,20 @@
 
     <properties>
         <gshell.osgi.import>
-            org.apache.servicemix.kernel.main.spi.*;resolution:=optional,
+            org.apache.felix.karaf.main.spi.*;resolution:=optional,
             org.apache.geronimo.gshell*,
         </gshell.osgi.import>
         <gshell.osgi.export>
         </gshell.osgi.export>
         <gshell.osgi.private>
-            org.apache.servicemix.kernel.gshell.wrapper.*,
+            org.apache.felix.karaf.gshell.wrapper.*,
         </gshell.osgi.private>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.servicemix.kernel.gshell</groupId>
-            <artifactId>org.apache.servicemix.kernel.gshell.core</artifactId>
+            <groupId>org.apache.felix.karaf.gshell</groupId>
+            <artifactId>org.apache.felix.karaf.gshell.core</artifactId>
         </dependency>
 
         <dependency>
@@ -97,12 +97,12 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
-                        <Export-Package>org.apache.servicemix.kernel.gshell.wrapper.*;version=${project.version}
+                        <Export-Package>org.apache.felix.karaf.gshell.wrapper.*;version=${project.version}
                         </Export-Package>
                         <Import-Package>
                             org.apache.geronimo.gshell.wisdom.command,
                             org.apache.geronimo.gshell.wisdom.registry,
-                            org.apache.servicemix.kernel.gshell.core,
+                            org.apache.felix.karaf.gshell.core,
                             *
                         </Import-Package>
                         <Private-Package>!*</Private-Package>

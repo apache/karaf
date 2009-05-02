@@ -16,4 +16,4 @@
 #    limitations under the License.
 #
 ################################################################################
-http\://servicemix.apache.org/schema/servicemix-jaas.xsd = org/apache/servicemix/kernel/jaas/config/servicemix-jaas.xsd
+http\://servicemix.apache.org/schema/servicemix-jaas.xsd = org/apache/felix/karaf/jaas/config/servicemix-jaas.xsd

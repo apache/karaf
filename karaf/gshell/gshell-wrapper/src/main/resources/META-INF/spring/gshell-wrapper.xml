@@ -32,11 +32,11 @@
   http://servicemix.apache.org/schema/servicemix-gshell
   http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
-    <import resource="classpath:org/apache/servicemix/kernel/gshell/core/commands.xml" />
+    <import resource="classpath:org/apache/felix/karaf/gshell/core/commands.xml" />
 
     <gshell:command-bundle>
         <gshell:command name="wrapper/install">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.wrapper.InstallCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.wrapper.InstallCommand" />
         </gshell:command>
     </gshell:command-bundle>
 

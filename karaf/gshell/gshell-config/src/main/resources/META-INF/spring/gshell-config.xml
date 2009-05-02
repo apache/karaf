@@ -35,49 +35,49 @@
   http://servicemix.apache.org/schema/servicemix-gshell
   http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
-    <import resource="classpath:org/apache/servicemix/kernel/gshell/core/commands.xml" />
+    <import resource="classpath:org/apache/felix/karaf/gshell/core/commands.xml" />
 
     <gshell:command-bundle>
         <gshell:command name="config/cancel">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.config.CancelCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.config.CancelCommand" />
         </gshell:command>
         <gshell:command name="config/edit">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.config.EditCommand"/>
+            <gshell:action class="org.apache.felix.karaf.gshell.config.EditCommand"/>
             <gshell:completers>
                 <ref bean="configCompleter" />
                 <null/>
             </gshell:completers>
         </gshell:command>
         <gshell:command name="config/list">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.config.ListCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.config.ListCommand" />
         </gshell:command>
         <gshell:command name="config/propdel">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.config.PropDelCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.config.PropDelCommand" />
             <gshell:completers>
                 <ref bean="configPropertyCompleter" />
                 <null/>
             </gshell:completers>
         </gshell:command>
         <gshell:command name="config/proplist">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.config.PropListCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.config.PropListCommand" />
         </gshell:command>
         <gshell:command name="config/propset">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.config.PropSetCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.config.PropSetCommand" />
             <gshell:completers>
                 <ref bean="configPropertyCompleter" />
                 <null/>
             </gshell:completers>
         </gshell:command>
         <gshell:command name="config/update">
-            <gshell:action class="org.apache.servicemix.kernel.gshell.config.UpdateCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.config.UpdateCommand" />
         </gshell:command>
     </gshell:command-bundle>
 
-    <bean id="configCompleter" class="org.apache.servicemix.kernel.gshell.config.completers.ConfigurationCompleter" init-method="init">
+    <bean id="configCompleter" class="org.apache.felix.karaf.gshell.config.completers.ConfigurationCompleter" init-method="init">
         <property name="admin" ref="configAdmin"/>
     </bean>
 
-    <bean id="configPropertyCompleter" class="org.apache.servicemix.kernel.gshell.config.completers.ConfigurationPropertyCompleter" />
+    <bean id="configPropertyCompleter" class="org.apache.felix.karaf.gshell.config.completers.ConfigurationPropertyCompleter" />
 
     <osgi:reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"  />
 

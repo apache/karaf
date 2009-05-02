@@ -21,4 +21,4 @@
 ## $Rev: 697807 $ $Date: 2008-09-22 20:12:04 +0700 (Mon, 22 Sep 2008) $
 ##
 
-http\://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd=org/apache/servicemix/kernel/gshell/core/servicemix-gshell.xsd
+http\://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd=org/apache/felix/karaf/gshell/core/servicemix-gshell.xsd

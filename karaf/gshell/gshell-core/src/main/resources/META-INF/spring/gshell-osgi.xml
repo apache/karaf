@@ -39,11 +39,11 @@
        default-init-method="init"
        default-destroy-method="destroy">
 
-    <bean id="osgiCommandRegistry" class="org.apache.servicemix.kernel.gshell.core.OsgiCommandRegistry">
+    <bean id="osgiCommandRegistry" class="org.apache.felix.karaf.gshell.core.OsgiCommandRegistry">
         <constructor-arg ref="commandRegistry" />
     </bean>
 
-    <bean id="osgiAliasRegistry" class="org.apache.servicemix.kernel.gshell.core.OsgiAliasRegistry">
+    <bean id="osgiAliasRegistry" class="org.apache.felix.karaf.gshell.core.OsgiAliasRegistry">
         <constructor-arg ref="aliasRegistry" />
     </bean>
 

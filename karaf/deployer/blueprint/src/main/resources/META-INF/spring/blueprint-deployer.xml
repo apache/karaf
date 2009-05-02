@@ -29,17 +29,17 @@
   http://www.springframework.org/schema/osgi
   http://www.springframework.org/schema/osgi/spring-osgi.xsd">
 
-    <bean id="blueprintDeploymentListener" class="org.apache.servicemix.kernel.deployer.blueprint.BlueprintDeploymentListener">
+    <bean id="blueprintDeploymentListener" class="org.apache.felix.karaf.deployer.blueprint.BlueprintDeploymentListener">
 
     </bean>
 
     <osgi:service ref="blueprintDeploymentListener">
         <osgi:interfaces>
-            <value>org.apache.servicemix.kernel.deployer.filemonitor.DeploymentListener</value>
+            <value>org.apache.felix.karaf.deployer.filemonitor.DeploymentListener</value>
         </osgi:interfaces>
     </osgi:service>
 
-    <bean id="blueprintHandler" class="org.apache.servicemix.kernel.deployer.blueprint.BlueprintURLHandler" />
+    <bean id="blueprintHandler" class="org.apache.felix.karaf.deployer.blueprint.BlueprintURLHandler" />
 
     <osgi:service ref="blueprintHandler" interface="org.osgi.service.url.URLStreamHandlerService">
     	<osgi:service-properties>
