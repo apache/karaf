@@ -70,14 +70,21 @@ public class FelixResolverState implements Resolver.ResolverState
             if (!host.isResolved() && !Util.isFragment(host))
             {
                 ICapability[] caps = host.getCapabilities();
-                ICapability bundleCap = null;
+                ICapability hostCap = null;
                 for (int capIdx = 0; capIdx < caps.length; capIdx++)
                 {
                     if (caps[capIdx].getNamespace().equals(ICapability.HOST_NAMESPACE))
                     {
-                        bundleCap = caps[capIdx];
+                        hostCap = caps[capIdx];
                         break;
                     }
+                }
+
+                // If there is no host capability in the current module,
+                // then just ignore it.
+                if (hostCap == null)
+                {
+                    continue;
                 }
 
                 // Need to remove any previously attached, but not resolved fragments.
@@ -99,7 +106,7 @@ public class FelixResolverState implements Resolver.ResolverState
                         for (int reqIdx = 0; reqIdx < reqs.length; reqIdx++)
                         {
                             if (reqs[reqIdx].getNamespace().equals(ICapability.HOST_NAMESPACE)
-                                && reqs[reqIdx].isSatisfied(bundleCap)
+                                && reqs[reqIdx].isSatisfied(hostCap)
                                 && !((BundleImpl) fragments[fragIdx].getBundle()).isStale()
                                 && !((BundleImpl) fragments[fragIdx].getBundle()).isRemovalPending())
                             {
