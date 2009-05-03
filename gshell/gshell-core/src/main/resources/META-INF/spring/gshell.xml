@@ -37,7 +37,7 @@
         <property name="verbosity" value="DEBUG"/>
     </bean>
 
-    <bean id="branding" class="org.apache.felix.karaf.gshell.core.ServiceMixBranding">
+    <bean id="branding" class="org.apache.felix.karaf.gshell.core.DefaultBranding">
         <property name="prompt" value="@|bold %{gshell.username}|@%{application.id}:@|bold %{gshell.group}|> " />
     </bean>
 

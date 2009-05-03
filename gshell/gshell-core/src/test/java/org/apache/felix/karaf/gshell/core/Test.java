@@ -60,9 +60,9 @@ public class Test extends TestCase {
             ApplicationManager appMgr = (ApplicationManager) context.getBean("applicationManager");
             assertNotNull(appMgr);
             Shell shell = appMgr.create();
-            ServiceMixBranding smxBrandng = (ServiceMixBranding)appMgr.getApplication().getModel().getBranding();
-            assertNotNull(smxBrandng.getWelcomeMessage());
-            System.out.println(smxBrandng.getWelcomeMessage());
+            DefaultBranding branding = (DefaultBranding)appMgr.getApplication().getModel().getBranding();
+            assertNotNull(branding.getWelcomeMessage());
+            System.out.println(branding.getWelcomeMessage());
             assertNotNull(shell);
             shell.execute("about");
         } finally {
@@ -86,9 +86,9 @@ public class Test extends TestCase {
             ApplicationManager appMgr = (ApplicationManager) context.getBean("applicationManager");
             assertNotNull(appMgr);
             Shell shell = appMgr.create();
-            ServiceMixBranding smxBrandng = (ServiceMixBranding)appMgr.getApplication().getModel().getBranding();
-            assertNotNull(smxBrandng.getWelcomeMessage());
-            System.out.println(smxBrandng.getWelcomeMessage());
+            DefaultBranding branding = (DefaultBranding)appMgr.getApplication().getModel().getBranding();
+            assertNotNull(branding.getWelcomeMessage());
+            System.out.println(branding.getWelcomeMessage());
             assertNotNull(shell);
             shell.execute("vfs/ls meta:/commands/");
         } finally {
@@ -112,9 +112,9 @@ public class Test extends TestCase {
             ApplicationManager appMgr = (ApplicationManager) context.getBean("applicationManager");
             assertNotNull(appMgr);
             Shell shell = appMgr.create();
-            ServiceMixBranding smxBrandng = (ServiceMixBranding)appMgr.getApplication().getModel().getBranding();
-            assertNotNull(smxBrandng.getWelcomeMessage());
-            System.out.println(smxBrandng.getWelcomeMessage());
+            DefaultBranding branding = (DefaultBranding)appMgr.getApplication().getModel().getBranding();
+            assertNotNull(branding.getWelcomeMessage());
+            System.out.println(branding.getWelcomeMessage());
             assertNotNull(shell);
 
             shell.execute("vfs");

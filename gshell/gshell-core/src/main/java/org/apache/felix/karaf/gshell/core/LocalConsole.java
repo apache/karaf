@@ -76,7 +76,7 @@ public class LocalConsole implements Runnable, BundleContextAware {
         mainServiceTracker = new ServiceTracker(bundleContext, "org.apache.felix.karaf.main.spi.MainService", null);
         mainServiceTracker.open();
 
-        shell.getContext().getVariables().set("gshell.username", "smx");
+        shell.getContext().getVariables().set("gshell.username", "karaf");
         frameworkStarted = new CountDownLatch(1);
 		getBundleContext().addFrameworkListener(new FrameworkListener(){
 			public void frameworkEvent(FrameworkEvent event) {
