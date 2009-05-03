@@ -1,3 +1,12 @@
+Version 1.0.0
+-------------
+
+** Bug
+    * [FELIX-1036] - FileInstaller spawns multiple watchers for same directory
+
+** Improvement
+    * [FELIX-1055] - Making FileInstall bundle CDC-1.1/Foundation 1.1 compatible
+
 Version 0.9.2
 --------------
 

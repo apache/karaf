@@ -159,7 +159,7 @@ public class DirectoryWatcherTest extends TestCase
         mockBundleContextControl.setReturnValue( null );
         mockBundleContextControl.replay();
         mockPackageAdmin.getBundleType( mockBundle );
-        mockPackageAdminControl.setReturnValue( PackageAdmin.BUNDLE_TYPE_FRAGMENT );
+        mockPackageAdminControl.setReturnValue( new Long(PackageAdmin.BUNDLE_TYPE_FRAGMENT) );
         mockPackageAdminControl.replay();
         mockBundleControl.replay();
 

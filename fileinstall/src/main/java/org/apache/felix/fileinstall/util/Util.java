@@ -22,7 +22,6 @@ package org.apache.felix.fileinstall.util;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 
 public class Util
