@@ -54,12 +54,12 @@ public class ApplicationImpl implements Application, InitializingBean  {
         props.load(getClass().getClassLoader().getResourceAsStream(SERVICEMIX_VERSION));
         String kernelVersion = props.getProperty(VERSION_PROPERTY);
         this.model.setVersion(kernelVersion);
-    	ServiceMixBranding smxBranding = (ServiceMixBranding) this.model.getBranding();
-        smxBranding.setVersion(kernelVersion);
+    	  DefaultBranding branding = (DefaultBranding) this.model.getBranding();
+        branding.setVersion(kernelVersion);
         
      	if (this.getClass().getClassLoader().getResource(EMBEDDED_PROPS) != null) {                    
             embeddedResource = this.getClass().getClassLoader().getResource(EMBEDDED_PROPS);
-            smxBranding.setEmbeddedResource(embeddedResource);
+            branding.setEmbeddedResource(embeddedResource);
         }
     }
     

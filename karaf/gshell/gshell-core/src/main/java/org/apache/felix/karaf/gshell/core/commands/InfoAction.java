@@ -36,12 +36,12 @@ import org.apache.geronimo.gshell.ansi.AnsiRenderer;
 import org.apache.geronimo.gshell.command.CommandAction;
 import org.apache.geronimo.gshell.command.CommandContext;
 import org.apache.geronimo.gshell.io.IO;
-import org.apache.felix.karaf.gshell.core.ServiceMixBranding;
+import org.apache.felix.karaf.gshell.core.DefaultBranding;
 import org.codehaus.plexus.util.StringUtils;
 
 public class InfoAction implements CommandAction {
 
-    private ServiceMixBranding branding;
+    private DefaultBranding branding;
 
     private IO io;
 
@@ -49,7 +49,7 @@ public class InfoAction implements CommandAction {
     private NumberFormat fmtI = new DecimalFormat("###,###", new DecimalFormatSymbols(Locale.ENGLISH));
     private NumberFormat fmtD = new DecimalFormat("###,##0.000", new DecimalFormatSymbols(Locale.ENGLISH));
 
-    public InfoAction(ServiceMixBranding branding) {
+    public InfoAction(DefaultBranding branding) {
         this.branding = branding;
     }
 

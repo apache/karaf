@@ -30,7 +30,7 @@ import org.apache.geronimo.gshell.ansi.AnsiCode;
 import org.apache.geronimo.gshell.ansi.AnsiRenderWriter;
 import org.apache.geronimo.gshell.application.model.Branding;
 
-public class ServiceMixBranding extends Branding {		
+public class DefaultBranding extends Branding {
    
     private String prompt; 
     private String[] banner;
@@ -41,20 +41,20 @@ public class ServiceMixBranding extends Branding {
     private String applicationVersion;
     private String applicationLocation;
     
-    private String[] kernelBanner = {
-        " ____                  _          __  __ _      ",
-        "/ ___|  ___ _ ____   _(_) ___ ___|  \\/  (_)_  __",
-        "\\___ \\ / _ \\ '__\\ \\ / / |/ __/ _ \\ |\\/| | \\ \\/ /",
-        " ___) |  __/ |   \\ V /| | (_|  __/ |  | | |>  < ",
-        "|____/ \\___|_|    \\_/ |_|\\___\\___|_|  |_|_/_/\\_\\",
+    private String[] defaultBanner = {
+"        __ __                  ____",
+"       / //_/____ __________ _/ __/",
+"      / ,<  / __ `/ ___/ __ `/ /_",
+"     / /| |/ /_/ / /  / /_/ / __/",
+"    /_/ |_|\\__,_/_/   \\__,_/_/"
     };
 
-    public ServiceMixBranding() {
-    	banner = kernelBanner;
-    	displayName = "ServiceMix Kernel";
-    	displayLocation = "http://servicemix.apache.org/kernel/";    	
+    public DefaultBranding() {
+    	banner = defaultBanner;
+    	displayName = "Apache Felix Karaf";
+    	displayLocation = "http://felix.apache.org/site/apache-felix-karaf.html";    	
     }
-    
+
     public void setEmbeddedResource(URL embeddedResource) {    	
     	Properties brandProps = loadPropertiesFile(embeddedResource);        
     	String brandBanner = brandProps.getProperty("banner");
@@ -76,7 +76,7 @@ public class ServiceMixBranding extends Branding {
     }    
     
     public String getName() {
-        return "servicemix";
+        return "karaf";
     }
         
     public String getDisplayName() {    	
@@ -171,7 +171,7 @@ public class ServiceMixBranding extends Branding {
         catch (Exception ex) {
             System.err.println(
                     "Error loading embedded properties from " + brandPropURL);
-            System.err.println("ServicemixBranding: " + ex);
+            System.err.println("DefaultBranding: " + ex);
             try {
                 if (is != null) is.close();
             }
