@@ -22,7 +22,12 @@ import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.net.*;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
+
 import org.apache.felix.framework.util.SecureAction;
 import org.osgi.service.url.URLStreamHandlerService;
 import org.osgi.service.url.URLStreamHandlerSetter;
@@ -49,9 +54,10 @@ import org.osgi.service.url.URLStreamHandlerSetter;
  * stream handler service at any given time.
  * </p>
 **/
-public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
+public class URLHandlersStreamHandlerProxy extends URLStreamHandler
     implements URLStreamHandlerSetter, InvocationHandler
 {
+    private static final Class[] URL_PROXY_CLASS;
     private static final Object[] SERVICE_RANKING_PARAMS = new Object[]{"service.ranking"};
     private static final Object[] SERVICE_ID_PARAMS = new Object[]{"service.id"};
     private static final Class[] STRING_TYPES = new Class[]{String.class};
@@ -62,13 +68,14 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
     private static final Method HASH_CODE;
     private static final Method HOSTS_EQUAL;
     private static final Method OPEN_CONNECTION;
+    private static final Method OPEN_CONNECTION_PROXY;
     private static final Method SAME_FILE;
     private static final Method TO_EXTERNAL_FORM;
     
     static {
+        SecureAction action = new SecureAction();
         try
         {
-            SecureAction action = new SecureAction();
             EQUALS = URLStreamHandler.class.getDeclaredMethod("equals", 
                 new Class[]{URL.class, URL.class});
             action.setAccesssible(EQUALS);
@@ -96,9 +103,25 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
         }
         catch (Exception ex)
         {
-            ex.printStackTrace();
             throw new RuntimeException(ex.getMessage());
         }
+
+        Method open_connection_proxy = null;
+        Class[] url_proxy_class = null;
+        try
+        {
+        	url_proxy_class = new Class[]{URL.class, java.net.Proxy.class};
+            open_connection_proxy = URLStreamHandler.class.getDeclaredMethod(
+                "openConnection", url_proxy_class);
+            action.setAccesssible(open_connection_proxy);
+        }
+        catch (Throwable ex)
+        {
+           open_connection_proxy = null; 
+           url_proxy_class = null;
+        }
+        OPEN_CONNECTION_PROXY = open_connection_proxy;
+        URL_PROXY_CLASS = url_proxy_class;
     }
 
     private final Object m_service;
@@ -126,7 +149,7 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
         m_action = action;
         m_builtIn = null;
         m_builtInURL = null;
-        m_filter = null;
+        m_filter = null; 
     }
 
     //
@@ -150,7 +173,6 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
         } 
         catch (Exception ex)  
         {
-            ex.printStackTrace();
             throw new IllegalStateException("Stream handler unavailable due to: " + ex.getMessage());
         }
     }
@@ -172,7 +194,6 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
         } 
         catch (Exception ex)  
         {
-            ex.printStackTrace();
             throw new IllegalStateException("Stream handler unavailable due to: " + ex.getMessage());
         }
     }
@@ -195,7 +216,6 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
         } 
         catch (Exception ex)  
         {
-            ex.printStackTrace();
             throw new IllegalStateException("Stream handler unavailable due to: " + ex.getMessage());
         }
     }
@@ -218,7 +238,6 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
         } 
         catch (Exception ex)  
         {
-            ex.printStackTrace();
             throw new IllegalStateException("Stream handler unavailable due to: " + ex.getMessage());
         }
     }
@@ -241,7 +260,6 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
         } 
         catch (Exception ex)  
         {
-            ex.printStackTrace();
             throw new IllegalStateException("Stream handler unavailable due to: " + ex.getMessage());
         }
     }
@@ -287,7 +305,44 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
         } 
         catch (Exception ex)  
         {
-            ex.printStackTrace();
+            throw new IllegalStateException("Stream handler unavailable due to: " + ex.getMessage());
+        }
+    }
+
+    protected URLConnection openConnection(URL url, java.net.Proxy proxy) throws IOException
+    {
+        Object svc = getStreamHandlerService();
+        if (svc == null)
+        {
+            throw new MalformedURLException("Unknown protocol: " + url.toString());
+        }
+        if (svc instanceof URLStreamHandlerService)
+        {
+            Method method;
+            try 
+            {
+                method = svc.getClass().getMethod("openConnection", URL_PROXY_CLASS);
+            } 
+            catch (NoSuchMethodException e) 
+            {
+                throw new UnsupportedOperationException(e);
+            }
+            try 
+            {
+                m_action.setAccesssible(method);
+                return (URLConnection) method.invoke(svc, new Object[]{url, proxy});
+            } 
+            catch (Exception e) 
+            {
+                throw new IOException(e.getMessage());
+            }
+        }
+        try 
+        {
+            return (URLConnection) OPEN_CONNECTION_PROXY.invoke(svc, new Object[]{url, proxy});
+        } 
+        catch (Exception ex)  
+        {
             throw new IllegalStateException("Stream handler unavailable due to: " + ex.getMessage());
         }
     }
@@ -323,7 +378,6 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
             } 
             catch (Exception ex)  
             {
-                ex.printStackTrace();
                 throw new IllegalStateException("Stream handler unavailable due to: " + ex.getMessage());
             }
         }
@@ -348,7 +402,6 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
         } 
         catch (Exception ex)  
         {
-            ex.printStackTrace();
             throw new IllegalStateException("Stream handler unavailable due to: " + ex.getMessage());
         }
     }
@@ -389,7 +442,6 @@ public final class URLHandlersStreamHandlerProxy extends URLStreamHandler
         } 
         catch (Exception ex)  
         {
-            ex.printStackTrace();
             throw new IllegalStateException("Stream handler unavailable due to: " + ex.getMessage());
         }
     }
