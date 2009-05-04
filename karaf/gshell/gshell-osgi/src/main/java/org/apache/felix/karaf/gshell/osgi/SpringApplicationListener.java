@@ -37,8 +37,7 @@ import org.springframework.osgi.service.importer.event.OsgiServiceDependencyEven
 import org.springframework.osgi.service.importer.event.OsgiServiceDependencyWaitStartingEvent;
 
 public class SpringApplicationListener implements OsgiBundleApplicationContextListener,
-                                                  BundleListener, BundleContextAware,
-                                                  InitializingBean, DisposableBean {
+                                                  BundleListener {
 
     public static enum SpringState {
         Unknown,
@@ -92,7 +91,7 @@ public class SpringApplicationListener implements OsgiBundleApplicationContextLi
         this.bundleContext = bundleContext;
     }
 
-    public void afterPropertiesSet() throws Exception {
+    public void init() throws Exception {
         bundleContext.addBundleListener(this);
     }
 

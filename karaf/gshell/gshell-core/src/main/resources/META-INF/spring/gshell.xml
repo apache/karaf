@@ -56,7 +56,7 @@
 
     <bean id="eventManager" class="org.apache.geronimo.gshell.event.EventManagerImpl"/>
 
-    <bean id="applicationManager" class="org.apache.felix.karaf.gshell.core.ApplicationManagerImpl">
+    <bean id="applicationManager" class="org.apache.felix.karaf.gshell.core.ApplicationManagerImpl" init-method="init" destroy-method="destroy">
         <constructor-arg ref="eventManager" />
         <constructor-arg ref="application" />
     </bean>

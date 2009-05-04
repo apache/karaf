@@ -56,8 +56,7 @@ import org.springframework.osgi.context.BundleContextAware;
 /**
  * A deployment listener able to hot deploy a feature descriptor
  */
-public class FeatureDeploymentListener implements DeploymentListener, SynchronousBundleListener, BundleContextAware,
-                                                        InitializingBean, DisposableBean {
+public class FeatureDeploymentListener implements DeploymentListener, SynchronousBundleListener {
 
     public static final String FEATURE_PATH = "org.apache.felix.karaf.gshell.features";
 
@@ -83,7 +82,7 @@ public class FeatureDeploymentListener implements DeploymentListener, Synchronou
         this.bundleContext = bundleContext;
     }
 
-    public void afterPropertiesSet() throws Exception {
+    public void init() throws Exception {
         bundleContext.addBundleListener(this);
         for (Bundle bundle : bundleContext.getBundles()) {
             bundleChanged(new BundleEvent(BundleEvent.INSTALLED, bundle));

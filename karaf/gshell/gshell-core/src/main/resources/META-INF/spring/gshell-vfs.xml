@@ -55,7 +55,7 @@
     -->
     <bean id="defaultFileReplicator" class="org.apache.commons.vfs.impl.DefaultFileReplicator"/>
 
-    <bean id="fileSystemManager" class="org.apache.geronimo.gshell.vfs.config.FileSystemManagerFactoryBean">
+    <bean id="fileSystemManagerFactory" class="org.apache.geronimo.gshell.vfs.config.FileSystemManagerFactory">
         <property name="filesCache">
             <bean class="org.apache.commons.vfs.cache.SoftRefFilesCache"/>
         </property>
@@ -83,6 +83,7 @@
             <bean class="org.apache.commons.vfs.provider.url.UrlFileProvider"/>
         </property>
     </bean>
+    <bean id="fileSystemManager" factory-bean="fileSystemManagerFactory" factory-method="getFileSystemManager"/>
 
     <bean class="org.apache.geronimo.gshell.vfs.config.FileProviderConfigurer">
         <property name="fileSystemManager" ref="fileSystemManager"/>

@@ -38,11 +38,10 @@
   http://servicemix.apache.org/schema/servicemix-gshell
   http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
-    <import resource="classpath:org/apache/felix/karaf/gshell/core/commands.xml" />
-
     <gshell:command-bundle>
         <gshell:command name="log/display">
             <gshell:action class="org.apache.felix.karaf.gshell.log.DisplayLog">
+                <property name="bundleContext" ref="bundleContext"/>
                 <property name="events" ref="events" />
                 <property name="pattern" value="${pattern}" />
             </gshell:action>
@@ -50,15 +49,20 @@
         <gshell:link name="log/d" target="log/display" />
         <gshell:command name="log/display-exception">
             <gshell:action class="org.apache.felix.karaf.gshell.log.DisplayException">
+                <property name="bundleContext" ref="bundleContext"/>
                 <property name="events" ref="events" />
             </gshell:action>
         </gshell:command>
         <gshell:link name="log/de" target="log/display-exception" />
         <gshell:command name="log/get">
-            <gshell:action class="org.apache.felix.karaf.gshell.log.GetLogLevel" />
+            <gshell:action class="org.apache.felix.karaf.gshell.log.GetLogLevel">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
         </gshell:command>
         <gshell:command name="log/set">
-            <gshell:action class="org.apache.felix.karaf.gshell.log.SetLogLevel" />
+            <gshell:action class="org.apache.felix.karaf.gshell.log.SetLogLevel">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
         </gshell:command>
 
         <gshell:alias name="ld" alias="log/d" />

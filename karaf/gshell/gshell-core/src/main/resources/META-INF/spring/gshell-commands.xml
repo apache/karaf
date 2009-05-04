@@ -33,12 +33,6 @@
        default-init-method="init"
        default-destroy-method="destroy">
 
-    <import resource="classpath:org/apache/felix/karaf/gshell/core/commands.xml" />
-
-    <bean id="vfsCommandActionTemplate" abstract="true">
-        <property name="fileSystemAccess" ref="fileSystemAccess"/>
-    </bean>
-
     <gshell:command-bundle>
         <gshell:command name="about">
             <gshell:action class="org.apache.geronimo.gshell.commands.builtin.AboutAction">
@@ -73,7 +67,7 @@
             <gshell:action class="org.apache.geronimo.gshell.commands.builtin.EchoAction"/>
         </gshell:command>
 
-        <gshell:command name="clear" type="stateless">
+        <gshell:command name="clear">
             <gshell:action class="org.apache.geronimo.gshell.commands.builtin.ClearAction"/>
         </gshell:command>
 
@@ -215,19 +209,25 @@
 
     <gshell:command-bundle>
         <gshell:command name="cd">
-            <gshell:action class="org.apache.geronimo.gshell.commands.file.ChangeDirectoryAction" parent="vfsCommandActionTemplate"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.file.ChangeDirectoryAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </gshell:action>
             <gshell:completers>
                 <ref bean="fileObjectNameCompleter"/>
                 <null/>
             </gshell:completers>
         </gshell:command>
 
-        <gshell:command name="pwd" type="stateless">
-            <gshell:action class="org.apache.geronimo.gshell.commands.file.CurrentDirectoryAction" parent="vfsCommandActionTemplate"/>
+        <gshell:command name="pwd">
+            <gshell:action class="org.apache.geronimo.gshell.commands.file.CurrentDirectoryAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </gshell:action>
         </gshell:command>
 
         <gshell:command name="ls">
-            <gshell:action class="org.apache.geronimo.gshell.commands.file.ListDirectoryAction" parent="vfsCommandActionTemplate"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.file.ListDirectoryAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </gshell:action>
             <gshell:completers>
                 <ref bean="fileObjectNameCompleter"/>
                 <null/>
@@ -237,7 +237,9 @@
         <gshell:link name="dir" target="ls"/>
 
         <gshell:command name="cp">
-            <gshell:action class="org.apache.geronimo.gshell.commands.file.CopyAction" parent="vfsCommandActionTemplate"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.file.CopyAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </gshell:action>
             <gshell:completers>
                 <ref bean="fileObjectNameCompleter"/>
                 <ref bean="fileObjectNameCompleter"/>
@@ -248,7 +250,9 @@
         <gshell:link name="copy" target="cp"/>
 
         <gshell:command name="rm">
-            <gshell:action class="org.apache.geronimo.gshell.commands.file.RemoveAction" parent="vfsCommandActionTemplate"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.file.RemoveAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </gshell:action>
             <gshell:completers>
                 <ref bean="fileObjectNameCompleter"/>
                 <null/>
@@ -258,7 +262,9 @@
         <gshell:link name="del" target="rm"/>
 
         <gshell:command name="fileinfo">
-            <gshell:action class="org.apache.geronimo.gshell.commands.file.FileInfoAction" parent="vfsCommandActionTemplate"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.file.FileInfoAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </gshell:action>
             <gshell:completers>
                 <ref bean="fileObjectNameCompleter"/>
                 <null/>
@@ -266,7 +272,9 @@
         </gshell:command>
 
         <gshell:command name="touch">
-            <gshell:action class="org.apache.geronimo.gshell.commands.file.TouchAction" parent="vfsCommandActionTemplate"/>
+            <gshell:action class="org.apache.geronimo.gshell.commands.file.TouchAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </gshell:action>
             <gshell:completers>
                 <ref bean="fileObjectNameCompleter"/>
                 <null/>

@@ -32,56 +32,83 @@
   http://servicemix.apache.org/schema/servicemix-gshell
   http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
-    <import resource="classpath:org/apache/felix/karaf/gshell/core/commands.xml" />
-
     <gshell:command-bundle>
         <gshell:command name="osgi/bundle-level">
-            <gshell:action class="org.apache.felix.karaf.gshell.osgi.BundleLevel" />
+            <gshell:action class="org.apache.felix.karaf.gshell.osgi.BundleLevel">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
         </gshell:command>
         <gshell:command name="osgi/headers">
-            <gshell:action class="org.apache.felix.karaf.gshell.osgi.Headers" />
+            <gshell:action class="org.apache.felix.karaf.gshell.osgi.Headers">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
         </gshell:command>
         <gshell:command name="osgi/install">
-            <gshell:action class="org.apache.felix.karaf.gshell.osgi.InstallBundle" />
+            <gshell:action class="org.apache.felix.karaf.gshell.osgi.InstallBundle">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
         </gshell:command>
         <gshell:command name="osgi/list">
             <gshell:action class="org.apache.felix.karaf.gshell.osgi.ListBundles">
+                <property name="bundleContext" ref="bundleContext"/>
                 <property name="springApplicationListener" ref="springApplicationListener" />
             </gshell:action>
         </gshell:command>
         <gshell:command name="osgi/ls">
-            <gshell:action class="org.apache.felix.karaf.gshell.osgi.ListServices" />
+            <gshell:action class="org.apache.felix.karaf.gshell.osgi.ListServices">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
         </gshell:command>
         <gshell:command name="osgi/refresh">
-            <gshell:action class="org.apache.felix.karaf.gshell.osgi.RefreshBundle" />
+            <gshell:action class="org.apache.felix.karaf.gshell.osgi.RefreshBundle">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
         </gshell:command>
         <gshell:command name="osgi/update">
-            <gshell:action class="org.apache.felix.karaf.gshell.osgi.UpdateBundle" />
+            <gshell:action class="org.apache.felix.karaf.gshell.osgi.UpdateBundle">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
         </gshell:command>
         <gshell:command name="osgi/resolve">
-            <gshell:action class="org.apache.felix.karaf.gshell.osgi.ResolveBundle" />
+            <gshell:action class="org.apache.felix.karaf.gshell.osgi.ResolveBundle">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
         </gshell:command>
         <gshell:command name="osgi/restart">
-            <gshell:action class="org.apache.felix.karaf.gshell.osgi.RestartBundle" />
+            <gshell:action class="org.apache.felix.karaf.gshell.osgi.RestartBundle">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
         </gshell:command>
         <gshell:command name="osgi/shutdown">
-            <gshell:action class="org.apache.felix.karaf.gshell.osgi.Shutdown" />
+            <gshell:action class="org.apache.felix.karaf.gshell.osgi.Shutdown">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
         </gshell:command>
         <gshell:command name="osgi/start">
-            <gshell:action class="org.apache.felix.karaf.gshell.osgi.StartBundle" />
+            <gshell:action class="org.apache.felix.karaf.gshell.osgi.StartBundle">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
         </gshell:command>
         <gshell:command name="osgi/start-level">
-            <gshell:action class="org.apache.felix.karaf.gshell.osgi.StartLevel" />
+            <gshell:action class="org.apache.felix.karaf.gshell.osgi.StartLevel">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
         </gshell:command>
         <gshell:command name="osgi/stop">
-            <gshell:action class="org.apache.felix.karaf.gshell.osgi.StopBundle" />
+            <gshell:action class="org.apache.felix.karaf.gshell.osgi.StopBundle">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
         </gshell:command>
         <gshell:command name="osgi/uninstall">
-            <gshell:action class="org.apache.felix.karaf.gshell.osgi.UninstallBundle" />
+            <gshell:action class="org.apache.felix.karaf.gshell.osgi.UninstallBundle">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
         </gshell:command>
     </gshell:command-bundle>
 
-    <bean id="springApplicationListener" class="org.apache.felix.karaf.gshell.osgi.SpringApplicationListener" />
+    <bean id="springApplicationListener" class="org.apache.felix.karaf.gshell.osgi.SpringApplicationListener" init-method="init" destroy-method="destroy">
+        <property name="bundleContext" ref="bundleContext"/>
+    </bean>
 
     <osgi:service ref="springApplicationListener" interface="org.springframework.osgi.context.event.OsgiBundleApplicationContextListener" />
 

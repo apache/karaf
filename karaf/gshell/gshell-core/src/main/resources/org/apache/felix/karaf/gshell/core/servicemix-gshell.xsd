@@ -76,19 +76,6 @@
                 <xsd:element ref="message-source" minOccurs="0" maxOccurs="1"/>
             </xsd:sequence>
             <xsd:attribute name="name" type="xsd:string" use="required"/>
-            <xsd:attribute name="type" use="optional" default="stateful">
-                <xsd:annotation>
-                    <xsd:documentation>
-                        The command type.
-                    </xsd:documentation>
-                </xsd:annotation>
-                <xsd:simpleType>
-                    <xsd:restriction base="xsd:string">
-                        <xsd:enumeration value="stateless"/>
-                        <xsd:enumeration value="stateful"/>
-                    </xsd:restriction>
-                </xsd:simpleType>
-            </xsd:attribute>
         </xsd:complexType>
     </xsd:element>
 

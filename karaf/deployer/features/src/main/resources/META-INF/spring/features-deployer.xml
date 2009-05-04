@@ -40,7 +40,9 @@
 
     <osgi:reference id="featuresService" interface="org.apache.felix.karaf.gshell.features.FeaturesService" cardinality="1..1"/>
 
-    <bean id="featureDeploymentListener" class="org.apache.felix.karaf.deployer.features.FeatureDeploymentListener">
+    <bean id="featureDeploymentListener" class="org.apache.felix.karaf.deployer.features.FeatureDeploymentListener"
+          init-method="init" destroy-method="destroy">
+        <property name="bundleContext" ref="bundleContext"/>
         <property name="featuresService" ref="featuresService" />
     </bean>
 

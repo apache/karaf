@@ -30,7 +30,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-public class ApplicationManagerImpl implements ApplicationManager, ApplicationContextAware, InitializingBean, DisposableBean {
+public class ApplicationManagerImpl implements ApplicationManager, ApplicationContextAware {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -45,7 +45,7 @@ public class ApplicationManagerImpl implements ApplicationManager, ApplicationCo
         this.application = application;
     }
 
-    public void afterPropertiesSet() throws Exception {
+    public void init() throws Exception {
         if (!SystemOutputHijacker.isInstalled()) {
             SystemOutputHijacker.install();
         }

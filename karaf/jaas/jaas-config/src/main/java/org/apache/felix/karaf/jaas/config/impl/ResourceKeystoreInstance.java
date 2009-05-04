@@ -45,7 +45,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.felix.karaf.jaas.config.KeystoreInstance;
 import org.apache.felix.karaf.jaas.config.KeystoreIsLocked;
-import org.springframework.util.StringUtils;
 
 /**
  *
@@ -109,7 +108,7 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
     public void setPath(URL keystorePath) throws IOException {
         this.path = keystorePath;
         if (keystorePath.getProtocol().equals("file")) {
-            URI uri = URI.create(StringUtils.replace(keystorePath.toString(), " ", "%20"));
+            URI uri = URI.create(keystorePath.toString().replace(" ", "%20"));
             this.keystoreFile = new File(uri.getSchemeSpecificPart());
         }
     }
