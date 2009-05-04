@@ -65,7 +65,7 @@
     <osgi:service ref="commandLineExecutor" interface="org.apache.geronimo.gshell.commandline.CommandLineExecutor">
     </osgi:service>
 
-    <osgix:cm-properties id="cmProps" persistent-id="org.apache.servicemix.shell">
+    <osgix:cm-properties id="cmProps" persistent-id="org.apache.felix.karaf.shell">
         <prop key="sshPort">8101</prop>
         <prop key="sshRealm">servicemix</prop>
         <prop key="hostKey">${karaf.base}/etc/host.key</prop>
