@@ -14,35 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.servicemix.jpm.impl;
+package org.apache.felix.karaf.jpm;
 
-import java.io.File;
-import java.io.IOException;
+public class MainTest {
 
-import org.apache.servicemix.jpm.Process;
-import org.apache.servicemix.jpm.ProcessBuilder;
-
-
-public class ProcessBuilderImpl implements ProcessBuilder {
-
-    private File dir;
-    private String command;
-
-    public ProcessBuilder directory(File dir) {
-        this.dir = dir;
-        return this;
-    }
-
-    public ProcessBuilder command(String command) {
-        this.command = command;
-        return this;
-    }
-
-    public Process start() throws IOException {
-        return ProcessImpl.create(dir, command);
-    }
-
-    public Process attach(int pid) throws IOException {
-        return ProcessImpl.attach(pid);
+    public static void main(String[] args) throws Exception {
+        Thread.sleep(Long.parseLong(args[0]));
     }
 }

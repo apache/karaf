@@ -14,10 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.servicemix.jpm;
+package org.apache.felix.karaf.jpm;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.*;
 
 /**
  * Interface used to create new processes.
@@ -46,7 +47,7 @@ public interface ProcessBuilder {
      * @return the process that has been started
      * @throws IOException if the process can not be created
      */
-    Process start() throws IOException;
+    org.apache.felix.karaf.jpm.Process start() throws IOException;
 
     /**
      * Attach to an existing process
@@ -54,6 +55,6 @@ public interface ProcessBuilder {
      * @return the process that has been attached
      * @throws IOException if the process can not be attached to
      */
-    Process attach(int pid) throws IOException;
+    org.apache.felix.karaf.jpm.Process attach(int pid) throws IOException;
 
 }

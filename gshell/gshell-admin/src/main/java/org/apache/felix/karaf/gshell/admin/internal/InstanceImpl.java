@@ -28,9 +28,9 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.servicemix.jpm.Process;
-import org.apache.servicemix.jpm.ProcessBuilderFactory;
-import org.apache.servicemix.jpm.impl.ScriptUtils;
+import org.apache.felix.karaf.jpm.Process;
+import org.apache.felix.karaf.jpm.ProcessBuilderFactory;
+import org.apache.felix.karaf.jpm.impl.ScriptUtils;
 import org.apache.felix.karaf.gshell.admin.Instance;
 
 public class InstanceImpl implements Instance {

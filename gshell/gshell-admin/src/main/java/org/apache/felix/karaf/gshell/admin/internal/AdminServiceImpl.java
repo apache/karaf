@@ -36,9 +36,8 @@ import org.apache.felix.karaf.gshell.admin.Instance;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 import org.osgi.service.prefs.PreferencesService;
-import org.springframework.beans.factory.InitializingBean;
 
-public class AdminServiceImpl implements AdminService, InitializingBean {
+public class AdminServiceImpl implements AdminService {
 
     private static final Log LOGGER = LogFactory.getLog(AdminServiceImpl.class);
 
@@ -56,7 +55,7 @@ public class AdminServiceImpl implements AdminService, InitializingBean {
         this.preferences = preferences;
     }
 
-    public synchronized void afterPropertiesSet() throws Exception {
+    public synchronized void init() throws Exception {
         try {
             Preferences prefs = preferences.getUserPreferences("AdminServiceState");
             Preferences child = prefs.node("Instances");

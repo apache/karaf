@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.servicemix.jpm.impl;
+package org.apache.felix.karaf.jpm.impl;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -26,7 +26,7 @@ import java.io.InterruptedIOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.servicemix.jpm.Process;
+import org.apache.felix.karaf.jpm.Process;
 
 public class ProcessImpl implements Process {
 
@@ -103,7 +103,7 @@ public class ProcessImpl implements Process {
         return 0;
     }
 
-    public static Process create(File dir, String command) throws IOException {
+    public static org.apache.felix.karaf.jpm.Process create(File dir, String command) throws IOException {
         //File input = File.createTempFile("jpm.", ".input");
         //File output = File.createTempFile("jpm.", ".output");
         //File error = File.createTempFile("jpm.", ".error");

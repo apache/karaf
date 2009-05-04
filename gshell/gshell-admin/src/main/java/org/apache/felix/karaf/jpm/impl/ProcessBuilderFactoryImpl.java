@@ -14,10 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.servicemix.jpm.impl;
+package org.apache.felix.karaf.jpm.impl;
 
-import org.apache.servicemix.jpm.ProcessBuilder;
-import org.apache.servicemix.jpm.ProcessBuilderFactory;
+import org.apache.felix.karaf.jpm.ProcessBuilder;
+import org.apache.felix.karaf.jpm.ProcessBuilderFactory;
 
 public class ProcessBuilderFactoryImpl extends ProcessBuilderFactory {
 
