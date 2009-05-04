@@ -94,7 +94,7 @@
 
     <osgi:reference id="preferences" interface="org.osgi.service.prefs.PreferencesService" cardinality="0..1" />
 
-    <bean id="adminService" class="org.apache.felix.karaf.gshell.admin.internal.AdminServiceImpl">
+    <bean id="adminService" class="org.apache.felix.karaf.gshell.admin.internal.AdminServiceImpl" init-method="init">
         <property name="preferences" ref="preferences" />
     </bean>
 

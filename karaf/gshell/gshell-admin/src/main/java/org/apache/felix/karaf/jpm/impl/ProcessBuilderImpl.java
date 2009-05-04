@@ -14,34 +14,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.servicemix.jpm;
+package org.apache.felix.karaf.jpm.impl;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 
-/**
- * Interface representing a process
- */
-public interface Process extends Serializable {
+import org.apache.felix.karaf.jpm.Process;
+import org.apache.felix.karaf.jpm.ProcessBuilder;
 
-    /**
-     * Retrieves the PID of the process
-     * @return the pid
-     */
-    int getPid();
 
-    /**
-     * Check if this process is still running
-     * @return <code>true</code> if the process is running
-     * @throws IOException if an error occurs
-     */
-    boolean isRunning() throws IOException;
+public class ProcessBuilderImpl implements ProcessBuilder {
 
-    /**
-     * Destroy the process.
-     *
-     * @throws IOException
-     */
-    void destroy() throws IOException;
+    private File dir;
+    private String command;
 
+    public ProcessBuilder directory(File dir) {
+        this.dir = dir;
+        return this;
+    }
+
+    public ProcessBuilder command(String command) {
+        this.command = command;
+        return this;
+    }
+
+    public Process start() throws IOException {
+        return ProcessImpl.create(dir, command);
+    }
+
+    public org.apache.felix.karaf.jpm.Process attach(int pid) throws IOException {
+        return ProcessImpl.attach(pid);
+    }
 }

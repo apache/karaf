@@ -14,12 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.servicemix.jpm;
+package org.apache.felix.karaf.jpm;
 
 import java.io.File;
 
 import junit.framework.TestCase;
-import org.apache.servicemix.jpm.impl.ScriptUtils;
+import org.apache.felix.karaf.jpm.impl.ScriptUtils;
+import org.apache.felix.karaf.jpm.ProcessBuilder;
 
 public class ProcessTest extends TestCase {
 
@@ -41,7 +42,7 @@ public class ProcessTest extends TestCase {
         System.err.println("Executing: " + command.toString());
 
         ProcessBuilder builder = ProcessBuilderFactory.newInstance().newBuilder();
-        Process p = builder.command(command.toString()).start();
+        org.apache.felix.karaf.jpm.Process p = builder.command(command.toString()).start();
         assertNotNull(p);
         System.err.println("Process: " + p.getPid());
         assertNotNull(p.getPid());

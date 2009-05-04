@@ -14,7 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.servicemix.jpm;
+package org.apache.felix.karaf.jpm;
+
+import org.apache.felix.karaf.jpm.impl.ProcessBuilderFactoryImpl;
 
 /**
  * Factory for process builders.
@@ -22,7 +24,7 @@ package org.apache.servicemix.jpm;
 public abstract class ProcessBuilderFactory {
 
     public static ProcessBuilderFactory newInstance() {
-        return new org.apache.servicemix.jpm.impl.ProcessBuilderFactoryImpl();
+        return new ProcessBuilderFactoryImpl();
     }
 
     public abstract ProcessBuilder newBuilder();
