@@ -68,7 +68,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
-                        <Export-Package>org.apache.felix.karaf.gshell.obr*;version=${project.version}</Export-Package>
+                        <Export-Package>${pom.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>
                             org.apache.geronimo.gshell.wisdom.command,
                             org.apache.geronimo.gshell.wisdom.registry,
@@ -76,7 +76,8 @@
                             *
                         </Import-Package>
                         <Private-Package>!*</Private-Package>
-                        <Spring-Context>*;publish-context:=false;create-asynchronously:=false</Spring-Context>
+                        <Spring-Context>*;publish-context:=false;create-asynchronously:=true</Spring-Context>
+                        <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>
             </plugin>

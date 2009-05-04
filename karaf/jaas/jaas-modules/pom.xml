@@ -74,15 +74,14 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
-                        <Export-Package>
-                            org.apache.felix.karaf.jaas.modules*;version=${project.version};-split-package:=merge-first
-                        </Export-Package>
+                        <Export-Package>${pom.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>
                             org.apache.felix.karaf.jaas.config,
                             org.springframework.beans.factory.config,
                             *
                         </Import-Package>
-                        <Spring-Context>*;publish-context:=false;create-asynchronously:=false</Spring-Context>
+                        <Spring-Context>*;publish-context:=false;create-asynchronously:=true</Spring-Context>
+                        <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>
             </plugin>

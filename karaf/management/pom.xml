@@ -68,8 +68,9 @@
                             javax.management,
                             *
                         </Import-Package>
-                        <Export-Package>org.apache.felix.karaf.management*</Export-Package>
-                        <Spring-Context>*;publish-context:=false</Spring-Context>
+                        <Export-Package>${pom.artifactId}*;version=${project.version}</Export-Package>
+                        <Spring-Context>*;publish-context:=false;create-asynchronously:=true</Spring-Context>
+                        <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>
             </plugin>

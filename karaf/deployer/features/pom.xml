@@ -67,8 +67,10 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-                        <Private-Package>org.apache.felix.karaf.deployer.blueprint</Private-Package>
-                        <Spring-Context>*;publish-context:=false;create-asynchronously:=false</Spring-Context>
+                        <Export-Package>${pom.artifactId}*;version=${project.version}</Export-Package>
+                        <Private-Package>org.apache.felix.karaf.deployer.features</Private-Package>
+                        <Spring-Context>*;publish-context:=false;create-asynchronously:=true</Spring-Context>
+                        <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>
             </plugin>

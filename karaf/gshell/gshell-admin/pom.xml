@@ -89,6 +89,7 @@
                     <include>**/*</include>
                 </includes>
             </resource>
+            <!--
             <resource>
                 <directory>${pom.basedir}/src/main/filtered-resources</directory>
                 <filtering>true</filtering>
@@ -96,6 +97,7 @@
                     <include>**/*</include>
                 </includes>
             </resource>
+            -->
         </resources>
         <plugins>
             <plugin>
@@ -103,7 +105,7 @@
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>copy-resources</id>
+                        <id>copy-config-properties</id>
                         <!-- here the phase you need -->
                         <phase>compile</phase>
                         <goals>
@@ -111,15 +113,36 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${basedir}/target/classes/org/apache/felix/karaf/gshell/admin/etc</outputDirectory>
-                            <resources>          
+                            <resources>
                                 <resource>
                                     <directory>../../${config.location}</directory>
                                     <includes>
                                         <include>config.properties</include>
                                     </includes>
                                 </resource>
-                            </resources>              
-                        </configuration>            
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-filtered</id>
+                        <!-- here the phase you need -->
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/target/classes</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/filtered-resources</directory>
+                                    <filtering>true</filtering>
+                                    <includes>
+                                        <include>**/*.cfg</include>
+                                        <include>**/*.properties</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>            
@@ -136,8 +159,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
-                        <Export-Package>org.apache.felix.karaf.gshell.admin.*;version=${project.version}
-                        </Export-Package>
+                        <Export-Package>${pom.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>
                             org.apache.geronimo.gshell.wisdom.command,
                             org.apache.geronimo.gshell.wisdom.registry,
@@ -145,7 +167,8 @@
                             *
                         </Import-Package>
                         <Private-Package>org.apache.felix.karaf.jpm.*</Private-Package>
-                        <Spring-Context>*;publish-context:=false;create-asynchronously:=false</Spring-Context>
+                        <Spring-Context>*;publish-context:=false;create-asynchronously:=true</Spring-Context>
+                        <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>
             </plugin>

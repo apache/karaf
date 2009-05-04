@@ -70,7 +70,7 @@
                         <Bundle-Name>Apache Felix Karaf Shell Client</Bundle-Name>
                         <Bundle-Description>Shell client bundle for Apache Felix Karaf.</Bundle-Description>
                         <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-                        <Export-Package>org.apache.felix.karaf.client</Export-Package>
+                        <Export-Package>${pom.artifactId}*;version=${project.version}</Export-Package>
                         <Private-Package>
                             org.apache.felix.karaf.client;-split-package:=merge-first,
                             org.slf4j;-split-package:=merge-first,

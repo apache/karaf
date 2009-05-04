@@ -37,35 +37,6 @@
         Provides the OSGi GShell integration
     </description>
 
-    <properties>
-        <gshell.osgi.import>
-            org.springframework.aop,
-            org.springframework.aop.framework,
-            org.springframework.beans.factory.annotation,
-            org.springframework.context.annotation,
-            org.springframework.osgi.service.importer,
-            org.aopalliance.aop,
-            org.apache.commons.vfs.provider.temp,
-            org.apache.commons.vfs.provider.ram,
-            jline*,
-            org.apache.felix.karaf.jaas.config;resolution:=optional,
-            org.apache.felix.karaf.version;resolution:=optional, 
-            org.apache.felix.karaf.main.spi;resolution:=optional;version="1.0.0",
-            org.codehaus.plexus*;resolution:=optional,
-            org.apache.sshd.server.keyprovider,
-            org.apache.sshd.server.jaas,
-            org.jsecurity*;resolution:=optional,
-            *
-        </gshell.osgi.import>
-        <!-- TODO: remove plexus util package -->
-        <gshell.osgi.export>
-            org.apache.geronimo.gshell*;version="1.0.0.alpha-2-SNAPSHOT";-split-package:=merge-first,
-            org.apache.felix.karaf.gshell.core*,
-            org.codehaus.plexus.interpolation*;-split-package:=merge-first,
-            org.codehaus.plexus.util;-split-package:=merge-first
-        </gshell.osgi.export>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.apache.felix.karaf</groupId>
@@ -111,10 +82,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.gshell.commands</groupId>
-            <artifactId>gshell-ssh</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.gshell.commands</groupId>
             <artifactId>gshell-text</artifactId>
         </dependency>
         <dependency>
@@ -134,10 +101,6 @@
                     <artifactId>commons-jexl</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-utils</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -204,19 +167,6 @@
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.jline</artifactId>
         </dependency>
-        
-        <!-- jsecurity is a dependency for the ssh commands -->
-        <dependency>
-            <groupId>org.jsecurity</groupId>
-            <artifactId>jsecurity</artifactId>
-            <version>0.9.0-RC2</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
     </dependencies>
 
     <build>
@@ -249,9 +199,32 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
-                        <Import-Package>${gshell.osgi.import}</Import-Package>
-                        <Export-Package>${gshell.osgi.export}</Export-Package>
-                        <Spring-Context>*;publish-context:=false;create-asynchronously:=false</Spring-Context>
+                        <Import-Package>
+                            org.springframework.aop,
+                            org.springframework.aop.framework,
+                            org.springframework.beans.factory.annotation,
+                            org.springframework.context.annotation,
+                            org.springframework.osgi.service.importer,
+                            org.aopalliance.aop,
+                            org.apache.commons.vfs.provider.temp,
+                            org.apache.commons.vfs.provider.ram,
+                            jline*,
+                            org.apache.felix.karaf.jaas.config;resolution:=optional,
+                            org.apache.felix.karaf.version;resolution:=optional,
+                            org.apache.felix.karaf.main.spi;resolution:=optional;version="1.0.0",
+                            org.apache.sshd.server.keyprovider,
+                            org.apache.sshd.server.jaas,
+                            *
+                        </Import-Package>
+                        <Export-Package>
+                            org.apache.geronimo.gshell*;version="1.0.0.alpha-2";-split-package:=merge-first,
+                            org.apache.felix.karaf.gshell.core*;version=${project.version};-split-package:=merge-first,
+                        </Export-Package>
+                        <Private-Package>
+                            org.codehaus.plexus.interpolation*,
+                        </Private-Package>
+                        <Spring-Context>*;publish-context:=false;create-asynchronously:=true</Spring-Context>
+                        <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                     <unpackBundle>true</unpackBundle>
                 </configuration>
@@ -285,7 +258,6 @@
                                     <include>org.apache.geronimo.gshell.support:gshell-i18n</include>
                                     <include>org.apache.geronimo.gshell.support:gshell-interpolation</include>
                                     <include>org.apache.geronimo.gshell.support:gshell-io</include>
-                                    <include>org.apache.geronimo.gshell.support:gshell-security</include>
                                     <include>org.apache.geronimo.gshell.support:gshell-spring</include>
                                     <include>org.apache.geronimo.gshell.support:gshell-terminal</include>
                                     <include>org.apache.geronimo.gshell.support:gshell-vfs</include>
@@ -293,7 +265,6 @@
                                     <include>org.apache.geronimo.gshell.support:gshell-yarn</include>
                                     <include>org.apache.geronimo.gshell.wisdom:gshell-wisdom-core</include>
                                     <include>org.apache.geronimo.gshell.wisdom:gshell-wisdom-bootstrap</include>
-                                    <include>org.codehaus.plexus:plexus-utils</include>
                                     <include>org.codehaus.plexus:plexus-interpolation</include>
                                     <include>${project.groupId}:${project.artifactId}</include>
                                 </includes>
@@ -337,12 +308,6 @@
                                 </filter>
                                 <filter>
                                     <artifact>org.apache.geronimo.gshell.commands:gshell-shell</artifact>
-                                    <excludes>
-                                        <exclude>org/apache/geronimo/gshell/**</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.apache.geronimo.gshell.commands:gshell-ssh</artifact>
                                     <excludes>
                                         <exclude>org/apache/geronimo/gshell/**</exclude>
                                     </excludes>
@@ -408,12 +373,6 @@
                                     </excludes>
                                 </filter>
                                 <filter>
-                                    <artifact>org.apache.geronimo.gshell.support:gshell-security</artifact>
-                                    <excludes>
-                                        <exclude>org/apache/geronimo/gshell/**</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
                                     <artifact>org.apache.geronimo.gshell.support:gshell-spring</artifact>
                                     <excludes>
                                         <exclude>org/apache/geronimo/gshell/**</exclude>
@@ -453,12 +412,6 @@
                                     <artifact>org.apache.geronimo.gshell.wisdom:gshell-wisdom-bootstrap</artifact>
                                     <excludes>
                                         <exclude>org/apache/geronimo/gshell/**</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.codehaus.plexus:plexus-utils</artifact>
-                                    <excludes>
-                                        <exclude>org/codehaus/plexus/**</exclude>
                                     </excludes>
                                 </filter>
                                 <filter>
