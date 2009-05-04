@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-Building Apache ServiceMix Kernel
+Building Apache Felix Karaf
 ===================================
 
 Initial Setup
@@ -36,13 +36,13 @@ Initial Setup
 Building
 --------
 
-1) Change to the top level directory of Apache ServiceMix Kernel source distribution.
+1) Change to the top level directory of Apache Felix Karaf source distribution.
 2) Run
          $> mvn
-   This will compile Apache ServiceMix Kernel and run all of the tests in the 
-   Apache ServiceMix Kernel source distribution. Alternatively, you can run
+   This will compile Apache Felix Karaf and run all of the tests in the
+   Apache Felix Karafl source distribution. Alternatively, you can run
          $> mvn -Pfastinstall
-   This will compile Apache ServiceMix Kernel without running the tests and takes less
+   This will compile Apache Felix Karaf without running the tests and takes less
    time to build.
    Depending on the load of remote Maven 2.0 repositories, you may have 
    to run "mvn" several times until the required dependencies are 

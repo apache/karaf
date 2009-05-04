@@ -20,7 +20,7 @@ import org.apache.felix.karaf.gshell.core.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
 
 /**
- * Command to shut down ServiceMix Kernel
+ * Command to shut down Karaf
  */
 public class Shutdown extends OsgiCommandSupport {
 
@@ -31,7 +31,7 @@ public class Shutdown extends OsgiCommandSupport {
                     Bundle bundle = getBundleContext().getBundle(0);
                     bundle.stop();
                 } catch (Exception e) {
-                    log.error("Error when shutting down ServiceMix Kernel", e);
+                    log.error("Error when shutting down Apache Felix Karaf", e);
                 }
             }
         }.start();

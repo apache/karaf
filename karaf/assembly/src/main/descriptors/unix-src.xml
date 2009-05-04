@@ -52,7 +52,7 @@
                 <include>**/*.bin</include>
                 <include>**/*.jnilib</include>
                 <include>**/*.cert</include>
-                <include>apache-servicemix/src/main/release/bin/*/wrapper</include>
+                <include>apache-felix-karaf/src/main/release/bin/*/wrapper</include>
             </includes>
             <excludes>
                 <exclude>**/eclipse-classes/**</exclude>
@@ -82,7 +82,7 @@
                 <exclude>**/*.bin</exclude>
                 <exclude>**/*.jnilib</exclude>
                 <exclude>**/*.cert</exclude>
-                <exclude>apache-servicemix/src/main/release/bin/*/wrapper</exclude>
+                <exclude>apache-felix-karaf/src/main/release/bin/*/wrapper</exclude>
                 <exclude>**/target/**</exclude>
                 <exclude>**/build/**</exclude>
                 <exclude>activemq-data/**</exclude>

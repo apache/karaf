@@ -67,7 +67,7 @@
                             ../system/org/apache/mina/mina-core/${mina.version}/mina-core-${mina.version}.jar
                             ../system/org/apache/servicemix/bundles/org.apache.servicemix.bundles.jline/${jline.version}/org.apache.servicemix.bundles.jline-${jline.version}.jar
                         </Class-Path>
-                        <Bundle-Name>Apache ServiceMix Shell Client</Bundle-Name>
+                        <Bundle-Name>Apache Felix Karaf Shell Client</Bundle-Name>
                         <Bundle-Description>Shell client bundle for Apache Felix Karaf.</Bundle-Description>
                         <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
                         <Export-Package>org.apache.felix.karaf.client</Export-Package>

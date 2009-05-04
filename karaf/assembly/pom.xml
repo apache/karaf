@@ -271,19 +271,19 @@
                                     <groupId>org.apache.felix.karaf</groupId>
                                     <artifactId>org.apache.felix.karaf.main</artifactId>
                                     <outputDirectory>target/dependencies</outputDirectory>
-                                    <destFileName>servicemix.jar</destFileName>
+                                    <destFileName>karaf.jar</destFileName>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.felix.karaf</groupId>
                                     <artifactId>org.apache.felix.karaf.client</artifactId>
                                     <outputDirectory>target/dependencies</outputDirectory>
-                                    <destFileName>servicemix-client.jar</destFileName>
+                                    <destFileName>karaf-client.jar</destFileName>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.felix.karaf.jaas</groupId>
                                     <artifactId>org.apache.felix.karaf.jaas.boot</artifactId>
                                     <outputDirectory>target/dependencies</outputDirectory>
-                                    <destFileName>servicemix-jaas-boot.jar</destFileName>
+                                    <destFileName>karaf-jaas-boot.jar</destFileName>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>

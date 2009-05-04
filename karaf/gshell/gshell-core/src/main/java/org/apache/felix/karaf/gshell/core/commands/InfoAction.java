@@ -64,13 +64,13 @@ public class InfoAction implements CommandAction {
         io = context.getIo();
 
         //
-        // print ServiceMix informations
+        // print Karaf informations
         //
         maxNameLen = 25;
-        io.out.println("ServiceMix");
-        printValue("ServiceMix home", maxNameLen, System.getProperty("karaf.home"));
-        printValue("ServiceMix base", maxNameLen, System.getProperty("karaf.base"));
-        printValue("ServiceMix Kernel version", maxNameLen, branding.getParent().getVersion());
+        io.out.println("Apache Felix Karaf");
+        printValue("Karaf home", maxNameLen, System.getProperty("karaf.home"));
+        printValue("Karaf base", maxNameLen, System.getProperty("karaf.base"));
+        printValue("Karaf version", maxNameLen, branding.getParent().getVersion());
 
         if (branding.getApplicationName() != null && branding.getApplicationVersion() != null) {
             printValue(branding.getApplicationName() + " version", maxNameLen, branding.getApplicationVersion());

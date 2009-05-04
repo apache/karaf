@@ -105,7 +105,7 @@
 
     <osgi:service ref="featuresService" interface="org.apache.felix.karaf.gshell.features.FeaturesService" />
 
-    <osgix:cm-properties id="cmProps" persistent-id="org.apache.servicemix.features">
+    <osgix:cm-properties id="cmProps" persistent-id="org.apache.felix.karaf.features">
         <prop key="featuresRepositories"></prop>
         <prop key="featuresBoot"></prop>
     </osgix:cm-properties>

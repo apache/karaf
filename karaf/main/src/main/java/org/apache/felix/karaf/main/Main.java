@@ -84,23 +84,23 @@ public class Main implements MainService, BundleActivator {
      */
     public static final String PROPERTY_AUTO_START = "felix.auto.start";
     /**
-     * The system property for specifying the ServiceMix home directory.  The home directory
-     * hold the binary install of ServiceMix.
+     * The system property for specifying the Karaf home directory.  The home directory
+     * hold the binary install of Karaf.
      */
     public static final String PROP_KARAF_HOME = "karaf.home";
     /**
-     * The environment variable for specifying the ServiceMix home directory.  The home directory
-     * hold the binary install of ServiceMix.
+     * The environment variable for specifying the Karaf home directory.  The home directory
+     * hold the binary install of Karaf.
      */
     public static final String ENV_KARAF_HOME = "KARAF_HOME";
     /**
-     * The system property for specifying the ServiceMix base directory.  The base directory
-     * holds the configuration and data for a ServiceMix instance.
+     * The system property for specifying the Karaf base directory.  The base directory
+     * holds the configuration and data for a Karaf instance.
      */
     public static final String PROP_KARAF_BASE = "karaf.base";
     /**
-     * The environment variable for specifying the ServiceMix base directory.  The base directory
-     * holds the configuration and data for a ServiceMix instance.
+     * The environment variable for specifying the Karaf base directory.  The base directory
+     * holds the configuration and data for a Karaf instance.
      */
     public static final String ENV_KARAF_BASE = "KARAF_BASE";
 
@@ -131,8 +131,8 @@ public class Main implements MainService, BundleActivator {
     public static final String PROPERTY_LOCK_CLASS_DEFAULT = SimpleFileLock.class.getName();
 
 
-    private File servicemixHome;
-    private File servicemixBase;
+    private File karafHome;
+    private File karafBase;
     private static Properties m_configProps = null;
     private static Felix m_felix = null;
     private final String[] args;
@@ -149,14 +149,14 @@ public class Main implements MainService, BundleActivator {
     }
 
     public void launch() throws Exception {
-        servicemixHome = getServiceMixHome();
-        servicemixBase = getServiceMixBase(servicemixHome);
+        karafHome = getServiceMixHome();
+        karafBase = getServiceMixBase(karafHome);
 
-        //System.out.println("ServiceMix Home: "+main.servicemixHome.getPath());
-        //System.out.println("ServiceMix Base: "+main.servicemixBase.getPath());
+        //System.out.println("Karaf Home: "+main.servicemixHome.getPath());
+        //System.out.println("Karaf Base: "+main.servicemixBase.getPath());
 
-        System.setProperty(PROP_KARAF_HOME, servicemixHome.getPath());
-        System.setProperty(PROP_KARAF_BASE, servicemixBase.getPath());
+        System.setProperty(PROP_KARAF_HOME, karafHome.getPath());
+        System.setProperty(PROP_KARAF_BASE, karafBase.getPath());
 
         // Load system properties.
         loadSystemProperties();
@@ -169,7 +169,7 @@ public class Main implements MainService, BundleActivator {
 
         processSecurityProperties(m_configProps);
 
-        m_configProps.setProperty(BundleCache.CACHE_ROOTDIR_PROP, servicemixBase.getPath() + "/data");
+        m_configProps.setProperty(BundleCache.CACHE_ROOTDIR_PROP, karafBase.getPath() + "/data");
         m_configProps.setProperty(Constants.FRAMEWORK_STORAGE, "cache");
 
         // Register the Main class so that other bundles can inspect the command line args.
@@ -370,7 +370,7 @@ public class Main implements MainService, BundleActivator {
         if (rc == null) {
             // Dig into the classpath to guess the location of the jar
             String classpath = System.getProperty("java.class.path");
-            int index = classpath.toLowerCase().indexOf("servicemix.jar");
+            int index = classpath.toLowerCase().indexOf("karaf.jar");
             int start = classpath.lastIndexOf(File.pathSeparator, index) + 1;
             if (index >= start) {
                 String jarLocation = classpath.substring(start, index);
@@ -378,7 +378,7 @@ public class Main implements MainService, BundleActivator {
             }
         }
         if (rc == null) {
-            throw new IOException("The ServiceMix install directory could not be determined.  Please set the " + PROP_KARAF_HOME + " system property or the " + ENV_KARAF_HOME + " environment variable.");
+            throw new IOException("The Karaf install directory could not be determined.  Please set the " + PROP_KARAF_HOME + " system property or the " + ENV_KARAF_HOME + " environment variable.");
         }
 
         return rc;
@@ -422,7 +422,7 @@ public class Main implements MainService, BundleActivator {
     }
 
     private static void processSecurityProperties(Properties m_configProps) {
-        String prop = m_configProps.getProperty("org.apache.servicemix.security.providers");
+        String prop = m_configProps.getProperty("org.apache.felix.karaf.security.providers");
         if (prop != null) {
             String[] providers = prop.split(",");
             for (String provider : providers) {
@@ -683,7 +683,7 @@ public class Main implements MainService, BundleActivator {
         // See if the property URL was specified as a property.
         URL propURL = null;
         try {
-            File file = new File(new File(servicemixBase, "etc"), SYSTEM_PROPERTIES_FILE_NAME);
+            File file = new File(new File(karafBase, "etc"), SYSTEM_PROPERTIES_FILE_NAME);
             propURL = file.toURL();
         }
         catch (MalformedURLException ex) {
@@ -754,17 +754,17 @@ public class Main implements MainService, BundleActivator {
         URL startupPropURL = null;
 
         try {
-            File file = new File(new File(servicemixBase, "etc"), CONFIG_PROPERTIES_FILE_NAME);
+            File file = new File(new File(karafBase, "etc"), CONFIG_PROPERTIES_FILE_NAME);
             configPropURL = file.toURL();
 
-            file = new File(new File(servicemixBase, "etc"), STARTUP_PROPERTIES_FILE_NAME);
+            file = new File(new File(karafBase, "etc"), STARTUP_PROPERTIES_FILE_NAME);
             startupPropURL = file.toURL();
 
-            if (servicemixBase.equals(servicemixHome)) {
-                bundleDirs.add(new File(servicemixHome, "system"));
+            if (karafBase.equals(karafHome)) {
+                bundleDirs.add(new File(karafHome, "system"));
             } else {
-                bundleDirs.add(new File(servicemixBase, "system"));
-                bundleDirs.add(new File(servicemixHome, "system"));
+                bundleDirs.add(new File(karafBase, "system"));
+                bundleDirs.add(new File(karafHome, "system"));
             }
 
         }
@@ -847,7 +847,7 @@ public class Main implements MainService, BundleActivator {
              e.hasMoreElements();) {
             String key = (String) e.nextElement();
             if (key.startsWith("felix.") ||
-                    key.startsWith("servicemix.") ||
+                    key.startsWith("karaf.") ||
                     key.equals("org.osgi.framework.system.packages") ||
                     key.equals("org.osgi.framework.bootdelegation")) {
                 configProps.setProperty(key, System.getProperty(key));
@@ -1077,7 +1077,7 @@ public class Main implements MainService, BundleActivator {
     }
 
     /* (non-Javadoc)
-      * @see org.apache.servicemix.main.MainService#getArgs()
+      * @see org.apache.felix.karaf.main.MainService#getArgs()
       */
     public String[] getArgs() {
         return args;
@@ -1091,12 +1091,12 @@ public class Main implements MainService, BundleActivator {
         this.exitCode = exitCode;
     }
 
-    public File getServicemixHome() {
-        return servicemixHome;
+    public File getKarafHome() {
+        return karafHome;
     }
 
-    public File getServicemixBase() {
-        return servicemixBase;
+    public File getKarafBase() {
+        return karafBase;
     }
 
     public void lock(Properties props) {

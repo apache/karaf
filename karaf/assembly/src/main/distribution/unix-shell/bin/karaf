@@ -15,7 +15,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 #
-# $Id: servicemix 979 2005-11-30 22:50:55Z bsnyder $
+# $Id: karaf 979 2005-11-30 22:50:55Z bsnyder $
 #
 
 DIRNAME=`dirname $0`

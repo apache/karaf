@@ -15,62 +15,61 @@
  * limitations under the License.
  */
 
-Welcome to Apache ServiceMix Kernel 
+Welcome to Apache Felix Karaf
 ====================================
-Apache ServiceMix Kernel is a small OSGi based kernel which provides a 
+Apache Felix Karaf is a small OSGi based kernel which provides a
 lightweight container onto which various bundles can be deployed.
 
 The following features are included:
-    * Hot deployment: ServiceMix Kernel supports hot deployment of OSGi bundles by monitoring
+    * Hot deployment: Karaf supports hot deployment of OSGi bundles by monitoring
       jar files inside the [home]/deploy directory. Each time a jar is copied in this folder,
       it will be installed inside the runtime. You can then update or delete it and changes will
       be handled automatically. In addition, the Kernel also supports exploded bundles and custom
       deployers (a spring one is included by default).
     * Dynamic configuration: Services are usually configured through the ConfigurationAdmin OSGi
-      service. Such configuration can be defined in ServiceMix Kernel using property files inside
+      service. Such configuration can be defined in Karf using property files inside
       the [home]/etc directory. These configurations are monitored and changes on the properties
       files will be propagated to the services.
-    * Logging System: using a centralized logging back end supported by Log4J, ServiceMix Kernel
+    * Logging System: using a centralized logging back end supported by Log4J, Karaf
       supports a number of different APIs (JDK 1.4, JCL, SLF4J, Avalon, Tomcat, OSGi)
     * Provisioning: Provisioning of libraries or applications can be done through a number of
       different ways, by which they will be downloaded locally, installed and started.
-    * Native OS integration: ServiceMix Kernel can be integrated into your own Operating System as
+    * Native OS integration: Karaf can be integrated into your own Operating System as
       a service so that the lifecycle will be bound to your Operating System.
-    * Extensible Shell console: ServiceMix features a nice text console where you can manage the
+    * Extensible Shell console: Karaf features a nice text console where you can manage the
       services, install new applications or libraries and manage their state. This shell is easily
       extensible by deploying new commands dynamically along with new features or applications.
     * Remote access: use any SSH client to connect to the kernel and issue commands in the console
     * Security framework based on JAAS
-    * Managing instances: ServiceMix Kernel provides simple commands for managing instances of
-      ServiceMix Kernel. You can easily create, delete, start and stop instances of ServiceMix
-      Kernel through the console.
+    * Managing instances: Karaf provides simple commands for managing instances of Karaf.
+      You can easily create, delete, start and stop instances of Karaf through the console.
 
 Getting Started
 ===============
-For an Apache ServiceMix Kernel source distribution, please read 
-BUILDING.txt for instructions on building Apache ServiceMix Kernel. 
+For an Apache Felix Karaf source distribution, please read
+BUILDING.txt for instructions on building Apache Felix Karaf.
 
-For an Apache ServiceMix Kernel binary distribution, please read 
+For an Apache Felix Karaf binary distribution, please read
 RELEASE-NOTES.txt for installation instructions and list of supported 
 and unsupported features.
 
 Alternatively, you can also find out how to get started here:
-    http://servicemix.apache.org/kernel/
+    http://felix.apache.org/site/apache-felix-karaf.html
 
 If you need more help try talking to us on our mailing lists
-    http://servicemix.apache.org/mailing-lists.html
+    http://felix.apache.org/site/mailinglists.html
 
-If you find any issues with ServiceMix Kernel, please submit reports 
+If you find any issues with Apache Felix Karaf, please submit reports
 with JIRA here:
-    http://issues.apache.org/activemq/browse/SMX4KNL
+    http://issues.apache.org/jira/browse/FELIX
 
 We welcome contributions, and encourage you to get involved in the 
-ServiceMix community. If you'd like to learn more about how you can 
+Felix community. If you'd like to learn more about how you can
 contribute, please see:
-    http://servicemix.apache.org/contributing.html
+    http://felix.apache.org/site/contributing.html
 
-Many thanks for using Apache ServiceMix.
+Many thanks for using Apache Felix Karaf.
 
 
-The ServiceMix Team
-http://servicemix.apache.org/team.html
+The Felix Team
+
