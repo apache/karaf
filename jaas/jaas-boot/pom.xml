@@ -53,10 +53,10 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
-                        <Export-Package>${artifactId}*;version=${project.version};-split-package:=merge-first
-                        </Export-Package>
+                        <Export-Package>${pom.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>*</Import-Package>
                         <Private-Package>!*</Private-Package>
+                        <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>
             </plugin>

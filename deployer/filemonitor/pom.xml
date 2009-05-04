@@ -74,9 +74,9 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-                        <Export-Package>${pom.artifactId}</Export-Package>
-                        <Bundle-Activator>org.apache.felix.karaf.deployer.filemonitor.FileMonitorActivator
-                        </Bundle-Activator>
+                        <Export-Package>${pom.artifactId}*;version=${project.version}</Export-Package>
+                        <Bundle-Activator>org.apache.felix.karaf.deployer.filemonitor.FileMonitorActivator</Bundle-Activator>
+                        <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>
             </plugin>

@@ -37,7 +37,6 @@ import org.apache.geronimo.gshell.command.CommandAction;
 import org.apache.geronimo.gshell.command.CommandContext;
 import org.apache.geronimo.gshell.io.IO;
 import org.apache.felix.karaf.gshell.core.DefaultBranding;
-import org.codehaus.plexus.util.StringUtils;
 
 public class InfoAction implements CommandAction {
 
@@ -171,7 +170,24 @@ public class InfoAction implements CommandAction {
     }
 
     void printValue(String name, int pad, String value) {
-        io.out.println("  " + renderer.render(AnsiRenderer.encode(StringUtils.rightPad(name, pad), AnsiCode.BOLD)) + "   " + value);
+        io.out.println("  " + renderer.render(AnsiRenderer.encode(rightPad(name, pad, " "), AnsiCode.BOLD)) + "   " + value);
     }
 
+    //==== Plexus StringUtils =====
+
+    public static String rightPad( String str, int size, String delim ) {
+        size = ( size - str.length() ) / delim.length();
+        if ( size > 0 ) {
+            str += repeat( delim, size );
+        }
+        return str;
+    }
+
+    public static String repeat( String str, int repeat ) {
+        StringBuffer buffer = new StringBuffer( repeat * str.length() );
+        for ( int i = 0; i < repeat; i++ ) {
+            buffer.append( str );
+        }
+        return buffer.toString();
+    }
 }
