@@ -42,7 +42,9 @@
 
     <bean id="proxyLoginModuleInitializer"
           class="org.apache.felix.karaf.jaas.config.impl.ProxyLoginModuleInitializer"
-          init-method="init"/>
+          init-method="init">
+        <property name="bundleContext" ref="bundleContext"/>
+    </bean>
 
     <!-- Register the Straight-Through flow -->
     <bean id="keystoreManager" class="org.apache.felix.karaf.jaas.config.impl.OsgiKeystoreManager" />

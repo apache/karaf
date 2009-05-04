@@ -33,6 +33,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.net.URL;
+import java.net.URI;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -43,7 +45,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.felix.karaf.jaas.config.KeystoreInstance;
 import org.apache.felix.karaf.jaas.config.KeystoreIsLocked;
-import org.springframework.core.io.Resource;
+import org.springframework.util.StringUtils;
 
 /**
  *
@@ -55,7 +57,7 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
 
     private String name;
     private int rank;
-    private Resource path;
+    private URL path;
     private String keystorePassword;
     private Map keyPasswords = new HashMap();
     private File keystoreFile; // Only valid after startup and if the resource points to a file
@@ -97,17 +99,18 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
     /**
      * @return the keystorePath
      */
-    public Resource getPath() {
+    public URL getPath() {
         return path;
     }
 
     /**
      * @param keystorePath the keystorePath to set
      */
-    public void setPath(Resource keystorePath) throws IOException {
+    public void setPath(URL keystorePath) throws IOException {
         this.path = keystorePath;
-        if (keystorePath.getURL().getProtocol().equals("file")) {
-            this.keystoreFile = keystorePath.getFile();
+        if (keystorePath.getProtocol().equals("file")) {
+            URI uri = URI.create(StringUtils.replace(keystorePath.toString(), " ", "%20"));
+            this.keystoreFile = new File(uri.getSchemeSpecificPart());
         }
     }
 
@@ -261,7 +264,7 @@ public class ResourceKeystoreInstance implements KeystoreInstance {
             if (keystore == null) {
                 keystore = KeyStore.getInstance(JKS);
             }
-            InputStream in = new BufferedInputStream(path.getInputStream());
+            InputStream in = new BufferedInputStream(path.openStream());
             keystore.load(in, keystorePassword == null ? new char[0] : keystorePassword.toCharArray());
             in.close();
             Enumeration aliases = keystore.aliases();

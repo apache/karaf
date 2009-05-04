@@ -18,9 +18,8 @@ package org.apache.felix.karaf.jaas.config.impl;
 
 import org.apache.felix.karaf.jaas.boot.ProxyLoginModule;
 import org.osgi.framework.BundleContext;
-import org.springframework.osgi.context.BundleContextAware;
 
-public class ProxyLoginModuleInitializer implements BundleContextAware {
+public class ProxyLoginModuleInitializer {
 
     private BundleContext bundleContext;
 
