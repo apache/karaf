@@ -41,19 +41,19 @@
 
     <osgi:reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" />
 
-    <jaas:config id="servicemix">
+    <jaas:config id="karaf">
         <jaas:module className="org.apache.felix.karaf.jaas.modules.osgi.OsgiConfigLoginModule" flags="required">
             pid = org.apache.servicemix.users
         </jaas:module>
     </jaas:config>
     -->
 
-    <!-- Bean to allow the ${karaf.home} property to be correctly resolved -->
+    <!-- Bean to allow the ${servicemix.home} property to be correctly resolved -->
     <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" />
 
-    <jaas:config id="servicemix">
+    <jaas:config id="karaf">
         <jaas:module className="org.apache.felix.karaf.jaas.modules.properties.PropertiesLoginModule" flags="required">
-            users = ${karaf.base}/etc/users.properties
+            users = ${servicemix.base}/etc/users.properties
         </jaas:module>
     </jaas:config>
 
