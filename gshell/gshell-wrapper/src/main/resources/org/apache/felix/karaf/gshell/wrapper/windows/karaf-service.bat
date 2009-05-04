@@ -21,13 +21,13 @@ setlocal
 
 set APP_NAME=${name}
 set APP_LONG_NAME=${displayName}
-set APP_BASE=${servicemix.base}
+set APP_BASE=${karaf.base}
 
 if ""%1"" == ""run"" goto doRun
 if ""%1"" == ""install"" goto doInstall
 if ""%1"" == ""remove"" goto doRemove
 
-echo Usage:  servicemix-service ( commands ... )
+echo Usage:  karaf-service ( commands ... )
 echo commands:
 echo   run               Start %APP_NAME% in the current console
 echo   install           Install %APP_NAME% as a Windows service

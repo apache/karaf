@@ -114,10 +114,10 @@ public abstract class AbstractIntegrationTest {
 
             // this is how you set the default log level when using pax logging (logProfile)
             systemProperty("org.ops4j.pax.logging.DefaultServiceLog.level").value("INFO"),
-            systemProperty("servicemix.name").value("root"),
-            systemProperty("servicemix.base").value("target/smx.base"),
-            systemProperty("servicemix.startLocalConsole").value("false"),
-            systemProperty("servicemix.startRemoteShell").value("false"),
+            systemProperty("karaf.name").value("root"),
+            systemProperty("karaf.base").value("target/smx.base"),
+            systemProperty("karaf.startLocalConsole").value("false"),
+            systemProperty("karaf.startRemoteShell").value("false"),
 
             // hack system packages
             systemPackages("org.apache.felix.karaf.main.spi;version=1.0.0", "org.apache.felix.karaf.jaas.boot"),

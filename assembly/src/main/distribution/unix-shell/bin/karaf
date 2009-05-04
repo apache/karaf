@@ -108,29 +108,29 @@ unlimitFD() {
 }
 
 locateHome() {
-    if [ "x$SERVICEMIX_HOME" != "x" ]; then
-        warn "Ignoring predefined value for SERVICEMIX_HOME"
+    if [ "x$KARAF_HOME" != "x" ]; then
+        warn "Ignoring predefined value for KARAF_HOME"
     fi
 
-    SERVICEMIX_HOME=`cd $DIRNAME/..; pwd`
-    if [ ! -d "$SERVICEMIX_HOME" ]; then
-        die "SERVICEMIX_HOME is not valid: $SERVICEMIX_HOME"
+    KARAF_HOME=`cd $DIRNAME/..; pwd`
+    if [ ! -d "$KARAF_HOME" ]; then
+        die "KARAF_HOME is not valid: $KARAF_HOME"
     fi
 }
 
 locateBase() {
-    if [ "x$SERVICEMIX_BASE" != "x" ]; then
-        if [ ! -d "$SERVICEMIX_BASE" ]; then
-            die "SERVICEMIX_BASE is not valid: $SERVICEMIX_BASE"
+    if [ "x$KARAF_BASE" != "x" ]; then
+        if [ ! -d "$KARAF_BASE" ]; then
+            die "KARAF_BASE is not valid: $KARAF_BASE"
         fi
     else
-        SERVICEMIX_BASE=$SERVICEMIX_HOME
+        KARAF_BASE=$KARAF_HOME
     fi
 }
 
 setupNativePath() {
     # Support for loading native libraries
-    LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:$SERVICEMIX_BASE/lib:$SERVICEMIX_HOME/lib"
+    LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:$KARAF_BASE/lib:$KARAF_HOME/lib"
 
     # For Cygwin, set PATH from LD_LIBRARY_PATH
     if $cygwin; then
@@ -186,7 +186,7 @@ setupDebugOptions() {
     export JAVA_OPTS
 
     # Set Debug options if enabled
-    if [ "x$SERVICEMIX_DEBUG" != "x" ]; then
+    if [ "x$KARAF_DEBUG" != "x" ]; then
         # Use the defaults if JAVA_DEBUG_OPTS was not set
         if [ "x$JAVA_DEBUG_OPTS" = "x" ]; then
             JAVA_DEBUG_OPTS="$DEFAULT_JAVA_DEBUG_OPTS"
@@ -214,7 +214,7 @@ setupDefaults() {
     fi
 
     # Add the jars in the lib dir
-    for file in $SERVICEMIX_HOME/lib/*.jar
+    for file in $KARAF_HOME/lib/*.jar
     do
         if [ -z "$CLASSPATH" ]; then
             CLASSPATH="$file"
@@ -238,10 +238,10 @@ init() {
     # Unlimit the number of file descriptors if possible
     unlimitFD
 
-    # Locate the ServiceMix home directory
+    # Locate the Karaf home directory
     locateHome
 
-    # Locate the ServiceMix base directory
+    # Locate the Karaf base directory
     locateBase
 
     # Setup the native library path
@@ -262,26 +262,26 @@ init() {
 }
 
 run() {
-    OPTS="-Dservicemix.startLocalConsole=true -Dservicemix.startRemoteShell=true"
+    OPTS="-Dkaraf.startLocalConsole=true -Dkaraf.startRemoteShell=true"
     case "$1" in
         'console')
             shift
             ;;
         'server')
-            OPTS="-Dservicemix.startLocalConsole=false -Dservicemix.startRemoteShell=true"
+            OPTS="-Dkaraf.startLocalConsole=false -Dkaraf.startRemoteShell=true"
             shift
             ;;
         'client')
-            OPTS="-Dservicemix.startLocalConsole=true -Dservicemix.startRemoteShell=false"
+            OPTS="-Dkaraf.startLocalConsole=true -Dkaraf.startRemoteShell=false"
             shift
             ;;
     esac
 
     if $cygwin; then
-        SERVICEMIX_HOME=`cygpath --path --windows "$SERVICEMIX_HOME"`
-        SERVICEMIX_BASE=`cygpath --path --windows "$SERVICEMIX_BASE"`
+        KARAF_HOME=`cygpath --path --windows "$KARAF_HOME"`
+        KARAF_BASE=`cygpath --path --windows "$KARAF_BASE"`
     fi
-    exec $JAVA $JAVA_OPTS -Dservicemix.home="$SERVICEMIX_HOME" -Dservicemix.base="$SERVICEMIX_BASE" -Djava.util.logging.config.file=$SERVICEMIX_BASE/etc/java.util.logging.properties $OPTS -classpath "$CLASSPATH" org.apache.felix.karaf.main.Main $*
+    exec $JAVA $JAVA_OPTS -Dkaraf.home="$KARAF_HOME" -Dkaraf.base="$KARAF_BASE" -Djava.util.logging.config.file=$KARAF_BASE/etc/java.util.logging.properties $OPTS -classpath "$CLASSPATH" org.apache.felix.karaf.main.Main $*
 }
 
 main() {

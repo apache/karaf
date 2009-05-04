@@ -125,12 +125,12 @@ public class AdminServiceImpl implements AdminService, InitializingBean {
         copyResourceToDir(serviceMixBase, "etc/startup.properties", true);
 
         HashMap<String, String> props = new HashMap<String, String>();
-        props.put("${servicemix.name}", name);
-        props.put("${servicemix.home}", System.getProperty("servicemix.home"));
-        props.put("${servicemix.base}", serviceMixBase.getPath());
-        props.put("${servicemix.sshPort}", Integer.toString(sshPort));
+        props.put("${karaf.name}", name);
+        props.put("${karaf.home}", System.getProperty("karaf.home"));
+        props.put("${karaf.base}", serviceMixBase.getPath());
+        props.put("${karaf.sshPort}", Integer.toString(sshPort));
         copyFilteredResourceToDir(serviceMixBase, "etc/system.properties", props);
-        copyFilteredResourceToDir(serviceMixBase, "etc/org.apache.servicemix.shell.cfg", props);
+        copyFilteredResourceToDir(serviceMixBase, "etc/org.apache.felix.karaf.shell.cfg", props);
         if( System.getProperty("os.name").startsWith("Win") ) {
             copyFilteredResourceToDir(serviceMixBase, "bin/servicemix.bat", props);
         } else {

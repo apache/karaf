@@ -79,7 +79,7 @@
 
     <bean id="sshServerFactory" class="org.apache.felix.karaf.gshell.core.sshd.SshServerFactory" init-method="start" destroy-method="stop">
         <constructor-arg ref="sshServer" />
-        <property name="start" value="${servicemix.startRemoteShell}" />
+        <property name="start" value="${karaf.startRemoteShell}" />
     </bean>
 
     <!--

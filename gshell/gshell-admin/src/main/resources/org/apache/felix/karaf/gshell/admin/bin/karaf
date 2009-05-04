@@ -18,8 +18,8 @@
 #
 ################################################################################
 
-SERVICEMIX_HOME=${servicemix.home}
-SERVICEMIX_BASE=${servicemix.base}
+KARAF_HOME=${karaf.home}
+KARAF_BASE=${karaf.base}
 
-export SERVICEMIX_BASE
-${SERVICEMIX_HOME}/bin/servicemix "$*"
+export KARAF_BASE
+${KARAF_HOME}/bin/karaf "$*"

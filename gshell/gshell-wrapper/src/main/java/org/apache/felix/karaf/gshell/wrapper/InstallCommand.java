@@ -51,14 +51,14 @@ public class InstallCommand extends OsgiCommandSupport
     	
     	try {
     		String name = getName();    		
-    		File base = new File(System.getProperty("servicemix.base"));
+    		File base = new File(System.getProperty("karaf.base"));
     		File bin = new File(base, "bin");
     		File etc = new File(base, "etc");
     		File lib = new File(base, "lib");
     		
 			HashMap<String, String> props = new HashMap<String, String>();
-			props.put("${servicemix.home}", System.getProperty("servicemix.home"));
-			props.put("${servicemix.base}", base.getPath());
+			props.put("${karaf.home}", System.getProperty("karaf.home"));
+			props.put("${karaf.base}", base.getPath());
 			props.put("${name}", name);
 			props.put("${displayName}", getDisplayName());
 			props.put("${description}", getDescription());
@@ -321,7 +321,7 @@ public class InstallCommand extends OsgiCommandSupport
 
 	public String getName() {
 		if( name ==  null ) {
-    		File base = new File(System.getProperty("servicemix.base"));
+    		File base = new File(System.getProperty("karaf.base"));
     		name = base.getName();
 		}
 		return name;

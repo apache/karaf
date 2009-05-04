@@ -40,7 +40,7 @@
     </bean>
 
     <bean id="localConsole" class="org.apache.felix.karaf.gshell.core.LocalConsole">
-        <property name="createLocalShell" value="${servicemix.startLocalConsole}"/>
+        <property name="createLocalShell" value="${karaf.startLocalConsole}"/>
         <property name="shell" ref="localShell"/>
     </bean>
 

@@ -41,7 +41,7 @@
     <import resource="classpath:org/apache/felix/karaf/gshell/core/commands.xml" />
     
     <bean id="placeholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-      <property name="location" value="file:${servicemix.home}/etc/org.apache.servicemix.features.cfg"/>
+      <property name="location" value="file:${karaf.home}/etc/org.apache.servicemix.features.cfg"/>
     </bean>
 
     <gshell:command-bundle>

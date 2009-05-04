@@ -42,7 +42,7 @@
     </bean>
 
     <bean id="application" class="org.apache.felix.karaf.gshell.core.ApplicationImpl">
-        <property name="id" value="${servicemix.name}"/>
+        <property name="id" value="${karaf.name}"/>
         <property name="io" ref="io"/>
         <property name="model">
             <bean class="org.apache.geronimo.gshell.application.model.ApplicationModel">

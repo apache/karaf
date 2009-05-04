@@ -22,15 +22,15 @@ APP_NAME="${name}"
 APP_LONG_NAME="${displayName}"
 
 # Wrapper
-WRAPPER_CMD="${servicemix.base}/bin/${APP_NAME}-wrapper"
-WRAPPER_CONF="${servicemix.base}/etc/${APP_NAME}-wrapper.conf"
+WRAPPER_CMD="${karaf.base}/bin/${APP_NAME}-wrapper"
+WRAPPER_CONF="${karaf.base}/etc/${APP_NAME}-wrapper.conf"
 
 # Priority at which to run the wrapper.  See "man nice" for valid priorities.
 #  nice is only used if a priority is specified.
 PRIORITY=
 
 # Location of the pid file.
-PIDDIR="${servicemix.base}/data"
+PIDDIR="${karaf.base}/data"
 
 # If uncommented, causes the Wrapper to be shutdown using an anchor file.
 #  When launched with the 'start' command, it will also ignore all INT and

@@ -18,8 +18,8 @@ REM limitations under the License.
 REM 
 REM =========================================================================
 
-SET SERVICEMIX_BASE=${servicemix.base}
+SET KARAF_BASE=${karaf.base}
 SETLOCAL
-SET SERVICEMIX_HOME=${servicemix.home}
+SET KARAF_HOME=${karaf.home}
 
-%SERVICEMIX_HOME%\bin\servicemix.bat %*
+%KARAF_HOME%\bin\karaf.bat %*

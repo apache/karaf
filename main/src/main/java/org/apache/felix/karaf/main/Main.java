@@ -87,22 +87,22 @@ public class Main implements MainService, BundleActivator {
      * The system property for specifying the ServiceMix home directory.  The home directory
      * hold the binary install of ServiceMix.
      */
-    public static final String PROP_SERVICEMIX_HOME = "servicemix.home";
+    public static final String PROP_KARAF_HOME = "karaf.home";
     /**
      * The environment variable for specifying the ServiceMix home directory.  The home directory
      * hold the binary install of ServiceMix.
      */
-    public static final String ENV_SERVICEMIX_HOME = "SERVICEMIX_HOME";
+    public static final String ENV_KARAF_HOME = "KARAF_HOME";
     /**
      * The system property for specifying the ServiceMix base directory.  The base directory
      * holds the configuration and data for a ServiceMix instance.
      */
-    public static final String PROP_SERVICEMIX_BASE = "servicemix.base";
+    public static final String PROP_KARAF_BASE = "karaf.base";
     /**
      * The environment variable for specifying the ServiceMix base directory.  The base directory
      * holds the configuration and data for a ServiceMix instance.
      */
-    public static final String ENV_SERVICEMIX_BASE = "SERVICEMIX_BASE";
+    public static final String ENV_KARAF_BASE = "KARAF_BASE";
 
     /**
      * Config property which identifies directories which contain bundles to be loaded by SMX
@@ -112,21 +112,21 @@ public class Main implements MainService, BundleActivator {
     /**
      * Config property that indicates we want to convert bundles locations to maven style urls
      */
-    public static final String PROPERTY_CONVERT_TO_MAVEN_URL = "servicemix.maven.convert";
+    public static final String PROPERTY_CONVERT_TO_MAVEN_URL = "karaf.maven.convert";
 
     /**
      * If a lock should be used before starting the runtime
      */
-    public static final String PROPERTY_USE_LOCK = "servicemix.lock";
+    public static final String PROPERTY_USE_LOCK = "karaf.lock";
 
     /**
      * The lock implementation
      */
-    public static final String PROPERTY_LOCK_CLASS = "servicemix.lock.class";
+    public static final String PROPERTY_LOCK_CLASS = "karaf.lock.class";
 
-    public static final String PROPERTY_LOCK_DELAY = "servicemix.lock.delay";
+    public static final String PROPERTY_LOCK_DELAY = "karaf.lock.delay";
 
-    public static final String PROPERTY_LOCK_LEVEL = "servicemix.lock.level";
+    public static final String PROPERTY_LOCK_LEVEL = "karaf.lock.level";
 
     public static final String PROPERTY_LOCK_CLASS_DEFAULT = SimpleFileLock.class.getName();
 
@@ -155,8 +155,8 @@ public class Main implements MainService, BundleActivator {
         //System.out.println("ServiceMix Home: "+main.servicemixHome.getPath());
         //System.out.println("ServiceMix Base: "+main.servicemixBase.getPath());
 
-        System.setProperty(PROP_SERVICEMIX_HOME, servicemixHome.getPath());
-        System.setProperty(PROP_SERVICEMIX_BASE, servicemixBase.getPath());
+        System.setProperty(PROP_KARAF_HOME, servicemixHome.getPath());
+        System.setProperty(PROP_KARAF_BASE, servicemixBase.getPath());
 
         // Load system properties.
         loadSystemProperties();
@@ -341,15 +341,15 @@ public class Main implements MainService, BundleActivator {
         File rc = null;
 
         // Use the system property if specified.
-        String path = System.getProperty(PROP_SERVICEMIX_HOME);
+        String path = System.getProperty(PROP_KARAF_HOME);
         if (path != null) {
-            rc = validateDirectoryExists(path, "Invalid " + PROP_SERVICEMIX_HOME + " system property");
+            rc = validateDirectoryExists(path, "Invalid " + PROP_KARAF_HOME + " system property");
         }
 
         if (rc == null) {
-            path = System.getenv(ENV_SERVICEMIX_HOME);
+            path = System.getenv(ENV_KARAF_HOME);
             if (path != null) {
-                rc = validateDirectoryExists(path, "Invalid " + ENV_SERVICEMIX_HOME + " environment variable");
+                rc = validateDirectoryExists(path, "Invalid " + ENV_KARAF_HOME + " environment variable");
             }
         }
 
@@ -378,7 +378,7 @@ public class Main implements MainService, BundleActivator {
             }
         }
         if (rc == null) {
-            throw new IOException("The ServiceMix install directory could not be determined.  Please set the " + PROP_SERVICEMIX_HOME + " system property or the " + ENV_SERVICEMIX_HOME + " environment variable.");
+            throw new IOException("The ServiceMix install directory could not be determined.  Please set the " + PROP_KARAF_HOME + " system property or the " + ENV_KARAF_HOME + " environment variable.");
         }
 
         return rc;
@@ -403,15 +403,15 @@ public class Main implements MainService, BundleActivator {
     private static File getServiceMixBase(File defaultValue) {
         File rc = null;
 
-        String path = System.getProperty(PROP_SERVICEMIX_BASE);
+        String path = System.getProperty(PROP_KARAF_BASE);
         if (path != null) {
-            rc = validateDirectoryExists(path, "Invalid " + PROP_SERVICEMIX_BASE + " system property");
+            rc = validateDirectoryExists(path, "Invalid " + PROP_KARAF_BASE + " system property");
         }
 
         if (rc == null) {
-            path = System.getenv(ENV_SERVICEMIX_BASE);
+            path = System.getenv(ENV_KARAF_BASE);
             if (path != null) {
-                rc = validateDirectoryExists(path, "Invalid " + ENV_SERVICEMIX_BASE + " environment variable");
+                rc = validateDirectoryExists(path, "Invalid " + ENV_KARAF_BASE + " environment variable");
             }
         }
 
