@@ -24,13 +24,12 @@ import javax.security.auth.login.AppConfigurationEntry;
 import org.apache.felix.karaf.jaas.boot.ProxyLoginModule;
 import org.apache.felix.karaf.jaas.config.JaasRealm;
 import org.osgi.framework.BundleContext;
-import org.springframework.osgi.context.BundleContextAware;
 
 /**
  * An implementation of JaasRealm which is created
  * by the spring namespace handler.
  */
-public class Config implements JaasRealm, BundleContextAware {
+public class Config implements JaasRealm {
 
     private String name;
     private int rank;

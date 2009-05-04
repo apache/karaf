@@ -37,7 +37,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
  * for JMX management.
  */
 @ManagedResource(description = "Features Service Registry and Management")
-public class ManagedFeaturesRegistry implements InitializingBean, FeaturesRegistry {
+public class ManagedFeaturesRegistry implements FeaturesRegistry {
 
     private static final transient Log LOG = LogFactory.getLog(ManagedFeaturesRegistry.class);
 
@@ -175,7 +175,7 @@ public class ManagedFeaturesRegistry implements InitializingBean, FeaturesRegist
         }
     }
 
-    public void afterPropertiesSet() throws Exception {
+    public void init() throws Exception {
         if (managementAgent == null) {
             throw new IllegalArgumentException("managementAgent must not be null");
         }

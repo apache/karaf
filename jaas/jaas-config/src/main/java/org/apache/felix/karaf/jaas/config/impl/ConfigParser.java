@@ -48,6 +48,7 @@ public class ConfigParser extends AbstractSingleBeanDefinitionParser {
         if (name == null || name.length() == 0) {
             name = element.getAttribute("id");
         }
+        builder.addPropertyReference("bundleContext", "bundleContext");
         builder.addPropertyValue("name", name);
         String rank = element.getAttribute("rank");
         if (rank != null && rank.length() > 0) {
@@ -83,6 +84,7 @@ public class ConfigParser extends AbstractSingleBeanDefinitionParser {
         if (Boolean.valueOf(publish)) {
             // Publish Config
             BeanDefinitionBuilder bd = BeanDefinitionBuilder.genericBeanDefinition(OsgiServiceFactoryBean.class);
+            bd.addPropertyReference("bundleContext", "bundleContext");
             bd.addPropertyValue("target", builder.getBeanDefinition());
             bd.addPropertyValue("interfaces", new Class[] { JaasRealm.class });
             Map<String,String> props = new HashMap<String,String>();

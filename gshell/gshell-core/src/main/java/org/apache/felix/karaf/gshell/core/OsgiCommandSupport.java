@@ -29,9 +29,8 @@ import org.apache.geronimo.gshell.command.Variables;
 import org.apache.geronimo.gshell.io.IO;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.springframework.osgi.context.BundleContextAware;
 
-public abstract class OsgiCommandSupport implements CommandAction, BundleContextAware {
+public abstract class OsgiCommandSupport implements CommandAction {
 
     protected Log log = LogFactory.getLog(getClass());
     protected BundleContext bundleContext;

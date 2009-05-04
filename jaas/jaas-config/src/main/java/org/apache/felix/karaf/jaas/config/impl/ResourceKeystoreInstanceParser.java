@@ -72,6 +72,7 @@ public class ResourceKeystoreInstanceParser extends AbstractSingleBeanDefinition
         if (Boolean.valueOf(publish)) {
             // Publish Config
             BeanDefinitionBuilder bd = BeanDefinitionBuilder.genericBeanDefinition(OsgiServiceFactoryBean.class);
+            bd.addPropertyReference("bundleContext", "bundleContext");
             bd.addPropertyValue("target", builder.getBeanDefinition());
             bd.addPropertyValue("interfaces", new Class[] { KeystoreInstance.class });
             BeanDefinition def = bd.getBeanDefinition();

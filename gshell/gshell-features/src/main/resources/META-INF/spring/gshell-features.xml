@@ -38,42 +38,54 @@
   http://servicemix.apache.org/schema/servicemix-gshell
   http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
-    <import resource="classpath:org/apache/felix/karaf/gshell/core/commands.xml" />
-    
     <bean id="placeholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
       <property name="location" value="file:${karaf.home}/etc/org.apache.servicemix.features.cfg"/>
     </bean>
 
     <gshell:command-bundle>
         <gshell:command name="features/addUrl">
-            <gshell:action class="org.apache.felix.karaf.gshell.features.commands.AddUrlCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.features.commands.AddUrlCommand">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
         </gshell:command>
         <gshell:command name="features/listUrl">
-            <gshell:action class="org.apache.felix.karaf.gshell.features.commands.ListUrlCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.features.commands.ListUrlCommand">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
         </gshell:command>
         <gshell:command name="features/removeUrl">
-            <gshell:action class="org.apache.felix.karaf.gshell.features.commands.RemoveUrlCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.features.commands.RemoveUrlCommand">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
             <gshell:completers>
                 <ref bean="removeUrlCompleter" />
             </gshell:completers>
         </gshell:command>
         <gshell:command name="features/refreshUrl">
-            <gshell:action class="org.apache.felix.karaf.gshell.features.commands.RefreshUrlCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.features.commands.RefreshUrlCommand">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
         </gshell:command>
         <gshell:command name="features/install">
-            <gshell:action class="org.apache.felix.karaf.gshell.features.commands.InstallFeatureCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.features.commands.InstallFeatureCommand">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
             <gshell:completers>
                 <ref bean="installFeatureCompleter" /> 
             </gshell:completers>
         </gshell:command>
         <gshell:command name="features/uninstall">
-            <gshell:action class="org.apache.felix.karaf.gshell.features.commands.UninstallFeatureCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.features.commands.UninstallFeatureCommand">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
             <gshell:completers>
                 <ref bean="uninstallFeatureCompleter" />
             </gshell:completers>
         </gshell:command>
         <gshell:command name="features/list">
-            <gshell:action class="org.apache.felix.karaf.gshell.features.commands.ListFeaturesCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.features.commands.ListFeaturesCommand">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
         </gshell:command>
     </gshell:command-bundle>
 
@@ -93,7 +105,7 @@
         <property name="mbeanServer" ref="mbeanServer" />
     </bean>
 
-    <bean id="featureServiceRegistry" class="org.apache.felix.karaf.gshell.features.management.ManagedFeaturesRegistry">
+    <bean id="featureServiceRegistry" class="org.apache.felix.karaf.gshell.features.management.ManagedFeaturesRegistry" init-method="init">
         <property name="managementAgent" ref="managementAgent" />
         <property name="namingStrategy" ref="namingStrategy" />
         <property name="featuresService" ref="featuresService" />

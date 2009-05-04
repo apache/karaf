@@ -19,6 +19,7 @@ package org.apache.felix.karaf.jaas.config;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.HashMap;
 
 import javax.security.auth.login.AppConfigurationEntry;
 
@@ -36,6 +37,15 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.AbstractBeanFactory;
+import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.BeansException;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.osgi.context.support.BundleContextAwareProcessor;
@@ -64,7 +74,10 @@ public class NamespaceHandlerTest extends TestCase {
         AbstractApplicationContext ctx = new ClassPathXmlApplicationContext(new String[] { "classpath:config.xml" }, false) {
             protected DefaultListableBeanFactory createBeanFactory() {
                 DefaultListableBeanFactory f = super.createBeanFactory();
-                f.addBeanPostProcessor(new BundleContextAwareProcessor(bundleContext));
+                Map<String, Object> beans = new HashMap<String, Object>();
+                beans.put("bundleContext", bundleContext);
+                SimpleBeanFactory p = new SimpleBeanFactory(beans);
+                f.setParentBeanFactory(p);
                 return f;
             }
         };
@@ -108,5 +121,70 @@ public class NamespaceHandlerTest extends TestCase {
         assertEquals("ks", ks.getName());
         assertEquals(1, ks.getRank());
         assertNotNull(ks.getPrivateKey("myalias"));
+    }
+
+    public static class SimpleBeanFactory implements BeanFactory {
+
+        private final Map beans;
+
+        public SimpleBeanFactory(Map beans) {
+            this.beans = beans;
+        }
+        public boolean containsBean(String name) {
+            return beans.containsKey(name);
+        }
+        public String[] getAliases(String name) throws NoSuchBeanDefinitionException {
+            Object bean = beans.get(name);
+            if (bean == null) {
+                throw new NoSuchBeanDefinitionException(name);
+            }
+            return new String[0];
+        }
+        public Object getBean(String name) throws BeansException {
+            return getBean(name, (Class) null);
+        }
+        public Object getBean(String name, Class requiredType) throws BeansException {
+            Object bean = beans.get(name);
+            if (bean == null) {
+                throw new NoSuchBeanDefinitionException(name);
+            }
+            if (requiredType != null && !requiredType.isInstance(bean)) {
+                throw new BeanNotOfRequiredTypeException(name, requiredType, bean.getClass());
+            }
+            return bean;
+        }
+        public Object getBean(String name, Object[] args) throws BeansException {
+            if (args != null) {
+                throw new BeanDefinitionStoreException("Bean is not a prototype");
+            }
+            return getBean(name, (Class) null);
+        }
+        public Class getType(String name) throws NoSuchBeanDefinitionException {
+            Object bean = beans.get(name);
+            if (bean == null) {
+                throw new NoSuchBeanDefinitionException(name);
+            }
+            return bean.getClass();
+        }
+        public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
+            Object bean = beans.get(name);
+            if (bean == null) {
+                throw new NoSuchBeanDefinitionException(name);
+            }
+            return true;
+        }
+        public boolean isTypeMatch(String name, Class targetType) throws NoSuchBeanDefinitionException {
+            if (!beans.containsKey(name)) {
+                throw new NoSuchBeanDefinitionException(name);
+            }
+            if (targetType == null || Object.class.equals(targetType)) {
+                return true;
+            }
+            return targetType.isAssignableFrom(beans.get(name).getClass());
+        }
+        public boolean isPrototype(String name) {
+            return false;
+        }
+
     }
 }

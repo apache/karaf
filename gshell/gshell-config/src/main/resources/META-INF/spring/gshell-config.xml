@@ -35,41 +35,53 @@
   http://servicemix.apache.org/schema/servicemix-gshell
   http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
-    <import resource="classpath:org/apache/felix/karaf/gshell/core/commands.xml" />
-
     <gshell:command-bundle>
         <gshell:command name="config/cancel">
-            <gshell:action class="org.apache.felix.karaf.gshell.config.CancelCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.config.CancelCommand">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
         </gshell:command>
         <gshell:command name="config/edit">
-            <gshell:action class="org.apache.felix.karaf.gshell.config.EditCommand"/>
+            <gshell:action class="org.apache.felix.karaf.gshell.config.EditCommand">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
             <gshell:completers>
                 <ref bean="configCompleter" />
                 <null/>
             </gshell:completers>
         </gshell:command>
         <gshell:command name="config/list">
-            <gshell:action class="org.apache.felix.karaf.gshell.config.ListCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.config.ListCommand">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
         </gshell:command>
         <gshell:command name="config/propdel">
-            <gshell:action class="org.apache.felix.karaf.gshell.config.PropDelCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.config.PropDelCommand">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
             <gshell:completers>
                 <ref bean="configPropertyCompleter" />
                 <null/>
             </gshell:completers>
         </gshell:command>
         <gshell:command name="config/proplist">
-            <gshell:action class="org.apache.felix.karaf.gshell.config.PropListCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.config.PropListCommand">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
         </gshell:command>
         <gshell:command name="config/propset">
-            <gshell:action class="org.apache.felix.karaf.gshell.config.PropSetCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.config.PropSetCommand">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
             <gshell:completers>
                 <ref bean="configPropertyCompleter" />
                 <null/>
             </gshell:completers>
         </gshell:command>
         <gshell:command name="config/update">
-            <gshell:action class="org.apache.felix.karaf.gshell.config.UpdateCommand" />
+            <gshell:action class="org.apache.felix.karaf.gshell.config.UpdateCommand">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
         </gshell:command>
     </gshell:command-bundle>
 
