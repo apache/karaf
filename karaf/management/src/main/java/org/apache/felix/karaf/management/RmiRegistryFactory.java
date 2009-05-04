@@ -14,22 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.servicemix.management;
+package org.apache.felix.karaf.management;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.InitializingBean;
-
 /**
  * 
  * @author gnodet
  */
-public class RmiRegistryFactoryBean implements FactoryBean, InitializingBean, DisposableBean {
+public class RmiRegistryFactory {
 
     private int port = Registry.REGISTRY_PORT;
     private Registry registry;
@@ -83,15 +79,7 @@ public class RmiRegistryFactoryBean implements FactoryBean, InitializingBean, Di
         return registry;
     }
 
-    public Class getObjectType() {
-        return Registry.class;
-    }
-
-    public boolean isSingleton() {
-        return true;
-    }
-
-    public void afterPropertiesSet() throws RemoteException {
+    public void init() throws RemoteException {
         if (registry == null && locate) {
             try {
                 Registry reg = LocateRegistry.getRegistry(getPort());
