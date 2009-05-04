@@ -33,7 +33,7 @@ import org.springframework.beans.factory.InitializingBean;
 public class ApplicationImpl implements Application  {
 
 	private static final String EMBEDDED_PROPS = "org/apache/felix/karaf/version/embedded.properties";
-    private static final String SERVICEMIX_VERSION ="org/apache/felix/karaf/gshell/core/servicemix-version.properties";
+    private static final String SERVICEMIX_VERSION ="org/apache/felix/karaf/gshell/core/karaf-version.properties";
     private static final String VERSION_PROPERTY = "version";
 
     private String id;

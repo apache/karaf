@@ -20,7 +20,7 @@ import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.geronimo.gshell.clp.Option;
 
 /**
- * Creates a new servicemix instance 
+ * Creates a new Karaf instance 
  *
  * @version $Rev: 679826 $ $Date: 2008-07-25 17:00:12 +0200 (Fri, 25 Jul 2008) $
  */
@@ -32,7 +32,7 @@ public class CreateCommand extends AdminCommandSupport
     @Option(name = "-l", aliases = { "--location"}, description = "Location of the new instance on the file system")
     private String location;
 
-    @Argument(index=0, required=true, description="Name of the new ServiceMix instance")
+    @Argument(index=0, required=true, description="Name of the new Karaf instance")
     private String instance = null;
 
     protected Object doExecute() throws Exception {

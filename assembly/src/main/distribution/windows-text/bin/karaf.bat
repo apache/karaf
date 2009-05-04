@@ -17,7 +17,7 @@ rem    See the License for the specific language governing permissions and
 rem    limitations under the License.
 rem
 rem 
-rem $Id: servicemix.bat 979 2005-11-30 22:50:55Z bsnyder $
+rem $Id: karaf.bat 979 2005-11-30 22:50:55Z bsnyder $
 rem 
 
 if not "%ECHO%" == "" echo %ECHO%

@@ -31,7 +31,7 @@ import org.apache.geronimo.gshell.io.PumpStreamHandler;
 import org.apache.felix.karaf.gshell.core.OsgiCommandSupport;
 
 /**
- * Installs this ServiceMix instance as a service in your operating systems. 
+ * Installs this Karaf instance as a service in your operating systems.
  *
  * @version $Rev: 603634 $ $Date: 2007-12-12 16:07:16 +0100 (Wed, 12 Dec 2007) $
  */
@@ -39,7 +39,7 @@ public class InstallCommand extends OsgiCommandSupport
 {
 	
     @Option(name="-n", aliases={"--name"}, description="The service name that will be used when installing the service.")
-    private String name="servicemix";
+    private String name="karaf";
     @Option(name="-d", aliases={"--display"}, description="The display name of the service.")
     private String displayName;
     @Option(name="-D", aliases={"--description"}, description="The description of the service.")
@@ -68,20 +68,20 @@ public class InstallCommand extends OsgiCommandSupport
 			File serviceFile=null;
 			if( os.startsWith("Win") ) {
 				mkdir(bin);
-				copyResourceTo(new File(bin, name+"-wrapper.exe"), "windows/servicemix-wrapper.exe", false);
+				copyResourceTo(new File(bin, name+"-wrapper.exe"), "windows/karaf-wrapper.exe", false);
 				serviceFile = new File(bin,name+"-service.bat");
-				copyFilteredResourceTo(serviceFile, "windows/servicemix-service.bat", props);
+				copyFilteredResourceTo(serviceFile, "windows/karaf-service.bat", props);
 				mkdir(lib);
 				copyResourceTo(new File(bin, "wrapper.dll"), "windows/wrapper.dll", false);								
 			} else if( os.startsWith("Mac OS X") ) {
 				mkdir(bin);
 				
 				File file = new File(bin, name+"-wrapper");
-				copyResourceTo(file, "macosx/servicemix-wrapper", false);
+				copyResourceTo(file, "macosx/karaf-wrapper", false);
 				chmod(file, "a+x");
 				
 				serviceFile = new File(bin,name+"-service");
-				copyFilteredResourceTo(serviceFile, "unix/servicemix-service", props);
+				copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
 				chmod(serviceFile, "a+x");
 				
 				mkdir(lib);
@@ -93,11 +93,11 @@ public class InstallCommand extends OsgiCommandSupport
 				mkdir(bin);
 				
 				File file = new File(bin, name+"-wrapper");
-				copyResourceTo(file, "linux/servicemix-wrapper", false);
+				copyResourceTo(file, "linux/karaf-wrapper", false);
 				chmod(file, "a+x");
 
 				serviceFile = new File(bin,name+"-service");
-				copyFilteredResourceTo(serviceFile, "unix/servicemix-service", props);
+				copyFilteredResourceTo(serviceFile, "unix/karaf-service", props);
 				chmod(serviceFile, "a+x");
 				
 				mkdir(lib);
@@ -112,10 +112,10 @@ public class InstallCommand extends OsgiCommandSupport
 
     		// Install the wrapper jar to the lib directory..
 			mkdir(lib);
-			copyResourceTo(new File(lib, "servicemix-wrapper.jar"), "all/servicemix-wrapper.jar", false);
+			copyResourceTo(new File(lib, "karaf-wrapper.jar"), "all/karaf-wrapper.jar", false);
 			mkdir(etc);
 			File wrapperConf = new File(etc,name+"-wrapper.conf");
-			copyFilteredResourceTo(wrapperConf, "all/servicemix-wrapper.conf", props);
+			copyFilteredResourceTo(wrapperConf, "all/karaf-wrapper.conf", props);
 
 			io.out.println("");
 			io.out.println("Setup complete.  You may want to tweak the JVM properties in the wrapper configuration file: "+wrapperConf.getPath());
@@ -139,7 +139,7 @@ public class InstallCommand extends OsgiCommandSupport
 				io.out.println("");
 				io.out.println("At this time it is not known how to get this service to start when the machine is rebooted.");
 				io.out.println("If you know how to install the following service script so that it gets started");
-				io.out.println("when OS X starts, please email dev@servicemix.apache.org and let us know how so");
+				io.out.println("when OS X starts, please email dev@felix.apache.org and let us know how so");
 				io.out.println("we can update this message.");
 				io.out.println(" ");
 				io.out.println("  To start the service:");

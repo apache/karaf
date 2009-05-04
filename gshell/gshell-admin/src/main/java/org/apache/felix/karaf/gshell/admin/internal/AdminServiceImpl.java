@@ -79,7 +79,7 @@ public class AdminServiceImpl implements AdminService {
             }
             instances = newInstances;
         } catch (Exception e) {
-            LOGGER.warn("Unable to reload ServiceMix instance list", e);
+            LOGGER.warn("Unable to reload Karaf instance list", e);
         }
     }
 
@@ -117,7 +117,7 @@ public class AdminServiceImpl implements AdminService {
         mkdir(serviceMixBase, "data");
 
         copyResourceToDir(serviceMixBase, "etc/config.properties", true);
-        copyResourceToDir(serviceMixBase, "etc/org.apache.servicemix.features.cfg", true);
+        copyResourceToDir(serviceMixBase, "etc/org.apache.felix.karaf.features.cfg", true);
         copyResourceToDir(serviceMixBase, "etc/users.properties", true);
         copyResourceToDir(serviceMixBase, "etc/org.ops4j.pax.logging.cfg", true);
         copyResourceToDir(serviceMixBase, "etc/org.ops4j.pax.url.mvn.cfg", true);
@@ -131,10 +131,10 @@ public class AdminServiceImpl implements AdminService {
         copyFilteredResourceToDir(serviceMixBase, "etc/system.properties", props);
         copyFilteredResourceToDir(serviceMixBase, "etc/org.apache.felix.karaf.shell.cfg", props);
         if( System.getProperty("os.name").startsWith("Win") ) {
-            copyFilteredResourceToDir(serviceMixBase, "bin/servicemix.bat", props);
+            copyFilteredResourceToDir(serviceMixBase, "bin/karaf.bat", props);
         } else {
-            copyFilteredResourceToDir(serviceMixBase, "bin/servicemix", props);
-            chmod(new File(serviceMixBase, "bin/servicemix"), "a+x");
+            copyFilteredResourceToDir(serviceMixBase, "bin/karaf", props);
+            chmod(new File(serviceMixBase, "bin/karaf"), "a+x");
         }
         Instance instance = new InstanceImpl(this, name, serviceMixBase.toString());
         instances.put(name, instance);

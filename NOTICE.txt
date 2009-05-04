@@ -1,6 +1,6 @@
    =========================================================================
    ==  NOTICE file for use with the Apache License, Version 2.0,          ==
-   ==  in this case for the Apache ServiceMix distribution.               ==
+   ==  in this case for the Apache Felix Karaf distribution.              ==
    =========================================================================
 
    This product contains software developed by

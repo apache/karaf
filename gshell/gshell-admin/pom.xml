@@ -43,11 +43,11 @@
             org.apache.geronimo.gshell*,
         </gshell.osgi.import>
         <gshell.osgi.export>
-            org.apache.servicemix.jpm
+            org.apache.felix.karaf.jpm
         </gshell.osgi.export>
         <gshell.osgi.private>
             org.apache.felix.karaf.gshell.admin.*,
-            org.apache.servicemix.jpm.impl
+            org.apache.feix.karaf.jpm.impl
         </gshell.osgi.private>
     </properties>
 
