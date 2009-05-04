@@ -30,7 +30,7 @@ import org.apache.geronimo.gshell.command.Variables;
 import org.apache.geronimo.gshell.io.IO;
 import org.springframework.beans.factory.InitializingBean; 
 
-public class ApplicationImpl implements Application, InitializingBean  {
+public class ApplicationImpl implements Application  {
 
 	private static final String EMBEDDED_PROPS = "org/apache/felix/karaf/version/embedded.properties";
     private static final String SERVICEMIX_VERSION ="org/apache/felix/karaf/gshell/core/servicemix-version.properties";
@@ -49,7 +49,7 @@ public class ApplicationImpl implements Application, InitializingBean  {
         this.homeDir = detectHomeDir();    
     }           
      
-    public void afterPropertiesSet() throws Exception {      	         	    	
+    public void init() throws Exception {
         Properties props = new Properties();
         props.load(getClass().getClassLoader().getResourceAsStream(SERVICEMIX_VERSION));
         String kernelVersion = props.getProperty(VERSION_PROPERTY);

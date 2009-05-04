@@ -41,7 +41,7 @@
         <property name="prompt" value="@|bold %{gshell.username}|@%{application.id}:@|bold %{gshell.group}|> " />
     </bean>
 
-    <bean id="application" class="org.apache.felix.karaf.gshell.core.ApplicationImpl">
+    <bean id="application" class="org.apache.felix.karaf.gshell.core.ApplicationImpl" init-method="init">
         <property name="id" value="${karaf.name}"/>
         <property name="io" ref="io"/>
         <property name="model">
