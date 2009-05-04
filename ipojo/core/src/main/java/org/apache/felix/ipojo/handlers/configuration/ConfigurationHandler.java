@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -18,7 +18,6 @@
  */
 package org.apache.felix.ipojo.handlers.configuration;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -27,6 +26,7 @@ import java.util.Properties;
 
 import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.HandlerFactory;
+import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.PrimitiveHandler;
 import org.apache.felix.ipojo.architecture.ComponentTypeDescription;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
@@ -69,12 +69,12 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
      * Properties to propagate.
      */
     private Dictionary m_toPropagate = new Properties();
-    
+
     /**
      * Properties propagated from the configuration admin.
      */
     private Dictionary m_propagatedFromCA;
-    
+
     /**
      * Check if the instance was already reconfigured by the configuration admin.
      */
@@ -84,30 +84,30 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
      * should the component propagate configuration ?
      */
     private boolean m_mustPropagate;
-    
+
     /**
      * Service Registration to publish the service registration.
      */
     private ServiceRegistration m_sr;
-    
+
     /**
      * Managed Service PID.
-     * This PID must be different from the instance name if the instance was created 
+     * This PID must be different from the instance name if the instance was created
      * with the Configuration Admin.
      */
     private String m_managedServicePID;
-    
+
     /**
-     * the handler description. 
+     * the handler description.
      */
     private ConfigurationHandlerDescription m_description;
-    
+
     /**
      * Updated method.
      * This method is called when a reconfiguration is completed.
      */
     private Callback m_updated;
-   
+
 
     /**
      * Initialize the component type.
@@ -123,7 +123,7 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
         for (int i = 0; configurables != null && i < configurables.length; i++) {
             String fieldName = configurables[i].getAttribute("field");
             String methodName = configurables[i].getAttribute("method");
-            
+
             if (fieldName == null && methodName == null) {
                 throw new ConfigurationException("Malformed property : The property needs to contain at least a field or a method");
             }
@@ -137,7 +137,7 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
                 }
                 configurables[i].addAttribute(new Attribute("name", name)); // Add the type to avoid configure checking
             }
-            
+
             String value = configurables[i].getAttribute("value");
 
             // Detect the type of the property
@@ -163,30 +163,30 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
                 type = field.getFieldType();
                 configurables[i].addAttribute(new Attribute("type", type)); // Add the type to avoid configure checking
             }
-            
+
             // Is the property set to immutable
             boolean immutable = false;
             String imm = configurables[i].getAttribute("immutable");
             immutable = imm != null && imm.equalsIgnoreCase("true");
-            
+
             boolean mandatory = false;
             String man = configurables[i].getAttribute("mandatory");
             mandatory =  man != null && man.equalsIgnoreCase("true");
-            
+
             PropertyDescription pd = null;
             if (value == null) {
                 pd = new PropertyDescription(name, type, null, false); // Cannot be immutable if we have no value.
             } else {
                 pd = new PropertyDescription(name, type, value, immutable);
             }
-            
+
             if (mandatory) {
                 pd.setMandatory();
             }
-            
+
             desc.addProperty(pd);
         }
-        
+
     }
 
     /**
@@ -195,7 +195,7 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
      * before any thread access to this object.
      * @param metadata the metadata of the component
      * @param configuration the instance configuration
-     * @throws ConfigurationException one property metadata is not correct 
+     * @throws ConfigurationException one property metadata is not correct
      * @see org.apache.felix.ipojo.Handler#configure(org.apache.felix.ipojo.InstanceManager,
      * org.apache.felix.ipojo.metadata.Element)
      */
@@ -211,20 +211,20 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
             m_mustPropagate = true;
             m_toPropagate = configuration; // Instance configuration to propagate.
         }
-        
+
         // Check if the component support ConfigurationADmin reconfiguration
         m_managedServicePID = confs[0].getAttribute("pid"); // Look inside the component type description
         String instanceMSPID = (String) configuration.get("managed.service.pid"); // Look inside the instance configuration.
         if (instanceMSPID != null) {
             m_managedServicePID = instanceMSPID;
         }
-        
+
         // updated method
         String upd = confs[0].getAttribute("updated");
         if (upd != null) {
             m_updated = new Callback(upd, new Class[] {Dictionary.class}, false, getInstanceManager());
         }
-        
+
         for (int i = 0; configurables != null && i < configurables.length; i++) {
             String fieldName = configurables[i].getAttribute("field");
             String methodName = configurables[i].getAttribute("method");
@@ -233,7 +233,7 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
             String value = configurables[i].getAttribute("value");
 
             String type = configurables[i].getAttribute("type"); // The initialize method has fixed the property name.
-            
+
             Property prop = new Property(name, fieldName, methodName, value, type, getInstanceManager(), this);
             addProperty(prop);
 
@@ -245,13 +245,13 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
             } else {
                 prop.setValue(configuration.get(name));
             }
-            
+
             if (fieldName != null) {
                 FieldMetadata field = new FieldMetadata(fieldName, type);
                 getInstanceManager().register(field, prop);
             }
         }
-        
+
         m_description = new ConfigurationHandlerDescription(this, m_configurableProperties);
 
     }
@@ -289,7 +289,7 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
             }
             reconfigure(m_toPropagate);
         }
-        
+
         if (m_managedServicePID != null && m_sr == null) {
             Properties props = new Properties();
             props.put(Constants.SERVICE_PID, m_managedServicePID);
@@ -299,25 +299,9 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
         }
     }
 
-//    /**
-//     * Handler state changed.
-//     * @param state : the new instance state.
-//     * @see org.apache.felix.ipojo.CompositeHandler#stateChanged(int)
-//     */
-//    public void stateChanged(int state) {
-//        if (state == InstanceManager.VALID) {
-//            start();
-//            return;
-//        }
-//        if (state == InstanceManager.INVALID) {
-//            stop();
-//            return;
-//        }
-//    }
-
     /**
      * Adds the given property metadata to the property metadata list.
-     * 
+     *
      * @param prop : property metadata to add
      */
     protected void addProperty(Property prop) {
@@ -326,7 +310,7 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
 
     /**
      * Checks if the list contains the property.
-     * 
+     *
      * @param name : name of the property
      * @return true if the property exist in the list
      */
@@ -344,31 +328,28 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
      * @param configuration : the new configuration
      * @see org.apache.felix.ipojo.Handler#reconfigure(java.util.Dictionary)
      */
-    public synchronized void reconfigure(Dictionary configuration) {  
+    public synchronized void reconfigure(Dictionary configuration) {
         info(getInstanceManager().getInstanceName() + " is reconfiguring the properties : " + configuration);
         Properties props = reconfigureProperties(configuration);
         propagate(props, m_propagatedFromInstance);
         m_propagatedFromInstance = props;
-        
+
         if (getInstanceManager().getPojoObjects() != null) {
             try {
                 notifyUpdated(null);
             } catch (Throwable e) {
-                System.out.println("=========");
-                e.printStackTrace();
-
-                System.out.println("=========");
+                error("Cannot call the updated method : " + e.getMessage(), e);
             }
         }
     }
-    
+
     /**
      * Reconfigured configuration properties and returns non matching properties.
      * When called, it must hold the monitor lock.
      * @param configuration : new configuration
      * @return the properties that does not match with configuration properties
      */
-    private Properties reconfigureProperties(Dictionary configuration) {        
+    private Properties reconfigureProperties(Dictionary configuration) {
         Properties toPropagate = new Properties();
         Enumeration keysEnumeration = configuration.keys();
         while (keysEnumeration.hasMoreElements()) {
@@ -384,7 +365,7 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
                     break; // Exit the search loop
                 }
             }
-            if (!found) { 
+            if (!found) {
                 // The property is not a configurable property, aadd it to the toPropagate list.
                 toPropagate.put(name, value);
             }
@@ -415,7 +396,7 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
             }
         }
     }
-    
+
     /**
      * Removes the old properties from the provided services and propagate new properties.
      * @param newProps : new properties to propagate
@@ -452,17 +433,14 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
                 prop.invoke(instance);
             }
         }
-        
+
         try {
             notifyUpdated(instance);
         } catch (Throwable e) {
-            System.out.println("=========");
-            e.printStackTrace();
-
-            System.out.println("=========");
+            error("Cannot call the updated method : " + e.getMessage(), e);
         }
     }
-    
+
     /**
      * Invokes the updated method.
      * This method build the dictionary containing all valued properties.
@@ -514,8 +492,16 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
             m_propagatedFromCA = null;
             m_configurationAlreadyPushed = false;
         }
+
+        if (getInstanceManager().getPojoObjects() != null) {
+            try {
+                notifyUpdated(null);
+            } catch (Throwable e) {
+                error("Cannot call the updated method : " + e.getMessage(), e);
+            }
+        }
     }
-    
+
     /**
      * Gets the configuration handler description.
      * @return the configuration handler description.
