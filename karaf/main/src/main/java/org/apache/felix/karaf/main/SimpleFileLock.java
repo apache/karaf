@@ -26,8 +26,8 @@ import java.util.Properties;
 
 public class SimpleFileLock implements Lock {
 
-    private static final String PROPERTY_LOCK_DIR = "servicemix.lock.dir";
-    private static final String PROP_SERVICEMIX_BASE = "servicemix.base";
+    private static final String PROPERTY_LOCK_DIR = "karaf.lock.dir";
+    private static final String PROP_KARAF_BASE = "karaf.base";
     private RandomAccessFile lockFile;
     private FileLock lock;
 
@@ -39,7 +39,7 @@ public class SimpleFileLock implements Lock {
                 File servicemixLock = getServiceMixLock(new File(lock), props);
                 props.setProperty(PROPERTY_LOCK_DIR, servicemixLock.getPath());
             } else {
-                props.setProperty(PROPERTY_LOCK_DIR, System.getProperty(PROP_SERVICEMIX_BASE));
+                props.setProperty(PROPERTY_LOCK_DIR, System.getProperty(PROP_KARAF_BASE));
             }
 
             File base = new File(props.getProperty(PROPERTY_LOCK_DIR));
@@ -77,9 +77,9 @@ public class SimpleFileLock implements Lock {
         }
 
         if (rc == null) {
-            path = props.getProperty(PROP_SERVICEMIX_BASE);
+            path = props.getProperty(PROP_KARAF_BASE);
             if (path != null) {
-                rc = validateDirectoryExists(path, "Invalid " + PROP_SERVICEMIX_BASE + " property");
+                rc = validateDirectoryExists(path, "Invalid " + PROP_KARAF_BASE + " property");
             }
         }
 

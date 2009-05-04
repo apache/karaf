@@ -32,10 +32,10 @@ public class WebAppListener implements ServletContextListener {
 			System.err.println("contextInitialized");
 			String root = new File(sce.getServletContext().getRealPath("/") + "WEB-INF/servicemix").getAbsolutePath();
 			System.err.println("Root: " + root);
-			System.setProperty("servicemix.home", root);
-			System.setProperty("servicemix.base", root);
-			System.setProperty("servicemix.startLocalConsole", "false");
-			System.setProperty("servicemix.startRemoteShell", "true");
+			System.setProperty("karaf.home", root);
+			System.setProperty("karaf.base", root);
+			System.setProperty("karaf.startLocalConsole", "false");
+			System.setProperty("karaf.startRemoteShell", "true");
 			main = new Main(new String[0]);
 			main.launch();
 		} catch (Exception e) {

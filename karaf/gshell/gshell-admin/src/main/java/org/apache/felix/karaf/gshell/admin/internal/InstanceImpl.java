@@ -72,7 +72,7 @@ public class InstanceImpl implements Instance {
     public int getPort() throws Exception {
         InputStream is = null;
         try {
-            File f = new File(location, "etc/org.apache.servicemix.shell.cfg");
+            File f = new File(location, "etc/org.apache.felix.karaf.shell.cfg");
             is = new FileInputStream(f);
             Properties props = new Properties();
             props.load(is);
@@ -91,7 +91,7 @@ public class InstanceImpl implements Instance {
             throw new IllegalStateException("Instance not stopped");
         }
         Properties props = new Properties();
-        File f = new File(location, "etc/org.apache.servicemix.shell.cfg");
+        File f = new File(location, "etc/org.apache.felix.karaf.shell.cfg");
         InputStream is = new FileInputStream(f);
         try {
             props.load(is);
@@ -115,7 +115,7 @@ public class InstanceImpl implements Instance {
         if (javaOpts == null) {
             javaOpts = "-server -Xmx512M -Dcom.sun.management.jmxremote";
         }
-        File libDir = new File(System.getProperty("servicemix.home"), "lib");
+        File libDir = new File(System.getProperty("karaf.home"), "lib");
         File[] jars = libDir.listFiles(new FilenameFilter() {
             public boolean accept(File dir, String name) {
                 return name.endsWith(".jar");
@@ -130,10 +130,10 @@ public class InstanceImpl implements Instance {
         }
         String command = new File(System.getProperty("java.home"), ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java").getCanonicalPath()
                 + " " + javaOpts
-                + " -Dservicemix.home=\"" + System.getProperty("servicemix.home") + "\""
-                + " -Dservicemix.base=\"" + new File(location).getCanonicalPath() + "\""
-                + " -Dservicemix.startLocalConsole=false"
-                + " -Dservicemix.startRemoteShell=true"
+                + " -Dkaraf.home=\"" + System.getProperty("karaf.home") + "\""
+                + " -Dkaraf.base=\"" + new File(location).getCanonicalPath() + "\""
+                + " -Dkaraf.startLocalConsole=false"
+                + " -Dkaraf.startRemoteShell=true"
                 + " -classpath " + classpath.toString()
                 + " org.apache.felix.karaf.main.Main";
         LOG.debug("Starting instance with command: " + command);

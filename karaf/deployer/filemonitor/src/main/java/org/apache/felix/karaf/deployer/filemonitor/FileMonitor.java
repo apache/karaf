@@ -70,10 +70,10 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class FileMonitor {
 
-    public final static String CONFIG_DIR = "org.apache.servicemix.filemonitor.configDir";
-    public final static String DEPLOY_DIR = "org.apache.servicemix.filemonitor.monitorDir";
-    public final static String GENERATED_JAR_DIR = "org.apache.servicemix.filemonitor.generatedJarDir";
-    public final static String SCAN_INTERVAL = "org.apache.servicemix.filemonitor.scanInterval";
+    public final static String CONFIG_DIR = "org.apache.felix.karaf.filemonitor.configDir";
+    public final static String DEPLOY_DIR = "org.apache.felix.karaf.filemonitor.monitorDir";
+    public final static String GENERATED_JAR_DIR = "org.apache.felix.karaf.filemonitor.generatedJarDir";
+    public final static String SCAN_INTERVAL = "org.apache.felix.karaf.filemonitor.scanInterval";
     public final static String PREFERENCE_KEY = "FileMonitor";
 
     protected static final String ALIAS_KEY = "_alias_factory_pid";
@@ -98,7 +98,7 @@ public class FileMonitor {
     private String pid;
 
     public FileMonitor() {
-        String base = System.getProperty("servicemix.base", ".");
+        String base = System.getProperty("karaf.base", ".");
         configDir = new File(base, "etc");
         deployDir = new File(base, "deploy");
         generateDir = new File(base, "data/generated-bundles");

@@ -68,7 +68,7 @@
     <osgix:cm-properties id="cmProps" persistent-id="org.apache.servicemix.shell">
         <prop key="sshPort">8101</prop>
         <prop key="sshRealm">servicemix</prop>
-        <prop key="hostKey">${servicemix.base}/etc/host.key</prop>
+        <prop key="hostKey">${karaf.base}/etc/host.key</prop>
     </osgix:cm-properties>
 
     <ctx:property-placeholder properties-ref="cmProps" />

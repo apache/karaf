@@ -25,7 +25,7 @@ public class Test extends TestCase {
 
     public void test() throws Exception {
         System.setProperty("startLocalConsole", "true");
-        System.setProperty("servicemix.name", "root");
+        System.setProperty("karaf.name", "root");
 
         ClassPathXmlApplicationContext context = null;
         try {
@@ -48,7 +48,7 @@ public class Test extends TestCase {
 
     public void testBanner() throws Exception {
         System.setProperty("startLocalConsole", "true");
-        System.setProperty("servicemix.name", "root");
+        System.setProperty("karaf.name", "root");
 
         ClassPathXmlApplicationContext context = null;
         try {
@@ -74,7 +74,7 @@ public class Test extends TestCase {
 
     public void testLs() throws Exception {
         System.setProperty("startLocalConsole", "true");
-        System.setProperty("servicemix.name", "root");
+        System.setProperty("karaf.name", "root");
 
         ClassPathXmlApplicationContext context = null;
         try {
@@ -100,7 +100,7 @@ public class Test extends TestCase {
 
     public void testCommandGroups() throws Exception {
         System.setProperty("startLocalConsole", "true");
-        System.setProperty("servicemix.name", "root");
+        System.setProperty("karaf.name", "root");
 
         ClassPathXmlApplicationContext context = null;
         try {
@@ -129,7 +129,7 @@ public class Test extends TestCase {
 
     public void testFileAccessCommands() throws Exception {
         System.setProperty("startLocalConsole", "true");
-        System.setProperty("servicemix.name", "root");
+        System.setProperty("karaf.name", "root");
 
         ClassPathXmlApplicationContext context = null;
         try {
