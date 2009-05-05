@@ -21,6 +21,9 @@ package org.apache.felix.karaf.gshell.features;
  * Tracks features and repositories.
  */
 public interface FeaturesRegistry {
+
+    void setFeaturesService(FeaturesService service);
+
     void register(Feature feature);
 
     void unregister(Feature feature);

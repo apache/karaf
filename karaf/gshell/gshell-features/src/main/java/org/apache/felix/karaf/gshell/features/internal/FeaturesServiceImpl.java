@@ -105,6 +105,7 @@ public class FeaturesServiceImpl implements FeaturesService, BundleContextAware 
 
     public void setFeaturesServiceRegistry(FeaturesRegistry featuresRegistry) {
         this.featuresRegistry = featuresRegistry;
+        this.featuresRegistry.setFeaturesService(this);
     }
 
     public void setUrls(String uris) throws URISyntaxException {

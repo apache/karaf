@@ -48,6 +48,7 @@ public class ManagedFeaturesRegistry implements FeaturesRegistry {
     private Map<String, ManagedRepository> repositories;
     private boolean mbeanServerInitialized;
     private FeaturesService featuresService;
+    private MBeanServer mbeanServer;
 
     @ManagedOperation
     public void installFeature(String name) throws Exception {
@@ -182,12 +183,19 @@ public class ManagedFeaturesRegistry implements FeaturesRegistry {
         if (namingStrategy == null) {
             throw new IllegalArgumentException("namingStrategy must not be null");
         }
+        if (mbeanServer != null) {
+            registerMBeanServer(mbeanServer, null);
+        }
     }
 
     public void registerMBeanServer(MBeanServer mbeanServer, Map props ) throws Exception {
         if (mbeanServer != null) {
-            mbeanServerInitialized = true;
+            this.mbeanServer = mbeanServer;
         }
+        if (managementAgent == null) {
+            return;
+        }
+        mbeanServerInitialized = true;
 
         managementAgent.register(this, namingStrategy.getObjectName(this));
 
