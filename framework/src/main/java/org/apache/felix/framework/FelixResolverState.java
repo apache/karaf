@@ -35,6 +35,7 @@ import org.apache.felix.moduleloader.ICapability;
 import org.apache.felix.moduleloader.IModule;
 import org.apache.felix.moduleloader.IRequirement;
 import org.apache.felix.moduleloader.IWire;
+import org.osgi.framework.Constants;
 import org.osgi.framework.PackagePermission;
 import org.osgi.framework.Version;
 
@@ -276,33 +277,53 @@ public class FelixResolverState implements Resolver.ResolverState
         {
             return true;
         }
-        // If optionality is not the same, then they conflict.
-        if (existing.isOptional() != additional.isOptional())
+        // If optionality is not the same, then they conflict, unless
+        // the existing requirement is not optional, then it doesn't matter
+        // what subsequent requirements are since non-optional is stronger
+        // than optional.
+        if (existing.isOptional() && (existing.isOptional() != additional.isOptional()))
         {
             return true;
         }
         // Verify directives are the same.
+        // This is sort of ugly, but we need to remove
+        // the resolution directive, since it is effectively
+        // test above when checking optionality.
+        // Put directives in a map, since ordering is arbitrary.
         final R4Directive[] exDirs = (existing.getDirectives() == null)
             ? new R4Directive[0] : existing.getDirectives();
-        final R4Directive[] addDirs = (additional.getDirectives() == null)
-            ? new R4Directive[0] : additional.getDirectives();
-        // If different number of directives, then they conflict.
-        if (exDirs.length != addDirs.length)
-        {
-            return true;
-        }
-        // Put directives in a map, since ordering is arbitrary.
         final Map exDirMap = new HashMap();
         for (int i = 0; i < exDirs.length; i++)
         {
-            exDirMap.put(exDirs[i].getName(), exDirs[i]);
+            if (!exDirs[i].getName().equals(Constants.RESOLUTION_DIRECTIVE))
+            {
+                exDirMap.put(exDirs[i].getName(), exDirs[i]);
+            }
         }
-        // If directive values do not match, then they conflict.
+        final R4Directive[] addDirs = (additional.getDirectives() == null)
+            ? new R4Directive[0] : additional.getDirectives();
+        final Map addDirMap = new HashMap();
         for (int i = 0; i < addDirs.length; i++)
         {
-            final R4Directive exDir = (R4Directive) exDirMap.get(addDirs[i].getName());
+            if (!addDirs[i].getName().equals(Constants.RESOLUTION_DIRECTIVE))
+            {
+                addDirMap.put(addDirs[i].getName(), addDirs[i]);
+            }
+        }
+        // If different number of directives, then they conflict.
+        if (exDirMap.size() != addDirMap.size())
+        {
+            return true;
+        }
+        // If directive values do not match, then they conflict.
+        for (Iterator it = addDirMap.entrySet().iterator(); it.hasNext(); )
+        {
+            final Map.Entry entry = (Map.Entry) it.next();
+            final String name = (String) entry.getKey();
+            final R4Directive addDir = (R4Directive) entry.getValue();
+            final R4Directive exDir = (R4Directive) exDirMap.get(name);
             if ((exDir == null) ||
-                !exDir.getValue().equals(addDirs[i].getValue()))
+                !exDir.getValue().equals(addDir.getValue()))
             {
                 return true;
             }

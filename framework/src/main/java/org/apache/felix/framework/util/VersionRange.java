@@ -98,6 +98,46 @@ public class VersionRange
         }
     }
 
+    public boolean equals(Object obj)
+    {
+        if (obj == null)
+        {
+            return false;
+        }
+        if (getClass() != obj.getClass())
+        {
+            return false;
+        }
+        final VersionRange other = (VersionRange) obj;
+        if (m_low != other.m_low && (m_low == null || !m_low.equals(other.m_low)))
+        {
+            return false;
+        }
+        if (m_isLowInclusive != other.m_isLowInclusive)
+        {
+            return false;
+        }
+        if (m_high != other.m_high && (m_high == null || !m_high.equals(other.m_high)))
+        {
+            return false;
+        }
+        if (m_isHighInclusive != other.m_isHighInclusive)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    public int hashCode()
+    {
+        int hash = 5;
+        hash = 97 * hash + (m_low != null ? m_low.hashCode() : 0);
+        hash = 97 * hash + (m_isLowInclusive ? 1 : 0);
+        hash = 97 * hash + (m_high != null ? m_high.hashCode() : 0);
+        hash = 97 * hash + (m_isHighInclusive ? 1 : 0);
+        return hash;
+    }
+
     public String toString()
     {
         if (m_toString == null)
