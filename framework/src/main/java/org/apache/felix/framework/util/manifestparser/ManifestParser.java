@@ -95,16 +95,15 @@ public class ManifestParser
             m_bundleSymbolicName = (String)
                 moduleCap.getProperties().get(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE);
 
-            // Add the module capability to all capabilities.
-            // TODO: FRAGMENT - Fragment bundles cannot be required, so we
-            //       should not add this capability, but for now we are using
-            //       it to get the symbolic name.
-            capList.add(moduleCap);
-            // Add a host capability if the bundle is not a fragment. A host
-            // capability is the same as a module capability, but with a
-            // different capability namespace.
+            // Add a module capability and a host capability to all
+            // non-fragment bundles. A host capability is the same
+            // as a module capability, but with a different capability
+            // namespace. Module capabilities resolve required-bundle
+            // dependencies, while host capabilities resolve fragment-host
+            // dependencies.
             if (headerMap.get(Constants.FRAGMENT_HOST) == null)
             {
+                capList.add(moduleCap);
                 capList.add(new Capability(
                     ICapability.HOST_NAMESPACE, null,
                     ((Capability) moduleCap).getAttributes()));

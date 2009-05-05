@@ -28,12 +28,13 @@ import org.apache.felix.framework.searchpolicy.ModuleImpl;
 import org.apache.felix.framework.searchpolicy.Resolver;
 import org.apache.felix.framework.searchpolicy.PackageSource;
 import org.apache.felix.framework.util.Util;
+import org.apache.felix.framework.util.manifestparser.R4Attribute;
+import org.apache.felix.framework.util.manifestparser.R4Directive;
 import org.apache.felix.framework.util.manifestparser.Requirement;
 import org.apache.felix.moduleloader.ICapability;
 import org.apache.felix.moduleloader.IModule;
 import org.apache.felix.moduleloader.IRequirement;
 import org.apache.felix.moduleloader.IWire;
-import org.osgi.framework.Constants;
 import org.osgi.framework.PackagePermission;
 import org.osgi.framework.Version;
 
@@ -95,7 +96,7 @@ public class FelixResolverState implements Resolver.ResolverState
                 // Fragments are grouped by symbolic name and descending version.
                 // Attach the first matching fragment from each group if possible,
                 // since only one version of a given fragment may attach to a host.
-                List list = new ArrayList();
+                List fragmentList = new ArrayList();
                 for (Iterator it = m_fragmentMap.entrySet().iterator(); it.hasNext(); )
                 {
                     Map.Entry entry = (Map.Entry) it.next();
@@ -113,105 +114,31 @@ public class FelixResolverState implements Resolver.ResolverState
                                 // Fragments are attached in bundle ID order.
                                 int index = -1;
                                 for (int listIdx = 0;
-                                    (index < 0) && (listIdx < list.size());
+                                    (index < 0) && (listIdx < fragmentList.size());
                                     listIdx++)
                                 {
                                     if (fragments[fragIdx].getBundle().getBundleId()
-                                        < ((IModule) list.get(listIdx)).getBundle().getBundleId())
+                                        < ((IModule) fragmentList.get(listIdx)).getBundle().getBundleId())
                                     {
                                         index = listIdx;
                                     }
                                 }
-                                list.add((index < 0) ? list.size() : index, fragments[fragIdx]);
+                                fragmentList.add(
+                                    (index < 0) ? fragmentList.size() : index,
+                                    fragments[fragIdx]);
                                 break done;
                             }
                         }
                     }
                 }
 
-                if (list.size() > 0)
+                if (fragmentList.size() > 0)
                 {
-                    // Verify the fragments do not have conflicting imports.
-                    // For now, just check for duplicate imports, but in the
-                    // future we might want to make this more fine grained.
-                    // First get the host's imported packages.
-                    Map ipMerged = new HashMap();
-                    Map rbMerged = new HashMap();
-                    IRequirement[] reqs = host.getRequirements();
-                    for (int reqIdx = 0; (reqs != null) && (reqIdx < reqs.length); reqIdx++)
-                    {
-                        if (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
-                        {
-                            ipMerged.put(((Requirement) reqs[reqIdx]).getTargetName(), host);
-                        }
-                        else if (reqs[reqIdx].getNamespace().equals(ICapability.MODULE_NAMESPACE))
-                        {
-                            rbMerged.put(((Requirement) reqs[reqIdx]).getTargetName(), host);
-                        }
-                    }
-                    // Loop through all fragments verifying they do no conflict,
-                    // adding those packages that do not conflict and removing
-                    // the fragment if it does conflict.
-                    for (Iterator it = list.iterator(); it.hasNext(); )
-                    {
-                        IModule fragment = (IModule) it.next();
-                        reqs = fragment.getRequirements();
-                        List ipFragment = new ArrayList();
-                        List rbFragment = new ArrayList();
-                        boolean conflicting = false;
-                        for (int reqIdx = 0;
-                            !conflicting && (reqs != null) && (reqIdx < reqs.length);
-                            reqIdx++)
-                        {
-                            if (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE)
-                                || reqs[reqIdx].getNamespace().equals(ICapability.MODULE_NAMESPACE))
-                            {
-                                String targetName = ((Requirement) reqs[reqIdx]).getTargetName();
-                                Map mergedReqMap = (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
-                                    ? ipMerged : rbMerged;
-                                List fragmentReqList = (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
-                                    ? ipFragment : rbFragment;
-                                if (mergedReqMap.get(targetName) == null)
-                                {
-                                    fragmentReqList.add(targetName);
-                                }
-                                else
-                                {
-                                    conflicting = true;
-                                }
-                                if (conflicting)
-                                {
-                                    ipFragment.clear();
-                                    rbFragment.clear();
-                                    it.remove();
-                                    m_logger.log(
-                                        Logger.LOG_DEBUG,
-                                        "Excluding fragment " + fragment.getSymbolicName()
-                                        + " from " + host.getSymbolicName()
-                                        + " due to conflict with "
-                                        + (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE)
-                                            ? "imported package " : "required bundle ")
-                                        + targetName + " from "
-                                        + ((IModule) mergedReqMap.get(targetName)).getSymbolicName());
-                                }
-                            }
-                        }
-
-                        // Merge non-conflicting requirements into overall set
-                        // of requirements and continue checking for conflicts
-                        // with the next fragment.
-                        for (int pkgIdx = 0; pkgIdx < ipFragment.size(); pkgIdx++)
-                        {
-                            ipMerged.put(ipFragment.get(pkgIdx), fragment);
-                        }
-                        for (int pkgIdx = 0; pkgIdx < rbFragment.size(); pkgIdx++)
-                        {
-                            rbMerged.put(rbFragment.get(pkgIdx), fragment);
-                        }
-                    }
+                    // Check if fragment conflicts with existing metadata.
+                    checkForConflicts(host, fragmentList);
 
                     // Attach the fragments to the host.
-                    IModule[] fragments = (IModule[]) list.toArray(new IModule[list.size()]);
+                    IModule[] fragments = (IModule[]) fragmentList.toArray(new IModule[fragmentList.size()]);
                     ((ModuleImpl) host).attachFragments(fragments);
 
                     for (int fragIdx = 0; fragIdx < fragments.length; fragIdx++)
@@ -240,6 +167,175 @@ public class FelixResolverState implements Resolver.ResolverState
         }
 
         return newRootModule;
+    }
+
+    private void checkForConflicts(IModule host, List fragmentList)
+    {
+        // Verify the fragments do not have conflicting imports.
+        // For now, just check for duplicate imports, but in the
+        // future we might want to make this more fine grained.
+        // First get the host's imported packages.
+        final int MODULE_IDX = 0, REQ_IDX = 1;
+        Map ipMerged = new HashMap();
+        Map rbMerged = new HashMap();
+        IRequirement[] reqs = host.getRequirements();
+        for (int reqIdx = 0; (reqs != null) && (reqIdx < reqs.length); reqIdx++)
+        {
+            if (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+            {
+                ipMerged.put(
+                    ((Requirement) reqs[reqIdx]).getTargetName(),
+                    new Object[] { host, reqs[reqIdx] });
+            }
+            else if (reqs[reqIdx].getNamespace().equals(ICapability.MODULE_NAMESPACE))
+            {
+                rbMerged.put(
+                    ((Requirement) reqs[reqIdx]).getTargetName(),
+                    new Object[] { host, reqs[reqIdx] });
+            }
+        }
+        // Loop through all fragments verifying they do no conflict,
+        // adding those packages that do not conflict and removing
+        // the fragment if it does conflict.
+        for (Iterator it = fragmentList.iterator(); it.hasNext(); )
+        {
+            IModule fragment = (IModule) it.next();
+            reqs = fragment.getRequirements();
+            List ipFragment = new ArrayList();
+            List rbFragment = new ArrayList();
+            boolean conflicting = false;
+            for (int reqIdx = 0;
+                !conflicting && (reqs != null) && (reqIdx < reqs.length);
+                reqIdx++)
+            {
+                if (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE)
+                    || reqs[reqIdx].getNamespace().equals(ICapability.MODULE_NAMESPACE))
+                {
+                    String targetName = ((Requirement) reqs[reqIdx]).getTargetName();
+                    Map mergedReqMap = (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                        ? ipMerged : rbMerged;
+                    List fragmentReqList = (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                        ? ipFragment : rbFragment;
+                    Object[] existing = (Object[]) mergedReqMap.get(targetName);
+                    if (existing == null)
+                    {
+                        fragmentReqList.add(targetName);
+                    }
+                    else if (isRequirementConflicting(
+                        (Requirement) existing[REQ_IDX], (Requirement) reqs[reqIdx]))
+                    {
+                        conflicting = true;
+                    }
+                    if (conflicting)
+                    {
+                        ipFragment.clear();
+                        rbFragment.clear();
+                        it.remove();
+                        m_logger.log(
+                            Logger.LOG_DEBUG,
+                            "Excluding fragment " + fragment.getSymbolicName()
+                            + " from " + host.getSymbolicName()
+                            + " due to conflict with "
+                            + (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE)
+                                ? "imported package " : "required bundle ")
+                            + targetName + " from "
+                            + ((IModule) existing[MODULE_IDX]).getSymbolicName());
+                    }
+                }
+            }
+
+            // Merge non-conflicting requirements into overall set
+            // of requirements and continue checking for conflicts
+            // with the next fragment.
+            for (int pkgIdx = 0; pkgIdx < ipFragment.size(); pkgIdx++)
+            {
+                ipMerged.put(ipFragment.get(pkgIdx), fragment);
+            }
+            for (int pkgIdx = 0; pkgIdx < rbFragment.size(); pkgIdx++)
+            {
+                rbMerged.put(rbFragment.get(pkgIdx), fragment);
+            }
+        }
+    }
+
+    private boolean isRequirementConflicting(
+        Requirement existing, Requirement additional)
+    {
+        // If the namespace is not the same, then they do NOT conflict.
+        if (!existing.getNamespace().equals(additional.getNamespace()))
+        {
+            return false;
+        }
+        // If the target name is not the same, then they do NOT conflict.
+        if (!existing.getTargetName().equals(additional.getTargetName()))
+        {
+            return false;
+        }
+        // If the target version range is not the same, then they conflict.
+        if (!existing.getTargetVersionRange().equals(additional.getTargetVersionRange()))
+        {
+            return true;
+        }
+        // If optionality is not the same, then they conflict.
+        if (existing.isOptional() != additional.isOptional())
+        {
+            return true;
+        }
+        // Verify directives are the same.
+        final R4Directive[] exDirs = (existing.getDirectives() == null)
+            ? new R4Directive[0] : existing.getDirectives();
+        final R4Directive[] addDirs = (additional.getDirectives() == null)
+            ? new R4Directive[0] : additional.getDirectives();
+        // If different number of directives, then they conflict.
+        if (exDirs.length != addDirs.length)
+        {
+            return true;
+        }
+        // Put directives in a map, since ordering is arbitrary.
+        final Map exDirMap = new HashMap();
+        for (int i = 0; i < exDirs.length; i++)
+        {
+            exDirMap.put(exDirs[i].getName(), exDirs[i]);
+        }
+        // If directive values do not match, then they conflict.
+        for (int i = 0; i < addDirs.length; i++)
+        {
+            final R4Directive exDir = (R4Directive) exDirMap.get(addDirs[i].getName());
+            if ((exDir == null) ||
+                !exDir.getValue().equals(addDirs[i].getValue()))
+            {
+                return true;
+            }
+        }
+        // Verify attributes are the same.
+        final R4Attribute[] exAttrs = (existing.getAttributes() == null)
+            ? new R4Attribute[0] : existing.getAttributes();
+        final R4Attribute[] addAttrs = (additional.getAttributes() == null)
+            ? new R4Attribute[0] : additional.getAttributes();
+        // If different number of attributes, then they conflict.
+        if (exAttrs.length != addAttrs.length)
+        {
+            return true;
+        }
+        // Put attributes in a map, since ordering is arbitrary.
+        final Map exAttrMap = new HashMap();
+        for (int i = 0; i < exAttrs.length; i++)
+        {
+            exAttrMap.put(exAttrs[i].getName(), exAttrs[i]);
+        }
+        // If attribute values do not match, then they conflict.
+        for (int i = 0; i < addAttrs.length; i++)
+        {
+            final R4Attribute exAttr = (R4Attribute) exAttrMap.get(addAttrs[i].getName());
+            if ((exAttr == null) ||
+                !exAttr.getValue().equals(addAttrs[i].getValue()) ||
+                (exAttr.isMandatory() != addAttrs[i].isMandatory()))
+            {
+                return true;
+            }
+        }
+        // They do no conflict.
+        return false;
     }
 
     private void addFragment(IModule module)
@@ -429,21 +525,6 @@ public class FelixResolverState implements Resolver.ResolverState
     public synchronized IModule[] getModules()
     {
         return (IModule[]) m_moduleList.toArray(new IModule[m_moduleList.size()]);
-    }
-
-// TODO: FRAGMENT - Not very efficient.
-    private static Version getBundleVersion(IModule module)
-    {
-        ICapability[] caps = module.getCapabilities();
-        for (int capIdx = 0; (caps != null) && (capIdx < caps.length); capIdx++)
-        {
-            if (caps[capIdx].getNamespace().equals(ICapability.MODULE_NAMESPACE))
-            {
-                return (Version)
-                    caps[capIdx].getProperties().get(Constants.BUNDLE_VERSION_ATTRIBUTE);
-            }
-        }
-        return Version.emptyVersion;
     }
 
     public synchronized void moduleResolved(IModule module)
@@ -741,13 +822,13 @@ public class FelixResolverState implements Resolver.ResolverState
         }
         else
         {
-            Version version = getBundleVersion(module);
+            Version version = module.getVersion();
             Version middleVersion = null;
             int top = 0, bottom = modules.length - 1, middle = 0;
             while (top <= bottom)
             {
                 middle = (bottom - top) / 2 + top;
-                middleVersion = getBundleVersion(modules[middle]);
+                middleVersion = modules[middle].getVersion();
                 // Sort in reverse version order.
                 int cmp = middleVersion.compareTo(version);
                 if (cmp < 0)
