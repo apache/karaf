@@ -39,7 +39,7 @@
   http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
     <bean id="placeholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-      <property name="location" value="file:${karaf.home}/etc/org.apache.servicemix.features.cfg"/>
+      <property name="location" value="file:${karaf.home}/etc/org.apache.felix.karaf.features.cfg"/>
     </bean>
 
     <gshell:command-bundle>
@@ -108,7 +108,6 @@
     <bean id="featureServiceRegistry" class="org.apache.felix.karaf.gshell.features.management.ManagedFeaturesRegistry" init-method="init">
         <property name="managementAgent" ref="managementAgent" />
         <property name="namingStrategy" ref="namingStrategy" />
-        <property name="featuresService" ref="featuresService" />
     </bean>
 
     <osgi:reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" />

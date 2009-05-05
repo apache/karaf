@@ -53,7 +53,7 @@
 
     <jaas:config id="karaf">
         <jaas:module className="org.apache.felix.karaf.jaas.modules.properties.PropertiesLoginModule" flags="required">
-            users = ${servicemix.base}/etc/users.properties
+            users = ${karaf.base}/etc/users.properties
         </jaas:module>
     </jaas:config>
 
