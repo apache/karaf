@@ -22,33 +22,29 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.JarURLConnection;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.concurrent.CountDownLatch;
 
-import org.apache.felix.framework.Felix;
-import org.apache.felix.framework.cache.BundleCache;
-import org.apache.felix.framework.util.FelixConstants;
-import org.apache.felix.framework.util.StringMap;
-import org.apache.felix.karaf.main.spi.MainService;
+import org.apache.felix.karaf.main.Utils;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.launch.Framework;
+import org.osgi.framework.launch.FrameworkFactory;
 import org.osgi.service.startlevel.StartLevel;
 
 /**
@@ -62,7 +58,7 @@ import org.osgi.service.startlevel.StartLevel;
  * the framework.
  * </p>
  */
-public class Main implements MainService, BundleActivator {
+public class Main {
     /**
      * The default name used for the system properties file.
      */
@@ -130,17 +126,15 @@ public class Main implements MainService, BundleActivator {
 
     public static final String PROPERTY_LOCK_CLASS_DEFAULT = SimpleFileLock.class.getName();
 
-
     private File karafHome;
     private File karafBase;
-    private static Properties m_configProps = null;
-    private static Felix m_felix = null;
+    private Properties configProps = null;
+    private Framework framework = null;
     private final String[] args;
     private int exitCode;
     private Lock lock;
-    private CountDownLatch shutdown = new CountDownLatch(1);
     private int defaultStartLevel = 100;
-    private int lockStartLevel = 0;
+    private int lockStartLevel = 1;
     private int lockDelay = 1000;
     private boolean exiting = false;
 
@@ -149,8 +143,8 @@ public class Main implements MainService, BundleActivator {
     }
 
     public void launch() throws Exception {
-        karafHome = getServiceMixHome();
-        karafBase = getServiceMixBase(karafHome);
+        karafHome = Utils.getKarafHome();
+        karafBase = getKarafBase(karafHome);
 
         //System.out.println("Karaf Home: "+main.servicemixHome.getPath());
         //System.out.println("Karaf Base: "+main.servicemixBase.getPath());
@@ -162,47 +156,34 @@ public class Main implements MainService, BundleActivator {
         loadSystemProperties();
 
         // Read configuration properties.
-        m_configProps = loadConfigProperties();
+        configProps = loadConfigProperties();
 
         // Copy framework properties from the system properties.
-        Main.copySystemProperties(m_configProps);
+        Main.copySystemProperties(configProps);
 
-        processSecurityProperties(m_configProps);
+        processSecurityProperties(configProps);
 
-        m_configProps.setProperty(BundleCache.CACHE_ROOTDIR_PROP, karafBase.getPath() + "/data");
-        m_configProps.setProperty(Constants.FRAMEWORK_STORAGE, "cache");
-
-        // Register the Main class so that other bundles can inspect the command line args.
-        BundleActivator activator = new BundleActivator() {
-            private ServiceRegistration registration;
-
-            public void start(BundleContext context) {
-                registration = context.registerService(MainService.class.getName(), Main.this, null);
-            }
-
-            public void stop(BundleContext context) {
-                registration.unregister();
-                shutdown.countDown();
-            }
-        };
-        List<BundleActivator> activations = new ArrayList<BundleActivator>();
-        activations.add(this);
-        activations.add(activator);
-
-        m_configProps.put(FelixConstants.SYSTEMBUNDLE_ACTIVATORS_PROP, activations);
+        File storage = new File(karafBase.getPath(), "data/cache");
+        storage.mkdirs();
+        configProps.setProperty(Constants.FRAMEWORK_STORAGE, storage.getAbsolutePath());
 
         try {
-            defaultStartLevel = Integer.parseInt(m_configProps.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
-            lockStartLevel = Integer.parseInt(m_configProps.getProperty(PROPERTY_LOCK_LEVEL, Integer.toString(lockStartLevel)));
-            lockDelay = Integer.parseInt(m_configProps.getProperty(PROPERTY_LOCK_DELAY, Integer.toString(lockDelay)));
-            m_configProps.setProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(lockStartLevel));
+            defaultStartLevel = Integer.parseInt(configProps.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
+            lockStartLevel = Integer.parseInt(configProps.getProperty(PROPERTY_LOCK_LEVEL, Integer.toString(lockStartLevel)));
+            lockDelay = Integer.parseInt(configProps.getProperty(PROPERTY_LOCK_DELAY, Integer.toString(lockDelay)));
+            configProps.setProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, Integer.toString(lockStartLevel));
             // Start up the OSGI framework
-            m_felix = new Felix(new StringMap(m_configProps, false));
-            m_felix.start();
+
+            InputStream is = getClass().getResourceAsStream("/META-INF/services/" + FrameworkFactory.class.getName());
+            String factoryClass = new BufferedReader(new InputStreamReader(is, "UTF-8")).readLine();
+            FrameworkFactory factory = (FrameworkFactory) getClass().getClassLoader().loadClass(factoryClass).newInstance();
+            framework = factory.newFramework(new StringMap(configProps, false));
+            framework.start();
+            processAutoProperties(framework.getBundleContext());
             // Start lock monitor
             new Thread() {
                 public void run() {
-                    lock(m_configProps);
+                    lock(configProps);
                 }
             }.start();
         }
@@ -215,35 +196,15 @@ public class Main implements MainService, BundleActivator {
     public void destroy(boolean await) throws Exception {
         try {
             if (await) {
-                shutdown.await();
+                framework.waitForStop(0);
             }
             exiting = true;
-            if (m_felix.getState() == Bundle.ACTIVE) {
-                m_felix.stop();
+            if (framework.getState() == Bundle.ACTIVE) {
+                framework.stop();
             }
         } finally {
             unlock();
         }
-    }
-
-    /**
-     * Used to instigate auto-install and auto-start configuration
-     * property processing via a custom framework activator during
-     * framework startup.
-     *
-     * @param context The system bundle context.
-     */
-    public void start(BundleContext context) {
-        Main.processAutoProperties(context);
-    }
-
-    /**
-     * Currently does nothing as part of framework shutdown.
-     *
-     * @param context The system bundle context.
-     */
-    public void stop(BundleContext context) {
-        // Do nothing.
     }
 
     /**
@@ -337,81 +298,18 @@ public class Main implements MainService, BundleActivator {
         }
     }
 
-    private static File getServiceMixHome() throws IOException {
-        File rc = null;
-
-        // Use the system property if specified.
-        String path = System.getProperty(PROP_KARAF_HOME);
-        if (path != null) {
-            rc = validateDirectoryExists(path, "Invalid " + PROP_KARAF_HOME + " system property");
-        }
-
-        if (rc == null) {
-            path = System.getenv(ENV_KARAF_HOME);
-            if (path != null) {
-                rc = validateDirectoryExists(path, "Invalid " + ENV_KARAF_HOME + " environment variable");
-            }
-        }
-
-        // Try to figure it out using the jar file this class was loaded from.
-        if (rc == null) {
-            // guess the home from the location of the jar
-            URL url = Main.class.getClassLoader().getResource(Main.class.getName().replace(".", "/") + ".class");
-            if (url != null) {
-                try {
-                    JarURLConnection jarConnection = (JarURLConnection) url.openConnection();
-                    url = jarConnection.getJarFileURL();
-                    rc = new File(new URI(url.toString())).getCanonicalFile().getParentFile().getParentFile();
-                } catch (Exception ignored) {
-                }
-            }
-        }
-
-        if (rc == null) {
-            // Dig into the classpath to guess the location of the jar
-            String classpath = System.getProperty("java.class.path");
-            int index = classpath.toLowerCase().indexOf("karaf.jar");
-            int start = classpath.lastIndexOf(File.pathSeparator, index) + 1;
-            if (index >= start) {
-                String jarLocation = classpath.substring(start, index);
-                rc = new File(jarLocation).getCanonicalFile().getParentFile();
-            }
-        }
-        if (rc == null) {
-            throw new IOException("The Karaf install directory could not be determined.  Please set the " + PROP_KARAF_HOME + " system property or the " + ENV_KARAF_HOME + " environment variable.");
-        }
-
-        return rc;
-    }
-
-    private static File validateDirectoryExists(String path, String errPrefix) {
-        File rc;
-        try {
-            rc = new File(path).getCanonicalFile();
-        } catch (IOException e) {
-            throw new IllegalArgumentException(errPrefix + " '" + path + "' : " + e.getMessage());
-        }
-        if (!rc.exists()) {
-            throw new IllegalArgumentException(errPrefix + " '" + path + "' : does not exist");
-        }
-        if (!rc.isDirectory()) {
-            throw new IllegalArgumentException(errPrefix + " '" + path + "' : is not a directory");
-        }
-        return rc;
-    }
-
-    private static File getServiceMixBase(File defaultValue) {
+    private static File getKarafBase(File defaultValue) {
         File rc = null;
 
         String path = System.getProperty(PROP_KARAF_BASE);
         if (path != null) {
-            rc = validateDirectoryExists(path, "Invalid " + PROP_KARAF_BASE + " system property");
+            rc = Utils.validateDirectoryExists(path, "Invalid " + PROP_KARAF_BASE + " system property");
         }
 
         if (rc == null) {
             path = System.getenv(ENV_KARAF_BASE);
             if (path != null) {
-                rc = validateDirectoryExists(path, "Invalid " + ENV_KARAF_BASE + " environment variable");
+                rc = Utils.validateDirectoryExists(path, "Invalid " + ENV_KARAF_BASE + " environment variable");
             }
         }
 
@@ -440,9 +338,9 @@ public class Main implements MainService, BundleActivator {
      * Processes the auto-install and auto-start properties from the
      * specified configuration properties.
      */
-    private static void processAutoProperties(BundleContext context) {
+    private void processAutoProperties(BundleContext context) {
         // Check if we want to convert URLs to maven style
-        boolean convertToMavenUrls = Boolean.parseBoolean(m_configProps.getProperty(PROPERTY_CONVERT_TO_MAVEN_URL, "true"));
+        boolean convertToMavenUrls = Boolean.parseBoolean(configProps.getProperty(PROPERTY_CONVERT_TO_MAVEN_URL, "true"));
 
         // Retrieve the Start Level service, since it will be needed
         // to set the start level of the installed bundles.
@@ -454,7 +352,7 @@ public class Main implements MainService, BundleActivator {
         // the start level to which the bundles are assigned is specified by
         // appending a ".n" to the auto-install property name, where "n" is
         // the desired start level for the list of bundles.
-        for (Iterator i = m_configProps.keySet().iterator(); i.hasNext();) {
+        for (Iterator i = configProps.keySet().iterator(); i.hasNext();) {
             String key = (String) i.next();
 
             // Ignore all keys that are not the auto-install property.
@@ -475,7 +373,7 @@ public class Main implements MainService, BundleActivator {
                 }
             }
 
-            StringTokenizer st = new StringTokenizer(m_configProps.getProperty(key), "\" ", true);
+            StringTokenizer st = new StringTokenizer(configProps.getProperty(key), "\" ", true);
             if (st.countTokens() > 0) {
                 String location = null;
                 do {
@@ -502,7 +400,7 @@ public class Main implements MainService, BundleActivator {
         // where "n" is the desired start level for the list of bundles.
         // The following code starts bundles in two passes, first it installs
         // them, then it starts them.
-        for (Iterator i = m_configProps.keySet().iterator(); i.hasNext();) {
+        for (Iterator i = configProps.keySet().iterator(); i.hasNext();) {
             String key = (String) i.next();
 
             // Ignore all keys that are not the auto-start property.
@@ -523,7 +421,7 @@ public class Main implements MainService, BundleActivator {
                 }
             }
 
-            StringTokenizer st = new StringTokenizer(m_configProps.getProperty(key), "\" ", true);
+            StringTokenizer st = new StringTokenizer(configProps.getProperty(key), "\" ", true);
             if (st.countTokens() > 0) {
                 String location = null;
                 do {
@@ -544,10 +442,10 @@ public class Main implements MainService, BundleActivator {
         }
 
         // Now loop through and start the installed bundles.
-        for (Iterator i = m_configProps.keySet().iterator(); i.hasNext();) {
+        for (Iterator i = configProps.keySet().iterator(); i.hasNext();) {
             String key = (String) i.next();
             if (key.startsWith(PROPERTY_AUTO_START)) {
-                StringTokenizer st = new StringTokenizer(m_configProps.getProperty(key), "\" ", true);
+                StringTokenizer st = new StringTokenizer(configProps.getProperty(key), "\" ", true);
                 if (st.countTokens() > 0) {
                     String location = null;
                     do {
@@ -1091,14 +989,6 @@ public class Main implements MainService, BundleActivator {
         this.exitCode = exitCode;
     }
 
-    public File getKarafHome() {
-        return karafHome;
-    }
-
-    public File getKarafBase() {
-        return karafBase;
-    }
-
     public void lock(Properties props) {
         try {
             if (Boolean.parseBoolean(props.getProperty(PROPERTY_USE_LOCK, "true"))) {
@@ -1117,7 +1007,7 @@ public class Main implements MainService, BundleActivator {
                             }
                             Thread.sleep(lockDelay);
                         }
-                        if (m_felix.getState() == Bundle.ACTIVE && !exiting) {
+                        if (framework.getState() == Bundle.ACTIVE && !exiting) {
                             System.out.println("Lost the lock, stopping this instance ...");
                             setStartLevel(lockStartLevel);
                         }
@@ -1141,7 +1031,7 @@ public class Main implements MainService, BundleActivator {
     }
 
     protected void setStartLevel(int level) throws Exception {
-        BundleContext ctx = m_felix.getBundleContext();
+        BundleContext ctx = framework.getBundleContext();
         ServiceReference[] refs = ctx.getServiceReferences(StartLevel.class.getName(), null);
         StartLevel sl = (StartLevel) ctx.getService(refs[0]);
         sl.setStartLevel(level);

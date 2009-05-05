@@ -124,6 +124,7 @@
                 <include>org.apache.felix:org.osgi.compendium</include>
                 <include>org.apache.felix:org.apache.felix.configadmin</include>
                 <include>org.apache.felix:org.apache.felix.prefs</include>
+                <include>org.apache.felix:org.apache.felix.framework</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -285,6 +286,15 @@
             <outputFileNameMapping>com/oracle/osgi/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
                 <include>com.oracle.osgi:jmx-impl</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputFileNameMapping>org/eclipse/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse:osgi</include>
             </includes>
         </dependencySet>
 
