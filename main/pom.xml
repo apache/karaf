@@ -35,12 +35,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.framework</artifactId>
+            <groupId>org.eclipse</groupId>
+            <artifactId>osgi</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
-            <artifactId>org.osgi.core</artifactId>
+            <artifactId>org.apache.felix.framework</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
@@ -61,24 +63,20 @@
                         <Bundle-Description>OSGi R4 framework.</Bundle-Description>
                         <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
                         <Export-Package>org.apache.felix.karaf.main.spi.*;version=${pom.version}</Export-Package>
+                        <!--
                         <Private-Package>
-                            org.apache.felix.karaf.main;-split-package:=merge-first,
-                            org.apache.felix.moduleloader.*;-split-package:=merge-first,
-                            org.apache.felix.framework.*;-split-package:=merge-first,
-                            org.osgi.framework.launch*,
-                            org.osgi.framework.hooks*,
-                            org.osgi.framework;-split-package:=merge-first,
-                            org.osgi.service.packageadmin;-split-package:=merge-first,
-                            org.osgi.service.startlevel;-split-package:=merge-first,
-                            org.osgi.service.url;-split-package:=merge-first,
-                            org.osgi.util.tracker;-split-package:=merge-first,
+                            org.apache.felix.*;-split-package:=merge-first,
+                            org.eclipse.*;-split-package:=merge-first,
+                            org.osgi.*;-split-package:=merge-first,
                             META-INF;-split-package:=merge-first
                         </Private-Package>
                         <Import-Package>!*</Import-Package>
+                        -->
                     </instructions>
                     <unpackBundle>true</unpackBundle>
                 </configuration>
             </plugin>
+            <!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -91,24 +89,25 @@
                         <configuration>
                             <artifactSet>
                                 <includes>
+                                    <include>org.eclipse:osgi</include>
                                     <include>org.apache.felix:org.apache.felix.framework</include>
-                                    <include>org.apache.felix:org.osgi.core</include>
                                     <include>${project.groupId}:${project.artifactId}</include>
                                 </includes>
                             </artifactSet>
                             <filters>
                                 <filter>
-                                    <artifact>org.apache.felix:org.apache.felix.framework</artifact>
-                                    <excludes>
-                                        <exclude>org/apache/felix/**</exclude>
-                                        <exclude>org/osgi/**</exclude>
-                                    </excludes>
+                                    <artifact>org.eclipse:osgi</artifact>
+                                    <includes>
+                                        <include>org/osgi/**</include>
+                                        <include>org/eclipse/**</include>
+                                        <include>hookconfigurators.properties</include>
+                                    </includes>
                                 </filter>
                                 <filter>
-                                    <artifact>org.apache.felix:org.osgi.core</artifact>
-                                    <excludes>
-                                        <exclude>org/osgi/**</exclude>
-                                    </excludes>
+                                    <artifact>org.apache.felix:org.apache.felix.framework</artifact>
+                                    <includes>
+                                        <include>org/apache/felix/**</include>
+                                    </includes>
                                 </filter>
                             </filters>
                             <createSourcesJar>${createSourcesJar}</createSourcesJar>
@@ -118,6 +117,7 @@
                     </execution>
                 </executions>
             </plugin>
+        -->
         </plugins>
         <resources>
             <resource>
@@ -147,6 +147,11 @@
                                 </goals>
                                 <configuration>
                                     <artifactItems>
+                                        <artifactItem>
+                                            <groupId>org.eclipse</groupId>
+                                            <artifactId>osgi</artifactId>
+                                            <classifier>sources</classifier>
+                                        </artifactItem>
                                         <artifactItem>
                                             <groupId>org.apache.felix</groupId>
                                             <artifactId>org.osgi.core</artifactId>
