@@ -64,6 +64,10 @@
         </dependency>
         <dependency>
             <groupId>org.apache.felix.karaf.gshell</groupId>
+            <artifactId>org.apache.felix.karaf.gshell.run</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix.karaf.gshell</groupId>
             <artifactId>org.apache.felix.karaf.gshell.admin</artifactId>
         </dependency>
         <dependency>

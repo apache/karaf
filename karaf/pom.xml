@@ -231,6 +231,11 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.felix.karaf.gshell</groupId>
+                <artifactId>org.apache.felix.karaf.gshell.run</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix.karaf.gshell</groupId>
                 <artifactId>org.apache.felix.karaf.gshell.admin</artifactId>
                 <version>${pom.version}</version>
             </dependency>

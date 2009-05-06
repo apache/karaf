@@ -234,6 +234,7 @@
             <outputFileNameMapping>org/apache/felix/karaf/gshell/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
                 <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.core</include>
+                <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.run</include>
                 <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.admin</include>
                 <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.osgi</include>
                 <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.log</include>

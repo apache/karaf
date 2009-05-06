@@ -35,6 +35,7 @@
 
     <modules>
         <module>gshell-core</module>
+        <module>gshell-run</module>
         <module>gshell-osgi</module>
         <module>gshell-admin</module>
         <module>gshell-features</module>
