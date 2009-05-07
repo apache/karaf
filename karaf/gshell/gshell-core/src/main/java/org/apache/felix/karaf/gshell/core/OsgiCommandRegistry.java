@@ -37,21 +37,21 @@ public class OsgiCommandRegistry {
         this.commandRegistry = commandRegistry;
     }
 
-    public void register(final Command command, Map<String, ?> properties) throws Exception {
+    public synchronized void register(final Command command, Map<String, ?> properties) throws Exception {
         commandRegistry.registerCommand(command);
     }
 
-    public void unregister(final Command command, Map<String, ?> properties) throws Exception {
+    public synchronized void unregister(final Command command, Map<String, ?> properties) throws Exception {
         commandRegistry.removeCommand(command);
     }
 
-    public void register(final Link link, Map<String, ?> properties) throws Exception {
+    public synchronized void register(final Link link, Map<String, ?> properties) throws Exception {
         LinkCommand cmd = new LinkCommand(commandRegistry, link.getTarget());
         cmd.setLocation(new CommandLocationImpl(link.getName()));
         commandRegistry.registerCommand(cmd);
     }
 
-    public void unregister(final Link link, Map<String, ?> properties) throws Exception {
+    public synchronized void unregister(final Link link, Map<String, ?> properties) throws Exception {
         commandRegistry.removeCommand(commandRegistry.getCommand(link.getName()));
     }
 
