@@ -34,11 +34,11 @@ public class OsgiAliasRegistry {
         this.aliasRegistry = aliasRegistry;
     }
 
-    public void register(final Alias alias, Map<String, ?> properties) throws Exception {
+    public synchronized void register(final Alias alias, Map<String, ?> properties) throws Exception {
         aliasRegistry.registerAlias(alias.getName(), alias.getAlias());
     }
 
-    public void unregister(final Alias alias, Map<String, ?> properties) throws Exception {
+    public synchronized void unregister(final Alias alias, Map<String, ?> properties) throws Exception {
         aliasRegistry.removeAlias(alias.getName());
     }
 
