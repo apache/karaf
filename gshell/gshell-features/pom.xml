@@ -92,9 +92,10 @@
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
                         <Export-Package>${pom.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>
+                            org.apache.geronimo.gshell.command,
                             org.apache.geronimo.gshell.wisdom.command,
-                            org.apache.felix.karaf.gshell.core,
                             org.apache.geronimo.gshell.wisdom.registry,
+                            org.apache.felix.karaf.gshell.core,
                             org.springframework.beans.factory.config,
                             *
                         </Import-Package>
