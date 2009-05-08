@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -30,32 +30,32 @@ import org.apache.tools.ant.Task;
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class IPojoTask extends Task {
-    
+
     /** Metadata file. */
     private File m_metadata;
-    
+
     /** Input bundle. */
     private File m_input;
-    
+
     /** Output bundle. */
     private File m_output;
-    
+
     /** Input directory. */
     private File m_directory;
-    
+
     /** Input manifest. */
     private File m_manifest;
 
     /** Flag describing if we need to ignore annotation of not. */
     private boolean m_ignoreAnnotations = false;
-    
+
     /**
      * Flag describing if we need or not use local XSD files
      * (i.e. use the {@link SchemaResolver} or not).
      * If <code>true</code> the local XSD are not used.
      */
     private boolean m_ignoreLocalXSD = false;
-    
+
     /**
      * Set the metadata file.
      * @param meta : the metadata file.
@@ -63,7 +63,7 @@ public class IPojoTask extends Task {
     public void setMetadata(File meta) {
         m_metadata = meta;
     }
-    
+
     /**
      * Set the manifest file.
      * @param manifest : the manifest file.
@@ -71,7 +71,7 @@ public class IPojoTask extends Task {
     public void setManifest(File manifest) {
         m_manifest = manifest;
     }
-    
+
     /**
      * Set the input bundle.
      * @param in : the input bundle
@@ -79,7 +79,7 @@ public class IPojoTask extends Task {
     public void setInput(File in) {
         m_input = in;
     }
-    
+
     /**
      * Set the input directory.
      * @param dir : the input directory
@@ -87,7 +87,7 @@ public class IPojoTask extends Task {
     public void setDir(File dir) {
         m_directory  = dir;
     }
-    
+
     /**
      * Set the output bundle.
      * @param out : the output bundle
@@ -95,7 +95,7 @@ public class IPojoTask extends Task {
     public void setOutput(File out) {
         m_output = out;
     }
-    
+
     /**
      * Set if we need to ignore annotations or not.
      * @param flag : true if we need to ignore annotations.
@@ -103,7 +103,7 @@ public class IPojoTask extends Task {
     public void setIgnoreAnnotations(boolean flag) {
         m_ignoreAnnotations = flag;
     }
-    
+
     /**
      * Set if we need to use embedded XSD files or not.
      * @param flag : true if we need to ignore embedded XSD files.
@@ -111,35 +111,35 @@ public class IPojoTask extends Task {
     public void setIgnoreEmbeddedSchemas(boolean flag) {
         m_ignoreLocalXSD = flag;
     }
-    
+
     /**
      * Execute the Ant Task.
      * @see org.apache.tools.ant.Task#execute()
      */
     public void execute() {
-        
+
         if (m_input == null  && m_directory == null) {
             throw new BuildException("Neither input bundle nor directory specified");
         }
-        
+
         if (m_input != null && !m_input.exists()) {
             throw new BuildException("The input bundle " + m_input.getAbsolutePath() + " does not exist");
         }
-        
+
         if (m_directory != null && !m_directory.exists()) {
             throw new BuildException("The input directory " + m_directory.getAbsolutePath() + " does not exist");
         }
         if (m_directory != null && !m_directory.isDirectory()) {
             throw new BuildException("The input directory " + m_directory.getAbsolutePath() + " is not a directory");
         }
-        
-        
+
+
         if (m_input != null) {
             log("Input bundle file : " + m_input.getAbsolutePath());
         } else {
             log("Input directory : " + m_directory.getAbsolutePath());
         }
-        
+
         if (m_manifest != null) {
             if (m_input != null) {
                 throw new BuildException("The manifest location cannot be used when manipulating an existing bundle");
@@ -148,7 +148,7 @@ public class IPojoTask extends Task {
                 throw new BuildException("The manifest file " + m_manifest.getAbsolutePath() + " does not exist");
             }
         }
-        
+
         // Get metadata file
         if (m_metadata == null) {
             m_metadata = new File("./metadata.xml");
@@ -172,10 +172,12 @@ public class IPojoTask extends Task {
                 log("Metadata file : " + m_metadata.getAbsolutePath());
             }
         }
-        
+
+        initializeSaxDriver();
+
 
         log("Start manipulation");
-        
+
         if (m_input != null) { // Prepare output file
             if (m_output == null) {
                 m_output = new File("./_out.jar");
@@ -185,7 +187,7 @@ public class IPojoTask extends Task {
                 if (!r) { throw new BuildException("The file " + m_output.getAbsolutePath() + " cannot be deleted"); }
             }
         }
-       
+
         Pojoization pojo = new Pojoization();
         if (! m_ignoreAnnotations) {
             pojo.setAnnotationProcessing();
@@ -202,14 +204,14 @@ public class IPojoTask extends Task {
             log((String) pojo.getWarnings().get(i), Project.MSG_WARN);
         }
         if (pojo.getErrors().size() > 0) { throw new BuildException((String) pojo.getErrors().get(0)); }
-        
+
         if (m_input != null) {
             String out;
             if (m_output.getName().equals("_out.jar")) {
                 if (m_input.delete()) {
                     if (! m_output.renameTo(m_input)) {
                         log("Cannot rename the output jar to " + m_input.getAbsolutePath(), Project.MSG_WARN);
-                    }   
+                    }
                 } else {
                     log("Cannot delete the input file : " + m_input.getAbsolutePath(), Project.MSG_WARN);
                 }
@@ -217,7 +219,7 @@ public class IPojoTask extends Task {
             } else {
                 out = m_output.getAbsolutePath();
             }
-        
+
             log("Bundle manipulation - SUCCESS");
             log("Output file : " + out);
         } else {
@@ -228,10 +230,23 @@ public class IPojoTask extends Task {
             }
 
         }
-        
+
     }
-    
-    
+
+    /**
+     * If Ant runs with Java 1.4, we should use the embedded Xerces.
+     * To achieve that, we set the org.xml.sax.driver property.
+     * Otherwise, the JVM sets the org.xml.sax.driver property.
+     */
+    private void initializeSaxDriver() {
+        String version = (String) System.getProperty("java.vm.version");
+        if (version.startsWith("1.4")) {
+            System.setProperty("org.xml.sax.driver", "org.apache.xerces.parsers.SAXParser");
+        }
+
+    }
+
+
 
 }
 

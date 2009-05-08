@@ -47,7 +47,7 @@
 							org.objectweb.asm.commons, org.objectweb.asm </Export-Package>
 						<Import-Package> !org.objectweb.asm.tree, !sun.io, * 
 						</Import-Package>
-						<Embed-Dependency>xercesImpl|xml-resolver</Embed-Dependency>
+						<!-- <Embed-Dependency>xercesImpl|xml-resolver</Embed-Dependency> -->
 					</instructions>
 				</configuration>
 			</plugin>

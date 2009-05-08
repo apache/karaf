@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -115,11 +115,11 @@ public class ManipulatorMojo extends AbstractMojo {
      * @parameter alias="IgnoreEmbeddedSchemas" default-value="false"
      */
     private boolean m_ignoreEmbeddedXSD;
-    
+
     protected MavenProject getProject() {
         return this.m_project;
     }
-    
+
     private boolean isXML() {
         return m_metadata != null && (m_metadata.indexOf('<') > -1);
     }
@@ -135,16 +135,17 @@ public class ManipulatorMojo extends AbstractMojo {
             this.getLog().debug("Ignoring project " + this.getProject().getArtifact() + " : type " + this.getProject().getArtifact().getType() + " is not supported by iPOJO plugin, supported types are " + this.m_supportedProjectTypes);
             return;
         }
-        
+
+        initializeSaxDriver();
 
         getLog().info("Start bundle manipulation");
 
         // Get metadata
         // Check if metadata are contained in the configuration
         InputStream is = null;
-        
+
         if (isXML()) {
-            is = new ByteArrayInputStream(m_metadata.getBytes()); 
+            is = new ByteArrayInputStream(m_metadata.getBytes());
         } else {
             if (m_metadata == null) {
                 // Try with metadata.xml
@@ -152,11 +153,11 @@ public class ManipulatorMojo extends AbstractMojo {
             }
             // Look for the metadata file in the output directory
             File meta = new File(m_outputDirectory + File.separator + m_metadata);
-            // If not found look inside the pom directory 
+            // If not found look inside the pom directory
             if (! meta.exists()) {
                 meta = new File(m_project.getBasedir() + File.separator + m_metadata);
             }
-        
+
             getLog().info("Metadata file : " + meta.getAbsolutePath());
             if (!meta.exists()) {
                 // Verify if annotations are ignored
@@ -168,7 +169,7 @@ public class ManipulatorMojo extends AbstractMojo {
                     meta = null;
                 }
             }
-            
+
             if (meta != null) {
                 try {
                     is = new FileInputStream(meta);
@@ -190,14 +191,14 @@ public class ManipulatorMojo extends AbstractMojo {
         Pojoization pojo = new Pojoization();
         if (!m_ignoreAnnotations) { pojo.setAnnotationProcessing(); }
         if (!m_ignoreEmbeddedXSD) { pojo.setUseLocalXSD(); }
-        
+
         // Executes the pojoization.
         if (is == null) {
             pojo.pojoization(in, out, (File) null); // Only annotations
         } else  {
             pojo.pojoization(in, out, is);
         }
-        
+
         for (int i = 0; i < pojo.getWarnings().size(); i++) {
             getLog().warn((String) pojo.getWarnings().get(i));
         }
@@ -218,6 +219,20 @@ public class ManipulatorMojo extends AbstractMojo {
             }
         }
         getLog().info("Bundle manipulation - SUCCESS");
+    }
+
+    /**
+     * If Maven runs with Java 1.4, we should use the Maven Xerces.
+     * To achieve that, we set the org.xml.sax.driver property.
+     * Otherwise, the JVM sets the org.xml.sax.driver property.
+     */
+    private void initializeSaxDriver() {
+        String version = (String) System.getProperty("java.vm.version");
+        if (version.startsWith("1.4")) {
+            getLog().info("Set the Sax driver to org.apache.xerces.parsers.SAXParser");
+            System.setProperty("org.xml.sax.driver", "org.apache.xerces.parsers.SAXParser");
+        }
+
     }
 
 }
