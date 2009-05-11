@@ -18,32 +18,16 @@ package org.apache.felix.webconsole.internal.servlet;
 
 
 import java.io.IOException;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
-import javax.servlet.GenericServlet;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.webconsole.AbstractWebConsolePlugin;
-import org.apache.felix.webconsole.Action;
-import org.apache.felix.webconsole.Render;
-import org.apache.felix.webconsole.WebConsoleConstants;
-import org.apache.felix.webconsole.internal.Logger;
-import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
-import org.apache.felix.webconsole.internal.Util;
+import org.apache.felix.webconsole.*;
+import org.apache.felix.webconsole.internal.*;
 import org.apache.felix.webconsole.internal.core.BundlesServlet;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.*;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.log.LogService;
@@ -191,7 +175,7 @@ public class OsgiManager extends GenericServlet
         httpServiceTracker.open();
     }
 
-    
+
     public void dispose()
     {
         // now drop the HttpService and continue with further destroyals
@@ -219,7 +203,7 @@ public class OsgiManager extends GenericServlet
 
 
     //---------- Servlet API
-    
+
     public void init()
     {
         // base class initialization not needed, since the GenericServlet.init
@@ -269,7 +253,7 @@ public class OsgiManager extends GenericServlet
         pluginsTracker = new PluginServiceTracker( this );
         pluginsTracker.open();
     }
-    
+
     public void service( ServletRequest req, ServletResponse res ) throws ServletException, IOException
     {
 
@@ -318,12 +302,12 @@ public class OsgiManager extends GenericServlet
         }
 
     }
-    
+
     public void destroy()
     {
         // base class destroy not needed, since the GenericServlet.destroy
         // is an empty method
-        
+
         // stop listening for plugins
         if ( operationsTracker != null )
         {
@@ -376,12 +360,10 @@ public class OsgiManager extends GenericServlet
                 catch ( IOException ioe )
                 {
                     log.log( LogService.LOG_WARNING, ioe.getMessage(), ioe );
-                    throw ioe;
                 }
                 catch ( ServletException se )
                 {
                     log.log( LogService.LOG_WARNING, se.getMessage(), se.getRootCause() );
-                    throw se;
                 }
 
                 // maybe overwrite redirect
@@ -576,7 +558,7 @@ public class OsgiManager extends GenericServlet
                 "bindHttpService: Already bound to an HTTP Service, ignoring further services" );
             return;
         }
-        
+
         Dictionary config = getConfiguration();
 
         // get authentication details
