@@ -552,6 +552,8 @@ public class BundlesServlet extends BaseWebConsolePlugin
         }
 
         listServices( jw, bundle );
+        
+        listHeaders( jw, bundle );
 
         jw.endArray();
     }
@@ -797,13 +799,13 @@ public class BundlesServlet extends BaseWebConsolePlugin
         {
             return;
         }
-
+        
         for ( int i = 0; i < refs.length; i++ )
         {
             String key = "Service ID " + refs[i].getProperty( Constants.SERVICE_ID );
-
+            
             JSONArray val = new JSONArray();
-
+            
             appendProperty( val, refs[i], Constants.OBJECTCLASS, "Types" );
             appendProperty( val, refs[i], Constants.SERVICE_PID, "PID" );
             appendProperty( val, refs[i], ConfigurationAdmin.SERVICE_FACTORYPID, "Factory PID" );
@@ -812,9 +814,29 @@ public class BundlesServlet extends BaseWebConsolePlugin
             appendProperty( val, refs[i], ComponentConstants.COMPONENT_FACTORY, "Component Factory" );
             appendProperty( val, refs[i], Constants.SERVICE_DESCRIPTION, "Description" );
             appendProperty( val, refs[i], Constants.SERVICE_VENDOR, "Vendor" );
-
+            
             keyVal( jw, key, val);
         }
+    }
+    
+    
+    private void listHeaders( JSONWriter jw, Bundle bundle ) throws JSONException
+    {
+        JSONArray val = new JSONArray();
+
+        Dictionary headers = bundle.getHeaders();
+        Enumeration he = headers.keys();
+        while ( he.hasMoreElements() )
+        {
+            Object header = he.nextElement();
+            String value = String.valueOf(headers.get( header ));
+            // Package headers may be long, support line breaking by
+            // ensuring blanks after comma and semicolon.
+            value = value.replaceAll( "([;,])", "$1 " );
+            val.put( header + ": " + value );
+        }
+
+        keyVal( jw, "Manifest Headers", val );
     }
 
 
