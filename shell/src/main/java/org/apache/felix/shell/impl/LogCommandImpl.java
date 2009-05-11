@@ -114,7 +114,7 @@ public class LogCommandImpl implements Command
 
     public String getShortDescription()
     {
-        return "list the most recent log entries";
+        return "list the most recent log entries.";
     }
 
     public String getUsage()

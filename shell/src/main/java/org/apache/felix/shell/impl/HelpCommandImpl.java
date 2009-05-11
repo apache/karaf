@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -20,6 +20,7 @@ package org.apache.felix.shell.impl;
 
 import java.io.PrintStream;
 
+import java.util.StringTokenizer;
 import org.apache.felix.shell.Command;
 import org.apache.felix.shell.ShellService;
 import org.osgi.framework.BundleContext;
@@ -41,12 +42,12 @@ public class HelpCommandImpl implements Command
 
     public String getUsage()
     {
-        return "help";
+        return "help [<command> ...]";
     }
 
     public String getShortDescription()
     {
-        return "display impl commands.";
+        return "display all command usage messages or descriptions.";
     }
 
     public void execute(String s, PrintStream out, PrintStream err)
@@ -59,32 +60,49 @@ public class HelpCommandImpl implements Command
             if (ref != null)
             {
                 ShellService ss = (ShellService) m_context.getService(ref);
-                String[] cmds = ss.getCommands();
-                String[] usage = new String[cmds.length];
-                String[] desc = new String[cmds.length];
-                int maxUsage = 0;
-                for (int i = 0; i < cmds.length; i++)
+
+                // Parse command line.
+                StringTokenizer st = new StringTokenizer(s, " ");
+
+                // Ignore the command name.
+                st.nextToken();
+
+                if (!st.hasMoreTokens())
                 {
-                    usage[i] = ss.getCommandUsage(cmds[i]);
-                    desc[i] = ss.getCommandDescription(cmds[i]);
-                    // Just in case the command has gone away.
-                    if ((usage[i] != null) && (desc[i] != null))
+                    String[] cmds = ss.getCommands();
+                    for (int i = 0; i < cmds.length; i++)
                     {
-                        maxUsage = Math.max(maxUsage, usage[i].length());
+                        out.println(ss.getCommandUsage(cmds[i]));
                     }
                 }
-                StringBuffer sb = new StringBuffer();
-                for (int i = 0; i < cmds.length; i++)
+                else
                 {
-                    // Just in case the command has gone away.
-                    if ((usage[i] != null) && (desc[i] != null))
+                    String[] cmds = ss.getCommands();
+                    String[] targets = new String[st.countTokens()];
+                    for (int i = 0; i < targets.length; i++)
                     {
-                        sb.delete(0, sb.length());
-                        for (int j = 0; j < (maxUsage - usage[i].length()); j++)
+                        targets[i] = st.nextToken().trim();
+                    }
+                    boolean found = false;
+                    for (int cmdIdx = 0; (cmdIdx < cmds.length); cmdIdx++)
+                    {
+                        for (int targetIdx = 0; targetIdx < targets.length; targetIdx++)
                         {
-                            sb.append(' ');
+                            if (cmds[cmdIdx].equals(targets[targetIdx]))
+                            {
+                                if (found)
+                                {
+                                    out.println("---");
+                                }
+                                found = true;
+                                out.println("Command     : "
+                                    + cmds[cmdIdx]);
+                                out.println("Usage       : "
+                                    + ss.getCommandUsage(cmds[cmdIdx]));
+                                out.println("Description : "
+                                    + ss.getCommandDescription(cmds[cmdIdx]));
+                            }
                         }
-                        out.println(usage[i] + sb + " - " + desc[i]);
                     }
                 }
             }
