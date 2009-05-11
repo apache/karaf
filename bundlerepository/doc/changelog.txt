@@ -1,4 +1,4 @@
-Changes from 1.2.1 to 1.2.2
+Changes from 1.2.1 to 1.4.0
 ---------------------------
 ** Bug
     * [FELIX-973] - FilterImpl from Felix Framework does not support none LDAP operators
