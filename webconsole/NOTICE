@@ -15,12 +15,18 @@ Licensed under the Apache License 2.0.
 
 This product includes software from http://kxml.sourceforge.net.
 Copyright (c) 2002,2003, Stefan Haustein, Oberhausen, Rhld., Germany.
-Licensed under BSD License.
+Licensed under the BSD License
 
 This product includes software from http://www.json.org.
 Copyright (c) 2002 JSON.org
+Licensed under the JSON License
 
 This product includes software from http://www.jquery.com
+Copyright (c) 2009 John Resig, http://jquery.com/
+Licensed under the MIT License
+
+This product includes software from http://tablesorter.com
+Copyright (c) 2007 Christian Bach
 Licensed under the MIT License
 
 This product includes icons from Mark James
