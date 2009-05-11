@@ -20,15 +20,11 @@ import java.util.List;
 
 import org.apache.felix.karaf.gshell.features.Feature;
 import org.apache.felix.karaf.gshell.features.FeaturesService;
-import org.springframework.jmx.export.annotation.ManagedAttribute;
-import org.springframework.jmx.export.annotation.ManagedOperation;
-import org.springframework.jmx.export.annotation.ManagedResource;
 
 /**
  * Managed Repository MBean
  */
-@ManagedResource(description = "Feature")
-public class ManagedFeature {
+public class ManagedFeature implements ManagedFeatureMBean {
     private Feature feature;
     private FeaturesService featuresService;
     private String id;
@@ -39,39 +35,32 @@ public class ManagedFeature {
         this.featuresService = featuresService;
     }
 
-    @ManagedAttribute
     public String getId() {
         return id;    
     }
 
-    @ManagedAttribute
     public String getName() {
         return feature.getName();
     }
 
-    @ManagedAttribute
     public String getVersion() {
         return feature.getVersion();
     }
 
-    @ManagedAttribute
     public List<Feature> getDependencies() {
         return feature.getDependencies();
     }
 
-    @ManagedAttribute
     public List<String> getBundles() {
         return feature.getBundles();
     }
 
-    @ManagedOperation
-    public void uninstallFeature() throws Exception {
-        featuresService.uninstallFeature(feature.getName(), feature.getVersion());
-    }
-
-    @ManagedOperation
     public void installFeature() throws Exception {
         featuresService.installFeature(feature.getName(), feature.getVersion());
+    }
+
+    public void uninstallFeature() throws Exception {
+        featuresService.uninstallFeature(feature.getName(), feature.getVersion());
     }
 
 }

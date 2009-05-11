@@ -25,30 +25,21 @@ import javax.management.MBeanServer;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
-import javax.management.modelmbean.InvalidTargetObjectTypeException;
-import javax.management.modelmbean.ModelMBeanInfo;
-import javax.management.modelmbean.RequiredModelMBean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource;
-import org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler;
 
 /**
  * Management Agent that registers MBeans with JMX MBeanServer.
  */
-public class ManagementAgent implements DisposableBean {
+public class ManagementAgent {
 
     private static final transient Log LOG = LogFactory.getLog(ManagementAgent.class);
 
     private MBeanServer mbeanServer;
-    private MetadataMBeanInfoAssembler assembler;
     private Set<ObjectName> mbeans = new HashSet<ObjectName>();
 
     public ManagementAgent() {
-        assembler = new MetadataMBeanInfoAssembler();
-        assembler.setAttributeSource(new AnnotationJmxAttributeSource());
     }
 
     public MBeanServer getMbeanServer() {
@@ -85,6 +76,7 @@ public class ManagementAgent implements DisposableBean {
     }
 
     public void register(Object obj, ObjectName name, boolean forceRegistration) throws JMException {
+        /*
         try {
             registerMBeanWithServer(obj, name, forceRegistration);
         } catch (NotCompliantMBeanException e) {
@@ -100,6 +92,8 @@ public class ManagementAgent implements DisposableBean {
             }
             registerMBeanWithServer(mbean, name, forceRegistration);
         }
+        */
+        registerMBeanWithServer(obj, name, forceRegistration);
     }
 
     public synchronized void unregister(ObjectName name) throws JMException {
