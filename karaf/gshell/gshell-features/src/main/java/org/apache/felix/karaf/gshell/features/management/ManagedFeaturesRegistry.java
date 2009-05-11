@@ -28,16 +28,12 @@ import org.apache.felix.karaf.gshell.features.Feature;
 import org.apache.felix.karaf.gshell.features.FeaturesRegistry;
 import org.apache.felix.karaf.gshell.features.FeaturesService;
 import org.apache.felix.karaf.gshell.features.Repository;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jmx.export.annotation.ManagedOperation;
-import org.springframework.jmx.export.annotation.ManagedResource;
 
 /**
  * The FeaturesServiceRegistry maintains the managed Features and Repositories
  * for JMX management.
  */
-@ManagedResource(description = "Features Service Registry and Management")
-public class ManagedFeaturesRegistry implements FeaturesRegistry {
+public class ManagedFeaturesRegistry implements FeaturesRegistry, ManagedFeaturesRegistryMBean {
 
     private static final transient Log LOG = LogFactory.getLog(ManagedFeaturesRegistry.class);
 
@@ -50,17 +46,14 @@ public class ManagedFeaturesRegistry implements FeaturesRegistry {
     private FeaturesService featuresService;
     private MBeanServer mbeanServer;
 
-    @ManagedOperation
     public void installFeature(String name) throws Exception {
         featuresService.installFeature(name);
     }
 
-    @ManagedOperation
     public void installFeature(String name, String version) throws Exception {
         featuresService.installFeature(name, version);
     }
 
-    @ManagedOperation
     public void installRepository(String repositoryUri) throws Exception {
         featuresService.addRepository(new URI(repositoryUri));
     }

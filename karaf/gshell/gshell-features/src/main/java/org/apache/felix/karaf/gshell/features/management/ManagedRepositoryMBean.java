@@ -19,32 +19,15 @@ package org.apache.felix.karaf.gshell.features.management;
 import java.net.URI;
 
 import org.apache.felix.karaf.gshell.features.Feature;
-import org.apache.felix.karaf.gshell.features.FeaturesService;
-import org.apache.felix.karaf.gshell.features.Repository;
 
-public class ManagedRepository implements ManagedRepositoryMBean {
+public interface ManagedRepositoryMBean {
 
-    private Repository repository;
-    private FeaturesService featuresService;
+    URI getUri();
 
-    public ManagedRepository(Repository repository, FeaturesService featuresService) {
-        this.repository = repository;
-        this.featuresService = featuresService;
-    }
+    URI[] getRepositories() throws Exception;
 
-    public URI getUri() {
-        return repository.getURI();
-    }
+    Feature[] getFeatures() throws Exception;
 
-    public URI[] getRepositories() throws Exception {
-        return repository.getRepositories();
-    }
+    void removeRepository() throws Exception;
 
-    public Feature[] getFeatures() throws Exception {
-        return repository.getFeatures();
-    }
-
-    public void removeRepository() throws Exception {
-        featuresService.removeRepository(repository.getURI());
-    }
 }

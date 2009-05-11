@@ -39,7 +39,14 @@
   http://servicemix.apache.org/schema/servicemix-gshell/servicemix-gshell.xsd">
 
     <bean id="placeholderConfig" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-      <property name="location" value="file:${karaf.home}/etc/org.apache.felix.karaf.features.cfg"/>
+        <property name="location" value="file:${karaf.home}/etc/org.apache.felix.karaf.features.cfg"/>
+        <property name="ignoreResourceNotFound" value="true"/>
+        <property name="properties">
+            <props>
+                <prop key="featuresRepositories"></prop>
+                <prop key="featuresBoot"></prop>
+            </props>
+        </property>
     </bean>
 
     <gshell:command-bundle>
@@ -97,37 +104,11 @@
         <property name="featuresServiceRegistry" ref="featureServiceRegistry" />
     </bean>
 
-    <bean id="namingStrategy" class="org.apache.felix.karaf.gshell.features.management.DefaultNamingStrategy">
-        <property name="jmxDomainName" value="org.apache.servicemix" />
-    </bean>
-
-    <bean id="managementAgent" class="org.apache.felix.karaf.gshell.features.management.ManagementAgent">
-        <property name="mbeanServer" ref="mbeanServer" />
-    </bean>
-
-    <bean id="featureServiceRegistry" class="org.apache.felix.karaf.gshell.features.management.ManagedFeaturesRegistry" init-method="init">
-        <property name="managementAgent" ref="managementAgent" />
-        <property name="namingStrategy" ref="namingStrategy" />
-    </bean>
-
     <osgi:reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" />
 
     <osgi:reference id="preferences" interface="org.osgi.service.prefs.PreferencesService" cardinality="0..1" />
 
     <osgi:service ref="featuresService" interface="org.apache.felix.karaf.gshell.features.FeaturesService" />
-
-    <osgix:cm-properties id="cmProps" persistent-id="org.apache.felix.karaf.features">
-        <prop key="featuresRepositories"></prop>
-        <prop key="featuresBoot"></prop>
-    </osgix:cm-properties>
-
-    <!-- <ctx:property-placeholder properties-ref="cmProps" /> -->
-
-    <osgi:reference id="mbeanServer"
-                    interface="javax.management.MBeanServer"
-                    cardinality="0..1" >
-        <osgi:listener ref="featureServiceRegistry" bind-method="registerMBeanServer" />
-    </osgi:reference>
 
     <bean id="installFeatureCompleter" class="org.apache.felix.karaf.gshell.features.completers.AvailableFeatureCompleter">
         <property name="featuresRegistry" ref="featureServiceRegistry" />
@@ -140,5 +121,27 @@
     <bean id="removeUrlCompleter" class="org.apache.felix.karaf.gshell.features.completers.FeatureRepositoryCompleter">
         <property name="featuresRegistry" ref="featureServiceRegistry" />
     </bean>
+
+    <!-- Management -->
+
+    <bean id="namingStrategy" class="org.apache.felix.karaf.gshell.features.management.DefaultNamingStrategy">
+        <property name="jmxDomainName" value="org.apache.felix.karaf" />
+    </bean>
+
+    <bean id="managementAgent" class="org.apache.felix.karaf.gshell.features.management.ManagementAgent" destroy-method="destroy">
+        <property name="mbeanServer" ref="mbeanServer" />
+    </bean>
+
+    <bean id="featureServiceRegistry" class="org.apache.felix.karaf.gshell.features.management.ManagedFeaturesRegistry" init-method="init">
+        <property name="managementAgent" ref="managementAgent" />
+        <property name="namingStrategy" ref="namingStrategy" />
+    </bean>
+
+    <osgi:reference id="mbeanServer"
+                    interface="javax.management.MBeanServer"
+                    cardinality="0..1" >
+        <osgi:listener ref="featureServiceRegistry" bind-method="registerMBeanServer"/>
+    </osgi:reference>
+
 
 </beans>
