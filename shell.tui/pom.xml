@@ -52,9 +52,7 @@
           <instructions>
             <Private-Package>org.apache.felix.shell.tui.*</Private-Package>
             <Bundle-Activator>org.apache.felix.shell.tui.Activator</Bundle-Activator>
-            <Bundle-DocURL>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/</Bundle-DocURL>
-            <Bundle-Url>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}.jar</Bundle-Url>
-            <Bundle-Source>http://oscar-osgi.sf.net/obr2/${pom.artifactId}/${pom.artifactId}-${pom.version}-src.jar</Bundle-Source>
+            <Bundle-DocURL>http://felix.apache.org/site/apache-felix-shell-tui.html</Bundle-DocURL>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <Import-Service>org.apache.felix.shell.ShellService</Import-Service>
