@@ -45,12 +45,21 @@ public class StringMap extends TreeMap
         this(caseSensitive);
         putAll(map);
     }
-    
+
     public Object put(Object key, Object value)
     {
         return super.put(key.toString(), value);
     }
     
+    public void putAll(Map map)
+    {
+        for (Iterator it = map.entrySet().iterator(); it.hasNext(); )
+        {
+            Map.Entry entry = (Map.Entry) it.next();
+            put(entry.getKey(), entry.getValue());
+        }
+    }
+
     public boolean isCaseSensitive()
     {
         return ((StringComparator) comparator()).isCaseSensitive();
