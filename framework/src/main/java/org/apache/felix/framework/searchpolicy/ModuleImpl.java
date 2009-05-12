@@ -495,7 +495,8 @@ public class ModuleImpl implements IModule
         {
             m_logger.log(
                 Logger.LOG_DEBUG,
-                ex.getMessage());
+                ex.getMessage(),
+                ex);
         }
         return null;
     }
