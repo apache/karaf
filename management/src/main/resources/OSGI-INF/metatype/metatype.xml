@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0" localization="OSGI-INF/metatype/metatype">
+    <OCD id="org.apache.felix.karaf.management" name="%management.name" description="%management.description">
+        <AD id="rmiRegistryPort" type="Integer" default="1099" name="%rmiRegistryPort.name"
+            description="%rmiRegistryPort.description"/>
+        <AD id="jmxRealm" type="String" default="karaf" name="%jmxRealm.name"
+            description="%jmxRealm.description"/>
+        <AD id="serviceUrl" type="String" default="service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi" name="%serviceUrl.name"
+            description="%serviceUrl.description"/>
+        <AD id="daemon" type="Boolean" default="true" name="%daemon.name" description="%daemon.description"/>
+        <AD id="threaded" type="Boolean" default="true" name="%threaded.name" description="%threaded.description"/>
+        <AD id="objectName" type="String" default="connector:name=rmi" name="%objectName.name" description="%objectName.description"/>
+    </OCD>
+    <Designate pid="org.apache.felix.karaf.management">
+        <Object ocdref="org.apache.felix.karaf.management"/>
+    </Designate>
+</metatype:MetaData>
