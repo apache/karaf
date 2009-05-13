@@ -116,11 +116,11 @@ public class InspectCommandImpl implements Command
                 {
                     if (PROVIDE_DIRECTION.startsWith(direction))
                     {
-                        out.println("Not yet implemented.");
+                        out.println("Fragment inspection not yet implemented.");
                     }
                     else
                     {
-                        out.println("Not yet implemented.");
+                        out.println("Fragment inspection not yet implemented.");
                     }
                 }
                 else
