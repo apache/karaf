@@ -92,11 +92,6 @@ public class Activator implements BundleActivator
         context.registerService(
             classes, new CdCommandImpl(m_context), null);
 
-        // Register "exports" command service.
-        context.registerService(
-            org.apache.felix.shell.Command.class.getName(),
-            new ExportsCommandImpl(m_context), null);
-
         // Register "find" command service.
         context.registerService(
             org.apache.felix.shell.Command.class.getName(),
@@ -112,10 +107,10 @@ public class Activator implements BundleActivator
             org.apache.felix.shell.Command.class.getName(),
             new HelpCommandImpl(m_context), null);
 
-        // Register "imports" command service.
+        // Register "inspect" command service.
         context.registerService(
             org.apache.felix.shell.Command.class.getName(),
-            new ImportsCommandImpl(m_context), null);
+            new InspectCommandImpl(m_context), null);
 
         // Register "install" command service.
         context.registerService(
@@ -137,25 +132,10 @@ public class Activator implements BundleActivator
             org.apache.felix.shell.Command.class.getName(),
             new RefreshCommandImpl(m_context), null);
 
-        // Register "requires" command service.
-        context.registerService(
-            org.apache.felix.shell.Command.class.getName(),
-            new RequiresCommandImpl(m_context), null);
-
-        // Register "requirers" command service.
-        context.registerService(
-            org.apache.felix.shell.Command.class.getName(),
-            new RequirersCommandImpl(m_context), null);
-
         // Register "resolve" command service.
         context.registerService(
             org.apache.felix.shell.Command.class.getName(),
             new ResolveCommandImpl(m_context), null);
-
-        // Register "services" command service.
-        context.registerService(
-            org.apache.felix.shell.Command.class.getName(),
-            new ServicesCommandImpl(m_context), null);
 
         // Register "startlevel" command service.
         context.registerService(
