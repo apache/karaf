@@ -47,7 +47,7 @@ public class HelpCommandImpl implements Command
 
     public String getShortDescription()
     {
-        return "display all command usage messages or descriptions.";
+        return "display available command usage and description.";
     }
 
     public void execute(String s, PrintStream out, PrintStream err)
@@ -72,8 +72,9 @@ public class HelpCommandImpl implements Command
                     String[] cmds = ss.getCommands();
                     for (int i = 0; i < cmds.length; i++)
                     {
-                        out.println(ss.getCommandUsage(cmds[i]));
+                        out.println(cmds[i]);
                     }
+                    out.println("\nUse 'help <command-name>' for more information.");
                 }
                 else
                 {
