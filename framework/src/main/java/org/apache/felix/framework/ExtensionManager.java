@@ -206,14 +206,14 @@ class ExtensionManager extends URLStreamHandler implements IContent
             {
                 // If there is a bundle symbolic name attribute, add the
                 // standard alias as a value.
-                if (attrs[i].getName().equalsIgnoreCase(FelixConstants.BUNDLE_SYMBOLICNAME_ATTRIBUTE))
+                if (attrs[i].getName().equalsIgnoreCase(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE))
                 {
                     // Make a copy of the attribute array.
                     R4Attribute[] aliasAttrs = new R4Attribute[attrs.length];
                     System.arraycopy(attrs, 0, aliasAttrs, 0, attrs.length);
                     // Add the aliased value.
                     aliasAttrs[i] = new R4Attribute(
-                        FelixConstants.BUNDLE_SYMBOLICNAME_ATTRIBUTE,
+                        Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE,
                         new String[] { (String) attrs[i].getValue(), Constants.SYSTEM_BUNDLE_SYMBOLICNAME }, false);
                     // Create the aliased capability to replace the old capability.
                     aliasCaps[capIdx] = new Capability(
@@ -274,10 +274,10 @@ class ExtensionManager extends URLStreamHandler implements IContent
         }
 
         R4Directive dir = ManifestParser.parseExtensionBundleHeader((String)
-            bundle.getCurrentModule().getHeaders().get(FelixConstants.FRAGMENT_HOST));
+            bundle.getCurrentModule().getHeaders().get(Constants.FRAGMENT_HOST));
 
         // We only support classpath extensions (not bootclasspath).
-        if (!FelixConstants.EXTENSION_FRAMEWORK.equals(dir.getValue()))
+        if (!Constants.EXTENSION_FRAMEWORK.equals(dir.getValue()))
         {
             throw new BundleException("Unsupported Extension Bundle type: " +
                 dir.getValue(), new UnsupportedOperationException(
@@ -297,14 +297,16 @@ class ExtensionManager extends URLStreamHandler implements IContent
             try
             {
                 exports = ManifestParser.parseExportHeader((String)
-                    bundle.getCurrentModule().getHeaders().get(FelixConstants.EXPORT_PACKAGE));
+                    bundle.getCurrentModule().getHeaders().get(Constants.EXPORT_PACKAGE),
+                    m_module.getSymbolicName(), m_module.getVersion());
+                exports = aliasSymbolicName(exports);
             }
             catch (Exception ex)
             {
                 m_logger.log(
                     Logger.LOG_ERROR,
                     "Error parsing extension bundle export statement: "
-                    + bundle.getCurrentModule().getHeaders().get(FelixConstants.EXPORT_PACKAGE), ex);
+                    + bundle.getCurrentModule().getHeaders().get(Constants.EXPORT_PACKAGE), ex);
                 return;
             }
 
@@ -401,7 +403,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
     void setCapabilities(ICapability[] capabilities)
     {
         m_capabilities = capabilities;
-        m_headerMap.put(FelixConstants.EXPORT_PACKAGE, convertCapabilitiesToHeaders(m_headerMap));
+        m_headerMap.put(Constants.EXPORT_PACKAGE, convertCapabilitiesToHeaders(m_headerMap));
     }
 
     private String convertCapabilitiesToHeaders(Map headers)
@@ -592,7 +594,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
                     Util.substVars(props.getProperty(name), name, null, props));
             }
             // Return system packages property.
-            return props.getProperty(FelixConstants.FRAMEWORK_SYSTEMPACKAGES);
+            return props.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES);
         }
         catch (Exception ex)
         {

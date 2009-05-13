@@ -747,44 +747,13 @@ public class ManifestParser
     private void checkAndNormalizeR4() throws BundleException
     {
         // Verify that bundle symbolic name is specified.
-        String symName = (String) m_headerMap.get(Constants.BUNDLE_SYMBOLICNAME);
-        if (symName == null)
+        if (m_bundleSymbolicName == null)
         {
             throw new BundleException("R4 bundle manifests must include bundle symbolic name.");
         }
 
-        // Verify that the exports do not specify bundle symbolic name
-        // or bundle version.
-        for (int i = 0; (m_capabilities != null) && (i < m_capabilities.length); i++)
-        {
-            if (m_capabilities[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
-            {
-                R4Attribute[] attrs = ((Capability) m_capabilities[i]).getAttributes();
-                for (int attrIdx = 0; attrIdx < attrs.length; attrIdx++)
-                {
-                    // Find symbolic name and version attribute, if present.
-                    if (attrs[attrIdx].getName().equals(Constants.BUNDLE_VERSION_ATTRIBUTE) ||
-                        attrs[attrIdx].getName().equals(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE))
-                    {
-                        throw new BundleException(
-                            "Exports must not specify bundle symbolic name or bundle version.");
-                    }
-                }
-
-                // Now that we know that there are no bundle symbolic name and version
-                // attributes, add them since the spec says they are there implicitly.
-                R4Attribute[] newAttrs = new R4Attribute[attrs.length + 2];
-                System.arraycopy(attrs, 0, newAttrs, 0, attrs.length);
-                newAttrs[attrs.length] = new R4Attribute(
-                    Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, symName, false);
-                newAttrs[attrs.length + 1] = new R4Attribute(
-                    Constants.BUNDLE_VERSION_ATTRIBUTE, getBundleVersion(), false);
-                m_capabilities[i] = new Capability(
-                    ICapability.PACKAGE_NAMESPACE,
-                    ((Capability) m_capabilities[i]).getDirectives(),
-                    newAttrs);
-            }
-        }
+        m_capabilities = checkAndNormalizeR4Exports(
+            m_capabilities, m_bundleSymbolicName, m_bundleVersion);
 
         R4Directive extension = parseExtensionBundleHeader((String)
             m_headerMap.get(Constants.FRAGMENT_HOST));
@@ -802,6 +771,46 @@ public class ManifestParser
         }
     }
 
+    private static ICapability[] checkAndNormalizeR4Exports(
+        ICapability[] caps, String bsn, Version bv)
+        throws BundleException
+    {
+        // Verify that the exports do not specify bundle symbolic name
+        // or bundle version.
+        for (int i = 0; (caps != null) && (i < caps.length); i++)
+        {
+            if (caps[i].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+            {
+                R4Attribute[] attrs = ((Capability) caps[i]).getAttributes();
+                for (int attrIdx = 0; attrIdx < attrs.length; attrIdx++)
+                {
+                    // Find symbolic name and version attribute, if present.
+                    if (attrs[attrIdx].getName().equals(Constants.BUNDLE_VERSION_ATTRIBUTE) ||
+                        attrs[attrIdx].getName().equals(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE))
+                    {
+                        throw new BundleException(
+                            "Exports must not specify bundle symbolic name or bundle version.");
+                    }
+                }
+
+                // Now that we know that there are no bundle symbolic name and version
+                // attributes, add them since the spec says they are there implicitly.
+                R4Attribute[] newAttrs = new R4Attribute[attrs.length + 2];
+                System.arraycopy(attrs, 0, newAttrs, 0, attrs.length);
+                newAttrs[attrs.length] = new R4Attribute(
+                    Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, bsn, false);
+                newAttrs[attrs.length + 1] = new R4Attribute(
+                    Constants.BUNDLE_VERSION_ATTRIBUTE, bv, false);
+                caps[i] = new Capability(
+                    ICapability.PACKAGE_NAMESPACE,
+                    ((Capability) caps[i]).getDirectives(),
+                    newAttrs);
+            }
+        }
+
+        return caps;
+    }
+
     private void checkExtensionBundle() throws BundleException
     {
         if (m_headerMap.containsKey(Constants.IMPORT_PACKAGE) ||
@@ -814,7 +823,7 @@ public class ManifestParser
         }
     }
 
-    public static ICapability parseBundleSymbolicName(Map headerMap)
+    private static ICapability parseBundleSymbolicName(Map headerMap)
         throws BundleException
     {
         Object[][][] clauses = parseStandardHeader(
@@ -866,7 +875,22 @@ public class ManifestParser
         return null;
     }
 
-    public static ICapability[] parseExportHeader(String header)
+    public static ICapability[] parseExportHeader(String header, String bsn, Version bv)
+        throws BundleException
+    {
+        ICapability[] caps = parseExportHeader(header);
+        try
+        {
+            caps = checkAndNormalizeR4Exports(caps, bsn, bv);
+        }
+        catch (BundleException ex)
+        {
+            caps = null;
+        }
+        return caps;
+    }
+
+    private static ICapability[] parseExportHeader(String header)
     {
         Object[][][] clauses = parseStandardHeader(header);
 
@@ -962,7 +986,7 @@ public class ManifestParser
         return (ICapability[]) capList.toArray(new ICapability[capList.size()]);
     }
 
-    public static IRequirement[] parseImportHeader(String header)
+    private static IRequirement[] parseImportHeader(String header)
     {
         Object[][][] clauses = parseStandardHeader(header);
 
@@ -1061,7 +1085,7 @@ public class ManifestParser
         return (IRequirement[]) reqList.toArray(new IRequirement[reqList.size()]);
     }
 
-    public static IRequirement[] parseRequireBundleHeader(String header)
+    private static IRequirement[] parseRequireBundleHeader(String header)
     {
         Object[][][] clauses = parseStandardHeader(header);
 
@@ -1157,7 +1181,7 @@ public class ManifestParser
 
     // Like this: path; path; dir1:=dirval1; dir2:=dirval2; attr1=attrval1; attr2=attrval2,
     //            path; path; dir1:=dirval1; dir2:=dirval2; attr1=attrval1; attr2=attrval2
-    public static Object[][][] parseStandardHeader(String header)
+    private static Object[][][] parseStandardHeader(String header)
     {
         Object[][][] clauses = null;
 
@@ -1184,7 +1208,7 @@ public class ManifestParser
     }
 
     // Like this: path; path; dir1:=dirval1; dir2:=dirval2; attr1=attrval1; attr2=attrval2
-    public static Object[][] parseStandardHeaderClause(String clauseString)
+    private static Object[][] parseStandardHeaderClause(String clauseString)
         throws IllegalArgumentException
     {
         // Break string into semi-colon delimited pieces.
@@ -1363,7 +1387,7 @@ public class ManifestParser
      * @return an array of <tt>LibraryInfo</tt> objects for the
      *         passed in strings.
     **/
-    public static R4LibraryClause[] parseLibraryStrings(Logger logger, String[] libStrs)
+    private static R4LibraryClause[] parseLibraryStrings(Logger logger, String[] libStrs)
         throws IllegalArgumentException
     {
         if (libStrs == null)
