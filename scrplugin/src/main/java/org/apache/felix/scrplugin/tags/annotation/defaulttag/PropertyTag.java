@@ -20,7 +20,8 @@ package org.apache.felix.scrplugin.tags.annotation.defaulttag;
 
 import java.util.*;
 
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scrplugin.Constants;
 import org.apache.felix.scrplugin.tags.JavaClassDescription;
 import org.apache.felix.scrplugin.tags.JavaField;
@@ -75,13 +76,41 @@ public class PropertyTag extends AbstractTag {
                 return Util.getBooleanValue(annotation, "propertyPrivate", Property.class);
             }
 
-            public Class<?> type() {
-                return Util.getClassValue(annotation, "type", Property.class);
-            }
-
             public String[] value() {
                 // value property can be used as String[] or String property
-                return Util.getStringValues(annotation, desc, "value", Property.class);
+                return Util.getStringValues(annotation, desc, "value");
+            }
+
+            public boolean[] boolValue() {
+                return Util.getBooleanValues(annotation, desc, "boolValue");
+            }
+
+            public byte[] byteValue() {
+                return Util.getByteValues(annotation, desc, "byteValue");
+            }
+
+            public char[] charValue() {
+                return Util.getCharValues(annotation, desc, "charValue");
+            }
+
+            public double[] doubleValue() {
+                return Util.getDoubleValues(annotation, desc, "doubleValue");
+            }
+
+            public float[] floatValue() {
+                return Util.getFloatValues(annotation, desc, "floatValue");
+            }
+
+            public int[] intValue() {
+                return Util.getIntValues(annotation, desc, "intValue");
+            }
+
+            public long[] longValue() {
+                return Util.getLongValues(annotation, desc, "longValue");
+            }
+
+            public short[] shortValue() {
+                return Util.getShortValues(annotation, desc, "shortValue");
             }
 
             public Class<? extends java.lang.annotation.Annotation> annotationType() {
@@ -103,22 +132,74 @@ public class PropertyTag extends AbstractTag {
         map.put(Constants.PROPERTY_LABEL, emptyToNull(this.annotation.label()));
         map.put(Constants.PROPERTY_DESCRIPTION, emptyToNull(this.annotation.description()));
 
-        String[] values = this.annotation.value();
-        if (values == null || values.length == 0) {
-            map.put(Constants.PROPERTY_VALUE, "");
-        } else if (values.length == 1) {
-            map.put(Constants.PROPERTY_VALUE, values[0]);
-        } else {
-            for (int i = 0; i < values.length; i++) {
-                map.put(Constants.PROPERTY_MULTIVALUE_PREFIX + '.' + i, values[i]);
-            }
-        }
 
         String type = null;
-        if (this.annotation.type() != AutoDetect.class) {
-            type = this.annotation.type().getSimpleName();
+        Object[] values = this.annotation.value();
+        // we now check all options
+        if (values == null || values.length == 0 ) {
+            long[] lValues = this.annotation.longValue();
+            if ( lValues.length == 0 ) {
+                double[] dValues = this.annotation.doubleValue();
+                if ( dValues.length == 0 ) {
+                    float[] fValues = this.annotation.floatValue();
+                    if ( fValues.length == 0 ) {
+                        int[] iValues = this.annotation.intValue();
+                        if ( iValues.length == 0 ) {
+                            byte[] byteValues = this.annotation.byteValue();
+                            if ( byteValues.length == 0 ) {
+                                char[] cValues = this.annotation.charValue();
+                                if ( cValues.length == 0 ) {
+                                    boolean[] boolValues = this.annotation.boolValue();
+                                    if ( boolValues.length == 0 ) {
+                                        short[] sValues  = this.annotation.shortValue();
+                                        if ( boolValues.length != 0 ) {
+                                            values = Arrays.asList(sValues).toArray();
+                                            type = "Short";
+                                        }
+                                    } else {
+                                        values = Arrays.asList(boolValues).toArray();
+                                        type = "Boolean";
+                                    }
+                                } else {
+                                    values = Arrays.asList(cValues).toArray();
+                                    type = "Char";
+                                }
+                            } else {
+                                values = Arrays.asList(byteValues).toArray();
+                                type = "Byte";
+                            }
+                        } else {
+                            values = Arrays.asList(fValues).toArray();
+                            type = "Integer";
+                        }
+                    } else {
+                        values = Arrays.asList(fValues).toArray();
+                        type = "Float";
+                    }
+                } else {
+                    values = Arrays.asList(dValues).toArray();
+                    type = "Double";
+                }
+            } else {
+                values = Arrays.asList(lValues).toArray();
+                type = "Long";
+            }
+        } else {
+            type = "String";
         }
-        map.put(Constants.PROPERTY_TYPE, type);
+
+        if ( values != null ) {
+            map.put(Constants.PROPERTY_TYPE, type);
+            if (values.length == 1) {
+                map.put(Constants.PROPERTY_VALUE, values[0].toString());
+            } else {
+                for (int i = 0; i < values.length; i++) {
+                    map.put(Constants.PROPERTY_MULTIVALUE_PREFIX + '.' + i, values[i].toString());
+                }
+            }
+        } else {
+            map.put(Constants.PROPERTY_VALUE, "");
+        }
 
         if (this.annotation.cardinality() != 0) {
             map.put(Constants.PROPERTY_CARDINALITY, String.valueOf(this.annotation.cardinality()));

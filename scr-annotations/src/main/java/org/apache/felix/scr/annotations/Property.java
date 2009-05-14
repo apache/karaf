@@ -60,15 +60,66 @@ public @interface Property {
      * The value(s) of the property. If the property type is not String, parsing
      * of the value is done using the valueOf(String) method of the class
      * defined by the property type.
+     * This attribute should not be used in combination with any of the other
+     * value attributes.
      */
     String[] value() default "";
 
     /**
-     * The type of the property value. This must be one of {@link String},
-     * {@link Long}, {@link Double}, {@link Float}, {@link Integer},
-     * {@link Byte}, {@link Character}, {@link Boolean} and {@link Short}.
+     * The long value(s) of the property.
+     * This attribute should not be used in combination with any of the other
+     * value attributes or the type attribute.
      */
-    Class<?> type() default AutoDetect.class;
+    long[] longValue() default 0;
+
+    /**
+     * The double value(s) of the property.
+     * This attribute should not be used in combination with any of the other
+     * value attributes.
+     */
+    double[] doubleValue() default 0.0;
+
+    /**
+     * The float value(s) of the property.
+     * This attribute should not be used in combination with any of the other
+     * value attributes or the type attribute.
+     */
+    float[] floatValue() default 0;
+
+    /**
+     * The int value(s) of the property.
+     * This attribute should not be used in combination with any of the other
+     * value attributes or the type attribute.
+     */
+    int[] intValue() default 0;
+
+    /**
+     * The byte value(s) of the property.
+     * This attribute should not be used in combination with any of the other
+     * value attributes or the type attribute.
+     */
+    byte[] byteValue() default 0;
+
+    /**
+     * The char value(s) of the property.
+     * This attribute should not be used in combination with any of the other
+     * value attributes or the type attribute.
+     */
+    char[] charValue() default '\0';
+
+    /**
+     * The bool value(s) of the property.
+     * This attribute should not be used in combination with any of the other
+     * value attributes or the type attribute.
+     */
+    boolean[] boolValue() default false;
+
+    /**
+     * The short value(s) of the property.
+     * This attribute should not be used in combination with any of the other
+     * value attributes or the type attribute.
+     */
+    short[] shortValue() default 0;
 
     /**
      * Defines the cardinality of the property and its collection type. If the

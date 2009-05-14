@@ -69,7 +69,7 @@ public abstract class Util {
         }
     }
 
-    public static String[] getStringValues(Annotation annotation, JavaClassDescription desc, String name, final Class<?> clazz) {
+    public static String[] getStringValues(Annotation annotation, JavaClassDescription desc, String name) {
         final Object obj = annotation.getNamedParameter(name);
         if ( obj != null ) {
             List<String> list;
@@ -86,12 +86,167 @@ public abstract class Util {
             }
             return values;
         }
-        try {
-            return (String[]) clazz.getMethod(name).getDefaultValue();
-        } catch( NoSuchMethodException mnfe) {
-            // we ignore this
-            return null;
+        return null;
+    }
+
+    public static long[] getLongValues(Annotation annotation, JavaClassDescription desc, String name) {
+        final Object obj = annotation.getNamedParameter(name);
+        if ( obj != null ) {
+            List<Long> list;
+            if (obj instanceof Long) {
+                list = new ArrayList<Long>();
+                list.add((Long)obj);
+            }
+            else {
+                list = (List<Long>)obj;
+            }
+            long[] values = new long[list.size()];
+            for (int i=0; i<values.length; i++) {
+                values[i] = list.get(i);
+            }
+            return values;
         }
+        return null;
+    }
+
+    public static int[] getIntValues(Annotation annotation, JavaClassDescription desc, String name) {
+        final Object obj = annotation.getNamedParameter(name);
+        if ( obj != null ) {
+            List<Integer> list;
+            if (obj instanceof Integer) {
+                list = new ArrayList<Integer>();
+                list.add((Integer)obj);
+            }
+            else {
+                list = (List<Integer>)obj;
+            }
+            int[] values = new int[list.size()];
+            for (int i=0; i<values.length; i++) {
+                values[i] = list.get(i);
+            }
+            return values;
+        }
+        return null;
+    }
+
+    public static float[] getFloatValues(Annotation annotation, JavaClassDescription desc, String name) {
+        final Object obj = annotation.getNamedParameter(name);
+        if ( obj != null ) {
+            List<Float> list;
+            if (obj instanceof Float) {
+                list = new ArrayList<Float>();
+                list.add((Float)obj);
+            }
+            else {
+                list = (List<Float>)obj;
+            }
+            float[] values = new float[list.size()];
+            for (int i=0; i<values.length; i++) {
+                values[i] = list.get(i);
+            }
+            return values;
+        }
+        return null;
+    }
+
+    public static double[] getDoubleValues(Annotation annotation, JavaClassDescription desc, String name) {
+        final Object obj = annotation.getNamedParameter(name);
+        if ( obj != null ) {
+            List<Double> list;
+            if (obj instanceof Double) {
+                list = new ArrayList<Double>();
+                list.add((Double)obj);
+            }
+            else {
+                list = (List<Double>)obj;
+            }
+            double[] values = new double[list.size()];
+            for (int i=0; i<values.length; i++) {
+                values[i] = list.get(i);
+            }
+            return values;
+        }
+        return null;
+    }
+
+    public static char[] getCharValues(Annotation annotation, JavaClassDescription desc, String name) {
+        final Object obj = annotation.getNamedParameter(name);
+        if ( obj != null ) {
+            List<Character> list;
+            if (obj instanceof Character) {
+                list = new ArrayList<Character>();
+                list.add((Character)obj);
+            }
+            else {
+                list = (List<Character>)obj;
+            }
+            char[] values = new char[list.size()];
+            for (int i=0; i<values.length; i++) {
+                values[i] = list.get(i);
+            }
+            return values;
+        }
+        return null;
+    }
+
+    public static short[] getShortValues(Annotation annotation, JavaClassDescription desc, String name) {
+        final Object obj = annotation.getNamedParameter(name);
+        if ( obj != null ) {
+            List<Short> list;
+            if (obj instanceof Short) {
+                list = new ArrayList<Short>();
+                list.add((Short)obj);
+            }
+            else {
+                list = (List<Short>)obj;
+            }
+            short[] values = new short[list.size()];
+            for (int i=0; i<values.length; i++) {
+                values[i] = list.get(i);
+            }
+            return values;
+        }
+        return null;
+    }
+
+    public static byte[] getByteValues(Annotation annotation, JavaClassDescription desc, String name) {
+        final Object obj = annotation.getNamedParameter(name);
+        if ( obj != null ) {
+            List<Byte> list;
+            if (obj instanceof Byte) {
+                list = new ArrayList<Byte>();
+                list.add((Byte)obj);
+            }
+            else {
+                list = (List<Byte>)obj;
+            }
+            byte[] values = new byte[list.size()];
+            for (int i=0; i<values.length; i++) {
+                values[i] = list.get(i);
+            }
+            return values;
+        }
+        return null;
+    }
+
+    public static boolean[] getBooleanValues(Annotation annotation, JavaClassDescription desc, String name) {
+        final Object obj = annotation.getNamedParameter(name);
+        if ( obj != null ) {
+            List<Boolean> list;
+            if (obj instanceof Boolean) {
+                list = new ArrayList<Boolean>();
+                list.add((Boolean)obj);
+            }
+            else {
+                list = (List<Boolean>)obj;
+            }
+            boolean[] values = new boolean[list.size()];
+            for (int i=0; i<values.length; i++) {
+                values[i] = list.get(i);
+            }
+            return values;
+        }
+        return null;
     }
 
     public static String getStringValue(Annotation annotation, JavaClassDescription desc, String name, final Class<?> clazz) {
