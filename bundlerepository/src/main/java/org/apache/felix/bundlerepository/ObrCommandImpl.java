@@ -241,7 +241,12 @@ public class ObrCommandImpl implements Command
                 // Otherwise, compare the presentation name to keep them sorted
                 // by presentation name. If the presentation names are equal, then
                 // use the symbolic name to differentiate.
-                int compare = r1.getPresentationName().compareToIgnoreCase(r2.getPresentationName());
+                int compare = (r1.getPresentationName() == null)
+                    ? -1
+                    : (r2.getPresentationName() == null)
+                        ? 1
+                        : r1.getPresentationName().compareToIgnoreCase(
+                            r2.getPresentationName());
                 if (compare == 0)
                 {
                     return symCompare;
