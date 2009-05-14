@@ -337,7 +337,7 @@ public class PreferencesImpl implements Preferences {
         this.checkKey(key);
         this.checkValue(value);
         try {
-            this.put(key, new String(Base64.decodeBase64(value), "utf-8"));
+            this.put(key, new String(Base64.encodeBase64(value), "utf-8"));
         } catch (UnsupportedEncodingException ignore) {
             // utf-8 is always available
         }
