@@ -1,0 +1,4 @@
+Changes from 0.3.0-SNAPSHOT to 0.4.0
+-------------------------------------
+
+* [2009-05-14] First public release
