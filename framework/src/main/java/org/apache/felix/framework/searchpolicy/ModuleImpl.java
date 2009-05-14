@@ -75,6 +75,7 @@ public class ModuleImpl implements IModule
     private final IRequirement[] m_requirements;
     private final IRequirement[] m_dynamicRequirements;
     private final R4Library[] m_nativeLibraries;
+    private final int m_activationPolicy;
     private final Bundle m_bundle;
 
     private IModule[] m_fragments = null;
@@ -132,6 +133,7 @@ public class ModuleImpl implements IModule
         m_requirements = null;
         m_dynamicRequirements = null;
         m_nativeLibraries = null;
+        m_activationPolicy = EAGER_ACTIVATION;
     }
 
     public ModuleImpl(
@@ -163,6 +165,7 @@ public class ModuleImpl implements IModule
         m_requirements = mp.getRequirements();
         m_dynamicRequirements = mp.getDynamicRequirements();
         m_nativeLibraries = mp.getLibraries();
+        m_activationPolicy = mp.getActivationPolicy();
         m_symbolicName = mp.getSymbolicName();
         m_isExtension = mp.isExtension();
 
@@ -295,6 +298,11 @@ public class ModuleImpl implements IModule
     public R4Library[] getNativeLibraries()
     {
         return m_nativeLibraries;
+    }
+
+    public int getActivationPolicy()
+    {
+        return m_activationPolicy;
     }
 
     //

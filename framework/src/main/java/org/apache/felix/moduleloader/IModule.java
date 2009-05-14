@@ -29,6 +29,9 @@ import org.osgi.framework.Version;
 
 public interface IModule
 {
+    final static int EAGER_ACTIVATION = 0;
+    final static int LAZY_ACTIVATION = 1;
+
     void setSecurityContext(Object securityContext);
     Object getSecurityContext();
 
@@ -41,6 +44,7 @@ public interface IModule
     IRequirement[] getRequirements();
     IRequirement[] getDynamicRequirements();
     R4Library[] getNativeLibraries();
+    int getActivationPolicy();
 
     // Run-time data access methods.
     Bundle getBundle();

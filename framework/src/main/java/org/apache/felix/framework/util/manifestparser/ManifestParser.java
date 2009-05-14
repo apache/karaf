@@ -24,6 +24,7 @@ import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.VersionRange;
 import org.apache.felix.moduleloader.ICapability;
+import org.apache.felix.moduleloader.IModule;
 import org.apache.felix.moduleloader.IRequirement;
 import org.osgi.framework.*;
 
@@ -32,6 +33,7 @@ public class ManifestParser
     private final Logger m_logger;
     private final Map m_configMap;
     private final Map m_headerMap;
+    private volatile int m_activationPolicy = IModule.EAGER_ACTIVATION;
     private volatile boolean m_isExtension = false;
     private volatile String m_bundleSymbolicName;
     private volatile Version m_bundleVersion;
@@ -249,6 +251,12 @@ public class ManifestParser
             m_libraryHeaders = tmp;
         }
 
+        //
+        // Parse activation policy.
+        //
+
+        m_activationPolicy = parseActivationPolicy(headerMap);
+
         // Do final checks and normalization of manifest.
         if (getManifestVersion().equals("2"))
         {
@@ -296,6 +304,11 @@ public class ManifestParser
     {
         String manifestVersion = (String) m_headerMap.get(Constants.BUNDLE_MANIFESTVERSION);
         return (manifestVersion == null) ? "1" : manifestVersion.trim();
+    }
+
+    public int getActivationPolicy()
+    {
+        return m_activationPolicy;
     }
 
     public boolean isExtension()
@@ -1173,6 +1186,32 @@ public class ManifestParser
         }
 
         return result;
+    }
+
+    private static int parseActivationPolicy(Map headerMap)
+    {
+        int policy = IModule.EAGER_ACTIVATION;
+
+        Object[][][] clauses = parseStandardHeader(
+            (String) headerMap.get(Constants.BUNDLE_ACTIVATIONPOLICY));
+
+        if (clauses.length > 0)
+        {
+            // Just look for a "path" matching the lazy policy, ignore
+            // everything else.
+            for (int i = 0;
+                i < clauses[0][CLAUSE_PATHS_INDEX].length;
+                i++)
+            {
+                if (clauses[0][CLAUSE_PATHS_INDEX][i].equals(Constants.ACTIVATION_LAZY))
+                {
+                    policy = IModule.LAZY_ACTIVATION;
+                    break;
+                }
+            }
+        }
+
+        return policy;
     }
 
     public static final int CLAUSE_PATHS_INDEX = 0;
