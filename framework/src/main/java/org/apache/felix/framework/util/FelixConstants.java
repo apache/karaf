@@ -42,6 +42,8 @@ public interface FelixConstants extends org.osgi.framework.Constants
     public static final String BUNDLE_URL_PROTOCOL = "bundle";
 
     // Miscellaneous framework configuration property names.
+    public static final String FRAMEWORK_BUNDLECACHE_IMPL
+        = "felix.bundlecache.impl";
     public static final String LOG_LEVEL_PROP = "felix.log.level";
     public static final String LOG_LOGGER_PROP = "felix.log.logger";
     public static final String SYSTEMBUNDLE_ACTIVATORS_PROP

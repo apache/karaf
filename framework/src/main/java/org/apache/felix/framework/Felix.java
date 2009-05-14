@@ -486,15 +486,21 @@ public class Felix extends BundleImpl implements Framework
             // Initialize event dispatcher.
             m_dispatcher = EventDispatcher.start(m_logger);
 
-            // Create the bundle cache so that we can reload any installed bundles.
-            try
+            // Create the bundle cache, if necessary, so that we can reload any
+            // installed bundles.
+            m_cache = (BundleCache) m_configMutableMap.get(
+                FelixConstants.FRAMEWORK_BUNDLECACHE_IMPL);
+            if (m_cache == null)
             {
-                m_cache = new BundleCache(m_logger, m_configMap);
-            }
-            catch (Exception ex)
-            {
-                m_logger.log(Logger.LOG_ERROR, "Error creating bundle cache.", ex);
-                throw new BundleException("Error creating bundle cache.", ex);
+                   try
+                   {
+                       m_cache = new BundleCache(m_logger, m_configMap);
+                   }
+                   catch (Exception ex)
+                   {
+                       m_logger.log(Logger.LOG_ERROR, "Error creating bundle cache.", ex);
+                       throw new BundleException("Error creating bundle cache.", ex);
+                   }
             }
 
             // If this is the first time init is called, check to see if
