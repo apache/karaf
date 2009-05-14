@@ -1383,11 +1383,13 @@ public class ModuleImpl implements IModule
     }
 
     private static final Constructor m_dexFileClassConstructor;
+    private static final Method m_dexFileClassLoadDex;
     private static final Method m_dexFileClassLoadClass;
 
     static
     {
         Constructor dexFileClassConstructor = null;
+        Method dexFileClassLoadDex = null;
         Method dexFileClassLoadClass = null;
         try
         {
@@ -1401,6 +1403,15 @@ public class ModuleImpl implements IModule
                 dexFileClass = Class.forName("android.dalvik.DexFile");
             }
 
+            try
+            {
+                dexFileClassLoadDex = dexFileClass.getMethod("loadDex", 
+                    new Class[]{String.class, String.class, Integer.TYPE});
+            }
+            catch (Exception ex)
+            {
+                // Nothing we need to do 
+            }
             dexFileClassConstructor = dexFileClass.getConstructor(
                 new Class[] { java.io.File.class });
             dexFileClassLoadClass = dexFileClass.getMethod("loadClass",
@@ -1409,9 +1420,11 @@ public class ModuleImpl implements IModule
         catch (Exception ex)
         {
            dexFileClassConstructor = null;
+           dexFileClassLoadDex = null;
            dexFileClassLoadClass = null;
         }
         m_dexFileClassConstructor = dexFileClassConstructor;
+        m_dexFileClassLoadDex= dexFileClassLoadDex;
         m_dexFileClassLoadClass = dexFileClassLoadClass;
     }
 
@@ -1421,7 +1434,7 @@ public class ModuleImpl implements IModule
 
         public ModuleClassLoader()
         {
-            if (m_dexFileClassConstructor != null)
+            if (m_dexFileClassLoadClass != null)
             {
                 m_jarContentToDexFile = new HashMap();
             }
@@ -1613,8 +1626,17 @@ public class ModuleImpl implements IModule
             {
                 try
                 {
-                    dexFile = m_dexFileClassConstructor.newInstance(
-                        new Object[] { content.getFile() });
+                    if (m_dexFileClassLoadDex != null)
+                    {
+                        dexFile = m_dexFileClassLoadDex.invoke(null, 
+                            new Object[]{content.getFile().getAbsolutePath(), 
+                                content.getFile().getAbsolutePath() + ".dex", new Integer(0)});
+                    }
+                    else
+                    {
+                        dexFile = m_dexFileClassConstructor.newInstance(
+                            new Object[] { content.getFile() });
+                    }
                 }
                 finally
                 {
