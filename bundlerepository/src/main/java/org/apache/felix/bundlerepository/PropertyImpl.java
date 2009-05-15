@@ -80,12 +80,7 @@ public class PropertyImpl
 
     private Object convertType(String value)
     {
-        if ((m_type != null) && m_type.equalsIgnoreCase(Resource.VERSION)
-            && (value.indexOf(',') > 0))
-        {
-            return VersionRange.parse(value);
-        }
-        else if ((m_type != null) && m_type.equalsIgnoreCase(Resource.VERSION))
+        if ((m_type != null) && m_type.equalsIgnoreCase(Resource.VERSION))
         {
             return new Version(value);
         }
