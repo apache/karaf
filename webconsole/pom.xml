@@ -89,7 +89,8 @@
                             org.apache.felix.scr;
                             org.apache.felix.shell;
                             org.osgi.service.*;resolution:=optional,
-                            javax.portlet;resolution:=optional,*;
+                            javax.portlet;resolution:=optional,
+                            javax.servlet.*;version=2.4,*;
                         </Import-Package>
                         
                         <Embed-Dependency>
