@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -83,7 +83,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * Thread Local.
      */
     private final ServiceUsage m_usage;
-    
+
     /**
      * Type of the object to inject.
      * Cannot change once set.
@@ -100,7 +100,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * Default-Implementation.
      */
     private final String m_di;
-    
+
     /**
      * Is the Nullable pattern enable?
      */
@@ -114,7 +114,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
 
     /**
      * Dependency constructor. After the creation the dependency is not started.
-     * 
+     *
      * @param handler : the dependency handler managing this dependency
      * @param field : field of the dependency
      * @param spec : required specification
@@ -137,7 +137,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
         } else {
             m_usage = null;
         }
-        
+
         m_supportNullable = nullable;
         m_di = defaultImplem;
 
@@ -147,14 +147,14 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
             }
         } else {
             m_id = identity;
-        } 
+        }
         // Else wait the setSpecification call.
     }
 
     /**
      * Set the specification of the current dependency.
      * In order to store the id of the dependency, this
-     * method is override. This method is called during the 
+     * method is override. This method is called during the
      * configuration.
      * @param spec : request service Class
      * @see org.apache.felix.ipojo.util.DependencyModel#setSpecification(java.lang.Class)
@@ -202,7 +202,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
     public synchronized boolean isFrozen() {
         return m_isFrozen;
     }
-    
+
     /**
      * Unfreeze the dependency.
      * @see org.apache.felix.ipojo.util.DependencyModel#unfreeze()
@@ -227,7 +227,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
 
             // Check optional case : nullable object case : do not call bind on nullable object
             if (isOptional() && getSize() == 0) { return; }
-            
+
             refs = getServiceReferences(); // Stack confinement.
         }
 
@@ -301,7 +301,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
             }
         }
     }
-    
+
     /**
      * Start the dependency.
      */
@@ -312,7 +312,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
                 if (m_supportNullable) {
                     // To load the proxy we use the POJO class loader. Indeed, this classloader imports iPOJO (so can access to Nullable) and has
                     // access to the service specification.
-                    try { 
+                    try {
                         m_nullable =
                             Proxy.newProxyInstance(getHandler().getInstanceManager().getClazz().getClassLoader(), new Class[] {
                                     getSpecification(), Nullable.class }, new NullableObject()); // NOPMD
@@ -352,8 +352,8 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
 
             m_isStarted = true;
         }
-        
-        
+
+
     }
 
     protected DependencyCallback[] getCallbacks() {
@@ -362,7 +362,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
 
     /**
      * Set that this dependency is a service level dependency.
-     * This forces the scoping policy to be STRICT. 
+     * This forces the scoping policy to be STRICT.
      */
     public void setServiceLevelDependency() {
         m_isServiceLevelRequirement = true;
@@ -399,7 +399,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
 
     /**
      * The dependency has been reconfigured.
-     * Call unbind method and then bind methods. If the dependency cache is not reset, 
+     * Call unbind method and then bind methods. If the dependency cache is not reset,
      * the thread continues to get older services.
      * @param departs : no more matching services.
      * @param arrivals : new services
@@ -409,12 +409,12 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
         for (int i = 0; departs != null && i < departs.length; i++) {
             callUnbindMethod(departs[i]);
         }
-        
+
         for (int i = 0; arrivals != null && i < arrivals.length; i++) {
             callBindMethod(arrivals[i]);
         }
     }
-    
+
     /**
      * Reset the thread local cache if used.
      */
@@ -449,7 +449,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * @return the service object or a nullable / default implementation if defined.
      * @see org.apache.felix.ipojo.FieldInterceptor#onGet(java.lang.Object, java.lang.String, java.lang.Object)
      */
-    public Object onGet(Object pojo, String fieldName, Object value) {        
+    public Object onGet(Object pojo, String fieldName, Object value) {
         // Initialize the thread local object is not already touched.
         Usage usage = (Usage) m_usage.get();
         if (usage.m_stack == 0) { // uninitialized usage.
@@ -462,7 +462,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
 
     }
 
-    
+
     /**
      * Creates the object to store in the given Thread Local.
      * This object will be injected inside the POJO field.
@@ -482,23 +482,28 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
             }
         } else {
             if (m_type == 0) { // Array
-                if (refs == null) {
-                    usage.m_object = (Object[]) Array.newInstance(getSpecification(), 0); // Create an empty array.
-                } else {
-                   // Use a reflective construction to avoid class cast exception. This method allows setting the component type.
-                    Object[] objs = (Object[]) Array.newInstance(getSpecification(), refs.length); 
-                    for (int i = 0; refs != null && i < refs.length; i++) {
-                        ServiceReference ref = refs[i];
-                        objs[i] = getService(ref);
+                try {
+                    if (refs == null) {
+                        usage.m_object = (Object[]) Array.newInstance(getSpecification(), 0); // Create an empty array.
+                    } else {
+                        //  Use a reflective construction to avoid class cast exception. This method allows setting the component type.
+                        Object[] objs = (Object[]) Array.newInstance(getSpecification(), refs.length);
+                        for (int i = 0; refs != null && i < refs.length; i++) {
+                            ServiceReference ref = refs[i];
+                            objs[i] = getService(ref);
+                        }
+                        usage.m_object = objs;
                     }
-                    usage.m_object = objs;
+                } catch (ArrayStoreException e) {
+                    m_handler.error("Cannot create the array - Check that the bundle can access the service interface", e);
+                    throw new RuntimeException("Cannot create the array - Check that the bundle can access the service interface : " + e.getMessage());
                 }
             } else if (m_type == DependencyHandler.LIST) {
                 if (refs == null) {
                     usage.m_object = new ArrayList(0); // Create an empty list.
                 } else {
                    // Use a list to store service objects
-                    List objs = new ArrayList(refs.length); 
+                    List objs = new ArrayList(refs.length);
                     for (int i = 0; refs != null && i < refs.length; i++) {
                         ServiceReference ref = refs[i];
                         objs.add(getService(ref));
@@ -510,7 +515,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
                     usage.m_object = new Vector(0); // Create an empty vector.
                 } else {
                    // Use a vector to store service objects
-                    Vector objs = new Vector(refs.length); 
+                    Vector objs = new Vector(refs.length);
                     for (int i = 0; refs != null && i < refs.length; i++) {
                         ServiceReference ref = refs[i];
                         objs.add(getService(ref));
@@ -522,7 +527,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
                     usage.m_object = new HashSet(0); // Create an empty vector.
                 } else {
                    // Use a vector to store service objects
-                    Set objs = new HashSet(refs.length); 
+                    Set objs = new HashSet(refs.length);
                     for (int i = 0; refs != null && i < refs.length; i++) {
                         ServiceReference ref = refs[i];
                         objs.add(getService(ref));
@@ -541,7 +546,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * @param value : set value.
      * @see org.apache.felix.ipojo.FieldInterceptor#onSet(java.lang.Object, java.lang.String, java.lang.Object)
      */
-    public void onSet(Object pojo, String fieldName, Object value) {        
+    public void onSet(Object pojo, String fieldName, Object value) {
         // Nothing to do.
     }
 
@@ -582,7 +587,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
      * @see org.apache.felix.ipojo.MethodInterceptor#onExit(java.lang.Object, java.lang.reflect.Method, java.lang.Object)
      */
     public void onExit(Object pojo, Method method, Object returnedObj) {
-        // Nothing to do  : wait onFinally        
+        // Nothing to do  : wait onFinally
     }
 
     /**
@@ -603,7 +608,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
             }
         }
     }
-    
+
     /**
      * Gets true if the dependency use Nullable objects.
      * @return true if the dependency is optional and supports nullable objects.
@@ -611,7 +616,7 @@ public class Dependency extends DependencyModel implements FieldInterceptor, Met
     public boolean supportsNullable() {
         return m_supportNullable;
     }
-    
+
     public String getDefaultImplementation() {
         return m_di;
     }
