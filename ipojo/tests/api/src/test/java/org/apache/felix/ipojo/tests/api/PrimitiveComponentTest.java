@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
@@ -35,28 +34,28 @@ import org.osgi.framework.ServiceReference;
 
 @RunWith( JUnit4TestRunner.class )
 public class PrimitiveComponentTest {
-    
+
     @Inject
     private BundleContext context;
-    
+
     private OSGiHelper osgi;
-    
+
     private IPOJOHelper ipojo;
-    
+
     @Before
     public void init() {
         osgi = new OSGiHelper(context);
         ipojo = new IPOJOHelper(context);
     }
-    
+
     @After
     public void stop() {
         ipojo.dispose();
         osgi.dispose();
     }
-    
+
     @Configuration
-    public static Option[] configure() {    
+    public static Option[] configure() {
         Option[] opt =  options(
                 provision(
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
@@ -79,7 +78,7 @@ public class PrimitiveComponentTest {
         assertThat(ref, is(notNullValue()));
 
     }
-    
+
     @Test
     public void killTheFactory() throws UnacceptableConfiguration, MissingHandlerException, ConfigurationException {
         assertThat( context, is( notNullValue() ) );
@@ -99,7 +98,7 @@ public class PrimitiveComponentTest {
         assertThat(ref, is(nullValue()));
 
     }
-    
+
     @Test
     public void createAServiceCons() throws Exception {
         assertThat( context, is( notNullValue() ) );
@@ -111,45 +110,45 @@ public class PrimitiveComponentTest {
                 is(ComponentInstance.INVALID));
 
     }
-    
+
     @Test
     public void createBoth() throws Exception {
         ComponentInstance cons = createAConsumer().createInstance();
         // cons is invalid
         assertThat("cons is invalid", cons.getState(), is(ComponentInstance.INVALID));
-                
+
         ComponentInstance prov = createAProvider().createInstance();
         assertThat("prov is valid", prov.getState(), is(ComponentInstance.VALID));
         assertThat("cons is valid", cons.getState(), is(ComponentInstance.VALID));
 
     }
-    
+
     @Test
     public void createTwoCons() throws Exception {
         ComponentInstance cons1 = createAConsumer().createInstance();
         // cons is invalid
         assertThat("cons is invalid", cons1.getState(), is(ComponentInstance.INVALID));
-                
+
         ComponentInstance prov = createAProvider().createInstance();
         assertThat("prov is valid", prov.getState(), is(ComponentInstance.VALID));
         assertThat("cons is valid", cons1.getState(), is(ComponentInstance.VALID));
-        
+
         ComponentInstance cons2 = createAnOptionalConsumer().createInstance();
-     
+
         assertThat("cons2 is valid", cons2.getState(), is(ComponentInstance.VALID));
-        
+
         prov.stop();
         assertThat("cons is invalid", cons1.getState(), is(ComponentInstance.INVALID));
         assertThat("cons2 is valid", cons2.getState(), is(ComponentInstance.VALID));
     }
-    
+
     private PrimitiveComponentType createAProvider() {
         return new PrimitiveComponentType()
         .setBundleContext(context)
         .setClassName(FooImpl.class.getName())
         .addService(new Service()); // Provide the FooService
     }
-    
+
     private PrimitiveComponentType createAConsumer() {
         return new SingletonComponentType()
         .setBundleContext(context)
@@ -157,7 +156,7 @@ public class PrimitiveComponentTest {
         .addDependency(new Dependency().setField("myFoo"))
         .setValidateMethod("start");
     }
-    
+
     private PrimitiveComponentType createAnOptionalConsumer() {
         return new SingletonComponentType()
         .setBundleContext(context)

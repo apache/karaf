@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -42,83 +42,88 @@ public class PrimitiveComponentType extends ComponentType {
      * The bundle context.
      */
     private BundleContext m_context;
-    
+
     /**
-     * The implementation class name. 
+     * The implementation class name.
      */
     private String m_classname;
-    
+
     /**
-     * The component type name. 
+     * The component type name.
      */
     private String m_name;
-    
+
     /**
-     * Is the component type immediate. 
+     * The component type version.
+     */
+    private String m_version;
+
+    /**
+     * Is the component type immediate.
      */
     private boolean m_immediate;
-    
+
     /**
-     * Manipulation metadata of the component type.  
+     * Manipulation metadata of the component type.
      */
     private Element m_manipulation;
-    
+
     /**
      * Component factory attached to the component
-     * type. 
+     * type.
      */
     private ComponentFactory m_factory;
-    
+
     /**
-     * Component type metadata. 
+     * Component type metadata.
      */
     private Element m_metadata;
-    
+
     /**
-     * List of provided services. 
+     * List of provided services.
      */
     private List m_services = new ArrayList(1);
-    
+
     /**
-     * List of service dependencies. 
+     * List of service dependencies.
      */
     private List m_dependencies = new ArrayList();
-    
+
     /**
-     * List of configuration properties. 
+     * List of configuration properties.
      */
     private List m_properties = new ArrayList();
-    
+
     /**
-     * The validate callback. 
+     * The validate callback.
      */
     private String m_validate;
-    
+
     /**
-     * The invalidate callback. 
+     * The invalidate callback.
      */
     private String m_invalidate;
-    
+
     /**
      * The udpated callback.
      */
     private String m_updated;
-    
+
     /**
-     * Are the properties propagated to provided services? 
+     * Are the properties propagated to provided services?
      */
     private boolean m_propagation;
-    
+
     /**
-     * The factory method. 
+     * The factory method.
      */
     private String m_factoryMethod;
-    
+
     /**
-     * Is the factory public? 
+     * Is the factory public?
      */
     private boolean m_public = true;
-    
+
     /**
      * The Managed Service PID.
      */
@@ -128,13 +133,13 @@ public class PrimitiveComponentType extends ComponentType {
      * The temporal dependencies.
      */
     private ArrayList m_temporals = new ArrayList();
-    
+
     /**
      * List of Handler representing external
      * handler configuration.
      */
     private List m_handlers = new ArrayList();
-    
+
     /**
      * Checks that the component type is not already
      * started.
@@ -144,7 +149,7 @@ public class PrimitiveComponentType extends ComponentType {
             throw new IllegalStateException("The component type was already initialized, cannot modify metadata");
         }
     }
-    
+
     /**
      * Checks that the component type description is valid.
      */
@@ -184,7 +189,7 @@ public class PrimitiveComponentType extends ComponentType {
         initializeFactory();
         m_factory.stop();
     }
-    
+
     /**
      * Initializes the factory.
      */
@@ -193,7 +198,7 @@ public class PrimitiveComponentType extends ComponentType {
             createFactory();
         }
     }
-    
+
     /**
      * Sets the bundle context.
      * @param bc the bundle context
@@ -204,10 +209,10 @@ public class PrimitiveComponentType extends ComponentType {
         m_context = bc;
         return this;
     }
-    
+
     /**
      * Sets the implementation class.
-     * @param classname the class name 
+     * @param classname the class name
      * @return the current component type
      */
     public PrimitiveComponentType setClassName(String classname) {
@@ -215,7 +220,7 @@ public class PrimitiveComponentType extends ComponentType {
         m_classname = classname;
         return this;
     }
-    
+
     /**
      * Sets the component type name.
      * @param name the factory name
@@ -226,7 +231,19 @@ public class PrimitiveComponentType extends ComponentType {
         m_name = name;
         return this;
     }
-    
+
+    /**
+     * Sets the component type version.
+     * @param version the factory version or "bundle" to use the
+     * bundle version.
+     * @return the current component type
+     */
+    public PrimitiveComponentType setComponentTypeVersion(String version) {
+        ensureNotInitialized();
+        m_version = version;
+        return this;
+    }
+
     /**
      * Sets if the component type is immediate or not.
      * @param immediate <code>true</code> to set the component
@@ -238,7 +255,7 @@ public class PrimitiveComponentType extends ComponentType {
         m_immediate = immediate;
         return this;
     }
-    
+
     /**
      * Sets the dependency factory method.
      * @param method the method used to create pojo object.
@@ -249,7 +266,7 @@ public class PrimitiveComponentType extends ComponentType {
         m_factoryMethod = method;
         return this;
     }
-    
+
     /**
      * Sets if the component type propagates properties to service properties.
      * @param propagation <code>true</code> to enable propagation
@@ -260,10 +277,10 @@ public class PrimitiveComponentType extends ComponentType {
         m_propagation = propagation;
         return this;
     }
-    
+
     /**
      * Sets the factory public aspect.
-     * @param visible <code>false</code> to create a private factory. 
+     * @param visible <code>false</code> to create a private factory.
      * @return the current component type
      */
     public PrimitiveComponentType setPublic(boolean visible) {
@@ -271,7 +288,7 @@ public class PrimitiveComponentType extends ComponentType {
         m_public = visible;
         return this;
     }
-    
+
     /**
      * Sets the managed service pid.
      * @param pid the managed service pid
@@ -282,7 +299,7 @@ public class PrimitiveComponentType extends ComponentType {
         m_msPID = pid;
         return this;
     }
-    
+
     /**
      * Sets the validate method.
      * @param method the validate method
@@ -293,7 +310,7 @@ public class PrimitiveComponentType extends ComponentType {
         m_validate = method;
         return this;
     }
-    
+
     /**
      * Sets the invalidate method.
      * @param method the invalidate method
@@ -304,7 +321,7 @@ public class PrimitiveComponentType extends ComponentType {
         m_invalidate = method;
         return this;
     }
-    
+
     /**
      * Sets the updated method.
      * @param method the updated method
@@ -315,10 +332,10 @@ public class PrimitiveComponentType extends ComponentType {
         m_updated = method;
         return this;
     }
-    
+
     /**
      * Generates the component description.
-     * @return the component type description of 
+     * @return the component type description of
      * the current component type
      */
     private Element generateComponentMetadata() {
@@ -326,6 +343,9 @@ public class PrimitiveComponentType extends ComponentType {
         element.addAttribute(new Attribute("classname", m_classname));
         if (m_name != null) {
             element.addAttribute(new Attribute("name", m_name));
+        }
+        if (m_version != null) {
+            element.addAttribute(new Attribute("version", m_version));
         }
         if (m_factoryMethod != null) {
             element.addAttribute(new Attribute("factory-method", m_factoryMethod));
@@ -360,7 +380,7 @@ public class PrimitiveComponentType extends ComponentType {
             callback.addAttribute(new Attribute("method", m_invalidate));
             element.addElement(callback);
         }
-        
+
         // Properties
         // First determine if we need the properties element
         if (m_propagation || m_msPID != null || ! m_properties.isEmpty()) {
@@ -380,16 +400,16 @@ public class PrimitiveComponentType extends ComponentType {
             }
             element.addElement(properties);
         }
-        
+
         // External handlers
         for (int i = 0; i < m_handlers.size(); i++) {
             HandlerConfiguration hc = (HandlerConfiguration) m_handlers.get(i);
             element.addElement(hc.getElement());
         }
-        
+
         return element;
     }
-    
+
 
     /**
      * Adds an HandlerConfiguration to the component type. Each component type
@@ -402,7 +422,7 @@ public class PrimitiveComponentType extends ComponentType {
         m_handlers.add(handler);
         return this;
     }
-    
+
     /**
      * Creates the component factory.
      */
@@ -422,9 +442,9 @@ public class PrimitiveComponentType extends ComponentType {
         } catch (ConfigurationException e) {
             throw new IllegalStateException("An exception occurs during factory initialization : " + e.getMessage());
         }
-       
+
     }
-    
+
     /**
      * Manipulates the implementation class.
      * @return the manipulated class
@@ -440,7 +460,7 @@ public class PrimitiveComponentType extends ComponentType {
             throw new IllegalStateException("An exception occurs during implementation class manipulation : " + e.getMessage());
         }
     }
-    
+
     /**
      * Gets a class file as a byte array.
      * @return the byte array.
@@ -456,8 +476,8 @@ public class PrimitiveComponentType extends ComponentType {
         if (is == null) {
             throw new IllegalStateException("An exception occurs during implementation class manipulation : cannot read the class file " + url);
         }
-        byte[] b = new byte[is.available()]; 
-        is.read(b); 
+        byte[] b = new byte[is.available()];
+        is.read(b);
         return b;
     }
 
@@ -471,7 +491,7 @@ public class PrimitiveComponentType extends ComponentType {
         m_services.add(svc);
         return this;
     }
-    
+
     /**
      * Adds a service dependency.
      * @param dep the dependency to add
@@ -482,7 +502,7 @@ public class PrimitiveComponentType extends ComponentType {
         m_dependencies.add(dep);
         return this;
     }
-    
+
     /**
      * Adds a temporal service dependency.
      * @param dep the temporal dependency to add
@@ -493,7 +513,7 @@ public class PrimitiveComponentType extends ComponentType {
         m_temporals.add(dep);
         return this;
     }
-    
+
     /**
      * Adds a configuration property.
      * @param prop the property to add

@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -44,7 +44,7 @@ import org.osgi.framework.ServiceRegistration;
 
 /**
  * Provided Service represent a provided service by the component.
- * 
+ *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ProvidedService implements ServiceFactory {
@@ -68,12 +68,12 @@ public class ProvidedService implements ServiceFactory {
      * Factory policy : SERVICE_FACTORY.
      */
     public static final int SERVICE_STRATEGY = 1;
-    
+
     /**
      * Factory policy : STATIC_FACTORY.
      */
     public static final int STATIC_STRATEGY = 2;
-    
+
     /**
      * Factory policy : INSTANCE.
      * Creates one service object per instance consuming the service.
@@ -100,7 +100,7 @@ public class ProvidedService implements ServiceFactory {
      * Properties Array.
      */
     private Property[] m_properties;
-    
+
     /**
      * Service Object creation policy.
      */
@@ -108,7 +108,7 @@ public class ProvidedService implements ServiceFactory {
 
     /**
      * Creates a provided service object.
-     * 
+     *
      * @param handler the the provided service handler.
      * @param specification the specifications provided by this provided service
      * @param factoryPolicy the service providing policy
@@ -118,14 +118,18 @@ public class ProvidedService implements ServiceFactory {
         m_handler = handler;
 
         m_serviceSpecification = specification;
-        
-        // Add instance name & factory name
+
+        // Add instance name, factory name and factory version is set.
         try {
-            addProperty(new Property("instance.name", null, null, handler.getInstanceManager().getInstanceName(), String.class.getName(), handler.getInstanceManager(), handler));       
+            addProperty(new Property("instance.name", null, null, handler.getInstanceManager().getInstanceName(), String.class.getName(), handler.getInstanceManager(), handler));
             addProperty(new Property("factory.name", null, null, handler.getInstanceManager().getFactory().getFactoryName(), String.class.getName(), handler.getInstanceManager(), handler));
+            if (handler.getInstanceManager().getFactory().getVersion() != null) {
+                addProperty(new Property("factory.version", null, null, handler.getInstanceManager().getFactory().getVersion(), String.class.getName(), handler.getInstanceManager(), handler));
+            }
         } catch (ConfigurationException e) {
             m_handler.error("An exception occurs when adding instance.name and factory.name property : " + e.getMessage());
         }
+
         if (creationStrategyClass != null) {
             try {
                 m_strategy = (CreationStrategy) creationStrategyClass.newInstance();
@@ -187,7 +191,7 @@ public class ProvidedService implements ServiceFactory {
 
     /**
      * Add the given property to the property list.
-     * 
+     *
      * @param prop : the element to add
      */
     private synchronized void addProperty(Property prop) {
@@ -209,7 +213,7 @@ public class ProvidedService implements ServiceFactory {
 
     /**
      * Remove a property.
-     * 
+     *
      * @param name : the property to remove
      */
     private synchronized void removeProperty(String name) {
@@ -261,7 +265,7 @@ public class ProvidedService implements ServiceFactory {
 
     /**
      * The unget method.
-     * 
+     *
      * @see org.osgi.framework.ServiceFactory#ungetService(org.osgi.framework.Bundle,
      * org.osgi.framework.ServiceRegistration, java.lang.Object)
      * @param bundle : bundle
@@ -274,10 +278,10 @@ public class ProvidedService implements ServiceFactory {
 
     /**
      * Registers the service. The service object must be able to serve this
-     * service. 
+     * service.
      * This method also notifies the creation strategy of the publication.
      */
-    protected synchronized void registerService() {        
+    protected synchronized void registerService() {
         if (m_serviceRegistration == null) {
             // Build the service properties list
             Properties serviceProperties = getServiceProperties();
@@ -294,9 +298,9 @@ public class ProvidedService implements ServiceFactory {
             m_serviceRegistration.unregister();
             m_serviceRegistration = null;
         }
-        
+
         m_strategy.onUnpublication();
-        
+
     }
 
     /**
@@ -318,7 +322,7 @@ public class ProvidedService implements ServiceFactory {
     /**
      * Return the list of properties attached to this service. This list
      * contains only property where a value are assigned.
-     * 
+     *
      * @return the properties attached to the provided service.
      */
     private Properties getServiceProperties() {
@@ -399,7 +403,7 @@ public class ProvidedService implements ServiceFactory {
     public ServiceRegistration getServiceRegistration() {
         return m_serviceRegistration;
     }
-    
+
     /**
      * Singleton creation strategy.
      * This strategy just creates one service object and
@@ -442,13 +446,13 @@ public class ProvidedService implements ServiceFactory {
          * @see org.osgi.framework.ServiceFactory#ungetService(org.osgi.framework.Bundle, org.osgi.framework.ServiceRegistration, java.lang.Object)
          */
         public void ungetService(Bundle arg0, ServiceRegistration arg1,
-                Object arg2) {            
+                Object arg2) {
         }
-        
+
     }
-    
+
     /**
-     * Service object creation policy following the OSGi Service Factory 
+     * Service object creation policy following the OSGi Service Factory
      * policy {@link ServiceFactory}.
      */
     private class FactoryStrategy extends CreationStrategy {
@@ -491,15 +495,15 @@ public class ProvidedService implements ServiceFactory {
          * @see org.osgi.framework.ServiceFactory#ungetService(org.osgi.framework.Bundle, org.osgi.framework.ServiceRegistration, java.lang.Object)
          */
         public void ungetService(Bundle arg0, ServiceRegistration arg1,
-                Object arg2) { 
+                Object arg2) {
             m_handler.getInstanceManager().deletePojoObject(arg2);
         }
     }
-    
-    
+
+
     /**
      * Service object creation policy creating a service object per asking iPOJO component
-     * instance. This creation policy follows the iPOJO Service Factory interaction pattern 
+     * instance. This creation policy follows the iPOJO Service Factory interaction pattern
      * and does no support 'direct' invocation.
      */
     private class PerInstanceStrategy extends CreationStrategy implements IPOJOServiceFactory, InvocationHandler {
@@ -510,17 +514,17 @@ public class ProvidedService implements ServiceFactory {
 
         /**
          * A method is invoked on the proxy object.
-         * If the method is the {@link IPOJOServiceFactory#getService(ComponentInstance)} 
+         * If the method is the {@link IPOJOServiceFactory#getService(ComponentInstance)}
          * method, this method creates a service object if no already created for the asking
-         * component instance. 
+         * component instance.
          * If the method is {@link IPOJOServiceFactory#ungetService(ComponentInstance, Object)}
          * the service object is unget (i.e. removed from the map and deleted).
          * In all other cases, a {@link UnsupportedOperationException} is thrown as this policy
-         * requires to use  the {@link IPOJOServiceFactory} interaction pattern.  
+         * requires to use  the {@link IPOJOServiceFactory} interaction pattern.
          * @param arg0 the proxy object
          * @param arg1 the called method
          * @param arg2 the arguments
-         * @return the service object attached to the asking instance for 'get', 
+         * @return the service object attached to the asking instance for 'get',
          * <code>null</code> for 'unget',
          * a {@link UnsupportedOperationException} for all other methods.
          * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
@@ -529,12 +533,12 @@ public class ProvidedService implements ServiceFactory {
             if (isGetServiceMethod(arg1)) {
                 return getService((ComponentInstance) arg2[0]);
             }
-            
+
             if (isUngetServiceMethod(arg1)) {
                 ungetService((ComponentInstance) arg2[0], arg2[1]);
                 return null;
             }
-            
+
             throw new UnsupportedOperationException("This service requires an advanced creation policy. "
                     + "Before calling the service, call the getService(ComponentInstance) method to get "
                     + "the service object. ");
@@ -600,7 +604,7 @@ public class ProvidedService implements ServiceFactory {
          * @see org.osgi.framework.ServiceFactory#getService(org.osgi.framework.Bundle, org.osgi.framework.ServiceRegistration)
          */
         public Object getService(Bundle arg0, ServiceRegistration arg1) {
-            Object proxy = Proxy.newProxyInstance(getInstanceManager().getClazz().getClassLoader(), 
+            Object proxy = Proxy.newProxyInstance(getInstanceManager().getClazz().getClassLoader(),
                     getSpecificationsWithIPOJOServiceFactory(m_serviceSpecification, m_handler.getInstanceManager().getContext()), this);
             return proxy;
         }
@@ -615,7 +619,7 @@ public class ProvidedService implements ServiceFactory {
          */
         public void ungetService(Bundle arg0, ServiceRegistration arg1,
                 Object arg2) { }
-        
+
         /**
          * Utility method returning the class array of provided service
          * specification and the {@link IPOJOServiceFactory} interface.
@@ -637,8 +641,8 @@ public class ProvidedService implements ServiceFactory {
             classes[i] = IPOJOServiceFactory.class;
             return classes;
         }
-        
-        
+
+
     }
 
 }

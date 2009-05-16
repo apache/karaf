@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -50,7 +50,7 @@ public class ComponentTypeDescription {
      * Represented factory.
      */
     private final IPojoFactory m_factory;
-    
+
     /**
      * Constructor.
      * @param factory : represented factory.
@@ -58,7 +58,7 @@ public class ComponentTypeDescription {
     public ComponentTypeDescription(IPojoFactory factory) {
         m_factory = factory;
     }
-    
+
     /**
      * Gets the attached factory.
      * @return the factory
@@ -86,6 +86,15 @@ public class ComponentTypeDescription {
     }
 
     /**
+     * Gets the component type version.
+     * @return the component type version or
+     * <code>null</code> if not set.
+     */
+    public String getVersion() {
+        return m_factory.getVersion();
+    }
+
+    /**
      * Gets component-type properties.
      * @return the list of configuration properties accepted by the component type type.
      */
@@ -101,7 +110,7 @@ public class ComponentTypeDescription {
     public void addProperty(String name, String value) {
         addProperty(name, value, false);
     }
-    
+
     /**
      * Adds a String property in the component type.
      * @param name : property name.
@@ -118,8 +127,8 @@ public class ComponentTypeDescription {
      * @param pd : the property to add
      */
     public void addProperty(PropertyDescription pd) { //NOPMD remove the instance name of the 'name' property.
-        String name = pd.getName(); 
-        
+        String name = pd.getName();
+
         // Check if the property is not already in the array
         for (int i = 0; i < m_properties.length; i++) {
             PropertyDescription desc = m_properties[i];
@@ -158,9 +167,9 @@ public class ComponentTypeDescription {
     public String getName() {
         return m_factory.getName();
     }
-    
+
     /**
-     * Computes the default service properties to publish : 
+     * Computes the default service properties to publish :
      * factory.name, service.pid, component.providedServiceSpecification, component.properties, component.description, factory.State.
      * @return : the dictionary of properties to publish.
      */
@@ -170,10 +179,16 @@ public class ComponentTypeDescription {
         props.put("factory.name", m_factory.getName());
         props.put(Constants.SERVICE_PID, m_factory.getName()); // Service PID is required for the integration in the configuration admin.
 
+        // Add the version if set
+        String v = getVersion();
+        if (v != null) {
+            props.put("factory.version", v);
+        }
+
         props.put("component.providedServiceSpecifications", m_providedServiceSpecification);
         props.put("component.properties", m_properties);
         props.put("component.description", this);
-        
+
         // add every immutable property
         for (int i = 0; i < m_properties.length; i++) {
             if (m_properties[i].isImmutable() && m_properties[i].getValue() != null) {
@@ -187,7 +202,7 @@ public class ComponentTypeDescription {
         return props;
 
     }
-    
+
     /**
      * Gets the interfaces published by the factory.
      * By default publish both {@link Factory} and {@link ManagedServiceFactory}.
@@ -196,7 +211,7 @@ public class ComponentTypeDescription {
     public String[] getFactoryInterfacesToPublish() {
         return new String[] {Factory.class.getName(), ManagedServiceFactory.class.getName()};
     }
-    
+
     /**
      * Gets the component type description.
      * @return : the description
@@ -206,7 +221,7 @@ public class ComponentTypeDescription {
 
         desc.addAttribute(new Attribute("name", m_factory.getName()));
         desc.addAttribute(
-                          new Attribute("bundle", 
+                          new Attribute("bundle",
                                           Long.toString(((ComponentFactory) m_factory).getBundleContext().getBundle().getBundleId())));
 
         String state = "valid";

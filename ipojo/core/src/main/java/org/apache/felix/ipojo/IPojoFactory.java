@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -32,6 +32,7 @@ import org.apache.felix.ipojo.architecture.PropertyDescription;
 import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ManagedServiceFactory;
@@ -62,7 +63,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
     protected ComponentTypeDescription m_componentDesc;
 
     /**
-     * The list of the managed instance managers. 
+     * The list of the managed instance managers.
      * The key of this map is the name (i.e. instance names) of the created instance
      */
     protected final Map m_componentInstances = new HashMap();
@@ -78,7 +79,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
     protected final BundleContext m_context;
 
     /**
-     * The factory name. 
+     * The factory name.
      * Could be the component class name if the factory name is not set.
      * Immutable once set.
      */
@@ -106,6 +107,11 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
     protected final boolean m_isPublic;
 
     /**
+     * The version of the component type.
+     */
+    protected final String m_version;
+
+    /**
      * The service registration of this factory (Factory & ManagedServiceFactory).
      * @see ManagedServiceFactory
      * @see Factory
@@ -129,7 +135,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
     private long m_index = 0;
 
     /**
-     * The flag indicating if this factory has already a 
+     * The flag indicating if this factory has already a
      * computed description or not.
      */
     private boolean m_described;
@@ -149,6 +155,15 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
         String fac = metadata.getAttribute("public");
         m_isPublic = fac == null || !fac.equalsIgnoreCase("false");
         m_logger = new Logger(m_context, m_factoryName);
+
+        // Compute the component type version.
+        String version = metadata.getAttribute("version");
+        if ("bundle".equalsIgnoreCase(version)) { // Handle the "bundle" constant: use the bundle version.
+            m_version = (String) m_context.getBundle().getHeaders().get(Constants.BUNDLE_VERSION);
+        } else {
+            m_version = version;
+        }
+
         m_requiredHandlers = getRequiredHandlerList(); // Call sub-class to get the list of required handlers.
     }
 
@@ -181,7 +196,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
 
     /**
      * Computes the factory name.
-     * Each sub-type must override this method. 
+     * Each sub-type must override this method.
      * @return the factory name.
      */
     public abstract String getFactoryName();
@@ -239,7 +254,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
         if (configuration == null) {
             configuration = new Properties();
         }
-        
+
         IPojoContext context = null;
         if (serviceContext == null) {
             context = new IPojoContext(m_context);
@@ -417,7 +432,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
         }
 
         // Check that the configuration does not override immutable properties.
-        
+
         for (int i = 0; i < props.length; i++) {
             // Is the property immutable
             if (props[i].isImmutable() && conf.get(props[i].getName()) != null) {
@@ -433,7 +448,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
     /**
      * Reconfigures an existing instance.
      * The acceptability of the configuration is checked before the reconfiguration. Moreover,
-     * the configuration must contain the 'instance.name' property specifying the instance 
+     * the configuration must contain the 'instance.name' property specifying the instance
      * to reconfigure.
      * This method is synchronized to assert the validity of the factory during the reconfiguration.
      * @param properties the new configuration to push.
@@ -450,12 +465,12 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
         if (name == null) {
             name = (String) properties.get("name");
         }
-        
+
         ComponentInstance instance = (ComponentInstance) m_componentInstances.get(name);
         if (instance == null) { // The instance does not exists.
             return;
         }
-        
+
         checkAcceptability(properties); // Test if the configuration is acceptable
         instance.reconfigure(properties); // re-configure the instance
     }
@@ -472,7 +487,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
     }
 
     /**
-     * Stopping method. 
+     * Stopping method.
      * This method is call when the factory is stopping.
      * This method is called when holding the lock on the factory.
      */
@@ -483,7 +498,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
      * This method calls the {@link IPojoFactory#stopping()} method,
      * notifies listeners, and disposes created instances. Moreover,
      * if the factory is public, services are also unregistered.
-     *  
+     *
      */
     public synchronized void stop() {
         ComponentInstance[] instances;
@@ -527,7 +542,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
     }
 
     /**
-     * Destroys the factory. 
+     * Destroys the factory.
      * The factory cannot be restarted. Only the {@link Extender} can call this method.
      */
     synchronized void dispose() {
@@ -537,7 +552,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
     }
 
     /**
-     * Starting method. 
+     * Starting method.
      * This method is called when the factory is starting.
      * This method is called when holding the lock on the factory.
      */
@@ -580,7 +595,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
         synchronized (this) {
             instance = (InstanceManager) m_componentInstances.get(name);
         }
-        
+
         if (instance == null) {
             try {
                 properties.put("instance.name", name); // Add the name in the configuration
@@ -637,9 +652,9 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
 
     /**
      * Computes the component type description.
-     * To do this, it creates a 'ghost' instance of the handler 
+     * To do this, it creates a 'ghost' instance of the handler
      * and calls the {@link Handler#initializeComponentFactory(ComponentTypeDescription, Element)}
-     * method. The handler instance is then deleted. 
+     * method. The handler instance is then deleted.
      * The factory must be valid when calling this method.
      * This method is called with the lock.
      */
@@ -849,7 +864,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
             }
 
         }
-        
+
         /**
          * Hashcode method.
          * This method delegates to the {@link Object#hashCode()}.
@@ -861,7 +876,7 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
         }
 
         /**
-         * Gets the factory object used for this handler. 
+         * Gets the factory object used for this handler.
          * The object is get when used for the first time.
          * This method is called with the lock avoiding concurrent modification and on a valid factory.
          * @return the factory object.

@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -36,50 +36,50 @@ import org.osgi.framework.BundleContext;
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class CompositeComponentType extends ComponentType {
-    
+
     /**
      * The bundle context.
      */
     private BundleContext m_context;
-    
+
     /**
      * Component factory attached to the component
-     * type. 
+     * type.
      */
     private ComponentFactory m_factory;
-    
+
     /**
-     * Component type metadata. 
+     * Component type metadata.
      */
     private Element m_metadata;
-    
+
     /**
-     * List of provided services. 
+     * List of provided services.
      */
     private List m_provided = new ArrayList(1);
-    
+
     /**
-     * List of exported services. 
+     * List of exported services.
      */
     private List m_exported = new ArrayList(1);
-    
+
     /**
-     * List of imported services. 
+     * List of imported services.
      */
     private List m_imported = new ArrayList(1);
-    
+
     /**
-     * List of instantiated services. 
+     * List of instantiated services.
      */
     private List m_instantiated = new ArrayList();
-    
+
     /**
      * List of contained instance.
      */
-    private List m_contained = new ArrayList(); 
-    
+    private List m_contained = new ArrayList();
+
     /**
-     * Is the factory public? 
+     * Is the factory public?
      */
     private boolean m_public = true;
 
@@ -87,7 +87,12 @@ public class CompositeComponentType extends ComponentType {
      * Component type name.
      */
     private String m_name;
-    
+
+    /**
+     * Component type version.
+     */
+    private String m_version;
+
     /**
      * List of Handler representing external.
      * handler configuration
@@ -103,7 +108,7 @@ public class CompositeComponentType extends ComponentType {
             throw new IllegalStateException("The component type was already initialized, cannot modify metadata");
         }
     }
-    
+
     /**
      * Checks that the component type description is valid.
      */
@@ -140,7 +145,7 @@ public class CompositeComponentType extends ComponentType {
         initializeFactory();
         m_factory.stop();
     }
-    
+
     /**
      * Initializes the factory.
      */
@@ -149,7 +154,7 @@ public class CompositeComponentType extends ComponentType {
             createFactory();
         }
     }
-    
+
     /**
      * Sets the bundle context.
      * @param bc the bundle context
@@ -160,10 +165,10 @@ public class CompositeComponentType extends ComponentType {
         m_context = bc;
         return this;
     }
-    
+
     /**
      * Sets the factory public aspect.
-     * @param visible <code>false</code> to create a private factory. 
+     * @param visible <code>false</code> to create a private factory.
      * @return the current component type
      */
     public CompositeComponentType setPublic(boolean visible) {
@@ -171,7 +176,7 @@ public class CompositeComponentType extends ComponentType {
         m_public = visible;
         return this;
     }
-    
+
     /**
      * Sets the component type name.
      * @param name the factory name
@@ -182,7 +187,19 @@ public class CompositeComponentType extends ComponentType {
         m_name = name;
         return this;
     }
-    
+
+    /**
+     * Sets the component type version.
+     * @param version the factory version or "bundle" to use the
+     * bundle version.
+     * @return the current component type
+     */
+    public CompositeComponentType setComponentTypeVersion(String version) {
+        ensureNotInitialized();
+        m_version = version;
+        return this;
+    }
+
     /**
      * Adds a contained instance.
      * @param inst the instance to add
@@ -192,7 +209,7 @@ public class CompositeComponentType extends ComponentType {
         m_contained.add(inst);
         return this;
     }
-    
+
     /**
      * Adds an imported (sub-)service.
      * @param is the imported service to add
@@ -202,7 +219,7 @@ public class CompositeComponentType extends ComponentType {
         m_imported.add(is);
         return this;
     }
-    
+
     /**
      * Adds an instantiated sub-service.
      * @param is the instantiated service to add
@@ -212,7 +229,7 @@ public class CompositeComponentType extends ComponentType {
         m_instantiated.add(is);
         return this;
     }
-    
+
     /**
      * Adds an exported service.
      * @param es the exported service to add
@@ -222,7 +239,7 @@ public class CompositeComponentType extends ComponentType {
         m_exported.add(es);
         return this;
     }
-    
+
     /**
      * Adds a provided service.
      * @param es the provided service to add
@@ -232,7 +249,7 @@ public class CompositeComponentType extends ComponentType {
         m_provided.add(es);
         return this;
     }
-    
+
     /**
      * Adds an HandlerConfiguration to the component type. Each component type
      * implementation must uses the populated list (m_handlers) when generating
@@ -244,16 +261,19 @@ public class CompositeComponentType extends ComponentType {
         m_handlers.add(handler);
         return this;
     }
-    
+
     /**
      * Generates the component description.
-     * @return the component type description of 
+     * @return the component type description of
      * the current component type
      */
     private Element generateComponentMetadata() {
         Element element = new Element("composite", "");
         if (m_name != null) {
             element.addAttribute(new Attribute("name", m_name));
+        }
+        if (m_version != null) {
+            element.addAttribute(new Attribute("version", m_version));
         }
         if (! m_public) {
             element.addAttribute(new Attribute("public", "false"));
@@ -278,16 +298,16 @@ public class CompositeComponentType extends ComponentType {
             ProvidedService inst = (ProvidedService) m_provided.get(i);
             element.addElement(inst.getElement());
         }
-        
+
         // External handlers
         for (int i = 0; i < m_handlers.size(); i++) {
             HandlerConfiguration hc = (HandlerConfiguration) m_handlers.get(i);
             element.addElement(hc.getElement());
         }
-        
+
         return element;
     }
-    
+
     /**
      * Creates the component factory.
      */
@@ -300,10 +320,10 @@ public class CompositeComponentType extends ComponentType {
         } catch (ConfigurationException e) {
             throw new IllegalStateException("An exception occurs during factory initialization : " + e.getMessage());
         }
-       
-    }
-    
 
-    
+    }
+
+
+
 
 }

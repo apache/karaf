@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -31,7 +31,7 @@ import org.apache.felix.ipojo.metadata.Element;
 /**
  * The Manifest Metadata parser reads a manifest file and builds
  * the iPOJO metadata ({@link Element} / {@link Attribute} ) structure.
- * 
+ *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ManifestMetadataParser {
@@ -79,7 +79,7 @@ public class ManifestMetadataParser {
     /**
      * Parses an Element to create an instance configuration dictionary.
      * The 'name' attribute of the instance declaration is mapped
-     * to the 'instance.name' property. 
+     * to the 'instance.name' property.
      * @param instance the Element describing an instance.
      * @return the resulting dictionary
      * @throws ParseException if a configuration cannot be parse correctly.
@@ -88,6 +88,8 @@ public class ManifestMetadataParser {
         Dictionary dict = new Properties();
         String name = instance.getAttribute("name");
         String comp = instance.getAttribute("component");
+        String version = instance.getAttribute("version");
+
         if (name != null) {
             dict.put("instance.name", instance.getAttribute("name"));
         }
@@ -97,6 +99,11 @@ public class ManifestMetadataParser {
         }
 
         dict.put("component", comp);
+
+        if (version != null) {
+            dict.put("factory.version", version);
+        }
+
         Element[] props = instance.getElements("property");
 
         for (int i = 0; props != null && i < props.length; i++) {
@@ -120,7 +127,7 @@ public class ManifestMetadataParser {
         if (name == null) {
             throw new ParseException("A property does not have the 'name' attribute: " + prop);
         }
-        
+
         //case : the property element has no 'value' attribute
         if (value == null) {
             // Recursive case
@@ -145,19 +152,19 @@ public class ManifestMetadataParser {
                     obj = new Object[list.size()];
                 }
                 // Transform the list to array
-                dict.put(name, list.toArray(obj)); 
+                dict.put(name, list.toArray(obj));
             }
         } else {
             dict.put(prop.getAttribute("name"), prop.getAttribute("value"));
         }
     }
-    
+
     /**
-     * Parses a complex property. 
+     * Parses a complex property.
      * This property will be built as a {@link Dictionary}.
      * @param prop the Element to parse.
      * @return the resulting dictionary
-     * @throws ParseException if an internal property is incorrect. 
+     * @throws ParseException if an internal property is incorrect.
      */
     private Dictionary parseDictionary(Element prop) throws ParseException {
      // Check if there is 'property' elements
@@ -173,9 +180,9 @@ public class ManifestMetadataParser {
             return new Properties();
         }
     }
-    
+
     /**
-     * Parses a complex property. 
+     * Parses a complex property.
      * This property will be built as a {@link Map}.
      * The used {@link Map} implementation is {@link HashMap}.
      * @param prop the property to parse
@@ -195,10 +202,10 @@ public class ManifestMetadataParser {
             return new HashMap(0);
         }
     }
-    
+
     /**
      * Parses a complex property. This property will be built as a {@link List}.
-     * The used {@link List} implementation is {@link ArrayList}. 
+     * The used {@link List} implementation is {@link ArrayList}.
      * The order of elements is kept.
      * @param prop the property to parse
      * @return the resulting List
@@ -217,7 +224,7 @@ public class ManifestMetadataParser {
             return new ArrayList(0);
         }
     }
-    
+
     /**
      * Parse a property.
      * This methods handles complex properties.
@@ -266,7 +273,7 @@ public class ManifestMetadataParser {
     /**
      * Parse an anonymous property.
      * An anonymous property is a property with no name.
-     * An anonymous property can be simple (just a value) or complex (i.e. a map, a dictionary 
+     * An anonymous property can be simple (just a value) or complex (i.e. a map, a dictionary
      * a list or an array).
      * @param prop the property to parse
      * @param list the list to populate with the resulting property
@@ -282,7 +289,7 @@ public class ManifestMetadataParser {
         //case : the property element has no 'value' attribute
         if (value == null) {
             // Recursive case
-            
+
             // Get the type of the structure to create
             String type = prop.getAttribute("type");
             if (type == null || type.equalsIgnoreCase("dictionary")) {
@@ -314,7 +321,7 @@ public class ManifestMetadataParser {
                 Element[] subProps = prop.getElements("property");
                 if (subProps != null) {
                     // Create a list to store elements.
-                    List list2 = new ArrayList(subProps.length); 
+                    List list2 = new ArrayList(subProps.length);
                     for (int i = 0; i < subProps.length; i++) {
                         parseAnonymousProperty(subProps[i], list2); // Anonymous properties
                     }
@@ -342,7 +349,7 @@ public class ManifestMetadataParser {
         } else {
             list.add(prop.getAttribute("value"));
         }
-        
+
     }
 
     /**
@@ -384,7 +391,7 @@ public class ManifestMetadataParser {
 
     /**
      * Looks for the <code>iPOJO-Components</code> header
-     * in the given dictionary. Then, initializes the 
+     * in the given dictionary. Then, initializes the
      * {@link ManifestMetadataParser#m_elements} list (adds the
      * <code>iPOJO</code> root element) and parses the contained
      * component type declarations and instance configurations.
@@ -399,9 +406,9 @@ public class ManifestMetadataParser {
     }
 
     /**
-     * Parses the given header, initialized the 
-     * {@link ManifestMetadataParser#m_elements} list 
-     * (adds the <code>iPOJO</code> element) and parses 
+     * Parses the given header, initialized the
+     * {@link ManifestMetadataParser#m_elements} list
+     * (adds the <code>iPOJO</code> element) and parses
      * contained component type declarations and instance configurations.
      * @param header the given header of the manifest file
      * @throws ParseException if any error occurs
@@ -429,12 +436,12 @@ public class ManifestMetadataParser {
         }
         return parser.m_elements[0];
     }
-    
+
     /**
      * Parses the metadata from the given header string.
      * This method creates a new {@link ManifestMetadataParser} object and then
      * creates the <code>iPOJO</code> root element, parses content elements
-     * (component types and instances declarations), and returns the resulting 
+     * (component types and instances declarations), and returns the resulting
      * {@link Element} / {@link Attribute} structure. The parsed string
      * must be a tree (only one root element).
      * @param header the header to parse
@@ -537,7 +544,7 @@ public class ManifestMetadataParser {
                         i = i + 1;
                     }
                     i = i + 1; // skip {
-                    
+
                     Element elem = null;
                     if (namespace == null) {
                         elem = new Element(name.toString(), null);
@@ -545,7 +552,7 @@ public class ManifestMetadataParser {
                         elem = new Element(name.toString(), namespace.toString());
                     }
                     addElement(elem);
-                    
+
                     break;
             }
         }

@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -37,17 +37,17 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 public class FactoryManagementTest extends OSGiTestCase {
-	
+
 	private FakeFactory fake1 = new FakeFactory("fake");
 	private FakeFactory fake2 = new FakeFactory("fake2");
-	
+
 	private Factory emptyFactory;
 	private ComponentInstance empty;
-	
+
 	private class FakeFactory implements Factory {
-		
+
 		private String m_name;
-		public FakeFactory(String name) { m_name = name; } 
+		public FakeFactory(String name) { m_name = name; }
 
 		public ComponentInstance createComponentInstance(Dictionary arg0) throws UnacceptableConfiguration { return null; }
 		public ComponentInstance createComponentInstance(Dictionary arg0, ServiceContext arg1) throws UnacceptableConfiguration { return null; }
@@ -63,9 +63,10 @@ public class FactoryManagementTest extends OSGiTestCase {
         public String getClassName() { return ""; }
         public int getState() { return Factory.VALID; }
         public BundleContext getBundleContext() { return getContext(); }
+        public String getVersion() { return null;  }
 
 	}
-	
+
 	public void setUp() {
 		emptyFactory = Utils.getFactoryByName(getContext(), "composite.empty");
 		Properties props = new Properties();
@@ -74,30 +75,30 @@ public class FactoryManagementTest extends OSGiTestCase {
 			empty = emptyFactory.createComponentInstance(props);
 		} catch (Exception e) { fail("Cannot create empty instance " + e.getMessage()); }
 	}
-	
+
 	public void tearDown() {
 		empty.dispose();
 		empty = null;
 	}
-	
+
 	public void testOneLevelExposition() {
 		ServiceReference[] parentsFactoryReferences = Utils.getServiceReferences(getContext(), Factory.class.getName(), null);
 		ServiceContext sc = Utils.getServiceContext(empty);
 		ServiceReference[] internalFactoryReferences = Utils.getServiceReferences(sc, Factory.class.getName(), null);
-		
+
 		assertEquals("Check the number of available factories", parentsFactoryReferences.length, internalFactoryReferences.length);
-		
+
 		for(int i = 0; i < parentsFactoryReferences.length; i++) {
 			Factory factory = (Factory) getContext().getService(parentsFactoryReferences[i]);
 			assertTrue("Check the avaibility of " + factory.getName(), isExposed(factory, internalFactoryReferences, sc));
 		}
 	}
-	
+
 	public void testTwoLevelExposition() {
 		ServiceReference[] parentsFactoryReferences = Utils.getServiceReferences(getContext(), Factory.class.getName(), null);
 		ServiceContext sc1 = Utils.getServiceContext(empty);
 		ServiceReference[] Level1FactoryReferences = Utils.getServiceReferences(sc1, Factory.class.getName(), null);
-		
+
 		Factory fact = Utils.getFactoryByName(sc1, "composite.empty");
 		Properties p = new Properties();
 		p.put("instance.name","empty2");
@@ -107,27 +108,27 @@ public class FactoryManagementTest extends OSGiTestCase {
 		} catch (Exception e) {
 			fail("Cannot instantiate empty2 instance : " + e.getMessage());
 		}
-		
+
 		ServiceContext sc2 = Utils.getServiceContext(empty2);
 		ServiceReference[] Level2FactoryReferences = Utils.getServiceReferences(sc2, Factory.class.getName(), null);
-		
+
 		assertEquals("Check the number of available factories - 1", parentsFactoryReferences.length, Level1FactoryReferences.length);
 		assertEquals("Check the number of available factories - 2", parentsFactoryReferences.length, Level2FactoryReferences.length);
 		assertEquals("Check the number of available factories - 3", Level1FactoryReferences.length, Level2FactoryReferences.length);
-		
+
 		for(int i = 0; i < Level1FactoryReferences.length; i++) {
 			Factory factory = (Factory) getContext().getService(parentsFactoryReferences[i]);
 			assertTrue("Check the avaibility of " + factory.getName(), isExposed(factory, Level2FactoryReferences, sc2));
 		}
-		
+
 		empty2.dispose();
 	}
-	
+
 	public void testDynamism() {
 		ServiceReference[] parentsFactoryReferences = Utils.getServiceReferences(getContext(), Factory.class.getName(), null);
 		ServiceContext sc1 = Utils.getServiceContext(empty);
 		ServiceReference[] Level1FactoryReferences = Utils.getServiceReferences(sc1, Factory.class.getName(), null);
-		
+
 		Factory fact = Utils.getFactoryByName(sc1, "composite.empty");
 		Properties p = new Properties();
 		p.put("instance.name","empty2");
@@ -137,74 +138,74 @@ public class FactoryManagementTest extends OSGiTestCase {
 		} catch (Exception e) {
 			fail("Cannot instantiate empty2 instance : " + e.getMessage());
 		}
-		
+
 		ServiceContext sc2 = Utils.getServiceContext(empty2);
 		ServiceReference[] Level2FactoryReferences = Utils.getServiceReferences(sc2, Factory.class.getName(), null);
-		
+
 		assertEquals("Check the number of available factories - 1", parentsFactoryReferences.length, Level1FactoryReferences.length);
 		assertEquals("Check the number of available factories - 2", parentsFactoryReferences.length, Level2FactoryReferences.length);
 		assertEquals("Check the number of available factories - 3", Level1FactoryReferences.length, Level2FactoryReferences.length);
-		
+
 		for(int i = 0; i < Level1FactoryReferences.length; i++) {
 			Factory factory = (Factory) getContext().getService(parentsFactoryReferences[i]);
 			assertTrue("Check the avaibility of " + factory.getName(), isExposed(factory, Level2FactoryReferences, sc2));
 		}
-		
+
 		// Publish fake1
 		ServiceRegistration reg1 = getContext().registerService(Factory.class.getName(), fake1, null);
-		
+
 		parentsFactoryReferences = Utils.getServiceReferences(getContext(), Factory.class.getName(), null);
 		sc1 = Utils.getServiceContext(empty);
 		Level1FactoryReferences = Utils.getServiceReferences(sc1, Factory.class.getName(), null);
 		sc2 = Utils.getServiceContext(empty2);
 		Level2FactoryReferences = Utils.getServiceReferences(sc2, Factory.class.getName(), null);
-		
+
 		assertEquals("Check the number of available factories - 1.1", parentsFactoryReferences.length, Level1FactoryReferences.length);
 		assertEquals("Check the number of available factories - 1.2", parentsFactoryReferences.length, Level2FactoryReferences.length);
 		assertEquals("Check the number of available factories - 1.3", Level1FactoryReferences.length, Level2FactoryReferences.length);
-		
+
 		// 	Publish fake2
 		ServiceRegistration reg2 = getContext().registerService(Factory.class.getName(), fake2, null);
-		
+
 		parentsFactoryReferences = Utils.getServiceReferences(getContext(), Factory.class.getName(), null);
 		sc1 = Utils.getServiceContext(empty);
 		Level1FactoryReferences = Utils.getServiceReferences(sc1, Factory.class.getName(), null);
 		sc2 = Utils.getServiceContext(empty2);
 		Level2FactoryReferences = Utils.getServiceReferences(sc2, Factory.class.getName(), null);
-		
+
 		assertEquals("Check the number of available factories - 1.1", parentsFactoryReferences.length, Level1FactoryReferences.length);
 		assertEquals("Check the number of available factories - 1.2", parentsFactoryReferences.length, Level2FactoryReferences.length);
 		assertEquals("Check the number of available factories - 1.3", Level1FactoryReferences.length, Level2FactoryReferences.length);
-		
+
 		reg1.unregister();
-		
+
 		parentsFactoryReferences = Utils.getServiceReferences(getContext(), Factory.class.getName(), null);
 		sc1 = Utils.getServiceContext(empty);
 		Level1FactoryReferences = Utils.getServiceReferences(sc1, Factory.class.getName(), null);
 		sc2 = Utils.getServiceContext(empty2);
 		Level2FactoryReferences = Utils.getServiceReferences(sc2, Factory.class.getName(), null);
-		
+
 		assertEquals("Check the number of available factories - 1.1", parentsFactoryReferences.length, Level1FactoryReferences.length);
 		assertEquals("Check the number of available factories - 1.2", parentsFactoryReferences.length, Level2FactoryReferences.length);
 		assertEquals("Check the number of available factories - 1.3", Level1FactoryReferences.length, Level2FactoryReferences.length);
-		
+
 		reg2.unregister();
-		
+
 		parentsFactoryReferences = Utils.getServiceReferences(getContext(), Factory.class.getName(), null);
 		sc1 = Utils.getServiceContext(empty);
 		Level1FactoryReferences = Utils.getServiceReferences(sc1, Factory.class.getName(), null);
 		sc2 = Utils.getServiceContext(empty2);
 		Level2FactoryReferences = Utils.getServiceReferences(sc2, Factory.class.getName(), null);
-		
+
 		assertEquals("Check the number of available factories - 1.1", parentsFactoryReferences.length, Level1FactoryReferences.length);
 		assertEquals("Check the number of available factories - 1.2", parentsFactoryReferences.length, Level2FactoryReferences.length);
 		assertEquals("Check the number of available factories - 1.3", Level1FactoryReferences.length, Level2FactoryReferences.length);
-		
+
 		empty2.dispose();
 	}
-	
+
 	public void testInvocation() {
-		ServiceContext sc1 = Utils.getServiceContext(empty);		
+		ServiceContext sc1 = Utils.getServiceContext(empty);
 		Factory fact = Utils.getFactoryByName(sc1, "composite.empty");
 		Properties p = new Properties();
 		p.put("instance.name","empty2");
@@ -214,9 +215,9 @@ public class FactoryManagementTest extends OSGiTestCase {
 		} catch (Exception e) {
 			fail("Cannot instantiate empty2 instance : " + e.getMessage());
 		}
-		
+
 		ServiceContext sc2 = Utils.getServiceContext(empty2);
-		
+
 		Factory fact1 = Utils.getFactoryByName(sc2, "COMPO-SimpleCheckServiceProvider");
 		Properties props = new Properties();
 		props.put("instance.name","client");
@@ -224,7 +225,7 @@ public class FactoryManagementTest extends OSGiTestCase {
 		try {
 			client = fact1.createComponentInstance(props);
 		} catch (Exception e) { e.printStackTrace(); fail("Cannot instantiate the client : " + e.getMessage()); }
-		
+
 		Factory fact2 = Utils.getFactoryByName(sc2, "COMPO-FooProviderType-1");
 		Properties props2 = new Properties();
 		props2.put("instance.name","provider");
@@ -234,26 +235,26 @@ public class FactoryManagementTest extends OSGiTestCase {
 		} catch (Exception e) {
 			fail("Cannot instantiate the provider : " + e.getMessage());
 		}
-		
-		ServiceReference ref = sc2.getServiceReference(CheckService.class.getName());		
+
+		ServiceReference ref = sc2.getServiceReference(CheckService.class.getName());
 		assertNotNull("Check ref existency", ref);
 		CheckService check = (CheckService) sc2.getService(ref);
-		
+
 		assertTrue("Check invocation", check.check());
 		client.dispose();
 		provider.dispose();
 		empty2.dispose();
 	}
-	
-	
-	
-	
+
+
+
+
 	private boolean isExposed(Factory fact, ServiceReference[] refs, ServiceContext sc) {
 		for(int i = 0; i < refs.length; i++) {
 			Factory f = (Factory) sc.getService(refs[i]);
 			if(fact.getName().equals(f.getName())) {
 				sc.ungetService(refs[i]);
-				return true; 
+				return true;
 			}
 			sc.ungetService(refs[i]);
 		}

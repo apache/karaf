@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -40,7 +40,7 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * The component factory manages component instance objects. This management
- * consists to create and manage component instances build with the current 
+ * consists to create and manage component instances build with the current
  * component factory. This class could export Factory and ManagedServiceFactory
  * services.
  * @see IPojoFactory
@@ -149,7 +149,7 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
      */
     public ComponentInstance createInstance(Dictionary config, IPojoContext context, HandlerManager[] handlers) throws org.apache.felix.ipojo.ConfigurationException {
         InstanceManager instance = new InstanceManager(this, context, handlers);
-        
+
         try {
             instance.configure(m_componentMetadata, config);
             instance.start();
@@ -175,7 +175,7 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
 
     /**
      * Defines a class.
-     * This method needs to be synchronized to avoid that the classloader 
+     * This method needs to be synchronized to avoid that the classloader
      * is created twice.
      * This method delegate the <code>define</code> method invocation to the
      * factory classloader.
@@ -193,7 +193,7 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
 
     /**
      * Returns the URL of a resource.
-     * This methods delegates the invocation to the 
+     * This methods delegates the invocation to the
      * {@link Bundle#getResource(String)} method.
      * @param resName the resource name
      * @return the URL of the resource
@@ -256,7 +256,7 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
      * Computes the factory name. The factory name is computed from
      * the 'name' and 'classname' attributes.
      * This method does not manipulate any non-immutable fields,
-     * so does not need to be synchronized. 
+     * so does not need to be synchronized.
      * @return the factory name.
      */
     public String getFactoryName() {
@@ -270,7 +270,7 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
 
     /**
      * Computes required handlers.
-     * This method does not manipulate any non-immutable fields, 
+     * This method does not manipulate any non-immutable fields,
      * so does not need to be synchronized.
      * @return the required handler list.
      */
@@ -292,8 +292,8 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
         if (arch == null || arch.equalsIgnoreCase("true")) {
             list.add(new RequiredHandler("architecture", null));
         }
-        
-        
+
+
         // Determine if the component must be immediate.
         // A component becomes immediate if it doesn't provide a service,
         // and does not specified that the component is not immediate.
@@ -323,13 +323,13 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
     /**
      * This method is called when a new handler factory is detected.
      * Test if the factory can be used or not.
-     * This method need to be synchronized as it accesses to the content 
+     * This method need to be synchronized as it accesses to the content
      * of required handlers.
      * @param reference the new service reference.
      * @return <code>true</code> if the given factory reference matches with a required handler.
      * @see org.apache.felix.ipojo.util.TrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
      */
-    public synchronized boolean addingService(ServiceReference reference) {        
+    public synchronized boolean addingService(ServiceReference reference) {
         for (int i = 0; i < m_requiredHandlers.size(); i++) {
             RequiredHandler req = (RequiredHandler) m_requiredHandlers.get(i);
             if (req.getReference() == null && match(req, reference)) {
@@ -347,8 +347,8 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
     }
 
     /**
-     * This method is called when a matching service has been added to the tracker, 
-     * we can no compute the factory state. This method is synchronized to avoid 
+     * This method is called when a matching service has been added to the tracker,
+     * we can no compute the factory state. This method is synchronized to avoid
      * concurrent calls to method modifying the factory state.
      * @param reference the added service reference.
      * @see org.apache.felix.ipojo.util.TrackerCustomizer#addedService(org.osgi.framework.ServiceReference)
@@ -361,7 +361,7 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
 
     /**
      * This method is called when a used handler factory disappears.
-     * This method is synchronized to avoid concurrent calls to method modifying 
+     * This method is synchronized to avoid concurrent calls to method modifying
      * the factory state.
      * @param reference the leaving service reference.
      * @param service  the handler factory object.
@@ -397,6 +397,15 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
      */
     public PojoMetadata getPojoMetadata() {
         return m_manipulation;
+    }
+
+    /**
+     * Gets the version of the component type
+     * @return the version of </code>null</code> if not set.
+     * @see org.apache.felix.ipojo.Factory#getVersion()
+     */
+    public String getVersion() {
+        return m_version;
     }
 
     /**
@@ -453,7 +462,7 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
 
     /**
      * This class defines the description of primitive (non-composite) component
-     * types. An instance of this class will be returned when invoking the 
+     * types. An instance of this class will be returned when invoking the
      * {@link ComponentFactory#getComponentDescription()} method.
      * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
      */
@@ -468,7 +477,7 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
         }
 
         /**
-         * Computes the properties to publish. 
+         * Computes the properties to publish.
          * The <code>component.class</code> property contains the implementation class name.
          * @return the dictionary of properties to publish
          * @see org.apache.felix.ipojo.architecture.ComponentTypeDescription#getPropertiesToPublish()

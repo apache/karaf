@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -30,7 +30,7 @@ import org.apache.felix.ipojo.util.Logger;
 import org.osgi.framework.BundleContext;
 
 /**
- * The instance creator creates instances and tracks their factories. 
+ * The instance creator creates instances and tracks their factories.
  * It allows creating instances from external factories.
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
@@ -72,11 +72,16 @@ public class InstanceCreator implements FactoryStateListener {
      * @param bundle the bundle id declaring the instance
      */
     synchronized void addInstance(Dictionary instance, long bundle) {
-        m_logger.log(Logger.DEBUG, "New instance to managed, looking for " + instance.get("component"));
+        if (instance.get("factory.version") != null) {
+            m_logger.log(Logger.DEBUG, "New instance to managed, looking for " + instance.get("component") + "-" + instance.get("factory.version"));
+        } else {
+            m_logger.log(Logger.DEBUG, "New instance to managed, looking for " + instance.get("component"));
+        }
+
         ManagedInstance managed = new ManagedInstance(instance, bundle);
         for (int i = 0; i < m_factories.size(); i++) {
             IPojoFactory factory = (IPojoFactory) m_factories.get(i);
-            if (managed.matchName(factory)) {
+            if (managed.matchNameAndVersion(factory)) {
                 // Subscribe to the factory state change
                 m_logger.log(Logger.DEBUG, "Listen factory " + factory.getName() + " events");
                 factory.addFactoryStateListener(this);
@@ -86,7 +91,7 @@ public class InstanceCreator implements FactoryStateListener {
                     if (list == null) {
                         list = new ArrayList();
                         list.add(managed);
-                        m_attached.put(factory, list);  
+                        m_attached.put(factory, list);
                     } else {
                         list.add(managed);
                     }
@@ -152,7 +157,7 @@ public class InstanceCreator implements FactoryStateListener {
         m_factories.add(factory);
         for (int i = 0; i < m_idle.size(); i++) {
             ManagedInstance managed = (ManagedInstance) m_idle.get(i);
-            if (managed.matchName(factory)) {
+            if (managed.matchNameAndVersion(factory)) {
                 // We have to subscribe to the factory.
                 factory.addFactoryStateListener(this);
                 if (factory.getState() == Factory.VALID && managed.match(factory)) {
@@ -243,8 +248,8 @@ public class InstanceCreator implements FactoryStateListener {
     }
 
     /**
-     * This structure aims to manage a configuration. 
-     * It stores all necessary information to create an instance 
+     * This structure aims to manage a configuration.
+     * It stores all necessary information to create an instance
      * and to track the factory.
      */
     private class ManagedInstance {
@@ -293,32 +298,38 @@ public class InstanceCreator implements FactoryStateListener {
         ComponentInstance getInstance() {
             return m_instance;
         }
-        
-        
+
+
         /**
          * Checks if the required factory name match with the given factory.
          * This methods checks only the name, and not the configuration.
          * @param factory the factory to test
-         * @return <code>true</code> if the factory name matches, <code>false</code>
+         * @return <code>true</code> if the factory name and the version (if set) match, <code>false</code>
          * otherwise.
          */
-        public boolean matchName(IPojoFactory factory) {
+        public boolean matchNameAndVersion(IPojoFactory factory) {
             String component = (String) m_configuration.get("component");
-            return factory.getName().equals(component) || factory.getClassName().equalsIgnoreCase(component);
+            String v = (String) m_configuration.get("factory.version");
+            if (v == null) {
+                return factory.getName().equals(component) || factory.getClassName().equalsIgnoreCase(component);
+            } else {
+                return (factory.getName().equals(component) || factory.getClassName().equalsIgnoreCase(component))
+                    && v.equals(factory.getVersion());
+            }
         }
 
         /**
-         * Checks if the given factory match with the factory 
-         * required by this instance. A factory matches if its 
-         * name or its class name is equals to the 'component' 
-         * property of the instance. Then the acceptability of 
+         * Checks if the given factory match with the factory
+         * required by this instance. A factory matches if its
+         * name or its class name is equals to the 'component'
+         * property of the instance. Then the acceptability of
          * the configuration is checked.
          * @param factory the factory to confront against the current instance.
          * @return <code>true</code> if the factory matches.
          */
         public boolean match(IPojoFactory factory) {
             // Test factory name (and classname)
-            if (matchName(factory)) {
+            if (matchNameAndVersion(factory)) {
                 // Test factory accessibility
                 if (factory.m_isPublic || factory.getBundleContext().getBundle().getBundleId() == m_bundleId) {
                     // Test the configuration validity.

@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -32,13 +32,13 @@ import org.osgi.framework.BundleContext;
 public interface Factory {
 
     /**
-     * Factory State. 
+     * Factory State.
      * A valid factory is a factory where all required handlers are available.
      */
     int VALID = 1;
 
     /**
-     * Factory State. 
+     * Factory State.
      * An invalid factory is a factory where at least one required handler is
      * unavailable. Creating an instance with an invalid factory failed.
      */
@@ -67,7 +67,7 @@ public interface Factory {
     ComponentInstance createComponentInstance(Dictionary configuration, ServiceContext serviceContext) throws UnacceptableConfiguration, MissingHandlerException, ConfigurationException;
 
     /**
-     * Gets the component type information containing provided service, 
+     * Gets the component type information containing provided service,
      * configuration properties ...
      * @return the component type information.
      */
@@ -94,7 +94,7 @@ public interface Factory {
     String getName();
 
     /**
-     * Reconfigures an instance already created. This configuration needs to 
+     * Reconfigures an instance already created. This configuration needs to
      * have the name property to identify the instance.
      * @param conf the configuration to reconfigure the instance.
      * @throws UnacceptableConfiguration  if the given configuration is not consistent for the targeted instance.
@@ -117,14 +117,14 @@ public interface Factory {
     /**
      * Gets the list of missing handlers.
      * The handlers are given under the form namespace:name
-     * @return the list containing the name of missing handlers 
+     * @return the list containing the name of missing handlers
      */
     List getMissingHandlers();
 
     /**
      * Get the list of required handlers.
      * The handlers are given under the form namespace:name
-     * @return the list containing the name of required handlers 
+     * @return the list containing the name of required handlers
      */
     List getRequiredHandlers();
 
@@ -147,5 +147,12 @@ public interface Factory {
      * @return the bundle context of the factory.
      */
     BundleContext getBundleContext();
+
+    /**
+     * Gets the version of the component type.
+     * @return the component type version or <code>null</code> if
+     * not specified.
+     */
+    String getVersion();
 
 }

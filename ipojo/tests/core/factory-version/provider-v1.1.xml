@@ -1,0 +1,5 @@
+<ipojo>
+	<component classname="org.apache.felix.ipojo.tests.core.component.MyComponent" version="BuNdlE">
+		<provides/>
+	</component>
+</ipojo>
