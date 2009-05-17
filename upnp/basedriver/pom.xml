@@ -1,8 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <groupId>org.apache.felix</groupId>
-    <artifactId>felix</artifactId>
-    <version>1.0.4</version>
+    <artifactId>felix-parent</artifactId>
+    <version>1.2.0</version>
     <relativePath>../../pom/pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -11,27 +11,6 @@
   <name>Apache Felix UPnP Base Driver</name>
   <artifactId>org.apache.felix.upnp.basedriver</artifactId>
   <version>0.9.0-SNAPSHOT</version>
-  <repositories>
-    <!-- For snapshots (no release jars or non-apache jars)           -->
-    <repository>
-      <id>snap.domoware.isti.cnr.it</id>
-      <name>Domoware Snapshot Repository</name>
-      <url>http://domoware.isti.cnr.it/maven2-snap</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-    <!-- For release (no snapshots jars or non-apache jars)           -->
-    <repository>
-      <id>release.domoware.isti.cnr.it</id>
-      <name>Domoware Release Repository</name>
-      <url>http://domoware.isti.cnr.it/maven2</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-  <!-- <url>http://maven.apache.org</url> -->
 
   <profiles>
     <profile>
@@ -62,7 +41,6 @@
 	  <plugin>
             <groupId>org.apache.felix</groupId>
             <artifactId>maven-bundle-plugin</artifactId>
-            <version>1.5.0-SNAPSHOT</version>
             <executions>
               <execution>
                 <id>cyberlink</id>
@@ -117,7 +95,6 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>1.4.0</version>
         <extensions>true</extensions>
         <configuration>
 	  <excludeDependencies>org.cybergarage.cyberlink:upnp-stack,upnp-stack-jdk13</excludeDependencies>
