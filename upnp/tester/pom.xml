@@ -30,7 +30,7 @@
   <artifactId>org.apache.felix.upnp.tester</artifactId>
   <packaging>bundle</packaging>
   <name>Apache Felix UPnP Tester</name>
-  <version>0.4.0</version>
+  <version>0.5.0-SNAPSHOT</version>
   
   <build>
     <plugins>
@@ -83,11 +83,5 @@
       <scope>provided</scope>
     </dependency -->
   </dependencies>
-
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.upnp.tester-0.4.0</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.upnp.tester-0.4.0</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.upnp.tester-0.4.0</url>
-  </scm>
 </project>
 
