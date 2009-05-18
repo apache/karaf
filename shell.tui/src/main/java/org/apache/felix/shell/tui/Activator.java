@@ -41,14 +41,8 @@ public class Activator implements BundleActivator
             {
                 synchronized (Activator.this)
                 {
-                    // Ignore additional services if we already have one.
-                    if ((event.getType() == ServiceEvent.REGISTERED)
-                        && (m_shellRef != null))
-                    {
-                        return;
-                    }
                     // Initialize the service if we don't have one.
-                    else if ((event.getType() == ServiceEvent.REGISTERED)
+                    if ((event.getType() == ServiceEvent.REGISTERED)
                         && (m_shellRef == null))
                     {
                         initializeService();
@@ -92,17 +86,15 @@ public class Activator implements BundleActivator
 
     private synchronized void initializeService()
     {
-        if (m_shell != null)
+        if (m_shell == null)
         {
-            return;
+            m_shellRef = m_context.getServiceReference(
+                org.apache.felix.shell.ShellService.class.getName());
+            if (m_shellRef != null)
+            {
+                m_shell = (ShellService) m_context.getService(m_shellRef);
+            }
         }
-        m_shellRef = m_context.getServiceReference(
-            org.apache.felix.shell.ShellService.class.getName());
-        if (m_shellRef == null)
-        {
-            return;
-        }
-        m_shell = (ShellService) m_context.getService(m_shellRef);
     }
 
     public void stop(BundleContext context)
@@ -127,61 +119,72 @@ public class Activator implements BundleActivator
             String line = null;
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
-            // Check to see if we have stdin.
             try
             {
-                System.in.available();
-            }
-            catch (IOException ex)
-            {
-                m_stop = true;
-            }
-
-            while (!m_stop)
-            {
-                System.out.print("-> ");
-
-                try
+                boolean needPrompt = true;
+                int available;
+                while (!m_stop)
                 {
+                    if (needPrompt)
+                    {
+                        System.out.print("-> ");
+                        needPrompt = false;
+                    }
+
+                    available = System.in.available();
+
+                    if (available == 0)
+                    {
+                        try
+                        {
+                            Thread.sleep(200);
+                        }
+                        catch (InterruptedException ex)
+                        {
+                            // No one should be interrupting this thread, so
+                            // ignore it.
+                        }
+                        continue;
+                    }
+
                     line = in.readLine();
-                }
-                catch (IOException ex)
-                {
-                    System.err.println("ShellTUI: Error reading from stdin...exiting.");
-                    break;
-                }
-
-                synchronized (Activator.this)
-                {
                     if (line == null)
                     {
                         System.err.println("ShellTUI: No standard input...exiting.");
                         break;
                     }
-
-                    if (m_shell == null)
-                    {
-                        System.out.println("No impl service available.");
-                        continue;
-                    }
+                    needPrompt = true;
 
                     line = line.trim();
-
                     if (line.length() == 0)
                     {
                         continue;
                     }
 
-                    try
+                    synchronized (Activator.this)
                     {
-                        m_shell.executeCommand(line, System.out, System.err);
-                    }
-                    catch (Exception ex)
-                    {
-                        System.err.println("ShellTUI: " + ex);
-                        ex.printStackTrace();
+                        if (m_shell == null)
+                        {
+                            System.out.println("No impl service available.");
+                            continue;
+                        }
+
+                        try
+                        {
+                            m_shell.executeCommand(line, System.out, System.err);
+                        }
+                        catch (Exception ex)
+                        {
+                            System.err.println("ShellTUI: " + ex);
+                            ex.printStackTrace();
+                        }
                     }
                 }
+            }
+            catch (IOException ex)
+            {
+                // Any IO error causes the thread to exit.
+                System.err.println("ShellTUI: Unable to read from stdin...exiting.");
             }
         }
     }
