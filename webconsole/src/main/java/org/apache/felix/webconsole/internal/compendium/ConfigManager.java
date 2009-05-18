@@ -814,9 +814,10 @@ public class ConfigManager extends ConfigManagerBase
                             }
                         }
 
-                        // but ensure size
+                        // but ensure size (check for positive value since
+                        // abs(Integer.MIN_VALUE) is still INTEGER.MIN_VALUE)
                         int maxSize = Math.abs( ad.getCardinality() );
-                        if ( vec.size() > maxSize )
+                        if ( vec.size() > maxSize && maxSize > 0 )
                         {
                             vec.setSize( maxSize );
                         }
