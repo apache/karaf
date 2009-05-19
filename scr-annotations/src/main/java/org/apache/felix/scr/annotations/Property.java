@@ -63,63 +63,63 @@ public @interface Property {
      * This attribute should not be used in combination with any of the other
      * value attributes.
      */
-    String[] value() default "";
+    String[] value() default {};
 
     /**
      * The long value(s) of the property.
      * This attribute should not be used in combination with any of the other
      * value attributes or the type attribute.
      */
-    long[] longValue() default 0;
+    long[] longValue() default {};
 
     /**
      * The double value(s) of the property.
      * This attribute should not be used in combination with any of the other
      * value attributes.
      */
-    double[] doubleValue() default 0.0;
+    double[] doubleValue() default {};
 
     /**
      * The float value(s) of the property.
      * This attribute should not be used in combination with any of the other
      * value attributes or the type attribute.
      */
-    float[] floatValue() default 0;
+    float[] floatValue() default {};
 
     /**
      * The int value(s) of the property.
      * This attribute should not be used in combination with any of the other
      * value attributes or the type attribute.
      */
-    int[] intValue() default 0;
+    int[] intValue() default {};
 
     /**
      * The byte value(s) of the property.
      * This attribute should not be used in combination with any of the other
      * value attributes or the type attribute.
      */
-    byte[] byteValue() default 0;
+    byte[] byteValue() default {};
 
     /**
      * The char value(s) of the property.
      * This attribute should not be used in combination with any of the other
      * value attributes or the type attribute.
      */
-    char[] charValue() default '\0';
+    char[] charValue() default {};
 
     /**
      * The bool value(s) of the property.
      * This attribute should not be used in combination with any of the other
      * value attributes or the type attribute.
      */
-    boolean[] boolValue() default false;
+    boolean[] boolValue() default {};
 
     /**
      * The short value(s) of the property.
      * This attribute should not be used in combination with any of the other
      * value attributes or the type attribute.
      */
-    short[] shortValue() default 0;
+    short[] shortValue() default {};
 
     /**
      * Defines the cardinality of the property and its collection type. If the

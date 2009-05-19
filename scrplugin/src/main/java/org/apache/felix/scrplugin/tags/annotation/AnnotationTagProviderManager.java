@@ -24,6 +24,7 @@ import java.util.List;
 import org.apache.felix.scrplugin.tags.JavaField;
 import org.apache.felix.scrplugin.tags.JavaTag;
 import org.apache.felix.scrplugin.tags.annotation.defaulttag.DefaultAnnotationTagProvider;
+import org.apache.felix.scrplugin.tags.annotation.sling.SlingAnnotationTagProvider;
 import org.apache.maven.plugin.MojoFailureException;
 
 import com.thoughtworks.qdox.model.Annotation;
@@ -52,6 +53,7 @@ public class AnnotationTagProviderManager {
 
         // always add provider supporting built-in SCR default properties
         annotationTagProviders.add(new DefaultAnnotationTagProvider());
+        annotationTagProviders.add(new SlingAnnotationTagProvider());
 
         // add custom providers defined in pom
         for (int i = 0; i < annotationTagProviderClasses.length; i++) {
