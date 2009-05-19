@@ -221,8 +221,6 @@ public class PropertyTag extends AbstractTag {
                     map.put(Constants.PROPERTY_MULTIVALUE_PREFIX + '.' + i, values[i].toString());
                 }
             }
-        } else {
-            map.put(Constants.PROPERTY_VALUE, "");
         }
 
         if (this.annotation.cardinality() != 0) {
