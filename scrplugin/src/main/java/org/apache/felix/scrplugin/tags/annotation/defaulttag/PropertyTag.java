@@ -138,57 +138,81 @@ public class PropertyTag extends AbstractTag {
         // we now check all options
         if (values == null || values.length == 0 ) {
             long[] lValues = this.annotation.longValue();
-            if ( lValues.length == 0 ) {
+            if ( lValues == null || lValues.length == 0 ) {
                 double[] dValues = this.annotation.doubleValue();
-                if ( dValues.length == 0 ) {
+                if ( dValues == null || dValues.length == 0 ) {
                     float[] fValues = this.annotation.floatValue();
-                    if ( fValues.length == 0 ) {
+                    if ( fValues == null || fValues.length == 0 ) {
                         int[] iValues = this.annotation.intValue();
-                        if ( iValues.length == 0 ) {
+                        if ( iValues == null || iValues.length == 0 ) {
                             byte[] byteValues = this.annotation.byteValue();
-                            if ( byteValues.length == 0 ) {
+                            if ( byteValues == null || byteValues.length == 0 ) {
                                 char[] cValues = this.annotation.charValue();
-                                if ( cValues.length == 0 ) {
+                                if ( cValues == null || cValues.length == 0 ) {
                                     boolean[] boolValues = this.annotation.boolValue();
-                                    if ( boolValues.length == 0 ) {
+                                    if ( boolValues == null || boolValues.length == 0 ) {
                                         short[] sValues  = this.annotation.shortValue();
-                                        if ( boolValues.length != 0 ) {
-                                            values = Arrays.asList(sValues).toArray();
+                                        if ( sValues != null && sValues.length != 0 ) {
+                                            values = new Object[sValues.length];
+                                            for(int i=0;i<sValues.length;i++) {
+                                                values[i] = sValues[i];
+                                            }
                                             type = "Short";
                                         }
                                     } else {
-                                        values = Arrays.asList(boolValues).toArray();
+                                        values = new Object[boolValues.length];
+                                        for(int i=0;i<boolValues.length;i++) {
+                                            values[i] = boolValues[i];
+                                        }
                                         type = "Boolean";
                                     }
                                 } else {
-                                    values = Arrays.asList(cValues).toArray();
+                                    values = new Object[cValues.length];
+                                    for(int i=0;i<cValues.length;i++) {
+                                        values[i] = cValues[i];
+                                    }
                                     type = "Char";
                                 }
                             } else {
-                                values = Arrays.asList(byteValues).toArray();
+                                values = new Object[byteValues.length];
+                                for(int i=0;i<byteValues.length;i++) {
+                                    values[i] = byteValues[i];
+                                }
                                 type = "Byte";
                             }
                         } else {
-                            values = Arrays.asList(fValues).toArray();
+                            values = new Object[iValues.length];
+                            for(int i=0;i<iValues.length;i++) {
+                                values[i] = iValues[i];
+                            }
                             type = "Integer";
                         }
                     } else {
-                        values = Arrays.asList(fValues).toArray();
+                        values = new Object[fValues.length];
+                        for(int i=0;i<fValues.length;i++) {
+                            values[i] = fValues[i];
+                        }
                         type = "Float";
                     }
                 } else {
-                    values = Arrays.asList(dValues).toArray();
+                    values = new Object[dValues.length];
+                    for(int i=0;i<dValues.length;i++) {
+                        values[i] = dValues[i];
+                    }
                     type = "Double";
                 }
             } else {
-                values = Arrays.asList(lValues).toArray();
+                values = new Object[lValues.length];
+                for(int i=0;i<lValues.length;i++) {
+                    values[i] = lValues[i];
+                }
                 type = "Long";
             }
         } else {
             type = "String";
         }
 
-        if ( values != null ) {
+        if ( values != null && values.length > 0 ) {
             map.put(Constants.PROPERTY_TYPE, type);
             if (values.length == 1) {
                 map.put(Constants.PROPERTY_VALUE, values[0].toString());

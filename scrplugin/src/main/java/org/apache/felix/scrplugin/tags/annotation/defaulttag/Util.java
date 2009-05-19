@@ -18,7 +18,7 @@
  */
 package org.apache.felix.scrplugin.tags.annotation.defaulttag;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.felix.scrplugin.tags.*;
@@ -69,19 +69,25 @@ public abstract class Util {
         }
     }
 
-    public static String[] getStringValues(Annotation annotation, JavaClassDescription desc, String name) {
+    /**
+     * Helper method to get the values of an annotation as string values.
+     * @param annotation The annotation.
+     * @param desc The java class description.
+     * @param name The attribute name from the annotation.
+     * @return The array of string values or null.
+     */
+    public static String[] getStringValues(Annotation annotation, JavaClassDescription desc, String name)
+    {
         final Object obj = annotation.getNamedParameter(name);
         if ( obj != null ) {
-            List<String> list;
-            if (obj instanceof String) {
-                list = new ArrayList<String>();
-                list.add((String)obj);
+            if (obj instanceof String)
+            {
+                return new String[] {stripQuotes(desc, obj.toString())};
             }
-            else {
-                list = (List<String>)obj;
-            }
+            final List<String> list = (List<String>)obj;
             String[] values = new String[list.size()];
-            for (int i=0; i<values.length; i++) {
+            for (int i=0; i<values.length; i++)
+            {
                 values[i] = stripQuotes(desc, list.get(i));
             }
             return values;
@@ -89,19 +95,26 @@ public abstract class Util {
         return null;
     }
 
-    public static long[] getLongValues(Annotation annotation, JavaClassDescription desc, String name) {
+    /**
+     * Helper method to get the values of an annotation as long values.
+     * @param annotation The annotation.
+     * @param desc The java class description.
+     * @param name The attribute name from the annotation.
+     * @return The array of long values or null.
+     */
+    public static long[] getLongValues(Annotation annotation, JavaClassDescription desc, String name)
+    {
         final Object obj = annotation.getNamedParameter(name);
-        if ( obj != null ) {
-            List<Long> list;
-            if (obj instanceof Long) {
-                list = new ArrayList<Long>();
-                list.add((Long)obj);
+        if ( obj != null )
+        {
+            if ( !(obj instanceof Collection<?>))
+            {
+                return new long[] {Long.valueOf(stripQuotes(desc, obj.toString()))};
             }
-            else {
-                list = (List<Long>)obj;
-            }
+            final List<Long> list = (List<Long>)obj;
             long[] values = new long[list.size()];
-            for (int i=0; i<values.length; i++) {
+            for (int i=0; i<values.length; i++)
+            {
                 values[i] = list.get(i);
             }
             return values;
@@ -109,19 +122,26 @@ public abstract class Util {
         return null;
     }
 
-    public static int[] getIntValues(Annotation annotation, JavaClassDescription desc, String name) {
+    /**
+     * Helper method to get the values of an annotation as long values.
+     * @param annotation The annotation.
+     * @param desc The java class description.
+     * @param name The attribute name from the annotation.
+     * @return The array of long values or null.
+     */
+    public static int[] getIntValues(Annotation annotation, JavaClassDescription desc, String name)
+    {
         final Object obj = annotation.getNamedParameter(name);
-        if ( obj != null ) {
-            List<Integer> list;
-            if (obj instanceof Integer) {
-                list = new ArrayList<Integer>();
-                list.add((Integer)obj);
+        if ( obj != null )
+        {
+            if ( !(obj instanceof Collection<?>))
+            {
+                return new int[] {Integer.valueOf(stripQuotes(desc, obj.toString()))};
             }
-            else {
-                list = (List<Integer>)obj;
-            }
+            final List<Integer> list = (List<Integer>)obj;
             int[] values = new int[list.size()];
-            for (int i=0; i<values.length; i++) {
+            for (int i=0; i<values.length; i++)
+            {
                 values[i] = list.get(i);
             }
             return values;
@@ -129,19 +149,26 @@ public abstract class Util {
         return null;
     }
 
-    public static float[] getFloatValues(Annotation annotation, JavaClassDescription desc, String name) {
+    /**
+     * Helper method to get the values of an annotation as float values.
+     * @param annotation The annotation.
+     * @param desc The java class description.
+     * @param name The attribute name from the annotation.
+     * @return The array of float values or null.
+     */
+    public static float[] getFloatValues(Annotation annotation, JavaClassDescription desc, String name)
+    {
         final Object obj = annotation.getNamedParameter(name);
-        if ( obj != null ) {
-            List<Float> list;
-            if (obj instanceof Float) {
-                list = new ArrayList<Float>();
-                list.add((Float)obj);
+        if ( obj != null )
+        {
+            if ( !(obj instanceof Collection<?>))
+            {
+                return new float[] {Float.valueOf(stripQuotes(desc, obj.toString()))};
             }
-            else {
-                list = (List<Float>)obj;
-            }
+            final List<Float> list = (List<Float>)obj;
             float[] values = new float[list.size()];
-            for (int i=0; i<values.length; i++) {
+            for (int i=0; i<values.length; i++)
+            {
                 values[i] = list.get(i);
             }
             return values;
@@ -149,19 +176,26 @@ public abstract class Util {
         return null;
     }
 
-    public static double[] getDoubleValues(Annotation annotation, JavaClassDescription desc, String name) {
+    /**
+     * Helper method to get the values of an annotation as double values.
+     * @param annotation The annotation.
+     * @param desc The java class description.
+     * @param name The attribute name from the annotation.
+     * @return The array of double values or null.
+     */
+    public static double[] getDoubleValues(Annotation annotation, JavaClassDescription desc, String name)
+    {
         final Object obj = annotation.getNamedParameter(name);
-        if ( obj != null ) {
-            List<Double> list;
-            if (obj instanceof Double) {
-                list = new ArrayList<Double>();
-                list.add((Double)obj);
+        if ( obj != null )
+        {
+            if ( !(obj instanceof Collection<?>))
+            {
+                return new double[] {Double.valueOf(stripQuotes(desc, obj.toString()))};
             }
-            else {
-                list = (List<Double>)obj;
-            }
+            final List<Double> list = (List<Double>)obj;
             double[] values = new double[list.size()];
-            for (int i=0; i<values.length; i++) {
+            for (int i=0; i<values.length; i++)
+            {
                 values[i] = list.get(i);
             }
             return values;
@@ -169,19 +203,25 @@ public abstract class Util {
         return null;
     }
 
+    /**
+     * Helper method to get the values of an annotation as char values.
+     * @param annotation The annotation.
+     * @param desc The java class description.
+     * @param name The attribute name from the annotation.
+     * @return The array of char values or null.
+     */
     public static char[] getCharValues(Annotation annotation, JavaClassDescription desc, String name) {
         final Object obj = annotation.getNamedParameter(name);
-        if ( obj != null ) {
-            List<Character> list;
-            if (obj instanceof Character) {
-                list = new ArrayList<Character>();
-                list.add((Character)obj);
+        if ( obj != null )
+        {
+            if ( !(obj instanceof Collection<?>))
+            {
+                return new char[] {Character.valueOf(stripQuotes(desc, obj.toString()).charAt(0))};
             }
-            else {
-                list = (List<Character>)obj;
-            }
+            final List<Character> list = (List<Character>)obj;
             char[] values = new char[list.size()];
-            for (int i=0; i<values.length; i++) {
+            for (int i=0; i<values.length; i++)
+            {
                 values[i] = list.get(i);
             }
             return values;
@@ -189,19 +229,26 @@ public abstract class Util {
         return null;
     }
 
-    public static short[] getShortValues(Annotation annotation, JavaClassDescription desc, String name) {
+    /**
+     * Helper method to get the values of an annotation as short values.
+     * @param annotation The annotation.
+     * @param desc The java class description.
+     * @param name The attribute name from the annotation.
+     * @return The array of short values or null.
+     */
+   public static short[] getShortValues(Annotation annotation, JavaClassDescription desc, String name)
+   {
         final Object obj = annotation.getNamedParameter(name);
-        if ( obj != null ) {
-            List<Short> list;
-            if (obj instanceof Short) {
-                list = new ArrayList<Short>();
-                list.add((Short)obj);
+        if ( obj != null )
+        {
+            if ( !(obj instanceof Collection<?>))
+            {
+                return new short[] {Short.valueOf(stripQuotes(desc, obj.toString()))};
             }
-            else {
-                list = (List<Short>)obj;
-            }
+            final List<Short> list = (List<Short>)obj;
             short[] values = new short[list.size()];
-            for (int i=0; i<values.length; i++) {
+            for (int i=0; i<values.length; i++)
+            {
                 values[i] = list.get(i);
             }
             return values;
@@ -209,19 +256,26 @@ public abstract class Util {
         return null;
     }
 
-    public static byte[] getByteValues(Annotation annotation, JavaClassDescription desc, String name) {
+    /**
+     * Helper method to get the values of an annotation as byte values.
+     * @param annotation The annotation.
+     * @param desc The java class description.
+     * @param name The attribute name from the annotation.
+     * @return The array of byte values or null.
+     */
+   public static byte[] getByteValues(Annotation annotation, JavaClassDescription desc, String name)
+   {
         final Object obj = annotation.getNamedParameter(name);
-        if ( obj != null ) {
-            List<Byte> list;
-            if (obj instanceof Byte) {
-                list = new ArrayList<Byte>();
-                list.add((Byte)obj);
+        if ( obj != null )
+        {
+            if ( !(obj instanceof Collection<?>))
+            {
+                return new byte[] {Byte.valueOf(stripQuotes(desc, obj.toString()))};
             }
-            else {
-                list = (List<Byte>)obj;
-            }
+            final List<Byte> list = (List<Byte>)obj;
             byte[] values = new byte[list.size()];
-            for (int i=0; i<values.length; i++) {
+            for (int i=0; i<values.length; i++)
+            {
                 values[i] = list.get(i);
             }
             return values;
@@ -229,19 +283,26 @@ public abstract class Util {
         return null;
     }
 
-    public static boolean[] getBooleanValues(Annotation annotation, JavaClassDescription desc, String name) {
+    /**
+     * Helper method to get the values of an annotation as boolean values.
+     * @param annotation The annotation.
+     * @param desc The java class description.
+     * @param name The attribute name from the annotation.
+     * @return The array of boolean values or null.
+     */
+    public static boolean[] getBooleanValues(Annotation annotation, JavaClassDescription desc, String name)
+    {
         final Object obj = annotation.getNamedParameter(name);
-        if ( obj != null ) {
-            List<Boolean> list;
-            if (obj instanceof Boolean) {
-                list = new ArrayList<Boolean>();
-                list.add((Boolean)obj);
+        if ( obj != null )
+        {
+            if ( !(obj instanceof Collection<?>))
+            {
+                return new boolean[] {Boolean.valueOf(stripQuotes(desc, obj.toString()))};
             }
-            else {
-                list = (List<Boolean>)obj;
-            }
+            final List<Boolean> list = (List<Boolean>)obj;
             boolean[] values = new boolean[list.size()];
-            for (int i=0; i<values.length; i++) {
+            for (int i=0; i<values.length; i++)
+            {
                 values[i] = list.get(i);
             }
             return values;
