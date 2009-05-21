@@ -60,4 +60,25 @@
       </modules>
     </profile>
   </profiles>
+
+  <build>
+    <plugins>  
+      <plugin>
+        <groupId>org.ops4j</groupId>
+        <artifactId>maven-pax-plugin</artifactId>
+        <configuration>
+          <provision>
+            <provision>mvn:org.apache.felix/org.apache.felix.upnp.basedriver@nostart</provision>
+            <provision>mvn:org.apache.felix/org.apache.felix.upnp.tester</provision>
+            <provision>mvn:org.apache.felix/org.apache.felix.upnp.extra</provision>
+            <provision>mvn:org.apache.felix/org.apache.felix.upnp.sample.binaryLight</provision>
+            <provision>mvn:org.apache.felix/org.apache.felix.upnp.sample.clock</provision>
+            <provision>mvn:org.apache.felix/org.apache.felix.upnp.sample.tv</provision>
+            <provision>mvn:org.apache.felix/javax.servlet</provision>
+            <provision>mvn:org.apache.felix/org.apache.felix.http.jetty@nostart</provision>
+          </provision>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>  
 </project>
