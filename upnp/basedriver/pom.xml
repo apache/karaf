@@ -157,24 +157,16 @@
 	  </execution>
 	</executions>
       </plugin>      
-      <!--plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>minijar-maven-plugin</artifactId>
-        <version>1.0-alpha-3</version>
-	<executions>
-	  <execution>
-	    <id>ueberjar</id>
-	    <phase>package</phase>
-	    <goals><goal>ueberjar</goal></goals>
-            <configuration>
-	      <stripUnusedClasses>true</stripUnusedClasses>
-	      <includeDependencies>
-	        <param>none:dependency</param>
-	      </includeDependencies>
-            </configuration>
-	  </execution>
-	</executions>
-      </plugin-->
+      <plugin>
+        <groupId>org.ops4j</groupId>
+        <artifactId>maven-pax-plugin</artifactId>
+        <configuration>
+          <provision>
+            <provision>mvn:org.apache.felix/org.apache.felix.upnp.basedriver</provision>
+            <provision>mvn:org.apache.felix/javax.servlet</provision>
+          </provision>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 

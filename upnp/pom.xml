@@ -67,6 +67,7 @@
         <groupId>org.ops4j</groupId>
         <artifactId>maven-pax-plugin</artifactId>
         <configuration>
+          <noDependencies>true</noDependencies>
           <provision>
             <provision>mvn:org.apache.felix/org.apache.felix.upnp.basedriver@nostart</provision>
             <provision>mvn:org.apache.felix/org.apache.felix.upnp.tester</provision>

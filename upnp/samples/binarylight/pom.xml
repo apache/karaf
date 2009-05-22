@@ -49,8 +49,22 @@
           </instructions>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.ops4j</groupId>
+        <artifactId>maven-pax-plugin</artifactId>
+        <configuration>
+          <provision>
+            <provision>mvn:org.apache.felix/org.apache.felix.upnp.basedriver@nostart</provision>
+            <provision>mvn:org.apache.felix/org.apache.felix.upnp.tester</provision>
+            <provision>mvn:org.apache.felix/org.apache.felix.upnp.extra</provision>
+            <provision>mvn:org.apache.felix/javax.servlet</provision>
+            <provision>mvn:org.apache.felix/org.apache.felix.http.jetty@nostart</provision>
+          </provision>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
+
   <dependencies>
     <dependency>
       <groupId>${pom.groupId}</groupId>
@@ -73,7 +87,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.upnp.extra</artifactId>
-      <version>0.5.0-SNAPSHOT</version>
+      <version>0.4.0</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>

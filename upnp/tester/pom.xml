@@ -53,6 +53,17 @@
           </instructions>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.ops4j</groupId>
+        <artifactId>maven-pax-plugin</artifactId>
+        <configuration>
+          <provision>
+            <provision>mvn:org.apache.felix/org.apache.felix.upnp.basedriver/0.8.0@nostart</provision>
+            <provision>mvn:org.apache.felix/org.apache.felix.upnp.tester</provision>
+            <provision>mvn:org.apache.felix/javax.servlet</provision>
+          </provision>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
