@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -43,45 +43,45 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
      * Class name.
      */
     private String m_className;
-    
+
     /**
      * Root element of computed metadata.
      */
     private Element m_elem = new Element("component", "");
-    
+
     /**
      * True if the visited class is a component type declaration (i.e. contains the @component annotation).
      */
     private boolean m_containsAnnotation = false;
-    
+
     /**
      * Map of [element ids, element].
-     * This map is used to easily get an already created element. 
+     * This map is used to easily get an already created element.
      */
     private Map m_ids = new HashMap();
-    
+
     /**
      * Map of [element, referto].
      * This map is used to recreate the element hierarchie.
-     * Stored element are added under referred element. 
+     * Stored element are added under referred element.
      */
     private Map m_elements = new HashMap();
-    
+
     public Element getElem() {
         return m_elem;
     }
-    
+
     public boolean isAnnotated() {
         return m_containsAnnotation;
     }
-    
+
 
     /**
      * Start visiting a class.
      * Initialize the getter/setter generator, add the _cm field, add the pojo interface.
      * @param version : class version
      * @param access : class access
-     * @param name : class name 
+     * @param name : class name
      * @param signature : class signature
      * @param superName : class super class
      * @param interfaces : implemented interfaces
@@ -93,7 +93,7 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
         m_className = name;
     }
 
-    
+
     /**
      * Visit class annotations.
      * This method detects @component and @provides annotations.
@@ -110,20 +110,20 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
             m_elem.addAttribute(new Attribute("className", m_className.replace('/', '.')));
             return new ComponentVisitor();
         }
-        
+
         // @Provides
         if (desc.equals("Lorg/apache/felix/ipojo/annotations/Provides;")) {
             return new ProvidesVisitor();
         }
-        
+
         if (CustomAnnotationVisitor.isCustomAnnotation(desc)) {
             Element elem = CustomAnnotationVisitor.buildElement(desc);
             return new CustomAnnotationVisitor(elem, this, true, true);
         }
-        
+
         return null;
     }
-    
+
 
 
     /**
@@ -155,7 +155,7 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         return new MethodCollector(name, this);
     }
-    
+
     /**
      * End of the visit : compute final elements.
      * @see org.objectweb.asm.commons.EmptyVisitor#visitEnd()
@@ -213,7 +213,7 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
                 m_prov.addAttribute(new Attribute("strategy", arg1.toString()));
             }
         }
-        
+
         /**
          * Visit specifications array.
          * @param arg0 : attribute name
@@ -227,7 +227,7 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
                 return null;
             }
         }
-        
+
         /**
          * End of the visit.
          * Append to the parent element the computed "provides" element.
@@ -237,13 +237,13 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
             getIds().put("provides", m_prov);
             getElements().put(m_prov, null);
         }
-        
+
         private class InterfaceArrayVisitor extends EmptyVisitor {
             /**
              * List of parsed interface.
              */
             private String m_itfs;
-            
+
             /**
              * Visit one element of the array.
              * @param arg0 : null
@@ -257,7 +257,7 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
                     m_itfs += "," + ((Type) arg1).getClassName();
                 }
             }
-            
+
             /**
              * End of the array visit.
              * Add the attribute to 'provides' element.
@@ -266,31 +266,31 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
             public void visitEnd() {
                 m_prov.addAttribute(new Attribute("specifications", m_itfs + "}"));
             }
-            
+
         }
-        
+
     }
-    
+
     /**
      * Parse the @component annotation.
      */
     private class ComponentVisitor extends EmptyVisitor implements AnnotationVisitor {
-        
+
         /**
          * Factory attribute.
          */
         private String m_factory;
 
         /**
-         * Is the component an immediate component? 
+         * Is the component an immediate component?
          */
         private String m_immediate;
-        
+
         /**
-         * Component name (cannot be null). 
+         * Component name (cannot be null).
          */
         private String m_name;
-        
+
         /**
          * Does the component exposes its architecture?
          */
@@ -300,17 +300,22 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
          * Does the component propagate configuration to provided services?
          */
         private String m_propagation;
-        
+
         /**
          * Managed Service PID.
          */
         private String m_managedservice;
-        
+
         /**
          * Factory-Method.
          */
         private String m_method;
-        
+
+        /**
+         * Version.
+         */
+        private String m_version;
+
         /**
          * Element properties.
          */
@@ -351,6 +356,10 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
                 m_method = arg1.toString();
                 return;
             }
+            if (arg0.equals("version")) {
+                m_version = arg1.toString();
+                return;
+            }
         }
 
         /**
@@ -358,7 +367,7 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
          * Append to the "component" element computed attribute.
          * @see org.objectweb.asm.commons.EmptyVisitor#visitEnd()
          */
-        public void visitEnd() { 
+        public void visitEnd() {
             if (m_name == null) {
                 m_name = m_className.replace('/', '.');
             }
@@ -366,7 +375,7 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
             if (m_factory != null && m_factory.equalsIgnoreCase("false")) {
                 m_elem.addAttribute(new Attribute("public", "false"));
             } else {
-                m_elem.addAttribute(new Attribute("public", "true")); 
+                m_elem.addAttribute(new Attribute("public", "true"));
             }
             if (m_architecture != null) {
                 m_elem.addAttribute(new Attribute("architecture", m_architecture));
@@ -376,6 +385,9 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
             }
             if (m_method != null) {
                 m_elem.addAttribute(new Attribute("factory-method", m_method));
+            }
+            if (m_version != null) {
+                m_elem.addAttribute(new Attribute("version", m_version));
             }
             if (m_propagation != null) {
                 if (m_props == null) {
@@ -393,6 +405,6 @@ public class MetadataCollector extends EmptyVisitor implements Opcodes {
                 }
                 m_props.addAttribute(new Attribute("pid", m_managedservice));
             }
-        }        
+        }
     }
 }

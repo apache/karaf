@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -28,48 +28,53 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 public @interface Component {
-    
+
     /**
      * Set if the component type is public.
      * Default: true
      */
     boolean public_factory() default true;
-    
+
     /**
      * Set the component type name.
      * Default : implementation class name.
      */
     String name() default "";
-    
+
     /**
      * Enable / Disable the architecture exposition.
      * Default : false
      */
     boolean architecture() default false;
-    
+
     /**
      * Set if the component is immediate.
      * Default : false
      */
     boolean immediate() default false;
-    
+
     /**
      * Set if the component must propagate received configuration to provided services.
      * default: false
      */
     boolean propagation() default false;
-    
+
     /**
      * Set the Managed Service PID.
      * default no PID (i.e. the managed service will not be exposed).
      */
     String managedservice() default "";
-    
+
     /**
      * Set the factory-method, if the pojo has to be created
      * from a static method. The specified method must be a static
      * method and return a pojo object.
-     * By default, iPOJO uses the 'regular' constructor. 
+     * By default, iPOJO uses the 'regular' constructor.
      */
     String factory_method() default "";
+
+    /**
+     * Set the version of the component type.
+     */
+    String version() default "";
 }
