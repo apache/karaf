@@ -27,11 +27,23 @@ import org.osgi.service.log.LogService;
 /**
  * The <code>ComponentActorThread</code> is the thread used to act upon registered
  * components of the service component runtime.
- *
- * @author fmeschbe
  */
 class ComponentActorThread extends Thread
 {
+
+    // sentinel task to terminate this thread
+    private static final Runnable TERMINATION_TASK = new Runnable()
+    {
+        public void run()
+        {
+        }
+
+
+        public String toString()
+        {
+            return "Component Actor Terminator";
+        }
+    };
 
     // the queue of Runnable instances  to be run
     private LinkedList tasks;
@@ -72,7 +84,7 @@ class ComponentActorThread extends Thread
             }
 
             // return if the task is this thread itself
-            if ( task == this )
+            if ( task == TERMINATION_TASK )
             {
                 Activator.log( LogService.LOG_DEBUG, null, "Shutting down ComponentActorThread", null );
                 return;
@@ -96,7 +108,7 @@ class ComponentActorThread extends Thread
     // of the queue
     void terminate()
     {
-        schedule( this );
+        schedule( TERMINATION_TASK );
     }
 
 
@@ -110,7 +122,7 @@ class ComponentActorThread extends Thread
 
             Activator.log( LogService.LOG_DEBUG, null, "Adding task [" + task + "] as #" + tasks.size()
                 + " in the queue", null );
-            
+
             // notify the waiting thread
             tasks.notifyAll();
         }

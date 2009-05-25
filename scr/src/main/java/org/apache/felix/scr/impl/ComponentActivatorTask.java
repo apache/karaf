@@ -19,6 +19,10 @@
 package org.apache.felix.scr.impl;
 
 
+import org.osgi.framework.Bundle;
+import org.osgi.service.log.LogService;
+
+
 /**
  * The <code>ComponentActivatorTask</code> extends the <code>Runnable</code>
  * interface with the functionality to have a meaningful {@link #toString()}
@@ -36,6 +40,24 @@ abstract class ComponentActivatorTask implements Runnable
     {
         this.taskName = taskName;
         this.component = component;
+    }
+
+
+    protected abstract void doRun();
+
+
+    public void run()
+    {
+        // fail, if the bundle is not active
+        if ( component.getBundle().getState() == Bundle.ACTIVE )
+        {
+            doRun();
+        }
+        else
+        {
+            Activator.log( LogService.LOG_WARNING, component.getBundle(), "Cannot run task '" + this
+                + "': Providing bundle is not active", null );
+        }
     }
 
 

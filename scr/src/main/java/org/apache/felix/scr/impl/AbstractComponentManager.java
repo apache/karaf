@@ -98,7 +98,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     {
         getActivator().schedule( new ComponentActivatorTask("Enable", this)
         {
-            public void run()
+            public void doRun()
             {
                 enableInternal();
             }
@@ -144,7 +144,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         
         getActivator().schedule( new ComponentActivatorTask("Activate", this)
         {
-            public void run()
+            public void doRun()
             {
                 activateInternal();
             }
@@ -175,7 +175,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     {
         getActivator().schedule( new ComponentActivatorTask( "Reactivate", this )
         {
-            public void run()
+            public void doRun()
             {
                 deactivateInternal();
                 activateInternal();
@@ -216,7 +216,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         
         getActivator().schedule( new ComponentActivatorTask( "Deactivate", this )
         {
-            public void run()
+            public void doRun()
             {
                 deactivateInternal();
             }
@@ -253,7 +253,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     {
         getActivator().schedule( new ComponentActivatorTask("Disable", this)
         {
-            public void run()
+            public void doRun()
             {
                 disableInternal();
             }
