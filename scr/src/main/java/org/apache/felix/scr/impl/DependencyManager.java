@@ -201,11 +201,13 @@ class DependencyManager implements ServiceListener, Reference
     private void serviceAdded( ServiceReference reference )
     {
         // if the component is currently unsatisfied, it may become satisfied
-        // by adding this service, try to activate
-        if ( m_componentManager.getState() == AbstractComponentManager.STATE_UNSATISFIED )
+        // by adding this service, try to activate (also schedule activation
+        // if the component is pending deactivation)
+        if ( m_componentManager.getState() == AbstractComponentManager.STATE_UNSATISFIED
+            || m_componentManager.isPendingDeactivate() )
         {
             m_componentManager.log( LogService.LOG_INFO, "Dependency Manager: Service "
-                + m_dependencyMetadata.getName() + " registered, trying to activate", m_componentManager
+                + m_dependencyMetadata.getName() + " registered, activate component", m_componentManager
                 .getComponentMetadata(), null );
 
             m_componentManager.activate();
