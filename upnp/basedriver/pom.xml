@@ -170,6 +170,21 @@
     </plugins>
   </build>
 
+  <repositories>
+    <repository>
+      <id>release.domoware.isti.cnr.it</id>
+      <name>Domoware Java Repository</name>
+      <url>http://domoware.isti.cnr.it/maven2/</url>
+      <snapshots><enabled>false</enabled></snapshots>
+    </repository>
+    <repository>
+      <id>snapshot.domoware.isti.cnr.it</id>
+      <name>Domoware Java Snapshot Repository</name>
+      <url>http://domoware.isti.cnr.it/maven2-snap/</url>
+      <releases><enabled>false</enabled></releases>
+    </repository>
+  </repositories>
+
 
   <dependencies>
     <dependency>
@@ -186,13 +201,13 @@
     <dependency>
       <groupId>it.cnr.isti.domoware.cyberdomo</groupId>
       <artifactId>upnp-stack</artifactId>
-      <version>1.8.0</version>
+      <version>1.9.0-SNAPSHOT</version>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>it.cnr.isti.domoware.cyberdomo</groupId>
       <artifactId>upnp-stack-jdk13</artifactId>
-      <version>1.8.0</version>
+      <version>1.8.1-SNAPSHOT</version>
       <optional>true</optional>
     </dependency>
   </dependencies>
