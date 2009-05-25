@@ -40,6 +40,9 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
 
     // The state of this instance manager
     private int m_state;
+    
+    // Flag indicating whether scheduled component deactivation is pending
+    private boolean m_pendingDeactivate;
 
     // The metadata
     private ComponentMetadata m_componentMetadata;
@@ -72,6 +75,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         m_componentId = componentId;
 
         m_state = STATE_DISABLED;
+        m_pendingDeactivate = false;
         loadDependencyManagers( metadata );
 
         log( LogService.LOG_DEBUG, "Component created", m_componentMetadata, null );
@@ -135,6 +139,9 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
      */
     public final void activate()
     {
+        // clear the deactivation pending flag, since activation is now pending
+        setPendingDeactivate( false );
+        
         getActivator().schedule( new ComponentActivatorTask("Activate", this)
         {
             public void run()
@@ -197,6 +204,16 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
      */
     public final void deactivate()
     {
+        // do nothing if deactivation is already pending
+        if ( isPendingDeactivate() )
+        {
+            log( LogService.LOG_DEBUG, "Deactivation already scheduled, nothing to do", m_componentMetadata, null );
+            return;
+        }
+        
+        // we are pending deactivation
+        setPendingDeactivate( true );
+        
         getActivator().schedule( new ComponentActivatorTask( "Deactivate", this )
         {
             public void run()
@@ -204,6 +221,25 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
                 deactivateInternal();
             }
         } );
+    }
+
+
+    /**
+     * Returns <code>true</code> if the deactivation of the component has been
+     * scheduled but not yet run.
+     */
+    public final boolean isPendingDeactivate()
+    {
+        return m_pendingDeactivate;
+    }
+
+
+    /**
+     * Sets the pending deactivate flag to the given value
+     */
+    public final void setPendingDeactivate( boolean pendingDeactivate )
+    {
+        m_pendingDeactivate = pendingDeactivate;
     }
 
 
@@ -483,17 +519,33 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         log( LogService.LOG_DEBUG, "Deactivating component", m_componentMetadata, null );
 
         // 0.- Remove published services from the registry
-        unregisterComponentService();
+        boolean unregistered = unregisterComponentService();
+        if ( !unregistered )
+        {
+            log( LogService.LOG_INFO, "Service could not be unregistered. Retrying after component deletion",
+                m_componentMetadata, null );
+        }
 
         // 1.- Call the deactivate method, if present
         // 2. Unbind any bound services
         // 3. Release references to the component instance and component context
         deleteComponent();
 
-        //Activator.trace("InstanceManager from bundle ["+ m_activator.getBundleContext().getBundle().getBundleId() + "] was invalidated.");
-
         // reset to state UNSATISFIED
         setState( STATE_UNSATISFIED );
+        
+        // clear the pending deactivation flag
+        setPendingDeactivate( false );
+        
+        // safety belt: try again to unregister the service if not done already
+        if ( !unregistered )
+        {
+            if ( !unregisterComponentService() )
+            {
+                log( LogService.LOG_INFO, "Service could still not be unregistered - Restart bundle " + getBundle()
+                    + " as a workaround", m_componentMetadata, null );
+            }
+        }
 
         log( LogService.LOG_DEBUG, "Component deactivated", m_componentMetadata, null );
     }
@@ -634,10 +686,33 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     }
 
 
-    protected void unregisterComponentService()
+    /**
+     * Unregisters the component as a service if it has been registered at all.
+     * <p>
+     * This method tries to acquire the service registration lock before
+     * unregistering the service. If the lock is not available, it cannot be
+     * securely checked whether the service needs to be unregistered or not. In
+     * this case the method return <code>true</code> only if the service
+     * registration field is not currently set.
+     * 
+     * @return <code>true</code> if the service could be unregistered or if the
+     *      component was not registered as a service in the first place.
+     *      Otherwise <code>false</code> is returned.
+     */
+    protected boolean unregisterComponentService()
     {
         // outside of try-finally to not trigger inadvertend unlock
-        lockServiceRegistration();
+        try {
+            lockServiceRegistration();
+        } catch (IllegalStateException ise) {
+            // cannot acquire the lock, thus use insecure field check
+            log( LogService.LOG_DEBUG, "Cannot unregister service reference: " + ise.getMessage(), m_componentMetadata,
+                null );
+
+            // if there was no service registration in the first place, this
+            // is not a problem. Otherwise the service will not be unregistered
+            return m_serviceRegistration == null;
+        }
 
         try
         {
@@ -653,6 +728,9 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         {
             unlockServiceRegistration();
         }
+        
+        // there is no service registered any more
+        return true;
     }
 
     //----------- Service Registration Locking --------------------------------
@@ -679,10 +757,17 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     // deactivateInternal method start its deactivation task by unregistering
     // the service.
     // See FELIX-550 for more information.
-    
 
-    // locks service registration by waiting for the registration to not
-    // be locked and then locking it
+    /**
+     * Locks service registration by waiting for the registration to not be
+     * locked and then locking it. If the lock does not get released within 
+     * 10 seconds an IllegalStateException is thrown. If the method terminates
+     * normally, the service lock is now held by the current thread.
+     * 
+     * @throws IllegalStateException if the service registration lock cannot be
+     *      acquired within 10 seconds. The message contains a human-readable
+     *      message mentioning the thread currently owning the lock.
+     */
     private void lockServiceRegistration()
     {
         synchronized ( serviceRegistrationLock )
@@ -722,8 +807,10 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     }
 
 
-    // unlocks the service registration. This should only be called by the
-    // thread actually holding the lock.
+    /**
+     * Unlocks the service registration. This should only be called by the
+     * thread actually holding the lock.
+     */
     private void unlockServiceRegistration()
     {
         synchronized ( serviceRegistrationLock )
@@ -923,7 +1010,17 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     ServiceReference getServiceReference()
     {
         // outside of try-finally to not trigger inadvertend unlock
-        lockServiceRegistration();
+        try
+        {
+            lockServiceRegistration();
+        }
+        catch ( IllegalStateException ise )
+        {
+            // cannot acquire the lock, thus assume no service registration
+            log( LogService.LOG_DEBUG, "Cannot return service reference: " + ise.getMessage(), m_componentMetadata,
+                null );
+            return null;
+        }
 
         try
         {
