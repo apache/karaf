@@ -72,7 +72,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         m_componentId = componentId;
 
         m_state = STATE_DISABLED;
-        m_dependencyManagers = new ArrayList();
+        loadDependencyManagers( metadata );
 
         log( LogService.LOG_DEBUG, "Component created", m_componentMetadata, null );
     }
@@ -341,20 +341,8 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
 
         try
         {
-            // If this component has got dependencies, create dependency managers for each one of them.
-            if ( m_componentMetadata.getDependencies().size() != 0 )
-            {
-                Iterator dependencyit = m_componentMetadata.getDependencies().iterator();
-
-                while ( dependencyit.hasNext() )
-                {
-                    ReferenceMetadata currentdependency = ( ReferenceMetadata ) dependencyit.next();
-
-                    DependencyManager depmanager = new DependencyManager( this, currentdependency );
-
-                    m_dependencyManagers.add( depmanager );
-                }
-            }
+            // enable the dependency managers of this component
+            enableDependencyManagers();
 
             // enter enabled state before trying to activate
             setState( STATE_ENABLED );
@@ -411,29 +399,11 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
 
             // Before creating the implementation object, we are going to
             // test if all the mandatory dependencies are satisfied
-            Dictionary properties = getProperties();
-            Iterator it = m_dependencyManagers.iterator();
-            while ( it.hasNext() )
+            if ( !verifyDependencyManagers( getProperties() ) )
             {
-                DependencyManager dm = ( DependencyManager ) it.next();
-
-                // ensure the target filter is correctly set
-                dm.setTargetFilter( properties );
-
-                // check whether the service is satisfied
-                if ( !dm.isSatisfied() )
-                {
-                    // at least one dependency is not satisfied
-                    log( LogService.LOG_INFO, "Dependency not satisfied: " + dm.getName(), m_componentMetadata, null );
-                    setState( STATE_UNSATISFIED );
-                }
-
-                // if at least one dependency is missing, we cannot continue and
-                // have to return
-                if ( getState() == STATE_UNSATISFIED )
-                {
-                    return;
-                }
+                log( LogService.LOG_INFO, "Not all dependencies satisified, cannot activate", m_componentMetadata, null );
+                setState( STATE_UNSATISFIED );
+                return;
             }
 
             // 1. Load the component implementation class
@@ -547,15 +517,9 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
 
         log( LogService.LOG_DEBUG, "Disabling component", m_componentMetadata, null );
 
-        // close all service listeners now, they are recreated on enable
-        // Stop the dependency managers to listen to events...
-        Iterator it = m_dependencyManagers.iterator();
-        while ( it.hasNext() )
-        {
-            DependencyManager dm = ( DependencyManager ) it.next();
-            dm.dispose();
-        }
-        m_dependencyManagers.clear();
+        // dispose and recreate dependency managers
+        disposeDependencyManagers();
+        loadDependencyManagers( m_componentMetadata );
 
         // we are now disabled, ready for re-enablement or complete destroyal
         setState( STATE_DISABLED );
@@ -589,7 +553,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
 
         // release references (except component metadata for logging purposes)
         m_activator = null;
-        m_dependencyManagers = null;
+        m_dependencyManagers.clear();
     }
 
 
@@ -817,6 +781,66 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     }
 
 
+    private void loadDependencyManagers( ComponentMetadata metadata )
+    {
+        List depMgrList = new ArrayList();
+
+        // If this component has got dependencies, create dependency managers for each one of them.
+        if ( metadata.getDependencies().size() != 0 )
+        {
+            Iterator dependencyit = metadata.getDependencies().iterator();
+
+            while ( dependencyit.hasNext() )
+            {
+                ReferenceMetadata currentdependency = ( ReferenceMetadata ) dependencyit.next();
+
+                DependencyManager depmanager = new DependencyManager( this, currentdependency );
+
+                depMgrList.add( depmanager );
+            }
+        }
+
+        m_dependencyManagers = depMgrList;
+    }
+
+
+    private void enableDependencyManagers() throws InvalidSyntaxException
+    {
+        Iterator it = getDependencyManagers();
+        while ( it.hasNext() )
+        {
+            DependencyManager dm = ( DependencyManager ) it.next();
+            dm.enable();
+        }
+    }
+
+
+    private boolean verifyDependencyManagers( Dictionary properties )
+    {
+        // indicates whether all dependencies are satisfied
+        boolean satisfied = true;
+
+        Iterator it = getDependencyManagers();
+        while ( it.hasNext() )
+        {
+            DependencyManager dm = ( DependencyManager ) it.next();
+
+            // ensure the target filter is correctly set
+            dm.setTargetFilter( properties );
+
+            // check whether the service is satisfied
+            if ( !dm.isSatisfied() )
+            {
+                // at least one dependency is not satisfied
+                log( LogService.LOG_INFO, "Dependency not satisfied: " + dm.getName(), m_componentMetadata, null );
+                satisfied = false;
+            }
+        }
+
+        return satisfied;
+    }
+
+
     Iterator getDependencyManagers()
     {
         return m_dependencyManagers.iterator();
@@ -840,11 +864,22 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     }
 
 
+    private void disposeDependencyManagers()
+    {
+        Iterator it = getDependencyManagers();
+        while ( it.hasNext() )
+        {
+            DependencyManager dm = ( DependencyManager ) it.next();
+            dm.dispose();
+        }
+    }
+
+
     /**
-    * Get the object that is implementing this descriptor
-    *
-    * @return the object that implements the services
-    */
+     * Get the object that is implementing this descriptor
+     *
+     * @return the object that implements the services
+     */
     public abstract Object getInstance();
 
 

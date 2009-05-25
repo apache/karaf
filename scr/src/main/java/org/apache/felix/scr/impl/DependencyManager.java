@@ -98,7 +98,6 @@ class DependencyManager implements ServiceListener, Reference
      * @param dependency An object that contains data about the dependency
      */
     DependencyManager( AbstractComponentManager componentManager, ReferenceMetadata dependency )
-        throws InvalidSyntaxException
     {
         m_componentManager = componentManager;
         m_dependencyMetadata = dependency;
@@ -106,10 +105,6 @@ class DependencyManager implements ServiceListener, Reference
 
         // setup the target filter from component descriptor
         setTargetFilter( m_dependencyMetadata.getTarget() );
-
-        // register the service listener
-        String filterString = "(" + Constants.OBJECTCLASS + "=" + dependency.getInterface() + ")";
-        componentManager.getActivator().getBundleContext().addServiceListener( this, filterString );
 
         // get the current number of registered services available
         ServiceReference refs[] = getFrameworkServiceReferences();
@@ -429,6 +424,18 @@ class DependencyManager implements ServiceListener, Reference
 
     //---------- Service tracking support -------------------------------------
 
+    /**
+     * Enables this dependency manager by starting to listen for service
+     * events.
+     * @throws InvalidSyntaxException if the target filter is invalid
+     */
+    void enable() throws InvalidSyntaxException
+    {
+        // register the service listener
+        String filterString = "(" + Constants.OBJECTCLASS + "=" + m_dependencyMetadata.getInterface() + ")";
+        m_componentManager.getActivator().getBundleContext().addServiceListener( this, filterString );
+    }
+    
     /**
      * Disposes off this dependency manager by removing as a service listener
      * and ungetting all services, which are still kept in the list of our
