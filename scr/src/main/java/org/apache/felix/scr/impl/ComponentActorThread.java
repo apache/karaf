@@ -81,12 +81,12 @@ class ComponentActorThread extends Thread
             // otherwise execute the task, log any issues
             try
             {
-                Activator.log( LogService.LOG_DEBUG, null, "Running task [" + task + "]", null );
+                Activator.log( LogService.LOG_INFO, null, "Running task: " + task, null );
                 task.run();
             }
             catch ( Throwable t )
             {
-                Activator.log( LogService.LOG_ERROR, null, "Unexpected problem executing task", t );
+                Activator.log( LogService.LOG_ERROR, null, "Unexpected problem executing task " + task, t );
             }
         }
     }
