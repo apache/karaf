@@ -106,13 +106,9 @@ class DependencyManager implements ServiceListener, Reference
         // setup the target filter from component descriptor
         setTargetFilter( m_dependencyMetadata.getTarget() );
 
-        // get the current number of registered services available
-        ServiceReference refs[] = getFrameworkServiceReferences();
-        m_size = ( refs == null ) ? 0 : refs.length;
-        
         m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager " + getName() + " created: filter="
-            + getTarget() + ", interface=" + m_dependencyMetadata.getInterface() + ",matching services=" + m_size,
-            m_componentManager.getComponentMetadata(), null );
+            + getTarget() + ", interface=" + m_dependencyMetadata.getInterface(), m_componentManager
+            .getComponentMetadata(), null );
     }
 
 
@@ -431,9 +427,16 @@ class DependencyManager implements ServiceListener, Reference
      */
     void enable() throws InvalidSyntaxException
     {
+        // get the current number of registered services available
+        ServiceReference refs[] = getFrameworkServiceReferences();
+        m_size = ( refs == null ) ? 0 : refs.length;
+
         // register the service listener
         String filterString = "(" + Constants.OBJECTCLASS + "=" + m_dependencyMetadata.getInterface() + ")";
         m_componentManager.getActivator().getBundleContext().addServiceListener( this, filterString );
+
+        m_componentManager.log( LogService.LOG_DEBUG, "Registered for service events, currently " + m_size
+            + " service(s) match the filter", m_componentManager.getComponentMetadata(), null );
     }
     
     /**
