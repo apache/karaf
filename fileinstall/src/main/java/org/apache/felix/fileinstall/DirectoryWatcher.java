@@ -388,6 +388,10 @@ public class DirectoryWatcher extends Thread
         if (log == null)
         {
             System.out.println(message + (e == null ? "" : ": " + e));
+            if (debug > 0 && e != null)
+            {
+                e.printStackTrace(System.out);
+            }
         }
         else
         {
