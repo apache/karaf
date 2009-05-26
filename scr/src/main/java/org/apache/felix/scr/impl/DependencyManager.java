@@ -358,6 +358,9 @@ class DependencyManager implements ServiceListener, Reference
                 {
                     invokeUnbindMethod( reference );
                 }
+                
+                // make sure the service is returned
+                ungetService( reference );
             }
         }
         
