@@ -23,6 +23,7 @@ import java.util.*;
 import java.net.URISyntaxException;
 import java.net.URI;
 
+import org.apache.felix.fileinstall.util.Util;
 import org.osgi.framework.*;
 import org.osgi.service.cm.*;
 import org.osgi.service.log.*;
@@ -443,14 +444,14 @@ public class DirectoryWatcher extends Thread
         for (int i = 0; i < list.length; i++)
         {
             File file = new File(jardir, list[i]);
-            if (list[i].endsWith(".jar"))
+            if (list[i].endsWith(".cfg"))
+            {
+                configs.add(file.getAbsolutePath());
+            }
+            else if (Util.isValidJar(file.getAbsolutePath()))
             {
                 Jar jar = new Jar(file);
                 jars.put(jar.getPath(), jar);
-            }
-            else if (list[i].endsWith(".cfg"))
-            {
-                configs.add(file.getAbsolutePath());
             }
         }
     }

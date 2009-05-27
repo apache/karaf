@@ -26,25 +26,30 @@ import junit.framework.TestCase;
 
 public class UtilTest extends TestCase
 {
-
     public void testBasicSubstitution()
     {
-        System.setProperty( "value1", "sub_value1" );
-        Dictionary  props = new Hashtable();
-        props.put( "key0", "value0" );
-        props.put( "key1", "${value1}" );
-        props.put( "key2", "${value2}" );
-        
-        for (Enumeration e = props.keys(); e.hasMoreElements(); )
+        System.setProperty("value1", "sub_value1");
+        Dictionary props = new Hashtable();
+        props.put("key0", "value0");
+        props.put("key1", "${value1}");
+        props.put("key2", "${value2}");
+
+        for (Enumeration e = props.keys(); e.hasMoreElements();)
         {
             String name = (String) e.nextElement();
             props.put(name,
-                Util.substVars(( String ) props.get(name), name, null, props));
-        }    
-        
-        assertEquals( "value0", props.get( "key0" ) );
-        assertEquals( "sub_value1", props.get( "key1" ) );
-        assertEquals( "", props.get( "key2" ) );
-        
+                Util.substVars((String) props.get(name), name, null, props));
+        }
+
+        assertEquals("value0", props.get("key0"));
+        assertEquals("sub_value1", props.get("key1"));
+        assertEquals("", props.get("key2"));
+
+    }
+
+    public void testCanRecognizeInvalidJar()
+    {
+        assertFalse(Util.isValidJar("src/test/resources/watched/firstjar.jar"));
+        assertFalse(Util.isValidJar("src/test/resources/watched/notexistentfile.jar"));
     }
 }
