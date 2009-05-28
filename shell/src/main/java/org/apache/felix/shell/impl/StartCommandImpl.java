@@ -29,6 +29,7 @@ import org.osgi.framework.*;
 public class StartCommandImpl extends InstallCommandImpl implements Command
 {
     private static final String TRANSIENT_SWITCH = "-t";
+    private static final String POLICY_SWITCH = "-p";
 
     private BundleContext m_context = null;
 
@@ -45,7 +46,7 @@ public class StartCommandImpl extends InstallCommandImpl implements Command
 
     public String getUsage()
     {
-        return "start [-t] <id> [<id> <URL> ...]";
+        return "start [-t | -p] <id> [<id> <URL> ...]";
     }
 
     public String getShortDescription()
@@ -67,15 +68,23 @@ public class StartCommandImpl extends InstallCommandImpl implements Command
             tokens.add(st.nextToken());
         }
 
-        // Default switch value.
-        boolean isTransient = false;
+        // Default switch values.
+        int options = 0;
 
         // Check for "transient" switch.
         if (tokens.contains(TRANSIENT_SWITCH))
         {
             // Remove the switch and set boolean flag.
             tokens.remove(TRANSIENT_SWITCH);
-            isTransient = true;
+            options |= Bundle.START_TRANSIENT;
+        }
+
+        // Check for "start policy" switch.
+        if (tokens.contains(POLICY_SWITCH))
+        {
+            // Remove the switch and set boolean flag.
+            tokens.remove(POLICY_SWITCH);
+            options |= Bundle.START_ACTIVATION_POLICY;
         }
 
         // There should be at least one bundle id.
@@ -102,7 +111,7 @@ public class StartCommandImpl extends InstallCommandImpl implements Command
 
                     if (bundle != null)
                     {
-                        bundle.start(isTransient ? Bundle.START_TRANSIENT : 0);
+                        bundle.start(options);
                     }
                     else
                     {

@@ -67,14 +67,14 @@ public class StopCommandImpl implements Command
         }
 
         // Default switch value.
-        boolean isTransient = false;
+        int options = 0;
 
         // Check for "transient" switch.
         if (tokens.contains(TRANSIENT_SWITCH))
         {
             // Remove the switch and set boolean flag.
             tokens.remove(TRANSIENT_SWITCH);
-            isTransient = true;
+            options |= Bundle.STOP_TRANSIENT;
         }
 
         // There should be at least one bundle id.
@@ -90,7 +90,7 @@ public class StopCommandImpl implements Command
                     Bundle bundle = m_context.getBundle(l);
                     if (bundle != null)
                     {
-                        bundle.stop(isTransient ? Bundle.STOP_TRANSIENT : 0);
+                        bundle.stop(options);
                     }
                     else
                     {
