@@ -427,7 +427,7 @@ public class ServiceRegistry
             }
         }
 
-        return (usage.m_count > 0);
+        return true;
     }
 
 
