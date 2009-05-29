@@ -123,7 +123,8 @@ public class AutoActivator implements BundleActivator
                 }
                 catch (Exception ex)
                 {
-                    System.err.println("Auto-properties install: " + ex);
+                    System.err.println("Auto-properties install: "
+                        + ex + ((ex.getCause() != null) ? " - " + ex.getCause() : ""));
                 }
             }
         }
@@ -148,7 +149,8 @@ public class AutoActivator implements BundleActivator
                     }
                     catch (Exception ex)
                     {
-                        System.err.println("Auto-properties start: " + ex);
+                        System.err.println("Auto-properties start: "
+                            + ex + ((ex.getCause() != null) ? " - " + ex.getCause() : ""));
                     }
                 }
             }
