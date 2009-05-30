@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -47,7 +47,7 @@ import org.apache.felix.ipojo.util.Logger;
 
 /**
  * This class implements iPOJO DynamicMBean. it builds the dynamic MBean
- * 
+ *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
@@ -80,7 +80,7 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
 
     /**
      * Constructor.
-     * 
+     *
      * @param properties the data extracted from metadat.xml file
      * @param instanceManager the InstanceManager instance
      */
@@ -93,7 +93,7 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
 
     /**
      * Gets the value of the required attribute.
-     * 
+     *
      * @param arg0 the name of required attribute
      * @throws AttributeNotFoundException if the attribute doesn't exist
      * @throws MBeanException if something bad occures
@@ -113,7 +113,7 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
 
     /**
      * Gets values of required attributes.
-     * 
+     *
      * @param attributeNames the names of the required attributes
      * @return return the list of the attribute
      */
@@ -139,7 +139,7 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
 
     /**
      * Returns the MBean Class builded.
-     * 
+     *
      * @return return MBeanInfo class constructed by buildMBeanInfo
      */
     public MBeanInfo getMBeanInfo() {
@@ -148,7 +148,7 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
 
     /**
      * Invokes the required method on the targeted POJO.
-     * 
+     *
      * @param operationName the name of the method called
      * @param params the parameters given to the method
      * @param signature the determine which method called
@@ -167,27 +167,22 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
             try {
                 return mc.call(params);
             } catch (NoSuchMethodException e) {
-                System.err.println("No such method!: " + operationName);
-                e.printStackTrace();
+                throw new ReflectionException(e);
             } catch (IllegalAccessException e) {
-                System.err.println("Illegal Access Exception");
-                e.printStackTrace();
+                throw new ReflectionException(e);
             } catch (InvocationTargetException e) {
-                System.err.println("Invocation Target Exception");
-                e.printStackTrace();
+                throw new MBeanException(e);
             }
         } else {
             throw new ReflectionException(new NoSuchMethodException(
                 operationName), "Cannot find the operation " + operationName
                     + " in " + m_className);
         }
-
-        return null;
     }
 
     /**
      * Changes specified attribute value.
-     * 
+     *
      * @param attribute the attribute with new value to be changed
      * @throws AttributeNotFoundException if the required attribute was not found
      * @throws InvalidAttributeValueException if the value is inccorrect type
@@ -254,7 +249,7 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
 
     /**
      * Changes all the attributes value.
-     * 
+     *
      * @param attributes the list of attribute value to be changed
      * @return the list of new attribute
      */
@@ -301,7 +296,7 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
         if (m_configMap == null) {
             return;
         }
-        
+
         String dDescription = m_configMap.getDecription();
 
         if (m_configMap.getProperties() != null) {
@@ -363,7 +358,7 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
 
     /**
      * Gets the notification informations (use by JMX).
-     * 
+     *
      * @return the structure which describe the notifications
      */
     public MBeanNotificationInfo[] getNotificationInfo() {
@@ -387,7 +382,7 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
 
     /**
      * Sends a notification to a subscriber.
-     * 
+     *
      * @param msg the msg to send
      * @param attributeName the name of the attribute
      * @param attributeType the type of the attribute
