@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -28,18 +28,18 @@ import org.apache.felix.ipojo.test.scenarios.util.Utils;
 import org.osgi.framework.ServiceReference;
 
 public class UpdatedMethod extends OSGiTestCase {
-	
+
 	ComponentInstance fooProvider1;
 	ComponentInstance fooProvider2;
 	ComponentInstance fooProvider3;
-	
+
 	public void setUp() {
 		String type = "CONFIG-FooProviderType-ConfUpdated";
-		
+
 		Properties p1 = new Properties();
 		p1.put("instance.name","FooProvider-1");
 		fooProvider1 = Utils.getComponentInstance(getContext(), type, p1);
-		
+
 		Properties p2 = new Properties();
 		p2.put("instance.name","FooProvider-2");
 		p2.put("int", new Integer(4));
@@ -48,12 +48,12 @@ public class UpdatedMethod extends OSGiTestCase {
 		p2.put("strAProp", new String[] {"bar", "foo"});
 		p2.put("intAProp", new int[] {1, 2, 3});
 		fooProvider2 = Utils.getComponentInstance(getContext(), type, p2);
-		
+
 		Properties p3 = new Properties();
         p3.put("instance.name","FooProvider-3");
         fooProvider3 = Utils.getComponentInstance(getContext(), "CONFIG-FooProviderType-ConfNoValueUpdated", p3);
 	}
-	
+
 	public void tearDown() {
 		fooProvider1.dispose();
 		fooProvider2.dispose();
@@ -62,23 +62,23 @@ public class UpdatedMethod extends OSGiTestCase {
 		fooProvider2 = null;
 		fooProvider3 = null;
 	}
-	
+
 	public void testComponentTypeConfiguration() {
 		ServiceReference ref = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), fooProvider1.getInstanceName());
 		assertNotNull("Check FooService availability", ref);
 		FooService fs = (FooService) getContext().getService(ref);
 		Properties toCheck = fs.fooProps();
-		
+
 		Integer intProp = (Integer) toCheck.get("intProp");
 		Boolean boolProp = (Boolean) toCheck.get("boolProp");
 		String strProp = (String) toCheck.get("strProp");
 		String[] strAProp = (String[]) toCheck.get("strAProp");
 		int[] intAProp = (int[]) toCheck.get("intAProp");
-		
+
 		// Check updated
 		Integer updated = (Integer) toCheck.get("updated");
 		Dictionary dict = (Dictionary) toCheck.get("lastupdated");
-		
+
 		assertEquals("Check intProp equality (1)", intProp, new Integer(2));
 		assertEquals("Check longProp equality (1)", boolProp, new Boolean(false));
 		assertEquals("Check strProp equality (1)", strProp, new String("foo"));
@@ -92,26 +92,26 @@ public class UpdatedMethod extends OSGiTestCase {
 		for (int i = 0; i < intAProp.length; i++) {
 			if(intAProp[i] != v2[i]) { fail("Check the intAProp Equality (1) : " + intAProp[i] + " != " + v2[i]); }
 		}
-		
+
 		assertEquals("updated count ", 1, updated.intValue());
 		assertEquals("Last updated", 5, dict.size());
-		
+
 		// change the field value
 		assertTrue("Invoke the fs service", fs.foo());
 		toCheck = fs.fooProps();
-		
-		
+
+
 		//	Re-check the property (change)
 		intProp = (Integer) toCheck.get("intProp");
 		boolProp = (Boolean) toCheck.get("boolProp");
 		strProp = (String) toCheck.get("strProp");
 		strAProp = (String[]) toCheck.get("strAProp");
 		intAProp = (int[]) toCheck.get("intAProp");
-		
+
 		// Check updated
         updated = (Integer) toCheck.get("updated");
         dict = (Dictionary) toCheck.get("lastupdated");
-		
+
 		assertEquals("Check intProp equality (2) ("+intProp+")", intProp, new Integer(3));
 		assertEquals("Check longProp equality (2)", boolProp, new Boolean(true));
 		assertEquals("Check strProp equality (2)", strProp, new String("bar"));
@@ -125,55 +125,55 @@ public class UpdatedMethod extends OSGiTestCase {
 		for (int i = 0; i < intAProp.length; i++) {
 			if(intAProp[i] != v2[i]) { fail("Check the intAProp Equality (2) : " + intAProp[i] + " != " + v2[i]); }
 		}
-		
+
 		// This does not reconfigure...
         assertEquals("updated count -2 ", 1, updated.intValue());
         assertEquals("Last update - 2", 5, dict.size());
-        		
+
 		fs = null;
 		getContext().ungetService(ref);
 	}
-	
+
 	public void testNoValue() {
         ServiceReference sr = Utils.getServiceReferenceByName(getContext(), FooService.class.getName(), "FooProvider-3");
         assertNotNull("Check the availability of the FS service", sr);
-        
+
         FooService fs = (FooService) getContext().getService(sr);
         Properties toCheck = fs.fooProps();
-        
+
         // Check service properties
         Integer intProp = (Integer) toCheck.get("intProp");
         Boolean boolProp = (Boolean) toCheck.get("boolProp");
         String strProp = (String) toCheck.get("strProp");
         String[] strAProp = (String[]) toCheck.get("strAProp");
         int[] intAProp = (int[]) toCheck.get("intAProp");
-        
+
         // Check updated
         Integer updated = (Integer) toCheck.get("updated");
         Dictionary dict = (Dictionary) toCheck.get("lastupdated");
-        
+
         assertEquals("Check intProp equality", intProp, new Integer(0));
         assertEquals("Check longProp equality", boolProp, new Boolean(false));
         assertEquals("Check strProp equality", strProp, null);
         assertNull("Check strAProp nullity", strAProp);
         assertNull("Check intAProp  nullity", intAProp);
-        
+
         assertEquals("updated count ", 1, updated.intValue());
         assertEquals("Last update", 0, dict.size());
-       
+
         assertTrue("invoke fs", fs.foo());
         toCheck = fs.fooProps();
-        
+
         // Re-check the property (change)
         intProp = (Integer) toCheck.get("intProp");
         boolProp = (Boolean) toCheck.get("boolProp");
         strProp = (String) toCheck.get("strProp");
         strAProp = (String[]) toCheck.get("strAProp");
         intAProp = (int[]) toCheck.get("intAProp");
-        
+
         updated = (Integer) toCheck.get("updated");
         dict = (Dictionary) toCheck.get("lastupdated");
-        
+
         assertEquals("Check intProp equality", intProp, new Integer(3));
         assertEquals("Check longProp equality", boolProp, new Boolean(true));
         assertEquals("Check strProp equality", strProp, new String("bar"));
@@ -187,9 +187,10 @@ public class UpdatedMethod extends OSGiTestCase {
         for (int i = 0; i < intAProp.length; i++) {
             if(intAProp[i] != v2[i]) { fail("Check the intAProp Equality"); }
         }
-        
+
         fs = null;
-        getContext().ungetService(sr);   
+        getContext().ungetService(sr);
     }
+
 
 }

@@ -443,9 +443,11 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
 
     /**
      * Invokes the updated method.
-     * This method build the dictionary containing all valued properties.
+     * This method build the dictionary containing all valued properties,
+     * as well as properties propagated to the provided service handler (
+     * only if the propagation is enabled).
      * @param instance the instance on which the callback must be called.
-     * If <code>null</code> the callback is called on all the exisiting
+     * If <code>null</code> the callback is called on all the existing
      * object.
      */
     private void notifyUpdated(Object instance) {
@@ -460,6 +462,31 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
                 props.put(n, v);
             }
         }
+        // add propagated properties to the list if propagation enable
+        if (m_mustPropagate) {
+            // Start by properties from the configuration admin,
+            if (m_propagatedFromCA != null) {
+
+                Enumeration e = m_propagatedFromCA.keys();
+                while (e.hasMoreElements()) {
+                    String k = (String) e.nextElement();
+                    if (! k.equals("instance.name")) {
+                        props.put(k, m_propagatedFromCA.get(k));
+                    }
+                }
+            }
+            // Do also the one from the instance configuration
+            if (m_propagatedFromInstance != null) {
+                Enumeration e = m_propagatedFromInstance.keys();
+                while (e.hasMoreElements()) {
+                    String k = (String) e.nextElement();
+                    if (! k.equals("instance.name")) { // Skip instance.name
+                        props.put(k, m_propagatedFromInstance.get(k));
+                    }
+                }
+            }
+        }
+
         try {
             if (instance == null) {
                 m_updated.call(new Object[] {props});

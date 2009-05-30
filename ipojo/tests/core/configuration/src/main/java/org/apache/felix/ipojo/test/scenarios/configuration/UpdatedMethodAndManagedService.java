@@ -118,7 +118,7 @@ public class UpdatedMethodAndManagedService extends OSGiTestCase {
         Dictionary dict = (Dictionary) fs.fooProps().get("lastupdated");
 
         assertEquals("Check updated", 1, updated.intValue());
-        assertEquals("Check last updated", 2, dict.size());
+        assertEquals("Check last updated", 3, dict.size());
 
         context.ungetService(fooRef);
 		getContext().ungetService(msRef);
@@ -163,7 +163,7 @@ public class UpdatedMethodAndManagedService extends OSGiTestCase {
         Dictionary dict = (Dictionary) fs.fooProps().get("lastupdated");
 
         assertEquals("Check updated", 1, updated.intValue());
-        assertEquals("Check last updated", 2, dict.size());
+        assertEquals("Check last updated", 3, dict.size());
 
         conf.put("baz", "zab2");
         conf.put("foo", "oof2");
@@ -177,7 +177,7 @@ public class UpdatedMethodAndManagedService extends OSGiTestCase {
         dict = (Dictionary) fs.fooProps().get("lastupdated");
 
         assertEquals("Check updated -2", 2, updated.intValue());
-        assertEquals("Check last updated", 2, dict.size());
+        assertEquals("Check last updated", 3, dict.size());
 
         getContext().ungetService(fooRef);
         getContext().ungetService(msRef);
@@ -231,7 +231,7 @@ public class UpdatedMethodAndManagedService extends OSGiTestCase {
         Dictionary dict = (Dictionary) fs.fooProps().get("lastupdated");
 
         assertEquals("Check updated -1", 1, updated.intValue());
-        assertEquals("Check last updated", 2, dict.size());
+        assertEquals("Check last updated", 3, dict.size());
 
         conf.put("baz", "zab2");
         conf.put("foo", "oof2");
@@ -245,7 +245,7 @@ public class UpdatedMethodAndManagedService extends OSGiTestCase {
         dict = (Dictionary) fs.fooProps().get("lastupdated");
 
         assertEquals("Check updated -2", 2, updated.intValue());
-        assertEquals("Check last updated", 2, dict.size());
+        assertEquals("Check last updated", 3, dict.size());
 
 
     	getContext().ungetService(fooRef);
@@ -301,7 +301,7 @@ public class UpdatedMethodAndManagedService extends OSGiTestCase {
         Dictionary dict = (Dictionary) fs.fooProps().get("lastupdated");
 
         assertEquals("Check updated", 1, updated.intValue());
-        assertEquals("Check last updated", 2, dict.size());
+        assertEquals("Check last updated", 3, dict.size());
 
         conf.put("baz", "zab2");
         conf.put("foo", "oof2");
@@ -315,7 +315,7 @@ public class UpdatedMethodAndManagedService extends OSGiTestCase {
         dict = (Dictionary) fs.fooProps().get("lastupdated");
 
         assertEquals("Check updated -2", 2, updated.intValue());
-        assertEquals("Check last updated", 2, dict.size());
+        assertEquals("Check last updated", 3, dict.size());
 
         getContext().ungetService(fooRef);
         getContext().ungetService(msRef);
