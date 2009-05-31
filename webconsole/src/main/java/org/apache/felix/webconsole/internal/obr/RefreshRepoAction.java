@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.Action;
+import org.osgi.service.log.LogService;
 import org.osgi.service.obr.Repository;
 import org.osgi.service.obr.RepositoryAdmin;
 
@@ -70,7 +71,8 @@ public class RefreshRepoAction extends AbstractObrPlugin implements Action
                 }
                 catch ( Throwable t )
                 {
-                    // don't care, just ignore
+                    getLog().log( LogService.LOG_ERROR,
+                        "RefreshRepoAction: Submitted URL " + repositoryURL + " is invalid: " + t.getMessage() );
                 }
             }
 
@@ -82,11 +84,12 @@ public class RefreshRepoAction extends AbstractObrPlugin implements Action
                     try
                     {
                         repoAdmin.removeRepository( repoURL );
+                        getLog().log( LogService.LOG_INFO, "RefreshRepoAction: Removed repository " + repositoryURL );
                     }
                     catch ( Exception e )
                     {
-                        // TODO: log.log(LogService.LOG_ERROR, "Cannot refresh
-                        // Repository " + repo.getURL());
+                         getLog().log( LogService.LOG_ERROR,
+                            "RefreshRepoAction: Failed removing repository " + repositoryURL, e );
                     }
                 }
                 else
@@ -94,11 +97,12 @@ public class RefreshRepoAction extends AbstractObrPlugin implements Action
                     try
                     {
                         repoAdmin.addRepository( repoURL );
+                        getLog().log( LogService.LOG_INFO, "RefreshRepoAction: Added repository " + repositoryURL );
                     }
                     catch ( Exception e )
                     {
-                        // TODO: log.log(LogService.LOG_ERROR, "Cannot refresh
-                        // Repository " + repo.getURL());
+                        getLog().log( LogService.LOG_ERROR,
+                            "RefreshRepoAction: Failed adding repository " + repositoryURL, e );
                     }
                 }
             }

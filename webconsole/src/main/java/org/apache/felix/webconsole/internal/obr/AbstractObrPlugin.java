@@ -20,6 +20,7 @@ package org.apache.felix.webconsole.internal.obr;
 
 
 import org.apache.felix.webconsole.internal.BaseManagementPlugin;
+import org.osgi.service.log.LogService;
 import org.osgi.service.obr.RepositoryAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -44,7 +45,7 @@ public class AbstractObrPlugin extends BaseManagementPlugin
             }
             catch ( Throwable t )
             {
-                // missing InstallerService class ??
+                getLog().log( LogService.LOG_WARNING, "Cannot create RepositoryAdmin service tracker", t );
                 return null;
             }
 
