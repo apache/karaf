@@ -22,16 +22,12 @@ package org.apache.felix.scr.impl;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.log.LogService;
 
 
 /**
  * The <code>DelayedComponentManager</code> TODO
- *
- * @author fmeschbe
- * @version $Rev$, $Date$
  */
-public class DelayedComponentManager extends ImmediateComponentManager implements ServiceFactory
+class DelayedComponentManager extends ImmediateComponentManager implements ServiceFactory
 {
 
     /**
@@ -43,6 +39,12 @@ public class DelayedComponentManager extends ImmediateComponentManager implement
     {
         super( activator, metadata, componentId );
     }
+
+
+	protected State getSatisfiedState()
+	{
+		return Registered.getInstance();
+	}
 
 
     protected boolean createComponent()
@@ -71,26 +73,15 @@ public class DelayedComponentManager extends ImmediateComponentManager implement
 
     //---------- ServiceFactory interface -------------------------------------
 
-    public Object getService( Bundle arg0, ServiceRegistration arg1 )
+    public synchronized Object getService( Bundle bundle, ServiceRegistration sr )
     {
-        log( LogService.LOG_DEBUG, "DelayedComponentServiceFactory.getService()", getComponentMetadata(), null );
-
-        // When the getServiceMethod is called, the implementation object must be created
-        // unless another bundle has already retrievd it
-
-        if ( getInstance() == null )
-        {
-            super.createComponent();
-
-            // if component creation failed, we were deactivated and the state
-            // is not REGISTERED any more. Otherwise go to standard ACTIVE
-            // state now
-            setStateConditional( STATE_REGISTERED, STATE_ACTIVE );
-        }
-
-        return getInstance();
+        return state().getService(this);
     }
 
+	protected boolean createRealComponent()
+	{
+		return super.createComponent();
+	}
 
     public void ungetService( Bundle arg0, ServiceRegistration arg1, Object arg2 )
     {

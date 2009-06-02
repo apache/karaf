@@ -18,22 +18,24 @@
  */
 package org.apache.felix.scr.impl;
 
-
-import java.util.*;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ManagedServiceFactory;
-import org.osgi.service.component.*;
+import org.osgi.service.component.ComponentConstants;
+import org.osgi.service.component.ComponentFactory;
+import org.osgi.service.component.ComponentInstance;
 import org.osgi.service.log.LogService;
-
 
 /**
  * The <code>ComponentFactoryImpl</code> TODO
- *
- * @author fmeschbe
  */
-public class ComponentFactoryImpl extends AbstractComponentManager implements ComponentFactory, ManagedServiceFactory
+class ComponentFactoryImpl extends AbstractComponentManager implements ComponentFactory, ManagedServiceFactory
 {
 
     // The component registry used to retrieve component IDs
@@ -79,8 +81,11 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         // nothing to delete
     }
 
+    protected State getSatisfiedState() {
+        return Factory.getInstance();
+    }
 
-    protected ServiceRegistration registerComponentService()
+    protected ServiceRegistration registerService()
     {
         log( LogService.LOG_DEBUG, "registering component factory", getComponentMetadata(), null );
 
@@ -154,7 +159,6 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         }
     }
 
-
     public void deleted( String pid )
     {
         if ( m_configuredServices != null )
@@ -163,7 +167,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
             if ( cm != null )
             {
                 log( LogService.LOG_DEBUG, "Disposing component after configuration deletion", getComponentMetadata(),
-                    null );
+                        null );
 
                 disposeComponentManager( cm );
             }
@@ -179,7 +183,6 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
 
 
     //---------- internal -----------------------------------------------------
-
     /**
      * ComponentManager instances created by this method are not registered
      * with the ComponentRegistry. Therefore, any configuration update to these
@@ -212,20 +215,21 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         if ( isNewInstance )
         {
             cm.setFactoryProperties( configuration );
+            // enable synchronously
+            cm.enableInternal();
+            cm.activateInternal();
         }
         else
         {
             // this should not call component reactivation because it is
             // not active yet
             cm.reconfigure( configuration );
+            // enable asynchronously
+            cm.enable();
         }
-
-        // enable synchronously or asynchronously depending on the flag
-        cm.enable( isNewInstance );
 
         return cm;
     }
-
 
     private void disposeComponentManager( ComponentManager cm )
     {

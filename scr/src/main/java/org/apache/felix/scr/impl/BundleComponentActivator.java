@@ -321,7 +321,7 @@ class BundleComponentActivator implements Logger
      * configuration data for components managed by this activator or
      * <code>null</code> if no Configuration Admin Service is available in the
      * framework.
-     */
+	 */
     protected ConfigurationAdmin getConfigurationAdmin()
     {
         return ( ConfigurationAdmin ) m_configurationAdmin.getService();

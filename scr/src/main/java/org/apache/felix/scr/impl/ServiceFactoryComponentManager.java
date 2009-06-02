@@ -32,7 +32,7 @@ import org.osgi.service.log.LogService;
 /**
  * The <code>ServiceFactoryComponentManager</code> TODO
  */
-public class ServiceFactoryComponentManager extends ImmediateComponentManager implements ServiceFactory
+class ServiceFactoryComponentManager extends ImmediateComponentManager implements ServiceFactory
 {
 
     // maintain the map of ComponentContext objects created for the
@@ -42,13 +42,20 @@ public class ServiceFactoryComponentManager extends ImmediateComponentManager im
 
     /**
      * @param activator
-     * @param metadata
+	 * @param metadata
+	 * @param componentId
      */
     public ServiceFactoryComponentManager( BundleComponentActivator activator, ComponentMetadata metadata,
         long componentId )
     {
         super( activator, metadata, componentId );
     }
+
+
+	protected State getSatisfiedState()
+	{
+		return Factory.getInstance();
+	}
 
 
     /* (non-Javadoc)
@@ -107,7 +114,16 @@ public class ServiceFactoryComponentManager extends ImmediateComponentManager im
             serviceContexts.put( service, serviceContext );
 
             // if this is the first use of this component, switch to ACTIVE state
-            setStateConditional( STATE_REGISTERED, STATE_ACTIVE );
+			if (getState() == STATE_FACTORY)
+			{
+				synchronized(this)
+				{
+					if (getState() == STATE_FACTORY)
+					{
+						changeState(Active.getInstance());
+					}
+				}
+			}
         }
 
         return service;
@@ -130,7 +146,16 @@ public class ServiceFactoryComponentManager extends ImmediateComponentManager im
         // if this was the last use of the component, go back to REGISTERED state
         if ( serviceContexts.isEmpty() )
         {
-            setStateConditional( STATE_ACTIVE, STATE_REGISTERED );
+			if (getState() == STATE_ACTIVE)
+			{
+				synchronized(this)
+				{
+					if (getState() == STATE_ACTIVE)
+					{
+						changeState(Factory.getInstance());
+					}
+				}
+			}
         }
     }
 

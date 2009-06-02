@@ -203,8 +203,7 @@ class DependencyManager implements ServiceListener, Reference
         // if the component is currently unsatisfied, it may become satisfied
         // by adding this service, try to activate (also schedule activation
         // if the component is pending deactivation)
-        if ( m_componentManager.getState() == AbstractComponentManager.STATE_UNSATISFIED
-            || m_componentManager.isPendingDeactivate() )
+        if ( m_componentManager.getState() == AbstractComponentManager.STATE_ENABLED )
         {
             m_componentManager.log( LogService.LOG_INFO, "Dependency Manager: Service "
                 + m_dependencyMetadata.getName() + " registered, activate component", m_componentManager
@@ -263,9 +262,10 @@ class DependencyManager implements ServiceListener, Reference
         
         else 
         {
-            m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Ignoring service addition, wrong state "
-                + m_componentManager.stateToString( m_componentManager.getState() ), m_componentManager
-                .getComponentMetadata(), null );
+            m_componentManager.log( LogService.LOG_DEBUG,
+					"Dependency Manager: Ignoring service addition, wrong state "
+					+ m_componentManager.state(),
+					m_componentManager.getComponentMetadata(), null );
         }
     }
     
@@ -309,7 +309,7 @@ class DependencyManager implements ServiceListener, Reference
                             + " not satisfied", m_componentManager.getComponentMetadata(), null );
     
                 // deactivate the component now
-                m_componentManager.deactivate();
+                m_componentManager.deactivateInternal();
             }
     
             // if the dependency is static, we have to reactivate the component
@@ -321,7 +321,8 @@ class DependencyManager implements ServiceListener, Reference
                     m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Static dependency on "
                         + m_dependencyMetadata.getName() + "/" + m_dependencyMetadata.getInterface() + " is broken",
                         m_componentManager.getComponentMetadata(), null );
-                    m_componentManager.reactivate();
+                    m_componentManager.deactivateInternal();
+					m_componentManager.activate();
                 }
                 catch ( Exception ex )
                 {
@@ -346,7 +347,7 @@ class DependencyManager implements ServiceListener, Reference
                             "Dependency Manager: Deactivating component due to mandatory dependency on "
                                 + m_dependencyMetadata.getName() + "/" + m_dependencyMetadata.getInterface()
                                 + " not satisfied", m_componentManager.getComponentMetadata(), null );
-                        m_componentManager.deactivate();
+                        m_componentManager.deactivateInternal();
     
                         // abort here we do not need to do more
                         return;
@@ -366,9 +367,10 @@ class DependencyManager implements ServiceListener, Reference
         
         else 
         {
-            m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Ignoring service removal, wrong state "
-                + m_componentManager.stateToString( m_componentManager.getState() ), m_componentManager
-                .getComponentMetadata(), null );
+            m_componentManager.log( LogService.LOG_DEBUG,
+					"Dependency Manager: Ignoring service removal, wrong state "
+					+ m_componentManager.state(),
+					m_componentManager.getComponentMetadata(), null );
         }
     }
     

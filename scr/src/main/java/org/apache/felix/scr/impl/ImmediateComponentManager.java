@@ -37,7 +37,6 @@ import org.osgi.service.log.LogService;
 /**
  * The default ComponentManager. Objects of this class are responsible for managing
  * implementation object's lifecycle.
- *
  */
 class ImmediateComponentManager extends AbstractComponentManager
 {
@@ -101,7 +100,7 @@ class ImmediateComponentManager extends AbstractComponentManager
      * Before doing real disposal, we also have to unregister the managed
      * service which was registered when the instance was created.
      */
-    public void dispose()
+    public synchronized void dispose()
     {
         if ( m_managedServiceRegistration != null )
         {
@@ -117,7 +116,7 @@ class ImmediateComponentManager extends AbstractComponentManager
         }
 
         // really dispose off this manager instance
-        super.dispose();
+        disposeInternal();
     }
 
 
@@ -152,6 +151,11 @@ class ImmediateComponentManager extends AbstractComponentManager
         m_componentContext = null;
         m_properties = null;
     }
+
+	protected State getSatisfiedState()
+	{
+		return Active.getInstance();
+	}
 
 
     //**********************************************************************************************************
