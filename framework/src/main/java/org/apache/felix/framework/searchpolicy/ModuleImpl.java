@@ -1449,6 +1449,9 @@ public class ModuleImpl implements IModule
 
         public ModuleClassLoader()
         {
+            // Set parent class loader to the same class loader
+            // used for boot delegation.
+            super(ModuleImpl.this.getClass().getClassLoader());
             if (m_dexFileClassLoadClass != null)
             {
                 m_jarContentToDexFile = new HashMap();
