@@ -47,7 +47,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     private long m_componentId;
 
     // The state of this instance manager
-    private State m_state;
+    private volatile State m_state;
 
     // The metadata
     private ComponentMetadata m_componentMetadata;
