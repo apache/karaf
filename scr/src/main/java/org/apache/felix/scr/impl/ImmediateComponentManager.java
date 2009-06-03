@@ -152,11 +152,6 @@ class ImmediateComponentManager extends AbstractComponentManager
         m_properties = null;
     }
 
-	protected State getSatisfiedState()
-	{
-		return Active.getInstance();
-	}
-
 
     //**********************************************************************************************************
 

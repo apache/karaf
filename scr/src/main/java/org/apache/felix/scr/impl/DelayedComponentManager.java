@@ -41,12 +41,6 @@ class DelayedComponentManager extends ImmediateComponentManager implements Servi
     }
 
 
-	protected State getSatisfiedState()
-	{
-		return Registered.getInstance();
-	}
-
-
     protected boolean createComponent()
     {
         // nothing to do here for a delayed component, will be done in the

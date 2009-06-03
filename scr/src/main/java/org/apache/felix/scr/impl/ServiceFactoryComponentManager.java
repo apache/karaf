@@ -52,12 +52,6 @@ class ServiceFactoryComponentManager extends ImmediateComponentManager implement
     }
 
 
-	protected State getSatisfiedState()
-	{
-		return Factory.getInstance();
-	}
-
-
     /* (non-Javadoc)
      * @see org.apache.felix.scr.AbstractComponentManager#createComponent()
      */

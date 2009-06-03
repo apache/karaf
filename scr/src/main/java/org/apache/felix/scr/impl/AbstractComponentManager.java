@@ -115,42 +115,42 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         void enableInternal( AbstractComponentManager acm )
         {
             acm.log( LogService.LOG_DEBUG,
-                    "Current state: " + m_state + ", Event: enable",
+                    "Current state: " + m_name + ", Event: enable",
                     acm.getComponentMetadata(), null );
         }
 
         void disableInternal( AbstractComponentManager acm )
         {
             acm.log( LogService.LOG_DEBUG,
-                    "Current state: " + m_state + ", Event: disable",
+                    "Current state: " + m_name + ", Event: disable",
                     acm.getComponentMetadata(), null );
         }
 
         void activateInternal( AbstractComponentManager acm )
         {
             acm.log(LogService.LOG_DEBUG,
-                    "Current state: " + m_state + ", Event: activate",
+                    "Current state: " + m_name + ", Event: activate",
                     acm.getComponentMetadata(), null);
         }
 
         void deactivateInternal( AbstractComponentManager acm )
         {
             acm.log( LogService.LOG_DEBUG,
-                    "Current state: " + m_state + ", Event: deactivate",
+                    "Current state: " + m_name + ", Event: deactivate",
                     acm.getComponentMetadata(), null );
         }
 
         void disposeInternal( AbstractComponentManager acm )
         {
             acm.log( LogService.LOG_DEBUG,
-                    "Current state: " + m_state + ", Event: dispose",
+                    "Current state: " + m_name + ", Event: dispose",
                     acm.getComponentMetadata(), null );
         }
 
         Object getService( DelayedComponentManager dcm )
         {
             dcm.log( LogService.LOG_DEBUG,
-                    "Current state: " + m_state + ", Event: getService",
+                    "Current state: " + m_name + ", Event: getService",
                     dcm.getComponentMetadata(), null );
             return null;
         }
@@ -649,7 +649,23 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
      */
     protected abstract Object getService();
 
-    protected abstract State getSatisfiedState();
+
+    final State getSatisfiedState()
+    {
+        if ( m_componentMetadata.isFactory() )
+        {
+            return Factory.getInstance();
+        }
+        else if ( m_componentMetadata.isImmediate() )
+        {
+            return Active.getInstance();
+        }
+        else
+        {
+            return Registered.getInstance();
+        }
+    }
+
 
     protected ServiceRegistration registerService()
     {

@@ -81,9 +81,6 @@ class ComponentFactoryImpl extends AbstractComponentManager implements Component
         // nothing to delete
     }
 
-    protected State getSatisfiedState() {
-        return Factory.getInstance();
-    }
 
     protected ServiceRegistration registerService()
     {
