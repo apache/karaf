@@ -93,7 +93,7 @@ class ServiceFactoryComponentManager extends ImmediateComponentManager implement
      */
     public Object getService( Bundle bundle, ServiceRegistration registration )
     {
-        log( LogService.LOG_DEBUG, "DelayedServiceFactoryServiceFactory.getService()", getComponentMetadata(), null );
+        log( LogService.LOG_DEBUG, "ServiceFactory.getService()", getComponentMetadata(), null );
 
         // When the getServiceMethod is called, the implementation object must be created
 
@@ -108,11 +108,11 @@ class ServiceFactoryComponentManager extends ImmediateComponentManager implement
             serviceContexts.put( service, serviceContext );
 
             // if this is the first use of this component, switch to ACTIVE state
-			if (getState() == STATE_FACTORY)
+			if (getState() == STATE_REGISTERED)
 			{
 				synchronized(this)
 				{
-					if (getState() == STATE_FACTORY)
+					if (getState() == STATE_REGISTERED)
 					{
 						changeState(Active.getInstance());
 					}
@@ -129,7 +129,7 @@ class ServiceFactoryComponentManager extends ImmediateComponentManager implement
      */
     public void ungetService( Bundle bundle, ServiceRegistration registration, Object service )
     {
-        log( LogService.LOG_DEBUG, "DelayedServiceFactoryServiceFactory.ungetService()", getComponentMetadata(), null );
+        log( LogService.LOG_DEBUG, "ServiceFactory.ungetService()", getComponentMetadata(), null );
 
         // When the ungetServiceMethod is called, the implementation object must be deactivated
 
@@ -146,7 +146,7 @@ class ServiceFactoryComponentManager extends ImmediateComponentManager implement
 				{
 					if (getState() == STATE_ACTIVE)
 					{
-						changeState(Factory.getInstance());
+						changeState(Registered.getInstance());
 					}
 				}
 			}
