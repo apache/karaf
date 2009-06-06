@@ -41,6 +41,7 @@
         <module>jaas</module>
         <module>client</module>
         <module>management</module>
+        <module>webconsole</module>
         <module>assembly</module>
         <module>demos</module>
         <module>itests</module>
@@ -100,6 +101,7 @@
         <pax.url.version>0.3.3</pax.url.version>
         <servicemix.legal.version>1.0</servicemix.legal.version>
         <servicemix.specs.version>1.4-SNAPSHOT</servicemix.specs.version>
+        <servlet.api.version>2.5</servlet.api.version>
         <spring.osgi.version>1.2.0-rc1</spring.osgi.version>
         <spring.version>2.5.6</spring.version>
         <sshd.version>1.0-SNAPSHOT</sshd.version>
@@ -357,6 +359,11 @@
                         <artifactId>kxml2</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.webconsole</artifactId>
+                <version>${felix.webconsole.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
@@ -818,6 +825,11 @@
                 <groupId>org.eclipse</groupId>
                 <artifactId>osgi</artifactId>
                 <version>${equinox.version}</version>
+            </dependency>            
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>servlet-api</artifactId>
+                <version>${servlet.api.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

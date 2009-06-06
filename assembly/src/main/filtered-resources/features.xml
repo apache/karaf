@@ -40,5 +40,6 @@
           username=karaf
           password=karaf
         </config>
+        <bundle>mvn:org.apache.felix.karaf/org.apache.felix.karaf.webconsole/${version}/jar</bundle>
     </feature>
 </features>
