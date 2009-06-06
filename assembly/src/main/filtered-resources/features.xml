@@ -24,4 +24,21 @@
         <bundle>mvn:org.apache.felix/org.apache.felix.bundlerepository/${felix.bundlerepository.version}</bundle>
         <bundle>mvn:org.apache.felix.karaf.gshell/org.apache.felix.karaf.gshell.obr/${version}</bundle>
     </feature>
+    <feature name="felix-http" version="${version}">
+        <bundle>mvn:org.mortbay.jetty/jetty-util/${jetty.version}/jar</bundle>
+        <bundle>mvn:org.mortbay.jetty/jetty-sslengine/${jetty.version}/jar</bundle>
+        <bundle>mvn:org.mortbay.jetty/jetty/${jetty.version}/jar</bundle>
+        <bundle>mvn:org.apache.felix/org.apache.felix.http.jetty/${felix.http.version}/jar</bundle>
+        <config name="org.apache.felix.http">
+          org.osgi.service.http.port=8080
+        </config>
+    </feature>
+    <feature name="webconsole" version="${version}">
+        <feature version="${version}">felix-http</feature>
+        <bundle>mvn:org.apache.felix/org.apache.felix.webconsole/${felix.webconsole.version}/jar</bundle>
+        <config name="org.apache.felix.webconsole.internal.servlet.OsgiManager">
+          username=karaf
+          password=karaf
+        </config>
+    </feature>
 </features>
