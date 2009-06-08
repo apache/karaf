@@ -150,20 +150,20 @@ public class ShellFactoryImpl
             this.callback = callback;
         }
 
-        public void start(final Map<String,String> env) throws IOException {
+        public void start(final Environment env) throws IOException {
             this.io = new IO(in, out, err, false);
 
             // Create variables, inheriting the application ones
             this.variables = new Variables(application.getVariables());
             // Set up additional env
             if (env != null) {
-                for (Map.Entry<String,String> entry : env.entrySet()) {
+                for (Map.Entry<String,String> entry : env.getEnv().entrySet()) {
                     this.variables.set(entry.getKey(), entry.getValue());
                 }
             }
             this.variables.set("gshell.prompt", application.getModel().getBranding().getPrompt());
             this.variables.set(CommandResolver.GROUP, "/");
-            this.variables.set("gshell.username", env.get("USER"));
+            this.variables.set("gshell.username", env.getEnv().get("USER"));
             this.variables.set("gshell.hostname", application.getLocalHost());
             // HACK: Add history for the 'history' command, since its not part of the Shell intf it can't really access it
             this.variables.set("gshell.internal.history", getHistory(), true);

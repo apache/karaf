@@ -16,6 +16,8 @@
  */
 package org.apache.felix.karaf.client;
 
+import java.io.ByteArrayInputStream;
+
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
@@ -31,8 +33,8 @@ public class Main {
     public static void main(String[] args) throws Exception {
         String host = "localhost";
         int port = 8101;
-        String user = "smx";
-        String password = "smx";
+        String user = "karaf";
+        String password = "karaf";
         StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < args.length; i++) {
@@ -76,8 +78,14 @@ public class Main {
             future.await();
             ClientSession session = future.getSession();
             session.authPassword(user, password);
-            ClientChannel channel = session.createChannel("shell");
-            channel.setIn(new ConsoleReader().getInput());
+            ClientChannel channel;
+			if (sb.length() > 0) {
+ 				channel = session.createChannel("exec");
+	            channel.setIn(new ByteArrayInputStream(sb.append("\n").toString().getBytes()));
+			} else {
+ 				channel = session.createChannel("shell");
+	            channel.setIn(new ConsoleReader().getInput());
+			}
             channel.setOut(System.out);
             channel.setErr(System.err);
             channel.open();

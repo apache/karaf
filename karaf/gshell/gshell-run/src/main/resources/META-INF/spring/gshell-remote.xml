@@ -66,6 +66,11 @@
                 </property>
             </bean>
         </property>
+        <property name="commandFactory">
+            <bean class="org.apache.felix.karaf.gshell.core.sshd.ShellCommandFactory">
+                <property name="executor" ref="commandLineExecutor" />
+            </bean>
+        </property>
         <property name="keyPairProvider" ref="keyPairProvider" />
         <property name="passwordAuthenticator" ref="passwordAuthenticator" />
     </bean>
