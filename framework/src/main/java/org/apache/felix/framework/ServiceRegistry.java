@@ -23,6 +23,7 @@ import java.util.*;
 import org.apache.felix.framework.util.FelixConstants;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.service.*;
+import org.osgi.framework.launch.Framework;
 
 public class ServiceRegistry
 {
@@ -73,12 +74,13 @@ public class ServiceRegistry
 
         synchronized (this)
         {
-            // Keep track of registered hooks.
-            addHooks(classNames, svcObj);
-
             // Create the service registration.
             reg = new ServiceRegistrationImpl(
                 this, bundle, classNames, new Long(m_currentServiceId++), svcObj, dict);
+                        
+            // Keep track of registered hooks.
+            addHooks(classNames, svcObj, reg);
+
             // Get the bundles current registered services.
             ServiceRegistration[] regs = (ServiceRegistration[]) m_serviceRegsMap.get(bundle);
             m_serviceRegsMap.put(bundle, addServiceRegistration(regs, reg));
@@ -90,7 +92,7 @@ public class ServiceRegistry
     public void unregisterService(Bundle bundle, ServiceRegistration reg)
     {
         // If this is a hook, it should be removed.
-        removeHook(((ServiceRegistrationImpl) reg).getService());
+        removeHook(reg);
 
         synchronized (this)
         {
@@ -731,13 +733,13 @@ public class ServiceRegistry
         }
     }
 
-    private void addHooks(String[] classNames, Object svcObj)
+    private void addHooks(String[] classNames, Object svcObj, ServiceRegistration reg)
     {
         if (isHook(classNames, EventHook.class, svcObj))
         {
             synchronized (m_eventHookLock)
             {
-                m_eventHooks = addToArray(m_eventHooks, svcObj);
+                m_eventHooks = addHookToArray(m_eventHooks, svcObj, reg);
             }
         }
 
@@ -745,7 +747,7 @@ public class ServiceRegistry
         {
             synchronized (m_findHookLock)
             {
-                m_findHooks = addToArray(m_findHooks, svcObj);
+                m_findHooks = addHookToArray(m_findHooks, svcObj, reg);
             }
         }
 
@@ -753,21 +755,28 @@ public class ServiceRegistry
         {
             synchronized (m_listenerHookLock)
             {
-                m_listenerHooks = addToArray(m_listenerHooks, svcObj);
+                m_listenerHooks = addHookToArray(m_listenerHooks, svcObj, reg);
             }
         }
     }
 
-    private static Object[] addToArray(Object[] src, Object svcObj)
+    private static Object[] addHookToArray(Object[] src, Object svcObj, ServiceRegistration reg)
     {
+        Object hookRef = getHookRef(svcObj, reg);
+        
         Object[] dst = new Object[src.length + 1];
         System.arraycopy(src, 0, dst, 0, src.length);
-        dst[src.length] = svcObj;
+        dst[src.length] = hookRef;
         return dst;
     }
 
     boolean isHook(String[] classNames, Class hookClass, Object svcObj)
     {
+        if (svcObj instanceof ServiceFactory) 
+        {
+            return Arrays.asList(classNames).contains(hookClass.getName());
+        }
+        
         if (hookClass.isAssignableFrom(svcObj.getClass()))
         {
             String hookName = hookClass.getName();
@@ -782,41 +791,64 @@ public class ServiceRegistry
         return false;
     }
 
-    private void removeHook(Object svcObj)
+    private void removeHook(ServiceRegistration reg) 
     {
-        if (svcObj instanceof EventHook)
+        Object svcObj = ((ServiceRegistrationImpl) reg).getService();
+        String [] classNames = (String[]) reg.getReference().getProperty(Constants.OBJECTCLASS);
+        
+        if (isHook(classNames, EventHook.class, svcObj)) 
         {
-            synchronized (m_eventHookLock)
+            synchronized (m_eventHookLock) 
             {
-                m_eventHooks = removeFromArray(m_eventHooks, svcObj);
+                m_eventHooks = removeFromHookArray(m_eventHooks, svcObj, reg);
             }
         }
-
-        if (svcObj instanceof FindHook)
+        
+        if (isHook(classNames, FindHook.class, svcObj)) 
         {
             synchronized (m_findHookLock)
             {
-                m_findHooks = removeFromArray(m_findHooks, svcObj);
+                m_findHooks = removeFromHookArray(m_findHooks, svcObj, reg);
             }
         }
 
-        if (svcObj instanceof ListenerHook)
+        if (isHook(classNames, ListenerHook.class, svcObj))
         {
             synchronized (m_listenerHookLock)
             {
-                m_listenerHooks = removeFromArray(m_listenerHooks, svcObj);
+                m_listenerHooks = removeFromHookArray(m_listenerHooks, svcObj, reg);
             }
         }
     }
 
-    private static Object[] removeFromArray(Object[] src, Object svcObj)
+    private static Object[] removeFromHookArray(Object[] src, Object svcObj, ServiceRegistration reg)
     {
         Object[] dst = src;
 
         int idx = -1;
         for (int i = 0; i < src.length; i++)
         {
-            if (src[i].equals(svcObj))
+            boolean found = false;
+            if (svcObj instanceof ServiceFactory)
+            {
+                if (src[i] instanceof Object[]) 
+                {
+                    Object [] arrElem = (Object []) src[i];
+                    if (arrElem[0].equals(svcObj) && arrElem[1].equals(reg)) 
+                    {
+                        found = true;
+                    }
+                }
+            }
+            else
+            {
+                if (src[i].equals(svcObj))
+                {
+                    found = true;
+                }                
+            }
+            
+            if (found) 
             {
                 idx = i;
                 break;
@@ -868,6 +900,76 @@ public class ServiceRegistry
         }
     }
 
+    /**
+     * Returns a hook reference object that can be passed to the 
+     * {@link #invokeHook(Object, Framework, InvokeHookCallback)} method.
+     * @param svcObj The Service Object. Either the service itself, or a <tt>ServiceFactory</tt>
+     *        object.
+     * @param reg The associated <tt>ServiceRegistration</tt>.
+     * @return In the case of a <tt>ServiceFactory</tt> an Object[2] with both the
+     *         factory and the <tt>ServiceRegistration</tt> is returned. In all other
+     *         cases the svcObj is returned as passed in. This is the behavior expected
+     *         by the {@link #invokeHook(Object, Framework, InvokeHookCallback)} method.
+     */
+    static Object getHookRef(Object svcObj, ServiceRegistration reg) 
+    {
+        if (svcObj instanceof ServiceFactory) 
+        {
+            return new Object[] {svcObj, reg};
+        }
+        else
+        {
+            return svcObj;
+        }
+    }
+    
+    /**
+     * Invokes a Service Registry Hook
+     * @param hookRef The hook to be invoked, this is an element on the list returned by the 
+     *        {@link #getEventHooks()}, {@link #getFindHooks()} or {@link #getListenerHooks()}
+     *        methods. It could either contain the hook object itself or an Object[2] when a
+     *        ServiceFactory is used. In that case the first element is the hook ServiceFactory
+     *        and the second element is its ServiceRegistration.
+     * @param framework The framework that is invoking the hook, typically the Felix object.
+     * @param callback This is a callback object that is invoked with the actual hook object to 
+     *        be used, either the plain hook, or one obtained from the ServiceFactory.
+     */
+    public static void invokeHook(
+        Object hookRef, Framework framework, InvokeHookCallback callback)
+    {
+        Object hook;
+        boolean serviceFactory;
+        if (hookRef instanceof Object[]) 
+        {
+            serviceFactory = true;
+            Object[] array = (Object[]) hookRef; 
+            ServiceFactory hookFactory = (ServiceFactory) array[0];
+            ServiceRegistration sr = (ServiceRegistration) array[1];
+            hook = hookFactory.getService(framework, sr);
+        }
+        else
+        {
+            serviceFactory = false; 
+            hook = hookRef;
+        }
+        
+        try 
+        {
+            callback.invokeHook(hook);
+            // TODO: SERVICE HOOKS - Check that "services in use" is handled
+        }
+        finally
+        {
+            if (serviceFactory) 
+            {
+                Object [] array = (Object []) hookRef; 
+                ServiceFactory hookFactory = (ServiceFactory) array[0];
+                ServiceRegistration sr = (ServiceRegistration) array[1];
+                hookFactory.ungetService(framework, sr, hook);
+            }
+        }        
+    }    
+    
     private static class UsageCount
     {
         public int m_count = 0;

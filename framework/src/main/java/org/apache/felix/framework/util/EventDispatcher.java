@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.apache.felix.framework.InvokeHookCallback;
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.ServiceRegistry;
 import org.osgi.framework.AllServiceListener;
@@ -44,8 +45,9 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServicePermission;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.SynchronousBundleListener;
-import org.osgi.framework.hooks.service.ListenerHook;
 import org.osgi.framework.hooks.service.EventHook;
+import org.osgi.framework.hooks.service.ListenerHook;
+import org.osgi.framework.launch.Framework;
 
 public class EventDispatcher
 {
@@ -69,7 +71,7 @@ public class EventDispatcher
 
     // A single thread is used to deliver events for all dispatchers.
     private static Thread m_thread = null;
-    private static String m_threadLock = new String("thread lock");
+    private final static String m_threadLock = new String("thread lock");
     private static int m_references = 0;
     private static volatile boolean m_stopping = false;
 
@@ -606,7 +608,7 @@ public class EventDispatcher
         }
     }
 
-    public void fireServiceEvent(ServiceEvent event)
+    public void fireServiceEvent(final ServiceEvent event, Framework felix)
     {
         // Take a snapshot of the listener array.
         Object[] listeners = null;
@@ -620,11 +622,20 @@ public class EventDispatcher
             List eventHooks = m_serviceRegistry.getEventHooks();
             if ((eventHooks != null) && (eventHooks.size() > 0))
             {
-                ListenerBundleContextCollectionWrapper wrapper =
+                final ListenerBundleContextCollectionWrapper wrapper =
                     new ListenerBundleContextCollectionWrapper(listeners);
                 for (int i = 0; i < eventHooks.size(); i++)
                 {
-                    ((EventHook) eventHooks.get(i)).event(event, wrapper);
+                    if (felix != null) 
+                    {
+                        ServiceRegistry.invokeHook(eventHooks.get(i), felix, new InvokeHookCallback() 
+                        {
+                            public void invokeHook(Object hook) 
+                            {
+                                ((EventHook) hook).event(event, wrapper);                            
+                            }                        
+                        });
+                    }
                 }
 
                 listeners = wrapper.getListeners();

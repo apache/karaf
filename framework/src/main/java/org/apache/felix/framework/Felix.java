@@ -2398,9 +2398,6 @@ ex.printStackTrace();
         return null;
     }
 
-    // Private member for method below.
-    private Comparator m_comparator = null;
-
     /**
      * Implementation for BundleContext.getBundles(). Retrieves
      * all installed bundles.
@@ -2449,13 +2446,20 @@ ex.printStackTrace();
 
         // Invoke the ListenerHook.added() on all hooks.
         List listenerHooks = m_registry.getListenerHooks();
-        Collection c = Collections.singleton(new ListenerHookInfoImpl(bundle.getBundleContext(), f));
+        final Collection c = Collections.singleton(
+            new ListenerHookInfoImpl(bundle.getBundleContext(), f));
         for (int i = 0; i < listenerHooks.size(); i++)
         {
-            ((ListenerHook) listenerHooks.get(i)).added(c);
+            ServiceRegistry.invokeHook(listenerHooks.get(i), this, new InvokeHookCallback() 
+            {
+                public void invokeHook(Object hook) 
+                {
+                    ((ListenerHook) hook).added(c);
+                }                
+            });
         }
     }
-
+        
     /**
      * Implementation for BundleContext.removeServiceListener().
      * Removes service listeners from the listener list.
@@ -2570,8 +2574,15 @@ ex.printStackTrace();
         // to invoke the callback with all existing service listeners.
         if (m_registry.isHook(classNames, ListenerHook.class, svcObj))
         {
-            ListenerHook lHook = (ListenerHook) svcObj;
-            lHook.added(m_dispatcher.wrapAllServiceListeners());
+            Object hookRef = ServiceRegistry.getHookRef(svcObj, reg);
+            ServiceRegistry.invokeHook(hookRef, this, new InvokeHookCallback() 
+            {
+                public void invokeHook(Object hook) 
+                {
+                    ((ListenerHook) hook).
+                        added(m_dispatcher.wrapAllServiceListeners());                    
+                }                
+            });
         }
 
         // TODO: CONCURRENCY - Reconsider firing event here, outside of the
@@ -2595,7 +2606,8 @@ ex.printStackTrace();
      * @throws InvalidSyntaxException
      */
     ServiceReference[] getServiceReferences(
-        BundleImpl bundle, String className, String expr, boolean checkAssignable)
+        final BundleImpl bundle, final String className,
+        final String expr, final boolean checkAssignable)
         throws InvalidSyntaxException
     {
         // Define filter if expression is not null.
@@ -2606,7 +2618,7 @@ ex.printStackTrace();
         }
 
         // Ask the service registry for all matching service references.
-        List refList = m_registry.getServiceReferences(className, filter);
+        final List refList = m_registry.getServiceReferences(className, filter);
 
         // Filter on assignable references
         if (checkAssignable)
@@ -2625,22 +2637,27 @@ ex.printStackTrace();
             }
         }
 
+        // activate findhooks
+        List findHooks = m_registry.getFindHooks();
+        for (int i = 0; i < findHooks.size(); i++)
+        {
+            ServiceRegistry.invokeHook(findHooks.get(i), this, new InvokeHookCallback() 
+            {
+                public void invokeHook(Object hook) 
+                {
+                    ((FindHook) hook).find(bundle.getBundleContext(),
+                        className,
+                        expr,
+                        !checkAssignable,
+                        new ShrinkableCollection(refList));
+                }                
+            });
+        }
+
         if (refList.size() > 0)
         {
-            // activate findhooks
-            List findHooks = m_registry.getFindHooks();
-            for (int i = 0; i < findHooks.size(); i++)
-            {
-                ((FindHook) findHooks.get(i)).find(
-                    bundle.getBundleContext(),
-                    className,
-                    expr,
-                    !checkAssignable,
-                    new ShrinkableCollection(refList));
-            }
-
             return (ServiceReference[]) refList.toArray(new ServiceReference[refList.size()]);
-        }
+        } 
 
         return null;
     }
@@ -3432,7 +3449,7 @@ ex.printStackTrace();
     **/
     private void fireServiceEvent(ServiceEvent event)
     {
-        m_dispatcher.fireServiceEvent(event);
+        m_dispatcher.fireServiceEvent(event, this);
     }
 
     //
