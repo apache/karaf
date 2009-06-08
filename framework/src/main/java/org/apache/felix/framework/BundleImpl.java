@@ -749,9 +749,19 @@ class BundleImpl implements Bundle
         return getCurrentModule().getSymbolicName();
     }
 
+    public Version getVersion()
+    {
+        return getCurrentModule().getVersion();
+    }
+
     public boolean hasPermission(Object obj)
     {
         return getFramework().bundleHasPermission(this, obj);
+    }
+
+    public Map getSignerCertificates(int signersType)
+    {
+        throw new UnsupportedOperationException("Not yet implemented.");
     }
 
     Object getSignerMatcher()
