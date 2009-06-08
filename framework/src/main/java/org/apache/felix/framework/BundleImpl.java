@@ -26,7 +26,7 @@ import java.util.*;
 
 import org.apache.felix.framework.cache.BundleArchive;
 import org.apache.felix.framework.ext.SecurityProvider;
-import org.apache.felix.framework.searchpolicy.ModuleImpl;
+import org.apache.felix.framework.ModuleImpl;
 import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.*;
 
@@ -38,6 +38,7 @@ class BundleImpl implements Bundle
     private final BundleArchive m_archive;
     private IModule[] m_modules = new IModule[0];
     private volatile int m_state;
+    private int m_runtimeActivationPolicy;
     private BundleActivator m_activator = null;
     private BundleContext m_context = null;
     private final Map m_cachedHeaders = new HashMap();
@@ -62,6 +63,7 @@ class BundleImpl implements Bundle
         __m_felix = null;
         m_archive = null;
         m_state = Bundle.INSTALLED;
+        m_runtimeActivationPolicy = 0;
         m_stale = false;
         m_activator = null;
         m_context = null;
@@ -72,6 +74,7 @@ class BundleImpl implements Bundle
         __m_felix = felix;
         m_archive = archive;
         m_state = Bundle.INSTALLED;
+        m_runtimeActivationPolicy = 0;
         m_stale = false;
         m_activator = null;
         m_context = null;
@@ -126,6 +129,18 @@ class BundleImpl implements Bundle
             m_cachedHeadersTimestamp = 0;
             m_removalPending = false;
         }
+    }
+
+    synchronized int getRuntimeActivationPolicy()
+    {
+        return (m_runtimeActivationPolicy == IModule.EAGER_ACTIVATION)
+            ? IModule.EAGER_ACTIVATION
+            : getCurrentModule().getDeclaredActivationPolicy();
+    }
+
+    synchronized void setRuntimeActivationPolicy(int policy)
+    {
+        m_runtimeActivationPolicy = policy;
     }
 
     synchronized BundleActivator getActivator()
@@ -647,6 +662,20 @@ class BundleImpl implements Bundle
         }
     }
 
+    void setPersistentStateStarting()
+    {
+        try
+        {
+            m_archive.setPersistentState(Bundle.STARTING);
+        }
+        catch (Exception ex)
+        {
+            getFramework().getLogger().log(
+                Logger.LOG_ERROR,
+                "Error writing persistent state to bundle archive.",
+                ex);
+        }
+    }
     void setPersistentStateUninstalled()
     {
         try
@@ -762,12 +791,6 @@ class BundleImpl implements Bundle
 
     public void start(int options) throws BundleException
     {
-        if ((options & Bundle.START_ACTIVATION_POLICY) > 0)
-        {
-            throw new UnsupportedOperationException(
-                "The activation policy feature has not yet been implemented.");
-        }
-
         Object sm = System.getSecurityManager();
 
         if (sm != null)
@@ -776,7 +799,7 @@ class BundleImpl implements Bundle
                 AdminPermission.EXECUTE));
         }
 
-        getFramework().startBundle(this, ((options & Bundle.START_TRANSIENT) == 0));
+        getFramework().startBundle(this, options);
     }
 
     public void update() throws BundleException

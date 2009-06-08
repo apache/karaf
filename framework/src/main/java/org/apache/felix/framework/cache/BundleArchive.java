@@ -78,6 +78,7 @@ public class BundleArchive
     private static final transient String REVISION_DIRECTORY = "version";
     private static final transient String DATA_DIRECTORY = "data";
     private static final transient String ACTIVE_STATE = "active";
+    private static final transient String STARTING_STATE = "starting";
     private static final transient String INSTALLED_STATE = "installed";
     private static final transient String UNINSTALLED_STATE = "uninstalled";
 
@@ -313,6 +314,10 @@ public class BundleArchive
             {
                 m_persistentState = Bundle.ACTIVE;
             }
+            else if ((s != null) && s.equals(STARTING_STATE))
+            {
+                m_persistentState = Bundle.STARTING;
+            }
             else if ((s != null) && s.equals(UNINSTALLED_STATE))
             {
                 m_persistentState = Bundle.UNINSTALLED;
@@ -354,6 +359,9 @@ public class BundleArchive
             {
                 case Bundle.ACTIVE:
                     s = ACTIVE_STATE;
+                    break;
+                case Bundle.STARTING:
+                    s = STARTING_STATE;
                     break;
                 case Bundle.UNINSTALLED:
                     s = UNINSTALLED_STATE;

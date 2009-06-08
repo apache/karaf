@@ -37,7 +37,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.felix.framework.Felix.FelixResolver;
-import org.apache.felix.framework.searchpolicy.ModuleImpl;
+import org.apache.felix.framework.ModuleImpl;
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.StringMap;
 import org.apache.felix.framework.util.Util;

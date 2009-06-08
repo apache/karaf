@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.apache.felix.framework.searchpolicy.ModuleImpl;
+import org.apache.felix.framework.ModuleImpl;
 import org.apache.felix.framework.searchpolicy.Resolver;
 import org.apache.felix.framework.searchpolicy.PackageSource;
 import org.apache.felix.framework.util.Util;

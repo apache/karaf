@@ -20,7 +20,7 @@ package org.apache.felix.framework;
 
 import java.util.*;
 
-import org.apache.felix.framework.searchpolicy.ModuleImpl;
+import org.apache.felix.framework.ModuleImpl;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.framework.util.VersionRange;
 import org.apache.felix.moduleloader.IModule;

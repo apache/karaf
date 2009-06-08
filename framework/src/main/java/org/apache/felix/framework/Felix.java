@@ -27,7 +27,7 @@ import java.util.*;
 import org.apache.felix.framework.cache.*;
 import org.apache.felix.framework.ext.SecurityProvider;
 import org.apache.felix.framework.searchpolicy.*;
-import org.apache.felix.framework.searchpolicy.ModuleImpl.ModuleClassLoader;
+import org.apache.felix.framework.ModuleImpl.ModuleClassLoader;
 import org.apache.felix.framework.util.*;
 import org.apache.felix.framework.util.manifestparser.*;
 import org.apache.felix.moduleloader.*;
@@ -981,13 +981,19 @@ ex.printStackTrace();
                 try
                 {
                     // Start the bundle if necessary.
-                    if ((impl.getPersistentState() == Bundle.ACTIVE) &&
-                        (impl.getStartLevel(getInitialBundleStartLevel())
+                    if (((impl.getPersistentState() == Bundle.ACTIVE)
+                        || (impl.getPersistentState() == Bundle.STARTING))
+                        && (impl.getStartLevel(getInitialBundleStartLevel())
                             <= getActiveStartLevel()))
                     {
                         try
                         {
-                            startBundle(impl, false);
+// TODO: LAZY - Not sure if this is the best way...
+                            int options = Bundle.START_TRANSIENT;
+                            options = (impl.getPersistentState() == Bundle.STARTING)
+                                ? options | Bundle.START_ACTIVATION_POLICY
+                                : options;
+                            startBundle(impl, options);
                         }
                         catch (Throwable th)
                         {
@@ -1139,11 +1145,18 @@ ex.printStackTrace();
                 try
                 {
                     // Start the bundle if necessary.
-                    if ((impl.getPersistentState() == Bundle.ACTIVE) &&
-                        (impl.getStartLevel(getInitialBundleStartLevel())
+                    // Start the bundle if necessary.
+                    if (((impl.getPersistentState() == Bundle.ACTIVE)
+                        || (impl.getPersistentState() == Bundle.STARTING))
+                        && (impl.getStartLevel(getInitialBundleStartLevel())
                             <= getActiveStartLevel()))
                     {
-                        startBundle(impl, false);
+// TODO: LAZY - Not sure if this is the best way...
+                        int options = Bundle.START_TRANSIENT;
+                        options = (impl.getPersistentState() == Bundle.STARTING)
+                            ? options | Bundle.START_ACTIVATION_POLICY
+                            : options;
+                        startBundle(impl, options);
                     }
                     // Stop the bundle if necessary.
                     else if ((impl.getState() == Bundle.ACTIVE) &&
@@ -1192,7 +1205,8 @@ ex.printStackTrace();
             throw new IllegalArgumentException("Bundle is uninstalled.");
         }
 
-        return (((BundleImpl) bundle).getPersistentState() == Bundle.ACTIVE);
+        return (((BundleImpl) bundle).getPersistentState() == Bundle.ACTIVE)
+            || (((BundleImpl) bundle).getPersistentState() == Bundle.STARTING);
     }
 
     //
@@ -1363,7 +1377,7 @@ ex.printStackTrace();
     /**
      * Implementation for Bundle.start().
     **/
-    void startBundle(BundleImpl bundle, boolean record) throws BundleException
+    void startBundle(BundleImpl bundle, int options) throws BundleException
     {
         // CONCURRENCY NOTE:
         // We will first acquire the bundle lock for the specific bundle
@@ -1390,6 +1404,13 @@ ex.printStackTrace();
                     + " cannot be started, since it is either starting or stopping.");
             }
         }
+
+        // Set the bundl
+        bundle.setRuntimeActivationPolicy(
+            ((options & Bundle.START_ACTIVATION_POLICY) > 0)
+            ? IModule.LAZY_ACTIVATION
+            : IModule.EAGER_ACTIVATION);
+
         try
         {
             // The spec doesn't say whether it is possible to start an extension
@@ -1408,9 +1429,16 @@ ex.printStackTrace();
 
             // Set and save the bundle's persistent state to active
             // if we are supposed to record state change.
-            if (record)
+            if ((options & Bundle.START_TRANSIENT) == 0)
             {
-                bundle.setPersistentStateActive();
+                if ((options & Bundle.START_ACTIVATION_POLICY) != 0)
+                {
+                    bundle.setPersistentStateStarting();
+                }
+                else
+                {
+                    bundle.setPersistentStateActive();
+                }
             }
 
             // Check to see if the bundle's start level is greater than the
@@ -1418,7 +1446,7 @@ ex.printStackTrace();
             if (bundle.getStartLevel(getInitialBundleStartLevel()) > getActiveStartLevel())
             {
                 // Throw an exception for transient starts.
-                if (!record)
+                if ((options & Bundle.START_TRANSIENT) != 0)
                 {
                     throw new BundleException(
                         "Cannot start bundle " + bundle + " because its start level is "
@@ -1450,11 +1478,64 @@ ex.printStackTrace();
                     break;
             }
 
+            // Set the bundle's context.
+            bundle.setBundleContext(new BundleContextImpl(m_logger, this, bundle));
+
+            if (bundle.getRuntimeActivationPolicy() != IModule.LAZY_ACTIVATION)
+            {
+                activateBundle(bundle);
+            }
+            else
+            {
+                setBundleStateAndNotify(bundle, Bundle.STARTING);
+            }
+
+            // We still need to fire the STARTED event, but we will do
+            // it later so we can release the bundle lock.
+        }
+        finally
+        {
+            // Release bundle lock.
+            releaseBundleLock(bundle);
+        }
+
+        // If there was no exception, then we should fire the STARTED event
+        // here without holding the lock.
+// TODO: LAZY - WE SHOULD REALLY BE FIRING EVENT HERE, OUTSIDE OF LOCK.
+//        fireBundleEvent(BundleEvent.STARTED, bundle);
+    }
+
+    public void activateBundle(BundleImpl bundle) throws BundleException
+    {
+        // CONCURRENCY NOTE:
+        // We will first acquire the bundle lock for the specific bundle
+        // as long as the bundle is INSTALLED, RESOLVED, or ACTIVE. If this
+        // bundle is not yet resolved, then it will be resolved too. In
+        // that case, the global lock will be acquired to make sure no
+        // bundles can be installed or uninstalled during the resolve.
+
+        // Acquire bundle lock.
+        try
+        {
+            acquireBundleLock(bundle, Bundle.STARTING);
+        }
+        catch (IllegalStateException ex)
+        {
+            throw new IllegalStateException(
+                "Activation only occurs for bundles in STARTING state.");
+        }
+        try
+        {
+            // Check to see if the bundle's start level is greater than the
+            // the framework's active start level.
+            if (bundle.getStartLevel(getInitialBundleStartLevel()) > getActiveStartLevel())
+            {
+                // Ignore persistent starts.
+                return;
+            }
+
             try
             {
-                // Set the bundle's context.
-                bundle.setBundleContext(new BundleContextImpl(m_logger, this, bundle));
-
                 // Set the bundle's activator.
                 bundle.setActivator(createBundleActivator(bundle));
 
@@ -1520,6 +1601,7 @@ ex.printStackTrace();
 
         // If there was no exception, then we should fire the STARTED event
         // here without holding the lock.
+// TODO: LAZY - WE COULD BE HOLDING THE LOCK FROM startBundle() ABOVE.
         fireBundleEvent(BundleEvent.STARTED, bundle);
     }
 
@@ -1725,7 +1807,7 @@ ex.printStackTrace();
             // but do not change its persistent state.
             else if (oldState == Bundle.ACTIVE)
             {
-                startBundle(bundle, false);
+                startBundle(bundle, Bundle.START_TRANSIENT);
             }
 
             // If update failed, rethrow exception.
@@ -1763,7 +1845,8 @@ ex.printStackTrace();
         // Acquire bundle lock.
         try
         {
-            acquireBundleLock(bundle, Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE);
+            acquireBundleLock(bundle,
+                Bundle.INSTALLED | Bundle.RESOLVED | Bundle.STARTING | Bundle.ACTIVE);
         }
         catch (IllegalStateException ex)
         {
@@ -1775,7 +1858,7 @@ ex.printStackTrace();
             {
                 throw new BundleException(
                     "Bundle " + bundle
-                    + " cannot be stopped, since it is either starting or stopping.");
+                    + " cannot be stopped since it is already stopping.");
             }
         }
 
@@ -1801,6 +1884,12 @@ ex.printStackTrace();
                 case Bundle.UNINSTALLED:
                     throw new IllegalStateException("Cannot stop an uninstalled bundle.");
                 case Bundle.STARTING:
+                    if (bundle.getRuntimeActivationPolicy() != IModule.LAZY_ACTIVATION)
+                    {
+                        throw new BundleException(
+                            "Stopping a starting or stopping bundle is currently not supported.");
+                    }
+                    break;
                 case Bundle.STOPPING:
                     throw new BundleException(
                         "Stopping a starting or stopping bundle is currently not supported.");
@@ -1814,17 +1903,20 @@ ex.printStackTrace();
                     break;
             }
 
-            try
+            if (bundle.getState() != Bundle.STARTING)
             {
-                if (bundle.getActivator() != null)
+                try
                 {
-                    m_secureAction.stopActivator(bundle.getActivator(), bundle.getBundleContext());
+                    if (bundle.getActivator() != null)
+                    {
+                        m_secureAction.stopActivator(bundle.getActivator(), bundle.getBundleContext());
+                    }
                 }
-            }
-            catch (Throwable th)
-            {
-                m_logger.log(Logger.LOG_ERROR, "Error stopping bundle.", th);
-                rethrow = th;
+                catch (Throwable th)
+                {
+                    m_logger.log(Logger.LOG_ERROR, "Error stopping bundle.", th);
+                    rethrow = th;
+                }
             }
 
             // Do not clean up after the system bundle since it will
@@ -1894,7 +1986,8 @@ ex.printStackTrace();
         // Acquire bundle lock.
         try
         {
-            acquireBundleLock(bundle, Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE);
+            acquireBundleLock(bundle,
+                Bundle.INSTALLED | Bundle.RESOLVED | Bundle.STARTING | Bundle.ACTIVE);
         }
         catch (IllegalStateException ex)
         {
@@ -1906,7 +1999,7 @@ ex.printStackTrace();
             {
                 throw new BundleException(
                     "Bundle " + bundle
-                    + " cannot be uninstalled, since it is either starting or stopping.");
+                    + " cannot be uninstalled since it is stopping.");
             }
         }
 
@@ -4141,7 +4234,12 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1])
             {
                 try
                 {
-                    startBundle(m_bundle, false);
+// TODO: LAZY - Not sure if this is the best way...
+                    int options = Bundle.START_TRANSIENT;
+                    options = (m_bundle.getPersistentState() == Bundle.STARTING)
+                        ? options | Bundle.START_ACTIVATION_POLICY
+                        : options;
+                    startBundle(m_bundle, options);
                 }
                 catch (Throwable ex)
                 {

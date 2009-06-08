@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.felix.framework.searchpolicy.ModuleImpl;
+import org.apache.felix.framework.ModuleImpl;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.moduleloader.ICapability;
 import org.apache.felix.moduleloader.IModule;

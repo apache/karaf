@@ -44,7 +44,7 @@ public interface IModule
     IRequirement[] getRequirements();
     IRequirement[] getDynamicRequirements();
     R4Library[] getNativeLibraries();
-    int getActivationPolicy();
+    int getDeclaredActivationPolicy();
 
     // Run-time data access methods.
     Bundle getBundle();

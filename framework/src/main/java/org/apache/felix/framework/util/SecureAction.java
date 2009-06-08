@@ -25,7 +25,7 @@ import java.security.*;
 import java.util.Hashtable;
 import java.util.jar.JarFile;
 
-import org.apache.felix.framework.searchpolicy.ModuleImpl;
+import org.apache.felix.framework.ModuleImpl;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 

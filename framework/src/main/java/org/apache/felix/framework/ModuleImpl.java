@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.framework.searchpolicy;
+package org.apache.felix.framework;
 
+import org.apache.felix.framework.searchpolicy.*;
 import org.apache.felix.moduleloader.*;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,7 +43,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 import org.apache.felix.framework.Felix.FelixResolver;
-import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.cache.JarContent;
 import org.apache.felix.framework.util.CompoundEnumeration;
 import org.apache.felix.framework.util.FelixConstants;
@@ -77,7 +77,7 @@ public class ModuleImpl implements IModule
     private final IRequirement[] m_requirements;
     private final IRequirement[] m_dynamicRequirements;
     private final R4Library[] m_nativeLibraries;
-    private final int m_activationPolicy;
+    private final int m_declaredActivationPolicy;
     private final Bundle m_bundle;
 
     private IModule[] m_fragments = null;
@@ -90,6 +90,7 @@ public class ModuleImpl implements IModule
     private IContent[] m_contentPath;
     private IContent[] m_fragmentContents = null;
     private ModuleClassLoader m_classLoader;
+    private boolean m_isActivationTriggered = false;
     private ProtectionDomain m_protectionDomain = null;
     private static SecureAction m_secureAction = new SecureAction();
 
@@ -135,7 +136,7 @@ public class ModuleImpl implements IModule
         m_requirements = null;
         m_dynamicRequirements = null;
         m_nativeLibraries = null;
-        m_activationPolicy = EAGER_ACTIVATION;
+        m_declaredActivationPolicy = EAGER_ACTIVATION;
     }
 
     public ModuleImpl(
@@ -167,7 +168,7 @@ public class ModuleImpl implements IModule
         m_requirements = mp.getRequirements();
         m_dynamicRequirements = mp.getDynamicRequirements();
         m_nativeLibraries = mp.getLibraries();
-        m_activationPolicy = mp.getActivationPolicy();
+        m_declaredActivationPolicy = mp.getActivationPolicy();
         m_symbolicName = mp.getSymbolicName();
         m_isExtension = mp.isExtension();
 
@@ -302,9 +303,9 @@ public class ModuleImpl implements IModule
         return m_nativeLibraries;
     }
 
-    public int getActivationPolicy()
+    public int getDeclaredActivationPolicy()
     {
-        return m_activationPolicy;
+        return m_declaredActivationPolicy;
     }
 
     //
@@ -1171,6 +1172,11 @@ public class ModuleImpl implements IModule
         return m_id;
     }
 
+    private synchronized boolean isActivationTrigger()
+    {
+        return m_isActivationTriggered;
+    }
+
     private synchronized ModuleClassLoader getClassLoader()
     {
         if (m_classLoader == null)
@@ -1443,15 +1449,14 @@ public class ModuleImpl implements IModule
         m_dexFileClassLoadClass = dexFileClassLoadClass;
     }
 
+    private static final ThreadLocal m_local = new ThreadLocal();
+
     public class ModuleClassLoader extends SecureClassLoader
     {
         private final Map m_jarContentToDexFile;
 
         public ModuleClassLoader()
         {
-            // Set parent class loader to the same class loader
-            // used for boot delegation.
-            super(ModuleImpl.this.getClass().getClassLoader());
             if (m_dexFileClassLoadClass != null)
             {
                 m_jarContentToDexFile = new HashMap();
@@ -1543,6 +1548,23 @@ public class ModuleImpl implements IModule
 
                         if (clazz == null)
                         {
+                            int activationPolicy = ((BundleImpl) getBundle()).getRuntimeActivationPolicy();
+
+                            // If the module is using deferred activation, then if
+                            // we load this class from this module we need to activate
+                            // the module before returning the class.
+                            if (!m_isActivationTriggered
+                                && (activationPolicy == IModule.LAZY_ACTIVATION)
+                                && (getBundle().getState() == Bundle.STARTING))
+                            {
+                                List list = (List) m_local.get();
+                                if (list == null)
+                                {
+                                    list = new ArrayList();
+                                    m_local.set(list);
+                                }
+                                list.add(new Object[] { name, getBundle() });
+                            }
                             // We need to try to define a Package object for the class
                             // before we call defineClass(). Get the package name and
                             // see if we have already created the package.
@@ -1600,7 +1622,36 @@ public class ModuleImpl implements IModule
                                     clazz = defineClass(name, bytes, 0, bytes.length);
                                 }
                             }
+
+                            // At this point if we have a class, then the deferred
+                            // activation trigger has tripped.
+                            if (!m_isActivationTriggered && (clazz != null))
+                            {
+                                m_isActivationTriggered = true;
+                            }
                         }
+                    }
+
+                    // Perform deferred activation without holding the class loader lock,
+                    // if necessary.
+                    List list = (List) m_local.get();
+                    if ((list != null)
+                        && (list.size() > 0)
+                        && ((Object[]) list.get(0))[0].equals(name))
+                    {
+                        for (int i = list.size() - 1; i >= 0; i--)
+                        {
+                            try
+                            {
+                                ((BundleImpl) ((Object[]) list.get(i))[1]).getFramework().activateBundle(
+                                    (BundleImpl) ((Object[]) list.get(i))[1]);
+                            }
+                            catch (BundleException ex)
+                            {
+                                ex.printStackTrace();
+                            }
+                        }
+                        list.clear();
                     }
                 }
             }
