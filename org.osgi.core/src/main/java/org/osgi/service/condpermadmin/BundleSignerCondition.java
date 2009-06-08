@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/BundleSignerCondition.java,v 1.13 2006/10/24 17:54:27 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2005, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +16,19 @@
 
 package org.osgi.service.condpermadmin;
 
-import java.lang.reflect.*;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 
 /**
- * Condition to test if the signer of a bundle matches a pattern. Since the bundle's signer can
- * only change when the bundle is updated, this condition is immutable.
+ * Condition to test if the signer of a bundle matches or does not match a
+ * pattern. Since the bundle's signer can only change when the bundle is
+ * updated, this condition is immutable.
  * <p>
  * The condition expressed using a single String that specifies a Distinguished
  * Name (DN) chain to match bundle signers against. DN's are encoded using IETF
@@ -47,68 +49,10 @@ import org.osgi.framework.Bundle;
  * must be the first RDN and will match any number of RDNs (including zero
  * RDNs).
  * 
- * @version $Revision: 1.13 $
+ * @ThreadSafe
+ * @version $Revision: 6860 $
  */
 public class BundleSignerCondition {
-	/*
-	 * NOTE: A framework implementor may also choose to replace this class in
-	 * their distribution with a class that directly interfaces with the
-	 * framework implementation. This replacement class MUST NOT alter the
-	 * public/protected signature of this class.
-	 */
-
-	/*
-	 * This class will load the BundleSignerCondition class in the package named
-	 * by the org.osgi.vendor.condpermadmin package. This class will delegate
-	 * getCondition methods calls to the vendor BundleSignerCondition class.
-	 */
-	
-	private static class ImplHolder implements PrivilegedAction {
-		private static final String	packageProperty	= "org.osgi.vendor.condpermadmin";
-		static final Method	getCondition;
-		static {
-			getCondition = (Method) AccessController.doPrivileged(new ImplHolder());
-		}
-
-		private ImplHolder() {
-		}
-
-		public Object run() {
-			String packageName = System
-			.getProperty(packageProperty);
-			if (packageName == null) {
-				throw new NoClassDefFoundError(packageProperty
-						+ " property not set");
-			}
-			
-			Class delegateClass;
-			try {
-				delegateClass = Class.forName(packageName
-						+ ".BundleSignerCondition");
-			}
-			catch (ClassNotFoundException e) {
-				throw new NoClassDefFoundError(e.toString());
-			}
-			
-			Method result;
-			try {
-				result = delegateClass.getMethod("getCondition",
-						new Class[] {Bundle.class,
-						ConditionInfo.class		});
-			}
-			catch (NoSuchMethodException e) {
-				throw new NoSuchMethodError(e.toString());
-			}
-			
-			if (!Modifier.isStatic(result.getModifiers())) {
-				throw new NoSuchMethodError(
-						"getCondition method must be static");
-			}
-			
-			return result;
-		}
-	}
-	
 	private static final String	CONDITION_TYPE	= "org.osgi.service.condpermadmin.BundleSignerCondition";
 
 	/**
@@ -116,39 +60,48 @@ public class BundleSignerCondition {
 	 * to the location pattern.
 	 * 
 	 * @param bundle The Bundle being evaluated.
-	 * @param info The ConditionInfo to construct the condition for. The args of
-	 *        the ConditionInfo specify a single String specifying the chain of
-	 *        distinguished names pattern to match against the signer of the
-	 *        Bundle.
-	 * @return A Condition which checks the signers of the specified bundle.        
+	 * @param info The ConditionInfo from which to construct the condition. The
+	 *        ConditionInfo must specify one or two arguments. The first
+	 *        argument of the ConditionInfo specifies the chain of distinguished
+	 *        names pattern to match against the signer of the bundle. The
+	 *        Condition is satisfied if the signer of the bundle matches the
+	 *        pattern. The second argument of the ConditionInfo is optional. If
+	 *        a second argument is present and equal to "!", then the
+	 *        satisfaction of the Condition is negated. That is, the Condition
+	 *        is satisfied if the signer of the bundle does NOT match the
+	 *        pattern. If the second argument is present but does not equal "!",
+	 *        then the second argument is ignored.
+	 * @return A Condition which checks the signers of the specified bundle.
 	 */
-	public static Condition getCondition(Bundle bundle, ConditionInfo info) {
+	public static Condition getCondition(final Bundle bundle,
+			final ConditionInfo info) {
 		if (!CONDITION_TYPE.equals(info.getType()))
 			throw new IllegalArgumentException(
 					"ConditionInfo must be of type \"" + CONDITION_TYPE + "\"");
 		String[] args = info.getArgs();
-		if (args.length != 1)
+		if (args.length != 1 && args.length != 2)
 			throw new IllegalArgumentException("Illegal number of args: "
 					+ args.length);
 
-		try {
-			try {
-				return (Condition) ImplHolder.getCondition.invoke(null, new Object[] {
-						bundle, info});
+		Map/* <X509Certificate, List<X509Certificate>> */signers = bundle
+				.getSignerCertificates(Bundle.SIGNERS_TRUSTED);
+		boolean match = false;
+		for (Iterator iSigners = signers.values().iterator(); iSigners
+				.hasNext();) {
+			List/* <X509Certificate> */signerCerts = (List) iSigners.next();
+			List/* <String> */dnChain = new ArrayList(signerCerts.size());
+			for (Iterator iCerts = signerCerts.iterator(); iCerts.hasNext();) {
+				dnChain.add(((X509Certificate) iCerts.next()).getSubjectDN()
+						.getName());
 			}
-			catch (InvocationTargetException e) {
-				throw e.getTargetException();
+			if (FrameworkUtil.matchDistinguishedNameChain(args[0], dnChain)) {
+				match = true;
+				break;
 			}
 		}
-		catch (Error e) {
-			throw e;
-		}
-		catch (RuntimeException e) {
-			throw e;
-		}
-		catch (Throwable e) {
-			throw new RuntimeException(e.toString());
-		}
+
+		boolean negate = (args.length == 2) ? "!".equals(args[1]) : false;
+		return negate ^ match ? Condition.TRUE : Condition.FALSE;
 	}
 
 	private BundleSignerCondition() {

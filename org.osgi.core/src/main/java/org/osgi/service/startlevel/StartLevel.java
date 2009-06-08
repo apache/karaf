@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.startlevel/src/org/osgi/service/startlevel/StartLevel.java,v 1.19 2007/02/09 03:20:24 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2002, 2007). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +66,8 @@ import org.osgi.framework.Bundle;
  * The StartLevel service can be used by management bundles to alter the active
  * start level of the framework.
  * 
- * @version $Revision: 1.19 $
+ * @ThreadSafe
+ * @version $Revision: 6747 $
  */
 public interface StartLevel {
 	/**
@@ -152,7 +151,9 @@ public interface StartLevel {
 	 * @param bundle The target bundle.
 	 * @return The start level value of the specified Bundle.
 	 * @throws java.lang.IllegalArgumentException If the specified bundle has
-	 *         been uninstalled.
+	 *         been uninstalled or if the specified bundle was not created by
+	 *         the same framework instance that registered this
+	 *         <code>StartLevel</code> service.
 	 */
 	public int getBundleStartLevel(Bundle bundle);
 
@@ -183,11 +184,13 @@ public interface StartLevel {
 	 * @param bundle The target bundle.
 	 * @param startlevel The new start level for the specified Bundle.
 	 * @throws IllegalArgumentException If the specified bundle has been
-	 *         uninstalled or if the specified start level is less than or equal
-	 *         to zero, or the specified bundle is the system bundle.
+	 *         uninstalled, or if the specified start level is less than or
+	 *         equal to zero, or if the specified bundle is the system bundle,
+	 *         or if the specified bundle was not created by the same framework
+	 *         instance that registered this <code>StartLevel</code> service.
 	 * @throws SecurityException If the caller does not have
-	 *         <code>AdminPermission[bundle,EXECUTE]</code> and the Java
-	 *         runtime environment supports permissions.
+	 *         <code>AdminPermission[bundle,EXECUTE]</code> and the Java runtime
+	 *         environment supports permissions.
 	 */
 	public void setBundleStartLevel(Bundle bundle, int startlevel);
 
@@ -218,7 +221,7 @@ public interface StartLevel {
 	 * been called to assign a different initial bundle start level value.
 	 * 
 	 * <p>
-	 * Thie method does not change the start level values of installed bundles.
+	 * This method does not change the start level values of installed bundles.
 	 * 
 	 * @param startlevel The initial start level for newly installed bundles.
 	 * @throws IllegalArgumentException If the specified start level is less
@@ -241,7 +244,9 @@ public interface StartLevel {
 	 *         indicates the bundle is to be started. <code>false</code>
 	 *         otherwise.
 	 * @throws java.lang.IllegalArgumentException If the specified bundle has
-	 *         been uninstalled.
+	 *         been uninstalled or if the specified bundle was not created by
+	 *         the same framework instance that registered this
+	 *         <code>StartLevel</code> service.
 	 * @see Bundle#START_TRANSIENT
 	 */
 	public boolean isBundlePersistentlyStarted(Bundle bundle);
@@ -254,11 +259,13 @@ public interface StartLevel {
 	 * activation policy is to be used when the bundle is started.
 	 * 
 	 * @param bundle The bundle whose autostart setting is to be examined.
-	 * @return <code>true</code> if the bundle’s autostart setting indicates
-	 *         the activation policy declared in the manifest must be used.
+	 * @return <code>true</code> if the bundle's autostart setting indicates the
+	 *         activation policy declared in the manifest must be used.
 	 *         <code>false</code> if the bundle must be eagerly activated.
 	 * @throws java.lang.IllegalArgumentException If the specified bundle has
-	 *         been uninstalled.
+	 *         been uninstalled or if the specified bundle was not created by
+	 *         the same framework instance that registered this
+	 *         <code>StartLevel</code> service.
 	 * @since 1.1
 	 * @see Bundle#START_ACTIVATION_POLICY
 	 */

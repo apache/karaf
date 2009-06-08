@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.packageadmin/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.19 2006/06/16 16:31:49 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +27,8 @@ import org.osgi.framework.Bundle;
  * If present, there will only be a single instance of this service registered
  * with the Framework.
  * 
- * @version $Revision: 1.19 $
+ * @ThreadSafe
+ * @version $Revision: 6779 $
  * @see org.osgi.service.packageadmin.ExportedPackage
  * @see org.osgi.service.packageadmin.RequiredBundle
  */
@@ -38,8 +37,8 @@ public interface PackageAdmin {
 	 * Gets the exported packages for the specified bundle.
 	 * 
 	 * @param bundle The bundle whose exported packages are to be returned, or
-	 *        <code>null</code> if all exported packages are to be returned.
-	 *        If the specified bundle is the system bundle (that is, the bundle
+	 *        <code>null</code> if all exported packages are to be returned. If
+	 *        the specified bundle is the system bundle (that is, the bundle
 	 *        with id zero), this method returns all the packages known to be
 	 *        exported by the system bundle. This will include the package
 	 *        specified by the <code>org.osgi.framework.system.packages</code>
@@ -48,6 +47,9 @@ public interface PackageAdmin {
 	 * 
 	 * @return An array of exported packages, or <code>null</code> if the
 	 *         specified bundle has no exported packages.
+	 * @throws IllegalArgumentException If the specified <code>Bundle</code> was
+	 *         not created by the same framework instance that registered this
+	 *         <code>PackageAdmin</code> service.
 	 */
 	public ExportedPackage[] getExportedPackages(Bundle bundle);
 
@@ -93,8 +95,8 @@ public interface PackageAdmin {
 	 * following steps on a separate thread:
 	 * 
 	 * <ol>
-	 * <li>Compute a graph of bundles starting with the specified bundles. If
-	 * no bundles are specified, compute a graph of bundles starting with bundle
+	 * <li>Compute a graph of bundles starting with the specified bundles. If no
+	 * bundles are specified, compute a graph of bundles starting with bundle
 	 * updated or uninstalled since the last call to this method. Add to the
 	 * graph any bundle that is wired to a package that is currently exported by
 	 * a bundle in the graph. The graph is fully constructed when there is no
@@ -105,9 +107,9 @@ public interface PackageAdmin {
 	 * <li>Each bundle in the graph that is in the <code>ACTIVE</code> state
 	 * will be stopped as described in the <code>Bundle.stop</code> method.
 	 * 
-	 * <li>Each bundle in the graph that is in the <code>RESOLVED</code>
-	 * state is unresolved and thus moved to the <code>INSTALLED</code> state.
-	 * The effect of this step is that bundles in the graph are no longer
+	 * <li>Each bundle in the graph that is in the <code>RESOLVED</code> state
+	 * is unresolved and thus moved to the <code>INSTALLED</code> state. The
+	 * effect of this step is that bundles in the graph are no longer
 	 * <code>RESOLVED</code>.
 	 * 
 	 * <li>Each bundle in the graph that is in the <code>UNINSTALLED</code>
@@ -137,8 +139,11 @@ public interface PackageAdmin {
 	 *        removed, or <code>null</code> for all bundles updated or
 	 *        uninstalled since the last call to this method.
 	 * @throws SecurityException If the caller does not have
-	 *         <code>AdminPermission[System Bundle,RESOLVE]</code> and the
-	 *         Java runtime environment supports permissions.
+	 *         <code>AdminPermission[System Bundle,RESOLVE]</code> and the Java
+	 *         runtime environment supports permissions.
+	 * @throws IllegalArgumentException If the specified <code>Bundle</code>s
+	 *         were not created by the same framework instance that registered
+	 *         this <code>PackageAdmin</code> service.
 	 */
 	public void refreshPackages(Bundle[] bundles);
 
@@ -155,12 +160,15 @@ public interface PackageAdmin {
 	 * be refreshed, stopped, or started. This method will not return until the
 	 * operation has completed.
 	 * 
-	 * @param bundles The bundles to resolve or <code>null</code> to resolve
-	 *        all unresolved bundles installed in the Framework.
+	 * @param bundles The bundles to resolve or <code>null</code> to resolve all
+	 *        unresolved bundles installed in the Framework.
 	 * @return <code>true</code> if all specified bundles are resolved;
 	 * @throws SecurityException If the caller does not have
-	 *         <code>AdminPermission[System Bundle,RESOLVE]</code> and the
-	 *         Java runtime environment supports permissions.
+	 *         <code>AdminPermission[System Bundle,RESOLVE]</code> and the Java
+	 *         runtime environment supports permissions.
+	 * @throws IllegalArgumentException If the specified <code>Bundle</code>s
+	 *         were not created by the same framework instance that registered
+	 *         this <code>PackageAdmin</code> service.
 	 * @since 1.2
 	 */
 	public boolean resolveBundles(Bundle[] bundles);
@@ -203,8 +211,8 @@ public interface PackageAdmin {
 
 	/**
 	 * Returns an array of attached fragment bundles for the specified bundle.
-	 * If the specified bundle is a fragment then <code>null</code> is
-	 * returned. If no fragments are attached to the specified bundle then
+	 * If the specified bundle is a fragment then <code>null</code> is returned.
+	 * If no fragments are attached to the specified bundle then
 	 * <code>null</code> is returned.
 	 * <p>
 	 * This method does not attempt to resolve the specified bundle. If the
@@ -215,19 +223,24 @@ public interface PackageAdmin {
 	 * @return An array of fragment bundles or <code>null</code> if the bundle
 	 *         does not have any attached fragment bundles or the bundle is not
 	 *         resolved.
+	 * @throws IllegalArgumentException If the specified <code>Bundle</code> was
+	 *         not created by the same framework instance that registered this
+	 *         <code>PackageAdmin</code> service.
 	 * @since 1.2
 	 */
 	public Bundle[] getFragments(Bundle bundle);
 
 	/**
-	 * Returns an array containing the host bundle to which the specified
-	 * fragment bundle is attached or <code>null</code> if the specified
-	 * bundle is not attached to a host or is not a fragment bundle. A fragment
-	 * may only be attached to a single host bundle.
+	 * Returns the host bundles to which the specified fragment bundle is
+	 * attached.
 	 * 
-	 * @param bundle The bundle whose host bundle is to be returned.
-	 * @return An array containing the host bundle or <code>null</code> if the
-	 *         bundle does not have a host bundle.
+	 * @param bundle The fragment bundle whose host bundles are to be returned.
+	 * @return An array containing the host bundles to which the specified
+	 *         fragment is attached or <code>null</code> if the specified bundle
+	 *         is not a fragment or is not attached to any host bundles.
+	 * @throws IllegalArgumentException If the specified <code>Bundle</code> was
+	 *         not created by the same framework instance that registered this
+	 *         <code>PackageAdmin</code> service.
 	 * @since 1.2
 	 */
 	public Bundle[] getHosts(Bundle bundle);
@@ -241,7 +254,8 @@ public interface PackageAdmin {
 	 * @param clazz The class object from which to locate the bundle.
 	 * @return The bundle from which the specified class is loaded or
 	 *         <code>null</code> if the class was not loaded by a bundle class
-	 *         loader.
+	 *         loader created by the same framework instance that registered
+	 *         this <code>PackageAdmin</code> service.
 	 * @since 1.2
 	 */
 	public Bundle getBundle(Class clazz);
@@ -272,6 +286,9 @@ public interface PackageAdmin {
 	 * 
 	 * @param bundle The bundle for which to return the special type.
 	 * @return The special type of the bundle.
+	 * @throws IllegalArgumentException If the specified <code>Bundle</code> was
+	 *         not created by the same framework instance that registered this
+	 *         <code>PackageAdmin</code> service.
 	 * @since 1.2
 	 */
 	public int getBundleType(Bundle bundle);

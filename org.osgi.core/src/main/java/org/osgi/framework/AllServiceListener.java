@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/AllServiceListener.java,v 1.10 2007/02/20 00:16:30 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2005, 2007). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +55,7 @@ package org.osgi.framework;
  * @see ServicePermission
  * @ThreadSafe
  * @since 1.3
- * @version $Revision: 1.10 $
+ * @version $Revision: 5673 $
  */
 
 public interface AllServiceListener extends ServiceListener {

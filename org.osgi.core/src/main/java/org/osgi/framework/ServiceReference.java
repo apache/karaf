@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceReference.java,v 1.20 2007/02/21 16:49:05 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +15,8 @@
  */
 
 package org.osgi.framework;
+
+import java.util.Dictionary;
 
 /**
  * A reference to a service.
@@ -46,7 +46,7 @@ package org.osgi.framework;
  * @see BundleContext#getServiceReferences
  * @see BundleContext#getService
  * @ThreadSafe
- * @version $Revision: 1.20 $
+ * @version $Revision: 6374 $
  */
 
 public interface ServiceReference extends Comparable {
@@ -85,8 +85,8 @@ public interface ServiceReference extends Comparable {
 	 * This method is <i>case-preserving </i>; this means that every key in the
 	 * returned array must have the same case as the corresponding key in the
 	 * properties <code>Dictionary</code> that was passed to the
-	 * {@link BundleContext#registerService(String[],Object,java.util.Dictionary)}
-	 * or {@link ServiceRegistration#setProperties} methods.
+	 * {@link BundleContext#registerService(String[],Object,Dictionary)} or
+	 * {@link ServiceRegistration#setProperties} methods.
 	 * 
 	 * @return An array of property keys.
 	 */
@@ -102,9 +102,9 @@ public interface ServiceReference extends Comparable {
 	 * unregistered.
 	 * 
 	 * @return The bundle that registered the service referenced by this
-	 *         <code>ServiceReference</code> object; <code>null</code> if
-	 *         that service has already been unregistered.
-	 * @see BundleContext#registerService(String[],Object,java.util.Dictionary)
+	 *         <code>ServiceReference</code> object; <code>null</code> if that
+	 *         service has already been unregistered.
+	 * @see BundleContext#registerService(String[],Object,Dictionary)
 	 */
 	public Bundle getBundle();
 
@@ -146,7 +146,9 @@ public interface ServiceReference extends Comparable {
 	 *         referenced by this <code>ServiceReference</code> and the
 	 *         specified bundle use the same source for the package of the
 	 *         specified class name. Otherwise <code>false</code> is returned.
-	 * 
+	 * @throws IllegalArgumentException If the specified <code>Bundle</code> was
+	 *         not created by the same framework instance as this
+	 *         <code>ServiceReference</code>.
 	 * @since 1.3
 	 */
 	public boolean isAssignableTo(Bundle bundle, String className);
@@ -157,10 +159,9 @@ public interface ServiceReference extends Comparable {
 	 * 
 	 * <p>
 	 * If this <code>ServiceReference</code> and the specified
-	 * <code>ServiceReference</code> have the same
-	 * {@link Constants#SERVICE_ID service id} they are equal. This
-	 * <code>ServiceReference</code> is less than the specified
-	 * <code>ServiceReference</code> if it has a lower
+	 * <code>ServiceReference</code> have the same {@link Constants#SERVICE_ID
+	 * service id} they are equal. This <code>ServiceReference</code> is less
+	 * than the specified <code>ServiceReference</code> if it has a lower
 	 * {@link Constants#SERVICE_RANKING service ranking} and greater if it has a
 	 * higher service ranking. Otherwise, if this <code>ServiceReference</code>
 	 * and the specified <code>ServiceReference</code> have the same
@@ -172,8 +173,11 @@ public interface ServiceReference extends Comparable {
 	 * 
 	 * @param reference The <code>ServiceReference</code> to be compared.
 	 * @return Returns a negative integer, zero, or a positive integer if this
-	 *         <code>ServiceReference</code> is less than, equal to, or
-	 *         greater than the specified <code>ServiceReference</code>.
+	 *         <code>ServiceReference</code> is less than, equal to, or greater
+	 *         than the specified <code>ServiceReference</code>.
+	 * @throws IllegalArgumentException If the specified
+	 *         <code>ServiceReference</code> was not created by the same
+	 *         framework instance as this <code>ServiceReference</code>.
 	 * @since 1.4
 	 */
 	public int compareTo(Object reference);

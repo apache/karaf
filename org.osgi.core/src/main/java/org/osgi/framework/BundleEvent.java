@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleEvent.java,v 1.19 2007/02/20 00:14:12 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +32,7 @@ import java.util.EventObject;
  * @Immutable
  * @see BundleListener
  * @see SynchronousBundleListener
- * @version $Revision: 1.19 $
+ * @version $Revision: 6542 $
  */
 
 public class BundleEvent extends EventObject {
@@ -51,8 +49,6 @@ public class BundleEvent extends EventObject {
 
 	/**
 	 * The bundle has been installed.
-	 * <p>
-	 * The value of <code>INSTALLED</code> is 0x00000001.
 	 * 
 	 * @see BundleContext#installBundle(String)
 	 */
@@ -64,8 +60,6 @@ public class BundleEvent extends EventObject {
 	 * The bundle's
 	 * {@link BundleActivator#start(BundleContext) BundleActivator start} method
 	 * has been executed if the bundle has a bundle activator class.
-	 * <p>
-	 * The value of <code>STARTED</code> is 0x00000002.
 	 * 
 	 * @see Bundle#start()
 	 */
@@ -77,8 +71,6 @@ public class BundleEvent extends EventObject {
 	 * The bundle's
 	 * {@link BundleActivator#stop(BundleContext) BundleActivator stop} method
 	 * has been executed if the bundle has a bundle activator class.
-	 * <p>
-	 * The value of <code>STOPPED</code> is 0x00000004.
 	 * 
 	 * @see Bundle#stop()
 	 */
@@ -86,8 +78,6 @@ public class BundleEvent extends EventObject {
 
 	/**
 	 * The bundle has been updated.
-	 * <p>
-	 * The value of <code>UPDATED</code> is 0x00000008.
 	 * 
 	 * @see Bundle#update()
 	 */
@@ -95,8 +85,6 @@ public class BundleEvent extends EventObject {
 
 	/**
 	 * The bundle has been uninstalled.
-	 * <p>
-	 * The value of <code>UNINSTALLED</code> is 0x00000010.
 	 * 
 	 * @see Bundle#uninstall
 	 */
@@ -104,8 +92,6 @@ public class BundleEvent extends EventObject {
 
 	/**
 	 * The bundle has been resolved.
-	 * <p>
-	 * The value of <code>RESOLVED</code> is 0x00000020.
 	 * 
 	 * @see Bundle#RESOLVED
 	 * @since 1.3
@@ -114,8 +100,6 @@ public class BundleEvent extends EventObject {
 
 	/**
 	 * The bundle has been unresolved.
-	 * <p>
-	 * The value of <code>UNRESOLVED</code> is 0x00000040.
 	 * 
 	 * @see Bundle#INSTALLED
 	 * @since 1.3
@@ -130,8 +114,6 @@ public class BundleEvent extends EventObject {
 	 * is about to be called if the bundle has a bundle activator class. This
 	 * event is only delivered to {@link SynchronousBundleListener}s. It is not
 	 * delivered to <code>BundleListener</code>s.
-	 * <p>
-	 * The value of <code>STARTING</code> is 0x00000080.
 	 * 
 	 * @see Bundle#start()
 	 * @since 1.3
@@ -146,8 +128,6 @@ public class BundleEvent extends EventObject {
 	 * is about to be called if the bundle has a bundle activator class. This
 	 * event is only delivered to {@link SynchronousBundleListener}s. It is not
 	 * delivered to <code>BundleListener</code>s.
-	 * <p>
-	 * The value of <code>STOPPING</code> is 0x00000100.
 	 * 
 	 * @see Bundle#stop()
 	 * @since 1.3
@@ -163,8 +143,6 @@ public class BundleEvent extends EventObject {
 	 * <code>BundleContext</code>. This event is only delivered to
 	 * {@link SynchronousBundleListener}s. It is not delivered to
 	 * <code>BundleListener</code>s.
-	 * <p>
-	 * The value of <code>LAZY_ACTIVATION</code> is 0x00000200.
 	 * 
 	 * @since 1.4
 	 */

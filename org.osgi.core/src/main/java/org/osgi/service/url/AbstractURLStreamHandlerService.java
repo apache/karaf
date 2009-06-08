@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.url/src/org/osgi/service/url/AbstractURLStreamHandlerService.java,v 1.8 2006/06/16 16:31:31 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +19,16 @@ package org.osgi.service.url;
 import java.net.*;
 
 /**
- * Abstract implementation of the <code>URLStreamHandlerService</code> interface.
- * All the methods simply invoke the corresponding methods on
- * <code>java.net.URLStreamHandler</code> except for <code>parseURL</code> and
- * <code>setURL</code>, which use the <code>URLStreamHandlerSetter</code>
+ * Abstract implementation of the <code>URLStreamHandlerService</code>
+ * interface. All the methods simply invoke the corresponding methods on
+ * <code>java.net.URLStreamHandler</code> except for <code>parseURL</code>
+ * and <code>setURL</code>, which use the <code>URLStreamHandlerSetter</code>
  * parameter. Subclasses of this abstract class should not need to override the
  * <code>setURL</code> and <code>parseURL(URLStreamHandlerSetter,...)</code>
  * methods.
  * 
- * @version $Revision: 1.8 $
+ * @ThreadSafe
+ * @version $Revision: 5673 $
  */
 public abstract class AbstractURLStreamHandlerService extends URLStreamHandler
 		implements URLStreamHandlerService {
@@ -43,7 +42,7 @@ public abstract class AbstractURLStreamHandlerService extends URLStreamHandler
 	 * The <code>URLStreamHandlerSetter</code> object passed to the parseURL
 	 * method.
 	 */
-	protected URLStreamHandlerSetter	realHandler;
+	protected volatile URLStreamHandlerSetter	realHandler;
 
 	/**
 	 * Parse a URL using the <code>URLStreamHandlerSetter</code> object. This
@@ -51,8 +50,8 @@ public abstract class AbstractURLStreamHandlerService extends URLStreamHandler
 	 * <code>URLStreamHandlerSetter</code> object and then calls
 	 * <code>parseURL(URL,String,int,int)</code>.
 	 * 
-	 * @param realHandler The object on which the <code>setURL</code> method must
-	 *        be invoked for the specified URL.
+	 * @param realHandler The object on which the <code>setURL</code> method
+	 *        must be invoked for the specified URL.
 	 * @see "java.net.URLStreamHandler.parseURL"
 	 */
 	public void parseURL(URLStreamHandlerSetter realHandler, URL u,

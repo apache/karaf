@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/ConditionInfo.java,v 1.13 2006/06/16 16:31:37 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,40 +43,39 @@ import java.util.ArrayList;
  * <code>ConditionInfo</code> object as arguments.
  * </ul>
  * 
- * @version $Revision: 1.13 $
+ * @Immutable
+ * @version $Revision: 6492 $
  */
 public class ConditionInfo {
-	private String		type;
-	private String[]	args;
+	private final String	type;
+	private final String[]	args;
 
 	/**
-	 * Constructs a <code>ConditionInfo</code> from the specified type and
-	 * args.
+	 * Constructs a <code>ConditionInfo</code> from the specified type and args.
 	 * 
 	 * @param type The fully qualified class name of the Condition represented
 	 *        by this <code>ConditionInfo</code>.
 	 * @param args The arguments for the Condition. These arguments are
 	 *        available to the newly created Condition by calling the
 	 *        {@link #getArgs()} method.
-	 * @throws java.lang.NullPointerException If <code>type</code> is
-	 *         <code>null</code>.
+	 * @throws NullPointerException If <code>type</code> is <code>null</code>.
 	 */
 	public ConditionInfo(String type, String[] args) {
 		this.type = type;
-		this.args = args != null ? args : new String[0];
+		this.args = (args != null) ? (String[]) args.clone() : new String[0];
 		if (type == null) {
 			throw new NullPointerException("type is null");
 		}
 	}
 
 	/**
-	 * Constructs a <code>ConditionInfo</code> object from the specified
-	 * encoded <code>ConditionInfo</code> string. White space in the encoded
+	 * Constructs a <code>ConditionInfo</code> object from the specified encoded
+	 * <code>ConditionInfo</code> string. White space in the encoded
 	 * <code>ConditionInfo</code> string is ignored.
 	 * 
 	 * @param encodedCondition The encoded <code>ConditionInfo</code>.
 	 * @see #getEncoded
-	 * @throws java.lang.IllegalArgumentException If the
+	 * @throws IllegalArgumentException If the specified
 	 *         <code>encodedCondition</code> is not properly formatted.
 	 */
 	public ConditionInfo(String encodedCondition) {
@@ -165,26 +162,25 @@ public class ConditionInfo {
 	}
 
 	/**
-	 * Returns the string encoding of this <code>ConditionInfo</code> in a
-	 * form suitable for restoring this <code>ConditionInfo</code>.
+	 * Returns the string encoding of this <code>ConditionInfo</code> in a form
+	 * suitable for restoring this <code>ConditionInfo</code>.
 	 * 
 	 * <p>
-	 * The encoding format is:
+	 * The encoded format is:
 	 * 
 	 * <pre>
 	 *   [type &quot;arg0&quot; &quot;arg1&quot; ...]
 	 * </pre>
 	 * 
-	 * where <i>argN</i> are strings that are encoded for proper parsing.
-	 * Specifically, the <code>"</code>, <code>\</code>, carriage return,
-	 * and linefeed characters are escaped using <code>\"</code>,
-	 * <code>\\</code>, <code>\r</code>, and <code>\n</code>,
-	 * respectively.
+	 * where <i>argN</i> are strings that must be encoded for proper parsing.
+	 * Specifically, the <code>&quot;</code>, <code>\</code>, carriage return,
+	 * and line feed characters must be escaped using <code>\&quot;</code>,
+	 * <code>\\</code>, <code>\r</code>, and <code>\n</code>, respectively.
 	 * 
 	 * <p>
 	 * The encoded string contains no leading or trailing whitespace characters.
-	 * A single space character is used between type and "<i>arg0</i>" and
-	 * between the arguments.
+	 * A single space character is used between type and &quot;<i>arg0</i>&quot;
+	 * and between the arguments.
 	 * 
 	 * @return The string encoding of this <code>ConditionInfo</code>.
 	 */
@@ -234,7 +230,7 @@ public class ConditionInfo {
 	 *         arguments.
 	 */
 	public final String[] getArgs() {
-		return args;
+		return (String[]) args.clone();
 	}
 
 	/**
@@ -278,12 +274,11 @@ public class ConditionInfo {
 	 */
 
 	public int hashCode() {
-		int hash = type.hashCode();
-
+		int h = 31 * 17 + type.hashCode();
 		for (int i = 0; i < args.length; i++) {
-			hash ^= args[i].hashCode();
+			h = 31 * h + args[i].hashCode();
 		}
-		return hash;
+		return h;
 	}
 
 	/**

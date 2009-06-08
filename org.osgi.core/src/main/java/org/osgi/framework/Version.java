@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Version.java,v 1.17 2007/02/20 00:07:22 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2004, 2007). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +37,7 @@ import java.util.StringTokenizer;
  * 
  * @since 1.3
  * @Immutable
- * @version $Revision: 1.17 $
+ * @version $Revision: 6860 $
  */
 
 public class Version implements Comparable {
@@ -50,8 +48,7 @@ public class Version implements Comparable {
 	private static final String	SEPARATOR		= ".";					//$NON-NLS-1$
 
 	/**
-	 * The empty version "0.0.0". Equivalent to calling
-	 * <code>new Version(0,0,0)</code>.
+	 * The empty version "0.0.0".
 	 */
 	public static final Version	emptyVersion	= new Version(0, 0, 0);
 
@@ -72,14 +69,14 @@ public class Version implements Comparable {
 	}
 
 	/**
-	 * Creates a version identifier from the specifed components.
+	 * Creates a version identifier from the specified components.
 	 * 
 	 * @param major Major component of the version identifier.
 	 * @param minor Minor component of the version identifier.
 	 * @param micro Micro component of the version identifier.
 	 * @param qualifier Qualifier component of the version identifier. If
-	 *        <code>null</code> is specified, then the qualifier will be set
-	 *        to the empty string.
+	 *        <code>null</code> is specified, then the qualifier will be set to
+	 *        the empty string.
 	 * @throws IllegalArgumentException If the numerical components are negative
 	 *         or the qualifier string is invalid.
 	 */
@@ -118,26 +115,26 @@ public class Version implements Comparable {
 	 *         formatted.
 	 */
 	public Version(String version) {
-		int major = 0;
-		int minor = 0;
-		int micro = 0;
-		String qualifier = ""; //$NON-NLS-1$
+		int maj = 0;
+		int min = 0;
+		int mic = 0;
+		String qual = ""; //$NON-NLS-1$
 
 		try {
 			StringTokenizer st = new StringTokenizer(version, SEPARATOR, true);
-			major = Integer.parseInt(st.nextToken());
+			maj = Integer.parseInt(st.nextToken());
 
 			if (st.hasMoreTokens()) {
 				st.nextToken(); // consume delimiter
-				minor = Integer.parseInt(st.nextToken());
+				min = Integer.parseInt(st.nextToken());
 
 				if (st.hasMoreTokens()) {
 					st.nextToken(); // consume delimiter
-					micro = Integer.parseInt(st.nextToken());
+					mic = Integer.parseInt(st.nextToken());
 
 					if (st.hasMoreTokens()) {
 						st.nextToken(); // consume delimiter
-						qualifier = st.nextToken();
+						qual = st.nextToken();
 
 						if (st.hasMoreTokens()) {
 							throw new IllegalArgumentException("invalid format"); //$NON-NLS-1$
@@ -150,10 +147,10 @@ public class Version implements Comparable {
 			throw new IllegalArgumentException("invalid format"); //$NON-NLS-1$
 		}
 
-		this.major = major;
-		this.minor = minor;
-		this.micro = micro;
-		this.qualifier = qualifier;
+		major = maj;
+		minor = min;
+		micro = mic;
+		qualifier = qual;
 		validate();
 	}
 
@@ -173,11 +170,23 @@ public class Version implements Comparable {
 		if (micro < 0) {
 			throw new IllegalArgumentException("negative micro"); //$NON-NLS-1$
 		}
-		int length = qualifier.length();
-		for (int i = 0; i < length; i++) {
-			if ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-".indexOf(qualifier.charAt(i)) == -1) { //$NON-NLS-1$
-				throw new IllegalArgumentException("invalid qualifier"); //$NON-NLS-1$
+		char[] chars = qualifier.toCharArray();
+		for (int i = 0, length = chars.length; i < length; i++) {
+	        char ch = chars[i];
+			if (('A' <= ch) && (ch <= 'Z')) {
+				continue;
 			}
+			if (('a' <= ch) && (ch <= 'z')) {
+				continue;
+			}
+			if (('0' <= ch) && (ch <= '9')) {
+				continue;
+			}
+			if ((ch == '_') || (ch == '-')) {
+				continue;
+			}
+			throw new IllegalArgumentException(
+					"invalid qualifier: " + qualifier); //$NON-NLS-1$
 		}
 	}
 
@@ -256,13 +265,18 @@ public class Version implements Comparable {
 	 * @return The string representation of this version identifier.
 	 */
 	public String toString() {
-		String base = major + SEPARATOR + minor + SEPARATOR + micro;
-		if (qualifier.length() == 0) { //$NON-NLS-1$
-			return base;
+		int q = qualifier.length();
+		StringBuffer result = new StringBuffer(20 + q);
+		result.append(major);
+		result.append(SEPARATOR);
+		result.append(minor);
+		result.append(SEPARATOR);
+		result.append(micro);
+		if (q > 0) {
+			result.append(SEPARATOR);
+			result.append(qualifier);
 		}
-		else {
-			return base + SEPARATOR + qualifier;
-		}
+		return result.toString();
 	}
 
 	/**

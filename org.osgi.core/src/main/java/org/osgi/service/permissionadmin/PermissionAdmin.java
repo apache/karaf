@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.permissionadmin/src/org/osgi/service/permissionadmin/PermissionAdmin.java,v 1.12 2006/06/16 16:31:44 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,39 +22,41 @@ package org.osgi.service.permissionadmin;
  * in the OSGi environment.
  * <p>
  * Access to the Permission Admin service is protected by corresponding
- * <code>ServicePermission</code>. In addition <code>AdminPermission</code> is
- * required to actually set permissions.
+ * <code>ServicePermission</code>. In addition <code>AdminPermission</code>
+ * is required to actually set permissions.
  * 
  * <p>
  * Bundle permissions are managed using a permission table. A bundle's location
  * serves as the key into this permission table. The value of a table entry is
- * the set of permissions (of type <code>PermissionInfo</code>) granted to the
- * bundle named by the given location. A bundle may have an entry in the
+ * the set of permissions (of type <code>PermissionInfo</code>) granted to
+ * the bundle named by the given location. A bundle may have an entry in the
  * permission table prior to being installed in the Framework.
  * 
  * <p>
- * The permissions specified in <code>setDefaultPermissions</code> are used as the
- * default permissions which are granted to all bundles that do not have an
+ * The permissions specified in <code>setDefaultPermissions</code> are used as
+ * the default permissions which are granted to all bundles that do not have an
  * entry in the permission table.
  * 
  * <p>
  * Any changes to a bundle's permissions in the permission table will take
- * effect no later than when bundle's <code>java.security.ProtectionDomain</code>
- * is next involved in a permission check, and will be made persistent.
+ * effect no later than when bundle's
+ * <code>java.security.ProtectionDomain</code> is next involved in a
+ * permission check, and will be made persistent.
  * 
  * <p>
  * Only permission classes on the system classpath or from an exported package
  * are considered during a permission check. Additionally, only permission
- * classes that are subclasses of <code>java.security.Permission</code> and define
- * a 2-argument constructor that takes a <i>name </i> string and an <i>actions
- * </i> string can be used.
+ * classes that are subclasses of <code>java.security.Permission</code> and
+ * define a 2-argument constructor that takes a <i>name </i> string and an
+ * <i>actions </i> string can be used.
  * <p>
  * Permissions implicitly granted by the Framework (for example, a bundle's
  * permission to access its persistent storage area) cannot be changed, and are
- * not reflected in the permissions returned by <code>getPermissions</code> and
- * <code>getDefaultPermissions</code>.
+ * not reflected in the permissions returned by <code>getPermissions</code>
+ * and <code>getDefaultPermissions</code>.
  * 
- * @version $Revision: 1.12 $
+ * @ThreadSafe
+ * @version $Revision: 5673 $
  */
 public interface PermissionAdmin {
 	/**
@@ -66,8 +66,8 @@ public interface PermissionAdmin {
 	 *        returned.
 	 * 
 	 * @return The permissions assigned to the bundle with the specified
-	 *         location, or <code>null</code> if that bundle has not been assigned
-	 *         any permissions.
+	 *         location, or <code>null</code> if that bundle has not been
+	 *         assigned any permissions.
 	 */
 	PermissionInfo[] getPermissions(String location);
 
@@ -77,10 +77,11 @@ public interface PermissionAdmin {
 	 * 
 	 * @param location The location of the bundle that will be assigned the
 	 *        permissions.
-	 * @param permissions The permissions to be assigned, or <code>null</code> if
-	 *        the specified location is to be removed from the permission table.
+	 * @param permissions The permissions to be assigned, or <code>null</code>
+	 *        if the specified location is to be removed from the permission
+	 *        table.
 	 * @throws SecurityException If the caller does not have
-	 *            <code>AllPermission</code>.
+	 *         <code>AllPermission</code>.
 	 */
 	void setPermissions(String location, PermissionInfo[] permissions);
 
@@ -115,7 +116,7 @@ public interface PermissionAdmin {
 	 * @param permissions The default permissions, or <code>null</code> if the
 	 *        default permissions are to be removed from the permission table.
 	 * @throws SecurityException If the caller does not have
-	 *            <code>AllPermission</code>.
+	 *         <code>AllPermission</code>.
 	 */
 	void setDefaultPermissions(PermissionInfo[] permissions);
 }

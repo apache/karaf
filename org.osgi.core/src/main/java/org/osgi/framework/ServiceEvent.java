@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceEvent.java,v 1.15 2007/02/20 00:14:12 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +16,15 @@
 
 package org.osgi.framework;
 
+import java.util.Dictionary;
 import java.util.EventObject;
 
 /**
  * An event from the Framework describing a service lifecycle change.
  * <p>
  * <code>ServiceEvent</code> objects are delivered to
- * <code>ServiceListener</code>s and <code>AllServiceListener</code>s when
- * a change occurs in this service's lifecycle. A type code is used to identify
+ * <code>ServiceListener</code>s and <code>AllServiceListener</code>s when a
+ * change occurs in this service's lifecycle. A type code is used to identify
  * the event type for future extendability.
  * 
  * <p>
@@ -34,7 +33,7 @@ import java.util.EventObject;
  * @Immutable
  * @see ServiceListener
  * @see AllServiceListener
- * @version $Revision: 1.15 $
+ * @version $Revision: 6542 $
  */
 
 public class ServiceEvent extends EventObject {
@@ -55,10 +54,7 @@ public class ServiceEvent extends EventObject {
 	 * This event is synchronously delivered <strong>after</strong> the service
 	 * has been registered with the Framework.
 	 * 
-	 * <p>
-	 * The value of <code>REGISTERED</code> is 0x00000001.
-	 * 
-	 * @see BundleContext#registerService(String[],Object,java.util.Dictionary)
+	 * @see BundleContext#registerService(String[],Object,Dictionary)
 	 */
 	public final static int			REGISTERED			= 0x00000001;
 
@@ -68,9 +64,6 @@ public class ServiceEvent extends EventObject {
 	 * This event is synchronously delivered <strong>after</strong> the service
 	 * properties have been modified.
 	 * 
-	 * <p>
-	 * The value of <code>MODIFIED</code> is 0x00000002.
-	 * 
 	 * @see ServiceRegistration#setProperties
 	 */
 	public final static int			MODIFIED			= 0x00000002;
@@ -78,8 +71,8 @@ public class ServiceEvent extends EventObject {
 	/**
 	 * This service is in the process of being unregistered.
 	 * <p>
-	 * This event is synchronously delivered <strong>before</strong> the
-	 * service has completed unregistering.
+	 * This event is synchronously delivered <strong>before</strong> the service
+	 * has completed unregistering.
 	 * 
 	 * <p>
 	 * If a bundle is using a service that is <code>UNREGISTERING</code>, the
@@ -88,20 +81,32 @@ public class ServiceEvent extends EventObject {
 	 * this event, the Framework will automatically release the bundle's use of
 	 * the service while completing the service unregistration operation.
 	 * 
-	 * <p>
-	 * The value of UNREGISTERING is 0x00000004.
-	 * 
 	 * @see ServiceRegistration#unregister
 	 * @see BundleContext#ungetService
 	 */
 	public final static int			UNREGISTERING		= 0x00000004;
 
 	/**
+	 * The properties of a registered service have been modified and the new
+	 * properties no longer match the listener's filter.
+	 * <p>
+	 * This event is synchronously delivered <strong>after</strong> the service
+	 * properties have been modified. This event is only delivered to listeners
+	 * which were added with a non-<code>null</code> filter where the filter
+	 * matched the service properties prior to the modification but the filter
+	 * does not match the modified service properties.
+	 * 
+	 * @see ServiceRegistration#setProperties
+	 * @since 1.5
+	 */
+	public final static int			MODIFIED_ENDMATCH	= 0x00000008;
+
+	/**
 	 * Creates a new service event object.
 	 * 
 	 * @param type The event type.
 	 * @param reference A <code>ServiceReference</code> object to the service
-	 *        that had a lifecycle change.
+	 * 	that had a lifecycle change.
 	 */
 	public ServiceEvent(int type, ServiceReference reference) {
 		super(reference);
@@ -124,9 +129,10 @@ public class ServiceEvent extends EventObject {
 	/**
 	 * Returns the type of event. The event type values are:
 	 * <ul>
-	 * <li>{@link #REGISTERED}
-	 * <li>{@link #MODIFIED}
-	 * <li>{@link #UNREGISTERING}
+	 * <li>{@link #REGISTERED} </li> 
+	 * <li>{@link #MODIFIED} </li> 
+	 * <li>{@link #MODIFIED_ENDMATCH} </li> 
+	 * <li>{@link #UNREGISTERING} </li>
 	 * </ul>
 	 * 
 	 * @return Type of service lifecycle change.

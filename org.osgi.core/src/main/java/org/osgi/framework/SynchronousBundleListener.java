@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/SynchronousBundleListener.java,v 1.15 2007/02/20 00:16:30 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2001, 2007). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +45,7 @@ package org.osgi.framework;
  * @since 1.1
  * @see BundleEvent
  * @ThreadSafe
- * @version $Revision: 1.15 $
+ * @version $Revision: 5673 $
  */
 
 public interface SynchronousBundleListener extends BundleListener {
