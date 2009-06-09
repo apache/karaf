@@ -86,6 +86,7 @@
                             org.apache.felix.webconsole.*,
                         </Private-Package>
                         <Import-Package>
+                            org.osgi.service.http,
                             org.apache.felix.scr;
                             org.apache.felix.shell;
                             org.osgi.service.*;resolution:=optional,
