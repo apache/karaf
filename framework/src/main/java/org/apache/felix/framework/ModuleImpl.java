@@ -1172,7 +1172,7 @@ public class ModuleImpl implements IModule
         return m_id;
     }
 
-    private synchronized boolean isActivationTrigger()
+    synchronized boolean isActivationTrigger()
     {
         return m_isActivationTriggered;
     }
@@ -1633,7 +1633,7 @@ public class ModuleImpl implements IModule
                     }
 
                     // Perform deferred activation without holding the class loader lock,
-                    // if necessary.
+                    // if the class we are returning is the instigating class.
                     List list = (List) m_local.get();
                     if ((list != null)
                         && (list.size() > 0)

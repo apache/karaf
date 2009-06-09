@@ -1481,10 +1481,14 @@ ex.printStackTrace();
             // Set the bundle's context.
             bundle.setBundleContext(new BundleContextImpl(m_logger, this, bundle));
 
-            if (bundle.getRuntimeActivationPolicy() != IModule.LAZY_ACTIVATION)
+            // If the bundle's activation policy is eager or activation has already
+            // been triggered, then activate the bundle immediately.
+            if ((bundle.getRuntimeActivationPolicy() != IModule.LAZY_ACTIVATION)
+                || ((ModuleImpl) bundle.getCurrentModule()).isActivationTrigger())
             {
                 activateBundle(bundle);
             }
+            // Otherwise, defer bundle activation.
             else
             {
                 setBundleStateAndNotify(bundle, Bundle.STARTING);
