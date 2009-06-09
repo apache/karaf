@@ -104,6 +104,9 @@ public class ModuleImpl implements IModule
     // Thread local to detect class loading cycles.
     private final ThreadLocal m_cycleCheck = new ThreadLocal();
 
+    // Thread local to keep track of deferred activation.
+    private static final ThreadLocal m_deferredActivation = new ThreadLocal();
+
     /**
      * This constructor is used by the extension manager, since it needs
      * a constructor that does not throw an exception.
@@ -1449,8 +1452,6 @@ public class ModuleImpl implements IModule
         m_dexFileClassLoadClass = dexFileClassLoadClass;
     }
 
-    private static final ThreadLocal m_local = new ThreadLocal();
-
     public class ModuleClassLoader extends SecureClassLoader
     {
         private final Map m_jarContentToDexFile;
@@ -1557,13 +1558,13 @@ public class ModuleImpl implements IModule
                                 && (activationPolicy == IModule.LAZY_ACTIVATION)
                                 && (getBundle().getState() == Bundle.STARTING))
                             {
-                                List list = (List) m_local.get();
-                                if (list == null)
+                                List deferredList = (List) m_deferredActivation.get();
+                                if (deferredList == null)
                                 {
-                                    list = new ArrayList();
-                                    m_local.set(list);
+                                    deferredList = new ArrayList();
+                                    m_deferredActivation.set(deferredList);
                                 }
-                                list.add(new Object[] { name, getBundle() });
+                                deferredList.add(new Object[] { name, getBundle() });
                             }
                             // We need to try to define a Package object for the class
                             // before we call defineClass(). Get the package name and
@@ -1634,24 +1635,24 @@ public class ModuleImpl implements IModule
 
                     // Perform deferred activation without holding the class loader lock,
                     // if the class we are returning is the instigating class.
-                    List list = (List) m_local.get();
-                    if ((list != null)
-                        && (list.size() > 0)
-                        && ((Object[]) list.get(0))[0].equals(name))
+                    List deferredList = (List) m_deferredActivation.get();
+                    if ((deferredList != null)
+                        && (deferredList.size() > 0)
+                        && ((Object[]) deferredList.get(0))[0].equals(name))
                     {
-                        for (int i = list.size() - 1; i >= 0; i--)
+                        for (int i = deferredList.size() - 1; i >= 0; i--)
                         {
                             try
                             {
-                                ((BundleImpl) ((Object[]) list.get(i))[1]).getFramework().activateBundle(
-                                    (BundleImpl) ((Object[]) list.get(i))[1]);
+                                ((BundleImpl) ((Object[]) deferredList.get(i))[1]).getFramework().activateBundle(
+                                    (BundleImpl) ((Object[]) deferredList.get(i))[1]);
                             }
                             catch (BundleException ex)
                             {
                                 ex.printStackTrace();
                             }
                         }
-                        list.clear();
+                        deferredList.clear();
                     }
                 }
             }
