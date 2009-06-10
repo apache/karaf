@@ -195,15 +195,15 @@ public class FelixResolverState implements Resolver.ResolverState
                     new Object[] { host, reqs[reqIdx] });
             }
         }
-        // Loop through all fragments verifying they do no conflict,
-        // adding those packages that do not conflict and removing
-        // the fragment if it does conflict.
+        // Loop through each fragment verifying it does no conflict,
+        // adding its package and bundle dependencies if they do not
+        // conflict and removing the fragment if it does conflict.
         for (Iterator it = fragmentList.iterator(); it.hasNext(); )
         {
             IModule fragment = (IModule) it.next();
             reqs = fragment.getRequirements();
-            List ipFragment = new ArrayList();
-            List rbFragment = new ArrayList();
+            Map ipFragment = new HashMap();
+            Map rbFragment = new HashMap();
             boolean conflicting = false;
             for (int reqIdx = 0;
                 !conflicting && (reqs != null) && (reqIdx < reqs.length);
@@ -215,12 +215,12 @@ public class FelixResolverState implements Resolver.ResolverState
                     String targetName = ((Requirement) reqs[reqIdx]).getTargetName();
                     Map mergedReqMap = (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
                         ? ipMerged : rbMerged;
-                    List fragmentReqList = (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
+                    Map fragmentReqMap = (reqs[reqIdx].getNamespace().equals(ICapability.PACKAGE_NAMESPACE))
                         ? ipFragment : rbFragment;
                     Object[] existing = (Object[]) mergedReqMap.get(targetName);
                     if (existing == null)
                     {
-                        fragmentReqList.add(targetName);
+                        fragmentReqMap.put(targetName, new Object[] { fragment, reqs[reqIdx] });
                     }
                     else if (isRequirementConflicting(
                         (Requirement) existing[REQ_IDX], (Requirement) reqs[reqIdx]))
@@ -248,13 +248,15 @@ public class FelixResolverState implements Resolver.ResolverState
             // Merge non-conflicting requirements into overall set
             // of requirements and continue checking for conflicts
             // with the next fragment.
-            for (int pkgIdx = 0; pkgIdx < ipFragment.size(); pkgIdx++)
+            for (Iterator it2 = ipFragment.entrySet().iterator(); it2.hasNext(); )
             {
-                ipMerged.put(ipFragment.get(pkgIdx), fragment);
+                Map.Entry entry = (Map.Entry) it2.next();
+                ipMerged.put(entry.getKey(), entry.getValue());
             }
-            for (int pkgIdx = 0; pkgIdx < rbFragment.size(); pkgIdx++)
+            for (Iterator it2 = rbFragment.entrySet().iterator(); it2.hasNext(); )
             {
-                rbMerged.put(rbFragment.get(pkgIdx), fragment);
+                Map.Entry entry = (Map.Entry) it2.next();
+                rbMerged.put(entry.getKey(), entry.getValue());
             }
         }
     }
