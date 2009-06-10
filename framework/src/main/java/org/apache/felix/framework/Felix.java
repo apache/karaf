@@ -1004,8 +1004,9 @@ ex.printStackTrace();
                         }
                     }
                     // Stop the bundle if necessary.
-                    else if ((impl.getState() == Bundle.ACTIVE) &&
-                        (impl.getStartLevel(getInitialBundleStartLevel())
+                    else if (((impl.getState() == Bundle.ACTIVE)
+                        || (impl.getState() == Bundle.STARTING))
+                        && (impl.getStartLevel(getInitialBundleStartLevel())
                             > getActiveStartLevel()))
                     {
                         try
@@ -1145,7 +1146,6 @@ ex.printStackTrace();
                 try
                 {
                     // Start the bundle if necessary.
-                    // Start the bundle if necessary.
                     if (((impl.getPersistentState() == Bundle.ACTIVE)
                         || (impl.getPersistentState() == Bundle.STARTING))
                         && (impl.getStartLevel(getInitialBundleStartLevel())
@@ -1159,8 +1159,9 @@ ex.printStackTrace();
                         startBundle(impl, options);
                     }
                     // Stop the bundle if necessary.
-                    else if ((impl.getState() == Bundle.ACTIVE) &&
-                        (impl.getStartLevel(getInitialBundleStartLevel())
+                    else if (((impl.getState() == Bundle.ACTIVE)
+                        || (impl.getState() == Bundle.STARTING))
+                        && (impl.getStartLevel(getInitialBundleStartLevel())
                             > getActiveStartLevel()))
                     {
                         stopBundle(impl, false);
@@ -1207,6 +1208,25 @@ ex.printStackTrace();
 
         return (((BundleImpl) bundle).getPersistentState() == Bundle.ACTIVE)
             || (((BundleImpl) bundle).getPersistentState() == Bundle.STARTING);
+    }
+
+    /**
+     * Returns whether the bundle is using its declared activation policy;
+     * this is an method implementation for the Start Level service.
+     * @param bundle The bundle to examine.
+     * @return <tt>true</tt> if the bundle is using its declared activation
+     *         policy, <tt>false</tt> otherwise.
+     * @throws java.lang.IllegalArgumentException If the specified
+     *          bundle has been uninstalled.
+    **/
+    boolean isBundleActivationPolicyUsed(Bundle bundle)
+    {
+        if (bundle.getState() == Bundle.UNINSTALLED)
+        {
+            throw new IllegalArgumentException("Bundle is uninstalled.");
+        }
+
+        return ((BundleImpl) bundle).isDeclaredActivationPolicyUsed();
     }
 
     //
@@ -1386,6 +1406,8 @@ ex.printStackTrace();
         // that case, the global lock will be acquired to make sure no
         // bundles can be installed or uninstalled during the resolve.
 
+        int eventType;
+
         // Acquire bundle lock.
         try
         {
@@ -1405,11 +1427,9 @@ ex.printStackTrace();
             }
         }
 
-        // Set the bundl
-        bundle.setRuntimeActivationPolicy(
-            ((options & Bundle.START_ACTIVATION_POLICY) > 0)
-            ? IModule.LAZY_ACTIVATION
-            : IModule.EAGER_ACTIVATION);
+        // Record whether the bundle is using its declared activation policy.
+        bundle.setDeclaredActivationPolicyUsed(
+            (options & Bundle.START_ACTIVATION_POLICY) != 0);
 
         try
         {
@@ -1473,25 +1493,35 @@ ex.printStackTrace();
                     resolveBundle(bundle);
                     // No break.
                 case Bundle.RESOLVED:
-                    setBundleStateAndNotify(bundle, Bundle.STARTING);
-                    fireBundleEvent(BundleEvent.STARTING, bundle);
                     break;
             }
 
             // Set the bundle's context.
             bundle.setBundleContext(new BundleContextImpl(m_logger, this, bundle));
 
+            // At this point, no matter if the bundle's activation policy is
+            // eager or deferred, we need to set the bundle's state to STARTING.
+            // We don't fire a BundleEvent here for this state change, since
+            // STARTING events are only fired if we are invoking the activator,
+            // which we may not do if activation is deferred.
+            setBundleStateAndNotify(bundle, Bundle.STARTING);
+
             // If the bundle's activation policy is eager or activation has already
             // been triggered, then activate the bundle immediately.
-            if ((bundle.getRuntimeActivationPolicy() != IModule.LAZY_ACTIVATION)
+            if (!bundle.isDeclaredActivationPolicyUsed()
+                || (bundle.getCurrentModule().getDeclaredActivationPolicy() != IModule.LAZY_ACTIVATION)
                 || ((ModuleImpl) bundle.getCurrentModule()).isActivationTrigger())
             {
-                activateBundle(bundle);
+                // Record the event type for the final event and activate.
+                eventType = BundleEvent.STARTED;
+                // Note that the STARTING event is thrown in the activateBundle() method.
+                activateBundle(bundle, false);
             }
             // Otherwise, defer bundle activation.
             else
             {
-                setBundleStateAndNotify(bundle, Bundle.STARTING);
+                // Record the event type for the final event.
+                eventType = BundleEvent.LAZY_ACTIVATION;
             }
 
             // We still need to fire the STARTED event, but we will do
@@ -1503,13 +1533,12 @@ ex.printStackTrace();
             releaseBundleLock(bundle);
         }
 
-        // If there was no exception, then we should fire the STARTED event
-        // here without holding the lock.
-// TODO: LAZY - WE SHOULD REALLY BE FIRING EVENT HERE, OUTSIDE OF LOCK.
-//        fireBundleEvent(BundleEvent.STARTED, bundle);
+        // If there was no exception, then we should fire the STARTED
+        // or LAZY_ACTIVATION event here without holding the lock.
+        fireBundleEvent(eventType, bundle);
     }
 
-    public void activateBundle(BundleImpl bundle) throws BundleException
+    void activateBundle(BundleImpl bundle, boolean fireEvent) throws BundleException
     {
         // CONCURRENCY NOTE:
         // We will first acquire the bundle lock for the specific bundle
@@ -1537,6 +1566,9 @@ ex.printStackTrace();
                 // Ignore persistent starts.
                 return;
             }
+
+            // Fire STARTING event to signify call to bundle activator.
+            fireBundleEvent(BundleEvent.STARTING, bundle);
 
             try
             {
@@ -1603,10 +1635,15 @@ ex.printStackTrace();
             releaseBundleLock(bundle);
         }
 
-        // If there was no exception, then we should fire the STARTED event
-        // here without holding the lock.
-// TODO: LAZY - WE COULD BE HOLDING THE LOCK FROM startBundle() ABOVE.
-        fireBundleEvent(BundleEvent.STARTED, bundle);
+        // If there was no exception, then we should fire the STARTED
+        // event here without holding the lock if specified.
+        // TODO: LAZY - It would be nice to figure out how to do this without
+        //       duplicating code; this method is called from two different
+        //       places -- one fires the event itself the other one needs it.
+        if (fireEvent)
+        {
+            fireBundleEvent(BundleEvent.STARTED, bundle);
+        }
     }
 
     void updateBundle(BundleImpl bundle, InputStream is)
@@ -1876,6 +1913,15 @@ ex.printStackTrace();
                 bundle.setPersistentStateInactive();
             }
 
+            // If the bundle is not persistently started, then we
+            // need to reset the activation policy flag, since it
+            // does not persist across persistent stops or transient
+            // stops.
+            if (!isBundlePersistentlyStarted(bundle))
+            {
+                bundle.setDeclaredActivationPolicyUsed(false);
+            }
+
             // As per the OSGi spec, fragment bundles can not be stopped and must
             // throw a BundleException when there is an attempt to stop one.
             if (Util.isFragment(bundle.getCurrentModule()))
@@ -1883,12 +1929,14 @@ ex.printStackTrace();
                 throw new BundleException("Fragment bundles can not be stopped: " + bundle);
             }
 
+            boolean wasActive = false;
             switch (bundle.getState())
             {
                 case Bundle.UNINSTALLED:
                     throw new IllegalStateException("Cannot stop an uninstalled bundle.");
                 case Bundle.STARTING:
-                    if (bundle.getRuntimeActivationPolicy() != IModule.LAZY_ACTIVATION)
+                    if (bundle.isDeclaredActivationPolicyUsed()
+                        && bundle.getCurrentModule().getDeclaredActivationPolicy() != IModule.LAZY_ACTIVATION)
                     {
                         throw new BundleException(
                             "Stopping a starting or stopping bundle is currently not supported.");
@@ -1901,13 +1949,18 @@ ex.printStackTrace();
                 case Bundle.RESOLVED:
                     return;
                 case Bundle.ACTIVE:
-                    // Set bundle state..
-                    setBundleStateAndNotify(bundle, Bundle.STOPPING);
-                    fireBundleEvent(BundleEvent.STOPPING, bundle);
+                    wasActive = true;
                     break;
             }
 
-            if (bundle.getState() != Bundle.STARTING)
+            // At this point, no matter if the bundle's activation policy is
+            // eager or deferred, we need to set the bundle's state to STOPPING
+            // and fire the STOPPING event.
+            setBundleStateAndNotify(bundle, Bundle.STOPPING);
+            fireBundleEvent(BundleEvent.STOPPING, bundle);
+
+            // If the bundle was active, then invoke the activator stop() method.
+            if (wasActive)
             {
                 try
                 {

@@ -1549,7 +1549,10 @@ public class ModuleImpl implements IModule
 
                         if (clazz == null)
                         {
-                            int activationPolicy = ((BundleImpl) getBundle()).getRuntimeActivationPolicy();
+                            int activationPolicy = 
+                                ((BundleImpl) getBundle()).isDeclaredActivationPolicyUsed()
+                                ? ((BundleImpl) getBundle()).getCurrentModule().getDeclaredActivationPolicy()
+                                : IModule.EAGER_ACTIVATION;
 
                             // If the module is using deferred activation, then if
                             // we load this class from this module we need to activate
@@ -1645,7 +1648,7 @@ public class ModuleImpl implements IModule
                             try
                             {
                                 ((BundleImpl) ((Object[]) deferredList.get(i))[1]).getFramework().activateBundle(
-                                    (BundleImpl) ((Object[]) deferredList.get(i))[1]);
+                                    (BundleImpl) ((Object[]) deferredList.get(i))[1], true);
                             }
                             catch (BundleException ex)
                             {

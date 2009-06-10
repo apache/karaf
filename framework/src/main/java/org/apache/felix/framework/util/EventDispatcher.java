@@ -595,13 +595,15 @@ public class EventDispatcher
             syncListeners = m_syncBundleListeners;
         }
 
+System.out.println("+++ FIRING BUNDLE EVENT " + event.getType() + " FROM " + event.getBundle().getSymbolicName());
         // Fire synchronous bundle listeners immediately on the calling thread.
         fireEventImmediately(m_logger, Request.BUNDLE_EVENT, syncListeners, event);
 
         // The spec says that asynchronous bundle listeners do not get events
-        // of types STARTING or STOPPING.
+        // of types STARTING, STOPPING, or LAZY_ACTIVATION.
         if ((event.getType() != BundleEvent.STARTING) &&
-            (event.getType() != BundleEvent.STOPPING))
+            (event.getType() != BundleEvent.STOPPING) &&
+            (event.getType() != BundleEvent.LAZY_ACTIVATION))
         {
             // Fire asynchronous bundle listeners on a separate thread.
             fireEventAsynchronously(m_logger, Request.BUNDLE_EVENT, listeners, event);

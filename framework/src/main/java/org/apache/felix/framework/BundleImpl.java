@@ -38,7 +38,7 @@ class BundleImpl implements Bundle
     private final BundleArchive m_archive;
     private IModule[] m_modules = new IModule[0];
     private volatile int m_state;
-    private int m_runtimeActivationPolicy;
+    private boolean m_useDeclaredActivationPolicy;
     private BundleActivator m_activator = null;
     private BundleContext m_context = null;
     private final Map m_cachedHeaders = new HashMap();
@@ -63,7 +63,7 @@ class BundleImpl implements Bundle
         __m_felix = null;
         m_archive = null;
         m_state = Bundle.INSTALLED;
-        m_runtimeActivationPolicy = 0;
+        m_useDeclaredActivationPolicy = false;
         m_stale = false;
         m_activator = null;
         m_context = null;
@@ -74,7 +74,7 @@ class BundleImpl implements Bundle
         __m_felix = felix;
         m_archive = archive;
         m_state = Bundle.INSTALLED;
-        m_runtimeActivationPolicy = 0;
+        m_useDeclaredActivationPolicy = false;
         m_stale = false;
         m_activator = null;
         m_context = null;
@@ -131,16 +131,14 @@ class BundleImpl implements Bundle
         }
     }
 
-    synchronized int getRuntimeActivationPolicy()
+    synchronized boolean isDeclaredActivationPolicyUsed()
     {
-        return (m_runtimeActivationPolicy == IModule.EAGER_ACTIVATION)
-            ? IModule.EAGER_ACTIVATION
-            : getCurrentModule().getDeclaredActivationPolicy();
+        return m_useDeclaredActivationPolicy;
     }
 
-    synchronized void setRuntimeActivationPolicy(int policy)
+    synchronized void setDeclaredActivationPolicyUsed(boolean b)
     {
-        m_runtimeActivationPolicy = policy;
+        m_useDeclaredActivationPolicy = b;
     }
 
     synchronized BundleActivator getActivator()

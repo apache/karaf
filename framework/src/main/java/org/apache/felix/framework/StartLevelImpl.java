@@ -215,7 +215,7 @@ public class StartLevelImpl implements StartLevel, Runnable
     **/
 	public boolean isBundleActivationPolicyUsed(Bundle bundle)
     {
-        throw new UnsupportedOperationException("This feature has not yet been implemented.");
+        return m_felix.isBundleActivationPolicyUsed(bundle);
     }
 
     public void run()
