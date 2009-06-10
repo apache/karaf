@@ -36,7 +36,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.main</artifactId>
-      <version>1.0.4</version>
+      <version>1.8.0</version>
     </dependency>
   </dependencies>
   <build>
@@ -48,10 +48,12 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <_donotcopy>(CVS|.svn|config.properties)</_donotcopy>
             <Main-Class>org.apache.felix.example.extenderbased.host.Activator</Main-Class>
-            <Import-Package>!android.dalvik,org.osgi.framework,org.osgi.service.packageadmin,org.osgi.service.url,org.osgi.service.startlevel,org.osgi.util.tracker,*</Import-Package>
+            <Import-Package>!android.*,!dalvik.*,org.osgi.framework,org.osgi.service.packageadmin,org.osgi.service.url,org.osgi.service.startlevel,org.osgi.util.tracker,*</Import-Package>
             <Export-Package>org.apache.felix.example.extenderbased.host.extension.*</Export-Package>
-            <Private-Package>org.apache.felix.example.extenderbased.host.*,org.apache.felix.moduleloader.*,org.apache.felix.framework.*,org.apache.felix.main,org.osgi.*</Private-Package>
+            <Private-Package>org.apache.felix.example.extenderbased.host.*</Private-Package>
+            <Embed-Dependency>*;artifactId=org.apache.felix.main;inline=true</Embed-Dependency>
             <Bundle-Activator>org.apache.felix.example.extenderbased.host.Activator</Bundle-Activator>
             <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
           </instructions>

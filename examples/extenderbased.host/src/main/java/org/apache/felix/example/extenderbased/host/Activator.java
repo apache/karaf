@@ -49,9 +49,8 @@ import org.apache.felix.main.AutoActivator;
  * launch the stand-alone application, it must be run from this bundle's
  * installation directory using "<tt>java -jar</tt>".
 **/
-public class Activator implements BundleActivator, Runnable
+public class Activator implements BundleActivator
 {
-    private BundleContext m_context	= null;
     private DrawingFrame m_frame = null;
     private ShapeTracker m_shapetracker = null;
 
@@ -61,24 +60,34 @@ public class Activator implements BundleActivator, Runnable
      * and repainting issues.
      * @param context The context of the bundle.
     **/
-    public void start(BundleContext context)
+    public void start(final BundleContext context)
     {
-        m_context = context;
-        if (SwingUtilities.isEventDispatchThread())
-        {
-            run();
-        }
-        else
-        {
-            try
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            // This creates of the application window.
+            public void run()
             {
-                javax.swing.SwingUtilities.invokeAndWait(this);
+                m_frame = new DrawingFrame();
+                m_frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+                m_frame.addWindowListener(new WindowAdapter() {
+                    public void windowClosing(WindowEvent evt)
+                    {
+                        try
+                        {
+                            context.getBundle(0).stop();
+                        }
+                        catch (BundleException ex)
+                        {
+                            ex.printStackTrace();
+                        }
+                    }
+                });
+
+                m_frame.setVisible(true);
+
+                m_shapetracker = new ShapeTracker(context, m_frame);
+                m_shapetracker.open();
             }
-            catch (Exception ex)
-            {
-                ex.printStackTrace();
-            }
-        }
+        });
     }
 
     /**
@@ -87,39 +96,31 @@ public class Activator implements BundleActivator, Runnable
     **/
     public void stop(BundleContext context)
     {
-        m_shapetracker.close();
-        m_frame.setVisible(false);
-        m_frame.dispose();
-    }
-
-    /**
-     * This method actually performs the creation of the application window.
-     * It is intended to be called by the Swing event thread and should not
-     * be called directly.
-    **/
-    public void run()
-    {
-        m_frame = new DrawingFrame();
-
-        m_frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        m_frame.addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent evt)
+        Runnable runner = new Runnable() {
+            // This disposes of the application window.
+            public void run()
             {
-                try
-                {
-                    m_context.getBundle(0).stop();
-                }
-                catch (BundleException ex)
-                {
-                    ex.printStackTrace();
-                }
+                m_shapetracker.close();
+                m_frame.setVisible(false);
+                m_frame.dispose();
             }
-        });
+        };
 
-        m_frame.setVisible(true);
-
-        m_shapetracker = new ShapeTracker(m_context, m_frame);
-        m_shapetracker.open();
+        if (SwingUtilities.isEventDispatchThread())
+        {
+            runner.run();
+        }
+        else
+        {
+            try
+            {
+                javax.swing.SwingUtilities.invokeAndWait(runner);
+            }
+            catch (Exception ex)
+            {
+                ex.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -146,20 +147,14 @@ public class Activator implements BundleActivator, Runnable
         });
 
         Map configMap = new StringMap(false);
-        configMap.put(Constants.FRAMEWORK_SYSTEMPACKAGES,
-            "org.osgi.framework; version=1.3.0," +
-            "org.osgi.service.packageadmin; version=1.2.0," +
-            "org.osgi.service.startlevel; version=1.0.0," +
-            "org.osgi.service.url; version=1.0.0," +
-            "org.osgi.util.tracker; version=1.3.2," +
-            "org.apache.felix.example.extenderbased.host.extension; version=1.0.0," +
-            "javax.swing");
+        configMap.put(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA,
+            "org.apache.felix.example.extenderbased.host.extension; version=1.0.0");
         configMap.put(AutoActivator.AUTO_START_PROP + ".1",
             "file:../extenderbased.circle/target/extenderbased.circle-1.0.0.jar " +
             "file:../extenderbased.square/target/extenderbased.square-1.0.0.jar " +
             "file:../extenderbased.triangle/target/extenderbased.triangle-1.0.0.jar");
-        configMap.put(FelixConstants.LOG_LEVEL_PROP, "1");
-        configMap.put(BundleCache.CACHE_PROFILE_DIR_PROP, cachedir.getAbsolutePath());
+        configMap.put(FelixConstants.LOG_LEVEL_PROP, "4");
+        configMap.put(Constants.FRAMEWORK_STORAGE, cachedir.getAbsolutePath());
 
         // Create list to hold custom framework activators.
         List list = new ArrayList();
@@ -167,11 +162,13 @@ public class Activator implements BundleActivator, Runnable
         list.add(new AutoActivator(configMap));
         // Add our own activator.
         list.add(new Activator());
+        // Add our custom framework activators to the configuration map.
+        configMap.put(FelixConstants.SYSTEMBUNDLE_ACTIVATORS_PROP, list);
 
         try
         {
             // Now create an instance of the framework.
-            Felix felix = new Felix(configMap, list);
+            Felix felix = new Felix(configMap);
             felix.start();
         }
         catch (Exception ex)
