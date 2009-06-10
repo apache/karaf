@@ -196,9 +196,11 @@ public class ShellFactoryImpl
         }
 
         public void close() {
-            closed = true;
-            Closer.close(in, out, err);
-            callback.onExit(0);
+            if (!closed) {
+                closed = true;
+                Closer.close(in, out, err);
+                callback.onExit(0);
+            }
         }
 
         public boolean isInteractive() {
