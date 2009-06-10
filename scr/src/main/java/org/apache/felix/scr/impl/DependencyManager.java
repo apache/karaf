@@ -230,6 +230,21 @@ class DependencyManager implements ServiceListener, Reference
     
                     m_componentManager.reactivate();
                 }
+                else
+                {
+                    // single service binding only which already exists
+                    // we have to check whether the bound service is to be
+                    // replaced
+                    ServiceReference[] boundRefs = getBoundServiceReferences();
+                    if ( isHigher( reference, boundRefs[0] ) )
+                    {
+                        m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Service "
+                            + m_dependencyMetadata.getName() + " with higher ranking registered, reactivate component",
+                            m_componentManager.getComponentMetadata(), null );
+
+                        m_componentManager.reactivate();
+                    }
+                }
             }
     
             // otherwise bind if we have a bind method and the service needs
