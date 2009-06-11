@@ -35,6 +35,7 @@
     </feature>
     <feature name="webconsole" version="${version}">
         <feature version="${version}">felix-http</feature>
+        <bundle>mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}/jar</bundle>
         <bundle>mvn:org.apache.felix/org.apache.felix.webconsole/${felix.webconsole.version}/jar</bundle>
         <config name="org.apache.felix.webconsole.internal.servlet.OsgiManager">
           username=karaf
