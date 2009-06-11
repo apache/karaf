@@ -47,16 +47,16 @@ public class SshAction
 {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Option(name="-l", aliases={"--username"})
+    @Option(name="-l", aliases={"--username"}, description = "Username")
     private String username;
 
-    @Option(name="-P", aliases={"--password"})
+    @Option(name="-P", aliases={"--password"}, description = "Password")
     private String password;
 
-    @Argument(required=true)
+    @Argument(required=true, description = "Host")
     private String hostname;
 
-    @Option(name="-p", aliases={"--port"})
+    @Option(name="-p", aliases={"--port"}, description = "Port")
     private int port = 22;
 
     private BeanContainer container;
