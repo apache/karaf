@@ -993,6 +993,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
     private String getBundleDescriptor( Bundle bundle )
     {
         StringBuffer val = new StringBuffer();
+        val.append("<a href='").append("./").append(bundle.getBundleId()).append("'>");
         if ( bundle.getSymbolicName() != null )
         {
             // list the bundle name if not null
@@ -1013,6 +1014,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
             // only append the bundle
             val.append( bundle.getBundleId() );
         }
+        val.append("</a>");
         return val.toString();
     }
 
