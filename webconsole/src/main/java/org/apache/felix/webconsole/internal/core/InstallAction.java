@@ -18,7 +18,7 @@ package org.apache.felix.webconsole.internal.core;
 
 
 import java.io.*;
-import java.util.Map;
+import java.util.*;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
@@ -72,19 +72,19 @@ public class InstallAction extends BaseManagementPlugin implements Action
     {
 
         // get the uploaded data
-        Map params = ( Map ) request.getAttribute( AbstractWebConsolePlugin.ATTR_FILEUPLOAD );
+        final Map params = ( Map ) request.getAttribute( AbstractWebConsolePlugin.ATTR_FILEUPLOAD );
         if ( params == null )
         {
             return true;
         }
 
-        FileItem startItem = getFileItem( params, FIELD_START, true );
-        FileItem startLevelItem = getFileItem( params, FIELD_STARTLEVEL, true );
-        FileItem bundleItem = getFileItem( params, FIELD_BUNDLEFILE, false );
-        FileItem refreshPackagesItem = getFileItem( params, FIELD_REFRESH_PACKAGES, true );
+        final FileItem startItem = getParameter( params, FIELD_START );
+        final FileItem startLevelItem = getParameter( params, FIELD_STARTLEVEL );
+        final FileItem[] bundleItems = getFileItems( params, FIELD_BUNDLEFILE );
+        final FileItem refreshPackagesItem = getParameter( params, FIELD_REFRESH_PACKAGES );
 
         // don't care any more if not bundle item
-        if ( bundleItem == null || bundleItem.getSize() <= 0 )
+        if ( bundleItems.length == 0 )
         {
             return true;
         }
@@ -108,49 +108,54 @@ public class InstallAction extends BaseManagementPlugin implements Action
             }
         }
 
-        // write the bundle data to a temporary file to ease processing
-        File tmpFile = null;
-        try
+        for(int i = 0; i < bundleItems.length; i++ )
         {
-            // copy the data to a file for better processing
-            tmpFile = File.createTempFile( "install", ".tmp" );
-            bundleItem.write( tmpFile );
-        }
-        catch ( Exception e )
-        {
-            getLog().log( LogService.LOG_ERROR, "Problem accessing uploaded bundle file", e );
+            final FileItem bundleItem = bundleItems[i];
+            getLog().log( LogService.LOG_ERROR, "Accessing uploaded bundle file: " + bundleItem.getName() );
+            // write the bundle data to a temporary file to ease processing
+            File tmpFile = null;
+            try
+            {
+                // copy the data to a file for better processing
+                tmpFile = File.createTempFile( "install", ".tmp" );
+                bundleItem.write( tmpFile );
+            }
+            catch ( Exception e )
+            {
+                getLog().log( LogService.LOG_ERROR, "Problem accessing uploaded bundle file: " + bundleItem.getName(), e );
 
-            // remove the tmporary file
+                // remove the tmporary file
+                if ( tmpFile != null )
+                {
+                    tmpFile.delete();
+                    tmpFile = null;
+                }
+            }
+
+            // install or update the bundle now
             if ( tmpFile != null )
             {
-                tmpFile.delete();
-                tmpFile = null;
+                // start, refreshPackages just needs to exist, don't care for value
+                boolean start = startItem != null;
+                boolean refreshPackages = refreshPackagesItem != null;
+
+                bundleLocation = "inputstream:" + bundleItem.getName();
+                installBundle( bundleLocation, tmpFile, startLevel, start, refreshPackages );
             }
-        }
-
-        // install or update the bundle now
-        if ( tmpFile != null )
-        {
-            // start, refreshPackages just needs to exist, don't care for value
-            boolean start = startItem != null;
-            boolean refreshPackages = refreshPackagesItem != null;
-
-            bundleLocation = "inputstream:" + bundleItem.getName();
-            installBundle( bundleLocation, tmpFile, startLevel, start, refreshPackages );
         }
 
         return true;
     }
 
 
-    private FileItem getFileItem( Map params, String name, boolean isFormField )
+    private FileItem getParameter( Map params, String name )
     {
         FileItem[] items = ( FileItem[] ) params.get( name );
         if ( items != null )
         {
             for ( int i = 0; i < items.length; i++ )
             {
-                if ( items[i].isFormField() == isFormField )
+                if ( items[i].isFormField() )
                 {
                     return items[i];
                 }
@@ -161,6 +166,23 @@ public class InstallAction extends BaseManagementPlugin implements Action
         return null;
     }
 
+    private FileItem[] getFileItems( Map params, String name )
+    {
+        final List files = new ArrayList();
+        FileItem[] items = ( FileItem[] ) params.get( name );
+        if ( items != null )
+        {
+            for ( int i = 0; i < items.length; i++ )
+            {
+                if ( !items[i].isFormField() && items[i].getSize() > 0 )
+                {
+                    files.add(items[i]);
+                }
+            }
+        }
+
+        return (FileItem[])files.toArray(new FileItem[files.size()]);
+    }
 
     private void installBundle( String location, File bundleFile, int startLevel, boolean start, boolean refreshPackages )
     throws IOException

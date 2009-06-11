@@ -294,7 +294,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
 
         if ( "upload".equals(reqInfo.pathInfo) )
         {
-            renderUploadForm(pw);
+            renderUploadForm(pw, appRoot);
         }
         else
         {
@@ -307,14 +307,15 @@ public class BundlesServlet extends BaseWebConsolePlugin
         }
     }
 
-    private void renderUploadForm( final PrintWriter pw ) throws IOException
+    private void renderUploadForm( final PrintWriter pw, final String appRoot ) throws IOException
     {
+        Util.script(pw, appRoot, "jquery.multifile-1.4.6.min.js");
         pw.println(" <div id='plugin_content'><div class='contentheader'>Upload / Install Bundles</div>");
         pw.println( "<form method='post' enctype='multipart/form-data' action='../'>");
         pw.println( "<input type='hidden' name='action' value='install'/>");
-        pw.println( "<div class='contentline'><input class='fileinput' type='file' name='bundlefile'/></div>");
         pw.println( "<div class='contentline'><div class='contentleft'>Start Bundle</div><div class='contentright'><input class='checkradio' type='checkbox' name='bundlestart' value='start'/></div></div>");
         pw.println( "<div class='contentline'><div class='contentleft'>Start Level</div><div class='contentright'><input class='input' type='input' name='bundlestartlevel' value='" + getStartLevel().getInitialBundleStartLevel() + "' size='4'/></div></div>");
+        pw.println( "<div class='contentline'><input class='fileinput multi' accept='jar' type='file' name='bundlefile'/></div>");
         pw.println( "<div class='contentline'><input type='submit' value='Install or Update'/></div>");
         pw.println( "</form></div");
     }
