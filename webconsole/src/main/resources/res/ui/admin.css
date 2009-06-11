@@ -629,3 +629,31 @@ background-color: #8dbdd8;
 .col_Actions {
     width: 95px;
 }
+#plugin_content {
+    margin-top: 26px;
+    margin-bottom: 26px;
+}
+.contentheader {
+    border: 0px solid #66dd44;
+    border-bottom: 1px solid #cccccc;
+    text-align: left;
+    padding: 5px;
+    padding-left: 10px;
+    color: #6181A9;
+    background-color: #f0f0f0;
+}
+.contentline {
+	padding-top: 15px;
+	padding-left:10px;
+    clear: both;
+    width: 100%;
+}
+.contentleft {
+    padding-left: 9px;
+    float: left;
+    width:110px;
+}
+.contentright {
+    display: inline;
+    width: 225px;
+}

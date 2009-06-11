@@ -214,13 +214,19 @@ function renderBundles(data) {
 	$(document).ready(function(){
     	renderView( ["Id", "Name", "Version", "Symbolic Name", "Status", "Actions"],
         		"<input type='hidden' name='action' value='install'/>" +
+        		"<input type='hidden' name='bundlestart' value='start'/>" +
+        		"<input type='hidden' name='bundlestartlevel' value='" + startLevel + "'/>" +
                 "<input class='fileinput' type='file' name='bundlefile' style='margin-left:10px'/>" +
-         		" - Start <input class='checkradio' type='checkbox' name='bundlestart' value='start' style='vertical-align:middle;'/>" +
-        		" - Start Level <input class='input' type='input' name='bundlestartlevel' value='" + startLevel + "' size='4'/>" +
-         		"<input type='submit' value='Install or Update' style='margin-left:60px'/>" +
-        		"<button id='refreshPackages' type='button' name='refresh' style='margin-left:10px'>Refresh Packages</button>"
+         		"<input type='submit' value='Install or Update' style='margin-left:10px'/>" +
+         		"<button class='reloadButton' type='button' name='reload' style='margin-left:60px'>Reload</button>" +
+         		"<button class='installButton' type='button' name='install'>Install/Update...</button>" +
+         		"<button class='refreshPackages' type='button' name='refresh'>Refresh Packages</button>"
         		 );
-        $("#refreshPackages").click(refreshPackages);
+        $(".refreshPackages").click(refreshPackages);
+	    $(".reloadButton").click(loadData);
+	    $(".installButton").click(function() {
+	    	document.location = pluginRoot + "/upload";
+	    });
         renderData(data);
         
         var extractMethod = function(node) {

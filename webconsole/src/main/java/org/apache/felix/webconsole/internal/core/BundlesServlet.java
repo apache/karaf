@@ -102,7 +102,13 @@ public class BundlesServlet extends BaseWebConsolePlugin
         IOException
     {
         final RequestInfo reqInfo = new RequestInfo(request);
-        if ( reqInfo.bundle == null && reqInfo.bundleRequested ) {
+        if ( "upload".equals(reqInfo.pathInfo) )
+        {
+            super.doGet(request, response);
+            return;
+        }
+        if ( reqInfo.bundle == null && reqInfo.bundleRequested )
+        {
             response.sendError(404);
             return;
         }
@@ -286,12 +292,31 @@ public class BundlesServlet extends BaseWebConsolePlugin
 
         Util.script(pw, appRoot, "bundles.js");
 
-        pw.println( "<div id='plugin_content'/>");
-        Util.startScript( pw );
-        pw.print( "renderBundles(");
-        writeJSON(pw, reqInfo.bundle);
-        pw.println(");" );
-        Util.endScript( pw );
+        if ( "upload".equals(reqInfo.pathInfo) )
+        {
+            renderUploadForm(pw);
+        }
+        else
+        {
+            pw.println( "<div id='plugin_content'/>");
+            Util.startScript( pw );
+            pw.print( "renderBundles(");
+            writeJSON(pw, reqInfo.bundle);
+            pw.println(");" );
+            Util.endScript( pw );
+        }
+    }
+
+    private void renderUploadForm( final PrintWriter pw ) throws IOException
+    {
+        pw.println(" <div id='plugin_content'><div class='contentheader'>Upload / Install Bundles</div>");
+        pw.println( "<form method='post' enctype='multipart/form-data' action='../'>");
+        pw.println( "<input type='hidden' name='action' value='install'/>");
+        pw.println( "<div class='contentline'><input class='fileinput' type='file' name='bundlefile'/></div>");
+        pw.println( "<div class='contentline'><div class='contentleft'>Start Bundle</div><div class='contentright'><input class='checkradio' type='checkbox' name='bundlestart' value='start'/></div></div>");
+        pw.println( "<div class='contentline'><div class='contentleft'>Start Level</div><div class='contentright'><input class='input' type='input' name='bundlestartlevel' value='" + getStartLevel().getInitialBundleStartLevel() + "' size='4'/></div></div>");
+        pw.println( "<div class='contentline'><input type='submit' value='Install or Update'/></div>");
+        pw.println( "</form></div");
     }
 
     private void renderJSON( final HttpServletResponse response, final Bundle bundle ) throws IOException
@@ -552,7 +577,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
         }
 
         listServices( jw, bundle );
-        
+
         listHeaders( jw, bundle );
 
         jw.endArray();
@@ -799,13 +824,13 @@ public class BundlesServlet extends BaseWebConsolePlugin
         {
             return;
         }
-        
+
         for ( int i = 0; i < refs.length; i++ )
         {
             String key = "Service ID " + refs[i].getProperty( Constants.SERVICE_ID );
-            
+
             JSONArray val = new JSONArray();
-            
+
             appendProperty( val, refs[i], Constants.OBJECTCLASS, "Types" );
             appendProperty( val, refs[i], Constants.SERVICE_PID, "PID" );
             appendProperty( val, refs[i], ConfigurationAdmin.SERVICE_FACTORYPID, "Factory PID" );
@@ -814,12 +839,12 @@ public class BundlesServlet extends BaseWebConsolePlugin
             appendProperty( val, refs[i], ComponentConstants.COMPONENT_FACTORY, "Component Factory" );
             appendProperty( val, refs[i], Constants.SERVICE_DESCRIPTION, "Description" );
             appendProperty( val, refs[i], Constants.SERVICE_VENDOR, "Vendor" );
-            
+
             keyVal( jw, key, val);
         }
     }
-    
-    
+
+
     private void listHeaders( JSONWriter jw, Bundle bundle ) throws JSONException
     {
         JSONArray val = new JSONArray();
@@ -1030,6 +1055,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
         public final String extension;
         public final Bundle bundle;
         public final boolean bundleRequested;
+        public final String pathInfo;
 
         protected RequestInfo( final HttpServletRequest request )
         {
@@ -1058,11 +1084,13 @@ public class BundlesServlet extends BaseWebConsolePlugin
             {
                 bundle = null;
                 bundleRequested = false;
+                pathInfo = null;
             }
             else
             {
                 bundle = getBundle(bundleInfo);
                 bundleRequested = true;
+                pathInfo = bundleInfo;
             }
             request.setAttribute(BundlesServlet.class.getName(), this);
         }
