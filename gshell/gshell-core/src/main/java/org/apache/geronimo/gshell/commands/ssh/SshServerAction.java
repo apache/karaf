@@ -40,10 +40,10 @@ public class SshServerAction
 {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Option(name="-p", aliases={ "--port" })
+    @Option(name="-p", aliases={ "--port" }, description = "Port")
     private int port=8101;
 
-    @Option(name="-b", aliases={ "--background"})
+    @Option(name="-b", aliases={ "--background"}, description = "Background")
     private boolean background = true;
 
     private BeanContainer container;
