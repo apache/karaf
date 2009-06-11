@@ -1,0 +1,6 @@
+-include: ~default.bnd
+Bundle-Name: aQute Shell Support
+Bundle-Description: Commands for the shell that turn it into a programming language
+Private-Package: aQute.shell.lang
+Service-Component: aQute.shell.lang.Support; \
+  provide:=org.osgi.service.command.Converter

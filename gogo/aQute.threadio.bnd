@@ -1,0 +1,8 @@
+-include: ~default.bnd
+
+Bundle-Name: Thread IO
+Bundle-Description: Multiplexes input/output/error streams based on the thread.
+Private-Package: aQute.threadio 
+Export-Package: org.osgi.service.threadio
+Service-Component: aQute.threadio.ThreadIOImpl;\
+  provide:=org.osgi.service.threadio.ThreadIO

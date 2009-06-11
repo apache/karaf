@@ -1,0 +1,4 @@
+-include: ~default.bnd
+Service-Component: aQute.shell.stdio.StdioConsole; \
+   processor=org.osgi.service.command.CommandProcessor
+Private-Package: aQute.shell.stdio,aQute.shell.console

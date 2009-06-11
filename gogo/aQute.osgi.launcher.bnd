@@ -1,0 +1,4 @@
+Private-Package: aQute.osgi.launcher, aQute.shell.runtime, aQute.shell.osgi, aQute.threadio, \
+ org.osgi.service.shell, org.osgi.service.threadio, aQute.shell.console, org.osgi.framework 
+Main-Class: aQute.osgi.launcher.Launcher
+
