@@ -1411,7 +1411,8 @@ ex.printStackTrace();
         // Acquire bundle lock.
         try
         {
-            acquireBundleLock(bundle, Bundle.INSTALLED | Bundle.RESOLVED | Bundle.ACTIVE);
+            acquireBundleLock(bundle,
+                Bundle.INSTALLED | Bundle.RESOLVED | Bundle.STARTING | Bundle.ACTIVE);
         }
         catch (IllegalStateException ex)
         {
@@ -1428,6 +1429,8 @@ ex.printStackTrace();
         }
 
         // Record whether the bundle is using its declared activation policy.
+        boolean wasDeferred = bundle.isDeclaredActivationPolicyUsed()
+            && (bundle.getCurrentModule().getDeclaredActivationPolicy() == IModule.LAZY_ACTIVATION);
         bundle.setDeclaredActivationPolicyUsed(
             (options & Bundle.START_ACTIVATION_POLICY) != 0);
 
@@ -1483,28 +1486,33 @@ ex.printStackTrace();
                 case Bundle.UNINSTALLED:
                     throw new IllegalStateException("Cannot start an uninstalled bundle.");
                 case Bundle.STARTING:
+                    if (!wasDeferred)
+                    {
+                        throw new BundleException(
+                            "Bundle " + bundle
+                            + " cannot be started, since it is starting.");
+                    }
+                    break;
                 case Bundle.STOPPING:
                     throw new BundleException(
                         "Bundle " + bundle
-                        + " cannot be started, since it is either starting or stopping.");
+                        + " cannot be started, since it is stopping.");
                 case Bundle.ACTIVE:
                     return;
                 case Bundle.INSTALLED:
                     resolveBundle(bundle);
                     // No break.
                 case Bundle.RESOLVED:
+                    // Set the bundle's context.
+                    bundle.setBundleContext(new BundleContextImpl(m_logger, this, bundle));
+                    // At this point, no matter if the bundle's activation policy is
+                    // eager or deferred, we need to set the bundle's state to STARTING.
+                    // We don't fire a BundleEvent here for this state change, since
+                    // STARTING events are only fired if we are invoking the activator,
+                    // which we may not do if activation is deferred.
+                    setBundleStateAndNotify(bundle, Bundle.STARTING);
                     break;
             }
-
-            // Set the bundle's context.
-            bundle.setBundleContext(new BundleContextImpl(m_logger, this, bundle));
-
-            // At this point, no matter if the bundle's activation policy is
-            // eager or deferred, we need to set the bundle's state to STARTING.
-            // We don't fire a BundleEvent here for this state change, since
-            // STARTING events are only fired if we are invoking the activator,
-            // which we may not do if activation is deferred.
-            setBundleStateAndNotify(bundle, Bundle.STARTING);
 
             // If the bundle's activation policy is eager or activation has already
             // been triggered, then activate the bundle immediately.
@@ -1550,20 +1558,21 @@ ex.printStackTrace();
         // Acquire bundle lock.
         try
         {
-            acquireBundleLock(bundle, Bundle.STARTING);
+            acquireBundleLock(bundle, Bundle.STARTING | Bundle.ACTIVE);
         }
         catch (IllegalStateException ex)
         {
             throw new IllegalStateException(
                 "Activation only occurs for bundles in STARTING state.");
         }
+
         try
         {
-            // Check to see if the bundle's start level is greater than the
-            // the framework's active start level.
-            if (bundle.getStartLevel(getInitialBundleStartLevel()) > getActiveStartLevel())
+            // If the bundle is already active or its start level is not met,
+            // simply return.
+            if ((bundle.getState() == Bundle.ACTIVE) ||
+                (bundle.getStartLevel(getInitialBundleStartLevel()) > getActiveStartLevel()))
             {
-                // Ignore persistent starts.
                 return;
             }
 

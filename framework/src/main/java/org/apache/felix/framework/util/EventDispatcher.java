@@ -595,7 +595,6 @@ public class EventDispatcher
             syncListeners = m_syncBundleListeners;
         }
 
-System.out.println("+++ FIRING BUNDLE EVENT " + event.getType() + " FROM " + event.getBundle().getSymbolicName());
         // Fire synchronous bundle listeners immediately on the calling thread.
         fireEventImmediately(m_logger, Request.BUNDLE_EVENT, syncListeners, event);
 
