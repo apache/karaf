@@ -78,6 +78,15 @@
                 <null/>
             </gshell:completers>
         </gshell:command>
+        <gshell:command name="config/propappend">
+            <gshell:action class="org.apache.felix.karaf.gshell.config.PropAppendCommand">
+                <property name="bundleContext" ref="bundleContext"/>
+            </gshell:action>
+            <gshell:completers>
+                <ref bean="configPropertyCompleter" />
+                <null/>
+            </gshell:completers>
+        </gshell:command>
         <gshell:command name="config/update">
             <gshell:action class="org.apache.felix.karaf.gshell.config.UpdateCommand">
                 <property name="bundleContext" ref="bundleContext"/>
