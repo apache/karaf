@@ -111,7 +111,6 @@ public class InstallAction extends BaseManagementPlugin implements Action
         for(int i = 0; i < bundleItems.length; i++ )
         {
             final FileItem bundleItem = bundleItems[i];
-            getLog().log( LogService.LOG_ERROR, "Accessing uploaded bundle file: " + bundleItem.getName() );
             // write the bundle data to a temporary file to ease processing
             File tmpFile = null;
             try
