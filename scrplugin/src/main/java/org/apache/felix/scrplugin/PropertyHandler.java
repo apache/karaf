@@ -61,7 +61,7 @@ public class PropertyHandler {
     protected void processProperty(JavaTag   tag,
                                    String    name,
                                    JavaField javaField,
-                                   final List<String> warnings)
+                                   final IssueLog iLog)
     throws MojoExecutionException {
         final Property prop = new Property(tag);
         prop.setName(name);
@@ -84,14 +84,7 @@ public class PropertyHandler {
                     final String key = entry.getKey();
                     if (key.startsWith(Constants.PROPERTY_MULTIVALUE_PREFIX) ) {
                         values.add(entry.getValue());
-                    } else if ( key.startsWith(Constants.PROPERTY_MULTIVALUE_REF_PREFIX)
-                        || key.startsWith(Constants.OLD_PROPERTY_MULTIVALUE_REF_PREFIX) ) {
-                        if ( key.startsWith(Constants.OLD_PROPERTY_MULTIVALUE_REF_PREFIX) ) {
-                            warnings.add("@" + tag.getName() + ": " + "Deprecated attribute '" +
-                                    Constants.OLD_PROPERTY_MULTIVALUE_REF_PREFIX + "' used, use '" +
-                                    Constants.PROPERTY_MULTIVALUE_REF_PREFIX + "' instead "
-                                    + " (" + tag.getSourceLocation() + ")");
-                        }
+                    } else if ( key.startsWith(Constants.PROPERTY_MULTIVALUE_REF_PREFIX) ) {
                         final String[] stringValues = this.getPropertyValueRef(tag, prop, entry.getValue());
                         if ( stringValues != null ) {
                             for(int i=0; i<stringValues.length; i++) {
@@ -279,23 +272,23 @@ public class PropertyHandler {
         if ( prop.getType() == null ) {
             final String type = field.getType();
             if ( "java.lang.String".equals(type) ) {
-                prop.setType("String");
+                prop.setType(Constants.PROPERTY_TYPE_STRING);
             } else if ("java.lang.Long".equals(type) || "long".equals(type) ) {
-                prop.setType("Long");
+                prop.setType(Constants.PROPERTY_TYPE_LONG);
             } else if ("java.lang.Double".equals(type) || "double".equals(type) ) {
-                prop.setType("Double");
+                prop.setType(Constants.PROPERTY_TYPE_DOUBLE);
             } else if ("java.lang.Float".equals(type) || "float".equals(type) ) {
-                prop.setType("Float");
+                prop.setType(Constants.PROPERTY_TYPE_FLOAT);
             } else if ("java.lang.Integer".equals(type) || "int".equals(type) ) {
-                prop.setType("Integer");
+                prop.setType(Constants.PROPERTY_TYPE_INTEGER);
             } else if ("java.lang.Byte".equals(type) || "byte".equals(type) ) {
-                prop.setType("Byte");
+                prop.setType(Constants.PROPERTY_TYPE_BYTE);
             } else if ("java.lang.Character".equals(type) || "char".equals(type) ) {
-                prop.setType("Char");
+                prop.setType(Constants.PROPERTY_TYPE_CHAR_1_1);
             } else if ("java.lang.Boolean".equals(type) || "boolean".equals(type) ) {
-                prop.setType("Boolean");
+                prop.setType(Constants.PROPERTY_TYPE_BOOLEAN);
             } else if ("java.lang.Short".equals(type) || "short".equals(type) ) {
-                prop.setType("Short");
+                prop.setType(Constants.PROPERTY_TYPE_SHORT);
             }
 
         }
@@ -341,20 +334,18 @@ public class PropertyHandler {
     /**
      * Process all found properties for the component.
      * @param globalProperties Global properties are set on all components.
-     * @param errors List of occured errors.
-     * @param warnings List of occured warnings
+     * @param iLog The issue log.
      * @throws MojoExecutionException
      */
     public void processProperties(final Map<String, String> globalProperties,
-                                  final List<String> errors,
-                                  final List<String> warnings)
+                                  final IssueLog iLog)
     throws MojoExecutionException {
         final Iterator<Map.Entry<String, PropertyDescription>> propIter = properties.entrySet().iterator();
         while ( propIter.hasNext() ) {
             final Map.Entry<String, PropertyDescription> entry = propIter.next();
             final String propName = entry.getKey();
             final PropertyDescription desc = entry.getValue();
-            this.processProperty(desc.propertyTag, propName, desc.field, warnings);
+            this.processProperty(desc.propertyTag, propName, desc.field, iLog);
         }
         // apply pre configured global properties
         if ( globalProperties != null ) {

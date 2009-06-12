@@ -21,6 +21,8 @@ package org.apache.felix.scrplugin.om;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.felix.scrplugin.Constants;
+import org.apache.felix.scrplugin.IssueLog;
 import org.apache.felix.scrplugin.tags.*;
 import org.apache.maven.plugin.MojoExecutionException;
 
@@ -61,6 +63,12 @@ public class Component extends AbstractObject {
     /** Is this a descriptor to be ignored ? */
     protected boolean isDs;
 
+    /** Configuration policy. (V1.1) */
+    protected String configurationPolicy;
+
+    /** The spec version. */
+    protected int specVersion;
+
     /**
      * Default constructor.
      */
@@ -73,6 +81,20 @@ public class Component extends AbstractObject {
      */
     public Component(JavaTag t) {
         super(t);
+    }
+
+    /**
+     * Get the spec version.
+     */
+    public int getSpecVersion() {
+        return this.specVersion;
+    }
+
+    /**
+     * Set the spec version.
+     */
+    public void setSpecVersion(int value) {
+        this.specVersion = value;
     }
 
     /**
@@ -181,9 +203,9 @@ public class Component extends AbstractObject {
      * If errors occur a message is added to the issues list,
      * warnings can be added to the warnings list.
      */
-    public void validate(List<String> issues, List<String> warnings)
+    public void validate(final int specVersion, final IssueLog iLog)
     throws MojoExecutionException {
-        final int currentIssueCount = issues.size();
+        final int currentIssueCount = iLog.getNumberOfErrors();
 
         // nothing to check if this is ignored
         if (!isDs()) {
@@ -192,24 +214,24 @@ public class Component extends AbstractObject {
 
         final JavaClassDescription javaClass = this.tag.getJavaClassDescription();
         if (javaClass == null) {
-            issues.add(this.getMessage("Tag not declared in a Java Class"));
+            iLog.addError(this.getMessage("Tag not declared in a Java Class"));
         } else {
 
             // if the service is abstract, we do not validate everything
             if ( !this.isAbstract ) {
                 // ensure non-abstract, public class
                 if (!javaClass.isPublic()) {
-                    issues.add(this.getMessage("Class must be public: " + javaClass.getName()));
+                    iLog.addError(this.getMessage("Class must be public: " + javaClass.getName()));
                 }
                 if (javaClass.isAbstract() || javaClass.isInterface()) {
-                    issues.add(this.getMessage("Class must be concrete class (not abstract or interface) : " + javaClass.getName()));
+                    iLog.addError(this.getMessage("Class must be concrete class (not abstract or interface) : " + javaClass.getName()));
                 }
 
                 // no errors so far, let's continue
-                if ( issues.size() == currentIssueCount ) {
+                if ( iLog.getNumberOfErrors() == currentIssueCount ) {
                     // check activate and deactivate methods
-                    this.checkLifecycleMethod(javaClass, "activate", warnings);
-                    this.checkLifecycleMethod(javaClass, "deactivate", warnings);
+                    this.checkLifecycleMethod(javaClass, "activate", iLog);
+                    this.checkLifecycleMethod(javaClass, "deactivate", iLog);
 
                     // ensure public default constructor
                     boolean constructorFound = true;
@@ -228,41 +250,52 @@ public class Component extends AbstractObject {
                         }
                     }
                     if (!constructorFound) {
-                        issues.add(this.getMessage("Class must have public default constructor: " + javaClass.getName()));
+                        iLog.addError(this.getMessage("Class must have public default constructor: " + javaClass.getName()));
                     }
 
                     // verify properties
                     for(final Property prop : this.getProperties()) {
-                        prop.validate(issues, warnings);
+                        prop.validate(specVersion, iLog);
                     }
 
                     // verify service
                     boolean isServiceFactory = false;
                     if (this.getService() != null) {
                         if ( this.getService().getInterfaces().size() == 0 ) {
-                            issues.add(this.getMessage("Service interface information is missing for @scr.service tag"));
+                            iLog.addError(this.getMessage("Service interface information is missing for @scr.service tag"));
                         }
-                        this.getService().validate(issues, warnings);
+                        this.getService().validate(specVersion, iLog);
                         isServiceFactory = this.getService().isServicefactory();
                     }
 
                     // serviceFactory must not be true for immediate of component factory
                     if (isServiceFactory && this.isImmediate() != null && this.isImmediate().booleanValue() && this.getFactory() != null) {
-                        issues.add(this.getMessage("Component must not be a ServiceFactory, if immediate and/or component factory: " + javaClass.getName()));
+                        iLog.addError(this.getMessage("Component must not be a ServiceFactory, if immediate and/or component factory: " + javaClass.getName()));
                     }
 
                     // immediate must not be true for component factory
                     if (this.isImmediate() != null && this.isImmediate().booleanValue() && this.getFactory() != null) {
-                        issues.add(this.getMessage("Component must not be immediate if component factory: " + javaClass.getName()));
+                        iLog.addError(this.getMessage("Component must not be immediate if component factory: " + javaClass.getName()));
                     }
                 }
             }
-            if ( issues.size() == currentIssueCount ) {
+            if ( iLog.getNumberOfErrors() == currentIssueCount ) {
                 // verify references
                 for(final Reference ref : this.getReferences()) {
-                    ref.validate(issues, warnings, this.isAbstract);
+                    ref.validate(specVersion, this.isAbstract, iLog);
                 }
             }
+        }
+        // check additional stuff if version is 1.1
+        if ( specVersion == Constants.VERSION_1_1 ) {
+            final String cp = this.getConfigurationPolicy();
+            if ( cp != null
+                 && !Constants.COMPONENT_CONFIG_POLICY_IGNORE.equals(cp)
+                 && !Constants.COMPONENT_CONFIG_POLICY_REQUIRE.equals(cp)
+                 && !Constants.COMPONENT_CONFIG_POLICY_OPTIONAL.equals(cp) ) {
+                iLog.addError(this.getMessage("Component has an unknown value for configuration policy: " + cp));
+            }
+
         }
     }
 
@@ -272,15 +305,15 @@ public class Component extends AbstractObject {
      * @param methodName The method name.
      * @param warnings The list of warnings used to add new warnings.
      */
-    protected void checkLifecycleMethod(JavaClassDescription javaClass, String methodName, List<String> warnings)
+    protected void checkLifecycleMethod(JavaClassDescription javaClass, String methodName, final IssueLog iLog)
     throws MojoExecutionException {
         final JavaMethod method = javaClass.getMethodBySignature(methodName, new String[] {"org.osgi.service.component.ComponentContext"});
         if ( method != null ) {
             // check protected
             if (method.isPublic()) {
-                warnings.add(this.getMessage("Lifecycle method " + method.getName() + " should be declared protected"));
+                iLog.addWarning(this.getMessage("Lifecycle method " + method.getName() + " should be declared protected"));
             } else if (!method.isProtected()) {
-                warnings.add(this.getMessage("Lifecycle method " + method.getName() + " has wrong qualifier, public or protected required"));
+                iLog.addWarning(this.getMessage("Lifecycle method " + method.getName() + " has wrong qualifier, public or protected required"));
             }
         } else {
             // if no method is found, we check for any method with that name
@@ -289,12 +322,26 @@ public class Component extends AbstractObject {
                 if ( methodName.equals(methods[i].getName()) ) {
 
                     if ( methods[i].getParameters().length != 1 ) {
-                        warnings.add(this.getMessage("Lifecycle method " + methods[i].getName() + " has wrong number of arguments"));
+                        iLog.addWarning(this.getMessage("Lifecycle method " + methods[i].getName() + " has wrong number of arguments"));
                     } else {
-                        warnings.add(this.getMessage("Lifecycle method " + methods[i].getName() + " has wrong argument " + methods[i].getParameters()[0].getType()));
+                        iLog.addWarning(this.getMessage("Lifecycle method " + methods[i].getName() + " has wrong argument " + methods[i].getParameters()[0].getType()));
                     }
                 }
             }
         }
+    }
+
+    /**
+     * Return the configuration policy.
+     */
+    public String getConfigurationPolicy() {
+        return this.configurationPolicy;
+    }
+
+    /**
+     * Set the configuration policy.
+     */
+    public void setConfigurationPolicy(final String value) {
+        this.configurationPolicy = value;
     }
 }

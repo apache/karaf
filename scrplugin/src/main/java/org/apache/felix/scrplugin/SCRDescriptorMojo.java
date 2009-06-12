@@ -134,23 +134,23 @@ public class SCRDescriptorMojo extends AbstractMojo {
         this.getLog().debug("..parsing javadocs: " + this.parseJavadoc);
         this.getLog().debug("..processing annotations: " + this.processAnnotations);
 
-        boolean hasFailures = false;
-
         JavaClassDescriptorManager jManager = new JavaClassDescriptorManager(this.getLog(),
                                                                              this.project,
                                                                              this.annotationTagProviders,
                                                                              this.sourceExcludes,
                                                                              this.parseJavadoc,
                                                                              this.processAnnotations);
+        final IssueLog iLog = new IssueLog(this.strictMode);
+
+        final MetaData metaData = new MetaData();
+        metaData.setLocalization(MetaTypeService.METATYPE_DOCUMENTS_LOCATION + "/metatype");
+
         // iterate through all source classes and check for component tag
         final JavaClassDescription[] javaSources = jManager.getSourceDescriptions();
         Arrays.sort(javaSources, new JavaClassDescriptionInheritanceComparator());
 
-        final Components components = new Components();
-        final Components abstractComponents = new Components();
-        final MetaData metaData = new MetaData();
-        metaData.setLocalization(MetaTypeService.METATYPE_DOCUMENTS_LOCATION + "/metatype");
-
+        int specVersion = Constants.VERSION_1_0;
+        final List<Component> scannedComponents = new ArrayList<Component>();
         for (int i = 0; i < javaSources.length; i++) {
             this.getLog().debug("Testing source " + javaSources[i].getName());
             final JavaTag tag = javaSources[i].getTagByName(Constants.COMPONENT);
@@ -158,31 +158,52 @@ public class SCRDescriptorMojo extends AbstractMojo {
                 this.getLog().debug("Processing service class " + javaSources[i].getName());
                 // check if there is more than one component tag!
                 if ( javaSources[i].getTagsByName(Constants.COMPONENT, false).length > 1 ) {
-                    hasFailures = true;
-                    this.getLog().error("Class " + javaSources[i].getName() + " has more than one " + Constants.COMPONENT + " tag." +
+                    iLog.addError("Class " + javaSources[i].getName() + " has more than one " + Constants.COMPONENT + " tag." +
                             " Merge the tags to a single tag.");
                 } else {
-                    final Component comp = this.createComponent(javaSources[i], tag, metaData);
-                    if (comp != null) {
-                        if ( !comp.isDs() ) {
-                            getLog().debug("Not adding descriptor " + comp);
-                        } else if ( comp.isAbstract() ) {
-                            this.getLog().debug("Adding abstract descriptor " + comp);
-                            abstractComponents.addComponent(comp);
-                        } else {
-                            this.getLog().debug("Adding descriptor " + comp);
-                            components.addComponent(comp);
-                            abstractComponents.addComponent(comp);
-                        }
-                    } else {
-                        hasFailures = true;
+                    final Component comp = this.createComponent(javaSources[i], tag, metaData, iLog);
+                    if ( comp.getSpecVersion() > specVersion ) {
+                        specVersion = comp.getSpecVersion();
                     }
+                    scannedComponents.add(comp);
                 }
             }
         }
 
+        // now check for abstract components and fill components objects
+        final Components components = new Components();
+        final Components abstractComponents = new Components();
+        components.setSpecVersion(specVersion);
+        abstractComponents.setSpecVersion(specVersion);
+
+        for(final Component comp : scannedComponents ) {
+            final int errorCount = iLog.getNumberOfErrors();
+            comp.validate(specVersion, iLog);
+            // ignore component if it has errors
+            if ( iLog.getNumberOfErrors() == errorCount ) {
+                if ( !comp.isDs() ) {
+                    getLog().debug("Ignoring descriptor " + comp);
+                } else if ( comp.isAbstract() ) {
+                    this.getLog().debug("Adding abstract descriptor " + comp);
+                    abstractComponents.addComponent(comp);
+                } else {
+                    this.getLog().debug("Adding descriptor " + comp);
+                    components.addComponent(comp);
+                    abstractComponents.addComponent(comp);
+                }
+            }
+        }
+
+        // now log warnings and errors (warnings first)
+        for(String warn : iLog.getWarnings()) {
+            this.getLog().warn(warn);
+        }
+        for(String err : iLog.getErrors()) {
+            this.getLog().error(err);
+        }
+
         // after checking all classes, throw if there were any failures
-        if (hasFailures) {
+        if (iLog.getNumberOfErrors() > 0 ) {
             throw new MojoFailureException("SCR Descriptor parsing had failures (see log)");
         }
 
@@ -280,11 +301,11 @@ public class SCRDescriptorMojo extends AbstractMojo {
      * @return The generated component descriptor or null if any error occurs.
      * @throws MojoExecutionException
      */
-    protected Component createComponent(JavaClassDescription description, JavaTag componentTag, MetaData metaData)
+    protected Component createComponent(JavaClassDescription description,
+                                        JavaTag componentTag,
+                                        MetaData metaData,
+                                        final IssueLog iLog)
     throws MojoExecutionException {
-        // two lists for errors and warnings
-        final List<String> errors = new ArrayList<String>();
-        final List<String> warnings = new ArrayList<String>();
         // create a new component
         final Component component = new Component(componentTag);
 
@@ -330,7 +351,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
         } while (inherited && currentDescription != null);
 
         // process properties
-        propertyHandler.processProperties(this.properties, errors, warnings);
+        propertyHandler.processProperties(this.properties, iLog);
 
         // process references
         final Iterator<Map.Entry<String, Object[]>> refIter = references.entrySet().iterator();
@@ -359,24 +380,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
                 pid.setValue(component.getName());
             }
         }
-
-        component.validate(errors, warnings);
-
-        // now log warnings and errors (warnings first)
-        // FELIX-997: In strictMode all warnings are regarded as errors
-        if ( this.strictMode ) {
-            errors.addAll(warnings);
-            warnings.clear();
-        }
-        for(String warn : warnings) {
-            this.getLog().warn(warn);
-        }
-        for(String err : errors) {
-            this.getLog().error(err);
-        }
-
-        // return nothing if validation fails
-        return errors.size() == 0 ? component : null;
+        return component;
     }
 
     /**
@@ -410,6 +414,12 @@ public class SCRDescriptorMojo extends AbstractMojo {
         if (tag.getNamedParameter(Constants.COMPONENT_IMMEDIATE) != null) {
             component.setImmediate(Boolean.valueOf(getBoolean(tag,
                 Constants.COMPONENT_IMMEDIATE, true)));
+        }
+
+        // check for V1.1 attributes
+        if ( tag.getNamedParameter(Constants.COMPONENT_CONFIG_POLICY) != null ) {
+            component.setSpecVersion(Constants.VERSION_1_1);
+            component.setConfigurationPolicy(tag.getNamedParameter(Constants.COMPONENT_CONFIG_POLICY));
         }
 
         // whether metatype information is to generated for the component

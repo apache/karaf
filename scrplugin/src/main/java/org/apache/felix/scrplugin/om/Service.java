@@ -20,6 +20,7 @@ package org.apache.felix.scrplugin.om;
 
 import java.util.*;
 
+import org.apache.felix.scrplugin.IssueLog;
 import org.apache.maven.plugin.MojoExecutionException;
 
 /**
@@ -90,10 +91,10 @@ public class Service {
      * If errors occur a message is added to the issues list,
      * warnings can be added to the warnings list.
      */
-    public void validate(List<String> issues, List<String> warnings)
+    public void validate(final int specVersion, final IssueLog iLog)
     throws MojoExecutionException {
         for(final Interface interf : this.getInterfaces()) {
-            interf.validate(issues, warnings);
+            interf.validate(specVersion, iLog);
         }
     }
 

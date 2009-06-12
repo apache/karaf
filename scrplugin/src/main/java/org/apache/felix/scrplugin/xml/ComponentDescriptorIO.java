@@ -24,6 +24,7 @@ import java.util.StringTokenizer;
 
 import javax.xml.transform.TransformerException;
 
+import org.apache.felix.scrplugin.Constants;
 import org.apache.felix.scrplugin.om.*;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.xml.sax.*;
@@ -38,17 +39,29 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class ComponentDescriptorIO {
 
-    public static final String NAMESPACE_URI = "http://www.osgi.org/xmlns/scr/v1.0.0";
+    /** The namespace for R4.1 - Version 1.0 */
+    public static final String NAMESPACE_URI_1_0 = "http://www.osgi.org/xmlns/scr/v1.0.0";
 
+    /** The namespace for R4.2 - Version 1.1 */
+    public static final String NAMESPACE_URI_1_1 = "http://www.osgi.org/xmlns/scr/v1.1.0";
+
+    /** The inner namespace - used for all inner elements. */
     public static final String INNER_NAMESPACE_URI = "";
 
+    /** The prefix used for the namespace. */
     private static final String PREFIX = "scr";
 
+    /** The root element. */
     private static final String COMPONENTS = "components";
 
+    /** The component element. */
     private static final String COMPONENT = "component";
 
+    /** The qualified component element. */
     private static final String COMPONENT_QNAME = PREFIX + ':' + COMPONENT;
+
+    /** The policy attribute. */
+    private static final String COMPONENT_ATTR_POLICY = "configuration-policy";
 
     private static final String IMPLEMENTATION = "implementation";
 
@@ -111,15 +124,24 @@ public class ComponentDescriptorIO {
      */
     protected static void generateXML(Components components, ContentHandler contentHandler, boolean isScrPrivateFile)
     throws SAXException {
+        // detect namespace to use
+        final String namespace;
+        if ( components.getSpecVersion() == Constants.VERSION_1_0 ) {
+            namespace = NAMESPACE_URI_1_0;
+        } else {
+            namespace = NAMESPACE_URI_1_1;
+        }
         contentHandler.startDocument();
-        contentHandler.startPrefixMapping(PREFIX, NAMESPACE_URI);
+        contentHandler.startPrefixMapping(PREFIX, namespace);
 
         // wrapper element to generate well formed xml
         contentHandler.startElement("", ComponentDescriptorIO.COMPONENTS, ComponentDescriptorIO.COMPONENTS, new AttributesImpl());
         IOUtils.newline(contentHandler);
 
         for(final Component component : components.getComponents()) {
-            generateXML(component, contentHandler, isScrPrivateFile);
+            if ( component.isDs() ) {
+                generateXML(namespace, component, contentHandler, isScrPrivateFile);
+            }
         }
         // end wrapper element
         contentHandler.endElement("", ComponentDescriptorIO.COMPONENTS, ComponentDescriptorIO.COMPONENTS);
@@ -134,7 +156,10 @@ public class ComponentDescriptorIO {
      * @param contentHandler
      * @throws SAXException
      */
-    protected static void generateXML(Component component, ContentHandler contentHandler, boolean isScrPrivateFile)
+    protected static void generateXML(final String namespace,
+                                      final Component component,
+                                      final ContentHandler contentHandler,
+                                      final boolean isScrPrivateFile)
     throws SAXException {
         final AttributesImpl ai = new AttributesImpl();
         IOUtils.addAttribute(ai, "enabled", component.isEnabled());
@@ -142,8 +167,13 @@ public class ComponentDescriptorIO {
         IOUtils.addAttribute(ai, "name", component.getName());
         IOUtils.addAttribute(ai, "factory", component.getFactory());
 
+        // attributes new in 1.1
+        if ( NAMESPACE_URI_1_1.equals(namespace) ) {
+            IOUtils.addAttribute(ai, COMPONENT_ATTR_POLICY, component.getConfigurationPolicy());
+        }
+
         IOUtils.indent(contentHandler, 1);
-        contentHandler.startElement(NAMESPACE_URI, ComponentDescriptorIO.COMPONENT, ComponentDescriptorIO.COMPONENT_QNAME, ai);
+        contentHandler.startElement(namespace, ComponentDescriptorIO.COMPONENT, ComponentDescriptorIO.COMPONENT_QNAME, ai);
         IOUtils.newline(contentHandler);
         generateXML(component.getImplementation(), contentHandler);
         if ( component.getService() != null ) {
@@ -160,7 +190,7 @@ public class ComponentDescriptorIO {
             }
         }
         IOUtils.indent(contentHandler, 1);
-        contentHandler.endElement(NAMESPACE_URI, ComponentDescriptorIO.COMPONENT, ComponentDescriptorIO.COMPONENT_QNAME);
+        contentHandler.endElement(namespace, ComponentDescriptorIO.COMPONENT, ComponentDescriptorIO.COMPONENT_QNAME);
         IOUtils.newline(contentHandler);
     }
 
@@ -320,7 +350,7 @@ public class ComponentDescriptorIO {
             if ( this.firstElement ) {
                 this.firstElement = false;
                 if ( localName.equals(COMPONENT) && "".equals(uri) ) {
-                    this.overrideNamespace = NAMESPACE_URI;
+                    this.overrideNamespace = NAMESPACE_URI_1_0;
                 }
             }
 
@@ -332,11 +362,15 @@ public class ComponentDescriptorIO {
             // of a component are unqualified, so they don't have
             // the namespace - we allow both: with or without namespace!
             if ( this.isComponent && "".equals(uri) )  {
-                uri = NAMESPACE_URI;
+                uri = NAMESPACE_URI_1_0;
             }
 
             // from here on, uri has the namespace regardless of the used xml format
-            if ( NAMESPACE_URI.equals(uri) ) {
+            if ( NAMESPACE_URI_1_0.equals(uri) || NAMESPACE_URI_1_1.equals(uri) ) {
+
+                if ( NAMESPACE_URI_1_1.equals(uri) ) {
+                    components.setSpecVersion(Constants.VERSION_1_1);
+                }
 
                 if (localName.equals(COMPONENT)) {
                     this.isComponent = true;
@@ -430,10 +464,10 @@ public class ComponentDescriptorIO {
             }
 
             if ( this.isComponent && "".equals(uri) )  {
-                uri = NAMESPACE_URI;
+                uri = NAMESPACE_URI_1_0;
             }
 
-            if ( NAMESPACE_URI.equals(uri) ) {
+            if ( NAMESPACE_URI_1_0.equals(uri) || NAMESPACE_URI_1_1.equals(uri) ) {
                 if (localName.equals(COMPONENT) ) {
                     this.components.addComponent(this.currentComponent);
                     this.currentComponent = null;

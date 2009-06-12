@@ -18,8 +18,7 @@
  */
 package org.apache.felix.scrplugin.om;
 
-import java.util.List;
-
+import org.apache.felix.scrplugin.IssueLog;
 import org.apache.felix.scrplugin.tags.*;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.plexus.util.StringUtils;
@@ -149,22 +148,24 @@ public class Reference extends AbstractObject {
      * If errors occur a message is added to the issues list,
      * warnings can be added to the warnings list.
      */
-    public void validate(List<String> issues, List<String> warnings, boolean componentIsAbstract)
+    public void validate(final int specVersion,
+                         final boolean componentIsAbstract,
+                         final IssueLog iLog)
     throws MojoExecutionException {
         // if this reference is already checked, return immediately
         if ( this.checked ) {
             return;
         }
-        final int currentIssueCount = issues.size();
+        final int currentIssueCount = iLog.getNumberOfErrors();
 
         // validate name
         if (StringUtils.isEmpty(this.name)) {
-            issues.add(this.getMessage("Reference has no name"));
+            iLog.addError(this.getMessage("Reference has no name"));
         }
 
         // validate interface
         if (StringUtils.isEmpty(this.interfacename)) {
-            issues.add(this.getMessage("Missing interface name"));
+            iLog.addError(this.getMessage("Missing interface name"));
         }
 
         // validate cardinality
@@ -172,30 +173,30 @@ public class Reference extends AbstractObject {
             this.cardinality = "1..1";
         } else if (!"0..1".equals(this.cardinality) && !"1..1".equals(this.cardinality)
             && !"0..n".equals(this.cardinality) && !"1..n".equals(this.cardinality)) {
-            issues.add(this.getMessage("Invalid Cardinality specification " + this.cardinality));
+            iLog.addError(this.getMessage("Invalid Cardinality specification " + this.cardinality));
         }
 
         // validate policy
         if (this.policy == null) {
             this.policy = "static";
         } else if (!"static".equals(this.policy) && !"dynamic".equals(this.policy)) {
-            issues.add(this.getMessage("Invalid Policy specification " + this.policy));
+            iLog.addError(this.getMessage("Invalid Policy specification " + this.policy));
         }
 
         // validate strategy
         if (this.strategy == null) {
             this.strategy = "event";
         } else if (!"event".equals(this.strategy) && !"lookup".equals(this.strategy)) {
-            issues.add(this.getMessage("Invalid startegy type " + this.strategy));
+            iLog.addError(this.getMessage("Invalid startegy type " + this.strategy));
         }
 
         // validate bind and unbind methods
         if (!isLookupStrategy()) {
             final String oldBind = this.bind;
             final String oldUnbind = this.unbind;
-            this.bind = this.validateMethod(this.bind, issues, warnings, componentIsAbstract);
-            this.unbind = this.validateMethod(this.unbind, issues, warnings, componentIsAbstract);
-            if ( issues.size() == currentIssueCount ) {
+            this.bind = this.validateMethod(this.bind, componentIsAbstract, iLog);
+            this.unbind = this.validateMethod(this.unbind, componentIsAbstract, iLog);
+            if ( iLog.getNumberOfErrors() == currentIssueCount ) {
                 if ( this.bind != null && this.unbind != null ) {
                     // no errors, so we're checked
                     this.checked = true;
@@ -214,23 +215,22 @@ public class Reference extends AbstractObject {
         }
     }
 
-    protected String validateMethod(String       methodName,
-                                    List<String> issues,
-                                    List<String> warnings,
-                                    boolean componentIsAbstract)
+    protected String validateMethod(String  methodName,
+                                    boolean componentIsAbstract,
+                                    final   IssueLog iLog)
     throws MojoExecutionException {
         final JavaMethod method = this.findMethod(methodName);
         if (method == null) {
             if ( !componentIsAbstract ) {
-                issues.add(this.getMessage("Missing method " + methodName + " for reference " + this.getName()));
+                iLog.addError(this.getMessage("Missing method " + methodName + " for reference " + this.getName()));
             }
             return null;
         }
 
         if (method.isPublic()) {
-            warnings.add(this.getMessage("Method " + method.getName() + " should be declared protected"));
+            iLog.addWarning(this.getMessage("Method " + method.getName() + " should be declared protected"));
         } else if (!method.isProtected()) {
-            issues.add(this.getMessage("Method " + method.getName() + " has wrong qualifier, public or protected required"));
+            iLog.addError(this.getMessage("Method " + method.getName() + " has wrong qualifier, public or protected required"));
             return null;
         }
 

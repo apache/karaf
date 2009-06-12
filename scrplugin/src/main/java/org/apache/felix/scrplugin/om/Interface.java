@@ -18,8 +18,7 @@
  */
 package org.apache.felix.scrplugin.om;
 
-import java.util.List;
-
+import org.apache.felix.scrplugin.IssueLog;
 import org.apache.felix.scrplugin.tags.JavaClassDescription;
 import org.apache.felix.scrplugin.tags.JavaTag;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -59,16 +58,16 @@ public class Interface extends AbstractObject {
      * If errors occur a message is added to the issues list,
      * warnings can be added to the warnings list.
      */
-    public void validate(List<String> issues, List<String> warnings)
+    public void validate(final int specVersion, final IssueLog iLog)
     throws MojoExecutionException {
         final JavaClassDescription javaClass = this.tag.getJavaClassDescription();
         if (javaClass == null) {
-            issues.add(this.getMessage("Must be declared in a Java class"));
+            iLog.addError(this.getMessage("Must be declared in a Java class"));
         } else {
 
             if ( !javaClass.isA(this.getInterfacename()) ) {
                // interface not implemented
-                issues.add(this.getMessage("Class must implement provided interface " + this.getInterfacename()));
+                iLog.addError(this.getMessage("Class must implement provided interface " + this.getInterfacename()));
             }
         }
     }

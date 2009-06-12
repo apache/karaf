@@ -28,6 +28,9 @@ import java.util.List;
  */
 public class Components {
 
+    /** The spec version. */
+    private int specVersion;
+
     /** The list of {@link Component}s. */
     protected List<Component> components = new ArrayList<Component>();
 
@@ -50,5 +53,19 @@ public class Components {
      */
     public void addComponent(Component component) {
         this.components.add(component);
+    }
+
+    /**
+     * Get the spec version.
+     */
+    public int getSpecVersion() {
+        return this.specVersion;
+    }
+
+    /**
+     * Set the spec version.
+     */
+    public void setSpecVersion(int value) {
+        this.specVersion = value;
     }
 }

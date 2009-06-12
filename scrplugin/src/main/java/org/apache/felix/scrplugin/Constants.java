@@ -25,6 +25,13 @@ import java.io.File;
  */
 public class Constants {
 
+    /** Version 1.0 (R4.1) */
+    public static final int VERSION_1_0 = 0;
+
+    /** Version 1.1 (R4.2) */
+    public static final int VERSION_1_1 = 1;
+
+
     public static final String COMPONENT = "scr.component";
 
     public static final String COMPONENT_NAME = "name";
@@ -49,6 +56,12 @@ public class Constants {
 
     public static final String COMPONENT_CREATE_PID = "create-pid";
 
+    // The component configuration policy (V1.1)
+    public static final String COMPONENT_CONFIG_POLICY = "policy";
+    public static final String COMPONENT_CONFIG_POLICY_OPTIONAL = "optional";
+    public static final String COMPONENT_CONFIG_POLICY_REQUIRE = "require";
+    public static final String COMPONENT_CONFIG_POLICY_IGNORE = "ignore";
+
     public static final String PROPERTY = "scr.property";
 
     public static final String PROPERTY_NAME = "name";
@@ -68,10 +81,18 @@ public class Constants {
     /** Property for multi value fields using references. */
     public static final String PROPERTY_MULTIVALUE_REF_PREFIX = "valueRefs";
 
-    /** @deprecated */
-    public static final String OLD_PROPERTY_MULTIVALUE_REF_PREFIX = "refValues";
-
+    // property type
     public static final String PROPERTY_TYPE = "type";
+    public static final String PROPERTY_TYPE_STRING = "String";
+    public static final String PROPERTY_TYPE_LONG = "Long";
+    public static final String PROPERTY_TYPE_DOUBLE = "Double";
+    public static final String PROPERTY_TYPE_FLOAT = "Float";
+    public static final String PROPERTY_TYPE_INTEGER = "Integer";
+    public static final String PROPERTY_TYPE_BYTE = "Bye";
+    public static final String PROPERTY_TYPE_CHAR = "Char";
+    public static final String PROPERTY_TYPE_CHAR_1_1 = "Character";
+    public static final String PROPERTY_TYPE_BOOLEAN = "Boolean";
+    public static final String PROPERTY_TYPE_SHORT = "Short";
 
     public static final String PROPERTY_CARDINALITY = "cardinality";
 

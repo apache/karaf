@@ -18,8 +18,8 @@
  */
 package org.apache.felix.scrplugin.om;
 
-import java.util.List;
-
+import org.apache.felix.scrplugin.Constants;
+import org.apache.felix.scrplugin.IssueLog;
 import org.apache.felix.scrplugin.tags.JavaTag;
 
 /**
@@ -91,11 +91,32 @@ public class Property extends AbstractObject {
      * If errors occur a message is added to the issues list,
      * warnings can be added to the warnings list.
      */
-    public void validate(List<String> issues, List<String> warnings) {
+    public void validate(final int specVersion, final IssueLog iLog) {
         if ( name == null || name.trim().length() == 0 ) {
-            issues.add(this.getMessage("Property name can not be empty."));
+            iLog.addError(this.getMessage("Property name can not be empty."));
         }
-        // might want to check type (and value)
+        if ( type != null ) {
+            if ( !type.equals(Constants.PROPERTY_TYPE_BOOLEAN)
+                 && !type.equals(Constants.PROPERTY_TYPE_BYTE )
+                 && !type.equals(Constants.PROPERTY_TYPE_CHAR )
+                 && !type.equals(Constants.PROPERTY_TYPE_CHAR_1_1 )
+                 && !type.equals(Constants.PROPERTY_TYPE_DOUBLE )
+                 && !type.equals(Constants.PROPERTY_TYPE_FLOAT )
+                 && !type.equals(Constants.PROPERTY_TYPE_INTEGER )
+                 && !type.equals(Constants.PROPERTY_TYPE_LONG )
+                 && !type.equals(Constants.PROPERTY_TYPE_STRING )
+                 && !type.equals(Constants.PROPERTY_TYPE_SHORT ) ) {
+                iLog.addError(this.getMessage("Property " + name + " has unknown type: " + type));
+            }
+            // now check for old and new char
+            if ( specVersion == Constants.VERSION_1_0 && type.equals(Constants.PROPERTY_TYPE_CHAR_1_1) ) {
+                type = Constants.PROPERTY_TYPE_CHAR;
+            }
+            if ( specVersion == Constants.VERSION_1_1 && type.equals(Constants.PROPERTY_TYPE_CHAR) ) {
+                type = Constants.PROPERTY_TYPE_CHAR_1_1;
+            }
+        }
+        // TODO might want to check value
     }
 
     public boolean isPrivate() {
