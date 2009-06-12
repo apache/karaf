@@ -103,6 +103,6 @@ public @interface Reference {
      * TODO: parameter documentation missing
      * @since 1.0.9
      */
-    String strategy() default "";
+    ReferenceStrategy strategy() default ReferenceStrategy.EVENT;
 
 }

@@ -107,4 +107,9 @@ public @interface Component {
      */
     boolean createPid() default true;
 
+    /**
+     * The configuration policy
+     * @since 1.0
+     */
+    ConfigurationPolicy policy() default ConfigurationPolicy.OPTIONAL;
 }
