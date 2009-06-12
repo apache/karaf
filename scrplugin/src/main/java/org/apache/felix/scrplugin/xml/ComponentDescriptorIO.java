@@ -60,8 +60,20 @@ public class ComponentDescriptorIO {
     /** The qualified component element. */
     private static final String COMPONENT_QNAME = PREFIX + ':' + COMPONENT;
 
+    /** The enabled attribute. */
+    private static final String COMPONENT_ATTR_ENABLED = "enabled";
+
     /** The policy attribute. */
     private static final String COMPONENT_ATTR_POLICY = "configuration-policy";
+
+    /** The factory attribute. */
+    private static final String COMPONENT_ATTR_FACTORY = "factory";
+
+    /** The immediate attribute. */
+    private static final String COMPONENT_ATTR_IMMEDIATE = "immediate";
+
+    /** The name attribute. */
+    private static final String COMPONENT_ATTR_NAME = "name";
 
     private static final String IMPLEMENTATION = "implementation";
 
@@ -162,10 +174,10 @@ public class ComponentDescriptorIO {
                                       final boolean isScrPrivateFile)
     throws SAXException {
         final AttributesImpl ai = new AttributesImpl();
-        IOUtils.addAttribute(ai, "enabled", component.isEnabled());
-        IOUtils.addAttribute(ai, "immediate",component.isImmediate());
-        IOUtils.addAttribute(ai, "name", component.getName());
-        IOUtils.addAttribute(ai, "factory", component.getFactory());
+        IOUtils.addAttribute(ai, COMPONENT_ATTR_ENABLED, component.isEnabled());
+        IOUtils.addAttribute(ai, COMPONENT_ATTR_IMMEDIATE,component.isImmediate());
+        IOUtils.addAttribute(ai, COMPONENT_ATTR_NAME, component.getName());
+        IOUtils.addAttribute(ai, COMPONENT_ATTR_FACTORY, component.getFactory());
 
         // attributes new in 1.1
         if ( NAMESPACE_URI_1_1.equals(namespace) ) {
@@ -376,20 +388,24 @@ public class ComponentDescriptorIO {
                     this.isComponent = true;
 
                     this.currentComponent = new Component();
-                    this.currentComponent.setName(attributes.getValue("name"));
+                    this.currentComponent.setName(attributes.getValue(COMPONENT_ATTR_NAME));
 
                     // enabled attribute is optional
-                    if (attributes.getValue("enabled") != null) {
-                        this.currentComponent.setEnabled(Boolean.valueOf(attributes.getValue("enabled")));
+                    if (attributes.getValue(COMPONENT_ATTR_ENABLED) != null) {
+                        this.currentComponent.setEnabled(Boolean.valueOf(attributes.getValue(COMPONENT_ATTR_ENABLED)));
                     }
 
                     // immediate attribute is optional
-                    if (attributes.getValue("immediate") != null) {
-                        this.currentComponent.setImmediate(Boolean.valueOf(attributes.getValue("immediate")));
+                    if (attributes.getValue(COMPONENT_ATTR_IMMEDIATE) != null) {
+                        this.currentComponent.setImmediate(Boolean.valueOf(attributes.getValue(COMPONENT_ATTR_IMMEDIATE)));
                     }
 
-                    this.currentComponent.setFactory(attributes.getValue("factory"));
+                    this.currentComponent.setFactory(attributes.getValue(COMPONENT_ATTR_FACTORY));
 
+                    // check for version 1.1 attributes
+                    if ( components.getSpecVersion() == Constants.VERSION_1_1 ) {
+                        this.currentComponent.setConfigurationPolicy(attributes.getValue(COMPONENT_ATTR_POLICY));
+                    }
                 } else if (localName.equals(IMPLEMENTATION)) {
                     // Set the implementation class name (mandatory)
                     final Implementation impl = new Implementation();
