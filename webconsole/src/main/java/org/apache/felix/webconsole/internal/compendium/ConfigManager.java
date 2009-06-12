@@ -17,9 +17,25 @@
 package org.apache.felix.webconsole.internal.compendium;
 
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.Vector;
 import java.util.Map.Entry;
 
 import javax.servlet.ServletException;
@@ -28,9 +44,20 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.internal.Util;
 import org.apache.felix.webconsole.internal.servlet.OsgiManager;
-import org.json.*;
-import org.osgi.framework.*;
-import org.osgi.service.cm.*;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONWriter;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.Version;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.cm.ManagedService;
+import org.osgi.service.cm.ManagedServiceFactory;
+import org.osgi.service.log.LogService;
 import org.osgi.service.metatype.AttributeDefinition;
 import org.osgi.service.metatype.ObjectClassDefinition;
 
@@ -346,6 +373,9 @@ public class ConfigManager extends ConfigManagerBase
         {
             // start with ManagedService instances
             SortedMap optionsPlain = getServices( ManagedService.class.getName(), pidFilter, locale, true );
+            
+            // next are the MetaType informations without ManagedService
+            addMetaTypeNames( optionsPlain, getPidObjectClasses( locale ), pidFilter, Constants.SERVICE_PID );
 
             // add in existing configuration (not duplicating ManagedServices)
             Configuration[] cfgs = ca.listConfigurations( pidFilter );
@@ -383,7 +413,7 @@ public class ConfigManager extends ConfigManagerBase
         }
         catch ( Exception e )
         {
-            // write a message or ignore
+            getLog().log( LogService.LOG_ERROR, "listConfigurations: Unexpected problem encountered", e );
         }
     }
 
@@ -394,11 +424,13 @@ public class ConfigManager extends ConfigManagerBase
         try
         {
             SortedMap optionsFactory = getServices( ManagedServiceFactory.class.getName(), pidFilter, locale, true );
+            addMetaTypeNames( optionsFactory, getFactoryPidObjectClasses( locale ), pidFilter,
+                ConfigurationAdmin.SERVICE_FACTORYPID );
             printOptionsForm( pw, optionsFactory, "configSelection_factory", "create", "Create" );
         }
         catch ( Exception e )
         {
-            // write a message or ignore
+            getLog().log( LogService.LOG_ERROR, "listFactoryConfigurations: Unexpected problem encountered", e );
         }
     }
 
@@ -436,6 +468,36 @@ public class ConfigManager extends ConfigManagerBase
         }
 
         return optionsFactory;
+    }
+
+
+    private void addMetaTypeNames( final Map pidMap, final Collection ocdCollection, final String filterSpec, final String type )
+    {
+        Filter filter = null;
+        if ( filterSpec != null )
+        {
+            try
+            {
+                filter = getBundleContext().createFilter( filterSpec );
+            }
+            catch ( InvalidSyntaxException not_expected )
+            {
+            }
+        }
+
+        for ( Iterator oci = ocdCollection.iterator(); oci.hasNext(); )
+        {
+            final ObjectClassDefinition ocd = ( ObjectClassDefinition ) oci.next();
+            final String pid = ocd.getID();
+            final Dictionary props = new Hashtable();
+            props.put( type, pid );
+            if ( filter == null || filter.match( props ) )
+            {
+                final String name = ocd.getName() + " (" + pid + ")";
+                pidMap.put( pid, name );
+            }
+        }
+
     }
 
 
@@ -725,7 +787,7 @@ public class ConfigManager extends ConfigManagerBase
             // only delete if the PID is not our place holder
             if ( !PLACEHOLDER_PID.equals( pid ) )
             {
-                // TODO: should log this here !!
+                getLog().log( LogService.LOG_INFO, "applyConfiguration: Deleting configuration " + pid );
                 Configuration config = ca.getConfiguration( pid, null );
                 config.delete();
             }
