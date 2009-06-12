@@ -38,4 +38,8 @@ public abstract class AbstractObject {
         }
         return "@" + this.tag.getName() + ": " + message + " (" + this.tag.getSourceLocation() + ")";
     }
+
+    public JavaTag getJavaTag() {
+        return this.tag;
+    }
 }

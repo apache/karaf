@@ -18,6 +18,7 @@
  */
 package org.apache.felix.scrplugin.om;
 
+import org.apache.felix.scrplugin.Constants;
 import org.apache.felix.scrplugin.IssueLog;
 import org.apache.felix.scrplugin.tags.*;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -140,7 +141,7 @@ public class Reference extends AbstractObject {
 
     /** @since 1.0.9 */
     public boolean isLookupStrategy() {
-        return "lookup".equals(getStrategy());
+        return Constants.REFERENCE_STRATEGY_LOOKUP.equals(getStrategy());
     }
 
     /**
@@ -185,17 +186,18 @@ public class Reference extends AbstractObject {
 
         // validate strategy
         if (this.strategy == null) {
-            this.strategy = "event";
-        } else if (!"event".equals(this.strategy) && !"lookup".equals(this.strategy)) {
-            iLog.addError(this.getMessage("Invalid startegy type " + this.strategy));
+            this.strategy = Constants.REFERENCE_STRATEGY_EVENT;
+        } else if (!Constants.REFERENCE_STRATEGY_EVENT.equals(this.strategy)
+                   && !Constants.REFERENCE_STRATEGY_LOOKUP.equals(this.strategy)) {
+            iLog.addError(this.getMessage("Invalid strategy type " + this.strategy));
         }
 
         // validate bind and unbind methods
         if (!isLookupStrategy()) {
             final String oldBind = this.bind;
             final String oldUnbind = this.unbind;
-            this.bind = this.validateMethod(this.bind, componentIsAbstract, iLog);
-            this.unbind = this.validateMethod(this.unbind, componentIsAbstract, iLog);
+            this.bind = this.validateMethod(specVersion, this.bind, componentIsAbstract, iLog);
+            this.unbind = this.validateMethod(specVersion, this.unbind, componentIsAbstract, iLog);
             if ( iLog.getNumberOfErrors() == currentIssueCount ) {
                 if ( this.bind != null && this.unbind != null ) {
                     // no errors, so we're checked
@@ -215,11 +217,12 @@ public class Reference extends AbstractObject {
         }
     }
 
-    protected String validateMethod(String  methodName,
-                                    boolean componentIsAbstract,
-                                    final   IssueLog iLog)
+    protected String validateMethod(final int      specVersion,
+                                    final String   methodName,
+                                    final boolean  componentIsAbstract,
+                                    final IssueLog iLog)
     throws MojoExecutionException {
-        final JavaMethod method = this.findMethod(methodName);
+        final JavaMethod method = this.findMethod(specVersion, methodName);
         if (method == null) {
             if ( !componentIsAbstract ) {
                 iLog.addError(this.getMessage("Missing method " + methodName + " for reference " + this.getName()));
@@ -237,16 +240,24 @@ public class Reference extends AbstractObject {
         return method.getName();
     }
 
-    public JavaMethod findMethod(String methodName)
+    private static final String TYPE_SERVICE_REFERENCE = "org.osgi.framework.ServiceReference";
+    private static final String TYPE_MAP = "java.util.Map";
+
+    public JavaMethod findMethod(final int    specVersion,
+                                 final String methodName)
     throws MojoExecutionException {
-        String[] sig = new String[]{ this.getInterfacename() };
-        String[] sig2 = new String[]{ "org.osgi.framework.ServiceReference" };
+        final String[] sig = new String[]{ TYPE_SERVICE_REFERENCE };
+        final String[] sig2 = new String[]{ this.getInterfacename() };
+        final String[] sig3 = new String[]{ this.getInterfacename(), TYPE_MAP};
 
         // service interface or ServiceReference first
         String realMethodName = methodName;
         JavaMethod method = this.javaClassDescription.getMethodBySignature(realMethodName, sig);
         if (method == null) {
             method = this.javaClassDescription.getMethodBySignature(realMethodName, sig2);
+            if ( specVersion == Constants.VERSION_1_1 && method == null ) {
+                method = this.javaClassDescription.getMethodBySignature(realMethodName, sig3);
+            }
         }
 
         // append reference name with service interface and ServiceReference
@@ -258,6 +269,9 @@ public class Reference extends AbstractObject {
         }
         if (method == null) {
             method = this.javaClassDescription.getMethodBySignature(realMethodName, sig2);
+            if ( specVersion == Constants.VERSION_1_1 && method == null ) {
+                method = this.javaClassDescription.getMethodBySignature(realMethodName, sig3);
+            }
         }
 
         // append type name with service interface and ServiceReference
@@ -269,6 +283,9 @@ public class Reference extends AbstractObject {
         }
         if (method == null) {
             method = this.javaClassDescription.getMethodBySignature(realMethodName, sig2);
+            if ( specVersion == Constants.VERSION_1_1 && method == null ) {
+                method = this.javaClassDescription.getMethodBySignature(realMethodName, sig3);
+            }
         }
 
         return method;

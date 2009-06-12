@@ -126,6 +126,13 @@ public class SCRDescriptorMojo extends AbstractMojo {
     private String[] annotationTagProviders = {};
 
     /**
+     * The version of the DS spec this plugin generates a descriptor for.
+     * By default the version is detected by the used tags.
+     * @parameter
+     */
+    private String specVersion;
+
+    /**
      * @see org.apache.maven.plugin.AbstractMojo#execute()
      */
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -134,6 +141,17 @@ public class SCRDescriptorMojo extends AbstractMojo {
         this.getLog().debug("..parsing javadocs: " + this.parseJavadoc);
         this.getLog().debug("..processing annotations: " + this.processAnnotations);
 
+        // check speck version configuration
+        int specVersion = Constants.VERSION_1_0;
+        if ( this.specVersion != null ) {
+            if ( this.specVersion.equals("1.1") ) {
+                specVersion = Constants.VERSION_1_1;
+            } else if ( !this.specVersion.equals("1.0") ) {
+                throw new MojoExecutionException("Unknown configuration for spec version: " + this.specVersion);
+            }
+        } else {
+            this.getLog().debug("..auto detecting spec version");
+        }
         JavaClassDescriptorManager jManager = new JavaClassDescriptorManager(this.getLog(),
                                                                              this.project,
                                                                              this.annotationTagProviders,
@@ -149,7 +167,6 @@ public class SCRDescriptorMojo extends AbstractMojo {
         final JavaClassDescription[] javaSources = jManager.getSourceDescriptions();
         Arrays.sort(javaSources, new JavaClassDescriptionInheritanceComparator());
 
-        int specVersion = Constants.VERSION_1_0;
         final List<Component> scannedComponents = new ArrayList<Component>();
         for (int i = 0; i < javaSources.length; i++) {
             this.getLog().debug("Testing source " + javaSources[i].getName());
@@ -163,12 +180,22 @@ public class SCRDescriptorMojo extends AbstractMojo {
                 } else {
                     final Component comp = this.createComponent(javaSources[i], tag, metaData, iLog);
                     if ( comp.getSpecVersion() > specVersion ) {
+                        // if a spec version has been configured and a component requires a higher
+                        // version, this is considered an error!
+                        if ( this.specVersion != null ) {
+                            String v = "1.0";
+                            if ( comp.getSpecVersion() == Constants.VERSION_1_1 ) {
+                                v = "1.1";
+                            }
+                            iLog.addError("Component " + comp + " requires spec version " + v + " but plugin is configured to use version " + this.specVersion);
+                        }
                         specVersion = comp.getSpecVersion();
                     }
                     scannedComponents.add(comp);
                 }
             }
         }
+        this.getLog().debug("..generating descriptor for spec version: " + this.specVersion);
 
         // now check for abstract components and fill components objects
         final Components components = new Components();
@@ -178,6 +205,39 @@ public class SCRDescriptorMojo extends AbstractMojo {
 
         for(final Component comp : scannedComponents ) {
             final int errorCount = iLog.getNumberOfErrors();
+            // before we can validate we should check the references for bind/unbind method
+            // in order to create them if possible
+
+            for(final Reference ref : comp.getReferences() ) {
+                // if this is a field with a single cardinality,
+                // we look for the bind/unbind methods
+                // and create them if they are not availabe
+                if ( this.generateAccessors && !ref.isLookupStrategy() ) {
+                    if ( ref.getJavaTag().getField() != null && comp.getJavaClassDescription() instanceof ModifiableJavaClassDescription ) {
+                        if ( ref.getCardinality().equals("0..1") || ref.getCardinality().equals("1..1") ) {
+                            final String bindValue = ref.getBind();
+                            final String unbindValue = ref.getUnbind();
+                            final String name = ref.getName();
+                            final String type = ref.getInterfacename();
+
+                            boolean createBind = false;
+                            boolean createUnbind = false;
+                            // Only create method if no bind name has been specified
+                            if ( bindValue == null && ref.findMethod(specVersion, ref.getBind()) == null ) {
+                                // create bind method
+                                createBind = true;
+                            }
+                            if ( unbindValue == null && ref.findMethod(specVersion, ref.getUnbind()) == null ) {
+                                // create unbind method
+                                createUnbind = true;
+                            }
+                            if ( createBind || createUnbind ) {
+                                ((ModifiableJavaClassDescription)comp.getJavaClassDescription()).addMethods(name, type, createBind, createUnbind);
+                            }
+                        }
+                    }
+                }
+            }
             comp.validate(specVersion, iLog);
             // ignore component if it has errors
             if ( iLog.getNumberOfErrors() == errorCount ) {
@@ -648,29 +708,6 @@ public class SCRDescriptorMojo extends AbstractMojo {
             ref.setStrategy(strategy);
         }
 
-        // if this is a field with a single cardinality,
-        // we look for the bind/unbind methods
-        // and create them if they are not availabe
-        if ( this.generateAccessors && !ref.isLookupStrategy() ) {
-            if ( reference.getField() != null && component.getJavaClassDescription() instanceof ModifiableJavaClassDescription ) {
-                if ( ref.getCardinality().equals("0..1") || ref.getCardinality().equals("1..1") ) {
-                    boolean createBind = false;
-                    boolean createUnbind = false;
-                    // Only create method if no bind name has been specified
-                    if ( bindValue == null && ref.findMethod(ref.getBind()) == null ) {
-                        // create bind method
-                        createBind = true;
-                    }
-                    if ( unbindValue == null && ref.findMethod(ref.getUnbind()) == null ) {
-                        // create unbind method
-                        createUnbind = true;
-                    }
-                    if ( createBind || createUnbind ) {
-                        ((ModifiableJavaClassDescription)component.getJavaClassDescription()).addMethods(name, type, createBind, createUnbind);
-                    }
-                }
-            }
-        }
         component.addReference(ref);
     }
 
