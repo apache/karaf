@@ -416,10 +416,19 @@ public class SCRDescriptorMojo extends AbstractMojo {
                 Constants.COMPONENT_IMMEDIATE, true)));
         }
 
-        // check for V1.1 attributes
+        // check for V1.1 attributes: configuration policy
         if ( tag.getNamedParameter(Constants.COMPONENT_CONFIG_POLICY) != null ) {
             component.setSpecVersion(Constants.VERSION_1_1);
             component.setConfigurationPolicy(tag.getNamedParameter(Constants.COMPONENT_CONFIG_POLICY));
+        }
+        // check for V1.1 attributes: activate, deactivate
+        if ( tag.getNamedParameter(Constants.COMPONENT_ACTIVATE) != null ) {
+            component.setSpecVersion(Constants.VERSION_1_1);
+            component.setActivate(tag.getNamedParameter(Constants.COMPONENT_ACTIVATE));
+        }
+        if ( tag.getNamedParameter(Constants.COMPONENT_DEACTIVATE) != null ) {
+            component.setSpecVersion(Constants.VERSION_1_1);
+            component.setDeactivate(tag.getNamedParameter(Constants.COMPONENT_DEACTIVATE));
         }
 
         // whether metatype information is to generated for the component

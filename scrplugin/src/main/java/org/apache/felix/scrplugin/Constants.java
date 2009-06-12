@@ -62,6 +62,12 @@ public class Constants {
     public static final String COMPONENT_CONFIG_POLICY_REQUIRE = "require";
     public static final String COMPONENT_CONFIG_POLICY_IGNORE = "ignore";
 
+    // The component activate method name (V1.1)
+    public static final String COMPONENT_ACTIVATE = "activate";
+
+    // The component activate method name (V1.1)
+    public static final String COMPONENT_DEACTIVATE = "deactivate";
+
     public static final String PROPERTY = "scr.property";
 
     public static final String PROPERTY_NAME = "name";

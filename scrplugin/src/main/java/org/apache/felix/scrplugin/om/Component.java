@@ -66,6 +66,12 @@ public class Component extends AbstractObject {
     /** Configuration policy. (V1.1) */
     protected String configurationPolicy;
 
+    /** Activation method. (V1.1) */
+    protected String activate;
+
+    /** Deactivation method. (V1.1) */
+    protected String deactivate;
+
     /** The spec version. */
     protected int specVersion;
 
@@ -199,6 +205,33 @@ public class Component extends AbstractObject {
     }
 
     /**
+     * Get the name of the activate method (or null for default)
+     */
+    public String getActivate() {
+        return this.activate;
+    }
+
+    /**
+     * Set the name of the deactivate method (or null for default)
+     */
+    public void setDeactivate(final String value) {
+        this.deactivate = value;
+    }
+
+    /**
+     * Get the name of the deactivate method (or null for default)
+     */
+    public String getDeactivate() {
+        return this.deactivate;
+    }
+
+    /**
+     * Set the name of the activate method (or null for default)
+     */
+    public void setActivate(final String value) {
+        this.activate = value;
+    }
+    /**
      * Validate the component description.
      * If errors occur a message is added to the issues list,
      * warnings can be added to the warnings list.
@@ -229,9 +262,12 @@ public class Component extends AbstractObject {
 
                 // no errors so far, let's continue
                 if ( iLog.getNumberOfErrors() == currentIssueCount ) {
+                    final String activateName = this.activate == null ? "activate" : this.activate;
+                    final String deactivateName = this.deactivate == null ? "deactivate" : this.deactivate;
+
                     // check activate and deactivate methods
-                    this.checkLifecycleMethod(javaClass, "activate", iLog);
-                    this.checkLifecycleMethod(javaClass, "deactivate", iLog);
+                    this.checkLifecycleMethod(specVersion, javaClass, activateName, iLog);
+                    this.checkLifecycleMethod(specVersion, javaClass, deactivateName, iLog);
 
                     // ensure public default constructor
                     boolean constructorFound = true;
@@ -299,34 +335,90 @@ public class Component extends AbstractObject {
         }
     }
 
+    private static final String TYPE_COMPONENT_CONTEXT = "org.osgi.service.component.ComponentContext";
+    private static final String TYPE_BUNDLE_CONTEXT = "org.osgi.framework.BundleContext";
+    private static final String TYPE_MAP = "java.util.Map";
     /**
      * Check for existence of lifecycle methods.
+     * @param specVersion The spec version
      * @param javaClass The java class to inspect.
      * @param methodName The method name.
      * @param warnings The list of warnings used to add new warnings.
      */
-    protected void checkLifecycleMethod(JavaClassDescription javaClass, String methodName, final IssueLog iLog)
+    protected void checkLifecycleMethod(final int specVersion,
+                                        final JavaClassDescription javaClass,
+                                        final String methodName,
+                                        final IssueLog iLog)
     throws MojoExecutionException {
-        final JavaMethod method = javaClass.getMethodBySignature(methodName, new String[] {"org.osgi.service.component.ComponentContext"});
+        // first candidate is (de)activate(ComponentContext)
+        JavaMethod method = javaClass.getMethodBySignature(methodName, new String[] {TYPE_COMPONENT_CONTEXT});
+        if ( method == null ) {
+            if ( specVersion == Constants.VERSION_1_1) {
+                // second candidate is (de)activate(BundleContext)
+                method = javaClass.getMethodBySignature(methodName, new String[] {TYPE_BUNDLE_CONTEXT});
+                if ( method == null ) {
+                    // third candidate is (de)activate(Map)
+                    method = javaClass.getMethodBySignature(methodName, new String[] {TYPE_MAP});
+
+                    if ( method == null ) {
+                        // fourth candidate is (de)activate with two or three arguments (type must be BundleContext, ComponentCtx and Map)
+                        // as we have to iterate now and the fifth candidate is zero arguments
+                        // we already store this option
+                        JavaMethod zeroArgMethod = null;
+                        JavaMethod found = null;
+                        final JavaMethod[] methods = javaClass.getMethods();
+                        int i = 0;
+                        while ( i < methods.length && found == null ) {
+                            if ( methodName.equals(methods[i].getName()) ) {
+
+                                if ( methods[i].getParameters().length == 0 ) {
+                                    zeroArgMethod = methods[i];
+                                } else if ( methods[i].getParameters().length == 2 || methods[i].getParameters().length == 3) {
+                                    boolean valid = true;
+                                    for(int m=0; m<methods[i].getParameters().length; m++) {
+                                        final String type = methods[i].getParameters()[m].getType();
+                                        if ( !type.equals(TYPE_BUNDLE_CONTEXT)
+                                              && !type.equals(TYPE_COMPONENT_CONTEXT)
+                                              && !type.equals(TYPE_MAP) ) {
+                                            valid = false;
+                                        }
+                                    }
+                                    if ( valid ) {
+                                        found = methods[i];
+                                    }
+                                }
+                            }
+                            i++;
+                        }
+                        if ( found != null ) {
+                            method = found;
+                        } else {
+                            method = zeroArgMethod;
+                        }
+                    }
+                }
+            }
+            // if no method is found, we check for any method with that name to print some warnings!
+            if ( method == null ) {
+                final JavaMethod[] methods = javaClass.getMethods();
+                for(int i=0; i<methods.length; i++) {
+                    if ( methodName.equals(methods[i].getName()) ) {
+
+                        if ( methods[i].getParameters().length != 1 ) {
+                            iLog.addWarning(this.getMessage("Lifecycle method " + methods[i].getName() + " has wrong number of arguments"));
+                        } else {
+                            iLog.addWarning(this.getMessage("Lifecycle method " + methods[i].getName() + " has wrong argument " + methods[i].getParameters()[0].getType()));
+                        }
+                    }
+                }
+            }
+        }
         if ( method != null ) {
             // check protected
             if (method.isPublic()) {
                 iLog.addWarning(this.getMessage("Lifecycle method " + method.getName() + " should be declared protected"));
             } else if (!method.isProtected()) {
                 iLog.addWarning(this.getMessage("Lifecycle method " + method.getName() + " has wrong qualifier, public or protected required"));
-            }
-        } else {
-            // if no method is found, we check for any method with that name
-            final JavaMethod[] methods = javaClass.getMethods();
-            for(int i=0; i<methods.length; i++) {
-                if ( methodName.equals(methods[i].getName()) ) {
-
-                    if ( methods[i].getParameters().length != 1 ) {
-                        iLog.addWarning(this.getMessage("Lifecycle method " + methods[i].getName() + " has wrong number of arguments"));
-                    } else {
-                        iLog.addWarning(this.getMessage("Lifecycle method " + methods[i].getName() + " has wrong argument " + methods[i].getParameters()[0].getType()));
-                    }
-                }
             }
         }
     }

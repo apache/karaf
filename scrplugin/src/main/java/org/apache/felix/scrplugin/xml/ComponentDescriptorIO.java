@@ -63,17 +63,23 @@ public class ComponentDescriptorIO {
     /** The enabled attribute. */
     private static final String COMPONENT_ATTR_ENABLED = "enabled";
 
-    /** The policy attribute. */
+    /** Component: The policy attribute. */
     private static final String COMPONENT_ATTR_POLICY = "configuration-policy";
 
-    /** The factory attribute. */
+    /** Component: The factory attribute. */
     private static final String COMPONENT_ATTR_FACTORY = "factory";
 
-    /** The immediate attribute. */
+    /** Component: The immediate attribute. */
     private static final String COMPONENT_ATTR_IMMEDIATE = "immediate";
 
-    /** The name attribute. */
+    /** Component: The name attribute. */
     private static final String COMPONENT_ATTR_NAME = "name";
+
+    /** Component: The immediate attribute. */
+    private static final String COMPONENT_ATTR_ACTIVATE = "activate";
+
+    /** Component: The immediate attribute. */
+    private static final String COMPONENT_ATTR_DEACTIVATE = "deactivate";
 
     private static final String IMPLEMENTATION = "implementation";
 
@@ -182,6 +188,8 @@ public class ComponentDescriptorIO {
         // attributes new in 1.1
         if ( NAMESPACE_URI_1_1.equals(namespace) ) {
             IOUtils.addAttribute(ai, COMPONENT_ATTR_POLICY, component.getConfigurationPolicy());
+            IOUtils.addAttribute(ai, COMPONENT_ATTR_ACTIVATE, component.getActivate());
+            IOUtils.addAttribute(ai, COMPONENT_ATTR_DEACTIVATE, component.getDeactivate());
         }
 
         IOUtils.indent(contentHandler, 1);
@@ -405,6 +413,8 @@ public class ComponentDescriptorIO {
                     // check for version 1.1 attributes
                     if ( components.getSpecVersion() == Constants.VERSION_1_1 ) {
                         this.currentComponent.setConfigurationPolicy(attributes.getValue(COMPONENT_ATTR_POLICY));
+                        this.currentComponent.setActivate(attributes.getValue(COMPONENT_ATTR_ACTIVATE));
+                        this.currentComponent.setDeactivate(attributes.getValue(COMPONENT_ATTR_DEACTIVATE));
                     }
                 } else if (localName.equals(IMPLEMENTATION)) {
                     // Set the implementation class name (mandatory)
