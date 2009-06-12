@@ -434,10 +434,9 @@ public class SCRDescriptorMojo extends AbstractMojo {
             // designate
             final Designate designate = new Designate();
             metaData.addDesignate(designate);
-            if ( component.getFactory() != null ) {
-                designate.setFactoryPid(component.getName());
-            } else {
-                designate.setPid(component.getName());
+            designate.setPid(component.getName());
+            if (component.getFactory() != null) {
+                designate.setFactoryPid( component.getFactory() );
             }
             // designate.object
             final MTObject mtobject = new MTObject();
