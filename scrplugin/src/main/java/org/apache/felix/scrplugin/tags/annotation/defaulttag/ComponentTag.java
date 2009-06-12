@@ -21,11 +21,12 @@ package org.apache.felix.scrplugin.tags.annotation.defaulttag;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scrplugin.Constants;
 import org.apache.felix.scrplugin.tags.JavaClassDescription;
 
 import com.thoughtworks.qdox.model.Annotation;
+import com.thoughtworks.qdox.model.JavaMethod;
 
 /**
  * Description of a java tag for components.
@@ -89,6 +90,10 @@ public class ComponentTag extends AbstractTag {
                 return Util.getStringValue(annotation, desc, "name", Component.class);
             }
 
+            public ConfigurationPolicy policy() {
+                return Util.getEnumValue(annotation, "policy", ConfigurationPolicy.class, Component.class);
+            }
+
             public Class<? extends java.lang.annotation.Annotation> annotationType() {
                 return null;
             }
@@ -119,6 +124,21 @@ public class ComponentTag extends AbstractTag {
         map.put(Constants.COMPONENT_ABSTRACT, String.valueOf(this.annotation.componentAbstract()));
         map.put(Constants.COMPONENT_DS, String.valueOf(this.annotation.ds()));
         map.put(Constants.COMPONENT_CREATE_PID, String.valueOf(this.annotation.createPid()));
+
+        // version 1.1
+        map.put(Constants.COMPONENT_CONFIG_POLICY, this.annotation.policy().getPolicyString());
+        final JavaMethod[] jms = this.sourceAnnotation.getContext().getParent().getParentSource().getClasses()[0].getMethods();
+        for(final JavaMethod jm : jms) {
+            final Annotation[] annotations = jm.getAnnotations();
+            for(final Annotation a : annotations) {
+                if ( a.getType().getJavaClass().getName().equals(Activate.class) ) {
+                    map.put(Constants.COMPONENT_ACTIVATE, jm.getName());
+                }
+                if ( a.getType().getJavaClass().getName().equals(Deactivate.class) ) {
+                    map.put(Constants.COMPONENT_ACTIVATE, jm.getName());
+                }
+            }
+        }
 
         return map;
     }

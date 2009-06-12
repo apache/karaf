@@ -68,8 +68,8 @@ public class ReferenceTag extends AbstractTag {
                 return Util.getClassValue(annotation, "referenceInterface", Reference.class);
             }
 
-            public String strategy() {
-                return Util.getStringValue(annotation, desc, "strategy", Reference.class);
+            public ReferenceStrategy strategy() {
+                return Util.getEnumValue(annotation, "strategy", ReferenceStrategy.class, Reference.class);
             }
 
             public String target() {
@@ -108,7 +108,7 @@ public class ReferenceTag extends AbstractTag {
         map.put(Constants.REFERENCE_BIND, emptyToNull(this.annotation.bind()));
         map.put(Constants.REFERENCE_UNDBIND, emptyToNull(this.annotation.unbind()));
         map.put(Constants.REFERENCE_CHECKED, String.valueOf(this.annotation.checked()));
-        map.put(Constants.REFERENCE_STRATEGY, emptyToNull(this.annotation.strategy()));
+        map.put(Constants.REFERENCE_STRATEGY, this.annotation.strategy().getStrategyString());
 
         return map;
     }
