@@ -19,19 +19,32 @@ package org.apache.felix.webconsole.internal.compendium;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Iterator;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.scr.*;
+import org.apache.felix.scr.Component;
+import org.apache.felix.scr.Reference;
+import org.apache.felix.scr.ScrService;
 import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.apache.felix.webconsole.internal.Util;
 import org.apache.felix.webconsole.internal.servlet.OsgiManager;
-import org.json.*;
-import org.osgi.framework.*;
-import org.osgi.service.cm.*;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONWriter;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.metatype.MetaTypeInformation;
 import org.osgi.service.metatype.MetaTypeService;
@@ -39,6 +52,8 @@ import org.osgi.service.metatype.MetaTypeService;
 
 public class ComponentsServlet extends BaseWebConsolePlugin
 {
+
+    private static final long serialVersionUID = 1L;
 
     public static final String NAME = "components";
 
@@ -249,7 +264,7 @@ public class ComponentsServlet extends BaseWebConsolePlugin
         }
         if ( pid != null )
         {
-            if ( isConfigurable( pid ) )
+            if ( isConfigurable( component.getBundle(), pid ) )
             {
                 action(jw, true, OPERATION_CONFIGURE, "Configure", "configure" );
             }
@@ -450,10 +465,12 @@ public class ComponentsServlet extends BaseWebConsolePlugin
     /**
      * Check if the component with the specified pid is
      * configurable
+     * @param providingBundle The Bundle providing the component. This may be
+     *      theoretically be <code>null</code>.
      * @param pid A non null pid
      * @return <code>true</code> if the component is configurable.
      */
-    private boolean isConfigurable( final String pid )
+    private boolean isConfigurable( final Bundle providingBundle, final String pid )
     {
         // we first check if the config admin has something for this pid
         final ConfigurationAdmin ca = this.getConfigurationAdmin();
@@ -481,31 +498,17 @@ public class ComponentsServlet extends BaseWebConsolePlugin
             }
         }
         // second check is using the meta type service
-        final MetaTypeService mts = this.getMetaTypeService();
-        if ( mts != null )
+        if ( providingBundle != null )
         {
-            try
+            final MetaTypeService mts = this.getMetaTypeService();
+            if ( mts != null )
             {
-                final ServiceReference[] refs = this.getBundleContext().getServiceReferences( ManagedService.class.getName(),
-                        '(' + "service.pid" + '=' + pid  + ')' );
-                for ( int i = 0; refs != null && i < refs.length; i++ )
+                final MetaTypeInformation mti = mts.getMetaTypeInformation( providingBundle );
+                if ( mti != null )
                 {
-                    if ( refs[i].getBundle() != null )
-                    {
-                        final MetaTypeInformation mti = mts.getMetaTypeInformation( refs[i].getBundle() );
-                        if ( mti != null )
-                        {
-                            return mti.getObjectClassDefinition(pid, null) != null;
-                        }
-                    }
+                    return mti.getObjectClassDefinition( pid, null ) != null;
                 }
-
             }
-            catch ( InvalidSyntaxException ise )
-            {
-                // we just ignore this for now
-            }
-
         }
         return false;
     }
