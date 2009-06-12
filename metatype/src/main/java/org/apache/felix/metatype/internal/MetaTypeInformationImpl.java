@@ -163,9 +163,10 @@ public class MetaTypeInformationImpl implements MetaTypeInformation {
                 }
 
                 // gather pids and factory pids
-                this.pids.add(designate.getPid());
                 if (designate.getFactoryPid() != null) {
                     this.factoryPids.add( designate.getFactoryPid() );
+                } else {
+                    this.pids.add(designate.getPid());
                 }
 
                 // register a metatype provider for the pid
