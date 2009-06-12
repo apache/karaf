@@ -34,13 +34,13 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
 
     protected static final JavaTag[] EMPTY_TAGS = new JavaTag[0];
 
-    protected final Class clazz;
+    protected final Class<?> clazz;
 
     protected final JavaClassDescriptorManager manager;
 
     protected final Component component;
 
-    public ClassLoaderJavaClassDescription(Class c, Component comp, JavaClassDescriptorManager m) {
+    public ClassLoaderJavaClassDescription(Class<?> c, Component comp, JavaClassDescriptorManager m) {
         this.clazz = c;
         this.manager = m;
         this.component = comp;
@@ -99,7 +99,7 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
      * @see org.apache.felix.scrplugin.tags.JavaClassDescription#getImplementedInterfaces()
      */
     public JavaClassDescription[] getImplementedInterfaces() throws MojoExecutionException {
-        Class[] implemented = clazz.getInterfaces();
+        Class<?>[] implemented = clazz.getInterfaces();
         if (implemented.length == 0) {
             return JavaClassDescription.EMPTY_RESULT;
         }
@@ -116,7 +116,7 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
      */
     public JavaMethod getMethodBySignature(String name, String[] parameters)
     throws MojoExecutionException {
-        Class[] classParameters = null;
+        Class<?>[] classParameters = null;
         if ( parameters != null ) {
             classParameters = new Class[parameters.length];
             for(int i=0; i<parameters.length; i++) {
@@ -235,8 +235,8 @@ public class ClassLoaderJavaClassDescription implements JavaClassDescription {
         return this.testClass(this.clazz, type);
     }
 
-    protected boolean testClass(Class c, String type) {
-        final Class[] interfaces = c.getInterfaces();
+    protected boolean testClass(Class<?> c, String type) {
+        final Class<?>[] interfaces = c.getInterfaces();
         for(int i=0; i<interfaces.length; i++) {
             if ( interfaces[i].getName().equals(type) ) {
                 return true;

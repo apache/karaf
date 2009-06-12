@@ -266,8 +266,8 @@ public class Component extends AbstractObject {
                     final String deactivateName = this.deactivate == null ? "deactivate" : this.deactivate;
 
                     // check activate and deactivate methods
-                    this.checkLifecycleMethod(specVersion, javaClass, activateName, iLog);
-                    this.checkLifecycleMethod(specVersion, javaClass, deactivateName, iLog);
+                    this.checkLifecycleMethod(specVersion, javaClass, activateName, true, iLog);
+                    this.checkLifecycleMethod(specVersion, javaClass, deactivateName, false, iLog);
 
                     // ensure public default constructor
                     boolean constructorFound = true;
@@ -338,6 +338,9 @@ public class Component extends AbstractObject {
     private static final String TYPE_COMPONENT_CONTEXT = "org.osgi.service.component.ComponentContext";
     private static final String TYPE_BUNDLE_CONTEXT = "org.osgi.framework.BundleContext";
     private static final String TYPE_MAP = "java.util.Map";
+    private static final String TYPE_INT = "int";
+    private static final String TYPE_INTEGER = "java.lang.Integer";
+
     /**
      * Check for existence of lifecycle methods.
      * @param specVersion The spec version
@@ -348,6 +351,7 @@ public class Component extends AbstractObject {
     protected void checkLifecycleMethod(final int specVersion,
                                         final JavaClassDescription javaClass,
                                         final String methodName,
+                                        final boolean isActivate,
                                         final IssueLog iLog)
     throws MojoExecutionException {
         // first candidate is (de)activate(ComponentContext)
@@ -361,11 +365,20 @@ public class Component extends AbstractObject {
                     method = javaClass.getMethodBySignature(methodName, new String[] {TYPE_MAP});
 
                     if ( method == null ) {
+                        // if this is a deactivate method, we have two additional possibilities
+                        // a method with parameter of type int and one of type Integer
+                        if ( !isActivate ) {
+                            method = javaClass.getMethodBySignature(methodName, new String[] {TYPE_INT});
+                            if ( method == null ) {
+                                method = javaClass.getMethodBySignature(methodName, new String[] {TYPE_INTEGER});
+                            }
+                        }
+
                         // fourth candidate is (de)activate with two or three arguments (type must be BundleContext, ComponentCtx and Map)
                         // as we have to iterate now and the fifth candidate is zero arguments
                         // we already store this option
                         JavaMethod zeroArgMethod = null;
-                        JavaMethod found = null;
+                        JavaMethod found = method;
                         final JavaMethod[] methods = javaClass.getMethods();
                         int i = 0;
                         while ( i < methods.length && found == null ) {
@@ -373,14 +386,17 @@ public class Component extends AbstractObject {
 
                                 if ( methods[i].getParameters().length == 0 ) {
                                     zeroArgMethod = methods[i];
-                                } else if ( methods[i].getParameters().length == 2 || methods[i].getParameters().length == 3) {
+                                } else if ( methods[i].getParameters().length >= 2 ) {
                                     boolean valid = true;
                                     for(int m=0; m<methods[i].getParameters().length; m++) {
                                         final String type = methods[i].getParameters()[m].getType();
                                         if ( !type.equals(TYPE_BUNDLE_CONTEXT)
                                               && !type.equals(TYPE_COMPONENT_CONTEXT)
                                               && !type.equals(TYPE_MAP) ) {
-                                            valid = false;
+                                            // if this is deactivate, int and integer are possible as well
+                                            if ( isActivate || (!type.equals(TYPE_INT) && !type.equals(TYPE_INTEGER)) ) {
+                                                valid = false;
+                                            }
                                         }
                                     }
                                     if ( valid ) {
