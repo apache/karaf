@@ -714,6 +714,11 @@ public class DirectoryWatcher extends Thread
 
             // old can't be null because of the way we calculate deleted list.
             Bundle bundle = context.getBundle(old.getBundleId());
+            if ( bundle == null )
+            {
+            	log( "Failed to uninstall bundle: " + jar.getPath() + " with id: "+old.getBundleId() + ". The bundle has already been uninstalled", null );
+            	return null;
+            }
             bundle.uninstall();
             startupFailures.remove(bundle);
             log("Uninstalled " + jar.getPath(), null);
@@ -734,6 +739,14 @@ public class DirectoryWatcher extends Thread
             File file = new File(jar.getPath());
             in = new FileInputStream(file);
             Bundle bundle = context.getBundle(jar.getBundleId());
+            if (bundle == null)
+            {
+            	log("Failed to update bundle: "
+                    + jar.getPath() + " with ID "
+                    + jar.getBundleId()
+                    + ". The bundle has been uninstalled", null);
+            	return null;
+            }
             bundle.update(in);
             startupFailures.remove(bundle);
             jar.setLastModified(bundle.getLastModified());
