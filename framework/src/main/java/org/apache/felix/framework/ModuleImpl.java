@@ -492,7 +492,10 @@ public class ModuleImpl implements IModule
 
     public Class getClassByDelegation(String name) throws ClassNotFoundException
     {
-        return getClassLoader().loadClass(name);
+        // We do not call getClassLoader().loadClass() because this does not
+        // correctly handle array types, which is necessary in cases like
+        // deserialization using a wrapper class loader.
+        return Class.forName(name, false, getClassLoader());
     }
 
     public URL getResourceByDelegation(String name)
