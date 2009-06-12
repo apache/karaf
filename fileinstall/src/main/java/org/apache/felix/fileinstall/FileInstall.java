@@ -126,8 +126,11 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory
         for (Enumeration e = properties.keys(); e.hasMoreElements(); )
         {
             String name = (String) e.nextElement();
+            Object value = properties.get(name);
             properties.put(name,
-                Util.substVars(( String ) properties.get(name), name, null, properties));
+                value instanceof String
+                    ? Util.substVars((String) value, name, null, properties)
+                    : value);
         }
     }
 }
