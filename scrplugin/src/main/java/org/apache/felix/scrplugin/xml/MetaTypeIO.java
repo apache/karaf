@@ -178,6 +178,7 @@ public class MetaTypeIO {
     throws SAXException {
         final AttributesImpl ai = new AttributesImpl();
         IOUtils.addAttribute(ai, "pid", designate.getPid());
+        IOUtils.addAttribute(ai, "factoryPid", designate.getFactoryPid());
         IOUtils.indent(contentHandler, 1);
         contentHandler.startElement(INNER_NAMESPACE_URI, DESIGNATE_ELEMENT, DESIGNATE_ELEMENT_QNAME, ai);
         IOUtils.newline(contentHandler);
