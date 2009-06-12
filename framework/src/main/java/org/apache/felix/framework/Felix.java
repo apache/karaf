@@ -1518,7 +1518,7 @@ ex.printStackTrace();
             // been triggered, then activate the bundle immediately.
             if (!bundle.isDeclaredActivationPolicyUsed()
                 || (bundle.getCurrentModule().getDeclaredActivationPolicy() != IModule.LAZY_ACTIVATION)
-                || ((ModuleImpl) bundle.getCurrentModule()).isActivationTrigger())
+                || ((ModuleImpl) bundle.getCurrentModule()).isActivationTriggered())
             {
                 // Record the event type for the final event and activate.
                 eventType = BundleEvent.STARTED;

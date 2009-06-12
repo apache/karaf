@@ -78,6 +78,9 @@ public class ModuleImpl implements IModule
     private final IRequirement[] m_dynamicRequirements;
     private final R4Library[] m_nativeLibraries;
     private final int m_declaredActivationPolicy;
+    private final String[] m_activationIncludes;
+    private final String[] m_activationExcludes;
+
     private final Bundle m_bundle;
 
     private IModule[] m_fragments = null;
@@ -140,6 +143,8 @@ public class ModuleImpl implements IModule
         m_dynamicRequirements = null;
         m_nativeLibraries = null;
         m_declaredActivationPolicy = EAGER_ACTIVATION;
+        m_activationExcludes = null;
+        m_activationIncludes = null;
     }
 
     public ModuleImpl(
@@ -172,6 +177,12 @@ public class ModuleImpl implements IModule
         m_dynamicRequirements = mp.getDynamicRequirements();
         m_nativeLibraries = mp.getLibraries();
         m_declaredActivationPolicy = mp.getActivationPolicy();
+        m_activationExcludes = (mp.getActivationExcludeDirective() == null)
+            ? null
+            : ManifestParser.parseDelimitedString(mp.getActivationExcludeDirective(), ",");
+        m_activationIncludes = (mp.getActivationIncludeDirective() == null)
+            ? null
+            : ManifestParser.parseDelimitedString(mp.getActivationIncludeDirective(), ",");
         m_symbolicName = mp.getSymbolicName();
         m_isExtension = mp.isExtension();
 
@@ -309,6 +320,40 @@ public class ModuleImpl implements IModule
     public int getDeclaredActivationPolicy()
     {
         return m_declaredActivationPolicy;
+    }
+
+    synchronized boolean isActivationTriggered()
+    {
+        return m_isActivationTriggered;
+    }
+
+    boolean isActivationTrigger(String pkgName)
+    {
+        if ((m_activationIncludes == null) && (m_activationExcludes == null))
+        {
+            return true;
+        }
+
+        // If there are no include filters then all classes are included
+        // by default, otherwise try to find one match.
+        boolean included = (m_activationIncludes == null);
+        for (int i = 0;
+            (!included) && (m_activationIncludes != null) && (i < m_activationIncludes.length);
+            i++)
+        {
+            included = m_activationIncludes[i].equals(pkgName);
+        }
+
+        // If there are no exclude filters then no classes are excluded
+        // by default, otherwise try to find one match.
+        boolean excluded = false;
+        for (int i = 0;
+            (!excluded) && (m_activationExcludes != null) && (i < m_activationExcludes.length);
+            i++)
+        {
+            excluded = m_activationExcludes[i].equals(pkgName);
+        }
+        return included && !excluded;
     }
 
     //
@@ -1178,11 +1223,6 @@ public class ModuleImpl implements IModule
         return m_id;
     }
 
-    synchronized boolean isActivationTrigger()
-    {
-        return m_isActivationTriggered;
-    }
-
     private synchronized ModuleClassLoader getClassLoader()
     {
         if (m_classLoader == null)
@@ -1543,6 +1583,9 @@ public class ModuleImpl implements IModule
 
                 if (bytes != null)
                 {
+                    // Get package name.
+                    String pkgName = Util.getClassPackage(name);
+
                     // Before we actually attempt to define the class, grab
                     // the lock for this class loader and make sure than no
                     // other thread has defined this class in the meantime.
@@ -1559,8 +1602,13 @@ public class ModuleImpl implements IModule
 
                             // If the module is using deferred activation, then if
                             // we load this class from this module we need to activate
-                            // the module before returning the class.
+                            // the module before returning the class. We will short
+                            // circuit the trigger matching if the trigger is already
+                            // tripped.
+                            boolean isTriggerClass = m_isActivationTriggered
+                                ? false : isActivationTrigger(pkgName);
                             if (!m_isActivationTriggered
+                                && isTriggerClass
                                 && (activationPolicy == IModule.LAZY_ACTIVATION)
                                 && (getBundle().getState() == Bundle.STARTING))
                             {
@@ -1573,9 +1621,8 @@ public class ModuleImpl implements IModule
                                 deferredList.add(new Object[] { name, getBundle() });
                             }
                             // We need to try to define a Package object for the class
-                            // before we call defineClass(). Get the package name and
-                            // see if we have already created the package.
-                            String pkgName = Util.getClassPackage(name);
+                            // before we call defineClass() if we haven't already
+                            // created it.
                             if (pkgName.length() > 0)
                             {
                                 if (getPackage(pkgName) == null)
@@ -1630,9 +1677,9 @@ public class ModuleImpl implements IModule
                                 }
                             }
 
-                            // At this point if we have a class, then the deferred
+                            // At this point if we have a trigger class, then the deferred
                             // activation trigger has tripped.
-                            if (!m_isActivationTriggered && (clazz != null))
+                            if (!m_isActivationTriggered && isTriggerClass && (clazz != null))
                             {
                                 m_isActivationTriggered = true;
                             }

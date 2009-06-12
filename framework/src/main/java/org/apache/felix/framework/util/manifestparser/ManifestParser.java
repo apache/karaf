@@ -34,6 +34,8 @@ public class ManifestParser
     private final Map m_configMap;
     private final Map m_headerMap;
     private volatile int m_activationPolicy = IModule.EAGER_ACTIVATION;
+    private volatile String m_activationIncludeDir;
+    private volatile String m_activationExcludeDir;
     private volatile boolean m_isExtension = false;
     private volatile String m_bundleSymbolicName;
     private volatile Version m_bundleVersion;
@@ -255,7 +257,9 @@ public class ManifestParser
         // Parse activation policy.
         //
 
-        m_activationPolicy = parseActivationPolicy(headerMap);
+        // This sets m_activationPolicy, m_includedPolicyClasses, and
+        // m_excludedPolicyClasses.
+        parseActivationPolicy(headerMap);
 
         // Do final checks and normalization of manifest.
         if (getManifestVersion().equals("2"))
@@ -309,6 +313,16 @@ public class ManifestParser
     public int getActivationPolicy()
     {
         return m_activationPolicy;
+    }
+
+    public String getActivationIncludeDirective()
+    {
+        return m_activationIncludeDir;
+    }
+
+    public String getActivationExcludeDirective()
+    {
+        return m_activationExcludeDir;
     }
 
     public boolean isExtension()
@@ -1188,9 +1202,9 @@ public class ManifestParser
         return result;
     }
 
-    private static int parseActivationPolicy(Map headerMap)
+    private void parseActivationPolicy(Map headerMap)
     {
-        int policy = IModule.EAGER_ACTIVATION;
+        m_activationPolicy = IModule.EAGER_ACTIVATION;
 
         Object[][][] clauses = parseStandardHeader(
             (String) headerMap.get(Constants.BUNDLE_ACTIVATIONPOLICY));
@@ -1205,13 +1219,23 @@ public class ManifestParser
             {
                 if (clauses[0][CLAUSE_PATHS_INDEX][i].equals(Constants.ACTIVATION_LAZY))
                 {
-                    policy = IModule.LAZY_ACTIVATION;
+                    m_activationPolicy = IModule.LAZY_ACTIVATION;
+                    for (int j = 0; j < clauses[0][CLAUSE_DIRECTIVES_INDEX].length; j++)
+                    {
+                        R4Directive dir = (R4Directive) clauses[0][CLAUSE_DIRECTIVES_INDEX][j];
+                        if (dir.getName().equalsIgnoreCase(Constants.INCLUDE_DIRECTIVE))
+                        {
+                            m_activationIncludeDir = dir.getValue();
+                        }
+                        else if (dir.getName().equalsIgnoreCase(Constants.EXCLUDE_DIRECTIVE))
+                        {
+                            m_activationExcludeDir = dir.getValue();
+                        }
+                    }
                     break;
                 }
             }
         }
-
-        return policy;
     }
 
     public static final int CLAUSE_PATHS_INDEX = 0;
