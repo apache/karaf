@@ -254,16 +254,11 @@ public class SCRDescriptorMojo extends AbstractMojo {
             }
         }
 
-        // now log warnings and errors (warnings first)
-        for(String warn : iLog.getWarnings()) {
-            this.getLog().warn(warn);
-        }
-        for(String err : iLog.getErrors()) {
-            this.getLog().error(err);
-        }
+        // log issues
+        iLog.log(this.getLog());
 
         // after checking all classes, throw if there were any failures
-        if (iLog.getNumberOfErrors() > 0 ) {
+        if ( iLog.hasErrors() ) {
             throw new MojoFailureException("SCR Descriptor parsing had failures (see log)");
         }
 

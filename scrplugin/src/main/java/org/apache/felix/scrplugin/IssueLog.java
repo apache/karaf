@@ -18,24 +18,32 @@
  */
 package org.apache.felix.scrplugin;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.maven.plugin.logging.Log;
 
 /**
  * Utility class for handling errors and warnings
  */
 public class IssueLog {
 
-    private final List<String> errors;
+    private final boolean strictMode;
 
-    private final List<String> warnings;
+    private final List<String> errors = new ArrayList<String>();
+
+    private final List<String> warnings = new ArrayList<String>();
 
     public IssueLog(final boolean strictMode) {
-        this.errors = new ArrayList<String>();
-        if ( strictMode ) {
-            this.warnings = this.errors;
-        } else {
-            this.warnings = new ArrayList<String>();
-        }
+        this.strictMode = strictMode;
+    }
+
+    public int getNumberOfErrors() {
+        return this.errors.size();
+    }
+
+    public boolean hasErrors() {
+        return errors.size() > 0 || (this.strictMode && warnings.size() > 0 );
     }
 
     public void addError(final String e) {
@@ -46,19 +54,19 @@ public class IssueLog {
         warnings.add(e);
     }
 
-    public int getNumberOfErrors() {
-        return this.errors.size();
-    }
-
-    public List<String> getErrors() {
-        return this.errors;
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<String> getWarnings() {
-        if ( this.errors == this.warnings ) {
-            return Collections.EMPTY_LIST;
+    public void log(final Log log) {
+        // now log warnings and errors (warnings first)
+        // in strict mode everything is an error!
+        for(String warn : warnings) {
+            if ( strictMode ) {
+                log.error(warn);
+            } else {
+                log.warn(warn);
+            }
         }
-        return this.warnings;
+        for(String err : errors) {
+            log.error(err);
+        }
+
     }
 }
