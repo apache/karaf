@@ -22,14 +22,10 @@ package org.apache.felix.scr.impl;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
-import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.log.LogService;
@@ -192,29 +188,30 @@ class ImmediateComponentManager extends AbstractComponentManager
 
         // 4. Call the activate method, if present
         // Search for the activate method
+        final String activateMethodName = getComponentMetadata().getActivate();
         try
         {
-            Method activateMethod = getMethod( implementationObject.getClass(), "activate", new Class[]
-                { ComponentContext.class }, false );
+            Method activateMethod = getMethod( implementationObject.getClass(), activateMethodName, new Class[]
+                    { ComponentContext.class }, false );
             activateMethod.invoke( implementationObject, new Object[]
                 { componentContext } );
         }
         catch ( NoSuchMethodException ex )
         {
             // We can safely ignore this one
-            log( LogService.LOG_DEBUG, "activate() method is not implemented", getComponentMetadata(), null );
+            log( LogService.LOG_DEBUG, activateMethodName + " method is not implemented", getComponentMetadata(), null );
         }
         catch ( IllegalAccessException ex )
         {
             // Ignored, but should it be logged?
-            log( LogService.LOG_DEBUG, "activate() method cannot be called", getComponentMetadata(), null );
+            log( LogService.LOG_DEBUG, activateMethodName + " method cannot be called", getComponentMetadata(), null );
         }
         catch ( InvocationTargetException ex )
         {
             // 112.5.8 If the activate method throws an exception, SCR must log an error message
             // containing the exception with the Log Service and activation fails
-            log( LogService.LOG_ERROR, "The activate method has thrown an exception", getComponentMetadata(), ex
-                .getCause() );
+            log( LogService.LOG_ERROR, "The " + activateMethodName + " method has thrown an exception",
+                getComponentMetadata(), ex.getCause() );
 
             // make sure, we keep no bindings
             it = getDependencyManagers();
@@ -233,11 +230,13 @@ class ImmediateComponentManager extends AbstractComponentManager
 
     protected void disposeImplementationObject( Object implementationObject, ComponentContext componentContext )
     {
+
         // 1. Call the deactivate method, if present
         // Search for the activate method
+        final String deactivateMethodName = getComponentMetadata().getDeactivate();
         try
         {
-            Method deactivateMethod = getMethod( implementationObject.getClass(), "deactivate", new Class[]
+            Method deactivateMethod = getMethod( implementationObject.getClass(), deactivateMethodName, new Class[]
                 { ComponentContext.class }, false );
             deactivateMethod.invoke( implementationObject, new Object[]
                 { componentContext } );
@@ -245,19 +244,20 @@ class ImmediateComponentManager extends AbstractComponentManager
         catch ( NoSuchMethodException ex )
         {
             // We can safely ignore this one
-            log( LogService.LOG_DEBUG, "deactivate() method is not implemented", getComponentMetadata(), null );
+            log( LogService.LOG_DEBUG, deactivateMethodName + " method is not implemented", getComponentMetadata(),
+                null );
         }
         catch ( IllegalAccessException ex )
         {
             // Ignored, but should it be logged?
-            log( LogService.LOG_DEBUG, "deactivate() method cannot be called", getComponentMetadata(), null );
+            log( LogService.LOG_DEBUG, deactivateMethodName + " method cannot be called", getComponentMetadata(), null );
         }
         catch ( InvocationTargetException ex )
         {
             // 112.5.12 If the deactivate method throws an exception, SCR must log an error message
             // containing the exception with the Log Service and continue
-            log( LogService.LOG_ERROR, "The deactivate method has thrown an exception", getComponentMetadata(), ex
-                .getCause() );
+            log( LogService.LOG_ERROR, "The " + deactivateMethodName + " method has thrown an exception",
+                getComponentMetadata(), ex.getCause() );
         }
 
         // 2. Unbind any bound services
