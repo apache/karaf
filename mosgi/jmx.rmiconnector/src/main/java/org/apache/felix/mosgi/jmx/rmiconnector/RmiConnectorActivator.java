@@ -37,6 +37,7 @@ import javax.management.remote.JMXServiceURL;
 
 import org.apache.felix.mosgi.jmx.registry.mx4j.tools.naming.NamingServiceIfc;  
 
+import java.io.IOException;
 import java.net.InetAddress;
 
 public class RmiConnectorActivator implements BundleActivator, ServiceListener{
@@ -96,7 +97,7 @@ public class RmiConnectorActivator implements BundleActivator, ServiceListener{
           try{
             this.startRmiConnector();
           }catch (Exception e){
-            e.printStackTrace();
+            this.log(LogService.LOG_ERROR, "cannot start rmi connector", e);
           }
         }
         break;
@@ -104,7 +105,7 @@ public class RmiConnectorActivator implements BundleActivator, ServiceListener{
         try{
           this.stopRmiConnector();
         }catch (Exception e){
-          e.printStackTrace();
+          this.log(LogService.LOG_ERROR, "cannot stop rmi connector", e);
         }
         break;
     }
@@ -177,7 +178,16 @@ java.util.logging.Logger.getLogger("javax.management.remote.misc").addHandler(ch
   private void stopRmiConnector() throws Exception {
     RmiConnectorActivator.log(LogService.LOG_INFO, "Stopping JMX Rmi connector "+version,null);
     if (this.connectorServer!=null){
-      this.connectorServer.stop();
+      try {
+        // The first call to stop() will close any open connections, but will
+        // throw an exception if there were open connections.
+        this.connectorServer.stop();
+      }catch(IOException e){
+        // Exception probably thrown because there were open connections. When
+        // this exception is thrown, the server has already attempted to close
+        // all client connections, try stopping again.
+        this.connectorServer.stop();
+      }
       this.connectorServer=null;
     }
 
