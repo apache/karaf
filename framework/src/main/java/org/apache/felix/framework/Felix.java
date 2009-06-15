@@ -1434,6 +1434,7 @@ ex.printStackTrace();
         bundle.setDeclaredActivationPolicyUsed(
             (options & Bundle.START_ACTIVATION_POLICY) != 0);
 
+        BundleException rethrow = null;
         try
         {
             // The spec doesn't say whether it is possible to start an extension
@@ -1523,7 +1524,14 @@ ex.printStackTrace();
                 // Record the event type for the final event and activate.
                 eventType = BundleEvent.STARTED;
                 // Note that the STARTING event is thrown in the activateBundle() method.
-                activateBundle(bundle, false);
+                try
+                {
+                    activateBundle(bundle, false);
+                }
+                catch (BundleException ex)
+                {
+                    rethrow = ex;
+                }
             }
             // Otherwise, defer bundle activation.
             else
@@ -1542,8 +1550,17 @@ ex.printStackTrace();
         }
 
         // If there was no exception, then we should fire the STARTED
-        // or LAZY_ACTIVATION event here without holding the lock.
-        fireBundleEvent(eventType, bundle);
+        // or LAZY_ACTIVATION event here without holding the lock. Otherwise,
+        // fire STOPPED and rethrow exception.
+        if (rethrow == null)
+        {
+            fireBundleEvent(eventType, bundle);
+        }
+        else
+        {
+            fireBundleEvent(BundleEvent.STOPPED, bundle);
+            throw rethrow;
+        }
     }
 
     void activateBundle(BundleImpl bundle, boolean fireEvent) throws BundleException
@@ -1598,6 +1615,9 @@ ex.printStackTrace();
             }
             catch (Throwable th)
             {
+                // Spec says we must fire STOPPING event.
+                fireBundleEvent(BundleEvent.STOPPING, bundle);
+
                 // If there was an error starting the bundle,
                 // then reset its state to RESOLVED.
                 setBundleStateAndNotify(bundle, Bundle.RESOLVED);
