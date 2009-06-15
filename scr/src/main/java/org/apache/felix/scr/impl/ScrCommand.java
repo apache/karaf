@@ -140,6 +140,7 @@ public class ScrCommand implements Command
                 if ( components == null )
                 {
                     out.println( "Bundle " + bundleId + " declares no components" );
+                    return;
                 }
             }
             catch ( NumberFormatException nfe )
@@ -154,6 +155,7 @@ public class ScrCommand implements Command
             if ( components == null )
             {
                 out.println( "No components registered" );
+                return;
             }
         }
 
