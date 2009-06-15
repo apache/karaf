@@ -47,6 +47,8 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     private long m_componentId;
 
     // The state of this instance manager
+    // methods accessing this field should be synchronized unless there is a
+    // good reason to not be synchronized
     private volatile State m_state;
 
     // The metadata
@@ -59,7 +61,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
     private BundleComponentActivator m_activator;
 
     // The ServiceRegistration
-    private ServiceRegistration m_serviceRegistration;
+    private volatile ServiceRegistration m_serviceRegistration;
 
     /**
      * There are 9 states in all. They are: Disabled, Enabled, Unsatisfied,
@@ -619,9 +621,29 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         m_state.disposeInternal( this );
     }
 
-    synchronized final ServiceReference getServiceReference()
+
+    final ServiceReference getServiceReference()
     {
-        return m_state.getServiceReference( this );
+        // This method is not synchronized even though it accesses the state.
+        // The reason for this is that we just want to have the state return
+        // the service reference which comes from the service registration.
+        // The only thing that may happen is that the service registration is
+        // still set on this instance but the service has already been 
+        // unregistered. In this case an IllegalStateException may be thrown
+        // which we just catch and ignore returning null
+        State state = m_state;
+        try
+        {
+            return state.getServiceReference( this );
+        }
+        catch ( IllegalStateException ise )
+        {
+            // may be thrown if the service has already been unregistered but
+            // the service registration is still set on this component manager
+            // we ignore this exception and assume there is no service reference
+        }
+
+        return null;
     }
 
     //---------- Component handling methods ----------------------------------
