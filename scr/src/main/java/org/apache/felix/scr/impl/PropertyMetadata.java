@@ -18,7 +18,9 @@
  */
 package org.apache.felix.scr.impl;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
 
 /**
  * A property descriptor that contains the information for properties

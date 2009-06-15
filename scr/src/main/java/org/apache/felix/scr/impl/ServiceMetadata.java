@@ -18,7 +18,9 @@
  */
 package org.apache.felix.scr.impl;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * This class contains the metadata associated to a service that is provided
