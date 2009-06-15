@@ -381,7 +381,7 @@ public class Component extends AbstractObject {
                         JavaMethod found = method;
                         final JavaMethod[] methods = javaClass.getMethods();
                         int i = 0;
-                        while ( i < methods.length && found == null ) {
+                        while ( i < methods.length ) {
                             if ( methodName.equals(methods[i].getName()) ) {
 
                                 if ( methods[i].getParameters().length == 0 ) {
@@ -400,7 +400,12 @@ public class Component extends AbstractObject {
                                         }
                                     }
                                     if ( valid ) {
-                                        found = methods[i];
+                                        if ( found == null ) {
+                                            found = methods[i];
+                                        } else {
+                                            // print warning
+                                            iLog.addWarning(this.getMessage("Lifecycle method " + methods[i].getName() + " occurs several times with different matching signature."));
+                                        }
                                     }
                                 }
                             }
@@ -419,7 +424,6 @@ public class Component extends AbstractObject {
                 final JavaMethod[] methods = javaClass.getMethods();
                 for(int i=0; i<methods.length; i++) {
                     if ( methodName.equals(methods[i].getName()) ) {
-
                         if ( methods[i].getParameters().length != 1 ) {
                             iLog.addWarning(this.getMessage("Lifecycle method " + methods[i].getName() + " has wrong number of arguments"));
                         } else {
@@ -429,7 +433,8 @@ public class Component extends AbstractObject {
                 }
             }
         }
-        if ( method != null ) {
+        // method must be protected for version 1.0
+        if ( method != null && specVersion == Constants.VERSION_1_0) {
             // check protected
             if (method.isPublic()) {
                 iLog.addWarning(this.getMessage("Lifecycle method " + method.getName() + " should be declared protected"));

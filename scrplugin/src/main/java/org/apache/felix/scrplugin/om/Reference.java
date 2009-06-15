@@ -230,13 +230,15 @@ public class Reference extends AbstractObject {
             return null;
         }
 
-        if (method.isPublic()) {
-            iLog.addWarning(this.getMessage("Method " + method.getName() + " should be declared protected"));
-        } else if (!method.isProtected()) {
-            iLog.addError(this.getMessage("Method " + method.getName() + " has wrong qualifier, public or protected required"));
-            return null;
+        // method needs to be protected for 1.0
+        if ( specVersion == Constants.VERSION_1_0 ) {
+            if (method.isPublic()) {
+                iLog.addWarning(this.getMessage("Method " + method.getName() + " should be declared protected"));
+            } else if (!method.isProtected()) {
+                iLog.addError(this.getMessage("Method " + method.getName() + " has wrong qualifier, public or protected required"));
+                return null;
+            }
         }
-
         return method.getName();
     }
 
