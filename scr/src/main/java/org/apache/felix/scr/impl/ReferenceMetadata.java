@@ -18,12 +18,39 @@
  */
 package org.apache.felix.scr.impl;
 
+import java.util.Set;
+import java.util.TreeSet;
+
 /**
  * Information associated to a dependency
  *
  */
 public class ReferenceMetadata
 {
+    // constant for option single reference - 0..1
+    public static final String CARDINALITY_0_1 = "0..1";
+
+    // constant for option multiple reference - 0..n
+    public static final String CARDINALITY_0_N = "0..n";
+
+    // constant for required single reference - 1..1
+    public static final String CARDINALITY_1_1 = "1..1";
+
+    // constant for required multiple reference - 1..n
+    public static final String CARDINALITY_1_N = "1..n";
+
+    // set of valid cardinality settings
+    private static final Set CARDINALITY_VALID;
+
+    // constant for static policy
+    public static final String POLICY_STATIC = "static";
+
+    // constant for dynamic policy
+    public static final String POLICY_DYNAMIC = "dynamic";
+
+    // set of valid policy settings
+    private static final Set POLICY_VALID;
+
     // Name for the reference (required)
     private String m_name = null;
 
@@ -31,7 +58,7 @@ public class ReferenceMetadata
     private String m_interface = null;
 
     // Cardinality (optional, default="1..1")
-    private String m_cardinality = "1..1";
+    private String m_cardinality = null;
 
     // Target (optional)
     private String m_target;
@@ -43,7 +70,7 @@ public class ReferenceMetadata
     private String m_unbind = null;
 
     // Policy attribute (optional, default = static)
-    private String m_policy = "static";
+    private String m_policy = null;
 
     // Flag that is set once the component is verified (its properties cannot be changed)
     private boolean m_validated = false;
@@ -52,6 +79,19 @@ public class ReferenceMetadata
     private boolean m_isStatic = true;
     private boolean m_isOptional = false;
     private boolean m_isMultiple = false;
+
+    static
+    {
+        CARDINALITY_VALID = new TreeSet();
+        CARDINALITY_VALID.add( CARDINALITY_0_1 );
+        CARDINALITY_VALID.add( CARDINALITY_0_N );
+        CARDINALITY_VALID.add( CARDINALITY_1_1 );
+        CARDINALITY_VALID.add( CARDINALITY_1_N );
+
+        POLICY_VALID = new TreeSet();
+        POLICY_VALID.add( POLICY_DYNAMIC );
+        POLICY_VALID.add( POLICY_STATIC );
+    }
 
 
     /////////////////////////////////////////////// setters ///////////////////////////////////
@@ -103,20 +143,9 @@ public class ReferenceMetadata
 
         m_cardinality = cardinality;
 
-        if ( !m_cardinality.equals( "0..1" ) && !m_cardinality.equals( "0..n" ) && !m_cardinality.equals( "1..1" )
-            && !m_cardinality.equals( "1..n" ) )
-        {
-            throw new IllegalArgumentException(
-                "Cardinality should take one of the following values: 0..1, 0..n, 1..1, 1..n" );
-        }
-        if ( m_cardinality.equals( "0..1" ) || m_cardinality.equals( "0..n" ) )
-        {
-            m_isOptional = true;
-        }
-        if ( m_cardinality.equals( "0..n" ) || m_cardinality.equals( "1..n" ) )
-        {
-            m_isMultiple = true;
-        }
+        // secondary properties
+        m_isOptional = CARDINALITY_0_1.equals( cardinality ) || CARDINALITY_0_N.equals( cardinality );
+        m_isMultiple = CARDINALITY_0_N.equals( cardinality ) || CARDINALITY_1_N.equals( cardinality );
     }
 
 
@@ -132,16 +161,10 @@ public class ReferenceMetadata
             return;
         }
 
-        if ( !m_policy.equals( "static" ) && !m_policy.equals( "dynamic" ) )
-        {
-            throw new IllegalArgumentException( "Policy must be either 'static' or 'dynamic'" );
-        }
-        if ( policy.equals( "static" ) == false )
-        {
-            m_isStatic = false;
-        }
-
         m_policy = policy;
+        
+        // secondary property
+        m_isStatic = POLICY_STATIC.equals( policy );
     }
 
 
@@ -330,12 +353,36 @@ public class ReferenceMetadata
     {
         if ( m_name == null )
         {
-            throw componentMetadata.validationFailure( "A name must be declared for the reference" );
+            // 112.10 name attribute is optional, defaults to interface since DS 1.1
+            if ( componentMetadata.getNamespaceCode() < XmlHandler.DS_VERSION_1_1 )
+            {
+                throw componentMetadata.validationFailure( "A name must be declared for the reference" );
+            }
+            setName( getInterface() );
         }
 
         if ( m_interface == null )
         {
             throw componentMetadata.validationFailure( "An interface must be declared for the reference" );
+        }
+        
+
+        if ( m_cardinality == null )
+        {
+            setCardinality( CARDINALITY_1_1 );
+        }
+        else if ( !CARDINALITY_VALID.contains( m_cardinality ) )
+        {
+            throw componentMetadata.validationFailure( "Cardinality must be one of " + CARDINALITY_VALID );
+        }
+
+        if ( m_policy == null )
+        {
+            setPolicy( POLICY_STATIC );
+        }
+        else if ( !POLICY_VALID.contains( m_policy ) )
+        {
+            throw componentMetadata.validationFailure( "Policy must be one of " + POLICY_VALID );
         }
     }
 

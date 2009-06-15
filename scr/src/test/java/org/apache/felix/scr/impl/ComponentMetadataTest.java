@@ -27,7 +27,7 @@ import org.osgi.service.component.ComponentException;
 public class ComponentMetadataTest extends TestCase
 {
 
-    private TestLogger logger = new TestLogger();
+    private MockLogger logger = new MockLogger();
 
 
     // test various combinations of component metadata with respect to
@@ -243,27 +243,230 @@ public class ComponentMetadataTest extends TestCase
     }
 
 
-    public void testReference()
+    public void test_component_no_name_ds10()
+    {
+        final ComponentMetadata cm1 = createComponentMetadata( Boolean.TRUE, null );
+        cm1.setName( null );
+        try
+        {
+            cm1.validate( logger );
+            fail( "Expected validation failure for DS 1.0 component without name" );
+        }
+        catch ( ComponentException ce )
+        {
+            // expected
+        }
+    }
+
+
+    public void test_component_no_name_ds11()
+    {
+        final ComponentMetadata cm1 = createComponentMetadata11( Boolean.TRUE, null );
+        cm1.setName( null );
+        cm1.validate( logger );
+        assertEquals( "Expected name to equal implementation class name", cm1.getImplementationClassName(), cm1
+            .getName() );
+    }
+
+
+    public void test_component_activate_ds10()
+    {
+        final ComponentMetadata cm1 = createComponentMetadata( Boolean.TRUE, null );
+        cm1.validate( logger );
+        assertEquals( "Activate method name", "activate", cm1.getActivate() );
+
+        final ComponentMetadata cm2 = createComponentMetadata( Boolean.TRUE, null );
+        cm2.setActivate( "someMethod" );
+        cm2.validate( logger );
+        assertEquals( "Activate method name", "activate", cm2.getActivate() );
+    }
+
+
+    public void test_component_activate_ds11()
+    {
+        final ComponentMetadata cm1 = createComponentMetadata11( Boolean.TRUE, null );
+        cm1.validate( logger );
+        assertEquals( "Activate method name", "activate", cm1.getActivate() );
+
+        final ComponentMetadata cm2 = createComponentMetadata11( Boolean.TRUE, null );
+        cm2.setActivate( "someMethod" );
+        cm2.validate( logger );
+        assertEquals( "Activate method name", "someMethod", cm2.getActivate() );
+    }
+
+
+    public void test_component_deactivate_ds10()
+    {
+        final ComponentMetadata cm1 = createComponentMetadata( Boolean.TRUE, null );
+        cm1.validate( logger );
+        assertEquals( "Deactivate method name", "deactivate", cm1.getDeactivate() );
+
+        final ComponentMetadata cm2 = createComponentMetadata( Boolean.TRUE, null );
+        cm2.setActivate( "someMethod" );
+        cm2.validate( logger );
+        assertEquals( "Deactivate method name", "deactivate", cm2.getDeactivate() );
+    }
+
+
+    public void test_component_deactivate_ds11()
+    {
+        final ComponentMetadata cm1 = createComponentMetadata11( Boolean.TRUE, null );
+        cm1.validate( logger );
+        assertEquals( "Deactivate method name", "deactivate", cm1.getDeactivate() );
+
+        final ComponentMetadata cm2 = createComponentMetadata11( Boolean.TRUE, null );
+        cm2.setDeactivate( "someMethod" );
+        cm2.validate( logger );
+        assertEquals( "Deactivate method name", "someMethod", cm2.getDeactivate() );
+    }
+
+
+    public void test_component_configuration_policy_ds10()
+    {
+        final ComponentMetadata cm1 = createComponentMetadata( Boolean.TRUE, null );
+        cm1.validate( logger );
+        assertEquals( "Configuration policy", ComponentMetadata.CONFIGURATION_POLICY_OPTIONAL, cm1
+            .getConfigurationPolicy() );
+
+        final ComponentMetadata cm2 = createComponentMetadata( Boolean.TRUE, null );
+        cm2.setConfigurationPolicy( ComponentMetadata.CONFIGURATION_POLICY_IGNORE );
+        cm2.validate( logger );
+        assertEquals( "Configuration policy", ComponentMetadata.CONFIGURATION_POLICY_OPTIONAL, cm2
+            .getConfigurationPolicy() );
+
+        final ComponentMetadata cm3 = createComponentMetadata( Boolean.TRUE, null );
+        cm3.setConfigurationPolicy( ComponentMetadata.CONFIGURATION_POLICY_OPTIONAL );
+        cm3.validate( logger );
+        assertEquals( "Configuration policy", ComponentMetadata.CONFIGURATION_POLICY_OPTIONAL, cm3
+            .getConfigurationPolicy() );
+
+        final ComponentMetadata cm4 = createComponentMetadata( Boolean.TRUE, null );
+        cm4.setConfigurationPolicy( ComponentMetadata.CONFIGURATION_POLICY_REQUIRE );
+        cm4.validate( logger );
+        assertEquals( "Configuration policy", ComponentMetadata.CONFIGURATION_POLICY_OPTIONAL, cm4
+            .getConfigurationPolicy() );
+
+        final ComponentMetadata cm5 = createComponentMetadata( Boolean.TRUE, null );
+        cm5.setConfigurationPolicy( "undefined" );
+        cm5.validate( logger );
+        assertEquals( "Configuration policy", ComponentMetadata.CONFIGURATION_POLICY_OPTIONAL, cm5
+            .getConfigurationPolicy() );
+    }
+
+
+    public void test_component_configuration_policy_ds11()
+    {
+        final ComponentMetadata cm1 = createComponentMetadata11( Boolean.TRUE, null );
+        cm1.validate( logger );
+        assertEquals( "Configuration policy", ComponentMetadata.CONFIGURATION_POLICY_OPTIONAL, cm1
+            .getConfigurationPolicy() );
+
+        final ComponentMetadata cm2 = createComponentMetadata11( Boolean.TRUE, null );
+        cm2.setConfigurationPolicy( ComponentMetadata.CONFIGURATION_POLICY_IGNORE );
+        cm2.validate( logger );
+        assertEquals( "Configuration policy", ComponentMetadata.CONFIGURATION_POLICY_IGNORE, cm2
+            .getConfigurationPolicy() );
+
+        final ComponentMetadata cm3 = createComponentMetadata11( Boolean.TRUE, null );
+        cm3.setConfigurationPolicy( ComponentMetadata.CONFIGURATION_POLICY_OPTIONAL );
+        cm3.validate( logger );
+        assertEquals( "Configuration policy", ComponentMetadata.CONFIGURATION_POLICY_OPTIONAL, cm3
+            .getConfigurationPolicy() );
+
+        final ComponentMetadata cm4 = createComponentMetadata11( Boolean.TRUE, null );
+        cm4.setConfigurationPolicy( ComponentMetadata.CONFIGURATION_POLICY_REQUIRE );
+        cm4.validate( logger );
+        assertEquals( "Configuration policy", ComponentMetadata.CONFIGURATION_POLICY_REQUIRE, cm4
+            .getConfigurationPolicy() );
+
+        final ComponentMetadata cm5 = createComponentMetadata11( Boolean.TRUE, null );
+        cm5.setConfigurationPolicy( "undefined" );
+        try
+        {
+            cm5.validate( logger );
+            fail( "Expected validation failure due to undefined configuration policy" );
+        }
+        catch ( ComponentException ce )
+        {
+            // expected due to undefned configuration policy
+        }
+    }
+
+
+    public void test_reference_valid()
     {
         // two references, should validate
         final ComponentMetadata cm1 = createComponentMetadata( Boolean.TRUE, null );
         cm1.addDependency( createReferenceMetadata( "name1" ) );
         cm1.addDependency( createReferenceMetadata( "name2" ) );
         cm1.validate( logger );
+    }
 
-        // two references, must warn
+
+    public void test_reference_duplicate_name()
+    {
+        // two references with same name, must warn
         final ComponentMetadata cm2 = createComponentMetadata( Boolean.TRUE, null );
         cm2.addDependency( createReferenceMetadata( "name1" ) );
         cm2.addDependency( createReferenceMetadata( "name1" ) );
         cm2.validate( logger );
-        assertTrue( "Expected warning for duplicate reference name", logger.lastMessage != null
-            && logger.lastMessage.indexOf( "Detected duplicate reference name" ) >= 0 );
+        assertTrue( "Expected warning for duplicate reference name", logger
+            .messageContains( "Detected duplicate reference name" ) );
     }
 
 
+    public void test_reference_no_name_ds10()
+    {
+        // un-named reference, illegal for pre DS 1.1
+        final ComponentMetadata cm3 = createComponentMetadata( Boolean.TRUE, null );
+        cm3.addDependency( createReferenceMetadata( null ) );
+        try
+        {
+            cm3.validate( logger );
+            fail( "Expect validation failure for DS 1.0 reference without name" );
+        }
+        catch ( ComponentException ce )
+        {
+            // expected
+        }
+    }
+
+
+    public void test_reference_no_name_ds11()
+    {
+        // un-named reference, illegal for DS 1.1
+        final ComponentMetadata cm4 = createComponentMetadata11( Boolean.TRUE, null );
+        final ReferenceMetadata rm4 = createReferenceMetadata( null );
+        cm4.addDependency( rm4 );
+        cm4.validate( logger );
+        assertEquals( "Reference name defaults to interface", rm4.getInterface(), rm4.getName() );
+    }
+
+
+    //---------- Helper methods
+
+    // Creates DS 1.0 Component Metadata
     private ComponentMetadata createComponentMetadata( Boolean immediate, String factory )
     {
-        ComponentMetadata meta = new ComponentMetadata();
+        ComponentMetadata meta = new ComponentMetadata( XmlHandler.DS_VERSION_1_0 );
+        meta.setName( "place.holder" );
+        meta.setImplementationClassName( "place.holder.implementation" );
+        if ( immediate != null )
+        {
+            meta.setImmediate( immediate.booleanValue() );
+        }
+        if ( factory != null )
+        {
+            meta.setFactoryIdentifier( factory );
+        }
+        return meta;
+    }
+
+
+    // Creates DS 1.1 Component Metadata
+    private ComponentMetadata createComponentMetadata11( Boolean immediate, String factory )
+    {
+        ComponentMetadata meta = new ComponentMetadata( XmlHandler.DS_VERSION_1_1 );
         meta.setName( "place.holder" );
         meta.setImplementationClassName( "place.holder.implementation" );
         if ( immediate != null )
@@ -296,16 +499,5 @@ public class ComponentMetadataTest extends TestCase
         meta.setName( name );
         meta.setInterface( "place.holder" );
         return meta;
-    }
-
-    private static class TestLogger implements Logger
-    {
-        String lastMessage;
-
-
-        public void log( int level, String message, ComponentMetadata metadata, Throwable ex )
-        {
-            lastMessage = message;
-        }
     }
 }

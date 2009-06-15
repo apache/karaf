@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -25,6 +25,8 @@ import java.util.Hashtable;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.osgi.service.component.ComponentException;
 import org.osgi.service.log.LogService;
@@ -34,6 +36,22 @@ import org.osgi.service.log.LogService;
  * This class holds the information associated to a component in the descriptor *  */
 public class ComponentMetadata
 {
+    // Configuration required for component activation (since DS 1.1)
+    public static final String CONFIGURATION_POLICY_REQUIRE = "require";
+
+    // Configuration not provided to component (since DS 1.1)
+    public static final String CONFIGURATION_POLICY_IGNORE = "ignore";
+
+    // Configuration optional (default) (since DS 1.1)
+    public static final String CONFIGURATION_POLICY_OPTIONAL = "optional";
+
+    // set of valid configuration policy settings
+    private static final Set CONFIGURATION_POLICY_VALID;
+
+    // the namespace code of the namespace declaring this component, this is
+    // one of the XmlHandler.DS_VERSION_* constants
+    private final int m_namespaceCode;
+
     // 112.4.3: A Globally unique component name (required)
     private String m_name;
 
@@ -43,13 +61,22 @@ public class ComponentMetadata
     // 112.4.3: Factory identified. If set to a non empty string, it indicates that the component is a factory component (optional).
     private String m_factory = null;
 
-    // 112.4.3: Controls whether component configurations must be immediately activated after becoming 
+    // 112.4.3: Controls whether component configurations must be immediately activated after becoming
     // satisfied or whether activation should be delayed. (optional, default value depends
     // on whether the component has a service element or not).
     private Boolean m_immediate = null;
 
     // 112.4.4 Implementation Element (required)
     private String m_implementationClassName = null;
+
+    // 112.5.8 activate can be specified (since DS 1.1)
+    private String m_activate = null;
+
+    // 112.5.12 deactivate can be specified (since DS 1.1)
+    private String m_deactivate = null;
+
+    // 112.4.3 configuration-policy (since DS 1.1)
+    private String m_configurationPolicy = null;
 
     // Associated properties (0..*)
     private Dictionary m_properties = new Hashtable();
@@ -69,11 +96,25 @@ public class ComponentMetadata
     // Flag that is set once the component is verified (its properties cannot be changed)
     private boolean m_validated = false;
 
+    static
+    {
+        CONFIGURATION_POLICY_VALID = new TreeSet();
+        CONFIGURATION_POLICY_VALID.add( CONFIGURATION_POLICY_IGNORE );
+        CONFIGURATION_POLICY_VALID.add( CONFIGURATION_POLICY_OPTIONAL );
+        CONFIGURATION_POLICY_VALID.add( CONFIGURATION_POLICY_REQUIRE );
+    }
+
+
+    public ComponentMetadata( int namespaceCode )
+    {
+        this.m_namespaceCode = namespaceCode;
+    }
+
     /////////////////////////////////////////// SETTERS //////////////////////////////////////
 
     /**
      * Setter for the name
-     * 
+     *
      * @param name
      */
     public void setName( String name )
@@ -88,7 +129,7 @@ public class ComponentMetadata
 
     /**
      * Setter for the enabled property
-     * 
+     *
      * @param enabled
      */
     public void setEnabled( boolean enabled )
@@ -102,7 +143,7 @@ public class ComponentMetadata
 
 
     /**
-     * 
+     *
      * @param factoryIdentifier
      */
     public void setFactoryIdentifier( String factoryIdentifier )
@@ -117,7 +158,7 @@ public class ComponentMetadata
 
     /**
      * Setter for the immediate property
-     * 
+     *
      * @param immediate
      */
     public void setImmediate( boolean immediate )
@@ -132,7 +173,7 @@ public class ComponentMetadata
 
     /**
      * Sets the name of the implementation class
-     * 
+     *
      * @param implementationClassName a class name
      */
     public void setImplementationClassName( String implementationClassName )
@@ -142,6 +183,54 @@ public class ComponentMetadata
             return;
         }
         m_implementationClassName = implementationClassName;
+    }
+
+
+    /**
+     * Sets the configuration policy
+     *
+     * @param configurationPolicy configuration policy
+     * @since 1.2.0 (DS 1.1)
+     */
+    public void setConfigurationPolicy( String configurationPolicy )
+    {
+        if ( m_validated )
+        {
+            return;
+        }
+        m_configurationPolicy = configurationPolicy;
+    }
+
+
+    /**
+     * Sets the name of the activate method
+     *
+     * @param activate a method name
+     * @since 1.2.0 (DS 1.1)
+     */
+    public void setActivate( String activate )
+    {
+        if ( m_validated )
+        {
+            return;
+        }
+        m_activate = activate;
+    }
+
+
+    /**
+     * Sets the name of the deactivate method
+     *
+     * @param deactivate a method name
+     * @since 1.2.0 (DS 1.1)
+     */
+    public void setDeactivate( String deactivate )
+    {
+        if ( m_validated )
+        {
+            return;
+        }
+        m_deactivate = deactivate;
     }
 
 
@@ -201,9 +290,20 @@ public class ComponentMetadata
     /////////////////////////////////////////// GETTERS //////////////////////////////////////
 
     /**
+     * Returns the namespace code of the namespace of the component element
+     * declaring this component. This is one of the XmlHandler.DS_VERSION_*
+     * constants.
+     */
+    public int getNamespaceCode()
+    {
+        return m_namespaceCode;
+    }
+
+
+    /**
      * Returns the name of the component
-     * 
-     * @return A string containing the name of the component 
+     *
+     * @return A string containing the name of the component
      */
     public String getName()
     {
@@ -212,8 +312,8 @@ public class ComponentMetadata
 
 
     /**
-     * Returns the value of the enabled flag 
-     * 
+     * Returns the value of the enabled flag
+     *
      * @return a boolean containing the value of the enabled flag
      */
     public boolean isEnabled()
@@ -224,7 +324,7 @@ public class ComponentMetadata
 
     /**
      * Returns the factory identifier
-     * 
+     *
      * @return A string containing a factory identifier or null
      */
     public String getFactoryIdentifier()
@@ -242,7 +342,7 @@ public class ComponentMetadata
      * element or the factory attribute is set or true otherwise. This latter
      * default value deduction may be unsafe while the descriptor has not been
      * completely read.
-     * 
+     *
      * @return a boolean that defines the activation policy
      */
     public boolean isImmediate()
@@ -253,7 +353,7 @@ public class ComponentMetadata
             return m_immediate.booleanValue();
         }
 
-        // deduce default from service element and factory attribute presence 
+        // deduce default from service element and factory attribute presence
         return m_service == null && m_factory == null;
     }
 
@@ -270,8 +370,44 @@ public class ComponentMetadata
 
 
     /**
+     * Returns the configuration Policy
+     *
+     * @return the configuration policy
+     * @since 1.2.0 (DS 1.1)
+     */
+    public String getConfigurationPolicy()
+    {
+        return m_configurationPolicy;
+    }
+
+
+    /**
+     * Returns the name of the activate method
+     *
+     * @return the name of the activate method
+     * @since 1.2.0 (DS 1.1)
+     */
+    public String getActivate()
+    {
+        return m_activate;
+    }
+
+
+    /**
+     * Returns the name of the deactivate method
+     *
+     * @return the name of the deactivate method
+     * @since 1.2.0 (DS 1.1)
+     */
+    public String getDeactivate()
+    {
+        return m_deactivate;
+    }
+
+
+    /**
      * Returns the associated ServiceMetadata
-     * 
+     *
      * @return a ServiceMetadata object or null if the Component does not provide any service
      */
     public ServiceMetadata getServiceMetadata()
@@ -288,6 +424,18 @@ public class ComponentMetadata
     public Dictionary getProperties()
     {
         return m_properties;
+    }
+
+
+    /**
+     * Returns the list of property meta data.
+     * <b>Note: This method is intended for unit testing only</b>
+     *
+     * @return the list of property meta data.
+     */
+    List getPropertyMetaData()
+    {
+        return m_propertyMetaData;
     }
 
 
@@ -327,13 +475,61 @@ public class ComponentMetadata
         // 112.10 The name of the component is required
         if ( m_name == null )
         {
-            throw new ComponentException( "The component name has not been set" );
+            // 112.4.3 name is optional defaulting to implementation class name since DS 1.1
+            if ( m_namespaceCode < XmlHandler.DS_VERSION_1_1 )
+            {
+                throw new ComponentException( "The component name has not been set" );
+            }
+            setName( getImplementationClassName() );
         }
 
         // 112.10 There must be one implementation element and the class atribute is required
         if ( m_implementationClassName == null )
         {
             throw validationFailure( "Implementation class name missing" );
+        }
+
+        // 112.4.3 configuration-policy (since DS 1.1)
+        if ( m_configurationPolicy == null )
+        {
+            // default if not specified or pre DS 1.1
+            m_configurationPolicy = CONFIGURATION_POLICY_OPTIONAL;
+        }
+        else if ( m_namespaceCode < XmlHandler.DS_VERSION_1_1 )
+        {
+            logger.log( LogService.LOG_WARNING, "Ignoring configuration policy, DS 1.1 or later namespace required",
+                this, null );
+            m_configurationPolicy = CONFIGURATION_POLICY_OPTIONAL;
+        }
+        else if ( !CONFIGURATION_POLICY_VALID.contains( m_configurationPolicy ) )
+        {
+            throw validationFailure( "Configuration policy must be one of " + CONFIGURATION_POLICY_VALID );
+        }
+
+        // 112.5.8 activate can be specified (since DS 1.1)
+        if ( m_activate == null )
+        {
+            // default if not specified or pre DS 1.1
+            m_activate = "activate";
+        }
+        else if ( m_namespaceCode < XmlHandler.DS_VERSION_1_1 )
+        {
+            logger.log( LogService.LOG_WARNING,
+                "Ignoring activate method declaration, DS 1.1 or later namespace required", this, null );
+            m_activate = "activate";
+        }
+
+        // 112.5.12 deactivate can be specified (since DS 1.1)
+        if ( m_deactivate == null )
+        {
+            // default if not specified or pre DS 1.1
+            m_deactivate = "deactivate";
+        }
+        else if ( m_namespaceCode < XmlHandler.DS_VERSION_1_1 )
+        {
+            logger.log( LogService.LOG_WARNING,
+                "Ignoring deactivate method declaration, DS 1.1 or later namespace required", this, null );
+            m_deactivate = "deactivate";
         }
 
         // Next check if the properties are valid (and extract property values)
@@ -391,7 +587,7 @@ public class ComponentMetadata
             }
         }
 
-        // 112.4.6 The serviceFactory attribute (of a provided service) must not be true if 
+        // 112.4.6 The serviceFactory attribute (of a provided service) must not be true if
         // the component is a factory component or an immediate component
         if ( m_service != null )
         {
@@ -409,7 +605,7 @@ public class ComponentMetadata
     /**
      * Returns a <code>ComponentException</code> for this compeonent with the
      * given explanation for failure.
-     * 
+     *
      * @param reason The explanation for failing to validate this component.
      */
     ComponentException validationFailure( String reason )

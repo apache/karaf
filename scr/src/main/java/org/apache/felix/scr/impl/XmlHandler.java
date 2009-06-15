@@ -37,8 +37,27 @@ import org.osgi.service.log.LogService;
 public class XmlHandler implements KXml2SAXHandler
 {
 
-    public static final String NAMESPACE_URI = "http://www.osgi.org/xmlns/scr/v1.0.0";
+    // Empty Namespace URI maps to DS 1.0
+    public static final String NAMESPACE_URI_EMPTY = "";
 
+    // Namespace URI of DS 1.0
+    public static final String NAMESPACE_URI = "http://www.osgi.org/xmlns/scr/v1.0.0";
+    
+    // Namespace URI of DS 1.1
+    public static final String NAMESPACE_URI_1_1 = "http://www.osgi.org/xmlns/scr/v1.1.0";
+    
+    // namespace code for non-DS namespace
+    public static final int DS_VERSION_NONE = -1;
+    
+    // namespace code for the DS 1.0 specification
+    public static final int DS_VERSION_1_0 = 0;
+    
+    // namespace code for the DS 1.0 specification
+    public static final int DS_VERSION_1_1 = 1;
+
+    // mapping of namespace URI to namespace code
+    private static final Map NAMESPACE_CODE_MAP;
+    
     // the bundle containing the XML resource being parsed
     private final Bundle m_bundle;
 
@@ -65,6 +84,14 @@ public class XmlHandler implements KXml2SAXHandler
 
     /** Flag for elements inside a component element */
     protected boolean isComponent = false;
+
+    static
+    {
+        NAMESPACE_CODE_MAP = new HashMap();
+        NAMESPACE_CODE_MAP.put( NAMESPACE_URI_EMPTY, new Integer( DS_VERSION_1_0 ) );
+        NAMESPACE_CODE_MAP.put( NAMESPACE_URI, new Integer( DS_VERSION_1_0 ) );
+        NAMESPACE_CODE_MAP.put( NAMESPACE_URI_1_1, new Integer( DS_VERSION_1_1 ) );
+    }
 
 
     // creates an instance with the bundle owning the component descriptor
@@ -111,8 +138,10 @@ public class XmlHandler implements KXml2SAXHandler
             uri = NAMESPACE_URI;
         }
 
+        // get the namespace code for the namespace uri
+        Integer namespaceCode = (Integer) NAMESPACE_CODE_MAP.get( uri );
         // from now on uri points to the namespace
-        if ( NAMESPACE_URI.equals( uri ) )
+        if ( namespaceCode != null )
         {
             try
             {
@@ -123,10 +152,13 @@ public class XmlHandler implements KXml2SAXHandler
                     this.isComponent = true;
 
                     // Create a new ComponentMetadata
-                    m_currentComponent = new ComponentMetadata();
+                    m_currentComponent = new ComponentMetadata( namespaceCode.intValue() );
 
-                    // name attribute is mandatory
-                    m_currentComponent.setName( attrib.getProperty( "name" ) );
+                    // name attribute is optional (since DS 1.1)
+                    if ( attrib.getProperty( "name" ) != null )
+                    {
+                        m_currentComponent.setName( attrib.getProperty( "name" ) );
+                    }
 
                     // enabled attribute is optional
                     if ( attrib.getProperty( "enabled" ) != null )
@@ -144,6 +176,24 @@ public class XmlHandler implements KXml2SAXHandler
                     if ( attrib.getProperty( "factory" ) != null )
                     {
                         m_currentComponent.setFactoryIdentifier( attrib.getProperty( "factory" ) );
+                    }
+
+                    // configuration-policy is optional (since DS 1.1)
+                    if ( attrib.getProperty( "configuration-policy" ) != null )
+                    {
+                        m_currentComponent.setConfigurationPolicy( attrib.getProperty( "configuration-policy" ) );
+                    }
+
+                    // activate attribute is optional (since DS 1.1)
+                    if ( attrib.getProperty( "activate" ) != null )
+                    {
+                        m_currentComponent.setActivate( attrib.getProperty( "activate" ) );
+                    }
+
+                    // deactivate attribute is optional (since DS 1.1)
+                    if ( attrib.getProperty( "deactivate" ) != null )
+                    {
+                        m_currentComponent.setDeactivate( attrib.getProperty( "deactivate" ) );
                     }
 
                     // Add this component to the list
@@ -210,7 +260,13 @@ public class XmlHandler implements KXml2SAXHandler
                 else if ( localName.equals( "reference" ) )
                 {
                     ReferenceMetadata ref = new ReferenceMetadata();
-                    ref.setName( attrib.getProperty( "name" ) );
+
+                    // name attribute is optional (since DS 1.1)
+                    if ( attrib.getProperty( "name" ) != null )
+                    {
+                        ref.setName( attrib.getProperty( "name" ) );
+                    }
+
                     ref.setInterface( attrib.getProperty( "interface" ) );
 
                     // Cardinality
