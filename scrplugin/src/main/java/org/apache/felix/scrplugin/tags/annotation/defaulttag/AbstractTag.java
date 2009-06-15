@@ -31,6 +31,8 @@ public abstract class AbstractTag implements JavaTag {
 
     protected final JavaField field;
 
+    protected Map<String, String> parameters;
+
     /**
      * @param desc Description
      * @param field Field
@@ -101,8 +103,19 @@ public abstract class AbstractTag implements JavaTag {
     public abstract String getName();
 
     /**
+     * @see org.apache.felix.scrplugin.tags.JavaTag#getNamedParameterMap()
+     */
+    public Map<String, String> getNamedParameterMap() {
+        if ( this.parameters == null ) {
+            this.parameters = this.createNamedParameterMap();
+        }
+        return this.parameters;
+    }
+
+    /**
+     * Create the parameter map.
      * @see JavaTag#getNamedParameterMap()
      */
-    public abstract Map<String, String> getNamedParameterMap();
+    protected abstract Map<String, String> createNamedParameterMap();
 
 }

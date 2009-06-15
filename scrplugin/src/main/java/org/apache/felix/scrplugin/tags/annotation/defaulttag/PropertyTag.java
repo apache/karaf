@@ -125,7 +125,7 @@ public class PropertyTag extends AbstractTag {
     }
 
     @Override
-    public Map<String, String> getNamedParameterMap() {
+    public Map<String, String> createNamedParameterMap() {
         final Map<String, String> map = new LinkedHashMap<String, String>();
 
         map.put(Constants.PROPERTY_NAME, emptyToNull(this.annotation.name()));

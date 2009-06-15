@@ -92,7 +92,7 @@ public class ReferenceTag extends AbstractTag {
     }
 
     @Override
-    public Map<String, String> getNamedParameterMap() {
+    public Map<String, String> createNamedParameterMap() {
         final Map<String, String> map = new HashMap<String, String>();
 
         map.put(Constants.REFERENCE_NAME, emptyToNull(this.annotation.name()));

@@ -18,9 +18,7 @@
  */
 package org.apache.felix.scrplugin.tags.annotation.sling;
 
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 import org.apache.felix.scrplugin.Constants;
 import org.apache.felix.scrplugin.tags.JavaClassDescription;
@@ -52,7 +50,7 @@ public class SlingServletPropertyTag extends AbstractTag {
     }
 
     @Override
-    public Map<String, String> getNamedParameterMap() {
+    public Map<String, String> createNamedParameterMap() {
         final SortedMap<String, String> map = new TreeMap<String, String>();
 
         map.put(Constants.PROPERTY_NAME, this.name);

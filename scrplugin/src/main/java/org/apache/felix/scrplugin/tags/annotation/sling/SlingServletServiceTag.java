@@ -45,7 +45,7 @@ public class SlingServletServiceTag extends AbstractTag {
     }
 
     @Override
-    public Map<String, String> getNamedParameterMap() {
+    public Map<String, String> createNamedParameterMap() {
         final Map<String, String> map = new HashMap<String, String>();
 
         map.put(Constants.SERVICE_INTERFACE, Servlet.class.getName());

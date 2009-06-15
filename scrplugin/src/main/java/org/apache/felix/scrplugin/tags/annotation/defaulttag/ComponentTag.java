@@ -106,7 +106,7 @@ public class ComponentTag extends AbstractTag {
     }
 
     @Override
-    public Map<String, String> getNamedParameterMap() {
+    public Map<String, String> createNamedParameterMap() {
         final Map<String, String> map = new HashMap<String, String>();
 
         map.put(Constants.COMPONENT_NAME, emptyToNull(this.annotation.name()));
@@ -133,11 +133,11 @@ public class ComponentTag extends AbstractTag {
         for(final JavaMethod jm : jms) {
             final Annotation[] annotations = jm.getAnnotations();
             for(final Annotation a : annotations) {
-                if ( a.getType().getJavaClass().getName().equals(Activate.class) ) {
+                if ( a.getType().getJavaClass().getFullyQualifiedName().equals(Activate.class.getName()) ) {
                     map.put(Constants.COMPONENT_ACTIVATE, jm.getName());
                 }
-                if ( a.getType().getJavaClass().getName().equals(Deactivate.class) ) {
-                    map.put(Constants.COMPONENT_ACTIVATE, jm.getName());
+                if ( a.getType().getJavaClass().getFullyQualifiedName().equals(Deactivate.class.getName()) ) {
+                    map.put(Constants.COMPONENT_DEACTIVATE, jm.getName());
                 }
             }
         }

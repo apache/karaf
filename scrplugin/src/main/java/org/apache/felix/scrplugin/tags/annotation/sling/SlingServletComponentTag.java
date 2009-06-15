@@ -43,7 +43,7 @@ public class SlingServletComponentTag extends AbstractTag {
     }
 
     @Override
-    public Map<String, String> getNamedParameterMap() {
+    public Map<String, String> createNamedParameterMap() {
         final Map<String, String> map = new HashMap<String, String>();
 
         map.put(Constants.COMPONENT_IMMEDIATE, String.valueOf(true));
