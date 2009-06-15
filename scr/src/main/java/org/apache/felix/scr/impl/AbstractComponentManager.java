@@ -28,6 +28,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.felix.scr.Component;
 import org.apache.felix.scr.Reference;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.InvalidSyntaxException;
@@ -41,7 +42,7 @@ import org.osgi.service.log.LogService;
  * implementation object's lifecycle.
  *
  */
-abstract class AbstractComponentManager implements ComponentManager, ComponentInstance
+abstract class AbstractComponentManager implements Component, ComponentInstance
 {
     // the ID of this component
     private long m_componentId;
@@ -448,12 +449,12 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
      * @param metadata
      * @param componentId
      */
-    protected AbstractComponentManager( BundleComponentActivator activator,
-            ComponentMetadata metadata, long componentId )
+    protected AbstractComponentManager( BundleComponentActivator activator, ComponentMetadata metadata,
+        ComponentRegistry componentRegistry )
     {
         m_activator = activator;
         m_componentMetadata = metadata;
-        m_componentId = componentId;
+        m_componentId = componentRegistry.createComponentId();
 
         m_state = Disabled.getInstance();
         loadDependencyManagers( metadata );
@@ -628,7 +629,7 @@ abstract class AbstractComponentManager implements ComponentManager, ComponentIn
         // The reason for this is that we just want to have the state return
         // the service reference which comes from the service registration.
         // The only thing that may happen is that the service registration is
-        // still set on this instance but the service has already been 
+        // still set on this instance but the service has already been
         // unregistered. In this case an IllegalStateException may be thrown
         // which we just catch and ignore returning null
         State state = m_state;

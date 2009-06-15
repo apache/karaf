@@ -34,10 +34,10 @@ abstract class ComponentActivatorTask implements Runnable
 {
 
     private final String taskName;
-    private final ComponentManager component;
+    private final AbstractComponentManager component;
 
 
-    protected ComponentActivatorTask( String taskName, ComponentManager component )
+    protected ComponentActivatorTask( String taskName, AbstractComponentManager component )
     {
         this.taskName = taskName;
         this.component = component;

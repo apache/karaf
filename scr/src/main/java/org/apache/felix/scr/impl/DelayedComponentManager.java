@@ -35,9 +35,10 @@ class DelayedComponentManager extends ImmediateComponentManager implements Servi
      * @param metadata
      * @param componentId
      */
-    public DelayedComponentManager( BundleComponentActivator activator, ComponentMetadata metadata, long componentId )
+    public DelayedComponentManager( BundleComponentActivator activator, ComponentMetadata metadata,
+        ComponentRegistry componentRegistry )
     {
-        super( activator, metadata, componentId );
+        super( activator, metadata, componentRegistry );
     }
 
 

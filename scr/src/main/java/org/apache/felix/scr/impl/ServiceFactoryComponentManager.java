@@ -46,9 +46,9 @@ class ServiceFactoryComponentManager extends ImmediateComponentManager implement
 	 * @param componentId
      */
     public ServiceFactoryComponentManager( BundleComponentActivator activator, ComponentMetadata metadata,
-        long componentId )
+        ComponentRegistry componentRegistry )
     {
-        super( activator, metadata, componentId );
+        super( activator, metadata, componentRegistry );
     }
 
 

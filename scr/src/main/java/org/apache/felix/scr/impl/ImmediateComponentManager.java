@@ -28,6 +28,7 @@ import java.util.List;
 
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
@@ -52,11 +53,6 @@ class ImmediateComponentManager extends AbstractComponentManager
     // the component properties, also used as service properties
     private Dictionary m_properties;
 
-    // the managed service registration object created in the constructor
-    // to receive configuration from the Configuration Admin Service
-    // null, if this is a component created by a component factory
-    private ServiceRegistration m_managedServiceRegistration;
-
     // the component properties from the Configuration Admin Service
     // this is null, if none exist or none are provided
     private Dictionary m_configurationProperties;
@@ -68,30 +64,21 @@ class ImmediateComponentManager extends AbstractComponentManager
      * @param activator
      * @param metadata
      */
-    ImmediateComponentManager( BundleComponentActivator activator, ComponentMetadata metadata, long componentId )
+    ImmediateComponentManager( BundleComponentActivator activator, ComponentMetadata metadata,
+        ComponentRegistry componentRegistry )
     {
-        super( activator, metadata, componentId );
+        super( activator, metadata, componentRegistry );
 
-        // only register as ManagedService if not created by a Component Factory
+        // only ask for configuration if not created by a Component Factory, in
+        // which case the configuration is provided by the Component Factory
         if ( !getComponentMetadata().isFactory() )
         {
-            Dictionary props = new Hashtable();
-            props.put( Constants.SERVICE_PID, getComponentMetadata().getName() );
-            props.put( Constants.SERVICE_DESCRIPTION, "ManagedService for Component "
-                + getComponentMetadata().getName() );
-            props.put( Constants.SERVICE_VENDOR, "The Apache Software Foundation" );
-
-            // register an anonymous managed service instance
-            ManagedService ms = new ManagedService()
+            Configuration cfg = componentRegistry.getConfiguration( activator.getBundleContext(),
+                getComponentMetadata().getName() );
+            if ( cfg != null )
             {
-                public void updated( Dictionary properties )
-                {
-                    reconfigure( properties );
-                }
-            };
-
-            m_managedServiceRegistration = activator.getBundleContext().registerService(
-                ManagedService.class.getName(), ms, props );
+                m_configurationProperties = cfg.getProperties();
+            }
         }
     }
 
@@ -102,19 +89,6 @@ class ImmediateComponentManager extends AbstractComponentManager
      */
     public synchronized void dispose()
     {
-        if ( m_managedServiceRegistration != null )
-        {
-            try
-            {
-                m_managedServiceRegistration.unregister();
-                m_managedServiceRegistration = null;
-            }
-            catch ( Throwable t )
-            {
-                log( LogService.LOG_INFO, "Unexpected problem unregistering ManagedService", getComponentMetadata(), t );
-            }
-        }
-
         // really dispose off this manager instance
         disposeInternal();
     }

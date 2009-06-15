@@ -26,7 +26,7 @@ import java.util.Map;
 
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.cm.ManagedServiceFactory;
+import org.osgi.service.cm.Configuration;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentFactory;
 import org.osgi.service.component.ComponentInstance;
@@ -35,14 +35,14 @@ import org.osgi.service.log.LogService;
 /**
  * The <code>ComponentFactoryImpl</code> TODO
  */
-class ComponentFactoryImpl extends AbstractComponentManager implements ComponentFactory, ManagedServiceFactory
+class ComponentFactoryImpl extends AbstractComponentManager implements ComponentFactory
 {
 
     // The component registry used to retrieve component IDs
     private ComponentRegistry m_componentRegistry;
 
     // The map of components created from Configuration objects
-    // maps PID to ComponentManager for configuration updating
+    // maps PID to ImmediateComponentManager for configuration updating
     // this map is lazily created
     private Map m_configuredServices;
 
@@ -54,7 +54,7 @@ class ComponentFactoryImpl extends AbstractComponentManager implements Component
     ComponentFactoryImpl( BundleComponentActivator activator, ComponentMetadata metadata,
         ComponentRegistry componentRegistry )
     {
-        super( activator, metadata, componentRegistry.createComponentId() );
+        super( activator, metadata, componentRegistry );
         m_componentRegistry = componentRegistry;
         m_createdComponents = new IdentityHashMap();
     }
@@ -65,7 +65,7 @@ class ComponentFactoryImpl extends AbstractComponentManager implements Component
      */
     public ComponentInstance newInstance( Dictionary dictionary )
     {
-        return ( ComponentInstance ) createComponentManager( dictionary, true );
+        return createComponentManager( dictionary, true );
     }
 
 
@@ -86,10 +86,19 @@ class ComponentFactoryImpl extends AbstractComponentManager implements Component
     {
         log( LogService.LOG_DEBUG, "registering component factory", getComponentMetadata(), null );
 
+        Configuration[] cfg = m_componentRegistry.getConfigurations( getActivator().getBundleContext(),
+            getComponentMetadata().getName() );
+        if ( cfg != null )
+        {
+            for ( int i = 0; i < cfg.length; i++ )
+            {
+                updated( cfg[i].getPid(), cfg[i].getProperties() );
+            }
+        }
+
         Dictionary serviceProperties = getProperties();
         return getActivator().getBundleContext().registerService( new String[]
-            { ComponentFactory.class.getName(), ManagedServiceFactory.class.getName() }, getService(),
-            serviceProperties );
+            { ComponentFactory.class.getName() }, getService(), serviceProperties );
     }
 
 
@@ -128,39 +137,42 @@ class ComponentFactoryImpl extends AbstractComponentManager implements Component
 
     //---------- ManagedServiceFactory interface ------------------------------
 
-    public void updated( String pid, Dictionary configuration )
+    void updated( String pid, Dictionary configuration )
     {
-        ComponentManager cm;
-        if ( m_configuredServices != null )
+        if ( getState() == STATE_FACTORY )
         {
-            cm = ( ComponentManager ) m_configuredServices.get( pid );
-        }
-        else
-        {
-            m_configuredServices = new HashMap();
-            cm = null;
-        }
+            ImmediateComponentManager cm;
+            if ( m_configuredServices != null )
+            {
+                cm = ( ImmediateComponentManager ) m_configuredServices.get( pid );
+            }
+            else
+            {
+                m_configuredServices = new HashMap();
+                cm = null;
+            }
 
-        if ( cm == null )
-        {
-            // create a new instance with the current configuration
-            cm = createComponentManager( configuration, false );
+            if ( cm == null )
+            {
+                // create a new instance with the current configuration
+                cm = createComponentManager( configuration, false );
 
-            // keep a reference for future updates
-            m_configuredServices.put( pid, cm );
-        }
-        else if ( cm instanceof ImmediateComponentManager )
-        {
-            // update the configuration as if called as ManagedService
-            ( ( ImmediateComponentManager ) cm ).reconfigure( configuration );
+                // keep a reference for future updates
+                m_configuredServices.put( pid, cm );
+            }
+            else
+            {
+                // update the configuration as if called as ManagedService
+                cm.reconfigure( configuration );
+            }
         }
     }
 
-    public void deleted( String pid )
+    void deleted( String pid )
     {
-        if ( m_configuredServices != null )
+        if ( getState() == STATE_FACTORY && m_configuredServices != null )
         {
-            ComponentManager cm = ( ComponentManager ) m_configuredServices.remove( pid );
+            ImmediateComponentManager cm = ( ImmediateComponentManager ) m_configuredServices.remove( pid );
             if ( cm != null )
             {
                 log( LogService.LOG_DEBUG, "Disposing component after configuration deletion", getComponentMetadata(),
@@ -196,11 +208,10 @@ class ComponentFactoryImpl extends AbstractComponentManager implements Component
      *      used as the normal configuration from configuration admin (not the
      *      factory configuration) and the component is enabled asynchronously.
      */
-    private ComponentManager createComponentManager( Dictionary configuration, boolean isNewInstance )
+    private ImmediateComponentManager createComponentManager( Dictionary configuration, boolean isNewInstance )
     {
-        long componentId = m_componentRegistry.createComponentId();
         ImmediateComponentManager cm = new ImmediateComponentManager( getActivator(), getComponentMetadata(),
-            componentId );
+            m_componentRegistry );
 
         // add the new component to the activators instances
         getActivator().getInstanceReferences().add( cm );
@@ -228,7 +239,7 @@ class ComponentFactoryImpl extends AbstractComponentManager implements Component
         return cm;
     }
 
-    private void disposeComponentManager( ComponentManager cm )
+    private void disposeComponentManager( ImmediateComponentManager cm )
     {
         // remove from created components
         m_createdComponents.remove( cm );

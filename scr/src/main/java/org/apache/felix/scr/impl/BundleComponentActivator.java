@@ -168,7 +168,7 @@ class BundleComponentActivator implements Logger
                         metadata.validate( this );
 
                         // Request creation of the component manager
-                        ComponentManager manager;
+                        AbstractComponentManager manager;
                         if ( metadata.isFactory() )
                         {
                             // 112.2.4 SCR must register a Component Factory
@@ -176,10 +176,26 @@ class BundleComponentActivator implements Logger
                             // as soon as the component factory is satisfied
                             manager = new ComponentFactoryImpl( this, metadata, m_componentRegistry );
                         }
+                        else if ( metadata.isImmediate() )
+                        {
+                            manager = new ImmediateComponentManager( this, metadata, m_componentRegistry );
+                        }
+                        else if ( metadata.getServiceMetadata() != null )
+                        {
+                            if ( metadata.getServiceMetadata().isServiceFactory() )
+                            {
+                                manager = new ServiceFactoryComponentManager( this, metadata, m_componentRegistry );
+                            }
+                            else
+                            {
+                                manager = new DelayedComponentManager( this, metadata, m_componentRegistry );
+                            }
+                        }
                         else
                         {
-                            manager = ManagerFactory.createManager( this, metadata, m_componentRegistry
-                                .createComponentId() );
+                            // if we get here, which is not expected after all, we fail
+                            throw new IllegalArgumentException( "Cannot create a component manager for "
+                                + metadata.getName() );
                         }
 
                         // register the component after validation
@@ -251,7 +267,7 @@ class BundleComponentActivator implements Logger
 
         while ( m_managers.size() != 0 )
         {
-            ComponentManager manager = ( ComponentManager ) m_managers.get( 0 );
+            AbstractComponentManager manager = ( AbstractComponentManager ) m_managers.get( 0 );
             try
             {
                 m_managers.remove( manager );
@@ -341,7 +357,7 @@ class BundleComponentActivator implements Logger
      */
     void enableComponent( String name )
     {
-        final ComponentManager[] cm = getSelectedComponents( name );
+        final AbstractComponentManager[] cm = getSelectedComponents( name );
         if ( cm == null )
         {
             return;
@@ -374,7 +390,7 @@ class BundleComponentActivator implements Logger
      */
     void disableComponent( String name )
     {
-        final ComponentManager[] cm = getSelectedComponents( name );
+        final AbstractComponentManager[] cm = getSelectedComponents( name );
         if ( cm == null )
         {
             return;
@@ -410,12 +426,12 @@ class BundleComponentActivator implements Logger
      *      to the <code>name</code> parameter or <code>null</code> if no
      *      component manager with the given name is currently registered.
      */
-    private ComponentManager[] getSelectedComponents( String name )
+    private AbstractComponentManager[] getSelectedComponents( String name )
     {
         // if all components are selected
         if ( name == null )
         {
-            return (org.apache.felix.scr.impl.ComponentManager[] ) m_managers.toArray( new ComponentManager[m_managers.size()] );
+            return ( AbstractComponentManager[] ) m_managers.toArray( new AbstractComponentManager[m_managers.size()] );
         }
 
         if ( m_componentRegistry.getComponent( name ) != null )
@@ -424,10 +440,10 @@ class BundleComponentActivator implements Logger
             Iterator it = m_managers.iterator();
             while ( it.hasNext() )
             {
-                ComponentManager cm = ( ComponentManager ) it.next();
+                AbstractComponentManager cm = ( AbstractComponentManager ) it.next();
                 if ( name.equals( cm.getComponentMetadata().getName() ) )
                 {
-                    return new ComponentManager[]
+                    return new AbstractComponentManager[]
                         { cm };
                 }
             }
