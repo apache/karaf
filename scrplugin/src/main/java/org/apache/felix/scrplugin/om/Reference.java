@@ -60,9 +60,6 @@ public class Reference extends AbstractObject {
     public Reference(JavaTag t, JavaClassDescription desc) {
         super(t);
         this.javaClassDescription = desc;
-        // set default values
-        this.setBind("bind");
-        this.setUnbind("unbind");
     }
 
     public String getName() {
@@ -194,6 +191,13 @@ public class Reference extends AbstractObject {
 
         // validate bind and unbind methods
         if (!isLookupStrategy()) {
+            // set default values
+            if ( this.bind == null ) {
+                this.setBind("bind");
+            }
+            if ( this.unbind == null ) {
+                this.setUnbind("unbind");
+            }
             final String oldBind = this.bind;
             final String oldUnbind = this.unbind;
             this.bind = this.validateMethod(specVersion, this.bind, componentIsAbstract, iLog);

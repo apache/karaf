@@ -91,7 +91,7 @@ public class ComponentTag extends AbstractTag {
             }
 
             public ConfigurationPolicy policy() {
-                return Util.getEnumValue(annotation, "policy", ConfigurationPolicy.class, Component.class);
+                return Util.getEnumValue(annotation, "policy", ConfigurationPolicy.class, Component.class, false);
             }
 
             public Class<? extends java.lang.annotation.Annotation> annotationType() {
@@ -126,7 +126,9 @@ public class ComponentTag extends AbstractTag {
         map.put(Constants.COMPONENT_CREATE_PID, String.valueOf(this.annotation.createPid()));
 
         // version 1.1
-        map.put(Constants.COMPONENT_CONFIG_POLICY, this.annotation.policy().getPolicyString());
+        if ( this.annotation.policy() != null ) {
+            map.put(Constants.COMPONENT_CONFIG_POLICY, this.annotation.policy().getPolicyString());
+        }
         final JavaMethod[] jms = this.sourceAnnotation.getContext().getParent().getParentSource().getClasses()[0].getMethods();
         for(final JavaMethod jm : jms) {
             final Annotation[] annotations = jm.getAnnotations();

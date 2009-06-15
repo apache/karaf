@@ -303,13 +303,19 @@ public abstract class Util {
         }
     }
 
-    public static <T extends Enum> T getEnumValue(Annotation annotation, String name, final Class<T> enumClass, final Class<?> clazz) {
+    public static <T extends Enum> T getEnumValue(Annotation annotation,
+                                                  String name,
+                                                  final Class<T> enumClass,
+                                                  final Class<?> clazz,
+                                                  final boolean returnDefault) {
         Object obj = annotation.getNamedParameter(name);
         if (obj == null) {
-            try {
-                obj = clazz.getMethod(name).getDefaultValue();
-            } catch( NoSuchMethodException mnfe) {
-                // we ignore this
+            if ( returnDefault ) {
+                try {
+                    obj = clazz.getMethod(name).getDefaultValue();
+                } catch( NoSuchMethodException mnfe) {
+                    // we ignore this
+                }
             }
         }
         if ( obj != null ) {
@@ -327,6 +333,13 @@ public abstract class Util {
             }
         }
         return null;
+    }
+
+    public static <T extends Enum> T getEnumValue(Annotation annotation,
+            String name,
+            final Class<T> enumClass,
+            final Class<?> clazz) {
+        return getEnumValue(annotation, name, enumClass, clazz, true);
     }
 
     private static String getAnnotationValue(final AnnotationValue av, final JavaClassDescription desc)

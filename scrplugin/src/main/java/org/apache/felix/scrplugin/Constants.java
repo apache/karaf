@@ -94,7 +94,7 @@ public class Constants {
     public static final String PROPERTY_TYPE_DOUBLE = "Double";
     public static final String PROPERTY_TYPE_FLOAT = "Float";
     public static final String PROPERTY_TYPE_INTEGER = "Integer";
-    public static final String PROPERTY_TYPE_BYTE = "Bye";
+    public static final String PROPERTY_TYPE_BYTE = "Byte";
     public static final String PROPERTY_TYPE_CHAR = "Char";
     public static final String PROPERTY_TYPE_CHAR_1_1 = "Character";
     public static final String PROPERTY_TYPE_BOOLEAN = "Boolean";

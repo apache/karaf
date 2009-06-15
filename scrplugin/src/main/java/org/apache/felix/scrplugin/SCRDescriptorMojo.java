@@ -223,11 +223,11 @@ public class SCRDescriptorMojo extends AbstractMojo {
                             boolean createBind = false;
                             boolean createUnbind = false;
                             // Only create method if no bind name has been specified
-                            if ( bindValue == null && ref.findMethod(specVersion, ref.getBind()) == null ) {
+                            if ( bindValue == null && ref.findMethod(specVersion, "bind") == null ) {
                                 // create bind method
                                 createBind = true;
                             }
-                            if ( unbindValue == null && ref.findMethod(specVersion, ref.getUnbind()) == null ) {
+                            if ( unbindValue == null && ref.findMethod(specVersion, "unbind") == null ) {
                                 // create unbind method
                                 createUnbind = true;
                             }
