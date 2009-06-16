@@ -45,6 +45,7 @@
         <module>assembly</module>
         <module>demos</module>
         <module>itests</module>
+        <module>tooling</module>
     </modules>
 
     <scm>
@@ -95,6 +96,7 @@
         <junit.version>3.8.2_1</junit.version>
         <jline.version>0.9.94_1</jline.version>
         <log4j.version>1.2.14</log4j.version>
+        <maven.version>2.0.9</maven.version>
         <mina.version>2.0.0-M6</mina.version>
         <oro.version>2.0.8_1</oro.version>
         <pax.exam.version>0.5.0</pax.exam.version>
@@ -370,6 +372,21 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.metatype</artifactId>
                 <version>${felix.metatype.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>${felix.plugin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-plugin-api</artifactId>
+                <version>${maven.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-project</artifactId>
+                <version>${maven.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
