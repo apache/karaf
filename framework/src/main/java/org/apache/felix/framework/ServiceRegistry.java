@@ -38,7 +38,7 @@ public class ServiceRegistry
     // Maps bundle to an array of usage counts.
     private Map m_inUseMap = new HashMap();
 
-    private ServiceListener m_serviceListener = null;
+    private final ServiceRegistryCallbacks m_callbacks;
 
     private final Object m_eventHookLock = new Object();
     private Object[] m_eventHooks = new Object[0];
@@ -47,9 +47,10 @@ public class ServiceRegistry
     private final Object m_listenerHookLock = new Object();
     private Object[] m_listenerHooks = new Object[0];
 
-    public ServiceRegistry(Logger logger)
+    public ServiceRegistry(Logger logger, ServiceRegistryCallbacks callbacks)
     {
         m_logger = logger;
+        m_callbacks = callbacks;
     }
 
     public synchronized ServiceReference[] getRegisteredServices(Bundle bundle)
@@ -85,7 +86,13 @@ public class ServiceRegistry
             ServiceRegistration[] regs = (ServiceRegistration[]) m_serviceRegsMap.get(bundle);
             m_serviceRegsMap.put(bundle, addServiceRegistration(regs, reg));
         }
-        fireServiceChanged(new ServiceEvent(ServiceEvent.REGISTERED, reg.getReference()));
+
+        // Notify callback objects about registered service.
+        if (m_callbacks != null)
+        {
+            m_callbacks.serviceChanged(
+                new ServiceEvent(ServiceEvent.REGISTERED, reg.getReference()), reg);
+        }
         return reg;
     }
 
@@ -107,9 +114,12 @@ public class ServiceRegistry
             m_serviceRegsMap.put(bundle, removeServiceRegistration(regs, reg));
         }
 
-        // Fire the service event which gives all client bundles the
-        // opportunity to unget their service object.
-        fireServiceChanged(new ServiceEvent(ServiceEvent.UNREGISTERING, reg.getReference()));
+        // Notify callback objects about unregistering service.
+        if (m_callbacks != null)
+        {
+            m_callbacks.serviceChanged(
+                new ServiceEvent(ServiceEvent.UNREGISTERING, reg.getReference()), reg);
+        }
 
         // Now forcibly unget the service object for all stubborn clients.
         synchronized (this)
@@ -498,9 +508,13 @@ public class ServiceRegistry
         return bundles;
     }
 
-    public void servicePropertiesModified(ServiceRegistration reg)
+    void servicePropertiesModified(ServiceRegistration reg, Map oldProps, Map newProps)
     {
-        fireServiceChanged(new ServiceEvent(ServiceEvent.MODIFIED, reg.getReference()));
+        if (m_callbacks != null)
+        {
+            m_callbacks.serviceChanged(
+                new ServiceEvent(ServiceEvent.MODIFIED, reg.getReference()), reg);
+        }
     }
 
     public Logger getLogger()
@@ -552,82 +566,6 @@ public class ServiceRegistry
             }
         }
         return regs;
-    }
-
-    public synchronized void addServiceListener(ServiceListener l)
-    {
-        m_serviceListener = ServiceListenerMulticaster.add(m_serviceListener, l);
-    }
-
-    public synchronized void removeServiceListener(ServiceListener l)
-    {
-        m_serviceListener = ServiceListenerMulticaster.remove(m_serviceListener, l);
-    }
-
-    protected void fireServiceChanged(ServiceEvent event)
-    {
-        // Grab a copy of the listener list.
-        ServiceListener listener;
-        synchronized (this)
-        {
-            listener = m_serviceListener;
-        }
-        // If not null, then dispatch event.
-        if (listener != null)
-        {
-            listener.serviceChanged(event);
-        }
-    }
-
-    private static class ServiceListenerMulticaster implements ServiceListener
-    {
-        protected ServiceListener m_a = null, m_b = null;
-
-        protected ServiceListenerMulticaster(ServiceListener a, ServiceListener b)
-        {
-            m_a = a;
-            m_b = b;
-        }
-
-        public void serviceChanged(ServiceEvent e)
-        {
-            m_a.serviceChanged(e);
-            m_b.serviceChanged(e);
-        }
-
-        public static ServiceListener add(ServiceListener a, ServiceListener b)
-        {
-            if (a == null)
-            {
-                return b;
-            }
-            else if (b == null)
-            {
-                return a;
-            }
-            else
-            {
-                return new ServiceListenerMulticaster(a, b);
-            }
-        }
-
-        public static ServiceListener remove(ServiceListener a, ServiceListener b)
-        {
-            if ((a == null) || (a == b))
-            {
-                return null;
-            }
-            else if (a instanceof ServiceListenerMulticaster)
-            {
-                return add(
-                    remove(((ServiceListenerMulticaster) a).m_a, b),
-                    remove(((ServiceListenerMulticaster) a).m_b, b));
-            }
-            else
-            {
-                return a;
-            }
-        }
     }
 
     /**
@@ -975,5 +913,10 @@ public class ServiceRegistry
         public int m_count = 0;
         public ServiceReference m_ref = null;
         public Object m_svcObj = null;
+    }
+
+    public interface ServiceRegistryCallbacks
+    {
+        void serviceChanged(ServiceEvent event, ServiceRegistration reg);
     }
 }

@@ -78,7 +78,7 @@ public class EventDispatcherTest extends TestCase
         };
 
         Logger logger = new Logger();
-        ServiceRegistry registry = new ServiceRegistry(logger)
+        ServiceRegistry registry = new ServiceRegistry(logger, null)
         {
             public List getEventHooks()
             {
@@ -155,7 +155,7 @@ public class EventDispatcherTest extends TestCase
                 framework
             });
 
-        ed.fireServiceEvent(event, framework);
+        ed.fireServiceEvent(event, null, framework);
         assertEquals(1, fired.size());
         assertSame(sl3, fired.iterator().next());
 

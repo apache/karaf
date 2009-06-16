@@ -31,23 +31,23 @@ import org.osgi.framework.*;
 class ServiceRegistrationImpl implements ServiceRegistration
 {
     // Service registry.
-    private ServiceRegistry m_registry = null;
+    private final ServiceRegistry m_registry;
     // Bundle implementing the service.
-    private Bundle m_bundle = null;
+    private final Bundle m_bundle;
     // Interfaces associated with the service object.
-    private String[] m_classes = null;
+    private final String[] m_classes;
     // Service Id associated with the service object.
-    private Long m_serviceId = null;
+    private final Long m_serviceId;
     // Service object.
-    private Object m_svcObj = null;
+    private volatile Object m_svcObj;
     // Service factory interface.
-    private ServiceFactory m_factory = null;
+    private volatile ServiceFactory m_factory;
     // Associated property dictionary.
     private volatile Map m_propMap = new StringMap(false);
     // Re-usable service reference.
-    private ServiceReferenceImpl m_ref = null;
+    private final ServiceReferenceImpl m_ref;
     // Flag indicating that we are unregistering.
-    private boolean m_isUnregistering = false;
+    private volatile boolean m_isUnregistering = false;
 
     public ServiceRegistrationImpl(
         ServiceRegistry registry, Bundle bundle,
@@ -82,7 +82,7 @@ class ServiceRegistrationImpl implements ServiceRegistration
         m_svcObj = null;
     }
 
-    public ServiceReference getReference()
+    public synchronized ServiceReference getReference()
     {
         // Make sure registration is valid.
         if (!isValid())
@@ -95,16 +95,24 @@ class ServiceRegistrationImpl implements ServiceRegistration
 
     public void setProperties(Dictionary dict)
     {
-        // Make sure registration is valid.
-        if (!isValid())
+        Map oldProps, newProps;
+        synchronized (this)
         {
-            throw new IllegalStateException(
-                "The service registration is no longer valid.");
+            // Make sure registration is valid.
+            if (!isValid())
+            {
+                throw new IllegalStateException(
+                    "The service registration is no longer valid.");
+            }
+            // Remember old properties.
+            oldProps = m_propMap;
+            // Set the properties.
+            initializeProperties(dict);
+            // Keep local reference to new properties.
+            newProps = m_propMap;
         }
-        // Set the properties.
-        initializeProperties(dict);
         // Tell registry about it.
-        m_registry.servicePropertiesModified(this);
+        m_registry.servicePropertiesModified(this, oldProps, newProps);
     }
 
     public void unregister()
@@ -136,7 +144,7 @@ class ServiceRegistrationImpl implements ServiceRegistration
      * @return <tt>true</tt> if the specified class is reachable from the
      *         service object's class loader, <tt>false</tt> otherwise.
     **/
-    protected boolean isClassAccessible(Class clazz)
+    private boolean isClassAccessible(Class clazz)
     {
         try
         {
@@ -153,18 +161,18 @@ class ServiceRegistrationImpl implements ServiceRegistration
         return false;
     }
 
-    protected Object getProperty(String key)
+    Object getProperty(String key)
     {
         return m_propMap.get(key);
     }
 
-    protected String[] getPropertyKeys()
+    private String[] getPropertyKeys()
     {
         Set s = m_propMap.keySet();
         return (String[]) s.toArray(new String[s.size()]);
     }
 
-    protected Bundle[] getUsingBundles()
+    private Bundle[] getUsingBundles()
     {
         return m_registry.getUsingBundles(m_ref);
     }
@@ -180,7 +188,7 @@ class ServiceRegistrationImpl implements ServiceRegistration
         return m_svcObj;
     }
 
-    protected Object getService(Bundle acqBundle)
+    Object getService(Bundle acqBundle)
     {
         // If the service object is a service factory, then
         // let it create the service object.
@@ -212,7 +220,7 @@ class ServiceRegistrationImpl implements ServiceRegistration
         }
     }
 
-    protected void ungetService(Bundle relBundle, Object svcObj)
+    void ungetService(Bundle relBundle, Object svcObj)
     {
         // If the service object is a service factory, then
         // let it release the service object.

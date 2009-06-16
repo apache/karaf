@@ -45,7 +45,7 @@ public class ServiceRegistryTest extends TestCase
         Bundle b = (Bundle) control.getMock();
         control.replay();
         
-        ServiceRegistry sr = new ServiceRegistry(new Logger());
+        ServiceRegistry sr = new ServiceRegistry(new Logger(), null);
         EventHook hook = new EventHook() 
         {
             public void event(ServiceEvent event, Collection contexts) 
@@ -74,7 +74,7 @@ public class ServiceRegistryTest extends TestCase
         Bundle b = (Bundle) control.getMock();
         control.replay();
         
-        ServiceRegistry sr = new ServiceRegistry(new Logger());
+        ServiceRegistry sr = new ServiceRegistry(new Logger(), null);
         MockControl sfControl = MockControl.createNiceControl(ServiceFactory.class);
         sfControl.replay();
         ServiceFactory sf = (ServiceFactory) sfControl.getMock();
@@ -103,7 +103,7 @@ public class ServiceRegistryTest extends TestCase
         Bundle b = (Bundle) control.getMock();
         control.replay();
         
-        ServiceRegistry sr = new ServiceRegistry(new Logger());
+        ServiceRegistry sr = new ServiceRegistry(new Logger(), null);
         FindHook hook = new FindHook() 
         {
             public void find(BundleContext context, String name, String filter,
@@ -133,7 +133,7 @@ public class ServiceRegistryTest extends TestCase
         Bundle b = (Bundle) control.getMock();
         control.replay();
         
-        ServiceRegistry sr = new ServiceRegistry(new Logger());
+        ServiceRegistry sr = new ServiceRegistry(new Logger(), null);
         MockControl sfControl = MockControl.createNiceControl(ServiceFactory.class);
         sfControl.replay();
         ServiceFactory sf = (ServiceFactory) sfControl.getMock();
@@ -162,10 +162,9 @@ public class ServiceRegistryTest extends TestCase
         Bundle b = (Bundle) control.getMock();
         control.replay();
         
-        ServiceRegistry sr = new ServiceRegistry(new Logger());
+        ServiceRegistry sr = new ServiceRegistry(new Logger(), null);
         ListenerHook hook = new ListenerHook() 
         {
-
             public void added(Collection listeners) 
             {
             }
@@ -196,7 +195,7 @@ public class ServiceRegistryTest extends TestCase
         Bundle b = (Bundle) control.getMock();
         control.replay();
         
-        ServiceRegistry sr = new ServiceRegistry(new Logger());
+        ServiceRegistry sr = new ServiceRegistry(new Logger(), null);
         MockControl sfControl = MockControl.createNiceControl(ServiceFactory.class);
         sfControl.replay();
         ServiceFactory sf = (ServiceFactory) sfControl.getMock();
@@ -225,7 +224,7 @@ public class ServiceRegistryTest extends TestCase
         Bundle b = (Bundle) control.getMock();
         control.replay();
         
-        ServiceRegistry sr = new ServiceRegistry(new Logger());
+        ServiceRegistry sr = new ServiceRegistry(new Logger(), null);
         class CombinedService implements ListenerHook, FindHook, EventHook, Runnable
         {
             public void added(Collection listeners) 
@@ -256,10 +255,10 @@ public class ServiceRegistryTest extends TestCase
         assertEquals("Precondition failed", 0, sr.getFindHooks().size());
         assertEquals("Precondition failed", 0, sr.getListenerHooks().size());
         ServiceRegistration reg = sr.registerService(b, new String [] {
-                Runnable.class.getName(),
-                ListenerHook.class.getName(),
-                FindHook.class.getName(),
-                EventHook.class.getName()}, hook, new Hashtable());
+            Runnable.class.getName(),
+            ListenerHook.class.getName(),
+            FindHook.class.getName(),
+            EventHook.class.getName()}, hook, new Hashtable());
         assertEquals(1, sr.getListenerHooks().size());
         assertSame(hook, sr.getListenerHooks().iterator().next());
         assertEquals(1, sr.getEventHooks().size());
@@ -279,7 +278,7 @@ public class ServiceRegistryTest extends TestCase
         Bundle b = (Bundle) control.getMock();
         control.replay();
         
-        ServiceRegistry sr = new ServiceRegistry(new Logger());
+        ServiceRegistry sr = new ServiceRegistry(new Logger(), null);
         String svcObj = "hello";        
         assertEquals("Precondition failed", 0, sr.getEventHooks().size());
         assertEquals("Precondition failed", 0, sr.getFindHooks().size());

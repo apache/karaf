@@ -28,6 +28,7 @@ import org.apache.felix.framework.cache.*;
 import org.apache.felix.framework.ext.SecurityProvider;
 import org.apache.felix.framework.searchpolicy.*;
 import org.apache.felix.framework.ModuleImpl.ModuleClassLoader;
+import org.apache.felix.framework.ServiceRegistry.ServiceRegistryCallbacks;
 import org.apache.felix.framework.util.*;
 import org.apache.felix.framework.util.manifestparser.*;
 import org.apache.felix.moduleloader.*;
@@ -616,18 +617,13 @@ ex.printStackTrace();
             m_nextId = Math.max(m_nextId, loadNextId());
 
             // Create service registry.
-            m_registry = new ServiceRegistry(m_logger);
-            m_dispatcher.setServiceRegistry(m_registry);
-
-            // Add a listener to the service registry; this is
-            // used to distribute service registry events to
-            // service listeners.
-            m_registry.addServiceListener(new ServiceListener() {
-                public void serviceChanged(ServiceEvent event)
+            m_registry = new ServiceRegistry(m_logger, new ServiceRegistryCallbacks() {
+                public void serviceChanged(ServiceEvent event, ServiceRegistration reg)
                 {
-                    fireServiceEvent(event);
+                    fireServiceEvent(event, reg);
                 }
             });
+            m_dispatcher.setServiceRegistry(m_registry);
 
             // The framework is now in its startup sequence.
             setBundleStateAndNotify(this, Bundle.STARTING);
@@ -3623,12 +3619,12 @@ ex.printStackTrace();
     /**
      * Fires service events.
      *
-     * @param type The type of service event to fire.
-     * @param ref The service reference associated with the event.
+     * @param event The service event to fire.
+     * @param reg The service registration associated with the service object.
     **/
-    private void fireServiceEvent(ServiceEvent event)
+    private void fireServiceEvent(ServiceEvent event, ServiceRegistration reg)
     {
-        m_dispatcher.fireServiceEvent(event, this);
+        m_dispatcher.fireServiceEvent(event, reg, this);
     }
 
     //

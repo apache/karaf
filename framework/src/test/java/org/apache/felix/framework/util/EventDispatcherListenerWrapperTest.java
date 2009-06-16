@@ -45,21 +45,24 @@ public class EventDispatcherListenerWrapperTest extends TestCase
 
         Object[] listeners = new Object[]
         {
-            b1,
-            String.class,
-            new Object(),
-            "(some=filter)",
-            null,
-            b2,
-            Integer.class,
-            new Object(),
-            "(some.other=filter)",
-            new Integer(15),
-            b3,
-            BundleContext.class,
-            new Object(),
-            null,
-            Boolean.TRUE,
+            b1,                    // LISTENER_BUNDLE_OFFSET
+            String.class,          // LISTENER_CLASS_OFFSET
+            new Object(),          // LISTENER_OBJECT_OFFSET
+            "(some=filter)",       // LISTENER_FILTER_OFFSET
+            null,                  // LISTENER_MATECHEDSET_OFFSET
+            null,                  // LISTENER_SECURITY_OFFSET
+            b2,                    // LISTENER_BUNDLE_OFFSET
+            Integer.class,         // LISTENER_CLASS_OFFSET
+            new Object(),          // LISTENER_OBJECT_OFFSET
+            "(some.other=filter)", // LISTENER_FILTER_OFFSET
+            null,                  // LISTENER_MATECHEDSET_OFFSET
+            new Integer(15),       // LISTENER_SECURITY_OFFSET
+            b3,                    // LISTENER_BUNDLE_OFFSET
+            BundleContext.class,   // LISTENER_CLASS_OFFSET
+            new Object(),          // LISTENER_OBJECT_OFFSET
+            null,                  // LISTENER_FILTER_OFFSET
+            null,                  // LISTENER_MATECHEDSET_OFFSET
+            Boolean.TRUE,          // LISTENER_SECURITY_OFFSET
         };
 
         Collection c = new EventDispatcher.ListenerBundleContextCollectionWrapper(listeners);
@@ -80,9 +83,15 @@ public class EventDispatcherListenerWrapperTest extends TestCase
 
         Object[] actualListeners =
             ((EventDispatcher.ListenerBundleContextCollectionWrapper) c).getListeners();
-        Object[] expectedListeners = new Object[10];
-        System.arraycopy(listeners, 0, expectedListeners, 0, 5);
-        System.arraycopy(listeners, 10, expectedListeners, 5, 5);
+        Object[] expectedListeners = new Object[EventDispatcher.LISTENER_ARRAY_INCREMENT * 2];
+        System.arraycopy(listeners, 0, expectedListeners, 0,
+            EventDispatcher.LISTENER_ARRAY_INCREMENT);
+        System.arraycopy(
+            listeners,
+            EventDispatcher.LISTENER_ARRAY_INCREMENT * 2,
+            expectedListeners,
+            EventDispatcher.LISTENER_ARRAY_INCREMENT,
+            EventDispatcher.LISTENER_ARRAY_INCREMENT);
         assertTrue(Arrays.equals(expectedListeners, actualListeners));
 
         assertTrue(c.remove(bc1));
@@ -95,8 +104,12 @@ public class EventDispatcherListenerWrapperTest extends TestCase
 
         Object[] actualListeners2 =
             ((EventDispatcher.ListenerBundleContextCollectionWrapper) c).getListeners();
-        Object[] expectedListeners2 = new Object[5];
-        System.arraycopy(listeners, 10, expectedListeners2, 0, 5);
+        Object[] expectedListeners2 = new Object[EventDispatcher.LISTENER_ARRAY_INCREMENT];
+        System.arraycopy(
+            listeners, EventDispatcher.LISTENER_ARRAY_INCREMENT * 2,
+            expectedListeners2,
+            0,
+            EventDispatcher.LISTENER_ARRAY_INCREMENT);
         assertTrue(Arrays.equals(expectedListeners2, actualListeners2));
 
         assertTrue(c.remove(bc3));
@@ -121,16 +134,18 @@ public class EventDispatcherListenerWrapperTest extends TestCase
 
         Object[] listeners = new Object[]
         {
-            b1,
-            String.class,
-            new Object(),
-            "(some=filter)",
-            null,
-            b2,
-            Integer.class,
-            new Object(),
-            "(some.other=filter)",
-            new Integer(15)
+            b1,                    // LISTENER_BUNDLE_OFFSET
+            String.class,          // LISTENER_CLASS_OFFSET
+            new Object(),          // LISTENER_OBJECT_OFFSET
+            "(some=filter)",       // LISTENER_FILTER_OFFSET
+            null,                  // LISTENER_MATECHEDSET_OFFSET
+            null,                  // LISTENER_SECURITY_OFFSET
+            b2,                    // LISTENER_BUNDLE_OFFSET
+            Integer.class,         // LISTENER_CLASS_OFFSET
+            new Object(),          // LISTENER_OBJECT_OFFSET
+            "(some.other=filter)", // LISTENER_FILTER_OFFSET
+            null,                  // LISTENER_MATECHEDSET_OFFSET
+            new Integer(15)        // LISTENER_SECURITY_OFFSET
         };
 
         Collection c = new EventDispatcher.ListenerBundleContextCollectionWrapper(listeners);
@@ -260,21 +275,24 @@ public class EventDispatcherListenerWrapperTest extends TestCase
 
         Object[] listeners = new Object[]
         {
-            b1,
-            String.class,
-            new Object(),
-            "(some=filter)",
-            null,
-            b2,
-            Integer.class,
-            new Object(),
-            "(some.other=filter)",
-            new Integer(15),
-            b3,
-            BundleContext.class,
-            new Object(),
-            null,
-            Boolean.TRUE,
+            b1,                    // LISTENER_BUNDLE_OFFSET
+            String.class,          // LISTENER_CLASS_OFFSET
+            new Object(),          // LISTENER_OBJECT_OFFSET
+            "(some=filter)",       // LISTENER_FILTER_OFFSET
+            null,                  // LISTENER_MATECHEDSET_OFFSET
+            null,                  // LISTENER_SECURITY_OFFSET
+            b2,                    // LISTENER_BUNDLE_OFFSET
+            Integer.class,         // LISTENER_CLASS_OFFSET
+            new Object(),          // LISTENER_OBJECT_OFFSET
+            "(some.other=filter)", // LISTENER_FILTER_OFFSET
+            null,                  // LISTENER_MATECHEDSET_OFFSET
+            new Integer(15),       // LISTENER_SECURITY_OFFSET
+            b3,                    // LISTENER_BUNDLE_OFFSET
+            BundleContext.class,   // LISTENER_CLASS_OFFSET
+            new Object(),          // LISTENER_OBJECT_OFFSET
+            null,                  // LISTENER_FILTER_OFFSET
+            null,                  // LISTENER_MATECHEDSET_OFFSET
+            Boolean.TRUE,          // LISTENER_SECURITY_OFFSET
         };
 
         Collection c = new EventDispatcher.ListenerBundleContextCollectionWrapper(listeners);
@@ -310,21 +328,24 @@ public class EventDispatcherListenerWrapperTest extends TestCase
 
         Object[] listeners = new Object[]
         {
-            b1,
-            String.class,
-            new Object(),
-            "(some=filter)",
-            null,
-            b2,
-            Integer.class,
-            new Object(),
-            "(some.other=filter)",
-            new Integer(15),
-            b3,
-            BundleContext.class,
-            new Object(),
-            null,
-            Boolean.TRUE,
+            b1,                    // LISTENER_BUNDLE_OFFSET
+            String.class,          // LISTENER_CLASS_OFFSET
+            new Object(),          // LISTENER_OBJECT_OFFSET
+            "(some=filter)",       // LISTENER_FILTER_OFFSET
+            null,                  // LISTENER_MATECHEDSET_OFFSET
+            null,                  // LISTENER_SECURITY_OFFSET
+            b2,                    // LISTENER_BUNDLE_OFFSET
+            Integer.class,         // LISTENER_CLASS_OFFSET
+            new Object(),          // LISTENER_OBJECT_OFFSET
+            "(some.other=filter)", // LISTENER_FILTER_OFFSET
+            null,                  // LISTENER_MATECHEDSET_OFFSET
+            new Integer(15),       // LISTENER_SECURITY_OFFSET
+            b3,                    // LISTENER_BUNDLE_OFFSET
+            BundleContext.class,   // LISTENER_CLASS_OFFSET
+            new Object(),          // LISTENER_OBJECT_OFFSET
+            null,                  // LISTENER_FILTER_OFFSET
+            null,                  // LISTENER_MATECHEDSET_OFFSET
+            Boolean.TRUE,          // LISTENER_SECURITY_OFFSET
         };
 
         Collection c = new EventDispatcher.ListenerBundleContextCollectionWrapper(listeners);
@@ -356,21 +377,24 @@ public class EventDispatcherListenerWrapperTest extends TestCase
 
         Object[] listeners = new Object[]
         {
-            b1,
-            String.class,
-            new Object(),
-            "(some=filter)",
-            null,
-            b2,
-            Integer.class,
-            new Object(),
-            "(some.other=filter)",
-            new Integer(15),
-            b3,
-            BundleContext.class,
-            new Object(),
-            null,
-            Boolean.TRUE,
+            b1,                    // LISTENER_BUNDLE_OFFSET
+            String.class,          // LISTENER_CLASS_OFFSET
+            new Object(),          // LISTENER_OBJECT_OFFSET
+            "(some=filter)",       // LISTENER_FILTER_OFFSET
+            null,                  // LISTENER_MATECHEDSET_OFFSET
+            null,                  // LISTENER_SECURITY_OFFSET
+            b2,                    // LISTENER_BUNDLE_OFFSET
+            Integer.class,         // LISTENER_CLASS_OFFSET
+            new Object(),          // LISTENER_OBJECT_OFFSET
+            "(some.other=filter)", // LISTENER_FILTER_OFFSET
+            null,                  // LISTENER_MATECHEDSET_OFFSET
+            new Integer(15),       // LISTENER_SECURITY_OFFSET
+            b3,                    // LISTENER_BUNDLE_OFFSET
+            BundleContext.class,   // LISTENER_CLASS_OFFSET
+            new Object(),          // LISTENER_OBJECT_OFFSET
+            null,                  // LISTENER_FILTER_OFFSET
+            null,                  // LISTENER_MATECHEDSET_OFFSET
+            Boolean.TRUE,          // LISTENER_SECURITY_OFFSET
         };
 
         Collection c = new EventDispatcher.ListenerBundleContextCollectionWrapper(listeners);
@@ -405,16 +429,18 @@ public class EventDispatcherListenerWrapperTest extends TestCase
 
         Object[] listeners = new Object[]
         {
-            b1,
-            String.class,
-            new Object(),
-            "(some=filter)",
-            null,
-            b2,
-            Integer.class,
-            new Object(),
-            "(some.other=filter)",
-            new Integer(15),
+            b1,                    // LISTENER_BUNDLE_OFFSET
+            String.class,          // LISTENER_CLASS_OFFSET
+            new Object(),          // LISTENER_OBJECT_OFFSET
+            "(some=filter)",       // LISTENER_FILTER_OFFSET
+            null,                  // LISTENER_MATECHEDSET_OFFSET
+            null,                  // LISTENER_SECURITY_OFFSET
+            b2,                    // LISTENER_BUNDLE_OFFSET
+            Integer.class,         // LISTENER_CLASS_OFFSET
+            new Object(),          // LISTENER_OBJECT_OFFSET
+            "(some.other=filter)", // LISTENER_FILTER_OFFSET
+            null,                  // LISTENER_MATECHEDSET_OFFSET
+            new Integer(15),       // LISTENER_SECURITY_OFFSET
         };
 
         Collection c = new EventDispatcher.ListenerBundleContextCollectionWrapper(listeners);

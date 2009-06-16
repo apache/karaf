@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import java.util.Set;
 import org.apache.felix.framework.InvokeHookCallback;
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.ServiceRegistry;
@@ -44,6 +45,7 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServicePermission;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.framework.hooks.service.EventHook;
 import org.osgi.framework.hooks.service.ListenerHook;
@@ -51,12 +53,13 @@ import org.osgi.framework.launch.Framework;
 
 public class EventDispatcher
 {
-    private static final int LISTENER_BUNDLE_OFFSET = 0;
-    private static final int LISTENER_CLASS_OFFSET = 1;
-    private static final int LISTENER_OBJECT_OFFSET = 2;
-    private static final int LISTENER_FILTER_OFFSET = 3;
-    private static final int LISTENER_SECURITY_OFFSET = 4;
-    private static final int LISTENER_ARRAY_INCREMENT = 5;
+    static final int LISTENER_BUNDLE_OFFSET = 0;
+    static final int LISTENER_CLASS_OFFSET = 1;
+    static final int LISTENER_OBJECT_OFFSET = 2;
+    static final int LISTENER_FILTER_OFFSET = 3;
+    static final int LISTENER_MATECHEDSET_OFFSET = 4;
+    static final int LISTENER_SECURITY_OFFSET = 5;
+    static final int LISTENER_ARRAY_INCREMENT = 6;
 
     private Logger m_logger = null;
     private volatile ServiceRegistry m_serviceRegistry = null;
@@ -198,6 +201,7 @@ public class EventDispatcher
         synchronized (this)
         {
             Object[] listeners = null;
+            Set set = null;
             Object acc = null;
 
             if (clazz == FrameworkListener.class)
@@ -223,7 +227,11 @@ public class EventDispatcher
                 {
                     acc = ((SecurityManager) sm).getSecurityContext();
                 }
-
+                // We need to create a Set for keeping track of matching service
+                // registrations so we can fire ServiceEvent.MODIFIED_ENDMATCH
+                // events. We need a Set even if filter is null, since the
+                // listener can be updated and have a filter added later.
+                set = new SmallSet();
                 listeners = m_serviceListeners;
             }
             else
@@ -239,6 +247,7 @@ public class EventDispatcher
                 listeners[LISTENER_CLASS_OFFSET] = clazz;
                 listeners[LISTENER_OBJECT_OFFSET] = l;
                 listeners[LISTENER_FILTER_OFFSET] = filter;
+                listeners[LISTENER_MATECHEDSET_OFFSET] = set;
                 listeners[LISTENER_SECURITY_OFFSET] = acc;
             }
             // Otherwise, we need to do some array copying.
@@ -254,6 +263,7 @@ public class EventDispatcher
                 newList[listeners.length + LISTENER_CLASS_OFFSET] = clazz;
                 newList[listeners.length + LISTENER_OBJECT_OFFSET] = l;
                 newList[listeners.length + LISTENER_FILTER_OFFSET] = filter;
+                newList[listeners.length + LISTENER_MATECHEDSET_OFFSET] = set;
                 newList[listeners.length + LISTENER_SECURITY_OFFSET] = acc;
                 listeners = newList;
             }
@@ -523,6 +533,7 @@ public class EventDispatcher
                     {
                         // The spec says to update the filter in this case.
                         listeners[i + LISTENER_FILTER_OFFSET] = filter;
+                        ((Set) listeners[i + LISTENER_MATECHEDSET_OFFSET]).clear();
                     }
                     return true;
                 }
@@ -596,7 +607,7 @@ public class EventDispatcher
         }
 
         // Fire synchronous bundle listeners immediately on the calling thread.
-        fireEventImmediately(m_logger, Request.BUNDLE_EVENT, syncListeners, event);
+        fireEventImmediately(m_logger, Request.BUNDLE_EVENT, syncListeners, event, null);
 
         // The spec says that asynchronous bundle listeners do not get events
         // of types STARTING, STOPPING, or LAZY_ACTIVATION.
@@ -609,7 +620,8 @@ public class EventDispatcher
         }
     }
 
-    public void fireServiceEvent(final ServiceEvent event, Framework felix)
+    public void fireServiceEvent(
+        final ServiceEvent event, final ServiceRegistration reg, final Framework felix)
     {
         // Take a snapshot of the listener array.
         Object[] listeners = null;
@@ -644,7 +656,7 @@ public class EventDispatcher
         }
 
         // Fire all service events immediately on the calling thread.
-        fireEventImmediately(m_logger, Request.SERVICE_EVENT, listeners, event);
+        fireEventImmediately(m_logger, Request.SERVICE_EVENT, listeners, event, reg);
     }
 
     private void fireEventAsynchronously(
@@ -688,7 +700,8 @@ public class EventDispatcher
     }
 
     private static void fireEventImmediately(
-        Logger logger, int type, Object[] listeners, EventObject event)
+        Logger logger, int type, Object[] listeners, EventObject event,
+        ServiceRegistration reg)
     {
         if (listeners.length > 0)
         {
@@ -700,6 +713,7 @@ public class EventDispatcher
                 Bundle bundle = (Bundle) listeners[i + LISTENER_BUNDLE_OFFSET];
                 EventListener l = (EventListener) listeners[i + LISTENER_OBJECT_OFFSET];
                 Filter filter = (Filter) listeners[i + LISTENER_FILTER_OFFSET];
+                Set matchedSet = (Set) listeners[i + LISTENER_MATECHEDSET_OFFSET];
                 Object acc = listeners[i + LISTENER_SECURITY_OFFSET];
                 try
                 {
@@ -713,7 +727,8 @@ public class EventDispatcher
                     }
                     else if (type == Request.SERVICE_EVENT)
                     {
-                        invokeServiceListenerCallback(bundle, l, filter, acc, event);
+                        invokeServiceListenerCallback(
+                            bundle, l, filter, matchedSet, acc, event, reg);
                     }
                 }
                 catch (Throwable th)
@@ -786,7 +801,9 @@ public class EventDispatcher
     }
 
     private static void invokeServiceListenerCallback(
-        Bundle bundle, final EventListener l, Filter filter, Object acc, final EventObject event)
+        Bundle bundle, final EventListener l, Filter filter,
+        Set matchedSet, Object acc, final EventObject event,
+        final ServiceRegistration reg)
     {
         // Service events should be delivered to STARTING,
         // STOPPING, and ACTIVE bundles.
@@ -837,11 +854,24 @@ public class EventDispatcher
             if (hasPermission)
             {
                 // Dispatch according to the filter.
-                if ((filter == null) || filter.match(((ServiceEvent) event).getServiceReference()))
+                boolean matched = (filter == null)
+                    || filter.match(((ServiceEvent) event).getServiceReference());
+
+                if (matched)
                 {
                     if ((l instanceof AllServiceListener) ||
                         Util.isServiceAssignable(bundle, ((ServiceEvent) event).getServiceReference()))
                     {
+                        // If we have a filter, then record the matching service
+                        // registration so we can know when to fire a MODIFIED_ENDMATCH
+                        // event if the filter no longer matches.
+                        if (filter != null)
+                        {
+                            synchronized (matchedSet)
+                            {
+                                matchedSet.add(reg);
+                            }
+                        }
                         if (System.getSecurityManager() != null)
                         {
                             AccessController.doPrivileged(new PrivilegedAction() {
@@ -854,9 +884,37 @@ public class EventDispatcher
                         }
                         else
                         {
-                            {
-                                ((ServiceListener) l).serviceChanged((ServiceEvent) event);
-                            }
+                            ((ServiceListener) l).serviceChanged((ServiceEvent) event);
+                        }
+                    }
+                }
+                // We need to send an MODIFIED_ENDMATCH event if the listener
+                // matched previously.
+                else if (((ServiceEvent) event).getType() == ServiceEvent.MODIFIED)
+                {
+                    boolean removed = false;
+                    synchronized (matchedSet)
+                    {
+                        removed = matchedSet.remove(reg);
+                    }
+                    if (removed)
+                    {
+                        final ServiceEvent se = new ServiceEvent(
+                            ServiceEvent.MODIFIED_ENDMATCH,
+                            ((ServiceEvent) event).getServiceReference());
+                        if (System.getSecurityManager() != null)
+                        {
+                            AccessController.doPrivileged(new PrivilegedAction() {
+                                public Object run()
+                                {
+                                    ((ServiceListener) l).serviceChanged(se);
+                                    return null;
+                                }
+                            });
+                        }
+                        else
+                        {
+                            ((ServiceListener) l).serviceChanged(se);
                         }
                     }
                 }
@@ -909,7 +967,7 @@ public class EventDispatcher
             // NOTE: We don't catch any exceptions here, because
             // the invoked method shields us from exceptions by
             // catching Throwables when it invokes callbacks.
-            fireEventImmediately(req.m_logger, req.m_type, req.m_listeners, req.m_event);
+            fireEventImmediately(req.m_logger, req.m_type, req.m_listeners, req.m_event, null);
 
             // Put dispatch request in cache.
             synchronized (m_requestPool)
