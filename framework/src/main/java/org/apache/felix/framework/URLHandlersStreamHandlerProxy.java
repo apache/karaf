@@ -20,6 +20,7 @@ package org.apache.felix.framework;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.InetAddress;
@@ -296,6 +297,10 @@ public class URLHandlersStreamHandlerProxy extends URLStreamHandler
                     
                     throw new IOException("Extensions not supported or ambiguous context.");
                 }
+                catch (IOException ex)
+                {
+                    throw ex;
+                }
                 catch (Exception ex)
                 {
                     throw new IOException(ex.getMessage());
@@ -303,6 +308,10 @@ public class URLHandlersStreamHandlerProxy extends URLStreamHandler
             }
             return (URLConnection) OPEN_CONNECTION.invoke(svc, new Object[]{url});
         } 
+        catch (IOException ex)
+        {
+            throw ex;
+        }
         catch (Exception ex)  
         {
             throw new IllegalStateException("Stream handler unavailable due to: " + ex.getMessage());
@@ -331,9 +340,13 @@ public class URLHandlersStreamHandlerProxy extends URLStreamHandler
             {
                 m_action.setAccesssible(method);
                 return (URLConnection) method.invoke(svc, new Object[]{url, proxy});
-            } 
+            }
             catch (Exception e) 
             {
+                if (e instanceof IOException)
+                {
+                    throw (IOException) e;
+                }
                 throw new IOException(e.getMessage());
             }
         }
@@ -343,6 +356,10 @@ public class URLHandlersStreamHandlerProxy extends URLStreamHandler
         } 
         catch (Exception ex)  
         {
+            if (ex instanceof IOException)
+            {
+                throw (IOException) ex;
+            }
             throw new IllegalStateException("Stream handler unavailable due to: " + ex.getMessage());
         }
     }
@@ -435,11 +452,61 @@ public class URLHandlersStreamHandlerProxy extends URLStreamHandler
         {
             return ((URLStreamHandlerService) svc).toExternalForm(url);
         }
-        try 
+        try
         {
-            return (String) TO_EXTERNAL_FORM.invoke( 
-                svc, new Object[]{url});
-        } 
+            try 
+            {
+                return (String) TO_EXTERNAL_FORM.invoke( 
+                    svc, new Object[]{url});
+            }
+            catch (InvocationTargetException ex)
+            {
+               Throwable t = ex.getTargetException();
+               if (t instanceof Exception)
+               {
+                   throw (Exception) t;
+               }
+               else if (t instanceof Error)
+               {
+                   throw (Error) t;
+               }
+               else
+               {
+                   throw new IllegalStateException("Unknown throwable: " + t);
+               }
+            }
+        }
+        catch (NullPointerException ex)
+        {
+            // workaround for harmony and possibly J9. The issue is that
+            // their implementation of URLStreamHandler.toExternalForm() 
+            // assumes that URL.getFile() doesn't return null but in our
+            // case it can -- hence, we catch the NPE and do the work
+            // ourselvs. The only difference is that we check whether the
+            // URL.getFile() is null or not. 
+            StringBuffer answer = new StringBuffer();
+            answer.append(url.getProtocol());
+            answer.append(':');
+            String authority = url.getAuthority();
+            if (authority != null && authority.length() > 0) 
+            {
+                answer.append("//"); //$NON-NLS-1$
+                answer.append(url.getAuthority());
+            }
+
+            String file = url.getFile();
+            String ref = url.getRef();
+            if (file != null)
+            {
+                answer.append(file);
+            }
+            if (ref != null) 
+            {
+                answer.append('#');
+                answer.append(ref);
+            }
+            return answer.toString();
+        }
         catch (Exception ex)  
         {
             throw new IllegalStateException("Stream handler unavailable due to: " + ex.getMessage());
