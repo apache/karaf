@@ -173,6 +173,16 @@
                     </instructions>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                  <excludes>
+                    <!-- this is not a unit test but an application used for testing -->
+                    <exclude>**/MainTest.java</exclude>
+                  </excludes>
+                </configuration>
+           </plugin>
         </plugins>
     </build>
 </project>

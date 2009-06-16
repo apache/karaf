@@ -17,8 +17,9 @@
 package org.apache.felix.karaf.tooling.features;
 
 import org.apache.maven.artifact.Artifact;
-import org.jmock.Expectations;
-import org.jmock.Mockery;
+import org.easymock.EasyMock;
+
+import static org.easymock.EasyMock.*;
 
 import junit.framework.TestCase;
 
@@ -27,22 +28,16 @@ import junit.framework.TestCase;
  */
 public class GenerateFeaturesXmlMojoTest extends TestCase {
     
-    private Mockery mockery;
-    
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        mockery = new Mockery();
-    }
-    
     public void testToString() throws Exception {
-        final Artifact artifact = mockery.mock(Artifact.class);
-        mockery.checking(new Expectations() {{
-            allowing(artifact).getGroupId(); will(returnValue("org.apache.servicemix.test"));
-            allowing(artifact).getArtifactId(); will(returnValue("test-artifact"));
-            allowing(artifact).getVersion(); will(returnValue("1.2.3"));
-        }});
-        assertEquals("org.apache.servicemix.test/test-artifact/1.2.3", GenerateFeaturesXmlMojo.toString(artifact));
+        Artifact artifact = EasyMock.createMock(Artifact.class);
+
+        expect(artifact.getGroupId()).andReturn("org.apache.felix.karaf.test");
+        expect(artifact.getArtifactId()).andReturn("test-artifact");
+        expect(artifact.getVersion()).andReturn("1.2.3");
+        
+        replay(artifact);
+        
+        assertEquals("org.apache.felix.karaf.test/test-artifact/1.2.3", GenerateFeaturesXmlMojo.toString(artifact));
     }
 
 }
