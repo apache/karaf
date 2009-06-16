@@ -18,6 +18,7 @@
  */
 package org.apache.felix.framework;
 
+import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.CodeSource;
@@ -27,8 +28,10 @@ import java.security.cert.Certificate;
 
 public class BundleProtectionDomain extends ProtectionDomain
 {
-    private final Felix m_felix;
-    private final BundleImpl m_bundle;
+    private final WeakReference m_felix;
+    private final WeakReference m_bundle;
+    private final int m_hashCode;
+    private final String m_toString;
 
     // TODO: SECURITY - This should probably take a module, not a bundle.
     BundleProtectionDomain(Felix felix, BundleImpl bundle)
@@ -37,41 +40,51 @@ public class BundleProtectionDomain extends ProtectionDomain
         super(new CodeSource(new URL(new URL(null, "location:", 
             new FakeURLStreamHandler()), bundle._getLocation(),
             new FakeURLStreamHandler()), (Certificate[]) null), null);
-        m_felix = felix;
-        m_bundle = bundle;
+        m_felix = new WeakReference(felix);
+        m_bundle = new WeakReference(bundle);
+        m_hashCode = bundle.hashCode();
+        m_toString = "[" + bundle + "]";
     }
 
     public boolean implies(Permission permission)
     {
-        return m_felix.impliesBundlePermission(this, permission, false);
+        Felix felix = (Felix) m_felix.get();
+        return (felix != null) ? 
+            felix.impliesBundlePermission(this, permission, false) : false;
     }
 
     public boolean impliesDirect(Permission permission)
     {
-        return m_felix.impliesBundlePermission(this, permission, true);
+        Felix felix = (Felix) m_felix.get();
+        return (felix != null) ? 
+            felix.impliesBundlePermission(this, permission, true) : false;
     }
 
     BundleImpl getBundle()
     {
-        return m_bundle;
+        return (BundleImpl) m_bundle.get();
     }
 
     public int hashCode()
     {
-        return m_bundle.hashCode();
+        return m_hashCode;
     }
 
     public boolean equals(Object other)
     {
-        if ((other == null) || other.getClass() != BundleProtectionDomain.class)
+        if ((other == null) || (other.getClass() != BundleProtectionDomain.class))
         {
             return false;
         }
-        return m_bundle == ((BundleProtectionDomain) other).m_bundle;
+        if (m_hashCode != other.hashCode())
+        {
+            return false;
+        }
+        return m_bundle.get() == ((BundleProtectionDomain) other).m_bundle.get();
     }
 
     public String toString()
     {
-        return "[" + m_bundle + "]";
+        return m_toString;
     }
 }
