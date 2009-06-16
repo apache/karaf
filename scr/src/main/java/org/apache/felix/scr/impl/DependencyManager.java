@@ -72,7 +72,7 @@ class DependencyManager implements ServiceListener, Reference
 
     // the object on which the bind/undind methods are to be called
     private transient Object m_componentInstance;
-    
+
     // the bind method
     private Method m_bind;
 
@@ -90,7 +90,7 @@ class DependencyManager implements ServiceListener, Reference
 
     // the target service filter
     private Filter m_targetFilter;
-    
+
 
     /**
      * Constructor that receives several parameters.
@@ -129,7 +129,7 @@ class DependencyManager implements ServiceListener, Reference
             case ServiceEvent.REGISTERED:
                 m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Adding " + serviceString,
                     m_componentManager.getComponentMetadata(), null );
-                
+
                 // consider the service if the filter matches
                 if ( targetFilterMatch( ref ) )
                 {
@@ -147,10 +147,10 @@ class DependencyManager implements ServiceListener, Reference
             case ServiceEvent.MODIFIED:
                 m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Updating " + serviceString,
                     m_componentManager.getComponentMetadata(), null );
-                
+
                 // remove the service first
                 serviceRemoved( ref );
-                
+
                 // recalculate the number of services matching the filter
                 // because we don't know whether this service previously matched
                 // or not
@@ -164,7 +164,7 @@ class DependencyManager implements ServiceListener, Reference
             case ServiceEvent.UNREGISTERING:
                 m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Removing " + serviceString,
                     m_componentManager.getComponentMetadata(), null );
-                
+
                 // manage the service counter if the filter matchs
                 if ( targetFilterMatch( ref ) )
                 {
@@ -181,7 +181,7 @@ class DependencyManager implements ServiceListener, Reference
                 // remove the service ignoring the filter match because if the
                 // service is bound, it has to be removed no matter what
                 serviceRemoved( ref );
-                
+
                 break;
         }
     }
@@ -227,7 +227,7 @@ class DependencyManager implements ServiceListener, Reference
                     m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Service "
                         + m_dependencyMetadata.getName() + " registered, reactivate component", m_componentManager
                         .getComponentMetadata(), null );
-    
+
                     m_componentManager.reactivate();
                 }
                 else
@@ -246,7 +246,7 @@ class DependencyManager implements ServiceListener, Reference
                     }
                 }
             }
-    
+
             // otherwise bind if we have a bind method and the service needs
             // be bound
             else if ( m_dependencyMetadata.getBind() != null )
@@ -267,15 +267,15 @@ class DependencyManager implements ServiceListener, Reference
                     {
                         // bind the service, getting it if required
                         invokeBindMethod( reference );
-    
+
                         // unbind the old service reference
                         unbind( boundRefs );
                     }
                 }
             }
         }
-        
-        else 
+
+        else
         {
             m_componentManager.log( LogService.LOG_DEBUG,
 					"Dependency Manager: Ignoring service addition, wrong state "
@@ -283,8 +283,8 @@ class DependencyManager implements ServiceListener, Reference
 					m_componentManager.getComponentMetadata(), null );
         }
     }
-    
-    
+
+
     /**
      * Called by the {@link #serviceChanged(ServiceEvent)} method if an existing
      * service is unregistered from the system or if a registered service has
@@ -322,11 +322,11 @@ class DependencyManager implements ServiceListener, Reference
                         "Dependency Manager: Deactivating component due to mandatory dependency on "
                             + m_dependencyMetadata.getName() + "/" + m_dependencyMetadata.getInterface()
                             + " not satisfied", m_componentManager.getComponentMetadata(), null );
-    
+
                 // deactivate the component now
                 m_componentManager.deactivateInternal();
             }
-    
+
             // if the dependency is static, we have to reactivate the component
             // to "remove" the dependency
             else if ( m_dependencyMetadata.isStatic() )
@@ -345,11 +345,11 @@ class DependencyManager implements ServiceListener, Reference
                         m_componentManager.getComponentMetadata(), ex );
                 }
             }
-    
+
             // dynamic dependency, multiple or single but this service is the bound one
             else
             {
-    
+
                 // try to bind a replacement service first if this is a unary
                 // cardinality reference and a replacement is available.
                 if ( !m_dependencyMetadata.isMultiple() )
@@ -363,24 +363,24 @@ class DependencyManager implements ServiceListener, Reference
                                 + m_dependencyMetadata.getName() + "/" + m_dependencyMetadata.getInterface()
                                 + " not satisfied", m_componentManager.getComponentMetadata(), null );
                         m_componentManager.deactivateInternal();
-    
+
                         // abort here we do not need to do more
                         return;
                     }
                 }
-    
+
                 // call the unbind method if one is defined
                 if ( m_dependencyMetadata.getUnbind() != null )
                 {
                     invokeUnbindMethod( reference );
                 }
-                
+
                 // make sure the service is returned
                 ungetService( reference );
             }
         }
-        
-        else 
+
+        else
         {
             m_componentManager.log( LogService.LOG_DEBUG,
 					"Dependency Manager: Ignoring service removal, wrong state "
@@ -388,8 +388,8 @@ class DependencyManager implements ServiceListener, Reference
 					m_componentManager.getComponentMetadata(), null );
         }
     }
-    
-    
+
+
     private boolean handleServiceEvent()
     {
         return ( m_componentManager.getState() & STATE_MASK ) != 0;
@@ -460,7 +460,7 @@ class DependencyManager implements ServiceListener, Reference
         m_componentManager.log( LogService.LOG_DEBUG, "Registered for service events, currently " + m_size
             + " service(s) match the filter", m_componentManager.getComponentMetadata(), null );
     }
-    
+
     /**
      * Disposes off this dependency manager by removing as a service listener
      * and ungetting all services, which are still kept in the list of our
@@ -635,12 +635,12 @@ class DependencyManager implements ServiceListener, Reference
      * ranking as specified by the service.ranking property. If both services
      * have the same service ranking, then the service with the lowest service
      * ID as specified by the service.id property is chosen.
-     * 
+     *
      * @param newReference The ServiceReference representing the newly added
      *      Service
      * @param oldReference The ServiceReference representing the service which
      *      is already bound to the component
-     *      
+     *
      * @return <code>true</code> if <code>newReference</code> has higher ranking
      */
     private boolean isHigher( ServiceReference newReference, ServiceReference oldReference )
@@ -680,7 +680,7 @@ class DependencyManager implements ServiceListener, Reference
      * if the property exists and is of type <code>java.lang.Integer</code>. If
      * the property does not exist or is of another type, zero is returned as
      * the default value for service ranking.
-     * 
+     *
      * @param serviceReference The Service reference whose ranking is to be
      *          returned.
      */
@@ -697,10 +697,10 @@ class DependencyManager implements ServiceListener, Reference
 
     /**
      * Returns the value of the <code>service.id</code> service property.
-     * 
+     *
      * @param serviceReference The Service reference whose service id is to be
      *          returned.
-     *          
+     *
      * @throws ClassCastException if the <code>service.id</code> property exists
      *          but is not a <code>java.lang.Long</code> value. This is not
      *          expected since the framework should guarantee this property and
@@ -990,8 +990,8 @@ class DependencyManager implements ServiceListener, Reference
         try
         {
             // Case 1 - ServiceReference parameter
-            return AbstractComponentManager.getMethod( targetClass, methodname, new Class[]
-                { SERVICE_REFERENCE_CLASS }, true );
+            return ReflectionHelper.getMethod( targetClass, methodname, new Class[]
+                { SERVICE_REFERENCE_CLASS }, false, false );
         }
         catch ( NoSuchMethodException ex )
         {
@@ -1009,8 +1009,8 @@ class DependencyManager implements ServiceListener, Reference
                 }
 
                 parameterClass = loader.loadClass( parameterClassName );
-                return AbstractComponentManager.getMethod( targetClass, methodname, new Class[]
-                    { parameterClass }, true );
+                return ReflectionHelper.getMethod( targetClass, methodname, new Class[]
+                    { parameterClass }, false, false );
             }
             catch ( NoSuchMethodException ex2 )
             {
@@ -1062,6 +1062,10 @@ class DependencyManager implements ServiceListener, Reference
                 // if we can't load the class, perhaps the method is declared in a super class
                 // so we try this class next
             }
+
+
+            // TODO: Case 4: same as case 2, but + Map param
+            // TODO: Case 5: same as case 3, but + Map param
         }
 
         // if we get here, we have no method, so check the super class
@@ -1289,7 +1293,7 @@ class DependencyManager implements ServiceListener, Reference
         }
     }
 
-    
+
     //------------- Service target filter support -----------------------------
 
     /**

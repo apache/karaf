@@ -18,9 +18,6 @@
  */
 package org.apache.felix.scr.impl;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -960,67 +957,5 @@ abstract class AbstractComponentManager implements Component, ComponentInstance
                 m_componentMetadata, null );
 
         m_state = newState;
-    }
-
-    /**
-     * Finds the named public or protected method in the given class or any
-     * super class. If such a method is found, its accessibility is enfored by
-     * calling the <code>Method.setAccessible</code> method if required and
-     * the method is returned. Enforcing accessibility is required to support
-     * invocation of protected methods.
-     *
-     * @param clazz The <code>Class</code> which provides the method.
-     * @param name The name of the method.
-     * @param parameterTypes The parameters to the method. Passing
-     *      <code>null</code> is equivalent to using an empty array.
-     * @param only Whether to only look at the declared methods of the given
-     *      class or also inspect the super classes.
-     *
-     * @return The named method with enforced accessibility
-     *
-     * @throws NoSuchMethodException If no public or protected method with
-     *      the given name can be found in the class or any of its super classes.
-     * @throws InvocationTargetException If an unexpected Throwable is caught
-     *      trying to access the desired method.
-     */
-    static Method getMethod( Class clazz, String name, Class[] parameterTypes, boolean only )
-            throws NoSuchMethodException, InvocationTargetException
-    {
-        for ( ; clazz != null; clazz = clazz.getSuperclass() )
-        {
-            try
-            {
-                // find the declared method in this class
-                Method method = clazz.getDeclaredMethod( name, parameterTypes );
-
-                // accept public and protected methods only and ensure accessibility
-                if ( Modifier.isPublic( method.getModifiers() ) || Modifier.isProtected( method.getModifiers()) )
-                {
-                    method.setAccessible( true );
-                    return method;
-                }
-
-                // if only the clazz is to be scanned terminate here
-                if ( only )
-                {
-                    break;
-                }
-            }
-            catch ( NoSuchMethodException nsme )
-            {
-                // ignore for now
-            }
-            catch ( Throwable throwable )
-            {
-                // unexpected problem accessing the method, don't let everything
-                // blow up in this situation, just throw a declared exception
-                throw new InvocationTargetException( throwable,
-                        "Unexpected problem trying to get method " + name );
-            }
-        }
-
-        // walked up the complete super class hierarchy and still not found
-        // anything, sigh ...
-        throw new NoSuchMethodException( name );
     }
 }

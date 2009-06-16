@@ -24,7 +24,9 @@ import java.lang.reflect.Method;
 import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
+import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
@@ -37,11 +39,50 @@ import org.osgi.service.log.LogService;
  */
 class ImmediateComponentManager extends AbstractComponentManager
 {
+    private static final Class COMPONENT_CONTEXT_CLASS = ComponentContext.class;
+
+    private static final Class BUNDLE_CONTEXT_CLASS = BundleContext.class;
+
+    private static final Class MAP_CLASS = Map.class;
+
+    // this is an internal field made available only to the unit tests
+    static final Class[][] ACTIVATE_PARAMETER_LIST = {
+        { COMPONENT_CONTEXT_CLASS },
+        { BUNDLE_CONTEXT_CLASS },
+        { MAP_CLASS },
+
+        { COMPONENT_CONTEXT_CLASS, BUNDLE_CONTEXT_CLASS },
+        { COMPONENT_CONTEXT_CLASS, MAP_CLASS },
+
+        { BUNDLE_CONTEXT_CLASS, COMPONENT_CONTEXT_CLASS },
+        { BUNDLE_CONTEXT_CLASS, MAP_CLASS },
+
+        { MAP_CLASS, COMPONENT_CONTEXT_CLASS },
+        { MAP_CLASS, BUNDLE_CONTEXT_CLASS },
+
+        { COMPONENT_CONTEXT_CLASS, BUNDLE_CONTEXT_CLASS, MAP_CLASS },
+        { COMPONENT_CONTEXT_CLASS, MAP_CLASS, BUNDLE_CONTEXT_CLASS },
+
+        { BUNDLE_CONTEXT_CLASS, COMPONENT_CONTEXT_CLASS, MAP_CLASS },
+        { BUNDLE_CONTEXT_CLASS, MAP_CLASS, COMPONENT_CONTEXT_CLASS },
+
+        { MAP_CLASS, COMPONENT_CONTEXT_CLASS, BUNDLE_CONTEXT_CLASS },
+        { MAP_CLASS, BUNDLE_CONTEXT_CLASS, COMPONENT_CONTEXT_CLASS },
+
+        {}
+    };
+
     // The object that implements the service and that is bound to other services
     private Object m_implementationObject;
 
     // The context that will be passed to the implementationObject
     private ComponentContext m_componentContext;
+
+    // the activate method
+    private Method activateMethod = ReflectionHelper.SENTINEL;
+
+    // the deactivate method
+    private Method deactivateMethod = ReflectionHelper.SENTINEL;
 
     // optional properties provided in the ComponentFactory.newInstance method
     private Dictionary m_factoryProperties;
@@ -186,34 +227,17 @@ class ImmediateComponentManager extends AbstractComponentManager
             }
         }
 
+        // get the method
+        if ( activateMethod == ReflectionHelper.SENTINEL )
+        {
+            activateMethod = getMethod( implementationObject, getComponentMetadata().getActivate() );
+        }
+
         // 4. Call the activate method, if present
-        // Search for the activate method
-        final String activateMethodName = getComponentMetadata().getActivate();
-        try
-        {
-            Method activateMethod = getMethod( implementationObject.getClass(), activateMethodName, new Class[]
-                    { ComponentContext.class }, false );
-            activateMethod.invoke( implementationObject, new Object[]
-                { componentContext } );
-        }
-        catch ( NoSuchMethodException ex )
-        {
-            // We can safely ignore this one
-            log( LogService.LOG_DEBUG, activateMethodName + " method is not implemented", getComponentMetadata(), null );
-        }
-        catch ( IllegalAccessException ex )
-        {
-            // Ignored, but should it be logged?
-            log( LogService.LOG_DEBUG, activateMethodName + " method cannot be called", getComponentMetadata(), null );
-        }
-        catch ( InvocationTargetException ex )
+        if ( activateMethod != null && !invokeMethod( activateMethod, implementationObject, componentContext ) )
         {
             // 112.5.8 If the activate method throws an exception, SCR must log an error message
             // containing the exception with the Log Service and activation fails
-            log( LogService.LOG_ERROR, "The " + activateMethodName + " method has thrown an exception",
-                getComponentMetadata(), ex.getCause() );
-
-            // make sure, we keep no bindings
             it = getDependencyManagers();
             while ( it.hasNext() )
             {
@@ -221,7 +245,7 @@ class ImmediateComponentManager extends AbstractComponentManager
                 dm.close();
             }
 
-            return null;
+            implementationObject = null;
         }
 
         return implementationObject;
@@ -231,34 +255,17 @@ class ImmediateComponentManager extends AbstractComponentManager
     protected void disposeImplementationObject( Object implementationObject, ComponentContext componentContext )
     {
 
+        // get the method
+        if ( deactivateMethod == ReflectionHelper.SENTINEL )
+        {
+            deactivateMethod = getMethod( implementationObject, getComponentMetadata().getDeactivate() );
+        }
+
         // 1. Call the deactivate method, if present
-        // Search for the activate method
-        final String deactivateMethodName = getComponentMetadata().getDeactivate();
-        try
-        {
-            Method deactivateMethod = getMethod( implementationObject.getClass(), deactivateMethodName, new Class[]
-                { ComponentContext.class }, false );
-            deactivateMethod.invoke( implementationObject, new Object[]
-                { componentContext } );
-        }
-        catch ( NoSuchMethodException ex )
-        {
-            // We can safely ignore this one
-            log( LogService.LOG_DEBUG, deactivateMethodName + " method is not implemented", getComponentMetadata(),
-                null );
-        }
-        catch ( IllegalAccessException ex )
-        {
-            // Ignored, but should it be logged?
-            log( LogService.LOG_DEBUG, deactivateMethodName + " method cannot be called", getComponentMetadata(), null );
-        }
-        catch ( InvocationTargetException ex )
-        {
-            // 112.5.12 If the deactivate method throws an exception, SCR must log an error message
-            // containing the exception with the Log Service and continue
-            log( LogService.LOG_ERROR, "The " + deactivateMethodName + " method has thrown an exception",
-                getComponentMetadata(), ex.getCause() );
-        }
+        // don't care for the result, the error (acccording to 112.5.12 If the deactivate
+        // method throws an exception, SCR must log an error message containing the
+        // exception with the Log Service and continue) has already been logged
+        invokeMethod( deactivateMethod, implementationObject, componentContext );
 
         // 2. Unbind any bound services
         Iterator it = getDependencyManagers();
@@ -381,5 +388,105 @@ class ImmediateComponentManager extends AbstractComponentManager
                 getComponentMetadata(), null );
             reactivate();
         }
+    }
+
+
+    /**
+     * Find the method with the given name in the class hierarchy of the
+     * implementation object's class. This method looks for methods which have
+     * one of the parameter lists of the {@link #ACTIVATE_PARAMETER_LIST} array.
+     *
+     * @param implementationObject The object whose class (and its super classes)
+     *      may provide the method
+     * @param methodName Name of the method to look for
+     * @return The named method or <code>null</code> if no such method is available.
+     */
+    private Method getMethod( final Object implementationObject, final String methodName )
+    {
+        try
+        {
+            return ReflectionHelper.getMethod( implementationObject.getClass(), methodName, ACTIVATE_PARAMETER_LIST );
+        }
+        catch ( InvocationTargetException ite )
+        {
+            // We can safely ignore this one
+            log( LogService.LOG_WARNING, methodName + " cannot be found", getComponentMetadata(), ite
+                .getTargetException() );
+        }
+        catch ( NoSuchMethodException ex )
+        {
+            // We can safely ignore this one
+            log( LogService.LOG_DEBUG, methodName + " method is not implemented", getComponentMetadata(), null );
+        }
+
+        return null;
+    }
+
+
+    /**
+     * Invokes the given method on the <code>implementationObject</code> using
+     * the <code>componentContext</code> as the base to create method argument
+     * list.
+     *
+     * @param method The method to call. This method must already have been
+     *      made accessible by calling
+     *      <code>Method.setAccessible(boolean)</code>.
+     * @param implementationObject The object on which to call the method.
+     * @param componentContext The <code>ComponentContext</code> used to
+     *      build the argument list
+     *
+     * @return <code>true</code> if the method should be considered invoked
+     *      successfully. <code>false</code> is returned if the method threw
+     *      an exception.
+     *
+     * @throws NullPointerException if any of the parameters is <code>null</code>.
+     */
+    private boolean invokeMethod( final Method method, final Object implementationObject,
+        final ComponentContext componentContext )
+    {
+        final String methodName = method.getName();
+        try
+        {
+            // build argument list
+            Class[] paramTypes = method.getParameterTypes();
+            Object[] param = new Object[paramTypes.length];
+            for ( int i = 0; i < param.length; i++ )
+            {
+                if ( paramTypes[i] == COMPONENT_CONTEXT_CLASS )
+                {
+                    param[i] = componentContext;
+                }
+                else if ( paramTypes[i] == BUNDLE_CONTEXT_CLASS )
+                {
+                    param[i] = componentContext.getBundleContext();
+                }
+                else if ( paramTypes[i] == MAP_CLASS )
+                {
+                    // note: getProperties() returns a Hashtable which is a Map
+                    param[i] = componentContext.getProperties();
+                }
+            }
+
+            method.invoke( implementationObject, new Object[]
+                { componentContext } );
+        }
+        catch ( IllegalAccessException ex )
+        {
+            // Ignored, but should it be logged?
+            log( LogService.LOG_DEBUG, methodName + " method cannot be called", getComponentMetadata(), null );
+        }
+        catch ( InvocationTargetException ex )
+        {
+            // 112.5.8 If the activate method throws an exception, SCR must log an error message
+            // containing the exception with the Log Service and activation fails
+            log( LogService.LOG_ERROR, "The " + methodName + " method has thrown an exception", getComponentMetadata(),
+                ex.getCause() );
+
+            // method threw, so it was a failure
+            return false;
+        }
+
+        // assume success (also if the method is not available or accessible)
+        return true;
     }
 }
