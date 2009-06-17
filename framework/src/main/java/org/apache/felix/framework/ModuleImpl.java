@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -425,6 +426,20 @@ public class ModuleImpl implements IModule
     public IContent getContent()
     {
         return m_content;
+    }
+
+    synchronized Enumeration getEntries()
+    {
+        Enumeration[] ens =
+            new Enumeration[(m_fragmentContents == null)
+                ? 1
+                : m_fragmentContents.length + 1];
+        ens[0] = m_content.getEntries();
+        for (int i = 1; i < ens.length; i++)
+        {
+            ens[i] = m_fragmentContents[i - 1].getEntries();
+        }
+        return new CompoundEnumeration(ens);
     }
 
     private synchronized IContent[] getContentPath()
@@ -1058,6 +1073,7 @@ public class ModuleImpl implements IModule
         }
     }
 
+    // This must be called holding the object lock.
     private void attachFragmentContents(IContent[] fragmentContents)
         throws Exception
     {

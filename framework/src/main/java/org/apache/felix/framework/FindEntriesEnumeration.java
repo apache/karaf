@@ -35,7 +35,7 @@ class FindEntriesEnumeration implements Enumeration
         m_bundle = bundle;
         m_path = path;
         m_enumeration = (m_bundle.getCurrentModule().getContent() == null)
-            ? null : m_bundle.getCurrentModule().getContent().getEntries();
+            ? null : ((ModuleImpl) m_bundle.getCurrentModule()).getEntries();
         m_recurse = recurse;
 
         // Sanity check the parameters.
