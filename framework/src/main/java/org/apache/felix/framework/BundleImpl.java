@@ -971,12 +971,15 @@ class BundleImpl implements Bundle
             // TODO: Security
             // sp.checkBundle(this);
         }
-        module.setSecurityContext(new BundleProtectionDomain(getFramework(), this));
 
         IModule[] dest = new IModule[m_modules.length + 1];
         System.arraycopy(m_modules, 0, dest, 0, m_modules.length);
         dest[m_modules.length] = module;
         m_modules = dest;
+
+        // Set protection domain after adding the module to the bundle,
+        // since this requires that the bundle has a module.
+        module.setSecurityContext(new BundleProtectionDomain(getFramework(), this));
 
         // TODO: REFACTOR - consider moving ModuleImpl into the framework package
         // so we can null module capabilities for extension bundles so we don't
