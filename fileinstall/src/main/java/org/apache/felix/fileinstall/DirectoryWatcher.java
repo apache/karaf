@@ -21,7 +21,6 @@ package org.apache.felix.fileinstall;
 import java.io.*;
 import java.util.*;
 import java.net.URISyntaxException;
-import java.net.URI;
 
 import org.apache.felix.fileinstall.util.Util;
 import org.osgi.framework.*;
@@ -90,8 +89,20 @@ public class DirectoryWatcher extends Thread
         {
             dir = "./load";
         }
-        this.watchedDirectory = new File(dir);
-        this.watchedDirectory.mkdirs();
+        watchedDirectory = new File(dir);
+        
+        if (!watchedDirectory.exists() && !watchedDirectory.mkdirs())
+        {
+            log("Cannot create folder " + watchedDirectory + ". Is the folder write-protected?", null);
+            throw new RuntimeException("Cannot create folder " + watchedDirectory);
+        }
+
+        if (!this.watchedDirectory.isDirectory())
+        {
+            log( "Cannot watch " + watchedDirectory + " because it's not a directory", null);
+            throw new RuntimeException("Cannot start FileInstall to watch something that is not a directory");
+        }
+        
         Object value = properties.get(START_NEW_BUNDLES);
         if (value != null)
         {
