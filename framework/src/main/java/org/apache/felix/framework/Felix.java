@@ -308,9 +308,8 @@ public class Felix extends BundleImpl implements Framework
         {
             // This should not throw an exception, but if so, lets convert it to
             // a runtime exception.
-            throw new RuntimeException(ex.getMessage());
+            throw new RuntimeException(ex);
         }
-
 
         // Read the boot delegation property and parse it.
         String s = (m_configMap == null)
@@ -2149,6 +2148,9 @@ ex.printStackTrace();
             releaseBundleLock(bundle);
         }
 
+        // Fire UNRESOLVED event without holding the lock.
+        fireBundleEvent(BundleEvent.UNRESOLVED, bundle);
+
         // Fire UNINSTALLED event without holding the lock.
         fireBundleEvent(BundleEvent.UNINSTALLED, bundle);
 
@@ -3561,7 +3563,6 @@ ex.printStackTrace();
         {
             // Reset the bundle object and fire UNRESOLVED event.
             ((BundleImpl) bundle).refresh();
-            fireBundleEvent(BundleEvent.UNRESOLVED, bundle);
         }
         catch (Exception ex)
         {
