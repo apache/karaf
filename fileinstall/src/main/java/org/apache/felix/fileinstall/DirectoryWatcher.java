@@ -82,7 +82,7 @@ public class DirectoryWatcher extends Thread
         this.context = context;
         poll = getLong(properties, POLL, poll);
         debug = getLong(properties, DEBUG, -1);
-        originatingFileName = ( String ) properties.get( FILENAME );
+        originatingFileName = (String) properties.get(FILENAME);
         
         String dir = (String) properties.get(DIR);
         if (dir == null)
@@ -99,7 +99,7 @@ public class DirectoryWatcher extends Thread
 
         if (!this.watchedDirectory.isDirectory())
         {
-            log( "Cannot watch " + watchedDirectory + " because it's not a directory", null);
+            log("Cannot watch " + watchedDirectory + " because it's not a directory", null);
             throw new RuntimeException("Cannot start FileInstall to watch something that is not a directory");
         }
         
@@ -293,36 +293,36 @@ public class DirectoryWatcher extends Thread
     Configuration getConfiguration(String pid, String factoryPid)
         throws Exception
     {
-	    Configuration oldConfiguration = findExistingConfiguration( pid, factoryPid );
-        if ( oldConfiguration != null )
+	    Configuration oldConfiguration = findExistingConfiguration(pid, factoryPid);
+        if (oldConfiguration != null)
         {
-            log( "Updating configuration from " + pid + ( factoryPid == null ? "" : "-" + factoryPid ) + ".cfg", null );
+            log("Updating configuration from " + pid + (factoryPid == null ? "" : "-" + factoryPid) + ".cfg", null);
             return oldConfiguration;
         }
         else
         {
-            ConfigurationAdmin cm = ( ConfigurationAdmin ) FileInstall.cmTracker.getService();
+            ConfigurationAdmin cm = (ConfigurationAdmin) FileInstall.cmTracker.getService();
             Configuration newConfiguration = null;
-            if ( factoryPid != null )
+            if (factoryPid != null)
             {
-                newConfiguration = cm.createFactoryConfiguration( pid, null );
+                newConfiguration = cm.createFactoryConfiguration(pid, null);
             }
             else
             {
-                newConfiguration = cm.getConfiguration( pid, null );
+                newConfiguration = cm.getConfiguration(pid, null);
             }
             return newConfiguration;
         }
     }
     
-    Configuration findExistingConfiguration( String pid, String factoryPid ) throws Exception
+    Configuration findExistingConfiguration(String pid, String factoryPid) throws Exception
     {
         String suffix = factoryPid == null ? ".cfg" : "-" + factoryPid + ".cfg";
 
-        ConfigurationAdmin cm = ( ConfigurationAdmin ) FileInstall.cmTracker.getService();
+        ConfigurationAdmin cm = (ConfigurationAdmin) FileInstall.cmTracker.getService();
         String filter = "(" + FILENAME + "=" + pid + suffix + ")";
-        Configuration[] configurations = cm.listConfigurations( filter );
-        if ( configurations != null && configurations.length > 0 )
+        Configuration[] configurations = cm.listConfigurations(filter);
+        if (configurations != null && configurations.length > 0)
         {
             return configurations[0];
         }
@@ -725,9 +725,12 @@ public class DirectoryWatcher extends Thread
 
             // old can't be null because of the way we calculate deleted list.
             Bundle bundle = context.getBundle(old.getBundleId());
-            if ( bundle == null )
+            if (bundle == null)
             {
-            	log( "Failed to uninstall bundle: " + jar.getPath() + " with id: "+old.getBundleId() + ". The bundle has already been uninstalled", null );
+            	log("Failed to uninstall bundle: "
+                    + jar.getPath() + " with id: "
+                    + old.getBundleId()
+                    + ". The bundle has already been uninstalled", null);
             	return null;
             }
             bundle.uninstall();

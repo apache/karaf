@@ -114,14 +114,14 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory
         throws ConfigurationException
     {
         deleted(pid);
-        performSubstitution( properties );    
+        performSubstitution(properties);    
         
         DirectoryWatcher watcher = new DirectoryWatcher(properties, context);
         watchers.put(pid, watcher);
         watcher.start();
     }
 
-    private void performSubstitution( Dictionary properties )
+    private void performSubstitution(Dictionary properties)
     {
         for (Enumeration e = properties.keys(); e.hasMoreElements(); )
         {
