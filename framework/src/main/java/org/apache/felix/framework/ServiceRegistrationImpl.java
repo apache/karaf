@@ -19,6 +19,7 @@
 package org.apache.felix.framework;
 
 import java.security.AccessController;
+import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.*;
 
@@ -194,25 +195,33 @@ class ServiceRegistrationImpl implements ServiceRegistration
         // let it create the service object.
         if (m_factory != null)
         {
+            Object svcObj = null;
             try
             {
                 if (System.getSecurityManager() != null)
                 {
-                    return AccessController.doPrivileged(
+                    svcObj = AccessController.doPrivileged(
                         new ServiceFactoryPrivileged(acqBundle, null));
                 }
                 else
                 {
-                    return getFactoryUnchecked(acqBundle);
+                    svcObj = getFactoryUnchecked(acqBundle);
                 }
             }
-            catch (Exception ex)
+            catch (PrivilegedActionException ex)
             {
-                m_registry.getLogger().log(
-                    Logger.LOG_ERROR,
-                    "ServiceRegistrationImpl: Error getting service.", ex);
-                return null;
+                if (ex.getException() instanceof ServiceException)
+                {
+                    throw (ServiceException) ex.getException();
+                }
+                else
+                {
+                    throw new ServiceException(
+                        "Service factory exception: " + ex.getException().getMessage(),
+                        ServiceException.FACTORY_EXCEPTION, ex.getException());
+                }
             }
+            return svcObj;
         }
         else
         {
@@ -279,7 +288,17 @@ class ServiceRegistrationImpl implements ServiceRegistration
 
     private Object getFactoryUnchecked(Bundle bundle)
     {
-        Object svcObj = m_factory.getService(bundle, this);
+        Object svcObj = null;
+        try
+        {
+            svcObj = m_factory.getService(bundle, this);
+        }
+        catch (Throwable th)
+        {
+            throw new ServiceException(
+                "Service factory exception: " + th.getMessage(),
+                ServiceException.FACTORY_EXCEPTION, th);
+        }
         if (svcObj != null)
         {
             for (int i = 0; i < m_classes.length; i++)
@@ -287,9 +306,25 @@ class ServiceRegistrationImpl implements ServiceRegistration
                 Class clazz = Util.loadClassUsingClass(svcObj.getClass(), m_classes[i]);
                 if ((clazz == null) || !clazz.isAssignableFrom(svcObj.getClass()))
                 {
-                    return null;
+                    if (clazz == null)
+                    {
+                        throw new ServiceException(
+                            "Service cannot be cast due to missing class: " + m_classes[i],
+                            ServiceException.FACTORY_ERROR);
+                    }
+                    else
+                    {
+                        throw new ServiceException(
+                            "Service cannot be cast: " + m_classes[i],
+                            ServiceException.FACTORY_ERROR);
+                    }
                 }
             }
+        }
+        else
+        {
+            throw new ServiceException(
+                "Service factory returned null.", ServiceException.FACTORY_ERROR);
         }
         return svcObj;
     }

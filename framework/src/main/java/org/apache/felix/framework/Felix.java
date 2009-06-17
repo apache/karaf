@@ -2905,6 +2905,7 @@ ex.printStackTrace();
         // Check that the bundle has permission to get at least
         // one of the service interfaces; the objectClass property
         // of the service stores its service interfaces.
+// TODO: SECURITY - This check does not look complete.
         String[] objectClass = (String[])
             ref.getProperty(Constants.OBJECTCLASS);
         if (objectClass == null)
@@ -2912,7 +2913,16 @@ ex.printStackTrace();
             return null;
         }
 
-        return m_registry.getService(bundle, ref);
+        try
+        {
+            return m_registry.getService(bundle, ref);
+        }
+        catch (ServiceException ex)
+        {
+            fireFrameworkEvent(FrameworkEvent.ERROR, ref.getBundle(), ex);
+        }
+
+        return null;
     }
 
     protected boolean ungetService(Bundle bundle, ServiceReference ref)
