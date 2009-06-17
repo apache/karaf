@@ -28,7 +28,7 @@ import org.osgi.framework.Bundle;
  * This class is used to cache vital information of a jar file
  * that is used during later processing. It also overrides hashCode and
  * equals methods so that it can be used in various Set operations.
- * It uses file's path as the primary key. Before
+ * It uses file's path as the primary key. 
  *
  * @author Sanjeeb.Sahoo@Sun.COM
  */
@@ -53,10 +53,26 @@ class Jar
 
     Jar(Bundle b) throws URISyntaxException
     {
+        // Convert to a URI because the location of a bundle
+        // is typically a URI. At least, that's the case for
+        // autostart bundles.
         // Normalisation is needed to ensure that we don't treat (e.g.)
         // /tmp/foo and /tmp//foo differently.
-        URI uri = new URI(b.getLocation()).normalize();
-        path = uri.getPath();
+        String location = b.getLocation();
+        if (location != null)
+        {
+            URI uri;
+            try
+            {
+                uri = new URI(b.getLocation()).normalize();
+            }
+            catch (URISyntaxException e)
+            {
+                // Let's try to interpret the location as a file path
+                uri = new File(location).toURI().normalize();
+            }
+            path = uri.getPath();
+        }
         lastModified = b.getLastModified();
         bundleId = b.getBundleId();
     }

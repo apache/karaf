@@ -552,20 +552,20 @@ public class DirectoryWatcher extends Thread
         {
             try
             {
-                final URI uri = new URI(bundles[i].getLocation());
-                if (uri.isOpaque())
+                Jar jar = new Jar(bundles[i]);
+                String path =  jar.getPath();
+                if (path == null)
                 {
-                    // We can't do any meaningful processing of Opaque URI.
-                    // e.g. Path component of an opaque URI is null
+                    // jar.getPath is null means we could not parse the location
+                    // as a meaningful URI or file path. e.g., location
+                    // represented an Opaque URI.
+                    // We can't do any meaningful processing for this bundle.
                     continue;
                 }
-                String location =  uri.normalize().getPath();
-                final int index = location.lastIndexOf('/');
-                if (index != -1 && location.substring(0, index + 1).equals(watchedDirPath))
+                final int index = path.lastIndexOf('/');
+                if (index != -1 && path.substring(0, index + 1).equals(watchedDirPath))
                 {
-                    // This bundle's location matches our watched dir path
-                    Jar jar = new Jar(bundles[i]);
-                    currentManagedBundles.put(jar.getPath(), jar);
+                    currentManagedBundles.put(path, jar);
                 }
             }
             catch (URISyntaxException e)
