@@ -2195,7 +2195,7 @@ ex.printStackTrace();
      * @param key The name of the property to retrieve.
      * @return The value of the specified property or null.
     **/
-    protected String getProperty(String key)
+    String getProperty(String key)
     {
         // First, check the config properties.
         String val = (String) m_configMap.get(key);
@@ -2203,7 +2203,7 @@ ex.printStackTrace();
         return (val == null) ? System.getProperty(key) : val;
     }
 
-    protected Bundle installBundle(String location, InputStream is)
+    Bundle installBundle(String location, InputStream is)
         throws BundleException
     {
         return installBundle(-1, location, is);
@@ -2532,7 +2532,7 @@ ex.printStackTrace();
      * @return The bundle associated with the location or null if there
      *         is no bundle associated with the location.
     **/
-    protected Bundle getBundle(String location)
+    Bundle getBundle(String location)
     {
         synchronized (m_installedBundleLock_Priority2)
         {
@@ -2548,7 +2548,7 @@ ex.printStackTrace();
      * @return The bundle associated with the identifier or null if there
      *         is no bundle associated with the identifier.
     **/
-    protected Bundle getBundle(long id)
+    Bundle getBundle(long id)
     {
         synchronized (m_installedBundleLock_Priority2)
         {
@@ -2582,7 +2582,7 @@ ex.printStackTrace();
      * @return An array containing all installed bundles or null if
      *         there are no installed bundles.
     **/
-    protected Bundle[] getBundles()
+    Bundle[] getBundles()
     {
         synchronized (m_installedBundleLock_Priority2)
         {
@@ -2596,12 +2596,12 @@ ex.printStackTrace();
         }
     }
 
-    protected void addBundleListener(Bundle bundle, BundleListener l)
+    void addBundleListener(Bundle bundle, BundleListener l)
     {
         m_dispatcher.addListener(bundle, BundleListener.class, l, null);
     }
 
-    protected void removeBundleListener(Bundle bundle, BundleListener l)
+    void removeBundleListener(Bundle bundle, BundleListener l)
     {
         m_dispatcher.removeListener(bundle, BundleListener.class, l);
     }
@@ -2615,7 +2615,7 @@ ex.printStackTrace();
      * @param l The service listener to add to the listener list.
      * @param f The filter for the listener; may be null.
     **/
-    protected void addServiceListener(Bundle bundle, ServiceListener l, String f)
+    void addServiceListener(Bundle bundle, ServiceListener l, String f)
         throws InvalidSyntaxException
     {
         m_dispatcher.addListener(
@@ -2644,7 +2644,7 @@ ex.printStackTrace();
      * @param bundle The context bundle of the listener
      * @param l The service listener to remove from the listener list.
     **/
-    protected void removeServiceListener(Bundle bundle, ServiceListener l)
+    void removeServiceListener(Bundle bundle, ServiceListener l)
     {
         ListenerHook.ListenerInfo listener =
             m_dispatcher.removeListener(bundle, ServiceListener.class, l);
@@ -2661,12 +2661,12 @@ ex.printStackTrace();
         }
     }
 
-    protected void addFrameworkListener(Bundle bundle, FrameworkListener l)
+    void addFrameworkListener(Bundle bundle, FrameworkListener l)
     {
         m_dispatcher.addListener(bundle, FrameworkListener.class, l, null);
     }
 
-    protected void removeFrameworkListener(Bundle bundle, FrameworkListener l)
+    void removeFrameworkListener(Bundle bundle, FrameworkListener l)
     {
         m_dispatcher.removeListener(bundle, FrameworkListener.class, l);
     }
@@ -2682,7 +2682,7 @@ ex.printStackTrace();
      *             service or null.
      * @return A <code>ServiceRegistration</code> object or null.
     **/
-    protected ServiceRegistration registerService(
+    ServiceRegistration registerService(
         BundleImpl bundle, String[] classNames, Object svcObj, Dictionary dict)
     {
         if (classNames == null)
@@ -2900,19 +2900,8 @@ ex.printStackTrace();
 
     }
 
-    protected Object getService(Bundle bundle, ServiceReference ref)
+    Object getService(Bundle bundle, ServiceReference ref)
     {
-        // Check that the bundle has permission to get at least
-        // one of the service interfaces; the objectClass property
-        // of the service stores its service interfaces.
-// TODO: SECURITY - This check does not look complete.
-        String[] objectClass = (String[])
-            ref.getProperty(Constants.OBJECTCLASS);
-        if (objectClass == null)
-        {
-            return null;
-        }
-
         try
         {
             return m_registry.getService(bundle, ref);
@@ -2925,12 +2914,12 @@ ex.printStackTrace();
         return null;
     }
 
-    protected boolean ungetService(Bundle bundle, ServiceReference ref)
+    boolean ungetService(Bundle bundle, ServiceReference ref)
     {
         return m_registry.ungetService(bundle, ref);
     }
 
-    protected File getDataFile(BundleImpl bundle, String s)
+    File getDataFile(BundleImpl bundle, String s)
     {
         try
         {
@@ -2963,7 +2952,7 @@ ex.printStackTrace();
      *         if the class was not loaded by a bundle or its associated
      *         bundle belongs to a different framework instance.
     **/
-    protected Bundle getBundle(Class clazz)
+    Bundle getBundle(Class clazz)
     {
         if (clazz.getClassLoader() instanceof ModuleClassLoader)
         {
@@ -2990,7 +2979,7 @@ ex.printStackTrace();
      * @param pkgName The name of the exported package to find.
      * @return The exported package or null if no matching package was found.
     **/
-    protected ExportedPackage[] getExportedPackages(String pkgName)
+    ExportedPackage[] getExportedPackages(String pkgName)
     {
         // First, get all exporters of the package.
         PackageSource[] exporters =
@@ -3054,7 +3043,7 @@ ex.printStackTrace();
      *        to be retrieved.
      * @return An array of exported packages.
     **/
-    protected ExportedPackage[] getExportedPackages(Bundle b)
+    ExportedPackage[] getExportedPackages(Bundle b)
     {
         List list = new ArrayList();
 
@@ -3172,7 +3161,7 @@ ex.printStackTrace();
         return null;
     }
 
-    protected Bundle[] getImportingBundles(ExportedPackage ep)
+    Bundle[] getImportingBundles(ExportedPackage ep)
     {
         // Create list for storing importing bundles.
         List list = new ArrayList();
@@ -4414,7 +4403,7 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1])
         }
     }
 
-    protected void acquireInstallLock(String location)
+    void acquireInstallLock(String location)
         throws BundleException
     {
         synchronized (m_installRequestLock_Priority1)
@@ -4435,7 +4424,7 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1])
         }
     }
 
-    protected void releaseInstallLock(String location)
+    void releaseInstallLock(String location)
     {
         synchronized (m_installRequestLock_Priority1)
         {
