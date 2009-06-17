@@ -2957,14 +2957,7 @@ ex.printStackTrace();
         {
             IModule module =
                 ((ModuleClassLoader) clazz.getClassLoader()).getModule();
-            IModule[] modules = m_resolverState.getModules();
-            for (int i = 0; i < modules.length; i++)
-            {
-                if (modules[i] == module)
-                {
-                    return modules[i].getBundle();
-                }
-            }
+            return module.getBundle();
         }
         try
         {
