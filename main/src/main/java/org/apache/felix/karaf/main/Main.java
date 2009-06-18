@@ -175,7 +175,9 @@ public class Main {
             // Start up the OSGI framework
 
             InputStream is = getClass().getResourceAsStream("/META-INF/services/" + FrameworkFactory.class.getName());
-            String factoryClass = new BufferedReader(new InputStreamReader(is, "UTF-8")).readLine();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            String factoryClass = br.readLine();
+            br.close();
             FrameworkFactory factory = (FrameworkFactory) getClass().getClassLoader().loadClass(factoryClass).newInstance();
             framework = factory.newFramework(new StringMap(configProps, false));
             framework.start();
