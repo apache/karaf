@@ -703,6 +703,11 @@ class ExtensionManager extends URLStreamHandler implements IContent
             return ExtensionManager.this;
         }
 
+        public Enumeration getEntries()
+        {
+            return ExtensionManager.this.getEntries();
+        }
+
         public URL getEntry(String name)
         {
             // There is no content for the system bundle, so return null.
