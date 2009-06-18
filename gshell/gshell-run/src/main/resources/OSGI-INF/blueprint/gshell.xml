@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+
+    <bean id="io" class="org.apache.geronimo.gshell.io.IO">
+        <property name="verbosity" value="DEBUG"/>
+    </bean>
+
+    <bean id="branding" class="org.apache.felix.karaf.gshell.core.DefaultBranding">
+        <property name="prompt" value="@|bold %{gshell.username}|@%{application.id}:@|bold %{gshell.group}|> " />
+    </bean>
+
+    <bean id="application" class="org.apache.felix.karaf.gshell.core.ApplicationImpl" init-method="init">
+        <property name="id" value="$[karaf.name]"/>
+        <property name="io" ref="io"/>
+        <property name="model">
+            <bean class="org.apache.geronimo.gshell.application.model.ApplicationModel">
+                <property name="branding" ref="branding"/>
+            </bean>
+        </property>
+        <property name="variables">
+            <bean class="org.apache.geronimo.gshell.command.Variables"/>
+        </property>
+    </bean>
+
+    <bean id="beanContainer" class="org.apache.felix.karaf.gshell.core.BeanContainerWrapper">
+        <argument ref="blueprintContainer"/>
+    </bean>
+
+    <bean id="eventManager" class="org.apache.geronimo.gshell.event.EventManagerImpl"/>
+
+    <bean id="applicationManager" class="org.apache.felix.karaf.gshell.core.ApplicationManagerImpl" init-method="init" destroy-method="destroy">
+        <argument ref="eventManager" />
+        <argument ref="application" />
+        <argument ref="blueprintContainer"/>
+    </bean>
+
+    <bean id="commandLineParser" class="org.apache.geronimo.gshell.parser.CommandLineParser"/>
+
+    <bean id="aliasRegistry" class="org.apache.geronimo.gshell.wisdom.registry.AliasRegistryImpl">
+        <argument ref="eventManager"/>
+    </bean>
+
+    <bean id="aliasMetaMapper" class="org.apache.geronimo.gshell.wisdom.registry.AliasMetaMapper" init-method="init">
+        <argument ref="eventManager"/>
+        <argument ref="metaDataRegistry"/>
+        <argument ref="aliasRegistry"/>
+    </bean>
+
+    <bean id="commandRegistry" class="org.apache.geronimo.gshell.wisdom.registry.CommandRegistryImpl">
+        <argument ref="eventManager"/>
+    </bean>
+
+    <bean id="commandMetaMapper" class="org.apache.geronimo.gshell.wisdom.registry.CommandMetaMapper" init-method="init">
+        <argument ref="eventManager"/>
+        <argument ref="metaDataRegistry"/>
+        <argument ref="commandRegistry"/>
+    </bean>
+
+    <bean id="groupDirResolver" class="org.apache.geronimo.gshell.wisdom.registry.GroupDirectoryResolver">
+        <argument ref="fileSystemAccess"/>
+    </bean>
+
+    <bean id="commandResolver" class="org.apache.felix.karaf.gshell.core.CommandResolverImpl">
+        <argument ref="fileSystemAccess"/>
+        <argument ref="groupDirResolver"/>
+        <property name="beanContainer" ref="beanContainer"/>
+        <property name="aliasCommandBeanId">
+            <idref component-id="aliasCommandPrototype"/>
+        </property>
+        <property name="groupCommandBeanId">
+            <idref component-id="groupCommandPrototype"/>
+        </property>
+    </bean>
+
+    <bean id="aliasCommandPrototype" class="org.apache.felix.karaf.gshell.core.WorkAroundAliasCommand" scope="prototype">
+        <argument ref="commandLineExecutor"/>
+        <property name="beanContainer" ref="beanContainer"/>
+    </bean>
+
+    <bean id="groupCommandPrototype" class="org.apache.geronimo.gshell.wisdom.command.GroupCommand" scope="prototype">
+        <property name="beanContainer" ref="beanContainer"/>
+    </bean>
+
+    <bean id="commandLineBuilder" class="org.apache.geronimo.gshell.wisdom.shell.CommandLineBuilderImpl">
+        <argument ref="commandLineParser"/>
+    </bean>
+
+    <bean id="commandLineExecutor" class="org.apache.geronimo.gshell.wisdom.shell.CommandLineExecutorImpl">
+        <argument ref="commandResolver"/>
+        <argument ref="commandLineBuilder"/>
+    </bean>
+
+    <bean id="shell" class="org.apache.geronimo.gshell.wisdom.shell.ShellImpl" scope="prototype" init-method="init" destroy-method="close">
+        <argument ref="application"/>
+        <argument ref="commandLineExecutor"/>
+
+        <property name="completers">
+            <list>
+                <ref component-id="commandsCompleter"/>
+                <ref component-id="aliasNameCompleter"/>
+            </list>
+        </property>
+        <property name="prompter">
+            <bean class="org.apache.geronimo.gshell.wisdom.shell.ConsolePrompterImpl">
+                <argument ref="application"/>
+            </bean>
+        </property>
+        <property name="errorHandler">
+            <bean class="org.apache.geronimo.gshell.wisdom.shell.ConsoleErrorHandlerImpl" />
+        </property>
+        <property name="history">
+            <bean class="org.apache.geronimo.gshell.wisdom.shell.HistoryImpl">
+                <argument ref="application"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="commandNameCompleter" class="org.apache.geronimo.gshell.wisdom.completer.CommandNameCompleter"
+          initialization="lazy" init-method="init">
+        <argument ref="eventManager"/>
+        <argument ref="commandRegistry"/>
+    </bean>
+
+    <bean id="aliasNameCompleter" class="org.apache.geronimo.gshell.wisdom.completer.AliasNameCompleter"
+          initialization="lazy" init-method="init">
+        <argument ref="eventManager"/>
+        <argument ref="aliasRegistry"/>
+    </bean>
+
+    <bean id="commandsCompleter" class="org.apache.geronimo.gshell.wisdom.completer.CommandsCompleter" initialization="lazy" init-method="init">
+        <argument ref="eventManager"/>
+        <argument ref="commandRegistry"/>
+    </bean>
+
+    <bean id="variableNameCompleter" class="org.apache.geronimo.gshell.wisdom.completer.VariableNameCompleter" initialization="lazy">
+    </bean>
+
+</blueprint>

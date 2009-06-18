@@ -92,15 +92,15 @@
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
                         <Export-Package>${pom.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>
+                            javax.management,
+                            javax.management.loading,
                             org.apache.geronimo.gshell.command,
                             org.apache.geronimo.gshell.wisdom.command,
                             org.apache.geronimo.gshell.wisdom.registry,
                             org.apache.felix.karaf.gshell.core,
-                            org.springframework.beans.factory.config,
                             *
                         </Import-Package>
                         <Private-Package>!*</Private-Package>
-                        <Spring-Context>*;publish-context:=false;create-asynchronously:=true</Spring-Context>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>

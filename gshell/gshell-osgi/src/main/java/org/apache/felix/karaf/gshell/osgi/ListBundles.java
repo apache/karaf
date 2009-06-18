@@ -35,14 +35,14 @@ public class ListBundles extends OsgiCommandSupport {
     @Option(name = "-u", description = "Show update")
     boolean showUpdate;
 
-    private SpringApplicationListener springApplicationListener;
+    private BlueprintListener blueprintListener;
 
-    public SpringApplicationListener getSpringApplicationListener() {
-        return springApplicationListener;
+    public BlueprintListener getBlueprintListener() {
+        return blueprintListener;
     }
 
-    public void setSpringApplicationListener(SpringApplicationListener springApplicationListener) {
-        this.springApplicationListener = springApplicationListener;
+    public void setBlueprintListener(BlueprintListener blueprintListener) {
+        this.blueprintListener = blueprintListener;
     }
 
     protected Object doExecute() throws Exception {
@@ -124,7 +124,7 @@ public class ListBundles extends OsgiCommandSupport {
                 }
                 io.out.println("[" + id + "] ["
                     + getStateString(bundles[i])
-                    + "] [" + getSpringStateString(bundles[i])
+                    + "] [" + getBlueprintStateString(bundles[i])
                     + "] [" + level + "] " + name);
 
                 if (admin != null) {
@@ -188,16 +188,25 @@ public class ListBundles extends OsgiCommandSupport {
         }
     }
 
-    public String getSpringStateString(Bundle bundle) {
-        SpringApplicationListener.SpringState state = springApplicationListener.getSpringState(bundle);
-        if (state == SpringApplicationListener.SpringState.Waiting) {
-            return "Waiting";
-        } else if (state == SpringApplicationListener.SpringState.Started) {
-            return "Started";
-        } else if (state == SpringApplicationListener.SpringState.Failed) {
-            return "Failed ";
-        } else {
-            return "       ";
+    public String getBlueprintStateString(Bundle bundle) {
+        BlueprintListener.BlueprintState state = blueprintListener.getBlueprintState(bundle);
+        switch (state) {
+            case Creating:
+                return "Creating   ";
+            case Created:
+                return "Created    ";
+            case Destroying:
+                return "Destroying ";
+            case Destroyed:
+                return "Destroyed  ";
+            case Failure:
+                return "Failure    ";
+            case GracePeriod:
+                return "GracePeriod";
+            case Waiting:
+                return "Waiting    ";
+            default:
+                return "           ";
         }
     }
 }

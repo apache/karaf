@@ -147,6 +147,7 @@
                 <include>org.ops4j.pax.url:pax-url-wrap</include>
             </includes>
         </dependencySet>
+        <!--
         <dependencySet>
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
@@ -170,6 +171,7 @@
                 <include>org.springframework.osgi:spring-osgi-io</include>
             </includes>
         </dependencySet>
+        -->
         <dependencySet>
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
@@ -177,7 +179,9 @@
             <outputFileNameMapping>org/apache/geronimo/specs/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
                 <include>org.apache.geronimo.specs:geronimo-servlet_2.5_spec</include>
+                <!--
                 <include>org.apache.geronimo.specs:geronimo-annotation_1.0_spec</include>
+                -->
             </includes>
         </dependencySet>
         <dependencySet>
@@ -186,8 +190,10 @@
             <useProjectArtifact>false</useProjectArtifact>
             <outputFileNameMapping>org/apache/servicemix/bundles/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
+                <!--
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.aopalliance</include>
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.cglib</include>
+                -->
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.jaxp-ri</include>
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.oro</include>
                 <include>org.apache.servicemix.bundles:org.apache.servicemix.bundles.commons-jexl</include>
@@ -296,6 +302,15 @@
             <outputFileNameMapping>org/eclipse/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
                 <include>org.eclipse:osgi</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputFileNameMapping>org/apache/geronimo/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <includes>
+                <include>org.apache.geronimo:blueprint-bundle</include>
             </includes>
         </dependencySet>
 

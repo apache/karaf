@@ -23,8 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-
 import jline.Completor;
 import org.apache.geronimo.gshell.console.completer.StringsCompleter;
 import org.osgi.service.cm.Configuration;
@@ -48,7 +46,6 @@ public class ConfigurationCompleter implements Completor, ConfigurationListener 
         this.admin = admin;
     }
 
-    @PostConstruct
     public void init() {
         Configuration[] configs;
         try {

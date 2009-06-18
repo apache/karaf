@@ -99,14 +99,6 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-aop</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
@@ -173,6 +165,10 @@
             <artifactId>org.osgi.compendium</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo</groupId>
+            <artifactId>blueprint-bundle</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -206,12 +202,6 @@
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
                         <Import-Package>
-                            org.springframework.aop,
-                            org.springframework.aop.framework,
-                            org.springframework.beans.factory.annotation,
-                            org.springframework.context.annotation,
-                            org.springframework.osgi.service.importer,
-                            org.aopalliance.aop,
                             org.apache.commons.vfs.provider.temp,
                             org.apache.commons.vfs.provider.ram,
                             jline*,
@@ -220,6 +210,7 @@
                             org.apache.felix.karaf.main.spi;resolution:=optional;version="1.0.0",
                             org.apache.sshd.server.keyprovider,
                             org.apache.sshd.server.jaas,
+                            !org.springframework*,
                             *
                         </Import-Package>
                         <Export-Package>
@@ -229,7 +220,6 @@
                         <Private-Package>
                             org.codehaus.plexus.interpolation*,
                         </Private-Package>
-                        <Spring-Context>*;publish-context:=false;create-asynchronously:=true</Spring-Context>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                     <unpackBundle>true</unpackBundle>

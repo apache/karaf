@@ -89,6 +89,7 @@
         <felix.webconsole.version>1.2.10</felix.webconsole.version>
         <felix.metatype.version>1.0.2</felix.metatype.version>
         <geronimo.annotation.version>1.1.1</geronimo.annotation.version>
+        <geronimo.blueprint.version>1.0.0-SNAPSHOT</geronimo.blueprint.version>
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
         <gshell.version>1.0-alpha-2</gshell.version>
         <jaxp.ri.version>1.4.2_2</jaxp.ri.version>
@@ -853,6 +854,11 @@
                 <groupId>javax.servlet</groupId>
                 <artifactId>servlet-api</artifactId>
                 <version>${servlet.api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.geronimo</groupId>
+                <artifactId>blueprint-bundle</artifactId>
+                <version>${geronimo.blueprint.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

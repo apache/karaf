@@ -39,15 +39,11 @@ import org.w3c.dom.NodeList;
 
 import org.apache.felix.karaf.gshell.features.Feature;
 import org.apache.felix.karaf.gshell.features.Repository;
-import org.springframework.jmx.export.annotation.ManagedAttribute;
-import org.springframework.jmx.export.annotation.ManagedOperation;
-import org.springframework.jmx.export.annotation.ManagedResource;
 import org.xml.sax.SAXException;
 
 /**
  * The repository implementation.
  */
-@ManagedResource
 public class RepositoryImpl implements Repository {
 
     private URI uri;
@@ -58,12 +54,10 @@ public class RepositoryImpl implements Repository {
         this.uri = uri;
     }
 
-    @ManagedAttribute
     public URI getURI() {
         return uri;
     }
 
-    @ManagedOperation
     public URI[] getRepositories() throws Exception {
         if (repositories == null) {
             load();
@@ -71,7 +65,6 @@ public class RepositoryImpl implements Repository {
         return repositories.toArray(new URI[repositories.size()]);
     }
 
-    @ManagedOperation(description = "List of Features provided by this repository")
     public Feature[] getFeatures() throws Exception {
         if (features == null) {
             load();

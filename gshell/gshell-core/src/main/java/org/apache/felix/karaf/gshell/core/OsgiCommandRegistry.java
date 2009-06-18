@@ -37,21 +37,21 @@ public class OsgiCommandRegistry {
         this.commandRegistry = commandRegistry;
     }
 
-    public synchronized void register(final Command command, Map<String, ?> properties) throws Exception {
+    public synchronized void register(final Command command, Map props) throws Exception {
         commandRegistry.registerCommand(command);
     }
 
-    public synchronized void unregister(final Command command, Map<String, ?> properties) throws Exception {
+    public synchronized void unregister(final Command command, Map props) throws Exception {
         commandRegistry.removeCommand(command);
     }
 
-    public synchronized void register(final Link link, Map<String, ?> properties) throws Exception {
+    public synchronized void register(final Link link, Map props) throws Exception {
         LinkCommand cmd = new LinkCommand(commandRegistry, link.getTarget());
         cmd.setLocation(new CommandLocationImpl(link.getName()));
         commandRegistry.registerCommand(cmd);
     }
 
-    public synchronized void unregister(final Link link, Map<String, ?> properties) throws Exception {
+    public synchronized void unregister(final Link link, Map props) throws Exception {
         commandRegistry.removeCommand(commandRegistry.getCommand(link.getName()));
     }
 
