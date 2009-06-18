@@ -60,8 +60,8 @@ public class DefaultJDBCLock implements Lock {
         this.clusterName = props.getProperty(PROPERTY_LOCK_JDBC_CLUSTERNAME);
         String time = props.getProperty(PROPERTY_LOCK_JDBC_TIMEOUT);
         this.lockConnection = null;
-        if (table == null) { table = "SERVICEMIX_LOCK"; }
-        if ( clusterName == null) { clusterName = "smx4"; }
+        if (table == null) { table = "KARAF_LOCK"; }
+        if ( clusterName == null) { clusterName = "karaf"; }
         this.statements = new Statements(table, clusterName);
         if (time != null) { 
             this.timeout = Integer.parseInt(time) * 1000; 
