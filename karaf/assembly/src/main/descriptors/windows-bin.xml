@@ -166,18 +166,18 @@
             </includes>
         </dependencySet>
         -->
+        <!--
         <dependencySet>
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
             <outputFileNameMapping>org/apache/geronimo/specs/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
-                <!--
                 <include>org.apache.geronimo.specs:geronimo-servlet_2.5_spec</include>
                 <include>org.apache.geronimo.specs:geronimo-annotation_1.0_spec</include>
-                -->
             </includes>
         </dependencySet>
+        -->
         <dependencySet>
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
