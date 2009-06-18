@@ -62,7 +62,7 @@ public class NamespaceHandler implements org.apache.geronimo.blueprint.Namespace
 
     public ComponentMetadata parseConfig(Element element, ParserContext context) {
         MutableBeanMetadata bean = context.createMetadata(MutableBeanMetadata.class);
-        bean.setClassName(Config.class.getName());
+        bean.setRuntimeClass(Config.class);
         String name = element.getAttribute("name");
         bean.addProperty("bundleContext", createRef(context, "blueprintBundleContext"));
         bean.addProperty("name", createValue(context, name));
@@ -76,7 +76,7 @@ public class NamespaceHandler implements org.apache.geronimo.blueprint.Namespace
             for (int i = 0; i < childElements.getLength(); ++i) {
                 Element childElement = (Element) childElements.item(i);
                 MutableBeanMetadata md = context.createMetadata(MutableBeanMetadata.class);
-                md.setClassName(Module.class.getName());
+                md.setRuntimeClass(Module.class);
                 md.addProperty("className", createValue(context, childElement.getAttribute("className")));
                 if (childElement.getAttribute("flags") != null) {
                     md.addProperty("flags", createValue(context, childElement.getAttribute("flags")));
@@ -100,7 +100,7 @@ public class NamespaceHandler implements org.apache.geronimo.blueprint.Namespace
 
     public ComponentMetadata parseKeystore(Element element, ParserContext context) {
         MutableBeanMetadata bean = context.createMetadata(MutableBeanMetadata.class);
-        bean.setClassName(ResourceKeystoreInstance.class.getName());
+        bean.setRuntimeClass(ResourceKeystoreInstance.class);
         // Parse name
         String name = element.getAttribute("name");
         bean.addProperty("name", createValue(context, name));
