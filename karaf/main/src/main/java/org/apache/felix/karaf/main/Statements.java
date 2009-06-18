@@ -25,8 +25,8 @@ import java.sql.Statement;
 
 public class Statements {
 
-    private String lockTableName = "SERVICEMIX_LOCK";
-    private String clusterName = "smx4";
+    private String lockTableName = "KARAF_LOCK";
+    private String clusterName = "karaf";
     private String lockCreateStatement;
     private String lockPopulateStatement;
     private String lockUpdateStatement;
