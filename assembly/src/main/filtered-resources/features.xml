@@ -43,7 +43,7 @@
     </feature>
     <feature name="http" version="${version}">
         <config name="org.ops4j.pax.web">
-          org.osgi.service.http.port=8080
+          org.osgi.service.http.port=8181
         </config>
         <bundle>mvn:org.apache.geronimo.specs/geronimo-servlet_2.5_spec/${geronimo.servlet.version}</bundle>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jetty-bundle/${jetty.bundle.version}</bundle>
