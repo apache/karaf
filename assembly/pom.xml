@@ -183,8 +183,8 @@
             <artifactId>org.apache.servicemix.bundles.commons-httpclient</artifactId>
         </dependency>
         <dependency>
-	    <groupId>org.apache.servicemix.bundles</groupId>
-	    <artifactId>org.apache.servicemix.bundles.jline</artifactId>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.jline</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
