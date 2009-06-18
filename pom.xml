@@ -111,7 +111,7 @@
         <servlet.api.version>2.5</servlet.api.version>
         <spring.osgi.version>1.2.0</spring.osgi.version>
         <spring.version>2.5.6.SEC01</spring.version>
-        <sshd.version>1.0-SNAPSHOT</sshd.version>
+        <sshd.version>0.1.0</sshd.version>
         <woodstox.version>3.2.7_1</woodstox.version>
         <osgi.jmx.version>1.0-r6125-patched</osgi.jmx.version>
 
