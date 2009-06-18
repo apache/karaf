@@ -402,6 +402,7 @@
                                     <artifact>org.apache.geronimo.gshell.wisdom:gshell-wisdom-core</artifact>
                                     <excludes>
                                         <exclude>org/apache/geronimo/gshell/**</exclude>
+                                        <exclue>META-INF/spring.*</exclue>
                                     </excludes>
                                 </filter>
                                 <filter>
