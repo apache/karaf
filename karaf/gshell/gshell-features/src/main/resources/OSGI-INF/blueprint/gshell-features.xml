@@ -120,7 +120,7 @@
     </bean>
 
     <reference id="mbeanServer" interface="javax.management.MBeanServer" availability="optional">
-        <listener ref="featureServiceRegistry" bind-method="registerMBeanServer" unbind-method="unregisterMBeanServer"/>
+        <reference-listener ref="featureServiceRegistry" bind-method="registerMBeanServer" unbind-method="unregisterMBeanServer"/>
     </reference>
 
 </blueprint>

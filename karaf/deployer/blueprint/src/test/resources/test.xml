@@ -54,13 +54,13 @@
     </reference>
 
     <reference id="ref2" interface="org.apache.geronimo.blueprint.sample.InterfaceA" timeout="100">
-        <listener bind-method="bind" unbind-method="unbind" ref="bindingListener" />
+        <reference-listener bind-method="bind" unbind-method="unbind" ref="bindingListener" />
     </reference>
 
     <bean id="bindingListener" class="org.apache.geronimo.blueprint.sample.BindingListener"/>
 
     <ref-list id="ref-list" interface="org.apache.geronimo.blueprint.sample.InterfaceA">
-        <listener bind-method="bind" unbind-method="unbind" ref="listBindingListener" />
+        <reference-listener bind-method="bind" unbind-method="unbind" ref="listBindingListener" />
     </ref-list>
 
     <bean id="listBindingListener" class="org.apache.geronimo.blueprint.sample.BindingListener"/>

@@ -93,7 +93,7 @@ public class NamespaceHandler implements org.apache.geronimo.blueprint.Namespace
         MutableServiceMetadata service = context.createMetadata(MutableServiceMetadata.class);
 		service.setId(name);
         service.setServiceComponent(bean);
-        service.addInterfaceName(JaasRealm.class.getName());
+        service.addInterface(JaasRealm.class.getName());
         service.addServiceProperty(createValue(context, ProxyLoginModule.PROPERTY_MODULE), createValue(context, name));
         return service;
     }
@@ -128,7 +128,7 @@ public class NamespaceHandler implements org.apache.geronimo.blueprint.Namespace
         MutableServiceMetadata service = context.createMetadata(MutableServiceMetadata.class);
 		service.setId(name);
         service.setServiceComponent(bean);
-        service.addInterfaceName(KeystoreInstance.class.getName());
+        service.addInterface(KeystoreInstance.class.getName());
         return service;
     }
 

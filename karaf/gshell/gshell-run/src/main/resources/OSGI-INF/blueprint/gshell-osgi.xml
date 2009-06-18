@@ -38,15 +38,15 @@
     </bean>
 
     <ref-list id="osgiCommands" interface="org.apache.geronimo.gshell.command.Command">
-        <listener ref="osgiCommandRegistry" bind-method="register" unbind-method="unregister"/>
+        <reference-listener ref="osgiCommandRegistry" bind-method="register" unbind-method="unregister"/>
     </ref-list>
 
     <ref-list id="osgiLinkCommands" interface="org.apache.geronimo.gshell.command.Link">
-        <listener ref="osgiCommandRegistry" bind-method="register" unbind-method="unregister"/>
+        <reference-listener ref="osgiCommandRegistry" bind-method="register" unbind-method="unregister"/>
     </ref-list>
 
     <ref-list id="osgiAliases" interface="org.apache.geronimo.gshell.command.Alias">
-        <listener ref="osgiAliasRegistry" bind-method="register" unbind-method="unregister"/>
+        <reference-listener ref="osgiAliasRegistry" bind-method="register" unbind-method="unregister"/>
     </ref-list>
 
     <service ref="localShell" interface="org.apache.geronimo.gshell.shell.Shell"/>

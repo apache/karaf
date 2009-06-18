@@ -27,7 +27,7 @@
     <ref-list id="realms"
               interface="org.apache.felix.karaf.jaas.config.JaasRealm"
               availability="optional">
-        <listener ref="config" bind-method="register" unbind-method="unregister" />
+        <reference-listener ref="config" bind-method="register" unbind-method="unregister" />
     </ref-list>
 
     <bean id="proxyLoginModuleInitializer" class="org.apache.felix.karaf.jaas.config.impl.ProxyLoginModuleInitializer" init-method="init">
@@ -41,7 +41,7 @@
     <ref-list id="keystores"
               interface="org.apache.felix.karaf.jaas.config.KeystoreInstance"
               availability="optional">
-        <listener ref="keystoreManager" bind-method="register" unbind-method="unregister" />
+        <reference-listener ref="keystoreManager" bind-method="register" unbind-method="unregister" />
     </ref-list>
 
     <service interface="org.apache.geronimo.blueprint.NamespaceHandler">

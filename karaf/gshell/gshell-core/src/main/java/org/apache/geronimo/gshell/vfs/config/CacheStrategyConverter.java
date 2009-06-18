@@ -23,12 +23,12 @@ import org.apache.commons.vfs.CacheStrategy;
 
 public class CacheStrategyConverter implements Converter {
 
-    public boolean canConvert(Object o, Class aClass) {
-        return o instanceof String && aClass == CacheStrategy.class;
+    public boolean canConvert(Object o, Object type) {
+        return o instanceof String && type == CacheStrategy.class;
     }
 
-    public Object convert(Object o, Class aClass) throws Exception {
-        if (canConvert(o, aClass)) {
+    public Object convert(Object o, Object type) throws Exception {
+        if (canConvert(o, type)) {
             String text = o.toString();
             if (text.equalsIgnoreCase("MANUAL")) {
                 return CacheStrategy.MANUAL;

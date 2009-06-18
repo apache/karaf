@@ -182,7 +182,7 @@ public class NamespaceHandler implements org.apache.geronimo.blueprint.Namespace
 
         MutableServiceMetadata commandService = context.createMetadata(MutableServiceMetadata.class);
         commandService.setId(getName());
-        commandService.addInterfaceName(Command.class.getName());
+        commandService.addInterface(Command.class.getName());
         commandService.setServiceComponent(command);
         context.getComponentDefinitionRegistry().registerComponentDefinition(commandService);
     }
@@ -239,7 +239,7 @@ public class NamespaceHandler implements org.apache.geronimo.blueprint.Namespace
 
         MutableServiceMetadata linkService = context.createMetadata(MutableServiceMetadata.class);
         linkService.setId(getName());
-        linkService.addInterfaceName(Link.class.getName());
+        linkService.addInterface(Link.class.getName());
         linkService.setServiceComponent(link);
         context.getComponentDefinitionRegistry().registerComponentDefinition(linkService);
     }
@@ -252,7 +252,7 @@ public class NamespaceHandler implements org.apache.geronimo.blueprint.Namespace
 
         MutableServiceMetadata aliasService = context.createMetadata(MutableServiceMetadata.class);
         aliasService.setId(getName());
-        aliasService.addInterfaceName(Alias.class.getName());
+        aliasService.addInterface(Alias.class.getName());
         aliasService.setServiceComponent(alias);
         context.getComponentDefinitionRegistry().registerComponentDefinition(aliasService);
     }
