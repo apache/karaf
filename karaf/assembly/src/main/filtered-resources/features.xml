@@ -19,19 +19,19 @@
 <features>
     <feature name="spring" version="${spring.version}">
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/${aopalliance.version}</bundle>
-        <bundle>mvn:org.springframework/spring-aop/${spring.version}</bundle>
+        <bundle>mvn:org.springframework/spring-core/${spring.version}</bundle>
         <bundle>mvn:org.springframework/spring-beans/${spring.version}</bundle>
         <bundle>mvn:org.springframework/spring-context/${spring.version}</bundle>
+        <bundle>mvn:org.springframework/spring-aop/${spring.version}</bundle>
         <bundle>mvn:org.springframework/spring-context-support/${spring.version}</bundle>
-        <bundle>mvn:org.springframework/spring-core/${spring.version}</bundle>
     </feature>
     <feature name="spring-dm" version="${spring.osgi.version}">
         <feature version="${spring.version}">spring</feature>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.cglib/${cglib.version}</bundle>
-        <bundle>mvn:org.springframework.osgi/spring-osgi-core/${spring.osgi.version}</bundle>
-        <bundle>mvn:org.springframework.osgi/spring-osgi-annotation/${spring.osgi.version}</bundle>
         <bundle>mvn:org.springframework.osgi/spring-osgi-io/${spring.osgi.version}</bundle>
+        <bundle>mvn:org.springframework.osgi/spring-osgi-core/${spring.osgi.version}</bundle>
         <bundle>mvn:org.springframework.osgi/spring-osgi-extender/${spring.osgi.version}</bundle>
+        <bundle>mvn:org.springframework.osgi/spring-osgi-annotation/${spring.osgi.version}</bundle>
         <bundle>mvn:org.apache.felix.karaf.deployer/org.apache.felix.karaf.deployer.spring/${version}</bundle>
     </feature>
     <feature name="wrapper" version="${version}">
@@ -41,23 +41,22 @@
         <bundle>mvn:org.apache.felix/org.apache.felix.bundlerepository/${felix.bundlerepository.version}</bundle>
         <bundle>mvn:org.apache.felix.karaf.gshell/org.apache.felix.karaf.gshell.obr/${version}</bundle>
     </feature>
-    <feature name="felix-http" version="${version}">
-        <bundle>mvn:org.mortbay.jetty/jetty-util/${jetty.version}/jar</bundle>
-        <bundle>mvn:org.mortbay.jetty/jetty-sslengine/${jetty.version}/jar</bundle>
-        <bundle>mvn:org.mortbay.jetty/jetty/${jetty.version}/jar</bundle>
-        <bundle>mvn:org.apache.felix/org.apache.felix.http.jetty/${felix.http.version}/jar</bundle>
-        <config name="org.apache.felix.http">
+    <feature name="http" version="${version}">
+        <config name="org.ops4j.pax.web">
           org.osgi.service.http.port=8080
         </config>
+        <bundle>mvn:org.apache.geronimo.specs/geronimo-servlet_2.5_spec/${geronimo.servlet.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jetty-bundle/${jetty.bundle.version}</bundle>
+        <bundle>mvn:org.ops4j.pax.web/pax-web-bundle/${pax.web.version}</bundle>
     </feature>
     <feature name="webconsole" version="${version}">
-        <feature version="${version}">felix-http</feature>
-        <bundle>mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}/jar</bundle>
-        <bundle>mvn:org.apache.felix/org.apache.felix.webconsole/${felix.webconsole.version}/jar</bundle>
+        <feature version="${version}">http</feature>
         <config name="org.apache.felix.webconsole.internal.servlet.OsgiManager">
           username=karaf
           password=karaf
         </config>
-        <bundle>mvn:org.apache.felix.karaf/org.apache.felix.karaf.webconsole/${version}/jar</bundle>
+        <bundle>mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
+        <bundle>mvn:org.apache.felix/org.apache.felix.webconsole/${felix.webconsole.version}</bundle>
+        <bundle>mvn:org.apache.felix.karaf/org.apache.felix.karaf.webconsole/${version}</bundle>
     </feature>
 </features>
