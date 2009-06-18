@@ -36,7 +36,7 @@ public class SpringDeploymentListenerTest extends TestCase {
 
     public void testPackagesExtraction() throws Exception {
         SpringDeploymentListener l = new SpringDeploymentListener();
-        File f = new File(getClass().getClassLoader().getResource("META-INF/spring/spring-deployer.xml").toURI());
+        File f = new File(getClass().getClassLoader().getResource("test.xml").toURI());
         Set<String> pkgs = SpringTransformer.analyze(new DOMSource(SpringTransformer.parse(f.toURL())));
         assertNotNull(pkgs);
         assertEquals(2, pkgs.size());

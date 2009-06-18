@@ -18,54 +18,44 @@
 
 -->
 <xs:schema elementFormDefault='qualified'
-           targetNamespace='http://servicemix.apache.org/jaas'
+           targetNamespace='http://felix.apache.org/karaf/xmlns/jaas/v1.0.0'
            xmlns:xs='http://www.w3.org/2001/XMLSchema'
-           xmlns:beans="http://www.springframework.org/schema/beans"
-           xmlns:tns='http://servicemix.apache.org/jaas'>
+           xmlns:bp="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:tns='http://felix.apache.org/karaf/xmlns/jaas/v1.0.0'>
 
-    <xs:import namespace="http://www.springframework.org/schema/beans"/>
+    <xs:import namespace="http://www.osgi.org/xmlns/blueprint/v1.0.0"/>
 
     <xs:element name="config">
         <xs:complexType>
-            <xs:complexContent>
-                <xs:extension base="beans:identifiedType">
-                    <xs:sequence>
-                        <xs:element name="module" minOccurs="0" maxOccurs="unbounded">
-                            <xs:complexType mixed="true">
-                                <xs:attribute name="className" use="required" type="xs:string" />
-                                <xs:attribute name="flags" default="required">
-                                    <xs:simpleType>
-                                        <xs:restriction base="xs:NMTOKEN">
-                                            <xs:enumeration value="required"/>
-                                            <xs:enumeration value="requisite"/>
-                                            <xs:enumeration value="sufficient"/>
-                                            <xs:enumeration value="optional"/>
-                                        </xs:restriction>
-                                    </xs:simpleType>
-                                </xs:attribute>
-                            </xs:complexType>
-                        </xs:element>
-                    </xs:sequence>
-                    <xs:attribute name="name" use="optional" type="xs:string" />
-                    <xs:attribute name="rank" use="optional" default="0" type="xs:int" />
-                    <xs:attribute name="publish" use="optional" default="true" type="xs:boolean" />
-                </xs:extension>
-            </xs:complexContent>
+            <xs:sequence>
+                <xs:element name="module" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType mixed="true">
+                        <xs:attribute name="className" use="required" type="xs:string" />
+                        <xs:attribute name="flags" default="required">
+                            <xs:simpleType>
+                                <xs:restriction base="xs:NMTOKEN">
+                                    <xs:enumeration value="required"/>
+                                    <xs:enumeration value="requisite"/>
+                                    <xs:enumeration value="sufficient"/>
+                                    <xs:enumeration value="optional"/>
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:attribute>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+            <xs:attribute name="name" use="required" type="xs:string" />
+            <xs:attribute name="rank" use="optional" default="0" type="xs:int" />
         </xs:complexType>
     </xs:element>
 
     <xs:element name="keystore">
         <xs:complexType>
-            <xs:complexContent>
-                <xs:extension base="beans:identifiedType">
-                    <xs:attribute name="name" use="optional" type="xs:string" />
-                    <xs:attribute name="rank" use="optional" default="0" type="xs:int" />
-                    <xs:attribute name="publish" use="optional" default="true" type="xs:boolean" />
-                    <xs:attribute name="path" use="required" type="xs:string" />
-                    <xs:attribute name="keystorePassword" use="optional" type="xs:string" />
-                    <xs:attribute name="keyPasswords" use="optional" type="xs:string" />
-                </xs:extension>
-            </xs:complexContent>
+            <xs:attribute name="name" use="required" type="xs:string" />
+            <xs:attribute name="rank" use="optional" default="0" type="xs:int" />
+            <xs:attribute name="path" use="required" type="xs:string" />
+            <xs:attribute name="keystorePassword" use="optional" type="xs:string" />
+            <xs:attribute name="keyPasswords" use="optional" type="xs:string" />
         </xs:complexType>
     </xs:element>
     

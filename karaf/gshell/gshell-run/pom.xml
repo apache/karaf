@@ -68,7 +68,6 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
-                        <Export-Package>${pom.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>
                             org.apache.commons.vfs,
                             org.apache.commons.vfs.cache,
@@ -133,10 +132,9 @@
                             org.apache.sshd,
                             org.apache.sshd.server.keyprovider,
                             org.apache.sshd.server.jaas,
-                            org.springframework.beans.factory.config,
+                            org.osgi.service.blueprint.container,
                             *
                         </Import-Package>
-                        <Spring-Context>*;publish-context:=false;create-asynchronously:=true</Spring-Context>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>

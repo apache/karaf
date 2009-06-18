@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+
+    <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/gshell/v1.0.0">
+        <command name="about">
+            <action class="org.apache.geronimo.gshell.commands.builtin.AboutAction">
+                <argument ref="application"/>
+            </action>
+        </command>
+
+        <command name="help">
+            <action class="org.apache.geronimo.gshell.commands.builtin.HelpAction">
+                <argument ref="commandResolver"/>
+            </action>
+            <completers>
+                <bean class="org.apache.geronimo.gshell.console.completer.AggregateCompleter">
+                    <argument xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+                        <list>
+                            <ref component-id="aliasNameCompleter"/>
+                            <ref component-id="commandNameCompleter"/>
+                        </list>
+                    </argument>
+                </bean>
+                <null/>
+            </completers>
+        </command>
+
+        <command name="exit">
+            <action class="org.apache.geronimo.gshell.commands.builtin.ExitAction"/>
+        </command>
+
+        <link name="quit" target="exit"/>
+
+        <command name="echo">
+            <action class="org.apache.geronimo.gshell.commands.builtin.EchoAction"/>
+        </command>
+
+        <command name="clear">
+            <action class="org.apache.geronimo.gshell.commands.builtin.ClearAction"/>
+        </command>
+
+        <command name="source">
+            <action class="org.apache.geronimo.gshell.commands.builtin.SourceAction">
+                <argument ref="commandLineExecutor"/>
+                <argument ref="fileSystemAccess"/>
+            </action>
+            <completers>
+                <ref component-id="fileObjectNameCompleter"/>
+                <null/>
+            </completers>
+        </command>
+
+        <command name="set">
+            <action class="org.apache.geronimo.gshell.commands.builtin.SetAction"/>
+        </command>
+
+        <command name="unset">
+            <action class="org.apache.geronimo.gshell.commands.builtin.UnsetAction"/>
+            <completers>
+                <ref component-id="variableNameCompleter"/>
+                <null/>
+            </completers>
+        </command>
+
+        <command name="alias">
+            <action class="org.apache.geronimo.gshell.commands.builtin.AliasAction">
+                <argument ref="aliasRegistry"/>
+            </action>
+        </command>
+
+        <command name="unalias">
+            <action class="org.apache.geronimo.gshell.commands.builtin.UnaliasAction">
+                <argument ref="aliasRegistry"/>
+            </action>
+            <completers>
+                <ref component-id="aliasNameCompleter"/>
+                <null/>
+            </completers>
+        </command>
+
+        <command name="history">
+            <action class="org.apache.geronimo.gshell.commands.builtin.HistoryAction"/>
+        </command>
+
+        <command name="info">
+            <action class="org.apache.felix.karaf.gshell.core.commands.InfoAction">
+                <argument ref="branding" />
+            </action>
+        </command>
+    </command-bundle>
+
+    <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/gshell/v1.0.0">
+        <command name="ssh">
+            <action class="org.apache.geronimo.gshell.commands.ssh.SshAction"/>
+        </command>
+
+        <command name="sshd">
+            <action class="org.apache.geronimo.gshell.commands.ssh.SshServerAction"/>
+        </command>
+    </command-bundle>
+
+    <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/gshell/v1.0.0">
+        <command name="exec">
+            <action class="org.apache.geronimo.gshell.commands.shell.ExecuteAction"/>
+        </command>
+
+        <command name="java">
+            <action class="org.apache.geronimo.gshell.commands.shell.JavaAction"/>
+        </command>
+
+        <command name="sleep">
+            <action class="org.apache.geronimo.gshell.commands.shell.SleepAction"/>
+        </command>
+
+        <command name="date">
+            <action class="org.apache.geronimo.gshell.commands.shell.DateAction"/>
+        </command>
+
+        <command name="edit">
+            <action class="org.apache.geronimo.gshell.commands.shell.EditAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </action>
+            <completers>
+                <ref component-id="fileObjectNameCompleter"/>
+                <null/>
+            </completers>
+        </command>
+
+        <command name="find">
+            <action class="org.apache.geronimo.gshell.commands.shell.FindAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </action>
+            <completers>
+                <ref component-id="fileObjectNameCompleter"/>
+                <null/>
+            </completers>
+        </command>
+
+        <command name="sort">
+            <action class="org.apache.geronimo.gshell.commands.text.SortAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </action>
+            <completers>
+                <ref component-id="fileObjectNameCompleter"/>
+                <null/>
+            </completers>
+        </command>
+    </command-bundle>
+
+    <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/gshell/v1.0.0">
+        <command name="hostname">
+            <action class="org.apache.geronimo.gshell.commands.network.HostnameAction"/>
+        </command>
+    </command-bundle>
+
+    <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/gshell/v1.0.0">
+        <link name="print" target="echo"/>
+
+        <command name="printf">
+            <action class="org.apache.geronimo.gshell.commands.text.PrintfAction"/>
+        </command>
+
+        <command name="cat">
+            <action class="org.apache.geronimo.gshell.commands.text.CatAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </action>
+            <completers>
+                <ref component-id="fileObjectNameCompleter"/>
+                <null/>
+            </completers>
+        </command>
+
+        <command name="grep">
+            <action class="org.apache.geronimo.gshell.commands.text.GrepAction"/>
+        </command>
+    </command-bundle>
+
+    <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/gshell/v1.0.0">
+        <command name="cd">
+            <action class="org.apache.geronimo.gshell.commands.file.ChangeDirectoryAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </action>
+            <completers>
+                <ref component-id="fileObjectNameCompleter"/>
+                <null/>
+            </completers>
+        </command>
+
+        <command name="pwd">
+            <action class="org.apache.geronimo.gshell.commands.file.CurrentDirectoryAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </action>
+        </command>
+
+        <command name="ls">
+            <action class="org.apache.geronimo.gshell.commands.file.ListDirectoryAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </action>
+            <completers>
+                <ref component-id="fileObjectNameCompleter"/>
+                <null/>
+            </completers>
+        </command>
+
+        <link name="dir" target="ls"/>
+
+        <command name="cp">
+            <action class="org.apache.geronimo.gshell.commands.file.CopyAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </action>
+            <completers>
+                <ref component-id="fileObjectNameCompleter"/>
+                <ref component-id="fileObjectNameCompleter"/>
+                <null/>
+            </completers>
+        </command>
+
+        <link name="copy" target="cp"/>
+
+        <command name="rm">
+            <action class="org.apache.geronimo.gshell.commands.file.RemoveAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </action>
+            <completers>
+                <ref component-id="fileObjectNameCompleter"/>
+                <null/>
+            </completers>
+        </command>
+
+        <link name="del" target="rm"/>
+
+        <command name="fileinfo">
+            <action class="org.apache.geronimo.gshell.commands.file.FileInfoAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </action>
+            <completers>
+                <ref component-id="fileObjectNameCompleter"/>
+                <null/>
+            </completers>
+        </command>
+
+        <command name="touch">
+            <action class="org.apache.geronimo.gshell.commands.file.TouchAction">
+                <property name="fileSystemAccess" ref="fileSystemAccess"/>
+            </action>
+            <completers>
+                <ref component-id="fileObjectNameCompleter"/>
+                <null/>
+            </completers>
+        </command>
+    </command-bundle>
+
+</blueprint>

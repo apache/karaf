@@ -25,12 +25,9 @@ import org.apache.geronimo.gshell.shell.Shell;
 import org.apache.geronimo.gshell.wisdom.application.ShellCreatedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.osgi.service.blueprint.container.BlueprintContainer;
 
-public class ApplicationManagerImpl implements ApplicationManager, ApplicationContextAware {
+public class ApplicationManagerImpl implements ApplicationManager {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -38,11 +35,12 @@ public class ApplicationManagerImpl implements ApplicationManager, ApplicationCo
 
     private Application application;
 
-    private ApplicationContext applicationContext;
+    private BlueprintContainer blueprintContainer;
 
-    public ApplicationManagerImpl(EventPublisher eventPublisher, Application application) {
+    public ApplicationManagerImpl(EventPublisher eventPublisher, Application application, BlueprintContainer blueprintContainer) {
         this.eventPublisher = eventPublisher;
         this.application = application;
+        this.blueprintContainer = blueprintContainer;
     }
 
     public void init() throws Exception {
@@ -56,10 +54,6 @@ public class ApplicationManagerImpl implements ApplicationManager, ApplicationCo
         SystemOutputHijacker.uninstall();
     }
 
-    public void setApplicationContext(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
-    }
-
     public void configure(ApplicationConfiguration applicationConfiguration) throws Exception {
         throw new UnsupportedOperationException();
     }
@@ -69,7 +63,7 @@ public class ApplicationManagerImpl implements ApplicationManager, ApplicationCo
     }
 
     public Shell create() throws Exception {
-        final Shell shell = (Shell) applicationContext.getBean("shell");
+        final Shell shell = (Shell) blueprintContainer.getComponentInstance("shell");
 
         log.debug("Created shell instance: {}", shell);
 

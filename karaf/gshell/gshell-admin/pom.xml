@@ -168,7 +168,6 @@
                             *
                         </Import-Package>
                         <Private-Package>org.apache.felix.karaf.jpm.*</Private-Package>
-                        <Spring-Context>*;publish-context:=false;create-asynchronously:=true</Spring-Context>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                 </configuration>

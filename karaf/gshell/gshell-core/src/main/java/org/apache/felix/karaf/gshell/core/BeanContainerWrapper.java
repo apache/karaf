@@ -24,19 +24,21 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.apache.geronimo.gshell.spring.BeanContainer;
+import org.apache.geronimo.gshell.wisdom.command.GroupCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
+import org.osgi.service.blueprint.container.BlueprintContainer;
 
 public class BeanContainerWrapper implements BeanContainer {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private ApplicationContext context;
+    private BlueprintContainer container;
 
-    public BeanContainerWrapper(ApplicationContext context) {
-        this.context = context;
+    public BeanContainerWrapper(BlueprintContainer container) {
+        this.container = container;
     }
 
     public BeanContainer getParent() {
@@ -44,7 +46,7 @@ public class BeanContainerWrapper implements BeanContainer {
     }
 
     public ClassLoader getClassLoader() {
-        return context.getClassLoader();
+        return null;
     }
 
     public void loadBeans(String[] strings) throws Exception {
@@ -54,18 +56,10 @@ public class BeanContainerWrapper implements BeanContainer {
     public <T> T getBean(Class<T> type) {
         assert type != null;
 
-        log.trace("Getting bean of type: {}", type);
-
-        String[] names = context.getBeanNamesForType(type);
-
-        if (names.length == 0) {
-            throw new NoSuchBeanDefinitionException(type, "No bean defined for type: " + type);
+        if (GroupCommand.class.isAssignableFrom(type)) {
+            return type.cast(new GroupCommand());
         }
-        if (names.length > 1) {
-            throw new NoSuchBeanDefinitionException(type, "No unique bean defined for type: " + type + ", found matches: " + Arrays.asList(names));
-        }
-
-        return getBean(names[0], type);
+        throw new UnsupportedOperationException();
     }
 
     public <T> T getBean(String name, Class<T> requiredType) {
@@ -74,29 +68,19 @@ public class BeanContainerWrapper implements BeanContainer {
 
         log.trace("Getting bean named '{}' of type: {}", name, requiredType);
 
-        return (T) context.getBean(name, requiredType);
+        return requiredType.cast(container.getComponentInstance(name));
     }
 
     public <T> Map<String, T> getBeans(Class<T> type) {
-        assert type != null;
-
-        log.trace("Getting beans of type: {}", type);
-
-        return (Map<String,T>) context.getBeansOfType(type);
+        throw new UnsupportedOperationException();
     }
 
     public String[] getBeanNames() {
-        log.trace("Getting bean names");
-
-        return context.getBeanDefinitionNames();
+        throw new UnsupportedOperationException();
     }
 
     public String[] getBeanNames(Class type) {
-        assert type != null;
-
-        log.trace("Getting bean names of type: {}", type);
-
-        return context.getBeanNamesForType(type);
+        throw new UnsupportedOperationException();
     }
 
     public BeanContainer createChild(Collection<URL> urls) {

@@ -17,6 +17,23 @@
       limitations under the License.
 -->
 <features>
+    <feature name="spring" version="${spring.version}">
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/${aopalliance.version}</bundle>
+        <bundle>mvn:org.springframework/spring-aop/${spring.version}</bundle>
+        <bundle>mvn:org.springframework/spring-beans/${spring.version}</bundle>
+        <bundle>mvn:org.springframework/spring-context/${spring.version}</bundle>
+        <bundle>mvn:org.springframework/spring-context-support/${spring.version}</bundle>
+        <bundle>mvn:org.springframework/spring-core/${spring.version}</bundle>
+    </feature>
+    <feature name="spring-dm" version="${spring.osgi.version}">
+        <feature version="${spring.version}">spring</feature>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.cglib/${cglib.version}</bundle>
+        <bundle>mvn:org.springframework.osgi/spring-osgi-core/${spring.osgi.version}</bundle>
+        <bundle>mvn:org.springframework.osgi/spring-osgi-annotation/${spring.osgi.version}</bundle>
+        <bundle>mvn:org.springframework.osgi/spring-osgi-io/${spring.osgi.version}</bundle>
+        <bundle>mvn:org.springframework.osgi/spring-osgi-extender/${spring.osgi.version}</bundle>
+        <bundle>mvn:org.apache.felix.karaf.deployer/org.apache.felix.karaf.deployer.spring/${version}</bundle>
+    </feature>
     <feature name="wrapper" version="${version}">
         <bundle>mvn:org.apache.felix.karaf.gshell/org.apache.felix.karaf.gshell.wrapper/${version}</bundle>
     </feature>

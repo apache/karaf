@@ -181,7 +181,7 @@ public class ManagedFeaturesRegistry implements FeaturesRegistry, ManagedFeature
         }
     }
 
-    public void registerMBeanServer(MBeanServer mbeanServer, Map props ) throws Exception {
+    public void registerMBeanServer(MBeanServer mbeanServer, Map props) throws Exception {
         if (mbeanServer != null) {
             this.mbeanServer = mbeanServer;
         }
@@ -204,7 +204,10 @@ public class ManagedFeaturesRegistry implements FeaturesRegistry, ManagedFeature
             installedFeatures.put(feature.getId(), feature);
             managementAgent.register(feature, namingStrategy.getObjectName(feature, true));
         }
+    }
 
+    public void unregisterMBeanServer(MBeanServer mbeanServer, Map props) throws Exception {
+        // TODO
     }
 
     

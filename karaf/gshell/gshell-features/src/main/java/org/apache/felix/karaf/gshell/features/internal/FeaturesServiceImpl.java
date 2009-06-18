@@ -53,7 +53,6 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 import org.osgi.service.prefs.PreferencesService;
-import org.springframework.osgi.context.BundleContextAware;
 
 /**
  * The Features service implementation.
@@ -62,7 +61,7 @@ import org.springframework.osgi.context.BundleContextAware;
  * installing the needed bundles.
  *
  */
-public class FeaturesServiceImpl implements FeaturesService, BundleContextAware {
+public class FeaturesServiceImpl implements FeaturesService {
 
     private static final String ALIAS_KEY = "_alias_factory_pid";
 
