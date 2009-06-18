@@ -83,7 +83,7 @@ public class ListBundles extends OsgiCommandSupport {
                msg = " Update location";
             }
             String level = (sl == null) ? "" : "  Level ";
-            io.out.println("   ID   State         Spring   " + level + msg);
+            io.out.println("   ID   State         Blueprint   " + level + msg);
             for (int i = 0; i < bundles.length; i++) {
                 // Get the bundle name or location.
                 String name = (String) bundles[i].getHeaders().get(Constants.BUNDLE_NAME);
