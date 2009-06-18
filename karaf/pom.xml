@@ -43,8 +43,10 @@
         <module>management</module>
         <module>webconsole</module>
         <module>assembly</module>
+        <!--
         <module>demos</module>
         <module>itests</module>
+        -->
         <module>tooling</module>
     </modules>
 
@@ -363,6 +365,11 @@
                         <artifactId>kxml2</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.metatype</artifactId>
+                <version>${felix.metatype.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
