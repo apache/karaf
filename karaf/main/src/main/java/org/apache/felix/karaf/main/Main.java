@@ -995,6 +995,7 @@ public class Main {
                 String clz = props.getProperty(PROPERTY_LOCK_CLASS, PROPERTY_LOCK_CLASS_DEFAULT);
                 lock = (Lock) Class.forName(clz).getConstructor(Properties.class).newInstance(props);
                 boolean lockLogged = false;
+                setStartLevel(lockStartLevel);
                 for (;;) {
                     if (lock.lock()) {
                         if (lockLogged) {
@@ -1017,7 +1018,9 @@ public class Main {
                         lockLogged = true;
                     }
                     Thread.sleep(lockDelay);
-                }
+                } 
+            } else {
+                setStartLevel(defaultStartLevel);
             }
         } catch (Exception e) {
             e.printStackTrace();
