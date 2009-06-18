@@ -110,8 +110,8 @@ public class FeaturesServiceImpl implements FeaturesService {
     public void setUrls(String uris) throws URISyntaxException {
         String[] s = uris.split(",");
         this.uris = new HashSet<URI>();
-        for (int i = 0; i < s.length; i++) {
-            this.uris.add(new URI(s[i]));
+        for (String value : s) {
+            this.uris.add(new URI(value));
         }
     }
 
@@ -120,7 +120,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     public void addRepository(URI uri) throws Exception {
-        if (!repositories.values().contains(uri)) {
+        if (!repositories.containsKey(uri)) {
             internalAddRepository(uri);
             saveState();
         }
@@ -208,7 +208,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
     protected Bundle installBundleIfNeeded(String bundleLocation) throws IOException, BundleException {
         LOGGER.debug("Checking " + bundleLocation);
-        InputStream is = null;
+        InputStream is;
         try {
             is = new BufferedInputStream(new URL(bundleLocation).openStream());
         } catch (RuntimeException e) {
@@ -256,7 +256,7 @@ public class FeaturesServiceImpl implements FeaturesService {
             throw new Exception("Feature named '" + name + "' is not installed");
         } else if (versions.size() > 1) {
             StringBuilder sb = new StringBuilder();
-            sb.append("Feature named '" + name + "' has multiple versions installed (");
+            sb.append("Feature named '").append(name).append("' has multiple versions installed (");
             for (int i = 0; i < versions.size(); i++) {
                 if (i > 0) {
                     sb.append(", ");
@@ -291,8 +291,7 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     public String[] listFeatures() throws Exception {
         Collection<String> features = new ArrayList<String>();
-        for (Map<String, Feature> featureWithDifferentVersion : getFeatures()
-				.values()) {
+        for (Map<String, Feature> featureWithDifferentVersion : getFeatures().values()) {
 			for (Feature f : featureWithDifferentVersion.values()) {
 				String installStatus = installed.containsKey(f) ? "installed  "
 						: "uninstalled";
@@ -358,7 +357,7 @@ public class FeaturesServiceImpl implements FeaturesService {
                 boolean newRepo = false;
                 for (Repository repo : listRepositories()) {
                     for (URI uri : repo.getRepositories()) {
-                        if (!repositories.keySet().contains(uri)) {
+                        if (!repositories.containsKey(uri)) {
                             internalAddRepository(uri);
                             newRepo = true;
                         }
@@ -535,6 +534,11 @@ public class FeaturesServiceImpl implements FeaturesService {
         return set;
     }
 
+    static Pattern fuzzyVersion  = Pattern.compile("(\\d+)(\\.(\\d+)(\\.(\\d+))?)?([^a-zA-Z0-9](.*))?",
+                                                   Pattern.DOTALL);
+    static Pattern fuzzyModifier = Pattern.compile("(\\d+[.-])*(.*)",
+                                                   Pattern.DOTALL);
+
     /**
      * Clean up version parameters. Other builders use more fuzzy definitions of
      * the version syntax. This method cleans up such a version to match an OSGi
@@ -543,11 +547,6 @@ public class FeaturesServiceImpl implements FeaturesService {
      * @param version
      * @return
      */
-    static Pattern fuzzyVersion  = Pattern.compile("(\\d+)(\\.(\\d+)(\\.(\\d+))?)?([^a-zA-Z0-9](.*))?",
-                                                   Pattern.DOTALL);
-    static Pattern fuzzyModifier = Pattern.compile("(\\d+[.-])*(.*)",
-                                                   Pattern.DOTALL);
-
     static public String cleanupVersion(String version) {
         Matcher m = fuzzyVersion.matcher(version);
         if (m.matches()) {
