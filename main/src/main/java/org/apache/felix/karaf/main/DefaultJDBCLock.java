@@ -26,7 +26,7 @@ import java.util.Properties;
 
 /**
  * Represents an exclusive lock on a database,
- * used to avoid multiple SMX instances attempting
+ * used to avoid multiple Karaf instances attempting
  * to become master.
  * 
  * @version $Revision: $
@@ -70,45 +70,41 @@ public class DefaultJDBCLock implements Lock {
         }
         if (user == null) { user = ""; }
         if (password == null) { password = ""; }
-        try {
-            obtainLock();
-        } catch (Exception e) {
-            System.err.println("Error occured while attempting to obtain connection: " + e.getMessage());
-        }
     }
 
     /**
-     * obtainLock - obtain the lock connection.
+     * setUpdateCursor - Send Update directive to data base server.
      *
      * @throws Exception
      */
-    private void obtainLock() throws Exception {
+    private boolean setUpdateCursor() throws Exception {
         PreparedStatement statement = null;
-        while (true) {
-            try {
+        boolean result = false;
+        try { 
+            if ((lockConnection == null) || (lockConnection.isClosed())) { 
                 lockConnection = getConnection(driver, url, user, password);
                 lockConnection.setAutoCommit(false);
                 statements.init(lockConnection);
-                String sql = statements.testLockTableStatus();
-                statement = lockConnection.prepareStatement(sql);
-                statement.execute();
-                break;
-            } catch (Exception e) {
-                System.err.println("Could not obtain lock: " + e.getMessage());
-                Thread.sleep(this.timeout);
-            } finally {
-                if (null != statement) {
-                    try {
-                        statement.close();
-                    } catch (SQLException e1) {
-                        System.err.println("Caught while closing statement: " + e1.getMessage());
-                    }
-                    statement = null;
-                }
             }
-            Thread.sleep(this.timeout);
+            //statements.init(lockConnection);
+            String sql = statements.setUpdateCursor();
+            statement = lockConnection.prepareStatement(sql);
+            result = statement.execute();
+        } catch (Exception e) {
+            System.err.println("Could not obtain connection: " + e.getMessage());
+        } finally {
+            if (null != statement) {
+                try {
+                    System.err.println("Cleaning up DB connection.");
+                    statement.close();
+                } catch (SQLException e1) {
+                    System.err.println("Caught while closing statement: " + e1.getMessage());
+                }
+                statement = null;
+            }
         }
         System.out.println("Connected to data source: " + url);
+        return result;
     }
 
     /**
@@ -120,7 +116,10 @@ public class DefaultJDBCLock implements Lock {
         PreparedStatement statement = null;
         boolean result = false;
         try {
-            if (lockConnection.isClosed()) { obtainLock(); } 
+            if (!setUpdateCursor()) {
+                System.err.println("Could not set DB update cursor");
+                return result;
+            }
             long time = System.currentTimeMillis();
             statement = lockConnection.prepareStatement(statements.getLockUpdateStatement(time));
             int rows = statement.executeUpdate();
@@ -155,18 +154,32 @@ public class DefaultJDBCLock implements Lock {
      * isAlive - test if lock still exists.
      */
     public boolean isAlive() throws Exception {
-        if (lockConnection == null) { return false; }
-        PreparedStatement statement = null;
-        try { 
-            lockConnection.setAutoCommit(false);
-            statements.init(lockConnection);
-            String sql = statements.testLockTableStatus();
-            statement = lockConnection.prepareStatement(sql);
-            statement.execute();
-        } catch (Exception ex) {
-            return false;
+        if ((lockConnection == null) || (lockConnection.isClosed())) { 
+            System.err.println("Lost lock!");
+            return false; 
         }
-        return true;
+        PreparedStatement statement = null;
+        boolean result = true;
+        try { 
+            long time = System.currentTimeMillis();
+            statement = lockConnection.prepareStatement(statements.getLockUpdateStatement(time));
+            int rows = statement.executeUpdate();
+            if (rows != 1) {
+                result = false;
+            }
+        } catch (Exception ex) {
+            System.err.println("Error occured while testing lock: " + ex + " " + ex.getMessage());
+            return false;
+        } finally {
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (Exception ex1) {
+                    System.err.println("Error occured after testing lock: " + ex1.getMessage());
+                }
+            }
+        }
+        return result;
     }
 
     /**
@@ -186,6 +199,7 @@ public class DefaultJDBCLock implements Lock {
             Class.forName(driver);
             conn = DriverManager.getConnection(url + ";create=true", username, password);
         } catch (Exception e) {
+            System.err.println("Error occured while setting up JDBC connection: " + e);
             throw e; 
         }
         return conn;

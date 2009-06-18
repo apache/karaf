@@ -38,7 +38,7 @@ public class Statements {
         this.lockPopulateStatement="insert into " + lockTableName + " (TIME, CLUSTER) values (1, '" + clusterName + "')";
     }
 
-    public String testLockTableStatus() {
+    public String setUpdateCursor() {
         String test = "SELECT * FROM " + lockTableName + " FOR UPDATE";
         return test;
     }
@@ -92,7 +92,7 @@ public class Statements {
             System.err.println(ignore);
         } finally {
             try {
-                s.close();
+                if (s != null) { s.close(); }
             } catch (Throwable e) {
                 // ignore
             }
