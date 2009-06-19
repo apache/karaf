@@ -25,7 +25,6 @@ import java.security.*;
 import java.util.Hashtable;
 import java.util.jar.JarFile;
 
-import org.apache.felix.framework.ModuleImpl;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
@@ -742,6 +741,27 @@ public class SecureAction
         }
     }
 
+    public void setAccesssible(Constructor ctor)
+    {
+        if (System.getSecurityManager() != null)
+        {
+            Actions actions = (Actions) m_actions.get();
+            actions.set(Actions.SET_ACCESSIBLE_ACTION, ctor);
+            try
+            {
+                AccessController.doPrivileged(actions, m_acc);
+            }
+            catch (PrivilegedActionException e)
+            {
+                throw (RuntimeException) e.getException();
+            }
+        }
+        else
+        {
+            ctor.setAccessible(true);
+        }
+    }
+
     public Object invoke(Method method, Object target, Object[] params) throws Exception
     {
         if (System.getSecurityManager() != null)
@@ -961,7 +981,8 @@ public class SecureAction
         public static final int GET_FIELD_ACTION = 31;
         public static final int GET_DECLAREDMETHOD_ACTION = 32;
         public static final int SET_ACCESSIBLE_ACTION = 33;
-        public static final int INVOKE_DIRECTMETHOD_ACTION = 34;
+        public static final int SET_ACCESSIBLE_CTOR_ACTION = 34;
+        public static final int INVOKE_DIRECTMETHOD_ACTION = 35;
 
         private int m_action = -1;
         private Object m_arg1 = null;
@@ -1187,6 +1208,10 @@ public class SecureAction
             else if (action == SET_ACCESSIBLE_ACTION)
             {
                 ((Method) arg1).setAccessible(true);
+            }
+            else if (action == SET_ACCESSIBLE_CTOR_ACTION)
+            {
+                ((Constructor) arg1).setAccessible(true);
             }
 
             return null;

@@ -20,12 +20,17 @@ package org.apache.felix.framework.util.ldap;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
+import org.apache.felix.framework.util.SecureAction;
 
 public class Parser
 {
+    // Secure action to make object constructors accessible.
+    private static final SecureAction m_secureAction = new SecureAction();
+
     //
     // Parser contants.
     //
@@ -1355,9 +1360,18 @@ loop:   for (;;)
                 }
                 else
                 {
-                    rhsComparable = (Comparable) lhs.getClass()
-                        .getConstructor(STRING_CLASS)
-                            .newInstance(new Object[] { rhs });
+                    // The constructor may not be public, so we need to make it
+                    // accessible in that case.
+                    Constructor ctor = lhs.getClass().getConstructor(STRING_CLASS);
+                    if (!ctor.isAccessible())
+                    {
+                        m_secureAction.setAccesssible(ctor);
+                    }
+                    // We don't invoke the constructor in a privileged block,
+                    // since we don't want to elevate the objects privileges.
+                    // If the object needs to, it should be doing a privileged
+                    // block internally.
+                    rhsComparable = (Comparable) ctor.newInstance(new Object[] { rhs });
                 }
             }
             catch (Exception ex)
@@ -1441,10 +1455,19 @@ loop:   for (;;)
             {
                 try
                 {
-                    Object rhsObject = lhsClass
-                        .getConstructor(STRING_CLASS)
-                            .newInstance(new Object[] { rhs });
-                        return lhs.equals(rhsObject);
+                    // The constructor may not be public, so we need to make it
+                    // accessible in that case.
+                    Constructor ctor = lhs.getClass().getConstructor(STRING_CLASS);
+                    if (!ctor.isAccessible())
+                    {
+                        m_secureAction.setAccesssible(ctor);
+                    }
+                    // We don't invoke the constructor in a privileged block,
+                    // since we don't want to elevate the objects privileges.
+                    // If the object needs to, it should be doing a privileged
+                    // block internally.
+                    Object rhsObject = ctor.newInstance(new Object[] { rhs });
+                    return lhs.equals(rhsObject);
                 }
                 catch (Exception ex)
                 {
