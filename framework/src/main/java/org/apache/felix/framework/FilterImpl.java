@@ -306,11 +306,11 @@ public class FilterImpl implements Filter
 
         public Object lookup(String name)
         {
-            if (m_map == null)
+            if (m_ref != null)
             {
                 return m_ref.getProperty(name);
             }
-            return m_map.get(name);
+            return (m_map != null) ? m_map.get(name) : null;
         }
     }
 }
