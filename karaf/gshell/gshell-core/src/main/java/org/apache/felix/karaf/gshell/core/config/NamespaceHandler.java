@@ -189,6 +189,8 @@ public class NamespaceHandler implements org.apache.geronimo.blueprint.Namespace
 
     private MutableBeanMetadata parseAction(ParserContext context, ComponentMetadata enclosingComponent, Element element) {
         MutableBeanMetadata action = context.createMetadata(MutableBeanMetadata.class);
+        action.setInitialization(MutableBeanMetadata.INITIALIZATION_LAZY);
+        action.setScope(MutableBeanMetadata.SCOPE_PROTOTYPE);
         action.setClassName(element.getAttribute("class"));
         NodeList children = element.getChildNodes();
         for (int i = 0; i < children.getLength(); i++) {
