@@ -1513,11 +1513,11 @@ loop:   for (;;)
         }
         else if (clazz == Short.TYPE)
         {
-            byte[] src = (byte[]) array;
-            array = new Byte[src.length];
+            short[] src = (short[]) array;
+            array = new Short[src.length];
             for (int i = 0; i < src.length; i++)
             {
-                ((Object[]) array)[i] = new Byte(src[i]);
+                ((Object[]) array)[i] = new Short(src[i]);
             }
         }
         else if (clazz == Integer.TYPE)
