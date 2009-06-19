@@ -158,6 +158,18 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+        <!-- OPS4J Snapshot repo -->
+       <repository>
+            <id>ops4j-snapshots</id>
+            <name>OPS4j Repository Snapshot</name>
+            <url>http://repository.ops4j.org/mvn-snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
         <!-- Spring milestones repository -->
         <!-- TODO: remove this repo when spring-dm 1.2.0 is out -->
         <repository>
