@@ -1663,9 +1663,10 @@ loop:   for (;;)
         }
         else if (obj1 instanceof Character)
         {
-            char value1 = ((Character)obj1).charValue();
-            char value2 = ((Character)obj2).charValue();
-            return (value2 >= (value1-((Math.abs(value1)*(char)APPROX_CRITERIA)/(char)100)) 
+            // We should ignore case.
+            char value1 = Character.toLowerCase(((Character) obj1).charValue());
+            char value2 = Character.toLowerCase(((Character) obj2).charValue());
+            return (value2 >= (value1-((Math.abs(value1)*(char)APPROX_CRITERIA)/(char)100))
                 && value2 <= (value1+((Math.abs(value1)*(char)APPROX_CRITERIA)/(char)100)));
         }
         else if (obj1 instanceof Double)
@@ -1705,10 +1706,12 @@ loop:   for (;;)
         }
         else if (obj1 instanceof String)
         {
+            // Spec says to ignore case and whitespace, to let's convert
+            // to lower case and remove whitespace.
             int distance = getDistance(
-                obj1.toString().toLowerCase(), obj2.toString().toLowerCase());
-            int size = ((String)obj1).length();
-            return (distance <= ((size*APPROX_CRITERIA)/100));
+                removeWhitespace(obj1.toString()), removeWhitespace(obj2.toString()));
+             int size = ((String)obj1).length();
+             return (distance <= ((size*APPROX_CRITERIA)/100));
         }
         else if (obj1 instanceof BigInteger)
         {
@@ -1735,6 +1738,19 @@ loop:   for (;;)
         throw new EvaluationException(
             "Approximate operator not supported for type "
             + obj1.getClass().getName());
+    }
+
+    private static String removeWhitespace(String s)
+    {
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < s.length(); i++)
+        {
+            if (!Character.isWhitespace(s.charAt(i)))
+            {
+                sb.append(Character.toLowerCase(s.charAt(i)));
+            }
+        }
+        return sb.toString();
     }
 
     /**
