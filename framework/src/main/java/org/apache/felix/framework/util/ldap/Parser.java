@@ -122,11 +122,14 @@ public class Parser
         {
             return ok;
         }
-        int ch = lexer.get();
-        if (ch != EOF)
+        // Ignore trailing whitespace.
+        for (int ch = lexer.get(); ch != EOF; ch = lexer.get())
         {
-            throw new ParseException(
-                "expected <EOF>; found '" + ((char) ch) + "'");
+            if (!Character.isWhitespace(ch))
+            {
+                throw new ParseException(
+                    "expected <EOF>; found '" + ((char) ch) + "'");
+            }
         }
         return ok;
     }
