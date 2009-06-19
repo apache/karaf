@@ -91,17 +91,7 @@ public class DirectoryWatcher extends Thread
         }
         watchedDirectory = new File(dir);
         
-        if (!watchedDirectory.exists() && !watchedDirectory.mkdirs())
-        {
-            log("Cannot create folder " + watchedDirectory + ". Is the folder write-protected?", null);
-            throw new RuntimeException("Cannot create folder " + watchedDirectory);
-        }
-
-        if (!this.watchedDirectory.isDirectory())
-        {
-            log("Cannot watch " + watchedDirectory + " because it's not a directory", null);
-            throw new RuntimeException("Cannot start FileInstall to watch something that is not a directory");
-        }
+        prepareWatchedDir(watchedDirectory);
         
         Object value = properties.get(START_NEW_BUNDLES);
         if (value != null)
@@ -144,6 +134,34 @@ public class DirectoryWatcher extends Thread
             }
         }
     }
+    
+    /**
+     * Create the watched directory, if not existing.
+     * Throws a runtime exception if the directory cannot be created,
+     * or if the provided File parameter does not refer to a directory.
+     * 
+     * @param watchedDirectory 
+     *            The directory File Install will monitor
+     */
+    private void prepareWatchedDir(File watchedDirectory)
+    {
+        if (!watchedDirectory.exists() && !watchedDirectory.mkdirs())
+        {
+            log("Cannot create folder "
+                + watchedDirectory
+                + ". Is the folder write-protected?", null);
+            throw new RuntimeException("Cannot create folder: " + watchedDirectory);
+        }
+
+        if (!watchedDirectory.isDirectory())
+        {
+            log("Cannot watch "
+                + watchedDirectory
+                + " because it's not a directory", null);
+            throw new RuntimeException(
+                "Cannot start FileInstall to watch something that is not a directory");
+        }
+    }
 
     /**
      * Handle the changes between the configurations already installed and the
@@ -163,7 +181,7 @@ public class DirectoryWatcher extends Thread
             // with the inactive ones.
             Set inactive = new HashSet(current.keySet());
 
-            for (Iterator e = discovered.iterator(); e.hasNext();)
+            for (Iterator e = discovered.iterator(); e.hasNext(); )
             {
                 String path = (String) e.next();
                 File f = new File(path);
@@ -227,8 +245,7 @@ public class DirectoryWatcher extends Thread
         {
             if (debug != 0 && !reported)
             {
-                log(
-                    "Can't find a Configuration Manager, configurations do not work",
+                log("Can't find a Configuration Manager, configurations do not work",
                     null);
                 reported = true;
             }
@@ -296,7 +313,8 @@ public class DirectoryWatcher extends Thread
 	    Configuration oldConfiguration = findExistingConfiguration(pid, factoryPid);
         if (oldConfiguration != null)
         {
-            log("Updating configuration from " + pid + (factoryPid == null ? "" : "-" + factoryPid) + ".cfg", null);
+            log("Updating configuration from " + pid
+                + (factoryPid == null ? "" : "-" + factoryPid) + ".cfg", null);
             return oldConfiguration;
         }
         else
@@ -374,10 +392,9 @@ public class DirectoryWatcher extends Thread
         start(new HashSet(startupFailures));
 
         if (startBundles
-                &&
-                (uninstalledBundles.size() > 0
-                        || updatedBundles.size() > 0
-                        || installedBundles.size() > 0))
+            && ((uninstalledBundles.size() > 0)
+                || (updatedBundles.size() > 0)
+                || (installedBundles.size() > 0)))
         {
             // Something has changed in the system, so
             // try to start all the bundles.
@@ -452,7 +469,12 @@ public class DirectoryWatcher extends Thread
     void traverse(Map/* <String, Jar> */ jars, Set configs, File jardir)
     {
         String list[] = jardir.list();
-        for (int i = 0; i < list.length; i++)
+        if (list == null)
+        {
+            prepareWatchedDir(jardir);
+            list = jardir.list();
+        }
+        for (int i = 0; (list != null) && (i < list.length); i++)
         {
             File file = new File(jardir, list[i]);
             if (list[i].endsWith(".cfg"))
@@ -559,7 +581,7 @@ public class DirectoryWatcher extends Thread
     {
         Bundle[] bundles = this.context.getBundles();
         String watchedDirPath = watchedDirectory.toURI().normalize().getPath();
-        for (int i = 0; i < bundles.length; ++i)
+        for (int i = 0; i < bundles.length; i++)
         {
             try
             {
@@ -630,7 +652,7 @@ public class DirectoryWatcher extends Thread
 
     private void start(Collection bundles)
     {
-        for (Iterator b = bundles.iterator(); b.hasNext();)
+        for (Iterator b = bundles.iterator(); b.hasNext(); )
         {
             start((Bundle) b.next());
         }
@@ -648,7 +670,7 @@ public class DirectoryWatcher extends Thread
     private Collection/* <Bundle> */ update(Collection jars)
     {
         List bundles = new ArrayList();
-        for (Iterator iter = jars.iterator(); iter.hasNext();)
+        for (Iterator iter = jars.iterator(); iter.hasNext(); )
         {
             Jar e = (Jar) iter.next();
             Jar c = (Jar) currentManagedBundles.get(e.getPath());
@@ -814,7 +836,7 @@ public class DirectoryWatcher extends Thread
      */
     private void startAllBundles()
     {
-        for (Iterator jars = currentManagedBundles.values().iterator(); jars.hasNext();)
+        for (Iterator jars = currentManagedBundles.values().iterator(); jars.hasNext(); )
         {
             Jar jar = (Jar) jars.next();
             Bundle bundle = context.getBundle(jar.getBundleId());
