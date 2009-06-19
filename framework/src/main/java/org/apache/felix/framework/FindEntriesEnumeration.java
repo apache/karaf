@@ -20,10 +20,14 @@ package org.apache.felix.framework;
 
 import java.util.*;
 
+import org.apache.felix.moduleloader.IModule;
+
 class FindEntriesEnumeration implements Enumeration
 {
     private BundleImpl m_bundle = null;
-    private Enumeration m_enumeration = null;
+    private Enumeration[] m_enumerations = null;
+    private IModule[] m_modules = null;
+    private int m_moduleIndex = 0;
     private String m_path = null;
     private String[] m_filePattern = null;
     private boolean m_recurse = false;
@@ -34,8 +38,24 @@ class FindEntriesEnumeration implements Enumeration
     {
         m_bundle = bundle;
         m_path = path;
-        m_enumeration = (m_bundle.getCurrentModule().getContent() == null)
-            ? null : ((ModuleImpl) m_bundle.getCurrentModule()).getEntries();
+        IModule bundleModule = m_bundle.getCurrentModule();
+        IModule[] fragmentModules = ((ModuleImpl) bundleModule).getFragments();
+        if (fragmentModules == null)
+        {
+            fragmentModules = new IModule[0];
+        }
+        m_modules = new IModule[fragmentModules.length + 1];
+        m_modules[0] = bundleModule;
+        for (int i = 0; i < fragmentModules.length; i++)
+        {
+            m_modules[i + 1] = fragmentModules[i];
+        }
+        m_enumerations = new Enumeration[m_modules.length];
+        for (int i = 0; i < m_modules.length; i++)
+        {
+            m_enumerations[i] = m_modules[i].getContent() != null ?
+                m_modules[i].getContent().getEntries() : null;
+        }
         m_recurse = recurse;
 
         // Sanity check the parameters.
@@ -84,39 +104,48 @@ class FindEntriesEnumeration implements Enumeration
         // it only displays the contents of the directory specified by
         // the path argument either recursively or not; much like using
         // "ls -R" or "ls" to list the contents of a directory, respectively.
-        while ((m_enumeration != null) && m_enumeration.hasMoreElements())
+        if (m_enumerations == null)
         {
-            // Get the next entry name.
-            String entryName = (String) m_enumeration.nextElement();
-            // Check to see if it is a descendent of the specified path.
-            if (!entryName.equals(m_path) && entryName.startsWith(m_path))
+            return null;
+        }
+        while (m_moduleIndex < m_enumerations.length)
+        {
+            while (m_enumerations[m_moduleIndex] != null
+                &&  m_enumerations[m_moduleIndex].hasMoreElements())
             {
-                // If this is recursive search, then try to match any
-                // entry path that starts with the specified path;
-                // otherwise, only try to match children of the specified
-                // path and not any grandchild. This code uses the knowledge
-                // that content entries corresponding to directories end in '/'.
-                int idx = entryName.indexOf('/', m_path.length());
-                if (m_recurse || (idx < 0) || (idx == (entryName.length() - 1)))
+                // Get the next entry name.
+                String entryName = (String) m_enumerations[m_moduleIndex].nextElement();
+                // Check to see if it is a descendent of the specified path.
+                if (!entryName.equals(m_path) && entryName.startsWith(m_path))
                 {
-                    // Get the last element of the entry path, not including
-                    // the '/' if it is a directory.
-                    int endIdx = (entryName.charAt(entryName.length() - 1) == '/')
-                        ? entryName.length() - 1
-                        : entryName.length();
-                    int startIdx = (entryName.charAt(entryName.length() - 1) == '/')
-                        ? entryName.lastIndexOf('/', endIdx - 1) + 1
-                        : entryName.lastIndexOf('/', endIdx) + 1;
-                    String lastElement = entryName.substring(startIdx, endIdx);
-                    
-                    // See if the file pattern matches the last element of the path.
-                    if (checkSubstring(m_filePattern, lastElement))
+                    // If this is recursive search, then try to match any
+                    // entry path that starts with the specified path;
+                    // otherwise, only try to match children of the specified
+                    // path and not any grandchild. This code uses the knowledge
+                    // that content entries corresponding to directories end in '/'.
+                    int idx = entryName.indexOf('/', m_path.length());
+                    if (m_recurse || (idx < 0) || (idx == (entryName.length() - 1)))
                     {
-                        // Convert entry name into an entry URL.
-                        return m_bundle.getCurrentModule().getEntry(entryName);
+                        // Get the last element of the entry path, not including
+                        // the '/' if it is a directory.
+                        int endIdx = (entryName.charAt(entryName.length() - 1) == '/')
+                            ? entryName.length() - 1
+                            : entryName.length();
+                        int startIdx = (entryName.charAt(entryName.length() - 1) == '/')
+                            ? entryName.lastIndexOf('/', endIdx - 1) + 1
+                            : entryName.lastIndexOf('/', endIdx) + 1;
+                        String lastElement = entryName.substring(startIdx, endIdx);
+                        
+                        // See if the file pattern matches the last element of the path.
+                        if (checkSubstring(m_filePattern, lastElement))
+                        {
+                            // Convert entry name into an entry URL.
+                            return m_modules[m_moduleIndex].getEntry(entryName);
+                        }
                     }
                 }
             }
+            m_moduleIndex++;
         }
 
         return null;

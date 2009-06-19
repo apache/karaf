@@ -428,20 +428,6 @@ public class ModuleImpl implements IModule
         return m_content;
     }
 
-    synchronized Enumeration getEntries()
-    {
-        Enumeration[] ens =
-            new Enumeration[(m_fragmentContents == null)
-                ? 1
-                : m_fragmentContents.length + 1];
-        ens[0] = m_content.getEntries();
-        for (int i = 1; i < ens.length; i++)
-        {
-            ens[i] = m_fragmentContents[i - 1].getEntries();
-        }
-        return new CompoundEnumeration(ens);
-    }
-
     private synchronized IContent[] getContentPath()
     {
         if (m_contentPath == null)
