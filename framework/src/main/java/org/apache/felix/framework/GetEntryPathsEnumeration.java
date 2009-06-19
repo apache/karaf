@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -23,42 +23,42 @@ import java.util.NoSuchElementException;
 
 class GetEntryPathsEnumeration implements Enumeration
 {
-    private BundleImpl m_bundle = null;
-    private Enumeration m_enumeration = null;
-    private String m_path = null;
+    private final BundleImpl m_bundle;
+    private final Enumeration m_enumeration;
+    private final String m_path;
     private Object m_next = null;
 
     public GetEntryPathsEnumeration(BundleImpl bundle, String path)
     {
         m_bundle = bundle;
-        m_path = path;
         m_enumeration = m_bundle.getCurrentModule().getContent().getEntries();
 
         // Sanity check the parameters.
-        if (m_path == null)
+        if (path == null)
         {
             throw new IllegalArgumentException("The path for findEntries() cannot be null.");
         }
         // Strip leading '/' if present.
-        if ((m_path.length() > 0) && (m_path.charAt(0) == '/'))
+        if ((path.length() > 0) && (path.charAt(0) == '/'))
         {
-            m_path = m_path.substring(1);
+            path = path.substring(1);
         }
         // Add a '/' to the end if not present.
-        if ((m_path.length() > 0) && (m_path.charAt(m_path.length() - 1) != '/'))
+        if ((path.length() > 0) && (path.charAt(path.length() - 1) != '/'))
         {
-            m_path = m_path + "/";
+            path = path + "/";
         }
+        m_path = path;
 
         m_next = findNext();
     }
 
-    public boolean hasMoreElements()
+    public synchronized boolean hasMoreElements()
     {
         return (m_next != null);
     }
 
-    public Object nextElement()
+    public synchronized Object nextElement()
     {
         if (m_next == null)
         {

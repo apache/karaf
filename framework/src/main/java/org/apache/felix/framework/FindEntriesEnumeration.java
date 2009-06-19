@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -24,20 +24,19 @@ import org.apache.felix.moduleloader.IModule;
 
 class FindEntriesEnumeration implements Enumeration
 {
-    private BundleImpl m_bundle = null;
-    private Enumeration[] m_enumerations = null;
-    private IModule[] m_modules = null;
+    private final BundleImpl m_bundle;
+    private final Enumeration[] m_enumerations;
+    private final IModule[] m_modules;
     private int m_moduleIndex = 0;
-    private String m_path = null;
-    private String[] m_filePattern = null;
-    private boolean m_recurse = false;
+    private final String m_path;
+    private final String[] m_filePattern;
+    private final boolean m_recurse;
     private Object m_next = null;
 
     public FindEntriesEnumeration(
         BundleImpl bundle, String path, String filePattern, boolean recurse)
     {
         m_bundle = bundle;
-        m_path = path;
         IModule bundleModule = m_bundle.getCurrentModule();
         IModule[] fragmentModules = ((ModuleImpl) bundleModule).getFragments();
         if (fragmentModules == null)
@@ -59,20 +58,21 @@ class FindEntriesEnumeration implements Enumeration
         m_recurse = recurse;
 
         // Sanity check the parameters.
-        if (m_path == null)
+        if (path == null)
         {
             throw new IllegalArgumentException("The path for findEntries() cannot be null.");
         }
         // Strip leading '/' if present.
-        if ((m_path.length() > 0) && (m_path.charAt(0) == '/'))
+        if ((path.length() > 0) && (path.charAt(0) == '/'))
         {
-            m_path = m_path.substring(1);
+            path = path.substring(1);
         }
         // Add a '/' to the end if not present.
-        if ((m_path.length() > 0) && (m_path.charAt(m_path.length() - 1) != '/'))
+        if ((path.length() > 0) && (path.charAt(path.length() - 1) != '/'))
         {
-            m_path = m_path + "/";
+            path = path + "/";
         }
+        m_path = path;
 
         // File pattern defaults to "*" if not specified.
         filePattern = (filePattern == null) ? "*" : filePattern;
@@ -82,12 +82,12 @@ class FindEntriesEnumeration implements Enumeration
         m_next = findNext();
     }
 
-    public boolean hasMoreElements()
+    public synchronized boolean hasMoreElements()
     {
         return (m_next != null);
     }
 
-    public Object nextElement()
+    public synchronized Object nextElement()
     {
         if (m_next == null)
         {
@@ -135,7 +135,7 @@ class FindEntriesEnumeration implements Enumeration
                             ? entryName.lastIndexOf('/', endIdx - 1) + 1
                             : entryName.lastIndexOf('/', endIdx) + 1;
                         String lastElement = entryName.substring(startIdx, endIdx);
-                        
+
                         // See if the file pattern matches the last element of the path.
                         if (checkSubstring(m_filePattern, lastElement))
                         {
@@ -188,7 +188,7 @@ class FindEntriesEnumeration implements Enumeration
                 ss.setLength(0);
                 break;
             }
-    
+
             char c = target.charAt(idx++);
             if (c == '*')
             {
