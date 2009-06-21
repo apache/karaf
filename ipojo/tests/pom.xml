@@ -62,6 +62,7 @@
 		<modules>
 			<module>core/annotations</module>
 			<module>manipulator/manipulator-java5</module>
+			<module>handler/transaction</module>
 		</modules>
 	</profile>
 	<profile>
@@ -72,6 +73,7 @@
 		<modules>
 			<module>core/annotations</module>
 			<module>manipulator/manipulator-java5</module>
+			<module>handler/transaction</module>
 		</modules>
 	</profile>
   </profiles>

@@ -41,69 +41,69 @@ import org.osgi.framework.ServiceReference;
 
 @RunWith( JUnit4TestRunner.class )
 public class TestNotSupported {
-    
+
     @Inject
     private BundleContext context;
-    
+
     private OSGiHelper osgi;
-    
+
     private IPOJOHelper ipojo;
     public static final File ROOT = new File("target/tmp");
     public static final File TEST = new File("src/test/resources");
 
-    
+
     @Before
     public void init() {
         osgi = new OSGiHelper(context);
         ipojo = new IPOJOHelper(context);
     }
-    
+
     @After
     public void stop() {
         ipojo.dispose();
         osgi.dispose();
     }
-    
+
     @Configuration
-    public static Option[] configure() {    
+    public static Option[] configure() {
         ROOT.mkdirs();
 
         URL service = TinyBundles.newBundle()
             .addClass(CheckService.class)
             .addClass(Foo.class)
-           .prepare( 
+           .prepare(
                 with()
                 .set(Constants.BUNDLE_SYMBOLICNAME,"Service")
                 .set(Constants.EXPORT_PACKAGE, "org.apache.felix.ipojo.transaction.test.service")
                 .set(Constants.IMPORT_PACKAGE, "javax.transaction")
                 )
             .build( TinyBundles.asURL());
-            
+
         String fooimpl = TinyBundles.newBundle()
             .addClass(FooImpl.class)
-            .prepare( 
+            .prepare(
                     with()
                     .set(Constants.BUNDLE_SYMBOLICNAME,"Foo Provider")
                     .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.transaction.test.service")
                 )
                 .build( new BundleAsiPOJO(new File(ROOT, "FooImpl.jar"), new File(TEST, "foo.xml"))  ).toExternalForm();
-        
+
         String test = TinyBundles.newBundle()
         .addClass(FooDelegator.class)
-        .prepare( 
+        .prepare(
                 with()
                 .set(Constants.BUNDLE_SYMBOLICNAME,"Required Transaction Propgatation")
                 .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.transaction.test.service, javax.transaction")
             )
             .build( new BundleAsiPOJO(new File(ROOT, "notsupported.jar"), new File(TEST, "notsupported.xml"))  ).toExternalForm();
-    
-        
+
+
         Option[] opt =  options(
- 
+
                 provision(
                         mavenBundle().groupId("org.ops4j.pax.logging").artifactId("pax-logging-api").version(asInProject()),
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
-                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.transaction").version(asInProject()),
+                        mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.handler.transaction").version(asInProject()),
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.transaction").version(asInProject()),
                         mavenBundle()
                         .groupId( "org.ops4j.pax.tinybundles" )
@@ -118,16 +118,16 @@ public class TestNotSupported {
                 ;
         return opt;
     }
-    
-    
+
+
     @Test
     public void testOkOutsideTransaction() {
         ComponentInstance prov = ipojo.createComponentInstance("org.apache.felix.ipojo.transaction.test.component.FooImpl");
         ComponentInstance under = ipojo.createComponentInstance("notsupported-ok");
-        
+
         Assert.assertEquals(ComponentInstance.VALID, prov.getState());
         Assert.assertEquals(ComponentInstance.VALID, under.getState());
-        
+
         ServiceReference ref = ipojo.getServiceReferenceByName(CheckService.class.getName(), under.getInstanceName());
         Assert.assertNotNull(ref);
 
@@ -135,18 +135,18 @@ public class TestNotSupported {
         cs.doSomethingGood();
         // No transaction.
     }
-    
+
     @Test
     public void testOkInsideTransaction() throws NotSupportedException, SystemException, SecurityException, HeuristicMixedException, HeuristicRollbackException, RollbackException {
         ComponentInstance prov = ipojo.createComponentInstance("org.apache.felix.ipojo.transaction.test.component.FooImpl");
         ComponentInstance under = ipojo.createComponentInstance("notsupported-ok");
-        
+
         Assert.assertEquals(ComponentInstance.VALID, prov.getState());
         Assert.assertEquals(ComponentInstance.VALID, under.getState());
-        
+
         ServiceReference ref = ipojo.getServiceReferenceByName(CheckService.class.getName(), under.getInstanceName());
         Assert.assertNotNull(ref);
-        
+
         CheckService cs = (CheckService) osgi.getServiceObject(ref);
         TransactionManager tm = (TransactionManager) osgi.getServiceObject(TransactionManager.class.getName(), null);
         tm.begin();
@@ -156,32 +156,32 @@ public class TestNotSupported {
         Assert.assertSame(t2, t);
         t.commit();
     }
-    
+
     @Test(expected=NullPointerException.class)
     public void testExceptionOutsideTransaction() {
         ComponentInstance prov = ipojo.createComponentInstance("org.apache.felix.ipojo.transaction.test.component.FooImpl");
         ComponentInstance under = ipojo.createComponentInstance("notsupported-ok");
-        
+
         Assert.assertEquals(ComponentInstance.VALID, prov.getState());
         Assert.assertEquals(ComponentInstance.VALID, under.getState());
-        
+
         ServiceReference ref = ipojo.getServiceReferenceByName(CheckService.class.getName(), under.getInstanceName());
         Assert.assertNotNull(ref);
 
         ((CheckService) osgi.getServiceObject(ref)).doSomethingBad();
     }
-    
+
     @Test
     public void testExceptionInsideTransaction() throws NotSupportedException, SystemException, SecurityException, HeuristicMixedException, HeuristicRollbackException, RollbackException {
         ComponentInstance prov = ipojo.createComponentInstance("org.apache.felix.ipojo.transaction.test.component.FooImpl");
         ComponentInstance under = ipojo.createComponentInstance("notsupported-ok");
-        
+
         Assert.assertEquals(ComponentInstance.VALID, prov.getState());
         Assert.assertEquals(ComponentInstance.VALID, under.getState());
-        
+
         ServiceReference ref = ipojo.getServiceReferenceByName(CheckService.class.getName(), under.getInstanceName());
         Assert.assertNotNull(ref);
-        
+
         CheckService cs = (CheckService) osgi.getServiceObject(ref);
         TransactionManager tm = (TransactionManager) osgi.getServiceObject(TransactionManager.class.getName(), null);
         tm.begin();
@@ -195,21 +195,21 @@ public class TestNotSupported {
         Transaction t2 = cs.getCurrentTransaction();
         Assert.assertSame(t2, t);
         Assert.assertEquals(Status.STATUS_ACTIVE, t.getStatus()); // No impact on the transaction.
-        
+
         t.commit(); // Ok.
     }
-    
+
     @Test
     public void testExceptionInsideTransactionRB() throws NotSupportedException, SystemException, SecurityException, HeuristicMixedException, HeuristicRollbackException, RollbackException {
         ComponentInstance prov = ipojo.createComponentInstance("org.apache.felix.ipojo.transaction.test.component.FooImpl");
         ComponentInstance under = ipojo.createComponentInstance("notsupported-ok");
-        
+
         Assert.assertEquals(ComponentInstance.VALID, prov.getState());
         Assert.assertEquals(ComponentInstance.VALID, under.getState());
-        
+
         ServiceReference ref = ipojo.getServiceReferenceByName(CheckService.class.getName(), under.getInstanceName());
         Assert.assertNotNull(ref);
-        
+
         CheckService cs = (CheckService) osgi.getServiceObject(ref);
         TransactionManager tm = (TransactionManager) osgi.getServiceObject(TransactionManager.class.getName(), null);
         tm.begin();
@@ -223,35 +223,35 @@ public class TestNotSupported {
         Transaction t2 = cs.getCurrentTransaction();
         Assert.assertSame(t2, t);
         Assert.assertEquals(Status.STATUS_ACTIVE, t.getStatus()); // No impact on the transaction.
-        
+
         t.rollback(); // Ok.
     }
-    
+
     @Test(expected=UnsupportedOperationException.class)
     public void testExpectedExceptionOutsideTransaction() {
         ComponentInstance prov = ipojo.createComponentInstance("org.apache.felix.ipojo.transaction.test.component.FooImpl");
         ComponentInstance under = ipojo.createComponentInstance("notsupported-ok");
-        
+
         Assert.assertEquals(ComponentInstance.VALID, prov.getState());
         Assert.assertEquals(ComponentInstance.VALID, under.getState());
-        
+
         ServiceReference ref = ipojo.getServiceReferenceByName(CheckService.class.getName(), under.getInstanceName());
         Assert.assertNotNull(ref);
 
         ((CheckService) osgi.getServiceObject(ref)).doSomethingBad2();
     }
-    
+
     @Test
     public void testExpectedExceptionInsideTransaction() throws NotSupportedException, SystemException, SecurityException, HeuristicMixedException, HeuristicRollbackException, RollbackException {
         ComponentInstance prov = ipojo.createComponentInstance("org.apache.felix.ipojo.transaction.test.component.FooImpl");
         ComponentInstance under = ipojo.createComponentInstance("notsupported-ok");
-        
+
         Assert.assertEquals(ComponentInstance.VALID, prov.getState());
         Assert.assertEquals(ComponentInstance.VALID, under.getState());
-        
+
         ServiceReference ref = ipojo.getServiceReferenceByName(CheckService.class.getName(), under.getInstanceName());
         Assert.assertNotNull(ref);
-        
+
         CheckService cs = (CheckService) osgi.getServiceObject(ref);
         TransactionManager tm = (TransactionManager) osgi.getServiceObject(TransactionManager.class.getName(), null);
         tm.begin();
@@ -265,43 +265,43 @@ public class TestNotSupported {
         Transaction t2 = cs.getCurrentTransaction();
         Assert.assertSame(t2, t);
         Assert.assertEquals(Status.STATUS_ACTIVE, t.getStatus());
-        
+
         t.commit();
     }
-    
+
     @Test
     public void testOkOutsideTransactionWithCallback() {
         ComponentInstance prov = ipojo.createComponentInstance("org.apache.felix.ipojo.transaction.test.component.FooImpl");
         ComponentInstance under = ipojo.createComponentInstance("notsupported-cb");
-        
+
         Assert.assertEquals(ComponentInstance.VALID, prov.getState());
         Assert.assertEquals(ComponentInstance.VALID, under.getState());
-        
+
         ServiceReference ref = ipojo.getServiceReferenceByName(CheckService.class.getName(), under.getInstanceName());
         Assert.assertNotNull(ref);
 
-        
+
         CheckService cs = (CheckService) osgi.getServiceObject(ref);
 
         cs.doSomethingGood();
-        
+
         Assert.assertNull(cs.getLastRolledBack());
         Assert.assertNull(cs.getLastCommitted());
         Assert.assertEquals(0, cs.getNumberOfCommit());
         Assert.assertEquals(0, cs.getNumberOfRollback());
     }
-    
+
     @Test
     public void testOkInsideTransactionWithCallback() throws NotSupportedException, SystemException, SecurityException, HeuristicMixedException, HeuristicRollbackException, RollbackException {
         ComponentInstance prov = ipojo.createComponentInstance("org.apache.felix.ipojo.transaction.test.component.FooImpl");
         ComponentInstance under = ipojo.createComponentInstance("notsupported-cb");
-        
+
         Assert.assertEquals(ComponentInstance.VALID, prov.getState());
         Assert.assertEquals(ComponentInstance.VALID, under.getState());
-        
+
         ServiceReference ref = ipojo.getServiceReferenceByName(CheckService.class.getName(), under.getInstanceName());
         Assert.assertNotNull(ref);
-        
+
         CheckService cs = (CheckService) osgi.getServiceObject(ref);
         TransactionManager tm = (TransactionManager) osgi.getServiceObject(TransactionManager.class.getName(), null);
         tm.begin();
@@ -310,45 +310,45 @@ public class TestNotSupported {
         Transaction t2 = cs.getCurrentTransaction();
         Assert.assertSame(t2, t);
         t.commit();
-        
+
         Assert.assertNull(cs.getLastRolledBack());
         Assert.assertNull(cs.getLastCommitted());
         Assert.assertEquals(0, cs.getNumberOfCommit());
         Assert.assertEquals(0, cs.getNumberOfRollback());
     }
-    
+
     @Test(expected=NullPointerException.class)
     public void testExceptionOutsideTransactionWithCallback() {
         ComponentInstance prov = ipojo.createComponentInstance("org.apache.felix.ipojo.transaction.test.component.FooImpl");
         ComponentInstance under = ipojo.createComponentInstance("notsupported-cb");
-        
+
         Assert.assertEquals(ComponentInstance.VALID, prov.getState());
         Assert.assertEquals(ComponentInstance.VALID, under.getState());
-        
+
         ServiceReference ref = ipojo.getServiceReferenceByName(CheckService.class.getName(), under.getInstanceName());
         Assert.assertNotNull(ref);
 
         CheckService cs = (CheckService) osgi.getServiceObject(ref);
 
         cs.doSomethingBad();
-        
+
         Assert.assertNull(cs.getLastRolledBack());
         Assert.assertNull(cs.getLastCommitted());
         Assert.assertEquals(0, cs.getNumberOfCommit());
         Assert.assertEquals(0, cs.getNumberOfRollback());
     }
-    
+
     @Test
     public void testExceptionInsideTransactionWithCallback() throws NotSupportedException, SystemException, SecurityException, HeuristicMixedException, HeuristicRollbackException, RollbackException {
         ComponentInstance prov = ipojo.createComponentInstance("org.apache.felix.ipojo.transaction.test.component.FooImpl");
         ComponentInstance under = ipojo.createComponentInstance("notsupported-cb");
-        
+
         Assert.assertEquals(ComponentInstance.VALID, prov.getState());
         Assert.assertEquals(ComponentInstance.VALID, under.getState());
-        
+
         ServiceReference ref = ipojo.getServiceReferenceByName(CheckService.class.getName(), under.getInstanceName());
         Assert.assertNotNull(ref);
-        
+
         CheckService cs = (CheckService) osgi.getServiceObject(ref);
         TransactionManager tm = (TransactionManager) osgi.getServiceObject(TransactionManager.class.getName(), null);
         tm.begin();
@@ -362,7 +362,7 @@ public class TestNotSupported {
         Transaction t2 = cs.getCurrentTransaction();
         Assert.assertSame(t2, t);
         Assert.assertEquals(Status.STATUS_ACTIVE, t.getStatus()); // No effect on the transaction
-        
+
         try {
             t.commit(); // Throw a rollback exception.
         } catch (RollbackException e) {
@@ -370,45 +370,45 @@ public class TestNotSupported {
         } catch (Throwable e) {
             Assert.fail(e.getMessage()); // Unexpected
         }
-        
+
         Assert.assertNull(cs.getLastRolledBack());
         Assert.assertNull(cs.getLastCommitted());
         Assert.assertEquals(0, cs.getNumberOfCommit());
         Assert.assertEquals(0, cs.getNumberOfRollback());
     }
-    
+
     @Test(expected=UnsupportedOperationException.class)
     public void testExpectedExceptionOutsideTransactionWithCallback() {
         ComponentInstance prov = ipojo.createComponentInstance("org.apache.felix.ipojo.transaction.test.component.FooImpl");
         ComponentInstance under = ipojo.createComponentInstance("notsupported-cb");
-        
+
         Assert.assertEquals(ComponentInstance.VALID, prov.getState());
         Assert.assertEquals(ComponentInstance.VALID, under.getState());
-        
+
         ServiceReference ref = ipojo.getServiceReferenceByName(CheckService.class.getName(), under.getInstanceName());
         Assert.assertNotNull(ref);
 
         CheckService cs = (CheckService) osgi.getServiceObject(ref);
 
         cs.doSomethingBad2();
-        
+
         Assert.assertNull(cs.getLastRolledBack());
         Assert.assertNull(cs.getLastCommitted());
         Assert.assertEquals(0, cs.getNumberOfCommit());
         Assert.assertEquals(0, cs.getNumberOfRollback());
     }
-    
+
     @Test
     public void testExpectedExceptionInsideTransactionWithCallback() throws NotSupportedException, SystemException, SecurityException, HeuristicMixedException, HeuristicRollbackException, RollbackException {
         ComponentInstance prov = ipojo.createComponentInstance("org.apache.felix.ipojo.transaction.test.component.FooImpl");
         ComponentInstance under = ipojo.createComponentInstance("notsupported-cb");
-        
+
         Assert.assertEquals(ComponentInstance.VALID, prov.getState());
         Assert.assertEquals(ComponentInstance.VALID, under.getState());
-        
+
         ServiceReference ref = ipojo.getServiceReferenceByName(CheckService.class.getName(), under.getInstanceName());
         Assert.assertNotNull(ref);
-        
+
         CheckService cs = (CheckService) osgi.getServiceObject(ref);
         TransactionManager tm = (TransactionManager) osgi.getServiceObject(TransactionManager.class.getName(), null);
         tm.begin();
@@ -422,15 +422,15 @@ public class TestNotSupported {
         Transaction t2 = cs.getCurrentTransaction();
         Assert.assertSame(t2, t);
         Assert.assertEquals(Status.STATUS_ACTIVE, t.getStatus());
-        
+
         t.commit();
-        
+
         Assert.assertNull(cs.getLastRolledBack());
         Assert.assertNull(cs.getLastCommitted());
         Assert.assertEquals(0, cs.getNumberOfCommit());
         Assert.assertEquals(0, cs.getNumberOfRollback());
     }
-    
 
-    
+
+
 }

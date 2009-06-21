@@ -10,18 +10,9 @@ import static org.ops4j.pax.tinybundles.core.TinyBundles.with;
 import java.io.File;
 import java.net.URL;
 
-import javax.transaction.HeuristicMixedException;
-import javax.transaction.HeuristicRollbackException;
-import javax.transaction.NotSupportedException;
-import javax.transaction.RollbackException;
-import javax.transaction.Status;
-import javax.transaction.SystemException;
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
-
-import org.apache.felix.ipojo.ComponentInstance;
+import org.apache.felix.ipojo.metadata.Element;
 import org.apache.felix.ipojo.pax.exam.target.BundleAsiPOJO;
-import org.apache.felix.ipojo.transaction.test.component.FooDelegator;
+import org.apache.felix.ipojo.transaction.test.component.ComponentUsingAnnotations;
 import org.apache.felix.ipojo.transaction.test.component.FooImpl;
 import org.apache.felix.ipojo.transaction.test.service.CheckService;
 import org.apache.felix.ipojo.transaction.test.service.Foo;
@@ -35,12 +26,12 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.tinybundles.core.TinyBundles;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceReference;
 
 @RunWith( JUnit4TestRunner.class )
-public class TestInvalidation {
+public class TestAnnotations {
 
     @Inject
     private BundleContext context;
@@ -69,7 +60,6 @@ public class TestInvalidation {
     public static Option[] configure() {
         ROOT.mkdirs();
 
-
         URL service = TinyBundles.newBundle()
             .addClass(CheckService.class)
             .addClass(Foo.class)
@@ -77,7 +67,6 @@ public class TestInvalidation {
                 with()
                 .set(Constants.BUNDLE_SYMBOLICNAME,"Service")
                 .set(Constants.EXPORT_PACKAGE, "org.apache.felix.ipojo.transaction.test.service")
-                .set(Constants.IMPORT_PACKAGE, "javax.transaction")
                 )
             .build( TinyBundles.asURL());
 
@@ -91,13 +80,13 @@ public class TestInvalidation {
                 .build( new BundleAsiPOJO(new File(ROOT, "FooImpl.jar"), new File(TEST, "foo.xml"))  ).toExternalForm();
 
         String test = TinyBundles.newBundle()
-        .addClass(FooDelegator.class)
+        .addClass(ComponentUsingAnnotations.class)
         .prepare(
                 with()
-                .set(Constants.BUNDLE_SYMBOLICNAME,"Required Transaction Propgatation")
+                .set(Constants.BUNDLE_SYMBOLICNAME,"Transaction Annotation Test")
                 .set(Constants.IMPORT_PACKAGE, "org.apache.felix.ipojo.transaction.test.service, javax.transaction")
             )
-            .build( new BundleAsiPOJO(new File(ROOT, "requires.jar"), new File(TEST, "requires.xml"))  ).toExternalForm();
+            .build( new BundleAsiPOJO(new File(ROOT, "annotations.jar"), new File(TEST, "annotation.xml"))  ).toExternalForm();
 
 
         Option[] opt =  options(
@@ -121,45 +110,56 @@ public class TestInvalidation {
         return opt;
     }
 
-
-
-
     @Test
-    public void testInvalidation() throws NotSupportedException, SystemException, SecurityException, HeuristicMixedException, HeuristicRollbackException, RollbackException {
-        final ComponentInstance prov = ipojo.createComponentInstance("org.apache.felix.ipojo.transaction.test.component.FooImpl");
-        ComponentInstance under = ipojo.createComponentInstance("requires-ok");
+    public void annotations() {
+        Element elem = IPOJOHelper.getMetadata(getBundle(), "org.apache.felix.ipojo.transaction.test.component.ComponentUsingAnnotations");
+        Assert.assertNotNull(elem);
 
-        Assert.assertEquals(ComponentInstance.VALID, prov.getState());
-        Assert.assertEquals(ComponentInstance.VALID, under.getState());
+        Element tr = elem.getElements("transaction", "org.apache.felix.ipojo.transaction")[0];
+        Assert.assertEquals("transaction", tr.getAttribute("field"));
 
-        ServiceReference ref = ipojo.getServiceReferenceByName(CheckService.class.getName(), under.getInstanceName());
-        Assert.assertNotNull(ref);
+        Assert.assertNull(tr.getAttribute("oncommit"));
+        Assert.assertNull(tr.getAttribute("onrollback"));
 
-        CheckService cs = (CheckService) osgi.getServiceObject(ref);
-        TransactionManager tm = (TransactionManager) osgi.getServiceObject(TransactionManager.class.getName(), null);
+        Element[] methods = tr.getElements();
+        Assert.assertEquals(4, methods.length);
 
-        Thread thread = new Thread (new Runnable() {
-           public void run() {
-               try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        Element m1 = getElementByMethod(methods, "doSomethingBad");
+        Assert.assertNotNull(m1);
+
+        Element m2 = getElementByMethod(methods, "doSomethingBad2");
+        Assert.assertNotNull(m2);
+        Assert.assertEquals("required", m2.getAttribute("propagation"));
+
+        Element m3 = getElementByMethod(methods, "doSomethingGood");
+        Assert.assertNotNull(m3);
+        Assert.assertEquals("supported", m3.getAttribute("propagation"));
+        Assert.assertEquals("{java.lang.Exception}", m3.getAttribute("norollbackfor"));
+
+        Element m4 = getElementByMethod(methods, "doSomethingLong");
+        Assert.assertNotNull(m4);
+        Assert.assertEquals("1000", m4.getAttribute("timeout"));
+        Assert.assertEquals("true", m4.getAttribute("exceptiononrollback"));
+    }
+
+    private Element getElementByMethod(Element[] e, String m) {
+        for(Element elem : e) {
+            if(m.equals(elem.getAttribute("method"))) {
+                return elem;
             }
-               prov.dispose();
+        }
+        Assert.fail("Method " + m + " not found");
+        return null;
+    }
+
+    private Bundle getBundle() {
+        for(Bundle b : context.getBundles()) {
+           if ("Transaction Annotation Test".equals(b.getSymbolicName())) {
+               return b;
            }
-        });
-
-        thread.start();
-
-        tm.begin();
-        Transaction t = tm.getTransaction();
-        cs.doSomethingLong(); // 5s, so prov should be disposed during this time and under becomes invalid
-
-        Assert.assertEquals(ComponentInstance.INVALID, under.getState());
-
-        Assert.assertEquals(Status.STATUS_MARKED_ROLLBACK, t.getStatus());
-
-        t.rollback();
+        }
+        Assert.fail("Cannot find the tested bundle");
+        return null;
     }
 
 

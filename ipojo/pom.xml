@@ -43,6 +43,7 @@
 		<module>handler/temporal</module>
 		<module>handler/eventadmin</module>
 		<module>handler/whiteboard</module>
+		<module>handler/transaction</module>
 		<module>api</module>
 		<module>online-manipulator</module>
 		<module>junit4osgi</module>
