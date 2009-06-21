@@ -1,0 +1,13 @@
+<ipojo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="org.apache.felix.ipojo http://felix.apache.org/ipojo/schemas/CURRENT/core.xsd"
+	xmlns="org.apache.felix.ipojo">
+	
+	<handler name="transaction" namespace="org.apache.felix.ipojo.transaction" 
+		classname="org.apache.felix.ipojo.transaction.TransactionHandler">
+		<requires field="m_transactionManager">
+			<callback type="bind" method="bind"/>
+			<callback type="unbind" method="unbind"/>
+		</requires>
+	</handler>
+	
+</ipojo>
