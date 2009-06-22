@@ -58,7 +58,7 @@
         <configuration>
           <instructions>
             <Export-Package>org.osgi.service.command; version=1.0.0</Export-Package>
-            <Private-Package>aQute.*</Private-Package>
+            <Private-Package>org.apache.felix.gogo.*</Private-Package>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
           </instructions>

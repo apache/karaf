@@ -1,4 +1,4 @@
 -include: ~default.bnd
-Service-Component: aQute.shell.stdio.StdioConsole; \
+Service-Component: org.apache.felix.gogo.shell.stdio.StdioConsole; \
    processor=org.osgi.service.command.CommandProcessor
-Private-Package: aQute.shell.stdio,aQute.shell.console
+Private-Package: org.apache.felix.gogo.shell.stdio,org.apache.felix.gogo.shell.console

@@ -1,7 +1,7 @@
 -include: ~default.bnd
 
 Bundle-Name: Telnet Shell Service
-Bundle-Description: Listens to port 2019 (unless overridden with configuration "port" for pid=aQute.shell.telnet.TelnetShell)
-Private-Package: aQute.shell.telnet, aQute.shell.console
-Service-Component: aQute.shell.telnet.TelnetShell; \
+Bundle-Description: Listens to port 2019 (unless overridden with configuration "port" for pid=org.apache.felix.gogo.shell.telnet.TelnetShell)
+Private-Package: org.apache.felix.gogo.shell.telnet, org.apache.felix.gogo.shell.console
+Service-Component: org.apache.felix.gogo.shell.telnet.TelnetShell; \
   processor=org.osgi.service.command.CommandProcessor

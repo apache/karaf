@@ -1,4 +1,4 @@
-Private-Package: aQute.osgi.launcher, aQute.shell.runtime, aQute.shell.osgi, aQute.threadio, \
- org.osgi.service.shell, org.osgi.service.threadio, aQute.shell.console, org.osgi.framework 
-Main-Class: aQute.osgi.launcher.Launcher
+Private-Package: org.apache.felix.gogo.launcher, org.apache.felix.gogo.shell.runtime, org.apache.felix.gogo.shell.osgi, org.apache.felix.gogo.threadio, \
+ org.osgi.service.shell, org.osgi.service.threadio, org.apache.felix.gogo.shell.console, org.osgi.framework
+Main-Class: org.apache.felix.gogo.launcher.Launcher
 

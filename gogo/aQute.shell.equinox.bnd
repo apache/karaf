@@ -1,6 +1,6 @@
 -include: ~default.bnd
-Service-Component: aQute.shell.equinox.Equinox; \
+Service-Component: org.apache.felix.gogo.shell.equinox.Equinox; \
    pka=org.osgi.service.packageadmin.PackageAdmin?; \
    lrs=org.osgi.service.log.LogReaderService?; \
    sls=org.osgi.service.startlevel.StartLevel?
-Private-Package: aQute.shell.equinox
+Private-Package: org.apache.felix.gogo.shell.equinox
