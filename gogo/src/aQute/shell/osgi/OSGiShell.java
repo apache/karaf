@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+// DWB3: dynamically load optional framework components to reduce dependencies
+// DWB4: get() with trailing colon causes org.osgi.framework.InvalidSyntaxException
 package aQute.shell.osgi;
 
 import org.osgi.framework.*;
 import org.osgi.service.command.*;
 import org.osgi.service.component.*;
 import org.osgi.service.packageadmin.*;
-import org.osgi.service.permissionadmin.*;
-import org.osgi.service.startlevel.*;
 import org.osgi.service.threadio.*;
 
 import aQute.shell.runtime.*;
@@ -45,14 +45,28 @@ public class OSGiShell extends CommandShellImpl {
         addCommand("osgi", commands);
         setConverter(commands);
         if (bundle.getState() == Bundle.ACTIVE) {
-            addCommand("osgi", commands.service(StartLevel.class.getName(),
-                    null), StartLevel.class);
             addCommand("osgi", commands.service(PackageAdmin.class.getName(),
                     null), PackageAdmin.class);
-            addCommand("osgi", commands.service(
-                    PermissionAdmin.class.getName(), null),
-                    PermissionAdmin.class);
             addCommand("osgi", commands.getContext(), BundleContext.class);
+            
+            try {
+                // derek - dynamically load StartLevel to avoid import dependency
+                String sl = "org.osgi.service.startlevel.StartLevel";
+                Class<?> slClass = bundle.loadClass(sl);
+                addCommand("osgi", commands.service(sl, null), slClass);
+            } catch (ClassNotFoundException e) {
+            }
+            
+            try {
+                // derek - dynamically load PermissionAdmin to avoid import dependency
+                String pa = "org.osgi.service.permissionadmin.PermissionAdmin";
+                Class<?> paClass = bundle.loadClass(pa);
+                addCommand("osgi", commands.service(pa, null), paClass);
+            } catch (ClassNotFoundException e) {
+            }
+        }
+        else {
+            System.err.println("eek! bundle not active: " + bundle);
         }
     }
 
@@ -74,6 +88,10 @@ public class OSGiShell extends CommandShellImpl {
 
                 String service = name.substring(0, n);
                 String function = name.substring(n + 1);
+                
+                // derek - fix org.osgi.framework.InvalidSyntaxException
+                if (service.length() == 0 || function.length() == 0)
+                    return null;
 
                 String filter = String.format(
                         "(&(osgi.command.scope=%s)(osgi.command.function=%s))",

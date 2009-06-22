@@ -16,7 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+// DWB11: add removeCommand: https://www.osgi.org/bugzilla/show_bug.cgi?id=49
+// DWB12: there is no API to list commands: https://www.osgi.org/bugzilla/show_bug.cgi?id=49
+// DWB13: addCommand() fails to add static methods (if target is Class)
 package aQute.shell.runtime;
 
 import java.io.*;
@@ -34,8 +36,9 @@ public class CommandShellImpl implements CommandProcessor {
 
     public CommandShellImpl() {
         addCommand("shell", this, "addCommand" );
+        addCommand("shell", this, "removeCommand" );    // derek
     }
-
+    
     public CommandSession createSession(InputStream in, PrintStream out,
             PrintStream err) {
 
@@ -61,7 +64,7 @@ public class CommandShellImpl implements CommandProcessor {
             return null;
 
         String function = name.substring(n);
-
+        
         Object cmd = null;
 
         if (commands.containsKey(name)) {
@@ -76,7 +79,15 @@ public class CommandShellImpl implements CommandProcessor {
                     }
                 }
             }
+            
+            // XXX: derek.baum@paremus.com
+            // there is no API to list commands
+            // so override otherwise illegal name ":"
+            if (cmd == null && name.equals(":")) {
+                return Collections.unmodifiableSet(commands.keySet());
+            }
         }
+        
         if (cmd == null)
             return null;
 
@@ -87,7 +98,9 @@ public class CommandShellImpl implements CommandProcessor {
     }
 
     public void addCommand(String scope, Object target) {
-        addCommand(scope,target,target.getClass());
+        // derek - fix target class
+        Class<?> tc = (target instanceof Class) ? (Class<?>) target : target.getClass();
+        addCommand(scope, target, tc);
     }
 
     public void addCommand(String scope, Object target, Class<?> functions) {
@@ -103,12 +116,27 @@ public class CommandShellImpl implements CommandProcessor {
     public void addCommand(String scope, Object target, String function) {
         commands.put((scope + ":" + function).toLowerCase(), target);
     }
+    
+    // derek.baum@paremus.com: need removeCommand, so stopped bundles can clean up.
+    public void removeCommand(String scope, String function) {
+        String func = (scope + ":" + function).toLowerCase();
+        commands.remove(func);
+    }
+    
+    public void removeCommand(Object target) {
+        for (Iterator<Object> i = commands.values().iterator(); i.hasNext();) {
+            if (i.next() == target)
+                i.remove();
+        }
+    }
 
-    public String[] getFunctions(Class<?> target) {
+    private String[] getFunctions(Class<?> target) {
         String[] functions;
         Set<String> list = new TreeSet<String>();
         Method methods[] = target.getMethods();
         for (Method m : methods) {
+            if (m.getDeclaringClass().equals(Object.class))    // derek
+                continue;
             list.add(m.getName());
             if (m.getName().startsWith("get")) {
                 String s = m.getName().substring(3);
@@ -116,6 +144,7 @@ public class CommandShellImpl implements CommandProcessor {
                     list.add(s.substring(0, 1).toLowerCase() + s.substring(1));
             }
         }
+        
         functions = list.toArray(new String[list.size()]);
         return functions;
     }

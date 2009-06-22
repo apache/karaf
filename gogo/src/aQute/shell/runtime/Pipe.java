@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+// DWB16: redirect System.err when creating pipe
 package aQute.shell.runtime;
 
 import java.io.*;
@@ -27,6 +27,7 @@ import org.osgi.service.command.*;
 public class Pipe extends Thread {
 	InputStream in;
 	PrintStream out;
+        PrintStream err;    // derek
 	PipedOutputStream pout;
 	Closure closure;
 	Exception exception;
@@ -47,6 +48,10 @@ public class Pipe extends Thread {
 		this.out = out;
 	}
 
+	public void setErr(PrintStream err) {
+		this.err = err;
+	}
+
 	public Pipe connect(Pipe next) throws IOException {
 		next.setOut(out);
 		pout = new PipedOutputStream();
@@ -57,7 +62,8 @@ public class Pipe extends Thread {
 	}
 
 	public void run() {
-		closure.session.service.threadIO.setStreams(in, out, System.err);
+		//closure.session.service.threadIO.setStreams(in, out, System.err);
+		closure.session.service.threadIO.setStreams(in, out, err);    // derek
 		try {
 			for (List<CharSequence> statement : statements) {
 				result = closure.executeStatement(statement);

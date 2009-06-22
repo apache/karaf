@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+// DWB14: parser loops if // comment at start of program
+// DWB15: allow program to have trailing ';'
 package aQute.shell.runtime;
 
 import java.util.*;
@@ -31,11 +33,16 @@ public class Parser {
 	}
 
 	void ws() {
-		while (!eof() && Character.isWhitespace(peek())) {
-			current++;
+	        // derek: BUGFIX: loop if comment  at beginning of input
+		//while (!eof() && Character.isWhitespace(peek())) {
+		while (!eof() && (Character.isWhitespace(peek()) || current == 0)) {
+        		if (current != 0 || Character.isWhitespace(peek()))
+        			current++;
 			if (peek() == '/' && current < text.length()-2 && text.charAt(current + 1) == '/') {
 				comment();
 			}
+			if (current == 0)
+			    break;
 		}
 	}
 
@@ -57,7 +64,11 @@ public class Parser {
 
 		if (c == '\\') {
 			escaped = true;
-			c = text.charAt(++current);
+			++current;
+			if (eof())
+        			throw new RuntimeException("Eof found after \\"); // derek
+			    
+			c = text.charAt(current);
 
 			switch (c) {
 			case 't':
@@ -117,14 +128,17 @@ public class Parser {
 		statements.add(statement());
 		while (peek() == ';') {
 			current++;
-			statements.add(statement());
+			// derek: BUGFIX: allow trailing ;
+			ws();
+			if (!eof())
+        			statements.add(statement());
 		}
 		return statements;
 	}
 
 	public List<CharSequence> statement() {
 		List<CharSequence> statement = new ArrayList<CharSequence>();
-		statement.add(value());
+        	statement.add(value());
 		while (!eof()) {
 			ws();
 			if (peek() == '|' || peek() == ';')
@@ -192,6 +206,7 @@ public class Parser {
 					break;
 			}
 		}
+		
 		return text.subSequence(start, current);
 	}
 

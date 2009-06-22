@@ -16,14 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+// DWB20: ThreadIO should check and reset IO if something (e.g. jetty) overrides
 package aQute.threadio;
 
 import java.io.*;
+import java.util.logging.Logger;
 
 import org.osgi.service.component.*;
 import org.osgi.service.threadio.*;
 
 public class ThreadIOImpl implements ThreadIO {
+    static private final Logger log = Logger.getLogger(ThreadIOImpl.class.getName());
 	ThreadPrintStream err = new ThreadPrintStream(System.err);
 	ThreadPrintStream out = new ThreadPrintStream(System.out);
 	ThreadInputStream in = new ThreadInputStream(System.in);
@@ -51,7 +54,25 @@ public class ThreadIOImpl implements ThreadIO {
         System.setErr(err);
 	}
 	
+	private void checkIO() {    // derek
+	    if (System.in != in) {
+	        log.fine("ThreadIO: eek! who's set System.in=" + System.in);
+		System.setIn(in);
+	    }
+	    
+	    if (System.out != out) {
+	        log.fine("ThreadIO: eek! who's set System.out=" + System.out);
+		System.setOut(out);
+	    }
+	    
+	    if (System.err != err) {
+	        log.fine("ThreadIO: eek! who's set System.err=" + System.err);
+		System.setErr(err);
+	    }
+	}
+	
 	public void close() {
+	    checkIO(); // derek
 	    Marker top = this.current.get();
 	    if ( top == null )
 	        throw new IllegalStateException("No thread io active");
@@ -71,6 +92,7 @@ public class ThreadIOImpl implements ThreadIO {
         assert in != null;
         assert out != null;
         assert err != null;
+        checkIO(); // derek
         Marker marker = new Marker(this,in,out,err, current.get());
 	    this.current.set(marker);
 	    marker.activate();

@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+// DWB1: osgi:each too verbose (formats reults to System.out)
+// DWB2: ClassNotFoundException should be caught in convert() method
 package aQute.shell.osgi;
 
 import java.io.*;
@@ -152,8 +154,10 @@ public class OSGiCommands implements Converter {
 		args.add(null);
 		for (Object x : list) {
 			args.set(0, x);
-			Object result = closure.execute(session, args);
-			System.out.println(session.format(result,Converter.INSPECT));
+			//Object result = closure.execute(session, args);
+			// System.out.println(session.format(result,Converter.INSPECT));
+			// derek: this is way too noisy
+			closure.execute(session, args);
 		}
 	}
 
@@ -204,8 +208,14 @@ public class OSGiCommands implements Converter {
 			return convertBundle(in);
         else if (desiredType == ServiceReference.class)
             return convertServiceReference(in);
-        else if (desiredType == Class.class)
-            return Class.forName(in.toString());
+        else if (desiredType == Class.class) {
+            // derek.baum@paremus.com - added try/catch
+            try {
+                return Class.forName(in.toString());
+            } catch (ClassNotFoundException e) {
+                return null;
+            }
+        }
         else if (desiredType.isAssignableFrom(String.class) && in instanceof InputStream)
             return read(((InputStream) in));
 

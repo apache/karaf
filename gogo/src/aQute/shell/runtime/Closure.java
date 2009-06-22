@@ -16,6 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+// DWB5: session.err is not redirected when creating pipeline
+// DWB6: add 'set -x' trace feature if echo is set
+// DWB7: removing variable via 'execute("name=") throws OutOfBoundsException
 package aQute.shell.runtime;
 
 import java.util.*;
@@ -48,6 +51,7 @@ public class Closure extends Reflective implements Function {
             if (pipes.isEmpty()) {
                 current.setIn(session.in);
                 current.setOut(session.out);
+                current.setErr(session.err);    // XXX: derek.baum@paremus.com
             } else {
                 Pipe previous = pipes.get(pipes.size() - 1);
                 previous.connect(current);
@@ -81,9 +85,21 @@ public class Closure extends Reflective implements Function {
     Object executeStatement(List<CharSequence> statement) throws Exception {
         Object result;
         List<Object> values = new ArrayList<Object>();
-        Object cmd = eval(statement.remove(0));
-        for (CharSequence token : statement)
+        CharSequence statement0 = statement.remove(0);
+        
+        // derek: FEATURE: add set -x facility if echo is set
+        StringBuilder buf = new StringBuilder("+ ");
+        buf.append(statement0);
+        
+        Object cmd = eval(statement0);
+        for (CharSequence token : statement) {
+            buf.append(' ');
+            buf.append(token);
             values.add(eval(token));
+        }
+        
+        if (Boolean.TRUE.equals(session.get("echo")))
+            System.err.println(buf);
 
         result = execute(cmd, values);
         return result;
@@ -108,7 +124,8 @@ public class Closure extends Reflective implements Function {
             String scmd = cmd.toString();
 
             if (values.size() > 0 && "=".equals(values.get(0))) {
-                if (values.size() == 0)
+                //if (values.size() == 0)
+                if (values.size() == 1)            // derek: BUGFIX
                     return session.variables.remove(scmd);
                 else {
                     Object value = execute(values.get(1), values.subList(2,

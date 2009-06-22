@@ -194,18 +194,18 @@ public class TestParser extends TestCase {
 
     public void ls() {
         beentheredonethat++;
-        System.out.println("Yes!");
+        System.out.println("ls(): Yes!");
     }
 
     public int ls(int onoff) {
         beentheredonethat += onoff;
-        System.out.println("ls " + onoff);
+        System.out.println("ls(int) " + onoff);
         return onoff;
     }
 
     public void ls(Object args[]) {
         beentheredonethat = args.length;
-        System.out.print("ls [");
+        System.out.print("ls(Object[]) [");
         for (Object i : args)
             System.out.print(i + " ");
         System.out.println("]");

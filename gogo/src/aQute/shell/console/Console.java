@@ -40,7 +40,7 @@ public class Console implements Runnable {
 		try {
 			while (!quit) {
 				try {
-					CharSequence line = getLine(session.getKeybord());
+					CharSequence line = getLine(session.getKeyboard());
 					if (line != null) {
 						history.add(line);
 						if (history.size() > 40)

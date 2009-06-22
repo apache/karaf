@@ -1,5 +1,5 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
+* Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
  * regarding copyright ownership.  The ASF licenses this file
@@ -16,6 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+// DWB16: coerce() doesn't support static methods
+// DWB17: coerce() doesn't support static void main(String[]) in rfc132
+// DWB18: coerce() doesn't extract cause from InvocationTargetException
+// DWB19: coerce() won't add empty array to satisfy Object[] argument
 package aQute.shell.runtime;
 
 import java.lang.reflect.*;
@@ -39,7 +43,10 @@ public class Reflective {
     public Object method(CommandSession session, Object target, String name,
             List<Object> args) throws IllegalArgumentException,
             IllegalAccessException, InvocationTargetException, Exception {
-        Method[] methods = target.getClass().getMethods();
+        // derek - support static methods
+        //Method[] methods = target.getClass().getMethods();
+        Class<?> tc = (target instanceof Class) ? (Class<?>)target : target.getClass();
+        Method[] methods = tc.getMethods();
         name = name.toLowerCase();
 
         String get = "get" + name;
@@ -52,26 +59,36 @@ public class Reflective {
         Method bestMethod = null;
         Object[] bestArgs = null;
         int match = -1;
+        ArrayList<Class<?>[]> possibleTypes = new ArrayList<Class<?>[]>();    // derek
+
         for (Method m : methods) {
             String mname = m.getName().toLowerCase();
             if (mname.equals(name) || mname.equals(get) || mname.equals(set)
-                    || mname.equals(is)) {
+                    || mname.equals(is) || mname.equals("_main")) {    // derek - added _main
                 Class<?>[] types = m.getParameterTypes();
+                ArrayList<Object> xargs = new ArrayList<Object>(args); // derek - BUGFIX don't modify args
 
                 // Check if the command takes a session
                 if (types.length > 0
                         && CommandSession.class.isAssignableFrom(types[0])) {
-                    args.add(0, session);
+                    xargs.add(0, session);
                 }
 
                 Object[] parms = new Object[types.length];
                 // if (types.length >= args.size() ) {
-                int local = coerce(session, target, types, parms, args);
-                if (local == types.length || local > match) {
-                    bestMethod = m;
-                    bestArgs = parms;
-                    match = local;
+                int local = coerce(session, target, types, parms, xargs);
+                if ((local >= xargs.size()) && (local >= types.length)) {       // derek - stop no-args
+                    boolean exact = (local == xargs.size() && local == types.length);
+                    if (exact || local > match) {
+                        bestMethod = m;
+                        bestArgs = parms;
+                        match = local;
+                    }
+                    if (exact)
+                        break;
                 }
+                else
+                    possibleTypes.add(types);    // derek
                 // }
                 // if (match == -1 && types.length == 1
                 // && types[0] == Object[].class) {
@@ -84,10 +101,36 @@ public class Reflective {
 
         if (bestMethod != null) {
             bestMethod.setAccessible(true);
-            return bestMethod.invoke(target, bestArgs);
-        } else
-            throw new IllegalArgumentException("Cannot find command:" + name
-                    + " with args:" + args);
+            // derek: BUGFIX catch InvocationTargetException
+            // return bestMethod.invoke(target, bestArgs);
+            try {
+                return bestMethod.invoke(target, bestArgs);
+            } catch (InvocationTargetException e) {
+                Throwable cause = e.getCause();
+                if (cause instanceof Exception)
+                    throw (Exception)cause;
+                throw e;
+            }
+        } else {
+            //throw new IllegalArgumentException("Cannot find command:" + name + " with args:" + args);
+            // { derek
+            ArrayList<String> list = new ArrayList<String>();
+            for (Class<?>[] types : possibleTypes) {
+                StringBuilder buf = new StringBuilder();
+                buf.append('(');
+                for (Class<?> type : types) {
+                    if (buf.length() > 1)
+                        buf.append(", ");
+                    buf.append(type.getSimpleName());
+                }
+                buf.append(')');
+                list.add(buf.toString());
+            }
+
+            throw new IllegalArgumentException(
+                    String.format("Cannot coerce %s%s to any of %s", name,  args, list));
+            // } derek
+        }
     }
 
     /**
@@ -104,6 +147,7 @@ public class Reflective {
      * @return
      * @throws Exception
      */
+    @SuppressWarnings("unchecked")
     private int coerce(CommandSession session, Object target, Class<?> types[],
             Object out[], List<Object> in) throws Exception {
         int i = 0;
@@ -111,11 +155,29 @@ public class Reflective {
             out[i] = null;
             try {
                 // Try to convert one argument
-                out[i] = coerce(session, target, types[i], in.get(i));
+                // derek: add empty array as extra argument
+                //out[i] = coerce(session, target, types[i], in.get(i));
+                if (i == in.size())
+                    out[i] = NO_MATCH;
+                else
+                    out[i] = coerce(session, target, types[i], in.get(i));
+                
                 if (out[i] == NO_MATCH) {
                     // Failed
                     // No match, check for varargs
                     if (types[i].isArray() && i == types.length - 1) {
+                        
+                        // derek - expand final array arg
+                        if (i < in.size()) {
+                            Object arg = in.get(i);
+                            if (arg instanceof List) {
+                                List<Object> args = (List<Object>)arg;
+                                in = new ArrayList<Object>(in);
+                                in.remove(i);
+                                in.addAll(args);
+                            }
+                        }
+                    
                         // Try to parse the remaining arguments in an array
                         Class<?> component = types[i].getComponentType();
                         Object components = Array.newInstance(component, in
@@ -132,14 +194,18 @@ public class Reflective {
                         }
                         out[n] = components;
                         // Is last element, so we will quite hereafter
-                        return n;
+                        // return n;
+                        if (i == in.size())
+                            ++i;
+                        return i;    // derek - return number of args converted
                     }
                     return -1;
                 }
                 i++;
             } catch (Exception e) {
-                // e.printStackTrace();
-                System.err.println(e);
+                System.err.println("Reflective:" + e);
+                e.printStackTrace();
+                
                 // should get rid of those exceptions, but requires
                 // reg ex matching to see if it throws an exception.
                 // dont know what is better
@@ -175,23 +241,28 @@ public class Reflective {
                 return NO_MATCH;
             }
         }
-        if (type == boolean.class)
-            return new Boolean(string);
-        else if (type == byte.class)
-            return new Byte(string);
-        else if (type == char.class) {
-            if (string.length() == 1)
-                return string.charAt(0);
-        } else if (type == short.class)
-            return new Short(string);
-        else if (type == int.class)
-            return new Integer(string);
-        else if (type == float.class)
-            return new Float(string);
-        else if (type == double.class)
-            return new Double(string);
-        else if (type == long.class)
-            return new Long(string);
+        
+        try {
+            if (type == boolean.class)
+                return new Boolean(string);
+            else if (type == byte.class)
+                return new Byte(string);
+            else if (type == char.class) {
+                if (string.length() == 1)
+                    return string.charAt(0);
+            } else if (type == short.class)
+                return new Short(string);
+            else if (type == int.class)
+                return new Integer(string);
+            else if (type == float.class)
+                return new Float(string);
+            else if (type == double.class)
+                return new Double(string);
+            else if (type == long.class)
+                return new Long(string);
+        }
+        catch (NumberFormatException e) {
+        }
 
         return NO_MATCH;
     }
