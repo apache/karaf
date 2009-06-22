@@ -46,7 +46,7 @@ public interface CommandSession {
 	 * @return InpuStream used closest to the user or null if input is from a
 	 *         file.
 	 */
-	InputStream getKeybord();
+	InputStream getKeyboard();
 
 	/**
 	 * Return the PrintStream for the console. This must always be the stream
