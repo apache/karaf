@@ -18,34 +18,43 @@
  */
 package org.apache.felix.gogo.shell.osgi;
 
-import java.util.*;
+import org.apache.felix.gogo.shell.runtime.CommandShellImpl;
+import org.apache.felix.gogo.shell.runtime.Reflective;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.command.CommandSession;
+import org.osgi.service.command.Function;
 
-import org.osgi.framework.*;
-import org.osgi.service.command.*;
+import java.util.List;
 
-import org.apache.felix.gogo.shell.runtime.*;
+public class ServiceCommand extends Reflective implements Function
+{
+    ServiceReference ref;
+    OSGiShell shell;
+    String name;
 
-public class ServiceCommand extends Reflective implements Function {
-	ServiceReference	ref;
-	OSGiShell			shell;
-	String				name;
-	
-	public ServiceCommand(OSGiShell shell, ServiceReference ref, String name) {
-		this.shell =shell;
-		this.ref = ref;
-		this.name = name;
-	}
+    public ServiceCommand(OSGiShell shell, ServiceReference ref, String name)
+    {
+        this.shell = shell;
+        this.ref = ref;
+        this.name = name;
+    }
 
-	public Object execute(CommandSession session, List<Object> arguments) throws Exception {
-		try {
-			Object target = shell.bundle.getBundleContext().getService(ref);
-			Object result = method(session,target, name, arguments);
-			if ( result != CommandShellImpl.NO_SUCH_COMMAND )
-				return result;
-			
-			throw new IllegalArgumentException("Service does not implement promised command " + ref + " " + name );
-		} finally {
-			shell.bundle.getBundleContext().ungetService(ref);
-		}
-	}
+    public Object execute(CommandSession session, List<Object> arguments) throws Exception
+    {
+        try
+        {
+            Object target = shell.bundle.getBundleContext().getService(ref);
+            Object result = method(session, target, name, arguments);
+            if (result != CommandShellImpl.NO_SUCH_COMMAND)
+            {
+                return result;
+            }
+
+            throw new IllegalArgumentException("Service does not implement promised command " + ref + " " + name);
+        }
+        finally
+        {
+            shell.bundle.getBundleContext().ungetService(ref);
+        }
+    }
 }

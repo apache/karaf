@@ -19,82 +19,101 @@
 // DWB20: ThreadIO should check and reset IO if something (e.g. jetty) overrides
 package org.apache.felix.gogo.threadio;
 
-import java.io.*;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.threadio.ThreadIO;
+
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.logging.Logger;
 
-import org.osgi.service.component.*;
-import org.osgi.service.threadio.*;
-
-public class ThreadIOImpl implements ThreadIO {
+public class ThreadIOImpl implements ThreadIO
+{
     static private final Logger log = Logger.getLogger(ThreadIOImpl.class.getName());
-	ThreadPrintStream err = new ThreadPrintStream(System.err);
-	ThreadPrintStream out = new ThreadPrintStream(System.out);
-	ThreadInputStream in = new ThreadInputStream(System.in);
+    ThreadPrintStream err = new ThreadPrintStream(System.err);
+    ThreadPrintStream out = new ThreadPrintStream(System.out);
+    ThreadInputStream in = new ThreadInputStream(System.in);
     ThreadLocal<Marker> current = new ThreadLocal<Marker>();
-	
-	protected void activate(ComponentContext context) {
-		start();
-	}
 
-	protected void deactivate() {
-	    stop();
-	}
-	
-	public void stop() {
-		System.setErr(err.dflt);
-		System.setOut(out.dflt);
-		System.setIn(in.dflt);
-	}
+    protected void activate(ComponentContext context)
+    {
+        start();
+    }
 
-	public void start() {
-		if ( System.out instanceof ThreadPrintStream )
-			throw new IllegalStateException("Thread Print Stream already set");
-		System.setOut(out);
-		System.setIn(in);
+    protected void deactivate()
+    {
+        stop();
+    }
+
+    public void stop()
+    {
+        System.setErr(err.dflt);
+        System.setOut(out.dflt);
+        System.setIn(in.dflt);
+    }
+
+    public void start()
+    {
+        if (System.out instanceof ThreadPrintStream)
+        {
+            throw new IllegalStateException("Thread Print Stream already set");
+        }
+        System.setOut(out);
+        System.setIn(in);
         System.setErr(err);
-	}
-	
-	private void checkIO() {    // derek
-	    if (System.in != in) {
-	        log.fine("ThreadIO: eek! who's set System.in=" + System.in);
-		System.setIn(in);
-	    }
-	    
-	    if (System.out != out) {
-	        log.fine("ThreadIO: eek! who's set System.out=" + System.out);
-		System.setOut(out);
-	    }
-	    
-	    if (System.err != err) {
-	        log.fine("ThreadIO: eek! who's set System.err=" + System.err);
-		System.setErr(err);
-	    }
-	}
-	
-	public void close() {
-	    checkIO(); // derek
-	    Marker top = this.current.get();
-	    if ( top == null )
-	        throw new IllegalStateException("No thread io active");
+    }
 
-	    Marker previous = top.previous;
-	    if (previous==null) {
-	        in.end();
-	        out.end();
-	        err.end();
-	    } else {
+    private void checkIO()
+    {    // derek
+        if (System.in != in)
+        {
+            log.fine("ThreadIO: eek! who's set System.in=" + System.in);
+            System.setIn(in);
+        }
+
+        if (System.out != out)
+        {
+            log.fine("ThreadIO: eek! who's set System.out=" + System.out);
+            System.setOut(out);
+        }
+
+        if (System.err != err)
+        {
+            log.fine("ThreadIO: eek! who's set System.err=" + System.err);
+            System.setErr(err);
+        }
+    }
+
+    public void close()
+    {
+        checkIO(); // derek
+        Marker top = this.current.get();
+        if (top == null)
+        {
+            throw new IllegalStateException("No thread io active");
+        }
+
+        Marker previous = top.previous;
+        if (previous == null)
+        {
+            in.end();
+            out.end();
+            err.end();
+        }
+        else
+        {
             this.current.set(previous);
-    	    previous.activate();
-	    }
-	}
+            previous.activate();
+        }
+    }
 
-	public void setStreams(InputStream in, PrintStream out, PrintStream err) {
+    public void setStreams(InputStream in, PrintStream out, PrintStream err)
+    {
         assert in != null;
         assert out != null;
         assert err != null;
         checkIO(); // derek
-        Marker marker = new Marker(this,in,out,err, current.get());
-	    this.current.set(marker);
-	    marker.activate();
-	}
+        Marker marker = new Marker(this, in, out, err, current.get());
+        this.current.set(marker);
+        marker.activate();
+    }
 }

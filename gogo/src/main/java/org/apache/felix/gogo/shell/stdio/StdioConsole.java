@@ -18,31 +18,37 @@
  */
 package org.apache.felix.gogo.shell.stdio;
 
-import org.osgi.service.command.*;
-import org.osgi.service.component.*;
+import org.apache.felix.gogo.shell.console.Console;
+import org.osgi.service.command.CommandProcessor;
+import org.osgi.service.component.ComponentContext;
 
-import org.apache.felix.gogo.shell.console.*;
-
-public class StdioConsole extends Thread {
+public class StdioConsole extends Thread
+{
     final Console console = new Console();
 
-    public StdioConsole() {
+    public StdioConsole()
+    {
         super("StdioConsole");
     }
-    protected void activate(ComponentContext context) {
+
+    protected void activate(ComponentContext context)
+    {
         start();
     }
 
-    protected void deactivate(ComponentContext context) {
+    protected void deactivate(ComponentContext context)
+    {
         console.close();
         interrupt();
     }
 
-    public void setProcessor(CommandProcessor processor ) {
-        console.setSession(processor.createSession(System.in,System.out,System.err));
+    public void setProcessor(CommandProcessor processor)
+    {
+        console.setSession(processor.createSession(System.in, System.out, System.err));
     }
-    
-    public void run() {
+
+    public void run()
+    {
         console.run();
     }
 }

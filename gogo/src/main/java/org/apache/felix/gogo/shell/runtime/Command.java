@@ -18,21 +18,25 @@
  */
 package org.apache.felix.gogo.shell.runtime;
 
-import java.util.*;
+import org.osgi.service.command.CommandSession;
+import org.osgi.service.command.Function;
 
-import org.osgi.service.command.*;
+import java.util.List;
 
-public class Command extends Reflective implements Function {
-	Object target;
-	String function;
+public class Command extends Reflective implements Function
+{
+    Object target;
+    String function;
 
-	public Command(Object target, String function) {
-		this.function = function;
-		this.target = target;
-	}
+    public Command(Object target, String function)
+    {
+        this.function = function;
+        this.target = target;
+    }
 
-	public Object execute(CommandSession session, List<Object> arguments) throws Exception {
-		return method(session,target, function, arguments);
-	}
+    public Object execute(CommandSession session, List<Object> arguments) throws Exception
+    {
+        return method(session, target, function, arguments);
+    }
 
 }

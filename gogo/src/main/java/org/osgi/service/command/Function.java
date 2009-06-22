@@ -18,21 +18,19 @@
  */
 package org.osgi.service.command;
 
-import java.util.*;
+import java.util.List;
 
 /**
  * A Function is a a block of code that can be executed with a set of arguments,
  * it returns the result object of executing the script.
  */
-public interface Function {
-	/**
-	 * Execute this function and return the result.
-	 * 
-	 * @return the result from the execution.
-	 * 
-	 * @throws Exception
-	 *             if anything goes terribly wrong
-	 */
-	Object execute(CommandSession session, List<Object> arguments)
-			throws Exception;
+public interface Function
+{
+    /**
+     * Execute this function and return the result.
+     *
+     * @return the result from the execution.
+     * @throws Exception if anything goes terribly wrong
+     */
+    Object execute(CommandSession session, List<Object> arguments) throws Exception;
 }

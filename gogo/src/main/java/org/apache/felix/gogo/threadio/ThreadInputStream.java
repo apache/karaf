@@ -18,47 +18,63 @@
  */
 package org.apache.felix.gogo.threadio;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 
-public class ThreadInputStream extends InputStream {
+public class ThreadInputStream extends InputStream
+{
     ThreadLocal<InputStream> map = new ThreadLocal<InputStream>();
-	InputStream dflt;
+    InputStream dflt;
 
-	public ThreadInputStream(InputStream in) {
-		dflt = in;
-	}
+    public ThreadInputStream(InputStream in)
+    {
+        dflt = in;
+    }
 
-	public int read(byte[] buffer, int offset, int length) throws IOException {
-		return getCurrent().read(buffer, offset, length);
-	}
+    public int read(byte[] buffer, int offset, int length) throws IOException
+    {
+        return getCurrent().read(buffer, offset, length);
+    }
 
-	public int read(byte[] buffer) throws IOException {
-		return getCurrent().read(buffer);
-	}
+    public int read(byte[] buffer) throws IOException
+    {
+        return getCurrent().read(buffer);
+    }
 
-	private InputStream getCurrent() {
-		InputStream in = map.get();
-		if (in != null)
-			return in;
-		return dflt;
-	}
+    private InputStream getCurrent()
+    {
+        InputStream in = map.get();
+        if (in != null)
+        {
+            return in;
+        }
+        return dflt;
+    }
 
-	public int read() throws IOException {
-		return getCurrent().read();
-	}
+    public int read() throws IOException
+    {
+        return getCurrent().read();
+    }
 
-	public void setStream(InputStream in) {
-		if ( in != dflt && in != this )
-			map.set(in);
-		else
-			map.remove();
-	}
+    public void setStream(InputStream in)
+    {
+        if (in != dflt && in != this)
+        {
+            map.set(in);
+        }
+        else
+        {
+            map.remove();
+        }
+    }
 
-	public void end() {
-		map.remove();
-	}
+    public void end()
+    {
+        map.remove();
+    }
 
-	InputStream getRoot() {
-		return dflt;
-	}
+    InputStream getRoot()
+    {
+        return dflt;
+    }
 }

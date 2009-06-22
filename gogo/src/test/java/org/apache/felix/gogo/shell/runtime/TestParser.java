@@ -18,32 +18,37 @@
  */
 package org.apache.felix.gogo.shell.runtime;
 
-import java.io.*;
-import java.util.*;
-import java.util.regex.*;
+import junit.framework.TestCase;
+import org.osgi.service.command.CommandSession;
+import org.osgi.service.command.Function;
 
-import junit.framework.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.regex.Pattern;
 
-import org.osgi.service.command.*;
-
-public class TestParser extends TestCase {
+public class TestParser extends TestCase
+{
     int beentheredonethat = 0;
 
-    public void testPipe() throws Exception {
+    public void testPipe() throws Exception
+    {
         Context c = new Context();
         c.addCommand("echo", this);
         c.addCommand("capture", this);
         c.addCommand("grep", this);
-        assertEquals("def", c
-                .execute("echo def|grep (d.*)|capture"));
-        assertEquals("def", c
-                .execute("echo abc; echo def; echo ghi|grep (d.*)|capture"));
+        assertEquals("def", c.execute("echo def|grep (d.*)|capture"));
+        assertEquals("def", c.execute("echo abc; echo def; echo ghi|grep (d.*)|capture"));
         assertEquals("hello world", c.execute("echo hello world|capture"));
-        assertEquals("defghi", c
-                .execute("echo abc; echo def; echo ghi|grep (def|ghi)|capture"));
+        assertEquals("defghi", c.execute("echo abc; echo def; echo ghi|grep (def|ghi)|capture"));
     }
 
-    public void testAssignment() throws Exception {
+    public void testAssignment() throws Exception
+    {
         Context c = new Context();
         c.addCommand("echo", this);
         c.addCommand("capture", this);
@@ -56,18 +61,19 @@ public class TestParser extends TestCase {
         assertEquals("a", c.execute("a = a; echo $$a").toString());
     }
 
-    public void testComment() throws Exception {
+    public void testComment() throws Exception
+    {
         Context c = new Context();
         c.addCommand("echo", this);
         assertEquals("1", c.execute("echo 1 // hello").toString());
 
     }
 
-    public void testClosure() throws Exception {
+    public void testClosure() throws Exception
+    {
         Context c = new Context();
         c.addCommand("echo", this);
-        assertEquals("http://www.aqute.biz?com=2&biz=1", c.execute(
-                "['http://www.aqute.biz?com=2&biz=1'] get 0").toString());
+        assertEquals("http://www.aqute.biz?com=2&biz=1", c.execute("['http://www.aqute.biz?com=2&biz=1'] get 0").toString());
         assertEquals("{a=2, b=3}", c.execute("[a=2 b=3]").toString());
         assertEquals("3", c.execute("[a=2 <b>=<3>] get b").toString());
         assertEquals("[3, 4]", c.execute("[1 2 [3 4] 5 6] get 2").toString());
@@ -75,10 +81,10 @@ public class TestParser extends TestCase {
 
     }
 
-    public void testArray() throws Exception {
+    public void testArray() throws Exception
+    {
         Context c = new Context();
-        assertEquals("http://www.aqute.biz?com=2&biz=1", c.execute(
-                "['http://www.aqute.biz?com=2&biz=1'] get 0").toString());
+        assertEquals("http://www.aqute.biz?com=2&biz=1", c.execute("['http://www.aqute.biz?com=2&biz=1'] get 0").toString());
         assertEquals("{a=2, b=3}", c.execute("[a=2 b=3]").toString());
         assertEquals("3", c.execute("[a=2 <b>=<3>] get b").toString());
         assertEquals("[3, 4]", c.execute("[1 2 [3 4] 5 6] get 2").toString());
@@ -86,7 +92,8 @@ public class TestParser extends TestCase {
 
     }
 
-    public void testEscape() {
+    public void testEscape()
+    {
         Parser parser = new Parser("'a|b;c'");
         CharSequence cs = parser.messy();
         assertEquals("a|b;c", cs.toString());
@@ -94,7 +101,8 @@ public class TestParser extends TestCase {
     }
 
 
-    public void testParentheses() {
+    public void testParentheses()
+    {
         Parser parser = new Parser("(a|b)|(d|f)");
         List<List<List<CharSequence>>> p = parser.program();
         assertEquals("(a|b)", p.get(0).get(0).get(0));
@@ -104,47 +112,52 @@ public class TestParser extends TestCase {
         assertEquals("(d.*)", p.get(0).get(0).get(1));
     }
 
-    public void testEcho() throws Exception {
+    public void testEcho() throws Exception
+    {
         Context c = new Context();
         c.addCommand("echo", this);
         c.execute("echo peter");
     }
 
-    public void grep(String match) throws IOException {
+    public void grep(String match) throws IOException
+    {
         Pattern p = Pattern.compile(match);
-        BufferedReader rdr = new BufferedReader(
-                new InputStreamReader(System.in));
+        BufferedReader rdr = new BufferedReader(new InputStreamReader(System.in));
         String s = rdr.readLine();
-        while (s != null) {
-            if (p.matcher(s).find()) {
+        while (s != null)
+        {
+            if (p.matcher(s).find())
+            {
                 System.out.println(s);
             }
             s = rdr.readLine();
         }
     }
 
-    public String capture() throws IOException {
+    public String capture() throws IOException
+    {
         StringWriter sw = new StringWriter();
-        BufferedReader rdr = new BufferedReader(
-                new InputStreamReader(System.in));
+        BufferedReader rdr = new BufferedReader(new InputStreamReader(System.in));
         String s = rdr.readLine();
-        while (s != null) {
+        while (s != null)
+        {
             sw.write(s);
             s = rdr.readLine();
         }
         return sw.toString();
     }
 
-    public void testVars() throws Exception {
+    public void testVars() throws Exception
+    {
         Context c = new Context();
         c.addCommand("echo", this);
 
-        assertEquals("", c.execute(
-                "echo ${very.likely.that.this.does.not.exist}").toString());
+        assertEquals("", c.execute("echo ${very.likely.that.this.does.not.exist}").toString());
         assertNotNull(c.execute("echo ${java.runtime.name}"));
     }
 
-    public void testFunny() throws Exception {
+    public void testFunny() throws Exception
+    {
         Context c = new Context();
         c.addCommand("echo", this);
         assertEquals("a", c.execute("echo a") + "");
@@ -152,15 +165,20 @@ public class TestParser extends TestCase {
         assertEquals("a", c.execute("<<echo echo> echo> <echo a>") + "");
     }
 
-    public CharSequence echo(Object args[]) {
+    public CharSequence echo(Object args[])
+    {
         if (args == null)
+        {
             return "";
-        
+        }
+
         StringBuilder sb = new StringBuilder();
         String del = "";
-        for (Object arg : args) {
+        for (Object arg : args)
+        {
             sb.append(del);
-            if (arg != null) {
+            if (arg != null)
+            {
                 sb.append(arg);
                 del = " ";
             }
@@ -168,7 +186,8 @@ public class TestParser extends TestCase {
         return sb;
     }
 
-    public void testContext() throws Exception {
+    public void testContext() throws Exception
+    {
         Context c = new Context();
         c.addCommand("ls", this);
         beentheredonethat = 0;
@@ -190,28 +209,33 @@ public class TestParser extends TestCase {
 
     }
 
-    public void ls() {
+    public void ls()
+    {
         beentheredonethat++;
         System.out.println("ls(): Yes!");
     }
 
-    public int ls(int onoff) {
+    public int ls(int onoff)
+    {
         beentheredonethat += onoff;
         System.out.println("ls(int) " + onoff);
         return onoff;
     }
 
-    public void ls(Object args[]) {
+    public void ls(Object args[])
+    {
         beentheredonethat = args.length;
         System.out.print("ls(Object[]) [");
         for (Object i : args)
+        {
             System.out.print(i + " ");
+        }
         System.out.println("]");
     }
 
-    public void testProgram() {
-        List<List<List<CharSequence>>> x = new Parser(
-                "abc def|ghi jkl;mno pqr|stu vwx").program();
+    public void testProgram()
+    {
+        List<List<List<CharSequence>>> x = new Parser("abc def|ghi jkl;mno pqr|stu vwx").program();
         assertEquals("abc", x.get(0).get(0).get(0));
         assertEquals("def", x.get(0).get(0).get(1));
         assertEquals("ghi", x.get(1).get(0).get(0));
@@ -222,9 +246,9 @@ public class TestParser extends TestCase {
         assertEquals("vwx", x.get(2).get(0).get(1));
     }
 
-    public void testStatements() {
-        List<List<CharSequence>> x = new Parser("abc def;ghi jkl;mno pqr")
-                .statements();
+    public void testStatements()
+    {
+        List<List<CharSequence>> x = new Parser("abc def;ghi jkl;mno pqr").statements();
         assertEquals("abc", x.get(0).get(0));
         assertEquals("def", x.get(0).get(1));
         assertEquals("ghi", x.get(1).get(0));
@@ -233,10 +257,9 @@ public class TestParser extends TestCase {
         assertEquals("pqr", x.get(2).get(1));
     }
 
-    public void testSimpleValue() {
-        List<CharSequence> x = new Parser(
-                "abc def.ghi http://www.osgi.org?abc=&x=1 [1,2,3] {{{{{{{xyz}}}}}}} <immediate> {'{{{{{'} {\\}} 'abc{}'")
-                .statement();
+    public void testSimpleValue()
+    {
+        List<CharSequence> x = new Parser("abc def.ghi http://www.osgi.org?abc=&x=1 [1,2,3] {{{{{{{xyz}}}}}}} <immediate> {'{{{{{'} {\\}} 'abc{}'").statement();
         assertEquals("abc", x.get(0));
         assertEquals("def.ghi", x.get(1));
         assertEquals("http://www.osgi.org?abc=&x=1", x.get(2));
@@ -248,11 +271,13 @@ public class TestParser extends TestCase {
         assertEquals("abc{}", x.get(8));
     }
 
-    void each(CommandSession session, Collection<Object> list, Function closure) throws Exception {
+    void each(CommandSession session, Collection<Object> list, Function closure) throws Exception
+    {
         List<Object> args = new ArrayList<Object>();
         args.add(null);
-        for (Object x : list) {
-            args.set(0, x );
+        for (Object x : list)
+        {
+            args.set(0, x);
             closure.execute(session, args);
         }
     }

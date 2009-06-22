@@ -19,70 +19,92 @@
 // DWB16: redirect System.err when creating pipe
 package org.apache.felix.gogo.shell.runtime;
 
+import org.osgi.service.command.Converter;
+
 import java.io.*;
-import java.util.*;
+import java.util.List;
 
-import org.osgi.service.command.*;
+public class Pipe extends Thread
+{
+    InputStream in;
+    PrintStream out;
+    PrintStream err;    // derek
+    PipedOutputStream pout;
+    Closure closure;
+    Exception exception;
+    Object result;
+    List<List<CharSequence>> statements;
 
-public class Pipe extends Thread {
-	InputStream in;
-	PrintStream out;
-        PrintStream err;    // derek
-	PipedOutputStream pout;
-	Closure closure;
-	Exception exception;
-	Object result;
-	List<List<CharSequence>> statements;
+    public Pipe(Closure closure, List<List<CharSequence>> statements)
+    {
+        super("pipe-" + statements);
+        this.closure = closure;
+        this.statements = statements;
+    }
 
-	public Pipe(Closure closure, List<List<CharSequence>> statements) {
-		super("pipe-" + statements);
-		this.closure = closure;
-		this.statements = statements;
-	}
+    public void setIn(InputStream in)
+    {
+        this.in = in;
+    }
 
-	public void setIn(InputStream in) {
-		this.in = in;
-	}
+    public void setOut(PrintStream out)
+    {
+        this.out = out;
+    }
 
-	public void setOut(PrintStream out) {
-		this.out = out;
-	}
+    public void setErr(PrintStream err)
+    {
+        this.err = err;
+    }
 
-	public void setErr(PrintStream err) {
-		this.err = err;
-	}
+    public Pipe connect(Pipe next) throws IOException
+    {
+        next.setOut(out);
+        pout = new PipedOutputStream();
+        next.setIn(new PipedInputStream(pout));
+        out = new PrintStream(pout);
+        return next;
 
-	public Pipe connect(Pipe next) throws IOException {
-		next.setOut(out);
-		pout = new PipedOutputStream();
-		next.setIn(new PipedInputStream(pout));
-		out = new PrintStream(pout);
-		return next;
+    }
 
-	}
-
-	public void run() {
-		//closure.session.service.threadIO.setStreams(in, out, System.err);
-		closure.session.service.threadIO.setStreams(in, out, err);    // derek
-		try {
-			for (List<CharSequence> statement : statements) {
-				result = closure.executeStatement(statement);
-				if ( result != null && pout != null )
-					out.println(closure.session.format(result, Converter.INSPECT));
-			}
-		} catch (Exception e) {
-			exception = e;
-		} finally {
-			out.flush();
-			closure.session.service.threadIO.close();
-			try {
-				if ( in instanceof PipedInputStream )
-					in.close();
-				if (pout!=null)
-					pout.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+    public void run()
+    {
+        //closure.session.service.threadIO.setStreams(in, out, System.err);
+        closure.session.service.threadIO.setStreams(in, out, err);    // derek
+        try
+        {
+            for (List<CharSequence> statement : statements)
+            {
+                result = closure.executeStatement(statement);
+                if (result != null && pout != null)
+                {
+                    out.println(closure.session.format(result, Converter.INSPECT));
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            exception = e;
+        }
+        finally
+        {
+            out.flush();
+            closure.session.service.threadIO.close();
+            try
+            {
+                if (in instanceof PipedInputStream)
+                {
+                    in.close();
+                }
+                if (pout != null)
+                {
+                    pout.close();
+                }
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
 }

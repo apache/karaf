@@ -20,276 +20,365 @@
 // DWB15: allow program to have trailing ';'
 package org.apache.felix.gogo.shell.runtime;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Parser {
-	int					current	= 0;
-	CharSequence		text;
-	boolean				escaped;
-	static final String	SPECIAL	= "<;|{[\"'$'`(=";
+public class Parser
+{
+    int current = 0;
+    CharSequence text;
+    boolean escaped;
+    static final String SPECIAL = "<;|{[\"'$'`(=";
 
-	public Parser(CharSequence program) {
-		text = program;
-	}
+    public Parser(CharSequence program)
+    {
+        text = program;
+    }
 
-	void ws() {
-	        // derek: BUGFIX: loop if comment  at beginning of input
-		//while (!eof() && Character.isWhitespace(peek())) {
-		while (!eof() && (Character.isWhitespace(peek()) || current == 0)) {
-        		if (current != 0 || Character.isWhitespace(peek()))
-        			current++;
-			if (peek() == '/' && current < text.length()-2 && text.charAt(current + 1) == '/') {
-				comment();
-			}
-			if (current == 0)
-			    break;
-		}
-	}
+    void ws()
+    {
+        // derek: BUGFIX: loop if comment  at beginning of input
+        //while (!eof() && Character.isWhitespace(peek())) {
+        while (!eof() && (Character.isWhitespace(peek()) || current == 0))
+        {
+            if (current != 0 || Character.isWhitespace(peek()))
+            {
+                current++;
+            }
+            if (peek() == '/' && current < text.length() - 2 && text.charAt(current + 1) == '/')
+            {
+                comment();
+            }
+            if (current == 0)
+            {
+                break;
+            }
+        }
+    }
 
-	private void comment() {
-		while (!eof() && peek() != '\n' && peek() != '\r')
-			next();
-	}
+    private void comment()
+    {
+        while (!eof() && peek() != '\n' && peek() != '\r')
+        {
+            next();
+        }
+    }
 
-	boolean eof() {
-		return current >= text.length();
-	}
+    boolean eof()
+    {
+        return current >= text.length();
+    }
 
-	char peek() {
-		escaped = false;
-		if (eof())
-			return 0;
+    char peek()
+    {
+        escaped = false;
+        if (eof())
+        {
+            return 0;
+        }
 
-		char c = text.charAt(current);
+        char c = text.charAt(current);
 
-		if (c == '\\') {
-			escaped = true;
-			++current;
-			if (eof())
-        			throw new RuntimeException("Eof found after \\"); // derek
-			    
-			c = text.charAt(current);
+        if (c == '\\')
+        {
+            escaped = true;
+            ++current;
+            if (eof())
+            {
+                throw new RuntimeException("Eof found after \\"); // derek
+            }
 
-			switch (c) {
-			case 't':
-				c = '\t';
-				break;
-			case '\r':
-			case '\n':
-				c = ' ';
-				break;
-			case 'b':
-				c = '\b';
-				break;
-			case 'f':
-				c = '\f';
-				break;
-			case 'n':
-				c = '\n';
-				break;
-			case 'r':
-				c = '\r';
-				break;
-			case 'u':
-				c = unicode();
-				break;
-			default:
-				// We just take the next character literally
-				// but have the escaped flag set, important for {},[] etc
-			}
-		}
-		return c;
-	}
+            c = text.charAt(current);
 
-	public List<List<List<CharSequence>>> program() {
-		List<List<List<CharSequence>>> program = new ArrayList<List<List<CharSequence>>>();
-		ws();
-		if (!eof()) {
-			program.add(statements());
-			while (peek() == '|') {
-				current++;
-				program.add(statements());
-			}
-		}
-		if (!eof())
-			throw new RuntimeException("Program has trailing text: "
-					+ context(current));
+            switch (c)
+            {
+                case 't':
+                    c = '\t';
+                    break;
+                case '\r':
+                case '\n':
+                    c = ' ';
+                    break;
+                case 'b':
+                    c = '\b';
+                    break;
+                case 'f':
+                    c = '\f';
+                    break;
+                case 'n':
+                    c = '\n';
+                    break;
+                case 'r':
+                    c = '\r';
+                    break;
+                case 'u':
+                    c = unicode();
+                    break;
+                default:
+                    // We just take the next character literally
+                    // but have the escaped flag set, important for {},[] etc
+            }
+        }
+        return c;
+    }
 
-		return program;
-	}
+    public List<List<List<CharSequence>>> program()
+    {
+        List<List<List<CharSequence>>> program = new ArrayList<List<List<CharSequence>>>();
+        ws();
+        if (!eof())
+        {
+            program.add(statements());
+            while (peek() == '|')
+            {
+                current++;
+                program.add(statements());
+            }
+        }
+        if (!eof())
+        {
+            throw new RuntimeException("Program has trailing text: " + context(current));
+        }
 
-	CharSequence context(int around) {
-		return text.subSequence(Math.max(0, current - 20), Math.min(text
-				.length(), current + 4));
-	}
+        return program;
+    }
 
-	public List<List<CharSequence>> statements() {
-		List<List<CharSequence>> statements = new ArrayList<List<CharSequence>>();
-		statements.add(statement());
-		while (peek() == ';') {
-			current++;
-			// derek: BUGFIX: allow trailing ;
-			ws();
-			if (!eof())
-        			statements.add(statement());
-		}
-		return statements;
-	}
+    CharSequence context(int around)
+    {
+        return text.subSequence(Math.max(0, current - 20), Math.min(text.length(), current + 4));
+    }
 
-	public List<CharSequence> statement() {
-		List<CharSequence> statement = new ArrayList<CharSequence>();
-        	statement.add(value());
-		while (!eof()) {
-			ws();
-			if (peek() == '|' || peek() == ';')
-				break;
+    public List<List<CharSequence>> statements()
+    {
+        List<List<CharSequence>> statements = new ArrayList<List<CharSequence>>();
+        statements.add(statement());
+        while (peek() == ';')
+        {
+            current++;
+            // derek: BUGFIX: allow trailing ;
+            ws();
+            if (!eof())
+            {
+                statements.add(statement());
+            }
+        }
+        return statements;
+    }
 
-			if (!eof())
-				statement.add(messy());
-		}
-		return statement;
-	}
+    public List<CharSequence> statement()
+    {
+        List<CharSequence> statement = new ArrayList<CharSequence>();
+        statement.add(value());
+        while (!eof())
+        {
+            ws();
+            if (peek() == '|' || peek() == ';')
+            {
+                break;
+            }
 
-	public CharSequence messy() {
-		char c = peek();
-		if (c > 0 && SPECIAL.indexOf(c)< 0) {
-			int start = current++;
-			while (!eof()) {
-				c = peek();
-				if (c == ';' || c == '|' || Character.isWhitespace(c))
-					break;
-				next();
-			}
+            if (!eof())
+            {
+                statement.add(messy());
+            }
+        }
+        return statement;
+    }
 
-			return text.subSequence(start, current);
-		} else
-			return value();
-	}
+    public CharSequence messy()
+    {
+        char c = peek();
+        if (c > 0 && SPECIAL.indexOf(c) < 0)
+        {
+            int start = current++;
+            while (!eof())
+            {
+                c = peek();
+                if (c == ';' || c == '|' || Character.isWhitespace(c))
+                {
+                    break;
+                }
+                next();
+            }
 
-	CharSequence value() {
-		ws();
+            return text.subSequence(start, current);
+        }
+        else
+        {
+            return value();
+        }
+    }
 
-		int start = current;
-		char c = next();
-		switch (c) {
-		case '{':
-			return text.subSequence(start, find('}', '{'));
-		case '(':
-			return text.subSequence(start, find(')', '('));
-		case '[':
-			return text.subSequence(start, find(']', '['));
-		case '"':
-			return text.subSequence(start + 1, quote('"'));
-		case '\'':
-			return text.subSequence(start + 1, quote('\''));
-		case '<':
-			return text.subSequence(start, find('>', '<'));
-		case '$':
-			value();
-			return text.subSequence(start, current);
-		}
+    CharSequence value()
+    {
+        ws();
 
-		if (Character.isJavaIdentifierPart(c)) {
-			// Some identifier or number
-			while (!eof()) {
-				c = peek();
-				if (c!=':' && !Character.isJavaIdentifierPart(c) && c != '.')
-					break;
-				next();
-			}
-		} else {
-			// Operator, repeat while in operator class
-			while (!eof()) {
-				c = peek();
-				if (Character.isWhitespace(c)
-						|| Character.isJavaIdentifierPart(c))
-					break;
-			}
-		}
-		
-		return text.subSequence(start, current);
-	}
+        int start = current;
+        char c = next();
+        switch (c)
+        {
+            case '{':
+                return text.subSequence(start, find('}', '{'));
+            case '(':
+                return text.subSequence(start, find(')', '('));
+            case '[':
+                return text.subSequence(start, find(']', '['));
+            case '"':
+                return text.subSequence(start + 1, quote('"'));
+            case '\'':
+                return text.subSequence(start + 1, quote('\''));
+            case '<':
+                return text.subSequence(start, find('>', '<'));
+            case '$':
+                value();
+                return text.subSequence(start, current);
+        }
 
-	char next() {
-		char c = peek();
-		current++;
-		return c;
-	}
+        if (Character.isJavaIdentifierPart(c))
+        {
+            // Some identifier or number
+            while (!eof())
+            {
+                c = peek();
+                if (c != ':' && !Character.isJavaIdentifierPart(c) && c != '.')
+                {
+                    break;
+                }
+                next();
+            }
+        }
+        else
+        {
+            // Operator, repeat while in operator class
+            while (!eof())
+            {
+                c = peek();
+                if (Character.isWhitespace(c) || Character.isJavaIdentifierPart(c))
+                {
+                    break;
+                }
+            }
+        }
 
-	char unicode() {
-		if (current + 4 > text.length())
-			throw new IllegalArgumentException(
-					"Unicode \\u escape at eof at pos ..." + context(current)
-							+ "...");
+        return text.subSequence(start, current);
+    }
 
-		String s = text.subSequence(current, current + 4).toString();
-		int n = Integer.parseInt(s, 16);
-		return (char) n;
-	}
+    char next()
+    {
+        char c = peek();
+        current++;
+        return c;
+    }
 
-	private int find(char target, char deeper) {
-		int start = current;
-		int level = 1;
+    char unicode()
+    {
+        if (current + 4 > text.length())
+        {
+            throw new IllegalArgumentException("Unicode \\u escape at eof at pos ..." + context(current) + "...");
+        }
 
-		while (level != 0) {
-			if (eof())
-				throw new RuntimeException(
-						"Eof found in the middle of a compound for '" + target
-								+ deeper + "', begins at " + context(start));
+        String s = text.subSequence(current, current + 4).toString();
+        int n = Integer.parseInt(s, 16);
+        return (char) n;
+    }
 
-			char c = next();
-			if (!escaped) {
-				if (c == target)
-					level--;
-				else if (c == deeper)
-					level++;
-				else if (c == '"')
-					quote('"');
-				else if (c == '\'')
-					quote('\'');
-				else if (c == '`')
-					quote('`');
-			}
-		}
-		return current;
-	}
+    private int find(char target, char deeper)
+    {
+        int start = current;
+        int level = 1;
 
-	int quote(char which) {
-		while (!eof() && (peek() != which || escaped))
-			next();
+        while (level != 0)
+        {
+            if (eof())
+            {
+                throw new RuntimeException("Eof found in the middle of a compound for '" + target + deeper + "', begins at " + context(start));
+            }
 
-		return current++;
-	}
+            char c = next();
+            if (!escaped)
+            {
+                if (c == target)
+                {
+                    level--;
+                }
+                else
+                {
+                    if (c == deeper)
+                    {
+                        level++;
+                    }
+                    else
+                    {
+                        if (c == '"')
+                        {
+                            quote('"');
+                        }
+                        else
+                        {
+                            if (c == '\'')
+                            {
+                                quote('\'');
+                            }
+                            else
+                            {
+                                if (c == '`')
+                                {
+                                    quote('`');
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return current;
+    }
 
-	CharSequence findVar() {
-		int start = current - 1;
-		char c = peek();
+    int quote(char which)
+    {
+        while (!eof() && (peek() != which || escaped))
+        {
+            next();
+        }
 
-		if (c == '{') {
-			next();
-			int end = find('}', '{');
-			return text.subSequence(start, end);
-		}
+        return current++;
+    }
 
-		if (Character.isJavaIdentifierStart(c)) {
-			while (!eof() && Character.isJavaIdentifierPart(c) || c == '.') {
-				next();
-			}
-			return text.subSequence(start, current);
-		}
-		throw new IllegalArgumentException(
-				"Reference to variable does not match syntax of a variable: "
-						+ context(start));
-	}
+    CharSequence findVar()
+    {
+        int start = current - 1;
+        char c = peek();
 
-	public String toString() {
-		return "..." + context(current) + "...";
-	}
+        if (c == '{')
+        {
+            next();
+            int end = find('}', '{');
+            return text.subSequence(start, end);
+        }
 
-	public String unescape() {
-		StringBuilder sb = new StringBuilder();
-		while (!eof())
-			sb.append(next());
-		return sb.toString();
-	}
+        if (Character.isJavaIdentifierStart(c))
+        {
+            while (!eof() && Character.isJavaIdentifierPart(c) || c == '.')
+            {
+                next();
+            }
+            return text.subSequence(start, current);
+        }
+        throw new IllegalArgumentException("Reference to variable does not match syntax of a variable: " + context(start));
+    }
+
+    public String toString()
+    {
+        return "..." + context(current) + "...";
+    }
+
+    public String unescape()
+    {
+        StringBuilder sb = new StringBuilder();
+        while (!eof())
+        {
+            sb.append(next());
+        }
+        return sb.toString();
+    }
 }

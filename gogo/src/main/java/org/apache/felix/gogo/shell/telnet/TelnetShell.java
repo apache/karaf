@@ -18,87 +18,128 @@
  */
 package org.apache.felix.gogo.shell.telnet;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import org.osgi.service.command.CommandProcessor;
+import org.osgi.service.command.CommandSession;
+import org.osgi.service.component.ComponentContext;
 
-import org.osgi.service.command.*;
-import org.osgi.service.component.*;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.net.BindException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
-public class TelnetShell extends Thread {
-    boolean          quit;
+public class TelnetShell extends Thread
+{
+    boolean quit;
     CommandProcessor processor;
-    ServerSocket     server;
-    int              port     = 2019;
-    List<Handler>    handlers = new ArrayList<Handler>();
+    ServerSocket server;
+    int port = 2019;
+    List<Handler> handlers = new ArrayList<Handler>();
 
-    protected void activate(ComponentContext context) {
+    protected void activate(ComponentContext context)
+    {
         String s = (String) context.getProperties().get("port");
         if (s != null)
+        {
             port = Integer.parseInt(s);
+        }
         System.out.println("Telnet Listener at port " + port);
         start();
     }
 
-    protected void deactivate(ComponentContext ctx) throws Exception {
-        try {
+    protected void deactivate(ComponentContext ctx) throws Exception
+    {
+        try
+        {
             quit = true;
             server.close();
             interrupt();
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             // Ignore
         }
     }
 
-    public void run() {
+    public void run()
+    {
         int delay = 0;
-        try {
+        try
+        {
             while (!quit)
-                try {
+            {
+                try
+                {
                     server = new ServerSocket(port);
                     delay = 5;
-                    while (!quit) {
+                    while (!quit)
+                    {
                         Socket socket = server.accept();
-                        CommandSession session = processor.createSession(socket
-                                .getInputStream(), new PrintStream(socket
-                                .getOutputStream()), System.err);
+                        CommandSession session = processor.createSession(socket.getInputStream(), new PrintStream(socket.getOutputStream()), System.err);
                         Handler handler = new Handler(this, session, socket);
                         handlers.add(handler);
                         handler.start();
                     }
-                } catch (BindException be) {
+                }
+                catch (BindException be)
+                {
                     delay += 5;
                     System.err.println("Can not bind to port " + port);
-                    try {
+                    try
+                    {
                         Thread.sleep(delay * 1000);
-                    } catch (InterruptedException e) {
+                    }
+                    catch (InterruptedException e)
+                    {
                         // who cares?
                     }
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     if (!quit)
+                    {
                         e.printStackTrace();
-                } finally {
-                    try {
+                    }
+                }
+                finally
+                {
+                    try
+                    {
                         server.close();
                         Thread.sleep(2000);
-                    } catch (Exception ie) {
+                    }
+                    catch (Exception ie)
+                    {
                         //
                     }
                 }
+            }
 
-        } finally {
-            try {
+        }
+        finally
+        {
+            try
+            {
                 if (server != null)
+                {
                     server.close();
-            } catch (IOException e) {
+                }
+            }
+            catch (IOException e)
+            {
                 //
             }
             for (Handler handler : handlers)
+            {
                 handler.close();
+            }
         }
     }
 
-    public void setProcessor(CommandProcessor processor) {
+    public void setProcessor(CommandProcessor processor)
+    {
         this.processor = processor;
     }
 }

@@ -19,125 +19,169 @@
 
 package org.apache.felix.gogo.shell.console;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
+import org.osgi.service.command.CommandSession;
+import org.osgi.service.command.Converter;
 
-import org.osgi.service.command.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Console implements Runnable {
-	StringBuilder		sb;
-	CommandSession		session;
-	List<CharSequence>	history	= new ArrayList<CharSequence>();
-	int					current	= 0;
-	boolean				quit;
+public class Console implements Runnable
+{
+    StringBuilder sb;
+    CommandSession session;
+    List<CharSequence> history = new ArrayList<CharSequence>();
+    int current = 0;
+    boolean quit;
 
-	public void setSession(CommandSession session) {
-	    this.session= session;
-	}
-	
-	public void run() {
-		try {
-			while (!quit) {
-				try {
-					CharSequence line = getLine(session.getKeyboard());
-					if (line != null) {
-						history.add(line);
-						if (history.size() > 40)
-							history.remove(0);
-						Object result = session.execute(line);
-						if (result != null)
-							session.getConsole().println(
-									session.format(result, Converter.INSPECT));
-					} else
-						quit = true;
+    public void setSession(CommandSession session)
+    {
+        this.session = session;
+    }
 
-				} catch (InvocationTargetException ite) {
-					session.getConsole().println(
-							"E: " + ite.getTargetException());
-					session.put("exception", ite.getTargetException());
-				} catch (Throwable e) {
-					if (!quit) {
-						session.getConsole().println("E: " + e.getMessage());
-						session.put("exception", e);
-					}
-				}
-			}
-		} catch (Exception e) {
-			if (!quit)
-				e.printStackTrace();
-		}
-	}
+    public void run()
+    {
+        try
+        {
+            while (!quit)
+            {
+                try
+                {
+                    CharSequence line = getLine(session.getKeyboard());
+                    if (line != null)
+                    {
+                        history.add(line);
+                        if (history.size() > 40)
+                        {
+                            history.remove(0);
+                        }
+                        Object result = session.execute(line);
+                        if (result != null)
+                        {
+                            session.getConsole().println(session.format(result, Converter.INSPECT));
+                        }
+                    }
+                    else
+                    {
+                        quit = true;
+                    }
 
-	CharSequence getLine(InputStream in) throws IOException {
-		sb = new StringBuilder();
-		session.getConsole().print("$ ");
-		int outer = 0;
-		while (!quit) {
-			session.getConsole().flush();
-			int c = in.read();
-			if (c < 0)
-				quit = true;
-			else {
-				switch (c) {
-				case '\r':
-				    break;
-				case '\n':
-					if (outer == 0 && sb.length() > 0) {
-						return sb;
-					} else {
-					        session.getConsole().print("$ ");
-					}
-					break;
+                }
+                catch (InvocationTargetException ite)
+                {
+                    session.getConsole().println("E: " + ite.getTargetException());
+                    session.put("exception", ite.getTargetException());
+                }
+                catch (Throwable e)
+                {
+                    if (!quit)
+                    {
+                        session.getConsole().println("E: " + e.getMessage());
+                        session.put("exception", e);
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            if (!quit)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
 
-				case '\u001b':
-					c = in.read();
-					if (c == '[') {
-						c = in.read();
-						session.getConsole().print("\b\b\b");
-						switch (c) {
-						case 'A':
-							history(current - 1);
-							break;
-						case 'B':
-							history(current + 1);
-							break;
-						case 'C': // right(); break;
-						case 'D': // left(); break;
-						}
-					}
-					break;
+    CharSequence getLine(InputStream in) throws IOException
+    {
+        sb = new StringBuilder();
+        session.getConsole().print("$ ");
+        int outer = 0;
+        while (!quit)
+        {
+            session.getConsole().flush();
+            int c = in.read();
+            if (c < 0)
+            {
+                quit = true;
+            }
+            else
+            {
+                switch (c)
+                {
+                    case '\r':
+                        break;
+                    case '\n':
+                        if (outer == 0 && sb.length() > 0)
+                        {
+                            return sb;
+                        }
+                        else
+                        {
+                            session.getConsole().print("$ ");
+                        }
+                        break;
 
-				case '\b':
-					if (sb.length() > 0) {
-						session.getConsole().print("\b \b");
-						sb.deleteCharAt(sb.length() - 1);
-					}
-					break;
+                    case '\u001b':
+                        c = in.read();
+                        if (c == '[')
+                        {
+                            c = in.read();
+                            session.getConsole().print("\b\b\b");
+                            switch (c)
+                            {
+                                case 'A':
+                                    history(current - 1);
+                                    break;
+                                case 'B':
+                                    history(current + 1);
+                                    break;
+                                case 'C': // right(); break;
+                                case 'D': // left(); break;
+                            }
+                        }
+                        break;
 
-				default:
-					sb.append((char) c);
-					break;
-				}
-			}
-		}
-		return null;
-	}
+                    case '\b':
+                        if (sb.length() > 0)
+                        {
+                            session.getConsole().print("\b \b");
+                            sb.deleteCharAt(sb.length() - 1);
+                        }
+                        break;
 
-	void history(int n) {
-		if (n < 0 || n > history.size())
-			return;
-		current = n;
-		for (int i = 0; i < sb.length(); i++)
-			session.getConsole().print("\b \b");
+                    default:
+                        sb.append((char) c);
+                        break;
+                }
+            }
+        }
+        return null;
+    }
 
-		sb = new StringBuilder(history.get(current));
-		session.getConsole().print(sb);
-	}
+    void history(int n)
+    {
+        if (n < 0 || n > history.size())
+        {
+            return;
+        }
+        current = n;
+        for (int i = 0; i < sb.length(); i++)
+        {
+            session.getConsole().print("\b \b");
+        }
 
-    public void close() {
+        sb = new StringBuilder(history.get(current));
+        session.getConsole().print(sb);
+    }
+
+    public void close()
+    {
         quit = true;
     }
-    
-    public void open() {}
+
+    public void open()
+    {
+    }
 }

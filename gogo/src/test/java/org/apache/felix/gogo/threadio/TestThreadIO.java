@@ -18,61 +18,72 @@
  */
 package org.apache.felix.gogo.threadio;
 
-import java.io.*;
-import java.util.*;
+import junit.framework.TestCase;
 
-import junit.framework.*;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 
-public class TestThreadIO extends TestCase {
-    
+public class TestThreadIO extends TestCase
+{
+
     /**
      * Test if the threadio works in a nested fashion. We first push
      * ten markers on the stack and print a message for each, capturing
      * the output in a ByteArrayOutputStream. Then we pop them, also printing
      * a message identifying the level. Then we verify the output for each level.
      */
-    public void testNested() {
+    public void testNested()
+    {
         ThreadIOImpl tio = new ThreadIOImpl();
         tio.start();
         List<ByteArrayOutputStream> list = new ArrayList<ByteArrayOutputStream>();
-        for ( int i =0; i<10; i++) {
+        for (int i = 0; i < 10; i++)
+        {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             list.add(out);
-            tio.setStreams(System.in, new PrintStream(out), System.err);            
+            tio.setStreams(System.in, new PrintStream(out), System.err);
             System.out.print("b" + i);
         }
-        for ( int i =9; i>=0; i--) {
-            System.out.println("e" + i);            
+        for (int i = 9; i >= 0; i--)
+        {
+            System.out.println("e" + i);
             tio.close();
         }
-        tio.stop();        
-        for ( int i =0; i<10; i++) {
+        tio.stop();
+        for (int i = 0; i < 10; i++)
+        {
             String message = list.get(i).toString().trim();
-            assertEquals("b"+i+"e"+i, message );
+            assertEquals("b" + i + "e" + i, message);
         }
     }
 
     /**
      * Simple test too see if the basics work.
      */
-    public void testSimple() {
+    public void testSimple()
+    {
         ThreadIOImpl tio = new ThreadIOImpl();
         tio.start();
-        System.out.println("Hello World");   
+        System.out.println("Hello World");
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ByteArrayOutputStream err = new ByteArrayOutputStream();
         tio.setStreams(System.in, new PrintStream(out), new PrintStream(err));
-        try {
+        try
+        {
             System.out.println("Simple Normal Message");
             System.err.println("Simple Error Message");
-        } finally {
+        }
+        finally
+        {
             tio.close();
         }
         tio.stop();
         String normal = out.toString().trim();
         //String error = err.toString().trim();
-        assertEquals("Simple Normal Message", normal );
+        assertEquals("Simple Normal Message", normal);
         //assertEquals("Simple Error Message", error );
-        System.out.println("Goodbye World");           
+        System.out.println("Goodbye World");
     }
 }

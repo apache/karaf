@@ -18,44 +18,52 @@
  */
 package org.apache.felix.gogo.shell.telnet;
 
-import java.io.*;
-import java.net.*;
+import org.apache.felix.gogo.shell.console.Console;
+import org.osgi.service.command.CommandSession;
 
-import org.osgi.service.command.*;
+import java.io.IOException;
+import java.net.Socket;
 
-import org.apache.felix.gogo.shell.console.*;
+public class Handler extends Thread
+{
+    TelnetShell master;
+    Socket socket;
+    CommandSession session;
+    Console console;
 
-public class Handler extends Thread {
-	TelnetShell		master;
-	Socket			socket;
-	CommandSession	session;
-	Console			console;
-	
-	public Handler(TelnetShell master, CommandSession session, Socket socket)
-			throws IOException {
-		this.master = master;
-		this.socket = socket;
-		this.session = session;
-	}
+    public Handler(TelnetShell master, CommandSession session, Socket socket) throws IOException
+    {
+        this.master = master;
+        this.socket = socket;
+        this.session = session;
+    }
 
-	public void run() {
-		try {
-			console = new Console();
-			console.setSession(session);
-			console.run();
-		} finally {
-			close();
-			master.handlers.remove(this);
-		}
-	}
+    public void run()
+    {
+        try
+        {
+            console = new Console();
+            console.setSession(session);
+            console.run();
+        }
+        finally
+        {
+            close();
+            master.handlers.remove(this);
+        }
+    }
 
-	public void close() {
-		session.close();
-		try {
-			socket.close();
-		} catch (IOException e) {
-			// Ignore, this is close
-		}
-	}
+    public void close()
+    {
+        session.close();
+        try
+        {
+            socket.close();
+        }
+        catch (IOException e)
+        {
+            // Ignore, this is close
+        }
+    }
 
 }

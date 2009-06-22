@@ -18,25 +18,28 @@
  */
 package org.apache.felix.gogo.threadio;
 
-import java.io.*;
+import java.io.InputStream;
+import java.io.PrintStream;
 
-public class Marker {
+public class Marker
+{
     Marker previous;
     InputStream in;
     PrintStream out;
     PrintStream err;
     ThreadIOImpl parent;
-    
-    public Marker(ThreadIOImpl parent, InputStream in, PrintStream out,
-            PrintStream err, Marker previous) {
+
+    public Marker(ThreadIOImpl parent, InputStream in, PrintStream out, PrintStream err, Marker previous)
+    {
         this.previous = previous;
         this.parent = parent;
         this.in = in;
-        this.out=out;
-        this.err=err;
+        this.out = out;
+        this.err = err;
     }
 
-    Marker activate() {
+    Marker activate()
+    {
         parent.in.setStream(in);
         parent.out.setStream(out);
         parent.err.setStream(err);

@@ -18,29 +18,35 @@
  */
 package org.apache.felix.gogo.shell.runtime;
 
-import org.apache.felix.gogo.threadio.*;
+import org.apache.felix.gogo.threadio.ThreadIOImpl;
 
-public class Context extends CommandShellImpl {
-	public static final String EMPTY = "";
-	CommandSessionImpl session = (CommandSessionImpl) createSession(System.in,System.out,System.err);
-	static ThreadIOImpl threadio; 
-	
-	static  {
-		threadio = new ThreadIOImpl();
-		threadio.start();
-		
-	}
-	public Context() {
-		setThreadio( threadio );
-	}
+public class Context extends CommandShellImpl
+{
+    public static final String EMPTY = "";
+    CommandSessionImpl session = (CommandSessionImpl) createSession(System.in, System.out, System.err);
+    static ThreadIOImpl threadio;
 
-	public Object execute(CharSequence source) throws Exception {
-		return session.execute(source);
-	}
+    static
+    {
+        threadio = new ThreadIOImpl();
+        threadio.start();
 
-	public void addCommand(String name, Object target ) {
-	    put("test:" + name, target );
-	}
-	
+    }
+
+    public Context()
+    {
+        setThreadio(threadio);
+    }
+
+    public Object execute(CharSequence source) throws Exception
+    {
+        return session.execute(source);
+    }
+
+    public void addCommand(String name, Object target)
+    {
+        put("test:" + name, target);
+    }
+
 
 }

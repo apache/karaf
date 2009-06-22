@@ -18,48 +18,61 @@
  */
 package org.apache.felix.gogo.threadio;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.PrintStream;
 
-public class ThreadPrintStream extends PrintStream {
-	PrintStream dflt;
-	ThreadLocal<PrintStream>	map  = new ThreadLocal<PrintStream>();
-	
-	public ThreadPrintStream(PrintStream out) {
-		super(out);
-		dflt = out;
-	}
+public class ThreadPrintStream extends PrintStream
+{
+    PrintStream dflt;
+    ThreadLocal<PrintStream> map = new ThreadLocal<PrintStream>();
 
-	public void write(byte[] buffer, int offset, int length) {
-		getCurrent().write(buffer, offset, length);
-	}
+    public ThreadPrintStream(PrintStream out)
+    {
+        super(out);
+        dflt = out;
+    }
 
-	public void write(byte[] buffer) throws IOException {
-		getCurrent().write(buffer);
-	}
+    public void write(byte[] buffer, int offset, int length)
+    {
+        getCurrent().write(buffer, offset, length);
+    }
 
-	public PrintStream getCurrent() {
-		PrintStream out = map.get();
-		if (out != null)
-			return out;
-		return dflt;
-	}
+    public void write(byte[] buffer) throws IOException
+    {
+        getCurrent().write(buffer);
+    }
 
-	public void write(int b) {
-		getCurrent().write(b);
-	}
+    public PrintStream getCurrent()
+    {
+        PrintStream out = map.get();
+        if (out != null)
+        {
+            return out;
+        }
+        return dflt;
+    }
 
-	public void setStream(PrintStream out) {
-		if (out != dflt && out != this) {
-			map.set(out);
-		}
-		else {
-			map.remove();			
-		}
-	}
+    public void write(int b)
+    {
+        getCurrent().write(b);
+    }
 
-	public void end() {
-		map.remove();
-	}
-	
+    public void setStream(PrintStream out)
+    {
+        if (out != dflt && out != this)
+        {
+            map.set(out);
+        }
+        else
+        {
+            map.remove();
+        }
+    }
+
+    public void end()
+    {
+        map.remove();
+    }
+
 
 }

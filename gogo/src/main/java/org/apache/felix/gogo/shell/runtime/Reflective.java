@@ -22,30 +22,23 @@
 // DWB19: coerce() won't add empty array to satisfy Object[] argument
 package org.apache.felix.gogo.shell.runtime;
 
-import java.lang.reflect.*;
+import org.osgi.service.command.CommandSession;
+
+import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 
-import org.osgi.service.command.*;
+public class Reflective
+{
+    public final static Object NO_MATCH = new Object();
+    public final static Set<String> KEYWORDS = new HashSet<String>(Arrays.asList(new String[]{"abstract", "continue", "for", "new", "switch", "assert", "default", "goto", "package", "synchronized", "boolean", "do", "if", "private", "this", "break", "double", "implements", "protected", "throw", "byte", "else", "import", "public", "throws", "case", "enum", "instanceof", "return", "transient", "catch", "extends", "int", "short", "try", "char", "final", "interface", "static", "void", "class", "finally", "long", "strictfp", "volatile", "const", "float", "native", "super", "while"}));
 
-public class Reflective {
-    public final static Object      NO_MATCH = new Object();
-    public final static Set<String> KEYWORDS = new HashSet<String>(Arrays
-                                                     .asList(new String[] {
-            "abstract", "continue", "for", "new", "switch", "assert",
-            "default", "goto", "package", "synchronized", "boolean", "do",
-            "if", "private", "this", "break", "double", "implements",
-            "protected", "throw", "byte", "else", "import", "public", "throws",
-            "case", "enum", "instanceof", "return", "transient", "catch",
-            "extends", "int", "short", "try", "char", "final", "interface",
-            "static", "void", "class", "finally", "long", "strictfp",
-            "volatile", "const", "float", "native", "super", "while" }));
-
-    public Object method(CommandSession session, Object target, String name,
-            List<Object> args) throws IllegalArgumentException,
-            IllegalAccessException, InvocationTargetException, Exception {
+    public Object method(CommandSession session, Object target, String name, List<Object> args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, Exception
+    {
         // derek - support static methods
         //Method[] methods = target.getClass().getMethods();
-        Class<?> tc = (target instanceof Class) ? (Class<?>)target : target.getClass();
+        Class<?> tc = (target instanceof Class) ? (Class<?>) target : target.getClass();
         Method[] methods = tc.getMethods();
         name = name.toLowerCase();
 
@@ -54,41 +47,50 @@ public class Reflective {
         String set = "set" + name;
 
         if (KEYWORDS.contains(name))
+        {
             name = "_" + name;
+        }
 
         Method bestMethod = null;
         Object[] bestArgs = null;
         int match = -1;
         ArrayList<Class<?>[]> possibleTypes = new ArrayList<Class<?>[]>();    // derek
 
-        for (Method m : methods) {
+        for (Method m : methods)
+        {
             String mname = m.getName().toLowerCase();
-            if (mname.equals(name) || mname.equals(get) || mname.equals(set)
-                    || mname.equals(is) || mname.equals("_main")) {    // derek - added _main
+            if (mname.equals(name) || mname.equals(get) || mname.equals(set) || mname.equals(is) || mname.equals("_main"))
+            {    // derek - added _main
                 Class<?>[] types = m.getParameterTypes();
                 ArrayList<Object> xargs = new ArrayList<Object>(args); // derek - BUGFIX don't modify args
 
                 // Check if the command takes a session
-                if (types.length > 0
-                        && CommandSession.class.isAssignableFrom(types[0])) {
+                if (types.length > 0 && CommandSession.class.isAssignableFrom(types[0]))
+                {
                     xargs.add(0, session);
                 }
 
                 Object[] parms = new Object[types.length];
                 // if (types.length >= args.size() ) {
                 int local = coerce(session, target, types, parms, xargs);
-                if ((local >= xargs.size()) && (local >= types.length)) {       // derek - stop no-args
+                if ((local >= xargs.size()) && (local >= types.length))
+                {       // derek - stop no-args
                     boolean exact = (local == xargs.size() && local == types.length);
-                    if (exact || local > match) {
+                    if (exact || local > match)
+                    {
                         bestMethod = m;
                         bestArgs = parms;
                         match = local;
                     }
                     if (exact)
+                    {
                         break;
+                    }
                 }
                 else
+                {
                     possibleTypes.add(types);    // derek
+                }
                 // }
                 // if (match == -1 && types.length == 1
                 // && types[0] == Object[].class) {
@@ -99,36 +101,47 @@ public class Reflective {
             }
         }
 
-        if (bestMethod != null) {
+        if (bestMethod != null)
+        {
             bestMethod.setAccessible(true);
             // derek: BUGFIX catch InvocationTargetException
             // return bestMethod.invoke(target, bestArgs);
-            try {
+            try
+            {
                 return bestMethod.invoke(target, bestArgs);
-            } catch (InvocationTargetException e) {
+            }
+            catch (InvocationTargetException e)
+            {
                 Throwable cause = e.getCause();
                 if (cause instanceof Exception)
-                    throw (Exception)cause;
+                {
+                    throw (Exception) cause;
+                }
                 throw e;
             }
-        } else {
+        }
+        else
+        {
             //throw new IllegalArgumentException("Cannot find command:" + name + " with args:" + args);
             // { derek
             ArrayList<String> list = new ArrayList<String>();
-            for (Class<?>[] types : possibleTypes) {
+            for (Class<?>[] types : possibleTypes)
+            {
                 StringBuilder buf = new StringBuilder();
                 buf.append('(');
-                for (Class<?> type : types) {
+                for (Class<?> type : types)
+                {
                     if (buf.length() > 1)
+                    {
                         buf.append(", ");
+                    }
                     buf.append(type.getSimpleName());
                 }
                 buf.append(')');
                 list.add(buf.toString());
             }
 
-            throw new IllegalArgumentException(
-                    String.format("Cannot coerce %s%s to any of %s", name,  args, list));
+            throw new IllegalArgumentException(String.format("Cannot coerce %s%s to any of %s", name, args, list));
             // } derek
         }
     }
@@ -138,7 +151,7 @@ public class Reflective {
      * the arguments of the method call. First, an attempt is made to convert
      * each argument. If this fails, a check is made to see if varargs can be
      * applied. This happens when the last method argument is an array.
-     * 
+     *
      * @param session
      * @param target
      * @param types
@@ -148,47 +161,57 @@ public class Reflective {
      * @throws Exception
      */
     @SuppressWarnings("unchecked")
-    private int coerce(CommandSession session, Object target, Class<?> types[],
-            Object out[], List<Object> in) throws Exception {
+    private int coerce(CommandSession session, Object target, Class<?> types[], Object out[], List<Object> in) throws Exception
+    {
         int i = 0;
-        while (i < out.length) {
+        while (i < out.length)
+        {
             out[i] = null;
-            try {
+            try
+            {
                 // Try to convert one argument
                 // derek: add empty array as extra argument
                 //out[i] = coerce(session, target, types[i], in.get(i));
                 if (i == in.size())
+                {
                     out[i] = NO_MATCH;
+                }
                 else
+                {
                     out[i] = coerce(session, target, types[i], in.get(i));
-                
-                if (out[i] == NO_MATCH) {
+                }
+
+                if (out[i] == NO_MATCH)
+                {
                     // Failed
                     // No match, check for varargs
-                    if (types[i].isArray() && i == types.length - 1) {
-                        
+                    if (types[i].isArray() && i == types.length - 1)
+                    {
+
                         // derek - expand final array arg
-                        if (i < in.size()) {
+                        if (i < in.size())
+                        {
                             Object arg = in.get(i);
-                            if (arg instanceof List) {
-                                List<Object> args = (List<Object>)arg;
+                            if (arg instanceof List)
+                            {
+                                List<Object> args = (List<Object>) arg;
                                 in = new ArrayList<Object>(in);
                                 in.remove(i);
                                 in.addAll(args);
                             }
                         }
-                    
+
                         // Try to parse the remaining arguments in an array
                         Class<?> component = types[i].getComponentType();
-                        Object components = Array.newInstance(component, in
-                                .size()
-                                - i);
+                        Object components = Array.newInstance(component, in.size() - i);
                         int n = i;
-                        while (i < in.size()) {
-                            Object t = coerce(session, target, component, in
-                                    .get(i));
+                        while (i < in.size())
+                        {
+                            Object t = coerce(session, target, component, in.get(i));
                             if (t == NO_MATCH)
+                            {
                                 return -1;
+                            }
                             Array.set(components, i - n, t);
                             i++;
                         }
@@ -196,16 +219,20 @@ public class Reflective {
                         // Is last element, so we will quite hereafter
                         // return n;
                         if (i == in.size())
+                        {
                             ++i;
+                        }
                         return i;    // derek - return number of args converted
                     }
                     return -1;
                 }
                 i++;
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 System.err.println("Reflective:" + e);
                 e.printStackTrace();
-                
+
                 // should get rid of those exceptions, but requires
                 // reg ex matching to see if it throws an exception.
                 // dont know what is better
@@ -215,63 +242,125 @@ public class Reflective {
         return i;
     }
 
-    Object coerce(CommandSession session, Object target, Class<?> type,
-            Object arg) throws Exception {
+    Object coerce(CommandSession session, Object target, Class<?> type, Object arg) throws Exception
+    {
         if (arg == null)
+        {
             return null;
+        }
 
         if (type.isAssignableFrom(arg.getClass()))
+        {
             return arg;
+        }
 
         Object converted = session.convert(type, arg);
         if (converted != null)
+        {
             return converted;
+        }
 
         String string = arg.toString();
         if (type.isAssignableFrom(String.class))
+        {
             return string;
+        }
 
-        if (type.isArray()) {
+        if (type.isArray())
+        {
             // Must handle array types
             return NO_MATCH;
-        } else if (!type.isPrimitive()) {
-            try {
-                return type.getConstructor(String.class).newInstance(string);
-            } catch (Exception e) {
-                return NO_MATCH;
+        }
+        else
+        {
+            if (!type.isPrimitive())
+            {
+                try
+                {
+                    return type.getConstructor(String.class).newInstance(string);
+                }
+                catch (Exception e)
+                {
+                    return NO_MATCH;
+                }
             }
         }
-        
-        try {
+
+        try
+        {
             if (type == boolean.class)
+            {
                 return new Boolean(string);
-            else if (type == byte.class)
-                return new Byte(string);
-            else if (type == char.class) {
-                if (string.length() == 1)
-                    return string.charAt(0);
-            } else if (type == short.class)
-                return new Short(string);
-            else if (type == int.class)
-                return new Integer(string);
-            else if (type == float.class)
-                return new Float(string);
-            else if (type == double.class)
-                return new Double(string);
-            else if (type == long.class)
-                return new Long(string);
+            }
+            else
+            {
+                if (type == byte.class)
+                {
+                    return new Byte(string);
+                }
+                else
+                {
+                    if (type == char.class)
+                    {
+                        if (string.length() == 1)
+                        {
+                            return string.charAt(0);
+                        }
+                    }
+                    else
+                    {
+                        if (type == short.class)
+                        {
+                            return new Short(string);
+                        }
+                        else
+                        {
+                            if (type == int.class)
+                            {
+                                return new Integer(string);
+                            }
+                            else
+                            {
+                                if (type == float.class)
+                                {
+                                    return new Float(string);
+                                }
+                                else
+                                {
+                                    if (type == double.class)
+                                    {
+                                        return new Double(string);
+                                    }
+                                    else
+                                    {
+                                        if (type == long.class)
+                                        {
+                                            return new Long(string);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
-        catch (NumberFormatException e) {
+        catch (NumberFormatException e)
+        {
         }
 
         return NO_MATCH;
     }
 
-    public static boolean hasCommand(Object target, String function) {
+    public static boolean hasCommand(Object target, String function)
+    {
         Method[] methods = target.getClass().getMethods();
-        for (Method m : methods) {
+        for (Method m : methods)
+        {
             if (m.getName().equals(function))
+            {
                 return true;
+            }
         }
         return false;
     }

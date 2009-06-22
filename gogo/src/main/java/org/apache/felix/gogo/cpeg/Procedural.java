@@ -19,41 +19,60 @@
 package org.apache.felix.gogo.cpeg;
 
 
-import org.osgi.framework.*;
-import org.osgi.service.command.*;
+import org.osgi.framework.Bundle;
+import org.osgi.service.command.CommandSession;
+import org.osgi.service.command.Function;
 
 
-public class Procedural {
-    
-    public Object _if( CommandSession session, Function condition, Function ifTrue, Function ifFalse ) throws Exception {
+public class Procedural
+{
+
+    public Object _if(CommandSession session, Function condition, Function ifTrue, Function ifFalse) throws Exception
+    {
         Object result = condition.execute(session, null);
-        if ( isTrue(result)) {
+        if (isTrue(result))
+        {
             return ifTrue.execute(session, null);
-        } else {
-            if ( ifFalse != null )
-                return ifFalse.execute(session,null);
+        }
+        else
+        {
+            if (ifFalse != null)
+            {
+                return ifFalse.execute(session, null);
+            }
         }
         return null;
     }
-    
-    public Object _new(String name, Bundle bundle) throws Exception {
-        if ( bundle == null)
+
+    public Object _new(String name, Bundle bundle) throws Exception
+    {
+        if (bundle == null)
+        {
             return Class.forName(name).newInstance();
-        else {
+        }
+        else
+        {
             return bundle.loadClass(name).newInstance();
         }
     }
 
-    private boolean isTrue(Object result) {
-        if ( result == null)
+    private boolean isTrue(Object result)
+    {
+        if (result == null)
+        {
             return false;
-        
-        if ( result instanceof String && ((String)result).equals(""))
+        }
+
+        if (result instanceof String && ((String) result).equals(""))
+        {
             return false;
-        
-        if ( result instanceof Boolean )
-            return ((Boolean)result).booleanValue();
-        
+        }
+
+        if (result instanceof Boolean)
+        {
+            return ((Boolean) result).booleanValue();
+        }
+
         return true;
     }
 }
