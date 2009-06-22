@@ -822,6 +822,7 @@ public class DirectoryWatcher extends Thread
             {
                 bundle.start();
                 startupFailures.remove(bundle);
+                log("Started bundle: " + bundle.getLocation(), null);
             }
             catch (BundleException e)
             {
