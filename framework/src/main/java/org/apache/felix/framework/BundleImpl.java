@@ -27,6 +27,7 @@ import java.util.*;
 import org.apache.felix.framework.cache.BundleArchive;
 import org.apache.felix.framework.ext.SecurityProvider;
 import org.apache.felix.framework.ModuleImpl;
+import org.apache.felix.framework.util.StringMap;
 import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.*;
 
@@ -268,7 +269,7 @@ class BundleImpl implements Bundle
         // Spec says empty local returns raw headers.
         if (locale.length() == 0)
         {
-            result = new HashMap(getCurrentModule().getHeaders());
+            result = new StringMap(getCurrentModule().getHeaders(), false);
         }
 
         // If we have no result, try to get it from the cached headers.
@@ -304,7 +305,7 @@ class BundleImpl implements Bundle
         if (result == null)
         {
             // Get a modifiable copy of the raw headers.
-            Map headers = new HashMap(getCurrentModule().getHeaders());
+            Map headers = new StringMap(getCurrentModule().getHeaders(), false);
             // Assume for now that this will be the result.
             result = headers;
 
