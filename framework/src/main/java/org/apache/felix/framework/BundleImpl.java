@@ -263,95 +263,134 @@ class BundleImpl implements Bundle
 
     Map getCurrentLocalizedHeader(String locale)
     {
-        synchronized (m_cachedHeaders)
+        Map result = null;
+
+        // Spec says empty local returns raw headers.
+        if (locale.length() == 0)
         {
-            // If the bundle has been updated, clear the cached headers
-            if (getLastModified() > m_cachedHeadersTimestamp)
+            result = new HashMap(getCurrentModule().getHeaders());
+        }
+
+        // If we have no result, try to get it from the cached headers.
+        if (result == null)
+        {
+            synchronized (m_cachedHeaders)
             {
-                m_cachedHeaders.clear();
+                // If the bundle is uninstalled, then the cached headers should
+                // only contain the localized headers for the default locale at
+                // the time of uninstall, so just return that.
+                if (getState() == Bundle.UNINSTALLED)
+                {
+                    result = (Map) m_cachedHeaders.values().iterator().next();
+                }
+                // If the bundle has been updated, clear the cached headers.
+                else if (getLastModified() > m_cachedHeadersTimestamp)
+                {
+                    m_cachedHeaders.clear();
+                }
+                // Otherwise, returned the cached headers if they exist.
+                else
+                {
+                    // Check if headers for this locale have already been resolved
+                    if (m_cachedHeaders.containsKey(locale))
+                    {
+                        result = (Map) m_cachedHeaders.get(locale);
+                    }
+                }
+            }
+        }
+
+        // If the requested locale is not cached, then try to create it.
+        if (result == null)
+        {
+            // Get a modifiable copy of the raw headers.
+            Map headers = new HashMap(getCurrentModule().getHeaders());
+            // Assume for now that this will be the result.
+            result = headers;
+
+            // Check to see if we actually need to localize anything
+            boolean localize = false;
+            for (Iterator it = headers.values().iterator(); !localize && it.hasNext(); )
+            {
+                if (((String) it.next()).startsWith("%"))
+                {
+                    localize = true;
+                }
+            }
+
+            if (!localize)
+            {
+                // If localization is not needed, just cache the headers and return them as-is
+                // Not sure if this is useful
+                updateHeaderCache(locale, headers);
             }
             else
             {
-                // Check if headers for this locale have already been resolved
-                if (m_cachedHeaders.containsKey(locale))
+                // Do localization here and return the localized headers
+                String basename = (String) headers.get(Constants.BUNDLE_LOCALIZATION);
+                if (basename == null)
                 {
-                    return (Map) m_cachedHeaders.get(locale);
+                    basename = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
+                }
+
+                // Create ordered list of files to load properties from
+                List resourceList = createResourceList(basename, locale);
+
+                // Create a merged props file with all available props for this locale
+                boolean found = false;
+                Properties mergedProperties = new Properties();
+                for (Iterator it = resourceList.iterator(); it.hasNext(); )
+                {
+                    URL temp = getCurrentModule().getResourceByDelegation(
+                        it.next() + ".properties");
+                    if (temp != null)
+                    {
+                        found = true;
+                        try
+                        {
+                            mergedProperties.load(temp.openConnection().getInputStream());
+                        }
+                        catch (IOException ex)
+                        {
+                            // File doesn't exist, just continue loop
+                        }
+                    }
+                }
+
+                // If the specified locale was not found, then the spec says we should
+                // return the default localization.
+                if (!found && !locale.equals(Locale.getDefault().toString()))
+                {
+                    result = getCurrentLocalizedHeader(Locale.getDefault().toString());
+                }
+                // Otherwise, perform the localization based on the discovered
+                // properties and cache the result.
+                else
+                {
+                    // Resolve all localized header entries
+                    for (Iterator it = headers.entrySet().iterator(); it.hasNext(); )
+                    {
+                        Map.Entry entry = (Map.Entry) it.next();
+                        String value = (String) entry.getValue();
+                        if (value.startsWith("%"))
+                        {
+                            String newvalue;
+                            String key = value.substring(value.indexOf("%") + 1);
+                            newvalue = mergedProperties.getProperty(key);
+                            if (newvalue==null)
+                            {
+                                newvalue = key;
+                            }
+                            entry.setValue(newvalue);
+                        }
+                    }
+
+                    updateHeaderCache(locale, headers);
                 }
             }
         }
 
-        Map rawHeaders = getCurrentModule().getHeaders();
-        Map headers = new HashMap(rawHeaders.size());
-        headers.putAll(rawHeaders);
-
-        // Check to see if we actually need to localize anything
-        boolean needsLocalization = false;
-        for (Iterator it = headers.values().iterator(); it.hasNext(); )
-        {
-            if (((String) it.next()).startsWith("%"))
-            {
-                needsLocalization = true;
-                break;
-            }
-        }
-
-        if (!needsLocalization)
-        {
-            // If localization is not needed, just cache the headers and return them as-is
-            // Not sure if this is useful
-            updateHeaderCache(locale, headers);
-            return headers;
-        }
-
-        // Do localization here and return the localized headers
-        String basename = (String) headers.get(Constants.BUNDLE_LOCALIZATION);
-        if (basename == null)
-        {
-            basename = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
-        }
-
-        // Create ordered list of files to load properties from
-        List resourceList = createResourceList(basename, locale);
-
-        // Create a merged props file with all available props for this locale
-        Properties mergedProperties = new Properties();
-        for (Iterator it = resourceList.iterator(); it.hasNext(); )
-        {
-            URL temp = this.getCurrentModule().getResourceByDelegation(it.next() + ".properties");
-            if (temp == null)
-            {
-                continue;
-            }
-            try
-            {
-                mergedProperties.load(temp.openConnection().getInputStream());
-            }
-            catch (IOException ex)
-            {
-                // File doesn't exist, just continue loop
-            }
-        }
-
-        // Resolve all localized header entries
-        for (Iterator it = headers.entrySet().iterator(); it.hasNext(); )
-        {
-            Map.Entry entry = (Map.Entry) it.next();
-            String value = (String) entry.getValue();
-            if (value.startsWith("%"))
-            {
-                String newvalue;
-                String key = value.substring(value.indexOf("%") + 1);
-                newvalue = mergedProperties.getProperty(key);
-                if (newvalue==null)
-                {
-                    newvalue = key;
-                }
-                entry.setValue(newvalue);
-            }
-        }
-
-        updateHeaderCache(locale, headers);
-        return headers;
+        return result;
     }
 
     private void updateHeaderCache(String locale, Map localizedHeaders)
@@ -856,6 +895,17 @@ class BundleImpl implements Bundle
                 AdminPermission.LIFECYCLE));
         }
 
+        // After a bundle is uninstalled, rhe spec says getHeaders() should
+        // return the localized headers for the default locale at the time of
+        // of uninstall. So, let's clear the existing header cache and populate
+        // it with the headers for the default locale.
+        synchronized (m_cachedHeaders)
+        {
+            m_cachedHeaders.clear();
+            Map map = getCurrentLocalizedHeader(Locale.getDefault().toString());
+        }
+
+        // Uninstall the bundle.
         getFramework().uninstallBundle(this);
     }
 
