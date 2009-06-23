@@ -1,3 +1,19 @@
+Version 1.2.0
+-------------
+   * [FELIX-1179] - FileInstall should recognize Jar files by content instead
+     of extension
+   * [FELIX-1216] - ClassCastException when running FileInstall with
+     Knopflerfish
+   * [FELIX-1228] - Felix File Install - Spaces in File Names
+   * [FELIX-1203] - NPE in fileinstall if a watched bundle is uninstalled by
+     some other means
+   * [FELIX-1235] - NullPointerException due to misconfigured watched dir
+   * [FELIX-1174] - FileInstall bundle does not print stack trace of exceptions
+     when log service is not used
+   * [FELIX-1251] - Looping NullPointerException if the polled directory is
+     removed after File Install registration
+   * [FELIX-1241] - Log "Bundle Started" 
+
 Version 1.0.0
 -------------
 
