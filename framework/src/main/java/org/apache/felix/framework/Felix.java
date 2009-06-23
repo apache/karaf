@@ -1248,6 +1248,10 @@ ex.printStackTrace();
         {
             throw new IllegalStateException("The bundle is uninstalled.");
         }
+        else if (Util.isFragment(bundle.getCurrentModule()))
+        {
+            return null;
+        }
         return bundle.getCurrentModule().getResourceByDelegation(name);
     }
 
@@ -1259,6 +1263,10 @@ ex.printStackTrace();
         if (bundle.getState() == Bundle.UNINSTALLED)
         {
             throw new IllegalStateException("The bundle is uninstalled.");
+        }
+        else if (Util.isFragment(bundle.getCurrentModule()))
+        {
+            return null;
         }
         return bundle.getCurrentModule().getResourcesByDelegation(name);
     }
@@ -1371,6 +1379,10 @@ ex.printStackTrace();
         if (bundle.getState() == Bundle.UNINSTALLED)
         {
             throw new IllegalStateException("Bundle is uninstalled");
+        }
+        else if (Util.isFragment(bundle.getCurrentModule()))
+        {
+            throw new ClassNotFoundException("Fragments cannot load classes.");
         }
         else if (bundle.getState() == Bundle.INSTALLED)
         {
