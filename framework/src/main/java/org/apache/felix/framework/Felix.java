@@ -212,8 +212,8 @@ public class Felix extends BundleImpl implements Framework
      *       OSGi Log Service (i.e., 1 = error, 2 = warning, 3 = information,
      *       and 4 = debug). The default value is 1.
      *   </li>
-     *   <li><tt>org.osgi.framework.startlevel</tt> - The initial start level
-     *       of the framework once it starts execution; the default
+     *   <li><tt>org.osgi.framework.startlevel.beginning</tt> - The initial
+     *       start level of the framework once it starts execution; the default
      *       value is 1.
      *   </li>
      *   <li><tt>felix.startlevel.bundle</tt> - The default start level for
