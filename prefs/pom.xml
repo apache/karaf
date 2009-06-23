@@ -22,8 +22,8 @@
 
     <parent>
         <groupId>org.apache.felix</groupId>
-        <artifactId>felix</artifactId>
-        <version>1.0.4</version>
+        <artifactId>felix-parent</artifactId>
+        <version>1.2.0</version>
         <relativePath>../pom</relativePath>
     </parent>
 
@@ -38,14 +38,15 @@
 
     <dependencies>
         <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>org.apache.felix</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <version>1.0.0</version>
+            <version>1.2.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>org.apache.felix</groupId>
             <artifactId>org.osgi.compendium</artifactId>
-            <version>1.0.0</version>
+            <version>1.2.0</version>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
@@ -67,7 +68,7 @@
                         <Bundle-SymbolicName>
                             ${artifactId}
                         </Bundle-SymbolicName>
-            <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
+                        <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
                         <Export-Package>
                             org.apache.felix.prefs,
                             org.osgi.service.prefs;version=1.1
