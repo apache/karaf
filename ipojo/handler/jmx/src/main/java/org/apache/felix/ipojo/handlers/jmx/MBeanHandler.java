@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.felix.ipojo.handlers.jmx;
 
 import java.lang.management.ManagementFactory;
@@ -42,7 +41,7 @@ import org.osgi.framework.ServiceRegistration;
 /**
  * This class implements iPOJO Handler. it builds the dynamic MBean from
  * metadata.xml and exposes it to the MBean Server.
- * 
+ *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class MBeanHandler extends PrimitiveHandler {
@@ -150,7 +149,7 @@ public class MBeanHandler extends PrimitiveHandler {
     /**
      * The flag used to inform if we use the MOSGi framework.
      */
-    private boolean m_usesMOSGi = false;
+    private boolean m_usesMOSGi;
     /**
      * The ObjectName used to register the MBean.
      */
@@ -158,7 +157,7 @@ public class MBeanHandler extends PrimitiveHandler {
     /**
      * The flag used to inform if the MBean is registered.
      */
-    private boolean m_registered = false;
+    private boolean m_registered;
     /**
      * The ObjectName specified in handler configuration. It can be null.
      */
@@ -167,7 +166,7 @@ public class MBeanHandler extends PrimitiveHandler {
      * The ObjectName without domain specified in handler configuration. It can be null.
      */
     private String m_objNameWODomainElt;
-    
+
     /**
      * The ObjectName domain specified in handler configuration. It can be null.
      */
@@ -195,7 +194,7 @@ public class MBeanHandler extends PrimitiveHandler {
 
     /**
      * Constructs the structure JmxConfigFieldMap and the Dynamic Mbean.
-     * 
+     *
      * @param metadata the component metadata
      * @param dict the instance configuration
      */
@@ -250,14 +249,14 @@ public class MBeanHandler extends PrimitiveHandler {
 
         // set property
         Element[] attributes = mbeans[0].getElements(JMX_PROPERTY_ELT, m_namespace);
-        
+
         if (attributes == null) {
             attributes = mbeans[0].getElements(JMX_PROPERTY_ELT);
             if (attributes != null) {
                 warn("The JMX property element should use the '" + m_namespace + "' namespace.");
             }
         }
-        
+
         // String[] fields = new String[attributes.length];
         if (attributes != null) {
             for (int i = 0; attributes != null && i < attributes.length; i++) {
@@ -305,14 +304,14 @@ public class MBeanHandler extends PrimitiveHandler {
 
         // set methods
         Element[] methods = mbeans[0].getElements(JMX_METHOD_ELT, m_namespace);
-        
+
         if (methods == null) {
             methods = mbeans[0].getElements(JMX_METHOD_ELT);
             if (methods != null) {
                 warn("The JMX method element should use the '" + m_namespace + "' namespace.");
             }
         }
-        
+
         for (int i = 0; methods != null && i < methods.length; i++) {
             String name = methods[i].getAttribute(JMX_NAME_ELT);
             if (name == null) {
@@ -395,7 +394,7 @@ public class MBeanHandler extends PrimitiveHandler {
 
     /**
      * Returns the object name of the exposed component.
-     * 
+     *
      * @return the object name of the exposed component.
      */
     private String getObjectNameString() {
@@ -423,13 +422,13 @@ public class MBeanHandler extends PrimitiveHandler {
         sb.append(name);
 
         info("Computed Objectname: " + sb.toString());
-        
+
         return sb.toString();
     }
 
     /**
      * Extracts the package name from of given type.
-     * 
+     *
      * @param className the type name.
      * @return the package name of the given type.
      */
@@ -470,7 +469,7 @@ public class MBeanHandler extends PrimitiveHandler {
 
     /**
      * Called when a POJO member is modified externally.
-     * 
+     *
      * @param pojo the modified POJO object
      * @param fieldName the name of the modified field
      * @param value the new value of the field
@@ -495,7 +494,7 @@ public class MBeanHandler extends PrimitiveHandler {
 
     /**
      * Called when a POJO member is read by the MBean.
-     * 
+     *
      * @param pojo the read POJO object.
      * @param fieldName the name of the modified field
      * @param value the old value of the field
@@ -516,7 +515,7 @@ public class MBeanHandler extends PrimitiveHandler {
 
     /**
      * Gets the type from a field name.
-     * 
+     *
      * @param fieldRequire the name of the required field
      * @param manipulation the metadata extracted from metadata.xml file
      * @return the type of the field or {@code null} if it wasn't found
@@ -534,7 +533,7 @@ public class MBeanHandler extends PrimitiveHandler {
 
     /**
      * Gets all the methods available which get this name.
-     * 
+     *
      * @param methodName the name of the required methods
      * @param manipulation the metadata extract from metadata.xml file
      * @param description the description which appears in JMX console
@@ -563,7 +562,7 @@ public class MBeanHandler extends PrimitiveHandler {
 
     /**
      * Gets the JMX handler description.
-     * 
+     *
      * @return the JMX handler description.
      * @see org.apache.felix.ipojo.Handler#getDescription()
      */
@@ -573,7 +572,7 @@ public class MBeanHandler extends PrimitiveHandler {
 
     /**
      * Returns the objectName used to register the MBean. If the MBean is not registered, return an empty string.
-     * 
+     *
      * @return the objectName used to register the MBean.
      * @see org.apache.felix.ipojo.Handler#getDescription()
      */
@@ -587,7 +586,7 @@ public class MBeanHandler extends PrimitiveHandler {
 
     /**
      * Returns true if the MBean is registered.
-     * 
+     *
      * @return true if the MBean is registered.
      */
     public boolean isRegistered() {
@@ -596,7 +595,7 @@ public class MBeanHandler extends PrimitiveHandler {
 
     /**
      * Returns true if the MBean must be registered thanks to white board pattern of MOSGi.
-     * 
+     *
      * @return {@code true} if the MBean must be registered thanks to white board pattern of MOSGi, false otherwise.
      */
     public boolean isUsesMOSGi() {
@@ -605,7 +604,7 @@ public class MBeanHandler extends PrimitiveHandler {
 
     /**
      * Returns true if the MOSGi framework is present on the OSGi platform.
-     * 
+     *
      * @return {@code true} if the MOSGi framework is present on the OSGi platform, false otherwise.
      */
     public boolean isMOSGiExists() {

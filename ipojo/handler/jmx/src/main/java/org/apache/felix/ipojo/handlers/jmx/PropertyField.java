@@ -21,7 +21,7 @@ package org.apache.felix.ipojo.handlers.jmx;
 
 /**
  * This class build the notification description structure.
- * 
+ *
  * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class PropertyField {
@@ -49,11 +49,11 @@ public class PropertyField {
     /**
      * The name of the notification.
      */
-    private boolean m_notification = false;
+    private boolean m_notification;
 
     /**
      * Constructor.
-     * 
+     *
      * @param name the name of the properety
      * @param field the field which send a notification when it is modified
      * @param rights the rights of the attribute (ie: 'r' or 'w')
@@ -185,7 +185,7 @@ public class PropertyField {
 
     /**
      * Is the rights is valid or not ? (ie = 'r' || 'w').
-     * 
+     *
      * @param rights string representing the rights
      * @return boolean : return {@code true} if rights = 'r' or 'w'
      */

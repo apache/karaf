@@ -1,4 +1,4 @@
-/*
+/* 
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.felix.ipojo.handlers.jmx;
 
 import java.lang.reflect.InvocationTargetException;
@@ -76,7 +75,7 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
     /**
      * The sequence number. Used to calculate unique id to notification.
      */
-    private int m_sequenceNumber = 0;
+    private int m_sequenceNumber;
 
     /**
      * Constructor.
@@ -269,7 +268,7 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
         }
 
         // for each attribute, try to set it and add to the result list if
-        // successfull
+        // successful
         for (Iterator i = attributes.iterator(); i.hasNext();) {
             Attribute attr = (Attribute) i.next();
             try {
@@ -306,13 +305,13 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
             Iterator < PropertyField > iterator = m_configMap.getProperties()
                 .iterator();
             while (iterator.hasNext()) {
-                PropertyField propertyField = (PropertyField) iterator.next();
+                PropertyField propertyField = iterator.next();
                 lAttributes.add(new MBeanAttributeInfo(propertyField.getName(),
                     propertyField.getType(), propertyField.getDescription(),
                     propertyField.isReadable(), propertyField.isWritable(),
                     false));
             }
-            dAttributes = (MBeanAttributeInfo[]) lAttributes
+            dAttributes = lAttributes
                 .toArray(new MBeanAttributeInfo[lAttributes.size()]);
         }
 
@@ -324,13 +323,13 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
             Iterator < MethodField[] > iterator = m_configMap.getMethods()
                 .iterator();
             while (iterator.hasNext()) {
-                MethodField[] method = (MethodField[]) iterator.next();
+                MethodField[] method = iterator.next();
                 for (int i = 0; i < method.length; i++) {
                     lOperations.add(new MBeanOperationInfo(method[i].getName(),
                         method[i].getDescription(), method[i].getParams(),
                         method[i].getReturnType(), MBeanOperationInfo.UNKNOWN));
                 }
-                dOperations = (MBeanOperationInfo[]) lOperations
+                dOperations = lOperations
                     .toArray(new MBeanOperationInfo[lOperations.size()]);
             }
         }
@@ -343,11 +342,11 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
             Iterator < NotificationField > iterator = m_configMap
                 .getNotifications().iterator();
             while (iterator.hasNext()) {
-                NotificationField notification = (NotificationField) iterator
+                NotificationField notification = iterator
                     .next();
                 lNotifications.add(notification.getNotificationInfo());
             }
-            dNotification = (MBeanNotificationInfo[]) lNotifications
+            dNotification = lNotifications
                 .toArray(new MBeanNotificationInfo[lNotifications.size()]);
         }
 
@@ -370,11 +369,11 @@ public class DynamicMBeanImpl extends NotificationBroadcasterSupport implements
             Iterator < NotificationField > iterator = m_configMap
                 .getNotifications().iterator();
             while (iterator.hasNext()) {
-                NotificationField notification = (NotificationField) iterator
+                NotificationField notification = iterator
                     .next();
                 lNotifications.add(notification.getNotificationInfo());
             }
-            dNotification = (MBeanNotificationInfo[]) lNotifications
+            dNotification = lNotifications
                 .toArray(new MBeanNotificationInfo[lNotifications.size()]);
         }
         return dNotification;
