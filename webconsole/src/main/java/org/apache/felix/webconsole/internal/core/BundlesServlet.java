@@ -282,7 +282,6 @@ public class BundlesServlet extends BaseWebConsolePlugin
         final PrintWriter pw = response.getWriter();
 
         final String appRoot = ( String ) request.getAttribute( OsgiManager.ATTR_APP_ROOT );
-        Util.script(pw, appRoot, "bundles.js");
 
         Util.startScript( pw );
         pw.println( "var imgRoot = '" + appRoot + "/res/imgs';");
