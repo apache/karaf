@@ -43,9 +43,19 @@ public class ThreadGate
     **/
     public synchronized void await(long timeout) throws InterruptedException
     {
+        long start = System.currentTimeMillis();
+        long remaining = timeout;
         while (!m_open)
         {
-            wait(timeout);
+            wait(remaining);
+            if (timeout > 0)
+            {
+                remaining = timeout - (System.currentTimeMillis() - start);
+                if (remaining <= 0)
+                {
+                    break;
+                }
+            }
         }
     }
 }
