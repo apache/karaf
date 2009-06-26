@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -24,13 +24,9 @@ import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
-import org.apache.felix.framework.util.SecureAction;
 
 public class Parser
 {
-    // Secure action to make object constructors accessible.
-    private static final SecureAction m_secureAction = new SecureAction();
-
     //
     // Parser contants.
     //
@@ -62,10 +58,10 @@ public class Parser
 
     // Flag indicating presense of BigDecimal.
     private static boolean m_hasBigDecimal = false;
-    
+
     private static final Class[] STRING_CLASS = new Class[] { String.class };
 
-    static 
+    static
     {
         try
         {
@@ -205,7 +201,7 @@ public class Parser
             case EOF :
                 return false;
             default :
-                return item("");        
+                return item("");
         }
     }
 
@@ -330,10 +326,10 @@ public class Parser
     {
         debug("attribute");
         lexer.skipwhitespace();
-        int c = lexer.peek(); 
+        int c = lexer.peek();
         // need to make sure there
         // is at least one KEYCHAR
-        switch (c) 
+        switch (c)
         {
             case '=':
             case '>':
@@ -352,7 +348,7 @@ public class Parser
         {
             buf.append((char) lexer.get());
             c = lexer.peek();
-            switch (c) 
+            switch (c)
             {
                 case '=':
                 case '>':
@@ -659,10 +655,10 @@ loop:   for (;;)
 
         public void buildTree(Stack operands)
         {
-            if (children == null) 
+            if (children == null)
             {
                 Operator[] tmp = new Operator[operandCount];
-            
+
                 // need to preserve stack order
                 for (int i = 0; i < operandCount; i++)
                 {
@@ -733,7 +729,7 @@ loop:   for (;;)
     private static final class ObjectClassOperator extends Operator
     {
         public final String m_target;
-        
+
         public ObjectClassOperator(String target)
         {
             m_target = target;
@@ -808,9 +804,9 @@ loop:   for (;;)
         public void buildTree(Stack operands)
         {
             if (children == null)
-            { 
+            {
                 Operator[] tmp = new Operator[2];
-            
+
                 // need to preserve stack order
                 for (int i = 0; i < 2; i++)
                 {
@@ -873,7 +869,7 @@ loop:   for (;;)
             if (children == null)
             {
                 Operator[] tmp = new Operator[2];
-            
+
                 // need to preserve stack order
                 for (int i = 0; i < 2; i++)
                 {
@@ -934,7 +930,7 @@ loop:   for (;;)
             if (children == null)
             {
                 Operator[] tmp = new Operator[2];
-            
+
                 // need to preserve stack order
                 for (int i = 0; i < 2; i++)
                 {
@@ -995,7 +991,7 @@ loop:   for (;;)
             if (children == null)
             {
                 Operator[] tmp = new Operator[2];
-            
+
                 // need to preserve stack order
                 for (int i = 0; i < 2; i++)
                 {
@@ -1196,7 +1192,7 @@ loop:   for (;;)
             for (int i = 0; i < len; i++)
             {
                 String piece = (String) pieces[i];
-                
+
                 if (i == len - 1)
                 {
                     // this is the last piece
@@ -1270,7 +1266,7 @@ loop:   for (;;)
 
         public void buildTree(Stack operands)
         {
-            if (children == null) 
+            if (children == null)
             {
                 children = new Operator[]{
                     (Operator) operands.pop()};
@@ -1307,9 +1303,9 @@ loop:   for (;;)
     }
 
     /**
-     * Compare two operands in an expression with respect  
+     * Compare two operands in an expression with respect
      * to the following operators =, <=, >= and ~=
-     * 
+     *
      * Example: value=100
      *
      * @param lhs an object that implements comparable or an array of
@@ -1360,15 +1356,9 @@ loop:   for (;;)
                 }
                 else
                 {
-                    // The constructor may not be public, so we need to make it
-                    // accessible in that case.
                     Constructor ctor = lhs.getClass().getConstructor(STRING_CLASS);
-                    if (!ctor.isAccessible())
-                    {
-                        m_secureAction.setAccesssible(ctor);
-                    }
                     // We don't invoke the constructor in a privileged block,
-                    // since we don't want to elevate the objects privileges.
+                    // since we don't want to elevate the caller's privileges.
                     // If the object needs to, it should be doing a privileged
                     // block internally.
                     rhsComparable = (Comparable) ctor.newInstance(new Object[] { rhs });
@@ -1455,15 +1445,9 @@ loop:   for (;;)
             {
                 try
                 {
-                    // The constructor may not be public, so we need to make it
-                    // accessible in that case.
                     Constructor ctor = lhs.getClass().getConstructor(STRING_CLASS);
-                    if (!ctor.isAccessible())
-                    {
-                        m_secureAction.setAccesssible(ctor);
-                    }
                     // We don't invoke the constructor in a privileged block,
-                    // since we don't want to elevate the objects privileges.
+                    // since we don't want to elevate the caller's privileges.
                     // If the object needs to, it should be doing a privileged
                     // block internally.
                     Object rhsObject = ctor.newInstance(new Object[] { rhs });
@@ -1482,19 +1466,19 @@ loop:   for (;;)
         return false;
     }
 
-    private static void appendEscaped(StringBuffer buf, String value) 
+    private static void appendEscaped(StringBuffer buf, String value)
     {
-        for (int i = 0; i < value.length(); i++) 
+        for (int i = 0; i < value.length(); i++)
         {
             char c = value.charAt(i);
-            if (c == '(' || c == ')' || c == '*' || c == '\\') 
+            if (c == '(' || c == ')' || c == '*' || c == '\\')
             {
                 buf.append('\\');
             }
             buf.append(c);
         }
     }
-    
+
     /**
      * This is an ugly utility method to convert an array of primitives
      * to an array of primitive wrapper objects. This method simplifies
@@ -1605,7 +1589,7 @@ loop:   for (;;)
                         break;
                     default:
                         throw new EvaluationException(
-                            "Unknown comparison operator: " + operator);   
+                            "Unknown comparison operator: " + operator);
                 }
             }
             return false;
@@ -1629,24 +1613,24 @@ loop:   for (;;)
     /**
      * Test if two objects are approximate. The two objects that are passed must
      * have the same type.
-     * 
+     *
      * Approximate for numerical values involves a difference of less than APPROX_CRITERIA
      * Approximate for string values is calculated by using the Levenshtein distance
      * between strings and is case insensitive. Less than APPROX_CRITERIA of
      * difference is considered as approximate.
-     * 
+     *
      * Supported types only include the following subclasses of Number:
      * - Byte
      * - Double
      * - Float
      * - Int
      * - Long
-     * - Short 
+     * - Short
      * - BigInteger
      * - BigDecimal
-     * As subclasses of Number must provide methods to convert the represented numeric value 
+     * As subclasses of Number must provide methods to convert the represented numeric value
      * to byte, double, float, int, long, and short. (see API)
-     * 
+     *
      * @param obj1
      * @param obj2
      * @return true if they are approximate
@@ -1658,7 +1642,7 @@ loop:   for (;;)
         {
             byte value1 = ((Byte)obj1).byteValue();
             byte value2 = ((Byte)obj2).byteValue();
-            return (value2 >= (value1-((Math.abs(value1)*(byte)APPROX_CRITERIA)/(byte)100)) 
+            return (value2 >= (value1-((Math.abs(value1)*(byte)APPROX_CRITERIA)/(byte)100))
                 && value2 <= (value1+((Math.abs(value1)*(byte)APPROX_CRITERIA)/(byte)100)));
         }
         else if (obj1 instanceof Character)
@@ -1673,35 +1657,35 @@ loop:   for (;;)
         {
             double value1 = ((Double)obj1).doubleValue();
             double value2 = ((Double)obj2).doubleValue();
-            return (value2 >= (value1-((Math.abs(value1)*(double)APPROX_CRITERIA)/(double)100)) 
+            return (value2 >= (value1-((Math.abs(value1)*(double)APPROX_CRITERIA)/(double)100))
                 && value2 <= (value1+((Math.abs(value1)*(double)APPROX_CRITERIA)/(double)100)));
         }
         else if (obj1 instanceof Float)
         {
             float value1 = ((Float)obj1).floatValue();
             float value2 = ((Float)obj2).floatValue();
-            return (value2 >= (value1-((Math.abs(value1)*(float)APPROX_CRITERIA)/(float)100)) 
+            return (value2 >= (value1-((Math.abs(value1)*(float)APPROX_CRITERIA)/(float)100))
                 && value2 <= (value1+((Math.abs(value1)*(float)APPROX_CRITERIA)/(float)100)));
         }
         else if (obj1 instanceof Integer)
         {
             int value1 = ((Integer)obj1).intValue();
             int value2 = ((Integer)obj2).intValue();
-            return (value2 >= (value1-((Math.abs(value1)*(int)APPROX_CRITERIA)/(int)100)) 
+            return (value2 >= (value1-((Math.abs(value1)*(int)APPROX_CRITERIA)/(int)100))
                 && value2 <= (value1+((Math.abs(value1)*(int)APPROX_CRITERIA)/(int)100)));
         }
         else if (obj1 instanceof Long)
         {
             long value1 = ((Long)obj1).longValue();
             long value2 = ((Long)obj2).longValue();
-            return (value2 >= (value1-((Math.abs(value1)*(long)APPROX_CRITERIA)/(long)100)) 
+            return (value2 >= (value1-((Math.abs(value1)*(long)APPROX_CRITERIA)/(long)100))
                 && value2 <= (value1+((Math.abs(value1)*(long)APPROX_CRITERIA)/(long)100)));
         }
         else if (obj1 instanceof Short)
         {
             short value1 = ((Short)obj1).shortValue();
             short value2 = ((Short)obj2).shortValue();
-            return (value2 >= (value1-((Math.abs(value1)*(short)APPROX_CRITERIA)/(short)100)) 
+            return (value2 >= (value1-((Math.abs(value1)*(short)APPROX_CRITERIA)/(short)100))
                 && value2 <= (value1+((Math.abs(value1)*(short)APPROX_CRITERIA)/(short)100)));
         }
         else if (obj1 instanceof String)
@@ -1755,13 +1739,13 @@ loop:   for (;;)
 
     /**
      * Calculate the Levenshtein distance (LD) between two strings.
-     * The Levenshteing distance is a measure of the similarity between 
-     * two strings, which we will refer to as the source string (s) and 
-     * the target string (t). The distance is the number of deletions, 
+     * The Levenshteing distance is a measure of the similarity between
+     * two strings, which we will refer to as the source string (s) and
+     * the target string (t). The distance is the number of deletions,
      * insertions, or substitutions required to transform s into t.
-     * 
+     *
      * Algorithm from: http://www.merriampark.com/ld.htm
-     * 
+     *
      * @param s the first string
      * @param t the second string
      * @return
@@ -1832,7 +1816,7 @@ loop:   for (;;)
 
     /**
      * Calculate the minimum between three values
-     * 
+     *
      * @param a
      * @param b
      * @param c
