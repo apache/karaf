@@ -617,9 +617,9 @@ ex.printStackTrace();
 
             // Create service registry.
             m_registry = new ServiceRegistry(m_logger, new ServiceRegistryCallbacks() {
-                public void serviceChanged(ServiceEvent event, ServiceRegistration reg)
+                public void serviceChanged(ServiceEvent event, Dictionary oldProps)
                 {
-                    fireServiceEvent(event, reg);
+                    fireServiceEvent(event, oldProps);
                 }
             });
             m_dispatcher.setServiceRegistry(m_registry);
@@ -2639,16 +2639,16 @@ ex.printStackTrace();
             new ListenerHookInfoImpl(bundle.getBundleContext(), f));
         for (int i = 0; i < listenerHooks.size(); i++)
         {
-            ServiceRegistry.invokeHook(listenerHooks.get(i), this, new InvokeHookCallback() 
+            ServiceRegistry.invokeHook(listenerHooks.get(i), this, new InvokeHookCallback()
             {
-                public void invokeHook(Object hook) 
+                public void invokeHook(Object hook)
                 {
                     ((ListenerHook) hook).added(c);
-                }                
+                }
             });
         }
     }
-        
+
     /**
      * Implementation for BundleContext.removeServiceListener().
      * Removes service listeners from the listener list.
@@ -2764,13 +2764,13 @@ ex.printStackTrace();
         if (m_registry.isHook(classNames, ListenerHook.class, svcObj))
         {
             Object hookRef = ServiceRegistry.getHookRef(svcObj, reg);
-            ServiceRegistry.invokeHook(hookRef, this, new InvokeHookCallback() 
+            ServiceRegistry.invokeHook(hookRef, this, new InvokeHookCallback()
             {
-                public void invokeHook(Object hook) 
+                public void invokeHook(Object hook)
                 {
                     ((ListenerHook) hook).
-                        added(m_dispatcher.wrapAllServiceListeners());                    
-                }                
+                        added(m_dispatcher.wrapAllServiceListeners());
+                }
             });
         }
 
@@ -2830,23 +2830,23 @@ ex.printStackTrace();
         List findHooks = m_registry.getFindHooks();
         for (int i = 0; i < findHooks.size(); i++)
         {
-            ServiceRegistry.invokeHook(findHooks.get(i), this, new InvokeHookCallback() 
+            ServiceRegistry.invokeHook(findHooks.get(i), this, new InvokeHookCallback()
             {
-                public void invokeHook(Object hook) 
+                public void invokeHook(Object hook)
                 {
                     ((FindHook) hook).find(bundle.getBundleContext(),
                         className,
                         expr,
                         !checkAssignable,
                         new ShrinkableCollection(refList));
-                }                
+                }
             });
         }
 
         if (refList.size() > 0)
         {
             return (ServiceReference[]) refList.toArray(new ServiceReference[refList.size()]);
-        } 
+        }
 
         return null;
     }
@@ -3627,9 +3627,9 @@ ex.printStackTrace();
      * @param event The service event to fire.
      * @param reg The service registration associated with the service object.
     **/
-    private void fireServiceEvent(ServiceEvent event, ServiceRegistration reg)
+    private void fireServiceEvent(ServiceEvent event, Dictionary oldProps)
     {
-        m_dispatcher.fireServiceEvent(event, reg, this);
+        m_dispatcher.fireServiceEvent(event, oldProps, this);
     }
 
     //

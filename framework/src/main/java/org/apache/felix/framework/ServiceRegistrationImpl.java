@@ -23,6 +23,7 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.*;
 
+import org.apache.felix.framework.util.MapToDictionary;
 import org.apache.felix.framework.util.StringMap;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.moduleloader.IModule;
@@ -96,7 +97,7 @@ class ServiceRegistrationImpl implements ServiceRegistration
 
     public void setProperties(Dictionary dict)
     {
-        Map oldProps, newProps;
+        Map oldProps;
         synchronized (this)
         {
             // Make sure registration is valid.
@@ -109,11 +110,9 @@ class ServiceRegistrationImpl implements ServiceRegistration
             oldProps = m_propMap;
             // Set the properties.
             initializeProperties(dict);
-            // Keep local reference to new properties.
-            newProps = m_propMap;
         }
         // Tell registry about it.
-        m_registry.servicePropertiesModified(this, oldProps, newProps);
+        m_registry.servicePropertiesModified(this, new MapToDictionary(oldProps));
     }
 
     public void unregister()

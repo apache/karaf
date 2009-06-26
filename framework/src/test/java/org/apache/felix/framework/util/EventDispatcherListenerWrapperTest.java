@@ -49,19 +49,16 @@ public class EventDispatcherListenerWrapperTest extends TestCase
             String.class,          // LISTENER_CLASS_OFFSET
             new Object(),          // LISTENER_OBJECT_OFFSET
             "(some=filter)",       // LISTENER_FILTER_OFFSET
-            null,                  // LISTENER_MATECHEDSET_OFFSET
             null,                  // LISTENER_SECURITY_OFFSET
             b2,                    // LISTENER_BUNDLE_OFFSET
             Integer.class,         // LISTENER_CLASS_OFFSET
             new Object(),          // LISTENER_OBJECT_OFFSET
             "(some.other=filter)", // LISTENER_FILTER_OFFSET
-            null,                  // LISTENER_MATECHEDSET_OFFSET
             new Integer(15),       // LISTENER_SECURITY_OFFSET
             b3,                    // LISTENER_BUNDLE_OFFSET
             BundleContext.class,   // LISTENER_CLASS_OFFSET
             new Object(),          // LISTENER_OBJECT_OFFSET
             null,                  // LISTENER_FILTER_OFFSET
-            null,                  // LISTENER_MATECHEDSET_OFFSET
             Boolean.TRUE,          // LISTENER_SECURITY_OFFSET
         };
 
@@ -138,13 +135,11 @@ public class EventDispatcherListenerWrapperTest extends TestCase
             String.class,          // LISTENER_CLASS_OFFSET
             new Object(),          // LISTENER_OBJECT_OFFSET
             "(some=filter)",       // LISTENER_FILTER_OFFSET
-            null,                  // LISTENER_MATECHEDSET_OFFSET
             null,                  // LISTENER_SECURITY_OFFSET
             b2,                    // LISTENER_BUNDLE_OFFSET
             Integer.class,         // LISTENER_CLASS_OFFSET
             new Object(),          // LISTENER_OBJECT_OFFSET
             "(some.other=filter)", // LISTENER_FILTER_OFFSET
-            null,                  // LISTENER_MATECHEDSET_OFFSET
             new Integer(15)        // LISTENER_SECURITY_OFFSET
         };
 
@@ -279,19 +274,16 @@ public class EventDispatcherListenerWrapperTest extends TestCase
             String.class,          // LISTENER_CLASS_OFFSET
             new Object(),          // LISTENER_OBJECT_OFFSET
             "(some=filter)",       // LISTENER_FILTER_OFFSET
-            null,                  // LISTENER_MATECHEDSET_OFFSET
             null,                  // LISTENER_SECURITY_OFFSET
             b2,                    // LISTENER_BUNDLE_OFFSET
             Integer.class,         // LISTENER_CLASS_OFFSET
             new Object(),          // LISTENER_OBJECT_OFFSET
             "(some.other=filter)", // LISTENER_FILTER_OFFSET
-            null,                  // LISTENER_MATECHEDSET_OFFSET
             new Integer(15),       // LISTENER_SECURITY_OFFSET
             b3,                    // LISTENER_BUNDLE_OFFSET
             BundleContext.class,   // LISTENER_CLASS_OFFSET
             new Object(),          // LISTENER_OBJECT_OFFSET
             null,                  // LISTENER_FILTER_OFFSET
-            null,                  // LISTENER_MATECHEDSET_OFFSET
             Boolean.TRUE,          // LISTENER_SECURITY_OFFSET
         };
 
@@ -332,19 +324,16 @@ public class EventDispatcherListenerWrapperTest extends TestCase
             String.class,          // LISTENER_CLASS_OFFSET
             new Object(),          // LISTENER_OBJECT_OFFSET
             "(some=filter)",       // LISTENER_FILTER_OFFSET
-            null,                  // LISTENER_MATECHEDSET_OFFSET
             null,                  // LISTENER_SECURITY_OFFSET
             b2,                    // LISTENER_BUNDLE_OFFSET
             Integer.class,         // LISTENER_CLASS_OFFSET
             new Object(),          // LISTENER_OBJECT_OFFSET
             "(some.other=filter)", // LISTENER_FILTER_OFFSET
-            null,                  // LISTENER_MATECHEDSET_OFFSET
             new Integer(15),       // LISTENER_SECURITY_OFFSET
             b3,                    // LISTENER_BUNDLE_OFFSET
             BundleContext.class,   // LISTENER_CLASS_OFFSET
             new Object(),          // LISTENER_OBJECT_OFFSET
             null,                  // LISTENER_FILTER_OFFSET
-            null,                  // LISTENER_MATECHEDSET_OFFSET
             Boolean.TRUE,          // LISTENER_SECURITY_OFFSET
         };
 
@@ -381,19 +370,16 @@ public class EventDispatcherListenerWrapperTest extends TestCase
             String.class,          // LISTENER_CLASS_OFFSET
             new Object(),          // LISTENER_OBJECT_OFFSET
             "(some=filter)",       // LISTENER_FILTER_OFFSET
-            null,                  // LISTENER_MATECHEDSET_OFFSET
             null,                  // LISTENER_SECURITY_OFFSET
             b2,                    // LISTENER_BUNDLE_OFFSET
             Integer.class,         // LISTENER_CLASS_OFFSET
             new Object(),          // LISTENER_OBJECT_OFFSET
             "(some.other=filter)", // LISTENER_FILTER_OFFSET
-            null,                  // LISTENER_MATECHEDSET_OFFSET
             new Integer(15),       // LISTENER_SECURITY_OFFSET
             b3,                    // LISTENER_BUNDLE_OFFSET
             BundleContext.class,   // LISTENER_CLASS_OFFSET
             new Object(),          // LISTENER_OBJECT_OFFSET
             null,                  // LISTENER_FILTER_OFFSET
-            null,                  // LISTENER_MATECHEDSET_OFFSET
             Boolean.TRUE,          // LISTENER_SECURITY_OFFSET
         };
 
@@ -433,13 +419,11 @@ public class EventDispatcherListenerWrapperTest extends TestCase
             String.class,          // LISTENER_CLASS_OFFSET
             new Object(),          // LISTENER_OBJECT_OFFSET
             "(some=filter)",       // LISTENER_FILTER_OFFSET
-            null,                  // LISTENER_MATECHEDSET_OFFSET
             null,                  // LISTENER_SECURITY_OFFSET
             b2,                    // LISTENER_BUNDLE_OFFSET
             Integer.class,         // LISTENER_CLASS_OFFSET
             new Object(),          // LISTENER_OBJECT_OFFSET
             "(some.other=filter)", // LISTENER_FILTER_OFFSET
-            null,                  // LISTENER_MATECHEDSET_OFFSET
             new Integer(15),       // LISTENER_SECURITY_OFFSET
         };
 
