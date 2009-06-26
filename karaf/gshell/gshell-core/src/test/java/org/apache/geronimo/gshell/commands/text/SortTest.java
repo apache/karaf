@@ -23,11 +23,18 @@ import java.util.List;
 import java.util.Collections;
 
 import junit.framework.TestCase;
+import org.apache.geronimo.gshell.ansi.AnsiRenderWriter;
 
 /**
  * TODO: remove this file when gshell is upgraded
  */
 public class SortTest extends TestCase {
+
+    public void testAnsi() {
+        AnsiRenderWriter w = new AnsiRenderWriter(System.out);
+        w.println("Hey, @|cyan Hello| world");
+        w.flush();
+    }
 
     public void testFieldIndexesDefaultSep() {
         SortAction.SortComparator comparator = new SortAction.SortComparator(false, false, false, false, '\0', null);
