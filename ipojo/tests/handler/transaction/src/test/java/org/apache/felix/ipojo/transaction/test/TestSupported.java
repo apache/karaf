@@ -5,7 +5,7 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
-import static org.ops4j.pax.tinybundles.core.TinyBundles.with;
+import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.with;
 
 import java.io.File;
 import java.net.URL;
@@ -20,7 +20,7 @@ import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
 import org.apache.felix.ipojo.ComponentInstance;
-import org.apache.felix.ipojo.pax.exam.target.BundleAsiPOJO;
+import org.apache.felix.ipojo.tinybundles.BundleAsiPOJO;
 import org.apache.felix.ipojo.transaction.test.component.FooDelegator;
 import org.apache.felix.ipojo.transaction.test.component.FooImpl;
 import org.apache.felix.ipojo.transaction.test.service.CheckService;
@@ -34,7 +34,7 @@ import org.ops4j.pax.exam.Inject;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.tinybundles.core.TinyBundles;
+import org.ops4j.pax.swissbox.tinybundles.core.TinyBundles;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
@@ -106,9 +106,9 @@ public class TestSupported {
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.handler.transaction").version(asInProject()),
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.transaction").version(asInProject()),
                         mavenBundle()
-                        .groupId( "org.ops4j.pax.tinybundles" )
-                        .artifactId( "pax-tinybundles-core" )
-                        .version( "0.5.0-SNAPSHOT" ),
+                            .groupId( "org.ops4j.pax.swissbox" )
+                            .artifactId( "pax-swissbox-tinybundles" )
+                            .version(asInProject()),
                         bundle(service.toExternalForm()),
                         bundle(fooimpl),
                         bundle(test)

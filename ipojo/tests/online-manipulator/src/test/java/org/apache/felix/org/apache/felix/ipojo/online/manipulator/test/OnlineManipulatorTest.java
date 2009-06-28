@@ -4,15 +4,14 @@ package org.apache.felix.org.apache.felix.ipojo.online.manipulator.test;
 import static org.ops4j.pax.exam.CoreOptions.equinox;
 import static org.ops4j.pax.exam.CoreOptions.felix;
 import static org.ops4j.pax.exam.CoreOptions.frameworks;
-import static org.ops4j.pax.exam.CoreOptions.knopflerfish;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.ops4j.pax.tinybundles.core.TinyBundles.asFile;
-import static org.ops4j.pax.tinybundles.core.TinyBundles.asURL;
-import static org.ops4j.pax.tinybundles.core.TinyBundles.newBundle;
-import static org.ops4j.pax.tinybundles.core.TinyBundles.with;
+import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.asFile;
+import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.asURL;
+import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.newBundle;
+import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.with;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,35 +41,35 @@ import org.osgi.framework.ServiceReference;
 
 @RunWith( JUnit4TestRunner.class )
 public class OnlineManipulatorTest {
-    
-    
+
+
     private static File TMP = new File("target/tmp-bundle");
-    
+
     @Inject
     BundleContext context;
 
     private OSGiHelper helper;
 
-    
+
     /*
      * <groupId>org.apache.felix</groupId>
   <artifactId>org.apache.felix.ipojo.online.manipulator</artifactId>
   <version>1.3.0-SNAPSHOT</version>
- 
+
      */
-    
+
     @Configuration
     public static Option[] configure() throws IOException
     {
-        
-        
+
+
 
         String providerWithMetadata = providerWithMetadata();
         String providerWithMetadataInMetaInf = providerWithMetadataInMetaInf();
         String providerWithoutMetadata = providerWithoutMetadata();
         String consumerWithMetadata =  consumerWithMetadata();
         String consumerWithoutMetadata = consumerWithoutMetadata();
-        
+
         return options(
                 frameworks(
                         felix(),
@@ -81,13 +80,13 @@ public class OnlineManipulatorTest {
                     .groupId( "org.ops4j.pax.tinybundles" )
                     .artifactId( "pax-tinybundles-core" )
                     .version( "0.5.0-SNAPSHOT" )),
-            provision( 
+            provision(
                     mavenBundle()
                     .groupId("org.apache.felix")
                     .artifactId("org.apache.felix.ipojo")
                     .version("1.3.0-SNAPSHOT")
             ),
-            
+
             provision(
                     mavenBundle()
                     .groupId("org.apache.felix")
@@ -108,22 +107,22 @@ public class OnlineManipulatorTest {
            systemProperty( "consumerWithMetadata").value(consumerWithMetadata),
            systemProperty( "consumerWithoutMetadata").value(consumerWithoutMetadata)
            );
-        
-       
+
+
 
 
     }
-    
+
     @Before
     public void before() {
         helper = new OSGiHelper(context);
     }
-    
+
     @After
     public void after() {
         helper.dispose();
     }
-    
+
     private static File getTemporaryFile(String name) throws IOException {
         if (! TMP.exists()) {
             TMP.mkdirs();
@@ -135,22 +134,22 @@ public class OnlineManipulatorTest {
             file.delete();
         }
         file.deleteOnExit();
-        return file;  
+        return file;
     }
-    
+
     @Test
     public void installProviderWithMetadata1() throws BundleException, InvalidSyntaxException, IOException {
         String url = context.getProperty("providerWithMetadata");
         Assert.assertNotNull(url);
         context.installBundle("ipojo:"+url).start();
-        
+
         assertBundle("Provider");
         helper.waitForService(Hello.class.getName(), null, 5000);
         assertValidity();
         Assert.assertNotNull(context.getServiceReference(Hello.class.getName()));
     }
-    
-   
+
+
 
     @Test
     public void installProviderWithMetadata2() throws BundleException, InvalidSyntaxException, IOException {
@@ -162,7 +161,7 @@ public class OnlineManipulatorTest {
         assertValidity();
         Assert.assertNotNull(context.getServiceReference(Hello.class.getName()));
     }
-    
+
     @Test
     public void installProviderWithoutMetadata() throws BundleException, InvalidSyntaxException, IOException {
         String url = context.getProperty("providerWithoutMetadata");
@@ -173,14 +172,14 @@ public class OnlineManipulatorTest {
         assertValidity();
         Assert.assertNotNull(context.getServiceReference(Hello.class.getName()));
     }
-    
+
     @Test
     public void installConsumerWithMetadata() throws BundleException, InvalidSyntaxException, IOException {
         String url = context.getProperty("providerWithoutMetadata");
         Assert.assertNotNull(url);
         context.installBundle("ipojo:"+url).start();
         assertBundle("Provider");
-        
+
         String url2 = context.getProperty("consumerWithMetadata");
         Assert.assertNotNull(url);
         context.installBundle("ipojo:"+url2).start();
@@ -195,7 +194,7 @@ public class OnlineManipulatorTest {
         assertValidity();
         Assert.assertNotNull(context.getServiceReference(Hello.class.getName()));
     }
-    
+
     @Test
     public void installConsumerWithoutMetadata() throws BundleException, InvalidSyntaxException, IOException {
         String url = context.getProperty("providerWithMetadataInMetaInf");
@@ -213,69 +212,69 @@ public class OnlineManipulatorTest {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }  
+        }
         assertValidity();
         Assert.assertNotNull(context.getServiceReference(Hello.class.getName()));
     }
-    
+
     /**
      * Gets a regular bundle containing metadata file
      * @return the url of the bundle
-     * @throws IOException 
+     * @throws IOException
      */
     public static String providerWithMetadata() throws IOException {
         return newBundle()
         .addResource("metadata.xml", OnlineManipulatorTest.class.getClassLoader().getResource("provider.xml"))
         .addClass(MyProvider.class)
-        .prepare( 
+        .prepare(
             with()
                 .set(Constants.BUNDLE_SYMBOLICNAME,"Provider")
                 .set(Constants.IMPORT_PACKAGE, "org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service")
             )
               .build( asFile(getTemporaryFile("providerWithMetadata")) ).toURL().toExternalForm();
     }
-    
+
     /**
      * Gets a regular bundle containing metadata file in the META-INF directory
      * @return the url of the bundle
-     * @throws IOException 
+     * @throws IOException
      */
     public static String providerWithMetadataInMetaInf() throws IOException {
         return newBundle()
         .addResource("META-INF/metadata.xml", OnlineManipulatorTest.class.getClassLoader().getResource("provider.xml"))
         .addClass(MyProvider.class)
-        .prepare( 
+        .prepare(
             with()
                 .set(Constants.BUNDLE_SYMBOLICNAME,"Provider")
                 .set(Constants.IMPORT_PACKAGE, "org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service")
             )
               .build( asFile(getTemporaryFile("providerWithMetadataInMetaInf")) ).toURL().toExternalForm();
     }
-    
+
     /**
      * Gets a provider bundle which does not contain the metadata file.
      * @return the url of the bundle + metadata
-     * @throws IOException 
+     * @throws IOException
      */
     public static String providerWithoutMetadata() throws IOException {
         String url = newBundle()
         //.addResource("metadata.xml", this.getClass().getClassLoader().getResource("provider.xml"))
         .addClass(MyProvider.class)
-        .prepare( 
+        .prepare(
             with()
                 .set(Constants.BUNDLE_SYMBOLICNAME,"Provider")
                 .set(Constants.IMPORT_PACKAGE, "org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service")
             )
               .build( asFile(getTemporaryFile("providerWithoutMetadata")) ).toURL().toExternalForm();
-        
+
         return url + "!" +OnlineManipulatorTest.class.getClassLoader().getResource("provider.xml");
     }
-    
+
     /**
      * Gets a consumer bundle using annotation containing the instance
      * declaration in the metadata.
      * @return the url of the bundle
-     * @throws IOException 
+     * @throws IOException
      */
     public static String consumerWithMetadata() throws IOException {
         return newBundle()
@@ -288,14 +287,14 @@ public class OnlineManipulatorTest {
                 .set(Constants.IMPORT_PACKAGE, "org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service")
                 )
                 .build( asFile(getTemporaryFile("consumerWithMetadata")) ).toURL().toExternalForm();
-       
+
     }
-    
+
     /**
      * Gets a consumer bundle using annotation that does not contain
      * metadata
      * @return the url of the bundle + metadata
-     * @throws IOException 
+     * @throws IOException
      */
     public static String consumerWithoutMetadata() throws IOException {
         String url = newBundle()
@@ -306,12 +305,12 @@ public class OnlineManipulatorTest {
                 .set(Constants.IMPORT_PACKAGE, "org.apache.felix.org.apache.felix.ipojo.online.manipulator.test.service")
                 )
                 .build( asFile(getTemporaryFile("consumerWithoutMetadata")) ).toURL().toExternalForm();
-        
+
         return url + "!" + OnlineManipulatorTest.class.getClassLoader().getResource("consumer.xml");
     }
-    
-    
-    
+
+
+
     public void dumpServices() throws InvalidSyntaxException {
         ServiceReference[] refs = context.getAllServiceReferences(null, null);
         System.out.println(" === Services === ");
@@ -321,7 +320,7 @@ public class OnlineManipulatorTest {
         }
         System.out.println("====");
     }
-    
+
     public void dumpBundles() throws InvalidSyntaxException {
         Bundle[] bundles = context.getBundles();
         System.out.println(" === Bundles === ");
@@ -331,18 +330,18 @@ public class OnlineManipulatorTest {
         }
         System.out.println("====");
     }
-    
+
     private void assertBundle(String sn) {
         for (Bundle bundle :context.getBundles()) {
             if (bundle.getSymbolicName().equals(sn)
                     && bundle.getState() == Bundle.ACTIVE) {
                 return;
             }
-                
+
         }
         Assert.fail("Cannot find the bundle " + sn);
     }
-    
+
     private void assertValidity() {
         try {
             ServiceReference[] refs = context.getServiceReferences(Architecture.class.getName(), null);
@@ -355,9 +354,9 @@ public class OnlineManipulatorTest {
         } catch (InvalidSyntaxException e) {
             Assert.fail(e.getMessage());
         }
-            
+
     }
-    
-  
+
+
 
 }

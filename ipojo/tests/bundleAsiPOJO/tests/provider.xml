@@ -1,0 +1,6 @@
+<ipojo>
+<component classname="org.apache.felix.ipojo.pax.tinybundles.tests.impl.MyProvider">
+	<provides/>
+</component>
+<instance component="org.apache.felix.ipojo.pax.tinybundles.tests.impl.MyProvider"/>
+</ipojo>

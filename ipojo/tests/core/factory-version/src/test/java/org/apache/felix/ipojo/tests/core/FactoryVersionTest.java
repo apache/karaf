@@ -1,13 +1,13 @@
 package org.apache.felix.ipojo.tests.core;
 
-import static org.apache.felix.ipojo.pax.exam.target.BundleAsiPOJO.asiPOJOBundle;
+import static org.apache.felix.ipojo.tinybundles.BundleAsiPOJO.asiPOJOBundle;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
 import static org.ops4j.pax.exam.MavenUtils.asInProject;
-import static org.ops4j.pax.tinybundles.core.TinyBundles.asURL;
-import static org.ops4j.pax.tinybundles.core.TinyBundles.newBundle;
-import static org.ops4j.pax.tinybundles.core.TinyBundles.with;
+import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.asURL;
+import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.newBundle;
+import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.with;
 
 import java.io.File;
 
@@ -60,7 +60,7 @@ public class FactoryVersionTest {
                 provision(
                         // Runtime.
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
-                        mavenBundle().groupId( "org.ops4j.pax.tinybundles" ).artifactId( "pax-tinybundles-core" ).version(asInProject())
+                        mavenBundle().groupId( "org.ops4j.pax.swissbox" ).artifactId( "pax-swissbox-tinybundles" ).version(asInProject())
                         ),
                 provision(
                         newBundle()

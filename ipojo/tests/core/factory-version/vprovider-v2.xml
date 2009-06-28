@@ -1,0 +1,7 @@
+<ipojo>
+	<component name="provider" classname="org.apache.felix.ipojo.tests.core.component.MyComponent" version="2.0">
+		<provides/>
+	</component>
+	<instance component="provider" version="2.0"/>
+
+</ipojo>

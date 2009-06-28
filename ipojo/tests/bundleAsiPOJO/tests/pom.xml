@@ -1,11 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>ipojo.tests</groupId>
-  <artifactId>tests.core.factory-version</artifactId>
-  <name>iPOJO Factory Version Test Suite</name>
-  <version>1.3.0-SNAPSHOT</version>
-  <description>Test the factory version attribute</description>
-
+  <artifactId>org.apache.felix.ipojo.tinybundle.bundleAsiPOJO.test</artifactId>
+  <packaging>jar</packaging>
+  <version>0.9.0-SNAPSHOT</version>
+  <name>bundleAsiPOJO Tests</name>
   <build>
 		<plugins>
 			<plugin>
@@ -50,11 +50,6 @@
 	</build>
 
 	<dependencies>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.ipojo</artifactId>
-			<version>1.3.0-SNAPSHOT</version>
-		</dependency>
 
 	<!--
 		Pax Exam API:
@@ -92,7 +87,9 @@
 		<type>jar</type>
 		<scope>test</scope>
 	</dependency>
-	<!--  Tinybundles -->
+
+
+	<!-- TinyBundle -->
 	<dependency>
 		<groupId>org.ops4j.pax.swissbox</groupId>
 		<artifactId>pax-swissbox-tinybundles</artifactId>
@@ -103,7 +100,16 @@
 		<artifactId>org.apache.felix.ipojo.tinybundles.bundleAsiPOJO</artifactId>
 		<version>1.3.0-SNAPSHOT</version>
 	</dependency>
+	<dependency>
+		<groupId>org.apache.felix</groupId>
+		<artifactId>org.apache.felix.ipojo.annotations</artifactId>
+		<version>1.2.0</version>
+	</dependency>
+
 	</dependencies>
+
+
+
 
 	<repositories>
 		<repository>
@@ -118,5 +124,4 @@
 			</snapshots>
 		</repository>
 	</repositories>
-
 </project>

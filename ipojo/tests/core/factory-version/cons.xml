@@ -1,0 +1,6 @@
+<ipojo>
+	<component name="cons" classname="org.apache.felix.ipojo.tests.core.component.MyCons">
+		<requires field="services"/>
+	</component>
+	<instance component="cons" name="mycons"/>
+</ipojo>
