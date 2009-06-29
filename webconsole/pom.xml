@@ -78,8 +78,7 @@
                             org.apache.felix.webconsole.internal.OsgiManagerActivator
                         </Bundle-Activator>
                         <Export-Package>
-                            org.apache.felix.webconsole;version=${project.version},
-                            org.osgi.service.obr
+                            org.apache.felix.webconsole;version=${project.version}
                         </Export-Package>
                         <Private-Package>
                             !org.apache.felix.webconsole,
@@ -95,8 +94,8 @@
                         </Import-Package>
                         
                         <Embed-Dependency>
-                            <!-- Import/Export-Package parsing, OBR -->
-                            org.apache.felix.bundlerepository,
+                            <!-- Import/Export-Package parsing -->
+                            org.apache.felix.bundlerepository;inline=org/apache/felix/bundlerepository/R4*.class,
                             
                             <!-- Required for JSON data transfer -->
                             json,
@@ -171,6 +170,15 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- OBR Service API -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.osgi.service.obr</artifactId>
+            <version>1.0.2</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!--  Parsing Import/Export-Package headers -->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.bundlerepository</artifactId>
