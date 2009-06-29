@@ -25,9 +25,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.apache.felix.webconsole.internal.Util;
-import org.apache.felix.webconsole.internal.servlet.OsgiManager;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.osgi.framework.*;
@@ -233,7 +233,7 @@ public class EventAdminServlet extends BaseWebConsolePlugin implements EventHand
     {
         final PrintWriter pw = response.getWriter();
 
-        final String appRoot = ( String ) request.getAttribute( OsgiManager.ATTR_APP_ROOT );
+        final String appRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT );
         Util.script(pw, appRoot, "events.js");
 
         pw.println( "<div id='plugin_content'/>");

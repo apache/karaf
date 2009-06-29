@@ -50,4 +50,30 @@ public interface WebConsoleConstants
      */
     public static final String PLUGIN_TITLE = "felix.webconsole.title";
 
+    /**
+     * The name of the request attribute providing the absolute path of the
+     * Web Console root (value is "felix.webconsole.appRoot"). This consists of
+     * the servlet context path (from <code>ServletRequest.getContextPath()</code>)
+     * and the configured path of the web console root (<code>/system/console</code>
+     * by default).
+     * <p>
+     * The type of this request attribute is <code>String</code>.
+     *
+     * @since 1.2.12
+     */
+    public static final String ATTR_APP_ROOT = "felix.webconsole.appRoot";
+
+    /**
+     * The name of the request attribute providing a mapping of labels to page
+     * titles of registered console plugins (value is "felix.webconsole.labelMap").
+     * This map may be used to render a navigation of the console plugins as the
+     * {@link AbstractWebConsolePlugin#renderTopNavigation(javax.servlet.http.HttpServletRequest, java.io.PrintWriter)}
+     * method does.
+     * <p>
+     * The type of this request attribute is <code>Map<String, String></code>.
+     *
+     * @since 1.2.12
+     */
+    public static final String ATTR_LABEL_MAP = "felix.webconsole.labelMap";
+
 }

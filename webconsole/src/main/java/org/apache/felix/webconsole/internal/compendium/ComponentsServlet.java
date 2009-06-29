@@ -33,9 +33,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.Reference;
 import org.apache.felix.scr.ScrService;
+import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.apache.felix.webconsole.internal.Util;
-import org.apache.felix.webconsole.internal.servlet.OsgiManager;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONWriter;
@@ -141,7 +141,7 @@ public class ComponentsServlet extends BaseWebConsolePlugin
         final RequestInfo reqInfo = getRequestInfo(request);
         final PrintWriter pw = response.getWriter();
 
-        final String appRoot = ( String ) request.getAttribute( OsgiManager.ATTR_APP_ROOT );
+        final String appRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT );
 
         Util.startScript( pw );
         pw.println( "var imgRoot = '" + appRoot + "/res/imgs';");

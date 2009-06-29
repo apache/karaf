@@ -305,8 +305,8 @@ public class OsgiManager extends GenericServlet
         if ( plugin != null )
         {
             // the official request attributes
-//            req.setAttribute( WebConsoleConstants.ATTR_LABEL_MAP, labelMap );
-//            req.setAttribute( WebConsoleConstants.ATTR_APP_ROOT, request.getContextPath() + request.getServletPath() );
+            req.setAttribute( WebConsoleConstants.ATTR_LABEL_MAP, labelMap );
+            req.setAttribute( WebConsoleConstants.ATTR_APP_ROOT, request.getContextPath() + request.getServletPath() );
 
             // deprecated request attributes
             req.setAttribute( ATTR_LABEL_MAP_OLD, labelMap );

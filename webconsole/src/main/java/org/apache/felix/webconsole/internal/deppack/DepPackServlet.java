@@ -27,9 +27,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.apache.felix.webconsole.internal.Util;
-import org.apache.felix.webconsole.internal.servlet.OsgiManager;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.osgi.service.component.ComponentContext;
@@ -162,7 +162,7 @@ public class DepPackServlet extends BaseWebConsolePlugin
 
         PrintWriter pw = response.getWriter();
 
-        String appRoot = ( String ) request.getAttribute( OsgiManager.ATTR_APP_ROOT );
+        String appRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT );
         pw.println( "<script src='" + appRoot + "/res/ui/packages.js' language='JavaScript'></script>" );
 
         pw.println( "<h1>Deployment Admin</h1>" );

@@ -42,8 +42,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.felix.webconsole.internal.Util;
-import org.apache.felix.webconsole.internal.servlet.OsgiManager;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONWriter;
@@ -276,7 +276,7 @@ public class ConfigManager extends ConfigManagerBase
 
         final PrintWriter pw = response.getWriter();
 
-        final String appRoot = (String) request.getAttribute( OsgiManager.ATTR_APP_ROOT );
+        final String appRoot = (String) request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT );
         pw.println( "<script src='" + appRoot + "/res/ui/configmanager.js' language='JavaScript'></script>" );
 
         pw.println( "<table class='content' cellpadding='0' cellspacing='0' width='100%'>" );
