@@ -24,6 +24,8 @@ import java.io.IOException;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -114,6 +116,28 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
 
         // plugin initialization
         plugin.init( config );
+    }
+
+
+    /**
+     * Directly refer to the plugin's service method unless the request method
+     * is <code>GET</code> in which case we defer the call into the service method
+     * until the abstract web console plugin calls the
+     * {@link #renderContent(HttpServletRequest, HttpServletResponse)}
+     * method.
+     */
+    public void service( ServletRequest req, ServletResponse resp ) throws ServletException, IOException
+    {
+        if ( ( req instanceof HttpServletRequest ) && ( ( HttpServletRequest ) req ).getMethod().equals( "GET" ) )
+        {
+            // not GET request, have the plugin handle it directly
+            super.service( req, resp );
+        }
+        else
+        {
+            // handle the GET request here and call into plugin on renderContent
+            plugin.service( req, resp );
+        }
     }
 
 
