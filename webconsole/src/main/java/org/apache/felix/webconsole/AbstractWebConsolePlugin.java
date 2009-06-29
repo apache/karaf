@@ -404,7 +404,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         {
             pw.println( "<div id='technav'>" );
 
-            SortedMap map = new TreeMap();
+            SortedMap map = new TreeMap( String.CASE_INSENSITIVE_ORDER );
             for ( Iterator ri = labelMap.entrySet().iterator(); ri.hasNext(); )
             {
                 Map.Entry labelMapEntry = ( Map.Entry ) ri.next();
