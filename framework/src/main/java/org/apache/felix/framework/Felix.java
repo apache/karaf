@@ -3098,7 +3098,9 @@ ex.printStackTrace();
             }
         }
 
-        return (ExportedPackage[]) list.toArray(new ExportedPackage[list.size()]);
+        return (list.isEmpty())
+            ? null
+            : (ExportedPackage[]) list.toArray(new ExportedPackage[list.size()]);
     }
 
     /**
