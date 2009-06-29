@@ -182,9 +182,22 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         return bundleContext;
     }
 
-    protected Object getResourceProvider() {
+
+    /**
+     * Returns the object which might provide resources. The class of this
+     * object is used to find the <code>getResource</code> method.
+     * <p>
+     * This method may be overwritten by extensions. This base class
+     * implementation returns this instance.
+     *
+     * @return The resource provider object or <code>null</code> if no
+     *      resources will be provided by this plugin.
+     */
+    protected Object getResourceProvider()
+    {
         return this;
     }
+
 
     /**
      * Returns a method which is called on the
