@@ -91,6 +91,17 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
     }
 
 
+    /**
+     * Returns the registered plugin class to be able to call the
+     * <code>getResource()</code> method on that object for this plugin to
+     * provide additional resources.
+     */
+    protected Object getResourceProvider()
+    {
+        return plugin;
+    }
+
+
     //---------- Servlet API overwrite
 
     /**
