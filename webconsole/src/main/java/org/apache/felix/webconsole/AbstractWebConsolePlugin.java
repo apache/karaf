@@ -93,7 +93,22 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
 
     public static final String GET_RESOURCE_METHOD_NAME = "getResource";
 
-    private final Method getResourceMethod;
+    /**
+     * The reference to the getResource method provided by the
+     * {@link #getResourceProvider()}. This is <code>null</code> if there is
+     * none or before the first check if there is one.
+     *
+     * @see #getGetResourceMethod()
+     */
+    private Method getResourceMethod;
+
+    /**
+     * flag indicating whether the getResource method has already been looked
+     * up or not. This prevens the {@link #getGetResourceMethod()} method from
+     * repeatedly looking up the resource method on plugins which do not have
+     * one.
+     */
+    private boolean getResourceMethodChecked;
 
     private BundleContext bundleContext;
 
@@ -101,10 +116,6 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
     private String productName;
     private String productWeb;
     private String vendorName;
-
-    {
-        getResourceMethod = getGetResourceMethod();
-    }
 
 
     //---------- HttpServlet Overwrites ----------------------------------------
@@ -220,8 +231,12 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
      */
     private Method getGetResourceMethod()
     {
-        Method tmpGetResourceMethod = null;
+        // return what we know of the getResourceMethod, if we already checked
+        if (getResourceMethodChecked) {
+            return getResourceMethod;
+        }
 
+        Method tmpGetResourceMethod = null;
         Object resourceProvider = getResourceProvider();
         if ( resourceProvider != null )
         {
@@ -258,7 +273,12 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
             }
         }
 
-        return tmpGetResourceMethod;
+        // set what we have found and prevent future lookups
+        getResourceMethod = tmpGetResourceMethod;
+        getResourceMethodChecked = true;
+
+        // now also return the method
+        return getResourceMethod;
     }
 
 
@@ -283,6 +303,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
     private boolean spoolResource( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         // no resource if no resource accessor
+        Method getResourceMethod = getGetResourceMethod();
         if ( getResourceMethod == null )
         {
             return false;
