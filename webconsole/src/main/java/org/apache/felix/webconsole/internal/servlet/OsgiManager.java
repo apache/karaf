@@ -46,9 +46,23 @@ public class OsgiManager extends GenericServlet
     /** Pseudo class version ID to keep the IDE quite. */
     private static final long serialVersionUID = 1L;
 
-    public static final String ATTR_LABEL_MAP = OsgiManager.class.getName() + ".labelMap";
+    /**
+     * Old name of the request attribute provding the root to the web console.
+     * This attribute is no deprecated and replaced by
+     * {@link WebConsoleConstants#ATTR_APP_ROOT}.
+     *
+     * @deprecated use {@link WebConsoleConstants#ATTR_APP_ROOT} instead
+     */
+    private static final String ATTR_APP_ROOT_OLD = OsgiManager.class.getName() + ".appRoot";
 
-    public static final String ATTR_APP_ROOT = OsgiManager.class.getName() + ".appRoot";
+    /**
+     * Old name of the request attribute provding the mappings from label to
+     * page title. This attribute is no deprecated and replaced by
+     * {@link WebConsoleConstants#ATTR_LABEL_MAP}.
+     *
+     * @deprecated use {@link WebConsoleConstants#ATTR_LABEL_MAP} instead
+     */
+    private static final String ATTR_LABEL_MAP_OLD = OsgiManager.class.getName() + ".labelMap";
 
     /**
      * The name and value of a parameter which will prevent redirection to a
@@ -290,8 +304,13 @@ public class OsgiManager extends GenericServlet
         Servlet plugin = ( Servlet ) plugins.get( label );
         if ( plugin != null )
         {
-            req.setAttribute( ATTR_LABEL_MAP, labelMap );
-            req.setAttribute( ATTR_APP_ROOT, request.getContextPath() + request.getServletPath() );
+            // the official request attributes
+//            req.setAttribute( WebConsoleConstants.ATTR_LABEL_MAP, labelMap );
+//            req.setAttribute( WebConsoleConstants.ATTR_APP_ROOT, request.getContextPath() + request.getServletPath() );
+
+            // deprecated request attributes
+            req.setAttribute( ATTR_LABEL_MAP_OLD, labelMap );
+            req.setAttribute( ATTR_APP_ROOT_OLD, request.getContextPath() + request.getServletPath() );
 
             plugin.service( req, res );
         }
@@ -525,6 +544,25 @@ public class OsgiManager extends GenericServlet
                 Object operation = super.addingService( reference );
                 if ( operation instanceof Servlet )
                 {
+                    // wrap the servlet if it is not an AbstractWebConsolePlugin
+                    // but has a title in the service properties
+                    if ( !( operation instanceof AbstractWebConsolePlugin ) )
+                    {
+                        Object title = reference.getProperty( WebConsoleConstants.PLUGIN_TITLE );
+                        if ( title instanceof String )
+                        {
+                            WebConsolePluginAdapter pluginAdapter = new WebConsolePluginAdapter( ( String ) label,
+                                ( String ) title, ( Servlet ) operation );
+
+                            // ensure the AbstractWebConsolePlugin is correctly setup
+                            Bundle pluginBundle = reference.getBundle();
+                            pluginAdapter.activate( pluginBundle.getBundleContext() );
+
+                            // now use this adapter as the operation
+                            operation = pluginAdapter;
+                        }
+                    }
+
                     // TODO: check reference properties !!
                     osgiManager.bindServlet( ( String ) label, ( Servlet ) operation );
                 }
@@ -542,6 +580,14 @@ public class OsgiManager extends GenericServlet
             {
                 // TODO: check reference properties !!
                 osgiManager.unbindServlet( ( String ) label );
+
+                // check whether the service is a WebConsolePluginAdapter in
+                // which case we have to deactivate it here (as we activated it
+                // while adding the service
+                if ( service instanceof WebConsolePluginAdapter )
+                {
+                    ( ( WebConsolePluginAdapter ) service ).deactivate();
+                }
             }
 
             super.removedService( reference, service );

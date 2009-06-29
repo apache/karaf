@@ -38,4 +38,16 @@ public interface WebConsoleConstants
      */
     public static final String PLUGIN_LABEL = "felix.webconsole.label";
 
+    /**
+     * The title under which the OSGi Manager plugin is called by
+     * the OSGi Manager (value is "felix.webconsole.label").
+     * <p>
+     * Only {@link #SERVICE_NAME} services with this service registration
+     * property set to a non-empty String values are accepted by the OSGi
+     * Manager as a plugin.
+     *
+     * @since 1.2.12
+     */
+    public static final String PLUGIN_TITLE = "felix.webconsole.title";
+
 }
