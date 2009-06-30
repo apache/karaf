@@ -819,8 +819,46 @@ ex.printStackTrace();
                 AdminPermission.EXECUTE));
         }
 
-        // TODO: FRAMEWORK - This is supposed to stop and then restart the framework.
-        throw new BundleException("System bundle update not implemented yet.");
+        // Spec says to close input stream first.
+        try
+        {
+            if (is != null) is.close();
+        }
+        catch (IOException ex)
+        {
+            m_logger.log(Logger.LOG_WARNING, "Exception closing input stream.", ex);
+        }
+
+        // Then to stop and restart the framework on a separate thread.
+        new Thread(new Runnable() {
+            public void run()
+            {
+                try
+                {
+                    stop();
+                }
+                catch (BundleException ex)
+                {
+                    m_logger.log(Logger.LOG_WARNING, "Exception stopping framework.", ex);
+                }
+                try
+                {
+                    waitForStop(0);
+                }
+                catch (InterruptedException ex)
+                {
+                    m_logger.log(Logger.LOG_WARNING, "Did not wait for framework to stop.", ex);
+                }
+                try
+                {
+                    start();
+                }
+                catch (BundleException ex)
+                {
+                    m_logger.log(Logger.LOG_WARNING, "Exception restarting framework.", ex);
+                }
+            }
+        }).start();
     }
 
     public String toString()
