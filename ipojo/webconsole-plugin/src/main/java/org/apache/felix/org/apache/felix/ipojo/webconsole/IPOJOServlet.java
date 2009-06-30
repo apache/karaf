@@ -592,8 +592,8 @@ public class IPOJOServlet extends AbstractWebConsolePlugin {
             if (dep.getComparator() != null) {
                 r += addEntry("Comparator", "" + dep.getComparator());
             }
-            r += addEntry("Matching Service", getServiceReferenceList(dep.getServiceReferences()));
-            r += addEntry("Used Service", getServiceReferenceList(dep.getUsedServices()));
+            r += addEntry("Matching Services", getServiceReferenceList(dep.getServiceReferences()));
+            r += addEntry("Used Services", getServiceReferenceList(dep.getUsedServices()));
 
             r += "</tbody></table>";
             r += "<hr style=\"color: #CCCCCC;'\"/>";
