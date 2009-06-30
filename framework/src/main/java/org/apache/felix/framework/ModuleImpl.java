@@ -96,6 +96,26 @@ public class ModuleImpl implements IModule
     private boolean m_isActivationTriggered = false;
     private ProtectionDomain m_protectionDomain = null;
     private static SecureAction m_secureAction = new SecureAction();
+    // Class load to be used for boot delegation.
+    private final static ClassLoader m_bootClassLoader;
+    // Statically create the class loader for boot delegation.
+    static
+    {
+        try
+        {
+            ClassLoader cl = null;
+            Constructor ctor = m_secureAction.getDeclaredConstructor(
+                SecureClassLoader.class, new Class[] { ClassLoader.class });
+            m_secureAction.setAccesssible(ctor);
+            cl = (ClassLoader) m_secureAction.invoke(ctor, new Object[] { null });
+            m_bootClassLoader = cl;
+        }
+        catch (Exception ex)
+        {
+            throw new RuntimeException(
+                "Problem creating boot delegation class loader.", ex);
+        }
+    }
 
     // Boot delegation packages.
     private final String[] m_bootPkgs;
@@ -596,6 +616,15 @@ public class ModuleImpl implements IModule
                 {
                     try
                     {
+                        // Get the appropriate class loader for delegation.
+                        ClassLoader parent = m_classLoader.getParent();
+                        parent = (parent == null) ? m_bootClassLoader : parent;
+                        result = (isClass)
+                            ? (Object) parent.loadClass(name)
+                            : (Object) parent.getResource(name);
+                         // If this is a java.* package, then always terminate the
+                         // search; otherwise, continue to look locally if not found.
+                         if (pkgName.startsWith("java.") || (result != null))
                         result = (isClass)
                             ? (Object) getClass().getClassLoader().loadClass(name)
                             : (Object) getClass().getClassLoader().getResource(name);
@@ -777,7 +806,10 @@ public class ModuleImpl implements IModule
         {
             try
             {
-                urls = getClass().getClassLoader().getResources(name);
+                // Get the appropriate class loader for delegation.
+                ClassLoader parent = m_classLoader.getParent();
+                parent = (parent == null) ? m_bootClassLoader : parent;
+                urls = parent.getResources(name);
             }
             catch (IOException ex)
             {
@@ -1233,13 +1265,36 @@ public class ModuleImpl implements IModule
     {
         if (m_classLoader == null)
         {
+            // Determine the class loader's parent based on the
+            // configuration property; use boot class loader by
+            // default.
+            String cfg = (String) m_configMap.get(Constants.FRAMEWORK_BUNDLE_PARENT);
+            cfg = (cfg == null) ? Constants.FRAMEWORK_BUNDLE_PARENT_BOOT : cfg;
+            final ClassLoader parent;
+            if (cfg.equalsIgnoreCase(Constants.FRAMEWORK_BUNDLE_PARENT_APP))
+            {
+                parent = ClassLoader.getSystemClassLoader();
+            }
+            else if (cfg.equalsIgnoreCase(Constants.FRAMEWORK_BUNDLE_PARENT_EXT))
+            {
+                parent = ClassLoader.getSystemClassLoader().getParent();
+            }
+            else if (cfg.equalsIgnoreCase(Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK))
+            {
+                parent = ModuleImpl.class.getClassLoader();
+            }
+            else
+            {
+                parent = null;
+            }
             if (System.getSecurityManager() != null)
             {
                 try
                 {
                     Constructor ctor = (Constructor) m_secureAction.getConstructor(
-                        ModuleClassLoader.class, null);
-                    m_classLoader = (ModuleClassLoader) m_secureAction.invoke(ctor, null);
+                        ModuleClassLoader.class, new Class[] { ClassLoader.class });
+                    m_classLoader = (ModuleClassLoader)
+                        m_secureAction.invoke(ctor, new Object[] { parent });
                 }
                 catch (Exception ex)
                 {
@@ -1248,7 +1303,7 @@ public class ModuleImpl implements IModule
             }
             else
             {
-                m_classLoader = new ModuleClassLoader();
+                m_classLoader = new ModuleClassLoader(parent);
             }
         }
         return m_classLoader;
@@ -1505,8 +1560,9 @@ public class ModuleImpl implements IModule
     {
         private final Map m_jarContentToDexFile;
 
-        public ModuleClassLoader()
+        public ModuleClassLoader(ClassLoader parent)
         {
+            super(parent);
             if (m_dexFileClassLoadClass != null)
             {
                 m_jarContentToDexFile = new HashMap();
