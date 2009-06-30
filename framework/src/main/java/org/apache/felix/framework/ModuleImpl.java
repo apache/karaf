@@ -34,7 +34,6 @@ import java.security.ProtectionDomain;
 import java.security.SecureClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
 
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -1236,21 +1235,21 @@ public class ModuleImpl implements IModule
         {
             if (System.getSecurityManager() != null)
             {
-                m_classLoader = (ModuleClassLoader)
-                    AccessController.doPrivileged(new PrivilegedAction() {
-                        public Object run()
-                        {
-                            return new ModuleClassLoader();
-                        }
-                    });
+                try
+                {
+                    Constructor ctor = (Constructor) m_secureAction.getConstructor(
+                        ModuleClassLoader.class, null);
+                    m_classLoader = (ModuleClassLoader) m_secureAction.invoke(ctor, null);
+                }
+                catch (Exception ex)
+                {
+                    throw new RuntimeException("Unable to create module class loader.", ex);
+                }
             }
             else
             {
                 m_classLoader = new ModuleClassLoader();
             }
-// TODO: SECURITY - Would be nice if this could use SecureAction again.
-//            m_classLoader = m_secureAction.createModuleClassLoader(
-//                this, m_protectionDomain);
         }
         return m_classLoader;
     }

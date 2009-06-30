@@ -470,7 +470,7 @@ public class SecureAction
             try
             {
                 Actions actions = (Actions) m_actions.get();
-                actions.set(Actions.OPEN_JARURLCONNECTIONJAR_ACTION, connection);
+                actions.set(Actions.GET_JARURLCONNECTION_JAR_ACTION, connection);
                 return (JarFile) AccessController.doPrivileged(actions,
                     m_acc);
             }
@@ -678,6 +678,27 @@ public class SecureAction
         }
     }
 
+    public Constructor getDeclaredConstructor(Class target, Class[] types) throws Exception
+    {
+        if (System.getSecurityManager() != null)
+        {
+            Actions actions = (Actions) m_actions.get();
+            actions.set(Actions.GET_DECLARED_CONSTRUCTOR_ACTION, target, types);
+            try
+            {
+                return (Constructor) AccessController.doPrivileged(actions, m_acc);
+            }
+            catch (PrivilegedActionException e)
+            {
+                throw e.getException();
+            }
+        }
+        else
+        {
+            return target.getDeclaredConstructor(types);
+        }
+    }
+
     public Method getMethod(Class target, String method, Class[] types) throws Exception
     {
         if (System.getSecurityManager() != null)
@@ -704,7 +725,7 @@ public class SecureAction
         if (System.getSecurityManager() != null)
         {
             Actions actions = (Actions) m_actions.get();
-            actions.set(Actions.GET_DECLAREDMETHOD_ACTION, target, method, types);
+            actions.set(Actions.GET_DECLARED_METHOD_ACTION, target, method, types);
             try
             {
                 return (Method) AccessController.doPrivileged(actions, m_acc);
@@ -720,12 +741,12 @@ public class SecureAction
         }
     }
 
-    public void setAccesssible(Method method)
+    public void setAccesssible(AccessibleObject ao)
     {
         if (System.getSecurityManager() != null)
         {
             Actions actions = (Actions) m_actions.get();
-            actions.set(Actions.SET_ACCESSIBLE_ACTION, method);
+            actions.set(Actions.SET_ACCESSIBLE_ACTION, ao);
             try
             {
                 AccessController.doPrivileged(actions, m_acc);
@@ -737,7 +758,7 @@ public class SecureAction
         }
         else
         {
-            method.setAccessible(true);
+            ao.setAccessible(true);
         }
     }
 
@@ -926,41 +947,42 @@ public class SecureAction
 
     private static class Actions implements PrivilegedExceptionAction
     {
-        public static final int GET_PROPERTY_ACTION = 0;
-        public static final int FOR_NAME_ACTION = 1;
-        public static final int CREATE_URL_ACTION = 2;
-        public static final int CREATE_URL_WITH_CONTEXT_ACTION = 3;
-        public static final int GET_ABSOLUTE_PATH_ACTION = 4;
-        public static final int FILE_EXISTS_ACTION = 5;
-        public static final int FILE_IS_DIRECTORY_ACTION = 6;
-        public static final int MAKE_DIRECTORY_ACTION = 7;
-        public static final int MAKE_DIRECTORIES_ACTION = 8;
-        public static final int LIST_DIRECTORY_ACTION = 9;
-        public static final int RENAME_FILE_ACTION = 10;
-        public static final int GET_FILE_INPUT_ACTION = 11;
-        public static final int GET_FILE_OUTPUT_ACTION = 12;
-        public static final int DELETE_FILE_ACTION = 13;
-        public static final int OPEN_JARX_ACTION = 14;
-        public static final int GET_URL_INPUT_ACTION = 15;
-        public static final int CREATE_MODULECLASSLOADER_ACTION = 16;
-        public static final int START_ACTIVATOR_ACTION = 17;
-        public static final int STOP_ACTIVATOR_ACTION = 18;
-        public static final int SYSTEM_EXIT_ACTION = 19;
-        public static final int OPEN_JARX_VERIFY_ACTION = 20;
-        public static final int GET_POLICY_ACTION = 21;
-        public static final int CREATE_TMPFILE_ACTION = 22;
-        public static final int OPEN_URLCONNECTION_ACTION = 23;
-        public static final int OPEN_JARURLCONNECTIONJAR_ACTION = 24;
-        public static final int ADD_EXTENSION_URL = 25;
-        public static final int GET_CONSTRUCTOR_ACTION = 26;
-        public static final int GET_METHOD_ACTION = 27;
-        public static final int INVOKE_METHOD_ACTION = 28;
-        public static final int INVOKE_CONSTRUCTOR_ACTION = 29;
-        public static final int SWAP_FIELD_ACTION = 30;
-        public static final int GET_FIELD_ACTION = 31;
-        public static final int GET_DECLAREDMETHOD_ACTION = 32;
-        public static final int SET_ACCESSIBLE_ACTION = 33;
-        public static final int INVOKE_DIRECTMETHOD_ACTION = 34;
+        public static final int ADD_EXTENSION_URL = 1;
+        public static final int CREATE_MODULECLASSLOADER_ACTION = 2;
+        public static final int CREATE_TMPFILE_ACTION = 3;
+        public static final int CREATE_URL_ACTION = 4;
+        public static final int CREATE_URL_WITH_CONTEXT_ACTION = 5;
+        public static final int DELETE_FILE_ACTION = 6;
+        public static final int FILE_EXISTS_ACTION = 7;
+        public static final int FILE_IS_DIRECTORY_ACTION = 8;
+        public static final int FOR_NAME_ACTION = 9;
+        public static final int GET_ABSOLUTE_PATH_ACTION = 10;
+        public static final int GET_CONSTRUCTOR_ACTION = 11;
+        public static final int GET_DECLARED_CONSTRUCTOR_ACTION = 12;
+        public static final int GET_DECLARED_METHOD_ACTION = 13;
+        public static final int GET_FIELD_ACTION = 14;
+        public static final int GET_FILE_INPUT_ACTION = 15;
+        public static final int GET_FILE_OUTPUT_ACTION = 16;
+        public static final int GET_JARURLCONNECTION_JAR_ACTION = 17;
+        public static final int GET_METHOD_ACTION = 18;
+        public static final int GET_POLICY_ACTION = 19;
+        public static final int GET_PROPERTY_ACTION = 20;
+        public static final int GET_URL_INPUT_ACTION = 21;
+        public static final int INVOKE_CONSTRUCTOR_ACTION = 22;
+        public static final int INVOKE_DIRECTMETHOD_ACTION = 23;
+        public static final int INVOKE_METHOD_ACTION = 24;
+        public static final int LIST_DIRECTORY_ACTION = 25;
+        public static final int MAKE_DIRECTORIES_ACTION = 26;
+        public static final int MAKE_DIRECTORY_ACTION = 27;
+        public static final int OPEN_JARX_ACTION = 28;
+        public static final int OPEN_JARX_VERIFY_ACTION = 29;
+        public static final int OPEN_URLCONNECTION_ACTION = 30;
+        public static final int RENAME_FILE_ACTION = 31;
+        public static final int SET_ACCESSIBLE_ACTION = 32;
+        public static final int START_ACTIVATOR_ACTION = 33;
+        public static final int STOP_ACTIVATOR_ACTION = 34;
+        public static final int SWAP_FIELD_ACTION = 35;
+        public static final int SYSTEM_EXIT_ACTION = 36;
 
         private int m_action = -1;
         private Object m_arg1 = null;
@@ -1103,11 +1125,6 @@ public class SecureAction
             {
                 return ((URLConnection) arg1).getInputStream();
             }
-// TODO: REFACTOR - SecureAction fix needed.
-//            else if (action == CREATE_MODULECLASSLOADER_ACTION)
-//            {
-//                return new ModuleClassLoader((ModuleImpl) arg1, (ProtectionDomain) arg2);
-//            }
             else if (action == START_ACTIVATOR_ACTION)
             {
                 ((BundleActivator) arg1).start((BundleContext) arg2);
@@ -1135,7 +1152,7 @@ public class SecureAction
             {
                 return ((URL) arg1).openConnection();
             }
-            else if (action == OPEN_JARURLCONNECTIONJAR_ACTION)
+            else if (action == GET_JARURLCONNECTION_JAR_ACTION)
             {
                 return ((JarURLConnection) arg1).getJarFile();
             }
@@ -1179,13 +1196,13 @@ public class SecureAction
                 field.setAccessible(true);
                 return field.get(arg3);
             }
-            else if (action == GET_DECLAREDMETHOD_ACTION)
+            else if (action == GET_DECLARED_METHOD_ACTION)
             {
                 return ((Class) arg1).getDeclaredMethod((String) arg2, (Class[]) arg3);
             }
             else if (action == SET_ACCESSIBLE_ACTION)
             {
-                ((Method) arg1).setAccessible(true);
+                ((AccessibleObject) arg1).setAccessible(true);
             }
 
             return null;
