@@ -2002,8 +2002,9 @@ ex.printStackTrace();
             setBundleStateAndNotify(bundle, Bundle.STOPPING);
             fireBundleEvent(BundleEvent.STOPPING, bundle);
 
-            // If the bundle was active, then invoke the activator stop() method.
-            if (wasActive)
+            // If the bundle was active, then invoke the activator stop() method
+            // or if we are stopping the system bundle.
+            if ((wasActive) || (bundle.getBundleId() == 0))
             {
                 try
                 {
