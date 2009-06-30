@@ -1,5 +1,0 @@
--output: work
-Private-Package: org.apache.felix.gogo.cpeg
-Service-Component: org.apache.felix.gogo.cpeg.Procedural; \
-  provide:=org.apache.felix.gogo.cpeg.Procedural; \
-  properties:="osgi.command.scope=proc,osgi.command.function=new"

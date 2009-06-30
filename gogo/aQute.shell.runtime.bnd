@@ -1,9 +1,0 @@
--include: ~default.bnd
-Bundle-Name: Command Shell Service
-Bundle-Description: Provides a shell service
-Private-Package: org.apache.felix.gogo.shell.osgi, org.apache.felix.gogo.shell.runtime
-Export-Package: org.osgi.service.command
-Service-Component: org.apache.felix.gogo.shell.osgi.OSGiShell; \
-  provide:=org.osgi.service.command.CommandProcessor; \
-  threadio=org.osgi.service.threadio.ThreadIO; \
-  converter=org.osgi.service.command.Converter*
