@@ -4251,6 +4251,10 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1])
             acquireBundleLock(Felix.this, Bundle.STOPPING);
             try
             {
+                // Clean up the bundle context.
+                ((BundleContextImpl) getBundleContext()).invalidate();
+                setBundleContext(null);
+
                 // Set the framework state to resolved and open
                 // the shutdown gate.
                 setBundleStateAndNotify(Felix.this, Bundle.RESOLVED);
