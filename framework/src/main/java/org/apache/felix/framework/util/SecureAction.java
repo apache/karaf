@@ -1190,6 +1190,10 @@ public class SecureAction
             {
                 return ((Class) arg1).getConstructor((Class[]) arg2);
             }
+            else if (action == GET_DECLARED_CONSTRUCTOR_ACTION)
+            {
+                return ((Class) arg1).getDeclaredConstructor((Class[]) arg2);
+            }
             else if (action == GET_METHOD_ACTION)
             {
                 return ((Class) arg1).getMethod((String) arg2, (Class[]) arg3);
