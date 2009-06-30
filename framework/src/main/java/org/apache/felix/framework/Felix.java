@@ -123,7 +123,7 @@ public class Felix extends BundleImpl implements Framework
 
     // Shutdown thread.
     private Thread m_shutdownThread = null;
-    private ThreadGate m_shutdownGate = null;
+    private volatile ThreadGate m_shutdownGate = null;
 
     /**
      * <p>
@@ -473,182 +473,190 @@ public class Felix extends BundleImpl implements Framework
      *
      * @throws org.osgi.framework.BundleException if any error occurs.
     **/
-    public synchronized void init() throws BundleException
+    public void init() throws BundleException
     {
         // The system bundle can only be initialized if it currently isn't started.
-        final int state = getState();
-        if ((state == Bundle.INSTALLED) || (state == Bundle.RESOLVED))
+        acquireBundleLock(this,
+            Bundle.INSTALLED | Bundle.RESOLVED | Bundle.STARTING | Bundle.ACTIVE);
+        try
         {
-            // Get any system bundle activators.
-            m_activatorList = (List) m_configMutableMap.get(FelixConstants.SYSTEMBUNDLE_ACTIVATORS_PROP);
-            m_activatorList = (m_activatorList == null) ? new ArrayList() : new ArrayList(m_activatorList);
-
-            // Initialize event dispatcher.
-            m_dispatcher = EventDispatcher.start(m_logger);
-
-            // Create the bundle cache, if necessary, so that we can reload any
-            // installed bundles.
-            m_cache = (BundleCache) m_configMutableMap.get(
-                FelixConstants.FRAMEWORK_BUNDLECACHE_IMPL);
-            if (m_cache == null)
+            if ((getState() == Bundle.INSTALLED) || (getState() == Bundle.RESOLVED))
             {
-                   try
-                   {
-                       m_cache = new BundleCache(m_logger, m_configMap);
-                   }
-                   catch (Exception ex)
-                   {
-                       m_logger.log(Logger.LOG_ERROR, "Error creating bundle cache.", ex);
-                       throw new BundleException("Error creating bundle cache.", ex);
-                   }
-            }
+                // Get any system bundle activators.
+                m_activatorList = (List) m_configMutableMap.get(FelixConstants.SYSTEMBUNDLE_ACTIVATORS_PROP);
+                m_activatorList = (m_activatorList == null) ? new ArrayList() : new ArrayList(m_activatorList);
 
-            // If this is the first time init is called, check to see if
-            // we need to flush the bundle cache.
-            if (state == Bundle.INSTALLED)
-            {
-                String flush = (String) m_configMap.get(Constants.FRAMEWORK_STORAGE_CLEAN);
-                if ((flush != null)
-                    && flush.equalsIgnoreCase(Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT))
+                // Initialize event dispatcher.
+                m_dispatcher = EventDispatcher.start(m_logger);
+
+                // Create the bundle cache, if necessary, so that we can reload any
+                // installed bundles.
+                m_cache = (BundleCache) m_configMutableMap.get(
+                    FelixConstants.FRAMEWORK_BUNDLECACHE_IMPL);
+                if (m_cache == null)
                 {
-                    try
+                       try
+                       {
+                           m_cache = new BundleCache(m_logger, m_configMap);
+                       }
+                       catch (Exception ex)
+                       {
+                           m_logger.log(Logger.LOG_ERROR, "Error creating bundle cache.", ex);
+                           throw new BundleException("Error creating bundle cache.", ex);
+                       }
+                }
+
+                // If this is the first time init is called, check to see if
+                // we need to flush the bundle cache.
+                if (getState() == Bundle.INSTALLED)
+                {
+                    String flush = (String) m_configMap.get(Constants.FRAMEWORK_STORAGE_CLEAN);
+                    if ((flush != null)
+                        && flush.equalsIgnoreCase(Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT))
                     {
-                        m_cache.flush();
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new BundleException("Unable to flush bundle cache.", ex);
+                        try
+                        {
+                            m_cache.flush();
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new BundleException("Unable to flush bundle cache.", ex);
+                        }
                     }
                 }
-            }
 
-            // Initialize installed bundle data structures.
-            m_installedBundleMap = new HashMap();
-            m_installedBundleIndex = new TreeMap();
+                // Initialize installed bundle data structures.
+                m_installedBundleMap = new HashMap();
+                m_installedBundleIndex = new TreeMap();
 
-            // Add the system bundle to the set of installed bundles.
-            m_installedBundleMap.put(_getLocation(), this);
-            m_installedBundleIndex.put(new Long(0), this);
+                // Add the system bundle to the set of installed bundles.
+                m_installedBundleMap.put(_getLocation(), this);
+                m_installedBundleIndex.put(new Long(0), this);
 
-            // Manually resolve the system bundle, which will cause its
-            // state to be set to RESOLVED.
-            try
-            {
-                m_felixResolver.resolve(getCurrentModule());
-            }
-            catch (ResolveException ex)
-            {
-                // This should never happen.
-                throw new BundleException(
-                    "Unresolved constraint in System Bundle:"
-                    + ex.getRequirement());
-            }
-
-            // Reload the cached bundles before creating and starting the
-            // system bundle, since we want all cached bundles to be reloaded
-            // when we activate the system bundle and any subsequent system
-            // bundle activators passed into the framework constructor.
-            BundleArchive[] archives = null;
-
-            // First get cached bundle identifiers.
-            try
-            {
-                archives = m_cache.getArchives();
-            }
-            catch (Exception ex)
-            {
-                m_logger.log(Logger.LOG_ERROR, "Unable to list saved bundles.", ex);
-                archives = null;
-            }
-
-            // Now load all cached bundles.
-            for (int i = 0; (archives != null) && (i < archives.length); i++)
-            {
+                // Manually resolve the system bundle, which will cause its
+                // state to be set to RESOLVED.
                 try
                 {
-                    // Keep track of the max bundle ID currently in use since we
-                    // will need to use this as our next bundle ID value if the
-                    // persisted value cannot be read.
-                    m_nextId = Math.max(m_nextId, archives[i].getId() + 1);
+                    m_felixResolver.resolve(getCurrentModule());
+                }
+                catch (ResolveException ex)
+                {
+                    // This should never happen.
+                    throw new BundleException(
+                        "Unresolved constraint in System Bundle:"
+                        + ex.getRequirement());
+                }
 
-                    // It is possible that a bundle in the cache was previously
-                    // uninstalled, but not completely deleted (perhaps because
-                    // of a crash or a locked file), so if we see an archive
-                    // with an UNINSTALLED persistent state, then try to remove
-                    // it now.
-                    if (archives[i].getPersistentState() == Bundle.UNINSTALLED)
-                    {
-                        m_cache.remove(archives[i]);
-                    }
-                    // Otherwise re-install the cached bundle.
-                    else
-                    {
-                        // Install the cached bundle.
-                        installBundle(archives[i].getId(), archives[i].getLocation(), null);
-                    }
+                // Reload the cached bundles before creating and starting the
+                // system bundle, since we want all cached bundles to be reloaded
+                // when we activate the system bundle and any subsequent system
+                // bundle activators passed into the framework constructor.
+                BundleArchive[] archives = null;
+
+                // First get cached bundle identifiers.
+                try
+                {
+                    archives = m_cache.getArchives();
                 }
                 catch (Exception ex)
                 {
-ex.printStackTrace();
-                    fireFrameworkEvent(FrameworkEvent.ERROR, this, ex);
+                    m_logger.log(Logger.LOG_ERROR, "Unable to list saved bundles.", ex);
+                    archives = null;
+                }
+
+                // Now load all cached bundles.
+                for (int i = 0; (archives != null) && (i < archives.length); i++)
+                {
                     try
                     {
-                        m_logger.log(
-                            Logger.LOG_ERROR,
-                            "Unable to re-install " + archives[i].getLocation(),
-                            ex);
+                        // Keep track of the max bundle ID currently in use since we
+                        // will need to use this as our next bundle ID value if the
+                        // persisted value cannot be read.
+                        m_nextId = Math.max(m_nextId, archives[i].getId() + 1);
+
+                        // It is possible that a bundle in the cache was previously
+                        // uninstalled, but not completely deleted (perhaps because
+                        // of a crash or a locked file), so if we see an archive
+                        // with an UNINSTALLED persistent state, then try to remove
+                        // it now.
+                        if (archives[i].getPersistentState() == Bundle.UNINSTALLED)
+                        {
+                            m_cache.remove(archives[i]);
+                        }
+                        // Otherwise re-install the cached bundle.
+                        else
+                        {
+                            // Install the cached bundle.
+                            installBundle(archives[i].getId(), archives[i].getLocation(), null);
+                        }
                     }
-                    catch (Exception ex2)
+                    catch (Exception ex)
                     {
-                        m_logger.log(
-                            Logger.LOG_ERROR,
-                            "Unable to re-install cached bundle.",
-                            ex);
+ex.printStackTrace();
+                        fireFrameworkEvent(FrameworkEvent.ERROR, this, ex);
+                        try
+                        {
+                            m_logger.log(
+                                Logger.LOG_ERROR,
+                                "Unable to re-install " + archives[i].getLocation(),
+                                ex);
+                        }
+                        catch (Exception ex2)
+                        {
+                            m_logger.log(
+                                Logger.LOG_ERROR,
+                                "Unable to re-install cached bundle.",
+                                ex);
+                        }
+                        // TODO: FRAMEWORK - Perhaps we should remove the cached bundle?
                     }
-                    // TODO: FRAMEWORK - Perhaps we should remove the cached bundle?
                 }
-            }
 
-            // Now that we have loaded all cached bundles and have determined the
-            // max bundle ID of cached bundles, we need to try to load the next
-            // bundle ID from persistent storage. In case of failure, we should
-            // keep the max value.
-            m_nextId = Math.max(m_nextId, loadNextId());
+                // Now that we have loaded all cached bundles and have determined the
+                // max bundle ID of cached bundles, we need to try to load the next
+                // bundle ID from persistent storage. In case of failure, we should
+                // keep the max value.
+                m_nextId = Math.max(m_nextId, loadNextId());
 
-            // Create service registry.
-            m_registry = new ServiceRegistry(m_logger, new ServiceRegistryCallbacks() {
-                public void serviceChanged(ServiceEvent event, Dictionary oldProps)
+                // Create service registry.
+                m_registry = new ServiceRegistry(m_logger, new ServiceRegistryCallbacks() {
+                    public void serviceChanged(ServiceEvent event, Dictionary oldProps)
+                    {
+                        fireServiceEvent(event, oldProps);
+                    }
+                });
+                m_dispatcher.setServiceRegistry(m_registry);
+
+                // The framework is now in its startup sequence.
+                setBundleStateAndNotify(this, Bundle.STARTING);
+
+                // Now it is possible for threads to wait for the framework to stop,
+                // so create a gate for that purpose.
+                m_shutdownGate = new ThreadGate();
+
+                // Create system bundle activator and bundle context so we can activate it.
+                setActivator(new SystemBundleActivator());
+                setBundleContext(new BundleContextImpl(m_logger, this, this));
+                try
                 {
-                    fireServiceEvent(event, oldProps);
+                    Felix.m_secureAction.startActivator(
+                        getActivator(), getBundleContext());
                 }
-            });
-            m_dispatcher.setServiceRegistry(m_registry);
+                catch (Throwable ex)
+                {
+                    EventDispatcher.shutdown();
+                    m_logger.log(Logger.LOG_ERROR, "Unable to start system bundle.", ex);
+                    throw new RuntimeException("Unable to start system bundle.");
+                }
 
-            // The framework is now in its startup sequence.
-            setBundleStateAndNotify(this, Bundle.STARTING);
-
-            // Now it is possible for threads to wait for the framework to stop,
-            // so create a gate for that purpose.
-            m_shutdownGate = new ThreadGate();
-
-            // Create system bundle activator and bundle context so we can activate it.
-            setActivator(new SystemBundleActivator());
-            setBundleContext(new BundleContextImpl(m_logger, this, this));
-            try
-            {
-                Felix.m_secureAction.startActivator(
-                    getActivator(), getBundleContext());
+                // Now that the system bundle is successfully created we can give
+                // its bundle context to the logger so that it can track log services.
+                m_logger.setSystemBundleContext(getBundleContext());
             }
-            catch (Throwable ex)
-            {
-                EventDispatcher.shutdown();
-                m_logger.log(Logger.LOG_ERROR, "Unable to start system bundle.", ex);
-                throw new RuntimeException("Unable to start system bundle.");
-            }
-
-            // Now that the system bundle is successfully created we can give
-            // its bundle context to the logger so that it can track log services.
-            m_logger.setSystemBundleContext(getBundleContext());
+        }
+        finally
+        {
+            releaseBundleLock(this);
         }
     }
 
@@ -665,7 +673,9 @@ ex.printStackTrace();
     {
         int startLevel = FelixConstants.FRAMEWORK_DEFAULT_STARTLEVEL;
 
-        synchronized (this)
+        acquireBundleLock(this,
+            Bundle.INSTALLED | Bundle.RESOLVED | Bundle.STARTING | Bundle.ACTIVE);
+        try
         {
             // Initialize if necessary.
             if ((getState() == Bundle.INSTALLED) || (getState() == Bundle.RESOLVED))
@@ -689,37 +699,38 @@ ex.printStackTrace();
                         startLevel = FelixConstants.FRAMEWORK_DEFAULT_STARTLEVEL;
                     }
                 }
+
+                // Set the start level using the start level service;
+                // this ensures that all start level requests are
+                // serialized.
+                StartLevel sl = null;
+                try
+                {
+                    sl = (StartLevel) getService(
+                        getBundle(0), getServiceReferences((BundleImpl) getBundle(0),
+                        StartLevel.class.getName(), null, true)[0]);
+                }
+                catch (InvalidSyntaxException ex)
+                {
+                    // Should never happen.
+                }
+
+                if (sl instanceof StartLevelImpl)
+                {
+                    ((StartLevelImpl) sl).setStartLevelAndWait(startLevel);
+                }
+                else
+                {
+                    sl.setStartLevel(startLevel);
+                }
+
+                // The framework is now running.
+                setBundleStateAndNotify(this, Bundle.ACTIVE);
             }
         }
-
-        // Set the start level using the start level service;
-        // this ensures that all start level requests are
-        // serialized.
-        StartLevel sl = null;
-        try
+        finally
         {
-            sl = (StartLevel) getService(
-                getBundle(0), getServiceReferences((BundleImpl) getBundle(0),
-                StartLevel.class.getName(), null, true)[0]);
-        }
-        catch (InvalidSyntaxException ex)
-        {
-            // Should never happen.
-        }
-
-        if (sl instanceof StartLevelImpl)
-        {
-            ((StartLevelImpl) sl).setStartLevelAndWait(startLevel);
-        }
-        else
-        {
-            sl.setStartLevel(startLevel);
-        }
-
-        synchronized (this)
-        {
-            // The framework is now running.
-            setBundleStateAndNotify(this, Bundle.ACTIVE);
+            releaseBundleLock(this);
         }
 
         // Fire started event for system bundle.
@@ -775,12 +786,8 @@ ex.printStackTrace();
         }
 
         // If there is a gate, wait on it; otherwise, return immediately.
-        ThreadGate gate;
-        synchronized (this)
-        {
-            gate = m_shutdownGate;
-        }
-
+        // Grab a copy of the gate, since it is volatile.
+        ThreadGate gate = m_shutdownGate;
         if (gate != null)
         {
             gate.await(timeout);
@@ -4143,17 +4150,10 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1])
 
         public void run()
         {
-            // First, start the framework shutdown, which will
-            // stop all bundles.
-            synchronized (Felix.this)
-            {
-                // Change framework state from active to stopping.
-                // If framework is not active, then just return.
-                if (getState() != Bundle.STOPPING)
-                {
-                    return;
-                }
-            }
+            // The state of the framework should be STOPPING, so
+            // acquire the bundle lock to verify it.
+            acquireBundleLock(Felix.this, Bundle.STOPPING);
+            releaseBundleLock(Felix.this);
 
             // Use the start level service to set the start level to zero
             // in order to stop all bundles in the framework. Since framework
@@ -4247,12 +4247,19 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1])
             }
 
             // Set the framework state to resolved.
-            synchronized (Felix.this)
+            acquireBundleLock(Felix.this, Bundle.STOPPING);
+            try
             {
+                // Set the framework state to resolved and open
+                // the shutdown gate.
                 setBundleStateAndNotify(Felix.this, Bundle.RESOLVED);
                 m_shutdownGate.open();
                 m_shutdownGate = null;
                 m_shutdownThread = null;
+            }
+            finally
+            {
+                releaseBundleLock(Felix.this);
             }
         }
     }
