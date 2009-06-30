@@ -56,7 +56,23 @@ public class SecureAction
 
     public SecureAction()
     {
-        m_acc = AccessController.getContext();
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                Actions actions = (Actions) m_actions.get();
+                actions.set(Actions.INITIALIZE_CONTEXT, null);
+                m_acc = (AccessControlContext) AccessController.doPrivileged(actions);
+            }
+            catch (PrivilegedActionException ex)
+            {
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            m_acc = AccessController.getContext();
+        }
     }
 
     public String getSystemProperty(String name, String def)
@@ -947,6 +963,8 @@ public class SecureAction
 
     private static class Actions implements PrivilegedExceptionAction
     {
+        public static final int INITIALIZE_CONTEXT = 0;
+
         public static final int ADD_EXTENSION_URL = 1;
         public static final int CREATE_MODULECLASSLOADER_ACTION = 2;
         public static final int CREATE_TMPFILE_ACTION = 3;
@@ -1054,7 +1072,11 @@ public class SecureAction
 
             unset();
 
-            if (action == GET_PROPERTY_ACTION)
+            if (action == INITIALIZE_CONTEXT)
+            {
+                return AccessController.getContext();
+            }
+            else if (action == GET_PROPERTY_ACTION)
             {
                 return System.getProperty((String) arg1, (String) arg2);
             }
