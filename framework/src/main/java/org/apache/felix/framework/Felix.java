@@ -788,15 +788,26 @@ ex.printStackTrace();
         // If there is a gate, wait on it; otherwise, return immediately.
         // Grab a copy of the gate, since it is volatile.
         ThreadGate gate = m_shutdownGate;
+        boolean open = false;
         if (gate != null)
         {
-            gate.await(timeout);
+            open = gate.await(timeout);
         }
 
-        // TODO: RFC132 - We need to modify this to return the proper reason:
-        //       FrameEvent.STOPPED, FrameEvent.STOPPED_UPDATE,
-        //       FrameEvent.STOPPED_BOOTCLASSPATH_MODIFIED, FrameEvent.ERROR
-        return new FrameworkEvent(FrameworkEvent.STOPPED, this, null);
+        FrameworkEvent event;
+        if (open && (gate.getMessage() != null))
+        {
+            event = (FrameworkEvent) gate.getMessage();
+        }
+        else if (!open && (gate != null))
+        {
+            event = new FrameworkEvent(FrameworkEvent.WAIT_TIMEDOUT, this, null);
+        }
+        else
+        {
+            event = new FrameworkEvent(FrameworkEvent.STOPPED, this, null);
+        }
+        return event;
     }
 
     public void uninstall() throws BundleException
@@ -837,6 +848,9 @@ ex.printStackTrace();
                 {
                     // First acquire the system bundle lock to verify the state.
                     acquireBundleLock(Felix.this, Bundle.STARTING | Bundle.ACTIVE);
+                    // Set the reason for the shutdown.
+                    m_shutdownGate.setMessage(
+                        new FrameworkEvent(FrameworkEvent.STOPPED_UPDATE, Felix.this, null));
                     // Record the state and stop the system bundle.
                     int oldState = Felix.this.getState();
                     try

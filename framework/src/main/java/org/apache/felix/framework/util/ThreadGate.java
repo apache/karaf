@@ -26,6 +26,8 @@ package org.apache.felix.framework.util;
 public class ThreadGate
 {
     private boolean m_open = false;
+    private Object m_msg = null;
+    private boolean m_initialized = false;
 
     /**
      * Open the gate and release any waiting threads.
@@ -37,11 +39,38 @@ public class ThreadGate
     }
 
     /**
+     * Returns the message object associated with the gate; the
+     * message is just an arbitrary object used to pass information
+     * to the waiting threads.
+     * @return the message object associated with the gate.
+    **/
+    public synchronized Object getMessage()
+    {
+        return m_msg;
+    }
+
+    /**
+     * Sets the message object associated with the gate. The message
+     * object can only be set once, subsequent calls to this method
+     * are ignored.
+     * @param msg the message object to associate with this gate.
+    **/
+    public synchronized void setMessage(Object msg)
+    {
+        if (!m_initialized)
+        {
+            m_msg = msg;
+            m_initialized = true;
+        }
+    }
+
+    /**
      * Wait for the gate to open.
+     * @return <tt>true</tt> if the gate was opened or <tt>false</tt> if the timeout expired.
      * @throws java.lang.InterruptedException If the calling thread is interrupted;
      *         the gate still remains closed until opened.
     **/
-    public synchronized void await(long timeout) throws InterruptedException
+    public synchronized boolean await(long timeout) throws InterruptedException
     {
         long start = System.currentTimeMillis();
         long remaining = timeout;
@@ -57,5 +86,6 @@ public class ThreadGate
                 }
             }
         }
+        return m_open;
     }
 }
