@@ -28,8 +28,6 @@ import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLStreamHandler;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.security.ProtectionDomain;
 import java.security.SecureClassLoader;
 import java.util.ArrayList;
@@ -54,6 +52,7 @@ import org.apache.felix.framework.util.manifestparser.R4Library;
 import org.apache.felix.framework.util.manifestparser.Requirement;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.BundleReference;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
@@ -1556,7 +1555,7 @@ public class ModuleImpl implements IModule
         m_dexFileClassLoadClass = dexFileClassLoadClass;
     }
 
-    public class ModuleClassLoader extends SecureClassLoader
+    public class ModuleClassLoader extends SecureClassLoader implements BundleReference
     {
         private final Map m_jarContentToDexFile;
 
@@ -1573,7 +1572,12 @@ public class ModuleImpl implements IModule
             }
         }
 
-        public IModule getModule()
+        public Bundle getBundle()
+        {
+            return ModuleImpl.this.getBundle();
+        }
+
+        IModule getModule()
         {
             return ModuleImpl.this;
         }
