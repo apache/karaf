@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -36,12 +36,12 @@ public class StringMap implements Map
     {
         this(true);
     }
-    
+
     public StringMap(boolean caseSensitive)
     {
         m_map = new TreeMap(new StringComparator(caseSensitive));
     }
-    
+
     public StringMap(Map map, boolean caseSensitive)
     {
         this(caseSensitive);
@@ -55,9 +55,12 @@ public class StringMap implements Map
 
     public void setCaseSensitive(boolean b)
     {
-        TreeMap map = new TreeMap(new StringComparator(b));
-        map.putAll(m_map);
-        m_map = map;
+        if (isCaseSensitive() != b)
+        {
+            TreeMap map = new TreeMap(new StringComparator(b));
+            map.putAll(m_map);
+            m_map = map;
+        }
     }
 
     public int size()
