@@ -3055,9 +3055,11 @@ ex.printStackTrace();
     {
         if (clazz.getClassLoader() instanceof ModuleClassLoader)
         {
-            IModule module =
+            // Only return the bundle if it is from this framework.
+            ModuleImpl module = (ModuleImpl)
                 ((ModuleClassLoader) clazz.getClassLoader()).getModule();
-            return module.getBundle();
+            return (((BundleImpl) module.getBundle()).getFramework() == this)
+                ? module.getBundle() : null;
         }
         try
         {
