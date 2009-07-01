@@ -835,27 +835,54 @@ ex.printStackTrace();
             {
                 try
                 {
-                    stop();
+                    // First acquire the system bundle lock to verify the state.
+                    acquireBundleLock(Felix.this, Bundle.STARTING | Bundle.ACTIVE);
+                    // Record the state and stop the system bundle.
+                    int oldState = Felix.this.getState();
+                    try
+                    {
+                        stop();
+                    }
+                    catch (BundleException ex)
+                    {
+                        m_logger.log(Logger.LOG_WARNING, "Exception stopping framework.", ex);
+                    }
+                    finally
+                    {
+                        releaseBundleLock(Felix.this);
+                    }
+
+                    // Make sure the framework is stopped.
+                    try
+                    {
+                        waitForStop(0);
+                    }
+                    catch (InterruptedException ex)
+                    {
+                        m_logger.log(Logger.LOG_WARNING, "Did not wait for framework to stop.", ex);
+                    }
+
+                    // Depending on the old state, restart the framework.
+                    try
+                    {
+                        switch (oldState)
+                        {
+                            case Bundle.STARTING:
+                                init();
+                                break;
+                            case Bundle.ACTIVE:
+                                start();
+                                break;
+                        }
+                    }
+                    catch (BundleException ex)
+                    {
+                        m_logger.log(Logger.LOG_WARNING, "Exception restarting framework.", ex);
+                    }
                 }
-                catch (BundleException ex)
+                catch (Exception ex)
                 {
-                    m_logger.log(Logger.LOG_WARNING, "Exception stopping framework.", ex);
-                }
-                try
-                {
-                    waitForStop(0);
-                }
-                catch (InterruptedException ex)
-                {
-                    m_logger.log(Logger.LOG_WARNING, "Did not wait for framework to stop.", ex);
-                }
-                try
-                {
-                    start();
-                }
-                catch (BundleException ex)
-                {
-                    m_logger.log(Logger.LOG_WARNING, "Exception restarting framework.", ex);
+                    m_logger.log(Logger.LOG_WARNING, "Cannot update an inactive framework.");
                 }
             }
         }).start();
