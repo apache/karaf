@@ -21,15 +21,17 @@ package org.apache.felix.framework.util;
 import java.util.*;
 
 /**
- * Simple utility class that creates a map for string-based keys by
- * extending <tt>TreeMap</tt>. This map can be set to use case-sensitive
- * or case-insensitive comparison when searching for the key.
- * Any keys put into this map will be converted to
- * a <tt>String</tt> using the <tt>toString()</tt> method,
- * since it is only intended to compare strings.
+ * Simple utility class that creates a map for string-based keys.
+ * This map can be set to use case-sensitive or case-insensitive
+ * comparison when searching for the key.  Any keys put into this
+ * map will be converted to a <tt>String</tt> using the
+ * <tt>toString()</tt> method, since it is only intended to
+ * compare strings.
 **/
-public class StringMap extends TreeMap
+public class StringMap implements Map
 {
+    private TreeMap m_map;
+
     public StringMap()
     {
         this(true);
@@ -37,7 +39,7 @@ public class StringMap extends TreeMap
     
     public StringMap(boolean caseSensitive)
     {
-        super(new StringComparator(caseSensitive));
+        m_map = new TreeMap(new StringComparator(caseSensitive));
     }
     
     public StringMap(Map map, boolean caseSensitive)
@@ -46,11 +48,48 @@ public class StringMap extends TreeMap
         putAll(map);
     }
 
+    public boolean isCaseSensitive()
+    {
+        return ((StringComparator) m_map.comparator()).isCaseSensitive();
+    }
+
+    public void setCaseSensitive(boolean b)
+    {
+        TreeMap map = new TreeMap(new StringComparator(b));
+        map.putAll(m_map);
+        m_map = map;
+    }
+
+    public int size()
+    {
+        return m_map.size();
+    }
+
+    public boolean isEmpty()
+    {
+        return m_map.isEmpty();
+    }
+
+    public boolean containsKey(Object arg0)
+    {
+        return m_map.containsKey(arg0);
+    }
+
+    public boolean containsValue(Object arg0)
+    {
+        return m_map.containsValue(arg0);
+    }
+
+    public Object get(Object arg0)
+    {
+        return m_map.get(arg0);
+    }
+
     public Object put(Object key, Object value)
     {
-        return super.put(key.toString(), value);
+        return m_map.put(key.toString(), value);
     }
-    
+
     public void putAll(Map map)
     {
         for (Iterator it = map.entrySet().iterator(); it.hasNext(); )
@@ -60,19 +99,34 @@ public class StringMap extends TreeMap
         }
     }
 
-    public boolean isCaseSensitive()
+    public Object remove(Object arg0)
     {
-        return ((StringComparator) comparator()).isCaseSensitive();
+        return m_map.remove(arg0);
     }
 
-    public void setCaseSensitive(boolean b)
+    public void clear()
     {
-        ((StringComparator) comparator()).setCaseSensitive(b);
+        m_map.clear();
+    }
+
+    public Set keySet()
+    {
+        return m_map.keySet();
+    }
+
+    public Collection values()
+    {
+        return m_map.values();
+    }
+
+    public Set entrySet()
+    {
+        return m_map.entrySet();
     }
 
     private static class StringComparator implements Comparator
     {
-        private boolean m_isCaseSensitive = true;
+        private final boolean m_isCaseSensitive;
 
         public StringComparator(boolean b)
         {
@@ -94,11 +148,6 @@ public class StringMap extends TreeMap
         public boolean isCaseSensitive()
         {
             return m_isCaseSensitive;
-        }
-
-        public void setCaseSensitive(boolean b)
-        {
-            m_isCaseSensitive = b;
         }
     }
 }
