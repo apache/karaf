@@ -59,9 +59,9 @@
 
     <bean id="bindingListener" class="org.apache.geronimo.blueprint.sample.BindingListener"/>
 
-    <ref-list id="ref-list" interface="org.apache.geronimo.blueprint.sample.InterfaceA">
+    <reference-list id="ref-list" interface="org.apache.geronimo.blueprint.sample.InterfaceA">
         <reference-listener bind-method="bind" unbind-method="unbind" ref="listBindingListener" />
-    </ref-list>
+    </reference-list>
 
     <bean id="listBindingListener" class="org.apache.geronimo.blueprint.sample.BindingListener"/>
 

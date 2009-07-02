@@ -24,11 +24,11 @@
           init-method="init"
           destroy-method="close"/>
 
-    <ref-list id="realms"
-              interface="org.apache.felix.karaf.jaas.config.JaasRealm"
-              availability="optional">
+    <reference-list id="realms"
+                    interface="org.apache.felix.karaf.jaas.config.JaasRealm"
+                    availability="optional">
         <reference-listener ref="config" bind-method="register" unbind-method="unregister" />
-    </ref-list>
+    </reference-list>
 
     <bean id="proxyLoginModuleInitializer" class="org.apache.felix.karaf.jaas.config.impl.ProxyLoginModuleInitializer" init-method="init">
         <property name="bundleContext" ref="blueprintBundleContext"/>
@@ -38,11 +38,11 @@
     <bean id="keystoreManager" class="org.apache.felix.karaf.jaas.config.impl.OsgiKeystoreManager" />
     <service ref="keystoreManager" interface="org.apache.felix.karaf.jaas.config.KeystoreManager" />
 
-    <ref-list id="keystores"
-              interface="org.apache.felix.karaf.jaas.config.KeystoreInstance"
-              availability="optional">
+    <reference-list id="keystores"
+                    interface="org.apache.felix.karaf.jaas.config.KeystoreInstance"
+                    availability="optional">
         <reference-listener ref="keystoreManager" bind-method="register" unbind-method="unregister" />
-    </ref-list>
+    </reference-list>
 
     <service interface="org.apache.geronimo.blueprint.NamespaceHandler">
         <service-properties>
