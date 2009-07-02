@@ -52,10 +52,6 @@ public class ReferenceTag extends AbstractTag {
                 return Util.getEnumValue(annotation, "cardinality", ReferenceCardinality.class, Reference.class);
             }
 
-            public boolean checked() {
-                return Util.getBooleanValue(annotation, "checked", Reference.class);
-            }
-
             public String name() {
                 return Util.getStringValue(annotation, desc, "name", Reference.class);
             }
@@ -107,7 +103,6 @@ public class ReferenceTag extends AbstractTag {
         map.put(Constants.REFERENCE_TARGET, emptyToNull(this.annotation.target()));
         map.put(Constants.REFERENCE_BIND, emptyToNull(this.annotation.bind()));
         map.put(Constants.REFERENCE_UNDBIND, emptyToNull(this.annotation.unbind()));
-        map.put(Constants.REFERENCE_CHECKED, String.valueOf(this.annotation.checked()));
         map.put(Constants.REFERENCE_STRATEGY, this.annotation.strategy().getStrategyString());
 
         return map;

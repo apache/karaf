@@ -23,6 +23,7 @@ import java.lang.annotation.*;
 /**
  * Defines a {@link Property} option.
  */
+@Property(options=@PropertyOption(name="you",value="something"))
 @Target(ElementType.ANNOTATION_TYPE)
 @Retention(RetentionPolicy.SOURCE)
 @Documented

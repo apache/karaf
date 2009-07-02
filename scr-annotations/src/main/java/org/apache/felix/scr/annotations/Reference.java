@@ -95,14 +95,11 @@ public @interface Reference {
     String unbind() default "";
 
     /**
-     * TODO: parameter documentation missing
-     */
-    boolean checked() default false;
-
-    /**
-     * TODO: parameter documentation missing
-     * @since 1.0.9
+     * The reference strategy for the reference. This can either be
+     * {@link ReferenceStrategy#EVENT} in which case the bind and unbind
+     * methods are used or it can be {@link ReferenceStrategy#LOOKUP}
+     * in which case the reference is looked up through the
+     * component context.
      */
     ReferenceStrategy strategy() default ReferenceStrategy.EVENT;
-
 }
