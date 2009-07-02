@@ -62,7 +62,18 @@ public class PropertyTag extends AbstractTag {
             public PropertyOption[] options() {
                 final Object obj = annotation.getNamedParameter("options");
                 if ( obj != null ) {
-                    return (PropertyOption[])obj;
+                    if ( obj instanceof Annotation ) {
+                        final Annotation annotation = (Annotation)obj;
+                        return new PropertyOption[] {new PropertyOptionImpl(annotation, desc)};
+                    }
+                    @SuppressWarnings("unchecked")
+                    final List<Annotation> annotations = (List<Annotation>) obj;
+                    PropertyOption[] options = new PropertyOption[annotations.size()];
+                    for (int index = 0; index < options.length; index++) {
+                        final Annotation propAnnotation = annotations.get(index);
+                        options[index] = new PropertyOptionImpl(propAnnotation, desc);
+                    }
+                    return options;
                 }
                 try {
                     return (PropertyOption[]) Property.class.getMethod("options").getDefaultValue();
@@ -255,4 +266,35 @@ public class PropertyTag extends AbstractTag {
         return parameters.toArray(new String[parameters.size()]);
     }
 
+    protected static class PropertyOptionImpl implements PropertyOption {
+
+        private final Annotation annotation;
+        private final JavaClassDescription description;
+
+        public PropertyOptionImpl(final Annotation annotation,
+                final JavaClassDescription desc) {
+            this.annotation = annotation;
+            this.description = desc;
+        }
+
+        public String name() {
+            final String[] names = Util.getAnnotationValues(annotation, "name", description);
+            if ( names != null && names.length > 0 ) {
+                return names[0];
+            }
+            return null;
+        }
+
+        public String value() {
+            final String[] values = Util.getAnnotationValues(annotation, "value", description);
+            if ( values != null && values.length > 0 ) {
+                return values[0];
+            }
+            return null;
+        }
+
+        public Class<? extends java.lang.annotation.Annotation> annotationType() {
+            return PropertyOption.class;
+        }
+    }
 }

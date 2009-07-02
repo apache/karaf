@@ -378,7 +378,7 @@ public abstract class Util {
         return ((AnnotationConstant)av).getValue().toString();
     }
 
-    private static String[] getAnnotationValues(final Annotation annotation, final String name, final JavaClassDescription desc)
+    public static String[] getAnnotationValues(final Annotation annotation, final String name, final JavaClassDescription desc)
     throws IllegalArgumentException
     {
         final AnnotationValue av = annotation.getProperty(name);
