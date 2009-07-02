@@ -24,7 +24,7 @@
              ref="featureDeploymentListener"/>
 
     <bean id="featureDeploymentListener" class="org.apache.felix.karaf.deployer.features.FeatureDeploymentListener"
-          init-method="init" destroy-method="destroy" initialization="lazy">
+          init-method="init" destroy-method="destroy" activation="lazy">
         <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="featuresService">
             <reference interface="org.apache.felix.karaf.gshell.features.FeaturesService"/>
