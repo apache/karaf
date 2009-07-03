@@ -33,7 +33,6 @@ import org.apache.felix.moduleloader.IContent;
 public class JarContent implements IContent
 {
     private static final int BUFSIZE = 4096;
-    private static final transient String LEGACY_EMBEDDED_DIRECTORY = "embedded";
     private static final transient String EMBEDDED_DIRECTORY = "-embedded";
     private static final transient String LIBRARY_DIRECTORY = "lib";
 
@@ -42,8 +41,6 @@ public class JarContent implements IContent
     private final File m_rootDir;
     private final File m_file;
     private JarFileX m_jarFile = null;
-    // TODO: CACHE - It would be nice to eventually remove this legacy flag.
-    private final boolean m_legacy;
 
     public JarContent(Logger logger, Object revisionLock, File rootDir, File file)
     {
@@ -51,17 +48,6 @@ public class JarContent implements IContent
         m_revisionLock = revisionLock;
         m_rootDir = rootDir;
         m_file = file;
-        m_legacy = false;
-    }
-
-    // This is only used by JarRevision.
-    public JarContent(Logger logger, Object revisionLock, File rootDir, File file, boolean legacy)
-    {
-        m_logger = logger;
-        m_revisionLock = revisionLock;
-        m_rootDir = rootDir;
-        m_file = file;
-        m_legacy = legacy;
     }
 
     protected void finalize()
@@ -291,7 +277,7 @@ public class JarContent implements IContent
         // just return it immediately.
         if (entryName.equals(FelixConstants.CLASS_PATH_DOT))
         {
-            return new JarContent(m_logger, m_revisionLock, m_rootDir, m_file, m_legacy);
+            return new JarContent(m_logger, m_revisionLock, m_rootDir, m_file);
         }
 
         // Remove any leading slash.
@@ -302,15 +288,7 @@ public class JarContent implements IContent
         // embedded JAR files, the embedded directory is per embedded JAR file.
         // For backwards compatibility purposes, don't use the file cache name
         // for the root bundle JAR file.
-        File embedDir;
-        if (m_legacy)
-        {
-            embedDir = new File(m_rootDir, LEGACY_EMBEDDED_DIRECTORY);
-        }
-        else
-        {
-            embedDir = new File(m_rootDir, m_file.getName() + EMBEDDED_DIRECTORY);
-        }
+        File embedDir = new File(m_rootDir, m_file.getName() + EMBEDDED_DIRECTORY);
 
         // Find the entry in the JAR file and create the
         // appropriate content type for it.
@@ -490,15 +468,7 @@ public class JarContent implements IContent
         // embedded JAR files, the embedded directory is per embedded JAR file.
         // For backwards compatibility purposes, don't use the file cache name
         // for the root bundle JAR file.
-        File embedDir;
-        if (m_legacy)
-        {
-            embedDir = new File(m_rootDir, LEGACY_EMBEDDED_DIRECTORY);
-        }
-        else
-        {
-            embedDir = new File(m_rootDir, m_file.getName() + EMBEDDED_DIRECTORY);
-        }
+        File embedDir = new File(m_rootDir, m_file.getName() + EMBEDDED_DIRECTORY);
         File jarFile = new File(embedDir, jarPath);
 
         if (!BundleCache.getSecureAction().fileExists(jarFile))

@@ -105,7 +105,7 @@ class JarRevision extends BundleRevision
 
     public synchronized IContent getContent() throws Exception
     {
-        return new JarContent(getLogger(), this, getRevisionRootDir(), m_bundleFile, true);
+        return new JarContent(getLogger(), this, getRevisionRootDir(), m_bundleFile);
     }
 
     public void dispose() throws Exception
