@@ -1,5 +1,5 @@
 <ipojo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="org.apache.felix.ipojo hhttp://felix.apache.org/ipojo/schemas/1.1.0-SNAPSHOT/core.xsd" 
+	xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/SCHEMA-DEV/core.xsd"
 	xmlns="org.apache.felix.ipojo">
 		<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn"
@@ -14,7 +14,7 @@
 			<property name="intAProp" field="intAProp" value="{1,2, 3}" />
 		</properties>
 	</component>
-	
+
 	<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn"
 		name="CONFIG-FooProviderType-ConfNoValue" architecture="true">
@@ -27,8 +27,8 @@
 			<property name="intAProp" field="intAProp"/>
 		</properties>
 	</component>
-	
-	
+
+
 	<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="CONFIG-FooProviderType-3" architecture="true">
@@ -147,7 +147,7 @@
 				type="java.lang.String[]" />
 		</properties>
 	</component>
-	
+
 	<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="CONFIG-FooProviderType-4" architecture="true">
@@ -161,7 +161,7 @@
 			<property name="bar" field="m_bar" />
 		</properties>
 	</component>
-	
+
 	<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.ComplexConfiguration">
 		<provides>
@@ -186,7 +186,7 @@
 			<property name="dict" field="m_dict"/>
 		</properties>
 	</component>
-	
+
 	<instance component="org.apache.felix.ipojo.test.scenarios.component.ComplexConfiguration" name="complex">
 		<property name="array" type="array">
 			<property value="a"/>
@@ -238,7 +238,7 @@
 		<property name="empty-list" type="list"/>
 		<property name="empty-map" type="map"/>
 	</instance>
-	
+
 	<component classname="org.apache.felix.ipojo.test.scenarios.component.PropertyModifier">
 		<provides>
 			<property field="classes"/>
@@ -247,7 +247,7 @@
 			<property method="setClasses" name="cls"/>
 		</properties>
 	</component>
-	
+
 	<!--  updated -->
 	 <component
 		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn"
@@ -262,7 +262,7 @@
 			<property name="intAProp" field="intAProp" value="{1,2, 3}" />
 		</properties>
 	</component>
-	
+
 	<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderTypeDyn"
 		name="CONFIG-FooProviderType-ConfNoValueUpdated" architecture="true">
@@ -275,7 +275,7 @@
 			<property name="intAProp" field="intAProp"/>
 		</properties>
 	</component>
-	
+
 	<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="CONFIG-FooProviderType-4Updated" architecture="true">
@@ -289,7 +289,7 @@
 			<property name="bar" field="m_bar" />
 		</properties>
 	</component>
-	
+
 	<component
 		classname="org.apache.felix.ipojo.test.scenarios.component.FooProviderType1"
 		name="CONFIG-FooProviderType-3Updated" architecture="true">
@@ -303,5 +303,5 @@
 			<property name="bar" field="m_bar" />
 		</properties>
 	</component>
-	
+
 </ipojo>

@@ -60,7 +60,7 @@ public class BundleAsiPOJO implements BundleAs<URL> {
                 }
             }
             e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e.getMessage() + " : " + list);
         }
 
     }

@@ -9,7 +9,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo</artifactId>
-      <version>1.3.0-SNAPSHOT</version>
+      <version>${pom.version}</version>
     </dependency>
 	<dependency>
 		<groupId>org.apache.felix</groupId>
@@ -44,7 +44,7 @@
 	<plugin>
 		<groupId>org.apache.felix</groupId>
 		<artifactId>maven-ipojo-plugin</artifactId>
-		<version>1.3.0-SNAPSHOT</version>
+		<version>${pom.version}</version>
 		<executions>
 			<execution>
 				<goals>
@@ -54,10 +54,10 @@
 					<ignoreAnnotations>true</ignoreAnnotations>
 					<metadata>
    					<![CDATA[
-   					<ipojo 
+   					<ipojo
     					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-						xsi:schemaLocation="org.apache.felix.ipojo http://felix.apache.org/ipojo/schemas/1.1.0-SNAPSHOT/core.xsd 
-	 					org.apache.felix.ipojo.whiteboard http://felix.apache.org/ipojo/schemas/1.1.0-SNAPSHOT/whiteboard-pattern.xsd"
+						xsi:schemaLocation="org.apache.felix.ipojo http://felix.apache.org/ipojo/schemas/SNAPSHOT/core.xsd
+	 					org.apache.felix.ipojo.whiteboard http://felix.apache.org/ipojo/schemas/SNAPSHOT/whiteboard-pattern.xsd"
 						xmlns="org.apache.felix.ipojo"
 						xmlns:wbp="org.apache.felix.ipojo.whiteboard">
 						<component classname="org.apache.felix.ipojo.test.FooProvider" name="fooprovider">
@@ -65,17 +65,17 @@
 								<property field="foo" value="foo"/>
 							</provides>
 						</component>
-	
+
 						<component classname="org.apache.felix.ipojo.test.FooWhiteBoardPattern" name="under-providers">
-								<wbp:wbp 
-									filter="(objectclass=org.apache.felix.ipojo.test.FooService)" 
+								<wbp:wbp
+									filter="(objectclass=org.apache.felix.ipojo.test.FooService)"
 									onArrival="onArrival" onDeparture="onDeparture" onModification="onModification"
 								/>
 								<provides/>
 						</component>
-	
+
 						<component classname="org.apache.felix.ipojo.test.FooWhiteBoardPattern" name="under-properties">
-								<wbp:wbp filter="(foo=foo)" onArrival="onArrival" onDeparture="onDeparture" 
+								<wbp:wbp filter="(foo=foo)" onArrival="onArrival" onDeparture="onDeparture"
 									onModification="onModification"
 								/>
 								<provides/>

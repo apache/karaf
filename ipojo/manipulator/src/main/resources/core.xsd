@@ -6,9 +6,9 @@
 	to you under the Apache License, Version 2.0 (the
 	"License"); you may not use this file except in compliance
 	with the License.  You may obtain a copy of the License at
-	
+
 	http://www.apache.org/licenses/LICENSE-2.0
-	
+
 	Unless required by applicable law or agreed to in writing,
 	software distributed under the License is distributed on an
 	"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -107,6 +107,11 @@
                     	<xs:documentation>The (unique) name of the instance.</xs:documentation>
                     </xs:annotation>
 				</xs:attribute>
+				<xs:attribute name="version" type="xs:string" use="optional">
+                    <xs:annotation>
+                    	<xs:documentation>The version of the factory to use.</xs:documentation>
+                    </xs:annotation>
+				</xs:attribute>
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
@@ -201,6 +206,10 @@ The 'instance.name' property has a special semantic as it will be used as the in
 			<xs:annotation>
 				<xs:documentation>Factory method called to create POJO objects instead of the constructor. The specified method must be a static method of the implementation class returning an instance of this implementation class. The factory method can receive the bundle context in argument.</xs:documentation>
 			</xs:annotation></xs:attribute>
+		<xs:attribute name="version" type="xs:string" use="optional">
+			<xs:annotation>
+				<xs:documentation>Set the version of this component type</xs:documentation>
+			</xs:annotation></xs:attribute>
 	</xs:complexType>
 	<xs:complexType name="RequiresType">
         <xs:annotation>
@@ -216,14 +225,14 @@ The 'instance.name' property has a special semantic as it will be used as the in
                         </xs:annotation>
 					</xs:element>
 				</xs:sequence>
-				
+
 				<xs:attribute name="interface" type="xs:string"
 				    use="prohibited">
                     <xs:annotation>
                     	<xs:documentation>The interface describing the required service type. This attribute is needed only when using aggregate dependencies with field injection and when the type of this field is a list, vector, collection and set. This attribute is deprecated, use 'specification'.</xs:documentation>
                     </xs:annotation>
 				</xs:attribute>
-				
+
 				<xs:attribute name="field" type="xs:string"
 					use="optional">
                     <xs:annotation>
@@ -251,7 +260,7 @@ The 'instance.name' property has a special semantic as it will be used as the in
                     	<xs:documentation>Specific service provider. The dependency can only be fulfilled by the component with the matching name, or by the service with a matching PID.</xs:documentation>
                     </xs:annotation>
 				</xs:attribute>
-				
+
 				<xs:attribute name="scope" use="optional">
 					<xs:simpleType>
 						<xs:restriction base="xs:string">
@@ -309,7 +318,7 @@ The 'instance.name' property has a special semantic as it will be used as the in
 		</xs:attribute>
 	</xs:complexType>
 	<xs:element name="provides" type="ProvidesType" id="provides"></xs:element>
-	<xs:complexType name="ProvidesType">
+		<xs:complexType name="ProvidesType">
         <xs:annotation>
         	<xs:documentation>Provided service(s) description.</xs:documentation>
         </xs:annotation>
@@ -397,7 +406,7 @@ The 'instance.name' property has a special semantic as it will be used as the in
     <xs:element name="properties" type="PropertiesType" id="properties"></xs:element>
 	<xs:complexType name="PropertiesType">
         <xs:annotation>
-        	<xs:documentation>List configuration properties. This field will receive the property value.</xs:documentation>
+        	<xs:documentation>List of component, instance or service properties. This field will receive the property value.</xs:documentation>
         </xs:annotation>
         <xs:sequence minOccurs="0" maxOccurs="unbounded">
 			<xs:element name="property" type="PropertyType">
@@ -415,10 +424,10 @@ The 'instance.name' property has a special semantic as it will be used as the in
 			</xs:annotation></xs:attribute>
 		<xs:attribute name="updated" type="xs:string" use="optional">
 			<xs:annotation>
-				<xs:documentation>Updated method called when a reconfiguration is done</xs:documentation>
+				<xs:documentation>Method called when a reconfiguration is done</xs:documentation>
 			</xs:annotation></xs:attribute>
 	</xs:complexType>
-	
+
 	<xs:complexType name="ServiceDependencyType">
 	    <xs:attribute name="specification" type="xs:string" use="optional">
 	    	<xs:annotation>

@@ -1,6 +1,9 @@
 package org.apache.felix.ipojo.tests.core;
 
 import static org.apache.felix.ipojo.tinybundles.BundleAsiPOJO.asiPOJOBundle;
+import static org.ops4j.pax.exam.CoreOptions.equinox;
+import static org.ops4j.pax.exam.CoreOptions.felix;
+import static org.ops4j.pax.exam.CoreOptions.knopflerfish;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
@@ -57,6 +60,9 @@ public class FactoryVersionTest {
         tmp.mkdirs();
 
         Option[] opt =  options(
+                felix(),
+                equinox(),
+                knopflerfish(),
                 provision(
                         // Runtime.
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),

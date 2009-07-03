@@ -3,8 +3,10 @@ package org.apache.felix.org.apache.felix.ipojo.online.manipulator.test;
 
 import static org.ops4j.pax.exam.CoreOptions.equinox;
 import static org.ops4j.pax.exam.CoreOptions.felix;
+import static org.ops4j.pax.exam.CoreOptions.knopflerfish;
 import static org.ops4j.pax.exam.CoreOptions.frameworks;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.MavenUtils.asInProject;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
@@ -74,24 +76,25 @@ public class OnlineManipulatorTest {
                 frameworks(
                         felix(),
                         equinox()
+                      //  knopflerfish() KF does not export an XML parser.
                     ),
             provision(
                 mavenBundle()
-                    .groupId( "org.ops4j.pax.tinybundles" )
-                    .artifactId( "pax-tinybundles-core" )
-                    .version( "0.5.0-SNAPSHOT" )),
+                    .groupId( "org.ops4j.pax.swissbox" )
+                    .artifactId( "pax-swissbox-tinybundles" )
+                    .version(asInProject())),
             provision(
                     mavenBundle()
                     .groupId("org.apache.felix")
                     .artifactId("org.apache.felix.ipojo")
-                    .version("1.3.0-SNAPSHOT")
+                    .version(asInProject())
             ),
 
             provision(
                     mavenBundle()
                     .groupId("org.apache.felix")
                     .artifactId("org.apache.felix.ipojo.online.manipulator")
-                    .version("1.3.0-SNAPSHOT")
+                    .version(asInProject())
                     ),
             provision(
                             newBundle()

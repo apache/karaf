@@ -1,7 +1,7 @@
 <ipojo
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="org.apache.felix.ipojo http://felix.apache.org/ipojo/schemas/1.1.0-SNAPSHOT/core.xsd 
-	    org.apache.felix.composite http://felix.apache.org/ipojo/schemas/1.1.0-SNAPSHOT/composite.xsd"
+	xsi:schemaLocation="org.apache.felix.ipojo http://felix.apache.org/ipojo/schemas/SNAPSHOT/core.xsd
+	    org.apache.felix.composite http://felix.apache.org/ipojo/schemas/SNAPSHOT/composite.xsd"
 	xmlns="org.apache.felix.ipojo"
 	xmlns:comp="org.apache.felix.ipojo.composite"
 	xmlns:cs="org.apache.felix.ipojo.test.composite.handler.CheckServiceHandler">
@@ -76,13 +76,13 @@
 			<property name="baz" type="java.lang.String" value="bar" />
 		</provides>
 	</component>
-	
+
 	<component
 		classname="org.apache.felix.ipojo.test.composite.component.BazProviderType1"
 		name="BazProviderType">
 		<provides />
 	</component>
-	
+
 	<component
 		classname="org.apache.felix.ipojo.test.composite.component.TataProvider"
 		name="tata">
@@ -100,14 +100,14 @@
 		name="totoglue">
 		<requires field="m_toto" scope="composite" />
 	</component>
-	
+
 	<!--  Composite -->
 	<comp:composite name="composite.empty" architecture="true">
 	</comp:composite>
-	
+
 	<component classname="org.apache.felix.ipojo.test.composite.component.Baz2CheckProvider" name="Baz2CheckProvider" architecture="true">
 		<requires field="fs" scope="composite"/>
 		<provides/>
 	</component>
-	
+
 </ipojo>

@@ -1,4 +1,6 @@
-<ipojo>
+<ipojo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="org.apache.felix.ipojo http://people.apache.org/~clement/ipojo/SCHEMA-DEV/core.xsd"
+	xmlns="org.apache.felix.ipojo">
 	<component name="provider" classname="org.apache.felix.ipojo.tests.core.component.MyComponent" version="1.0">
 		<provides/>
 	</component>

@@ -4,6 +4,11 @@ import static org.apache.felix.ipojo.tinybundles.BundleAsiPOJO.asiPOJOBundle;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
+import static org.ops4j.pax.exam.CoreOptions.felix;
+import static org.ops4j.pax.exam.CoreOptions.equinox;
+import static org.ops4j.pax.exam.CoreOptions.knopflerfish;
+import static org.ops4j.pax.exam.MavenUtils.asInProject;
+
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.asURL;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.newBundle;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.with;
@@ -47,16 +52,19 @@ public class BundleCreationTest {
         }
 
         return options(
+            felix(),
+            equinox(),
+            knopflerfish(),
             provision(
-                mavenBundle()
-                    .groupId( "org.ops4j.pax.tinybundles" )
-                    .artifactId( "pax-tinybundles-core" )
-                    .version( "0.5.0-SNAPSHOT" )),
+                    mavenBundle()
+                    .groupId( "org.ops4j.pax.swissbox" )
+                    .artifactId( "pax-swissbox-tinybundles" )
+                    .version( asInProject() )),
             provision(
                     mavenBundle()
                     .groupId("org.apache.felix")
                     .artifactId("org.apache.felix.ipojo")
-                    .version("1.3.0-SNAPSHOT")
+                    .version ( asInProject() )
             ),
             provision(
                             newBundle()

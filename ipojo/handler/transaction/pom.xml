@@ -24,7 +24,7 @@
       <plugin>
 	      <groupId>org.apache.felix</groupId>
 	      <artifactId>maven-ipojo-plugin</artifactId>
-	      <version>1.3.0-SNAPSHOT</version>
+	      <version>${pom.version}</version>
 		  <executions>
           	<execution>
             	<goals>
@@ -48,12 +48,12 @@
   	<dependency>
   		<groupId>org.apache.felix</groupId>
   		<artifactId>org.apache.felix.ipojo</artifactId>
-  		<version>1.3.0-SNAPSHOT</version>
+  		<version>${pom.version}</version>
   	</dependency>
   	<dependency>
   		<groupId>org.apache.felix</groupId>
   		<artifactId>org.apache.felix.ipojo.metadata</artifactId>
-  		<version>1.3.0-SNAPSHOT</version>
+  		<version>${pom.version}</version>
   	</dependency>
   	<dependency>
   		<groupId>org.apache.felix</groupId>

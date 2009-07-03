@@ -3,6 +3,9 @@ package org.apache.felix.ipojo.tests.api;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.ops4j.pax.exam.CoreOptions.equinox;
+import static org.ops4j.pax.exam.CoreOptions.felix;
+import static org.ops4j.pax.exam.CoreOptions.knopflerfish;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
@@ -26,29 +29,32 @@ import org.osgi.framework.BundleContext;
 
 @RunWith( JUnit4TestRunner.class )
 public class ExternalHandlerTest {
-    
+
     @Inject
     private BundleContext context;
-    
+
     private OSGiHelper osgi;
-    
+
     private IPOJOHelper ipojo;
-    
+
     @Before
     public void init() {
         osgi = new OSGiHelper(context);
         ipojo = new IPOJOHelper(context);
     }
-    
+
     @After
     public void stop() {
         ipojo.dispose();
         osgi.dispose();
     }
-    
+
     @Configuration
-    public static Option[] configure() {    
+    public static Option[] configure() {
         Option[] opt =  options(
+                felix(),
+                equinox(),
+                knopflerfish(),
                 provision(
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version(asInProject()),
                         mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.api").version(asInProject()),
@@ -57,7 +63,7 @@ public class ExternalHandlerTest {
                 );
         return opt;
     }
-    
+
     @Test
     public void createAHost() throws Exception {
         PrimitiveComponentType type = createAWhiteboardHost();
@@ -66,7 +72,7 @@ public class ExternalHandlerTest {
         HandlerDescription hd = ci.getInstanceDescription().getHandlerDescription(Whiteboard.NAMESPACE + ":" + Whiteboard.NAME);
         assertThat (hd, is (notNullValue()));
     }
-    
+
     @Test
     public void createDoubleHost() throws Exception {
         PrimitiveComponentType type = createASecondWhiteboardHost();
@@ -75,7 +81,7 @@ public class ExternalHandlerTest {
         HandlerDescription hd = ci.getInstanceDescription().getHandlerDescription(Whiteboard.NAMESPACE + ":" + Whiteboard.NAME);
         assertThat (hd, is (notNullValue()));
     }
-    
+
     private PrimitiveComponentType createAWhiteboardHost() {
         return new PrimitiveComponentType()
         .setBundleContext(context)
@@ -86,7 +92,7 @@ public class ExternalHandlerTest {
             .setFilter("(foo=foo)")
          );
     }
-    
+
     private PrimitiveComponentType createASecondWhiteboardHost() {
         return new PrimitiveComponentType()
         .setBundleContext(context)

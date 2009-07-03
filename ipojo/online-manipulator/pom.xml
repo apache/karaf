@@ -45,7 +45,7 @@
 							org.apache.felix.ipojo.manipulation,
 							org.apache.felix.ipojo.manipulation.annotations,
 							org.objectweb.asm.commons, org.objectweb.asm </Export-Package>
-						<Import-Package> !org.objectweb.asm.tree, !sun.io, * 
+						<Import-Package> !org.objectweb.asm.tree, !sun.io, org.osgi.framework;version=1.3, *
 						</Import-Package>
 						<!-- <Embed-Dependency>xercesImpl|xml-resolver</Embed-Dependency> -->
 					</instructions>
@@ -54,7 +54,7 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-ipojo-plugin</artifactId>
-				<version>1.3.0-SNAPSHOT</version>
+				<version>${pom.version}</version>
 				<executions>
 					<execution>
 						<goals>
@@ -91,7 +91,7 @@
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.ipojo.manipulator</artifactId>
-			<version>1.3.0-SNAPSHOT</version>
+			<version>${pom.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>asm</groupId>

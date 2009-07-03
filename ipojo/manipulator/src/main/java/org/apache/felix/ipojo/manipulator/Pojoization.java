@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -66,7 +66,7 @@ public class Pojoization {
     /**
      * iPOJO Imported Package Version.
      */
-    public static final String IPOJO_PACKAGE_VERSION = " 1.3.0";
+    public static final String IPOJO_PACKAGE_VERSION = " 1.4.0";
 
     /**
      * List of component types.
