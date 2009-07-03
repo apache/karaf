@@ -31,7 +31,8 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.felix</groupId>
-            <artifactId>org.osgi.core</artifactId>
+            <artifactId>org.apache.felix.framework</artifactId>
+            <version>1.8.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

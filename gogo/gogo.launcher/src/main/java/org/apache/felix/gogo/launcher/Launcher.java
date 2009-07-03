@@ -22,7 +22,8 @@ import org.apache.felix.gogo.runtime.osgi.OSGiShell;
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
 import org.apache.felix.gogo.console.stdio.Console;
 import org.osgi.framework.Bundle;
-import org.osgi.service.command.CommandProcessor;
+import org.osgi.framework.launch.FrameworkFactory;
+import org.osgi.framework.launch.Framework;
 import org.osgi.service.command.CommandSession;
 
 import java.io.*;
@@ -40,7 +41,7 @@ public class Launcher
     public static void main(String args[]) throws Exception
     {
         StringBuffer sb = new StringBuffer();
-        String framework = null;
+        String fwkClassName = null;
         PrintStream out = System.out;
         InputStream in = System.in;
         boolean console = false;
@@ -50,7 +51,7 @@ public class Launcher
             String arg = args[i];
             if (arg.equals("-f"))
             {
-                framework = args[++i];
+                fwkClassName = args[++i];
             }
             else
             {
@@ -87,27 +88,30 @@ public class Launcher
             }
         }
 
-        if (framework == null)
+        URL[] urls = classpath.toArray(new URL[classpath.size()]);
+        URLClassLoader cl = new URLClassLoader(urls, Launcher.class.getClassLoader());
+
+        Properties p = new Properties(System.getProperties());
+
+        Framework framework;
+        if (fwkClassName == null)
         {
-            System.err.println("No framework set");
-            System.exit(1);
+            framework = getFrameworkFactory(cl).newFramework(p);
+        }
+        else
+        {
+            Class<?> fw = cl.loadClass(fwkClassName);
+            Constructor<?> c = fw.getConstructor(Map.class, List.class);
+            framework = (Framework) c.newInstance(p);
         }
 
         ThreadIOImpl threadio = new ThreadIOImpl();
         threadio.start();
-        URL[] urls = classpath.toArray(new URL[classpath.size()]);
-        URLClassLoader urlcl = new URLClassLoader(urls, Launcher.class.getClassLoader());
-        Class<?> fw = urlcl.loadClass(framework);
-
-        Constructor<?> c = fw.getConstructor(Map.class, List.class);
-        Properties p = new Properties(System.getProperties());
-        Bundle bundle = (Bundle) c.newInstance(p, null);
 
         OSGiShell shell = new OSGiShell();
         shell.setThreadio(threadio);
-        shell.setBundle(bundle);
+        shell.setBundle(framework);
         shell.start();
-
 
         CommandSession session = shell.createSession(in, out, System.err);
         session.put("shell", shell);
@@ -116,7 +120,7 @@ public class Launcher
         session.execute(sb);
         out.flush();
 
-        if (bundle.getState() == Bundle.ACTIVE)
+        if (framework.getState() == Bundle.ACTIVE)
         {
         }
         if (console)
@@ -125,6 +129,42 @@ public class Launcher
             cons.setSession(session);
             cons.run();
         }
+    }
+
+    /**
+     * Simple method to search for META-INF/services for a FrameworkFactory
+     * provider. It simply looks for the first non-commented line and assumes
+     * it is the name of the provider class.
+     * @return a <tt>FrameworkFactory</tt> instance.
+     * @throws Exception if anything goes wrong.
+    **/
+    private static FrameworkFactory getFrameworkFactory(ClassLoader cl)
+        throws Exception
+    {
+        URL url = cl.getResource(
+            "META-INF/services/org.osgi.framework.launch.FrameworkFactory");
+        if (url != null)
+        {
+            BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+            try
+            {
+                for (String s = br.readLine(); s != null; s = br.readLine())
+                {
+                    s = s.trim();
+                    // Try to load first non-empty, non-commented line.
+                    if ((s.length() > 0) && (s.charAt(0) != '#'))
+                    {
+                        return (FrameworkFactory) cl.loadClass(s).newInstance();
+                    }
+                }
+            }
+            finally
+            {
+                if (br != null) br.close();
+            }
+        }
+
+        throw new Exception("Could not find framework factory.");
     }
 
     private static void classpath(String string) throws MalformedURLException
