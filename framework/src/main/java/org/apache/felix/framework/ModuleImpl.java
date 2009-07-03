@@ -1876,7 +1876,7 @@ public class ModuleImpl implements IModule
             R4Library[] libs = getNativeLibraries();
             for (int i = 0; (libs != null) && (i < libs.length); i++)
             {
-                if (libs[i].match(name))
+                if (libs[i].match(m_configMap, name))
                 {
                     return getContent().getEntryAsNativeLibrary(libs[i].getEntryName());
                 }

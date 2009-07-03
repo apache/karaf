@@ -18,6 +18,7 @@
  */
 package org.apache.felix.framework.util.manifestparser;
 
+import java.util.Map;
 import org.osgi.framework.Constants;
 
 public class R4Library
@@ -80,26 +81,41 @@ public class R4Library
      * @return <tt>true</tt> if this native library name matches this native
      *         library definition; <tt>false</tt> otherwise.
     **/
-    public boolean match(String name)
+    public boolean match(Map configMap, String name)
     {
         String libname = System.mapLibraryName(name);
-        if (m_libraryFile.equals(libname) || m_libraryFile.endsWith("/" + libname))
+        String[] exts = ManifestParser.parseDelimitedString(
+            (String) configMap.get(Constants.FRAMEWORK_LIBRARY_EXTENSIONS), ",");
+        int extIdx = 0;
+
+        // First try to match the default name, then try to match any additionally
+        // specified library extensions.
+        do
         {
-            return true;
-        }
-        else if (libname.endsWith(".jnilib") &&
-            m_libraryFile.endsWith(".dylib"))
-        {
-            libname = libname.substring(0, libname.length() - 6) + "dylib";
             if (m_libraryFile.equals(libname) || m_libraryFile.endsWith("/" + libname))
             {
                 return true;
             }
+            else if (libname.endsWith(".jnilib") && m_libraryFile.endsWith(".dylib"))
+            {
+                libname = libname.substring(0, libname.length() - 6) + "dylib";
+                if (m_libraryFile.equals(libname) || m_libraryFile.endsWith("/" + libname))
+                {
+                    return true;
+                }
+            }
+            else if (m_libraryFile.equals(name) || m_libraryFile.endsWith("/" + name))
+            {
+                return true;
+            }
+
+            int idx = libname.lastIndexOf(".");
+            libname = (idx < 0)
+                ? libname + "." + exts[extIdx++]
+                : libname.substring(0, idx) + "." + exts[extIdx++];
         }
-        else if (m_libraryFile.equals(name) || m_libraryFile.endsWith("/" + name))
-        {
-            return true;
-        }
+        while ((exts != null) && (extIdx < exts.length));
+
         return false;
     }
 
