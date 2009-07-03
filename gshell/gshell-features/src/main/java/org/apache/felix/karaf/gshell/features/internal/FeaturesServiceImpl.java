@@ -328,6 +328,9 @@ public class FeaturesServiceImpl implements FeaturesService {
     }
 
     protected Feature getFeature(String name, String version) throws Exception {
+        if (version != null) {
+            version = version.trim();
+        }
         Map<String, Feature> versions = getFeatures().get(name);
         if (versions == null || versions.isEmpty()) {
             return null;
