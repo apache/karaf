@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -77,7 +78,10 @@ public class RepositoryImpl implements Repository {
             repositories = new ArrayList<URI>();
             features = new ArrayList<Feature>();
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            Document doc = factory.newDocumentBuilder().parse(uri.toURL().openStream());
+            URLConnection conn = uri.toURL().openConnection();
+            conn.setDefaultUseCaches(false);
+            Document doc = factory.newDocumentBuilder().parse(conn.getInputStream());
+            
             NodeList nodes = doc.getDocumentElement().getChildNodes();
             for (int i = 0; i < nodes.getLength(); i++) {
                 Node node = nodes.item(i);
