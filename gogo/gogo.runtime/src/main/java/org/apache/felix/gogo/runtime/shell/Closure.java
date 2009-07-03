@@ -235,7 +235,7 @@ public class Closure extends Reflective implements Function
                 {
                     return false;
                 }
-                return seq;
+                return result;
         }
     }
 

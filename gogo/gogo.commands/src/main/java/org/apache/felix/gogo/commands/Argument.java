@@ -16,32 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.gogo.console.stdio;
+package org.apache.felix.gogo.commands;
 
-import org.osgi.service.command.CommandProcessor;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
 
-public class StdioConsole extends Thread
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD})
+public @interface Argument
 {
-    final Console console = new Console();
+    String name() default "VAL";
 
-    public StdioConsole()
-    {
-        super("StdioConsole");
-    }
+    String description() default "";
 
-    public void close()
-    {
-        console.close();
-        interrupt();
-    }
+    boolean required() default false;
 
-    public void setProcessor(CommandProcessor processor)
-    {
-        console.setSession(processor.createSession(System.in, System.out, System.err));
-    }
+    int index() default 0;
 
-    public void run()
-    {
-        console.run();
-    }
+    boolean multiValued() default false;
 }

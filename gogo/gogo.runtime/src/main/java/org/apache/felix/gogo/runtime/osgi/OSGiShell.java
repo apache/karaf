@@ -26,7 +26,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.command.Converter;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.threadio.ThreadIO;
 
@@ -34,16 +33,6 @@ public class OSGiShell extends CommandShellImpl
 {
     Bundle bundle;
     OSGiCommands commands;
-
-    protected void activate(ComponentContext context) throws Exception
-    {
-        this.bundle = context.getBundleContext().getBundle();
-        if (threadIO == null)
-        {
-            threadIO = (ThreadIO) context.locateService("x");
-        }
-        start();
-    }
 
     public void start() throws Exception
     {
@@ -82,11 +71,6 @@ public class OSGiShell extends CommandShellImpl
         {
             System.err.println("eek! bundle not active: " + bundle);
         }
-    }
-
-    protected void deactivate(ComponentContext context)
-    {
-        System.out.println("Deactivating");
     }
 
     public Object get(String name)

@@ -28,7 +28,7 @@ public class Parser
     int current = 0;
     CharSequence text;
     boolean escaped;
-    static final String SPECIAL = "<;|{[\"'$'`(=";
+    static final String SPECIAL = "<;|{[\"'$`(=";
 
     public Parser(CharSequence program)
     {
@@ -71,24 +71,29 @@ public class Parser
 
     char peek()
     {
+        return peek(false);
+    }
+
+    char peek(boolean increment)
+    {
         escaped = false;
         if (eof())
         {
             return 0;
         }
 
-        char c = text.charAt(current);
+        int last = current;
+        char c = text.charAt(current++);
 
         if (c == '\\')
         {
             escaped = true;
-            ++current;
             if (eof())
             {
                 throw new RuntimeException("Eof found after \\"); // derek
             }
 
-            c = text.charAt(current);
+            c = text.charAt(current++);
 
             switch (c)
             {
@@ -113,11 +118,15 @@ public class Parser
                     break;
                 case 'u':
                     c = unicode();
+                    current += 4;
                     break;
                 default:
                     // We just take the next character literally
                     // but have the escaped flag set, important for {},[] etc
             }
+        }
+        if (!increment) {
+            current = last;
         }
         return c;
     }
@@ -200,7 +209,6 @@ public class Parser
                 }
                 next();
             }
-
             return text.subSequence(start, current);
         }
         else
@@ -215,59 +223,45 @@ public class Parser
 
         int start = current;
         char c = next();
-        switch (c)
-        {
-            case '{':
-                return text.subSequence(start, find('}', '{'));
-            case '(':
-                return text.subSequence(start, find(')', '('));
-            case '[':
-                return text.subSequence(start, find(']', '['));
-            case '"':
-                return text.subSequence(start + 1, quote('"'));
-            case '\'':
-                return text.subSequence(start + 1, quote('\''));
-            case '<':
-                return text.subSequence(start, find('>', '<'));
-            case '$':
-                value();
-                return text.subSequence(start, current);
-        }
-
-        if (Character.isJavaIdentifierPart(c))
-        {
-            // Some identifier or number
-            while (!eof())
+        if (!escaped) {
+            switch (c)
             {
-                c = peek();
-                if (c != ':' && !Character.isJavaIdentifierPart(c) && c != '.')
-                {
-                    break;
-                }
-                next();
-            }
-        }
-        else
-        {
-            // Operator, repeat while in operator class
-            while (!eof())
-            {
-                c = peek();
-                if (Character.isWhitespace(c) || Character.isJavaIdentifierPart(c))
-                {
-                    break;
-                }
+                case '{':
+                    return text.subSequence(start, find('}', '{'));
+                case '(':
+                    return text.subSequence(start, find(')', '('));
+                case '[':
+                    return text.subSequence(start, find(']', '['));
+                case '"':
+                    return text.subSequence(start + 1, quote('"'));
+                case '\'':
+                    return text.subSequence(start + 1, quote('\''));
+                case '<':
+                    return text.subSequence(start, find('>', '<'));
+                case '$':
+                    value();
+                    return text.subSequence(start, current);
+                case '=':
+                    return text.subSequence(start, current);
             }
         }
 
+        // Some identifier or number
+        while (!eof())
+        {
+            c = peek();
+            if ((!escaped && SPECIAL.indexOf(c) >= 0) || Character.isWhitespace(c))
+            {
+                break;
+            }
+            next();
+        }
         return text.subSequence(start, current);
     }
 
     char next()
     {
-        char c = peek();
-        current++;
-        return c;
+        return peek(true);
     }
 
     char unicode()

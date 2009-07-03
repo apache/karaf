@@ -16,32 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.gogo.console.stdio;
+package org.apache.felix.gogo.commands.basic;
 
-import org.osgi.service.command.CommandProcessor;
+import java.util.List;
 
-public class StdioConsole extends Thread
-{
-    final Console console = new Console();
+import org.apache.felix.gogo.commands.basic.DefaultActionPreparator;
+import org.apache.felix.gogo.commands.basic.ActionPreparator;
+import org.apache.felix.gogo.commands.Action;
+import org.osgi.service.command.CommandSession;
+import org.osgi.service.command.Function;
 
-    public StdioConsole()
-    {
-        super("StdioConsole");
+public abstract class AbstractCommand implements Function {
+
+    public Object execute(CommandSession session, List<Object> arguments) throws Exception {
+        Action action = createNewAction();
+        getPreparator().prepare(action, session, arguments);
+        return action.execute(session);
     }
 
-    public void close()
-    {
-        console.close();
-        interrupt();
+    protected abstract Action createNewAction() throws Exception;
+
+    protected ActionPreparator getPreparator() throws Exception {
+        return new DefaultActionPreparator();
     }
 
-    public void setProcessor(CommandProcessor processor)
-    {
-        console.setSession(processor.createSession(System.in, System.out, System.err));
-    }
-
-    public void run()
-    {
-        console.run();
-    }
 }

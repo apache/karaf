@@ -16,32 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.gogo.console.stdio;
+package org.apache.felix.gogo.commands;
 
-import org.osgi.service.command.CommandProcessor;
+import org.osgi.service.command.CommandSession;
 
-public class StdioConsole extends Thread
+public interface Action
 {
-    final Console console = new Console();
 
-    public StdioConsole()
-    {
-        super("StdioConsole");
-    }
+    Object execute(CommandSession session) throws Exception;
 
-    public void close()
-    {
-        console.close();
-        interrupt();
-    }
-
-    public void setProcessor(CommandProcessor processor)
-    {
-        console.setSession(processor.createSession(System.in, System.out, System.err));
-    }
-
-    public void run()
-    {
-        console.run();
-    }
 }

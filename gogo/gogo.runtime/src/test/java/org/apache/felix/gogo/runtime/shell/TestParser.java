@@ -35,6 +35,15 @@ public class TestParser extends TestCase
 {
     int beentheredonethat = 0;
 
+    public void testScope() throws Exception
+    {
+        Context c= new Context();
+        c.addCommand("echo", this);
+        c.addCommand("capture", this);
+        assertEquals("$a", c.execute("test:echo \\$a | capture"));
+        assertEquals("file://poo", c.execute("test:echo file://poo|capture"));
+    }
+
     public void testPipe() throws Exception
     {
         Context c = new Context();
@@ -98,6 +107,7 @@ public class TestParser extends TestCase
         CharSequence cs = parser.messy();
         assertEquals("a|b;c", cs.toString());
         assertEquals("a|b;c", new Parser(cs).unescape());
+        assertEquals("$a", new Parser("\\$a").unescape());
     }
 
 

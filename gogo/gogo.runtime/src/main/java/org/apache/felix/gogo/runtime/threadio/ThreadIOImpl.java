@@ -19,7 +19,6 @@
 // DWB20: ThreadIO should check and reset IO if something (e.g. jetty) overrides
 package org.apache.felix.gogo.runtime.threadio;
 
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.threadio.ThreadIO;
 
 import java.io.InputStream;
@@ -34,23 +33,6 @@ public class ThreadIOImpl implements ThreadIO
     ThreadInputStream in = new ThreadInputStream(System.in);
     ThreadLocal<Marker> current = new ThreadLocal<Marker>();
 
-    protected void activate(ComponentContext context)
-    {
-        start();
-    }
-
-    protected void deactivate()
-    {
-        stop();
-    }
-
-    public void stop()
-    {
-        System.setErr(err.dflt);
-        System.setOut(out.dflt);
-        System.setIn(in.dflt);
-    }
-
     public void start()
     {
         if (System.out instanceof ThreadPrintStream)
@@ -60,6 +42,13 @@ public class ThreadIOImpl implements ThreadIO
         System.setOut(out);
         System.setIn(in);
         System.setErr(err);
+    }
+
+    public void stop()
+    {
+        System.setErr(err.dflt);
+        System.setOut(out.dflt);
+        System.setIn(in.dflt);
     }
 
     private void checkIO()
