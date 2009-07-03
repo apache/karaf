@@ -42,6 +42,21 @@ public class FeaturesServiceImplTest extends TestCase {
         assertSame(feature, impl.getFeature("transaction", FeatureImpl.DEFAULT_VERSION));
     }
     
+    public void testGetFeatureStripVersion() throws Exception {
+        final Map<String, Map<String, Feature>> features = new HashMap<String, Map<String,Feature>>();
+        Map<String, Feature> versions = new HashMap<String, Feature>();
+        FeatureImpl feature = new FeatureImpl("transaction");
+        versions.put("1.0.0", feature);
+        features.put("transaction", versions);
+        final FeaturesServiceImpl impl = new FeaturesServiceImpl() {
+            protected Map<String,Map<String,Feature>> getFeatures() throws Exception {
+                return features;
+            };
+        };
+        assertNotNull(impl.getFeature("transaction", "  1.0.0  "));
+        assertSame(feature, impl.getFeature("transaction", "  1.0.0   "));
+    }
+    
     public void testGetFeatureNotAvailable() throws Exception {
         final Map<String, Map<String, Feature>> features = new HashMap<String, Map<String,Feature>>();
         Map<String, Feature> versions = new HashMap<String, Feature>();
