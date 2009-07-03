@@ -101,8 +101,6 @@ public class Launcher
 
         Constructor<?> c = fw.getConstructor(Map.class, List.class);
         Properties p = new Properties(System.getProperties());
-        p.setProperty("felix.cache.profile", "default");
-        p.setProperty("felix.embedded.execution", "true");
         Bundle bundle = (Bundle) c.newInstance(p, null);
 
         OSGiShell shell = new OSGiShell();
@@ -120,7 +118,6 @@ public class Launcher
 
         if (bundle.getState() == Bundle.ACTIVE)
         {
-            bundle.getBundleContext().registerService(CommandProcessor.class.getName(), shell, null);
         }
         if (console)
         {
@@ -129,7 +126,6 @@ public class Launcher
             cons.run();
         }
     }
-
 
     private static void classpath(String string) throws MalformedURLException
     {
