@@ -30,14 +30,17 @@ public class DirectoryContent implements IContent
     private static final transient String EMBEDDED_DIRECTORY = "-embedded";
     private static final transient String LIBRARY_DIRECTORY = "lib";
 
-    private Logger m_logger;
+    private final Logger m_logger;
+    private final Map m_configMap;
     private final Object m_revisionLock;
-    private File m_rootDir;
-    private File m_dir;
+    private final File m_rootDir;
+    private final File m_dir;
 
-    public DirectoryContent(Logger logger, Object revisionLock, File rootDir, File dir)
+    public DirectoryContent(Logger logger, Map configMap, Object revisionLock,
+        File rootDir, File dir)
     {
         m_logger = logger;
+        m_configMap = configMap;
         m_revisionLock = revisionLock;
         m_rootDir = rootDir;
         m_dir = dir;
@@ -131,7 +134,7 @@ public class DirectoryContent implements IContent
         // just return it immediately.
         if (entryName.equals(FelixConstants.CLASS_PATH_DOT))
         {
-            return new DirectoryContent(m_logger, m_revisionLock, m_rootDir, m_dir);
+            return new DirectoryContent(m_logger, m_configMap, m_revisionLock, m_rootDir, m_dir);
         }
 
         // Remove any leading slash, since all bundle class path
@@ -147,7 +150,7 @@ public class DirectoryContent implements IContent
         File file = new File(m_dir, entryName);
         if (BundleCache.getSecureAction().isFileDirectory(file))
         {
-            return new DirectoryContent(m_logger, m_revisionLock, m_rootDir, file);
+            return new DirectoryContent(m_logger, m_configMap, m_revisionLock, m_rootDir, file);
         }
         else if (BundleCache.getSecureAction().fileExists(file)
             && entryName.endsWith(".jar"))
@@ -168,7 +171,7 @@ public class DirectoryContent implements IContent
                     }
                 }
             }
-            return new JarContent(m_logger, m_revisionLock, extractedDir, file);
+            return new JarContent(m_logger, m_configMap, m_revisionLock, extractedDir, file);
         }
 
         // The entry could not be found, so return null.

@@ -80,8 +80,8 @@ public class BundleCache
     protected static transient final String CACHE_ROOTDIR_DEFAULT = ".";
     protected static transient final String BUNDLE_DIR_PREFIX = "bundle";
 
-    private Map m_configMap = null;
-    private Logger m_logger = null;
+    private final Logger m_logger;
+    private final Map m_configMap;
     private File m_cacheDir = null;
     private BundleArchive[] m_archives = null;
 
@@ -90,8 +90,8 @@ public class BundleCache
     public BundleCache(Logger logger, Map configMap)
         throws Exception
     {
-        m_configMap = configMap;
         m_logger = logger;
+        m_configMap = configMap;
         initialize();
     }
 
@@ -156,7 +156,7 @@ public class BundleCache
         {
             // Create the archive and add it to the list of archives.
             BundleArchive ba =
-                new BundleArchive(m_logger, archiveRootDir, id, location, is);
+                new BundleArchive(m_logger, m_configMap, archiveRootDir, id, location, is);
             BundleArchive[] tmp = new BundleArchive[m_archives.length + 1];
             System.arraycopy(m_archives, 0, tmp, 0, m_archives.length);
             tmp[m_archives.length] = ba;
@@ -378,7 +378,7 @@ public class BundleCache
                 // Recreate the bundle archive.
                 try
                 {
-                    archiveList.add(new BundleArchive(m_logger, children[i]));
+                    archiveList.add(new BundleArchive(m_logger, m_configMap, children[i]));
                 }
                 catch (Exception ex)
                 {

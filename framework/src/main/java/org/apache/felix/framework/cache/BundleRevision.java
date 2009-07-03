@@ -42,9 +42,10 @@ import org.apache.felix.moduleloader.IContent;
 **/
 public abstract class BundleRevision
 {
-    private Logger m_logger;
-    private File m_revisionRootDir = null;
-    private String m_location = null;
+    private final Logger m_logger;
+    private final Map m_configMap;
+    private final File m_revisionRootDir;
+    private final String m_location;
 
     /**
      * <p>
@@ -64,10 +65,11 @@ public abstract class BundleRevision
      * @param trustedCaCerts the trusted CA certificates if any.
      * @throws Exception if any errors occur.
     **/
-    public BundleRevision(Logger logger, File revisionRootDir, String location)
+    public BundleRevision(Logger logger, Map configMap, File revisionRootDir, String location)
         throws Exception
     {
         m_logger = logger;
+        m_configMap = configMap;
         m_revisionRootDir = revisionRootDir;
         m_location = location;
     }
@@ -81,6 +83,17 @@ public abstract class BundleRevision
     public Logger getLogger()
     {
         return m_logger;
+    }
+
+    /**
+     * <p>
+     * Returns the configuration map for this revision.
+     * </p>
+     * @return the configuration map for this revision.
+    **/
+    public Map getConfig()
+    {
+        return m_configMap;
     }
 
     /**

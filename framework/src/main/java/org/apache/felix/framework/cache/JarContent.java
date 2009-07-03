@@ -24,11 +24,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
+import java.util.Map;
+import java.util.Properties;
 import java.util.zip.ZipEntry;
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.JarFileX;
+import org.apache.felix.framework.util.Util;
 import org.apache.felix.moduleloader.IContent;
+import org.osgi.framework.Constants;
 
 public class JarContent implements IContent
 {
@@ -37,14 +41,16 @@ public class JarContent implements IContent
     private static final transient String LIBRARY_DIRECTORY = "lib";
 
     private final Logger m_logger;
+    private final Map m_configMap;
     private final Object m_revisionLock;
     private final File m_rootDir;
     private final File m_file;
     private JarFileX m_jarFile = null;
 
-    public JarContent(Logger logger, Object revisionLock, File rootDir, File file)
+    public JarContent(Logger logger, Map configMap, Object revisionLock, File rootDir, File file)
     {
         m_logger = logger;
+        m_configMap = configMap;
         m_revisionLock = revisionLock;
         m_rootDir = rootDir;
         m_file = file;
@@ -277,7 +283,7 @@ public class JarContent implements IContent
         // just return it immediately.
         if (entryName.equals(FelixConstants.CLASS_PATH_DOT))
         {
-            return new JarContent(m_logger, m_revisionLock, m_rootDir, m_file);
+            return new JarContent(m_logger, m_configMap, m_revisionLock, m_rootDir, m_file);
         }
 
         // Remove any leading slash.
@@ -344,7 +350,8 @@ public class JarContent implements IContent
                 }
             }
             return new JarContent(
-                m_logger, m_revisionLock, extractedJar.getParentFile(), extractedJar);
+                m_logger, m_configMap, m_revisionLock,
+                extractedJar.getParentFile(), extractedJar);
         }
 
         // The entry could not be found, so return null.
@@ -409,6 +416,18 @@ public class JarContent implements IContent
 
                 // Create the file.
                 BundleCache.copyStreamToFile(is, libFile);
+
+                // Perform exec permission command on extracted library
+                // if one is configured.
+                String command = (String) m_configMap.get(Constants.FRAMEWORK_EXECPERMISSION);
+                if (command != null)
+                {
+                    Properties props = new Properties();
+                    props.setProperty("abspath", libFile.toString());
+                    command = Util.substVars(command, "command", null, props);
+                    Process p = BundleCache.getSecureAction().exec(command);
+                    p.waitFor();
+                }
             }
             catch (Exception ex)
             {

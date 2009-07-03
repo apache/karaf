@@ -21,6 +21,7 @@ package org.apache.felix.framework.cache;
 import java.io.*;
 import java.net.URLDecoder;
 
+import java.util.Map;
 import org.apache.felix.framework.Logger;
 import org.osgi.framework.Bundle;
 
@@ -82,9 +83,10 @@ public class BundleArchive
     private static final transient String INSTALLED_STATE = "installed";
     private static final transient String UNINSTALLED_STATE = "uninstalled";
 
-    private Logger m_logger = null;
+    private final Logger m_logger;
+    private final Map m_configMap;
     private long m_id = -1;
-    private File m_archiveRootDir = null;
+    private final File m_archiveRootDir;
     private String m_originalLocation = null;
     private String m_currentLocation = null;
     private int m_persistentState = -1;
@@ -102,6 +104,9 @@ public class BundleArchive
     **/
     public BundleArchive()
     {
+        m_logger = null;
+        m_configMap = null;
+        m_archiveRootDir = null;
     }
 
     /**
@@ -121,10 +126,11 @@ public class BundleArchive
      * @param is input stream from which to read the bundle content.
      * @throws Exception if any error occurs.
     **/
-    public BundleArchive(Logger logger, File archiveRootDir, long id,
+    public BundleArchive(Logger logger, Map configMap, File archiveRootDir, long id,
         String location, InputStream is) throws Exception
     {
         m_logger = logger;
+        m_configMap = configMap;
         m_archiveRootDir = archiveRootDir;
         m_id = id;
         if (m_id <= 0)
@@ -153,10 +159,11 @@ public class BundleArchive
      * @param id the bundle identifier associated with the archive.
      * @throws Exception if any error occurs.
     **/
-    public BundleArchive(Logger logger, File archiveRootDir)
+    public BundleArchive(Logger logger, Map configMap, File archiveRootDir)
         throws Exception
     {
         m_logger = logger;
+        m_configMap = configMap;
         m_archiveRootDir = archiveRootDir;
 
         // Add a revision for each one that already exists in the file
@@ -976,22 +983,26 @@ public class BundleArchive
                 // flag set to true.
                 if (BundleCache.getSecureAction().isFileDirectory(file))
                 {
-                    result = new DirectoryRevision(m_logger, revisionRootDir, location);
+                    result = new DirectoryRevision(m_logger, m_configMap,
+                        revisionRootDir, location);
                 }
                 else
                 {
-                    result = new JarRevision(m_logger, revisionRootDir, location, true);
+                    result = new JarRevision(m_logger, m_configMap, revisionRootDir,
+                        location, true);
                 }
             }
             else if (location.startsWith(INPUTSTREAM_PROTOCOL))
             {
                 // Assume all input streams point to JAR files.
-                result = new JarRevision(m_logger, revisionRootDir, location, false, is);
+                result = new JarRevision(m_logger, m_configMap, revisionRootDir,
+                    location, false, is);
             }
             else
             {
                 // Anything else is assumed to be a URL to a JAR file.
-                result = new JarRevision(m_logger, revisionRootDir, location, false);
+                result = new JarRevision(m_logger, m_configMap, revisionRootDir,
+                    location, false);
             }
         }
         catch (Exception ex)

@@ -37,12 +37,12 @@ import org.apache.felix.moduleloader.IContent;
 **/
 class DirectoryRevision extends BundleRevision
 {
-    private File m_refDir = null;
+    private final File m_refDir;
 
     public DirectoryRevision(
-        Logger logger, File revisionRootDir, String location) throws Exception
+        Logger logger, Map configMap, File revisionRootDir, String location) throws Exception
     {
-        super(logger, revisionRootDir, location);
+        super(logger, configMap, revisionRootDir, location);
         m_refDir = new File(location.substring(
             location.indexOf(BundleArchive.FILE_PROTOCOL)
                 + BundleArchive.FILE_PROTOCOL.length()));
@@ -96,7 +96,7 @@ class DirectoryRevision extends BundleRevision
 
     public synchronized IContent getContent() throws Exception
     {
-        return new DirectoryContent(getLogger(), this, getRevisionRootDir(), m_refDir);
+        return new DirectoryContent(getLogger(), getConfig(), this, getRevisionRootDir(), m_refDir);
     }
 
     public void dispose() throws Exception

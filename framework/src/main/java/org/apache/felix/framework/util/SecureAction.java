@@ -176,6 +176,27 @@ public class SecureAction
         }
     }
 
+    public Process exec(String command) throws IOException
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                Actions actions = (Actions) m_actions.get();
+                actions.set(Actions.EXEC_ACTION, command);
+                return (Process) AccessController.doPrivileged(actions, m_acc);
+            }
+            catch (PrivilegedActionException ex)
+            {
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            return Runtime.getRuntime().exec(command);
+        }
+    }
+
     public String getAbsolutePath(File file)
     {
         if (System.getSecurityManager() != null)
@@ -971,36 +992,37 @@ public class SecureAction
         public static final int CREATE_URL_ACTION = 4;
         public static final int CREATE_URL_WITH_CONTEXT_ACTION = 5;
         public static final int DELETE_FILE_ACTION = 6;
-        public static final int FILE_EXISTS_ACTION = 7;
-        public static final int FILE_IS_DIRECTORY_ACTION = 8;
-        public static final int FOR_NAME_ACTION = 9;
-        public static final int GET_ABSOLUTE_PATH_ACTION = 10;
-        public static final int GET_CONSTRUCTOR_ACTION = 11;
-        public static final int GET_DECLARED_CONSTRUCTOR_ACTION = 12;
-        public static final int GET_DECLARED_METHOD_ACTION = 13;
-        public static final int GET_FIELD_ACTION = 14;
-        public static final int GET_FILE_INPUT_ACTION = 15;
-        public static final int GET_FILE_OUTPUT_ACTION = 16;
-        public static final int GET_JARURLCONNECTION_JAR_ACTION = 17;
-        public static final int GET_METHOD_ACTION = 18;
-        public static final int GET_POLICY_ACTION = 19;
-        public static final int GET_PROPERTY_ACTION = 20;
-        public static final int GET_URL_INPUT_ACTION = 21;
-        public static final int INVOKE_CONSTRUCTOR_ACTION = 22;
-        public static final int INVOKE_DIRECTMETHOD_ACTION = 23;
-        public static final int INVOKE_METHOD_ACTION = 24;
-        public static final int LIST_DIRECTORY_ACTION = 25;
-        public static final int MAKE_DIRECTORIES_ACTION = 26;
-        public static final int MAKE_DIRECTORY_ACTION = 27;
-        public static final int OPEN_JARX_ACTION = 28;
-        public static final int OPEN_JARX_VERIFY_ACTION = 29;
-        public static final int OPEN_URLCONNECTION_ACTION = 30;
-        public static final int RENAME_FILE_ACTION = 31;
-        public static final int SET_ACCESSIBLE_ACTION = 32;
-        public static final int START_ACTIVATOR_ACTION = 33;
-        public static final int STOP_ACTIVATOR_ACTION = 34;
-        public static final int SWAP_FIELD_ACTION = 35;
-        public static final int SYSTEM_EXIT_ACTION = 36;
+        public static final int EXEC_ACTION = 7;
+        public static final int FILE_EXISTS_ACTION = 8;
+        public static final int FILE_IS_DIRECTORY_ACTION = 9;
+        public static final int FOR_NAME_ACTION = 10;
+        public static final int GET_ABSOLUTE_PATH_ACTION = 11;
+        public static final int GET_CONSTRUCTOR_ACTION = 12;
+        public static final int GET_DECLARED_CONSTRUCTOR_ACTION = 13;
+        public static final int GET_DECLARED_METHOD_ACTION = 14;
+        public static final int GET_FIELD_ACTION = 15;
+        public static final int GET_FILE_INPUT_ACTION = 16;
+        public static final int GET_FILE_OUTPUT_ACTION = 17;
+        public static final int GET_JARURLCONNECTION_JAR_ACTION = 18;
+        public static final int GET_METHOD_ACTION = 19;
+        public static final int GET_POLICY_ACTION = 20;
+        public static final int GET_PROPERTY_ACTION = 21;
+        public static final int GET_URL_INPUT_ACTION = 22;
+        public static final int INVOKE_CONSTRUCTOR_ACTION = 23;
+        public static final int INVOKE_DIRECTMETHOD_ACTION = 24;
+        public static final int INVOKE_METHOD_ACTION = 25;
+        public static final int LIST_DIRECTORY_ACTION = 26;
+        public static final int MAKE_DIRECTORIES_ACTION = 27;
+        public static final int MAKE_DIRECTORY_ACTION = 28;
+        public static final int OPEN_JARX_ACTION = 29;
+        public static final int OPEN_JARX_VERIFY_ACTION = 30;
+        public static final int OPEN_URLCONNECTION_ACTION = 31;
+        public static final int RENAME_FILE_ACTION = 32;
+        public static final int SET_ACCESSIBLE_ACTION = 33;
+        public static final int START_ACTIVATOR_ACTION = 34;
+        public static final int STOP_ACTIVATOR_ACTION = 35;
+        public static final int SWAP_FIELD_ACTION = 36;
+        public static final int SYSTEM_EXIT_ACTION = 37;
 
         private int m_action = -1;
         private Object m_arg1 = null;
@@ -1094,6 +1116,10 @@ public class SecureAction
             {
                 return new URL((URL) arg1, (String) arg2,
                     (URLStreamHandler) arg3);
+            }
+            else if (action == EXEC_ACTION)
+            {
+                return Runtime.getRuntime().exec((String) arg1);
             }
             else if (action == GET_ABSOLUTE_PATH_ACTION)
             {

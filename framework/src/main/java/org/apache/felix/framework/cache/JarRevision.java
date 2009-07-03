@@ -50,18 +50,19 @@ class JarRevision extends BundleRevision
     private File m_bundleFile = null;
 
     public JarRevision(
-        Logger logger, File revisionRootDir, String location, boolean byReference)
+        Logger logger, Map configMap, File revisionRootDir,
+        String location, boolean byReference)
         throws Exception
     {
-        this(logger, revisionRootDir, location, byReference, null);
+        this(logger, configMap, revisionRootDir, location, byReference, null);
     }
 
     public JarRevision(
-        Logger logger, File revisionRootDir, String location,
+        Logger logger, Map configMap, File revisionRootDir, String location,
         boolean byReference, InputStream is)
         throws Exception
     {
-        super(logger, revisionRootDir, location);
+        super(logger, configMap, revisionRootDir, location);
 
         if (byReference)
         {
@@ -105,7 +106,7 @@ class JarRevision extends BundleRevision
 
     public synchronized IContent getContent() throws Exception
     {
-        return new JarContent(getLogger(), this, getRevisionRootDir(), m_bundleFile);
+        return new JarContent(getLogger(), getConfig(), this, getRevisionRootDir(), m_bundleFile);
     }
 
     public void dispose() throws Exception
