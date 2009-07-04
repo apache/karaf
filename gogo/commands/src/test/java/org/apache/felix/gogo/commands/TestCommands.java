@@ -19,8 +19,11 @@
 package org.apache.felix.gogo.commands;
 
 import java.util.List;
-import java.util.Collections;
 import java.util.Arrays;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 import junit.framework.TestCase;
 import org.osgi.service.command.CommandSession;
@@ -32,10 +35,16 @@ public class TestCommands extends TestCase {
 
     public void testCommand() throws Exception {
         Context c= new Context();
+        c.addCommand("capture", this);
         c.addCommand("my-action", new SimpleCommand(MyAction.class));
 
         // Test help
-        c.execute("my-action --help");
+        Object help = c.execute("my-action --help | capture");
+        assertTrue(help instanceof String);
+        assertTrue(((String) help).indexOf("My Action") >= 0);
+        assertTrue(((String) help).indexOf("First option") >= 0);
+        assertTrue(((String) help).indexOf("Bundle ids") >= 0);
+
 
         // Test required argument
         try
@@ -61,6 +70,19 @@ public class TestCommands extends TestCase {
 
         // Test option alias
         assertEquals(Arrays.asList(4), c.execute("my-action --increment 3"));
+    }
+
+    public String capture() throws IOException
+    {
+        StringWriter sw = new StringWriter();
+        BufferedReader rdr = new BufferedReader(new InputStreamReader(System.in));
+        String s = rdr.readLine();
+        while (s != null)
+        {
+            sw.write(s);
+            s = rdr.readLine();
+        }
+        return sw.toString();
     }
 
     @Command(scope = "test", name = "my-action", description = "My Action")
