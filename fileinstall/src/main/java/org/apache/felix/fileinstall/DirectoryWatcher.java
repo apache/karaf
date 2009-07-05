@@ -107,10 +107,10 @@ public class DirectoryWatcher extends Thread
      */
     public void run()
     {
-        log(POLL + "  (ms)   " + poll, null);
-        log(DIR + "            " + watchedDirectory.getAbsolutePath(), null);
-        log(DEBUG + "          " + debug, null);
-        log(START_NEW_BUNDLES + "          " + startBundles, null);
+        log("{" + POLL + " (ms) = " + poll + ", "
+                + DIR + " = " + watchedDirectory.getAbsolutePath() + ", "
+                + DEBUG + " = " + debug + ", "
+                + START_NEW_BUNDLES + " = " + startBundles + "}", null);
         initializeCurrentManagedBundles();
         Map currentManagedConfigs = new HashMap(); // location -> Long(time)
         while (!interrupted())
