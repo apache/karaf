@@ -35,9 +35,32 @@ public class TestParser extends TestCase
 {
     int beentheredonethat = 0;
 
+    public void testQuotes() throws Exception {
+        Context c = new Context();
+        c.addCommand("echo", this);
+        c.addCommand("capture", this);
+        c.set("c", "a");
+        assertEquals("a  b", c.execute("echo \"$c  b\" | capture"));
+
+        assertEquals("a b", c.execute("echo a b | capture"));
+        assertEquals("a b", c.execute("echo 'a b' | capture"));
+        assertEquals("a b", c.execute("echo \"a b\" | capture"));
+        assertEquals("a b", c.execute("echo a  b | capture"));
+        assertEquals("a  b", c.execute("echo 'a  b' | capture"));
+        assertEquals("a  b", c.execute("echo \"a  b\" | capture"));
+        assertEquals("a b", c.execute("echo $c  b | capture"));
+        assertEquals("$c  b", c.execute("echo '$c  b' | capture"));
+        assertEquals("a  b", c.execute("echo \"$c  b\" | capture"));
+        assertEquals("a b", c.execute("echo ${c}  b | capture"));
+        assertEquals("${c}  b", c.execute("echo '${c}  b' | capture"));
+        assertEquals("a  b", c.execute("echo \"${c}  b\" | capture"));
+        assertEquals("aa", c.execute("echo $c$c | capture"));
+        assertEquals("a ;a", c.execute("echo a\\ \\;a | capture"));
+    }
+
     public void testScope() throws Exception
     {
-        Context c= new Context();
+        Context c = new Context();
         c.addCommand("echo", this);
         c.addCommand("capture", this);
         assertEquals("$a", c.execute("test:echo \\$a | capture"));
@@ -62,6 +85,8 @@ public class TestParser extends TestCase
         c.addCommand("echo", this);
         c.addCommand("capture", this);
         c.addCommand("grep", this);
+        assertEquals("a", c.execute("a = a; echo $$a").toString());
+
         assertEquals("hello", c.execute("echo hello|capture").toString());
         assertEquals("hello", c.execute("a = <echo hello|capture>").toString());
         assertEquals("a", c.execute("a = a; echo $<echo a>").toString());
@@ -105,8 +130,8 @@ public class TestParser extends TestCase
     {
         Parser parser = new Parser("'a|b;c'");
         CharSequence cs = parser.messy();
-        assertEquals("a|b;c", cs.toString());
-        assertEquals("a|b;c", new Parser(cs).unescape());
+        assertEquals("'a|b;c'", cs.toString());
+        assertEquals("'a|b;c'", new Parser(cs).unescape());
         assertEquals("$a", new Parser("\\$a").unescape());
     }
 
@@ -164,6 +189,7 @@ public class TestParser extends TestCase
 
         assertEquals("", c.execute("echo ${very.likely.that.this.does.not.exist}").toString());
         assertNotNull(c.execute("echo ${java.shell.name}"));
+        assertEquals("a", c.execute("a = a; echo ${a}").toString());
     }
 
     public void testFunny() throws Exception
@@ -278,7 +304,7 @@ public class TestParser extends TestCase
         assertEquals("<immediate>", x.get(5));
         assertEquals("{'{{{{{'}", x.get(6));
         assertEquals("{\\}}", x.get(7));
-        assertEquals("abc{}", x.get(8));
+        assertEquals("'abc{}'", x.get(8));
     }
 
     void each(CommandSession session, Collection<Object> list, Function closure) throws Exception

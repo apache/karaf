@@ -40,7 +40,7 @@ public class OSGiShell extends CommandShellImpl
         addCommand("osgi", this.bundle);
         addCommand("osgi", commands);
         setConverter(commands);
-        if (bundle.getState() == Bundle.ACTIVE)
+        if (bundle.getState() == Bundle.ACTIVE || bundle.getState() == Bundle.STARTING)
         {
             addCommand("osgi", commands.service(PackageAdmin.class.getName(), null), PackageAdmin.class);
             addCommand("osgi", commands.getContext(), BundleContext.class);

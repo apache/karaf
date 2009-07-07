@@ -48,7 +48,8 @@ public class OSGiCommands implements Converter
 
     public BundleContext getContext()
     {
-        if (bundle.getState() != Bundle.ACTIVE)
+        if (bundle.getState() != Bundle.ACTIVE && bundle.getState() != Bundle.STARTING
+                && bundle.getState() != Bundle.STOPPING)
         {
             throw new IllegalStateException("Framework is not started yet");
         }

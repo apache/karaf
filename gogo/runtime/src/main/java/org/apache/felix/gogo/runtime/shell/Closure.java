@@ -106,20 +106,21 @@ public class Closure extends Reflective implements Function
         CharSequence statement0 = statement.remove(0);
 
         // derek: FEATURE: add set -x facility if echo is set
-        StringBuilder buf = new StringBuilder("+ ");
-        buf.append(statement0);
+        if (Boolean.TRUE.equals(session.get("echo"))) {
+            StringBuilder buf = new StringBuilder("+ ");
+            buf.append(statement0);
+            for (CharSequence token : statement)
+            {
+                buf.append(' ');
+                buf.append(token);
+            }
+            System.err.println(buf);
+        }
 
         Object cmd = eval(statement0);
         for (CharSequence token : statement)
         {
-            buf.append(' ');
-            buf.append(token);
             values.add(eval(token));
-        }
-
-        if (Boolean.TRUE.equals(session.get("echo")))
-        {
-            System.err.println(buf);
         }
 
         result = execute(cmd, values);
@@ -207,36 +208,87 @@ public class Closure extends Reflective implements Function
 
     private Object eval(CharSequence seq) throws Exception
     {
-        int end = seq.length();
-        switch (seq.charAt(0))
-        {
-            case '$':
-                return var(seq);
-            case '<':
-                Closure c = new Closure(session, this, seq.subSequence(1, end - 1));
-                return c.execute(session, parms);
-            case '[':
-                return array(seq.subSequence(1, end - 1));
-
-            case '{':
-                return new Closure(session, this, seq.subSequence(1, end - 1));
-
-            default:
-                String result = new Parser(seq).unescape();
-                if ("null".equals(result))
-                {
-                    return null;
+        Object res = null;
+        StringBuilder sb = null;
+        Parser p = new Parser(seq);
+        int start = p.current;
+        while (!p.eof()) {
+            char c = p.peek();
+            if (!p.escaped) {
+                if (c == '$' || c == '<' || c == '\'' || c == '"' || c == '[' || c == '{') {
+                    if (start != p.current || res != null) {
+                        if (sb == null) {
+                            sb = new StringBuilder();
+                            if (res != null) {
+                                sb.append(res);
+                                res = null;
+                            }
+                        }
+                        if (start != p.current) {
+                            sb.append(new Parser(p.text.subSequence(start, p.current)).unescape());
+                            start = p.current;
+                            continue;
+                        }
+                    }
+                    switch (c) {
+                        case '\'':
+                            p.next();
+                            p.quote(c);
+                            res = new Parser(p.text.subSequence(start + 1, p.current - 1)).unescape();
+                            start = p.current;
+                            continue;
+                        case '\"':
+                            p.next();
+                            p.quote(c);
+                            res = eval(p.text.subSequence(start + 1, p.current - 1));
+                            start = p.current;
+                            continue;
+                        case '[':
+                            p.next();
+                            res = array(seq.subSequence(start + 1, p.find(']', '[') - 1));
+                            start = p.current;
+                            continue;
+                        case '<':
+                            p.next();
+                            Closure cl = new Closure(session, this, p.text.subSequence(start + 1, p.find('>', '<') - 1));
+                            res = cl.execute(session, parms);
+                            start = p.current;
+                            continue;
+                        case '{':
+                            p.next();
+                            res = new Closure(session, this, p.text.subSequence(start + 1, p.find('}', '{') - 1));
+                            start = p.current;
+                            continue;
+                        case '$':
+                            p.next();
+                            res = var(p.findVar());
+                            start = p.current;
+                            continue;
+                    }
                 }
-                if ("true".equalsIgnoreCase(result))
-                {
-                    return true;
-                }
-                if ("false".equalsIgnoreCase(result))
-                {
-                    return false;
-                }
-                return result;
+            }
+            p.next();
         }
+        if (start != p.current) {
+            if (sb == null) {
+                sb = new StringBuilder();
+                if (res != null) {
+                    sb.append(res);
+                    res = null;
+                }
+            }
+            sb.append(new Parser(p.text.subSequence(start, p.current)).unescape());
+        }
+        if (sb != null) {
+            if (res != null) {
+                sb.append(res);
+            }
+            return sb.toString();
+        }
+        if (res instanceof CharSequence) {
+            return res.toString();
+        }
+        return res;
     }
 
     private Object array(CharSequence array) throws Exception
@@ -294,7 +346,11 @@ public class Closure extends Reflective implements Function
 
     private Object var(CharSequence var) throws Exception
     {
-        String name = eval(var.subSequence(1, var.length())).toString();
+        Object v = eval(var);
+        if (v instanceof Closure) {
+            v = ((Closure) v).execute(session, null);
+        }
+        String name = v.toString();
         return get(name);
     }
 

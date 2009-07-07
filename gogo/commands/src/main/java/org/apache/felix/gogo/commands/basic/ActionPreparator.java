@@ -7,6 +7,6 @@ import org.apache.felix.gogo.commands.Action;
 
 public interface ActionPreparator {
 
-    void prepare(Action action, CommandSession session, List<Object> arguments) throws Exception;
+    boolean prepare(Action action, CommandSession session, List<Object> arguments) throws Exception;
 
 }

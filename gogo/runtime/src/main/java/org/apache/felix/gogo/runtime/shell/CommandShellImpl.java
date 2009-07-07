@@ -68,6 +68,10 @@ public class CommandShellImpl implements CommandProcessor
 
     public Object get(String name)
     {
+        if (name == null)
+        {
+            return commands.keySet();
+        }
         name = name.toLowerCase();
         int n = name.indexOf(':');
         if (n < 0)

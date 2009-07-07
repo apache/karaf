@@ -39,9 +39,9 @@ public class Parser
     {
         // derek: BUGFIX: loop if comment  at beginning of input
         //while (!eof() && Character.isWhitespace(peek())) {
-        while (!eof() && (Character.isWhitespace(peek()) || current == 0))
+        while (!eof() && (!escaped && Character.isWhitespace(peek()) || current == 0))
         {
-            if (current != 0 || Character.isWhitespace(peek()))
+            if (current != 0 || !escaped && Character.isWhitespace(peek()))
             {
                 current++;
             }
@@ -203,7 +203,7 @@ public class Parser
             while (!eof())
             {
                 c = peek();
-                if (c == ';' || c == '|' || Character.isWhitespace(c))
+                if (!escaped && (c == ';' || c == '|' || Character.isWhitespace(c)))
                 {
                     break;
                 }
@@ -232,17 +232,13 @@ public class Parser
                     return text.subSequence(start, find(')', '('));
                 case '[':
                     return text.subSequence(start, find(']', '['));
-                case '"':
-                    return text.subSequence(start + 1, quote('"'));
-                case '\'':
-                    return text.subSequence(start + 1, quote('\''));
                 case '<':
                     return text.subSequence(start, find('>', '<'));
-                case '$':
-                    value();
-                    return text.subSequence(start, current);
                 case '=':
                     return text.subSequence(start, current);
+                case '"':
+                case '\'':
+                    quote(c); break;
             }
         }
 
@@ -250,13 +246,33 @@ public class Parser
         while (!eof())
         {
             c = peek();
-            if ((!escaped && SPECIAL.indexOf(c) >= 0) || Character.isWhitespace(c))
+            if (!escaped)
             {
-                break;
+                if (Character.isWhitespace(c) || c == ';' || c =='|' || c == '=') {
+                    break;
+                } else if (c == '{') {
+                    next(); find('}', '{');
+                } else if (c == '(') {
+                    next(); find(')', '(');
+                } else if (c == '<') {
+                    next(); find('>', '<');
+                } else if (c == '[') {
+                    next(); find(']', '[');
+                } else if (c == '\'' || c == '"') {
+                    next(); quote(c); next();
+                } else {
+                    next();
+                }
+            } else {
+                next();
             }
-            next();
         }
         return text.subSequence(start, current);
+    }
+
+    boolean escaped()
+    {
+        return escaped;
     }
 
     char next()
@@ -276,7 +292,7 @@ public class Parser
         return (char) n;
     }
 
-    private int find(char target, char deeper)
+    int find(char target, char deeper)
     {
         int start = current;
         int level = 1;
@@ -340,7 +356,7 @@ public class Parser
 
     CharSequence findVar()
     {
-        int start = current - 1;
+        int start = current;
         char c = peek();
 
         if (c == '{')
@@ -349,12 +365,22 @@ public class Parser
             int end = find('}', '{');
             return text.subSequence(start, end);
         }
+        if (c == '<')
+        {
+            next();
+            int end = find('>', '<');
+            return text.subSequence(start, end);
+        }
 
         if (Character.isJavaIdentifierStart(c))
         {
-            while (!eof() && Character.isJavaIdentifierPart(c) || c == '.')
+            while (c == '$') {
+                c = next();
+            }
+            while (!eof() && (Character.isJavaIdentifierPart(c) || c == '.') && c != '$')
             {
                 next();
+                c = peek();
             }
             return text.subSequence(start, current);
         }

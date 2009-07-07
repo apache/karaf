@@ -72,7 +72,7 @@ public class DefaultActionPreparator implements ActionPreparator {
         }
     };
 
-    public void prepare(Action action, CommandSession session, List<Object> params) throws Exception
+    public boolean prepare(Action action, CommandSession session, List<Object> params) throws Exception
     {
         Map<Option, Field> options = new HashMap<Option, Field>();
         Map<Argument, Field> arguments = new HashMap<Argument, Field>();
@@ -114,7 +114,7 @@ public class DefaultActionPreparator implements ActionPreparator {
             // Check for help
             if (HELP.name().equals(param) || Arrays.asList(HELP.aliases()).contains(param)) {
                 printUsage(action.getClass().getAnnotation(Command.class), options.keySet(), arguments.keySet(), System.out);
-                return;
+                return false;
             }
             if (processOptions && param instanceof String && ((String) param).startsWith("-")) {
                 boolean isKeyValuePair = ((String) param).indexOf('=') != -1;
@@ -201,6 +201,7 @@ public class DefaultActionPreparator implements ActionPreparator {
             field.setAccessible(true);
             field.set(action, value);
         }
+        return true;
     }
 
     protected void printUsage(Command command, Set<Option> options, Set<Argument> arguments, PrintStream out)

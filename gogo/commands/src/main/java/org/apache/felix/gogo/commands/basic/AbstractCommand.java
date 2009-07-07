@@ -30,8 +30,11 @@ public abstract class AbstractCommand implements Function {
 
     public Object execute(CommandSession session, List<Object> arguments) throws Exception {
         Action action = createNewAction();
-        getPreparator().prepare(action, session, arguments);
-        return action.execute(session);
+        if (getPreparator().prepare(action, session, arguments)) {
+            return action.execute(session);
+        } else {
+            return null;
+        }
     }
 
     protected abstract Action createNewAction() throws Exception;

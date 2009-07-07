@@ -16,9 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.gogo.runtime.shell;
+package org.apache.felix.gogo.commands;
 
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
+import org.apache.felix.gogo.runtime.shell.CommandShellImpl;
+import org.apache.felix.gogo.runtime.shell.CommandSessionImpl;
 
 public class Context extends CommandShellImpl
 {
@@ -46,6 +48,11 @@ public class Context extends CommandShellImpl
     public void addCommand(String name, Object target)
     {
         put("test:" + name, target);
+    }
+
+    public void set(String name, Object value)
+    {
+        session.put(name, value);
     }
 
 

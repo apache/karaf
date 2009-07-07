@@ -32,12 +32,16 @@ import java.util.*;
 
 public class CommandSessionImpl implements CommandSession, Converter
 {
-    String COLUMN = "%-20s %s\n";
+    public static final String VARIABLES = ".variables";
+    public static final String COMMANDS = ".commands";
+
+    private static final String COLUMN = "%-20s %s\n";
+
     InputStream in;
     PrintStream out;
     PrintStream err;
     CommandShellImpl service;
-    Map<Object, Object> variables = new HashMap<Object, Object>();
+    final Map<Object, Object> variables = new HashMap<Object, Object>();
     private boolean closed;    // derek
 
     CommandSessionImpl(CommandShellImpl service, InputStream in, PrintStream out, PrintStream err)
@@ -77,12 +81,16 @@ public class CommandSessionImpl implements CommandSession, Converter
     {
         // XXX: derek.baum@paremus.com
         // there is no API to list all variables, so overload name == null
-        if (name == null)
+        if (name == null || VARIABLES.equals(name))
         {
             return variables.keySet();
         }
+        if (COMMANDS.equals(name))
+        {
+            return service.get(null);
+        }
 
-        if (variables != null && variables.containsKey(name))
+        if (variables.containsKey(name))
         {
             return variables.get(name);
         }

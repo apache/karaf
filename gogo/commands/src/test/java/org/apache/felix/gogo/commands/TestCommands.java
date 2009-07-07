@@ -27,11 +27,20 @@ import java.io.InputStreamReader;
 
 import junit.framework.TestCase;
 import org.osgi.service.command.CommandSession;
-import org.apache.felix.gogo.runtime.shell.Context;
 import org.apache.felix.gogo.commands.basic.SimpleCommand;
 
 public class TestCommands extends TestCase {
 
+
+    public void testPrompt() throws Exception {
+        Context c = new Context();
+        c.addCommand("echo", this);
+        c.set("USER", "gnodet");
+        c.set("APPLICATION", "karaf");
+        //c.set("SCOPE", "");
+        Object p = c.execute("\"@|bold ${USER}|@${APPLICATION}:@|bold ${SCOPE}|> \"");
+        System.out.println("Prompt: " + p);
+    }
 
     public void testCommand() throws Exception {
         Context c= new Context();
@@ -83,6 +92,27 @@ public class TestCommands extends TestCase {
             s = rdr.readLine();
         }
         return sw.toString();
+    }
+
+    public CharSequence echo(Object args[])
+    {
+        if (args == null)
+        {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        String del = "";
+        for (Object arg : args)
+        {
+            sb.append(del);
+            if (arg != null)
+            {
+                sb.append(arg);
+                del = " ";
+            }
+        }
+        return sb;
     }
 
     @Command(scope = "test", name = "my-action", description = "My Action")

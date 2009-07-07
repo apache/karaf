@@ -44,13 +44,19 @@ public class ServiceCommand extends Reflective implements Function
         try
         {
             Object target = shell.bundle.getBundleContext().getService(ref);
-            Object result = method(session, target, name, arguments);
-            if (result != CommandShellImpl.NO_SUCH_COMMAND)
+            if (target instanceof Function)
             {
-                return result;
+                return ((Function) target).execute(session, arguments);
             }
-
-            throw new IllegalArgumentException("Service does not implement promised command " + ref + " " + name);
+            else
+            {
+                Object result = method(session, target, name, arguments);
+                if (result != CommandShellImpl.NO_SUCH_COMMAND)
+                {
+                    return result;
+                }
+                throw new IllegalArgumentException("Service does not implement promised command " + ref + " " + name);
+            }
         }
         finally
         {
