@@ -1,4 +1,4 @@
-/*
+/* 
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -400,8 +400,8 @@ public class ComponentFactory extends IPojoFactory implements TrackerCustomizer 
     }
 
     /**
-     * Gets the version of the component type
-     * @return the version of </code>null</code> if not set.
+     * Gets the version of the component type.
+     * @return the version of <code>null</code> if not set.
      * @see org.apache.felix.ipojo.Factory#getVersion()
      */
     public String getVersion() {

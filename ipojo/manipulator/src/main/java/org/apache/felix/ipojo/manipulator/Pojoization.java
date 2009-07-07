@@ -1,4 +1,4 @@
-/*
+/* 
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -100,6 +100,7 @@ public class Pojoization {
 
     /**
      * Flag describing if we need or not compute annotations.
+     * By default, compute the annotations.
      */
     private boolean m_ignoreAnnotations;
 
@@ -149,8 +150,8 @@ public class Pojoization {
     /**
      * Activates annotation processing.
      */
-    public void setAnnotationProcessing() {
-        m_ignoreAnnotations = false;
+    public void disableAnnotationProcessing() {
+        m_ignoreAnnotations = true;
     }
 
     /**

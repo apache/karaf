@@ -107,16 +107,16 @@ public abstract class BundleTracker {
 
                 m_context.addBundleListener(m_listener);
             }
-           }
+        }
 
-            Bundle[] bundles = m_context.getBundles();
-            for (int i = 0; i < bundles.length; i++) {
-                if (bundles[i].getState() == Bundle.ACTIVE) {
-                    if (m_bundleSet.add(bundles[i])) {
-                        addedBundle(bundles[i]);
-                    }
+        Bundle[] bundles = m_context.getBundles();
+        for (int i = 0; i < bundles.length; i++) {
+            if (bundles[i].getState() == Bundle.ACTIVE) {
+                if (m_bundleSet.add(bundles[i])) {
+                    addedBundle(bundles[i]);
                 }
             }
+        }
     }
 
     /**

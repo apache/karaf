@@ -1,4 +1,4 @@
-/*
+/* 
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -189,8 +189,8 @@ public class IPojoTask extends Task {
         }
 
         Pojoization pojo = new Pojoization();
-        if (! m_ignoreAnnotations) {
-            pojo.setAnnotationProcessing();
+        if (m_ignoreAnnotations) {
+            pojo.disableAnnotationProcessing();
         }
         if (! m_ignoreLocalXSD) {
             pojo.setUseLocalXSD();
@@ -198,7 +198,7 @@ public class IPojoTask extends Task {
         if (m_input != null) {
             pojo.pojoization(m_input, m_output, m_metadata);
         } else {
-            pojo.directoryPojoization(m_directory,m_metadata, m_manifest);
+            pojo.directoryPojoization(m_directory, m_metadata, m_manifest);
         }
         for (int i = 0; i < pojo.getWarnings().size(); i++) {
             log((String) pojo.getWarnings().get(i), Project.MSG_WARN);

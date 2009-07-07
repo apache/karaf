@@ -1,4 +1,4 @@
-/*
+/* 
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -26,7 +26,6 @@ import java.util.Properties;
 
 import org.apache.felix.ipojo.ConfigurationException;
 import org.apache.felix.ipojo.HandlerFactory;
-import org.apache.felix.ipojo.InstanceManager;
 import org.apache.felix.ipojo.PrimitiveHandler;
 import org.apache.felix.ipojo.architecture.ComponentTypeDescription;
 import org.apache.felix.ipojo.architecture.HandlerDescription;
@@ -455,7 +454,7 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
             return;
         }
         Properties props = new Properties();
-        for (int i = 0; i <m_configurableProperties.size(); i++) {
+        for (int i = 0; i < m_configurableProperties.size(); i++) {
             String n = ((Property) m_configurableProperties.get(i)).getName();
             Object v = ((Property) m_configurableProperties.get(i)).getValue();
             if (v != Property.NO_VALUE) {
@@ -491,7 +490,7 @@ public class ConfigurationHandler extends PrimitiveHandler implements ManagedSer
             if (instance == null) {
                 m_updated.call(new Object[] {props});
             } else {
-                m_updated.call(instance, new Object[] {props} );
+                m_updated.call(instance, new Object[] {props});
             }
         } catch (Exception e) {
             error("Cannot call the updated method " + m_updated.getMethod() + " : " + e.getMessage());
