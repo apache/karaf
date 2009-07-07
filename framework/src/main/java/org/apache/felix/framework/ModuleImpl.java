@@ -100,20 +100,23 @@ public class ModuleImpl implements IModule
     // Statically create the class loader for boot delegation.
     static
     {
+        ClassLoader cl = null;
         try
         {
-            ClassLoader cl = null;
             Constructor ctor = m_secureAction.getDeclaredConstructor(
                 SecureClassLoader.class, new Class[] { ClassLoader.class });
             m_secureAction.setAccesssible(ctor);
             cl = (ClassLoader) m_secureAction.invoke(ctor, new Object[] { null });
-            m_bootClassLoader = cl;
         }
         catch (Exception ex)
         {
-            throw new RuntimeException(
-                "Problem creating boot delegation class loader.", ex);
+            // On Android we get an exception if we set the parent class loader
+            // to null, so we will work around that case by setting the parent
+            // class loader to the system class loader in getClassLoader() below.
+            cl = null;
+            System.err.println("Problem creating boot delegation class loader: " + ex);
         }
+        m_bootClassLoader = cl;
     }
 
     // Boot delegation packages.
@@ -1281,6 +1284,13 @@ public class ModuleImpl implements IModule
             else if (cfg.equalsIgnoreCase(Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK))
             {
                 parent = ModuleImpl.class.getClassLoader();
+            }
+            // On Android we cannot set the parent class loader to be null, so
+            // we special case that situation here and set it to the system
+            // class loader by default instead, which is not really spec.
+            else if (m_bootClassLoader == null)
+            {
+                parent = ClassLoader.getSystemClassLoader();
             }
             else
             {
