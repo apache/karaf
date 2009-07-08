@@ -31,16 +31,6 @@ public class ThreadInputStream extends InputStream
         dflt = in;
     }
 
-    public int read(byte[] buffer, int offset, int length) throws IOException
-    {
-        return getCurrent().read(buffer, offset, length);
-    }
-
-    public int read(byte[] buffer) throws IOException
-    {
-        return getCurrent().read(buffer);
-    }
-
     private InputStream getCurrent()
     {
         InputStream in = map.get();
@@ -49,11 +39,6 @@ public class ThreadInputStream extends InputStream
             return in;
         }
         return dflt;
-    }
-
-    public int read() throws IOException
-    {
-        return getCurrent().read();
     }
 
     public void setStream(InputStream in)
@@ -83,4 +68,52 @@ public class ThreadInputStream extends InputStream
         return dflt;
     }
 
+    //
+    // Delegate methods
+    //
+
+    public int read() throws IOException
+    {
+        return getCurrent().read();
+    }
+
+    public int read(byte[] b) throws IOException
+    {
+        return getCurrent().read(b);
+    }
+
+    public int read(byte[] b, int off, int len) throws IOException
+    {
+        return getCurrent().read(b, off, len);
+    }
+
+    public long skip(long n) throws IOException
+    {
+        return getCurrent().skip(n);
+    }
+
+    public int available() throws IOException
+    {
+        return getCurrent().available();
+    }
+
+    public void close() throws IOException
+    {
+        getCurrent().close();
+    }
+
+    public void mark(int readlimit)
+    {
+        getCurrent().mark(readlimit);
+    }
+
+    public void reset() throws IOException
+    {
+        getCurrent().reset();
+    }
+
+    public boolean markSupported()
+    {
+        return getCurrent().markSupported();
+    }
 }
