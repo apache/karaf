@@ -35,6 +35,13 @@ public class TestParser extends TestCase
 {
     int beentheredonethat = 0;
 
+    public void testSpecialValues() throws Exception {
+        Context c = new Context();
+        assertEquals(false, c.execute("false"));
+        assertEquals(true, c.execute("true"));
+        assertEquals(null, c.execute("null"));
+    }
+
     public void testQuotes() throws Exception {
         Context c = new Context();
         c.addCommand("echo", this);
@@ -107,12 +114,16 @@ public class TestParser extends TestCase
     {
         Context c = new Context();
         c.addCommand("echo", this);
+        c.addCommand("capture", this);
+
         assertEquals("http://www.aqute.biz?com=2&biz=1", c.execute("['http://www.aqute.biz?com=2&biz=1'] get 0").toString());
         assertEquals("{a=2, b=3}", c.execute("[a=2 b=3]").toString());
         assertEquals("3", c.execute("[a=2 <b>=<3>] get b").toString());
         assertEquals("[3, 4]", c.execute("[1 2 [3 4] 5 6] get 2").toString());
         assertEquals(5, c.execute("[1 2 [3 4] 5 6] size"));
-
+        assertEquals("a", c.execute("e = { echo $0 } ; <e a   b | capture>"));
+        assertEquals("b", c.execute("e = { echo $1 } ; <e a   b | capture>"));
+        assertEquals("a b", c.execute("e = { echo $args } ; <e a   b | capture>"));
     }
 
     public void testArray() throws Exception

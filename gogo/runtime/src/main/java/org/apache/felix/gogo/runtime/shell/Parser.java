@@ -372,7 +372,7 @@ public class Parser
             return text.subSequence(start, end);
         }
 
-        if (Character.isJavaIdentifierStart(c))
+        if (Character.isJavaIdentifierPart(c))
         {
             while (c == '$') {
                 c = next();

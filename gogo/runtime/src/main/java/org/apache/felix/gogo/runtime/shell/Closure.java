@@ -212,25 +212,33 @@ public class Closure extends Reflective implements Function
         StringBuilder sb = null;
         Parser p = new Parser(seq);
         int start = p.current;
-        while (!p.eof()) {
+        while (!p.eof())
+        {
             char c = p.peek();
-            if (!p.escaped) {
-                if (c == '$' || c == '<' || c == '\'' || c == '"' || c == '[' || c == '{') {
-                    if (start != p.current || res != null) {
-                        if (sb == null) {
+            if (!p.escaped)
+            {
+                if (c == '$' || c == '<' || c == '\'' || c == '"' || c == '[' || c == '{')
+                {
+                    if (start != p.current || res != null)
+                    {
+                        if (sb == null)
+                        {
                             sb = new StringBuilder();
-                            if (res != null) {
+                            if (res != null)
+                            {
                                 sb.append(res);
                                 res = null;
                             }
                         }
-                        if (start != p.current) {
+                        if (start != p.current)
+                        {
                             sb.append(new Parser(p.text.subSequence(start, p.current)).unescape());
                             start = p.current;
                             continue;
                         }
                     }
-                    switch (c) {
+                    switch (c)
+                    {
                         case '\'':
                             p.next();
                             p.quote(c);
@@ -269,25 +277,45 @@ public class Closure extends Reflective implements Function
             }
             p.next();
         }
-        if (start != p.current) {
-            if (sb == null) {
+        if (start != p.current)
+        {
+            if (sb == null)
+            {
                 sb = new StringBuilder();
-                if (res != null) {
+                if (res != null)
+                {
                     sb.append(res);
                     res = null;
                 }
             }
             sb.append(new Parser(p.text.subSequence(start, p.current)).unescape());
         }
-        if (sb != null) {
-            if (res != null) {
+        if (sb != null)
+        {
+            if (res != null)
+            {
                 sb.append(res);
             }
-            return sb.toString();
+            res = sb;
         }
-        if (res instanceof CharSequence) {
-            return res.toString();
+        if (res instanceof CharSequence)
+        {
+            String r = res.toString();
+            if ("null".equals(r))
+            {
+                return null;
+            }
+            else if ("false".equals(r))
+            {
+                return false;
+            }
+            else if ("true".equals(r))
+            {
+                return true;
+            }
+            return r;
         }
+
         return res;
     }
 
