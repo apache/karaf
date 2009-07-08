@@ -292,8 +292,6 @@ public class JarContent implements IContent
         // Any embedded JAR files will be extracted to the embedded directory.
         // Since embedded JAR file names may clash when extracting from multiple
         // embedded JAR files, the embedded directory is per embedded JAR file.
-        // For backwards compatibility purposes, don't use the file cache name
-        // for the root bundle JAR file.
         File embedDir = new File(m_rootDir, m_file.getName() + EMBEDDED_DIRECTORY);
 
         // Find the entry in the JAR file and create the
@@ -485,8 +483,6 @@ public class JarContent implements IContent
         // Any embedded JAR files will be extracted to the embedded directory.
         // Since embedded JAR file names may clash when extracting from multiple
         // embedded JAR files, the embedded directory is per embedded JAR file.
-        // For backwards compatibility purposes, don't use the file cache name
-        // for the root bundle JAR file.
         File embedDir = new File(m_rootDir, m_file.getName() + EMBEDDED_DIRECTORY);
         File jarFile = new File(embedDir, jarPath);
 
