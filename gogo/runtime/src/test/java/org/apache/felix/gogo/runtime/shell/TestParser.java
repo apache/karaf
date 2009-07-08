@@ -47,7 +47,6 @@ public class TestParser extends TestCase
         c.addCommand("echo", this);
         c.addCommand("capture", this);
         c.set("c", "a");
-        assertEquals("a  b", c.execute("echo \"$c  b\" | capture"));
 
         assertEquals("a b", c.execute("echo a b | capture"));
         assertEquals("a b", c.execute("echo 'a b' | capture"));
@@ -63,6 +62,7 @@ public class TestParser extends TestCase
         assertEquals("a  b", c.execute("echo \"${c}  b\" | capture"));
         assertEquals("aa", c.execute("echo $c$c | capture"));
         assertEquals("a ;a", c.execute("echo a\\ \\;a | capture"));
+        assertEquals("baabab", c.execute("echo b${c}${c}b${c}b | capture"));
     }
 
     public void testScope() throws Exception

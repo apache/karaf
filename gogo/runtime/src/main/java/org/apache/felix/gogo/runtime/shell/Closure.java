@@ -224,11 +224,11 @@ public class Closure extends Reflective implements Function
                         if (sb == null)
                         {
                             sb = new StringBuilder();
-                            if (res != null)
-                            {
-                                sb.append(res);
-                                res = null;
-                            }
+                        }
+                        if (res != null)
+                        {
+                            sb.append(res);
+                            res = null;
                         }
                         if (start != p.current)
                         {
@@ -282,11 +282,11 @@ public class Closure extends Reflective implements Function
             if (sb == null)
             {
                 sb = new StringBuilder();
-                if (res != null)
-                {
-                    sb.append(res);
-                    res = null;
-                }
+            }
+            if (res != null)
+            {
+                sb.append(res);
+                res = null;
             }
             sb.append(new Parser(p.text.subSequence(start, p.current)).unescape());
         }
