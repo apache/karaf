@@ -46,6 +46,7 @@
         
         activate="myactivate"
         deactivate="mydeactivate"
+        modified="mymodified"
         configuration-policy="ignore"
         >
 

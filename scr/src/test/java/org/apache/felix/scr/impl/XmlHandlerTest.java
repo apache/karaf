@@ -55,6 +55,7 @@ public class XmlHandlerTest extends TestCase
         assertEquals( "DS Version 1.0", XmlHandler.DS_VERSION_1_0, cm10.getNamespaceCode() );
         assertEquals( "Expected Activate Method not set", "activate", cm10.getActivate() );
         assertEquals( "Expected Deactivate Method not set", "deactivate", cm10.getDeactivate() );
+        assertNull( "Expected Modified Method not set", cm10.getModified() );
         assertEquals( "Expected Configuration Policy not set", ComponentMetadata.CONFIGURATION_POLICY_OPTIONAL, cm10
             .getConfigurationPolicy() );
 
@@ -65,6 +66,7 @@ public class XmlHandlerTest extends TestCase
         assertEquals( "DS Version 1.1", XmlHandler.DS_VERSION_1_1, cm11.getNamespaceCode() );
         assertEquals( "Expected Activate Method set", "myactivate", cm11.getActivate() );
         assertEquals( "Expected Deactivate Method set", "mydeactivate", cm11.getDeactivate() );
+        assertEquals( "Expected Modified Method set", "mymodified", cm11.getModified() );
         assertEquals( "Expected Configuration Policy set", ComponentMetadata.CONFIGURATION_POLICY_IGNORE, cm11
             .getConfigurationPolicy() );
     }
@@ -137,6 +139,7 @@ public class XmlHandlerTest extends TestCase
         // ds 1.1 elements
         assertEquals( "activate method", "myactivate", cm10.getActivate() );
         assertEquals( "deactivate method", "mydeactivate", cm10.getDeactivate() );
+        assertEquals( "modified method", "mymodified", cm10.getModified() );
         assertEquals( "configuration policy", "ignore", cm10.getConfigurationPolicy() );
 
         // from the implementation element

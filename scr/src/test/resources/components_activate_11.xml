@@ -19,7 +19,7 @@
 -->
 <components>
     <scr:component name="components.activate.11"
-        activate="myactivate" deactivate="mydeactivate"
+        activate="myactivate" deactivate="mydeactivate" modified="mymodified"
         configuration-policy="ignore" xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
         <implementation class="components.activate.11" />
     </scr:component>

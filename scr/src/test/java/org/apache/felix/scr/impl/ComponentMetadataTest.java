@@ -302,7 +302,7 @@ public class ComponentMetadataTest extends TestCase
         assertEquals( "Deactivate method name", "deactivate", cm1.getDeactivate() );
 
         final ComponentMetadata cm2 = createComponentMetadata( Boolean.TRUE, null );
-        cm2.setActivate( "someMethod" );
+        cm2.setDeactivate( "someMethod" );
         cm2.validate( logger );
         assertEquals( "Deactivate method name", "deactivate", cm2.getDeactivate() );
     }
@@ -318,6 +318,32 @@ public class ComponentMetadataTest extends TestCase
         cm2.setDeactivate( "someMethod" );
         cm2.validate( logger );
         assertEquals( "Deactivate method name", "someMethod", cm2.getDeactivate() );
+    }
+
+
+    public void test_component_modified_ds10()
+    {
+        final ComponentMetadata cm1 = createComponentMetadata( Boolean.TRUE, null );
+        cm1.validate( logger );
+        assertNull( "Modified method name", cm1.getModified() );
+
+        final ComponentMetadata cm2 = createComponentMetadata( Boolean.TRUE, null );
+        cm2.setModified( "someName" );
+        cm2.validate( logger );
+        assertNull( "Modified method name", cm2.getModified() );
+    }
+
+
+    public void test_component_modified_ds11()
+    {
+        final ComponentMetadata cm1 = createComponentMetadata11( Boolean.TRUE, null );
+        cm1.validate( logger );
+        assertNull( "Modified method name", cm1.getModified() );
+
+        final ComponentMetadata cm2 = createComponentMetadata11( Boolean.TRUE, null );
+        cm2.setModified( "someMethod" );
+        cm2.validate( logger );
+        assertEquals( "Modified method name", "someMethod", cm2.getModified() );
     }
 
 
