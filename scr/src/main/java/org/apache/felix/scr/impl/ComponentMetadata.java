@@ -75,6 +75,9 @@ public class ComponentMetadata
     // 112.5.12 deactivate can be specified (since DS 1.1)
     private String m_deactivate = null;
 
+    // 112.??.?? modified method (configuration update, since DS 1.1)
+    private String m_modified = null;
+
     // 112.4.3 configuration-policy (since DS 1.1)
     private String m_configurationPolicy = null;
 
@@ -231,6 +234,22 @@ public class ComponentMetadata
             return;
         }
         m_deactivate = deactivate;
+    }
+
+
+    /**
+     * Sets the name of the modified method
+     *
+     * @param modified a method name
+     * @since 1.2.0 (DS 1.1)
+     */
+    public void setModified( String modified )
+    {
+        if ( m_validated )
+        {
+            return;
+        }
+        m_modified = modified;
     }
 
 
@@ -406,6 +425,18 @@ public class ComponentMetadata
 
 
     /**
+     * Returns the name of the modified method
+     *
+     * @return the name of the modified method
+     * @since 1.2.0 (DS 1.1)
+     */
+    public String getModified()
+    {
+        return m_modified;
+    }
+
+
+    /**
      * Returns the associated ServiceMetadata
      *
      * @return a ServiceMetadata object or null if the Component does not provide any service
@@ -530,6 +561,15 @@ public class ComponentMetadata
             logger.log( LogService.LOG_WARNING,
                 "Ignoring deactivate method declaration, DS 1.1 or later namespace required", this, null );
             m_deactivate = "deactivate";
+        }
+
+        // 112.??.?? modified can be specified (since DS 1.1)
+        if ( m_modified != null && m_namespaceCode < XmlHandler.DS_VERSION_1_1 )
+        {
+            // require new namespace if modified is specified
+            logger.log( LogService.LOG_WARNING,
+                "Ignoring modified method declaration, DS 1.1 or later namespace required", this, null );
+            m_modified = null;
         }
 
         // Next check if the properties are valid (and extract property values)

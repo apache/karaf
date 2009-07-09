@@ -47,22 +47,22 @@ public class XmlHandler implements KXml2SAXHandler
 
     // Namespace URI of DS 1.0
     public static final String NAMESPACE_URI = "http://www.osgi.org/xmlns/scr/v1.0.0";
-    
+
     // Namespace URI of DS 1.1
     public static final String NAMESPACE_URI_1_1 = "http://www.osgi.org/xmlns/scr/v1.1.0";
-    
+
     // namespace code for non-DS namespace
     public static final int DS_VERSION_NONE = -1;
-    
+
     // namespace code for the DS 1.0 specification
     public static final int DS_VERSION_1_0 = 0;
-    
+
     // namespace code for the DS 1.0 specification
     public static final int DS_VERSION_1_1 = 1;
 
     // mapping of namespace URI to namespace code
     private static final Map NAMESPACE_CODE_MAP;
-    
+
     // the bundle containing the XML resource being parsed
     private final Bundle m_bundle;
 
@@ -201,6 +201,12 @@ public class XmlHandler implements KXml2SAXHandler
                         m_currentComponent.setDeactivate( attrib.getProperty( "deactivate" ) );
                     }
 
+                    // modified attribute is optional (since DS 1.1)
+                    if ( attrib.getProperty( "modified" ) != null )
+                    {
+                        m_currentComponent.setModified( attrib.getProperty( "modified" ) );
+                    }
+
                     // Add this component to the list
                     m_components.add( m_currentComponent );
                 }
@@ -292,7 +298,7 @@ public class XmlHandler implements KXml2SAXHandler
 
                     m_currentComponent.addDependency( ref );
                 }
-                
+
                 // unexpected element
                 else
                 {
@@ -306,7 +312,7 @@ public class XmlHandler implements KXml2SAXHandler
                 throw new ParseException( "Exception during parsing", ex );
             }
         }
-        
+
         // unexpected namespace
         else
         {
