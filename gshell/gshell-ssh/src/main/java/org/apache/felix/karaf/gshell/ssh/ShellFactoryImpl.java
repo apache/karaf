@@ -86,12 +86,10 @@ public class ShellFactoryImpl implements ShellFactory
 
         public void start(final Environment env) throws IOException {
             try {
-                CommandSession session = commandProcessor.createSession(in, new PrintStream(out), new PrintStream(err));
-                session.put("APPLICATION", System.getProperty("karaf.name", "root"));
-                for (Map.Entry<String,String> e : env.getEnv().entrySet()) {
-                    session.put(e.getKey(), e.getValue());
-                }
-                Console console = new Console(session,
+                Console console = new Console(commandProcessor,
+                                              in,
+                                              new PrintStream(out),
+                                              new PrintStream(err),
                                               new SshTerminal(env),
                                               new AggregateCompleter(completers),
                                               new Runnable() {
@@ -99,6 +97,11 @@ public class ShellFactoryImpl implements ShellFactory
                                                       destroy();
                                                   }
                                               });
+                CommandSession session = console.getSession();
+                session.put("APPLICATION", System.getProperty("karaf.name", "root"));
+                for (Map.Entry<String,String> e : env.getEnv().entrySet()) {
+                    session.put(e.getKey(), e.getValue());
+                }
                 new Thread(console).start();
             } catch (Exception e) {
                 throw (IOException) new IOException("Unable to start shell").initCause(e);
