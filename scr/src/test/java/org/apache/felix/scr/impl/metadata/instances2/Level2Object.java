@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl.instances2;
+package org.apache.felix.scr.impl.metadata.instances2;
 
 
 import java.util.Map;
 
-import org.apache.felix.scr.impl.instances.Level1Object;
-import org.apache.felix.scr.impl.instances.MethodNameException;
+import org.apache.felix.scr.impl.metadata.instances.Level1Object;
+import org.apache.felix.scr.impl.metadata.instances.MethodNameException;
 import org.osgi.service.component.ComponentContext;
 
 

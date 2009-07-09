@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl;
+package org.apache.felix.scr.impl.metadata;
 
 
 import java.util.ArrayList;
@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.felix.scr.impl.helper.Logger;
 import org.osgi.service.component.ComponentException;
 import org.osgi.service.log.LogService;
 
@@ -495,7 +496,7 @@ public class ComponentMetadata
     /**
      * Method used to verify if the semantics of this metadata are correct
      */
-    void validate( Logger logger )
+    public void validate( Logger logger )
     {
         // nothing to do if already validated
         if ( m_validated )

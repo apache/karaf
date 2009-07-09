@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl;
+package org.apache.felix.scr.impl.metadata;
 
 import java.util.ArrayList;
 import java.util.List;

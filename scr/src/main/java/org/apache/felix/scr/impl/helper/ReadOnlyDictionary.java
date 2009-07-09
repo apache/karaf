@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl;
+package org.apache.felix.scr.impl.helper;
 
 
 import java.util.Dictionary;
@@ -25,7 +25,7 @@ import java.util.Enumeration;
 
 /**
  * The <code>ReadOnlyDictionary</code> is a <code>Dictionary</code> whose
- * {@link #put(Object, Object)} and {@link #remove(Object)} methods have 
+ * {@link #put(Object, Object)} and {@link #remove(Object)} methods have
  * no effect and always return <code>null</code>.
  *
  * @author fmeschbe
@@ -36,7 +36,7 @@ public class ReadOnlyDictionary extends Dictionary
     private Dictionary delegatee;
 
 
-    ReadOnlyDictionary( Dictionary delegatee )
+    public ReadOnlyDictionary( Dictionary delegatee )
     {
         this.delegatee = delegatee;
     }

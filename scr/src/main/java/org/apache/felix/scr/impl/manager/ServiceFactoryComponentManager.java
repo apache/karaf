@@ -16,11 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl;
+package org.apache.felix.scr.impl.manager;
 
 
 import java.util.IdentityHashMap;
 
+import org.apache.felix.scr.impl.BundleComponentActivator;
+import org.apache.felix.scr.impl.ComponentRegistry;
+import org.apache.felix.scr.impl.metadata.ComponentMetadata;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
@@ -33,7 +36,7 @@ import org.osgi.service.log.LogService;
 /**
  * The <code>ServiceFactoryComponentManager</code> TODO
  */
-class ServiceFactoryComponentManager extends ImmediateComponentManager implements ServiceFactory
+public class ServiceFactoryComponentManager extends ImmediateComponentManager implements ServiceFactory
 {
 
     // maintain the map of ComponentContext objects created for the

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl;
+package org.apache.felix.scr.impl.manager;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -27,6 +27,11 @@ import java.util.List;
 
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.Reference;
+import org.apache.felix.scr.impl.BundleComponentActivator;
+import org.apache.felix.scr.impl.ComponentActivatorTask;
+import org.apache.felix.scr.impl.ComponentRegistry;
+import org.apache.felix.scr.impl.metadata.ComponentMetadata;
+import org.apache.felix.scr.impl.metadata.ReferenceMetadata;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -40,7 +45,7 @@ import org.osgi.service.log.LogService;
  * implementation object's lifecycle.
  *
  */
-abstract class AbstractComponentManager implements Component, ComponentInstance
+public abstract class AbstractComponentManager implements Component, ComponentInstance
 {
     // the ID of this component
     private long m_componentId;
@@ -738,7 +743,7 @@ abstract class AbstractComponentManager implements Component, ComponentInstance
     }
 
     //**********************************************************************************************************
-    BundleComponentActivator getActivator()
+    public BundleComponentActivator getActivator()
     {
         return m_activator;
     }

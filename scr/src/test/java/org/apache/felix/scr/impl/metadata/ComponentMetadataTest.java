@@ -16,11 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl;
+package org.apache.felix.scr.impl.metadata;
 
 
 import junit.framework.TestCase;
 
+import org.apache.felix.scr.impl.MockLogger;
+import org.apache.felix.scr.impl.metadata.ComponentMetadata;
+import org.apache.felix.scr.impl.metadata.ReferenceMetadata;
+import org.apache.felix.scr.impl.metadata.ServiceMetadata;
+import org.apache.felix.scr.impl.metadata.XmlHandler;
 import org.osgi.service.component.ComponentException;
 
 

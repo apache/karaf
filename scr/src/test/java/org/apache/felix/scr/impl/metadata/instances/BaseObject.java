@@ -16,17 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl.instances;
+package org.apache.felix.scr.impl.metadata.instances;
 
 
-public final class MethodNameException extends RuntimeException
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.ComponentContext;
+
+
+/**
+ * The <code>BaseObject</code> is a base class providing a number of methods
+ * to check. All methods take various combinations of arguments and return
+ * a single helper string to indicate what method has been called.
+ */
+public class BaseObject
 {
 
-    private static final long serialVersionUID = 1L;
-
-
-    public MethodNameException( String message )
+    private void activate_no_arg()
     {
-        super( message );
+        throw new MethodNameException( "activate_no_arg" );
+    }
+
+
+    protected void activate_comp( ComponentContext ctx )
+    {
+        throw new MethodNameException( "activate_comp" );
+    }
+
+
+    void activate_comp_bundle( ComponentContext ctx, BundleContext bundle )
+    {
+        throw new MethodNameException( "activate_comp_bundle" );
     }
 }

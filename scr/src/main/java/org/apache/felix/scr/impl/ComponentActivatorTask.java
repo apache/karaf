@@ -20,6 +20,7 @@ package org.apache.felix.scr.impl;
 
 
 import org.apache.felix.scr.Component;
+import org.apache.felix.scr.impl.manager.AbstractComponentManager;
 import org.osgi.framework.Bundle;
 import org.osgi.service.log.LogService;
 
@@ -30,7 +31,7 @@ import org.osgi.service.log.LogService;
  * implementation. This is mainly used when logging something around the task
  * being run or scheduled.
  */
-abstract class ComponentActivatorTask implements Runnable
+public abstract class ComponentActivatorTask implements Runnable
 {
 
     private final String taskName;

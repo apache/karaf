@@ -16,34 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl.instances;
+package org.apache.felix.scr.impl.metadata.instances;
 
 
 import java.util.Map;
 
-import org.apache.felix.scr.impl.instances2.Level2Object;
-import org.osgi.service.component.ComponentContext;
+import org.osgi.framework.BundleContext;
 
 
-public class Level3Object extends Level2Object
+public class Level1Object extends BaseObject
 {
 
-    private void activate_comp_map( ComponentContext ctx, Map map )
+    private void activate_level1_bundle( BundleContext ctx )
     {
-        throw new MethodNameException("activate_comp_map");
+        throw new MethodNameException("activate_level1_bundle");
     }
 
 
-    // this method should not be found, since the method taking a
-    // Map has higher precedence
-    public void activate_collision()
+    protected void activate_level1_map( Map props )
     {
-        throw new MethodNameException("not_expected_to_be_found");
+        throw new MethodNameException("activate_level1_map");
     }
 
-
-    public void activate_collision( Map map )
-    {
-        throw new MethodNameException("activate_collision");
-    }
 }

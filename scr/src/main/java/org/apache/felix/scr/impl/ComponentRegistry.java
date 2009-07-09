@@ -29,6 +29,9 @@ import java.util.Map;
 
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.ScrService;
+import org.apache.felix.scr.impl.manager.AbstractComponentManager;
+import org.apache.felix.scr.impl.manager.ComponentFactoryImpl;
+import org.apache.felix.scr.impl.manager.ImmediateComponentManager;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -220,7 +223,7 @@ public class ComponentRegistry implements ScrService, ConfigurationListener
     }
 
 
-    Configuration getConfiguration( final BundleContext ctx, final String pid )
+    public Configuration getConfiguration( final BundleContext ctx, final String pid )
     {
         final String filter = "(service.pid=" + pid + ")";
         Configuration[] cfg = getConfigurationInternal( ctx, filter );
@@ -228,7 +231,7 @@ public class ComponentRegistry implements ScrService, ConfigurationListener
     }
 
 
-    Configuration[] getConfigurations( final BundleContext ctx, final String factoryPid )
+    public Configuration[] getConfigurations( final BundleContext ctx, final String factoryPid )
     {
         final String filter = "(service.factoryPid=" + factoryPid + ")";
         return getConfigurationInternal( ctx, filter );
@@ -265,14 +268,14 @@ public class ComponentRegistry implements ScrService, ConfigurationListener
 
     //---------- ComponentManager registration support
 
-    long createComponentId()
+    public long createComponentId()
     {
         m_componentCounter++;
         return m_componentCounter;
     }
 
 
-    void checkComponentName( String name )
+    public void checkComponentName( String name )
     {
         if ( m_componentsByName.containsKey( name ) )
         {

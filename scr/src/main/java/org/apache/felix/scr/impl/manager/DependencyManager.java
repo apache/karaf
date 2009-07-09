@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl;
+package org.apache.felix.scr.impl.manager;
 
 
 import java.lang.reflect.InvocationTargetException;
@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.scr.Reference;
+import org.apache.felix.scr.impl.helper.ReflectionHelper;
+import org.apache.felix.scr.impl.metadata.ReferenceMetadata;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -46,7 +48,7 @@ import org.osgi.service.log.LogService;
  * declared by a single <code>&lt;reference&gt;</code element in component
  * descriptor.
  */
-class DependencyManager implements ServiceListener, Reference
+public class DependencyManager implements ServiceListener, Reference
 {
     // mask of states ok to send events
     private static final int STATE_MASK = AbstractComponentManager.STATE_UNSATISFIED

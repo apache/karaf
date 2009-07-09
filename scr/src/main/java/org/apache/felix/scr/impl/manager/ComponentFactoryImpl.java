@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl;
+package org.apache.felix.scr.impl.manager;
 
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -24,6 +24,9 @@ import java.util.Hashtable;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
+import org.apache.felix.scr.impl.BundleComponentActivator;
+import org.apache.felix.scr.impl.ComponentRegistry;
+import org.apache.felix.scr.impl.metadata.ComponentMetadata;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
@@ -35,7 +38,7 @@ import org.osgi.service.log.LogService;
 /**
  * The <code>ComponentFactoryImpl</code> TODO
  */
-class ComponentFactoryImpl extends AbstractComponentManager implements ComponentFactory
+public class ComponentFactoryImpl extends AbstractComponentManager implements ComponentFactory
 {
 
     // The component registry used to retrieve component IDs
@@ -51,7 +54,7 @@ class ComponentFactoryImpl extends AbstractComponentManager implements Component
     private final Map m_createdComponents;
 
 
-    ComponentFactoryImpl( BundleComponentActivator activator, ComponentMetadata metadata,
+    public ComponentFactoryImpl( BundleComponentActivator activator, ComponentMetadata metadata,
         ComponentRegistry componentRegistry )
     {
         super( activator, metadata, componentRegistry );
@@ -142,7 +145,7 @@ class ComponentFactoryImpl extends AbstractComponentManager implements Component
 
     //---------- ManagedServiceFactory interface ------------------------------
 
-    void updated( String pid, Dictionary configuration )
+    public void updated( String pid, Dictionary configuration )
     {
         if ( getState() == STATE_FACTORY )
         {
@@ -173,7 +176,7 @@ class ComponentFactoryImpl extends AbstractComponentManager implements Component
         }
     }
 
-    void deleted( String pid )
+    public void deleted( String pid )
     {
         if ( getState() == STATE_FACTORY && m_configuredServices != null )
         {

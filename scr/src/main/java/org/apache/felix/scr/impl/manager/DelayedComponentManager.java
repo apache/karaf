@@ -16,9 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl;
+package org.apache.felix.scr.impl.manager;
 
 
+import org.apache.felix.scr.impl.BundleComponentActivator;
+import org.apache.felix.scr.impl.ComponentRegistry;
+import org.apache.felix.scr.impl.metadata.ComponentMetadata;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
@@ -27,7 +30,7 @@ import org.osgi.framework.ServiceRegistration;
 /**
  * The <code>DelayedComponentManager</code> TODO
  */
-class DelayedComponentManager extends ImmediateComponentManager implements ServiceFactory
+public class DelayedComponentManager extends ImmediateComponentManager implements ServiceFactory
 {
 
     /**

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl;
+package org.apache.felix.scr.impl.metadata;
 
 
 import java.io.IOException;
@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.felix.scr.impl.helper.Logger;
 import org.apache.felix.scr.impl.parser.KXml2SAXHandler;
 import org.apache.felix.scr.impl.parser.ParseException;
 import org.osgi.framework.Bundle;
@@ -101,10 +102,21 @@ public class XmlHandler implements KXml2SAXHandler
 
     // creates an instance with the bundle owning the component descriptor
     // file parsed by this instance
-    XmlHandler( Bundle bundle, Logger logger )
+    public XmlHandler( Bundle bundle, Logger logger )
     {
         m_bundle = bundle;
         m_logger = logger;
+    }
+
+
+    /**
+    * Called to retrieve the service descriptors
+    *
+    * @return   A list of service descriptors
+    */
+    public List getComponentMetadataList()
+    {
+        return m_components;
     }
 
 
@@ -354,17 +366,6 @@ public class XmlHandler implements KXml2SAXHandler
                 m_pendingProperty = null;
             }
         }
-    }
-
-
-    /**
-    * Called to retrieve the service descriptors
-    *
-    * @return   A list of service descriptors
-    */
-    List getComponentMetadataList()
-    {
-        return m_components;
     }
 
 

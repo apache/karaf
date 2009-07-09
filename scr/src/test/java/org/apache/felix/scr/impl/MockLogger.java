@@ -18,6 +18,9 @@
  */
 package org.apache.felix.scr.impl;
 
+import org.apache.felix.scr.impl.helper.Logger;
+import org.apache.felix.scr.impl.metadata.ComponentMetadata;
+
 
 public class MockLogger implements Logger
 {

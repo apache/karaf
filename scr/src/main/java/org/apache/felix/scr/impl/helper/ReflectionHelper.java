@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl;
+package org.apache.felix.scr.impl.helper;
 
 
 import java.lang.reflect.InvocationTargetException;
@@ -35,25 +35,25 @@ import org.osgi.service.component.ComponentContext;
  * The <code>ReflectionHelper</code> class provides utility methods to find out
  * about binding and activation methods in components.
  */
-final class ReflectionHelper
+public final class ReflectionHelper
 {
 
     // Method instance to implement tristate behaviour on method fields:
     // unchecked (SENTINEL), no method (null), valid method (method object)
-    static final Method SENTINEL;
+    public static final Method SENTINEL;
 
     // class references to simplify parameter checking
-    static final Class COMPONENT_CONTEXT_CLASS = ComponentContext.class;
-    static final Class BUNDLE_CONTEXT_CLASS = BundleContext.class;
-    static final Class MAP_CLASS = Map.class;
-    static final Class INTEGER_CLASS = Integer.class;
+    public static final Class COMPONENT_CONTEXT_CLASS = ComponentContext.class;
+    public static final Class BUNDLE_CONTEXT_CLASS = BundleContext.class;
+    public static final Class MAP_CLASS = Map.class;
+    public static final Class INTEGER_CLASS = Integer.class;
 
     // Helper used to find the best matching activate and modified methods
-    static final ActivatorMethodTester ACTIVATE_ACCEPTED_PARAMETERS = new ActivatorMethodTester( new Class[]
+    public static final ActivatorMethodTester ACTIVATE_ACCEPTED_PARAMETERS = new ActivatorMethodTester( new Class[]
         { COMPONENT_CONTEXT_CLASS, BUNDLE_CONTEXT_CLASS, MAP_CLASS } );
 
     // Helper used to find the best matching deactivate method
-    static final ActivatorMethodTester DEACTIVATE_ACCEPTED_PARAMETERS = new ActivatorMethodTester( new Class[]
+    public static final ActivatorMethodTester DEACTIVATE_ACCEPTED_PARAMETERS = new ActivatorMethodTester( new Class[]
         { COMPONENT_CONTEXT_CLASS, BUNDLE_CONTEXT_CLASS, MAP_CLASS, Integer.TYPE, INTEGER_CLASS } );
 
     static
@@ -101,7 +101,7 @@ final class ReflectionHelper
      * @throws InvocationTargetException If an unexpected Throwable is caught
      *      trying to access the desired method.
      */
-    static Method getMethod( final Class objectClass, final String name, final MethodTester tester )
+    public static Method getMethod( final Class objectClass, final String name, final MethodTester tester )
         throws NoSuchMethodException, InvocationTargetException
     {
         // whether we accept package private methods
@@ -196,7 +196,7 @@ final class ReflectionHelper
      * @throws InvocationTargetException If an unexpected Throwable is caught
      *      trying to access the desired method.
      */
-    static Method getMethod( Class clazz, String name, Class[] parameterTypes, boolean acceptPrivate,
+    public static Method getMethod( Class clazz, String name, Class[] parameterTypes, boolean acceptPrivate,
         boolean acceptPackage ) throws NoSuchMethodException, InvocationTargetException
     {
         try
@@ -250,7 +250,7 @@ final class ReflectionHelper
      * @param acceptPackage Whether a package private method is acceptable
      * @return
      */
-    static boolean accept( Method method, boolean acceptPrivate, boolean acceptPackage )
+    public static boolean accept( Method method, boolean acceptPrivate, boolean acceptPackage )
     {
         // method must be void
         if ( Void.TYPE != method.getReturnType() )
@@ -302,7 +302,7 @@ final class ReflectionHelper
      * Returns the name of the package to which the class belongs or an
      * empty string if the class is in the default package.
      */
-    static String getPackageName( Class clazz )
+    public static String getPackageName( Class clazz )
     {
         String name = clazz.getName();
         int dot = name.lastIndexOf( '.' );
@@ -311,7 +311,7 @@ final class ReflectionHelper
 
     //---------- inner classes
 
-    static interface MethodTester
+    public static interface MethodTester
     {
 
         /**
@@ -334,7 +334,7 @@ final class ReflectionHelper
         Class[] getParameterLists();
     }
 
-    static final class ActivatorMethodTester implements ReflectionHelper.MethodTester
+    public static final class ActivatorMethodTester implements ReflectionHelper.MethodTester
     {
         private final Class[] parameterLists;
         private final Set methods;

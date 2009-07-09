@@ -16,11 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl;
+package org.apache.felix.scr.impl.manager;
 
 
 import java.util.Dictionary;
 
+import org.apache.felix.scr.impl.helper.ReadOnlyDictionary;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -32,7 +33,7 @@ import org.osgi.service.component.ComponentInstance;
  * Implementation for the ComponentContext interface
  *
  */
-class ComponentContextImpl implements ComponentContext
+public class ComponentContextImpl implements ComponentContext
 {
 
     private AbstractComponentManager m_componentManager;

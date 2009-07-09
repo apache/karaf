@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl;
+package org.apache.felix.scr.impl.manager;
 
 
 import java.lang.reflect.InvocationTargetException;
@@ -25,6 +25,11 @@ import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.felix.scr.impl.BundleComponentActivator;
+import org.apache.felix.scr.impl.ComponentRegistry;
+import org.apache.felix.scr.impl.helper.ReflectionHelper;
+import org.apache.felix.scr.impl.metadata.ComponentMetadata;
+import org.apache.felix.scr.impl.metadata.ReferenceMetadata;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
@@ -35,7 +40,7 @@ import org.osgi.service.log.LogService;
  * The default ComponentManager. Objects of this class are responsible for managing
  * implementation object's lifecycle.
  */
-class ImmediateComponentManager extends AbstractComponentManager
+public class ImmediateComponentManager extends AbstractComponentManager
 {
 
     // The object that implements the service and that is bound to other services
@@ -67,7 +72,7 @@ class ImmediateComponentManager extends AbstractComponentManager
      * @param activator
      * @param metadata
      */
-    ImmediateComponentManager( BundleComponentActivator activator, ComponentMetadata metadata,
+    public ImmediateComponentManager( BundleComponentActivator activator, ComponentMetadata metadata,
         ComponentRegistry componentRegistry )
     {
         super( activator, metadata, componentRegistry );

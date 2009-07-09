@@ -16,7 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl;
+package org.apache.felix.scr.impl.helper;
+
+import org.apache.felix.scr.impl.metadata.ComponentMetadata;
 
 
 /**
@@ -24,12 +26,12 @@ package org.apache.felix.scr.impl;
  * in the XML Parser and ComponentMetadata handling classes and at the same
  * time not be too intrusive for the unit tests.
  */
-interface Logger
+public interface Logger
 {
 
     /**
      * Writes a messages for the given <code>ComponentMetadata</code>.
-     * 
+     *
      * @param level The log level of the messages. This corresponds to the log
      *          levels defined by the OSGi LogService.
      * @param message The message to print

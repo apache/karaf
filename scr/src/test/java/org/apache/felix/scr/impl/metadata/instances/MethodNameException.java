@@ -16,56 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl.instances;
+package org.apache.felix.scr.impl.metadata.instances;
 
 
-/**
- * The <code>AcceptMethod</code> class provides methods, which are used to
- * test the ReflectionHelper.acceptMethod() method.
- */
-public class AcceptMethod
+public final class MethodNameException extends RuntimeException
 {
 
-    public void public_void()
+    private static final long serialVersionUID = 1L;
+
+
+    public MethodNameException( String message )
     {
-    }
-
-
-    public String public_string()
-    {
-        return "";
-    }
-
-
-    protected void protected_void()
-    {
-    }
-
-
-    protected String protected_string()
-    {
-        return "";
-    }
-
-
-    private void private_void()
-    {
-    }
-
-
-    private String private_string()
-    {
-        return "";
-    }
-
-
-    void package_void()
-    {
-    }
-
-
-    String package_string()
-    {
-        return "";
+        super( message );
     }
 }

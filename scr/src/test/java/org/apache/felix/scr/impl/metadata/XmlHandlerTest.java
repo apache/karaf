@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl;
+package org.apache.felix.scr.impl.metadata;
 
 
 import java.io.BufferedReader;
@@ -27,6 +27,13 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.apache.felix.scr.impl.MockBundle;
+import org.apache.felix.scr.impl.MockLogger;
+import org.apache.felix.scr.impl.metadata.ComponentMetadata;
+import org.apache.felix.scr.impl.metadata.PropertyMetadata;
+import org.apache.felix.scr.impl.metadata.ReferenceMetadata;
+import org.apache.felix.scr.impl.metadata.ServiceMetadata;
+import org.apache.felix.scr.impl.metadata.XmlHandler;
 import org.apache.felix.scr.impl.parser.KXml2SAXParser;
 import org.osgi.service.component.ComponentException;
 import org.xmlpull.v1.XmlPullParserException;

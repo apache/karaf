@@ -16,35 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl.instances;
+package org.apache.felix.scr.impl.metadata.instances;
 
 
-import org.osgi.framework.BundleContext;
+import java.util.Map;
+
+import org.apache.felix.scr.impl.metadata.instances2.Level2Object;
 import org.osgi.service.component.ComponentContext;
 
 
-/**
- * The <code>BaseObject</code> is a base class providing a number of methods
- * to check. All methods take various combinations of arguments and return
- * a single helper string to indicate what method has been called.
- */
-public class BaseObject
+public class Level3Object extends Level2Object
 {
 
-    private void activate_no_arg()
+    private void activate_comp_map( ComponentContext ctx, Map map )
     {
-        throw new MethodNameException( "activate_no_arg" );
+        throw new MethodNameException("activate_comp_map");
     }
 
 
-    protected void activate_comp( ComponentContext ctx )
+    // this method should not be found, since the method taking a
+    // Map has higher precedence
+    public void activate_collision()
     {
-        throw new MethodNameException( "activate_comp" );
+        throw new MethodNameException("not_expected_to_be_found");
     }
 
 
-    void activate_comp_bundle( ComponentContext ctx, BundleContext bundle )
+    public void activate_collision( Map map )
     {
-        throw new MethodNameException( "activate_comp_bundle" );
+        throw new MethodNameException("activate_collision");
     }
 }

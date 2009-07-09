@@ -29,6 +29,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.apache.felix.scr.impl.helper.Logger;
+import org.apache.felix.scr.impl.manager.AbstractComponentManager;
+import org.apache.felix.scr.impl.manager.ComponentFactoryImpl;
+import org.apache.felix.scr.impl.manager.DelayedComponentManager;
+import org.apache.felix.scr.impl.manager.ImmediateComponentManager;
+import org.apache.felix.scr.impl.manager.ServiceFactoryComponentManager;
+import org.apache.felix.scr.impl.metadata.ComponentMetadata;
+import org.apache.felix.scr.impl.metadata.XmlHandler;
 import org.apache.felix.scr.impl.parser.KXml2SAXParser;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -42,7 +50,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * a single bundle. It will read information from the metadata.xml file
  * descriptors and create the corresponding managers.
  */
-class BundleComponentActivator implements Logger
+public class BundleComponentActivator implements Logger
 {
     // global component registration
     private ComponentRegistry m_componentRegistry;
@@ -315,7 +323,7 @@ class BundleComponentActivator implements Logger
      *
      * @return the list of instance references
      */
-    protected List getInstanceReferences()
+    public List getInstanceReferences()
     {
         return m_managers;
     }
@@ -326,7 +334,7 @@ class BundleComponentActivator implements Logger
     *
     * @return the BundleContext
     */
-    protected BundleContext getBundleContext()
+    public BundleContext getBundleContext()
     {
         return m_context;
     }
@@ -355,7 +363,7 @@ class BundleComponentActivator implements Logger
      * @param name The name of the component to enable or <code>null</code> to
      *      enable all components.
      */
-    void enableComponent( String name )
+    public void enableComponent( String name )
     {
         final AbstractComponentManager[] cm = getSelectedComponents( name );
         if ( cm == null )
@@ -388,7 +396,7 @@ class BundleComponentActivator implements Logger
      * @param name The name of the component to disable or <code>null</code> to
      *      disable all components.
      */
-    void disableComponent( String name )
+    public void disableComponent( String name )
     {
         final AbstractComponentManager[] cm = getSelectedComponents( name );
         if ( cm == null )
@@ -431,7 +439,7 @@ class BundleComponentActivator implements Logger
         // if all components are selected
         if ( name == null )
         {
-            return ( AbstractComponentManager[] ) m_managers.toArray( new AbstractComponentManager[m_managers.size()] );
+            return (org.apache.felix.scr.impl.manager.AbstractComponentManager[] ) m_managers.toArray( new AbstractComponentManager[m_managers.size()] );
         }
 
         if ( m_componentRegistry.getComponent( name ) != null )
@@ -463,7 +471,7 @@ class BundleComponentActivator implements Logger
      *
      * @param task The component task to execute
      */
-    void schedule( ComponentActivatorTask task )
+    public void schedule( ComponentActivatorTask task )
     {
         if ( isActive() )
         {

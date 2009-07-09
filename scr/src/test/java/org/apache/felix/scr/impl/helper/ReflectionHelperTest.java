@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl;
+package org.apache.felix.scr.impl.helper;
 
 
 import java.lang.reflect.InvocationTargetException;
@@ -24,12 +24,13 @@ import java.lang.reflect.Method;
 
 import junit.framework.TestCase;
 
-import org.apache.felix.scr.impl.instances.AcceptMethod;
-import org.apache.felix.scr.impl.instances.BaseObject;
-import org.apache.felix.scr.impl.instances.Level1Object;
-import org.apache.felix.scr.impl.instances.Level3Object;
-import org.apache.felix.scr.impl.instances.MethodNameException;
-import org.apache.felix.scr.impl.instances2.Level2Object;
+import org.apache.felix.scr.impl.helper.ReflectionHelper;
+import org.apache.felix.scr.impl.metadata.instances.AcceptMethod;
+import org.apache.felix.scr.impl.metadata.instances.BaseObject;
+import org.apache.felix.scr.impl.metadata.instances.Level1Object;
+import org.apache.felix.scr.impl.metadata.instances.Level3Object;
+import org.apache.felix.scr.impl.metadata.instances.MethodNameException;
+import org.apache.felix.scr.impl.metadata.instances2.Level2Object;
 
 
 public class ReflectionHelperTest extends TestCase
@@ -139,7 +140,7 @@ public class ReflectionHelperTest extends TestCase
         Class dpc = getClass().getClassLoader().loadClass( "DefaultPackageClass" );
         assertEquals( "", ReflectionHelper.getPackageName( dpc ) );
 
-        assertEquals( "org.apache.felix.scr.impl.instances", ReflectionHelper.getPackageName( base.getClass() ) );
+        assertEquals( "org.apache.felix.scr.impl.metadata.instances", ReflectionHelper.getPackageName( base.getClass() ) );
     }
 
 
