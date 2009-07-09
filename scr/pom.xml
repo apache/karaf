@@ -76,20 +76,23 @@
                         </Bundle-Activator>
                         <Export-Package>
                             org.apache.felix.scr;version=${pom.version},
-                            org.osgi.service.cm,
-                            org.osgi.service.component
+                            org.osgi.service.component;version=1.0;-split-package:=merge-first
                         </Export-Package>
                         <Private-Package>
-                            org.apache.felix.scr.impl.*, org.kxml2.io,
-                            org.osgi.util.tracker,
-                            org.xmlpull.v1;-split-package:=merge-first
+                            org.apache.felix.scr.impl.*,
+                            org.osgi.util.tracker
                         </Private-Package>
                         <Import-Package>
-                            org.apache.felix.shell;resolution:=optional,*
+                            org.osgi.service.cm;
+                            org.apache.felix.shell; resolution:=optional,
+                            *
                         </Import-Package>
                         <DynamicImport-Package>
                             org.osgi.service.log
                         </DynamicImport-Package>
+                        <Embed-Dependency>
+                            kxml2
+                        </Embed-Dependency>
                     </instructions>
                 </configuration>
             </plugin>
