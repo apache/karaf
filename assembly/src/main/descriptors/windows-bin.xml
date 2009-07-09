@@ -122,6 +122,16 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
+            <outputFileNameMapping>org/apache/felix/gogo/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <includes>
+                <include>org.apache.felix.gogo:org.apache.felix.gogo.runtime</include>
+                <include>org.apache.felix.gogo:org.apache.felix.gogo.commands</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <useProjectArtifact>false</useProjectArtifact>
             <outputFileNameMapping>org/ops4j/pax/logging/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
                 <include>org.ops4j.pax.logging:pax-logging-api</include>
