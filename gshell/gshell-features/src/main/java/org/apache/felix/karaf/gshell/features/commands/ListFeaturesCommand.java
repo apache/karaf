@@ -16,8 +16,8 @@
  */
 package org.apache.felix.karaf.gshell.features.commands;
 
-import org.apache.geronimo.gshell.clp.Option;
 import org.apache.felix.karaf.gshell.features.FeaturesService;
+import org.apache.felix.gogo.commands.Option;
 
 public class ListFeaturesCommand extends FeaturesCommandSupport {
 
@@ -30,18 +30,18 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
             features = admin.listInstalledFeatures();
         } else {
         	// Print column headers.
-        	io.out.println("  State          Version       Name");
+        	System.out.println("  State          Version       Name");
             features = admin.listFeatures();
         }
         if ((features != null) && (features.length > 0)) {
             for (int i = 0; i < features.length; i++) {
-                io.out.println(features[i]);
+                System.out.println(features[i]);
             }
         } else {
             if (installed) {
-                io.out.println("No features installed.");
+                System.out.println("No features installed.");
             } else {
-                io.out.println("No features available.");
+                System.out.println("No features available.");
             }
         }
     }

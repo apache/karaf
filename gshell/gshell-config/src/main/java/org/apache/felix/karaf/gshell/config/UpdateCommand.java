@@ -28,11 +28,11 @@ public class UpdateCommand extends ConfigCommandSupport {
         if (props == null) {
             System.err.println("No configuration is being edited. Run the edit command first");
         } else {
-            String pid = (String) this.variables.parent().get(PROPERTY_CONFIG_PID);
+            String pid = (String) this.session.get(PROPERTY_CONFIG_PID);
             Configuration cfg = admin.getConfiguration(pid, null);
             cfg.update(props);
-            this.variables.parent().unset(PROPERTY_CONFIG_PID);
-            this.variables.parent().unset(PROPERTY_CONFIG_PROPS);
+            this.session.put(PROPERTY_CONFIG_PID, null);
+            this.session.put(PROPERTY_CONFIG_PROPS, null);
         }
     }
 }

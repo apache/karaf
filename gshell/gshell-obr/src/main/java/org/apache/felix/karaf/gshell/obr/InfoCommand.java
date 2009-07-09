@@ -16,13 +16,13 @@
  */
 package org.apache.felix.karaf.gshell.obr;
 
-import java.io.PrintWriter;
+import java.io.PrintStream;
 import java.lang.reflect.Array;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.geronimo.gshell.clp.Argument;
+import org.apache.felix.gogo.commands.Argument;
 import org.osgi.service.obr.Capability;
 import org.osgi.service.obr.RepositoryAdmin;
 import org.osgi.service.obr.Requirement;
@@ -39,7 +39,7 @@ public class InfoCommand extends ObrCommandSupport {
             Resource[] resources = searchRepository(admin, target[0], target[1]);
             if (resources == null)
             {
-                io.err.println("Unknown bundle and/or version: "
+                System.err.println("Unknown bundle and/or version: "
                     + target[0]);
             }
             else
@@ -48,15 +48,15 @@ public class InfoCommand extends ObrCommandSupport {
                 {
                     if (resIdx > 0)
                     {
-                        io.out.println("");
+                        System.out.println("");
                     }
-                    printResource(io.out, resources[resIdx]);
+                    printResource(System.out, resources[resIdx]);
                 }
             }
         }
     }
 
-    private void printResource(PrintWriter out, Resource resource)
+    private void printResource(PrintStream out, Resource resource)
     {
         printUnderline(out, resource.getPresentationName().length());
         out.println(resource.getPresentationName());

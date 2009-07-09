@@ -19,8 +19,8 @@ package org.apache.felix.karaf.gshell.obr;
 import java.net.URL;
 import java.util.List;
 
-import org.apache.geronimo.gshell.clp.Argument;
-import org.apache.geronimo.gshell.clp.Option;
+import org.apache.felix.gogo.commands.Option;
+import org.apache.felix.gogo.commands.Argument;
 import org.osgi.service.obr.RepositoryAdmin;
 import org.osgi.service.obr.Resource;
 
@@ -41,18 +41,18 @@ public class SourceCommand extends ObrCommandSupport {
             Resource resource = selectNewestVersion(searchRepository(admin, target[0], target[1]));
             if (resource == null)
             {
-                io.err.println("Unknown bundle and/or version: " + target[0]);
+                System.err.println("Unknown bundle and/or version: " + target[0]);
             }
             else
             {
                 URL srcURL = (URL) resource.getProperties().get(Resource.SOURCE_URL);
                 if (srcURL != null)
                 {
-                    FileUtil.downloadSource(io.out, io.err, srcURL, localDir, extract);
+                    FileUtil.downloadSource(System.out, System.err, srcURL, localDir, extract);
                 }
                 else
                 {
-                    io.err.println("Missing source URL: " + target[0]);
+                    System.err.println("Missing source URL: " + target[0]);
                 }
             }
         }

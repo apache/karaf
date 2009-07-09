@@ -19,9 +19,9 @@ package org.apache.felix.karaf.gshell.osgi;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.geronimo.gshell.clp.Argument;
-import org.apache.geronimo.gshell.clp.Option;
-import org.apache.felix.karaf.gshell.core.OsgiCommandSupport;
+import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
+import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Option;
 import org.osgi.framework.Bundle;
 
 public abstract class BundlesCommand extends OsgiCommandSupport {
@@ -38,16 +38,16 @@ public abstract class BundlesCommand extends OsgiCommandSupport {
             for (long id : ids) {
                 Bundle bundle = getBundleContext().getBundle(id);
                 if (bundle == null) {
-                    io.err.println("Bundle ID" + id + " is invalid");
+                    System.err.println("Bundle ID" + id + " is invalid");
                 } else {
-                    if (force || !Util.isASystemBundle(getBundleContext(), bundle) || Util.accessToSystemBundleIsAllowed(bundle.getBundleId(), io)) {
+                    if (force || !Util.isASystemBundle(getBundleContext(), bundle) || Util.accessToSystemBundleIsAllowed(bundle.getBundleId(), session)) {
                         bundles.add(bundle);
                     }
                 }
             }
         }
         doExecute(bundles);
-        return Result.SUCCESS;
+        return null;
     }
 
     protected abstract void doExecute(List<Bundle> bundles) throws Exception;

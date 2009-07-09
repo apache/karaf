@@ -26,16 +26,16 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.felix.karaf.gshell.admin.Instance;
 import org.apache.felix.karaf.jpm.Process;
 import org.apache.felix.karaf.jpm.ProcessBuilderFactory;
 import org.apache.felix.karaf.jpm.impl.ScriptUtils;
-import org.apache.felix.karaf.gshell.admin.Instance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InstanceImpl implements Instance {
 
-    private static final Log LOG = LogFactory.getLog(InstanceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(InstanceImpl.class);
 
     private AdminServiceImpl service;
     private String name;
@@ -130,12 +130,13 @@ public class InstanceImpl implements Instance {
         }
         String command = new File(System.getProperty("java.home"), ScriptUtils.isWindows() ? "bin\\java.exe" : "bin/java").getCanonicalPath()
                 + " " + javaOpts
+                + " -Djava.util.logging.config.file=\"" + new File(location, "etc/java.util.logging.properties").getCanonicalPath() + "\""
                 + " -Dkaraf.home=\"" + System.getProperty("karaf.home") + "\""
                 + " -Dkaraf.base=\"" + new File(location).getCanonicalPath() + "\""
                 + " -Dkaraf.startLocalConsole=false"
                 + " -Dkaraf.startRemoteShell=true"
                 + " -classpath " + classpath.toString()
-                + " org.apache.felix.karaf.main.Main";
+                + " org.apache.felix.karaf.main.Bootstrap";
         LOG.debug("Starting instance with command: " + command);
         this.process = ProcessBuilderFactory.newInstance().newBuilder()
                         .directory(new File(location))

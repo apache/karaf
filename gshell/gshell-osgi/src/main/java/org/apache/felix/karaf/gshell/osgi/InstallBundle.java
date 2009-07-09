@@ -16,13 +16,13 @@
  */
 package org.apache.felix.karaf.gshell.osgi;
 
-import java.io.PrintWriter;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.geronimo.gshell.clp.Argument;
-import org.apache.geronimo.gshell.clp.Option;
-import org.apache.felix.karaf.gshell.core.OsgiCommandSupport;
+import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
+import org.apache.felix.gogo.commands.Option;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
@@ -38,7 +38,7 @@ public class InstallBundle extends OsgiCommandSupport {
         List<Bundle> bundles = new ArrayList<Bundle>();
         StringBuffer sb = new StringBuffer();
         for (String url : urls) {
-            Bundle bundle = install(url, io.out, io.err);
+            Bundle bundle = install(url, System.out, System.err);
             if (bundle != null) {
                 bundles.add(bundle);
                 if (sb.length() > 0) {
@@ -53,14 +53,14 @@ public class InstallBundle extends OsgiCommandSupport {
             }
         }
         if (sb.toString().indexOf(',') > 0) {
-            io.out.println("Bundle IDs: " + sb.toString());
+            System.out.println("Bundle IDs: " + sb.toString());
         } else if (sb.length() > 0) {
-            io.out.println("Bundle ID: " + sb.toString());
+            System.out.println("Bundle ID: " + sb.toString());
         }
-        return Result.SUCCESS;
+        return null;
     }
 
-    protected Bundle install(String location, PrintWriter out, PrintWriter err) {
+    protected Bundle install(String location, PrintStream out, PrintStream err) {
         try {
             return getBundleContext().installBundle(location, null);
         } catch (IllegalStateException ex) {

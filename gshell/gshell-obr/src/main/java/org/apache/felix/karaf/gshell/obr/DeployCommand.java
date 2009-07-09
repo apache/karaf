@@ -18,8 +18,8 @@ package org.apache.felix.karaf.gshell.obr;
 
 import java.util.List;
 
-import org.apache.geronimo.gshell.clp.Argument;
 import org.osgi.service.obr.RepositoryAdmin;
+import org.apache.felix.gogo.commands.Argument;
 
 public class DeployCommand extends ObrCommandSupport {
 

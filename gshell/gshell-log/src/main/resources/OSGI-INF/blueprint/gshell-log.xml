@@ -32,7 +32,6 @@
     <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/gshell/v1.0.0">
         <command name="log/display">
             <action class="org.apache.felix.karaf.gshell.log.DisplayLog">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
                 <property name="events" ref="events"/>
                 <property name="pattern" value="${pattern}"/>
             </action>
@@ -40,20 +39,15 @@
         <link name="log/d" target="log/display"/>
         <command name="log/display-exception">
             <action class="org.apache.felix.karaf.gshell.log.DisplayException">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
                 <property name="events" ref="events"/>
             </action>
         </command>
         <link name="log/de" target="log/display-exception"/>
         <command name="log/get">
-            <action class="org.apache.felix.karaf.gshell.log.GetLogLevel">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.log.GetLogLevel" />
         </command>
         <command name="log/set">
-            <action class="org.apache.felix.karaf.gshell.log.SetLogLevel">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.log.SetLogLevel" />
         </command>
 
         <alias name="ld" alias="log/d"/>

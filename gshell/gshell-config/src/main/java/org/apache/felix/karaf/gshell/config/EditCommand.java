@@ -18,8 +18,8 @@ package org.apache.felix.karaf.gshell.config;
 
 import java.util.Dictionary;
 
-import org.apache.geronimo.gshell.clp.Argument;
-import org.apache.geronimo.gshell.clp.Option;
+import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Option;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 public class EditCommand extends ConfigCommandSupport {
@@ -31,13 +31,13 @@ public class EditCommand extends ConfigCommandSupport {
     boolean force;
 
     protected void doExecute(ConfigurationAdmin admin) throws Exception {
-        String oldPid = (String) this.variables.get(PROPERTY_CONFIG_PID);
+        String oldPid = (String) this.session.get(PROPERTY_CONFIG_PID);
         if (oldPid != null && !oldPid.equals(pid) && !force) {
-            io.err.println("Another config is being edited.  Cancel / update first, or use the --force option");
+            System.err.println("Another config is being edited.  Cancel / update first, or use the --force option");
             return;
         }
         Dictionary props = admin.getConfiguration(pid).getProperties();
-        this.variables.parent().set(PROPERTY_CONFIG_PID, pid);
-        this.variables.parent().set(PROPERTY_CONFIG_PROPS, props);
+        this.session.put(PROPERTY_CONFIG_PID, pid);
+        this.session.put(PROPERTY_CONFIG_PROPS, props);
     }
 }

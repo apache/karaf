@@ -26,15 +26,15 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * Management Agent that registers MBeans with JMX MBeanServer.
  */
 public class ManagementAgent {
 
-    private static final transient Log LOG = LogFactory.getLog(ManagementAgent.class);
+    private static final transient Logger LOG = LoggerFactory.getLogger(ManagementAgent.class);
 
     private MBeanServer mbeanServer;
     private Set<ObjectName> mbeans = new HashSet<ObjectName>();

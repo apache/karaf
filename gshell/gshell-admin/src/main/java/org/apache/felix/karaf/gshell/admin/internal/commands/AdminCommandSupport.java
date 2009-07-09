@@ -18,7 +18,7 @@ package org.apache.felix.karaf.gshell.admin.internal.commands;
 
 import org.apache.felix.karaf.gshell.admin.AdminService;
 import org.apache.felix.karaf.gshell.admin.Instance;
-import org.apache.felix.karaf.gshell.core.OsgiCommandSupport;
+import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
 
 public abstract class AdminCommandSupport extends OsgiCommandSupport {
 

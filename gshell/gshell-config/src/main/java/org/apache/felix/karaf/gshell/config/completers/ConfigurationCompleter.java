@@ -23,8 +23,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import jline.Completor;
-import org.apache.geronimo.gshell.console.completer.StringsCompleter;
+import org.apache.felix.karaf.gshell.console.completer.StringsCompleter;
+import org.apache.felix.karaf.gshell.console.Completer;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationEvent;
@@ -36,7 +36,7 @@ import org.osgi.service.cm.ConfigurationListener;
  * Displays a list of existing config admin configurations for completion.
  *
  */
-public class ConfigurationCompleter implements Completor, ConfigurationListener {
+public class ConfigurationCompleter implements Completer, ConfigurationListener {
 
     private final StringsCompleter delegate = new StringsCompleter();
 

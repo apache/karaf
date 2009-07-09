@@ -16,8 +16,8 @@
  */
 package org.apache.felix.karaf.gshell.osgi;
 
-import org.apache.geronimo.gshell.clp.Option;
-import org.apache.felix.karaf.gshell.core.OsgiCommandSupport;
+import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
+import org.apache.felix.gogo.commands.Option;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
@@ -52,7 +52,7 @@ public class ListBundles extends OsgiCommandSupport {
             sl = (StartLevel) getBundleContext().getService(ref);
         }
         if (sl == null) {
-            io.out.println("StartLevel service is unavailable.");
+            System.out.println("StartLevel service is unavailable.");
         }
 
         ServiceReference pkgref = getBundleContext().getServiceReference(PackageAdmin.class.getName());
@@ -60,7 +60,7 @@ public class ListBundles extends OsgiCommandSupport {
         if (pkgref != null) {
             admin = (PackageAdmin) getBundleContext().getService(pkgref);
             if (admin == null) {
-                io.out.println("PackageAdmin service is unavailable.");
+                System.out.println("PackageAdmin service is unavailable.");
             }
         }
 
@@ -68,7 +68,7 @@ public class ListBundles extends OsgiCommandSupport {
         if (bundles != null) {
             // Display active start level.
             if (sl != null) {
-                io.out.println("START LEVEL " + sl.getStartLevel());
+                System.out.println("START LEVEL " + sl.getStartLevel());
             }
 
             // Print column headers.
@@ -83,7 +83,7 @@ public class ListBundles extends OsgiCommandSupport {
                msg = " Update location";
             }
             String level = (sl == null) ? "" : "  Level ";
-            io.out.println("   ID   State         Blueprint   " + level + msg);
+            System.out.println("   ID   State         Blueprint   " + level + msg);
             for (int i = 0; i < bundles.length; i++) {
                 // Get the bundle name or location.
                 String name = (String) bundles[i].getHeaders().get(Constants.BUNDLE_NAME);
@@ -122,7 +122,7 @@ public class ListBundles extends OsgiCommandSupport {
                 while (id.length() < 4) {
                     id = " " + id;
                 }
-                io.out.println("[" + id + "] ["
+                System.out.println("[" + id + "] ["
                     + getStateString(bundles[i])
                     + "] [" + getBlueprintStateString(bundles[i])
                     + "] [" + level + "] " + name);
@@ -132,42 +132,42 @@ public class ListBundles extends OsgiCommandSupport {
                     Bundle[] hosts = admin.getHosts(bundles[i]);
 
                     if (fragments != null) {
-                        io.out.print("                                       Fragments: ");
+                        System.out.print("                                       Fragments: ");
                         int ii = 0;
                         for (Bundle fragment : fragments) {
                             ii++;
-                            io.out.print(fragment.getBundleId());
+                            System.out.print(fragment.getBundleId());
                             if ((fragments.length > 1) && ii < (fragments.length)) {
-                                io.out.print(",");
+                                System.out.print(",");
                             }
                         }
-                        io.out.println();
+                        System.out.println();
                     }
 
                     if (hosts != null) {
-                        io.out.print("                                       Hosts: ");
+                        System.out.print("                                       Hosts: ");
                         int ii = 0;
                         for (Bundle host : hosts) {
                             ii++;
-                            io.out.print(host.getBundleId());
+                            System.out.print(host.getBundleId());
                             if ((hosts.length > 1) && ii < (hosts.length)) {
-                                io.out.print(",");
+                                System.out.print(",");
                             }
                         }
-                        io.out.println();
+                        System.out.println();
                     }
 
                 }
             }
         }
         else {
-            io.out.println("There are no installed bundles.");
+            System.out.println("There are no installed bundles.");
         }
 
         getBundleContext().ungetService(ref);
         getBundleContext().ungetService(pkgref);
 
-        return Result.SUCCESS;
+        return null;
     }
 
     public String getStateString(Bundle bundle)

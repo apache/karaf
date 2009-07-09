@@ -19,7 +19,7 @@ package org.apache.felix.karaf.gshell.obr;
 import java.net.URL;
 import java.util.List;
 
-import org.apache.geronimo.gshell.clp.Argument;
+import org.apache.felix.gogo.commands.Argument;
 import org.osgi.service.obr.RepositoryAdmin;
 
 public class RemoveUrlCommand extends ObrCommandSupport {

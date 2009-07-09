@@ -17,16 +17,14 @@
  */
 package org.apache.felix.karaf.deployer.filemonitor;
 
-import java.io.File;
-
 import junit.framework.TestCase;
-import org.apache.commons.io.FileUtils;
 
 /**
  * @version $Revision: 1.1 $
  */
 public class BundlePackerTest extends TestCase {
     public void testFiles() throws Exception {
+/*
         File bundleDir = new File("target/deploy");
         File unpackDir = new File("target/data");
         FileUtils.deleteDirectory(unpackDir);
@@ -36,7 +34,6 @@ public class BundlePackerTest extends TestCase {
 
         FileUtils.copyDirectory(new File("src/test/data"), unpackDir);
 
-/*
         FileMonitor packer = new FileMonitor(bundleDir, unpackDir);
         packer.scan();
 */

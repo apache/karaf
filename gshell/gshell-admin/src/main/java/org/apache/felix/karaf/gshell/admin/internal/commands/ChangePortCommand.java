@@ -16,7 +16,7 @@
  */
 package org.apache.felix.karaf.gshell.admin.internal.commands;
 
-import org.apache.geronimo.gshell.clp.Argument;
+import org.apache.felix.gogo.commands.Argument;
 
 public class ChangePortCommand extends AdminCommandSupport {
 
@@ -28,6 +28,6 @@ public class ChangePortCommand extends AdminCommandSupport {
 
     protected Object doExecute() throws Exception {
         getExistingInstance(instance).changePort(port);
-        return Result.SUCCESS;
+        return null;
     }
 }

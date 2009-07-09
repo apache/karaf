@@ -20,8 +20,8 @@ import java.util.List;
 
 import org.apache.felix.karaf.gshell.admin.AdminService;
 import org.apache.felix.karaf.gshell.admin.Instance;
-import org.apache.geronimo.gshell.console.completer.StringsCompleter;
-import jline.Completor;
+import org.apache.felix.karaf.gshell.console.completer.StringsCompleter;
+import org.apache.felix.karaf.gshell.console.Completer;
 
 /**
  * {@link jline.Completor} for server instance names.
@@ -29,7 +29,7 @@ import jline.Completor;
  * Displays a list of configured server instances for the Admin commands.
  *
  */
-public class InstanceCompleter implements Completor {
+public class InstanceCompleter implements Completer {
     private AdminService adminService;
 
     public void setAdminService(AdminService adminService) {

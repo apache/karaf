@@ -16,18 +16,18 @@
  */
 package org.apache.felix.karaf.gshell.log;
 
-import org.apache.felix.karaf.gshell.core.OsgiCommandSupport;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
+import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
 
 public class DisplayException extends OsgiCommandSupport {
 
-    protected LruList<PaxLoggingEvent> events;
+    protected LruList events;
 
-    public LruList<PaxLoggingEvent> getEvents() {
+    public LruList getEvents() {
         return events;
     }
 
-    public void setEvents(LruList<PaxLoggingEvent> events) {
+    public void setEvents(LruList events) {
         this.events = events;
     }
 
@@ -42,11 +42,11 @@ public class DisplayException extends OsgiCommandSupport {
         }
         if (throwableEvent != null) {
             for (String r : throwableEvent.getThrowableStrRep()) {
-                io.out.println(r);
+                System.out.println(r);
             }
-            io.out.println();
+            System.out.println();
         }
-        return Result.SUCCESS;
+        return null;
     }
 
 }

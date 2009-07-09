@@ -19,8 +19,8 @@ package org.apache.felix.karaf.gshell.features.completers;
 import java.util.Collection;
 import java.util.List;
 
-import jline.Completor;
-import org.apache.geronimo.gshell.console.completer.StringsCompleter;
+import org.apache.felix.karaf.gshell.console.Completer;
+import org.apache.felix.karaf.gshell.console.completer.StringsCompleter;
 import org.apache.felix.karaf.gshell.features.management.ManagedFeature;
 import org.apache.felix.karaf.gshell.features.management.ManagedFeaturesRegistry;
 
@@ -30,7 +30,7 @@ import org.apache.felix.karaf.gshell.features.management.ManagedFeaturesRegistry
  * Displays a list of currently installed features.
  *
  */
-public class InstalledFeatureCompleter implements Completor {
+public class InstalledFeatureCompleter implements Completer {
 
     private ManagedFeaturesRegistry featuresRegistry;
     private StringsCompleter delegate;

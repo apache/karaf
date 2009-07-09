@@ -19,15 +19,9 @@
 
 package org.apache.felix.karaf.gshell.config.completers;
 
-import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.List;
 
-import jline.Completor;
-import org.apache.geronimo.gshell.command.Variables;
-import org.apache.geronimo.gshell.console.completer.StringsCompleter;
-import org.apache.geronimo.gshell.shell.ShellContextHolder;
-import org.apache.felix.karaf.gshell.config.ConfigCommandSupport;
+import org.apache.felix.karaf.gshell.console.Completer;
 
 /**
  * {@link jline.Completor} for Configuration Admin properties.
@@ -35,22 +29,24 @@ import org.apache.felix.karaf.gshell.config.ConfigCommandSupport;
  * Displays a list of existing properties based on the current configuration being edited.
  *
  */
-public class ConfigurationPropertyCompleter implements Completor {
+public class ConfigurationPropertyCompleter implements Completer {
 
     public int complete(final String buffer, final int cursor, final List candidates) {
-        Variables vars = ShellContextHolder.get().getVariables();
-        if (vars.get(ConfigCommandSupport.PROPERTY_CONFIG_PID) == null) {
-            return -1;
-        }
+        // TODO: currently we have no way to access the session which is being run in this thread
+        return -1;
 
-        Dictionary props = (Dictionary) vars.get(ConfigCommandSupport.PROPERTY_CONFIG_PROPS);
-        StringsCompleter delegate = new StringsCompleter();
-
-        for (Enumeration e = props.keys(); e.hasMoreElements();) {
-            String key = (String) e.nextElement();
-            delegate.getStrings().add(key);
-        }
-
-        return delegate.complete(buffer, cursor, candidates);
+//        if (vars.get(ConfigCommandSupport.PROPERTY_CONFIG_PID) == null) {
+//            return -1;
+//        }
+//
+//        Dictionary props = (Dictionary) vars.get(ConfigCommandSupport.PROPERTY_CONFIG_PROPS);
+//        StringsCompleter delegate = new StringsCompleter();
+//
+//        for (Enumeration e = props.keys(); e.hasMoreElements();) {
+//            String key = (String) e.nextElement();
+//            delegate.getStrings().add(key);
+//        }
+//
+//        return delegate.complete(buffer, cursor, candidates);
     }
 }

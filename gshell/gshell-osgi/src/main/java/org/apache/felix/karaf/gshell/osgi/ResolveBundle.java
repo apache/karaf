@@ -26,13 +26,13 @@ public class ResolveBundle extends BundleCommand {
         // Get package admin service.
         ServiceReference ref = getBundleContext().getServiceReference(PackageAdmin.class.getName());
         if (ref == null) {
-            io.out.println("PackageAdmin service is unavailable.");
+            System.out.println("PackageAdmin service is unavailable.");
             return;
         }
         try {
             PackageAdmin pa = (PackageAdmin) getBundleContext().getService(ref);
             if (pa == null) {
-                io.out.println("PackageAdmin service is unavailable.");
+                System.out.println("PackageAdmin service is unavailable.");
                 return;
             }
             pa.resolveBundles(new Bundle[] { bundle });

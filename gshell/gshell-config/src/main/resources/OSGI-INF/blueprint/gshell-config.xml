@@ -21,62 +21,48 @@
 
     <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/gshell/v1.0.0">
         <command name="config/cancel">
-            <action class="org.apache.felix.karaf.gshell.config.CancelCommand">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.config.CancelCommand"/>
         </command>
         <command name="config/edit">
-            <action class="org.apache.felix.karaf.gshell.config.EditCommand">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.config.EditCommand"/>
             <completers>
                 <ref component-id="configCompleter" />
                 <null/>
             </completers>
         </command>
         <command name="config/list">
-            <action class="org.apache.felix.karaf.gshell.config.ListCommand">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.config.ListCommand"/>
         </command>
         <command name="config/propdel">
-            <action class="org.apache.felix.karaf.gshell.config.PropDelCommand">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.config.PropDelCommand"/>
             <completers>
                 <ref component-id="configPropertyCompleter" />
                 <null/>
             </completers>
         </command>
         <command name="config/proplist">
-            <action class="org.apache.felix.karaf.gshell.config.PropListCommand">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.config.PropListCommand"/>
         </command>
         <command name="config/propset">
-            <action class="org.apache.felix.karaf.gshell.config.PropSetCommand">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.config.PropSetCommand"/>
             <completers>
                 <ref component-id="configPropertyCompleter" />
                 <null/>
             </completers>
         </command>
         <command name="config/update">
-            <action class="org.apache.felix.karaf.gshell.config.UpdateCommand">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.config.UpdateCommand"/>
         </command>
     </command-bundle>
 
     <bean id="configCompleter" class="org.apache.felix.karaf.gshell.config.completers.ConfigurationCompleter" init-method="init">
         <property name="admin" ref="configAdmin"/>
     </bean>
+    <service ref="configCompleter" interface="org.osgi.service.cm.ConfigurationListener" />
 
     <bean id="configPropertyCompleter" class="org.apache.felix.karaf.gshell.config.completers.ConfigurationPropertyCompleter" />
 
     <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"  />
 
-    <service ref="configCompleter" interface="org.osgi.service.cm.ConfigurationListener" />
 
 </blueprint>

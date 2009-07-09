@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.PrintStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.jar.JarEntry;
@@ -34,7 +35,7 @@ import java.util.jar.JarInputStream;
 public class FileUtil
 {
     public static void downloadSource(
-        PrintWriter out, PrintWriter err,
+        PrintStream out, PrintStream err,
         URL srcURL, String dirStr, boolean extract)
     {
         // Get the file name from the URL.

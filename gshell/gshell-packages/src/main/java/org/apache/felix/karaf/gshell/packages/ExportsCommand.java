@@ -16,11 +16,11 @@
  */
 package org.apache.felix.karaf.gshell.packages;
 
-import java.io.PrintWriter;
+import java.io.PrintStream;
 import java.util.List;
 
-import org.apache.geronimo.gshell.clp.Argument;
-import org.apache.geronimo.gshell.clp.Option;
+import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Option;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.service.packageadmin.ExportedPackage;
@@ -39,18 +39,18 @@ public class ExportsCommand extends PackageCommandSupport {
             for (long id : ids) {
                 Bundle bundle = getBundleContext().getBundle(id);
                 if (bundle != null) {
-                    printExports(io.out, bundle, admin.getExportedPackages(bundle));
+                    printExports(System.out, bundle, admin.getExportedPackages(bundle));
                 } else {
-                    io.err.println("Bundle ID " + id + " is invalid.");
+                    System.err.println("Bundle ID " + id + " is invalid.");
                 }
             }
         }
         else {
-            printExports(io.out, null, admin.getExportedPackages((Bundle) null));
+            printExports(System.out, null, admin.getExportedPackages((Bundle) null));
         }
     }
 
-    protected void printExports(PrintWriter out, Bundle target, ExportedPackage[] exports) {
+    protected void printExports(PrintStream out, Bundle target, ExportedPackage[] exports) {
         if ((exports != null) && (exports.length > 0)) {
             for (int i = 0; i < exports.length; i++) {
                 Bundle bundle = exports[i].getExportingBundle();

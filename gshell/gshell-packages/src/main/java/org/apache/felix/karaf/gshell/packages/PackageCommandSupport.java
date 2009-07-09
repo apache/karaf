@@ -16,7 +16,7 @@
  */
 package org.apache.felix.karaf.gshell.packages;
 
-import org.apache.felix.karaf.gshell.core.OsgiCommandSupport;
+import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
 
@@ -32,13 +32,13 @@ public abstract class PackageCommandSupport extends OsgiCommandSupport {
         // Get package admin service.
         ServiceReference ref = getBundleContext().getServiceReference(PackageAdmin.class.getName());
         if (ref == null) {
-            io.out.println("PackageAdmin service is unavailable.");
+            System.out.println("PackageAdmin service is unavailable.");
             return null;
         }
         try {
             PackageAdmin admin = (PackageAdmin) getBundleContext().getService(ref);
             if (admin == null) {
-                io.out.println("PackageAdmin service is unavailable.");
+                System.out.println("PackageAdmin service is unavailable.");
                 return null;
             }
 

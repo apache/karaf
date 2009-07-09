@@ -16,7 +16,7 @@
  */
 package org.apache.felix.karaf.gshell.admin.internal.commands;
 
-import org.apache.geronimo.gshell.clp.Option;
+import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.karaf.gshell.admin.Instance;
 
 /**
@@ -30,9 +30,9 @@ public class ListCommand extends AdminCommandSupport {
     protected Object doExecute() throws Exception {
         Instance[] instances = getAdminService().getInstances();
         if (location) {
-            io.out.println("  Port   State       Pid  Location");
+            System.out.println("  Port   State       Pid  Location");
         } else {
-            io.out.println("  Port   State       Pid  Name");
+            System.out.println("  Port   State       Pid  Name");
         }
         for (Instance instance : instances) {
             StringBuilder sb = new StringBuilder();
@@ -60,9 +60,9 @@ public class ListCommand extends AdminCommandSupport {
             } else {
                 sb.append(instance.getName());
             }
-            io.out.println(sb.toString());
+            System.out.println(sb.toString());
         }
-        return Result.SUCCESS;
+        return null;
     }
 
 }

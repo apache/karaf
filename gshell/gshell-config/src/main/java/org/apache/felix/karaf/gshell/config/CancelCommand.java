@@ -21,8 +21,8 @@ import org.osgi.service.cm.ConfigurationAdmin;
 public class CancelCommand extends ConfigCommandSupport {
 
     protected void doExecute(ConfigurationAdmin admin) throws Exception {
-        this.variables.parent().unset(PROPERTY_CONFIG_PID);
-        this.variables.parent().unset(PROPERTY_CONFIG_PROPS);
+        session.put(PROPERTY_CONFIG_PID, null);
+        session.put(PROPERTY_CONFIG_PROPS, null);
     }
 
 }

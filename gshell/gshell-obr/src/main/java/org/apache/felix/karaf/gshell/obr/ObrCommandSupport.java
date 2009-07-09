@@ -16,10 +16,10 @@
  */
 package org.apache.felix.karaf.gshell.obr;
 
-import java.io.PrintWriter;
+import java.io.PrintStream;
 import java.util.List;
 
-import org.apache.felix.karaf.gshell.core.OsgiCommandSupport;
+import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
@@ -36,13 +36,13 @@ public abstract class ObrCommandSupport extends OsgiCommandSupport {
         // Get repository admin service.
         ServiceReference ref = getBundleContext().getServiceReference(RepositoryAdmin.class.getName());
         if (ref == null) {
-            io.out.println("RepositoryAdmin service is unavailable.");
+            System.out.println("RepositoryAdmin service is unavailable.");
             return null;
         }
         try {
             RepositoryAdmin admin = (RepositoryAdmin) getBundleContext().getService(ref);
             if (admin == null) {
-                io.out.println("RepositoryAdmin service is unavailable.");
+                System.out.println("RepositoryAdmin service is unavailable.");
                 return null;
             }
 
@@ -123,7 +123,7 @@ public abstract class ObrCommandSupport extends OsgiCommandSupport {
         return target;
     }
 
-    protected void printUnderline(PrintWriter out, int length)
+    protected void printUnderline(PrintStream out, int length)
     {
         for (int i = 0; i < length; i++)
         {
@@ -143,7 +143,7 @@ public abstract class ObrCommandSupport extends OsgiCommandSupport {
             }
             else
             {
-                io.err.println("Unknown bundle - " + target[0]);
+                System.err.println("Unknown bundle - " + target[0]);
             }
         }
         if ((resolver.getAddedResources() != null) &&
@@ -151,46 +151,46 @@ public abstract class ObrCommandSupport extends OsgiCommandSupport {
         {
             if (resolver.resolve())
             {
-                io.out.println("Target resource(s):");
-                printUnderline(io.out, 19);
+                System.out.println("Target resource(s):");
+                printUnderline(System.out, 19);
                 Resource[] resources = resolver.getAddedResources();
                 for (int resIdx = 0; (resources != null) && (resIdx < resources.length); resIdx++)
                 {
-                    io.out.println("   " + resources[resIdx].getPresentationName()
+                    System.out.println("   " + resources[resIdx].getPresentationName()
                         + " (" + resources[resIdx].getVersion() + ")");
                 }
                 resources = resolver.getRequiredResources();
                 if ((resources != null) && (resources.length > 0))
                 {
-                    io.out.println("\nRequired resource(s):");
-                    printUnderline(io.out, 21);
+                    System.out.println("\nRequired resource(s):");
+                    printUnderline(System.out, 21);
                     for (int resIdx = 0; resIdx < resources.length; resIdx++)
                     {
-                        io.out.println("   " + resources[resIdx].getPresentationName()
+                        System.out.println("   " + resources[resIdx].getPresentationName()
                             + " (" + resources[resIdx].getVersion() + ")");
                     }
                 }
                 resources = resolver.getOptionalResources();
                 if ((resources != null) && (resources.length > 0))
                 {
-                    io.out.println("\nOptional resource(s):");
-                    printUnderline(io.out, 21);
+                    System.out.println("\nOptional resource(s):");
+                    printUnderline(System.out, 21);
                     for (int resIdx = 0; resIdx < resources.length; resIdx++)
                     {
-                        io.out.println("   " + resources[resIdx].getPresentationName()
+                        System.out.println("   " + resources[resIdx].getPresentationName()
                             + " (" + resources[resIdx].getVersion() + ")");
                     }
                 }
 
                 try
                 {
-                    io.out.print("\nDeploying...");
+                    System.out.print("\nDeploying...");
                     resolver.deploy(start);
-                    io.out.println("done.");
+                    System.out.println("done.");
                 }
                 catch (IllegalStateException ex)
                 {
-                    io.err.println(ex);
+                    System.err.println(ex);
                 }
             }
             else
@@ -198,21 +198,21 @@ public abstract class ObrCommandSupport extends OsgiCommandSupport {
                 Requirement[] reqs = resolver.getUnsatisfiedRequirements();
                 if ((reqs != null) && (reqs.length > 0))
                 {
-                    io.out.println("Unsatisfied requirement(s):");
-                    printUnderline(io.out, 27);
+                    System.out.println("Unsatisfied requirement(s):");
+                    printUnderline(System.out, 27);
                     for (int reqIdx = 0; reqIdx < reqs.length; reqIdx++)
                     {
-                        io.out.println("   " + reqs[reqIdx].getFilter());
+                        System.out.println("   " + reqs[reqIdx].getFilter());
                         Resource[] resources = resolver.getResources(reqs[reqIdx]);
                         for (int resIdx = 0; resIdx < resources.length; resIdx++)
                         {
-                            io.out.println("      " + resources[resIdx].getPresentationName());
+                            System.out.println("      " + resources[resIdx].getPresentationName());
                         }
                     }
                 }
                 else
                 {
-                    io.out.println("Could not resolve targets.");
+                    System.out.println("Could not resolve targets.");
                 }
             }
         }

@@ -16,8 +16,8 @@
  */
 package org.apache.felix.karaf.gshell.features.commands;
 
-import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.felix.karaf.gshell.features.FeaturesService;
+import org.apache.felix.gogo.commands.Argument;
 
 public class InstallFeatureCommand extends FeaturesCommandSupport {
 

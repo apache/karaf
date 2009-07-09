@@ -16,8 +16,9 @@
  */
 package org.apache.felix.karaf.gshell.admin.internal.commands;
 
-import org.apache.geronimo.gshell.clp.Argument;
-import org.apache.geronimo.gshell.clp.Option;
+import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Option;
+
 
 /**
  * Creates a new Karaf instance 
@@ -37,7 +38,7 @@ public class CreateCommand extends AdminCommandSupport
 
     protected Object doExecute() throws Exception {
         getAdminService().createInstance(instance, port, location);
-        return Result.SUCCESS;
+        return null;
     }
 
 }

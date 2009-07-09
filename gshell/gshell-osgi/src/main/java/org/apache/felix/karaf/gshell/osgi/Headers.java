@@ -20,8 +20,8 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.List;
 
-import org.apache.geronimo.gshell.clp.Argument;
-import org.apache.felix.karaf.gshell.core.OsgiCommandSupport;
+import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
+import org.apache.felix.gogo.commands.Argument;
 import org.osgi.framework.Bundle;
 
 public class Headers extends OsgiCommandSupport {
@@ -37,7 +37,7 @@ public class Headers extends OsgiCommandSupport {
                     printHeaders(bundle);
                 }
                 else {
-                    io.err.println("Bundle ID " + id + " is invalid.");
+                    System.err.println("Bundle ID " + id + " is invalid.");
                 }
             }
         }
@@ -47,20 +47,20 @@ public class Headers extends OsgiCommandSupport {
                 printHeaders(bundles[i]);
             }
         }
-        return Result.SUCCESS;
+        return null;
     }
 
     protected void printHeaders(Bundle bundle) throws Exception {
         String title = Util.getBundleName(bundle);
-        io.out.println("\n" + title);
-        io.out.println(Util.getUnderlineString(title));
+        System.out.println("\n" + title);
+        System.out.println(Util.getUnderlineString(title));
         Dictionary dict = bundle.getHeaders();
         Enumeration keys = dict.keys();
         while (keys.hasMoreElements())
         {
             Object k = (String) keys.nextElement();
             Object v = dict.get(k);
-            io.out.println(k + " = " + Util.getValueString(v));
+            System.out.println(k + " = " + Util.getValueString(v));
         }
     }
 

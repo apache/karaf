@@ -19,10 +19,10 @@ package org.apache.felix.karaf.gshell.features.completers;
 import java.util.Collection;
 import java.util.List;
 
-import jline.Completor;
-import org.apache.geronimo.gshell.console.completer.StringsCompleter;
 import org.apache.felix.karaf.gshell.features.management.ManagedFeature;
 import org.apache.felix.karaf.gshell.features.management.ManagedFeaturesRegistry;
+import org.apache.felix.karaf.gshell.console.completer.StringsCompleter;
+import org.apache.felix.karaf.gshell.console.Completer;
 
 /**
  * {@link jline.Completor} for available features.
@@ -30,7 +30,7 @@ import org.apache.felix.karaf.gshell.features.management.ManagedFeaturesRegistry
  * Displays a list of available features from installed repositories.
  *
  */
-public class AvailableFeatureCompleter implements Completor {
+public class AvailableFeatureCompleter implements Completer {
 
     private ManagedFeaturesRegistry featuresRegistry;
     private StringsCompleter delegate;
@@ -47,7 +47,7 @@ public class AvailableFeatureCompleter implements Completor {
         for (ManagedFeature feature : features) {
             delegate.getStrings().add(feature.getName());
         }
-        
+
         return delegate.complete(buffer, cursor, candidates);
     }
 

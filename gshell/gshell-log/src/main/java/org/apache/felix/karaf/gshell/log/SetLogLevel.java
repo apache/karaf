@@ -18,8 +18,8 @@ package org.apache.felix.karaf.gshell.log;
 
 import java.util.Dictionary;
 
-import org.apache.geronimo.gshell.clp.Argument;
-import org.apache.felix.karaf.gshell.core.OsgiCommandSupport;
+import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
+import org.apache.felix.gogo.commands.Argument;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -57,12 +57,12 @@ public class SetLogLevel extends OsgiCommandSupport {
                 !WARN.equals(level) &&
                 !ERROR.equals(level) &&
                 !INHERITED.equals(level)) {
-            io.err.println("level must be set to TRACE, DEBUG, INFO, WARN or ERROR (or - to unset it)");
-            return Result.FAILURE;
+            System.err.println("level must be set to TRACE, DEBUG, INFO, WARN or ERROR (or - to unset it)");
+            return null;
         }
         if (INHERITED.equals(level) && logger == null) {
-            io.err.println("Can not unset the ROOT logger");
-            return Result.FAILURE;
+            System.err.println("Can not unset the ROOT logger");
+            return null;
         }
 
         ConfigurationAdmin cfgAdmin = getConfigAdmin();
@@ -108,7 +108,7 @@ public class SetLogLevel extends OsgiCommandSupport {
         }
         cfg.update(props);
 
-        return Result.SUCCESS;
+        return null;
     }
 
     protected ConfigurationAdmin getConfigAdmin() {

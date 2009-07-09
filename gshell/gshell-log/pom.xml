@@ -40,7 +40,7 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.felix.karaf.gshell</groupId>
-            <artifactId>org.apache.felix.karaf.gshell.core</artifactId>
+            <artifactId>org.apache.felix.karaf.gshell.console</artifactId>
         </dependency>
 
         <dependency>
@@ -53,11 +53,6 @@
             <groupId>org.apache.felix</groupId>
             <artifactId>org.osgi.compendium</artifactId>
             <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.osgi</groupId>
-            <artifactId>spring-osgi-core</artifactId>
         </dependency>
 
         <dependency>
@@ -77,11 +72,9 @@
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
                         <Export-Package>${pom.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>
-                            org.apache.geronimo.gshell.command,
-                            org.apache.geronimo.gshell.wisdom.command,
-                            org.apache.geronimo.gshell.wisdom.registry,
-                            org.apache.felix.karaf.gshell.core,
-                            org.ops4j.pax.logging,
+                            org.osgi.service.command,
+                            org.apache.felix.gogo.commands,
+                            org.apache.felix.karaf.gshell.console,
                             *
                         </Import-Package>
                         <Private-Package>!*</Private-Package>

@@ -16,9 +16,9 @@
  */
 package org.apache.felix.karaf.gshell.osgi;
 
-import org.apache.geronimo.gshell.clp.Argument;
-import org.apache.geronimo.gshell.clp.Option;
-import org.apache.felix.karaf.gshell.core.OsgiCommandSupport;
+import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
+import org.apache.felix.gogo.commands.Option;
+import org.apache.felix.gogo.commands.Argument;
 import org.osgi.framework.Bundle;
 
 public abstract class BundleCommand extends OsgiCommandSupport {
@@ -32,15 +32,15 @@ public abstract class BundleCommand extends OsgiCommandSupport {
     protected Object doExecute() throws Exception {
         Bundle bundle = getBundleContext().getBundle(id);
         if (bundle == null) {
-            io.out.println("Bundle " + id + " not found");
-            return Result.FAILURE;
+            System.out.println("Bundle " + id + " not found");
+            return null;
         }
 
-        if (!force && Util.isASystemBundle(getBundleContext(), bundle) && !Util.accessToSystemBundleIsAllowed(bundle.getBundleId(), io)) {
-            return Result.FAILURE;
+        if (!force && Util.isASystemBundle(getBundleContext(), bundle) && !Util.accessToSystemBundleIsAllowed(bundle.getBundleId(), session)) {
+            return null;
         } else {
             doExecute(bundle);
-            return Result.SUCCESS;
+            return null;
         }
     }
 

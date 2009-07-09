@@ -18,24 +18,23 @@
  */
 package org.apache.felix.karaf.gshell.admin.internal.commands;
 
-import org.apache.geronimo.gshell.clp.Argument;
-import org.apache.geronimo.gshell.clp.Option;
-import org.apache.geronimo.gshell.shell.ShellContextHolder;
+import org.apache.felix.gogo.commands.Option;
+import org.apache.felix.gogo.commands.Argument;
 
 public class ConnectCommand extends AdminCommandSupport {
 
-    @Argument(index=0, required=true, description="The instance name")
+    @Argument(index=0, name="INSTANCE", required=true, description="The instance name")
     private String instance = null;
 
-    @Option(name="-u", aliases={"--username"}, token="USERNAME", description="Remote user name")
-    private String username = "smx";
+    @Option(name="-u", aliases={"--username"}, description="Remote user name")
+    private String username = "karaf";
 
-    @Option(name="-p", aliases={"--password"}, token="PASSWORD", description="Remote user password")
-    private String password = "smx";
+    @Option(name="-p", aliases={"--password"}, description="Remote user password")
+    private String password = "karaf";
 
     protected Object doExecute() throws Exception {
         int port = getExistingInstance(instance).getPort();
-        ShellContextHolder.get().getShell().execute("ssh -l " + username + " -P " + password + " -p " + port + " localhost");
-        return Result.SUCCESS;
+        session.execute("ssh -l " + username + " -P " + password + " -p " + port + " localhost");
+        return null;
     }
 }

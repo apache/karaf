@@ -75,9 +75,11 @@ public class Config implements JaasRealm {
             Module[] modules = this.modules;
             AppConfigurationEntry[] entries = new AppConfigurationEntry[modules.length];
             for (int i = 0; i < modules.length; i++) {
-                Map<String,String> options = new HashMap<String,String>();
+                Map<String,Object> options = new HashMap<String,Object>();
                 if (modules[i].getOptions() != null) {
-                    options.putAll(modules[i].getOptions());
+                    for (Map.Entry e : modules[i].getOptions().entrySet()) {
+                        options.put(e.getKey().toString(), e.getValue());
+                    }
                 }
                 options.put(ProxyLoginModule.PROPERTY_MODULE, modules[i].getClassName());
                 options.put(ProxyLoginModule.PROPERTY_BUNDLE, Long.toString(bundleContext.getBundle().getBundleId()));

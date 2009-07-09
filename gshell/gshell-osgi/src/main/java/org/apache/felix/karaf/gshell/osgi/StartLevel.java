@@ -16,8 +16,8 @@
  */
 package org.apache.felix.karaf.gshell.osgi;
 
-import org.apache.geronimo.gshell.clp.Argument;
-import org.apache.felix.karaf.gshell.core.OsgiCommandSupport;
+import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
+import org.apache.felix.gogo.commands.Argument;
 import org.osgi.framework.ServiceReference;
 
 public class StartLevel extends OsgiCommandSupport {
@@ -29,18 +29,18 @@ public class StartLevel extends OsgiCommandSupport {
         // Get package admin service.
         ServiceReference ref = getBundleContext().getServiceReference(org.osgi.service.startlevel.StartLevel.class.getName());
         if (ref == null) {
-            io.out.println("StartLevel service is unavailable.");
+            System.out.println("StartLevel service is unavailable.");
             return null;
         }
         try {
             org.osgi.service.startlevel.StartLevel sl = (org.osgi.service.startlevel.StartLevel) getBundleContext().getService(ref);
             if (sl == null) {
-                io.out.println("StartLevel service is unavailable.");
+                System.out.println("StartLevel service is unavailable.");
                 return null;
             }
 
             if (level == null) {
-                io.out.println("Level " + sl.getStartLevel());
+                System.out.println("Level " + sl.getStartLevel());
             }
             else {
                 sl.setStartLevel(level);
@@ -49,7 +49,7 @@ public class StartLevel extends OsgiCommandSupport {
         finally {
             getBundleContext().ungetService(ref);
         }
-        return Result.SUCCESS;
+        return null;
     }
 
 }

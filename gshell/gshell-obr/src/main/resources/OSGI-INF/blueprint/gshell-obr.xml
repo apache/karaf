@@ -21,49 +21,31 @@
 
     <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/gshell/v1.0.0">
         <command name="obr/addUrl">
-            <action class="org.apache.felix.karaf.gshell.obr.AddUrlCommand">
-                <property name="bundleContext" ref="bundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.obr.AddUrlCommand"/>
         </command>
         <command name="obr/deploy">
-            <action class="org.apache.felix.karaf.gshell.obr.DeployCommand">
-                <property name="bundleContext" ref="bundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.obr.DeployCommand"/>
         </command>
         <command name="obr/info">
-            <action class="org.apache.felix.karaf.gshell.obr.InfoCommand">
-                <property name="bundleContext" ref="bundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.obr.InfoCommand"/>
         </command>
         <command name="obr/list">
-            <action class="org.apache.felix.karaf.gshell.obr.ListCommand">
-                <property name="bundleContext" ref="bundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.obr.ListCommand"/>
         </command>
         <command name="obr/listUrl">
-            <action class="org.apache.felix.karaf.gshell.obr.ListUrlCommand">
-                <property name="bundleContext" ref="bundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.obr.ListUrlCommand"/>
         </command>
         <command name="obr/removeUrl">
-            <action class="org.apache.felix.karaf.gshell.obr.RemoveUrlCommand">
-                <property name="bundleContext" ref="bundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.obr.RemoveUrlCommand"/>
         </command>
         <command name="obr/refreshUrl">
-            <action class="org.apache.felix.karaf.gshell.obr.RefreshUrlCommand">
-                <property name="bundleContext" ref="bundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.obr.RefreshUrlCommand"/>
         </command>
         <command name="obr/source">
-            <action class="org.apache.felix.karaf.gshell.obr.SourceCommand">
-                <property name="bundleContext" ref="bundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.obr.SourceCommand"/>
         </command>
         <command name="obr/start">
-            <action class="org.apache.felix.karaf.gshell.obr.StartCommand">
-                <property name="bundleContext" ref="bundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.obr.StartCommand"/>
         </command>
     </command-bundle>
 

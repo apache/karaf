@@ -34,8 +34,7 @@
     <name>Apache Felix Karaf :: GShell</name>
 
     <modules>
-        <module>gshell-core</module>
-        <module>gshell-run</module>
+        <module>gshell-console</module>
         <module>gshell-osgi</module>
         <module>gshell-admin</module>
         <module>gshell-features</module>
@@ -44,6 +43,8 @@
         <module>gshell-log</module>
         <module>gshell-config</module>
         <module>gshell-packages</module>
+        <module>gshell-ssh</module>
+        <module>gshell-commands</module>
     </modules>
 
 </project>

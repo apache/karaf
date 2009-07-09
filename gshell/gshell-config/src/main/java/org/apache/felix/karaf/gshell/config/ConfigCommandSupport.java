@@ -18,7 +18,7 @@ package org.apache.felix.karaf.gshell.config;
 
 import java.util.Dictionary;
 
-import org.apache.felix.karaf.gshell.core.OsgiCommandSupport;
+import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationAdmin;
 
@@ -37,13 +37,13 @@ public abstract class ConfigCommandSupport extends OsgiCommandSupport {
         // Get config admin service.
         ServiceReference ref = getBundleContext().getServiceReference(ConfigurationAdmin.class.getName());
         if (ref == null) {
-            io.out.println("ConfigurationAdmin service is unavailable.");
+            System.out.println("ConfigurationAdmin service is unavailable.");
             return null;
         }
         try {
             ConfigurationAdmin admin = (ConfigurationAdmin) getBundleContext().getService(ref);
             if (admin == null) {
-                io.out.println("ConfigAdmin service is unavailable.");
+                System.out.println("ConfigAdmin service is unavailable.");
                 return null;
             }
 
@@ -56,7 +56,7 @@ public abstract class ConfigCommandSupport extends OsgiCommandSupport {
     }
 
     protected Dictionary getEditedProps() throws Exception {
-        return (Dictionary) this.variables.parent().get(PROPERTY_CONFIG_PROPS);
+        return (Dictionary) this.session.get(PROPERTY_CONFIG_PROPS);
     }
 
     protected abstract void doExecute(ConfigurationAdmin admin) throws Exception;

@@ -22,12 +22,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.management.MBeanServer;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.felix.karaf.gshell.features.Feature;
 import org.apache.felix.karaf.gshell.features.FeaturesRegistry;
 import org.apache.felix.karaf.gshell.features.FeaturesService;
 import org.apache.felix.karaf.gshell.features.Repository;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * The FeaturesServiceRegistry maintains the managed Features and Repositories
@@ -35,7 +35,7 @@ import org.apache.felix.karaf.gshell.features.Repository;
  */
 public class ManagedFeaturesRegistry implements FeaturesRegistry, ManagedFeaturesRegistryMBean {
 
-    private static final transient Log LOG = LogFactory.getLog(ManagedFeaturesRegistry.class);
+    private static final transient Logger LOG = LoggerFactory.getLogger(ManagedFeaturesRegistry.class);
 
     private NamingStrategy namingStrategy;
     private ManagementAgent managementAgent;

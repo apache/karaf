@@ -32,48 +32,34 @@
 
     <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/gshell/v1.0.0">
         <command name="features/addUrl">
-            <action class="org.apache.felix.karaf.gshell.features.commands.AddUrlCommand">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.features.commands.AddUrlCommand"/>
         </command>
         <command name="features/listUrl">
-            <action class="org.apache.felix.karaf.gshell.features.commands.ListUrlCommand">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.features.commands.ListUrlCommand"/>
         </command>
         <command name="features/removeUrl">
-            <action class="org.apache.felix.karaf.gshell.features.commands.RemoveUrlCommand">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.features.commands.RemoveUrlCommand"/>
             <completers>
                 <ref component-id="removeUrlCompleter" />
             </completers>
         </command>
         <command name="features/refreshUrl">
-            <action class="org.apache.felix.karaf.gshell.features.commands.RefreshUrlCommand">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.features.commands.RefreshUrlCommand"/>
         </command>
         <command name="features/install">
-            <action class="org.apache.felix.karaf.gshell.features.commands.InstallFeatureCommand">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.features.commands.InstallFeatureCommand"/>
             <completers>
                 <ref component-id="installFeatureCompleter" />
             </completers>
         </command>
         <command name="features/uninstall">
-            <action class="org.apache.felix.karaf.gshell.features.commands.UninstallFeatureCommand">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.features.commands.UninstallFeatureCommand"/>
             <completers>
                 <ref component-id="uninstallFeatureCompleter" />
             </completers>
         </command>
         <command name="features/list">
-            <action class="org.apache.felix.karaf.gshell.features.commands.ListFeaturesCommand">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.features.commands.ListFeaturesCommand"/>
         </command>
     </command-bundle>
 

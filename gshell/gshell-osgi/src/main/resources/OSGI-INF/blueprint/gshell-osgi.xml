@@ -21,75 +21,48 @@
 
     <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/gshell/v1.0.0">
         <command name="osgi/bundle-level">
-            <action class="org.apache.felix.karaf.gshell.osgi.BundleLevel">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.osgi.BundleLevel"/>
         </command>
         <command name="osgi/headers">
-            <action class="org.apache.felix.karaf.gshell.osgi.Headers">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.osgi.Headers"/>
         </command>
         <command name="osgi/install">
-            <action class="org.apache.felix.karaf.gshell.osgi.InstallBundle">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.osgi.InstallBundle"/>
         </command>
         <command name="osgi/list">
             <action class="org.apache.felix.karaf.gshell.osgi.ListBundles">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
                 <property name="blueprintListener" ref="blueprintListener"/>
             </action>
         </command>
         <command name="osgi/ls">
-            <action class="org.apache.felix.karaf.gshell.osgi.ListServices">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.osgi.ListServices"/>
         </command>
         <command name="osgi/refresh">
-            <action class="org.apache.felix.karaf.gshell.osgi.RefreshBundle">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.osgi.RefreshBundle"/>
         </command>
         <command name="osgi/update">
-            <action class="org.apache.felix.karaf.gshell.osgi.UpdateBundle">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.osgi.UpdateBundle"/>
         </command>
         <command name="osgi/resolve">
-            <action class="org.apache.felix.karaf.gshell.osgi.ResolveBundle">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.osgi.ResolveBundle"/>
         </command>
         <command name="osgi/restart">
-            <action class="org.apache.felix.karaf.gshell.osgi.RestartBundle">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.osgi.RestartBundle"/>
         </command>
         <command name="osgi/shutdown">
-            <action class="org.apache.felix.karaf.gshell.osgi.Shutdown">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.osgi.Shutdown"/>
         </command>
         <command name="osgi/start">
-            <action class="org.apache.felix.karaf.gshell.osgi.StartBundle">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.osgi.StartBundle"/>
         </command>
         <command name="osgi/start-level">
-            <action class="org.apache.felix.karaf.gshell.osgi.StartLevel">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.osgi.StartLevel"/>
         </command>
         <command name="osgi/stop">
-            <action class="org.apache.felix.karaf.gshell.osgi.StopBundle">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.osgi.StopBundle"/>
         </command>
         <command name="osgi/uninstall">
-            <action class="org.apache.felix.karaf.gshell.osgi.UninstallBundle">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.osgi.UninstallBundle"/>
         </command>
     </command-bundle>
 

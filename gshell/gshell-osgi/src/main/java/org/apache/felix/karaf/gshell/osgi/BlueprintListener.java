@@ -19,13 +19,13 @@ package org.apache.felix.karaf.gshell.osgi;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.service.blueprint.container.BlueprintEvent;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  *
@@ -45,7 +45,7 @@ public class BlueprintListener implements org.osgi.service.blueprint.container.B
         Waiting
     }
 
-    private static final Log LOG = LogFactory.getLog(BlueprintListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BlueprintListener.class);
 
     private final Map<Long, BlueprintState> states;
     private BundleContext bundleContext;

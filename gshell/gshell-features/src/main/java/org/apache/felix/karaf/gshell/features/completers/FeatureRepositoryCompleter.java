@@ -18,9 +18,9 @@ package org.apache.felix.karaf.gshell.features.completers;
 
 import java.util.List;
 
-import jline.Completor;
-import org.apache.geronimo.gshell.console.completer.StringsCompleter;
 import org.apache.felix.karaf.gshell.features.management.ManagedFeaturesRegistry;
+import org.apache.felix.karaf.gshell.console.completer.StringsCompleter;
+import org.apache.felix.karaf.gshell.console.Completer;
 
 /**
  * {@link jline.Completor} for Feature Repository URLs.
@@ -29,7 +29,7 @@ import org.apache.felix.karaf.gshell.features.management.ManagedFeaturesRegistry
  *
  */
 
-public class FeatureRepositoryCompleter implements Completor {
+public class FeatureRepositoryCompleter implements Completer {
 
     private ManagedFeaturesRegistry featuresRegistry;
 
