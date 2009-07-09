@@ -63,6 +63,11 @@ public class TestParser extends TestCase
         assertEquals("aa", c.execute("echo $c$c | capture"));
         assertEquals("a ;a", c.execute("echo a\\ \\;a | capture"));
         assertEquals("baabab", c.execute("echo b${c}${c}b${c}b | capture"));
+
+        c.set("d", "a  b ");
+        assertEquals("a  b ", c.execute("echo \"$d\" | capture"));
+//        assertEquals("a b", c.execute("echo $d | capture"));
+//        assertEquals("a b", c.execute("echo <echo $d> | capture"));
     }
 
     public void testScope() throws Exception
@@ -123,7 +128,10 @@ public class TestParser extends TestCase
         assertEquals(5, c.execute("[1 2 [3 4] 5 6] size"));
         assertEquals("a", c.execute("e = { echo $0 } ; <e a   b | capture>"));
         assertEquals("b", c.execute("e = { echo $1 } ; <e a   b | capture>"));
-        assertEquals("a b", c.execute("e = { echo $args } ; <e a   b | capture>"));
+        assertEquals("b", c.execute("e = { $args } ; <e echo  b | capture>"));
+        assertEquals("ca b", c.execute("e = { echo c$args } ; <e a  b | capture>"));
+        assertEquals("c a b", c.execute("e = { echo c $args } ; <e a  b | capture>"));
+        assertEquals("ca  b", c.execute("e = { echo c$args } ; <e 'a  b' | capture>"));
     }
 
     public void testArray() throws Exception

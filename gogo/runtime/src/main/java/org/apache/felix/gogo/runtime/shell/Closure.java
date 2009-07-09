@@ -101,29 +101,37 @@ public class Closure extends Reflective implements Function
 
     Object executeStatement(List<CharSequence> statement) throws Exception
     {
-        Object result;
-        List<Object> values = new ArrayList<Object>();
-        CharSequence statement0 = statement.remove(0);
-
         // derek: FEATURE: add set -x facility if echo is set
         if (Boolean.TRUE.equals(session.get("echo"))) {
             StringBuilder buf = new StringBuilder("+ ");
-            buf.append(statement0);
             for (CharSequence token : statement)
             {
-                buf.append(' ');
+                if (buf.length() > 0)
+                {
+                    buf.append(' ');
+                }
                 buf.append(token);
             }
             System.err.println(buf);
         }
 
-        Object cmd = eval(statement0);
+        Object result;
+        List<Object> values = new ArrayList<Object>();
         for (CharSequence token : statement)
         {
-            values.add(eval(token));
+            Object v = eval(token);
+            if (v != null && v == parms)
+            {
+                for (Object p : parms)
+                {
+                    values.add(p);
+                }
+            }
+            else {
+                values.add(v);
+            }
         }
-
-        result = execute(cmd, values);
+        result = execute(values.remove(0), values);
         return result;
     }
 
@@ -227,7 +235,21 @@ public class Closure extends Reflective implements Function
                         }
                         if (res != null)
                         {
-                            sb.append(res);
+                            if (res == parms)
+                            {
+                                for (int i = 0; i < parms.size(); i++)
+                                {
+                                    if (i > 0)
+                                    {
+                                        sb.append(' ');
+                                    }
+                                    sb.append(parms.get(i));
+                                }
+                            }
+                            else
+                            {
+                                sb.append(res);
+                            }
                             res = null;
                         }
                         if (start != p.current)
@@ -285,7 +307,17 @@ public class Closure extends Reflective implements Function
             }
             if (res != null)
             {
-                sb.append(res);
+                if (res == parms)
+                {
+                    for (Object v : parms)
+                    {
+                        sb.append(v);
+                    }
+                }
+                else
+                {
+                    sb.append(res);
+                }
                 res = null;
             }
             sb.append(new Parser(p.text.subSequence(start, p.current)).unescape());
@@ -294,7 +326,21 @@ public class Closure extends Reflective implements Function
         {
             if (res != null)
             {
-                sb.append(res);
+                if (res == parms)
+                {
+                    for (int i = 0; i < parms.size(); i++)
+                    {
+                        if (i > 0)
+                        {
+                            sb.append(' ');
+                        }
+                        sb.append(parms.get(i));
+                    }
+                }
+                else
+                {
+                    sb.append(res);
+                }
             }
             res = sb;
         }
