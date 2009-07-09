@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -24,6 +24,7 @@ import java.util.IdentityHashMap;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentInstance;
 import org.osgi.service.log.LogService;
@@ -135,21 +136,21 @@ class ServiceFactoryComponentManager extends ImmediateComponentManager implement
 
         // private ComponentContext and implementation instances
         ComponentContext serviceContext = ( ComponentContext ) serviceContexts.remove( service );
-        disposeImplementationObject( service, serviceContext );
+        disposeImplementationObject( service, serviceContext, ComponentConstants.DEACTIVATION_REASON_DISPOSED );
 
         // if this was the last use of the component, go back to REGISTERED state
         if ( serviceContexts.isEmpty() )
         {
-			if (getState() == STATE_ACTIVE)
-			{
-				synchronized(this)
-				{
-					if (getState() == STATE_ACTIVE)
-					{
-						changeState(Registered.getInstance());
-					}
-				}
-			}
+            if ( getState() == STATE_ACTIVE )
+            {
+                synchronized ( this )
+                {
+                    if ( getState() == STATE_ACTIVE )
+                    {
+                        changeState( Registered.getInstance() );
+                    }
+                }
+            }
         }
     }
 

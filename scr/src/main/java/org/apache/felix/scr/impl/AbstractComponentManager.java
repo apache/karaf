@@ -31,6 +31,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentInstance;
 import org.osgi.service.log.LogService;
 
@@ -133,11 +134,10 @@ abstract class AbstractComponentManager implements Component, ComponentInstance
                     acm.getComponentMetadata(), null);
         }
 
-        void deactivateInternal( AbstractComponentManager acm )
+        void deactivateInternal( AbstractComponentManager acm, int reason )
         {
-            acm.log( LogService.LOG_DEBUG,
-                    "Current state: " + m_name + ", Event: deactivate",
-                    acm.getComponentMetadata(), null );
+            acm.log( LogService.LOG_DEBUG, "Current state: " + m_name + ", Event: deactivate (reason: " + reason + ")",
+                acm.getComponentMetadata(), null );
         }
 
         void disposeInternal( AbstractComponentManager acm )
@@ -361,17 +361,26 @@ abstract class AbstractComponentManager implements Component, ComponentInstance
             return sr == null ? null : sr.getReference();
         }
 
-        void deactivateInternal( AbstractComponentManager acm )
+        void deactivateInternal( AbstractComponentManager acm, int reason )
         {
             acm.changeState(Deactivating.getInstance());
 
             ComponentMetadata componentMetadata = acm.getComponentMetadata();
             acm.log( LogService.LOG_DEBUG, "Deactivating component", componentMetadata, null );
 
-            acm.unregisterComponentService();
-            acm.deleteComponent();
-            acm.changeState( Unsatisfied.getInstance() );
+            // catch any problems from deleting the component to prevent the
+            // component to remain in the deactivating state !
+            try
+            {
+                acm.unregisterComponentService();
+                acm.deleteComponent( reason );
+            }
+            catch ( Throwable t )
+            {
+                acm.log( LogService.LOG_WARNING, "Component deactivation threw an exception", componentMetadata, t );
+            }
 
+            acm.changeState( Unsatisfied.getInstance() );
             acm.log( LogService.LOG_DEBUG, "Component deactivated", componentMetadata, null );
         }
     }
@@ -398,7 +407,7 @@ abstract class AbstractComponentManager implements Component, ComponentInstance
             }
             else
             {
-                deactivateInternal( dcm );
+                deactivateInternal( dcm, ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED );
                 return null;
             }
         }
@@ -496,10 +505,16 @@ abstract class AbstractComponentManager implements Component, ComponentInstance
         {
             public void doRun()
             {
-                deactivateInternal();
+                deactivateInternal( ComponentConstants.DEACTIVATION_REASON_DISABLED );
                 disableInternal();
             }
         });
+    }
+
+    // implements the ComponentInstance.dispose() method
+    public void dispose()
+    {
+        dispose( ComponentConstants.DEACTIVATION_REASON_DISPOSED );
     }
 
     /**
@@ -511,9 +526,9 @@ abstract class AbstractComponentManager implements Component, ComponentInstance
      * method has to actually complete before other actions like bundle stopping
      * may continue.
      */
-    public void dispose()
+    public void dispose( int reason )
     {
-        disposeInternal();
+        disposeInternal( reason );
     }
 
     //---------- Component interface ------------------------------------------
@@ -604,14 +619,14 @@ abstract class AbstractComponentManager implements Component, ComponentInstance
         m_state.activateInternal( this );
     }
 
-    synchronized final void deactivateInternal()
+    synchronized final void deactivateInternal( int reason )
     {
-        m_state.deactivateInternal( this );
+        m_state.deactivateInternal( this, reason );
     }
 
-    synchronized final void disposeInternal()
+    synchronized final void disposeInternal( int reason )
     {
-        m_state.deactivateInternal( this );
+        m_state.deactivateInternal( this, reason );
         // For the sake of the performance(no need to loadDependencyManagers again),
         // the disable transition is integrated into the destroy transition.
         // That is to say, state "Enabled" goes directly into state "Desctroyed"
@@ -655,7 +670,7 @@ abstract class AbstractComponentManager implements Component, ComponentInstance
      */
     protected abstract boolean createComponent();
 
-    protected abstract void deleteComponent();
+    protected abstract void deleteComponent( int reason );
 
     /**
      * Returns the service object to be registered if the service element is
@@ -710,7 +725,7 @@ abstract class AbstractComponentManager implements Component, ComponentInstance
         m_serviceRegistration = registerService();
     }
 
-    protected void unregisterComponentService()
+    protected final void unregisterComponentService()
     {
 
         if ( m_serviceRegistration != null )
@@ -769,11 +784,10 @@ abstract class AbstractComponentManager implements Component, ComponentInstance
      * activation the new configuration data is retrieved from the Configuration
      * Admin Service.
      */
-    public final void reconfigure()
+    public final void reconfigure( final int reason )
     {
-        log( LogService.LOG_DEBUG, "Deactivating and Activating to reconfigure",
-                m_componentMetadata, null );
-        reactivate();
+        log( LogService.LOG_DEBUG, "Deactivating and Activating to reconfigure", m_componentMetadata, null );
+        reactivate( reason );
     }
 
     /**
@@ -783,16 +797,17 @@ abstract class AbstractComponentManager implements Component, ComponentInstance
      * This method schedules the deactivation and reactivation for asynchronous
      * execution.
      */
-    public final void reactivate()
+    public final void reactivate( final int reason )
     {
-        getActivator().schedule(new ComponentActivatorTask( "Reactivate", this ) {
+        getActivator().schedule( new ComponentActivatorTask( "Reactivate", this )
+        {
 
             public void doRun()
             {
-                deactivateInternal();
+                deactivateInternal( reason );
                 activateInternal();
             }
-        });
+        } );
     }
 
     public String toString() {

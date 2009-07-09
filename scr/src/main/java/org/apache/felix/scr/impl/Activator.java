@@ -32,6 +32,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.Constants;
 import org.osgi.framework.SynchronousBundleListener;
+import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -261,7 +262,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener
         {
             try
             {
-                ga.dispose();
+                ga.dispose( ComponentConstants.DEACTIVATION_REASON_BUNDLE_STOPPED );
             }
             catch ( Exception e )
             {
@@ -280,7 +281,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener
             BundleComponentActivator ga = ( BundleComponentActivator ) it.next();
             try
             {
-                ga.dispose();
+                ga.dispose( ComponentConstants.DEACTIVATION_REASON_DISPOSED );
             }
             catch ( Exception e )
             {

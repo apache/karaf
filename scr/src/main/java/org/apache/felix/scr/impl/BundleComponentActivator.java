@@ -252,7 +252,7 @@ class BundleComponentActivator implements Logger
     * Dispose of this component activator instance and all the component
     * managers.
     */
-    void dispose()
+    void dispose( int reason )
     {
         if ( m_context == null )
         {
@@ -271,7 +271,7 @@ class BundleComponentActivator implements Logger
             try
             {
                 m_managers.remove( manager );
-                manager.dispose();
+                manager.dispose( reason );
             }
             catch ( Exception e )
             {
@@ -337,7 +337,7 @@ class BundleComponentActivator implements Logger
      * configuration data for components managed by this activator or
      * <code>null</code> if no Configuration Admin Service is available in the
      * framework.
-	 */
+     */
     protected ConfigurationAdmin getConfigurationAdmin()
     {
         return ( ConfigurationAdmin ) m_configurationAdmin.getService();

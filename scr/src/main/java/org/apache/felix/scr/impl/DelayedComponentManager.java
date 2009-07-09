@@ -50,12 +50,12 @@ class DelayedComponentManager extends ImmediateComponentManager implements Servi
     }
 
 
-    protected void deleteComponent()
+    protected void deleteComponent( int reason )
     {
         // only have to delete, if there is actually an instance
         if ( getInstance() != null )
         {
-            super.deleteComponent();
+            super.deleteComponent( reason );
         }
     }
 

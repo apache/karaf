@@ -37,6 +37,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.log.LogService;
 
 
@@ -228,7 +229,7 @@ class DependencyManager implements ServiceListener, Reference
                         + m_dependencyMetadata.getName() + " registered, reactivate component", m_componentManager
                         .getComponentMetadata(), null );
 
-                    m_componentManager.reactivate();
+                    m_componentManager.reactivate( ComponentConstants.DEACTIVATION_REASON_REFERENCE );
                 }
                 else
                 {
@@ -242,7 +243,7 @@ class DependencyManager implements ServiceListener, Reference
                             + m_dependencyMetadata.getName() + " with higher ranking registered, reactivate component",
                             m_componentManager.getComponentMetadata(), null );
 
-                        m_componentManager.reactivate();
+                        m_componentManager.reactivate( ComponentConstants.DEACTIVATION_REASON_REFERENCE );
                     }
                 }
             }
@@ -324,7 +325,7 @@ class DependencyManager implements ServiceListener, Reference
                             + " not satisfied", m_componentManager.getComponentMetadata(), null );
 
                 // deactivate the component now
-                m_componentManager.deactivateInternal();
+                m_componentManager.deactivateInternal( ComponentConstants.DEACTIVATION_REASON_REFERENCE );
             }
 
             // if the dependency is static, we have to reactivate the component
@@ -336,8 +337,8 @@ class DependencyManager implements ServiceListener, Reference
                     m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Static dependency on "
                         + m_dependencyMetadata.getName() + "/" + m_dependencyMetadata.getInterface() + " is broken",
                         m_componentManager.getComponentMetadata(), null );
-                    m_componentManager.deactivateInternal();
-					m_componentManager.activate();
+                    m_componentManager.deactivateInternal( ComponentConstants.DEACTIVATION_REASON_REFERENCE );
+                    m_componentManager.activate();
                 }
                 catch ( Exception ex )
                 {
@@ -362,7 +363,7 @@ class DependencyManager implements ServiceListener, Reference
                             "Dependency Manager: Deactivating component due to mandatory dependency on "
                                 + m_dependencyMetadata.getName() + "/" + m_dependencyMetadata.getInterface()
                                 + " not satisfied", m_componentManager.getComponentMetadata(), null );
-                        m_componentManager.deactivateInternal();
+                        m_componentManager.deactivateInternal( ComponentConstants.DEACTIVATION_REASON_REFERENCE );
 
                         // abort here we do not need to do more
                         return;

@@ -48,7 +48,7 @@ class ComponentFactoryImpl extends AbstractComponentManager implements Component
 
     // Actually we only use the identity key stuff, but there is
     // no IdentityHashSet and HashSet internally uses a HashMap anyway
-    private Map m_createdComponents;
+    private final Map m_createdComponents;
 
 
     ComponentFactoryImpl( BundleComponentActivator activator, ComponentMetadata metadata,
@@ -76,9 +76,14 @@ class ComponentFactoryImpl extends AbstractComponentManager implements Component
     }
 
 
-    protected void deleteComponent()
+    protected void deleteComponent( int reason )
     {
-        // nothing to delete
+        // though we have nothing to delete really, we have to remove all
+        // references to the components created for configuration
+        m_createdComponents.clear();
+        if (m_configuredServices != null) {
+            m_configuredServices = null;
+        }
     }
 
 
@@ -178,7 +183,7 @@ class ComponentFactoryImpl extends AbstractComponentManager implements Component
                 log( LogService.LOG_DEBUG, "Disposing component after configuration deletion", getComponentMetadata(),
                         null );
 
-                disposeComponentManager( cm );
+                disposeComponentManager( cm, ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_DELETED );
             }
         }
 
@@ -239,7 +244,7 @@ class ComponentFactoryImpl extends AbstractComponentManager implements Component
         return cm;
     }
 
-    private void disposeComponentManager( ImmediateComponentManager cm )
+    private void disposeComponentManager( ImmediateComponentManager cm, int reason )
     {
         // remove from created components
         m_createdComponents.remove( cm );
@@ -248,6 +253,6 @@ class ComponentFactoryImpl extends AbstractComponentManager implements Component
         getActivator().getInstanceReferences().remove( cm );
 
         // finally dispose it
-        cm.dispose();
+        cm.dispose( reason );
     }
 }

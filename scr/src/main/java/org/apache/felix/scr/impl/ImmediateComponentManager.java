@@ -24,9 +24,7 @@ import java.lang.reflect.Method;
 import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
-import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
@@ -39,38 +37,6 @@ import org.osgi.service.log.LogService;
  */
 class ImmediateComponentManager extends AbstractComponentManager
 {
-    private static final Class COMPONENT_CONTEXT_CLASS = ComponentContext.class;
-
-    private static final Class BUNDLE_CONTEXT_CLASS = BundleContext.class;
-
-    private static final Class MAP_CLASS = Map.class;
-
-    // this is an internal field made available only to the unit tests
-    static final Class[][] ACTIVATE_PARAMETER_LIST = {
-        { COMPONENT_CONTEXT_CLASS },
-        { BUNDLE_CONTEXT_CLASS },
-        { MAP_CLASS },
-
-        { COMPONENT_CONTEXT_CLASS, BUNDLE_CONTEXT_CLASS },
-        { COMPONENT_CONTEXT_CLASS, MAP_CLASS },
-
-        { BUNDLE_CONTEXT_CLASS, COMPONENT_CONTEXT_CLASS },
-        { BUNDLE_CONTEXT_CLASS, MAP_CLASS },
-
-        { MAP_CLASS, COMPONENT_CONTEXT_CLASS },
-        { MAP_CLASS, BUNDLE_CONTEXT_CLASS },
-
-        { COMPONENT_CONTEXT_CLASS, BUNDLE_CONTEXT_CLASS, MAP_CLASS },
-        { COMPONENT_CONTEXT_CLASS, MAP_CLASS, BUNDLE_CONTEXT_CLASS },
-
-        { BUNDLE_CONTEXT_CLASS, COMPONENT_CONTEXT_CLASS, MAP_CLASS },
-        { BUNDLE_CONTEXT_CLASS, MAP_CLASS, COMPONENT_CONTEXT_CLASS },
-
-        { MAP_CLASS, COMPONENT_CONTEXT_CLASS, BUNDLE_CONTEXT_CLASS },
-        { MAP_CLASS, BUNDLE_CONTEXT_CLASS, COMPONENT_CONTEXT_CLASS },
-
-        {}
-    };
 
     // The object that implements the service and that is bound to other services
     private Object m_implementationObject;
@@ -124,10 +90,10 @@ class ImmediateComponentManager extends AbstractComponentManager
      * Before doing real disposal, we also have to unregister the managed
      * service which was registered when the instance was created.
      */
-    public synchronized void dispose()
+    public synchronized void dispose( final int reason )
     {
         // really dispose off this manager instance
-        disposeInternal();
+        disposeInternal( reason );
     }
 
 
@@ -155,9 +121,9 @@ class ImmediateComponentManager extends AbstractComponentManager
     }
 
 
-    protected void deleteComponent()
+    protected void deleteComponent( int reason )
     {
-        disposeImplementationObject( m_implementationObject, m_componentContext );
+        disposeImplementationObject( m_implementationObject, m_componentContext, reason );
         m_implementationObject = null;
         m_componentContext = null;
         m_properties = null;
@@ -230,11 +196,12 @@ class ImmediateComponentManager extends AbstractComponentManager
         // get the method
         if ( activateMethod == ReflectionHelper.SENTINEL )
         {
-            activateMethod = getMethod( implementationObject, getComponentMetadata().getActivate() );
+            activateMethod = getMethod( implementationObject, getComponentMetadata().getActivate(),
+                ReflectionHelper.ACTIVATE_ACCEPTED_PARAMETERS );
         }
 
         // 4. Call the activate method, if present
-        if ( activateMethod != null && !invokeMethod( activateMethod, implementationObject, componentContext ) )
+        if ( activateMethod != null && !invokeMethod( activateMethod, implementationObject, componentContext, -1 ) )
         {
             // 112.5.8 If the activate method throws an exception, SCR must log an error message
             // containing the exception with the Log Service and activation fails
@@ -252,20 +219,25 @@ class ImmediateComponentManager extends AbstractComponentManager
     }
 
 
-    protected void disposeImplementationObject( Object implementationObject, ComponentContext componentContext )
+    protected void disposeImplementationObject( Object implementationObject, ComponentContext componentContext,
+        int reason )
     {
 
         // get the method
         if ( deactivateMethod == ReflectionHelper.SENTINEL )
         {
-            deactivateMethod = getMethod( implementationObject, getComponentMetadata().getDeactivate() );
+            deactivateMethod = getMethod( implementationObject, getComponentMetadata().getDeactivate(),
+                ReflectionHelper.DEACTIVATE_ACCEPTED_PARAMETERS );
         }
 
         // 1. Call the deactivate method, if present
         // don't care for the result, the error (acccording to 112.5.12 If the deactivate
         // method throws an exception, SCR must log an error message containing the
         // exception with the Log Service and continue) has already been logged
-        invokeMethod( deactivateMethod, implementationObject, componentContext );
+        if ( deactivateMethod != null )
+        {
+            invokeMethod( deactivateMethod, implementationObject, componentContext, reason );
+        }
 
         // 2. Unbind any bound services
         Iterator it = getDependencyManagers();
@@ -386,7 +358,9 @@ class ImmediateComponentManager extends AbstractComponentManager
         {
             log( LogService.LOG_DEBUG, "Deactivating and Activating to reconfigure from configuration",
                 getComponentMetadata(), null );
-            reactivate();
+            int reason = ( configuration == null ) ? ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_DELETED
+                : ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_DELETED;
+            reactivate( reason );
         }
     }
 
@@ -399,13 +373,16 @@ class ImmediateComponentManager extends AbstractComponentManager
      * @param implementationObject The object whose class (and its super classes)
      *      may provide the method
      * @param methodName Name of the method to look for
+     * @param methodTester The {@link ReflectionHelper.MethodTester} instance
+     *      used to select the actual method.
      * @return The named method or <code>null</code> if no such method is available.
      */
-    private Method getMethod( final Object implementationObject, final String methodName )
+    private Method getMethod( final Object implementationObject, final String methodName,
+        final ReflectionHelper.MethodTester methodTester )
     {
         try
         {
-            return ReflectionHelper.getMethod( implementationObject.getClass(), methodName, ACTIVATE_PARAMETER_LIST );
+            return ReflectionHelper.getMethod( implementationObject.getClass(), methodName, methodTester );
         }
         catch ( InvocationTargetException ite )
         {
@@ -434,6 +411,10 @@ class ImmediateComponentManager extends AbstractComponentManager
      * @param implementationObject The object on which to call the method.
      * @param componentContext The <code>ComponentContext</code> used to
      *      build the argument list
+     * @param reason The deactivation reason code. This should be one of the
+     *      values in the {@link ComponentConstants} interface. This parameter
+     *      is only of practical use for calling deactivate methods, which may
+     *      take a numeric argument indicating the deactivation reason.
      *
      * @return <code>true</code> if the method should be considered invoked
      *      successfully. <code>false</code> is returned if the method threw
@@ -442,7 +423,7 @@ class ImmediateComponentManager extends AbstractComponentManager
      * @throws NullPointerException if any of the parameters is <code>null</code>.
      */
     private boolean invokeMethod( final Method method, final Object implementationObject,
-        final ComponentContext componentContext )
+        final ComponentContext componentContext, int reason )
     {
         final String methodName = method.getName();
         try
@@ -452,23 +433,26 @@ class ImmediateComponentManager extends AbstractComponentManager
             Object[] param = new Object[paramTypes.length];
             for ( int i = 0; i < param.length; i++ )
             {
-                if ( paramTypes[i] == COMPONENT_CONTEXT_CLASS )
+                if ( paramTypes[i] == ReflectionHelper.COMPONENT_CONTEXT_CLASS )
                 {
                     param[i] = componentContext;
                 }
-                else if ( paramTypes[i] == BUNDLE_CONTEXT_CLASS )
+                else if ( paramTypes[i] == ReflectionHelper.BUNDLE_CONTEXT_CLASS )
                 {
                     param[i] = componentContext.getBundleContext();
                 }
-                else if ( paramTypes[i] == MAP_CLASS )
+                else if ( paramTypes[i] == ReflectionHelper.MAP_CLASS )
                 {
                     // note: getProperties() returns a Hashtable which is a Map
                     param[i] = componentContext.getProperties();
                 }
+                else if ( paramTypes[i] == ReflectionHelper.INTEGER_CLASS || paramTypes[i] == Integer.TYPE)
+                {
+                    param[i] = new Integer(reason);
+                }
             }
 
-            method.invoke( implementationObject, new Object[]
-                { componentContext } );
+            method.invoke( implementationObject, param );
         }
         catch ( IllegalAccessException ex )
         {
@@ -483,6 +467,14 @@ class ImmediateComponentManager extends AbstractComponentManager
                 ex.getCause() );
 
             // method threw, so it was a failure
+            return false;
+        }
+        catch ( Throwable t )
+        {
+            // anything else went wrong, log the message and fail the invocation
+            log( LogService.LOG_ERROR, "The " + methodName + " method could not be called", getComponentMetadata(), t );
+
+            // method invocation threw, so it was a failure
             return false;
         }
 

@@ -155,7 +155,7 @@ public class ComponentRegistry implements ScrService, ConfigurationListener
         {
             cm = getComponent( factoryPid );
         }
-        
+
         if (cm == null) {
             // this configuration is not for a SCR component
             return;

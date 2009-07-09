@@ -197,7 +197,7 @@ public class ReflectionHelperTest extends TestCase
         IllegalAccessException
     {
         Method method = ReflectionHelper.getMethod( obj.getClass(), methodName,
-            ImmediateComponentManager.ACTIVATE_PARAMETER_LIST );
+            ReflectionHelper.ACTIVATE_ACCEPTED_PARAMETERS );
         try
         {
             method.invoke( obj, new Object[method.getParameterTypes().length] );
