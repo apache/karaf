@@ -27,51 +27,37 @@ import java.util.Enumeration;
  * The <code>ReadOnlyDictionary</code> is a <code>Dictionary</code> whose
  * {@link #put(Object, Object)} and {@link #remove(Object)} methods have
  * no effect and always return <code>null</code>.
- *
- * @author fmeschbe
  */
 public class ReadOnlyDictionary extends Dictionary
 {
 
-    private Dictionary delegatee;
+    private final Dictionary delegatee;
 
 
-    public ReadOnlyDictionary( Dictionary delegatee )
+    public ReadOnlyDictionary( final Dictionary delegatee )
     {
         this.delegatee = delegatee;
     }
 
 
-    /* (non-Javadoc)
-     * @see java.util.Dictionary#elements()
-     */
     public Enumeration elements()
     {
         return delegatee.elements();
     }
 
 
-    /* (non-Javadoc)
-     * @see java.util.Dictionary#get(java.lang.Object)
-     */
-    public Object get( Object key )
+    public Object get( final Object key )
     {
         return delegatee.get( key );
     }
 
 
-    /* (non-Javadoc)
-     * @see java.util.Dictionary#isEmpty()
-     */
     public boolean isEmpty()
     {
         return delegatee.isEmpty();
     }
 
 
-    /* (non-Javadoc)
-     * @see java.util.Dictionary#keys()
-     */
     public Enumeration keys()
     {
         return delegatee.keys();
@@ -82,7 +68,7 @@ public class ReadOnlyDictionary extends Dictionary
      * This method has no effect and always returns <code>null</code> as this
      * instance is read-only and cannot modify and properties.
      */
-    public Object put( Object arg0, Object arg1 )
+    public Object put( final Object key, final Object value )
     {
         return null;
     }
@@ -92,17 +78,20 @@ public class ReadOnlyDictionary extends Dictionary
      * This method has no effect and always returns <code>null</code> as this
      * instance is read-only and cannot modify and properties.
      */
-    public Object remove( Object key )
+    public Object remove( final Object key )
     {
         return null;
     }
 
 
-    /* (non-Javadoc)
-     * @see java.util.Dictionary#size()
-     */
     public int size()
     {
         return delegatee.size();
+    }
+
+
+    public String toString()
+    {
+        return delegatee.toString();
     }
 }
