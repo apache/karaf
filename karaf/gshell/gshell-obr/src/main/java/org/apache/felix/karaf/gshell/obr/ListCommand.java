@@ -18,10 +18,10 @@ package org.apache.felix.karaf.gshell.obr;
 
 import java.util.List;
 
-import org.apache.geronimo.gshell.clp.Argument;
 import org.osgi.framework.Version;
 import org.osgi.service.obr.RepositoryAdmin;
 import org.osgi.service.obr.Resource;
+import org.apache.felix.gogo.commands.Argument;
 
 public class ListCommand extends ObrCommandSupport {
 
@@ -68,17 +68,17 @@ public class ListCommand extends ObrCommandSupport {
             Version version = resources[resIdx].getVersion();
             if (version != null)
             {
-                io.out.println(name + " (" + version + ")");
+                System.out.println(name + " (" + version + ")");
             }
             else
             {
-                io.out.println(name);
+                System.out.println(name);
             }
         }
 
         if (resources == null)
         {
-            io.out.println("No matching bundles.");
+            System.out.println("No matching bundles.");
         }
     }
 

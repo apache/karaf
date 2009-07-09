@@ -16,7 +16,7 @@
  */
 package org.apache.felix.karaf.gshell.osgi;
 
-import org.apache.felix.karaf.gshell.core.OsgiCommandSupport;
+import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
 import org.osgi.framework.Bundle;
 
 /**
@@ -35,7 +35,7 @@ public class Shutdown extends OsgiCommandSupport {
                 }
             }
         }.start();
-        return Result.SUCCESS;
+        return null;
     }
 
 }

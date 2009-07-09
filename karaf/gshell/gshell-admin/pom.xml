@@ -37,24 +37,10 @@
         Provides administration commands
     </description>
 
-    <properties>
-        <gshell.osgi.import>
-            org.apache.felix.karaf.main.spi.*;resolution:=optional,
-            org.apache.geronimo.gshell*,
-        </gshell.osgi.import>
-        <gshell.osgi.export>
-            org.apache.felix.karaf.jpm
-        </gshell.osgi.export>
-        <gshell.osgi.private>
-            org.apache.felix.karaf.gshell.admin.*,
-            org.apache.feix.karaf.jpm.impl
-        </gshell.osgi.private>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.apache.felix.karaf.gshell</groupId>
-            <artifactId>org.apache.felix.karaf.gshell.core</artifactId>
+            <artifactId>org.apache.felix.karaf.gshell.console</artifactId>
         </dependency>
 
         <dependency>
@@ -67,11 +53,6 @@
             <groupId>org.apache.felix</groupId>
             <artifactId>org.osgi.compendium</artifactId>
             <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.osgi</groupId>
-            <artifactId>spring-osgi-core</artifactId>
         </dependency>
 
         <dependency>
@@ -115,10 +96,16 @@
                             <outputDirectory>${basedir}/target/classes/org/apache/felix/karaf/gshell/admin/etc</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>../../${config.location}</directory>
+                                    <directory>../../assembly/src/main/distribution/text/etc/</directory>
                                     <includes>
-                                        <include>config.properties</include>
+                                        <include>*.properties</include>
+                                        <include>*.cfg</include>
                                     </includes>
+                                    <excludes>
+                                        <exclude>org.apache.felix.karaf.shell.cfg</exclude>
+                                        <exclude>org.ops4j.pax.url.mvn.cfg</exclude>
+                                        <exclude>system.properties</exclude>
+                                    </excludes>
                                 </resource>
                             </resources>
                         </configuration>
@@ -131,14 +118,14 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${basedir}/target/classes</outputDirectory>
+                            <outputDirectory>${basedir}/target/classes/org/apache/felix/karaf/gshell/admin/etc</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>src/main/filtered-resources</directory>
+                                    <directory>../../assembly/src/main/filtered-resources/etc</directory>
                                     <filtering>true</filtering>
                                     <includes>
-                                        <include>**/*.cfg</include>
-                                        <include>**/*.properties</include>
+                                        <include>*.properties</include>
+                                        <include>*.cfg</include>
                                     </includes>
                                 </resource>
                             </resources>
@@ -161,10 +148,9 @@
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
                         <Export-Package>${pom.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>
-                            org.apache.geronimo.gshell.command,
-                            org.apache.geronimo.gshell.wisdom.command,
-                            org.apache.geronimo.gshell.wisdom.registry,
-                            org.apache.felix.karaf.gshell.core,
+                            org.osgi.service.command,
+                            org.apache.felix.gogo.commands,
+                            org.apache.felix.karaf.gshell.console,
                             *
                         </Import-Package>
                         <Private-Package>org.apache.felix.karaf.jpm.*</Private-Package>

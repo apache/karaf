@@ -19,7 +19,7 @@ package org.apache.felix.karaf.gshell.osgi;
 import java.io.InputStream;
 import java.net.URL;
 
-import org.apache.geronimo.gshell.clp.Argument;
+import org.apache.felix.gogo.commands.Argument;
 import org.osgi.framework.Bundle;
 
 public class UpdateBundle extends BundleCommand {

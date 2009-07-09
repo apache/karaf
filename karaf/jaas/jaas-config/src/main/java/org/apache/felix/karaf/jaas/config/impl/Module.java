@@ -16,7 +16,7 @@
  */
 package org.apache.felix.karaf.jaas.config.impl;
 
-import java.util.Map;
+import java.util.Properties;
 
 /**
  * POJO for a login module.
@@ -26,7 +26,7 @@ public class Module {
 
     private String className;
     private String flags;
-    private Map<String,String> options;
+    private Properties options;
 
     public String getClassName() {
         return className;
@@ -44,11 +44,11 @@ public class Module {
         this.flags = flags;
     }
 
-    public Map<String, String> getOptions() {
+    public Properties getOptions() {
         return options;
     }
 
-    public void setOptions(Map<String, String> options) {
+    public void setOptions(Properties options) {
         this.options = options;
     }
 

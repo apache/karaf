@@ -16,8 +16,8 @@
  */
 package org.apache.felix.karaf.gshell.admin.internal.commands;
 
-import org.apache.geronimo.gshell.clp.Argument;
-import org.apache.geronimo.gshell.clp.Option;
+import org.apache.felix.gogo.commands.Option;
+import org.apache.felix.gogo.commands.Argument;
 
 public class StartCommand extends AdminCommandSupport {
 
@@ -29,6 +29,6 @@ public class StartCommand extends AdminCommandSupport {
 
     protected Object doExecute() throws Exception {
         getExistingInstance(instance).start(javaOpts);
-        return Result.SUCCESS;
+        return null;
     }
 }

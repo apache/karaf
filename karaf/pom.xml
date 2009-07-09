@@ -18,7 +18,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
     -->
-
+                                      ƒ
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -66,35 +66,25 @@
     </prerequisites>
 
     <properties>
-        <config.location>etc</config.location>
-        <ant.version>1.7.0_1</ant.version>
         <aopalliance.version>1.0_1</aopalliance.version>
         <asm.version>2.2.3_1</asm.version>
         <cglib.version>2.1_3_2-SNAPSHOT</cglib.version>
-        <commons.codec.version>1.2_1</commons.codec.version>
-        <commons.httpclient.version>3.1_1</commons.httpclient.version>
-        <commons.io.version>1.3.2_1</commons.io.version>
-        <commons.jexl.version>1.1_1</commons.jexl.version>
         <commons.logging.version>1.1.1</commons.logging.version>
-        <commons.vfs.version>1.0_1</commons.vfs.version>
         <depends.maven.plugin.version>1.0</depends.maven.plugin.version>
         <easymock.version>2.4</easymock.version>
-        <equinox.version> 3.5.0.v20090429-1630</equinox.version>
+        <equinox.version> 3.5.0.v20090520</equinox.version>
         <felix.bundlerepository.version>1.4.0</felix.bundlerepository.version>
         <felix.compendium.version>1.2.0</felix.compendium.version>
         <felix.configadmin.version>1.0.4</felix.configadmin.version>
         <felix.framework.version>1.9.0-SNAPSHOT</felix.framework.version>
-        <felix.http.version>1.0.0</felix.http.version>
+        <felix.gogo.version>0.9.0-SNAPSHOT</felix.gogo.version>
         <felix.osgi.version>1.3.0-SNAPSHOT</felix.osgi.version>
         <felix.plugin.version>2.0.0</felix.plugin.version>
         <felix.prefs.version>1.0.2</felix.prefs.version>
         <felix.webconsole.version>1.2.11-SNAPSHOT</felix.webconsole.version>
         <felix.metatype.version>1.0.2</felix.metatype.version>
-        <geronimo.annotation.version>1.1.1</geronimo.annotation.version>
         <geronimo.blueprint.version>1.0.0-SNAPSHOT</geronimo.blueprint.version>
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
-        <gshell.version>1.0-alpha-2</gshell.version>
-        <jaxp.ri.version>1.4.2_2</jaxp.ri.version>
         <jetty.bundle.version>6.1.14_1</jetty.bundle.version>
         <junit.version>3.8.2_1</junit.version>
         <jline.version>0.9.94_1</jline.version>
@@ -113,7 +103,7 @@
         <spring.version>2.5.6.SEC01</spring.version>
         <sshd.version>0.1.0</sshd.version>
         <woodstox.version>3.2.7_1</woodstox.version>
-        <osgi.jmx.version>1.0-r6125-patched</osgi.jmx.version>
+        <osgi.jmx.version>4.2.0.200907080519</osgi.jmx.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -243,6 +233,11 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.felix.karaf.gshell</groupId>
+                <artifactId>org.apache.felix.karaf.gshell.console</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix.karaf.gshell</groupId>
                 <artifactId>org.apache.felix.karaf.gshell.run</artifactId>
                 <version>${pom.version}</version>
             </dependency>
@@ -279,6 +274,16 @@
             <dependency>
                 <groupId>org.apache.felix.karaf.gshell</groupId>
                 <artifactId>org.apache.felix.karaf.gshell.packages</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix.karaf.gshell</groupId>
+                <artifactId>org.apache.felix.karaf.gshell.ssh</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix.karaf.gshell</groupId>
+                <artifactId>org.apache.felix.karaf.gshell.commands</artifactId>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
@@ -571,138 +576,14 @@
                 <version>${mina.version}</version>
                 <exclusions>
                     <exclusion>
-                        <groupId>net.gleamynode</groupId>
-                        <artifactId>netty2</artifactId>
+                      <groupId>org.easymock</groupId>
+                      <artifactId>easymock</artifactId>
                     </exclusion>
                     <exclusion>
-                        <groupId>com.jcraft</groupId>
-                        <artifactId>jzlib</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>log4j</groupId>
-                        <artifactId>log4j</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>logkit</groupId>
-                        <artifactId>logkit</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>avalon-framework</groupId>
-                        <artifactId>avalon-framework</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.servlet</groupId>
-                        <artifactId>servlet-api</artifactId>
+                      <groupId>org.easymock</groupId>
+                      <artifactId>easymockclassextension</artifactId>
                     </exclusion>
                 </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.gshell.support</groupId>
-                <artifactId>gshell-terminal</artifactId>
-                <version>${gshell.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>jline</groupId>
-                        <artifactId>jline</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.gshell.support</groupId>
-                <artifactId>gshell-spring</artifactId>
-                <version>${gshell.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>jcl-over-slf4j</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.gshell.support</groupId>
-                <artifactId>gshell-interpolation</artifactId>
-                <version>${gshell.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>jcl-over-slf4j</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.gshell.commands</groupId>
-                <artifactId>gshell-builtin</artifactId>
-                <version>${gshell.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>oro</groupId>
-                        <artifactId>oro</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>commons-vfs</groupId>
-                        <artifactId>commons-vfs</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.gshell.commands</groupId>
-                <artifactId>gshell-file</artifactId>
-                <version>${gshell.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.gshell.commands</groupId>
-                <artifactId>gshell-network</artifactId>
-                <version>${gshell.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.gshell.commands</groupId>
-                <artifactId>gshell-shell</artifactId>
-                <version>${gshell.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.gshell.commands</groupId>
-                <artifactId>gshell-ssh</artifactId>
-                <version>${gshell.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.apache.geronimo.gshell.support</groupId>
-                        <artifactId>gshell-security</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.gshell.commands</groupId>
-                <artifactId>gshell-text</artifactId>
-                <version>${gshell.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.gshell.wisdom</groupId>
-                <artifactId>gshell-wisdom-core</artifactId>
-                <version>${gshell.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.apache.geronimo.gshell.support</groupId>
-                        <artifactId>gshell-ivy</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.geronimo.gshell.support</groupId>
-                        <artifactId>gshell-xstore</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>commons-jexl</groupId>
-                        <artifactId>commons-jexl</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.codehaus.plexus</groupId>
-                <artifactId>plexus-component-api</artifactId>
-                <version>1.0-alpha-32</version>
-            </dependency>
-            <dependency>
-                <groupId>org.codehaus.plexus</groupId>
-                <artifactId>plexus-utils</artifactId>
-                <version>1.5.5</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -718,19 +599,6 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-nop</artifactId>
                 <version>1.4.3</version>
-            </dependency>
-            <dependency>
-                <groupId>com.thoughtworks.xstream</groupId>
-                <artifactId>xstream</artifactId>
-                <version>1.3</version>
-                <exclusions>
-                    <exclusion>
-                    <!-- xom is an optional dependency of xstream. Its also 
-                         LGPL, so its really not ASF compatible. -->
-                        <groupId>xom</groupId>
-                        <artifactId>xom</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.logging</groupId>
@@ -769,21 +637,6 @@
                 <version>${geronimo.annotation.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.servicemix.specs</groupId>
-                <artifactId>org.apache.servicemix.specs.jaxp-api-1.4</artifactId>
-                <version>${servicemix.specs.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.jaxp-ri</artifactId>
-                <version>${jaxp.ri.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.woodstox</artifactId>
-                <version>${woodstox.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.easymock</groupId>
                 <artifactId>easymock</artifactId>
                 <version>${easymock.version}</version>
@@ -792,58 +645,11 @@
                 <groupId>org.apache.sshd</groupId>
                 <artifactId>sshd-core</artifactId>
                 <version>${sshd.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.apache.mina</groupId>
-                        <artifactId>mina-core</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.osgi</groupId>
-                <artifactId>jmx</artifactId>
+                <artifactId>org.osgi.impl.bundle.jmx</artifactId>
                 <version>${osgi.jmx.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.osgi</groupId>
-                        <artifactId>osgi_R4_core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.osgi</groupId>
-                        <artifactId>osgi_R4_compendium</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>jcl104-over-slf4j</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.easymock</groupId>
-                        <artifactId>easymock</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>com.oracle.osgi</groupId>
-                <artifactId>jmx-impl</artifactId>
-                <version>${osgi.jmx.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.osgi</groupId>
-                        <artifactId>osgi_R4_core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.osgi</groupId>
-                        <artifactId>osgi_R4_compendium</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>jcl104-over-slf4j</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.easymock</groupId>
-                        <artifactId>easymock</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.exam</groupId>
@@ -879,6 +685,16 @@
                 <groupId>org.apache.geronimo</groupId>
                 <artifactId>blueprint-bundle</artifactId>
                 <version>${geronimo.blueprint.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix.gogo</groupId>
+                <artifactId>org.apache.felix.gogo.runtime</artifactId>
+                <version>${felix.gogo.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix.gogo</groupId>
+                <artifactId>org.apache.felix.gogo.commands</artifactId>
+                <version>${felix.gogo.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

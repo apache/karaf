@@ -21,14 +21,10 @@
 
     <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/gshell/v1.0.0">
         <command name="packages/exports">
-            <action class="org.apache.felix.karaf.gshell.packages.ExportsCommand">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.packages.ExportsCommand"/>
         </command>
         <command name="packages/imports">
-            <action class="org.apache.felix.karaf.gshell.packages.ImportsCommand">
-                <property name="bundleContext" ref="blueprintBundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.packages.ImportsCommand"/>
         </command>
     </command-bundle>
 

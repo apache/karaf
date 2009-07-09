@@ -70,7 +70,7 @@ public class NamespaceHandler implements org.apache.geronimo.blueprint.Namespace
         if (rank != null && rank.length() > 0) {
             bean.addProperty("rank", createValue(context, rank));
         }
-        NodeList childElements = element.getElementsByTagName("module");
+        NodeList childElements = element.getElementsByTagNameNS("http://felix.apache.org/karaf/xmlns/jaas/v1.0.0", "module");
         if (childElements != null && childElements.getLength() > 0) {
             MutableCollectionMetadata children = context.createMetadata(MutableCollectionMetadata.class);
             for (int i = 0; i < childElements.getLength(); ++i) {

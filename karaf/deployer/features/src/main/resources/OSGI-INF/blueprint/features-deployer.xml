@@ -18,7 +18,8 @@
 
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
-           xmlns:cm="http://www.osgi.org/xmlns/blueprint-cm/v1.0.0">
+           xmlns:cm="http://www.osgi.org/xmlns/blueprint-cm/v1.0.0"
+           default-activation="lazy">
 
     <service interface="org.apache.felix.karaf.deployer.filemonitor.DeploymentListener"
              ref="featureDeploymentListener"/>

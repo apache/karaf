@@ -27,19 +27,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.geronimo.gshell.shell.ShellContext;
-import org.apache.geronimo.gshell.shell.ShellContextHolder;
 import org.apache.felix.karaf.gshell.admin.AdminService;
 import org.apache.felix.karaf.gshell.admin.Instance;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 import org.osgi.service.prefs.PreferencesService;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 public class AdminServiceImpl implements AdminService {
 
-    private static final Log LOGGER = LogFactory.getLog(AdminServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AdminServiceImpl.class);
 
     private PreferencesService preferences;
 
@@ -117,11 +115,14 @@ public class AdminServiceImpl implements AdminService {
         mkdir(serviceMixBase, "data");
 
         copyResourceToDir(serviceMixBase, "etc/config.properties", true);
+        copyResourceToDir(serviceMixBase, "etc/java.util.logging.properties", true);
+        copyResourceToDir(serviceMixBase, "etc/org.apache.felix.karaf.log.cfg", true);
         copyResourceToDir(serviceMixBase, "etc/org.apache.felix.karaf.features.cfg", true);
-        copyResourceToDir(serviceMixBase, "etc/users.properties", true);
+        copyResourceToDir(serviceMixBase, "etc/org.apache.felix.karaf.management.cfg", true);
         copyResourceToDir(serviceMixBase, "etc/org.ops4j.pax.logging.cfg", true);
         copyResourceToDir(serviceMixBase, "etc/org.ops4j.pax.url.mvn.cfg", true);
         copyResourceToDir(serviceMixBase, "etc/startup.properties", true);
+        copyResourceToDir(serviceMixBase, "etc/users.properties", true);
 
         HashMap<String, String> props = new HashMap<String, String>();
         props.put("${karaf.name}", name);
@@ -206,12 +207,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     private void println(String st) {
-        ShellContext ctx = ShellContextHolder.get(true);
-        if (ctx != null) {
-            ctx.getIo().out.println(st);
-        } else {
-            System.out.println(st);
-        }
+        System.out.println(st);
     }
 
     private void copyFilteredResourceToDir(File target, String resource, HashMap<String, String> props) throws Exception {

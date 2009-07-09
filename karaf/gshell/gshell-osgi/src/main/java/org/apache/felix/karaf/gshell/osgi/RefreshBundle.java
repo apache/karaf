@@ -16,8 +16,8 @@
  */
 package org.apache.felix.karaf.gshell.osgi;
 
-import org.apache.geronimo.gshell.clp.Argument;
-import org.apache.felix.karaf.gshell.core.OsgiCommandSupport;
+import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
+import org.apache.felix.gogo.commands.Argument;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -31,14 +31,14 @@ public class RefreshBundle extends OsgiCommandSupport {
         // Get package admin service.
         ServiceReference ref = getBundleContext().getServiceReference(PackageAdmin.class.getName());
         if (ref == null) {
-            io.out.println("PackageAdmin service is unavailable.");
-            return Result.FAILURE;
+            System.out.println("PackageAdmin service is unavailable.");
+            return null;
         }
         try {
             PackageAdmin pa = (PackageAdmin) getBundleContext().getService(ref);
             if (pa == null) {
-                io.out.println("PackageAdmin service is unavailable.");
-                return Result.FAILURE;
+                System.out.println("PackageAdmin service is unavailable.");
+                return null;
             }
             if (id == null) {
                 pa.refreshPackages(null);
@@ -46,8 +46,8 @@ public class RefreshBundle extends OsgiCommandSupport {
             else {
                 Bundle bundle = getBundleContext().getBundle(id);
                 if (bundle == null) {
-                    io.out.println("Bundle " + id + " not found");
-                    return Result.FAILURE;
+                    System.out.println("Bundle " + id + " not found");
+                    return null;
                 }
                 pa.refreshPackages(new Bundle[] { bundle });
             }
@@ -55,6 +55,6 @@ public class RefreshBundle extends OsgiCommandSupport {
         finally {
             getBundleContext().ungetService(ref);
         }
-        return Result.SUCCESS;
+        return null;
     }
 }

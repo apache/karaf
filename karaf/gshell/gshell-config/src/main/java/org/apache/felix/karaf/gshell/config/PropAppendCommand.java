@@ -18,7 +18,7 @@ package org.apache.felix.karaf.gshell.config;
 
 import java.util.Dictionary;
 
-import org.apache.geronimo.gshell.clp.Argument;
+import org.apache.felix.gogo.commands.Argument;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**

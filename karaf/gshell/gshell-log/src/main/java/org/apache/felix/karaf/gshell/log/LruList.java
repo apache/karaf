@@ -20,12 +20,14 @@ package org.apache.felix.karaf.gshell.log;
 
 import java.util.Arrays;
 
+import org.ops4j.pax.logging.spi.PaxLoggingEvent;
+
 /**
  * A list that only keep the last N elements added
  */
-public class LruList<E> {
+public class LruList {
 
-    private E[] elements;
+    private PaxLoggingEvent[] elements;
     private transient int start = 0;
     private transient int end = 0;
     private transient boolean full = false;
@@ -35,7 +37,7 @@ public class LruList<E> {
         if (size <= 0) {
             throw new IllegalArgumentException("The size must be greater than 0");
         }
-        elements = (E[]) new Object[size];
+        elements = new PaxLoggingEvent[size];
         maxElements = elements.length;
     }
 
@@ -53,7 +55,7 @@ public class LruList<E> {
         }
     }
 
-    public void add(E element) {
+    public void add(PaxLoggingEvent element) {
         synchronized (elements) {
             if (null == element) {
                  throw new NullPointerException("Attempted to add null object to buffer");
@@ -78,17 +80,17 @@ public class LruList<E> {
         }
     }
 
-    public Iterable<E> getElements() {
+    public Iterable<PaxLoggingEvent> getElements() {
         synchronized (elements) {
             return getElements(size());
         }
     }
 
-    public Iterable<E> getElements(int nb) {
+    public Iterable<PaxLoggingEvent> getElements(int nb) {
         synchronized (elements) {
             int s = size();
             nb = Math.min(Math.max(0, nb), s);
-            E[] e = (E[]) new Object[nb];
+            PaxLoggingEvent[] e = new PaxLoggingEvent[nb];
             for (int i = 0; i < nb; i++) {
                 e[i] = elements[(i + s - nb + start) % maxElements];
             }

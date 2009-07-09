@@ -21,9 +21,7 @@
 
     <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/gshell/v1.0.0">
         <command name="wrapper/install">
-            <action class="org.apache.felix.karaf.gshell.wrapper.InstallCommand">
-                <property name="bundleContext" ref="bundleContext"/>
-            </action>
+            <action class="org.apache.felix.karaf.gshell.wrapper.InstallCommand"/>
         </command>
     </command-bundle>
 

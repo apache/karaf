@@ -26,13 +26,13 @@ import org.ops4j.pax.logging.spi.PaxLoggingEvent;
  */
 public class VmLogAppender implements PaxAppender {
 
-    protected LruList<PaxLoggingEvent> events;
+    protected LruList events;
 
-    public LruList<PaxLoggingEvent> getEvents() {
+    public LruList getEvents() {
         return events;
     }
 
-    public void setEvents(LruList<PaxLoggingEvent> events) {
+    public void setEvents(LruList events) {
         this.events = events;
     }
 

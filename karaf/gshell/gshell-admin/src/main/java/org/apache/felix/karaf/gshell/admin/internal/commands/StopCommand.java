@@ -16,7 +16,7 @@
  */
 package org.apache.felix.karaf.gshell.admin.internal.commands;
 
-import org.apache.geronimo.gshell.clp.Argument;
+import org.apache.felix.gogo.commands.Argument;
 
 public class StopCommand extends AdminCommandSupport {
 
@@ -25,6 +25,6 @@ public class StopCommand extends AdminCommandSupport {
 
     protected Object doExecute() throws Exception {
         getExistingInstance(instance).stop();
-        return Result.SUCCESS;
+        return null;
     }
 }

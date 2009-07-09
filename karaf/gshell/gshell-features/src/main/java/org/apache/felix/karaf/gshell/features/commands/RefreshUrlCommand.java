@@ -20,9 +20,9 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.geronimo.gshell.clp.Argument;
 import org.apache.felix.karaf.gshell.features.FeaturesService;
 import org.apache.felix.karaf.gshell.features.Repository;
+import org.apache.felix.gogo.commands.Argument;
 
 public class RefreshUrlCommand extends FeaturesCommandSupport {
 

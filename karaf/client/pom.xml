@@ -35,14 +35,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.felix.karaf.gshell</groupId>
-            <artifactId>org.apache.felix.karaf.gshell.core</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-jdk14</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.jline</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sshd</groupId>
+            <artifactId>sshd-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

@@ -36,8 +36,6 @@ import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.felix.karaf.gshell.features.Feature;
 import org.apache.felix.karaf.gshell.features.FeaturesRegistry;
 import org.apache.felix.karaf.gshell.features.FeaturesService;
@@ -53,6 +51,8 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 import org.osgi.service.prefs.PreferencesService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Features service implementation.
@@ -65,7 +65,7 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     private static final String ALIAS_KEY = "_alias_factory_pid";
 
-    private static final Log LOGGER = LogFactory.getLog(FeaturesServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FeaturesServiceImpl.class);
 
     private BundleContext bundleContext;
     private ConfigurationAdmin configAdmin;

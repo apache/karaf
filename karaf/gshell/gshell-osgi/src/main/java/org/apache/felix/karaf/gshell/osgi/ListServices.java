@@ -18,12 +18,12 @@ package org.apache.felix.karaf.gshell.osgi;
 
 import java.util.List;
 
-import org.apache.geronimo.gshell.clp.Argument;
-import org.apache.geronimo.gshell.clp.Option;
-import org.apache.geronimo.gshell.command.Command;
-import org.apache.felix.karaf.gshell.core.OsgiCommandSupport;
+import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
+import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Option;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.command.Function;
 
 public class ListServices extends OsgiCommandSupport {
 
@@ -65,7 +65,7 @@ public class ListServices extends OsgiCommandSupport {
                         for (int ocIdx = 0;
                              !showAll && (ocIdx < objectClass.length);
                              ocIdx++) {
-                            if (objectClass[ocIdx].equals(Command.class.getName())) {
+                            if (objectClass[ocIdx].equals(Function.class.getName())) {
                                 print = false;
                             }
                         }
@@ -77,15 +77,15 @@ public class ListServices extends OsgiCommandSupport {
                             title = (inUse)
                                     ? title + " uses:"
                                     : title + " provides:";
-                            io.out.println("");
-                            io.out.println(title);
-                            io.out.println(Util.getUnderlineString(title));
+                            System.out.println("");
+                            System.out.println(title);
+                            System.out.println(Util.getUnderlineString(title));
                         }
 
                         if (showAll || print) {
                             // Print service separator if necessary.
                             if (needSeparator) {
-                                io.out.println("----");
+                                System.out.println("----");
                             }
 
                             // Print service properties.
@@ -94,7 +94,7 @@ public class ListServices extends OsgiCommandSupport {
                                  (keys != null) && (keyIdx < keys.length);
                                  keyIdx++) {
                                 Object v = refs[refIdx].getProperty(keys[keyIdx]);
-                                io.out.println(
+                                System.out.println(
                                         keys[keyIdx] + " = " + Util.getValueString(v));
                             }
 
@@ -102,7 +102,7 @@ public class ListServices extends OsgiCommandSupport {
                         }
                     }
                 } else {
-                    io.err.println("Bundle ID " + id + " is invalid.");
+                    System.err.println("Bundle ID " + id + " is invalid.");
                 }
             }
         }
@@ -139,7 +139,7 @@ public class ListServices extends OsgiCommandSupport {
                             !showAll && (ocIdx < objectClass.length);
                             ocIdx++)
                         {
-                            if (objectClass[ocIdx].equals(Command.class.getName()))
+                            if (objectClass[ocIdx].equals(Function.class.getName()))
                             {
                                 print = false;
                             }
@@ -155,20 +155,20 @@ public class ListServices extends OsgiCommandSupport {
                                 title = (inUse)
                                     ? title + " uses:"
                                     : title + " provides:";
-                                io.out.println("\n" + title);
-                                io.out.println(Util.getUnderlineString(title));
+                                System.out.println("\n" + title);
+                                System.out.println(Util.getUnderlineString(title));
                             }
-                            io.out.println(Util.getValueString(objectClass));
+                            System.out.println(Util.getValueString(objectClass));
                         }
                     }
                 }
             }
             else
             {
-                io.out.println("There are no registered services.");
+                System.out.println("There are no registered services.");
             }
         }
-        return Result.SUCCESS;
+        return null;
     }
 
 }

@@ -57,7 +57,7 @@
 
         <dependency>
             <groupId>org.apache.felix.karaf.gshell</groupId>
-            <artifactId>org.apache.felix.karaf.gshell.core</artifactId>
+            <artifactId>org.apache.felix.karaf.gshell.console</artifactId>
         </dependency>
 
         <dependency>
@@ -68,8 +68,8 @@
         <dependency>
             <groupId>org.springframework.osgi</groupId>
             <artifactId>spring-osgi-core</artifactId>
+            <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.junit</artifactId>
@@ -78,6 +78,11 @@
         <dependency>
             <groupId>org.easymock</groupId>
             <artifactId>easymock</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -94,10 +99,9 @@
                         <Import-Package>
                             javax.management,
                             javax.management.loading,
-                            org.apache.geronimo.gshell.command,
-                            org.apache.geronimo.gshell.wisdom.command,
-                            org.apache.geronimo.gshell.wisdom.registry,
-                            org.apache.felix.karaf.gshell.core,
+                            org.osgi.service.command,
+                            org.apache.felix.gogo.commands,
+                            org.apache.felix.karaf.gshell.console,
                             *
                         </Import-Package>
                         <Private-Package>!*</Private-Package>

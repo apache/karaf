@@ -30,7 +30,7 @@ public class PropListCommand extends ConfigCommandSupport {
         } else {
             for (Enumeration e = props.keys(); e.hasMoreElements();) {
                 Object key = e.nextElement();
-                io.out.println("   " + key + " = " + props.get(key));
+                System.out.println("   " + key + " = " + props.get(key));
             }
         }
     }

@@ -59,4 +59,17 @@
         <bundle>mvn:org.apache.felix/org.apache.felix.webconsole/${felix.webconsole.version}</bundle>
         <bundle>mvn:org.apache.felix.karaf/org.apache.felix.karaf.webconsole/${version}</bundle>
     </feature>
+    <feature name="ssh" version="${version}">
+        <config name="org.apache.felix.karaf.gshell.ssh">
+            sshPort=8101
+            sshRealm=karaf
+        </config>
+        <bundle>mvn:org.apache.mina/mina-core/${mina.version}</bundle>
+        <bundle>mvn:org.apache.sshd/sshd-core/${sshd.version}</bundle>
+        <bundle>mvn:org.apache.felix.karaf.gshell/org.apache.felix.karaf.gshell.ssh/${version}</bundle>
+    </feature>
+    <feature name="management" version="${version}">
+        <bundle>mvn:org.apache.felix.karaf/org.apache.felix.karaf.management/${version}</bundle>
+        <bundle>mvn:org.osgi/org.osgi.impl.bundle.jmx/${osgi.jmx.version}</bundle>
+    </feature>
 </features>

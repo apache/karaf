@@ -18,12 +18,12 @@ package org.apache.felix.karaf.gshell.config;
 
 import java.util.Dictionary;
 
-import org.apache.geronimo.gshell.clp.Argument;
+import org.apache.felix.gogo.commands.Argument;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 public class PropDelCommand extends ConfigCommandSupport {
 
-    @Argument(index = 0, required = true, description = "the property to delete")
+    @Argument(name = "prop", index = 0, required = true, description = "the property to delete")
     String prop;
 
     protected void doExecute(ConfigurationAdmin admin) throws Exception {

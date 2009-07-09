@@ -21,11 +21,11 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.geronimo.gshell.clp.Argument;
-import org.apache.felix.karaf.gshell.core.OsgiCommandSupport;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
+import org.apache.felix.gogo.commands.Argument;
 
 /**
  * Get the log level for a given logger
@@ -59,9 +59,9 @@ public class GetLogLevel extends OsgiCommandSupport {
                     loggers.put(prop.substring(LOGGER_PREFIX.length()), val);
                 }
             }
-            io.out.println("ROOT: " + root);
+            System.out.println("ROOT: " + root);
             for (String logger : loggers.keySet()) {
-                io.out.println(logger + ": " + loggers.get(logger));
+                System.out.println(logger + ": " + loggers.get(logger));
             }
         } else {
             String logger = this.logger;
@@ -89,9 +89,9 @@ public class GetLogLevel extends OsgiCommandSupport {
             if (logger != this.logger) {
                 st += " (inherited from " + (logger != null ? logger : "ROOT") + ")";
             }
-            io.out.println(st);
+            System.out.println(st);
         }
-        return Result.SUCCESS;
+        return null;
     }
 
     protected String getLevel(String prop) {

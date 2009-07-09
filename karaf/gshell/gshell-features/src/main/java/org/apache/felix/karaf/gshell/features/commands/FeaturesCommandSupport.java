@@ -16,8 +16,8 @@
  */
 package org.apache.felix.karaf.gshell.features.commands;
 
-import org.apache.felix.karaf.gshell.core.OsgiCommandSupport;
 import org.apache.felix.karaf.gshell.features.FeaturesService;
+import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
 import org.osgi.framework.ServiceReference;
 
 public abstract class FeaturesCommandSupport extends OsgiCommandSupport {
@@ -26,13 +26,13 @@ public abstract class FeaturesCommandSupport extends OsgiCommandSupport {
         // Get repository admin service.
         ServiceReference ref = getBundleContext().getServiceReference(FeaturesService.class.getName());
         if (ref == null) {
-            io.out.println("FeaturesService service is unavailable.");
+            System.out.println("FeaturesService service is unavailable.");
             return null;
         }
         try {
             FeaturesService admin = (FeaturesService) getBundleContext().getService(ref);
             if (admin == null) {
-                io.out.println("FeaturesService service is unavailable.");
+                System.out.println("FeaturesService service is unavailable.");
                 return null;
             }
 

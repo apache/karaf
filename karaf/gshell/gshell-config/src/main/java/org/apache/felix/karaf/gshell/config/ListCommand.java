@@ -19,9 +19,9 @@ package org.apache.felix.karaf.gshell.config;
 import java.util.Dictionary;
 import java.util.Enumeration;
 
-import org.apache.geronimo.gshell.clp.Argument;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.apache.felix.gogo.commands.Argument;
 
 public class ListCommand extends ConfigCommandSupport {
 
@@ -31,18 +31,18 @@ public class ListCommand extends ConfigCommandSupport {
     protected void doExecute(ConfigurationAdmin admin) throws Exception {
         Configuration[] configs = admin.listConfigurations(query);
         for (Configuration config : configs) {
-            io.out.println("----------------------------------------------------------------");
-            io.out.println("Pid:            " + config.getPid());
+            System.out.println("----------------------------------------------------------------");
+            System.out.println("Pid:            " + config.getPid());
             if (config.getFactoryPid() != null) {
-                io.out.println("FactoryPid:     " + config.getFactoryPid());
+                System.out.println("FactoryPid:     " + config.getFactoryPid());
             }
-            io.out.println("BundleLocation: " + config.getBundleLocation());
+            System.out.println("BundleLocation: " + config.getBundleLocation());
             if (config.getProperties() != null) {
-                io.out.println("Properties:");
+                System.out.println("Properties:");
                 Dictionary props = config.getProperties();
                 for (Enumeration e = props.keys(); e.hasMoreElements();) {
                     Object key = e.nextElement();
-                    io.out.println("   " + key + " = " + props.get(key));
+                    System.out.println("   " + key + " = " + props.get(key));
                 }
             }
         }

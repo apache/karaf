@@ -16,15 +16,17 @@
  */
 package org.apache.felix.karaf.gshell.log;
 
-import org.apache.geronimo.gshell.clp.Option;
-import org.apache.felix.karaf.gshell.core.OsgiCommandSupport;
 import org.apache.felix.karaf.gshell.log.layout.PatternConverter;
 import org.apache.felix.karaf.gshell.log.layout.PatternParser;
+import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
+import org.apache.felix.gogo.commands.Option;
+import org.apache.felix.gogo.commands.Command;
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 
 /**
  * Displays the last log entries
  */
+@Command(scope = "log", name = "display", description = "Display log entries.")
 public class DisplayLog extends OsgiCommandSupport {
 
     @Option(name = "-n", description="Number of entries to display")
@@ -35,13 +37,13 @@ public class DisplayLog extends OsgiCommandSupport {
 
     protected String pattern;
 
-    protected LruList<PaxLoggingEvent> events;
+    protected LruList events;
 
-    public LruList<PaxLoggingEvent> getEvents() {
+    public LruList getEvents() {
         return events;
     }
 
-    public void setEvents(LruList<PaxLoggingEvent> events) {
+    public void setEvents(LruList events) {
         this.events = events;
     }
 
@@ -63,16 +65,16 @@ public class DisplayLog extends OsgiCommandSupport {
             for (PatternConverter pc = cnv; pc != null; pc = pc.next) {
                 pc.format(sb, event);
             }
-            io.out.print(sb.toString());
+            System.out.print(sb.toString());
             if (event.getThrowableStrRep() != null) {
                 for (String r : event.getThrowableStrRep()) {
-                    io.out.println(r);
+                    System.out.println(r);
                 }
             }
         }
-        io.out.println();
+        System.out.println();
         
-        return Result.SUCCESS;
+        return null;
     }
 
 }

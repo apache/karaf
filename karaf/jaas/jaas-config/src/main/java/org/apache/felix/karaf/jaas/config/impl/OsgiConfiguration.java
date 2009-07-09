@@ -27,16 +27,14 @@ import org.apache.felix.karaf.jaas.config.JaasRealm;
 
 public class OsgiConfiguration extends Configuration {
 
-    private List<JaasRealm> realms;
+    private final List<JaasRealm> realms = new CopyOnWriteArrayList<JaasRealm>();
 
     public void init() {
-        realms = new CopyOnWriteArrayList<JaasRealm>();
         Configuration.setConfiguration(this);
     }
 
     public void close() {
         realms.clear();
-        realms = null;
         Configuration.setConfiguration(null);
     }
 
@@ -45,9 +43,7 @@ public class OsgiConfiguration extends Configuration {
     }
 
     public void unregister(JaasRealm realm, Map<String,?> properties) {
-        if (realms != null) {
-            realms.remove(realm);
-        }
+        realms.remove(realm);
     }
 
     public AppConfigurationEntry[] getAppConfigurationEntry(String name) {

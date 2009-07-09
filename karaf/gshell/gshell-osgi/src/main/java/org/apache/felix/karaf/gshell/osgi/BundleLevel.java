@@ -16,7 +16,7 @@
  */
 package org.apache.felix.karaf.gshell.osgi;
 
-import org.apache.geronimo.gshell.clp.Argument;
+import org.apache.felix.gogo.commands.Argument;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.startlevel.StartLevel;
@@ -30,29 +30,29 @@ public class BundleLevel extends BundleCommand {
         // Get package admin service.
         ServiceReference ref = getBundleContext().getServiceReference(StartLevel.class.getName());
         if (ref == null) {
-            io.out.println("StartLevel service is unavailable.");
+            System.out.println("StartLevel service is unavailable.");
             return;
         }
         StartLevel sl = getService(StartLevel.class, ref);
         if (sl == null) {
-            io.out.println("StartLevel service is unavailable.");
+            System.out.println("StartLevel service is unavailable.");
             return;
         }
 
         if (level == null) {
-            io.out.println("Level " + sl.getBundleStartLevel(bundle));
+            System.out.println("Level " + sl.getBundleStartLevel(bundle));
         }
         else if ((level < 50) && sl.getBundleStartLevel(bundle) > 50){
             for (;;) {
                 StringBuffer sb = new StringBuffer();
-                io.err.println("You are about to designate bundle as a system bundle.  Do you want to continue (yes/no): ");
-                io.err.flush();
+                System.err.println("You are about to designate bundle as a system bundle.  Do you want to continue (yes/no): ");
+                System.err.flush();
                 for (;;) {
-                    int c = io.in.read();
+                    int c = System.in.read();
                     if (c < 0) {
                         return;
                     }
-                    io.err.println((char) c);
+                    System.err.println((char) c);
                     if (c == '\r' || c == '\n') {
                         break;
                     }

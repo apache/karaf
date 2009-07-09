@@ -18,7 +18,6 @@ package org.apache.felix.karaf.gshell.osgi;
 
 import java.util.List;
 
-import org.apache.geronimo.gshell.clp.Option;
 import org.osgi.framework.Bundle;
 
 public class StopBundle extends BundlesCommand {
