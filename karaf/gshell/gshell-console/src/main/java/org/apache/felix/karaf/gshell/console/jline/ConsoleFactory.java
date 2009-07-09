@@ -71,10 +71,6 @@ public class ConsoleFactory {
             InputStream in = unwrap(System.in);
             PrintStream out = unwrap(System.out);
             PrintStream err = unwrap(System.err);
-            CommandSession session = this.commandProcessor.createSession(
-                    in, new PrintStream(new AnsiOutputStream(out)), new PrintStream(new AnsiOutputStream(err)));
-            session.put("USER", "karaf");
-            session.put("APPLICATION", System.getProperty("karaf.name", "root"));
             Runnable callback = new Runnable() {
                 public void run() {
                     try {
@@ -84,7 +80,10 @@ public class ConsoleFactory {
                     }
                 }
             };
-            this.console = new Console(session, terminal, new AggregateCompleter(completers), callback);
+            this.console = new Console(commandProcessor, in, out, err, terminal, new AggregateCompleter(completers), callback);
+            CommandSession session = console.getSession();
+            session.put("USER", "karaf");
+            session.put("APPLICATION", System.getProperty("karaf.name", "root"));
             new Thread(console, "Karaf Shell Console Thread").start();
         }
     }

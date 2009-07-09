@@ -21,6 +21,7 @@ package org.apache.felix.karaf.gshell.console.jline;
 import jline.*;
 import org.osgi.service.command.CommandSession;
 import org.osgi.service.command.Converter;
+import org.osgi.service.command.CommandProcessor;
 import org.apache.felix.karaf.gshell.console.ansi.AnsiOutputStream;
 import org.apache.felix.karaf.gshell.console.Completer;
 
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.PrintWriter;
+import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -47,32 +49,40 @@ public class Console implements Runnable
     private boolean running;
     private Runnable closeCallback;
     private Terminal terminal;
+    private InputStream consoleInput;
+    private InputStream in;
+    private PrintStream out;
+    private PrintStream err;
 
-    public Console(CommandSession session, Terminal term) throws Exception
+    public Console(CommandProcessor processor,
+                   InputStream in,
+                   PrintStream out,
+                   PrintStream err,
+                   Terminal term,
+                   Completer completer,
+                   Runnable closeCallback) throws Exception
     {
-        this(session, term, null);
-    }
-
-    public Console(CommandSession session, Terminal term, Completer completer) throws Exception
-    {
-        this(session, term, completer, null);
-    }
-
-    public Console(CommandSession session, Terminal term, Completer completer, Runnable closeCallback) throws Exception
-    {
-        this.session = session;
+        this.in = in;
+        this.out = out;
+        this.err = err;
+        this.consoleInput = new ConsoleInputStream();
+        this.session = processor.createSession(this.consoleInput, this.out, this.err);
         this.terminal = term == null ? new UnsupportedTerminal() : term;
         this.closeCallback = closeCallback;
-        reader = new ConsoleReader(new ConsoleInputStream(),
-                                   new PrintWriter(session.getConsole()),
+        reader = new ConsoleReader(this.consoleInput,
+                                   new PrintWriter(this.out),
                                    getClass().getResourceAsStream("keybinding.properties"),
-                                   terminal);
+                                   this.terminal);
         if (completer != null) {
             reader.addCompletor(new CompleterAsCompletor(completer));
         }
         pipe = new Thread(new Pipe());
         pipe.setName("gogo shell pipe thread");
         pipe.setDaemon(true);
+    }
+
+    public CommandSession getSession() {
+        return session;
     }
 
     public void close() {
@@ -217,7 +227,6 @@ public class Console implements Runnable
         public void run()
         {
             try {
-                InputStream in = session.getKeyboard();
                 while (running)
                 {
                     try
@@ -226,13 +235,13 @@ public class Console implements Runnable
                         if (c == -1 || c == 4)
                         {
                             //System.err.println("Received  " + c + " ... closing");
-                            session.getConsole().println("^D");
+                            err.println("^D");
                             queue.put(c);
                             return;
                         }
                         else if (c == 3)
                         {
-                            session.getConsole().println("^C");
+                            err.println("^C");
                             reader.getCursorBuffer().clearBuffer();
                             interrupt();
                             queue.put(c);
