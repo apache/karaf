@@ -1,6 +1,8 @@
 package org.apache.felix.karaf.gshell.console.jline;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
+import java.io.IOException;
 
 import jline.Terminal;
 import jline.WindowsTerminal;
@@ -13,7 +15,9 @@ public class TerminalFactory {
     private Thread hook;
 
     public Terminal getTerminal() throws Exception {
-        init();
+        if (term == null) {
+            init();
+        }
         return term;
     }
 
@@ -26,23 +30,8 @@ public class TerminalFactory {
                 t.initializeTerminal();
                 term = t;
             } else {
-                UnixTerminal t = new UnixTerminal();
-                Method mth = UnixTerminal.class.getDeclaredMethod("stty", String.class);
-                mth.setAccessible(true);
-                mth.invoke(null, "intr undef");
+                NoInterruptUnixTerminal t = new NoInterruptUnixTerminal();
                 t.initializeTerminal();
-                hook = new Thread() {
-                    public void run() {
-                        try {
-                            Method mth = UnixTerminal.class.getDeclaredMethod("stty", String.class);
-                            mth.setAccessible(true);
-                            mth.invoke(null, "intr ^C");
-                        } catch (Throwable t) {
-                            t.printStackTrace();
-                        }
-                    }
-                };
-                Runtime.getRuntime().addShutdownHook(hook);
                 term = t;
             }
         } catch (Throwable e) {
@@ -51,10 +40,41 @@ public class TerminalFactory {
     }
 
     public synchronized void destroy() throws Exception {
-        if (hook != null) {
-            hook.run();
-            Runtime.getRuntime().removeShutdownHook(hook);
-            hook = null;
+        if (term instanceof UnixTerminal) {
+            ((UnixTerminal) term).restoreTerminal();
+        }
+        term = null;
+    }
+
+    public static class NoInterruptUnixTerminal extends UnixTerminal {
+        @Override
+        public void initializeTerminal() throws IOException, InterruptedException {
+            super.initializeTerminal();
+            stty("intr undef");
+        }
+
+        @Override
+        public void restoreTerminal() throws Exception {
+            stty("intr ^C");
+            super.restoreTerminal();
+        }
+
+        protected static String stty(final String args) throws IOException, InterruptedException {
+            try {
+                try {
+                    Method mth = UnixTerminal.class.getDeclaredMethod("stty", String.class);
+                    mth.setAccessible(true);
+                    return (String) mth.invoke(null, args);
+                } catch (InvocationTargetException e) {
+                    throw e.getTargetException();
+                }
+            } catch (IOException e) {
+                throw e;
+            } catch (InterruptedException e) {
+                throw e;
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
