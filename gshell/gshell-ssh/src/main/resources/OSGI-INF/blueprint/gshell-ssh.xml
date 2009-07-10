@@ -20,7 +20,8 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xmlns:bp="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xmlns:cm="http://www.osgi.org/xmlns/blueprint-cm/v1.0.0"
-           xmlns:ext="http://geronimo.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0">
+           xmlns:ext="http://geronimo.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0"
+           default-activation="lazy">
 
     <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]"/>
 
@@ -35,6 +36,9 @@
     <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/gshell/v1.0.0">
         <command name="ssh/ssh">
             <action class="org.apache.felix.karaf.gshell.ssh.SshAction">
+                <property name="sshClientId">
+                    <bp:idref component-id="sshClient"/>
+                </property>
             </action>
         </command>
         <command name="ssh/sshd">
@@ -46,8 +50,7 @@
         </command>
     </command-bundle>
 
-    <bean id="sshClient" class="org.apache.sshd.SshClient" factory-method="setUpDefaultClient" init-method="start"
-          destroy-method="stop">
+    <bean id="sshClient" class="org.apache.sshd.SshClient" factory-method="setUpDefaultClient" scope="prototype">
     </bean>
 
     <bean id="sshServer" class="org.apache.sshd.SshServer" factory-method="setUpDefaultServer" scope="prototype">
@@ -79,7 +82,7 @@
     </bean>
 
     <bean id="sshServerFactory" class="org.apache.felix.karaf.gshell.ssh.SshServerFactory" init-method="start"
-          destroy-method="stop">
+          destroy-method="stop" activation="eager">
         <argument ref="sshServer"/>
         <property name="start" value="$[karaf.startRemoteShell]"/>
     </bean>

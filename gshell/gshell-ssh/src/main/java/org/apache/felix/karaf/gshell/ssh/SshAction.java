@@ -60,10 +60,15 @@ public class SshAction
     private BlueprintContainer container;
 
 	private ClientSession session;
+    private String sshClientId;
 
     public void setBlueprintContainer(final BlueprintContainer container) {
         assert container != null;
         this.container = container;
+    }
+
+    public void setSshClientId(String sshClientId) {
+        this.sshClientId = sshClientId;
     }
 
     @Override
@@ -87,9 +92,9 @@ public class SshAction
         }
 
         // Create the client from prototype
-        SshClient client = (SshClient) container.getComponentInstance(SshClient.class.getName());
+        SshClient client = (SshClient) container.getComponentInstance(sshClientId);
         log.debug("Created client: {}", client);
-        client.start();;
+        client.start();
 
         try {
             ConnectFuture future = client.connect(hostname, port);
