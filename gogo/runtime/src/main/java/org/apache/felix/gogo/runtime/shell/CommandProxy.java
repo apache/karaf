@@ -18,26 +18,40 @@
  */
 package org.apache.felix.gogo.runtime.shell;
 
-import org.osgi.service.command.CommandSession;
-import org.osgi.service.command.Function;
-import org.osgi.framework.ServiceReference;
-
 import java.util.List;
 
-public class Command extends Reflective implements Function
-{
-    Object target;
+import org.osgi.service.command.Function;
+import org.osgi.service.command.CommandSession;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.BundleContext;
+
+public class CommandProxy extends Reflective implements Function {
+
+    BundleContext context;
+    ServiceReference reference;
     String function;
 
-    public Command(Object target, String function)
-    {
+    public CommandProxy(BundleContext context, ServiceReference reference, String function) {
+        this.context = context;
+        this.reference = reference;
         this.function = function;
-        this.target = target;
     }
 
-    public Object execute(CommandSession session, List<Object> arguments) throws Exception
-    {
-        return method(session, target, function, arguments);
+    public Object execute(CommandSession session, List<Object> arguments) throws Exception {
+        Object target = context.getService(reference);
+        try {
+            if (target instanceof Function)
+            {
+                return ((Function) target).execute(session, arguments);
+            }
+            else
+            {
+                return method(session, target, function, arguments);
+            }
+        }
+        finally
+        {
+            context.ungetService(reference);
+        }
     }
-
 }

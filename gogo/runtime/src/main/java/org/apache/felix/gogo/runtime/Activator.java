@@ -21,16 +21,20 @@ package org.apache.felix.gogo.runtime;
 import org.apache.felix.gogo.runtime.lang.Support;
 import org.apache.felix.gogo.runtime.osgi.OSGiShell;
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
+import org.apache.felix.gogo.runtime.shell.CommandProxy;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.command.CommandProcessor;
 import org.osgi.service.command.Converter;
+import org.osgi.service.command.Function;
 import org.osgi.service.threadio.ThreadIO;
 import org.osgi.util.tracker.ServiceTracker;
 
 import java.util.Hashtable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Activator implements BundleActivator
 {
@@ -78,21 +82,25 @@ public class Activator implements BundleActivator
             {
                 Object scope = reference.getProperty("osgi.command.scope");
                 Object function = reference.getProperty("osgi.command.function");
+                List<Object> commands = new ArrayList<Object>();
                 if(scope != null && function != null)
                 {
-                    Object target = context.getService(reference);
                     if (function.getClass().isArray())
                     {
                         for (Object f : ((Object[]) function))
                         {
+                            Function target = new CommandProxy(context, reference, f.toString());
                             shell.addCommand(scope.toString(), target, f.toString());
+                            commands.add(target);
                         }
                     }
                     else
                     {
+                        Function target = new CommandProxy(context, reference, function.toString());
                         shell.addCommand(scope.toString(), target, function.toString());
+                        commands.add(target);
                     }
-                    return target;
+                    return commands;
                 }
                 return null;
             }
@@ -100,6 +108,10 @@ public class Activator implements BundleActivator
             @Override
             public void removedService(ServiceReference reference, Object service)
             {
+                List<Object> commands = (List<Object>) service;
+                for (Object cmd : commands) {
+                    shell.removeCommand(cmd);
+                }
                 super.removedService(reference, service);
             }
         };
