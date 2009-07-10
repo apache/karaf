@@ -39,8 +39,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.jline</artifactId>
+            <groupId>jline</groupId>
+            <artifactId>jline</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.fusesource.jansi</groupId>
+            <artifactId>jansi</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -98,11 +102,23 @@
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
                         <Import-Package>
                             !javax.swing,
+                            !org.apache.felix.karaf.gshell.console*,
+                            !org.fusesource.jansi*,
+                            !org.apache.felix.gogo.commands*,
+                            !jline,
+                            com.sun.jna*;resolution:=optional,
                             *
                         </Import-Package>
                         <Export-Package>
-                            org.apache.felix.karaf.gshell.console*;version=${pom.version}
+                            org.apache.felix.gogo.commands*;version=${felix.gogo.version},
+                            org.apache.felix.karaf.gshell.console*;version=${pom.version},
+                            org.fusesource.jansi;version=${jansi.version},
+                            jline;version=${jline.version},
+
                         </Export-Package>
+                        <Private-Package>
+                            org.fusesource.jansi.internal
+                        </Private-Package>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>
                     <unpackBundle>true</unpackBundle>

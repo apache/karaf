@@ -20,15 +20,16 @@ package org.apache.felix.karaf.gshell.console.jline;
 
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import org.apache.felix.karaf.gshell.console.ansi.AnsiOutputStream;
 import org.apache.felix.karaf.gshell.console.Completer;
 import org.apache.felix.karaf.gshell.console.completer.AggregateCompleter;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.command.CommandProcessor;
 import org.osgi.service.command.CommandSession;
+import org.fusesource.jansi.AnsiConsole;
 import jline.Terminal;
 
 public class ConsoleFactory {
@@ -80,7 +81,13 @@ public class ConsoleFactory {
                     }
                 }
             };
-            this.console = new Console(commandProcessor, in, out, err, terminal, new AggregateCompleter(completers), callback);
+            this.console = new Console(commandProcessor,
+                                       in,
+                                       wrap(out),
+                                       wrap(err),
+                                       terminal,
+                                       new AggregateCompleter(completers),
+                                       callback);
             CommandSession session = console.getSession();
             session.put("USER", "karaf");
             session.put("APPLICATION", System.getProperty("karaf.name", "root"));
@@ -91,6 +98,15 @@ public class ConsoleFactory {
     protected void stop() throws Exception {
         if (console != null) {
             console.close();
+        }
+    }
+
+    private static PrintStream wrap(PrintStream stream) {
+        OutputStream o = AnsiConsole.wrapOutputStream(stream);
+        if (o instanceof PrintStream) {
+            return ((PrintStream) o);
+        } else {
+            return new PrintStream(o);
         }
     }
 
