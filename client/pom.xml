@@ -35,8 +35,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.jline</artifactId>
+            <groupId>jline</groupId>
+            <artifactId>jline</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.sshd</groupId>
@@ -63,7 +63,7 @@
                         <Class-Path>
                             ../system/org/apache/sshd/sshd-core/${sshd.version}/sshd-core-${sshd.version}.jar
                             ../system/org/apache/mina/mina-core/${mina.version}/mina-core-${mina.version}.jar
-                            ../system/org/apache/servicemix/bundles/org.apache.servicemix.bundles.jline/${jline.version}/org.apache.servicemix.bundles.jline-${jline.version}.jar
+                            ../system/org/apache/felix/karaf/gshell/org.apache.felix.karaf.gshell.console/${pom.version}/org.apache.felix.karaf.gshell.console-${pom.version}.jar
                         </Class-Path>
                         <Bundle-Name>Apache Felix Karaf Shell Client</Bundle-Name>
                         <Bundle-Description>Shell client bundle for Apache Felix Karaf.</Bundle-Description>

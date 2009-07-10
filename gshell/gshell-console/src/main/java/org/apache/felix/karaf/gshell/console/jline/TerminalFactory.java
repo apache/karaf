@@ -12,7 +12,6 @@ import jline.UnsupportedTerminal;
 public class TerminalFactory {
 
     private Terminal term;
-    private Thread hook;
 
     public Terminal getTerminal() throws Exception {
         if (term == null) {
@@ -25,7 +24,7 @@ public class TerminalFactory {
         boolean windows = System.getProperty("os.name").toLowerCase().contains("windows");
         try {
             if (windows) {
-                WindowsTerminal t = new WindowsTerminal();
+                AnsiWindowsTerminal t = new AnsiWindowsTerminal();
                 t.setDirectConsole(true);
                 t.initializeTerminal();
                 term = t;
@@ -40,10 +39,15 @@ public class TerminalFactory {
     }
 
     public synchronized void destroy() throws Exception {
-        if (term instanceof UnixTerminal) {
-            ((UnixTerminal) term).restoreTerminal();
-        }
+        term.restoreTerminal();
         term = null;
+    }
+
+    public static class AnsiWindowsTerminal extends WindowsTerminal {
+        @Override
+        public boolean isANSISupported() {
+            return true;
+        }
     }
 
     public static class NoInterruptUnixTerminal extends UnixTerminal {
@@ -59,23 +63,6 @@ public class TerminalFactory {
             super.restoreTerminal();
         }
 
-        protected static String stty(final String args) throws IOException, InterruptedException {
-            try {
-                try {
-                    Method mth = UnixTerminal.class.getDeclaredMethod("stty", String.class);
-                    mth.setAccessible(true);
-                    return (String) mth.invoke(null, args);
-                } catch (InvocationTargetException e) {
-                    throw e.getTargetException();
-                }
-            } catch (IOException e) {
-                throw e;
-            } catch (InterruptedException e) {
-                throw e;
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 
 }

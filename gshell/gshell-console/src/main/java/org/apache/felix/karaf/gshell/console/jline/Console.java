@@ -22,15 +22,14 @@ import jline.*;
 import org.osgi.service.command.CommandSession;
 import org.osgi.service.command.Converter;
 import org.osgi.service.command.CommandProcessor;
-import org.apache.felix.karaf.gshell.console.ansi.AnsiOutputStream;
 import org.apache.felix.karaf.gshell.console.Completer;
+import org.fusesource.jansi.Ansi;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.PrintWriter;
 import java.io.PrintStream;
-import java.lang.reflect.Method;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.Properties;
@@ -39,7 +38,8 @@ public class Console implements Runnable
 {
 
     public static final String PROMPT = "PROMPT";
-    public static final String DEFAULT_PROMPT = "\"@|bold ${USER}|@${APPLICATION}:@|bold ${SCOPE}|> \"";
+    public static final String DEFAULT_PROMPT =
+             "\"\u001B\\[1m${USER}\u001B\\[0m@${APPLICATION}> \"";
 
     private CommandSession session;
     private ConsoleReader reader;
@@ -99,8 +99,7 @@ public class Console implements Runnable
         welcome();
         while (running) {
             try {
-                String prompt = AnsiOutputStream.decode(getPrompt());
-                String line = reader.readLine(prompt);
+                String line = reader.readLine(getPrompt());
                 if (line == null)
                 {
                     break;
@@ -136,11 +135,7 @@ public class Console implements Runnable
         loadProps(props, "/org/apache/felix/karaf/branding/branding.properties");
         String welcome = props.getProperty("welcome");
         if (welcome != null && welcome.length() > 0) {
-            try {
-                session.getConsole().println(AnsiOutputStream.decode(welcome));
-            } catch (IOException e) {
-                //
-            }
+            session.getConsole().println(welcome);
         }
     }
 
@@ -192,7 +187,6 @@ public class Console implements Runnable
 
     private void interrupt() {
         interrupt = true;
-        //System.err.println("Interrupt ^C");
     }
 
     private class ConsoleInputStream extends InputStream

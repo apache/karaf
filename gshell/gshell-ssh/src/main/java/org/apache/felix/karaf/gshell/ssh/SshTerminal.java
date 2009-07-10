@@ -33,6 +33,9 @@ public class SshTerminal extends Terminal implements ShellFactory.SignalListener
     public void initializeTerminal() throws Exception {
     }
 
+    public void restoreTerminal() throws Exception {
+    }
+
     public int getTerminalWidth() {
         return Integer.valueOf(this.environment.getEnv().get("COLUMNS"));
     }

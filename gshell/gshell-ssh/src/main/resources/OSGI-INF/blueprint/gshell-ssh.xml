@@ -33,12 +33,10 @@
     </cm:property-placeholder>
 
     <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/gshell/v1.0.0">
-        <!--
         <command name="ssh/ssh">
             <action class="org.apache.felix.karaf.gshell.ssh.SshAction">
             </action>
         </command>
-        -->
         <command name="ssh/sshd">
             <action class="org.apache.felix.karaf.gshell.ssh.SshServerAction">
                 <property name="sshServerId">

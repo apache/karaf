@@ -18,7 +18,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
     -->
-                                      ƒ
+
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -67,12 +67,11 @@
 
     <properties>
         <aopalliance.version>1.0_1</aopalliance.version>
-        <asm.version>2.2.3_1</asm.version>
         <cglib.version>2.1_3_2-SNAPSHOT</cglib.version>
         <commons.logging.version>1.1.1</commons.logging.version>
         <depends.maven.plugin.version>1.0</depends.maven.plugin.version>
         <easymock.version>2.4</easymock.version>
-        <equinox.version> 3.5.0.v20090520</equinox.version>
+        <equinox.version>3.5.0.v20090520</equinox.version>
         <felix.bundlerepository.version>1.4.0</felix.bundlerepository.version>
         <felix.compendium.version>1.2.0</felix.compendium.version>
         <felix.configadmin.version>1.0.4</felix.configadmin.version>
@@ -85,13 +84,13 @@
         <felix.metatype.version>1.0.2</felix.metatype.version>
         <geronimo.blueprint.version>1.0.0-SNAPSHOT</geronimo.blueprint.version>
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
+        <jansi.version>1.0-SNAPSHOT</jansi.version>
         <jetty.bundle.version>6.1.14_1</jetty.bundle.version>
         <junit.version>3.8.2_1</junit.version>
-        <jline.version>0.9.94_1</jline.version>
+        <jline.version>0.9.95-SNAPSHOT</jline.version>
         <log4j.version>1.2.14</log4j.version>
         <maven.version>2.0.9</maven.version>
         <mina.version>2.0.0-M6</mina.version>
-        <oro.version>2.0.8_1</oro.version>
         <pax.exam.version>0.5.0</pax.exam.version>
         <pax.logging.version>1.3.1-SNAPSHOT</pax.logging.version>
         <pax.url.version>0.3.3</pax.url.version>
@@ -101,8 +100,7 @@
         <servlet.api.version>2.5</servlet.api.version>
         <spring.osgi.version>1.2.0</spring.osgi.version>
         <spring.version>2.5.6.SEC01</spring.version>
-        <sshd.version>0.1.0</sshd.version>
-        <woodstox.version>3.2.7_1</woodstox.version>
+        <sshd.version>1.0-SNAPSHOT</sshd.version>
         <osgi.jmx.version>4.2.0.200907080519</osgi.jmx.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -171,6 +169,17 @@
             </releases>
             <snapshots>
                 <enabled>false</enabled>
+            </snapshots>
+        </repository>
+
+        <repository>
+            <id>gnodet.snapshots</id>
+            <url>http://people.apache.org/~gnodet/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
             </snapshots>
         </repository>
     </repositories>
@@ -545,15 +554,14 @@
                 <version>${log4j.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.jline</artifactId>
+                <groupId>jline</groupId>
+                <artifactId>jline</artifactId>
                 <version>${jline.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>junit</groupId>
-                        <artifactId>junit</artifactId>
-                    </exclusion>
-                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.fusesource.jansi</groupId>
+                <artifactId>jansi</artifactId>
+                <version>${jansi.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-logging</groupId>
