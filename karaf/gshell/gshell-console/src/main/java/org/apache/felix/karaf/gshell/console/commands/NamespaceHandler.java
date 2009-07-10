@@ -159,6 +159,7 @@ public class NamespaceHandler implements org.apache.geronimo.blueprint.Namespace
         }
 
         MutableServiceMetadata commandService = context.createMetadata(MutableServiceMetadata.class);
+        commandService.setActivation(MutableServiceMetadata.ACTIVATION_LAZY);
         commandService.setId(getName());
         commandService.addInterface(Function.class.getName());
         commandService.addInterface(CompletableFunction.class.getName());
