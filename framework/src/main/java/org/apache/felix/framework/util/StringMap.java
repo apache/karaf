@@ -127,6 +127,11 @@ public class StringMap implements Map
         return m_map.entrySet();
     }
 
+    public String toString()
+    {
+        return m_map.toString();
+    }
+
     private static class StringComparator implements Comparator
     {
         private final boolean m_isCaseSensitive;
