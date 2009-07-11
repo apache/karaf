@@ -294,10 +294,12 @@ public class Pojoization {
         if (xml.isAnnotated()) {
             boolean toskip = false;
             for (int i = 0; !toskip && i < m_metadata.length; i++) {
-                if (m_metadata[i].containsAttribute("name")
+                if (! m_metadata[i].getName().equals("instance") // Only if its a component type definition, 
+                                                                 // so skip instance declaration 
+                        && m_metadata[i].containsAttribute("name")
                         && m_metadata[i].getAttribute("name").equalsIgnoreCase(xml.getElem().getAttribute("name"))) {
                     toskip = true;
-                    warn("The component " + xml.getElem().getAttribute("name") + " is overriden by the metadata file");
+                    warn("The component type " + xml.getElem().getAttribute("name") + " is overriden by the metadata file");
                 }
             }
             if (!toskip) {
