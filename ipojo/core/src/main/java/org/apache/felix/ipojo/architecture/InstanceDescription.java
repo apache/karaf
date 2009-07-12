@@ -102,12 +102,13 @@ public class InstanceDescription implements InstanceStateListener {
     
     /**
      * Gets a handler description by specifying the handler qualified name.
+     * This method ignores case of the given handler name.
      * @param handler the handler name
      * @return the handler description or <code>null</code> if not found
      */
     public HandlerDescription getHandlerDescription(String handler) {
         for (int i = 0; i < m_handlers.length; i++) {
-            if (m_handlers[i].getHandlerName().equals(handler)) {
+            if (m_handlers[i].getHandlerName().equalsIgnoreCase(handler)) {
                 return m_handlers[i];
             }
         }

@@ -23,7 +23,7 @@ public class BundleAsiPOJO implements BundleAs<URL> {
     public BundleAsiPOJO (File file, File metadata) {
         m_metadata = metadata;
         m_file = file;
-        if (! metadata.exists()) {
+        if (metadata != null && !metadata.exists()) {
             throw new RuntimeException("METADATA NOT FOUND");
         }
     }

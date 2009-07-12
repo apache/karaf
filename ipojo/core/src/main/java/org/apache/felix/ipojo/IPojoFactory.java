@@ -752,9 +752,9 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
         String name = (String) ref.getProperty(Handler.HANDLER_NAME_PROPERTY);
         String namespace = (String) ref.getProperty(Handler.HANDLER_NAMESPACE_PROPERTY);
         if (HandlerFactory.IPOJO_NAMESPACE.equals(namespace)) {
-            return name.equals(req.getName()) && req.getNamespace() == null;
+            return name.equalsIgnoreCase(req.getName()) && req.getNamespace() == null; 
         }
-        return name.equals(req.getName()) && namespace.equals(req.getNamespace());
+        return name.equalsIgnoreCase(req.getName()) && namespace.equalsIgnoreCase(req.getNamespace());
     }
 
     /**

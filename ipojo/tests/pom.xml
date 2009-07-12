@@ -39,6 +39,7 @@
 	<module>core/service-dependency-comparator</module>
 	<module>core/service-providing-strategies</module>
 	<module>core/configuration</module>
+	<module>core/handler</module>
 	<module>core/external-handlers</module>
 	<module>core/bad-configurations</module>
 	<module>composite/composite-runtime</module>
