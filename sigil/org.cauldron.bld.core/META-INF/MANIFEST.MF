@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Sigil_bld Plug-in
+Bundle-SymbolicName: org.cauldron.bld.core;singleton:=true
+Bundle-Version: 0.8.0.qualifier
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-Activator: org.cauldron.bld.core.BldCore
+Bundle-ActivationPolicy: lazy
+Export-Package: org.cauldron.bld.bnd,
+ org.cauldron.bld.config,
+ org.cauldron.bld.core,
+ org.cauldron.bld.core.licence,
+ org.cauldron.bld.core.repository,
+ org.cauldron.sigil.model,
+ org.cauldron.sigil.model.common,
+ org.cauldron.sigil.model.eclipse,
+ org.cauldron.sigil.model.osgi,
+ org.cauldron.sigil.repository
+Import-Package: org.osgi.framework
+Require-Bundle: org.eclipse.equinox.common;bundle-version="3.4.0"
+Bundle-ClassPath: lib/bndlib.jar,
+ .

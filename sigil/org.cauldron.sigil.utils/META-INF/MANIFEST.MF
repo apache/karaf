@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Sigil Utils Plug-in
+Bundle-SymbolicName: org.cauldron.sigil.utils;singleton:=true
+Bundle-Version: 0.8.0.qualifier
+Require-Bundle: org.eclipse.core.runtime
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: org.eclipse.core.expressions,
+ org.eclipse.core.resources,
+ org.eclipse.ui
+Export-Package: org.cauldron.sigil.utils

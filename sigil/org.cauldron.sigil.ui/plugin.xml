@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+  
+    http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+-->
+<?eclipse version="3.2"?>
+<plugin>
+   <extension-point id="org.cauldron.sigil.ui.repositorywizard" name="Repository Wizard" schema="schema/org.cauldron.sigil.ui.repositorywizard.exsd"/>
+      <extension
+         point="org.eclipse.ui.startup">
+      <startup class="org.cauldron.sigil.startup.SigilStartup"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            id="org.cauldron.sigil.newWizardCategory"
+            name="Sigil"/>
+      <wizard
+            category="org.cauldron.sigil.newWizardCategory"
+            class="org.cauldron.sigil.ui.wizard.project.SigilProjectWizard"
+            finalPerspective="org.cauldron.sigil.ui.perspective"
+            icon="etc/images/newton.png"
+            id="org.cauldron.sigil.editors.newProjectWizard"
+            name="Sigil Project"
+            project="true"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="org.cauldron.sigil.ui.preferences.SigilPreferencePage"
+            id="org.cauldron.sigil.ui.preferences.SigilPreferencePage"
+            name="Sigil"/>
+      <!--page
+            category="org.cauldron.sigil.ui.preferences.SigilPreferencePage"
+            class="org.cauldron.sigil.ui.preferences.LibraryPreferencePage"
+            id="org.cauldron.sigil.ui.libraryPreferences"
+            name="%librariesPrefsPage" >
+      </page-->
+      <page
+            category="org.cauldron.sigil.ui.preferences.SigilPreferencePage"
+            class="org.cauldron.sigil.ui.preferences.repository.RepositoriesPreferencePage"
+            id="org.cauldron.sigil.ui.preferences.repositoriesPreferencePage"
+            name="%repositoriesPrefPage">
+      </page>
+      <page
+            category="org.cauldron.sigil.ui.preferences.SigilPreferencePage"
+            class="org.cauldron.sigil.ui.preferences.ExcludedResourcesPrefsPage"
+            id="org.cauldron.sigil.ui.preferences.excludedResources"
+            name="Excluded Resources">
+      </page>
+      <page
+            category="org.cauldron.sigil.ui.preferences.SigilPreferencePage"
+            class="org.cauldron.sigil.ui.preferences.VersionsPreferencePage"
+            id="org.cauldron.sigil.ui.preferences.VersionsPreferencePage"
+            name="Version Handling">
+      </page>
+      <page
+            category="org.cauldron.sigil.ui.preferences.SigilPreferencePage"
+            class="org.cauldron.sigil.ui.preferences.installs.OSGiInstallsPreferencePage"
+            id="org.cauldron.sigil.ui.preferences.newtonInstalls"
+            name="Newton Installs">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.cauldron.sigil.ui.editors.project.SigilProjectEditorPart"
+            default="true"
+            filenames="sigil.properties"
+            icon="etc/images/newton.png"
+            id="org.cauldron.sigil.editors.SigilProjectEditor"
+            name="Sigil Project Editor"/>
+   </extension>
+   <extension
+         point="org.eclipse.jdt.core.classpathContainerInitializer">
+      <classpathContainerInitializer
+            class="org.cauldron.sigil.classpath.SigilClasspathContainerInitializer"
+            id="org.cauldron.sigil.core.classpathContainer"/>
+   </extension>
+   <extension
+         point="org.eclipse.jdt.ui.classpathContainerPage">
+      <classpathContainerPage
+            class="org.cauldron.sigil.classpath.SigilLibraryPage"        id="org.cauldron.sigil.core.classpathContainer"
+            name="Sigil Library"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="org.cauldron.sigil.ui.perspective.SigilPerspectiveFactory"
+            icon="etc/images/newton.png"
+            id="org.cauldron.sigil.ui.perspective"
+            name="Sigil">
+      </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.jdt.ui.quickFixProcessors">
+      <quickFixProcessor
+            class="org.cauldron.sigil.ui.quickfix.ImportQuickFixProcessor"
+            id="org.cauldron.sigil.ui.quickFixProcessor1">
+      </quickFixProcessor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            allowMultiple="false"
+            category="org.cauldron.sigil.ui.views"
+            class="org.cauldron.sigil.ui.views.resolution.BundleResolverView"
+            icon="icons/jar_web_obj.png"
+            id="org.cauldron.sigil.ui.bundleDependencyView"
+            name="Bundle Dependency View"
+            restorable="true">
+      </view>
+      <view
+            allowMultiple="false"
+            category="org.cauldron.sigil.ui.views"
+            class="org.cauldron.sigil.ui.views.RepositoryViewPart"
+            icon="icons/jars_obj.png"
+            id="org.cauldron.sigil.ui.repositoryBrowser"
+            name="Repository Browser"
+            restorable="true">
+      </view>
+      <category
+            id="org.cauldron.sigil.ui.views"
+            name="Sigil">
+      </category>
+   </extension>
+   <extension
+         point="org.cauldron.sigil.ui.repositorywizard">
+      <wizard
+            class="org.cauldron.sigil.ui.internal.repository.FileSystemRepositoryWizard"
+            repository="org.cauldron.sigil.core.file">
+      </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            id="org.cauldron.sigil.ui.commands.renameComposite"
+            name="Rename Composite">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ltk.core.refactoring.refactoringContributions">
+      <contribution
+            class="org.cauldron.sigil.ui.refactor.RenameCompositeRefactoring"
+            id="org.cauldron.sigil.ui.rename.composite">
+      </contribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            class="org.cauldron.sigil.ui.preferences.project.ProjectPropertyPage"
+            id="org.cauldron.sigil.ui.projectpage"
+            name="Repositories">
+         <filter
+               name="projectNature"
+               value="org.cauldron.sigil.core.newtonnature"/>
+         <enabledWhen>
+            <adapt
+                  type="org.eclipse.core.resources.IProject">
+            </adapt>
+         </enabledWhen>
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="popup:org.eclipse.ui.popup.any">
+         <menu
+               icon="etc/images/newton.png"
+               label="Sigil">
+            <command
+                  commandId="org.cauldron.sigil.ui.convertproject"
+                  label="Convert Project"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="true">
+               </visibleWhen>
+            </command>
+         </menu>
+         <separator
+               name="org.cauldron.sigil.ui.separator"
+               visible="true">
+         </separator>
+         <command
+               commandId="org.cauldron.sigil.ui.refreshclasspath"
+               icon="icons/refreshBundle.png"
+               label="Refresh bundle classpath"
+               style="push">
+               <visibleWhen
+                     checkEnabled="true">
+               </visibleWhen>
+            </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            id="org.cauldron.sigil.ui.convertproject"
+            name="%commandConvertProject">
+      </command>
+      <command
+            id="org.cauldron.sigil.ui.refreshclasspath"
+            name="%commandRefreshClasspath">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="org.cauldron.sigil.ui.convertproject"
+            icon="etc/images/newton.png">
+      </image>
+      <image
+            commandId="org.cauldron.sigil.ui.refreshclasspath"
+            icon="etc/images/newton.png">
+      </image>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.cauldron.sigil.handlers.project.ConvertProjectHandler"
+            commandId="org.cauldron.sigil.ui.convertproject">
+         <activeWhen>
+            <with
+                  variable="selection">
+               <iterate
+                     ifEmpty="false"
+                     operator="and">
+					<instanceof
+	                           value="org.eclipse.core.resources.IProject">
+	                </instanceof>
+		            <test
+						property="org.cauldron.sigil.isSigilProject"
+						value="false">
+					</test>
+               </iterate>
+            </with>
+         </activeWhen>
+      </handler>      
+      <handler
+            class="org.cauldron.sigil.handlers.project.RefreshSigilClasspathHandler"
+            commandId="org.cauldron.sigil.ui.refreshclasspath">
+         <activeWhen>
+            <with
+                  variable="selection">
+               <iterate
+                     ifEmpty="false"
+                     operator="and">
+					<instanceof
+	                           value="org.eclipse.core.resources.IProject">
+	                </instanceof>
+		            <test
+						property="org.cauldron.sigil.isSigilProject"
+						value="true">
+					</test>
+               </iterate>
+            </with>
+         </activeWhen>
+      </handler>      
+   </extension>   
+</plugin>

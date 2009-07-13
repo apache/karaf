@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Obr Plug-in
+Bundle-SymbolicName: org.cauldron.bld.obr
+Bundle-Version: 0.8.0.qualifier
+Bundle-Vendor: Paremus Ltd
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Require-Bundle: org.cauldron.bld.core;bundle-version="0.6.0",
+ org.eclipse.equinox.common;bundle-version="3.4.0"
+Import-Package: org.osgi.framework;version="1.4.0"
+Export-Package: org.cauldron.bld.obr

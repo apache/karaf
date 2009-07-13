@@ -1,0 +1,34 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Ui Plug-in
+Bundle-SymbolicName: org.cauldron.sigil.ui;singleton:=true
+Bundle-Version: 0.8.0.qualifier
+Bundle-Activator: org.cauldron.sigil.ui.SigilUI
+Bundle-Vendor: Paremus Ltd
+Require-Bundle: org.cauldron.sigil.core,
+ org.cauldron.bld.core,
+ org.cauldron.sigil.utils,
+ org.cauldron.sigil.search,
+ org.eclipse.core.runtime,
+ org.eclipse.debug.ui,
+ org.eclipse.jdt.core,
+ org.eclipse.jdt.ui,
+ org.eclipse.jface.text,
+ org.eclipse.pde.ui,
+ org.eclipse.ui,
+ org.eclipse.ui.editors,
+ org.eclipse.ui.forms,
+ org.eclipse.ui.ide,
+ org.eclipse.help,
+ org.eclipse.zest.core;bundle-version="[1,2)",
+ org.eclipse.zest.layouts;bundle-version="[1,2)",
+ org.eclipse.ltk.core.refactoring
+Eclipse-LazyStart: true
+Export-Package: org.cauldron.sigil.actions,
+ org.cauldron.sigil.handlers,
+ org.cauldron.sigil.ui,
+ org.cauldron.sigil.ui.util,
+ org.cauldron.sigil.ui.wizard.project,
+ org.cauldron.sigil.ui.wizard.repository
+Bundle-Localization: plugin
+

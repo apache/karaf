@@ -1,0 +1,466 @@
+<?xml version="1.0"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+  
+    http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+-->
+<project name="common" 
+         xmlns:ivy="antlib:org.apache.ivy.ant">
+    
+    <dirname property="common.dir" file="${ant.file.common}"/>
+    <property file="${common.dir}/sigil-defaults.properties" prefix="default."/>
+    <property file="${common.dir}/build.properties"/>
+
+    <!-- =====================================================
+         stuff intended to be over-ridden is prefixed with my.
+         =====================================================-->
+
+    <fileset id="my.projects" dir="${basedir}">
+      <include name="**/${build_xml}"/>
+    </fileset>
+
+    <path id="my.classpath">
+        <fileset dir="${basedir}" includes="lib/*.jar"/>
+    </path>
+
+    <path id="javac.classpath">
+	<path refid="my.classpath"/>
+        <fileset dir="${deps.dir}" />
+    </path>
+
+    <path id="sigil.classpath">
+        <path refid="javac.classpath" />
+        <path location="${classes.dir}" />
+    </path>
+
+    <!-- ================================= 
+          target: load-ivy
+         ================================= -->
+    <target name="load-ivy" depends="ident,ivy-taskdefs">
+	<ivy:settings file="${common.dir}/ivysettings.xml" />
+    </target>
+
+    <!-- ================================= 
+          target: ivy-taskdefs
+         ================================= -->
+    <target name="ivy-taskdefs" unless="ivy.loaded">
+    	<property name="ivy.loaded" value="true"/>
+		<echo message="Loading Ivy ... common.dir=${common.dir}"/>
+	
+	    	<taskdef resource="org/apache/ivy/ant/antlib.xml"
+	    	         uri="antlib:org.apache.ivy.ant"
+			 classpath="${ivy.jar}:${sigil-ivy-plugin.jar}"/>
+	
+		<taskdef name="sigil.bundle"
+			 classname="org.cauldron.bld.ant.BundleTask"
+			 classpath="${sigil-ivy-plugin.jar}"/>
+    	
+    	<taskdef name="sigil.bundle.info"
+    		 classname="org.cauldron.bld.ant.BundleInfoTask"
+    		 classpath="${sigil-ivy-plugin.jar}"/>
+    </target>    
+	
+
+    <!-- ================================= 
+          target: build (default target)
+         ================================= -->
+    <target name="build" depends="publish-local, composites" />
+
+    <target name="ident">
+      <echo message="${ant.project.name}"/>
+    </target>
+
+    <!-- ================================= 
+          target: resolve              
+         ================================= -->
+    <target name="resolve" depends="load-ivy"
+    	description="--> resolve and retrieve dependencies with ivy">
+	<mkdir dir="${deps.dir}"/>
+    	<ivy:resolve file="${ivy.file}" log="${resolve.log}"/>
+    	<ivy:retrieve pattern="${deps.dir}/[artifact].[ext]"
+		symlink="true" sync="true"/>
+    	<!-- sync=true removes empty deps dir, so re-create it -->
+	<mkdir dir="${deps.dir}"/>
+    </target>
+
+    <!-- ================================= 
+          target: publish-local
+         ================================= -->
+
+    <target name="publish-check" unless="bundle.modified">
+      <ivy:info file="${ivy.file}"/>
+      <condition property="bundle.modified">
+	<not>
+	  <available file="${repository.dir}/local/${ivy.module}" type="dir"/>
+	</not>
+      </condition>
+    </target>
+
+    <target name="publish-local" depends="bundle, publish-check" if="bundle.modified"
+    	description="--> publish project in the local repository">
+
+	<tstamp>
+	    <format property="now" pattern="yyyyMMddHHmmss"/>
+	</tstamp>
+        <property name="local-version" value="${now}"/>
+
+	<antcall target="clean-local"/>
+    	<ivy:publish artifactspattern="${build.lib.dir}/[artifact].[ext]" 
+		       resolver="local"
+		       pubrevision="${local-version}" 
+		       pubdate="${now}"
+		       forcedeliver="true"
+		       status="integration"/>
+        <echo message="project ${ant.project.name} published locally with version ${local-version}" />
+    </target>
+
+    <!-- ================================= 
+          target: report              
+         ================================= -->
+    <target name="report" depends="resolve"
+    	description="--> generates a report of dependencies">
+        <ivy:report todir="${build.dir}"/>
+    </target>
+    
+    <!-- ================================= 
+          target: compile              
+         ================================= -->
+    <target name="compile" depends="resolve"
+    	description="--> compile the project">
+        <!-- uncomment the following to debug classpath -->
+        <!--pathconvert property="cp" refid="javac.classpath"/>
+        <echo>Classpath - ${cp}</echo-->
+        <mkdir dir="${classes.dir}" />
+        <javac srcdir="${src.dir}"
+		destdir="${classes.dir}"
+		classpathref="javac.classpath"
+		target="1.5"
+		debug="true" />
+    </target>
+    
+    <!-- ================================= 
+          target: bundle
+         ================================= -->
+    <target name="bundle" depends="compile"
+    	description="--> build OSGi bundle(s) for this project">
+	<mkdir dir="${build.lib.dir}"/>
+        <sigil.bundle
+                classpathref="sigil.classpath"
+		destpattern="${build.lib.dir}/[name].[ext]"
+		force="${bundle.force}"
+		property="bundle.modified" />
+    </target>
+
+    <!-- ================================= 
+          target: composites              
+         ================================= -->
+    <available file="${composite.dir}" type="dir"
+               property="composite.dir.present"/>
+
+    <target name="composites" if="composite.dir.present"
+    	description="--> filter xml composites replacing ${VERSION} etc.">
+	<mkdir dir="${build.etc.dir}"/>
+	<copy todir="${build.etc.dir}">
+	  <fileset dir="${composite.dir}">
+	    <exclude name="*-template.composite"/>
+	    <include name="*.composite"/>
+	    <include name="*.system"/>
+	  </fileset>
+	  <filterset begintoken="@" endtoken="@">
+	    <filter token="VERSION" value="${bundle.version}"/>
+	    <filter token="COMMUNITY_VERSION" value="${community.version}"/>
+	    <filter token="JINI_VERSION" value="${jini.version}"/>
+	    <filter token="PAREMUS_VERSION" value="${paremus.version}"/>
+	  </filterset>
+	</copy>
+    </target>
+
+    <!-- ================================= 
+          target: install              
+	  install-bin, install-etc deprecated in favour of single
+	  assemble/bin, assemble/etc dirs
+         ================================= -->
+    <target name="install"
+    	 depends="install-lib, install-composites"/>
+
+    <available file="bin" type="dir"
+               property="bin.dir.present"/>
+    <available file="etc" type="dir"
+               property="etc.dir.present"/>
+
+    <target name="install-bin" if="bin.dir.present">
+	<mkdir dir="${install.dir}/bin"/>
+	<copy todir="${install.dir}/bin">
+	  <fileset dir="bin" />
+	</copy>
+	<chmod dir="${install.dir}/bin" perm="755" excludes="*.bat"/>
+    </target>
+
+    <target name="install-etc" if="etc.dir.present">
+	<mkdir dir="${install.dir}/etc"/>
+	<copy todir="${install.dir}/etc">
+	  <fileset dir="etc" />
+	</copy>
+    </target>
+
+    <target name="composites-available">
+      <available file="${build.etc.dir}" type="dir"
+               property="build.etc.dir.present"/>
+    </target>
+
+    <target name="install-composites"
+	 depends="composites, composites-available"
+	      if="build.etc.dir.present">
+	<copy todir="${install.dir}/etc">
+	  <fileset dir="${build.etc.dir}" />
+	</copy>
+    </target>
+
+    <target name="libs-available">
+      <available file="${build.lib.dir}" type="dir"
+               property="build.lib.dir.present"/>
+    </target>
+
+    <target name="install-lib"
+	 depends="publish-local, libs-available"
+	      if="build.lib.dir.present">
+	<copy todir="${install.dir}/lib">
+	  <fileset dir="${build.lib.dir}" />
+	  <mapper type="glob" from="*.jar" to="*-${buildVersion}.jar"/>
+	</copy>
+    </target>
+
+    <!-- ================================= 
+	  target: clean-local              
+	 ================================= -->
+    <target name="clean-local" depends="load-ivy"
+    	description="--> cleans the local repository for the current module">
+       <ivy:info file="${ivy.file}"/>
+       <delete dir="${repository.dir}/local/${ivy.module}"/>
+    </target>
+
+    <!-- ================================= 
+	  target: clean-deps              
+	 ================================= -->
+    <target name="clean-deps"
+    	description="--> clean the project dependencies directory">
+	<delete includeemptydirs="true" dir="${deps.dir}"/>
+    </target>
+
+    <!-- ================================= 
+          target: clean-build              
+         ================================= -->
+    <target name="clean-build"
+    	description="--> clean the project built files">
+        <delete includeemptydirs="true" dir="${build.dir}"/>
+    </target>
+
+    <!-- ================================= 
+          target: clean              
+         ================================= -->
+    <target name="clean" depends="ident, clean-build, clean-deps"
+    	description="--> clean the project" />
+
+
+    <!-- ================================= 
+          target: buildlist
+         ================================= -->
+    <target name="buildlist" depends="load-ivy">
+      <ivy:buildlist reference="ordered-list"
+		  onMissingDescriptor="skip">
+	<fileset refid="my.projects"/>
+      </ivy:buildlist>
+    </target>
+
+    <!-- ================================= 
+          target: build-list
+         ================================= -->
+    <target name="build-list" depends="buildlist" 
+	  description="--> build all projects in the right order">
+      <property name="target" value="build"/>
+      <subant target="${target}" buildpathref="ordered-list">
+	<propertyset>
+	  <propertyref name="ivy.loaded" />
+	</propertyset>
+      </subant>
+    </target>
+
+    <!-- ================================= 
+          target: install-list
+         ================================= -->
+    <target name="install-list"
+	  description="--> install all projects">
+      <antcall target="build-list">
+        <param name="target" value="install"/>
+      </antcall>
+    </target>
+
+    <!-- ================================= 
+          target: ident-list
+         ================================= -->
+    <target name="ident-list"
+	  description="--> identify projects">
+      <antcall target="build-list">
+        <param name="target" value="ident"/>
+      </antcall>
+    </target>
+
+    <!-- ================================= 
+          target: clean-list
+         ================================= -->
+    <target name="clean-list"
+	  description="--> clean all projects">
+      <antcall target="build-list">
+        <param name="target" value="clean"/>
+      </antcall>
+    </target>
+
+    <!-- ================================= 
+          target: clean-all
+         ================================= -->
+    <target name="clean-all" depends="clean-list, clean" 
+    description="--> clean repository, cache, and all projects">
+      <delete dir="${repository.dir}"/>
+      <delete dir="${cache.dir}"/>
+      <delete dir="${install.dir}"/>
+      <delete dir="${dist.dir}"/>
+    </target>
+	
+    <target name="sigil.test" depends="ivy-taskdefs">
+        <mkdir dir="${dist.dir}/lib/sigil" />
+        <copy todir="${dist.dir}/lib/sigil" overwrite="true">
+                <fileset dir="${common.dir}/test/lib">
+                        <include name="*.jar" />
+                </fileset>
+        </copy>
+
+        <mkdir dir="${dist.dir}/etc/sigil/boot" />
+
+        <copy todir="${dist.dir}/etc/sigil/boot" overwrite="true">
+                <fileset dir="${common.dir}/test/etc/boot">
+                        <include name="*" />
+                </fileset>
+        </copy>
+
+    	<property name="install.script" value="${dist.dir}/etc/sigil/boot/2-install-tests" />
+        <delete file="${install.script}" />
+
+        <for param="project">
+            <fileset refid="my.projects" />
+            <sequential>
+                <antcall target="sigil.test.setup">
+					<param name="project" value="@{project}"/>
+                </antcall>
+            </sequential>
+        </for>
+
+        <for param="project">
+            <fileset refid="my.projects" />
+            <sequential>
+                <antcall target="sigil.test.install">
+					<param name="project" value="@{project}"/>
+                </antcall>
+            </sequential>
+        </for>
+    	
+        <delete dir="${dist.dir}/../test-results" />
+    	
+        <exec executable="sh" osfamily="unix">
+          <arg line="${dist.dir}/bin/container equinox -verbose=true" />
+          <arg line="-bootScript=etc/sigil/boot" />
+        </exec>
+    </target>	
+
+	<target name="sigil.test.setup">
+		<property name="dir" location="${project}/../" />
+		<path id="test.resources">
+	        <fileset dir="${dir}">
+	        	<include name="build/lib/*.jar" />
+	        	<exclude name="**/*-dl.jar" />
+	        </fileset>
+            <fileset dir="${dir}">
+            	<include name="build/deps/*.jar" />
+	        	<exclude name="**/*!*.jar" />
+            </fileset>
+		</path>
+        <for param="jar">
+        	<path refid="test.resources"/>
+            <sequential>
+            	<antcall target="sigil.test.load">
+                	<param name="jar" value="@{jar}" />
+            	</antcall>
+            </sequential>
+        </for>
+	</target>
+	
+	<target name="sigil.test.install">
+		<property name="dir" location="${project}/../" />
+		<path id="test.bundles">
+	        <fileset dir="${dir}">
+	        	<include name="build/lib/*test.jar" />
+            </fileset>
+		</path>
+        <for param="jar">
+        	<path refid="test.bundles"/>
+            <sequential>
+            	<antcall target="sigil.test.start">
+                	<param name="jar" value="@{jar}" />
+            	</antcall>
+            </sequential>
+        </for>
+	</target>
+	
+	<target name="sigil.test.load">
+		<sigil.bundle.info bundle="${jar}" header="Bundle-SymbolicName" property="test.bundle.symbolic.name"/>
+		<if>
+			<isset property="test.bundle.symbolic.name"/>
+			<then>
+		        <echo file="${install.script}" append="true">cds load boot ${test.bundle.symbolic.name}.jar ${jar}
+</echo>
+			</then>
+		</if>
+	</target>
+	
+	<target name="sigil.test.start">
+		<sigil.bundle.info bundle="${jar}" header="Bundle-SymbolicName" property="test.bundle.symbolic.name"/>
+		<if>
+			<isset property="test.bundle.symbolic.name"/>
+			<then>
+				<sigil.bundle.info bundle="${jar}" header="Bundle-Version" property="test.bundle.version" defaultvalue="0"/>
+				<sigil.bundle.info bundle="${jar}" header="Fragment-Host" property="test.bundle.fragment"/>
+				<if>
+					<isset property="test.bundle.fragment" />
+					<then>
+						<propertyregex property="test.bundle.fragment.name"
+						              input="${test.bundle.fragment}"
+						              regexp="([^;]*).*"
+									  select="\1"
+						              casesensitive="false" />
+
+		        		<echo file="${install.script}" append="true">nim policy -a osgi.installed.bundle/${test.bundle.fragment.name} osgi.fragment.bundle/${test.bundle.symbolic.name}:${test.bundle.version}
+</echo>
+		        		<echo file="${install.script}" append="true">nim add ${test.bundle.symbolic.name}:${test.bundle.version}@fragment
+</echo>
+					</then>
+					<else>
+		        		<echo file="${install.script}" append="true">nim add ${test.bundle.symbolic.name}:${test.bundle.version}@installed
+</echo>
+					</else>
+				</if>
+			</then>
+		</if>
+	</target>
+</project>

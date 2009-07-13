@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+  
+    http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+-->
+<project xmlns:ivy="antlib:org.apache.ivy.ant" name="bld-ivy" default="jar">
+
+    <!-- buildVersion is overridden by Hudson -->
+    <property name="buildVersion" value="0.8.0-dev" />
+    <property name="version" value="${buildVersion}" />
+
+    <property name="name" value="sigil-ivy-plugin" />
+    <property name="name.jar" value="${name}.jar" />
+    <property name="name-version.jar" value="${name}-${version}.jar" />
+
+    <property name="lib.dir" value="${basedir}/lib" />
+    <property name="target.dir" value="${basedir}/target" />
+    <property name="classes.dir" value="${basedir}/target/classes" />
+
+    <property name="java-src.dir" value="${basedir}/src" />
+
+    <property name="sigil-plugins.dir" location="../sigil-builder/target/tmp/eclipse/plugins" />
+    <property name="bnd-plugins.dir" location="../org.cauldron.bld.core/lib" />
+
+    <target name="init" depends="find-plugins">
+
+      <path id="run.classpath">
+        <pathelement location="${classes.dir}" />
+        <pathelement location="${bld-core.jar}" />
+        <pathelement location="${bld-obr.jar}" />
+        <pathelement location="${equinox-common.jar}" />
+        <pathelement location="${osgi-core.jar}" />
+      </path>
+
+      <path id="compile.classpath">
+	<path refid="run.classpath"/>
+        <fileset dir="${lib.dir}/compile">
+            <include name="*.jar" />
+        </fileset>
+      </path>
+
+    </target>
+
+    <target name="mkdirs">
+        <mkdir dir="${target.dir}" />
+        <mkdir dir="${classes.dir}" />
+    </target>
+
+    <target name="find-plugins" depends="mkdirs">
+      <property name="osgi-core.jar" value="${lib.dir}/runtime/osgi.core.jar"/>
+      <property name="equinox-common.jar" value="${lib.dir}/runtime/equinox.common.jar"/>
+
+      <fileset id="bld-core" dir="${sigil-plugins.dir}"
+	includes="org.cauldron.bld.core_*.jar" />
+      <property name="bld-core" refid="bld-core"/>
+      <property name="bld-core.jar" location="${sigil-plugins.dir}/${bld-core}"/>
+
+      <fileset id="bld-obr" dir="${sigil-plugins.dir}"
+	includes="org.cauldron.bld.obr*.jar" />
+      <property name="bld-obr" refid="bld-obr"/>
+      <property name="bld-obr.jar" location="${sigil-plugins.dir}/${bld-obr}"/>
+    </target>
+
+    <target name="clean">
+        <delete dir="${target.dir}" />
+    </target>
+    
+    <target name="compile" depends="init">
+        <javac debug="true" debuglevel="source,lines,vars" source="1.5" target="1.5" fork="true" destdir="${classes.dir}" srcdir="${java-src.dir}">
+            <classpath refid="compile.classpath" />
+        </javac>
+    </target>
+    
+    <target name="dist" depends="jar">
+	<zip destfile="${target.dir}/sigil-${version}.zip">
+	  <zipfileset dir="example" prefix="sigil-${version}/example"
+	  	excludes="**/build/**, **/lib/**, **/ivy-cache/**, **/repository/**"/>
+	  <zipfileset dir="target" prefix="sigil-${version}/lib"
+		includes="${name.jar}, bndlib.jar"/>
+	</zip>
+    
+    	<copy file="${target.dir}/${name.jar}" tofile="${target.dir}/${name-version.jar}"/>
+    </target>
+
+    <target name="jar" depends="compile, taskdefs">
+       <bnd 
+	  classpath="${toString:run.classpath}" 
+	  files="sigil-ivy-plugin.bnd" 
+	  output="${target.dir}/${name.jar}"
+	  eclipse="false" 
+	  failok="false" 
+	  exceptions="true" />
+
+      <copy todir="${target.dir}">
+        <fileset dir="${bnd-plugins.dir}" includes="bndlib.jar"/>
+      </copy>
+    </target>
+
+    <target name="taskdefs"> 
+      <taskdef resource="aQute/bnd/ant/taskdef.properties"
+	classpath="${lib.dir}/ant/bnd-0.0.312.jar"/> 
+    </target>
+
+</project>

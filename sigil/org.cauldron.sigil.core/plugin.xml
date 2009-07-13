@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+  
+    http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+-->
+<?eclipse version="3.2"?>
+<plugin>
+   <extension-point id="org.cauldron.sigil.repositoryprovider" name="Bundle Repository Provider" schema="schema/org.cauldron.sigil.repositoryprovider.exsd"/>
+   <extension-point id="org.cauldron.sigil.installbuilder" name="Newton Install Builder" schema="schema/org.cauldron.sigil.runtime.installbuilder.exsd"/>
+   
+   <extension
+         point="org.eclipse.core.contenttype.contentTypes">
+      <content-type
+            base-type="org.eclipse.core.runtime.text"
+            file-extensions="script,nsh"
+            id="org.cauldron.sigil.content.NewtonScriptType"
+            name="Newton Script"
+            priority="normal">
+      </content-type>
+
+   </extension>
+   <extension
+         point="org.eclipse.core.expressions.propertyTesters">
+      <propertyTester
+            class="org.cauldron.sigil.property.SigilPropertyTester"
+            id="org.cauldron.sigil.property.NewtonPropertyTester"
+            namespace="org.cauldron.sigil"
+            properties="isNewtonResource,isCompositeResource,isSystemResource,isScriptResource,isSigilProject"
+            type="org.eclipse.core.resources.IResource"/>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="org.eclipse.core.resources.IFile"
+            class="org.cauldron.sigil.internal.adapter.FileAdaptorFactory">
+         <adapter type="org.cauldron.sigil.model.eclipse.ISigilBundle"/>
+      </factory>
+      <factory
+            adaptableType="org.eclipse.core.resources.IProject"
+            class="org.cauldron.sigil.internal.adapter.ProjectAdaptorFactory">
+         <adapter type="org.cauldron.sigil.model.project.ISigilProjectModel"/>
+      </factory>
+   </extension>
+   <extension
+         id="org.cauldron.sigil.core.sigilnature"
+         name="Sigil Nature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run class="org.cauldron.sigil.nature.SigilProjectNature"/>
+      </runtime>
+   </extension>
+   <extension
+   		 id="sigilBuilder"
+         name="Sigil Bundle Builder"
+         point="org.eclipse.core.resources.builders">
+      <builder
+            hasNature="false"
+            isConfigurable="false">
+         <run class="org.cauldron.sigil.internal.builders.SigilIncrementalProjectBuilder"/>
+      </builder>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="org.cauldron.sigil.preferences.SigilPreferencesInitializer">
+      </initializer>
+   </extension>
+   <extension
+         point="org.cauldron.sigil.repositoryprovider">
+      <provider
+            class="org.cauldron.sigil.internal.repository.eclipse.WorkspaceRepositoryProvider"
+            defaultLevel="-3"
+            dynamic="false"
+            id="org.cauldron.sigil.core.workspaceprovider"
+            type="Workspace Repository">
+      </provider>
+      <provider
+            class="org.cauldron.bld.core.repository.FileSystemRepositoryProvider"
+            dynamic="true"
+            id="org.cauldron.sigil.core.file"
+            type="File System Repository">
+      </provider>
+   </extension>
+   <extension
+         id="org.cauldron.sigil.unresolvedDependencyMarker"
+         name="Unresolved Dependency"
+         point="org.eclipse.core.resources.markers">
+      <persistent
+            value="true">
+      </persistent>
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+      <attribute
+            name="element">
+      </attribute>
+      <attribute
+            name="versionRange">
+      </attribute>
+   </extension>
+   <extension
+         id="org.cauldron.sigil.unresolvedDependencyMarker.importPackage"
+         name="Unresolved Import Package"
+         point="org.eclipse.core.resources.markers">
+      <persistent
+            value="true">
+      </persistent>
+      <super
+            type="org.cauldron.sigil.unresolvedDependencyMarker">
+      </super>
+   </extension>
+   <extension
+         id="org.cauldron.sigil.unresolvedDependencyMarker.requireBundle"
+         name="Unresolve Require Bundle"
+         point="org.eclipse.core.resources.markers">
+      <persistent
+            value="true">
+      </persistent>
+      <super
+            type="org.cauldron.sigil.unresolvedDependencyMarker">
+      </super>
+   </extension>
+</plugin>

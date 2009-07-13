@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+  
+    http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+-->
+<ivysettings>
+  <properties file="${ivy.settings.dir}/build.properties"/>
+  <caches defaultCacheDir="${cache.dir}" />
+
+  <settings defaultResolver="local" circularDependencyStrategy="error" />
+
+  <!--
+  <classpath file="${sigil-ivy-plugin.jar}" />
+  Ant tasks "subant" and "ant" cause IvySettings to be re-loaded, 
+  which then re-loads SigilParser in a new URLClassLoader,
+  which causes ProjectRepository to be re-initialised. Outch!
+  Loading sigil-ivy-plugin.jar in load-ivy task, uses the same ClassLoader
+  and thus avoids re-initialising ProjectRepositiory.
+  Search for Derek Baum in the October 2008 ant-dev archives for my attempt
+  at getting the Ivy communiuty to fix this.
+  http://mail-archives.apache.org/mod_mbox/ant-dev/200810.mbox/browser
+  -->
+  <typedef name="sigil-parser" classname="org.cauldron.bld.ivy.SigilParser" />
+  <typedef name="sigil" classname="org.cauldron.bld.ivy.SigilResolver" />
+
+  <parsers>
+    <sigil-parser config="${ivy.settings.dir}/sigil-repos.properties"
+    		quiet="true"/>
+  </parsers>
+
+  <resolvers>
+    <sigil name="sigil"
+	   config="${ivy.settings.dir}/sigil-repos.properties"
+	   extractBCP="true"/>
+
+    <filesystem name="local">
+      <ivy pattern="${repository.dir}/local/${repository.pattern}" />
+      <artifact pattern="${repository.dir}/local/${repository.pattern}" />
+    </filesystem>
+
+    <filesystem name="shared">
+      <ivy pattern="${repository.dir}/shared/${repository.pattern}" />
+      <artifact pattern="${repository.dir}/shared/${repository.pattern}" />
+    </filesystem>
+  </resolvers>
+
+  <modules>
+    <module organisation="sigil" resolver="sigil"/>
+  </modules>
+</ivysettings>
