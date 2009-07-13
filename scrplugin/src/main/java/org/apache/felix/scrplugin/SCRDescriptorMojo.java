@@ -485,6 +485,10 @@ public class SCRDescriptorMojo extends AbstractMojo {
             component.setSpecVersion(Constants.VERSION_1_1);
             component.setDeactivate(tag.getNamedParameter(Constants.COMPONENT_DEACTIVATE));
         }
+        if ( tag.getNamedParameter(Constants.COMPONENT_MODIFIED) != null ) {
+            component.setSpecVersion(Constants.VERSION_1_1);
+            component.setModified(tag.getNamedParameter(Constants.COMPONENT_MODIFIED));
+        }
 
         // whether metatype information is to generated for the component
         final String metaType = tag.getNamedParameter(Constants.COMPONENT_METATYPE);

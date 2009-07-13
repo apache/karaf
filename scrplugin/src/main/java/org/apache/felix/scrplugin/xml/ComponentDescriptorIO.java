@@ -75,11 +75,14 @@ public class ComponentDescriptorIO {
     /** Component: The name attribute. */
     private static final String COMPONENT_ATTR_NAME = "name";
 
-    /** Component: The immediate attribute. */
+    /** Component: The activate attribute. */
     private static final String COMPONENT_ATTR_ACTIVATE = "activate";
 
-    /** Component: The immediate attribute. */
+    /** Component: The deactivate attribute. */
     private static final String COMPONENT_ATTR_DEACTIVATE = "deactivate";
+
+    /** Component: The modified attribute. */
+    private static final String COMPONENT_ATTR_MODIFIED = "modified";
 
     private static final String IMPLEMENTATION = "implementation";
 
@@ -190,6 +193,7 @@ public class ComponentDescriptorIO {
             IOUtils.addAttribute(ai, COMPONENT_ATTR_POLICY, component.getConfigurationPolicy());
             IOUtils.addAttribute(ai, COMPONENT_ATTR_ACTIVATE, component.getActivate());
             IOUtils.addAttribute(ai, COMPONENT_ATTR_DEACTIVATE, component.getDeactivate());
+            IOUtils.addAttribute(ai, COMPONENT_ATTR_MODIFIED, component.getModified());
         }
 
         IOUtils.indent(contentHandler, 1);
@@ -415,6 +419,7 @@ public class ComponentDescriptorIO {
                         this.currentComponent.setConfigurationPolicy(attributes.getValue(COMPONENT_ATTR_POLICY));
                         this.currentComponent.setActivate(attributes.getValue(COMPONENT_ATTR_ACTIVATE));
                         this.currentComponent.setDeactivate(attributes.getValue(COMPONENT_ATTR_DEACTIVATE));
+                        this.currentComponent.setModified(attributes.getValue(COMPONENT_ATTR_MODIFIED));
                     }
                 } else if (localName.equals(IMPLEMENTATION)) {
                     // Set the implementation class name (mandatory)

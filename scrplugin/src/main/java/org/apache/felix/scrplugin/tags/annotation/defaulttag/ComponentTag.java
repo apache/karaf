@@ -139,6 +139,9 @@ public class ComponentTag extends AbstractTag {
                 if ( a.getType().getJavaClass().getFullyQualifiedName().equals(Deactivate.class.getName()) ) {
                     map.put(Constants.COMPONENT_DEACTIVATE, jm.getName());
                 }
+                if ( a.getType().getJavaClass().getFullyQualifiedName().equals(Modified.class.getName()) ) {
+                    map.put(Constants.COMPONENT_MODIFIED, jm.getName());
+                }
             }
         }
 

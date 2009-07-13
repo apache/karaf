@@ -72,6 +72,9 @@ public class Component extends AbstractObject {
     /** Deactivation method. (V1.1) */
     protected String deactivate;
 
+    /** Modified method. (V1.1) */
+    protected String modified;
+
     /** The spec version. */
     protected int specVersion;
 
@@ -231,6 +234,21 @@ public class Component extends AbstractObject {
     public void setActivate(final String value) {
         this.activate = value;
     }
+
+    /**
+     * Set the name of the modified method (or null for default)
+     */
+    public void setModified(final String value) {
+        this.modified = value;
+    }
+
+    /**
+     * Get the name of the modified method (or null for default)
+     */
+    public String getModified() {
+        return this.modified;
+    }
+
     /**
      * Validate the component description.
      * If errors occur a message is added to the issues list,
@@ -269,6 +287,9 @@ public class Component extends AbstractObject {
                     this.checkLifecycleMethod(specVersion, javaClass, activateName, true, iLog);
                     this.checkLifecycleMethod(specVersion, javaClass, deactivateName, false, iLog);
 
+                    if ( this.modified != null && specVersion == Constants.VERSION_1_1 ) {
+                        this.checkLifecycleMethod(specVersion, javaClass, this.modified, true, iLog);
+                    }
                     // ensure public default constructor
                     boolean constructorFound = true;
                     JavaMethod[] methods = javaClass.getMethods();

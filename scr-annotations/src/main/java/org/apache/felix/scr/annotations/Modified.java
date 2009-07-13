@@ -21,8 +21,8 @@ package org.apache.felix.scr.annotations;
 import java.lang.annotation.*;
 
 /**
- * The <code>Activate</code> annotation defines the method which is used
- * to activate the component.
+ * The <code>Modified</code> annotation defines the method which is used
+ * to update the component.
  * Please note that this annotation only marks the method name which is
  * put into the configuration. The DS implementation will still use its
  * search strategy to find the method based on the name.
@@ -30,6 +30,6 @@ import java.lang.annotation.*;
 @Target( { ElementType.METHOD })
 @Retention(RetentionPolicy.SOURCE)
 @Documented
-public @interface Activate {
+public @interface Modified {
 
 }

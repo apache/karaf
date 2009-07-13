@@ -68,6 +68,9 @@ public class Constants {
     // The component activate method name (V1.1)
     public static final String COMPONENT_DEACTIVATE = "deactivate";
 
+    // The component modified method name (V1.1)
+    public static final String COMPONENT_MODIFIED = "modified";
+
     public static final String PROPERTY = "scr.property";
 
     public static final String PROPERTY_NAME = "name";

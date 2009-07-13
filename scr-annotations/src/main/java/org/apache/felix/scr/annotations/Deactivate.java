@@ -25,7 +25,7 @@ import java.lang.annotation.*;
  * to deactivate the component.
  * Please note that this annotation only marks the method name which is
  * put into the configuration. The DS implementation will still use its
- * search strategy to find the method.
+ * search strategy to find the method based on the name.
  */
 @Target( { ElementType.METHOD })
 @Retention(RetentionPolicy.SOURCE)
