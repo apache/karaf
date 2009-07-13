@@ -36,6 +36,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -975,7 +976,7 @@ public class BundlePlugin extends AbstractMojo
     {
         final String basePath = project.getBasedir().getAbsolutePath();
 
-        StringBuffer resourcePaths = new StringBuffer();
+        Set pathSet = new LinkedHashSet();
         for ( Iterator i = project.getResources().iterator(); i.hasNext(); )
         {
             org.apache.maven.model.Resource resource = ( org.apache.maven.model.Resource ) i.next();
@@ -1041,22 +1042,24 @@ public class BundlePlugin extends AbstractMojo
                         path = targetPath + '/' + path;
                     }
 
-                    if ( resourcePaths.length() > 0 )
-                    {
-                        resourcePaths.append( ',' );
-                    }
-
+                    // use Bnd filtering?
                     if ( resource.isFiltering() )
                     {
-                        resourcePaths.append( '{' );
-                        resourcePaths.append( path );
-                        resourcePaths.append( '}' );
+                        path = '{' + path + '}';
                     }
-                    else
-                    {
-                        resourcePaths.append( path );
-                    }
+
+                    pathSet.add( path );
                 }
+            }
+        }
+
+        StringBuffer resourcePaths = new StringBuffer();
+        for ( Iterator i = pathSet.iterator() ; i.hasNext(); )
+        {
+            resourcePaths.append( i.next() );
+            if ( i.hasNext() )
+            {
+                resourcePaths.append( ',' );
             }
         }
 
