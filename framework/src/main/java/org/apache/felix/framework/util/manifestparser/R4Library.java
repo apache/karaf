@@ -125,37 +125,42 @@ public class R4Library
         {
             StringBuffer sb = new StringBuffer();
             sb.append(m_libraryFile);
-            sb.append(';');
             for (int i = 0; (m_osnames != null) && (i < m_osnames.length); i++)
             {
+                sb.append(';');
                 sb.append(Constants.BUNDLE_NATIVECODE_OSNAME);
                 sb.append('=');
                 sb.append(m_osnames[i]);
-                sb.append(';');
             }
             for (int i = 0; (m_processors != null) && (i < m_processors.length); i++)
             {
-                sb.append(Constants.BUNDLE_NATIVECODE_PROCESSOR);
-                sb.append(m_processors[i]);
                 sb.append(';');
+                sb.append(Constants.BUNDLE_NATIVECODE_PROCESSOR);
+                sb.append('=');
+                sb.append(m_processors[i]);
             }
             for (int i = 0; (m_osversions != null) && (i < m_osversions.length); i++)
             {
-                sb.append(Constants.BUNDLE_NATIVECODE_OSVERSION);
-                sb.append(m_osversions[i]);
                 sb.append(';');
+                sb.append(Constants.BUNDLE_NATIVECODE_OSVERSION);
+                sb.append('=');
+                sb.append(m_osversions[i]);
             }
             for (int i = 0; (m_languages != null) && (i < m_languages.length); i++)
             {
-                sb.append(Constants.BUNDLE_NATIVECODE_LANGUAGE);
-                sb.append(m_languages[i]);
                 sb.append(';');
+                sb.append(Constants.BUNDLE_NATIVECODE_LANGUAGE);
+                sb.append('=');
+                sb.append(m_languages[i]);
             }
-            sb.append(Constants.SELECTION_FILTER_ATTRIBUTE);
-            sb.append('=');
-            sb.append('\'');
-            sb.append(m_selectionFilter);
-            sb.append('\'');
+            if (m_selectionFilter != null)
+            {
+                sb.append(';');
+                sb.append(Constants.SELECTION_FILTER_ATTRIBUTE);
+                sb.append('=');
+                sb.append('\'');
+                sb.append(m_selectionFilter);
+            }
 
             return sb.toString();
         }

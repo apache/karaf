@@ -121,7 +121,6 @@ public class ManifestParser
             (String) headerMap.get(Constants.FRAGMENT_HOST));
         if (clauses.length > 0)
         {
-            validateFragment(headerMap);
             try
             {
                 reqList.add(
@@ -269,38 +268,6 @@ public class ManifestParser
         else
         {
             checkAndNormalizeR3();
-        }
-    }
-
-    /**
-     * Checks whether a fragment uses features that we do not currently support
-     * (e.g., Import-Package, Export-Package, and Bundle-NativeCode). If so, we
-     * throw an exception.
-     * @param headerMap the header to validate.
-    **/
-    private void validateFragment(Map headerMap) throws BundleException
-    {
-        // TODO: FRAGMENTS - We should delete this method and the related
-        //       fragment constants in FelixConstants when fragments are
-        //       fully implemented.
-        String fragmentHost = (String) headerMap.get(Constants.FRAGMENT_HOST);
-        if ((fragmentHost != null) && (parseExtensionBundleHeader(fragmentHost) == null))
-        {
-            if (headerMap.get(Constants.BUNDLE_NATIVECODE) != null)
-            {
-                String s = (String) m_configMap.get(FelixConstants.FRAGMENT_VALIDATION_PROP);
-                s = (s == null) ? FelixConstants.FRAGMENT_VALIDATION_EXCEPTION_VALUE : s;
-                if (s.equalsIgnoreCase(FelixConstants.FRAGMENT_VALIDATION_WARNING_VALUE))
-                {
-                    m_logger.log(Logger.LOG_WARNING,
-                        "Fragments with native code are not currently supported.");
-                }
-                else
-                {
-                    throw new BundleException(
-                        "Fragments native code are not currently supported.");
-                }
-            }
         }
     }
 

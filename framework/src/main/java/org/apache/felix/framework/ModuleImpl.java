@@ -334,9 +334,23 @@ public class ModuleImpl implements IModule
         return (IRequirement[]) reqList.toArray(new IRequirement[reqList.size()]);
     }
 
-    public R4Library[] getNativeLibraries()
+    public synchronized R4Library[] getNativeLibraries()
     {
-        return m_nativeLibraries;
+        List nativeList = (m_nativeLibraries == null)
+            ? new ArrayList() : new ArrayList(Arrays.asList(m_nativeLibraries));
+        for (int fragIdx = 0;
+            (m_fragments != null) && (fragIdx < m_fragments.length);
+            fragIdx++)
+        {
+            R4Library[] libs = m_fragments[fragIdx].getNativeLibraries();
+            for (int reqIdx = 0;
+                (libs != null) && (reqIdx < libs.length);
+                reqIdx++)
+            {
+                nativeList.add(libs[reqIdx]);
+            }
+        }
+        return (R4Library[]) nativeList.toArray(new R4Library[nativeList.size()]);
     }
 
     public int getDeclaredActivationPolicy()
@@ -1567,7 +1581,7 @@ public class ModuleImpl implements IModule
     public class ModuleClassLoader extends SecureClassLoader implements BundleReference
     {
         private final Map m_jarContentToDexFile;
-        private Object[][] m_libs = new Object[0][];
+        private Object[][] m_cachedLibs = new Object[0][];
         private static final int LIBNAME_IDX = 0;
         private static final int LIBPATH_IDX = 1;
 
@@ -1892,11 +1906,11 @@ public class ModuleImpl implements IModule
             synchronized (this)
             {
                 // Check to make sure we haven't already found this library.
-                for (int i = 0; (result == null) && (i < m_libs.length); i++)
+                for (int i = 0; (result == null) && (i < m_cachedLibs.length); i++)
                 {
-                    if (m_libs[i][LIBNAME_IDX].equals(name))
+                    if (m_cachedLibs[i][LIBNAME_IDX].equals(name))
                     {
-                        result = (String) m_libs[i][LIBPATH_IDX];
+                        result = (String) m_cachedLibs[i][LIBPATH_IDX];
                     }
                 }
 
@@ -1905,21 +1919,32 @@ public class ModuleImpl implements IModule
                 if (result == null)
                 {
                     R4Library[] libs = getNativeLibraries();
-                    for (int i = 0; (libs != null) && (i < libs.length); i++)
+                    for (int libIdx = 0; (libs != null) && (libIdx < libs.length); libIdx++)
                     {
-                        if (libs[i].match(m_configMap, name))
+                        if (libs[libIdx].match(m_configMap, name))
                         {
-                            result = getContent().getEntryAsNativeLibrary(libs[i].getEntryName());
+                            // Search bundle content first for native library.
+                            result = getContent().getEntryAsNativeLibrary(
+                                libs[libIdx].getEntryName());
+                            // If not found, then search fragments in order.
+                            for (int i = 0;
+                                (result == null) && (m_fragmentContents != null)
+                                    && (i < m_fragmentContents.length);
+                                i++)
+                            {
+                                result = m_fragmentContents[i].getEntryAsNativeLibrary(
+                                    libs[libIdx].getEntryName());
+                            }
                         }
                     }
 
                     // Remember the result for future requests.
                     if (result != null)
                     {
-                        Object[][] tmp = new Object[m_libs.length + 1][];
-                        System.arraycopy(m_libs, 0, tmp, 0, m_libs.length);
-                        tmp[m_libs.length] = new Object[] { name, result };
-                        m_libs = tmp;
+                        Object[][] tmp = new Object[m_cachedLibs.length + 1][];
+                        System.arraycopy(m_cachedLibs, 0, tmp, 0, m_cachedLibs.length);
+                        tmp[m_cachedLibs.length] = new Object[] { name, result };
+                        m_cachedLibs = tmp;
                     }
                 }
             }
