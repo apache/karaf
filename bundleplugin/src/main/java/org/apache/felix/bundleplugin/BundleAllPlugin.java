@@ -24,9 +24,9 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -338,7 +338,7 @@ public class BundleAllPlugin extends ManifestPlugin
 
         try
         {
-            Map instructions = new HashMap();
+            Map instructions = new LinkedHashMap();
             instructions.put( Analyzer.IMPORT_PACKAGE, wrapImportPackage );
 
             project.getArtifact().setFile( getFile( artifact ) );

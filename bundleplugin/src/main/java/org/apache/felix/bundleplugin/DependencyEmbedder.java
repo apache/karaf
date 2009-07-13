@@ -21,8 +21,8 @@ package org.apache.felix.bundleplugin;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
@@ -67,8 +67,8 @@ public final class DependencyEmbedder extends AbstractDependencyFilter
     {
         super( dependencyArtifacts );
 
-        m_inlinedPaths = new HashSet();
-        m_embeddedArtifacts = new HashSet();
+        m_inlinedPaths = new LinkedHashSet();
+        m_embeddedArtifacts = new LinkedHashSet();
     }
 
 

@@ -30,9 +30,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -167,7 +167,7 @@ public class BundlePlugin extends AbstractMojo
      *
      * @parameter
      */
-    private Map instructions = new HashMap();
+    private Map instructions = new LinkedHashMap();
 
     /**
      * Use locally patched version for now.
@@ -245,7 +245,7 @@ public class BundlePlugin extends AbstractMojo
     /* transform directives from their XML form to the expected BND syntax (eg. _include becomes -include) */
     protected static Map transformDirectives( Map originalInstructions )
     {
-        Map transformedInstructions = new HashMap();
+        Map transformedInstructions = new LinkedHashMap();
         for ( Iterator i = originalInstructions.entrySet().iterator(); i.hasNext(); )
         {
             Map.Entry e = ( Map.Entry ) i.next();
@@ -638,7 +638,7 @@ public class BundlePlugin extends AbstractMojo
 
     private static Map getProperties( Model projectModel, String prefix )
     {
-        Map properties = new HashMap();
+        Map properties = new LinkedHashMap();
         Method methods[] = Model.class.getDeclaredMethods();
         for ( int i = 0; i < methods.length; i++ )
         {
@@ -759,7 +759,7 @@ public class BundlePlugin extends AbstractMojo
             return Collections.EMPTY_LIST;
         }
 
-        Collection selectedDependencies = new HashSet( artifacts );
+        Collection selectedDependencies = new LinkedHashSet( artifacts );
         DependencyExcluder excluder = new DependencyExcluder( artifacts );
         excluder.processHeaders( excludeDependencies );
         selectedDependencies.removeAll( excluder.getExcludedArtifacts() );
@@ -905,7 +905,7 @@ public class BundlePlugin extends AbstractMojo
 
     private static void addLocalPackages( String sourceDirectory, Analyzer analyzer )
     {
-        Collection packages = new HashSet();
+        Collection packages = new LinkedHashSet();
 
         if ( sourceDirectory != null && new File( sourceDirectory ).isDirectory() )
         {
