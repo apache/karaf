@@ -23,18 +23,21 @@ import java.io.*;
 import java.util.*;
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.FelixConstants;
+import org.apache.felix.framework.util.Util;
+import org.osgi.framework.Constants;
 
 public class DirectoryContent implements IContent
 {
     private static final int BUFSIZE = 4096;
     private static final transient String EMBEDDED_DIRECTORY = "-embedded";
-    private static final transient String LIBRARY_DIRECTORY = "lib";
+    private static final transient String LIBRARY_DIRECTORY = "-lib";
 
     private final Logger m_logger;
     private final Map m_configMap;
     private final Object m_revisionLock;
     private final File m_rootDir;
     private final File m_dir;
+    private int m_libCount = 0;
 
     public DirectoryContent(Logger logger, Map configMap, Object revisionLock,
         File rootDir, File dir)
@@ -155,15 +158,15 @@ public class DirectoryContent implements IContent
         else if (BundleCache.getSecureAction().fileExists(file)
             && entryName.endsWith(".jar"))
         {
-            File extractedDir = new File(embedDir,
+            File extractDir = new File(embedDir,
                 (entryName.lastIndexOf('/') >= 0)
                     ? entryName.substring(0, entryName.lastIndexOf('/'))
                     : entryName);
             synchronized (m_revisionLock)
             {
-                if (!BundleCache.getSecureAction().fileExists(extractedDir))
+                if (!BundleCache.getSecureAction().fileExists(extractDir))
                 {
-                    if (!BundleCache.getSecureAction().mkdirs(extractedDir))
+                    if (!BundleCache.getSecureAction().mkdirs(extractDir))
                     {
                         m_logger.log(
                             Logger.LOG_ERROR,
@@ -171,7 +174,7 @@ public class DirectoryContent implements IContent
                     }
                 }
             }
-            return new JarContent(m_logger, m_configMap, m_revisionLock, extractedDir, file);
+            return new JarContent(m_logger, m_configMap, m_revisionLock, extractDir, file);
         }
 
         // The entry could not be found, so return null.
@@ -179,9 +182,110 @@ public class DirectoryContent implements IContent
     }
 
 // TODO: This will need to consider security.
-    public synchronized String getEntryAsNativeLibrary(String name)
+    public synchronized String getEntryAsNativeLibrary(String entryName)
     {
-        return BundleCache.getSecureAction().getAbsolutePath(new File(m_rootDir, name));
+        // Return result.
+        String result = null;
+
+        // Remove any leading slash, since all bundle class path
+        // entries are relative to the root of the bundle.
+        entryName = (entryName.startsWith("/")) ? entryName.substring(1) : entryName;
+
+        // Any embedded native library files will be extracted to the lib directory.
+        File libDir = new File(m_rootDir, m_dir.getName() + LIBRARY_DIRECTORY);
+
+        // The entry must exist and refer to a file, not a directory,
+        // since we are expecting it to be a native library.
+        File entryFile = new File(m_dir, entryName);
+        if (BundleCache.getSecureAction().fileExists(entryFile)
+            && !BundleCache.getSecureAction().isFileDirectory(entryFile))
+        {
+            // Extracting the embedded native library file impacts all other
+            // existing contents for this revision, so we have to grab the
+            // revision lock first before trying to extract the embedded JAR
+            // file to avoid a race condition.
+            synchronized (m_revisionLock)
+            {
+                // Since native libraries cannot be shared, we must extract a
+                // separate copy per request, so use the request library counter
+                // as part of the extracted path.
+                File libFile = new File(
+                    libDir, Integer.toString(m_libCount) + File.separatorChar + entryName);
+                // Increment library request counter.
+                m_libCount++;
+
+                if (!BundleCache.getSecureAction().fileExists(libFile))
+                {
+                    if (!BundleCache.getSecureAction().fileExists(libFile.getParentFile()))
+                    {
+                        if (!BundleCache.getSecureAction().mkdirs(libFile.getParentFile()))
+                        {
+                            m_logger.log(
+                                Logger.LOG_ERROR,
+                                "Unable to create library directory.");
+                        }
+                        else
+                        {
+                            InputStream is = null;
+
+                            try
+                            {
+                                is = new BufferedInputStream(
+                                    new FileInputStream(entryFile),
+                                    BundleCache.BUFSIZE);
+                                if (is == null)
+                                {
+                                    throw new IOException("No input stream: " + entryName);
+                                }
+
+                                // Create the file.
+                                BundleCache.copyStreamToFile(is, libFile);
+
+                                // Perform exec permission command on extracted library
+                                // if one is configured.
+                                String command = (String) m_configMap.get(
+                                    Constants.FRAMEWORK_EXECPERMISSION);
+                                if (command != null)
+                                {
+                                    Properties props = new Properties();
+                                    props.setProperty("abspath", libFile.toString());
+                                    command = Util.substVars(command, "command", null, props);
+                                    Process p = BundleCache.getSecureAction().exec(command);
+                                    p.waitFor();
+                                }
+
+                                // Return the path to the extracted native library.
+                                result = BundleCache.getSecureAction().getAbsolutePath(libFile);
+                            }
+                            catch (Exception ex)
+                            {
+                                m_logger.log(
+                                    Logger.LOG_ERROR,
+                                    "Extracting native library.", ex);
+                            }
+                            finally
+                            {
+                                try
+                                {
+                                    if (is != null) is.close();
+                                }
+                                catch (IOException ex)
+                                {
+                                    // Not much we can do.
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // Return the path to the extracted native library.
+                    result = BundleCache.getSecureAction().getAbsolutePath(libFile);
+                }
+            }
+        }
+
+        return result;
     }
 
     public String toString()

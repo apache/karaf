@@ -219,7 +219,7 @@ public class ModuleImpl implements IModule
                 String entryName = m_nativeLibraries[i].getEntryName();
                 if (entryName != null)
                 {
-                    if (m_content.getEntryAsNativeLibrary(entryName) == null)
+                    if (!m_content.hasEntry(entryName))
                     {
                         throw new BundleException("Native library does not exist: " + entryName);
                     }
@@ -1567,6 +1567,9 @@ public class ModuleImpl implements IModule
     public class ModuleClassLoader extends SecureClassLoader implements BundleReference
     {
         private final Map m_jarContentToDexFile;
+        private Object[][] m_libs = new Object[0][];
+        private static final int LIBNAME_IDX = 0;
+        private static final int LIBPATH_IDX = 1;
 
         public ModuleClassLoader(ClassLoader parent)
         {
@@ -1882,16 +1885,46 @@ public class ModuleImpl implements IModule
                 name = name.substring(1);
             }
 
-            R4Library[] libs = getNativeLibraries();
-            for (int i = 0; (libs != null) && (i < libs.length); i++)
+            String result = null;
+            // CONCURRENCY: In the long run, we might want to break this
+            // sync block in two to avoid manipulating the cache while
+            // holding the lock, but for now we will do it the simple way.
+            synchronized (this)
             {
-                if (libs[i].match(m_configMap, name))
+                // Check to make sure we haven't already found this library.
+                for (int i = 0; (result == null) && (i < m_libs.length); i++)
                 {
-                    return getContent().getEntryAsNativeLibrary(libs[i].getEntryName());
+                    if (m_libs[i][LIBNAME_IDX].equals(name))
+                    {
+                        result = (String) m_libs[i][LIBPATH_IDX];
+                    }
+                }
+
+                // If we don't have a cached result, see if we have a matching
+                // native library.
+                if (result == null)
+                {
+                    R4Library[] libs = getNativeLibraries();
+                    for (int i = 0; (libs != null) && (i < libs.length); i++)
+                    {
+                        if (libs[i].match(m_configMap, name))
+                        {
+                            result = getContent().getEntryAsNativeLibrary(libs[i].getEntryName());
+                        }
+                    }
+
+                    // Remember the result for future requests.
+                    if (result != null)
+                    {
+                        Object[][] tmp = new Object[m_libs.length + 1][];
+                        System.arraycopy(m_libs, 0, tmp, 0, m_libs.length);
+                        tmp[m_libs.length] = new Object[] { name, result };
+                        m_libs = tmp;
+                    }
                 }
             }
 
-            return null;
+            return result;
         }
 
         public String toString()

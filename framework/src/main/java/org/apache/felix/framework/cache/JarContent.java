@@ -38,7 +38,7 @@ public class JarContent implements IContent
 {
     private static final int BUFSIZE = 4096;
     private static final transient String EMBEDDED_DIRECTORY = "-embedded";
-    private static final transient String LIBRARY_DIRECTORY = "lib";
+    private static final transient String LIBRARY_DIRECTORY = "-lib";
 
     private final Logger m_logger;
     private final Map m_configMap;
@@ -46,6 +46,7 @@ public class JarContent implements IContent
     private final File m_rootDir;
     private final File m_file;
     private JarFileX m_jarFile = null;
+    private int m_libCount = 0;
 
     public JarContent(Logger logger, Map configMap, Object revisionLock, File rootDir, File file)
     {
@@ -303,7 +304,7 @@ public class JarContent implements IContent
         ZipEntry ze = m_jarFile.getEntry(entryName);
         if ((ze != null) && ze.isDirectory())
         {
-            File extractedDir = new File(embedDir, entryName);
+            File extractDir = new File(embedDir, entryName);
 
             // Extracting an embedded directory file impacts all other existing
             // contents for this revision, so we have to grab the revision
@@ -311,9 +312,9 @@ public class JarContent implements IContent
             // directory to avoid a race condition.
             synchronized (m_revisionLock)
             {
-                if (!BundleCache.getSecureAction().fileExists(extractedDir))
+                if (!BundleCache.getSecureAction().fileExists(extractDir))
                 {
-                    if (!BundleCache.getSecureAction().mkdirs(extractedDir))
+                    if (!BundleCache.getSecureAction().mkdirs(extractDir))
                     {
                         m_logger.log(
                             Logger.LOG_ERROR,
@@ -325,7 +326,7 @@ public class JarContent implements IContent
         }
         else if ((ze != null) && ze.getName().endsWith(".jar"))
         {
-            File extractedJar = new File(embedDir, entryName);
+            File extractJar = new File(embedDir, entryName);
 
             // Extracting the embedded JAR file impacts all other existing
             // contents for this revision, so we have to grab the revision
@@ -333,7 +334,7 @@ public class JarContent implements IContent
             // to avoid a race condition.
             synchronized (m_revisionLock)
             {
-                if (!BundleCache.getSecureAction().fileExists(extractedJar))
+                if (!BundleCache.getSecureAction().fileExists(extractJar))
                 {
                     try
                     {
@@ -349,7 +350,7 @@ public class JarContent implements IContent
             }
             return new JarContent(
                 m_logger, m_configMap, m_revisionLock,
-                extractedJar.getParentFile(), extractedJar);
+                extractJar.getParentFile(), extractJar);
         }
 
         // The entry could not be found, so return null.
@@ -357,8 +358,11 @@ public class JarContent implements IContent
     }
 
 // TODO: This will need to consider security.
-    public synchronized String getEntryAsNativeLibrary(String name)
+    public synchronized String getEntryAsNativeLibrary(String entryName)
     {
+        // Return result.
+        String result = null;
+
         // Open JAR file if not already opened.
         if (m_jarFile == null)
         {
@@ -370,83 +374,111 @@ public class JarContent implements IContent
             {
                 m_logger.log(
                     Logger.LOG_ERROR,
-                    "JarContent: Unable to open JAR file.", ex);
+                    "Unable to open JAR file.", ex);
                 return null;
             }
+
         }
 
-        // Get bundle lib directory.
-        File libDir = new File(m_rootDir, LIBRARY_DIRECTORY);
-        // Get lib file.
-        File libFile = new File(libDir, File.separatorChar + name);
-        // Make sure that the library's parent directory exists;
-        // it may be in a sub-directory.
-        libDir = libFile.getParentFile();
-        if (!BundleCache.getSecureAction().fileExists(libDir))
+        // Remove any leading slash.
+        entryName = (entryName.startsWith("/")) ? entryName.substring(1) : entryName;
+
+        // Any embedded native libraries will be extracted to the lib directory.
+        // Since embedded library file names may clash when extracting from multiple
+        // embedded JAR files, the embedded lib directory is per embedded JAR file.
+        File libDir = new File(m_rootDir, m_file.getName() + LIBRARY_DIRECTORY);
+
+        // The entry name must refer to a file type, since it is
+        // a native library, not a directory.
+        ZipEntry ze = m_jarFile.getEntry(entryName);
+        if ((ze != null) && !ze.isDirectory())
         {
-            if (!BundleCache.getSecureAction().mkdirs(libDir))
+            // Extracting the embedded native library file impacts all other
+            // existing contents for this revision, so we have to grab the
+            // revision lock first before trying to extract the embedded JAR
+            // file to avoid a race condition.
+            synchronized (m_revisionLock)
             {
-                m_logger.log(
-                    Logger.LOG_ERROR,
-                    "JarContent: Unable to create library directory.");
-                return null;
+                // Since native libraries cannot be shared, we must extract a
+                // separate copy per request, so use the request library counter
+                // as part of the extracted path.
+                File libFile = new File(
+                    libDir, Integer.toString(m_libCount) + File.separatorChar + entryName);
+                // Increment library request counter.
+                m_libCount++;
+
+                if (!BundleCache.getSecureAction().fileExists(libFile))
+                {
+                    if (!BundleCache.getSecureAction().fileExists(libFile.getParentFile()))
+                    {
+                        if (!BundleCache.getSecureAction().mkdirs(libFile.getParentFile()))
+                        {
+                            m_logger.log(
+                                Logger.LOG_ERROR,
+                                "Unable to create library directory.");
+                        }
+                        else
+                        {
+                            InputStream is = null;
+
+                            try
+                            {
+                                is = new BufferedInputStream(
+                                    m_jarFile.getInputStream(ze),
+                                    BundleCache.BUFSIZE);
+                                if (is == null)
+                                {
+                                    throw new IOException("No input stream: " + entryName);
+                                }
+
+                                // Create the file.
+                                BundleCache.copyStreamToFile(is, libFile);
+
+                                // Perform exec permission command on extracted library
+                                // if one is configured.
+                                String command = (String) m_configMap.get(
+                                    Constants.FRAMEWORK_EXECPERMISSION);
+                                if (command != null)
+                                {
+                                    Properties props = new Properties();
+                                    props.setProperty("abspath", libFile.toString());
+                                    command = Util.substVars(command, "command", null, props);
+                                    Process p = BundleCache.getSecureAction().exec(command);
+                                    p.waitFor();
+                                }
+
+                                // Return the path to the extracted native library.
+                                result = BundleCache.getSecureAction().getAbsolutePath(libFile);
+                            }
+                            catch (Exception ex)
+                            {
+                                m_logger.log(
+                                    Logger.LOG_ERROR,
+                                    "Extracting native library.", ex);
+                            }
+                            finally
+                            {
+                                try
+                                {
+                                    if (is != null) is.close();
+                                }
+                                catch (IOException ex)
+                                {
+                                    // Not much we can do.
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // Return the path to the extracted native library.
+                    result = BundleCache.getSecureAction().getAbsolutePath(libFile);
+                }
             }
         }
-        // Extract the library from the JAR file if it does not
-        // already exist.
-        if (!BundleCache.getSecureAction().fileExists(libFile))
-        {
-            InputStream is = null;
 
-            try
-            {
-                ZipEntry ze = m_jarFile.getEntry(name);
-                if (ze == null)
-                {
-                    return null;
-                }
-                is = new BufferedInputStream(
-                    m_jarFile.getInputStream(ze), BundleCache.BUFSIZE);
-                if (is == null)
-                {
-                    throw new IOException("No input stream: " + name);
-                }
-
-                // Create the file.
-                BundleCache.copyStreamToFile(is, libFile);
-
-                // Perform exec permission command on extracted library
-                // if one is configured.
-                String command = (String) m_configMap.get(Constants.FRAMEWORK_EXECPERMISSION);
-                if (command != null)
-                {
-                    Properties props = new Properties();
-                    props.setProperty("abspath", libFile.toString());
-                    command = Util.substVars(command, "command", null, props);
-                    Process p = BundleCache.getSecureAction().exec(command);
-                    p.waitFor();
-                }
-            }
-            catch (Exception ex)
-            {
-                m_logger.log(
-                    Logger.LOG_ERROR,
-                    "JarContent: Extracting native library.", ex);
-            }
-            finally
-            {
-                try
-                {
-                    if (is != null) is.close();
-                }
-                catch (IOException ex)
-                {
-                    // Not much we can do.
-                }
-            }
-        }
-
-        return BundleCache.getSecureAction().getAbsolutePath(libFile);
+        return result;
     }
 
     public String toString()

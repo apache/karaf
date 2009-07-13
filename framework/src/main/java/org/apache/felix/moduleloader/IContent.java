@@ -32,7 +32,7 @@ public interface IContent
      * is already closed, then calls on this method should have no effect.
      * </p>
     **/
-    public void close();
+    void close();
 
     /**
      * <p>
@@ -44,7 +44,7 @@ public interface IContent
      * @return <tt>true</tt> if a corresponding entry was found, <tt>false</tt>
      *         otherwise.
     **/
-    public boolean hasEntry(String name);
+    boolean hasEntry(String name);
 
     /**
      * <p>
@@ -56,7 +56,7 @@ public interface IContent
      * </p>
      * @returns An enumeration of entry names or <tt>null</tt>.
     **/
-    public Enumeration getEntries();
+    Enumeration getEntries();
 
     /**
      * <p>
@@ -66,7 +66,7 @@ public interface IContent
      * @return An array of bytes if the corresponding entry was found, <tt>null</tt>
      *         otherwise.
     **/
-    public byte[] getEntryAsBytes(String name);
+    byte[] getEntryAsBytes(String name);
 
     /**
      * <p>
@@ -77,8 +77,7 @@ public interface IContent
      *         otherwise.
      * @throws <tt>java.io.IOException</tt> if any error occurs.
     **/
-    public InputStream getEntryAsStream(String name)
-        throws IOException;
+    InputStream getEntryAsStream(String name) throws IOException;
 
     /**
      * <p>
@@ -94,22 +93,20 @@ public interface IContent
      * @return An <tt>IContent</tt> instance if a corresponding entry was found,
      *         <tt>null</tt> otherwise.
     **/
-    public IContent getEntryAsContent(String name);
+    IContent getEntryAsContent(String name);
 
     /**
      * <p>
      * This method returns the named entry as a file in the file system for
      * use as a native library. It may not be possible for all content
      * implementations (e.g., memory only) to implement this method, in which
-     * case it is acceptable to return <tt>null</tt>.
+     * case it is acceptable to return <tt>null</tt>. Since native libraries
+     * can only be associated with a single class loader, this method should
+     * return a unique file per request.
      * </p>
      * @param name The name of the entry to retrieve as a file.
      * @return A string corresponding to the absolute path of the file if a
      *         corresponding entry was found, <tt>null</tt> otherwise.
     **/
-// TODO: CACHE - This method needs to be rethought once we start allowing
-//               native libs in fragments to support multi-host attachement.
-//               For now, our implementations of this interface will not
-//               return a new file for every invocation.
-    public String getEntryAsNativeLibrary(String name);
+    String getEntryAsNativeLibrary(String name);
 }
