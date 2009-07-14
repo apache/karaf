@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.cauldron.sigil.help;
+package org.apache.felix.sigil.eclipse.help;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;

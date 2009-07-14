@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.cauldron.sigil.cheatsheets.actions;
+package org.apache.felix.sigil.eclipse.cheatsheets.actions;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.cauldron.sigil.cheatsheets.actions;
+package org.apache.felix.sigil.eclipse.cheatsheets.actions;
 
 import org.apache.felix.sigil.ui.eclipse.ui.wizard.project.SigilProjectWizard;
 import org.eclipse.core.runtime.CoreException;
