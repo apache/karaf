@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.cauldron.sigil.obr;
+package org.apache.felix.sigil.obr;
 
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 
