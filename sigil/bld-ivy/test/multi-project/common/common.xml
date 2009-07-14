@@ -76,7 +76,7 @@
 		 classpath="${ivy.jar.file}"/>
 
 	<taskdef name="sigil.bundle"
-		 classname="org.cauldron.bld.ant.BundleTask"
+		 classname="org.apache.felix.sigil.ant.BundleTask"
 		 classpath="${sigil-ivy-plugin.jar}:${bndlib.jar}"/>
     </target>    
 

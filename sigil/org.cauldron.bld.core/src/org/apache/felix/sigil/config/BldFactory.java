@@ -68,7 +68,7 @@ public class BldFactory {
 			p.load();
 			projects.put(uri, p);
     			
-    		if (Boolean.getBoolean("org.cauldron.bld.config.test")) {
+    		if (Boolean.getBoolean("org.apache.felix.sigil.config.test")) {
     			File path = new File(uri.getPath() + ".tmp");
     			System.out.println("XXX: config.test writing: " + path);
     			p.saveAs(path);

@@ -80,13 +80,13 @@
         </fileset>
       </classpath>
     </javac>
-    <taskdef name="findbundle" classname="org.cauldron.sigil.build.FindBundlesTask">
+    <taskdef name="findbundle" classname="org.apache.felix.sigil.build.FindBundlesTask">
       <classpath>
         <pathelement location="build-libs/osgi.core.jar"/>
         <pathelement location="build-libs/classes"/>
       </classpath>
     </taskdef>
-    <taskdef name="siteInsertFeatures" classname="org.cauldron.sigil.build.SiteInsertFeatures">
+    <taskdef name="siteInsertFeatures" classname="org.apache.felix.sigil.build.SiteInsertFeatures">
       <classpath>
         <pathelement location="build-libs/classes"/>
       </classpath>

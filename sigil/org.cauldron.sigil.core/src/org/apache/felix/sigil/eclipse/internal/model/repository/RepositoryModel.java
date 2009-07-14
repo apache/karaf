@@ -39,37 +39,22 @@ public class RepositoryModel implements IRepositoryModel {
 		this.preferences = preferences;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.cauldron.sigil.ui.preferences.repository.IRepositoryModel#getPreferences()
-	 */
 	public PreferenceStore getPreferences() {
 		return preferences;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.cauldron.sigil.ui.preferences.repository.IRepositoryModel#getType()
-	 */
 	public IRepositoryType getType() {
 		return type;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.cauldron.sigil.ui.preferences.repository.IRepositoryModel#getId()
-	 */
 	public String getId() {
 		return id;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.cauldron.sigil.ui.preferences.repository.IRepositoryModel#getName()
-	 */
 	public String getName() {
 		return name;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.cauldron.sigil.ui.wizard.repository.IRepositoryModel#setName(java.lang.String)
-	 */
 	public void setName(String name) {
 		this.name = name;
 	}

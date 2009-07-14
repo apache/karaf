@@ -62,9 +62,6 @@ public class RepositoryConfiguration implements IRepositoryConfiguration {
 	
 	public static final String REPOSITORY_DEFAULT_SET = REPOSITORY + "default.set";
 
-	/* (non-Javadoc)
-	 * @see org.cauldron.sigil.repository.management.IRepositoryManagement#loadRepositories()
-	 */
 	public List<IRepositoryModel> loadRepositories() {
 		IPreferenceStore prefs = SigilCore.getDefault().getPreferenceStore();
 		
@@ -101,9 +98,6 @@ public class RepositoryConfiguration implements IRepositoryConfiguration {
 		return null;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.cauldron.sigil.repository.management.IRepositoryManagement#saveRepositories(java.util.List)
-	 */
 	public void saveRepositories(List<IRepositoryModel> repositories) throws CoreException {
 		IPreferenceStore prefs = getPreferences();
 		
@@ -117,9 +111,6 @@ public class RepositoryConfiguration implements IRepositoryConfiguration {
 		timeStamp(prefs);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.cauldron.sigil.repository.management.IRepositoryManagement#loadRepositoryTypes()
-	 */
 	public List<RepositoryType> loadRepositoryTypes() {
 		List<RepositoryType> repositories = new ArrayList<RepositoryType>();
 		
@@ -141,9 +132,6 @@ public class RepositoryConfiguration implements IRepositoryConfiguration {
 		return repositories;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.cauldron.sigil.repository.management.IRepositoryManagement#newRepositoryElement(org.cauldron.sigil.repository.management.RepositoryType)
-	 */
 	public IRepositoryModel newRepositoryElement(IRepositoryType type) {
 		String id = UUID.randomUUID().toString();
 		PreferenceStore prefs = new PreferenceStore();

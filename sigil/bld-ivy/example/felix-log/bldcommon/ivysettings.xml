@@ -24,8 +24,8 @@
   <settings defaultResolver="local" circularDependencyStrategy="error" />
 
   <classpath file="${sigil-ivy-plugin.jar}" />
-  <typedef name="sigil-parser" classname="org.cauldron.bld.ivy.SigilParser" />
-  <typedef name="sigil" classname="org.cauldron.bld.ivy.SigilResolver" />
+  <typedef name="sigil-parser" classname="org.apache.felix.sigil.ivy.SigilParser" />
+  <typedef name="sigil" classname="org.apache.felix.sigil.ivy.SigilResolver" />
 
   <parsers>
     <sigil-parser config="${ivy.settings.dir}/sigil-repos.properties"

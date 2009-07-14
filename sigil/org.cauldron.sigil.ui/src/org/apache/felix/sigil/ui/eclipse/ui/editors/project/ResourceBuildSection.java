@@ -65,9 +65,6 @@ public class ResourceBuildSection extends AbstractResourceSection implements ICh
 		super( page, parent, project );
 	}
 
-	/* (non-Javadoc)
-	 * @see org.cauldron.sigil.ui.editors.project.SigilSection#createSection(org.eclipse.ui.forms.widgets.Section, org.eclipse.ui.forms.widgets.FormToolkit)
-	 */
 	@Override
 	protected void createSection(Section section, FormToolkit toolkit) {
 		setTitle( "Resources" );

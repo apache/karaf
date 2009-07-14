@@ -12,7 +12,7 @@ Class-Path: bndlib.jar
 
 # embed other dependencies directly in the plugin
 Private-Package: \
-  org.cauldron.*, \
+  org.apache.felix.sigil.*, \
   profiles.*, \
   org.eclipse.core.runtime, \
   org.osgi.framework

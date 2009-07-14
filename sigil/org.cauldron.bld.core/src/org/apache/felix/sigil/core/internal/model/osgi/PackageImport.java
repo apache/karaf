@@ -49,16 +49,10 @@ public class PackageImport extends AbstractModelElement implements IPackageImpor
     	}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.cauldron.sigil.internal.model.osgi.IPackageImport#isOptional()
-	 */
     public boolean isOptional() {
         return optional;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.internal.model.osgi.IPackageImport#setOptional(boolean)
-	 */
     public void setOptional(boolean optional) {
         this.optional = optional;
     }
@@ -83,23 +77,14 @@ public class PackageImport extends AbstractModelElement implements IPackageImpor
         return name;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.internal.model.osgi.IPackageImport#setName(java.lang.String)
-	 */
     public void setPackageName(String name) {
         this.name = name;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.internal.model.osgi.IPackageImport#getVersion()
-	 */
     public VersionRange getVersions() {
         return versions;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.internal.model.osgi.IPackageImport#setVersion(java.lang.String)
-	 */
     public void setVersions(VersionRange versions) {
         this.versions = versions == null ? VersionRange.ANY_VERSION : versions;
     }

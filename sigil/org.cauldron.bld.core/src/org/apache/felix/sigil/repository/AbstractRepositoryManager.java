@@ -164,9 +164,6 @@ public abstract class AbstractRepositoryManager implements IRepositoryManager, I
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.cauldron.sigil.internal.repository.IRepositoryManager#getRepositories()
-	 */
 	public Collection<IBundleRepository> getRepositories() {
 		initialise();
 		ArrayList<IBundleRepository> safe = null;
@@ -236,36 +233,24 @@ public abstract class AbstractRepositoryManager implements IRepositoryManager, I
 		return found;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.cauldron.sigil.internal.repository.IRepositoryManager#addLibrary(org.cauldron.sigil.model.eclipse.ILibrary)
-	 */
 	public void addLibrary(ILibrary library) {
 		synchronized( libraries ) {
 			libraries.add(library);
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.cauldron.sigil.internal.repository.IRepositoryManager#removeLibrary(org.cauldron.sigil.model.eclipse.ILibrary)
-	 */
 	public void removeLibrary(ILibrary library) {
 		synchronized( libraries ) {
 			libraries.remove(library);
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.cauldron.sigil.internal.repository.IRepositoryManager#getLibraries()
-	 */
 	public Collection<ILibrary> getLibraries() {
 		synchronized( libraries ) {
 			return libraries;
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.cauldron.sigil.internal.repository.IRepositoryManager#resolveLibrary(org.cauldron.sigil.model.eclipse.ILibraryImport)
-	 */
 	public ILibrary resolveLibrary(final ILibraryImport l) {
 		final ArrayList<ILibrary> found = new ArrayList<ILibrary>(1);
 		//ISigilProjectModel p = l.getAncestor(ISigilProjectModel.class);

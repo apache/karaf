@@ -48,7 +48,7 @@
 	<ivy:settings file="${ivy.settings.dir}/ivysettings.xml" />
 
         <taskdef name="sigil.bundle"
-          classname="org.cauldron.bld.ant.BundleTask"
+          classname="org.apache.felix.sigil.ant.BundleTask"
           classpath="${sigil-ivy-plugin.jar}"/>
     </target>
 

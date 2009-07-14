@@ -93,214 +93,127 @@ public class BundleModelElement extends AbstractCompoundModelElement implements 
 		libraries.remove(library);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#getCategory()
-	 */
     public String getCategory() {
         return category;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#setCategory(java.lang.String)
-	 */
     public void setCategory(String category) {
         this.category = category;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#getContactAddress()
-	 */
     public String getContactAddress() {
         return contactAddress;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#setContactAddress(java.lang.String)
-	 */
     public void setContactAddress(String contactAddress) {
         this.contactAddress = contactAddress;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#getCopyright()
-	 */
     public String getCopyright() {
         return copyright;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#setCopyright(java.lang.String)
-	 */
     public void setCopyright(String copyright) {
         this.copyright = copyright;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#getDocURI()
-	 */
     public URI getDocURI() {
         return docURI;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#setDocURI(java.net.URI)
-	 */
     public void setDocURI(URI docURI) {
         this.docURI = docURI;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#getExports()
-	 */
     public Set<IPackageExport> getExports() {
         return exports;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#addExport(org.cauldron.sigil.model.osgi.PackageExport)
-	 */
     public void addExport(IPackageExport packageExport) {
         exports.add(packageExport);
         packageExport.setParent(this);
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#removeExport(org.cauldron.sigil.model.osgi.PackageExport)
-	 */
     public void removeExport(IPackageExport packageExport) {
     	if ( exports.remove(packageExport) ) {
     		packageExport.setParent(null);
     	}
     }
     
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#getImports()
-	 */
     public Set<IPackageImport> getImports() {
         return imports;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#addImport(org.cauldron.sigil.model.osgi.PackageImport)
-	 */
     public void addImport(IPackageImport packageImport) {
         imports.add(packageImport);
         packageImport.setParent(this);
     }
     
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#removeImport(org.cauldron.sigil.model.osgi.PackageImport)
-	 */
     public void removeImport(IPackageImport packageImport) {
     	if ( imports.remove( packageImport ) ) {
     		packageImport.setParent(null);
     	}
     }
     
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#getRequiredBundles()
-	 */
     public Set<IRequiredBundle> getRequiredBundles() {
         return requires;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#addRequiredBundle(org.cauldron.sigil.model.osgi.RequiresBundle)
-	 */
     public void addRequiredBundle(IRequiredBundle bundle) {
         requires.add( bundle );
         bundle.setParent(this);
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#removeRequiredBundle(org.cauldron.sigil.model.osgi.RequiresBundle)
-	 */
     public void removeRequiredBundle(IRequiredBundle bundle) {
     	if ( requires.remove(bundle) ) {
     		bundle.setParent(null);
     	}
     }
     
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#getLicenseURI()
-	 */
     public URI getLicenseURI() {
         return licenseURI;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#setLicenseURI(java.net.URI)
-	 */
     public void setLicenseURI(URI licenseURI) {
         this.licenseURI = licenseURI;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#getSourceLocation()
-	 */
     public URI getSourceLocation() {
         return sourceLocation;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#setSourceLocation(java.net.URI)
-	 */
     public void setSourceLocation(URI sourceLocation) {
         this.sourceLocation = sourceLocation;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#getSymbolicName()
-	 */
     public String getSymbolicName() {
         return symbolicName;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#setSymbolicName(java.lang.String)
-	 */
     public void setSymbolicName(String symbolicName) {
         this.symbolicName = symbolicName == null ? null : symbolicName.intern();
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#getUpdateLocation()
-	 */
     public URI getUpdateLocation() {
         return updateLocation;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#setUpdateLocation(java.net.URI)
-	 */
     public void setUpdateLocation(URI updateLocation) {
         this.updateLocation = updateLocation;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#getVendor()
-	 */
     public String getVendor() {
     		return vendor;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#setVendor(java.lang.String)
-	 */
     public void setVendor(String vendor) {
         this.vendor = vendor;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#getVersion()
-	 */
     public Version getVersion() {
     	return version;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.model.osgi.IBundleModelElement#setVersion(java.lang.String)
-	 */
     public void setVersion(Version version) {
         this.version = version == null ? Version.emptyVersion : version;
     }

@@ -39,23 +39,14 @@ public class PackageExport extends AbstractModelElement implements IPackageExpor
 		super("OSGi Package Export");
 	}
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.internal.model.osgi.IPackageExport#getPackageName()
-	 */
     public String getPackageName() {
         return name;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.internal.model.osgi.IPackageExport#setPackageName(java.lang.String)
-	 */
     public void setPackageName(String packageName) {
         this.name = packageName;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.internal.model.osgi.IPackageExport#getVersion()
-	 */
     public Version getVersion() {
     	Version result;
         if(version != null) {
@@ -75,9 +66,6 @@ public class PackageExport extends AbstractModelElement implements IPackageExpor
     	return version;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.internal.model.osgi.IPackageExport#setVersion(java.lang.String)
-	 */
     public void setVersion(Version version) {
         this.version = version; // == null ? Version.emptyVersion : version;
     }
@@ -131,6 +119,5 @@ public class PackageExport extends AbstractModelElement implements IPackageExpor
 				return version.compareTo(other);
 			}
 		}
-	}
-	
+	}	
 }

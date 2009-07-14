@@ -36,30 +36,18 @@ public class RepositoryType implements IRepositoryType {
 		this.icon = icon;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.cauldron.sigil.ui.preferences.repository.IRepositoryType#getType()
-	 */
 	public String getType() {
 		return type;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.cauldron.sigil.ui.preferences.repository.IRepositoryType#getId()
-	 */
 	public String getId() {
 		return id;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.cauldron.sigil.ui.preferences.repository.IRepositoryType#getIcon()
-	 */
 	public Image getIcon() {
 		return icon;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.cauldron.sigil.ui.preferences.repository.IRepositoryType#isDynamic()
-	 */
 	public boolean isDynamic() {
 		return dynamic;
 	}

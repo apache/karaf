@@ -22,8 +22,6 @@ package org.apache.felix.sigil.core.licence;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-//import org.cauldron.sigil.model.project.ISigilProjectModel;
-
 public interface ILicenseManager {
 	void addLicense(String name, Pattern pattern);
 	void removeLicense(String name);

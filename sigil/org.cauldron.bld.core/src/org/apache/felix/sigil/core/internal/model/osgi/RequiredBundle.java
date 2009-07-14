@@ -36,30 +36,18 @@ public class RequiredBundle extends AbstractModelElement implements IRequiredBun
 		super("OSGi Bundle Requirement");
 	}
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.internal.model.osgi.IRequiresBundle#getSymbolicName()
-	 */
     public String getSymbolicName() {
         return symbolicName;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.internal.model.osgi.IRequiresBundle#setSymbolicName(java.lang.String)
-	 */
     public void setSymbolicName(String symbolicName) {
         this.symbolicName = symbolicName == null ? null : symbolicName.intern();
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.internal.model.osgi.IRequiresBundle#getVersion()
-	 */
     public VersionRange getVersions() {
         return versions;
     }
 
-    /* (non-Javadoc)
-	 * @see org.cauldron.sigil.internal.model.osgi.IRequiresBundle#setVersion(java.lang.String)
-	 */
     public void setVersions(VersionRange versions) {
         this.versions = versions == null ? VersionRange.ANY_VERSION : versions;
     }
