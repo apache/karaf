@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Ui Plug-in
 Bundle-SymbolicName: org.cauldron.sigil.ui;singleton:=true
 Bundle-Version: 0.8.0.qualifier
-Bundle-Activator: org.cauldron.sigil.ui.SigilUI
+Bundle-Activator: org.apache.felix.sigil.ui.eclipse.ui.SigilUI
 Bundle-Vendor: Paremus Ltd
 Require-Bundle: org.cauldron.sigil.core,
  org.cauldron.bld.core,
@@ -24,11 +24,11 @@ Require-Bundle: org.cauldron.sigil.core,
  org.eclipse.zest.layouts;bundle-version="[1,2)",
  org.eclipse.ltk.core.refactoring
 Eclipse-LazyStart: true
-Export-Package: org.cauldron.sigil.actions,
- org.cauldron.sigil.handlers,
- org.cauldron.sigil.ui,
- org.cauldron.sigil.ui.util,
- org.cauldron.sigil.ui.wizard.project,
- org.cauldron.sigil.ui.wizard.repository
+Export-Package: org.apache.felix.sigil.ui.eclipse.actions,
+ org.apache.felix.sigil.ui.eclipse.handlers,
+ org.apache.felix.sigil.ui.eclipse.ui,
+ org.apache.felix.sigil.ui.eclipse.ui.util,
+ org.apache.felix.sigil.ui.eclipse.ui.wizard.project,
+ org.apache.felix.sigil.ui.eclipse.ui.wizard.repository
 Bundle-Localization: plugin
 

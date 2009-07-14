@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: OBR Plug-in
 Bundle-SymbolicName: org.cauldron.sigil.obr;singleton:=true
 Bundle-Version: 0.8.0.qualifier
-Bundle-Activator: org.cauldron.sigil.obr.Activator
+Bundle-Activator: org.apache.felix.sigil.obr.eclipse.Activator
 Bundle-Vendor: Paremus Ltd
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -12,5 +12,5 @@ Require-Bundle: org.eclipse.ui,
  org.cauldron.bld.core
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
-Import-Package: org.cauldron.bld.obr,
- org.cauldron.sigil.model
+Import-Package: org.apache.felix.sigil.model,
+ org.cauldron.sigil.obr

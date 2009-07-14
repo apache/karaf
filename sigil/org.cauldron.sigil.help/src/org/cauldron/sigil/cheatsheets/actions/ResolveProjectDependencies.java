@@ -19,9 +19,9 @@
 
 package org.cauldron.sigil.cheatsheets.actions;
 
-import org.cauldron.sigil.SigilCore;
-import org.cauldron.sigil.model.project.ISigilProjectModel;
-import org.cauldron.sigil.actions.ResolveProjectDependenciesAction;
+import org.apache.felix.sigil.eclipse.SigilCore;
+import org.apache.felix.sigil.eclipse.model.project.ISigilProjectModel;
+import org.apache.felix.sigil.ui.eclipse.actions.ResolveProjectDependenciesAction;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;

@@ -31,7 +31,7 @@
    <extension
          point="org.cauldron.sigil.ui.repositorywizard">
       <wizard
-            class="org.cauldron.sigil.obr.OBRRepositoryWizard"
+            class="org.apache.felix.sigil.obr.eclipse.OBRRepositoryWizard"
             repository="org.cauldron.sigil.obr.provider">
       </wizard>
    </extension>

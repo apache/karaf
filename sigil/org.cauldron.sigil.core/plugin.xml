@@ -36,7 +36,7 @@
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester
-            class="org.cauldron.sigil.property.SigilPropertyTester"
+            class="org.apache.felix.sigil.property.SigilPropertyTester"
             id="org.cauldron.sigil.property.NewtonPropertyTester"
             namespace="org.cauldron.sigil"
             properties="isNewtonResource,isCompositeResource,isSystemResource,isScriptResource,isSigilProject"
@@ -46,13 +46,13 @@
          point="org.eclipse.core.runtime.adapters">
       <factory
             adaptableType="org.eclipse.core.resources.IFile"
-            class="org.cauldron.sigil.internal.adapter.FileAdaptorFactory">
+            class="org.apache.felix.sigil.eclipse.internal.adapter.FileAdaptorFactory">
          <adapter type="org.cauldron.sigil.model.eclipse.ISigilBundle"/>
       </factory>
       <factory
             adaptableType="org.eclipse.core.resources.IProject"
-            class="org.cauldron.sigil.internal.adapter.ProjectAdaptorFactory">
-         <adapter type="org.cauldron.sigil.model.project.ISigilProjectModel"/>
+            class="org.apache.felix.sigil.eclipse.internal.adapter.ProjectAdaptorFactory">
+         <adapter type="org.apache.felix.sigil.model.project.ISigilProjectModel"/>
       </factory>
    </extension>
    <extension
@@ -60,7 +60,7 @@
          name="Sigil Nature"
          point="org.eclipse.core.resources.natures">
       <runtime>
-         <run class="org.cauldron.sigil.nature.SigilProjectNature"/>
+         <run class="org.apache.felix.sigil.nature.SigilProjectNature"/>
       </runtime>
    </extension>
    <extension
@@ -70,19 +70,19 @@
       <builder
             hasNature="false"
             isConfigurable="false">
-         <run class="org.cauldron.sigil.internal.builders.SigilIncrementalProjectBuilder"/>
+         <run class="org.apache.felix.sigil.eclipse.internal.builders.SigilIncrementalProjectBuilder"/>
       </builder>
    </extension>
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="org.cauldron.sigil.preferences.SigilPreferencesInitializer">
+            class="org.apache.felix.sigil.preferences.SigilPreferencesInitializer">
       </initializer>
    </extension>
    <extension
          point="org.cauldron.sigil.repositoryprovider">
       <provider
-            class="org.cauldron.sigil.internal.repository.eclipse.WorkspaceRepositoryProvider"
+            class="org.apache.felix.sigil.eclipse.internal.repository.eclipse.WorkspaceRepositoryProvider"
             defaultLevel="-3"
             dynamic="false"
             id="org.cauldron.sigil.core.workspaceprovider"

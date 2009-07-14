@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Search Plug-in
 Bundle-SymbolicName: org.cauldron.sigil.search;singleton:=true
 Bundle-Version: 0.8.0.qualifier
-Bundle-Activator: org.cauldron.sigil.search.SigilSearch
+Bundle-Activator: org.apache.felix.sigil.search.SigilSearch
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.jdt.core;bundle-version="3.4.0",
@@ -12,6 +12,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.resources;bundle-version="3.4.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Export-Package: org.cauldron.sigil.search
+Export-Package: org.apache.felix.sigil.search
 Bundle-ClassPath: lib/bcel-5.2.jar,
  .

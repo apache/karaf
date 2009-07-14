@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: org.cauldron.sigil.core
 Bundle-SymbolicName: org.cauldron.sigil.core;singleton:=true
 Bundle-Version: 0.8.0.qualifier
-Bundle-Activator: org.cauldron.sigil.SigilCore
+Bundle-Activator: org.apache.felix.sigil.eclipse.SigilCore
 Bundle-Vendor: Paremus Ltd.
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.core.expressions,
@@ -15,13 +15,13 @@ Require-Bundle: org.eclipse.core.expressions,
  org.cauldron.sigil.utils,
  org.cauldron.bld.core
 Bundle-ActivationPolicy: lazy
-Export-Package: org.cauldron.sigil,
- org.cauldron.sigil.install,
- org.cauldron.sigil.job,
- org.cauldron.sigil.model.project,
- org.cauldron.sigil.model.repository,
- org.cauldron.sigil.model.util,
- org.cauldron.sigil.preferences
+Export-Package: org.apache.felix.sigil.eclipse,
+ org.apache.felix.sigil.eclipse.install,
+ org.apache.felix.sigil.eclipse.job,
+ org.apache.felix.sigil.eclipse.model.project,
+ org.apache.felix.sigil.eclipse.model.repository,
+ org.apache.felix.sigil.eclipse.model.util,
+ org.apache.felix.sigil.eclipse.preferences
 Bundle-ClassPath: .,
  lib/commons-lang-2.4.jar
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

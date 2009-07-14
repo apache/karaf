@@ -19,7 +19,7 @@
 
 package org.cauldron.sigil.junit.activator;
 
-import org.cauldron.sigil.model.project.ISigilProjectModel;
+import org.apache.felix.sigil.eclipse.model.project.ISigilProjectModel;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 

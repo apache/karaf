@@ -9,4 +9,4 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: org.eclipse.core.expressions,
  org.eclipse.core.resources,
  org.eclipse.ui
-Export-Package: org.cauldron.sigil.utils
+Export-Package: org.apache.felix.sigil.utils

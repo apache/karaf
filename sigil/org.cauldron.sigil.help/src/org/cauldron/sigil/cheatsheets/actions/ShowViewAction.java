@@ -19,7 +19,7 @@
 
 package org.cauldron.sigil.cheatsheets.actions;
 
-import org.cauldron.sigil.SigilCore;
+import org.apache.felix.sigil.eclipse.SigilCore;
 import org.eclipse.jface.action.Action;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;

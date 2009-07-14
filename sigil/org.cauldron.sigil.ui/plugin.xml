@@ -22,7 +22,7 @@
    <extension-point id="org.cauldron.sigil.ui.repositorywizard" name="Repository Wizard" schema="schema/org.cauldron.sigil.ui.repositorywizard.exsd"/>
       <extension
          point="org.eclipse.ui.startup">
-      <startup class="org.cauldron.sigil.startup.SigilStartup"/>
+      <startup class="org.apache.felix.sigil.ui.eclipse.startup.SigilStartup"/>
    </extension>
    <extension
          point="org.eclipse.ui.newWizards">
@@ -31,7 +31,7 @@
             name="Sigil"/>
       <wizard
             category="org.cauldron.sigil.newWizardCategory"
-            class="org.cauldron.sigil.ui.wizard.project.SigilProjectWizard"
+            class="org.apache.felix.sigil.ui.eclipse.ui.wizard.project.SigilProjectWizard"
             finalPerspective="org.cauldron.sigil.ui.perspective"
             icon="etc/images/newton.png"
             id="org.cauldron.sigil.editors.newProjectWizard"
@@ -41,7 +41,7 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            class="org.cauldron.sigil.ui.preferences.SigilPreferencePage"
+            class="org.apache.felix.sigil.ui.eclipse.ui.preferences.SigilPreferencePage"
             id="org.cauldron.sigil.ui.preferences.SigilPreferencePage"
             name="Sigil"/>
       <!--page
@@ -52,25 +52,25 @@
       </page-->
       <page
             category="org.cauldron.sigil.ui.preferences.SigilPreferencePage"
-            class="org.cauldron.sigil.ui.preferences.repository.RepositoriesPreferencePage"
+            class="org.apache.felix.sigil.ui.eclipse.ui.preferences.repository.RepositoriesPreferencePage"
             id="org.cauldron.sigil.ui.preferences.repositoriesPreferencePage"
             name="%repositoriesPrefPage">
       </page>
       <page
             category="org.cauldron.sigil.ui.preferences.SigilPreferencePage"
-            class="org.cauldron.sigil.ui.preferences.ExcludedResourcesPrefsPage"
+            class="org.apache.felix.sigil.ui.eclipse.ui.preferences.ExcludedResourcesPrefsPage"
             id="org.cauldron.sigil.ui.preferences.excludedResources"
             name="Excluded Resources">
       </page>
       <page
             category="org.cauldron.sigil.ui.preferences.SigilPreferencePage"
-            class="org.cauldron.sigil.ui.preferences.VersionsPreferencePage"
+            class="org.apache.felix.sigil.ui.eclipse.ui.preferences.VersionsPreferencePage"
             id="org.cauldron.sigil.ui.preferences.VersionsPreferencePage"
             name="Version Handling">
       </page>
       <page
             category="org.cauldron.sigil.ui.preferences.SigilPreferencePage"
-            class="org.cauldron.sigil.ui.preferences.installs.OSGiInstallsPreferencePage"
+            class="org.apache.felix.sigil.ui.eclipse.ui.preferences.installs.OSGiInstallsPreferencePage"
             id="org.cauldron.sigil.ui.preferences.newtonInstalls"
             name="Newton Installs">
       </page>
@@ -78,7 +78,7 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="org.cauldron.sigil.ui.editors.project.SigilProjectEditorPart"
+            class="org.apache.felix.sigil.ui.eclipse.ui.editors.project.SigilProjectEditorPart"
             default="true"
             filenames="sigil.properties"
             icon="etc/images/newton.png"
@@ -88,19 +88,19 @@
    <extension
          point="org.eclipse.jdt.core.classpathContainerInitializer">
       <classpathContainerInitializer
-            class="org.cauldron.sigil.classpath.SigilClasspathContainerInitializer"
+            class="org.apache.felix.sigil.ui.eclipse.classpath.SigilClasspathContainerInitializer"
             id="org.cauldron.sigil.core.classpathContainer"/>
    </extension>
    <extension
          point="org.eclipse.jdt.ui.classpathContainerPage">
       <classpathContainerPage
-            class="org.cauldron.sigil.classpath.SigilLibraryPage"        id="org.cauldron.sigil.core.classpathContainer"
+            class="org.apache.felix.sigil.ui.eclipse.classpath.SigilLibraryPage"        id="org.cauldron.sigil.core.classpathContainer"
             name="Sigil Library"/>
    </extension>
    <extension
          point="org.eclipse.ui.perspectives">
       <perspective
-            class="org.cauldron.sigil.ui.perspective.SigilPerspectiveFactory"
+            class="org.apache.felix.sigil.ui.eclipse.ui.perspective.SigilPerspectiveFactory"
             icon="etc/images/newton.png"
             id="org.cauldron.sigil.ui.perspective"
             name="Sigil">
@@ -109,7 +109,7 @@
    <extension
          point="org.eclipse.jdt.ui.quickFixProcessors">
       <quickFixProcessor
-            class="org.cauldron.sigil.ui.quickfix.ImportQuickFixProcessor"
+            class="org.apache.felix.sigil.ui.eclipse.ui.quickfix.ImportQuickFixProcessor"
             id="org.cauldron.sigil.ui.quickFixProcessor1">
       </quickFixProcessor>
    </extension>
@@ -118,7 +118,7 @@
       <view
             allowMultiple="false"
             category="org.cauldron.sigil.ui.views"
-            class="org.cauldron.sigil.ui.views.resolution.BundleResolverView"
+            class="org.apache.felix.sigil.ui.eclipse.ui.views.resolution.BundleResolverView"
             icon="icons/jar_web_obj.png"
             id="org.cauldron.sigil.ui.bundleDependencyView"
             name="Bundle Dependency View"
@@ -127,7 +127,7 @@
       <view
             allowMultiple="false"
             category="org.cauldron.sigil.ui.views"
-            class="org.cauldron.sigil.ui.views.RepositoryViewPart"
+            class="org.apache.felix.sigil.ui.eclipse.ui.views.RepositoryViewPart"
             icon="icons/jars_obj.png"
             id="org.cauldron.sigil.ui.repositoryBrowser"
             name="Repository Browser"
@@ -141,7 +141,7 @@
    <extension
          point="org.cauldron.sigil.ui.repositorywizard">
       <wizard
-            class="org.cauldron.sigil.ui.internal.repository.FileSystemRepositoryWizard"
+            class="org.apache.felix.sigil.ui.eclipse.ui.internal.repository.FileSystemRepositoryWizard"
             repository="org.cauldron.sigil.core.file">
       </wizard>
    </extension>
@@ -155,14 +155,14 @@
    <extension
          point="org.eclipse.ltk.core.refactoring.refactoringContributions">
       <contribution
-            class="org.cauldron.sigil.ui.refactor.RenameCompositeRefactoring"
+            class="org.apache.felix.sigil.ui.eclipse.ui.refactor.RenameCompositeRefactoring"
             id="org.cauldron.sigil.ui.rename.composite">
       </contribution>
    </extension>
    <extension
          point="org.eclipse.ui.propertyPages">
       <page
-            class="org.cauldron.sigil.ui.preferences.project.ProjectPropertyPage"
+            class="org.apache.felix.sigil.ui.eclipse.ui.preferences.project.ProjectPropertyPage"
             id="org.cauldron.sigil.ui.projectpage"
             name="Repositories">
          <filter
@@ -232,7 +232,7 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="org.cauldron.sigil.handlers.project.ConvertProjectHandler"
+            class="org.apache.felix.sigil.ui.eclipse.handlers.project.ConvertProjectHandler"
             commandId="org.cauldron.sigil.ui.convertproject">
          <activeWhen>
             <with
@@ -252,7 +252,7 @@
          </activeWhen>
       </handler>      
       <handler
-            class="org.cauldron.sigil.handlers.project.RefreshSigilClasspathHandler"
+            class="org.apache.felix.sigil.ui.eclipse.handlers.project.RefreshSigilClasspathHandler"
             commandId="org.cauldron.sigil.ui.refreshclasspath">
          <activeWhen>
             <with

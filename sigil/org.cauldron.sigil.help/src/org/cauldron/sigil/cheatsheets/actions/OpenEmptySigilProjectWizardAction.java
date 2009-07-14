@@ -19,7 +19,7 @@
 
 package org.cauldron.sigil.cheatsheets.actions;
 
-import org.cauldron.sigil.ui.wizard.project.SigilProjectWizard;
+import org.apache.felix.sigil.ui.eclipse.ui.wizard.project.SigilProjectWizard;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.cheatsheets.ICheatSheetAction;
