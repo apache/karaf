@@ -500,42 +500,13 @@ public class R4LibraryClause
     {
         // Header: 'Bundle-NativeCode', Parameter: 'osversion'
         // Standardized 'osversion': major.minor.micro, only digits
-        String VERSION_DELIM = ".";
-        String QUALIFIER_DELIM = "-";
-        int major = 0;
-        int minor = 0;
-        int micro = 0;
         try
         {
-            StringTokenizer st = new StringTokenizer(value, VERSION_DELIM, true);
-            major = Integer.parseInt(st.nextToken());
-
-            if (st.hasMoreTokens())
-            {
-                st.nextToken(); // consume delimiter
-                minor = Integer.parseInt(st.nextToken());
-
-                if (st.hasMoreTokens())
-                {
-                    st.nextToken(); // consume delimiter
-                    String microStr = st.nextToken();
-                    if (microStr.indexOf(QUALIFIER_DELIM) < 0)
-                    {
-                        micro = Integer.parseInt(microStr);
-                    }
-                    else
-                    {
-                        micro = Integer.parseInt(microStr.substring(0, microStr
-                            .indexOf(QUALIFIER_DELIM)));
-                    }
-                }
-            }
+            return VersionRange.parse(value).toString();
         }
         catch (Exception ex)
         {
             return Version.emptyVersion.toString();
         }
-
-        return major + "." + minor + "." + micro;
     }
 }

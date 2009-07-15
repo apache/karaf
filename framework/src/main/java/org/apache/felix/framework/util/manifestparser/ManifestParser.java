@@ -331,27 +331,40 @@ public class ManifestParser
      * <p>
      * This method returns the selected native library metadata from
      * the manifest. The information is not the raw metadata from the
-     * manifest, but is native library metadata clause selected according
+     * manifest, but is the native library clause selected according
      * to the OSGi native library clause selection policy. The metadata
      * returned by this method will be attached directly to a module and
      * used for finding its native libraries at run time. To inspect the
      * raw native library metadata refer to <tt>getLibraryClauses()</tt>.
      * </p>
-     * @return an array of selected library metadata objects from the manifest.
-     * @throws BundleException if any problems arise.
+     * <p>
+     * This method returns one of three values:
+     * </p>
+     * <ul>
+     * <li><tt>null</tt> - if the are no native libraries for this module;
+     *     this may also indicate the native libraries are optional and
+     *     did not match the current platform.</li>
+     * <li>Zero-length <tt>R4Library</tt> array - if no matching native library
+     *     clause was found; this bundle should not resolve.</li>
+     * <li>Nonzero-length <tt>R4Library</tt> array - the native libraries
+     *     associated with the matching native library clause.</li>
+     * </ul>
+     *
+     * @return <tt>null</tt> if there are no native libraries, a zero-length
+     *         array if no libraries matched, or an array of selected libraries.
     **/
-    public R4Library[] getLibraries() throws BundleException
+    public R4Library[] getLibraries()
     {
-        R4LibraryClause clause = getSelectedLibraryClause();
-
-        if (clause != null)
+        R4Library[] libs = null;
+        try
         {
-            String[] entries = clause.getLibraryEntries();
-            R4Library[] libraries = new R4Library[entries.length];
-            int current = 0;
-            try
+            R4LibraryClause clause = getSelectedLibraryClause();
+            if (clause != null)
             {
-                for (int i = 0; i < libraries.length; i++)
+                String[] entries = clause.getLibraryEntries();
+                libs = new R4Library[entries.length];
+                int current = 0;
+                for (int i = 0; i < libs.length; i++)
                 {
                     String name = getName(entries[i]);
                     boolean found = false;
@@ -361,26 +374,25 @@ public class ManifestParser
                     }
                     if (!found)
                     {
-                        libraries[current++] = new R4Library(
+                        libs[current++] = new R4Library(
                             clause.getLibraryEntries()[i],
                             clause.getOSNames(), clause.getProcessors(), clause.getOSVersions(),
                             clause.getLanguages(), clause.getSelectionFilter());
                     }
                 }
-                if (current < libraries.length)
+                if (current < libs.length)
                 {
                     R4Library[] tmp = new R4Library[current];
-                    System.arraycopy(libraries, 0, tmp, 0, current);
-                    libraries = tmp;
+                    System.arraycopy(libs, 0, tmp, 0, current);
+                    libs = tmp;
                 }
-                return libraries;
-            }
-            catch (Exception ex)
-            {
-                throw new BundleException("Unable to create library", ex);
             }
         }
-        return null;
+        catch (Exception ex)
+        {
+            libs = new R4Library[0];
+        }
+        return libs;
     }
 
     private String getName(String path)

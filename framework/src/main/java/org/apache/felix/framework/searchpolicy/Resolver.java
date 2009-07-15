@@ -30,6 +30,7 @@ import org.apache.felix.framework.util.Util;
 import org.apache.felix.framework.util.manifestparser.Capability;
 import org.apache.felix.framework.util.manifestparser.R4Attribute;
 import org.apache.felix.framework.util.manifestparser.R4Directive;
+import org.apache.felix.framework.util.manifestparser.R4Library;
 import org.apache.felix.framework.util.manifestparser.Requirement;
 import org.apache.felix.moduleloader.ICapability;
 import org.apache.felix.moduleloader.IModule;
@@ -343,6 +344,38 @@ public class Resolver
         if (candidatesMap.get(targetModule) != null)
         {
             return;
+        }
+
+        // First, try to resolve any native code, since the module is
+        // not resolvable if its native code cannot be loaded.
+        R4Library[] libs = targetModule.getNativeLibraries();
+        if (libs != null)
+        {
+            String msg = null;
+            // Verify that all native libraries exist in advance; this will
+            // throw an exception if the native library does not exist.
+            for (int libIdx = 0; (msg == null) && (libIdx < libs.length); libIdx++)
+            {
+                String entryName = libs[libIdx].getEntryName();
+                if (entryName != null)
+                {
+                    if (!targetModule.getContent().hasEntry(entryName))
+                    {
+                        msg = "Native library does not exist: " + entryName;
+                    }
+                }
+            }
+            // If we have a zero-length native library array, then
+            // this means no native library class could be selected
+            // so we should fail to resolve.
+            if (libs.length == 0)
+            {
+                msg = "No matching native libraries found.";
+            }
+            if (msg != null)
+            {
+                throw new ResolveException(msg, targetModule, null);
+            }
         }
 
         // List to hold the resolving candidate sets for the target

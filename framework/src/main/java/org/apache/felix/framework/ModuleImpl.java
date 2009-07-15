@@ -207,35 +207,6 @@ public class ModuleImpl implements IModule
             : ManifestParser.parseDelimitedString(mp.getActivationIncludeDirective(), ",");
         m_symbolicName = mp.getSymbolicName();
         m_isExtension = mp.isExtension();
-
-        // Verify that all native libraries exist in advance; this will
-        // throw an exception if the native library does not exist.
-        try
-        {
-            for (int i = 0;
-                (m_nativeLibraries != null) && (i < m_nativeLibraries.length);
-                i++)
-            {
-                String entryName = m_nativeLibraries[i].getEntryName();
-                if (entryName != null)
-                {
-                    if (!m_content.hasEntry(entryName))
-                    {
-                        throw new BundleException("Native library does not exist: " + entryName);
-                    }
-                }
-            }
-        }
-        finally
-        {
-            // We close the module content here to make sure it is closed
-            // to avoid having to close it if there is an exception during
-            // the entire module creation process.
-// TODO: REFACTOR - If we do the above check here, then we open the module's content
-//       immediately every time, which means we must close it here so we don't have
-//       to remember to close it if there are other failures during module init.
-            m_content.close();
-        }
     }
 
     //
@@ -336,21 +307,37 @@ public class ModuleImpl implements IModule
 
     public synchronized R4Library[] getNativeLibraries()
     {
-        List nativeList = (m_nativeLibraries == null)
-            ? new ArrayList() : new ArrayList(Arrays.asList(m_nativeLibraries));
-        for (int fragIdx = 0;
-            (m_fragments != null) && (fragIdx < m_fragments.length);
-            fragIdx++)
+        R4Library[] result = null;
+        if (m_isResolved)
         {
-            R4Library[] libs = m_fragments[fragIdx].getNativeLibraries();
-            for (int reqIdx = 0;
-                (libs != null) && (reqIdx < libs.length);
-                reqIdx++)
+            List nativeList = (m_nativeLibraries == null)
+                ? new ArrayList() : new ArrayList(Arrays.asList(m_nativeLibraries));
+            for (int fragIdx = 0;
+                (m_fragments != null) && (fragIdx < m_fragments.length);
+                fragIdx++)
             {
-                nativeList.add(libs[reqIdx]);
+                R4Library[] libs = m_fragments[fragIdx].getNativeLibraries();
+                for (int reqIdx = 0;
+                    (libs != null) && (reqIdx < libs.length);
+                    reqIdx++)
+                {
+                    nativeList.add(libs[reqIdx]);
+                }
             }
+
+            // We need to return null here if we don't have any libraries, since a
+            // zero-length array is used to indicate that matching native libraries
+            // could not be found when resolving the bundle.
+            result = (nativeList.size() == 0)
+                ? null
+                : (R4Library[]) nativeList.toArray(new R4Library[nativeList.size()]);
         }
-        return (R4Library[]) nativeList.toArray(new R4Library[nativeList.size()]);
+        else
+        {
+            result = m_nativeLibraries;
+        }
+
+        return result;
     }
 
     public int getDeclaredActivationPolicy()
