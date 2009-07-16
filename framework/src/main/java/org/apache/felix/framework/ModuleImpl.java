@@ -1429,7 +1429,7 @@ public class ModuleImpl implements IModule
                 // Delegate to the parent class loader unless this call
                 // is due to outside code calling a method on the bundle
                 // interface (e.g., Bundle.loadClass()).
-                if (delegate && !Bundle.class.isInstance(classes[i - 1]))
+                if (delegate && !Bundle.class.isAssignableFrom(classes[i - 1]))
                 {
                     try
                     {
