@@ -464,16 +464,18 @@ public class JavaHelper {
 
 				for (String cp : classpath) {
 					IPath p = ".".equals(cp) ? path : cache.append(cp);
-					IPath source = bundle.getSourcePathLocation();
-
-					if (source != null && !source.toFile().exists()) {
-						source = null;
+					if ( p.toFile().exists() ) {
+						IPath source = bundle.getSourcePathLocation();
+	
+						if (source != null && !source.toFile().exists()) {
+							source = null;
+						}
+	
+						IClasspathEntry e = JavaCore.newLibraryEntry(p, source,
+								bundle.getSourceRootPath(), rules, attributes,
+								exported);
+						entries.add(e);
 					}
-
-					IClasspathEntry e = JavaCore.newLibraryEntry(p, source,
-							bundle.getSourceRootPath(), rules, attributes,
-							exported);
-					entries.add(e);
 				}
 
 				return entries;
