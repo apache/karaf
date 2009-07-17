@@ -31,60 +31,61 @@
   <version>1.3.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  	<modules>
-		<module>metadata</module>
-		<module>manipulator</module>
-		<module>plugin</module>
-		<module>core</module>
-		<module>composite</module>
-		<module>arch</module>
-		<module>ant</module>
-		<module>handler/extender</module>
-		<module>handler/temporal</module>
-		<module>handler/eventadmin</module>
-		<module>handler/whiteboard</module>
-	<!--	<module>handler/transaction</module> -->
-		<module>api</module>
-		<module>online-manipulator</module>
-	<!--	<module>junit4osgi</module> -->
-	</modules>
+    <modules>
+    <module>metadata</module>
+    <module>manipulator</module>
+    <module>plugin</module>
+    <module>core</module>
+    <module>composite</module>
+    <module>arch</module>
+    <module>ant</module>
+    <module>handler/extender</module>
+    <module>handler/temporal</module>
+    <module>handler/eventadmin</module>
+    <module>handler/whiteboard</module>
+    <module>api</module>
+    <module>online-manipulator</module>
+     <module>junit4osgi</module>
+  </modules>
 
 
   <profiles>
-	<profile>
-		<id>java5</id>
-		<activation>
-			<jdk>1.5</jdk>
-		</activation>
-		<modules>
-			<module>annotations</module>
-			<module>handler/jmx</module>
-			<module>webconsole-plugin</module>
-		</modules>
-	</profile>
-	<profile>
-		<id>java6</id>
-		<activation>
-			<jdk>1.6</jdk>
-		</activation>
-		<modules>
-			<module>annotations</module>
-			<module>handler/jmx</module>
-			<module>webconsole-plugin</module>
-		</modules>
-	</profile>
-	<profile>
-		<id>examples</id>
-		<modules>
-			<module>examples</module>
-		</modules>
-	</profile>
-	<profile>
-		<id>tests</id>
-		<modules>
-			<module>tests</module>
-		</modules>
-	</profile>
+  <profile>
+    <id>java5</id>
+    <activation>
+      <jdk>1.5</jdk>
+    </activation>
+    <modules>
+      <module>annotations</module>
+      <module>handler/jmx</module>
+      <module>webconsole-plugin</module>
+      <module>handler/transaction</module>
+    </modules>
+  </profile>
+  <profile>
+    <id>java6</id>
+    <activation>
+      <jdk>1.6</jdk>
+    </activation>
+    <modules>
+      <module>annotations</module>
+      <module>handler/jmx</module>
+      <module>webconsole-plugin</module>
+      <module>handler/transaction</module>
+    </modules>
+  </profile>
+  <profile>
+    <id>examples</id>
+    <modules>
+      <module>examples</module>
+    </modules>
+  </profile>
+  <profile>
+    <id>tests</id>
+    <modules>
+      <module>tests</module>
+    </modules>
+  </profile>
   </profiles>
 
     <build>
@@ -94,10 +95,10 @@
         <artifactId>rat-maven-plugin</artifactId>
         <version>1.0-alpha-3</version>
         <configuration>
-        	<excludeSubProjects>true</excludeSubProjects>
-        	<excludes>
-        		<param>**/*</param>
-        	</excludes>
+          <excludeSubProjects>true</excludeSubProjects>
+          <excludes>
+            <param>**/*</param>
+          </excludes>
         </configuration>
       </plugin>
     </plugins>
