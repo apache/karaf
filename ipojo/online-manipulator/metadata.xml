@@ -17,13 +17,13 @@
  under the License.
 -->
 <ipojo>
-<component classname="org.apache.felix.org.apache.felix.ipojo.online.manipulator.IPOJOURLHandler" 
-	public="false"
-	immediate="true">
-	<provides>
-		<property name="url.handler.protocol" type="java.lang.String" value="ipojo"/>
-	</provides>
-	<callback transition="invalidate" method="stop"/>
+<component classname="org.apache.felix.ipojo.online.manipulator.IPOJOURLHandler" 
+  public="false"
+  immediate="true">
+  <provides>
+    <property name="url.handler.protocol" type="java.lang.String" value="ipojo"/>
+  </provides>
+  <callback transition="invalidate" method="stop"/>
 </component>
-<instance component="org.apache.felix.org.apache.felix.ipojo.online.manipulator.IPOJOURLHandler"/>
+<instance component="org.apache.felix.ipojo.online.manipulator.IPOJOURLHandler"/>
 </ipojo>

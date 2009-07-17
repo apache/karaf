@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.org.apache.felix.ipojo.online.manipulator;
+package org.apache.felix.ipojo.online.manipulator;
 
 import java.io.File;
 import java.io.FileOutputStream;
