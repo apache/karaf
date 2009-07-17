@@ -236,24 +236,30 @@ public abstract class AbstractBundleRepository implements IBundleRepository {
 					info.setDescription( attrs.getValue( "Bundle-Description" ) );
 					info.setVendor( attrs.getValue( "Bundle-Vendor" ) );
 
-					String importStr = attrs.getValue( "Import-Package" );
-					if ( importStr != null ) {
-						addImports( info, importStr );
+					String str = attrs.getValue( "Import-Package" );
+					if ( str != null ) {
+						addImports( info, str );
 					}
-					String exportStr = attrs.getValue( "Export-Package" );
-					if ( exportStr != null ) {
-						addExports( info, exportStr );
-					}
-
-					String reqStr = attrs.getValue( "Require-Bundle" );
-					if ( reqStr != null ) {
-						addRequires( info, reqStr );
+					
+					str = attrs.getValue( "Export-Package" );
+					if ( str != null ) {
+						addExports( info, str );
 					}
 
-					String cpStr = attrs.getValue( "Bundle-Classpath" );
+					str = attrs.getValue( "Require-Bundle" );
+					if ( str != null ) {
+						addRequires( info, str );
+					}
 
-					if ( cpStr != null ) {
-						addClasspath( info, cpStr );
+					str = attrs.getValue( "Bundle-Classpath" );
+
+					if ( str != null ) {
+						addClasspath( info, str );
+					}
+					
+					str = attrs.getValue( "Fragment-Host" );
+					if ( str != null ) {
+						addHost(info, str);
 					}
 				}
 				catch (RuntimeException e) {
@@ -376,5 +382,23 @@ public abstract class AbstractBundleRepository implements IBundleRepository {
 			}
 			info.addRequiredBundle(req);
 		}
+	}
+	
+	/**
+	 * @param info
+	 * @param str
+	 */
+	private void addHost(IBundleModelElement info, String str) {
+		String[] parts = str.split( ";" );
+		IRequiredBundle req = ModelElementFactory.getInstance().newModelElement(IRequiredBundle.class);
+		req.setSymbolicName( parts[0].trim() );
+		
+		if ( parts.length > 1 ) {
+			String part = parts[1].toLowerCase().trim();
+			if ( part.startsWith( "bundle-version=" ) ) {
+				req.setVersions( VersionRange.parseVersionRange(part.substring("bundle-version=".length())));
+			}
+		}
+		info.setFragmentHost(req);
 	}
 }
