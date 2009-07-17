@@ -34,6 +34,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.regex.Pattern;
@@ -47,6 +48,7 @@ import org.apache.felix.sigil.model.common.VersionRange;
 import org.apache.felix.sigil.model.common.VersionRangeBoundingRule;
 import org.apache.felix.sigil.model.eclipse.ISCAComposite;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
+import org.apache.felix.sigil.model.osgi.IBundleModelElement;
 import org.apache.felix.sigil.model.osgi.IPackageExport;
 import org.apache.felix.sigil.model.osgi.IPackageImport;
 import org.apache.felix.sigil.model.osgi.IRequiredBundle;
@@ -288,12 +290,12 @@ public class JavaHelper {
 		return unused;
 	}
 	
-	public static Collection<IClasspathEntry> resolveClasspathEntrys(ISigilProjectModel sigil, IProgressMonitor monitor)
+	public static Collection<IClasspathEntry> resolveClasspathEntrys(ISigilProjectModel newton, IProgressMonitor monitor)
 	throws CoreException {
 		if ( monitor == null ) {
 			monitor = Job.getJobManager().createProgressGroup();
 			monitor.beginTask("Resolving classpath for "
-					+ sigil.getSymbolicName(), 2);
+					+ newton.getSymbolicName(), 2);
 		}
 
 		ArrayList<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
@@ -302,17 +304,18 @@ public class JavaHelper {
 
 		IResolution resolution;
 		try {
-			resolution = SigilCore.getRepositoryManager(sigil).getBundleResolver().resolve(sigil, config, new ResolutionMonitorAdapter(monitor));
+			resolution = SigilCore.getRepositoryManager(newton).getBundleResolver().resolve(newton, config, new ResolutionMonitorAdapter(monitor));
 		} catch (ResolutionException e) {
 			throw SigilCore.newCoreException("Failed to resolve dependencies", e);
 		}
 
 		monitor.worked(1);
 
-		for (ISigilBundle bundle : resolution.getBundles()) {
-			if (!bundle.getBundleInfo().getSymbolicName().equals(sigil.getSymbolicName())) { // discard self reference...
+		Set<ISigilBundle> bundles = resolution.getBundles();
+		for (ISigilBundle bundle : bundles) {
+			if (!bundle.getBundleInfo().getSymbolicName().equals(newton.getSymbolicName())) { // discard self reference...
 				List<IModelElement> matched = resolution.getMatchedRequirements(bundle);
-				for (IClasspathEntry cpe : buildClassPathEntry(sigil, bundle, matched, monitor)) {
+				for (IClasspathEntry cpe : buildClassPathEntry(newton, bundle, bundles, matched, monitor)) {
 					entries.add(cpe);
 				}
 			}
@@ -324,8 +327,8 @@ public class JavaHelper {
 		return entries;
 	}
 
-	private static Collection<IClasspathEntry> buildClassPathEntry(ISigilProjectModel project, ISigilBundle provider, List<IModelElement> requirements, IProgressMonitor monitor) throws CoreException {
-		IAccessRule[] rules = buildAccessRules(project, provider, requirements);
+	private static Collection<IClasspathEntry> buildClassPathEntry(ISigilProjectModel project, ISigilBundle provider, Set<ISigilBundle> all, List<IModelElement> requirements, IProgressMonitor monitor) throws CoreException {
+		IAccessRule[] rules = buildAccessRules(project, provider, all, requirements);
 
 		ISigilProjectModel other = provider.getAncestor(ISigilProjectModel.class);
 
@@ -341,8 +344,9 @@ public class JavaHelper {
 		}
 	}
 
-	private static IAccessRule[] buildExportRules(ISigilBundle bundle) {
-		Set<IPackageExport> ex = bundle.getBundleInfo().getExports();
+	private static IAccessRule[] buildExportRules(ISigilBundle bundle, Set<ISigilBundle> all, List<IModelElement> requirements) {
+		Set<IPackageExport> ex = mergeExports( bundle, all, requirements );
+		
 		IAccessRule[] rules = new IAccessRule[ex.size() + 1];
 
 		Iterator<IPackageExport> iter = ex.iterator();
@@ -357,13 +361,29 @@ public class JavaHelper {
 		return rules;
 	}
 
+	private static Set<IPackageExport> mergeExports(ISigilBundle bundle, Set<ISigilBundle> all, List<IModelElement> requirements) {
+		IBundleModelElement headers = bundle.getBundleInfo();
+		// FIXME treeset as PackageExport does not implement equals/hashCode
+		TreeSet<IPackageExport> exports = new TreeSet<IPackageExport>(headers.getExports());
+		IRequiredBundle host = headers.getFragmentHost();
+		if ( host != null ) {
+			for ( ISigilBundle b : all ) {
+				if ( host.accepts(b.getBundleInfo()) ) {
+					exports.addAll( b.getBundleInfo().getExports() );
+					break;
+				}
+			}
+		}
+		return exports;
+	}
+
 	private static Collection<IClasspathEntry> newProjectEntry(
 			ISigilProjectModel n, IAccessRule[] rules,
 			IClasspathAttribute[] attributes, boolean export)
 			throws CoreException {
-		if (rules == null) {
-			rules = JavaHelper.buildExportRules(n.getBundle());
-		}
+//		if (rules == null) {
+//			rules = JavaHelper.buildExportRules(n.getBundle());
+//		}
 
 		if (attributes == null) {
 			attributes = new IClasspathAttribute[] {};
@@ -401,9 +421,9 @@ public class JavaHelper {
 			throws CoreException {
 		String name = bundle.getBundleInfo().getSymbolicName();
 
-		if (rules == null) {
-			rules = JavaHelper.buildExportRules(bundle);
-		}
+//		if (rules == null) {
+//			rules = JavaHelper.buildExportRules(bundle);
+//		}
 
 		if (attributes == null) {
 			attributes = new IClasspathAttribute[] {};
@@ -589,7 +609,7 @@ public class JavaHelper {
 		file.delete();
 	}
 
-	private static IAccessRule[] buildAccessRules(ISigilProjectModel project, ISigilBundle bundle, List<IModelElement> requirements) throws JavaModelException {
+	private static IAccessRule[] buildAccessRules(ISigilProjectModel project, ISigilBundle bundle, Set<ISigilBundle> all, List<IModelElement> requirements) throws JavaModelException {
 		ArrayList<IAccessRule> rules = new ArrayList<IAccessRule>();
 
 		for (IModelElement e : requirements) {
@@ -600,11 +620,11 @@ public class JavaHelper {
 						return new IAccessRule[] { ALLOW_ALL_RULE };
 					}
 					else {
-						return buildExportRules(bundle);
+						return buildExportRules(bundle, all, requirements);
 					}
 				}
 				else {
-					return buildExportRules(bundle);
+					return buildExportRules(bundle, all, requirements);
 				}
 			} else if (e instanceof IPackageImport) {
 				IPackageImport pi = (IPackageImport) e;
