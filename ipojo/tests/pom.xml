@@ -29,56 +29,64 @@
     <module>manipulator/metadata</module>
     <module>manipulator/primitives</module>
     <module>manipulator/creation</module>
-	<module>core/factories</module>
-	<module>core/lifecycle-controller</module>
-	<module>core/service-providing</module>
-	<module>core/lifecycle-callback</module>
-	<module>core/service-dependency</module>
-	<module>core/service-dependency-bindingpolicy</module>
-	<module>core/service-dependency-filter</module>
-	<module>core/service-dependency-comparator</module>
-	<module>core/service-providing-strategies</module>
-	<module>core/configuration</module>
-	<module>core/handler</module>
-	<module>core/external-handlers</module>
-	<module>core/bad-configurations</module>
-	<module>composite/composite-runtime</module>
-	<module>composite/import-export</module>
-	<module>composite/service-instance</module>
-	<module>composite/service-providing</module>
-	<module>handler/temporal</module>
-	<module>handler/whiteboard</module>
-	<module>handler/eventadmin</module>
-	<module>core/configadmin</module>
-	<module>api</module>
-	<module>online-manipulator</module>
+  <module>core/factories</module>
+  <module>core/lifecycle-controller</module>
+  <module>core/service-providing</module>
+  <module>core/lifecycle-callback</module>
+  <module>core/service-dependency</module>
+  <module>core/service-dependency-bindingpolicy</module>
+  <module>core/service-dependency-filter</module>
+  <module>core/service-dependency-comparator</module>
+  <module>core/service-providing-strategies</module>
+  <module>core/configuration</module>
+  <module>core/handler</module>
+  <module>core/external-handlers</module>
+  <module>core/bad-configurations</module>
+  <module>composite/composite-runtime</module>
+  <module>composite/import-export</module>
+  <module>composite/service-instance</module>
+  <module>composite/service-providing</module>
+  <module>handler/temporal</module>
+  <module>handler/whiteboard</module>
+  <module>handler/eventadmin</module>
+  <module>core/configadmin</module>
+  <module>api</module>
+  <module>online-manipulator</module>
    </modules>
    
    <profiles>
-	<profile>
-		<id>java5</id>
-		<activation>
-			<jdk>1.5</jdk>
-		</activation>
-		<modules>
-			<module>bundleAsiPOJO</module>
-			<module>core/annotations</module>
-			<module>manipulator/manipulator-java5</module>
-			<module>handler/transaction</module>
-		</modules>
-	</profile>
-	<profile>
-		<id>java6</id>
-		<activation>
-			<jdk>1.6</jdk>
-		</activation>
-		<modules>
-			<module>bundleAsiPOJO</module>
-			<module>core/annotations</module>
-			<module>manipulator/manipulator-java5</module>
-			<module>handler/transaction</module>
-		</modules>
-	</profile>
+  <profile>
+    <id>java5</id>
+    <activation>
+      <jdk>1.5</jdk>
+    </activation>
+    <modules>
+      <module>bundleAsiPOJO</module>
+      <module>core/annotations</module>
+      <module>manipulator/manipulator-java5</module>
+      <module>handler/transaction</module>
+    </modules>
+  </profile>
+  <profile>
+    <id>java6</id>
+    <activation>
+      <jdk>1.6</jdk>
+    </activation>
+    <modules>
+      <module>bundleAsiPOJO</module>
+      <module>core/annotations</module>
+      <module>manipulator/manipulator-java5</module>
+      <module>handler/transaction</module>
+    </modules>
+  </profile>
+  
+  <profile>
+    <id>integration-tests</id>
+    <modules>
+      <module>integration-tests</module>
+    </modules>
+  </profile>
+  
   </profiles>
   
 </project>
