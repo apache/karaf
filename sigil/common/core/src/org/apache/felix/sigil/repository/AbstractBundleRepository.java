@@ -293,7 +293,7 @@ public abstract class AbstractBundleRepository implements IBundleRepository {
 	}
 	
 	private void addClasspath(IBundleModelElement info, String cpStr) {
-		for ( String cp : cpStr.split( "," ) ) {
+		for ( String cp : cpStr.split( "\\s*,\\s*" ) ) {
 			info.addClasspath( cp );
 		}
 	}
