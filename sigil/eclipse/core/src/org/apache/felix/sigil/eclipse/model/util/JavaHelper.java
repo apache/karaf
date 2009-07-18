@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -321,6 +322,12 @@ public class JavaHelper {
 			}
 		}
 
+		Collections.sort(entries, new Comparator<IClasspathEntry>() {
+			public int compare(IClasspathEntry o1, IClasspathEntry o2) {
+				return o1.toString().compareTo(o2.toString());
+			}
+		});
+		
 		monitor.worked(1);
 		monitor.done();
 
