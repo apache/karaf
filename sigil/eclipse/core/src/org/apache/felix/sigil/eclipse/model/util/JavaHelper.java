@@ -484,27 +484,32 @@ public class JavaHelper {
 			// ok it's a jar could contain libs etc
 			try {
 				IPath cache = bundleCache.append(name);
-				Set<String> files = unpack(cache, bundle);
-				Set<String> classpath = filterClasspath(bundle.getBundleInfo().getClasspaths(), files);
-				ArrayList<IClasspathEntry> entries = new ArrayList<IClasspathEntry>(
-						classpath.size());
-
-				for (String cp : classpath) {
-					IPath p = ".".equals(cp) ? path : cache.append(cp);
-					if ( p.toFile().exists() ) {
-						IPath source = bundle.getSourcePathLocation();
-	
-						if (source != null && !source.toFile().exists()) {
-							source = null;
-						}
-	
-						IClasspathEntry e = JavaCore.newLibraryEntry(p, source,
-								bundle.getSourceRootPath(), rules, attributes,
-								exported);
-						entries.add(e);
-					}
+				Collection<String> classpath = bundle.getBundleInfo().getClasspaths();
+				ArrayList<IClasspathEntry> entries = new ArrayList<IClasspathEntry>(classpath.size());
+				IPath source = bundle.getSourcePathLocation();
+				
+				if (source != null && !source.toFile().exists()) {
+					source = null;
 				}
 
+				if ( !classpath.isEmpty() ) {
+					unpack(cache, bundle, classpath);
+					for (String cp : classpath) {
+						IPath p = ".".equals(cp) ? path : cache.append(cp);
+						if ( p.toFile().exists() ) {
+							IClasspathEntry e = JavaCore.newLibraryEntry(p, source,
+									bundle.getSourceRootPath(), rules, attributes,
+									exported);
+							entries.add(e);
+						}
+					}
+				}
+				else { // default classpath is .
+					IClasspathEntry e = JavaCore.newLibraryEntry(path, source,
+							bundle.getSourceRootPath(), rules, attributes,
+							exported);
+					entries.add(e);
+				}
 				return entries;
 			} catch (IOException e) {
 				throw SigilCore.newCoreException("Failed to unpack bundle", e);
@@ -512,58 +517,66 @@ public class JavaHelper {
 		}
 	}
 
-	private static Set<String> filterClasspath(Collection<String> classpaths,
-			Collection<String> files) {
-		HashSet<String> cp = new HashSet<String>(classpaths);
-		for (String c : cp) {
-			if (".".equals(c)) {
-				// ignore
-			} else {
-				if (!files.remove(c)) {
-					break;
+	private static HashMap<IPath, Collection<String>> unpacked = new HashMap<IPath, Collection<String>>();
+	
+	private static synchronized void unpack(IPath cache, ISigilBundle bundle, Collection<String> classpath) throws IOException {
+		Collection<String> check = unpacked.get(cache);
+
+		if ( check == null || !check.equals(classpath) ) {
+			if ( classpath.size() == 1 && classpath.contains(".") ) {
+				unpacked.put(cache, classpath);
+			}
+			else {
+				// trim . from path to avoid check later in inClasspath
+				check = new HashSet<String>(classpath);
+				check.remove( "." );
+				
+				File dir = createEmptyDir(cache);
+				FileInputStream fin = null;
+				try {
+					fin = new FileInputStream(bundle.getLocation().toFile());
+					JarInputStream in = new JarInputStream(fin);
+					JarEntry entry;
+					while ((entry = in.getNextJarEntry()) != null) {
+						if ( inClasspath(check, entry) ) {
+							File f = new File(dir, entry.getName());
+							if (entry.isDirectory()) {
+								createDir(f);
+							} else {
+								try {
+									File p = f.getParentFile();
+									createDir(p);
+									streamTo(in, f);
+								}
+								catch (RuntimeException e) {
+									SigilCore.error("Failed to unpack " + entry, e);
+								}
+							}
+						}
+					}
+					unpacked.put(cache, classpath);
+				}
+				finally {
+					if ( fin != null ) {
+						fin.close();
+					}
 				}
 			}
 		}
-
-		if (files.isEmpty()) {
-			cp.remove(".");
-		}
-
-		return cp;
 	}
 
-	private static HashMap<IPath, Set<String>> unpacked = new HashMap<IPath, Set<String>>();
-	
-	private static synchronized Set<String> unpack(IPath cache,
-			ISigilBundle bundle) throws IOException {
-		Set<String> files = unpacked.get(cache);
-
-		if ( files == null ) {
-			files = new HashSet<String>();
-			File dir = createEmptyDir(cache);
-			JarInputStream in = new JarInputStream(new FileInputStream(bundle
-					.getLocation().toFile()));
-			JarEntry entry;
-			while ((entry = in.getNextJarEntry()) != null) {
-				File f = new File(dir, entry.getName());
-				if (entry.isDirectory()) {
-					createDir(f);
-				} else {
-					try {
-						File p = f.getParentFile();
-						createDir(p);
-						streamTo(in, f);
-						files.add(entry.getName());
-					}
-					catch (RuntimeException e) {
-						SigilCore.error("Failed to unpack " + entry, e);
-					}
-				}
+	/**
+	 * @param classpath
+	 * @param entry
+	 * @return
+	 */
+	private static boolean inClasspath(Collection<String> classpath, JarEntry entry) {
+		for ( String s : classpath ) {
+			if ( entry.getName().startsWith(s) ) {
+				return true;
 			}
-			
-			unpacked.put(cache, files);
 		}
-		return files;
+		return false;
 	}
 
 	private static void createDir(File p) throws IOException {
