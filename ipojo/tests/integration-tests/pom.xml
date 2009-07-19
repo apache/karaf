@@ -121,12 +121,6 @@
 		</dependency>
 		<dependency>
 			<groupId>ipojo.tests</groupId>
-			<artifactId>tests.core.configadmin</artifactId>
-			<version>${ipojo.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>ipojo.tests</groupId>
 			<artifactId>tests.core.factories</artifactId>
 			<version>${ipojo.version}</version>
 			<scope>test</scope>
@@ -282,4 +276,18 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	
+	<profiles>
+		<profile>
+		<id>configadmin</id>
+		<dependencies>
+		<dependency>
+			<groupId>ipojo.tests</groupId>
+			<artifactId>tests.core.configadmin</artifactId>
+			<version>${ipojo.version}</version>
+			<scope>test</scope>
+		</dependency>
+		</dependencies>
+		</profile>
+	</profiles>
 </project>
