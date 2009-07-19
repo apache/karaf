@@ -23,6 +23,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
 
 /**
  * This class is used to cache vital information of a jar file
@@ -59,7 +60,8 @@ class Jar
         // Normalisation is needed to ensure that we don't treat (e.g.)
         // /tmp/foo and /tmp//foo differently.
         String location = b.getLocation();
-        if (location != null)
+        if (location != null &&
+                !location.equals(Constants.SYSTEM_BUNDLE_LOCATION))
         {
             URI uri;
             try
