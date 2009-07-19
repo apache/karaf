@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>org.cauldron.bld.core.tests</name>
+	<name>org.apache.felix.sigil.common.core.tests</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -10,8 +10,14 @@
 			<arguments>
 			</arguments>
 		</buildCommand>
+		<buildCommand>
+			<name>org.cauldron.sigil.core.newtonBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
 	</buildSpec>
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>org.cauldron.sigil.core.newtonnature</nature>
 	</natures>
 </projectDescription>

@@ -2,7 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.cauldron.bld.core"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="con" path="org.cauldron.sigil.core.classpathContainer"/>
+	<classpathentry kind="output" path="build/classes"/>
 </classpath>
