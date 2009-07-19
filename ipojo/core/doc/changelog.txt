@@ -1,3 +1,19 @@
+Changes from 1.2.0 to 1.4.0
+---------------------------
+** Bug
+    * [FELIX-985] - iPOJO analyzes already installed bundle by holding a lock
+    * [FELIX-1002] - iPOJO Static binding policy is not compliant with the Declarative Service static binding policy.
+    * [FELIX-1318] - Case mismatch problem of iPOJO custom handler name 
+** Improvement
+    * Update parent pom
+    * [FELIX-936] - Allowing publishing class as services
+    * [FELIX-966] - iPOJO: Better error reporting when getPojoObject return null
+    * [FELIX-982] - Declare iPOJO as a singleton bundle to avoid multiple version of the runtime at the same time
+    * [FELIX-1114] - callback after configuration change needed
+    * [FELIX-1163] - Improve error message when an array cannot be created due to a classloading issue
+    * [FELIX-1182] - iPOJO - reconfiguration : get all properties with the update callback
+    
+    
 Changes from 1.0.0 to 1.2.0
 ---------------------------
 ** Bug

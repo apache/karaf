@@ -29,6 +29,12 @@
   <artifactId>org.apache.felix.ipojo.online.manipulator</artifactId>
   <version>1.3.0-SNAPSHOT</version>
   <name>Apache Felix iPOJO URL Handler</name>
+  
+  <description>
+  iPOJO online manipulator allowing install time manipulation of iPOJO bundle.
+  </description>
+  <url>http://felix.apache.org/site/apache-felix-ipojo-online-manipulator.html</url>
+  
   <build>
     <plugins>
       <plugin>
@@ -40,6 +46,9 @@
           <instructions>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Private-Package>org.apache.felix.ipojo.online.manipulator</Private-Package>
+            <Bundle-DocURL>
+              http://felix.apache.org/site/apache-felix-ipojo-online-manipulator.html
+            </Bundle-DocURL>
             <Export-Package> org.apache.felix.ipojo.manipulator,
               org.apache.felix.ipojo.xml.parser,
               org.apache.felix.ipojo.manipulation,
@@ -47,6 +56,10 @@
               org.objectweb.asm.commons, org.objectweb.asm </Export-Package>
             <Import-Package> !org.objectweb.asm.tree, !sun.io, org.osgi.framework;version=1.3, *
             </Import-Package>
+            <Include-Resource> META-INF/LICENSE=LICENSE,
+              META-INF/LICENSE.asm=LICENSE.asm,
+              META-INF/NOTICE=NOTICE
+             </Include-Resource>
             <!-- <Embed-Dependency>xercesImpl|xml-resolver</Embed-Dependency> -->
           </instructions>
         </configuration>
@@ -71,10 +84,11 @@
           <useEclipseDefaultExcludes>true</useEclipseDefaultExcludes>
           <useMavenDefaultExcludes>true</useMavenDefaultExcludes>
           <excludes>
-            <param>doc/*</param>
+            <param>doc/**/*</param>
             <param>maven-eclipse.xml</param>
             <param>.checkstyle</param>
             <param>.externalToolBuilders/*</param>
+            <param>LICENSE.asm</param>
           </excludes>
         </configuration>
       </plugin>

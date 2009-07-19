@@ -1,0 +1,11 @@
+Version 1.4.0
+-------------
+    
+** Bug
+    * [FELIX-965] - Avoid classloading issue if an already manipulated class is used by the API
+
+** Improvement
+    * Update parent pom
+    * Initial commit
+    
+   

@@ -45,7 +45,7 @@
     <module>handler/whiteboard</module>
     <module>api</module>
     <module>online-manipulator</module>
-     <module>junit4osgi</module>
+    <module>junit4osgi</module>
   </modules>
 
 
@@ -59,7 +59,7 @@
       <module>annotations</module>
       <module>handler/jmx</module>
       <module>webconsole-plugin</module>
-      <module>handler/transaction</module>
+      <!--<module>handler/transaction</module>-->
     </modules>
   </profile>
   <profile>
@@ -71,7 +71,7 @@
       <module>annotations</module>
       <module>handler/jmx</module>
       <module>webconsole-plugin</module>
-      <module>handler/transaction</module>
+      <!--<module>handler/transaction</module>-->
     </modules>
   </profile>
   <profile>

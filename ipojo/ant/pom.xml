@@ -29,6 +29,14 @@
   <version>1.3.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <name>Apache Felix iPOJO Ant Task</name>
+  
+  <description>
+  Ant task to package iPOJO-powered bundles.
+  </description>
+  <url>
+  http://felix.apache.org/site/ipojo-ant-task.html
+  </url>
+  
   <dependencies>
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -63,6 +71,7 @@
             <Bundle-Name>iPOJO Ant Task</Bundle-Name>
             <Bundle-Vendor> The Apache Software Foundation </Bundle-Vendor>
             <Bundle-Description> iPOJO Ant Task </Bundle-Description>
+            <Bundle-DocURL>http://felix.apache.org/site/ipojo-ant-task.html</Bundle-DocURL>
             <Private-Package> org.apache.felix.ipojo.metadata,
               org.apache.felix.ipojo.manipulator,
               org.apache.felix.ipojo.xml.parser,
@@ -75,9 +84,10 @@
               org.apache.xerces.dom.*, org.apache.xerces.dom3.*
             </Private-Package>
             <Export-Package> org.apache.felix.ipojo.task </Export-Package>
-            <Include-Resource> META-INF/LICENCE=LICENSE,
+            <Include-Resource> META-INF/LICENSE=LICENSE,
               META-INF/NOTICE=NOTICE, META-INF/LICENSE.asm=LICENSE.asm
             </Include-Resource>
+            <Import-Package>!org.objectweb.asm.signature, !org.objectweb.asm.tree, !org.objectweb.asm.tree.analysis, *</Import-Package>
           </instructions>
           <obrRepository>NONE</obrRepository>
         </configuration>

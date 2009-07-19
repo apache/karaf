@@ -1,3 +1,10 @@
+Changes from 1.2.0 to 1.4.0
+---------------------------
+** Improvement
+    * Update parent pom
+    * [FELIX-996] - Arch -factory  command always prints out one component factory
+
+
 Changes from 1.0.0 to 1.2.0
 ---------------------------
 ** Bug

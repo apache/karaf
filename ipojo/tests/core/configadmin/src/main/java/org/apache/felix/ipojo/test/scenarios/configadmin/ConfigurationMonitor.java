@@ -44,7 +44,7 @@ public class ConfigurationMonitor implements ConfigurationListener {
             }
             long end = System.currentTimeMillis();
             duration = end - begin;
-            if (duration > 5000) {
+            if (duration > 10000) {
                 Assert.fail(mes + " -> Timeout when waiting for a reconfiguration of " + pid);
             }
         }
