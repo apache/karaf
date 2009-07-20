@@ -21,7 +21,7 @@
   <properties file="${ivy.settings.dir}/build.properties"/>
   <caches defaultCacheDir="${cache.dir}" />
 
-  <settings defaultResolver="local" circularDependencyStrategy="error" />
+  <settings defaultResolver="default" circularDependencyStrategy="error" />
 
   <!--
   <classpath file="${sigil-ivy-plugin.jar}" />
@@ -47,18 +47,26 @@
 	   config="${ivy.settings.dir}/sigil-repos.properties"
 	   extractBCP="true"/>
 
-    <filesystem name="local">
-      <ivy pattern="${repository.dir}/local/${repository.pattern}" />
-      <artifact pattern="${repository.dir}/local/${repository.pattern}" />
-    </filesystem>
+    <chain name="default" returnFirst="true">
+      <filesystem name="local">
+        <ivy pattern="${repository.dir}/local/${repository.pattern}" />
+        <artifact pattern="${repository.dir}/local/${repository.pattern}" />
+      </filesystem>
 
-    <filesystem name="shared">
-      <ivy pattern="${repository.dir}/shared/${repository.pattern}" />
-      <artifact pattern="${repository.dir}/shared/${repository.pattern}" />
-    </filesystem>
+      <filesystem name="shared">
+        <ivy pattern="${repository.dir}/shared/${repository.pattern}" />
+        <artifact pattern="${repository.dir}/shared/${repository.pattern}" />
+      </filesystem>
+
+    </chain>
+    <url name="eclipse">
+      <artifact pattern="http://download.eclipse.org/releases/ganymede/plugins/[module]_[revision].[ext]" />
+      <artifact pattern="http://download.eclipse.org/releases/ganymede/[module].[artifact]_[revision].[ext]" />
+    </url>
   </resolvers>
 
   <modules>
     <module organisation="sigil" resolver="sigil"/>
+    <module organisation="org.eclipse" resolver="eclipse"/>
   </modules>
 </ivysettings>

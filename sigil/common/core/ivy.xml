@@ -1,0 +1,9 @@
+<ivy-module version="1.0">
+  <info 
+        organisation="org.apache"
+        module="felix.sigil.common.core"
+        status="integration"/>
+   <publications>
+     <artifact name="org.apache.felix.sigil.common.core" />
+   </publications>
+</ivy-module>

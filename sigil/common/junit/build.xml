@@ -18,6 +18,6 @@
   under the License.
 -->
 
-<project name="bld-junit" default="bundle" basedir=".">
-  <import file="../bldcommon/common.xml"/>
+<project name="junit" default="bundle" basedir=".">
+  <import file="../build.xml"/>
 </project>

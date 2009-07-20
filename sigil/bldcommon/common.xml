@@ -17,10 +17,10 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<project name="common" 
+<project name="bldcommon" 
          xmlns:ivy="antlib:org.apache.ivy.ant">
     
-    <dirname property="common.dir" file="${ant.file.common}"/>
+    <dirname property="common.dir" file="${ant.file.bldcommon}"/>
     <property file="${common.dir}/sigil-defaults.properties" prefix="default."/>
     <property file="${common.dir}/build.properties"/>
 
@@ -141,8 +141,8 @@
     <target name="compile" depends="resolve"
     	description="--> compile the project">
         <!-- uncomment the following to debug classpath -->
-        <!--pathconvert property="cp" refid="javac.classpath"/>
-        <echo>Classpath - ${cp}</echo-->
+        <pathconvert property="cp" refid="javac.classpath"/>
+        <echo>Classpath - ${cp}</echo>
         <mkdir dir="${classes.dir}" />
         <javac srcdir="${src.dir}"
 		destdir="${classes.dir}"

@@ -19,10 +19,10 @@
 -->
 <ivy-module version="1.0">
     <info 
-        organisation="org.cauldron"
-        module="bld.junit"
+        organisation="org.apache"
+        module="felix.sigil.common.junit"
         status="integration"/>
-    <publications>
-      <artifact name="org.cauldron.sigil.junit" />
-    </publications>
+   <publications>
+     <artifact name="org.apache.felix.sigil.common.junit" />
+   </publications>
 </ivy-module>

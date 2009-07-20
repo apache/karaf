@@ -1,0 +1,3 @@
+<project name="core" default="build">
+      <import file="../build.xml"/>
+</project>

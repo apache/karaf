@@ -1,0 +1,3 @@
+<project name="eclipse" default="build-list">
+  <import file="../bldcommon/common.xml"/>
+</project>

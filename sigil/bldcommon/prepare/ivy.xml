@@ -1,0 +1,41 @@
+<ivy-module version="1.0">
+  <info organisation="org.apache"
+        module="felix.sigil.bldcommon.prepare"
+        status="integration"/>
+
+    <dependencies>
+        <!-- bundles -->
+        <dependency org="org.eclipse" name="org.eclipse.core.commands" rev="3.4.0.I20080509-2000" />
+        <dependency org="org.eclipse" name="org.eclipse.core.contenttype" rev="3.3.0.v20080604-1400" />
+        <dependency org="org.eclipse" name="org.eclipse.core.expressions" rev="3.4.1.r342_v20081203-0800" />
+        <dependency org="org.eclipse" name="org.eclipse.core.jobs" rev="3.4.1.R34x_v20081128" />
+        <dependency org="org.eclipse" name="org.eclipse.core.resources" rev="3.4.2.R34x_v20090126" />
+        <dependency org="org.eclipse" name="org.eclipse.debug.core" rev="3.4.1.v20090106_r342" />
+        <dependency org="org.eclipse" name="org.eclipse.debug.ui" rev="3.4.2.v20090110_r342" />
+        <dependency org="org.eclipse" name="org.eclipse.equinox.common" rev="3.4.0.v20080421-2006" />
+        <dependency org="org.eclipse" name="org.eclipse.jdt.core" rev="3.4.4.v_894_R34x" />
+        <dependency org="org.eclipse" name="org.eclipse.jdt.ui" rev="3.4.2.r342_v20090107-0800" />
+        <dependency org="org.eclipse" name="org.eclipse.jface.text" rev="3.4.2.r342_v20081119-0800" />
+        <dependency org="org.eclipse" name="org.eclipse.jface" rev="3.4.2.M20090107-0800" />
+        <dependency org="org.eclipse" name="org.eclipse.ltk.core.refactoring" rev="3.4.2.r342_v20081028-0800" />
+        <dependency org="org.eclipse" name="org.eclipse.pde.ui" rev="3.4.0.v20090202" />
+        <dependency org="org.eclipse" name="org.eclipse.swt.carbon.macosx" rev="3.4.1.v3452b" />
+        <dependency org="org.eclipse" name="org.eclipse.ui.cheatsheets" rev="3.3.101.v20080702_34x" />
+        <dependency org="org.eclipse" name="org.eclipse.ui.console" rev="3.3.1.v20090128_r342" />
+        <dependency org="org.eclipse" name="org.eclipse.ui.editors" rev="3.4.0.v20080603-2000" />
+        <dependency org="org.eclipse" name="org.eclipse.ui.forms" rev="3.3.103.v20081027_34x" />
+        <dependency org="org.eclipse" name="org.eclipse.ui.ide" rev="3.4.2.M20090127-1700" />
+        <dependency org="org.eclipse" name="org.eclipse.ui.workbench" rev="3.4.2.M20090127-1700" />
+
+        <dependency org="org.eclipse" name="org.eclipse.draw2d" rev="3.4.2.v20090114-1330" />
+        <dependency org="org.eclipse" name="org.eclipse.zest.core" rev="1.0.0.v20080115" />
+        <dependency org="org.eclipse" name="org.eclipse.zest.layouts" rev="1.0.0.v20080226" />
+	<!-- fragments -->
+        <dependency org="org.eclipse" name="org.eclipse.core.runtime" rev="3.4.0.v20080512" />
+        <dependency org="org.eclipse" name="org.eclipse.equinox.preferences" rev="3.2.201.R34x_v20080709" />
+        <dependency org="org.eclipse" name="org.eclipse.equinox.registry" rev="3.4.0.v20080516-0950" />
+        <dependency org="org.eclipse" name="org.eclipse.swt" rev="3.4.2.v3452b" />
+        <dependency org="org.eclipse" name="org.eclipse.text" rev="3.4.0.v20080605-1800" />
+        <dependency org="org.eclipse" name="org.eclipse.ui.workbench.texteditor" rev="3.4.1.r341_v20080827-1100" />
+    </dependencies>
+</ivy-module>
