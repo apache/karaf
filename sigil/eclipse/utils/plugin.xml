@@ -23,22 +23,22 @@
          point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester
             class="org.apache.felix.sigil.utils.properties.EditorPropertyTester"
-            id="org.cauldron.sigil.utils.editorPropertyTester"
-            namespace="org.cauldron.sigil"
+            id="org.apache.felix.sigil.utils.editorPropertyTester"
+            namespace="org.apache.felix.sigil"
             properties="isEditorOfType"
             type="org.eclipse.ui.IWorkbenchPart">
       </propertyTester>
       <propertyTester
             class="org.apache.felix.sigil.utils.properties.PartKindPropertyTester"
-            id="org.cauldron.sigil.runtime.PartKindPropertyTester"
-            namespace="org.cauldron.sigil"
+            id="org.apache.felix.sigil.runtime.PartKindPropertyTester"
+            namespace="org.apache.felix.sigil"
             properties="partKind,partId"
             type="org.eclipse.ui.IWorkbenchPart">
       </propertyTester>
       <propertyTester
             class="org.apache.felix.sigil.utils.properties.ResourceTypePropertyTester"
-            id="org.cauldron.sigil.utils.ResourcePropertyTester"
-            namespace="org.cauldron.sigil"
+            id="org.apache.felix.sigil.utils.ResourcePropertyTester"
+            namespace="org.apache.felix.sigil"
             properties="isResourceOfType"
             type="org.eclipse.core.resources.IResource">
       </propertyTester>

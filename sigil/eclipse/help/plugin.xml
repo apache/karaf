@@ -22,14 +22,14 @@
    <extension
          point="org.eclipse.ui.cheatsheets.cheatSheetContent">
       <category
-            id="org.cauldron.sigil.help.category"
+            id="org.apache.felix.sigil.help.category"
             name="Sigil">
       </category>
       <cheatsheet
-            category="org.cauldron.sigil.help.category"
+            category="org.apache.felix.sigil.help.category"
             composite="false"
             contentFile="cheatsheets/HelloWorld.xml"
-            id="org.cauldron.sigil.help.createProjectCheatSheet"
+            id="org.apache.felix.sigil.help.createProjectCheatSheet"
             name="Create a Hello World composite application">
       </cheatsheet>
    </extension>

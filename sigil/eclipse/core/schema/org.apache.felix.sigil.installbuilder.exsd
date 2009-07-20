@@ -1,27 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!--
-  Licensed to the Apache Software Foundation (ASF) under one
-  or more contributor license agreements.  See the NOTICE file
-  distributed with this work for additional information
-  regarding copyright ownership.  The ASF licenses this file
-  to you under the Apache License, Version 2.0 (the
-  "License"); you may not use this file except in compliance
-  with the License.  You may obtain a copy of the License at
-  
-    http://www.apache.org/licenses/LICENSE-2.0
-  
-  Unless required by applicable law or agreed to in writing,
-  software distributed under the License is distributed on an
-  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-  KIND, either express or implied.  See the License for the
-  specific language governing permissions and limitations
-  under the License.
--->
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.cauldron.sigil.core" xmlns="http://www.w3.org/2001/XMLSchema">
+<schema targetNamespace="org.apache.felix.sigil.eclipse.core" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="org.cauldron.sigil.core" id="org.cauldron.sigil.repository" name="Sigil Bundle Repository Provider"/>
+         <meta.schema plugin="org.apache.felix.sigil.eclipse.core" id="org.apache.felix.sigil.installbuilder" name="OSGi Install Builder"/>
       </appinfo>
       <documentation>
          [Enter description of this extension point.]
@@ -36,7 +18,7 @@
       </annotation>
       <complexType>
          <sequence>
-            <element ref="provider" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="builder" minOccurs="0" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -65,50 +47,19 @@
       </complexType>
    </element>
 
-   <element name="provider">
+   <element name="builder">
       <complexType>
-         <attribute name="id" type="string" use="required">
-            <annotation>
-               <documentation>
-                  
-               </documentation>
-            </annotation>
-         </attribute>
-         <attribute name="type" type="string" use="required">
-            <annotation>
-               <documentation>
-                  
-               </documentation>
-            </annotation>
-         </attribute>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.cauldron.sigil.repository.IRepositoryProvider"/>
+                  <meta.attribute kind="java" basedOn=":org.apache.felix.sigil.eclipse.install.IOSGiInstallBuilder"/>
                </appinfo>
             </annotation>
          </attribute>
-         <attribute name="icon" type="string">
-            <annotation>
-               <documentation>
-                  
-               </documentation>
-               <appinfo>
-                  <meta.attribute kind="resource"/>
-               </appinfo>
-            </annotation>
-         </attribute>
-         <attribute name="dynamic" type="boolean" use="default" value="true">
-            <annotation>
-               <documentation>
-                  
-               </documentation>
-            </annotation>
-         </attribute>
-         <attribute name="defaultLevel" type="string" use="default" value="500">
+         <attribute name="priority" type="string">
             <annotation>
                <documentation>
                   

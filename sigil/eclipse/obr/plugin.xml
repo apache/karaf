@@ -20,19 +20,19 @@
 <?eclipse version="3.2"?>
 <plugin>
    <extension
-         point="org.cauldron.sigil.repositoryprovider">
+         point="org.apache.felix.sigil.repositoryprovider">
       <provider
-            class="org.cauldron.bld.obr.OBRRepositoryProvider"
+            class="org.apache.felix.sigil.obr.OBRRepositoryProvider"
             dynamic="true"
-            id="org.cauldron.sigil.obr.provider"
+            id="org.apache.felix.sigil.obr.provider"
             type="OSGi Bundle Repository (OBR)">
       </provider>
    </extension>
    <extension
-         point="org.cauldron.sigil.ui.repositorywizard">
+         point="org.apache.felix.sigil.ui.repositorywizard">
       <wizard
             class="org.apache.felix.sigil.obr.eclipse.OBRRepositoryWizard"
-            repository="org.cauldron.sigil.obr.provider">
+            repository="org.apache.felix.sigil.obr.provider">
       </wizard>
    </extension>
 

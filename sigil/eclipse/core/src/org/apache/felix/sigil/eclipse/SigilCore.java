@@ -85,41 +85,41 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class SigilCore extends AbstractUIPlugin {
 
+	private static final String BASE = "org.apache.felix.sigil";
 	// The plug-in ID
-	public static final String PLUGIN_ID = "org.cauldron.sigil.core";
-    public static final String NATURE_ID = PLUGIN_ID + ".sigilnature";
-    public static final String PREFERENCES_ID = "org.cauldron.sigil.ui.preferences.SigilPreferencePage";
-    public static final String OSGI_INSTALLS_PREFERENCES_ID = "org.cauldron.sigil.ui.preferences.osgiInstalls";
-    public static final String EXCLUDED_RESOURCES_PREFERENCES_ID = "org.cauldron.sigil.ui.preferences.excludedResources";
-	public static final String REPOSITORIES_PREFERENCES_ID = "org.cauldron.sigil.ui.preferences.repositoriesPreferencePage";
-    public static final String OSGI_SCRIPT_TYPE = "org.cauldron.sigil.content.OSGiScriptType";
+	public static final String PLUGIN_ID = BASE + ".eclipse.core";
+    public static final String NATURE_ID = BASE + ".sigilnature";
+    public static final String PREFERENCES_ID = BASE + ".ui.preferences.SigilPreferencePage";
+    public static final String OSGI_INSTALLS_PREFERENCES_ID = BASE + ".ui.preferences.osgiInstalls";
+    public static final String EXCLUDED_RESOURCES_PREFERENCES_ID = BASE + ".ui.preferences.excludedResources";
+	public static final String REPOSITORIES_PREFERENCES_ID = BASE + ".ui.preferences.repositoriesPreferencePage";
     public static final String SIGIL_PROJECT_FILE = IBldProject.PROJECT_FILE;
 	public static final String BUILDER_ID = PLUGIN_ID + ".sigilBuilder";
-	public static final String CLASSPATH_CONTAINER_PATH = PLUGIN_ID + ".classpathContainer";
+	public static final String CLASSPATH_CONTAINER_PATH = BASE + ".classpathContainer";
 
-    public static final String OSGI_INSTALLS = "org.cauldron.osgi.installs";
-	public static final String OSGI_DEFAULT_INSTALL_ID = "org.cauldron.osgi.default.install.id";
-	public static final String OSGI_INSTALL_PREFIX = "org.cauldron.osgi.install.";
-	public static final String OSGI_SOURCE_LOCATION = "org.cauldron.osgi.source.location";
-	public static final String OSGI_INSTALL_CHECK_PREFERENCE = "org.cauldron.osgi.install.check";
-	public static final String LIBRARY_KEYS_PREF = "org.cauldron.osgi.library.keys";
-	public static final String PREFERENCES_REBUILD_PROJECTS = "org.cauldron.sigil.rebuild.projects";
-	public static final String QUALIFY_VERSIONS = "org.cauldron.sigil.qualify.versions";
+    public static final String OSGI_INSTALLS = BASE + ".osgi.installs";
+	public static final String OSGI_DEFAULT_INSTALL_ID = BASE + ".osgi.default.install.id";
+	public static final String OSGI_INSTALL_PREFIX = BASE + ".osgi.install.";
+	public static final String OSGI_SOURCE_LOCATION = BASE + ".osgi.source.location";
+	public static final String OSGI_INSTALL_CHECK_PREFERENCE = BASE + ".osgi.install.check";
+	public static final String LIBRARY_KEYS_PREF = BASE + ".library.keys";
+	public static final String PREFERENCES_REBUILD_PROJECTS = BASE + ".rebuild.projects";
+	public static final String QUALIFY_VERSIONS = BASE + ".qualify.versions";
 	
-	public static final String DEFAULT_VERSION_LOWER_BOUND = "org.cauldron.sigil.versionLowerBound";
-	public static final String DEFAULT_VERSION_UPPER_BOUND = "org.cauldron.sigil.versionUpperBound";
+	public static final String DEFAULT_VERSION_LOWER_BOUND = BASE + ".versionLowerBound";
+	public static final String DEFAULT_VERSION_UPPER_BOUND = BASE + ".versionUpperBound";
 
-	public static final String DEFAULT_EXCLUDED_RESOURCES = "org.cauldron.sigil.excludedResources";
-	public static final String PREFERENCES_NOASK_OSGI_INSTALL = "org.cauldron.sigil.noAskOSGIHome";
-	public static final String PREFERENCES_ADD_IMPORT_FOR_EXPORT = "org.cauldron.sigil.addImportForExport";
-	public static final String INCLUDE_OPTIONAL_DEPENDENCIES = "org.cauldron.sigil.includeOptionalDependencies";
+	public static final String DEFAULT_EXCLUDED_RESOURCES = BASE + ".excludedResources";
+	public static final String PREFERENCES_NOASK_OSGI_INSTALL = BASE + ".noAskOSGIHome";
+	public static final String PREFERENCES_ADD_IMPORT_FOR_EXPORT = BASE + ".addImportForExport";
+	public static final String INCLUDE_OPTIONAL_DEPENDENCIES = BASE + ".includeOptionalDependencies";
 
-	public static final String INSTALL_BUILDER_EXTENSION_POINT_ID = "org.cauldron.sigil.installbuilder";
-	public static final String REPOSITORY_PROVIDER_EXTENSION_POINT_ID = "org.cauldron.sigil.repositoryprovider";
+	public static final String INSTALL_BUILDER_EXTENSION_POINT_ID = BASE + ".installbuilder";
+	public static final String REPOSITORY_PROVIDER_EXTENSION_POINT_ID = BASE + ".repositoryprovider";
 	
-	public static final String MARKER_UNRESOLVED_DEPENDENCY = "org.cauldron.sigil.unresolvedDependencyMarker";
-	public static final String MARKER_UNRESOLVED_IMPORT_PACKAGE = "org.cauldron.sigil.unresolvedDependencyMarker.importPackage";
-	public static final String MARKER_UNRESOLVED_REQUIRE_BUNDLE = "org.cauldron.sigil.unresolvedDependencyMarker.requireBundle";
+	public static final String MARKER_UNRESOLVED_DEPENDENCY = BASE + ".unresolvedDependencyMarker";
+	public static final String MARKER_UNRESOLVED_IMPORT_PACKAGE = BASE + ".unresolvedDependencyMarker.importPackage";
+	public static final String MARKER_UNRESOLVED_REQUIRE_BUNDLE = BASE + ".unresolvedDependencyMarker.requireBundle";
 	public static final String REPOSITORY_SET = PLUGIN_ID + ".repository.set";
 	public static final String PREFERENCES_INCLUDE_OPTIONAL = PLUGIN_ID + ".include.optional";
 	
