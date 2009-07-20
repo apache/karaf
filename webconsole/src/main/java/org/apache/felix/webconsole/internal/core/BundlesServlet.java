@@ -114,7 +114,8 @@ public class BundlesServlet extends BaseWebConsolePlugin
         }
         if ( reqInfo.extension.equals("json")  )
         {
-            this.renderJSON(response, reqInfo.bundle);
+            final String pluginRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_PLUGIN_ROOT );
+            this.renderJSON(response, reqInfo.bundle, pluginRoot);
 
             // nothing more to do
             return;
@@ -207,7 +208,8 @@ public class BundlesServlet extends BaseWebConsolePlugin
             } catch (InterruptedException e) {
                 // we ignore this
             }
-            this.renderJSON(resp, null);
+            final String pluginRoot = ( String ) req.getAttribute( WebConsoleConstants.ATTR_PLUGIN_ROOT );
+            this.renderJSON(resp, null, pluginRoot);
         }
         else
         {
@@ -300,7 +302,8 @@ public class BundlesServlet extends BaseWebConsolePlugin
             pw.println( "<div id='plugin_content'/>");
             Util.startScript( pw );
             pw.print( "renderBundles(");
-            writeJSON(pw, reqInfo.bundle);
+            final String pluginRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_PLUGIN_ROOT );
+            writeJSON(pw, reqInfo.bundle, pluginRoot );
             pw.println(");" );
             Util.endScript( pw );
         }
@@ -319,16 +322,16 @@ public class BundlesServlet extends BaseWebConsolePlugin
         pw.println( "</form></div");
     }
 
-    private void renderJSON( final HttpServletResponse response, final Bundle bundle ) throws IOException
+    private void renderJSON( final HttpServletResponse response, final Bundle bundle, final String pluginRoot ) throws IOException
     {
         response.setContentType( "application/json" );
         response.setCharacterEncoding( "UTF-8" );
 
         final PrintWriter pw = response.getWriter();
-        writeJSON(pw, bundle);
+        writeJSON(pw, bundle, pluginRoot);
     }
 
-    private void writeJSON( final PrintWriter pw, final Bundle bundle) throws IOException
+    private void writeJSON( final PrintWriter pw, final Bundle bundle, final String pluginRoot) throws IOException
     {
         final Bundle[] allBundles = this.getBundles();
         final String statusLine = this.getStatusLine(allBundles);
@@ -351,7 +354,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
 
             for ( int i = 0; i < bundles.length; i++ )
             {
-                bundleInfo( jw, bundles[i], bundle != null );
+                bundleInfo( jw, bundles[i], bundle != null, pluginRoot );
             }
 
             jw.endArray();
@@ -426,7 +429,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
         return buffer.toString();
     }
 
-    private void bundleInfo( JSONWriter jw, Bundle bundle, boolean details ) throws JSONException
+    private void bundleInfo( JSONWriter jw, Bundle bundle, boolean details, final String pluginRoot ) throws JSONException
     {
         jw.object();
         jw.key( "id" );
@@ -460,7 +463,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
 
         if ( details )
         {
-            bundleDetails( jw, bundle );
+            bundleDetails( jw, bundle, pluginRoot );
         }
 
         jw.endObject();
@@ -542,7 +545,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
     }
 
 
-    private void bundleDetails( JSONWriter jw, Bundle bundle ) throws JSONException
+    private void bundleDetails( JSONWriter jw, Bundle bundle, final String pluginRoot ) throws JSONException
     {
         Dictionary headers = bundle.getHeaders();
 
@@ -569,11 +572,11 @@ public class BundlesServlet extends BaseWebConsolePlugin
 
         if ( bundle.getState() == Bundle.INSTALLED )
         {
-            listImportExportsUnresolved( jw, bundle );
+            listImportExportsUnresolved( jw, bundle, pluginRoot );
         }
         else
         {
-            listImportExport( jw, bundle );
+            listImportExport( jw, bundle, pluginRoot );
         }
 
         listServices( jw, bundle );
@@ -591,7 +594,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
     }
 
 
-    private void listImportExport( JSONWriter jw, Bundle bundle ) throws JSONException
+    private void listImportExport( JSONWriter jw, Bundle bundle, final String pluginRoot ) throws JSONException
     {
         PackageAdmin packageAdmin = getPackageAdmin();
         if ( packageAdmin == null )
@@ -683,7 +686,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
                 for ( int i = 0; i < packages.length; i++ )
                 {
                     ExportedPackage ep = packages[i];
-                    collectImport( val, ep.getName(), ep.getVersion(), false, ep );
+                    collectImport( val, ep.getName(), ep.getVersion(), false, ep, pluginRoot );
                 }
             }
             else
@@ -701,14 +704,14 @@ public class BundlesServlet extends BaseWebConsolePlugin
             for ( Iterator ui = usingBundles.values().iterator(); ui.hasNext(); )
             {
                 Bundle usingBundle = ( Bundle ) ui.next();
-                val.put( getBundleDescriptor( usingBundle ) );
+                val.put( getBundleDescriptor( usingBundle, pluginRoot ) );
             }
             keyVal( jw, "Importing Bundles", val );
         }
     }
 
 
-    private void listImportExportsUnresolved( JSONWriter jw, Bundle bundle ) throws JSONException
+    private void listImportExportsUnresolved( JSONWriter jw, Bundle bundle, final String pluginRoot ) throws JSONException
     {
         Dictionary dict = bundle.getHeaders();
 
@@ -802,7 +805,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
                             }
                         }
 
-                        collectImport( val, r4Import.getName(), r4Import.getVersion(), r4Import.isOptional(), ep );
+                        collectImport( val, r4Import.getName(), r4Import.getVersion(), r4Import.isOptional(), ep, pluginRoot );
                     }
                 }
                 else
@@ -925,7 +928,8 @@ public class BundlesServlet extends BaseWebConsolePlugin
     }
 
 
-    private void collectImport( JSONArray array, String name, Version version, boolean optional, ExportedPackage export )
+    private void collectImport( JSONArray array, String name, Version version, boolean optional,
+            ExportedPackage export, final String pluginRoot )
     {
         StringBuffer val = new StringBuffer();
         boolean bootDel = isBootDelegated( name );
@@ -937,7 +941,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
 
         if ( export != null )
         {
-            val.append( getBundleDescriptor( export.getExportingBundle() ) );
+            val.append( getBundleDescriptor( export.getExportingBundle(), pluginRoot ) );
 
             if ( bootDel )
             {
@@ -1015,10 +1019,10 @@ public class BundlesServlet extends BaseWebConsolePlugin
     }
 
 
-    private String getBundleDescriptor( Bundle bundle )
+    private String getBundleDescriptor( Bundle bundle, final String pluginRoot )
     {
         StringBuffer val = new StringBuffer();
-        val.append("<a href='").append("./").append(bundle.getBundleId()).append("'>");
+        val.append("<a href='").append(pluginRoot).append('/').append(bundle.getBundleId()).append("'>");
         if ( bundle.getSymbolicName() != null )
         {
             // list the bundle name if not null
