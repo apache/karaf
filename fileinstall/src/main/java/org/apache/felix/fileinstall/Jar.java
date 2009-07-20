@@ -36,7 +36,6 @@ import org.osgi.framework.Constants;
 class Jar
 {
     private String path;
-    private long length = -1;
     private long lastModified = -1;
     private long bundleId = -1;
 
@@ -49,14 +48,13 @@ class Jar
         // /tmp/foo and /tmp//foo differently.
         path = file.toURI().normalize().getPath();
         lastModified = file.lastModified();
-        length = file.length();
     }
 
     Jar(Bundle b) throws URISyntaxException
     {
         // Convert to a URI because the location of a bundle
         // is typically a URI. At least, that's the case for
-        // autostart bundles.
+        // autostart bundles and bundles installed by fileinstall.
         // Normalisation is needed to ensure that we don't treat (e.g.)
         // /tmp/foo and /tmp//foo differently.
         String location = b.getLocation();
@@ -92,16 +90,6 @@ class Jar
     public void setLastModified(long lastModified)
     {
         this.lastModified = lastModified;
-    }
-
-    public long getLength()
-    {
-        return length;
-    }
-
-    public void setLength(long length)
-    {
-        this.length = length;
     }
 
     public long getBundleId()

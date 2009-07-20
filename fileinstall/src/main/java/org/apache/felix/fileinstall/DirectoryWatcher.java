@@ -714,7 +714,9 @@ public class DirectoryWatcher extends Thread
             InputStream in = new FileInputStream(file);
             try
             {
-                bundle = context.installBundle(path, in);
+                // Some users wanted the location to be a URI (See FELIX-1269)
+                final String location = file.toURI().normalize().toString();
+                bundle = context.installBundle(location, in);
             }
             finally
             {
@@ -786,7 +788,6 @@ public class DirectoryWatcher extends Thread
             bundle.update(in);
             startupFailures.remove(bundle);
             jar.setLastModified(bundle.getLastModified());
-            jar.setLength(file.length());
             log("Updated " + jar.getPath(), null);
             return bundle;
         }
