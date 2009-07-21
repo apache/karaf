@@ -17,6 +17,7 @@
 package org.apache.felix.karaf.gshell.config;
 
 import java.util.Dictionary;
+import java.util.Properties;
 
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Option;
@@ -37,6 +38,9 @@ public class EditCommand extends ConfigCommandSupport {
             return;
         }
         Dictionary props = admin.getConfiguration(pid).getProperties();
+        if (props == null) {
+            props = new Properties();
+        }
         this.session.put(PROPERTY_CONFIG_PID, pid);
         this.session.put(PROPERTY_CONFIG_PROPS, props);
     }
