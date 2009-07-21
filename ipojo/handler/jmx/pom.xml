@@ -27,7 +27,7 @@
   <packaging>bundle</packaging>
   <name>Apache Felix iPOJO JMX Handler</name>
   <artifactId>org.apache.felix.ipojo.handler.jmx</artifactId>
-  <version>1.4.0</version>
+  <version>1.5.0-SNAPSHOT</version>
   
   <description>
   iPOJO extension to expose instances as MBean inside a MBean Server.
@@ -119,10 +119,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <scm>
-    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.ipojo.handler.jmx-1.4.0</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.ipojo.handler.jmx-1.4.0</developerConnection>
-    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.ipojo.handler.jmx-1.4.0</url>
-  </scm>
 </project>
