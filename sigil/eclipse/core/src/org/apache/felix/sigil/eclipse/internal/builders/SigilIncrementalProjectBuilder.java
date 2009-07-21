@@ -275,11 +275,10 @@ public class SigilIncrementalProjectBuilder extends IncrementalProjectBuilder {
 		case IClasspathEntry.CPE_LIBRARY: {
 			IPath p = cp.getPath();
 			
-			IPath ppath = sigil.getProject().getFullPath();
-			
-			if ( ppath.isPrefixOf(p) ) {
-				p = sigil.getProject().getLocation().append( p.removeFirstSegments(1) );
-			}
+			IProject project = sigil.getProject().getWorkspace().getRoot().getProject(p.segment(0));
+			if ( project.exists() ) {
+				p = project.getLocation().append( p.removeFirstSegments(1) );
+			}				
 			
 			files.add( p.toFile() );
 			break;
