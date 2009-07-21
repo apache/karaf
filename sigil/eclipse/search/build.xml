@@ -17,6 +17,6 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<project name="core" default="build">
+<project name="eclipse.search" default="build">
       <import file="../build.xml"/>
 </project>

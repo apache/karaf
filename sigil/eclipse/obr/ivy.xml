@@ -17,6 +17,12 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<project name="core" default="build">
-      <import file="../build.xml"/>
-</project>
+<ivy-module version="1.0">
+  <info 
+        organisation="org.apache"
+        module="felix.sigil.eclipse.obr"
+        status="integration"/>
+   <publications>
+     <artifact name="org.apache.felix.sigil.eclipse.obr" />
+   </publications>
+</ivy-module>
