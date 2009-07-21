@@ -58,7 +58,7 @@ public class Resolver
     public Resolver(Logger logger, String fwkExecEnvStr)
     {
         m_logger = logger;
-        m_fwkExecEnvStr = fwkExecEnvStr.trim();
+        m_fwkExecEnvStr = (fwkExecEnvStr != null) ? fwkExecEnvStr.trim() : null;
         m_fwkExecEnvSet = parseExecutionEnvironments(fwkExecEnvStr);
     }
 
@@ -1632,14 +1632,16 @@ public class Resolver
      * system variable 'org.osgi.framework.executionenvironment'.
      * @param frameworkEnvironment Comma delimited string of provided execution environments
     **/
-    private static Set parseExecutionEnvironments(String frameworkEnvironment)
+    private static Set parseExecutionEnvironments(String fwkExecEnvStr)
     {
-        StringTokenizer tokens = new StringTokenizer(frameworkEnvironment, ",");
-
-        Set newSet = new HashSet(tokens.countTokens());
-        while (tokens.hasMoreTokens())
+        Set newSet = new HashSet();
+        if (fwkExecEnvStr != null)
         {
-            newSet.add(tokens.nextToken().trim());
+            StringTokenizer tokens = new StringTokenizer(fwkExecEnvStr, ",");
+            while (tokens.hasMoreTokens())
+            {
+                newSet.add(tokens.nextToken().trim());
+            }
         }
         return newSet;
     }
