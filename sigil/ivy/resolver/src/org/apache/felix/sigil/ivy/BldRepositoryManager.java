@@ -37,10 +37,10 @@ public class BldRepositoryManager extends AbstractRepositoryManager
 
     static
     {
-        aliases.put( "filesystem", "org.cauldron.bld.core.repository.FileSystemRepositoryProvider" );
-        aliases.put( "obr", "org.cauldron.bld.obr.OBRRepositoryProvider" );
-        aliases.put( "project", "org.cauldron.bld.ivy.ProjectRepositoryProvider" );
-        aliases.put( "system", "org.cauldron.bld.core.repository.SystemRepositoryProvider" );
+        aliases.put( "filesystem", "org.apache.felix.sigil.core.repository.FileSystemRepositoryProvider" );
+        aliases.put( "obr", "org.apache.felix.sigil.obr.OBRRepositoryProvider" );
+        aliases.put( "project", "org.apache.felix.sigil.ivy.ProjectRepositoryProvider" );
+        aliases.put( "system", "org.apache.felix.sigil.core.repository.SystemRepositoryProvider" );
     };
 
     private Map<String, Properties> repos;
