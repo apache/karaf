@@ -32,6 +32,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
@@ -142,6 +143,7 @@ public class SigilResolver extends BasicResolver implements IBldResolver {
 
 		ISigilBundle bundle = resolve(id);
 		if (bundle == null) {
+			Log.error( "Failed to find bundle for module " + id );
 			return null;
 		}
 
@@ -208,6 +210,8 @@ public class SigilResolver extends BasicResolver implements IBldResolver {
 		bundle.setSymbolicName(id.getName());
 		bundle.setVersions(VersionRange.parseVersionRange(range));
 
+		Log.verbose("searching for " + bundle);
+		
 		try {
 			IResolution resolution = resolveOrFail(bundle, false);
 			ISigilBundle[] bundles = resolution.getBundles().toArray(new ISigilBundle[0]);
@@ -215,6 +219,7 @@ public class SigilResolver extends BasicResolver implements IBldResolver {
 				return bundles[0];
 			}
 		} catch (ResolutionException e) {
+			Log.warn( e.getMessage() );
 			return null;
 		}
 		return null;
@@ -295,9 +300,8 @@ public class SigilResolver extends BasicResolver implements IBldResolver {
     			for (String j : bcp.split(",\\s*")) {
     				if (j.equals(".")) {
             			content.append("<artifact/>\n");
-    				} else if (!j.endsWith("component-activator.jar")) {
-    					if (j.endsWith(".jar"))
-    						j = j.substring(0, j.length() - 4);
+        			} else if (j.endsWith(".jar") && bundleContains(bundle, j)) {
+        				j = j.substring(0, j.length() - 4);
             			content.append(format("<artifact name=\"%s!%s\"/>\n", module, j));
         			}
     			}
@@ -313,7 +317,32 @@ public class SigilResolver extends BasicResolver implements IBldResolver {
 			content.append("</ivy-module>\n");
 		}
 		
-        private String readBundleClassPath(ISigilBundle bundle) {
+        private boolean bundleContains(ISigilBundle bundle, String j) {
+        	URI uri = bundle.getBundleInfo().getUpdateLocation();
+            InputStream is = null;
+			try {
+    			URL url =  (uri != null) ? uri.toURL() : bundle.getLocation().toFile().toURL();
+				is = url.openStream();
+            	JarInputStream js = new JarInputStream(is, false);
+            	JarEntry entry;
+            	while ( (entry = js.getNextJarEntry()) != null ) {
+            		if ( j.equals( entry.getName() ) ) {
+            			return true;
+            		}
+            	}
+			} catch (IOException e) {
+			} finally {
+				if (is != null) {
+					try {
+						is.close();
+					} catch (IOException e2) {
+					}
+				}
+			}
+        	return false;
+		}
+
+		private String readBundleClassPath(ISigilBundle bundle) {
         	if (bundle == null)
         		return null;
         	
