@@ -1,0 +1,801 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html><head>
+
+
+  
+    <title>Apache Felix - apache-felix-ipojo-api</title>
+    <link rel="stylesheet" href="apache-felix-ipojo-api_files/site.css" type="text/css" media="all">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  </head><body>
+    <div class="title"><div class="logo"><a href="http://felix.apache.org/site/index.html"><img alt="Apache Felix" src="apache-felix-ipojo-api_files/logo.png" border="0"></a></div><div class="header"><a href="http://www.apache.org/"><img alt="Apache" src="apache-felix-ipojo-api_files/apache.png" border="0"></a></div></div>
+    <div class="menu">
+<ul>
+	<li><a href="http://felix.apache.org/site/news.html" title="news">news</a></li>
+	<li><a href="http://felix.apache.org/site/license.html" title="license">license</a></li>
+	<li><a href="http://felix.apache.org/site/downloads.cgi" rel="nofollow">downloads</a></li>
+	<li><a href="http://felix.apache.org/site/documentation.html" title="documentation">documentation</a></li>
+	<li><a href="http://felix.apache.org/site/mailinglists.html" title="mailinglists">mailing lists</a></li>
+	<li><a href="http://felix.apache.org/site/contributing.html" title="Contributing">contributing</a></li>
+	<li><a href="http://www.apache.org/" rel="nofollow">asf</a></li>
+	<li><a href="http://www.apache.org/foundation/sponsorship.html" rel="nofollow">sponsorship</a></li>
+	<li><a href="http://www.apache.org/foundation/thanks.html" rel="nofollow">sponsors</a>
+<!-- ApacheCon Ad -->
+<iframe src="apache-felix-ipojo-api_files/button.html" style="border-width: 0pt; float: left;" scrolling="no" frameborder="0" height="135" width="135"></iframe>
+<p style="height: 100px;">
+<!-- ApacheCon Ad -->
+</p></li></ul> </div>
+    <div class="main">
+<style type="text/css">
+ @import url(http://people.apache.org/~clement/ipojo/site/superfish.css); 
+</style>
+
+<style type="text/css">
+ @import url(http://people.apache.org/~clement/ipojo/site/style.css); 
+</style>
+
+<p>
+<script class="javascript" src="apache-felix-ipojo-api_files/shCore.js"></script>
+<script class="javascript" src="apache-felix-ipojo-api_files/shBrushCSharp.js"></script>
+<script class="javascript" src="apache-felix-ipojo-api_files/shBrushPhp.js"></script>
+<script class="javascript" src="apache-felix-ipojo-api_files/shBrushJScript.js"></script>
+<script class="javascript" src="apache-felix-ipojo-api_files/shBrushVb.js"></script>
+<script class="javascript" src="apache-felix-ipojo-api_files/shBrushSql.js"></script>
+<script class="javascript" src="apache-felix-ipojo-api_files/shBrushXml.js"></script>
+<script class="javascript" src="apache-felix-ipojo-api_files/shBrushShell.js"></script>
+<script class="javascript" src="apache-felix-ipojo-api_files/shBrushDelphi.js"></script>
+<script class="javascript" src="apache-felix-ipojo-api_files/shBrushPython.js"></script>
+<script class="javascript" src="apache-felix-ipojo-api_files/shBrushJava.js"></script>
+
+<script type="text/javascript" src="apache-felix-ipojo-api_files/jquery-1.js"></script>
+<script type="text/javascript" src="apache-felix-ipojo-api_files/hoverIntent.js"></script> 
+<script type="text/javascript" src="apache-felix-ipojo-api_files/superfish.js"></script> 
+<script type="text/javascript" src="apache-felix-ipojo-api_files/supersubs.js"></script> 
+
+<script type="text/javascript"> 
+ 
+    $(document).ready(function(){ 
+        $("ul.sf-menu").supersubs({ 
+            minWidth:    14,   // minimum width of sub-menus in em units 
+            maxWidth:    30,   // maximum width of sub-menus in em units 
+            extraWidth:  1     // extra width can ensure lines don't sometimes turn over 
+                               // due to slight rounding differences and font-family 
+        }).superfish();  // call supersubs first, then superfish, so that subs are 
+                         // not display:none when measuring. Call before initialising 
+                         // containing tabs for same reason. 
+    }); 
+ 
+</script>
+</p><div class="main">
+<div class="page-header">
+<img src="apache-felix-ipojo-api_files/header.png" class="header">
+<a href="http://ipojo.org/"><img src="apache-felix-ipojo-api_files/ipojo.png" class="header-logo" width="225"></a>
+<ul class="sf-menu sf-js-enabled sf-shadow" id="ipojo-menu">
+<li class="current">
+<!-- Menu Overview -->
+<a href="" class="sf-with-ul">Overview<span class="sf-sub-indicator"> »</span><span class="sf-sub-indicator"> »</span><span class="sf-sub-indicator"> »</span></a>
+<ul style="float: none; width: 14em; display: none; visibility: hidden;">
+	<li style="white-space: normal; float: left; width: 100%;">
+	<a style="float: none; width: auto;" href="http://felix.apache.org/site/apache-felix-ipojo.html" title="Apache Felix iPOJO">Home</a>							
+	</li>
+	<li style="white-space: normal; float: left; width: 100%;">
+	<a style="float: none; width: auto;" href="http://felix.apache.org/site/apache-felix-ipojo-why-choose-ipojo.html" title="apache-felix-ipojo-why-choose-ipojo">Why choose iPOJO</a>
+	</li>
+	<li style="white-space: normal; float: left; width: 100%;">
+	<a style="float: none; width: auto;" href="http://felix.apache.org/site/apache-felix-ipojo-successstories.html" title="apache-felix-ipojo-successstories">Success stories</a>
+	</li>
+	<li style="white-space: normal; float: left; width: 100%;">
+	<a style="float: none; width: auto;" href="http://felix.apache.org/site/apache-felix-ipojo-feature-overview.html" title="Apache Felix iPOJO Feature Overview">Features</a>
+	</li>
+</ul>
+</li>	
+
+<li class="">			
+<!-- Menu download -->
+</li><li>
+<a href="http://felix.apache.org/site/download.html" title="Download">Download </a>
+</li>
+
+<li class="">					
+<!-- Menu Documentation -->
+<a href="" class="sf-with-ul">Documentation<span class="sf-sub-indicator"> »</span><span class="sf-sub-indicator"> »</span><span class="sf-sub-indicator"> »</span></a>
+<ul style="float: none; width: 14em; display: none; visibility: hidden;">
+    <!-- sub- menu : getting started -->
+    <li style="white-space: normal; float: left; width: 100%;" class="">
+    <a style="float: none; width: auto;" href="" class="sf-with-ul">Getting Started<span class="sf-sub-indicator"> »</span><span class="sf-sub-indicator"> »</span><span class="sf-sub-indicator"> »</span></a>
+    <ul style="left: 14em; float: none; width: 14em; display: none; visibility: hidden;">
+     <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/ipojo-in-10-minutes.html" title="iPOJO in 10 minutes">iPOJO in 10 minutes</a></li>
+     <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/how-to-use-ipojo-annotations.html" title="How to use iPOJO Annotations">Using Annotations</a></li>
+     <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/ipojo-hello-word-maven-based-tutorial.html" title="iPOJO Hello Word (Maven-Based) tutorial">Maven tutorial</a></li>
+     <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/ipojo-advanced-tutorial.html" title="iPOJO Advanced Tutorial">Advanced tutorial</a></li>
+     <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/apache-felix-ipojo-dosgi.html" title="apache-felix-ipojo-dosgi">Using Distributed OSGi</a></li>
+     <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/ipojo-composition-tutorial.html" title="iPOJO Composition Tutorial">Application Composition</a></li>
+    </ul>
+    </li> <!-- end of getting started -->
+    <!-- sub menu : Describing Components -->
+     <li style="white-space: normal; float: left; width: 100%;" class="">
+        <a style="float: none; width: auto;" href="http://felix.apache.org/site/describing-components.html" class="sf-with-ul">Describing components<span class="sf-sub-indicator"> »</span><span class="sf-sub-indicator"> »</span><span class="sf-sub-indicator"> »</span></a>
+        <ul style="left: 14em; float: none; width: 14em; display: none; visibility: hidden;">
+        <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/service-requirement-handler.html" title="Service Requirement Handler">Requiring a service</a></li>
+        <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/providing-osgi-services.html" title="Providing OSGi services">Providing a service</a></li>
+        <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/lifecycle-callback-handler.html" title="Lifecycle Callback Handler">Lifecycle management</a></li>
+        <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/configuration-handler.html" title="Configuration Handler">Configuration</a></li>
+        <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/architecture-handler.html" title="Architecture Handler">Introspection</a></li>
+        <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/controller-lifecycle-handler.html" title="Controller Lifecycle Handler">Impacting the lifecycle</a></li>
+        <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/event-admin-handlers.html" title="Event Admin Handlers">Asynchronous communication</a></li>
+        <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/ipojo-jmx-handler.html" title="iPOJO JMX Handler">JMX management</a></li>
+        <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/extender-pattern-handler.html" title="Extender Pattern Handler">Extender pattern</a></li>
+        <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/white-board-pattern-handler.html" title="White Board Pattern Handler">Whiteboard pattern</a></li>
+        <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/temporal-service-dependency.html" title="Temporal Service Dependency">Temporal dependencies</a></li>
+        </ul>
+     </li> <!-- End of describing components -->
+    <!-- sub- menu : User Guide -->
+    <li style="white-space: normal; float: left; width: 100%;" class="">
+    <a style="float: none; width: auto;" href="" class="sf-with-ul">User Guide<span class="sf-sub-indicator"> »</span><span class="sf-sub-indicator"> »</span><span class="sf-sub-indicator"> »</span></a>
+        <ul style="left: 14em; float: none; width: 14em; display: none; visibility: hidden;">
+        <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/using-xml-schemas.html" title="Using XML Schemas">XML Schemas</a></li>
+        <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="" title="apache-felix-ipojo-api">API</a></li>
+        <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/apache-felix-ipojo-testing-components.html" title="apache-felix-ipojo-testing-components">Testing components</a></li>
+        <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/apache-felix-ipojo-eclipse-integration.html" title="apache-felix-ipojo-eclipse-integration">Eclipse Integration</a></li>
+        <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/ipojo-faq.html" title="iPOJO FAQ">FAQ</a></li>
+        <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/ipojo-reference-card.html" title="iPOJO-Reference-Card">Reference Card</a></li>
+        </ul>
+    </li> <!-- end of user guide -->
+    <!-- sub- menu : Dev Guide -->
+    <li class="" style="white-space: normal; float: left; width: 100%;"> 
+    <a style="float: none; width: auto;" href="" class="sf-with-ul">Advanced Topics<span class="sf-sub-indicator"> »</span><span class="sf-sub-indicator"> »</span><span class="sf-sub-indicator"> »</span></a>
+       <ul style="left: 14em; float: none; width: 14em; display: none; visibility: hidden;">
+        <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/ipojo/api/1.2.0" rel="nofollow">Javadoc</a></li>
+        <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/how-to-write-your-own-handler.html" title="How to write your own handler">Handler guide</a></li>
+        <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/how-to-use-ipojo-manipulation-metadata.html" title="How to use iPOJO Manipulation Metadata">Manipulation Metadata </a></li>
+        <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/dive-into-the-ipojo-manipulation-depths.html" title="Dive into the iPOJO Manipulation depths">Dive into the iPOJO Manipulation depths</a></li>
+       </ul>
+    </li> <!-- End of Dev guide -->
+</ul> 
+</li> <!-- End of doc -->
+<!-- Menu 4 : Tools -->
+<li class="">
+<a href="" class="sf-with-ul">Tools<span class="sf-sub-indicator"> »</span><span class="sf-sub-indicator"> »</span><span class="sf-sub-indicator"> »</span></a>
+<ul style="float: none; width: 14em; display: none; visibility: hidden;">
+   <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/ipojo-ant-task.html" title="iPOJO Ant Task">Ant Task</a></li>
+   <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/ipojo-eclipse-plug-in.html" title="iPOJO Eclipse Plug-in">Eclipse Plugin</a></li>
+   <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/ipojo-maven-plug-in.html" title="iPOJO Maven Plug-in">Maven Plugin</a></li>
+   <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/apache-felix-ipojo-online-manipulator.html" title="apache-felix-ipojo-online-manipulator">Online Manipulator</a></li>
+   <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/ipojo-webconsole-plugin.html" title="iPOJO Webconsole Plugin">Webconsole plugin</a></li>
+   <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/apache-felix-ipojo-junit4osgi.html" title="apache-felix-ipojo-junit4osgi">Junit4OSGi</a></li>
+</ul>   
+</li><!-- End of tools -->					
+<!-- Menu 5 : Misc -->
+<li class="">
+<a href="" class="sf-with-ul">Misc<span class="sf-sub-indicator"> »</span><span class="sf-sub-indicator"> »</span><span class="sf-sub-indicator"> »</span></a>
+<ul style="float: none; width: 14em; display: none; visibility: hidden;">
+   <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/apache-felix-ipojo-issuestracker.html" title="apache-felix-ipojo-issuestracker">Issues Tracker</a></li>
+   <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/apache-felix-ipojo-supportedvms.html" title="apache-felix-ipojo-supportedVMs">Supported JVMs</a></li>
+   <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/apache-felix-ipojo-supportedosgi.html" title="apache-felix-ipojo-supportedOSGi">Supported OSGi Implementations</a></li>
+   <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://ipojo-dark-side.blogspot.com/" rel="nofollow">iPOJO's Dark Side Blog</a></li>
+   <li style="white-space: normal; float: left; width: 100%;"><a style="float: none; width: auto;" href="http://felix.apache.org/site/article-presentations.html" title="Article &amp; Presentations">Article &amp; Presentations</a></li>
+</ul>
+</li><!-- End of misc -->
+</ul> <!-- End of the menu -->
+</div> <!-- Page header -->
+
+
+<div class="content">
+
+<h1><a name="apache-felix-ipojo-api-iPOJOAPI"></a>iPOJO API</h1>
+
+<p><em>The iPOJO API provides a third way to describe iPOJO components.
+With the API, you can dynamically create new components types and
+create instances from them. Your component types are described with an
+API. To use the API, deploy and start the iPOJO-API bundle and the
+iPOJO core bundle.</em></p>
+
+<div class="toc">
+<ul>
+    <li><a href="#apache-felix-ipojo-api-Asimpleexample">A simple example</a></li>
+    <li><a href="#apache-felix-ipojo-api-PrimitiveComponentTypebasics">Primitive Component Type basics</a></li>
+    <li><a href="#apache-felix-ipojo-api-ImmediateComponent%252CValidateandInvalidateMethod">Immediate Component, Validate and Invalidate Method</a></li>
+    <li><a href="#apache-felix-ipojo-api-Declaringservices">Declaring services</a></li>
+    <li><a href="#apache-felix-ipojo-api-ServiceDependencies">Service Dependencies</a></li>
+    <li><a href="#apache-felix-ipojo-api-Properties">Properties</a></li>
+    <li><a href="#apache-felix-ipojo-api-TemporalDependencies">Temporal Dependencies</a></li>
+    <li><a href="#apache-felix-ipojo-api-Instancecreation">Instance creation</a></li>
+    <li><a href="#apache-felix-ipojo-api-ManagedServiceandPropagation">Managed Service and Propagation</a></li>
+    <li><a href="#apache-felix-ipojo-api-ManagingiPOJOFactory">Managing iPOJO Factory</a></li>
+    <li><a href="#apache-felix-ipojo-api-AccesstotheintrospectionAPI">Access to the introspection API</a></li>
+    <li><a href="#apache-felix-ipojo-api-SingletonComponentType">Singleton Component Type</a></li>
+    <li><a href="#apache-felix-ipojo-api-Usingexternalhandlers">Using external handlers</a></li>
+    <li><a href="#apache-felix-ipojo-api-CreatingcompositionwiththeAPI">Creating composition with the API</a></li>
+</ul></div>
+
+
+<div class="panelMacro"><table class="infoMacro"><colgroup><col width="24"><col></colgroup><tbody><tr><td valign="top"><img src="apache-felix-ipojo-api_files/information.gif" alt="" border="0" align="absmiddle" height="16" width="16"></td><td><b>1.3.0-SNAPSHOT feature</b><br><p>The API is a 1.3.0-SNAPSHOT feature, and is not available in the 1.2.0 release.</p></td></tr></tbody></table></div>
+
+<h2><a name="apache-felix-ipojo-api-Asimpleexample"></a>A simple example</h2>
+
+<p>Let's imagine a simple component providing a service Foo. The following code is the implementation class of our component:</p>
+<div class="code">
+<div class="dp-highlighter"><table class="dp-c" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="line1"><span></span><span class="keyword">package</span><span>&nbsp;org.example.service.impl;&nbsp;</span></td></tr><tr><td class="line2">&nbsp;</td></tr><tr><td class="line1"><span class="keyword">import</span><span>&nbsp;org.example.service.Foo;&nbsp;</span></td></tr><tr><td class="line2">&nbsp;</td></tr><tr><td class="line1"><span class="keyword">public</span><span>&nbsp;</span><span class="keyword">class</span><span>&nbsp;FooImpl&nbsp;</span><span class="keyword">implements</span><span>&nbsp;Foo&nbsp;{&nbsp;</span></td></tr><tr><td class="line2">&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">public</span><span>&nbsp;</span><span class="keyword">void</span><span>&nbsp;doSomething()&nbsp;{&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Do&nbsp;something...</span><span>&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;</td></tr><tr><td class="line2">&nbsp;</td></tr><tr><td class="line1">}&nbsp;</td></tr></tbody></table></div><textarea style="display: none;" name="newcodemacro" class="java:nocontrols:nogutter" rows="10" readonly="readonly">package org.example.service.impl;
+
+import org.example.service.Foo;
+
+public class FooImpl implements Foo {
+
+    public void doSomething() {
+        // Do something...
+    }
+
+}</textarea>
+<script class="javascript">
+    if(!window.newcodemacro_initialised)
+    {
+        window.newcodemacro_initialised = true;
+        window.oldonloadmethod = window.onload;
+        window.onload = function(){
+            dp.SyntaxHighlighter.HighlightAll('newcodemacro');
+            if(window.oldonloadmethod)
+            {
+                window.oldonloadmethod();
+            }
+        }
+    }
+
+</script>
+</div>
+
+
+<p>To create the component type and an instance of the component type
+just create a class, get the bundle context (either from a
+Bundle-Activator, or from an iPOJO component), and write the following
+code:</p>
+<div class="code">
+<div class="dp-highlighter"><table class="dp-c" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="line1"><span>new&nbsp;PrimitiveComponentType()&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;.setBundleContext(context)&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;.setClassName(FooImpl.<span class="keyword">class</span><span>.getName())&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;.addService(new&nbsp;Service())&nbsp;<span class="comment">//&nbsp;Provide&nbsp;the&nbsp;Foo&nbsp;service</span><span>&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;.createInstance();&nbsp;<span class="comment">//&nbsp;Create&nbsp;the&nbsp;instance</span><span>&nbsp;</span></td></tr></tbody></table></div><textarea style="display: none;" name="newcodemacro" class="java:nocontrols:nogutter" rows="10" readonly="readonly">new PrimitiveComponentType()
+    .setBundleContext(context)
+    .setClassName(FooImpl.class.getName())
+    .addService(new Service()) // Provide the Foo service
+    .createInstance(); // Create the instance</textarea>
+<script class="javascript">
+    if(!window.newcodemacro_initialised)
+    {
+        window.newcodemacro_initialised = true;
+        window.oldonloadmethod = window.onload;
+        window.onload = function(){
+            dp.SyntaxHighlighter.HighlightAll('newcodemacro');
+            if(window.oldonloadmethod)
+            {
+                window.oldonloadmethod();
+            }
+        }
+    }
+
+</script>
+</div>
+
+
+<p>So, now let's imagine another component using this service. The
+following code is the implementation class of this component type:</p>
+<div class="code">
+<div class="dp-highlighter"><table class="dp-c" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="line1"><span></span><span class="keyword">package</span><span>&nbsp;org.example.service.impl;&nbsp;</span></td></tr><tr><td class="line2">&nbsp;</td></tr><tr><td class="line1"><span class="keyword">import</span><span>&nbsp;org.example.service.Foo;&nbsp;</span></td></tr><tr><td class="line2">&nbsp;</td></tr><tr><td class="line1"><span class="keyword">public</span><span>&nbsp;</span><span class="keyword">class</span><span>&nbsp;MyComponentImpl&nbsp;{&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">private</span><span>&nbsp;Foo&nbsp;myFoo;&nbsp;</span></td></tr><tr><td class="line1">&nbsp;</td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">public</span><span>&nbsp;</span><span class="keyword">void</span><span>&nbsp;start()&nbsp;{&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;myFoo.doSomething();&nbsp;</td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;</td></tr><tr><td class="line1">&nbsp;</td></tr><tr><td class="line2">}&nbsp;</td></tr></tbody></table></div><textarea style="display: none;" name="newcodemacro" class="java:nocontrols:nogutter" rows="10" readonly="readonly">package org.example.service.impl;
+
+import org.example.service.Foo;
+
+public class MyComponentImpl {
+    private Foo myFoo;
+
+    public void start() {
+        myFoo.doSomething();
+    }
+
+}</textarea>
+<script class="javascript">
+    if(!window.newcodemacro_initialised)
+    {
+        window.newcodemacro_initialised = true;
+        window.oldonloadmethod = window.onload;
+        window.onload = function(){
+            dp.SyntaxHighlighter.HighlightAll('newcodemacro');
+            if(window.oldonloadmethod)
+            {
+                window.oldonloadmethod();
+            }
+        }
+    }
+
+</script>
+</div>
+
+
+<p>It is a regular iPOJO component expecting to get a Foo service in the <tt>myFoo</tt>
+field. It also has a method executed when the instance is valid using
+the Foo service. To describe this component, just write the following
+lines:</p>
+<div class="code">
+<div class="dp-highlighter"><table class="dp-c" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="line1"><span>new&nbsp;PrimitiveComponentType()&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;.setBundleContext(context)&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;.setClassName(MyComponentImpl.<span class="keyword">class</span><span>.getName())&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;.addDependency(new&nbsp;Dependency().setField(<span class="string">"myFoo"</span><span>))&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;.setValidateMethod(<span class="string">"start"</span><span>)&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;.createInstance();&nbsp;</td></tr></tbody></table></div><textarea style="display: none;" name="newcodemacro" class="java:nocontrols:nogutter" rows="10" readonly="readonly">new PrimitiveComponentType()
+    .setBundleContext(context)
+    .setClassName(MyComponentImpl.class.getName())
+    .addDependency(new Dependency().setField("myFoo"))
+    .setValidateMethod("start")
+    .createInstance();</textarea>
+<script class="javascript">
+    if(!window.newcodemacro_initialised)
+    {
+        window.newcodemacro_initialised = true;
+        window.oldonloadmethod = window.onload;
+        window.onload = function(){
+            dp.SyntaxHighlighter.HighlightAll('newcodemacro');
+            if(window.oldonloadmethod)
+            {
+                window.oldonloadmethod();
+            }
+        }
+    }
+
+</script>
+</div>
+
+
+<h2><a name="apache-felix-ipojo-api-PrimitiveComponentTypebasics"></a>Primitive Component Type basics</h2>
+
+<p>When you create a new Primitive component type (so, using a Java
+class as implementation), you must set the bundle context and the class
+name. Everything else is optional. </p>
+
+<p>Note about inner classes: iPOJO is based on a bytecode manipulation.
+The API embeds the manipulator. So, when you initialize the component
+type, the specified class name is manipulated (if not already
+manipulated). So, as this force using a customized classloader, inner
+classes cannot be manipulated. So, inner class injection is not
+supported with the API.</p>
+
+<h2><a name="apache-felix-ipojo-api-ImmediateComponent,ValidateandInvalidateMethod"></a>Immediate Component, Validate and Invalidate Method</h2>
+<p>To set the component type as immediate, just call the <tt>setImmediate(immediate)</tt> method on the primitive component type object. <br>
+To set validate and invalidate methods, just call the <tt>setValidate(method)</tt> and <tt>setInvalidate(method)</tt>. Specify the method name that you want to call in argument. </p>
+
+<h2><a name="apache-felix-ipojo-api-Declaringservices"></a>Declaring services</h2>
+<p>To declare that a component provides a service, add a new service to your primitive component type.<br>
+The Service object can be configured. By default, it exposed every implemented interface (regular iPOJO behavior). So, you can:</p>
+<ul>
+	<li>Add service property</li>
+	<li>Set the creation strategy</li>
+	<li>Set the exposed service specifications</li>
+</ul>
+
+
+<div class="code">
+<div class="dp-highlighter"><table class="dp-c" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="line1"><span>new&nbsp;PrimitiveComponentType()&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;.setBundleContext(context)&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;.setClassName(org.example.service.impl.MyComponentImpl.<span class="keyword">class</span><span>.getName())&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;.addService(new&nbsp;Service()&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.addProperty(new&nbsp;ServiceProperty()&nbsp;</td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setField(<span class="string">"myServiceProperty"</span><span>)&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setName(<span class="string">"sample.myProperty"</span><span>))&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setCreationStrategy(Service.INSTANCE_STRATEGY))&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;.createInstance();&nbsp;</td></tr></tbody></table></div><textarea style="display: none;" name="newcodemacro" class="java:nocontrols:nogutter" rows="10" readonly="readonly">new PrimitiveComponentType()
+    .setBundleContext(context)
+    .setClassName(org.example.service.impl.MyComponentImpl.class.getName())
+    .addService(new Service()
+        .addProperty(new ServiceProperty()
+            .setField("myServiceProperty")
+            .setName("sample.myProperty"))
+        .setCreationStrategy(Service.INSTANCE_STRATEGY))
+    .createInstance();</textarea>
+<script class="javascript">
+    if(!window.newcodemacro_initialised)
+    {
+        window.newcodemacro_initialised = true;
+        window.oldonloadmethod = window.onload;
+        window.onload = function(){
+            dp.SyntaxHighlighter.HighlightAll('newcodemacro');
+            if(window.oldonloadmethod)
+            {
+                window.oldonloadmethod();
+            }
+        }
+    }
+
+</script>
+</div>
+
+
+<h2><a name="apache-felix-ipojo-api-ServiceDependencies"></a>Service Dependencies</h2>
+<p>To declare a service dependency, create and add a Dependency object.
+The dependency object offers all the iPOJO service dependency features.
+You can set the injected field and/or bind/unbind methods. Here is an
+example:</p>
+<div class="code">
+<div class="dp-highlighter"><table class="dp-c" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="line1"><span>new&nbsp;PrimitiveComponentType()&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;.setBundleContext(context)&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;.setClassName(org.example.service.impl.MyComponentImpl.<span class="keyword">class</span><span>.getName())&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;.addDependency(&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new&nbsp;Dependency().setField(<span class="string">"myFoo"</span><span>)&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setOptional(<span class="keyword">true</span><span>)&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setDefaultImplementation(<span class="string">"org.sample.FooDefaultImplementation"</span><span>)&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;.createInstance();&nbsp;</td></tr></tbody></table></div><textarea style="display: none;" name="newcodemacro" class="java:nocontrols:nogutter" rows="10" readonly="readonly">new PrimitiveComponentType()
+    .setBundleContext(context)
+    .setClassName(org.example.service.impl.MyComponentImpl.class.getName())
+    .addDependency(
+        new Dependency().setField("myFoo")
+       .setOptional(true)
+       .setDefaultImplementation("org.sample.FooDefaultImplementation")
+       )
+    .createInstance();</textarea>
+<script class="javascript">
+    if(!window.newcodemacro_initialised)
+    {
+        window.newcodemacro_initialised = true;
+        window.oldonloadmethod = window.onload;
+        window.onload = function(){
+            dp.SyntaxHighlighter.HighlightAll('newcodemacro');
+            if(window.oldonloadmethod)
+            {
+                window.oldonloadmethod();
+            }
+        }
+    }
+
+</script>
+</div>
+
+
+<h2><a name="apache-felix-ipojo-api-Properties"></a>Properties</h2>
+<p>Thanks to the <tt>addProperty</tt> method, you can create component properties. Here is some example of properties:</p>
+<div class="code">
+<div class="dp-highlighter"><table class="dp-c" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="line1"><span>new&nbsp;PrimitiveComponentType()&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;.setBundleContext(context)&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;.setClassName(MyComponentImpl.<span class="keyword">class</span><span>.getName())&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;.addProperty(new&nbsp;Property()&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setField(<span class="string">"myProperty"</span><span>)&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setValue(<span class="string">"default-value"</span><span>)&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)&nbsp;</td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;.addProperty(new&nbsp;Property()&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setMethod(<span class="string">"setMethod"</span><span>)&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setName(<span class="string">"prop"</span><span>)&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;)&nbsp;</td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;.createInstance();&nbsp;</td></tr></tbody></table></div><textarea style="display: none;" name="newcodemacro" class="java:nocontrols:nogutter" rows="10" readonly="readonly">new PrimitiveComponentType()
+    .setBundleContext(context)
+    .setClassName(MyComponentImpl.class.getName())
+    .addProperty(new Property()
+        .setField("myProperty")
+        .setValue("default-value")
+        )
+    .addProperty(new Property()
+        .setMethod("setMethod")
+        .setName("prop")
+    )
+    .createInstance();</textarea>
+<script class="javascript">
+    if(!window.newcodemacro_initialised)
+    {
+        window.newcodemacro_initialised = true;
+        window.oldonloadmethod = window.onload;
+        window.onload = function(){
+            dp.SyntaxHighlighter.HighlightAll('newcodemacro');
+            if(window.oldonloadmethod)
+            {
+                window.oldonloadmethod();
+            }
+        }
+    }
+
+</script>
+</div>
+
+
+<h2><a name="apache-felix-ipojo-api-TemporalDependencies"></a>Temporal Dependencies</h2>
+<p>Temporal dependencies are also supported: </p>
+<div class="code">
+<div class="dp-highlighter"><table class="dp-c" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="line1"><span>new&nbsp;PrimitiveComponentType()&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setBundleContext(context)&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setClassName(MyComponentImpl.<span class="keyword">class</span><span>.getName())&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.addDependency(&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new&nbsp;TemporalDependency().setField(<span class="string">"myFoo"</span><span>)&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setOnTimeoutPolicy(TemporalDependency.NULLABLE)&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setTimeout(3000)&nbsp;</td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setProxy(<span class="keyword">true</span><span>)&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)&nbsp;</td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.createInstance();&nbsp;</td></tr></tbody></table></div><textarea style="display: none;" name="newcodemacro" class="java:nocontrols:nogutter" rows="10" readonly="readonly">new PrimitiveComponentType()
+        .setBundleContext(context)
+        .setClassName(MyComponentImpl.class.getName())
+        .addDependency(
+             new TemporalDependency().setField("myFoo")
+            .setOnTimeoutPolicy(TemporalDependency.NULLABLE)
+            .setTimeout(3000)
+            .setProxy(true)
+            )
+        .createInstance();</textarea>
+<script class="javascript">
+    if(!window.newcodemacro_initialised)
+    {
+        window.newcodemacro_initialised = true;
+        window.oldonloadmethod = window.onload;
+        window.onload = function(){
+            dp.SyntaxHighlighter.HighlightAll('newcodemacro');
+            if(window.oldonloadmethod)
+            {
+                window.oldonloadmethod();
+            }
+        }
+    }
+
+</script>
+</div>
+
+
+<h2><a name="apache-felix-ipojo-api-Instancecreation"></a>Instance creation</h2>
+<p>The API allows you to create instances from the component type you described. Three differents methods.<br>
+The <tt>createInstance()</tt> method just creates an instance. The <tt>createInstance(String name)</tt> method allows to set the instance name. Finally, the <tt>createInstance(Dictionary configuration)</tt>
+allows setting the instance configuration. All those methods returns
+the ComponentInstance object allowing to manage the instance (stop,
+start, dispose). </p>
+
+<h2><a name="apache-felix-ipojo-api-ManagedServiceandPropagation"></a>Managed Service and Propagation</h2>
+<p>You can enable/disable the property propagation thanks to the <tt>setPropagation</tt> method on the PrimitiveComponentType object. <br>
+You can also set the the managed service PID with the <tt>setManagedServicePID</tt>
+method. This method should be only use to give a default value of for
+singleton component. In all other case, the managed service pid has to
+be provided inside the instance configuration.</p>
+
+<h2><a name="apache-felix-ipojo-api-ManagingiPOJOFactory"></a>Managing iPOJO Factory</h2>
+<p>Beyond the PrimitiveComponentType, an iPOJO factory is hidden. You can configure this factory to be public or private with the <tt>setPublic</tt> method. You can also set the name of the factory with the <tt>setName</tt> method. </p>
+
+<p>Then, you can access to the Factory object by calling the <tt>getFactory</tt> method.</p>
+
+<h2><a name="apache-felix-ipojo-api-AccesstotheintrospectionAPI"></a>Access to the introspection API</h2>
+<p>The API provides bridge to get access to the iPOJO introspection
+API. The introspection API allows reconfiguring at runtime an instance
+(properties, service dependencies...). From Service and Dependency,
+Property and ServiceProperty objects, call the <tt>getXXXDescription</tt>
+method. You must give the instance that you want to introspect in
+argument. If the lookup success, you get an object allowing
+reconfiguring the service, dependency or property. </p>
+
+<h2><a name="apache-felix-ipojo-api-SingletonComponentType"></a>Singleton Component Type</h2>
+<p>If you are sure to create only one instance of your component type,
+you can use the singleton component type class. This is a kind of
+primitive component type, but when you start it (with the <tt>create</tt> method), it will automatically create an instance.</p>
+<div class="code">
+<div class="dp-highlighter"><table class="dp-c" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="line1"><span>PrimitiveComponentType&nbsp;type&nbsp;=&nbsp;new&nbsp;SingletonComponentType()&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setBundleContext(context)&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setClassName(org.example.service.impl.MyComponentImpl.<span class="keyword">class</span><span>.getName())&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.addDependency(new&nbsp;Dependency().setField(<span class="string">"myFoo"</span><span>))&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setValidateMethod(<span class="string">"start"</span><span>);&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((SingletonComponentType)&nbsp;type)&nbsp;</td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setObject(new&nbsp;MyComponentImpl(5))&nbsp;<span class="comment">//&nbsp;Inject&nbsp;a&nbsp;pojo&nbsp;object</span><span>&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.create();<span class="comment">//&nbsp;Create&nbsp;an&nbsp;instance</span><span>&nbsp;</span></td></tr></tbody></table></div><textarea style="display: none;" name="newcodemacro" class="java:nocontrols:nogutter" rows="10" readonly="readonly">PrimitiveComponentType type = new SingletonComponentType()
+            .setBundleContext(context)
+            .setClassName(org.example.service.impl.MyComponentImpl.class.getName())
+            .addDependency(new Dependency().setField("myFoo"))
+            .setValidateMethod("start");
+        
+        ((SingletonComponentType) type)
+            .setObject(new MyComponentImpl(5)) // Inject a pojo object
+            .create();// Create an instance</textarea>
+<script class="javascript">
+    if(!window.newcodemacro_initialised)
+    {
+        window.newcodemacro_initialised = true;
+        window.oldonloadmethod = window.onload;
+        window.onload = function(){
+            dp.SyntaxHighlighter.HighlightAll('newcodemacro');
+            if(window.oldonloadmethod)
+            {
+                window.oldonloadmethod();
+            }
+        }
+    }
+
+</script>
+</div>
+ 
+
+<p>The type created with the singleton component type are set to <tt>private</tt> by default. Instead of calling the <tt>start</tt> method, you have to call one of the <tt>create</tt> methods to start the type and create the instance.</p>
+
+<p>You can also set the contained POJO object by using the <tt>setObject</tt> method. The given object MUST be compatible with the component implementation class.</p>
+
+<h2><a name="apache-felix-ipojo-api-Usingexternalhandlers"></a>Using external handlers</h2>
+<p>iPOJO is extensible... So, it makes sense that the API is also
+extensible. So component type provides a method allowing to add
+external handler configuration:</p>
+<div class="code">
+<div class="dp-highlighter"><table class="dp-c" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="line1"><span></span><span class="keyword">return</span><span>&nbsp;new&nbsp;PrimitiveComponentType()&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setBundleContext(context)&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setClassName(HostImpl.<span class="keyword">class</span><span>.getName())&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.addHandler(new&nbsp;Whiteboard()&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.onArrival(<span class="string">"arrival"</span><span>)&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.onDeparture(<span class="string">"departure"</span><span>)&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setFilter(<span class="string">"(foo=foo)"</span><span>)&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;);&nbsp;</td></tr></tbody></table></div><textarea style="display: none;" name="newcodemacro" class="java:nocontrols:nogutter" rows="10" readonly="readonly">return new PrimitiveComponentType()
+        .setBundleContext(context)
+        .setClassName(HostImpl.class.getName())
+        .addHandler(new Whiteboard()
+            .onArrival("arrival")
+            .onDeparture("departure")
+            .setFilter("(foo=foo)")
+         );</textarea>
+<script class="javascript">
+    if(!window.newcodemacro_initialised)
+    {
+        window.newcodemacro_initialised = true;
+        window.oldonloadmethod = window.onload;
+        window.onload = function(){
+            dp.SyntaxHighlighter.HighlightAll('newcodemacro');
+            if(window.oldonloadmethod)
+            {
+                window.oldonloadmethod();
+            }
+        }
+    }
+
+</script>
+</div>
+
+
+<p>The <tt>addHandler</tt> method allows you to add any handler description. A handler description is an object of a class implementing <tt>org.apache.felix.ipojo.api.HandlerConfiguration</tt>. Handler provider willing to support the API have to provide this class. For example, the example above uses <tt>Whiteboard</tt> that is the Whiteboard pattern handler description. This class is very simple, and is shown below:</p>
+<div class="code">
+<div class="dp-highlighter"><table class="dp-c" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="line1"><span></span><span class="keyword">public</span><span>&nbsp;</span><span class="keyword">class</span><span>&nbsp;Whiteboard&nbsp;</span><span class="keyword">implements</span><span>&nbsp;HandlerConfiguration&nbsp;{&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">public</span><span>&nbsp;</span><span class="keyword">static</span><span>&nbsp;</span><span class="keyword">final</span><span>&nbsp;String&nbsp;NAME&nbsp;=&nbsp;</span><span class="string">"wbp"</span><span>;&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">public</span><span>&nbsp;</span><span class="keyword">static</span><span>&nbsp;</span><span class="keyword">final</span><span>&nbsp;String&nbsp;NAMESPACE&nbsp;=&nbsp;</span><span class="string">"org.apache.felix.ipojo.whiteboard"</span><span>;&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">private</span><span>&nbsp;String&nbsp;arrival;&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">private</span><span>&nbsp;String&nbsp;departure;&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">private</span><span>&nbsp;String&nbsp;modification;&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">private</span><span>&nbsp;String&nbsp;filter;&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">public</span><span>&nbsp;Whiteboard&nbsp;onArrival(String&nbsp;method)&nbsp;{&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arrival&nbsp;=&nbsp;method;&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;</span><span class="keyword">this</span><span>;&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">public</span><span>&nbsp;Whiteboard&nbsp;onDeparture(String&nbsp;method)&nbsp;{&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;departure&nbsp;=&nbsp;method;&nbsp;</td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;</span><span class="keyword">this</span><span>;&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;</td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">public</span><span>&nbsp;Whiteboard&nbsp;onModification(String&nbsp;method)&nbsp;{&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;modification&nbsp;=&nbsp;method;&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;</span><span class="keyword">this</span><span>;&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">public</span><span>&nbsp;Whiteboard&nbsp;setFilter(String&nbsp;fil)&nbsp;{&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;filter&nbsp;=&nbsp;fil;&nbsp;</td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;</span><span class="keyword">this</span><span>;&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;</td></tr><tr><td class="line2">&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">public</span><span>&nbsp;Element&nbsp;getElement()&nbsp;{&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ensureValidity();&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Create&nbsp;the&nbsp;root&nbsp;element.</span><span>&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Element&nbsp;element&nbsp;=&nbsp;new&nbsp;Element(NAME,&nbsp;NAMESPACE);&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Mandatory&nbsp;attributes</span><span>&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;element.addAttribute(new&nbsp;Attribute(<span class="string">"onArrival"</span><span>,&nbsp;arrival));&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;element.addAttribute(new&nbsp;Attribute(<span class="string">"onDeparture"</span><span>,&nbsp;departure));&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;element.addAttribute(new&nbsp;Attribute(<span class="string">"filter"</span><span>,&nbsp;filter));&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">//&nbsp;Optional&nbsp;attribute</span><span>&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(modification&nbsp;!=&nbsp;</span><span class="keyword">null</span><span>)&nbsp;{&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;element.addAttribute(new&nbsp;Attribute(<span class="string">"onModification"</span><span>,&nbsp;modification));&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span><span>&nbsp;element;&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;</td></tr><tr><td class="line1">&nbsp;</td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">private</span><span>&nbsp;</span><span class="keyword">void</span><span>&nbsp;ensureValidity()&nbsp;{&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(arrival&nbsp;==&nbsp;</span><span class="keyword">null</span><span>)&nbsp;{&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">throw</span><span>&nbsp;new&nbsp;IllegalStateException(</span><span class="string">"The&nbsp;whiteboard&nbsp;pattern&nbsp;configuration&nbsp;must&nbsp;have&nbsp;a&nbsp;onArrival&nbsp;method"</span><span>);&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;</td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(departure&nbsp;==&nbsp;</span><span class="keyword">null</span><span>)&nbsp;{&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">throw</span><span>&nbsp;new&nbsp;IllegalStateException(</span><span class="string">"The&nbsp;whiteboard&nbsp;pattern&nbsp;configuration&nbsp;must&nbsp;have&nbsp;a&nbsp;onDeparture&nbsp;method"</span><span>);&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span><span>&nbsp;(filter&nbsp;==&nbsp;</span><span class="keyword">null</span><span>)&nbsp;{&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">throw</span><span>&nbsp;new&nbsp;IllegalStateException(</span><span class="string">"The&nbsp;whiteboard&nbsp;pattern&nbsp;configuration&nbsp;must&nbsp;have&nbsp;a&nbsp;filter"</span><span>);&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;</td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;</td></tr></tbody></table></div><textarea style="display: none;" name="newcodemacro" class="java:nocontrols:nogutter" rows="10" readonly="readonly">public class Whiteboard implements HandlerConfiguration {
+    
+    public static final String NAME = "wbp";
+    
+    public static final String NAMESPACE = "org.apache.felix.ipojo.whiteboard";
+    
+    private String arrival;
+    
+    private String departure;
+    
+    private String modification;
+    
+    private String filter;
+    
+    public Whiteboard onArrival(String method) {
+        arrival = method;
+        return this;
+    }
+    
+    public Whiteboard onDeparture(String method) {
+        departure = method;
+        return this;
+    }
+    
+    public Whiteboard onModification(String method) {
+        modification = method;
+        return this;
+    }
+    
+    public Whiteboard setFilter(String fil) {
+        filter = fil;
+        return this;
+    }
+
+    public Element getElement() {
+        ensureValidity();
+        // Create the root element.
+        Element element = new Element(NAME, NAMESPACE);
+        // Mandatory attributes
+        element.addAttribute(new Attribute("onArrival", arrival));
+        element.addAttribute(new Attribute("onDeparture", departure));
+        element.addAttribute(new Attribute("filter", filter));
+        
+        // Optional attribute
+        if (modification != null) {
+            element.addAttribute(new Attribute("onModification", modification));
+        }        
+        
+        return element;
+    }
+
+    private void ensureValidity() {
+        if (arrival == null) {
+            throw new IllegalStateException("The whiteboard pattern configuration must have a onArrival method");
+        }
+        if (departure == null) {
+            throw new IllegalStateException("The whiteboard pattern configuration must have a onDeparture method");
+        }
+        if (filter == null) {
+            throw new IllegalStateException("The whiteboard pattern configuration must have a filter");
+        }
+        
+    }</textarea>
+<script class="javascript">
+    if(!window.newcodemacro_initialised)
+    {
+        window.newcodemacro_initialised = true;
+        window.oldonloadmethod = window.onload;
+        window.onload = function(){
+            dp.SyntaxHighlighter.HighlightAll('newcodemacro');
+            if(window.oldonloadmethod)
+            {
+                window.oldonloadmethod();
+            }
+        }
+    }
+
+</script>
+</div>
+
+
+<p>The only required method is <tt>getElement</tt> returning the
+Element-Attribute structure representing the handler configuration
+(this uses the internal iPOJO data format). If the metadata cannot be
+generated, the class throws IllegalStateExceptions.</p>
+
+<h2><a name="apache-felix-ipojo-api-CreatingcompositionwiththeAPI"></a>Creating composition with the API</h2>
+<p>The API also allows you to create iPOJO compositions in a pretty simple way. So you can create compositions:</p>
+<ul>
+	<li>containing internal instances</li>
+	<li>importing services</li>
+	<li>instantiating sub-services</li>
+	<li>exporting services</li>
+	<li>providing services (by delegation)</li>
+</ul>
+
+
+<p>Here are some examples:</p>
+<div class="code">
+<div class="dp-highlighter"><table class="dp-c" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="line1"><span>PrimitiveComponentType&nbsp;prov&nbsp;=&nbsp;createAProvider();&nbsp;</span><span class="comment">//&nbsp;Create&nbsp;a&nbsp;primitive&nbsp;type</span><span>&nbsp;</span></td></tr><tr><td class="line2">&nbsp;PrimitiveComponentType&nbsp;cons&nbsp;=&nbsp;createAConsumer();&nbsp;<span class="comment">//&nbsp;Create&nbsp;another&nbsp;primitive&nbsp;type</span><span>&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CompositeComponentType&nbsp;type&nbsp;=&nbsp;new&nbsp;CompositeComponentType()&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setBundleContext(context)&nbsp;</td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setComponentTypeName(<span class="string">"comp1"</span><span>)&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.addInstance(new&nbsp;Instance(prov.getFactory().getName()))&nbsp;<span class="comment">//&nbsp;Create&nbsp;an&nbsp;instance&nbsp;in&nbsp;the&nbsp;composite</span><span>&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.addInstance(new&nbsp;Instance(cons.getFactory().getName()));&nbsp;&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ComponentInstance&nbsp;ci&nbsp;=&nbsp;type.createInstance();&nbsp;</td></tr></tbody></table></div><textarea style="display: none;" name="newcodemacro" class="java:nocontrols:nogutter" rows="10" readonly="readonly">PrimitiveComponentType prov = createAProvider(); // Create a primitive type
+ PrimitiveComponentType cons = createAConsumer(); // Create another primitive type
+       
+       CompositeComponentType type = new CompositeComponentType()
+           .setBundleContext(context)
+           .setComponentTypeName("comp1")
+           .addInstance(new Instance(prov.getFactory().getName())) // Create an instance in the composite
+           .addInstance(new Instance(cons.getFactory().getName())); 
+       
+       ComponentInstance ci = type.createInstance();</textarea>
+<script class="javascript">
+    if(!window.newcodemacro_initialised)
+    {
+        window.newcodemacro_initialised = true;
+        window.oldonloadmethod = window.onload;
+        window.onload = function(){
+            dp.SyntaxHighlighter.HighlightAll('newcodemacro');
+            if(window.oldonloadmethod)
+            {
+                window.oldonloadmethod();
+            }
+        }
+    }
+
+</script>
+</div>
+
+<div class="code">
+<div class="dp-highlighter"><table class="dp-c" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="line1"><span>CompositeComponentType&nbsp;type&nbsp;=&nbsp;new&nbsp;CompositeComponentType()&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setBundleContext(context)&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setComponentTypeName(<span class="string">"comp3"</span><span>)&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.addSubService(new&nbsp;InstantiatedService()&nbsp;<span class="comment">//&nbsp;Importation</span><span>&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setSpecification(Foo.<span class="keyword">class</span><span>.getName())&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setOptional(<span class="keyword">true</span><span>));&nbsp;</span></td></tr></tbody></table></div><textarea style="display: none;" name="newcodemacro" class="java:nocontrols:nogutter" rows="10" readonly="readonly">CompositeComponentType type = new CompositeComponentType()
+           .setBundleContext(context)
+           .setComponentTypeName("comp3")
+           .addSubService(new InstantiatedService() // Importation
+              .setSpecification(Foo.class.getName())
+              .setOptional(true));</textarea>
+<script class="javascript">
+    if(!window.newcodemacro_initialised)
+    {
+        window.newcodemacro_initialised = true;
+        window.oldonloadmethod = window.onload;
+        window.onload = function(){
+            dp.SyntaxHighlighter.HighlightAll('newcodemacro');
+            if(window.oldonloadmethod)
+            {
+                window.oldonloadmethod();
+            }
+        }
+    }
+
+</script>
+</div>
+
+<div class="code">
+<div class="dp-highlighter"><table class="dp-c" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="line1"><span>CompositeComponentType&nbsp;type&nbsp;=&nbsp;new&nbsp;CompositeComponentType()&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setBundleContext(context)&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setComponentTypeName(<span class="string">"comp2"</span><span>)&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.addSubService(new&nbsp;InstantiatedService()&nbsp;&nbsp;<span class="comment">//&nbsp;Instantiated&nbsp;service</span><span>&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setSpecification(Foo.<span class="keyword">class</span><span>.getName()))&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.addInstance(new&nbsp;Instance(cons.getFactory().getName()));&nbsp;</td></tr></tbody></table></div><textarea style="display: none;" name="newcodemacro" class="java:nocontrols:nogutter" rows="10" readonly="readonly">CompositeComponentType type = new CompositeComponentType()
+           .setBundleContext(context)
+           .setComponentTypeName("comp2")
+           .addSubService(new InstantiatedService()  // Instantiated service
+              .setSpecification(Foo.class.getName()))
+           .addInstance(new Instance(cons.getFactory().getName()));</textarea>
+<script class="javascript">
+    if(!window.newcodemacro_initialised)
+    {
+        window.newcodemacro_initialised = true;
+        window.oldonloadmethod = window.onload;
+        window.onload = function(){
+            dp.SyntaxHighlighter.HighlightAll('newcodemacro');
+            if(window.oldonloadmethod)
+            {
+                window.oldonloadmethod();
+            }
+        }
+    }
+
+</script>
+</div>
+
+<div class="code">
+<div class="dp-highlighter"><table class="dp-c" border="0" cellpadding="0" cellspacing="0"><tbody><tr><td class="line1"><span>CompositeComponentType&nbsp;type&nbsp;=&nbsp;new&nbsp;CompositeComponentType()&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setBundleContext(context)&nbsp;</td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setComponentTypeName(<span class="string">"compExport"</span><span>)&nbsp;</span></td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.addSubService(new&nbsp;InstantiatedService().setSpecification(Foo.<span class="keyword">class</span><span>.getName()))&nbsp;</span></td></tr><tr><td class="line1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.addService(new&nbsp;ExportedService()&nbsp;</td></tr><tr><td class="line2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setSpecification(Foo.<span class="keyword">class</span><span>.getName()));&nbsp;</span><span class="comment">//&nbsp;Exports&nbsp;a&nbsp;service</span><span>&nbsp;</span></td></tr></tbody></table></div><textarea style="display: none;" name="newcodemacro" class="java:nocontrols:nogutter" rows="10" readonly="readonly">CompositeComponentType type = new CompositeComponentType()
+           .setBundleContext(context)
+           .setComponentTypeName("compExport")
+           .addSubService(new InstantiatedService().setSpecification(Foo.class.getName()))
+           .addService(new ExportedService()
+                .setSpecification(Foo.class.getName())); // Exports a service</textarea>
+<script class="javascript">
+    if(!window.newcodemacro_initialised)
+    {
+        window.newcodemacro_initialised = true;
+        window.oldonloadmethod = window.onload;
+        window.onload = function(){
+            dp.SyntaxHighlighter.HighlightAll('newcodemacro');
+            if(window.oldonloadmethod)
+            {
+                window.oldonloadmethod();
+            }
+        }
+    }
+
+</script>
+</div>
+
+<p><br clear="all"></p>
+
+ </div>
+        <img src="apache-felix-ipojo-api_files/footer.png" class="footer">
+</div>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script><script src="apache-felix-ipojo-api_files/ga.js" type="text/javascript"></script>
+<script type="text/javascript">
+try{
+var pageTracker = _gat._getTracker("UA-1518442-4");
+pageTracker._trackPageview();
+} catch(err) {}
+</script>
+
+    </div>
+  </body><div FirebugVersion="1.4.0" style="display: none;" id="_firebugConsole"></div></html>
