@@ -65,11 +65,11 @@
 			 classpath="${ivy.jar}:${sigil-ivy-plugin.jar}"/>
 	
 		<taskdef name="sigil.bundle"
-			 classname="org.cauldron.bld.ant.BundleTask"
+			 classname="org.apache.felix.sigil.ant.BundleTask"
 			 classpath="${sigil-ivy-plugin.jar}"/>
     	
     	<taskdef name="sigil.bundle.info"
-    		 classname="org.cauldron.bld.ant.BundleInfoTask"
+    		 classname="org.apache.felix.sigil.ant.BundleInfoTask"
     		 classpath="${sigil-ivy-plugin.jar}"/>
     </target>    
 	
@@ -141,8 +141,8 @@
     <target name="compile" depends="resolve"
     	description="--> compile the project">
         <!-- uncomment the following to debug classpath -->
-        <pathconvert property="cp" refid="javac.classpath"/>
-        <echo>Classpath - ${cp}</echo>
+        <!--pathconvert property="cp" refid="javac.classpath"/>
+        <echo>Classpath - ${cp}</echo-->
         <mkdir dir="${classes.dir}" />
         <javac srcdir="${src.dir}"
 		destdir="${classes.dir}"
