@@ -68,7 +68,11 @@ public abstract class AbstractOBRBundleRepository extends AbstractBundleReposito
 				URLConnection c = getObrURL().openConnection();
 				c.connect();
 				in = c.getInputStream();
-				out = new FileOutputStream(getObrlCache());
+				File file = getObrlCache();
+				if ( !file.getParentFile().mkdirs() ) {
+					throw new IOException( "Failed to create obr cache" );
+				}
+				out = new FileOutputStream(file);
 				stream(in, out);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
