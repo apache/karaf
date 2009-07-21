@@ -19,9 +19,17 @@
 
 package org.apache.felix.sigil.eclipse.model.repository;
 
-public interface IRepositorySet {
-	void setRepository(IRepositoryModel id, int position);
-	void removeRepository(IRepositoryModel id);
-	IRepositoryModel[] getRepositories();
-	void setRepositories(IRepositoryModel[] repositories);
+
+public interface IRepositorySet
+{
+    void setRepository( IRepositoryModel id, int position );
+
+
+    void removeRepository( IRepositoryModel id );
+
+
+    IRepositoryModel[] getRepositories();
+
+
+    void setRepositories( IRepositoryModel[] repositories );
 }

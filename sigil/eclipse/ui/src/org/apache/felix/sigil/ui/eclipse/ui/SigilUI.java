@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui;
 
+
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Locale;
@@ -37,145 +38,196 @@ import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+
 /**
  * The activator class controls the plug-in life cycle
  */
-public class SigilUI extends AbstractUIPlugin {
+public class SigilUI extends AbstractUIPlugin
+{
 
-	// The plug-in ID
-	public static final String PLUGIN_ID = "org.cauldron.sigil.ui";
+    // The plug-in ID
+    public static final String PLUGIN_ID = "org.cauldron.sigil.ui";
 
-	public static final String REPOSITORY_WIZARD_EXTENSION_POINT_ID = "org.cauldron.sigil.ui.repositorywizard";
+    public static final String REPOSITORY_WIZARD_EXTENSION_POINT_ID = "org.cauldron.sigil.ui.repositorywizard";
 
-	public static final String PREF_NOPROMPT_INSTALL_COMPOSITE_WITH_ERRORS = "nopromptInstallCompositeError";
-	public static final String PREF_INSTALL_COMPOSITE_WITH_ERRORS_ANSWER = "answerInstallCompositeError";
+    public static final String PREF_NOPROMPT_INSTALL_COMPOSITE_WITH_ERRORS = "nopromptInstallCompositeError";
+    public static final String PREF_INSTALL_COMPOSITE_WITH_ERRORS_ANSWER = "answerInstallCompositeError";
 
-	public static final String ID_REPOSITORY_VIEW = "org.cauldron.sigil.ui.repositoryBrowser";
-	public static final String ID_DEPENDENCY_VIEW = "org.cauldron.sigil.ui.bundleDependencyView";
-	public static final String ID_INSTANCES_VIEW = "org.cauldron.sigil.runtime.newtonInstancesView";
+    public static final String ID_REPOSITORY_VIEW = "org.cauldron.sigil.ui.repositoryBrowser";
+    public static final String ID_DEPENDENCY_VIEW = "org.cauldron.sigil.ui.bundleDependencyView";
+    public static final String ID_INSTANCES_VIEW = "org.cauldron.sigil.runtime.newtonInstancesView";
 
-	// The shared instance
-	private static SigilUI plugin;
-	
-	/**
-	 * The constructor
-	 */
-	public SigilUI() {
-	}
+    // The shared instance
+    private static SigilUI plugin;
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
-	 */
-	public void start(BundleContext context) throws Exception {
-		super.start(context);
-		SigilCore.getDefault();
-		plugin = this;
-	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
-	 */
-	public void stop(BundleContext context) throws Exception {
-		plugin = null;
-		super.stop(context);
-	}
+    /**
+     * The constructor
+     */
+    public SigilUI()
+    {
+    }
 
-	/**
-	 * Returns the shared instance
-	 *
-	 * @return the shared instance
-	 */
-	public static SigilUI getDefault() {
-		return plugin;
-	}
 
-	public static ResourceBundle getResourceBundle() {
-		return ResourceBundle.getBundle( "resources." + SigilUI.class.getName(), Locale.getDefault(), SigilUI.class.getClassLoader() );
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
+     */
+    public void start( BundleContext context ) throws Exception
+    {
+        super.start( context );
+        SigilCore.getDefault();
+        plugin = this;
+    }
 
-	public static void runWorkspaceOperation(IRunnableWithProgress op, Shell shell) {
-		if ( shell == null ) {
-			shell = getActiveWorkbenchShell();
-		}
-		try {
-			new ProgressMonitorDialog(shell).run(true, true, op);
-		} catch (InvocationTargetException e) {
-			SigilCore.error( "Workspace operation failed", e);
-		} catch (InterruptedException e1) {
-			SigilCore.log( "Workspace operation interrupted");
-		}
-	}
-	
-	public static void runWorkspaceOperationSync(IRunnableWithProgress op, Shell shell) throws Throwable {
-		if ( shell == null ) {
-			shell = getActiveWorkbenchShell();
-		}
-		try {
-			new ProgressMonitorDialog(shell).run(false, true, op);
-		} catch (InvocationTargetException e) {
-			throw e.getCause();
-		} catch (InterruptedException e1) {
-			SigilCore.log( "Workspace operation interrupted");
-		}
-	}
-	public static IWorkbenchWindow getActiveWorkbenchWindow() {
-		return getDefault().getWorkbench().getActiveWorkbenchWindow();
-	}
-	
-	public static Shell getActiveWorkbenchShell() {
-		final Shell[] shell = new Shell[1];
-		runInUISync( new Runnable() {
-			public void run() {
-				shell[0] = getActiveDisplay().getActiveShell();
-			}
-		});
-		return shell[0];
-	}
 
-	public static Display getActiveDisplay() {
-		Display d = Display.getCurrent();
-		
-		if ( d == null ) {
-			d = Display.getDefault();
-		}
+    /*
+     * (non-Javadoc)
+     * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
+     */
+    public void stop( BundleContext context ) throws Exception
+    {
+        plugin = null;
+        super.stop( context );
+    }
 
-		return d;
-	}
 
-	public static void runInUI(Runnable runnable) {
-		getActiveDisplay().asyncExec(runnable);
-	}
+    /**
+     * Returns the shared instance
+     *
+     * @return the shared instance
+     */
+    public static SigilUI getDefault()
+    {
+        return plugin;
+    }
 
-	public static void runInUISync(Runnable runnable) {
-		getActiveDisplay().syncExec(runnable);
-	}
-	
-	public static Image cacheImage(String path, ClassLoader classLoader) {
-		ImageRegistry registry = SigilUI.getDefault().getImageRegistry();
-		
-		Image image = registry.get( path );
-		
-		if ( image == null ) {
-			image = loadImage( path, classLoader );
-			// XXX-FIXME-XXX add null image
-			if ( image != null ) {
-				registry.put( path, image);
-			}
-		}
-		
-		return image; 
-	}
 
-	private static Image loadImage(String resource, ClassLoader loader) {
-		InputStream in = loader.getResourceAsStream( resource );
-		if ( in != null ) {
-			ImageData data = new ImageData( in );
-			return new Image( SigilUI.getActiveDisplay(), data );
-		}
-		else {
-			return null;
-		}
-	}
+    public static ResourceBundle getResourceBundle()
+    {
+        return ResourceBundle.getBundle( "resources." + SigilUI.class.getName(), Locale.getDefault(), SigilUI.class
+            .getClassLoader() );
+    }
+
+
+    public static void runWorkspaceOperation( IRunnableWithProgress op, Shell shell )
+    {
+        if ( shell == null )
+        {
+            shell = getActiveWorkbenchShell();
+        }
+        try
+        {
+            new ProgressMonitorDialog( shell ).run( true, true, op );
+        }
+        catch ( InvocationTargetException e )
+        {
+            SigilCore.error( "Workspace operation failed", e );
+        }
+        catch ( InterruptedException e1 )
+        {
+            SigilCore.log( "Workspace operation interrupted" );
+        }
+    }
+
+
+    public static void runWorkspaceOperationSync( IRunnableWithProgress op, Shell shell ) throws Throwable
+    {
+        if ( shell == null )
+        {
+            shell = getActiveWorkbenchShell();
+        }
+        try
+        {
+            new ProgressMonitorDialog( shell ).run( false, true, op );
+        }
+        catch ( InvocationTargetException e )
+        {
+            throw e.getCause();
+        }
+        catch ( InterruptedException e1 )
+        {
+            SigilCore.log( "Workspace operation interrupted" );
+        }
+    }
+
+
+    public static IWorkbenchWindow getActiveWorkbenchWindow()
+    {
+        return getDefault().getWorkbench().getActiveWorkbenchWindow();
+    }
+
+
+    public static Shell getActiveWorkbenchShell()
+    {
+        final Shell[] shell = new Shell[1];
+        runInUISync( new Runnable()
+        {
+            public void run()
+            {
+                shell[0] = getActiveDisplay().getActiveShell();
+            }
+        } );
+        return shell[0];
+    }
+
+
+    public static Display getActiveDisplay()
+    {
+        Display d = Display.getCurrent();
+
+        if ( d == null )
+        {
+            d = Display.getDefault();
+        }
+
+        return d;
+    }
+
+
+    public static void runInUI( Runnable runnable )
+    {
+        getActiveDisplay().asyncExec( runnable );
+    }
+
+
+    public static void runInUISync( Runnable runnable )
+    {
+        getActiveDisplay().syncExec( runnable );
+    }
+
+
+    public static Image cacheImage( String path, ClassLoader classLoader )
+    {
+        ImageRegistry registry = SigilUI.getDefault().getImageRegistry();
+
+        Image image = registry.get( path );
+
+        if ( image == null )
+        {
+            image = loadImage( path, classLoader );
+            // XXX-FIXME-XXX add null image
+            if ( image != null )
+            {
+                registry.put( path, image );
+            }
+        }
+
+        return image;
+    }
+
+
+    private static Image loadImage( String resource, ClassLoader loader )
+    {
+        InputStream in = loader.getResourceAsStream( resource );
+        if ( in != null )
+        {
+            ImageData data = new ImageData( in );
+            return new Image( SigilUI.getActiveDisplay(), data );
+        }
+        else
+        {
+            return null;
+        }
+    }
 }

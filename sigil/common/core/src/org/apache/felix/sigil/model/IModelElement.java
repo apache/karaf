@@ -19,8 +19,10 @@
 
 package org.apache.felix.sigil.model;
 
+
 import java.util.Map;
 import java.util.Set;
+
 
 /**
  * Descriptors represent static information about component, composite or system. They allow other services to decide
@@ -29,14 +31,16 @@ import java.util.Set;
  * @author dave
  * 
  */
-public interface IModelElement extends Cloneable {
+public interface IModelElement extends Cloneable
+{
     /**
      * A brief human readable description of the component, composite or system.
      * 
      * @return
      */
     String getElementDescription();
-    
+
+
     /**
      * A set of key value pairs designed for use by a machine to classify a particular component, composite or system.
      * 
@@ -44,13 +48,15 @@ public interface IModelElement extends Cloneable {
      */
     Map<Object, Object> getMeta();
 
+
     /**
      * Set meta data on this descriptor. Meta data is designed for use by a machine to classify or further enhance a
      * particular component, composite or system.
      * 
      * @param meta
      */
-    void setMeta(Map<Object, Object> meta);
+    void setMeta( Map<Object, Object> meta );
+
 
     /**
      * Check to see if this descriptor defines a complete set of properties. The definition of what constitutes a
@@ -59,15 +65,18 @@ public interface IModelElement extends Cloneable {
      * @throws InvalidModelException
      */
     void checkValid() throws InvalidModelException;
-    
+
+
     /**
      * Find the parent element of this model element or null if no parent exists.
      * @return
      */
     IModelElement getParent();
-    
+
+
     void setParent( IModelElement parent );
-        
+
+
     /**
      * Finds the first ancestor up the hierarch of parents which is an instance of the specified
      * type.
@@ -75,24 +84,33 @@ public interface IModelElement extends Cloneable {
      * @param type
      * @return
      */
-    <T extends IModelElement> T getAncestor(Class<T> type);
-    
+    <T extends IModelElement> T getAncestor( Class<T> type );
+
+
     IModelElement clone();
-    
+
+
     Set<String> getPropertyNames();
-    
-    void setProperty(String name, Object value) throws NoSuchMethodException;
-    
-	void addProperty(String name, Object value) throws NoSuchMethodException;
-	
-	void removeProperty(String name, Object value) throws NoSuchMethodException;
-	
-    Object getProperty(String name) throws NoSuchMethodException;
-    
-    Object getDefaultPropertyValue(String name);
-    
+
+
+    void setProperty( String name, Object value ) throws NoSuchMethodException;
+
+
+    void addProperty( String name, Object value ) throws NoSuchMethodException;
+
+
+    void removeProperty( String name, Object value ) throws NoSuchMethodException;
+
+
+    Object getProperty( String name ) throws NoSuchMethodException;
+
+
+    Object getDefaultPropertyValue( String name );
+
+
     Set<String> getRequiredProperties();
 
-	Class<?> getPropertyType(String name) throws NoSuchMethodException;
+
+    Class<?> getPropertyType( String name ) throws NoSuchMethodException;
 
 }

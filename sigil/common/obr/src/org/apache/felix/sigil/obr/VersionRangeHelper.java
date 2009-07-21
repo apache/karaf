@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.obr;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,162 +32,208 @@ import org.apache.felix.sigil.model.common.SimpleTerm;
 import org.apache.felix.sigil.model.common.VersionRange;
 import org.osgi.framework.Version;
 
-class VersionRangeHelper {
-	
-	// e.g. (&(version>=1.0.0)(version<=2.0.0)) (&(version>1.0.0)(version<2.0.0)) (&(!(version<1.0.0))(!(version>2.0.0))) (&(!(version<=1.0.0))(!(version>=2.0.0))) (version=1.0.0) (version>=1.0.0) (version<=2.0.0) (version>1.0.0) (version<2.0.0)  (!(version>2.0.0)) (!(version<1.0.0)) (!(version>=2.0.0)) (!(version<=1.0.0))
-	public static void main(String[] args) throws LDAPParseException {
-		for ( String arg : args ) {
-			LDAPExpr expr = LDAPParser.parseExpression(arg.trim());
-			System.out.println( expr + " -> " + decodeVersions(expr) ); 
-		}
-	}
-	
-	static VersionRange decodeVersions(LDAPExpr expr) throws NumberFormatException {
-		ArrayList<LDAPExpr> terms = new ArrayList<LDAPExpr>(1);
-		
-		findExpr("version", expr, terms);
-		
-		if ( terms.isEmpty() ) {
-			// woo hoo!
-			return VersionRange.ANY_VERSION;
-		}
-		else {
-			switch ( terms.size() ) {
-			case 1: {
-				return parseSimpleVersionRange(terms.get(0));
-			}
-			case 2: {
-				return parseCompoundVersionRange(terms.get(0), terms.get(1));
-			}
-			default: {
-				// (&(version>=min)(!(version=min))(version<=max)(!(version=max))) 	- (min,max) - not dealt with!!
-				// (&(|(version>min)(version=min))(|(version<max)(version=max))) 	- [min,max] - not dealt with!!
-				throw new NumberFormatException("Failed to parse complicated version expression " + expr);				
-			}
-			}
-		}
-	}
 
-	// (&(version>=min)(version<=max)) 									- [min,max]
-	// (&(version>min)(version<max))									- (min,max)
-	//
-	// (&(!(version<min))(!(version>max)))								- [min,max]
-	// (&(!(version<=min))(!(version>=max)) 							- (min,max)
-	private static VersionRange parseCompoundVersionRange(LDAPExpr left, LDAPExpr right) throws NumberFormatException {
-		VersionRange one = parseSimpleVersionRange(left);
-		VersionRange two = parseSimpleVersionRange(right);
-		
-		// sanity check
-		if ( one.isPointVersion() || two.isPointVersion() ) {
-			throw new NumberFormatException("Unexpected point version in compound expression " + left);				
-		}
-		
-		VersionRange max = one.getFloor().equals( Version.emptyVersion ) ? one : two;
-		VersionRange min = max == one ? two : one;
+class VersionRangeHelper
+{
 
-		return new VersionRange( min.isOpenFloor(), min.getFloor(), max.getCeiling(), max.isOpenCeiling() );
-	}
+    // e.g. (&(version>=1.0.0)(version<=2.0.0)) (&(version>1.0.0)(version<2.0.0)) (&(!(version<1.0.0))(!(version>2.0.0))) (&(!(version<=1.0.0))(!(version>=2.0.0))) (version=1.0.0) (version>=1.0.0) (version<=2.0.0) (version>1.0.0) (version<2.0.0)  (!(version>2.0.0)) (!(version<1.0.0)) (!(version>=2.0.0)) (!(version<=1.0.0))
+    public static void main( String[] args ) throws LDAPParseException
+    {
+        for ( String arg : args )
+        {
+            LDAPExpr expr = LDAPParser.parseExpression( arg.trim() );
+            System.out.println( expr + " -> " + decodeVersions( expr ) );
+        }
+    }
 
-	// possible variations				
-	// (version=v)														- [v,v]
-	//
-	// (version>=min)													- [min,*)
-	// (version<=max)													- [0,max]
-	//
-	// (version>min)													- (min,*)
-	// (version<max)													- [0,max)
-	//
-	// (!(version>max))													- [0,max]
-	// (!(version<min))													- [min,*)
-	// (!(version>=max))												- [0,max)
-	// (!(version<=min))												- (0,*)
-	private static VersionRange parseSimpleVersionRange(LDAPExpr expr) throws NumberFormatException {
-		Version min = Version.emptyVersion;
-		Version max = VersionRange.INFINITE_VERSION;
-		boolean openFloor = false;
-		boolean openCeiling = false;
-		if ( expr instanceof Not ) {
-			Not n = (Not) expr;
-			SimpleTerm t = (SimpleTerm) n.getEx();
-			if ( t.getOp() == Ops.EQ ) {
-				throw new NumberFormatException("Unexpected point version in negated expression " + expr);								
-			}
-			if ( !isMax(t.getOp()) ) {
-				max = toVersion(t);
-				openCeiling = !openFloor(t);
-			}
-			else if ( !isMin(t.getOp()) ) {
-				min = toVersion(t);
-				openFloor = !openCeiling(t);
-			}
-			else {
-				throw new IllegalStateException("Unexpected operator " + t.getOp());
-			}
-		}
-		else {
-			SimpleTerm t = (SimpleTerm) expr;
-			if ( t.getOp().equals( Ops.EQ ) ) {
-				max = toVersion(t);
-				min = max;
-				openFloor = false;
-				openCeiling = false;
-			}
-			else if ( isMax(t.getOp()) ) {
-				max = toVersion(t); 
-				openCeiling = openCeiling(t);
-			}
-			else if ( isMin(t.getOp()) ) {
-				min = toVersion(t);
-				openFloor = openFloor(t);
-			}
-			else {
-				throw new IllegalStateException("Unexpected operator " + t.getOp());
-			}
-		}
 
-		return new VersionRange( openFloor, min, max, openCeiling );
-	}
+    static VersionRange decodeVersions( LDAPExpr expr ) throws NumberFormatException
+    {
+        ArrayList<LDAPExpr> terms = new ArrayList<LDAPExpr>( 1 );
 
-	private static Version toVersion(SimpleTerm t) {
-		return new Version(t.getRval());
-	}
+        findExpr( "version", expr, terms );
 
-	private static boolean isMax(Ops op) {
-		return op == Ops.LE || op == Ops.LT;
-	}
-	
-	private static boolean isMin(Ops op) {
-		return op == Ops.GE || op == Ops.GT;
-	}
+        if ( terms.isEmpty() )
+        {
+            // woo hoo!
+            return VersionRange.ANY_VERSION;
+        }
+        else
+        {
+            switch ( terms.size() )
+            {
+                case 1:
+                {
+                    return parseSimpleVersionRange( terms.get( 0 ) );
+                }
+                case 2:
+                {
+                    return parseCompoundVersionRange( terms.get( 0 ), terms.get( 1 ) );
+                }
+                default:
+                {
+                    // (&(version>=min)(!(version=min))(version<=max)(!(version=max))) 	- (min,max) - not dealt with!!
+                    // (&(|(version>min)(version=min))(|(version<max)(version=max))) 	- [min,max] - not dealt with!!
+                    throw new NumberFormatException( "Failed to parse complicated version expression " + expr );
+                }
+            }
+        }
+    }
 
-	private static boolean openFloor(SimpleTerm t) {
-		return t.getOp() == Ops.GT;
-	}
 
-	private static boolean openCeiling(SimpleTerm t) {
-		return t.getOp() == Ops.LT;
-	}
-	
-	private static void findExpr(String string, LDAPExpr expr, List<LDAPExpr> terms) {
-		if ( expr instanceof SimpleTerm ) {
-			SimpleTerm term = (SimpleTerm) expr;
-			if ( term.getName().equals(string) ) {
-				terms.add(term);
-			}
-		}
-		else if ( expr instanceof Not ) {
-			Not not = (Not) expr;
-			if ( not.getEx() instanceof SimpleTerm ) {
-				SimpleTerm term = (SimpleTerm) not.getEx();
-				if ( term.getName().equals(string) ) {
-					terms.add(not);
-				}
-			}
-		}
-		else {
-			for ( LDAPExpr c : expr.getChildren() ) {
-				findExpr(string, c, terms);
-			}
-		}
-	}
+    // (&(version>=min)(version<=max)) 									- [min,max]
+    // (&(version>min)(version<max))									- (min,max)
+    //
+    // (&(!(version<min))(!(version>max)))								- [min,max]
+    // (&(!(version<=min))(!(version>=max)) 							- (min,max)
+    private static VersionRange parseCompoundVersionRange( LDAPExpr left, LDAPExpr right ) throws NumberFormatException
+    {
+        VersionRange one = parseSimpleVersionRange( left );
+        VersionRange two = parseSimpleVersionRange( right );
+
+        // sanity check
+        if ( one.isPointVersion() || two.isPointVersion() )
+        {
+            throw new NumberFormatException( "Unexpected point version in compound expression " + left );
+        }
+
+        VersionRange max = one.getFloor().equals( Version.emptyVersion ) ? one : two;
+        VersionRange min = max == one ? two : one;
+
+        return new VersionRange( min.isOpenFloor(), min.getFloor(), max.getCeiling(), max.isOpenCeiling() );
+    }
+
+
+    // possible variations				
+    // (version=v)														- [v,v]
+    //
+    // (version>=min)													- [min,*)
+    // (version<=max)													- [0,max]
+    //
+    // (version>min)													- (min,*)
+    // (version<max)													- [0,max)
+    //
+    // (!(version>max))													- [0,max]
+    // (!(version<min))													- [min,*)
+    // (!(version>=max))												- [0,max)
+    // (!(version<=min))												- (0,*)
+    private static VersionRange parseSimpleVersionRange( LDAPExpr expr ) throws NumberFormatException
+    {
+        Version min = Version.emptyVersion;
+        Version max = VersionRange.INFINITE_VERSION;
+        boolean openFloor = false;
+        boolean openCeiling = false;
+        if ( expr instanceof Not )
+        {
+            Not n = ( Not ) expr;
+            SimpleTerm t = ( SimpleTerm ) n.getEx();
+            if ( t.getOp() == Ops.EQ )
+            {
+                throw new NumberFormatException( "Unexpected point version in negated expression " + expr );
+            }
+            if ( !isMax( t.getOp() ) )
+            {
+                max = toVersion( t );
+                openCeiling = !openFloor( t );
+            }
+            else if ( !isMin( t.getOp() ) )
+            {
+                min = toVersion( t );
+                openFloor = !openCeiling( t );
+            }
+            else
+            {
+                throw new IllegalStateException( "Unexpected operator " + t.getOp() );
+            }
+        }
+        else
+        {
+            SimpleTerm t = ( SimpleTerm ) expr;
+            if ( t.getOp().equals( Ops.EQ ) )
+            {
+                max = toVersion( t );
+                min = max;
+                openFloor = false;
+                openCeiling = false;
+            }
+            else if ( isMax( t.getOp() ) )
+            {
+                max = toVersion( t );
+                openCeiling = openCeiling( t );
+            }
+            else if ( isMin( t.getOp() ) )
+            {
+                min = toVersion( t );
+                openFloor = openFloor( t );
+            }
+            else
+            {
+                throw new IllegalStateException( "Unexpected operator " + t.getOp() );
+            }
+        }
+
+        return new VersionRange( openFloor, min, max, openCeiling );
+    }
+
+
+    private static Version toVersion( SimpleTerm t )
+    {
+        return new Version( t.getRval() );
+    }
+
+
+    private static boolean isMax( Ops op )
+    {
+        return op == Ops.LE || op == Ops.LT;
+    }
+
+
+    private static boolean isMin( Ops op )
+    {
+        return op == Ops.GE || op == Ops.GT;
+    }
+
+
+    private static boolean openFloor( SimpleTerm t )
+    {
+        return t.getOp() == Ops.GT;
+    }
+
+
+    private static boolean openCeiling( SimpleTerm t )
+    {
+        return t.getOp() == Ops.LT;
+    }
+
+
+    private static void findExpr( String string, LDAPExpr expr, List<LDAPExpr> terms )
+    {
+        if ( expr instanceof SimpleTerm )
+        {
+            SimpleTerm term = ( SimpleTerm ) expr;
+            if ( term.getName().equals( string ) )
+            {
+                terms.add( term );
+            }
+        }
+        else if ( expr instanceof Not )
+        {
+            Not not = ( Not ) expr;
+            if ( not.getEx() instanceof SimpleTerm )
+            {
+                SimpleTerm term = ( SimpleTerm ) not.getEx();
+                if ( term.getName().equals( string ) )
+                {
+                    terms.add( not );
+                }
+            }
+        }
+        else
+        {
+            for ( LDAPExpr c : expr.getChildren() )
+            {
+                findExpr( string, c, terms );
+            }
+        }
+    }
 }

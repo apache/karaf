@@ -19,57 +19,76 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.views.resolution;
 
+
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.ui.eclipse.ui.SigilUI;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
-public class BundleGraphLabelProvider extends LabelProvider {
 
-	private BundleResolverView view;
-	
-	public BundleGraphLabelProvider(BundleResolverView view) {
-		this.view = view;
-	}
+public class BundleGraphLabelProvider extends LabelProvider
+{
 
-	@Override
-	public String getText(Object element) {
-		if ( element instanceof Link ) {
-			Link l = (Link) element;
-			if ( l.isSatisfied() ) {
-				if ( view.isDisplayed(BundleResolverView.LINK_LABELS) ) {
-					return view.getLinkText((Link) element);
-				}
-				else {
-					return "";
-				}
-			}
-			else {
-				return view.getLinkText((Link) element);				
-			}
-		}
-		else if ( element instanceof ISigilBundle ) {
-			ISigilBundle b = (ISigilBundle) element;
-			return b.getBundleInfo().getSymbolicName() + ": " + b.getBundleInfo().getVersion();
-		}
-		else if ( element instanceof Link.Unsatisfied ) {
-			return "unsatisfied";
-		}
-		else {
-			return "unknown:" + element;
-		}
-	}
-	
-	@Override
-	public Image getImage(Object element) {
-		Image result = null;
-		if ( element instanceof ISigilBundle ) {
-			result = SigilUI.cacheImage("icons/jar_obj.png", BundleGraphLabelProvider.class.getClassLoader());
-		}
-		else if ( element instanceof Link.Unsatisfied ) {
-			result = SigilUI.cacheImage("icons/error.gif", BundleGraphLabelProvider.class.getClassLoader());
-		}
-		
-		return result;
-	}	
+    private BundleResolverView view;
+
+
+    public BundleGraphLabelProvider( BundleResolverView view )
+    {
+        this.view = view;
+    }
+
+
+    @Override
+    public String getText( Object element )
+    {
+        if ( element instanceof Link )
+        {
+            Link l = ( Link ) element;
+            if ( l.isSatisfied() )
+            {
+                if ( view.isDisplayed( BundleResolverView.LINK_LABELS ) )
+                {
+                    return view.getLinkText( ( Link ) element );
+                }
+                else
+                {
+                    return "";
+                }
+            }
+            else
+            {
+                return view.getLinkText( ( Link ) element );
+            }
+        }
+        else if ( element instanceof ISigilBundle )
+        {
+            ISigilBundle b = ( ISigilBundle ) element;
+            return b.getBundleInfo().getSymbolicName() + ": " + b.getBundleInfo().getVersion();
+        }
+        else if ( element instanceof Link.Unsatisfied )
+        {
+            return "unsatisfied";
+        }
+        else
+        {
+            return "unknown:" + element;
+        }
+    }
+
+
+    @Override
+    public Image getImage( Object element )
+    {
+        Image result = null;
+        if ( element instanceof ISigilBundle )
+        {
+            result = SigilUI.cacheImage( "icons/jar_obj.png", BundleGraphLabelProvider.class.getClassLoader() );
+        }
+        else if ( element instanceof Link.Unsatisfied )
+        {
+            result = SigilUI.cacheImage( "icons/error.gif", BundleGraphLabelProvider.class.getClassLoader() );
+        }
+
+        return result;
+    }
 }

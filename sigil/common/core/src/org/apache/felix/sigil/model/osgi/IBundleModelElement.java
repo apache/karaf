@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.model.osgi;
 
+
 import java.net.URI;
 import java.util.Collection;
 import java.util.Set;
@@ -28,87 +29,129 @@ import org.apache.felix.sigil.model.INamedModelElement;
 import org.apache.felix.sigil.model.eclipse.ILibraryImport;
 import org.osgi.framework.Version;
 
-public interface IBundleModelElement extends INamedModelElement, ICompoundModelElement, IVersionedModelElement {
 
-	 String getActivator();
-	 
-	 void setActivator(String activator);
-	 
-	 String getCategory();
+public interface IBundleModelElement extends INamedModelElement, ICompoundModelElement, IVersionedModelElement
+{
 
-	 void setCategory(String category);
+    String getActivator();
 
-	 String getContactAddress();
 
-	 void setContactAddress(String contactAddress);
+    void setActivator( String activator );
 
-	 String getCopyright();
 
-	 void setCopyright(String copyright);
+    String getCategory();
 
-	 URI getDocURI();
 
-	 void setDocURI(URI docURI);
+    void setCategory( String category );
 
-	 Set<IPackageExport> getExports();
 
-	 void addExport(IPackageExport packageExport);
+    String getContactAddress();
 
-	 void removeExport(IPackageExport packageExport);
 
-	 Set<IPackageImport> getImports();
+    void setContactAddress( String contactAddress );
 
-	 void addImport(IPackageImport packageImport);
 
-	 void removeImport(IPackageImport packageImport);
+    String getCopyright();
 
-	 Set<IRequiredBundle> getRequiredBundles();
 
-	 void addRequiredBundle(IRequiredBundle bundle);
+    void setCopyright( String copyright );
 
-	 void removeRequiredBundle(IRequiredBundle bundle);
-	 
-	 void addLibraryImport(ILibraryImport library);
-	 
-	 void removeLibraryImport(ILibraryImport library);
-	 
-	 Set<ILibraryImport> getLibraryImports();
 
-	 URI getLicenseURI();
+    URI getDocURI();
 
-	 void setLicenseURI(URI licenseURI);
 
-	 URI getSourceLocation();
+    void setDocURI( URI docURI );
 
-	 void setSourceLocation(URI sourceLocation);
 
-	 String getSymbolicName();
+    Set<IPackageExport> getExports();
 
-	 void setSymbolicName(String symbolicName);
 
-	 URI getUpdateLocation();
+    void addExport( IPackageExport packageExport );
 
-	 void setUpdateLocation(URI updateLocation);
 
-	 String getVendor();
+    void removeExport( IPackageExport packageExport );
 
-	 void setVendor(String vendor);
 
-	 Version getVersion();
+    Set<IPackageImport> getImports();
 
-	 void setVersion(Version version);
 
-	 void setDescription(String elementText);
-	 
-	 String getDescription();
+    void addImport( IPackageImport packageImport );
 
-	Collection<String> getClasspaths();
-	
-	void addClasspath(String path);
-	
-	void removeClasspath(String path);
 
-	void setFragmentHost(IRequiredBundle fragmentHost);
-	
-	IRequiredBundle getFragmentHost();
+    void removeImport( IPackageImport packageImport );
+
+
+    Set<IRequiredBundle> getRequiredBundles();
+
+
+    void addRequiredBundle( IRequiredBundle bundle );
+
+
+    void removeRequiredBundle( IRequiredBundle bundle );
+
+
+    void addLibraryImport( ILibraryImport library );
+
+
+    void removeLibraryImport( ILibraryImport library );
+
+
+    Set<ILibraryImport> getLibraryImports();
+
+
+    URI getLicenseURI();
+
+
+    void setLicenseURI( URI licenseURI );
+
+
+    URI getSourceLocation();
+
+
+    void setSourceLocation( URI sourceLocation );
+
+
+    String getSymbolicName();
+
+
+    void setSymbolicName( String symbolicName );
+
+
+    URI getUpdateLocation();
+
+
+    void setUpdateLocation( URI updateLocation );
+
+
+    String getVendor();
+
+
+    void setVendor( String vendor );
+
+
+    Version getVersion();
+
+
+    void setVersion( Version version );
+
+
+    void setDescription( String elementText );
+
+
+    String getDescription();
+
+
+    Collection<String> getClasspaths();
+
+
+    void addClasspath( String path );
+
+
+    void removeClasspath( String path );
+
+
+    void setFragmentHost( IRequiredBundle fragmentHost );
+
+
+    IRequiredBundle getFragmentHost();
 }

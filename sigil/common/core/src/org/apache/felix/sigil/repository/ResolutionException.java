@@ -19,45 +19,61 @@
 
 package org.apache.felix.sigil.repository;
 
+
 import org.apache.felix.sigil.model.IModelElement;
 
-public class ResolutionException extends Exception {
 
-	private static final long serialVersionUID = 1L;
-	
-	private IModelElement[] parsed;
-	
-	public ResolutionException(String message, Throwable cause) {
-		super(message, cause);
-	}
+public class ResolutionException extends Exception
+{
 
-	public ResolutionException(String message) {
-		super(message);
-	}
+    private static final long serialVersionUID = 1L;
 
-	public ResolutionException(Throwable cause) {
-		super(cause);
-	}
+    private IModelElement[] parsed;
 
-	public ResolutionException(IModelElement root, IModelElement[] parsed) {
-		super(buildMessage(root, parsed));
-		this.parsed = parsed;
-	}
-	
-	private static String buildMessage(IModelElement root, IModelElement[] parsed) {
-		StringBuilder b = new StringBuilder();
-		b.append( "Failed to resolve " );
-		b.append( root );
-		
-		if ( parsed.length > 0 ) {
-			b.append( " due to missing provider for " );
-			b.append( parsed[parsed.length - 1] );
-		}
-		
-		return b.toString();
-	}
 
-	public IModelElement[] getParsed() {
-		return parsed;
-	}
+    public ResolutionException( String message, Throwable cause )
+    {
+        super( message, cause );
+    }
+
+
+    public ResolutionException( String message )
+    {
+        super( message );
+    }
+
+
+    public ResolutionException( Throwable cause )
+    {
+        super( cause );
+    }
+
+
+    public ResolutionException( IModelElement root, IModelElement[] parsed )
+    {
+        super( buildMessage( root, parsed ) );
+        this.parsed = parsed;
+    }
+
+
+    private static String buildMessage( IModelElement root, IModelElement[] parsed )
+    {
+        StringBuilder b = new StringBuilder();
+        b.append( "Failed to resolve " );
+        b.append( root );
+
+        if ( parsed.length > 0 )
+        {
+            b.append( " due to missing provider for " );
+            b.append( parsed[parsed.length - 1] );
+        }
+
+        return b.toString();
+    }
+
+
+    public IModelElement[] getParsed()
+    {
+        return parsed;
+    }
 }

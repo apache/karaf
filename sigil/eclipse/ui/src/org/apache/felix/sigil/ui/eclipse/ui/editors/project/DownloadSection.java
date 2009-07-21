@@ -20,8 +20,6 @@
 package org.apache.felix.sigil.ui.eclipse.ui.editors.project;
 
 
-
-
 import org.apache.felix.sigil.eclipse.SigilCore;
 import org.apache.felix.sigil.eclipse.model.project.ISigilProjectModel;
 import org.apache.felix.sigil.model.ModelElementFactory;
@@ -41,100 +39,124 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
+
 /**
  * @author dave
  *
  */
-public class DownloadSection extends AbstractResourceSection {
+public class DownloadSection extends AbstractResourceSection
+{
 
-	/**
-	 * @param page
-	 * @param parent
-	 * @param project
-	 * @throws CoreException 
-	 */
-	
-	private IDownloadJar dl;
-	
-	public DownloadSection(SigilPage page, Composite parent, ISigilProjectModel project) throws CoreException {
-		super( page, parent, project );
-	}
+    /**
+     * @param page
+     * @param parent
+     * @param project
+     * @throws CoreException 
+     */
 
-	@Override
-	protected void createSection(Section section, FormToolkit toolkit) throws CoreException {
-		setTitle( "Codebase" );
-		
-		Composite body = createTableWrapBody(1, toolkit);
+    private IDownloadJar dl;
+
+
+    public DownloadSection( SigilPage page, Composite parent, ISigilProjectModel project ) throws CoreException
+    {
+        super( page, parent, project );
+    }
+
+
+    @Override
+    protected void createSection( Section section, FormToolkit toolkit ) throws CoreException
+    {
+        setTitle( "Codebase" );
+
+        Composite body = createTableWrapBody( 1, toolkit );
 
         toolkit.createLabel( body, "Specify which resources are included as part of this bundles remote codebase." );
-		
-		tree = toolkit.createTree( body, SWT.CHECK | SWT.BORDER );
-		
-		TableWrapData data = new TableWrapData( TableWrapData.FILL_GRAB);
-		data.heightHint = 200;
-		tree.setLayoutData( data );
-		
-		viewer = new CheckboxTreeViewer( tree );
-		IFolder base = ResourcesPlugin.getWorkspace().getRoot().getFolder(getProjectModel().getJavaModel().getOutputLocation());
-		viewer.setContentProvider( new ContainerTreeProvider() );
-		viewer.setLabelProvider( new ModelLabelProvider() );
-		viewer.addCheckStateListener( this );
-		viewer.setInput( base );
-		
-		dl = getProjectModel().getBundle().getDownloadJar();
-		
-		startWorkspaceListener(base.getWorkspace());
-	}
 
-	@Override
-	public void refresh() {
-		dl = getProjectModel().getBundle().getDownloadJar();
-		super.refresh();
-	}
+        tree = toolkit.createTree( body, SWT.CHECK | SWT.BORDER );
 
-	@Override
-	public void commit(boolean onSave) {
-		getProjectModel().getBundle().setDownloadJar(dl);			
-		super.commit(onSave);
-	}
+        TableWrapData data = new TableWrapData( TableWrapData.FILL_GRAB );
+        data.heightHint = 200;
+        tree.setLayoutData( data );
 
-	@Override
-	protected void refreshSelections() {
-		// zero the state
-		if ( dl != null ) {
-			for ( IPath path : dl.getEntrys() ) {
-				IResource r = findResource( path );
-				if ( r != null ) {
-					viewer.expandToLevel(r, 0);
-					viewer.setChecked( r, true );
-					viewer.setGrayed( r, false );
-					handleStateChanged(r, true, false, false);
-				}
-				else {
-					SigilCore.error( "Unknown path " + path );
-				}
-			}
-		}
-	}	
-	
-	protected void syncResourceModel(IResource element, boolean checked) {
-		try {
-			if ( dl == null ) {
-				dl = ModelElementFactory.getInstance().newModelElement(IDownloadJar.class);
-				getProjectModel().getBundle().setDownloadJar(dl);
-			}
-			
-			if ( checked ) {
-				dl.addEntry( element.getProjectRelativePath() );
-			}
-			else {
-				dl.removeEntry( element.getProjectRelativePath() );
-			}
-			
-			markDirty();
-		}
-		catch (ModelElementFactoryException e) {
-			SigilCore.error( "Failed to create model element", e );
-		}
-	}	
+        viewer = new CheckboxTreeViewer( tree );
+        IFolder base = ResourcesPlugin.getWorkspace().getRoot().getFolder(
+            getProjectModel().getJavaModel().getOutputLocation() );
+        viewer.setContentProvider( new ContainerTreeProvider() );
+        viewer.setLabelProvider( new ModelLabelProvider() );
+        viewer.addCheckStateListener( this );
+        viewer.setInput( base );
+
+        dl = getProjectModel().getBundle().getDownloadJar();
+
+        startWorkspaceListener( base.getWorkspace() );
+    }
+
+
+    @Override
+    public void refresh()
+    {
+        dl = getProjectModel().getBundle().getDownloadJar();
+        super.refresh();
+    }
+
+
+    @Override
+    public void commit( boolean onSave )
+    {
+        getProjectModel().getBundle().setDownloadJar( dl );
+        super.commit( onSave );
+    }
+
+
+    @Override
+    protected void refreshSelections()
+    {
+        // zero the state
+        if ( dl != null )
+        {
+            for ( IPath path : dl.getEntrys() )
+            {
+                IResource r = findResource( path );
+                if ( r != null )
+                {
+                    viewer.expandToLevel( r, 0 );
+                    viewer.setChecked( r, true );
+                    viewer.setGrayed( r, false );
+                    handleStateChanged( r, true, false, false );
+                }
+                else
+                {
+                    SigilCore.error( "Unknown path " + path );
+                }
+            }
+        }
+    }
+
+
+    protected void syncResourceModel( IResource element, boolean checked )
+    {
+        try
+        {
+            if ( dl == null )
+            {
+                dl = ModelElementFactory.getInstance().newModelElement( IDownloadJar.class );
+                getProjectModel().getBundle().setDownloadJar( dl );
+            }
+
+            if ( checked )
+            {
+                dl.addEntry( element.getProjectRelativePath() );
+            }
+            else
+            {
+                dl.removeEntry( element.getProjectRelativePath() );
+            }
+
+            markDirty();
+        }
+        catch ( ModelElementFactoryException e )
+        {
+            SigilCore.error( "Failed to create model element", e );
+        }
+    }
 }

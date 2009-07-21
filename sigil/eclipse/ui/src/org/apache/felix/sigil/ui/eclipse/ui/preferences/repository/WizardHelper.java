@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.preferences.repository;
 
+
 import org.apache.felix.sigil.eclipse.SigilCore;
 import org.apache.felix.sigil.eclipse.model.repository.IRepositoryType;
 import org.apache.felix.sigil.ui.eclipse.ui.SigilUI;
@@ -30,35 +31,45 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 
-public class WizardHelper {
-	public static RepositoryWizard loadWizard(IRepositoryType type) throws CoreException {
-		IConfigurationElement e = findWizardConfig(type.getId());
-		
-		if ( e == null ) {
-			throw SigilCore.newCoreException("No wizard registered for repository " + type, null);
-		}
-		
-		return (RepositoryWizard) e.createExecutableExtension("class");
-	}
-	
-	public static boolean hasWizard(IRepositoryType type) {
-		return findWizardConfig(type.getId()) != null;
-	}	
-		
-	private static IConfigurationElement findWizardConfig(String id) {
-		IExtensionRegistry registry = Platform.getExtensionRegistry();		
-		IExtensionPoint p = registry.getExtensionPoint(SigilUI.REPOSITORY_WIZARD_EXTENSION_POINT_ID);
-		
-		for ( IExtension e : p.getExtensions() ) {
-			for ( IConfigurationElement c : e.getConfigurationElements() ) {
-				if ( id.equals( c.getAttribute("repository") ) ) {
-					return c;
-				}
-			}
-		}
-		
-		return null;
-	}
-	
-	
+
+public class WizardHelper
+{
+    public static RepositoryWizard loadWizard( IRepositoryType type ) throws CoreException
+    {
+        IConfigurationElement e = findWizardConfig( type.getId() );
+
+        if ( e == null )
+        {
+            throw SigilCore.newCoreException( "No wizard registered for repository " + type, null );
+        }
+
+        return ( RepositoryWizard ) e.createExecutableExtension( "class" );
+    }
+
+
+    public static boolean hasWizard( IRepositoryType type )
+    {
+        return findWizardConfig( type.getId() ) != null;
+    }
+
+
+    private static IConfigurationElement findWizardConfig( String id )
+    {
+        IExtensionRegistry registry = Platform.getExtensionRegistry();
+        IExtensionPoint p = registry.getExtensionPoint( SigilUI.REPOSITORY_WIZARD_EXTENSION_POINT_ID );
+
+        for ( IExtension e : p.getExtensions() )
+        {
+            for ( IConfigurationElement c : e.getConfigurationElements() )
+            {
+                if ( id.equals( c.getAttribute( "repository" ) ) )
+                {
+                    return c;
+                }
+            }
+        }
+
+        return null;
+    }
+
 }

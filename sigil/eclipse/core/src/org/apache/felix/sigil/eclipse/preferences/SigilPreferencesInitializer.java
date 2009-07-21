@@ -26,29 +26,32 @@ import org.apache.felix.sigil.model.common.VersionRangeBoundingRule;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
-public class SigilPreferencesInitializer extends AbstractPreferenceInitializer {
-	
-	public static final String[] EXCLUDED_RESOURCES = new String[] {
-		".project", ".classpath", ".settings"
-	};
-	
-	@Override
-	public void initializeDefaultPreferences() {
-		IPreferenceStore store = SigilCore.getDefault().getPreferenceStore();
 
-		store.setDefault(SigilCore.OSGI_INSTALL_CHECK_PREFERENCE, true);
+public class SigilPreferencesInitializer extends AbstractPreferenceInitializer
+{
 
-		store.setDefault(SigilCore.DEFAULT_VERSION_LOWER_BOUND, VersionRangeBoundingRule.Micro.name());
-		store.setDefault(SigilCore.DEFAULT_VERSION_UPPER_BOUND, VersionRangeBoundingRule.Any.name());
+    public static final String[] EXCLUDED_RESOURCES = new String[]
+        { ".project", ".classpath", ".settings" };
 
-		store.setDefault(SigilCore.DEFAULT_EXCLUDED_RESOURCES, PrefsUtils.arrayToString(EXCLUDED_RESOURCES));
-		
-		store.setDefault(SigilCore.PREFERENCES_NOASK_OSGI_INSTALL, false);
-		
-		store.setDefault(SigilCore.PREFERENCES_ADD_IMPORT_FOR_EXPORT, PromptablePreference.Prompt.name());
-		
-		store.setDefault(SigilCore.PREFERENCES_REBUILD_PROJECTS, PromptablePreference.Prompt.name() );
-		
-		store.setDefault(RepositoryConfiguration.REPOSITORY_DEFAULT_SET, "org.cauldron.sigil.core.workspaceprovider" );
-	}
+
+    @Override
+    public void initializeDefaultPreferences()
+    {
+        IPreferenceStore store = SigilCore.getDefault().getPreferenceStore();
+
+        store.setDefault( SigilCore.OSGI_INSTALL_CHECK_PREFERENCE, true );
+
+        store.setDefault( SigilCore.DEFAULT_VERSION_LOWER_BOUND, VersionRangeBoundingRule.Micro.name() );
+        store.setDefault( SigilCore.DEFAULT_VERSION_UPPER_BOUND, VersionRangeBoundingRule.Any.name() );
+
+        store.setDefault( SigilCore.DEFAULT_EXCLUDED_RESOURCES, PrefsUtils.arrayToString( EXCLUDED_RESOURCES ) );
+
+        store.setDefault( SigilCore.PREFERENCES_NOASK_OSGI_INSTALL, false );
+
+        store.setDefault( SigilCore.PREFERENCES_ADD_IMPORT_FOR_EXPORT, PromptablePreference.Prompt.name() );
+
+        store.setDefault( SigilCore.PREFERENCES_REBUILD_PROJECTS, PromptablePreference.Prompt.name() );
+
+        store.setDefault( RepositoryConfiguration.REPOSITORY_DEFAULT_SET, "org.cauldron.sigil.core.workspaceprovider" );
+    }
 }

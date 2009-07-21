@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.actions;
 
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -26,43 +27,61 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
-public abstract class DisplayAction extends Action {
 
-	public DisplayAction() {
-		super();
-	}
+public abstract class DisplayAction extends Action
+{
 
-	public DisplayAction(String text) {
-		super(text);
-	}
+    public DisplayAction()
+    {
+        super();
+    }
 
-	public DisplayAction(String text, ImageDescriptor image) {
-		super(text, image);
-	}
 
-	public DisplayAction(String text, int style) {
-		super(text, style);
-	}
+    public DisplayAction( String text )
+    {
+        super( text );
+    }
 
-	protected Display findDisplay() {
-		Display d = Display.getCurrent();
-		
-		if ( d == null ) {
-			d = Display.getDefault();
-		}
-		
-		return d;
-	}
 
-	protected void runInUI(final Shell shell, final WorkspaceModifyOperation op) {
-	}
+    public DisplayAction( String text, ImageDescriptor image )
+    {
+        super( text, image );
+    }
 
-	protected void info(final Shell shell, final String msg) {
-		shell.getDisplay().asyncExec( new Runnable() {
-			public void run() {
-				MessageDialog.openInformation(shell, "Information", msg );
-			}
-		} );
-	}
+
+    public DisplayAction( String text, int style )
+    {
+        super( text, style );
+    }
+
+
+    protected Display findDisplay()
+    {
+        Display d = Display.getCurrent();
+
+        if ( d == null )
+        {
+            d = Display.getDefault();
+        }
+
+        return d;
+    }
+
+
+    protected void runInUI( final Shell shell, final WorkspaceModifyOperation op )
+    {
+    }
+
+
+    protected void info( final Shell shell, final String msg )
+    {
+        shell.getDisplay().asyncExec( new Runnable()
+        {
+            public void run()
+            {
+                MessageDialog.openInformation( shell, "Information", msg );
+            }
+        } );
+    }
 
 }

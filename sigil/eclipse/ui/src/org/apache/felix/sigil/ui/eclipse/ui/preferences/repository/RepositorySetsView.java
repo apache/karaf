@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.preferences.repository;
 
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,181 +49,233 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 
-public class RepositorySetsView {
-	private static final String DEFAULT = "default";
 
-	private final RepositoriesPreferencePage page;
+public class RepositorySetsView
+{
+    private static final String DEFAULT = "default";
 
-	private ArrayList<RepositoryViewData> sets = new ArrayList<RepositoryViewData>();
-	
-	private TableViewer setView;
+    private final RepositoriesPreferencePage page;
 
-	private RepositoryViewData defaultSet;
-	
-	public RepositorySetsView(RepositoriesPreferencePage page) {
-		this.page = page;
-	}
+    private ArrayList<RepositoryViewData> sets = new ArrayList<RepositoryViewData>();
 
-	public Control createContents(Composite parent) {
-		// Create Controls
-		Composite composite = new Composite(parent, SWT.NONE);
-		
-		Table table = new Table(composite, SWT.SINGLE | SWT.BORDER);
+    private TableViewer setView;
 
-		// Table Viewer Setup
-		setView = new TableViewer(table);
+    private RepositoryViewData defaultSet;
 
-		setView.setContentProvider( new DefaultTableProvider() {
-			public Object[] getElements(Object inputElement) {
-				return toArray(inputElement);
-			}
-		} );
-		
-		defaultSet = new RepositoryViewData(DEFAULT, SigilCore.getRepositoryConfiguration().getDefaultRepositorySet().getRepositories());
-		
-		sets.add( defaultSet );
-		
-		for( Map.Entry<String, IRepositorySet> e : SigilCore.getRepositoryConfiguration().loadRepositorySets().entrySet() ) {
-			IRepositorySet s = e.getValue();
-			sets.add( new RepositoryViewData( e.getKey(), s.getRepositories() ) );
-		}
-		
-		setView.setLabelProvider( new DefaultLabelProvider() {
-			public Image getImage(Object element) {
-				return null;
-			}
 
-			public String getText(Object element) {
-				RepositoryViewData data = (RepositoryViewData) element;
-				return data.getName();
-			}
-		});
-		
-		setView.setInput(sets);
-		
-		// Layout
-		composite.setLayout(new GridLayout(2, false));
-		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 6));
-		
-		createButtons(composite);	
-				
-		return composite;
-	}
-	
-	private void createButtons(final Composite composite) {
-		final Button add = new Button(composite, SWT.PUSH);
-		add.setText("Add...");
-		add.setEnabled(true);
-		
-		final Button edit = new Button(composite, SWT.PUSH);
-		edit.setText("Edit...");
-		edit.setEnabled(false);
-				
-		final Button remove = new Button(composite, SWT.PUSH);
-		remove.setText("Remove");
-		remove.setEnabled(false);
-		// Listeners
-		add.addSelectionListener( new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				add(composite);
-			}			
-		});
-		
-		edit.addSelectionListener( new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				IStructuredSelection sel = (IStructuredSelection) setView.getSelection();
-				edit(composite, sel);
-			}			
-		});
-		
-		remove.addSelectionListener( new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				IStructuredSelection sel = (IStructuredSelection) setView.getSelection();
-				remove(sel);
-			}			
-		});
+    public RepositorySetsView( RepositoriesPreferencePage page )
+    {
+        this.page = page;
+    }
 
-		setView.addSelectionChangedListener( new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				boolean enabled = !event.getSelection().isEmpty();
-				if ( enabled ) {
-					RepositoryViewData element = (RepositoryViewData) ((IStructuredSelection) event.getSelection()).getFirstElement();
-					edit.setEnabled(true);
-					remove.setEnabled( element != defaultSet );
-				}
-				else {
-					edit.setEnabled(false);
-					remove.setEnabled(false);
-				}
-			}
-		});
-		
-		add.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		edit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		remove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));		
-	}
-	
-	private void add(Control parent) {
-		RepositorySetDialog wizard = new RepositorySetDialog(getShell(parent), getNames());
-		if ( wizard.open() == Window.OK ) {
-			sets.add( wizard.getData() );
-			updated();
-		}
-	}
 
-	private void edit(Control parent, IStructuredSelection sel) {
-		RepositoryViewData data = (RepositoryViewData) sel.getFirstElement();
-		RepositorySetDialog wizard = new RepositorySetDialog(getShell(parent), data, data != defaultSet, getNames());
-		if ( wizard.open() == Window.OK ) {
-			if ( data != defaultSet ) {
-				data.setName( wizard.getData().getName() );
-			}
-			data.setRepositories( wizard.getData().getRepositories() );
-			updated();
-		}
-	}
+    public Control createContents( Composite parent )
+    {
+        // Create Controls
+        Composite composite = new Composite( parent, SWT.NONE );
 
-	private Set<String> getNames() {
-		HashSet<String> names = new HashSet<String>();
-		
-		for ( RepositoryViewData view : sets ) {
-			if ( view != defaultSet ) {
-				names.add( view.getName() );
-			}
-		}
-		
-		return names;
-	}
+        Table table = new Table( composite, SWT.SINGLE | SWT.BORDER );
 
-	private Shell getShell(Control parent) {
-		return parent.getShell();
-	}
+        // Table Viewer Setup
+        setView = new TableViewer( table );
 
-	private void remove(IStructuredSelection sel) {
-		if ( sets.remove(sel.getFirstElement())) {
-			updated();
-		}
-	}
+        setView.setContentProvider( new DefaultTableProvider()
+        {
+            public Object[] getElements( Object inputElement )
+            {
+                return toArray( inputElement );
+            }
+        } );
 
-	private void updated() {
-		setView.refresh();
-		page.changed();
-	}
+        defaultSet = new RepositoryViewData( DEFAULT, SigilCore.getRepositoryConfiguration().getDefaultRepositorySet()
+            .getRepositories() );
 
-	public Map<String, IRepositorySet> getSets() {
-		HashMap<String, IRepositorySet> ret = new HashMap<String, IRepositorySet>();
-		
-		for ( RepositoryViewData data : sets ) {
-			if ( data != defaultSet ) {
-				IRepositorySet set = new RepositorySet(data.getRepositories());
-				ret.put( data.getName(), set );
-			}
-		}
-		
-		return ret;
-	}
+        sets.add( defaultSet );
 
-	public IRepositoryModel[] getDefaultRepositories() {
-		return defaultSet.getRepositories();
-	}
+        for ( Map.Entry<String, IRepositorySet> e : SigilCore.getRepositoryConfiguration().loadRepositorySets()
+            .entrySet() )
+        {
+            IRepositorySet s = e.getValue();
+            sets.add( new RepositoryViewData( e.getKey(), s.getRepositories() ) );
+        }
+
+        setView.setLabelProvider( new DefaultLabelProvider()
+        {
+            public Image getImage( Object element )
+            {
+                return null;
+            }
+
+
+            public String getText( Object element )
+            {
+                RepositoryViewData data = ( RepositoryViewData ) element;
+                return data.getName();
+            }
+        } );
+
+        setView.setInput( sets );
+
+        // Layout
+        composite.setLayout( new GridLayout( 2, false ) );
+        table.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, true, 1, 6 ) );
+
+        createButtons( composite );
+
+        return composite;
+    }
+
+
+    private void createButtons( final Composite composite )
+    {
+        final Button add = new Button( composite, SWT.PUSH );
+        add.setText( "Add..." );
+        add.setEnabled( true );
+
+        final Button edit = new Button( composite, SWT.PUSH );
+        edit.setText( "Edit..." );
+        edit.setEnabled( false );
+
+        final Button remove = new Button( composite, SWT.PUSH );
+        remove.setText( "Remove" );
+        remove.setEnabled( false );
+        // Listeners
+        add.addSelectionListener( new SelectionAdapter()
+        {
+            public void widgetSelected( SelectionEvent e )
+            {
+                add( composite );
+            }
+        } );
+
+        edit.addSelectionListener( new SelectionAdapter()
+        {
+            public void widgetSelected( SelectionEvent e )
+            {
+                IStructuredSelection sel = ( IStructuredSelection ) setView.getSelection();
+                edit( composite, sel );
+            }
+        } );
+
+        remove.addSelectionListener( new SelectionAdapter()
+        {
+            public void widgetSelected( SelectionEvent e )
+            {
+                IStructuredSelection sel = ( IStructuredSelection ) setView.getSelection();
+                remove( sel );
+            }
+        } );
+
+        setView.addSelectionChangedListener( new ISelectionChangedListener()
+        {
+            public void selectionChanged( SelectionChangedEvent event )
+            {
+                boolean enabled = !event.getSelection().isEmpty();
+                if ( enabled )
+                {
+                    RepositoryViewData element = ( RepositoryViewData ) ( ( IStructuredSelection ) event.getSelection() )
+                        .getFirstElement();
+                    edit.setEnabled( true );
+                    remove.setEnabled( element != defaultSet );
+                }
+                else
+                {
+                    edit.setEnabled( false );
+                    remove.setEnabled( false );
+                }
+            }
+        } );
+
+        add.setLayoutData( new GridData( SWT.FILL, SWT.FILL, false, false ) );
+        edit.setLayoutData( new GridData( SWT.FILL, SWT.FILL, false, false ) );
+        remove.setLayoutData( new GridData( SWT.FILL, SWT.FILL, false, false ) );
+    }
+
+
+    private void add( Control parent )
+    {
+        RepositorySetDialog wizard = new RepositorySetDialog( getShell( parent ), getNames() );
+        if ( wizard.open() == Window.OK )
+        {
+            sets.add( wizard.getData() );
+            updated();
+        }
+    }
+
+
+    private void edit( Control parent, IStructuredSelection sel )
+    {
+        RepositoryViewData data = ( RepositoryViewData ) sel.getFirstElement();
+        RepositorySetDialog wizard = new RepositorySetDialog( getShell( parent ), data, data != defaultSet, getNames() );
+        if ( wizard.open() == Window.OK )
+        {
+            if ( data != defaultSet )
+            {
+                data.setName( wizard.getData().getName() );
+            }
+            data.setRepositories( wizard.getData().getRepositories() );
+            updated();
+        }
+    }
+
+
+    private Set<String> getNames()
+    {
+        HashSet<String> names = new HashSet<String>();
+
+        for ( RepositoryViewData view : sets )
+        {
+            if ( view != defaultSet )
+            {
+                names.add( view.getName() );
+            }
+        }
+
+        return names;
+    }
+
+
+    private Shell getShell( Control parent )
+    {
+        return parent.getShell();
+    }
+
+
+    private void remove( IStructuredSelection sel )
+    {
+        if ( sets.remove( sel.getFirstElement() ) )
+        {
+            updated();
+        }
+    }
+
+
+    private void updated()
+    {
+        setView.refresh();
+        page.changed();
+    }
+
+
+    public Map<String, IRepositorySet> getSets()
+    {
+        HashMap<String, IRepositorySet> ret = new HashMap<String, IRepositorySet>();
+
+        for ( RepositoryViewData data : sets )
+        {
+            if ( data != defaultSet )
+            {
+                IRepositorySet set = new RepositorySet( data.getRepositories() );
+                ret.put( data.getName(), set );
+            }
+        }
+
+        return ret;
+    }
+
+
+    public IRepositoryModel[] getDefaultRepositories()
+    {
+        return defaultSet.getRepositories();
+    }
 }

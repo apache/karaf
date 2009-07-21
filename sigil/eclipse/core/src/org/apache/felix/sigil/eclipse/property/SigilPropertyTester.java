@@ -19,36 +19,47 @@
 
 package org.apache.felix.sigil.eclipse.property;
 
+
 import org.apache.felix.sigil.eclipse.SigilCore;
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
-public class SigilPropertyTester extends PropertyTester {
 
-	public SigilPropertyTester() {
-	}
+public class SigilPropertyTester extends PropertyTester
+{
 
-	public boolean test( Object receiver, String property, Object[] args, Object expectedValue ) {
-		IResource resource = (IResource) receiver;
-		if ( "isSigilProject".equals( property ) ) {
-			return expectedValue.equals( isSigilProjectLikeResource( resource ) );
-		}
-		return false;
-	}
+    public SigilPropertyTester()
+    {
+    }
 
-	/**
-	 * @param resource
-	 * @return
-	 */
-	private static boolean isSigilProjectLikeResource(IResource resource) {
-		if ( resource instanceof IProject ) {
-			IProject p = (IProject) resource;
-			return SigilCore.isSigilProject(p);
-		}
-		else {
-			return resource.getName().equals( SigilCore.SIGIL_PROJECT_FILE );
-		}
-	}
+
+    public boolean test( Object receiver, String property, Object[] args, Object expectedValue )
+    {
+        IResource resource = ( IResource ) receiver;
+        if ( "isSigilProject".equals( property ) )
+        {
+            return expectedValue.equals( isSigilProjectLikeResource( resource ) );
+        }
+        return false;
+    }
+
+
+    /**
+     * @param resource
+     * @return
+     */
+    private static boolean isSigilProjectLikeResource( IResource resource )
+    {
+        if ( resource instanceof IProject )
+        {
+            IProject p = ( IProject ) resource;
+            return SigilCore.isSigilProject( p );
+        }
+        else
+        {
+            return resource.getName().equals( SigilCore.SIGIL_PROJECT_FILE );
+        }
+    }
 
 }

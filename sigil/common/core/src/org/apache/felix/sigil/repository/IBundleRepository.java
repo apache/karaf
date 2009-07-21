@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.repository;
 
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;
@@ -28,32 +29,46 @@ import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.model.osgi.IPackageImport;
 import org.apache.felix.sigil.model.osgi.IRequiredBundle;
 
-public interface IBundleRepository {
-	static final int NORMAL_PRIORITY = 0;
-	static final int MAXIMUM_PRIORITY = -500;
-	static final int MINIMUM_PRIORITY = 500;
-	
-	String getId();
-	
-	void addBundleRepositoryListener(IBundleRepositoryListener listener);
-	
-	void removeBundleRepositoryListener(IBundleRepositoryListener listener);
-	
-	void accept(IRepositoryVisitor visitor);
-	
-	void accept(IRepositoryVisitor visitor, int options);
-	
-	void writeOBR(OutputStream out) throws IOException;
-	
-	void refresh();
-	
-	ISigilBundle findProvider(IPackageImport packageImport, int options);
-	
-	ISigilBundle findProvider(IRequiredBundle bundle, int options);
-	
-	Collection<ISigilBundle> findAllProviders(IRequiredBundle bundle, int options);
-	
-	Collection<ISigilBundle> findAllProviders(IPackageImport packageImport, int options);
-	
-	Collection<ISigilBundle> findProviders(ILibrary library, int options);
+
+public interface IBundleRepository
+{
+    static final int NORMAL_PRIORITY = 0;
+    static final int MAXIMUM_PRIORITY = -500;
+    static final int MINIMUM_PRIORITY = 500;
+
+
+    String getId();
+
+
+    void addBundleRepositoryListener( IBundleRepositoryListener listener );
+
+
+    void removeBundleRepositoryListener( IBundleRepositoryListener listener );
+
+
+    void accept( IRepositoryVisitor visitor );
+
+
+    void accept( IRepositoryVisitor visitor, int options );
+
+
+    void writeOBR( OutputStream out ) throws IOException;
+
+
+    void refresh();
+
+
+    ISigilBundle findProvider( IPackageImport packageImport, int options );
+
+
+    ISigilBundle findProvider( IRequiredBundle bundle, int options );
+
+
+    Collection<ISigilBundle> findAllProviders( IRequiredBundle bundle, int options );
+
+
+    Collection<ISigilBundle> findAllProviders( IPackageImport packageImport, int options );
+
+
+    Collection<ISigilBundle> findProviders( ILibrary library, int options );
 }

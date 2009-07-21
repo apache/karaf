@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.preferences.project;
 
+
 import java.util.concurrent.Callable;
 
 import org.apache.felix.sigil.eclipse.SigilCore;
@@ -48,143 +49,179 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.osgi.service.prefs.BackingStoreException;
 
-public class ProjectPropertyPage extends PropertyPage implements
-		IWorkbenchPropertyPage {
 
-	private boolean projectSpecific;
-	private ComboViewer setView;
-	private Composite settings;
-	private Button projectSpecificBtn;
+public class ProjectPropertyPage extends PropertyPage implements IWorkbenchPropertyPage
+{
 
-	@Override
-	protected Control createContents(Composite parent) {
-		final Composite control = new Composite(parent, SWT.NONE);
-		
-		projectSpecificBtn = new Button(control, SWT.CHECK);
-		projectSpecificBtn.setText( "Enable project specific settings");
-		projectSpecificBtn.addSelectionListener( new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				setProjectSpecific(!projectSpecific);
-			}
-		});
-		
-		Label link = new Label( control, SWT.UNDERLINE_SINGLE );
-		link.addMouseListener( new MouseAdapter() {
-			@Override
-			public void mouseDown(MouseEvent e) {
-				PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(null, SigilCore.REPOSITORIES_PREFERENCES_ID, null, null);
-				dialog.open();
-			}			
-		});
-		
-		link.setText("Configure workspace settings" );
-		
-		settings = new Composite( control, SWT.BORDER );
-		settings.setLayout( new GridLayout(1,false));
-		createSettings( settings );
-		
-		setFonts(control);
-		
-		// layout
-		control.setLayout( new GridLayout(2, false));
-		projectSpecificBtn.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false ) );
-		settings.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1 ) );
+    private boolean projectSpecific;
+    private ComboViewer setView;
+    private Composite settings;
+    private Button projectSpecificBtn;
 
-		// load settings
-		String currentSet = getCurrentSet();
-		
-		if ( currentSet == null ) {
-			setProjectSpecific(false);
-		}
-		else {
-			setView.setSelection( new StructuredSelection(currentSet) );
-			setProjectSpecific(true);
-		}
-		
-		return control;
-	}
 
-	private void setFonts(Composite control) {
-		Composite p = control.getParent();
-		for ( Control c : control.getChildren() ) {
-			c.setFont( p.getFont() );
-			if ( c instanceof Composite ) {
-				setFonts( (Composite) c );
-			}
-		}
-	}
+    @Override
+    protected Control createContents( Composite parent )
+    {
+        final Composite control = new Composite( parent, SWT.NONE );
 
-	private void setProjectSpecific(boolean projectSpecific) {
-		if ( this.projectSpecific != projectSpecific ) {
-			this.projectSpecific = projectSpecific;
-			settings.setEnabled(projectSpecific);
-			for ( Control c : settings.getChildren() ) {
-				c.setEnabled( projectSpecific );
-			}
-			projectSpecificBtn.setSelection(projectSpecific);
-		}
-	}
+        projectSpecificBtn = new Button( control, SWT.CHECK );
+        projectSpecificBtn.setText( "Enable project specific settings" );
+        projectSpecificBtn.addSelectionListener( new SelectionAdapter()
+        {
+            @Override
+            public void widgetSelected( SelectionEvent e )
+            {
+                setProjectSpecific( !projectSpecific );
+            }
+        } );
 
-	private void createSettings(Composite parent) {
-		Composite control = new Composite(parent, SWT.NONE);
-		
-		new Label( control, SWT.NONE).setText( "Repository Set:" );
-		Combo combo = new Combo(control, SWT.SINGLE);
-		
-		setView = new ComboViewer(combo);
-		setView.setContentProvider( new DefaultTableProvider() {
-			public Object[] getElements(Object inputElement) {
-				return toArray(inputElement);
-			}
-		});
-		
-		setView.setInput( SigilCore.getRepositoryConfiguration().loadRepositorySets().keySet() );
-		
-		// layout
-		control.setLayout( new GridLayout(2, false ) );
-	}
+        Label link = new Label( control, SWT.UNDERLINE_SINGLE );
+        link.addMouseListener( new MouseAdapter()
+        {
+            @Override
+            public void mouseDown( MouseEvent e )
+            {
+                PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn( null,
+                    SigilCore.REPOSITORIES_PREFERENCES_ID, null, null );
+                dialog.open();
+            }
+        } );
 
-	private String getCurrentSet() {
-		try {
-			IProject p = (IProject) getElement().getAdapter(IProject.class);
-			ISigilProjectModel model = SigilCore.create(p);
-			return model.getPreferences().get( SigilCore.REPOSITORY_SET, null );
-		} catch (CoreException e) {
-			SigilCore.error("Failed to read repository set", e );
-			return null;
-		}
-	}
+        link.setText( "Configure workspace settings" );
 
-	@Override
-	public boolean okToLeave() {
-		if ( projectSpecific ) {
-			if ( setView.getSelection().isEmpty() ) {
-				setErrorMessage("Must select a repository set");
-				return false;
-			}
-		}
-		setErrorMessage(null);
-		return true;
-	}
+        settings = new Composite( control, SWT.BORDER );
+        settings.setLayout( new GridLayout( 1, false ) );
+        createSettings( settings );
 
-	@Override
-	public boolean performOk() {
-		return ProjectUtils.runTaskWithRebuildCheck( new Callable<Boolean>() {
-			public Boolean call() throws CoreException, BackingStoreException {
-				String set = null;
-				if ( projectSpecific ) {
-					set = (String) ((IStructuredSelection) setView.getSelection()).getFirstElement();
-				}
+        setFonts( control );
 
-				IProject p = (IProject) getElement().getAdapter(IProject.class);
-				ISigilProjectModel model = SigilCore.create(p);
-				model.getPreferences().put( SigilCore.REPOSITORY_SET, set );
-				model.getPreferences().flush();
-				return true;
-			}
+        // layout
+        control.setLayout( new GridLayout( 2, false ) );
+        projectSpecificBtn.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, false ) );
+        settings.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, true, 2, 1 ) );
 
-		}, getShell());
-	}
+        // load settings
+        String currentSet = getCurrentSet();
+
+        if ( currentSet == null )
+        {
+            setProjectSpecific( false );
+        }
+        else
+        {
+            setView.setSelection( new StructuredSelection( currentSet ) );
+            setProjectSpecific( true );
+        }
+
+        return control;
+    }
+
+
+    private void setFonts( Composite control )
+    {
+        Composite p = control.getParent();
+        for ( Control c : control.getChildren() )
+        {
+            c.setFont( p.getFont() );
+            if ( c instanceof Composite )
+            {
+                setFonts( ( Composite ) c );
+            }
+        }
+    }
+
+
+    private void setProjectSpecific( boolean projectSpecific )
+    {
+        if ( this.projectSpecific != projectSpecific )
+        {
+            this.projectSpecific = projectSpecific;
+            settings.setEnabled( projectSpecific );
+            for ( Control c : settings.getChildren() )
+            {
+                c.setEnabled( projectSpecific );
+            }
+            projectSpecificBtn.setSelection( projectSpecific );
+        }
+    }
+
+
+    private void createSettings( Composite parent )
+    {
+        Composite control = new Composite( parent, SWT.NONE );
+
+        new Label( control, SWT.NONE ).setText( "Repository Set:" );
+        Combo combo = new Combo( control, SWT.SINGLE );
+
+        setView = new ComboViewer( combo );
+        setView.setContentProvider( new DefaultTableProvider()
+        {
+            public Object[] getElements( Object inputElement )
+            {
+                return toArray( inputElement );
+            }
+        } );
+
+        setView.setInput( SigilCore.getRepositoryConfiguration().loadRepositorySets().keySet() );
+
+        // layout
+        control.setLayout( new GridLayout( 2, false ) );
+    }
+
+
+    private String getCurrentSet()
+    {
+        try
+        {
+            IProject p = ( IProject ) getElement().getAdapter( IProject.class );
+            ISigilProjectModel model = SigilCore.create( p );
+            return model.getPreferences().get( SigilCore.REPOSITORY_SET, null );
+        }
+        catch ( CoreException e )
+        {
+            SigilCore.error( "Failed to read repository set", e );
+            return null;
+        }
+    }
+
+
+    @Override
+    public boolean okToLeave()
+    {
+        if ( projectSpecific )
+        {
+            if ( setView.getSelection().isEmpty() )
+            {
+                setErrorMessage( "Must select a repository set" );
+                return false;
+            }
+        }
+        setErrorMessage( null );
+        return true;
+    }
+
+
+    @Override
+    public boolean performOk()
+    {
+        return ProjectUtils.runTaskWithRebuildCheck( new Callable<Boolean>()
+        {
+            public Boolean call() throws CoreException, BackingStoreException
+            {
+                String set = null;
+                if ( projectSpecific )
+                {
+                    set = ( String ) ( ( IStructuredSelection ) setView.getSelection() ).getFirstElement();
+                }
+
+                IProject p = ( IProject ) getElement().getAdapter( IProject.class );
+                ISigilProjectModel model = SigilCore.create( p );
+                model.getPreferences().put( SigilCore.REPOSITORY_SET, set );
+                model.getPreferences().flush();
+                return true;
+            }
+
+        }, getShell() );
+    }
 
 }

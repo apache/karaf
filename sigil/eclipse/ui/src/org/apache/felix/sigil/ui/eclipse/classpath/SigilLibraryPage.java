@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.classpath;
 
+
 import org.apache.felix.sigil.eclipse.SigilCore;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -29,38 +30,52 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-public class SigilLibraryPage extends WizardPage implements IClasspathContainerPage {
+
+public class SigilLibraryPage extends WizardPage implements IClasspathContainerPage
+{
 
     private IClasspathEntry classpathEntry;
 
-    public SigilLibraryPage() {
+
+    public SigilLibraryPage()
+    {
         super( "Sigil" );
     }
-    
-    public void createControl(Composite parent) {
-        setTitle("Sigil Library");
 
-        Label label = new Label(parent, SWT.NONE);
-        label.setText("Press Finish to add the Sigil Library");
-        label.setFont(parent.getFont());
 
-        setControl(label);
+    public void createControl( Composite parent )
+    {
+        setTitle( "Sigil Library" );
+
+        Label label = new Label( parent, SWT.NONE );
+        label.setText( "Press Finish to add the Sigil Library" );
+        label.setFont( parent.getFont() );
+
+        setControl( label );
     }
 
-    public boolean finish() {
-        classpathEntry = JavaCore.newContainerEntry(new Path(SigilCore.CLASSPATH_CONTAINER_PATH));
+
+    public boolean finish()
+    {
+        classpathEntry = JavaCore.newContainerEntry( new Path( SigilCore.CLASSPATH_CONTAINER_PATH ) );
         return true;
     }
 
-    public boolean isPageComplete() {
+
+    public boolean isPageComplete()
+    {
         return true;
     }
 
-    public IClasspathEntry getSelection() {
+
+    public IClasspathEntry getSelection()
+    {
         return classpathEntry;
     }
 
-    public void setSelection(IClasspathEntry containerEntry) {
+
+    public void setSelection( IClasspathEntry containerEntry )
+    {
         this.classpathEntry = containerEntry;
     }
 

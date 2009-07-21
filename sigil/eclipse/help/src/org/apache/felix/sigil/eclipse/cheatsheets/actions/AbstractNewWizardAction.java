@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.eclipse.cheatsheets.actions;
 
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
@@ -31,36 +32,45 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
-public abstract class AbstractNewWizardAction extends Action {
 
-	@Override
-	public void run() {
-		Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-		
-		try {
-			INewWizard wizard = createWizard();
-			wizard.init(PlatformUI.getWorkbench(), getSelection());
-			WizardDialog dialog = new WizardDialog(shell, wizard);
-			int res = dialog.open();
-			notifyResult(res == Window.OK);
-		} catch (CoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}		
-	}
-	
-	protected abstract INewWizard createWizard() throws CoreException;
+public abstract class AbstractNewWizardAction extends Action
+{
 
-	private IStructuredSelection getSelection() {
-		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		if (window != null)
-		{
-			ISelection selection = window.getSelectionService().getSelection();
-			if (selection instanceof IStructuredSelection)
-			{
-				return (IStructuredSelection)selection;
-			}
-		}
-		return StructuredSelection.EMPTY;
-	}
+    @Override
+    public void run()
+    {
+        Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+
+        try
+        {
+            INewWizard wizard = createWizard();
+            wizard.init( PlatformUI.getWorkbench(), getSelection() );
+            WizardDialog dialog = new WizardDialog( shell, wizard );
+            int res = dialog.open();
+            notifyResult( res == Window.OK );
+        }
+        catch ( CoreException e )
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+
+    protected abstract INewWizard createWizard() throws CoreException;
+
+
+    private IStructuredSelection getSelection()
+    {
+        IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+        if ( window != null )
+        {
+            ISelection selection = window.getSelectionService().getSelection();
+            if ( selection instanceof IStructuredSelection )
+            {
+                return ( IStructuredSelection ) selection;
+            }
+        }
+        return StructuredSelection.EMPTY;
+    }
 }

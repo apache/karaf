@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.repository;
 
+
 import java.util.Collection;
 
 import org.apache.felix.sigil.model.IModelWalker;
@@ -26,26 +27,38 @@ import org.apache.felix.sigil.model.eclipse.ILibrary;
 import org.apache.felix.sigil.model.eclipse.ILibraryImport;
 import org.eclipse.core.runtime.CoreException;
 
-public interface IRepositoryManager {
-	void addRepositoryChangeListener(IRepositoryChangeListener listener);
-	
-	void removeRepositoryChangeListener(IRepositoryChangeListener listener);
-	
-	Collection<IBundleRepository> getRepositories();
-	
-	Collection<IBundleRepository> getRepositories(int level);
-	
-	void addLibrary(ILibrary library);
 
-	void removeLibrary(ILibrary library);
+public interface IRepositoryManager
+{
+    void addRepositoryChangeListener( IRepositoryChangeListener listener );
 
-	Collection<ILibrary> getLibraries();
 
-	ILibrary resolveLibrary(final ILibraryImport l);
-	
-	IBundleResolver getBundleResolver();
+    void removeRepositoryChangeListener( IRepositoryChangeListener listener );
 
-	int[] getPriorityLevels();
 
-	void visit(IModelWalker modelWalker);	
+    Collection<IBundleRepository> getRepositories();
+
+
+    Collection<IBundleRepository> getRepositories( int level );
+
+
+    void addLibrary( ILibrary library );
+
+
+    void removeLibrary( ILibrary library );
+
+
+    Collection<ILibrary> getLibraries();
+
+
+    ILibrary resolveLibrary( final ILibraryImport l );
+
+
+    IBundleResolver getBundleResolver();
+
+
+    int[] getPriorityLevels();
+
+
+    void visit( IModelWalker modelWalker );
 }

@@ -19,12 +19,21 @@
 
 package org.apache.felix.sigil.search;
 
+
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.model.osgi.IPackageExport;
 
-public interface ISearchResult {
-	ISigilBundle getProvider();
-	IPackageExport getExport();
-	String getPackageName();
-	String getClassName();
+
+public interface ISearchResult
+{
+    ISigilBundle getProvider();
+
+
+    IPackageExport getExport();
+
+
+    String getPackageName();
+
+
+    String getClassName();
 }

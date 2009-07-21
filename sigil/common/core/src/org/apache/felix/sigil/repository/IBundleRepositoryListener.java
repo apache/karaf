@@ -19,6 +19,8 @@
 
 package org.apache.felix.sigil.repository;
 
-public interface IBundleRepositoryListener {
-	void notifyChange(IBundleRepository repository);
+
+public interface IBundleRepositoryListener
+{
+    void notifyChange( IBundleRepository repository );
 }

@@ -19,11 +19,15 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.internal.repository;
 
+
 import org.apache.felix.sigil.ui.eclipse.ui.wizard.repository.RepositoryWizard;
 
-public class FileSystemRepositoryWizard extends RepositoryWizard {
-	@Override
-	public void addPages() {
-		addPage( new FileSystemRepositoryWizardPage(this) );
-	}
+
+public class FileSystemRepositoryWizard extends RepositoryWizard
+{
+    @Override
+    public void addPages()
+    {
+        addPage( new FileSystemRepositoryWizardPage( this ) );
+    }
 }

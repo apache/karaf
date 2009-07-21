@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.eclipse.cheatsheets.actions;
 
+
 import org.apache.felix.sigil.eclipse.SigilCore;
 import org.eclipse.jface.action.Action;
 import org.eclipse.ui.IWorkbenchPage;
@@ -28,18 +29,25 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.cheatsheets.ICheatSheetAction;
 import org.eclipse.ui.cheatsheets.ICheatSheetManager;
 
-public class ShowViewAction extends Action implements ICheatSheetAction {
 
-	public void run(String[] params, ICheatSheetManager manager) {
-		if ( params != null && params.length > 0 )  {
-			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-			IWorkbenchPage page = window.getActivePage();
-			try {
-				page.showView(params[0]);
-			} catch (PartInitException e) {
-				SigilCore.error( "Failed to show view", e);
-			}
-		}
+public class ShowViewAction extends Action implements ICheatSheetAction
+{
 
-	}
+    public void run( String[] params, ICheatSheetManager manager )
+    {
+        if ( params != null && params.length > 0 )
+        {
+            IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+            IWorkbenchPage page = window.getActivePage();
+            try
+            {
+                page.showView( params[0] );
+            }
+            catch ( PartInitException e )
+            {
+                SigilCore.error( "Failed to show view", e );
+            }
+        }
+
+    }
 }

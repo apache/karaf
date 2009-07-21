@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.preferences.repository;
 
+
 import org.apache.felix.sigil.eclipse.SigilCore;
 import org.apache.felix.sigil.eclipse.model.repository.IRepositoryModel;
 import org.apache.felix.sigil.ui.eclipse.ui.wizard.repository.RepositoryWizard;
@@ -27,45 +28,64 @@ import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardNode;
 import org.eclipse.swt.graphics.Point;
 
-public class RepositoryWizardNode implements IWizardNode {
 
-	private IRepositoryModel repository;
-	
-	private RepositoryWizard wizard;
-	
-	public RepositoryWizardNode(IRepositoryModel repository) {
-		this.repository = repository;
-	}
+public class RepositoryWizardNode implements IWizardNode
+{
 
-	public void dispose() {
-		if ( wizard != null ) {
-			wizard.dispose();
-			wizard = null;
-		}
-	}
+    private IRepositoryModel repository;
 
-	public Point getExtent() {
-		return new Point(-1, -1);
-	}
+    private RepositoryWizard wizard;
 
-	public IWizard getWizard() {
-		if ( wizard == null ) {
-			try {
-				wizard = WizardHelper.loadWizard(repository.getType());
-				wizard.init( repository );
-			} catch (CoreException e) {
-				SigilCore.error( "Failed to create wizard for " + repository.getType(), e);
-			}
-		}
-		return wizard;
-	}
-	
-	public IRepositoryModel getRepository() {
-		return repository;
-	}
 
-	public boolean isContentCreated() {
-		return wizard != null;
-	}
+    public RepositoryWizardNode( IRepositoryModel repository )
+    {
+        this.repository = repository;
+    }
+
+
+    public void dispose()
+    {
+        if ( wizard != null )
+        {
+            wizard.dispose();
+            wizard = null;
+        }
+    }
+
+
+    public Point getExtent()
+    {
+        return new Point( -1, -1 );
+    }
+
+
+    public IWizard getWizard()
+    {
+        if ( wizard == null )
+        {
+            try
+            {
+                wizard = WizardHelper.loadWizard( repository.getType() );
+                wizard.init( repository );
+            }
+            catch ( CoreException e )
+            {
+                SigilCore.error( "Failed to create wizard for " + repository.getType(), e );
+            }
+        }
+        return wizard;
+    }
+
+
+    public IRepositoryModel getRepository()
+    {
+        return repository;
+    }
+
+
+    public boolean isContentCreated()
+    {
+        return wizard != null;
+    }
 
 }

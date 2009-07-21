@@ -19,49 +19,63 @@
 
 package org.apache.felix.sigil.obr;
 
+
 import java.io.File;
 import java.net.URL;
 
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.repository.IRepositoryVisitor;
 
-public class NonCachingOBRBundleRepository extends AbstractOBRBundleRepository {
 
-	/*public static void main(String[] args) throws Exception {
-		String url = args[0];
-		String obr = args[1];
-		String cache = args[2];
-		String update = args[3];
-		BldCore.init();
-		NonCachingOBRBundleRepository rep = new NonCachingOBRBundleRepository( "main", new URL(url), new File(obr), new File(cache), Long.parseLong(update));
-		rep.accept(new IRepositoryVisitor() {
-			public boolean visit(ISigilBundle bundle) {
-				System.out.println( "Found " + bundle );
-				return true;
-			}
-		});
-	} */
-	
-	public NonCachingOBRBundleRepository(String id, URL repositoryURL, File obrCache, File bundleCache, long updatePeriod) {
-		super(id, repositoryURL, obrCache, bundleCache, updatePeriod);
-	}
+public class NonCachingOBRBundleRepository extends AbstractOBRBundleRepository
+{
 
-	@Override
-	public void accept(final IRepositoryVisitor visitor, int options) {
-		try {
-			readBundles(new OBRListener() {
-				boolean visit = true;
-				public void handleBundle(ISigilBundle bundle) {
-					if ( visit ) {
-						visit = visitor.visit(bundle);
-					}
-				}
-			});
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+    /*public static void main(String[] args) throws Exception {
+    	String url = args[0];
+    	String obr = args[1];
+    	String cache = args[2];
+    	String update = args[3];
+    	BldCore.init();
+    	NonCachingOBRBundleRepository rep = new NonCachingOBRBundleRepository( "main", new URL(url), new File(obr), new File(cache), Long.parseLong(update));
+    	rep.accept(new IRepositoryVisitor() {
+    		public boolean visit(ISigilBundle bundle) {
+    			System.out.println( "Found " + bundle );
+    			return true;
+    		}
+    	});
+    } */
 
+    public NonCachingOBRBundleRepository( String id, URL repositoryURL, File obrCache, File bundleCache,
+        long updatePeriod )
+    {
+        super( id, repositoryURL, obrCache, bundleCache, updatePeriod );
+    }
+
+
+    @Override
+    public void accept( final IRepositoryVisitor visitor, int options )
+    {
+        try
+        {
+            readBundles( new OBRListener()
+            {
+                boolean visit = true;
+
+
+                public void handleBundle( ISigilBundle bundle )
+                {
+                    if ( visit )
+                    {
+                        visit = visitor.visit( bundle );
+                    }
+                }
+            } );
+        }
+        catch ( Exception e )
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
 }

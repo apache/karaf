@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.editors.project;
 
+
 import org.apache.felix.sigil.eclipse.SigilCore;
 import org.apache.felix.sigil.eclipse.model.project.ISigilProjectModel;
 import org.apache.felix.sigil.ui.eclipse.ui.form.SigilPage;
@@ -31,25 +32,31 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 import org.eclipse.ui.forms.widgets.TableWrapLayout;
 
-public class ContentsForm extends SigilPage  {
 
-	public static final String PAGE_ID = "contents";
-	
-	private ISigilProjectModel project;
-	
-	public ContentsForm(FormEditor editor, ISigilProjectModel project) {
-		super(editor, PAGE_ID, "Contents");
-		this.project = project;
-	}
-	
+public class ContentsForm extends SigilPage
+{
+
+    public static final String PAGE_ID = "contents";
+
+    private ISigilProjectModel project;
+
+
+    public ContentsForm( FormEditor editor, ISigilProjectModel project )
+    {
+        super( editor, PAGE_ID, "Contents" );
+        this.project = project;
+    }
+
+
     @Override
-    protected void createFormContent(IManagedForm managedForm) {
+    protected void createFormContent( IManagedForm managedForm )
+    {
         FormToolkit toolkit = managedForm.getToolkit();
-        
+
         ScrolledForm form = managedForm.getForm();
         form.setText( "Contents" );
-        
-        Composite body = form.getBody();        
+
+        Composite body = form.getBody();
         TableWrapLayout layout = new TableWrapLayout();
         layout.bottomMargin = 10;
         layout.topMargin = 5;
@@ -57,41 +64,43 @@ public class ContentsForm extends SigilPage  {
         layout.rightMargin = 10;
         layout.numColumns = 2;
         layout.horizontalSpacing = 10;
-        body.setLayout(layout);
-        body.setLayoutData(new TableWrapData(TableWrapData.FILL));
-        
-        Composite top = toolkit.createComposite(body);
+        body.setLayout( layout );
+        body.setLayoutData( new TableWrapData( TableWrapData.FILL ) );
+
+        Composite top = toolkit.createComposite( body );
         layout = new TableWrapLayout();
         layout.verticalSpacing = 20;
-        top.setLayout(layout);
-        TableWrapData data = new TableWrapData(TableWrapData.FILL_GRAB);
+        top.setLayout( layout );
+        TableWrapData data = new TableWrapData( TableWrapData.FILL_GRAB );
         data.colspan = 2;
-        top.setLayoutData(data);
-        
-        Composite left = toolkit.createComposite(body);
+        top.setLayoutData( data );
+
+        Composite left = toolkit.createComposite( body );
         layout = new TableWrapLayout();
         layout.verticalSpacing = 20;
-        left.setLayout(layout);
-        left.setLayoutData(new TableWrapData(TableWrapData.FILL_GRAB));
-        
-        Composite right = toolkit.createComposite(body);
+        left.setLayout( layout );
+        left.setLayoutData( new TableWrapData( TableWrapData.FILL_GRAB ) );
+
+        Composite right = toolkit.createComposite( body );
         layout = new TableWrapLayout();
         layout.verticalSpacing = 20;
-        right.setLayout(layout);
-        right.setLayoutData( new TableWrapData( TableWrapData.FILL_GRAB) );
-                
-        try {
-	        ClasspathSection classpath = new ClasspathSection( this, top, project );
-	        managedForm.addPart( classpath );
-	        
-	        ResourceBuildSection runtimeBuild = new ResourceBuildSection( this, left, project );
-	        managedForm.addPart( runtimeBuild );
-	        
-	        DownloadSection download = new DownloadSection( this, right, project );
-	        managedForm.addPart( download );	        
+        right.setLayout( layout );
+        right.setLayoutData( new TableWrapData( TableWrapData.FILL_GRAB ) );
+
+        try
+        {
+            ClasspathSection classpath = new ClasspathSection( this, top, project );
+            managedForm.addPart( classpath );
+
+            ResourceBuildSection runtimeBuild = new ResourceBuildSection( this, left, project );
+            managedForm.addPart( runtimeBuild );
+
+            DownloadSection download = new DownloadSection( this, right, project );
+            managedForm.addPart( download );
         }
-        catch (CoreException e) {
-        	SigilCore.error( "Failed to create contents form", e);
+        catch ( CoreException e )
+        {
+            SigilCore.error( "Failed to create contents form", e );
         }
     }
 }

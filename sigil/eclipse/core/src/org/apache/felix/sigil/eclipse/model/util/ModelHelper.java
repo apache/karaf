@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.eclipse.model.util;
 
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,56 +32,73 @@ import org.apache.felix.sigil.model.osgi.IPackageExport;
 import org.apache.felix.sigil.model.osgi.IPackageImport;
 import org.apache.felix.sigil.model.osgi.IRequiredBundle;
 
-public class ModelHelper {
-	public static List<IModelElement> findUsers(IModelElement e) {
-		LinkedList<IModelElement> users = new LinkedList<IModelElement>();
-		
-		findUsers(e, users);
-		
-		return users;
-	}
 
-	private static void findUsers(IModelElement e, final LinkedList<IModelElement> users) {
-		if ( e instanceof IPackageExport ) {
-			final IPackageExport pe = (IPackageExport) e;
-			SigilCore.getGlobalRepositoryManager().visit( new IModelWalker() {
-				public boolean visit(IModelElement element) {
-					if ( element instanceof IPackageImport ) {
-						IPackageImport pi = (IPackageImport) element;
-						if ( pi.accepts( pe ) ) {
-							users.add( pi );
-						}
-						return false;
-					}
-					
-					return true;
-				} 
-			} );
-		}
-		else if ( e instanceof IBundleModelElement ) {
-			final IBundleModelElement bndl = (IBundleModelElement) e;
-			
-			SigilCore.getGlobalRepositoryManager().visit( new IModelWalker() {
-				public boolean visit(IModelElement element) {
-					if ( element instanceof IRequiredBundle ) {
-						IRequiredBundle req = (IRequiredBundle) element;
-						if ( req.accepts( bndl ) ) {
-							users.add( req );
-						}
-						return false;
-					}
-					return true;
-				} 
-			} );
-		}
-		
-		if ( e instanceof ICompoundModelElement ) {
-			ICompoundModelElement c = (ICompoundModelElement) e;
-			IModelElement[] ch = c.children();
-			for ( IModelElement ee : ch ) {
-				findUsers( ee, users );
-			}
-		}
-	}
+public class ModelHelper
+{
+    public static List<IModelElement> findUsers( IModelElement e )
+    {
+        LinkedList<IModelElement> users = new LinkedList<IModelElement>();
+
+        findUsers( e, users );
+
+        return users;
+    }
+
+
+    private static void findUsers( IModelElement e, final LinkedList<IModelElement> users )
+    {
+        if ( e instanceof IPackageExport )
+        {
+            final IPackageExport pe = ( IPackageExport ) e;
+            SigilCore.getGlobalRepositoryManager().visit( new IModelWalker()
+            {
+                public boolean visit( IModelElement element )
+                {
+                    if ( element instanceof IPackageImport )
+                    {
+                        IPackageImport pi = ( IPackageImport ) element;
+                        if ( pi.accepts( pe ) )
+                        {
+                            users.add( pi );
+                        }
+                        return false;
+                    }
+
+                    return true;
+                }
+            } );
+        }
+        else if ( e instanceof IBundleModelElement )
+        {
+            final IBundleModelElement bndl = ( IBundleModelElement ) e;
+
+            SigilCore.getGlobalRepositoryManager().visit( new IModelWalker()
+            {
+                public boolean visit( IModelElement element )
+                {
+                    if ( element instanceof IRequiredBundle )
+                    {
+                        IRequiredBundle req = ( IRequiredBundle ) element;
+                        if ( req.accepts( bndl ) )
+                        {
+                            users.add( req );
+                        }
+                        return false;
+                    }
+                    return true;
+                }
+            } );
+        }
+
+        if ( e instanceof ICompoundModelElement )
+        {
+            ICompoundModelElement c = ( ICompoundModelElement ) e;
+            IModelElement[] ch = c.children();
+            for ( IModelElement ee : ch )
+            {
+                findUsers( ee, users );
+            }
+        }
+    }
 
 }

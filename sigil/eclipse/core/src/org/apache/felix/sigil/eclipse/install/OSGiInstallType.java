@@ -19,104 +19,140 @@
 
 package org.apache.felix.sigil.eclipse.install;
 
+
 import java.util.Arrays;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.swt.graphics.Image;
 
-public class OSGiInstallType implements IOSGiInstallType {
 
-	private String id;
-	private String name;
-	private String version;
-	private String mainClass;
-	private String[] classPath;
-	private IPath javaDocLocation;
-	private IPath sourceLocation;
-	private IPath[] defaultBundleLocations;
-	private Image icon;
-	
-	public Image getIcon() {
-		return icon;
-	}
+public class OSGiInstallType implements IOSGiInstallType
+{
 
-	public void setIcon(Image icon) {
-		this.icon = icon;
-	}
+    private String id;
+    private String name;
+    private String version;
+    private String mainClass;
+    private String[] classPath;
+    private IPath javaDocLocation;
+    private IPath sourceLocation;
+    private IPath[] defaultBundleLocations;
+    private Image icon;
 
-	public String getId() {
-		return id;
-	}
-	
-	public String[] getClassPath() {
-		return classPath;
-	}
 
-	public IPath[] getDefaultBundleLocations() {
-		return defaultBundleLocations;
-	}
+    public Image getIcon()
+    {
+        return icon;
+    }
 
-	public IPath getJavaDocLocation() {
-		return javaDocLocation;
-	}
 
-	public String getMainClass() {
-		return mainClass;
-	}
+    public void setIcon( Image icon )
+    {
+        this.icon = icon;
+    }
 
-	public String getName() {
-		return name;
-	}
 
-	public IPath getSourceLocation() {
-		return sourceLocation;
-	}
+    public String getId()
+    {
+        return id;
+    }
 
-	public String getVersion() {
-		return version;
-	}
-	
-	public void setId(String id) {
-		this.id = id;
-	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public String[] getClassPath()
+    {
+        return classPath;
+    }
 
-	public void setVersion(String version) {
-		this.version = version;
-	}
 
-	public void setMainClass(String mainClass) {
-		this.mainClass = mainClass;
-	}
+    public IPath[] getDefaultBundleLocations()
+    {
+        return defaultBundleLocations;
+    }
 
-	public void setClassPath(String[] classPath) {
-		this.classPath = classPath;
-	}
 
-	public void setJavaDocLocation(IPath javaDocLocation) {
-		this.javaDocLocation = javaDocLocation;
-	}
+    public IPath getJavaDocLocation()
+    {
+        return javaDocLocation;
+    }
 
-	public void setSourceLocation(IPath sourceLocation) {
-		this.sourceLocation = sourceLocation;
-	}
 
-	public void setDefaultBundleLocations(IPath[] defaultBundleLocations) {
-		this.defaultBundleLocations = defaultBundleLocations;
-	}
-	
-	public String toString() {
-		return "OSGiInstallType[\n" + 
-			"name=" + name + "\n" +
-			"version=" + version + "\n" +
-			"mainClass=" + mainClass + "\n" +
-			"classPath=" + Arrays.asList(classPath) + "\n" +
-			"javaDocLocation=" + javaDocLocation + "\n" +
-			"sourceLocation=" + sourceLocation + "\n" +
-			"defaultBundleLocations=" + Arrays.asList(defaultBundleLocations) + "\n" +
-			"]";
-	}
+    public String getMainClass()
+    {
+        return mainClass;
+    }
+
+
+    public String getName()
+    {
+        return name;
+    }
+
+
+    public IPath getSourceLocation()
+    {
+        return sourceLocation;
+    }
+
+
+    public String getVersion()
+    {
+        return version;
+    }
+
+
+    public void setId( String id )
+    {
+        this.id = id;
+    }
+
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
+
+    public void setVersion( String version )
+    {
+        this.version = version;
+    }
+
+
+    public void setMainClass( String mainClass )
+    {
+        this.mainClass = mainClass;
+    }
+
+
+    public void setClassPath( String[] classPath )
+    {
+        this.classPath = classPath;
+    }
+
+
+    public void setJavaDocLocation( IPath javaDocLocation )
+    {
+        this.javaDocLocation = javaDocLocation;
+    }
+
+
+    public void setSourceLocation( IPath sourceLocation )
+    {
+        this.sourceLocation = sourceLocation;
+    }
+
+
+    public void setDefaultBundleLocations( IPath[] defaultBundleLocations )
+    {
+        this.defaultBundleLocations = defaultBundleLocations;
+    }
+
+
+    public String toString()
+    {
+        return "OSGiInstallType[\n" + "name=" + name + "\n" + "version=" + version + "\n" + "mainClass=" + mainClass
+            + "\n" + "classPath=" + Arrays.asList( classPath ) + "\n" + "javaDocLocation=" + javaDocLocation + "\n"
+            + "sourceLocation=" + sourceLocation + "\n" + "defaultBundleLocations="
+            + Arrays.asList( defaultBundleLocations ) + "\n" + "]";
+    }
 }

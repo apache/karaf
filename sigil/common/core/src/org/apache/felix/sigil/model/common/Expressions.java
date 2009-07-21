@@ -19,61 +19,82 @@
 
 package org.apache.felix.sigil.model.common;
 
+
 import java.util.Map;
 
-public class Expressions {
 
-    public static LDAPExpr and(LDAPExpr... terms) {
-        return And.apply(terms);
+public class Expressions
+{
+
+    public static LDAPExpr and( LDAPExpr... terms )
+    {
+        return And.apply( terms );
     }
 
-    public static LDAPExpr or(LDAPExpr... terms) {
-        return Or.apply(terms);
+
+    public static LDAPExpr or( LDAPExpr... terms )
+    {
+        return Or.apply( terms );
     }
 
-    public static LDAPExpr not(LDAPExpr e) {
-        return Not.apply(e);
+
+    public static LDAPExpr not( LDAPExpr e )
+    {
+        return Not.apply( e );
     }
 
     public static LDAPExpr T = Bool.TRUE;
     public static LDAPExpr F = Bool.FALSE;
 
-    // supports direct use of wildcards for ease of testing, but not literal *s
-    public static SimpleTerm ex(String name, Ops op, String rhs) {
 
-        rhs = rhs.replace('*', SimpleTerm.WILDCARD);
-        return new SimpleTerm(name, op, rhs);
+    // supports direct use of wildcards for ease of testing, but not literal *s
+    public static SimpleTerm ex( String name, Ops op, String rhs )
+    {
+
+        rhs = rhs.replace( '*', SimpleTerm.WILDCARD );
+        return new SimpleTerm( name, op, rhs );
     }
 
 }
 
-class Bool implements LDAPExpr {
+class Bool implements LDAPExpr
+{
 
     /**
      * 
      */
     private static final long serialVersionUID = 1L;
-    public static final Bool TRUE = new Bool(true);
-    public static final Bool FALSE = new Bool(false);
+    public static final Bool TRUE = new Bool( true );
+    public static final Bool FALSE = new Bool( false );
 
     private boolean bool;
 
-    public Bool(boolean bool) {
+
+    public Bool( boolean bool )
+    {
         this.bool = bool;
     }
 
-    public boolean eval(Map<String, ?> map) {
+
+    public boolean eval( Map<String, ?> map )
+    {
         return bool;
     }
 
-    public void visit(ExprVisitor v) {
+
+    public void visit( ExprVisitor v )
+    {
     }
 
-    public LDAPExpr[] getChildren() {
+
+    public LDAPExpr[] getChildren()
+    {
         return CHILDLESS;
     }
 
-    public String toString() {
+
+    public String toString()
+    {
         return "(" + bool + ")";
     }
 }

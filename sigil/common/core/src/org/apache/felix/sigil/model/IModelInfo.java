@@ -19,8 +19,14 @@
 
 package org.apache.felix.sigil.model;
 
-public interface IModelInfo {
-	String getGroupName();
-	String getGroupURI();
-	String getName();
+
+public interface IModelInfo
+{
+    String getGroupName();
+
+
+    String getGroupURI();
+
+
+    String getName();
 }

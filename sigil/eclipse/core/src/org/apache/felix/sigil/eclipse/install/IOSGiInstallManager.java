@@ -19,10 +19,20 @@
 
 package org.apache.felix.sigil.eclipse.install;
 
-public interface IOSGiInstallManager {
-	IOSGiInstall findInstall(String id);
-	String[] getInstallIDs();
-	IOSGiInstall[] getInstalls();
-	IOSGiInstall getDefaultInstall();
-	IOSGiInstallType findInstallType(String location);
+
+public interface IOSGiInstallManager
+{
+    IOSGiInstall findInstall( String id );
+
+
+    String[] getInstallIDs();
+
+
+    IOSGiInstall[] getInstalls();
+
+
+    IOSGiInstall getDefaultInstall();
+
+
+    IOSGiInstallType findInstallType( String location );
 }

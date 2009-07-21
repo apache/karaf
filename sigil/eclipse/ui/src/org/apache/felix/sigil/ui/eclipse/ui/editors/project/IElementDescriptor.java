@@ -19,18 +19,21 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.editors.project;
 
-public interface IElementDescriptor<E> {	
-	/**
-	 * Return the short identifying name of the element.
-	 */
-	String getName(E element);
 
-	/**
-	 * Return a label for the element, including the name but possibly supplying
-	 * additional information.
-	 * 
-	 * @param element
-	 * @return
-	 */
-	String getLabel(E element);
+public interface IElementDescriptor<E>
+{
+    /**
+     * Return the short identifying name of the element.
+     */
+    String getName( E element );
+
+
+    /**
+     * Return a label for the element, including the name but possibly supplying
+     * additional information.
+     * 
+     * @param element
+     * @return
+     */
+    String getLabel( E element );
 }

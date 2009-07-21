@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.internal.repository;
 
+
 import java.util.ArrayList;
 
 import org.apache.felix.sigil.eclipse.SigilCore;
@@ -27,27 +28,31 @@ import org.apache.felix.sigil.ui.eclipse.ui.wizard.repository.RepositoryWizard;
 import org.apache.felix.sigil.ui.eclipse.ui.wizard.repository.RepositoryWizardPage;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 
-public class OSGiInstallRepositoryWizardPage extends RepositoryWizardPage {
 
-	protected OSGiInstallRepositoryWizardPage(RepositoryWizard parent) {
-		super("OSGi Install Repository", parent);
-	}
+public class OSGiInstallRepositoryWizardPage extends RepositoryWizardPage
+{
 
-	@Override
-	public void createFieldEditors() {
-		ArrayList<String[]> installs = new ArrayList<String[]>();
-		for ( String id : SigilCore.getInstallManager().getInstallIDs() ) {
-			IOSGiInstall i = SigilCore.getInstallManager().findInstall(id);
-			installs.add( new String[] { i.getType().getName(), id } );
-		}
-		String[][] strs = installs.toArray( new String[installs.size()][] );
-		
-		RadioGroupFieldEditor editor = new RadioGroupFieldEditor(
-				"id", 
-				"Install", 
-				1, strs, getFieldEditorParent() );
-		
-		addField(editor);
-	}
+    protected OSGiInstallRepositoryWizardPage( RepositoryWizard parent )
+    {
+        super( "OSGi Install Repository", parent );
+    }
+
+
+    @Override
+    public void createFieldEditors()
+    {
+        ArrayList<String[]> installs = new ArrayList<String[]>();
+        for ( String id : SigilCore.getInstallManager().getInstallIDs() )
+        {
+            IOSGiInstall i = SigilCore.getInstallManager().findInstall( id );
+            installs.add( new String[]
+                { i.getType().getName(), id } );
+        }
+        String[][] strs = installs.toArray( new String[installs.size()][] );
+
+        RadioGroupFieldEditor editor = new RadioGroupFieldEditor( "id", "Install", 1, strs, getFieldEditorParent() );
+
+        addField( editor );
+    }
 
 }

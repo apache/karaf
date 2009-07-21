@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.editors.project;
 
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -62,135 +63,174 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 
-public class DependencyManagementSection extends SigilSection {
 
-	private Hyperlink hypConvertRBtoIP;
+public class DependencyManagementSection extends SigilSection
+{
 
-	public DependencyManagementSection(SigilPage page, Composite parent,
-			ISigilProjectModel project) throws CoreException {
-		super(page, parent, project);
-	}
+    private Hyperlink hypConvertRBtoIP;
 
-	protected void createSection(Section section, FormToolkit toolkit) throws CoreException {
-		setTitle("Dependency Management");
-		
-		Composite body = createGridBody(1, false, toolkit);
-		
-		hypConvertRBtoIP = toolkit.createHyperlink(body, "Convert Required Bundles to Imported Packages", SWT.NONE);
-		hypConvertRBtoIP.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		hypConvertRBtoIP.addHyperlinkListener(new HyperlinkAdapter() {
-			public void linkActivated(HyperlinkEvent e) {
-				run();
-			}
-		});
-	}
-	
-	protected void run() {
-		final Map<String, IPackageExport> exports = new HashMap<String, IPackageExport>();
-		final Set<String> imports = new HashSet<String>();
-		
-		// Find all exports
-		final ExportedPackageFinder exportFinder = new ExportedPackageFinder(getProjectModel(), new AccumulatorAdapter<IPackageExport>() {
-			public void addElements(Collection<? extends IPackageExport> elements) {
-				for (IPackageExport export : elements) {
-					exports.put(export.getPackageName(), export);
-				}
-			}
-		});
-		Job findExportsJob = new Job("Find exports") {
-			protected IStatus run(IProgressMonitor monitor) {
-				return exportFinder.run(monitor);
-			}
-		};
-		findExportsJob.setUser(true);
-		findExportsJob.schedule();
-		
-		// Find imports from Java source
-		Job findImportsJob = new Job("Find imports") {
-			protected IStatus run(IProgressMonitor monitor) {
-				IJavaProject javaProject = getProjectModel().getJavaModel();
-				try {
-					IPackageFragment[] packages = javaProject.getPackageFragments();
-					for (IPackageFragment pkg : packages) {
-						ICompilationUnit[] compilationUnits = pkg.getCompilationUnits();
-						for (ICompilationUnit compilationUnit : compilationUnits) {
-							IImportDeclaration[] importDecls = compilationUnit.getImports();
-							for (IImportDeclaration importDecl : importDecls) {
-								imports.add(getPackageName(importDecl));
-							}
-						}
-					}
-					return Status.OK_STATUS;
-				} catch (JavaModelException e) {
-					return new Status(IStatus.ERROR, SigilUI.PLUGIN_ID, 0, "Error finding imports", e);
-				}
-			}
-		};
-		findImportsJob.setUser(true);
-		findImportsJob.schedule();
-		
-		// Wait for both jobs to complete
-		try {
-			findImportsJob.join();
-			findExportsJob.join();
-		} catch (InterruptedException e) {
-			// Aborted, just do nothing
-			return;
-		}
-		
-		// Get the version rules
-		IPreferenceStore prefStore = SigilCore.getDefault().getPreferenceStore();
-		VersionRangeBoundingRule lowerBoundRule = VersionRangeBoundingRule.valueOf(prefStore.getString(SigilCore.DEFAULT_VERSION_LOWER_BOUND));
-		VersionRangeBoundingRule upperBoundRule = VersionRangeBoundingRule.valueOf(prefStore.getString(SigilCore.DEFAULT_VERSION_UPPER_BOUND));
-		
-		// Get the existing imports for the bundle
-		IBundleModelElement bundleInfo = getProjectModel().getBundle().getBundleInfo();
-		Set<IPackageImport> existingImports = bundleInfo.getImports();
-		Map<String, IPackageImport> existingImportsMap = new HashMap<String, IPackageImport>();
-		for (IPackageImport existingImport : existingImports) {
-			existingImportsMap.put(existingImport.getPackageName(), existingImport);
-		}
-		
-		// Add imports to the bundle
-		ModelElementFactory elementFactory = ModelElementFactory.getInstance();
-		int count = 0;
-		for (String pkgImport : imports) {
-			IPackageExport export = exports.get(pkgImport);
-			if(export != null && !existingImportsMap.containsKey(pkgImport)) {
-				VersionRange versionRange = VersionRange.newInstance(export.getVersion(), lowerBoundRule, upperBoundRule);
-				IPackageImport newImport = elementFactory.newModelElement(IPackageImport.class);
-				newImport.setPackageName(pkgImport);
-				newImport.setVersions(versionRange);
-				newImport.setOptional(false);
-				
-				bundleInfo.addImport(newImport);
-				count++;
-			}
-		}
-		
-		// Remove required bundles
-		Set<IRequiredBundle> requiredBundles = bundleInfo.getRequiredBundles();
-		int requiredBundlesSize = requiredBundles.size();
-		for (IRequiredBundle requiredBundle : requiredBundles) {
-			bundleInfo.removeRequiredBundle(requiredBundle);
-		}
 
-		// Update the editor
-		if(count + requiredBundlesSize > 0) {
-			IFormPart[] parts = getPage().getManagedForm().getParts();
-			for (IFormPart formPart : parts) {
-				formPart.refresh();
-				((AbstractFormPart) formPart).markDirty();
-			}
-		}
-		
-		MessageDialog.openInformation(getManagedForm().getForm().getShell(), "Dependency Management", "Removed " + requiredBundlesSize + " required bundle(s) and added " + count + " imported package(s).");
-	}
-	
-	private static String getPackageName(IImportDeclaration decl) {
-		String name = decl.getElementName();
-		int lastDot = name.lastIndexOf('.');
-		return name.substring(0, lastDot);
-	}
+    public DependencyManagementSection( SigilPage page, Composite parent, ISigilProjectModel project )
+        throws CoreException
+    {
+        super( page, parent, project );
+    }
+
+
+    protected void createSection( Section section, FormToolkit toolkit ) throws CoreException
+    {
+        setTitle( "Dependency Management" );
+
+        Composite body = createGridBody( 1, false, toolkit );
+
+        hypConvertRBtoIP = toolkit.createHyperlink( body, "Convert Required Bundles to Imported Packages", SWT.NONE );
+        hypConvertRBtoIP.setLayoutData( new GridData( SWT.FILL, SWT.FILL, true, false ) );
+
+        hypConvertRBtoIP.addHyperlinkListener( new HyperlinkAdapter()
+        {
+            public void linkActivated( HyperlinkEvent e )
+            {
+                run();
+            }
+        } );
+    }
+
+
+    protected void run()
+    {
+        final Map<String, IPackageExport> exports = new HashMap<String, IPackageExport>();
+        final Set<String> imports = new HashSet<String>();
+
+        // Find all exports
+        final ExportedPackageFinder exportFinder = new ExportedPackageFinder( getProjectModel(),
+            new AccumulatorAdapter<IPackageExport>()
+            {
+                public void addElements( Collection<? extends IPackageExport> elements )
+                {
+                    for ( IPackageExport export : elements )
+                    {
+                        exports.put( export.getPackageName(), export );
+                    }
+                }
+            } );
+        Job findExportsJob = new Job( "Find exports" )
+        {
+            protected IStatus run( IProgressMonitor monitor )
+            {
+                return exportFinder.run( monitor );
+            }
+        };
+        findExportsJob.setUser( true );
+        findExportsJob.schedule();
+
+        // Find imports from Java source
+        Job findImportsJob = new Job( "Find imports" )
+        {
+            protected IStatus run( IProgressMonitor monitor )
+            {
+                IJavaProject javaProject = getProjectModel().getJavaModel();
+                try
+                {
+                    IPackageFragment[] packages = javaProject.getPackageFragments();
+                    for ( IPackageFragment pkg : packages )
+                    {
+                        ICompilationUnit[] compilationUnits = pkg.getCompilationUnits();
+                        for ( ICompilationUnit compilationUnit : compilationUnits )
+                        {
+                            IImportDeclaration[] importDecls = compilationUnit.getImports();
+                            for ( IImportDeclaration importDecl : importDecls )
+                            {
+                                imports.add( getPackageName( importDecl ) );
+                            }
+                        }
+                    }
+                    return Status.OK_STATUS;
+                }
+                catch ( JavaModelException e )
+                {
+                    return new Status( IStatus.ERROR, SigilUI.PLUGIN_ID, 0, "Error finding imports", e );
+                }
+            }
+        };
+        findImportsJob.setUser( true );
+        findImportsJob.schedule();
+
+        // Wait for both jobs to complete
+        try
+        {
+            findImportsJob.join();
+            findExportsJob.join();
+        }
+        catch ( InterruptedException e )
+        {
+            // Aborted, just do nothing
+            return;
+        }
+
+        // Get the version rules
+        IPreferenceStore prefStore = SigilCore.getDefault().getPreferenceStore();
+        VersionRangeBoundingRule lowerBoundRule = VersionRangeBoundingRule.valueOf( prefStore
+            .getString( SigilCore.DEFAULT_VERSION_LOWER_BOUND ) );
+        VersionRangeBoundingRule upperBoundRule = VersionRangeBoundingRule.valueOf( prefStore
+            .getString( SigilCore.DEFAULT_VERSION_UPPER_BOUND ) );
+
+        // Get the existing imports for the bundle
+        IBundleModelElement bundleInfo = getProjectModel().getBundle().getBundleInfo();
+        Set<IPackageImport> existingImports = bundleInfo.getImports();
+        Map<String, IPackageImport> existingImportsMap = new HashMap<String, IPackageImport>();
+        for ( IPackageImport existingImport : existingImports )
+        {
+            existingImportsMap.put( existingImport.getPackageName(), existingImport );
+        }
+
+        // Add imports to the bundle
+        ModelElementFactory elementFactory = ModelElementFactory.getInstance();
+        int count = 0;
+        for ( String pkgImport : imports )
+        {
+            IPackageExport export = exports.get( pkgImport );
+            if ( export != null && !existingImportsMap.containsKey( pkgImport ) )
+            {
+                VersionRange versionRange = VersionRange.newInstance( export.getVersion(), lowerBoundRule,
+                    upperBoundRule );
+                IPackageImport newImport = elementFactory.newModelElement( IPackageImport.class );
+                newImport.setPackageName( pkgImport );
+                newImport.setVersions( versionRange );
+                newImport.setOptional( false );
+
+                bundleInfo.addImport( newImport );
+                count++;
+            }
+        }
+
+        // Remove required bundles
+        Set<IRequiredBundle> requiredBundles = bundleInfo.getRequiredBundles();
+        int requiredBundlesSize = requiredBundles.size();
+        for ( IRequiredBundle requiredBundle : requiredBundles )
+        {
+            bundleInfo.removeRequiredBundle( requiredBundle );
+        }
+
+        // Update the editor
+        if ( count + requiredBundlesSize > 0 )
+        {
+            IFormPart[] parts = getPage().getManagedForm().getParts();
+            for ( IFormPart formPart : parts )
+            {
+                formPart.refresh();
+                ( ( AbstractFormPart ) formPart ).markDirty();
+            }
+        }
+
+        MessageDialog.openInformation( getManagedForm().getForm().getShell(), "Dependency Management", "Removed "
+            + requiredBundlesSize + " required bundle(s) and added " + count + " imported package(s)." );
+    }
+
+
+    private static String getPackageName( IImportDeclaration decl )
+    {
+        String name = decl.getElementName();
+        int lastDot = name.lastIndexOf( '.' );
+        return name.substring( 0, lastDot );
+    }
 }

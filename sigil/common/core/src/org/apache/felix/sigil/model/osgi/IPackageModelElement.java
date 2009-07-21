@@ -19,12 +19,16 @@
 
 package org.apache.felix.sigil.model.osgi;
 
+
 import org.apache.felix.sigil.model.IModelElement;
 
-public interface IPackageModelElement extends IModelElement {
 
-	String getPackageName();
+public interface IPackageModelElement extends IModelElement
+{
 
-	void setPackageName(String packageName);
+    String getPackageName();
+
+
+    void setPackageName( String packageName );
 
 }

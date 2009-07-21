@@ -19,30 +19,41 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.wizard.repository;
 
+
 import org.apache.felix.sigil.eclipse.model.repository.IRepositoryModel;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 
-public class RepositoryWizard extends Wizard {
-	
-	private IRepositoryModel model;
-	
-	@Override
-	public boolean performFinish() {
-		for ( IWizardPage page : getPages() ) {
-			if ( page instanceof RepositoryWizardPage ) {
-				RepositoryWizardPage rwp = (RepositoryWizardPage) page;
-				rwp.storeFields();
-			}
-		}
-		return true;
-	}
-	
-	public IRepositoryModel getModel() {
-		return model;
-	}
 
-	public void init(IRepositoryModel model) {
-		this.model = model;
-	}
+public class RepositoryWizard extends Wizard
+{
+
+    private IRepositoryModel model;
+
+
+    @Override
+    public boolean performFinish()
+    {
+        for ( IWizardPage page : getPages() )
+        {
+            if ( page instanceof RepositoryWizardPage )
+            {
+                RepositoryWizardPage rwp = ( RepositoryWizardPage ) page;
+                rwp.storeFields();
+            }
+        }
+        return true;
+    }
+
+
+    public IRepositoryModel getModel()
+    {
+        return model;
+    }
+
+
+    public void init( IRepositoryModel model )
+    {
+        this.model = model;
+    }
 }

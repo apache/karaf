@@ -19,21 +19,33 @@
 
 package org.apache.felix.sigil.repository;
 
-public class RepositoryChangeEvent {
-	public static enum Type { ADDED, CHANGED, REMOVED };
-	
-	private Type type;
-	private IBundleRepository repository;
-	
-	public RepositoryChangeEvent(IBundleRepository repository, Type type) {
-		this.repository = repository;
-		this.type = type;
-	}
-	
-	public Type getType() {
-		return type;
-	}
-	public IBundleRepository getRepository() {
-		return repository;
-	}
+
+public class RepositoryChangeEvent
+{
+    public static enum Type
+    {
+        ADDED, CHANGED, REMOVED
+    };
+
+    private Type type;
+    private IBundleRepository repository;
+
+
+    public RepositoryChangeEvent( IBundleRepository repository, Type type )
+    {
+        this.repository = repository;
+        this.type = type;
+    }
+
+
+    public Type getType()
+    {
+        return type;
+    }
+
+
+    public IBundleRepository getRepository()
+    {
+        return repository;
+    }
 }

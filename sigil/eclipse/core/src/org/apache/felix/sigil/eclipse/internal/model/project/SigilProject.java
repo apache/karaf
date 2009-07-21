@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.eclipse.internal.model.project;
 
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -71,390 +72,519 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.osgi.framework.Version;
 import org.osgi.service.prefs.Preferences;
 
+
 /**
  * @author dave
  *
  */
-public class SigilProject extends AbstractCompoundModelElement implements ISigilProjectModel {
+public class SigilProject extends AbstractCompoundModelElement implements ISigilProjectModel
+{
 
-	private static final long serialVersionUID = 1L;
-	
-	private IFile bldProjectFile;
+    private static final long serialVersionUID = 1L;
+
+    private IFile bldProjectFile;
     private IProject project;
     private IBldProject bldProject;
-    
+
     private ISigilBundle bundle;
 
-	private IEclipsePreferences preferences;
+    private IEclipsePreferences preferences;
 
-    public SigilProject() {
-    	super( "Sigil Project" );
+
+    public SigilProject()
+    {
+        super( "Sigil Project" );
     }
-    
-    public SigilProject(IProject project) throws CoreException {
-    	this();
+
+
+    public SigilProject( IProject project ) throws CoreException
+    {
+        this();
         this.project = project;
-        bldProjectFile = project.getFile( new Path( SigilCore.SIGIL_PROJECT_FILE) );
+        bldProjectFile = project.getFile( new Path( SigilCore.SIGIL_PROJECT_FILE ) );
     }
-    
+
+
     // to aid testing conversion between project file formats
-    public InputStream saveBundle(ISigilBundle b) throws CoreException {
-    	setBundle(b);
-    	// FIXME causes NPE in JavaHelper
-    	// calculateUses();
-    	return buildContents();
+    public InputStream saveBundle( ISigilBundle b ) throws CoreException
+    {
+        setBundle( b );
+        // FIXME causes NPE in JavaHelper
+        // calculateUses();
+        return buildContents();
     }
-    
-	public void save(IProgressMonitor monitor) throws CoreException {
-		SubMonitor progress = SubMonitor.convert(monitor, 100);
-		
-    	calculateUses();
-    	
-    	bldProjectFile.setContents( buildContents(), IFile.KEEP_HISTORY, progress.newChild(10));
-    	
-		IRepositoryManager manager = SigilCore.getRepositoryManager(this);
-		ResolutionConfig config = new ResolutionConfig(ResolutionConfig.INCLUDE_OPTIONAL);
-		
-		try {
-			IResolution res = manager.getBundleResolver().resolve(this, config, new ResolutionMonitorAdapter(progress.newChild(10)));
-			if ( !res.isSynchronized() ) {
-				res.synchronize(progress.newChild(60));
-			}
-		} catch (ResolutionException e) {
-			throw SigilCore.newCoreException("Failed to synchronize dependencies", e);
-		}
-		
-		
-		progress.setWorkRemaining(40);
-		
-    	SigilCore.rebuildBundleDependencies( this, progress.newChild(20) );
+
+
+    public void save( IProgressMonitor monitor ) throws CoreException
+    {
+        SubMonitor progress = SubMonitor.convert( monitor, 100 );
+
+        calculateUses();
+
+        bldProjectFile.setContents( buildContents(), IFile.KEEP_HISTORY, progress.newChild( 10 ) );
+
+        IRepositoryManager manager = SigilCore.getRepositoryManager( this );
+        ResolutionConfig config = new ResolutionConfig( ResolutionConfig.INCLUDE_OPTIONAL );
+
+        try
+        {
+            IResolution res = manager.getBundleResolver().resolve( this, config,
+                new ResolutionMonitorAdapter( progress.newChild( 10 ) ) );
+            if ( !res.isSynchronized() )
+            {
+                res.synchronize( progress.newChild( 60 ) );
+            }
+        }
+        catch ( ResolutionException e )
+        {
+            throw SigilCore.newCoreException( "Failed to synchronize dependencies", e );
+        }
+
+        progress.setWorkRemaining( 40 );
+
+        SigilCore.rebuildBundleDependencies( this, progress.newChild( 20 ) );
     }
-	
-	/**
-	 * Returns the project custom preference pool.
-	 * Project preferences may include custom encoding.
-	 * @return IEclipsePreferences or <code>null</code> if the project
-	 * 	does not have a java nature.
-	 */
-	public Preferences getPreferences(){
-		synchronized(this) {
-			if ( preferences == null ) {
-				preferences = loadPreferences();
-			}
-			
-			return preferences;
-		}
-	}
-	
-	
-	/**
-	 * @return
-	 */
-	private synchronized IEclipsePreferences loadPreferences() {
-		IScopeContext context = new ProjectScope(getProject());
-		final IEclipsePreferences eclipsePreferences = context.getNode(SigilCore.PLUGIN_ID);
-		
-		// Listen to node removal from parent in order to reset cache
-		INodeChangeListener nodeListener = new IEclipsePreferences.INodeChangeListener() {
-			public void added(IEclipsePreferences.NodeChangeEvent event) {
-				// do nothing
-			}
-			
-			public void removed(IEclipsePreferences.NodeChangeEvent event) {
-				if (event.getChild() == eclipsePreferences) {
-					synchronized( SigilProject.this ) {
-						preferences = null;
-					}
-					((IEclipsePreferences) eclipsePreferences.parent()).removeNodeChangeListener(this);
-				}
-			}
-		};
 
-		((IEclipsePreferences) eclipsePreferences.parent()).addNodeChangeListener(nodeListener);
-		
-		return eclipsePreferences;
-	}
 
-	public Collection<IClasspathEntry> findExternalClasspath(IProgressMonitor monitor) throws CoreException {
-		return JavaHelper.resolveClasspathEntrys(this, monitor);
-	}
+    /**
+     * Returns the project custom preference pool.
+     * Project preferences may include custom encoding.
+     * @return IEclipsePreferences or <code>null</code> if the project
+     * 	does not have a java nature.
+     */
+    public Preferences getPreferences()
+    {
+        synchronized ( this )
+        {
+            if ( preferences == null )
+            {
+                preferences = loadPreferences();
+            }
 
-	private void calculateUses() {
-		visit( new IModelWalker() {
-			public boolean visit(IModelElement element) {
-				if ( element instanceof IPackageExport ) {
-					IPackageExport pe = (IPackageExport) element;
-					try {
-						pe.setUses( Arrays.asList( JavaHelper.findUses(pe.getPackageName(), SigilProject.this ) ) );
-					} catch (CoreException e) {
-						SigilCore.error( "Failed to build uses list for " + pe, e );
-					}
-				}
-				return true;
-			} 
-		} );
-	}
+            return preferences;
+        }
+    }
 
-    public Collection<ISigilProjectModel> findDependentProjects(IProgressMonitor monitor) {
-		return SigilCore.getRoot().resolveDependentProjects(this, monitor);
-	}
 
-	public Version getVersion() {
-		ISigilBundle bundle = getBundle();
-		return bundle == null ? null : bundle.getBundleInfo() == null ? null :  bundle.getBundleInfo().getVersion();
-	}
+    /**
+     * @return
+     */
+    private synchronized IEclipsePreferences loadPreferences()
+    {
+        IScopeContext context = new ProjectScope( getProject() );
+        final IEclipsePreferences eclipsePreferences = context.getNode( SigilCore.PLUGIN_ID );
 
-    public String getSymbolicName() {
-		ISigilBundle bundle = getBundle();
-    	return bundle == null ? null : bundle.getBundleInfo() == null ? null : bundle.getBundleInfo().getSymbolicName();
-	}
+        // Listen to node removal from parent in order to reset cache
+        INodeChangeListener nodeListener = new IEclipsePreferences.INodeChangeListener()
+        {
+            public void added( IEclipsePreferences.NodeChangeEvent event )
+            {
+                // do nothing
+            }
 
-    public IProject getProject() {
+
+            public void removed( IEclipsePreferences.NodeChangeEvent event )
+            {
+                if ( event.getChild() == eclipsePreferences )
+                {
+                    synchronized ( SigilProject.this )
+                    {
+                        preferences = null;
+                    }
+                    ( ( IEclipsePreferences ) eclipsePreferences.parent() ).removeNodeChangeListener( this );
+                }
+            }
+        };
+
+        ( ( IEclipsePreferences ) eclipsePreferences.parent() ).addNodeChangeListener( nodeListener );
+
+        return eclipsePreferences;
+    }
+
+
+    public Collection<IClasspathEntry> findExternalClasspath( IProgressMonitor monitor ) throws CoreException
+    {
+        return JavaHelper.resolveClasspathEntrys( this, monitor );
+    }
+
+
+    private void calculateUses()
+    {
+        visit( new IModelWalker()
+        {
+            public boolean visit( IModelElement element )
+            {
+                if ( element instanceof IPackageExport )
+                {
+                    IPackageExport pe = ( IPackageExport ) element;
+                    try
+                    {
+                        pe.setUses( Arrays.asList( JavaHelper.findUses( pe.getPackageName(), SigilProject.this ) ) );
+                    }
+                    catch ( CoreException e )
+                    {
+                        SigilCore.error( "Failed to build uses list for " + pe, e );
+                    }
+                }
+                return true;
+            }
+        } );
+    }
+
+
+    public Collection<ISigilProjectModel> findDependentProjects( IProgressMonitor monitor )
+    {
+        return SigilCore.getRoot().resolveDependentProjects( this, monitor );
+    }
+
+
+    public Version getVersion()
+    {
+        ISigilBundle bundle = getBundle();
+        return bundle == null ? null : bundle.getBundleInfo() == null ? null : bundle.getBundleInfo().getVersion();
+    }
+
+
+    public String getSymbolicName()
+    {
+        ISigilBundle bundle = getBundle();
+        return bundle == null ? null : bundle.getBundleInfo() == null ? null : bundle.getBundleInfo().getSymbolicName();
+    }
+
+
+    public IProject getProject()
+    {
         return project;
     }
 
-	public ISigilBundle getBundle() {
-		if ( bundle == null && bldProjectFile != null ) {
-			synchronized( bldProjectFile ) {
-				try {
-			        if ( bldProjectFile.getLocation().toFile().exists() ) {
-			        	bundle = parseContents(bldProjectFile);
-			        }
-			        else {
-			        	bundle = setupDefaults();
-			        	NullProgressMonitor npm = new NullProgressMonitor();
-			        	bldProjectFile.create( buildContents(), true /* force */, npm);
-			        	project.refreshLocal( IResource.DEPTH_INFINITE, npm );
-			        }
-				} catch (CoreException e) {
-					SigilCore.error( "Failed to build bundle", e);
-				}
-			}
-		}
-		return bundle;
-	}
-	
-	public void setBundle(ISigilBundle bundle) {
-		this.bundle = bundle;
-	}
-	
-	public IJavaProject getJavaModel() {
-		return JavaCore.create( project );
-	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if ( obj == null ) return false;
-		
-		if ( obj == this ) return true;
-		
-		try {
-			SigilProject p = (SigilProject) obj;
-			return getSymbolicName().equals( p.getSymbolicName() ) && (getVersion() == null ? p.getVersion() == null : getVersion().equals( p.getVersion() ));
-		}
-		catch (ClassCastException e) {
-			return false;
-		}
-	}
-
-	@Override
-	public int hashCode() {
-		// TODO Auto-generated method stub
-		return super.hashCode();
-	}
-
-	@Override
-	public String toString() {
-		return "SigilProject[" + getSymbolicName() + ":" + getVersion() + "]";
-	}
-
-	public void resetClasspath(IProgressMonitor monitor) throws CoreException {
-    	Path containerPath = new Path( SigilCore.CLASSPATH_CONTAINER_PATH );
-    	IJavaProject java = getJavaModel();
-		ClasspathContainerInitializer init = JavaCore.getClasspathContainerInitializer(SigilCore.CLASSPATH_CONTAINER_PATH);
-		ThreadProgressMonitor.setProgressMonitor(monitor);
-		try {
-			init.requestClasspathContainerUpdate(containerPath, java, null);
-		}
-		finally {
-			ThreadProgressMonitor.setProgressMonitor(null);
-		}
-	}
-
-	public IPath findBundleLocation() throws CoreException {
-		IPath p = getBundle().getLocation();
-		if ( p == null ) {
-			p = SigilCore.getDefault().findDefaultBundleLocation(this);
-		}
-		return p;
-	}
-
-    public IModelElement findImport(final String packageName, final IProgressMonitor monitor) {
-    	final IModelElement[] found = new IModelElement[1];
-    	
-    	visit( new IModelWalker() {
-			public boolean visit(IModelElement element) {
-				if ( element instanceof IPackageImport ) {
-					IPackageImport pi = (IPackageImport) element;
-					if ( pi.getPackageName().equals( packageName ) ) {
-						found[0] = pi;
-						return false;
-					}
-				}
-				else if ( element instanceof IRequiredBundle ) {
-					IRequiredBundle rb = (IRequiredBundle) element;
-					try {
-						IRepositoryManager manager = SigilCore.getRepositoryManager(SigilProject.this);
-						ResolutionConfig config = new ResolutionConfig(ResolutionConfig.IGNORE_ERRORS);
-						IResolution res = manager.getBundleResolver().resolve(rb, config, new ResolutionMonitorAdapter(monitor));
-						ISigilBundle b = res.getProvider(rb);
-						for ( IPackageExport pe : b.getBundleInfo().getExports() ) {
-							if ( pe.getPackageName().equals( packageName ) ) {
-								found[0] = rb;
-								return false;
-							}
-						}
-					} catch (ResolutionException e) {
-						SigilCore.error( "Failed to resolve " + rb, e );
-					}
-				}
-				return true;
-			}
-    		
-    	});
-    	
-    	return found[0];
-	}
-
-	public boolean isInClasspath(String packageName, IProgressMonitor monitor) throws CoreException {
-		if ( findImport(packageName, monitor) != null ) {
-			return true;
-		}
-		
-		for ( String path : getBundle().getClasspathEntrys() ) {
-			IClasspathEntry cp = getJavaModel().decodeClasspathEntry(path);
-			for ( IPackageFragmentRoot root : getJavaModel().findPackageFragmentRoots(cp) ) {
-				if ( findPackage( packageName, root ) ) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	
-	public boolean isInClasspath(ISigilBundle bundle) {
-		for ( String path : getBundle().getClasspathEntrys() ) {
-			IClasspathEntry cp = getJavaModel().decodeClasspathEntry(path);
-			switch ( cp.getEntryKind() ) {
-			case IClasspathEntry.CPE_PROJECT:
-				ISigilProjectModel p = bundle.getAncestor(ISigilProjectModel.class);
-				return p != null && cp.getPath().equals(p.getProject().getFullPath());
-			case IClasspathEntry.CPE_LIBRARY:
-				return cp.getPath().equals(bundle.getLocation());
-			}
-		}	
-		
-		return false;
-	}
-
-	private boolean findPackage(String packageName, IParent parent) throws JavaModelException {
-		for ( IJavaElement e : parent.getChildren() ) {
-			if ( e.getElementType() == IJavaElement.PACKAGE_FRAGMENT ) {
-				return e.getElementName().equals( packageName );
-			}
-			
-			if ( e instanceof IParent ) {
-				if ( findPackage(packageName, (IParent) e) ) {
-					return true;
-				}
-			}
-		}
-		
-		return false;
-	}
-
-	private ISigilBundle setupDefaults() {
-    	ISigilBundle bundle = ModelElementFactory.getInstance().newModelElement(ISigilBundle.class);
-    	IBundleModelElement info = ModelElementFactory.getInstance().newModelElement( IBundleModelElement.class );
-    	info.setSymbolicName(project.getName());
-    	bundle.setBundleInfo(info);
-    	bundle.setParent(this);
-    	return bundle;
+    public ISigilBundle getBundle()
+    {
+        if ( bundle == null && bldProjectFile != null )
+        {
+            synchronized ( bldProjectFile )
+            {
+                try
+                {
+                    if ( bldProjectFile.getLocation().toFile().exists() )
+                    {
+                        bundle = parseContents( bldProjectFile );
+                    }
+                    else
+                    {
+                        bundle = setupDefaults();
+                        NullProgressMonitor npm = new NullProgressMonitor();
+                        bldProjectFile.create( buildContents(), true /* force */, npm );
+                        project.refreshLocal( IResource.DEPTH_INFINITE, npm );
+                    }
+                }
+                catch ( CoreException e )
+                {
+                    SigilCore.error( "Failed to build bundle", e );
+                }
+            }
+        }
+        return bundle;
     }
 
-	
-	private ISigilBundle parseContents(IFile projectFile) throws CoreException {
-		/*if ( !projectFile.isSynchronized(IResource.DEPTH_ONE) ) {
-			projectFile.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
-		}*/
-		
-		if ( projectFile.getName().equals( SigilCore.SIGIL_PROJECT_FILE) ) {
-			return parseBldContents(projectFile.getLocationURI());
-		}
-		else {
-			throw SigilCore.newCoreException("Unexpected project file: " + projectFile.getName(), null );
-		}
-	}
-	
-    private ISigilBundle parseBldContents(URI uri) throws CoreException {
-		try {
-			bldProject = BldFactory.getProject(uri, true);
-			ISigilBundle bundle = bldProject.getDefaultBundle();
-			bundle.setParent(this);
-			return bundle;
-		} catch (IOException e) {
-			throw SigilCore.newCoreException( "Failed to parse " + uri, e);
-		}
-	}
 
-	private InputStream buildContents() throws CoreException {
-    	ByteArrayOutputStream buf = new ByteArrayOutputStream();    	
-    	try {
-    		if (bldProject == null) {
-            	bldProject = BldFactory.newProject(bldProjectFile.getLocationURI(), null);
-    		}
-        	bldProject.setDefaultBundle(getBundle());
-			bldProject.saveTo(buf);
-		} catch (IOException e) {
-			throw SigilCore.newCoreException("Failed to save project file", e);
-		}
-    	return new ByteArrayInputStream(buf.toByteArray());
+    public void setBundle( ISigilBundle bundle )
+    {
+        this.bundle = bundle;
     }
-    
-//    private InputStream buildXMLContents() throws CoreException {
-//    	Serializer serializer = SigilCore.getDefault().getDescriptorSerializer();
-//    	
-//    	ByteArrayOutputStream buf = new ByteArrayOutputStream();
-//    	
-//    	try {
-//    		serializer.serialize(getBundle(), buf);
-//    	} catch (SerializingException e) {
-//			throw SigilCore.newCoreException("Failed to serialize " + this, e);
-//    	}
-//    	
-//        return new ByteArrayInputStream(buf.toByteArray());
-//    }
 
-	public String getName() {
-		return getProject().getName();
-	}
 
-	public IPath findOutputLocation() throws CoreException {
-		return getProject().getLocation().append(
-				getJavaModel().getOutputLocation()
-				.removeFirstSegments(1));
-	}
+    public IJavaProject getJavaModel()
+    {
+        return JavaCore.create( project );
+    }
 
-	public IBldProject getBldProject() throws CoreException {
-		try {
-			return BldFactory.getProject(project.getFile(IBldProject.PROJECT_FILE).getLocationURI());
-		} catch (IOException e) {
-			throw SigilCore.newCoreException("Failed to get project file: ",e);
-		}
-	}
 
-	public boolean isInBundleClasspath(IPackageFragmentRoot root) throws JavaModelException {
-		String enc = getJavaModel().encodeClasspathEntry(root.getRawClasspathEntry());
-		return getBundle().getClasspathEntrys().contains( enc.trim() );
-	}
+    @Override
+    public boolean equals( Object obj )
+    {
+        if ( obj == null )
+            return false;
+
+        if ( obj == this )
+            return true;
+
+        try
+        {
+            SigilProject p = ( SigilProject ) obj;
+            return getSymbolicName().equals( p.getSymbolicName() )
+                && ( getVersion() == null ? p.getVersion() == null : getVersion().equals( p.getVersion() ) );
+        }
+        catch ( ClassCastException e )
+        {
+            return false;
+        }
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        // TODO Auto-generated method stub
+        return super.hashCode();
+    }
+
+
+    @Override
+    public String toString()
+    {
+        return "SigilProject[" + getSymbolicName() + ":" + getVersion() + "]";
+    }
+
+
+    public void resetClasspath( IProgressMonitor monitor ) throws CoreException
+    {
+        Path containerPath = new Path( SigilCore.CLASSPATH_CONTAINER_PATH );
+        IJavaProject java = getJavaModel();
+        ClasspathContainerInitializer init = JavaCore
+            .getClasspathContainerInitializer( SigilCore.CLASSPATH_CONTAINER_PATH );
+        ThreadProgressMonitor.setProgressMonitor( monitor );
+        try
+        {
+            init.requestClasspathContainerUpdate( containerPath, java, null );
+        }
+        finally
+        {
+            ThreadProgressMonitor.setProgressMonitor( null );
+        }
+    }
+
+
+    public IPath findBundleLocation() throws CoreException
+    {
+        IPath p = getBundle().getLocation();
+        if ( p == null )
+        {
+            p = SigilCore.getDefault().findDefaultBundleLocation( this );
+        }
+        return p;
+    }
+
+
+    public IModelElement findImport( final String packageName, final IProgressMonitor monitor )
+    {
+        final IModelElement[] found = new IModelElement[1];
+
+        visit( new IModelWalker()
+        {
+            public boolean visit( IModelElement element )
+            {
+                if ( element instanceof IPackageImport )
+                {
+                    IPackageImport pi = ( IPackageImport ) element;
+                    if ( pi.getPackageName().equals( packageName ) )
+                    {
+                        found[0] = pi;
+                        return false;
+                    }
+                }
+                else if ( element instanceof IRequiredBundle )
+                {
+                    IRequiredBundle rb = ( IRequiredBundle ) element;
+                    try
+                    {
+                        IRepositoryManager manager = SigilCore.getRepositoryManager( SigilProject.this );
+                        ResolutionConfig config = new ResolutionConfig( ResolutionConfig.IGNORE_ERRORS );
+                        IResolution res = manager.getBundleResolver().resolve( rb, config,
+                            new ResolutionMonitorAdapter( monitor ) );
+                        ISigilBundle b = res.getProvider( rb );
+                        for ( IPackageExport pe : b.getBundleInfo().getExports() )
+                        {
+                            if ( pe.getPackageName().equals( packageName ) )
+                            {
+                                found[0] = rb;
+                                return false;
+                            }
+                        }
+                    }
+                    catch ( ResolutionException e )
+                    {
+                        SigilCore.error( "Failed to resolve " + rb, e );
+                    }
+                }
+                return true;
+            }
+
+        } );
+
+        return found[0];
+    }
+
+
+    public boolean isInClasspath( String packageName, IProgressMonitor monitor ) throws CoreException
+    {
+        if ( findImport( packageName, monitor ) != null )
+        {
+            return true;
+        }
+
+        for ( String path : getBundle().getClasspathEntrys() )
+        {
+            IClasspathEntry cp = getJavaModel().decodeClasspathEntry( path );
+            for ( IPackageFragmentRoot root : getJavaModel().findPackageFragmentRoots( cp ) )
+            {
+                if ( findPackage( packageName, root ) )
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    public boolean isInClasspath( ISigilBundle bundle )
+    {
+        for ( String path : getBundle().getClasspathEntrys() )
+        {
+            IClasspathEntry cp = getJavaModel().decodeClasspathEntry( path );
+            switch ( cp.getEntryKind() )
+            {
+                case IClasspathEntry.CPE_PROJECT:
+                    ISigilProjectModel p = bundle.getAncestor( ISigilProjectModel.class );
+                    return p != null && cp.getPath().equals( p.getProject().getFullPath() );
+                case IClasspathEntry.CPE_LIBRARY:
+                    return cp.getPath().equals( bundle.getLocation() );
+            }
+        }
+
+        return false;
+    }
+
+
+    private boolean findPackage( String packageName, IParent parent ) throws JavaModelException
+    {
+        for ( IJavaElement e : parent.getChildren() )
+        {
+            if ( e.getElementType() == IJavaElement.PACKAGE_FRAGMENT )
+            {
+                return e.getElementName().equals( packageName );
+            }
+
+            if ( e instanceof IParent )
+            {
+                if ( findPackage( packageName, ( IParent ) e ) )
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+
+    private ISigilBundle setupDefaults()
+    {
+        ISigilBundle bundle = ModelElementFactory.getInstance().newModelElement( ISigilBundle.class );
+        IBundleModelElement info = ModelElementFactory.getInstance().newModelElement( IBundleModelElement.class );
+        info.setSymbolicName( project.getName() );
+        bundle.setBundleInfo( info );
+        bundle.setParent( this );
+        return bundle;
+    }
+
+
+    private ISigilBundle parseContents( IFile projectFile ) throws CoreException
+    {
+        /*if ( !projectFile.isSynchronized(IResource.DEPTH_ONE) ) {
+        	projectFile.refreshLocal(IResource.DEPTH_ONE, new NullProgressMonitor());
+        }*/
+
+        if ( projectFile.getName().equals( SigilCore.SIGIL_PROJECT_FILE ) )
+        {
+            return parseBldContents( projectFile.getLocationURI() );
+        }
+        else
+        {
+            throw SigilCore.newCoreException( "Unexpected project file: " + projectFile.getName(), null );
+        }
+    }
+
+
+    private ISigilBundle parseBldContents( URI uri ) throws CoreException
+    {
+        try
+        {
+            bldProject = BldFactory.getProject( uri, true );
+            ISigilBundle bundle = bldProject.getDefaultBundle();
+            bundle.setParent( this );
+            return bundle;
+        }
+        catch ( IOException e )
+        {
+            throw SigilCore.newCoreException( "Failed to parse " + uri, e );
+        }
+    }
+
+
+    private InputStream buildContents() throws CoreException
+    {
+        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        try
+        {
+            if ( bldProject == null )
+            {
+                bldProject = BldFactory.newProject( bldProjectFile.getLocationURI(), null );
+            }
+            bldProject.setDefaultBundle( getBundle() );
+            bldProject.saveTo( buf );
+        }
+        catch ( IOException e )
+        {
+            throw SigilCore.newCoreException( "Failed to save project file", e );
+        }
+        return new ByteArrayInputStream( buf.toByteArray() );
+    }
+
+
+    //    private InputStream buildXMLContents() throws CoreException {
+    //    	Serializer serializer = SigilCore.getDefault().getDescriptorSerializer();
+    //    	
+    //    	ByteArrayOutputStream buf = new ByteArrayOutputStream();
+    //    	
+    //    	try {
+    //    		serializer.serialize(getBundle(), buf);
+    //    	} catch (SerializingException e) {
+    //			throw SigilCore.newCoreException("Failed to serialize " + this, e);
+    //    	}
+    //    	
+    //        return new ByteArrayInputStream(buf.toByteArray());
+    //    }
+
+    public String getName()
+    {
+        return getProject().getName();
+    }
+
+
+    public IPath findOutputLocation() throws CoreException
+    {
+        return getProject().getLocation().append( getJavaModel().getOutputLocation().removeFirstSegments( 1 ) );
+    }
+
+
+    public IBldProject getBldProject() throws CoreException
+    {
+        try
+        {
+            return BldFactory.getProject( project.getFile( IBldProject.PROJECT_FILE ).getLocationURI() );
+        }
+        catch ( IOException e )
+        {
+            throw SigilCore.newCoreException( "Failed to get project file: ", e );
+        }
+    }
+
+
+    public boolean isInBundleClasspath( IPackageFragmentRoot root ) throws JavaModelException
+    {
+        String enc = getJavaModel().encodeClasspathEntry( root.getRawClasspathEntry() );
+        return getBundle().getClasspathEntrys().contains( enc.trim() );
+    }
 }

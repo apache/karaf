@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.core.internal.license;
 
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
@@ -27,43 +28,55 @@ import java.util.regex.Pattern;
 import org.apache.felix.sigil.core.licence.ILicenseManager;
 import org.apache.felix.sigil.core.licence.ILicensePolicy;
 
-public class LicenseManager implements ILicenseManager {
 
-	private HashMap<String, Pattern> licenses = new HashMap<String, Pattern>();
-	private HashMap<String, LicensePolicy> policies = new HashMap<String, LicensePolicy>();
-	private LicensePolicy defaultPolicy = new LicensePolicy(this);
-	
-	public void addLicense(String name, Pattern pattern) {
-		licenses.put( name, pattern );
-	}
+public class LicenseManager implements ILicenseManager
+{
 
-	public void removeLicense(String name) {
-		licenses.remove(name);
-	}
+    private HashMap<String, Pattern> licenses = new HashMap<String, Pattern>();
+    private HashMap<String, LicensePolicy> policies = new HashMap<String, LicensePolicy>();
+    private LicensePolicy defaultPolicy = new LicensePolicy( this );
 
-	public Set<String> getLicenseNames() {
-		return Collections.unmodifiableSet(licenses.keySet());
-	}
 
-	public Pattern getLicensePattern(String name) {
-		return licenses.get( name );
-	}
+    public void addLicense( String name, Pattern pattern )
+    {
+        licenses.put( name, pattern );
+    }
 
-	public ILicensePolicy getDefaultPolicy() {
-		return defaultPolicy;
-	}
 
-	//public ILicensePolicy getPolicy(ISigilProjectModel project) {
-	//	synchronized( policies ) {
-	//		LicensePolicy p = policies.get(project.getName());
-	//		
-	//		if ( p == null ) {
-	//			p = new LicensePolicy(this, project);
-	//			policies.put( project.getName(), p );
-	//		}
-	//		
-	//		return p;
-	//	}
-	//}
+    public void removeLicense( String name )
+    {
+        licenses.remove( name );
+    }
+
+
+    public Set<String> getLicenseNames()
+    {
+        return Collections.unmodifiableSet( licenses.keySet() );
+    }
+
+
+    public Pattern getLicensePattern( String name )
+    {
+        return licenses.get( name );
+    }
+
+
+    public ILicensePolicy getDefaultPolicy()
+    {
+        return defaultPolicy;
+    }
+
+    //public ILicensePolicy getPolicy(ISigilProjectModel project) {
+    //	synchronized( policies ) {
+    //		LicensePolicy p = policies.get(project.getName());
+    //		
+    //		if ( p == null ) {
+    //			p = new LicensePolicy(this, project);
+    //			policies.put( project.getName(), p );
+    //		}
+    //		
+    //		return p;
+    //	}
+    //}
 
 }

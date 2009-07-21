@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.editors.project;
 
+
 import org.apache.felix.sigil.model.ModelElementFactory;
 import org.apache.felix.sigil.model.common.VersionRange;
 import org.apache.felix.sigil.model.osgi.IPackageImport;
@@ -30,60 +31,81 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
-public class ResourceImportDialog extends ResourceSelectDialog implements VersionsChangeListener {
 
-	private VersionRangeComponent versions;
-	private VersionRange range;
-	
-	public ResourceImportDialog(Shell parentShell, String title, String label, IContentProvider content, ViewerFilter filter, Object scope ) {
-		super(parentShell, content, filter, scope, title, label, true);
-	}
+public class ResourceImportDialog extends ResourceSelectDialog implements VersionsChangeListener
+{
 
-	public VersionRange getVersions() {
-		return range;
-	}
+    private VersionRangeComponent versions;
+    private VersionRange range;
 
-	@Override
-	protected void createCustom(Composite body) {
-		versions = new VersionRangeComponent(body, SWT.BORDER );
-		versions.addVersionChangeListener(this);
-		versions.setVersions(range);
-		
-		GridData data = new GridData( SWT.LEFT, SWT.TOP, true, true );
-		data.horizontalSpan = 2;
-		data.widthHint = 300;
-		data.heightHint = 200;
-		versions.setLayoutData(data);
-	}
 
-	@Override
-	protected void selectionChanged(SelectionChangedEvent event) {
-		if ( event.getSelection().isEmpty() ) {
-			versions.setEnabled(false);
-		}
-		else {
-			versions.setEnabled(true);
-		}
-	}
+    public ResourceImportDialog( Shell parentShell, String title, String label, IContentProvider content,
+        ViewerFilter filter, Object scope )
+    {
+        super( parentShell, content, filter, scope, title, label, true );
+    }
 
-	public void versionsChanged(VersionRange range) {
-		this.range = range; 
-		if ( range == null ) {
-			setErrorMessage( "Invalid version" );
-		}
-		else {
-			setErrorMessage( null );
-		}
-	}
 
-	public void setVersions(VersionRange range) {
-		this.range = range;
-	}
+    public VersionRange getVersions()
+    {
+        return range;
+    }
 
-	public IPackageImport getImport() {
-		IPackageImport packageImport = ModelElementFactory.getInstance().newModelElement( IPackageImport.class );
-		packageImport.setPackageName( (String) getSelected()[0] );
-		packageImport.setVersions( getVersions() );
-		return packageImport;
-	}
+
+    @Override
+    protected void createCustom( Composite body )
+    {
+        versions = new VersionRangeComponent( body, SWT.BORDER );
+        versions.addVersionChangeListener( this );
+        versions.setVersions( range );
+
+        GridData data = new GridData( SWT.LEFT, SWT.TOP, true, true );
+        data.horizontalSpan = 2;
+        data.widthHint = 300;
+        data.heightHint = 200;
+        versions.setLayoutData( data );
+    }
+
+
+    @Override
+    protected void selectionChanged( SelectionChangedEvent event )
+    {
+        if ( event.getSelection().isEmpty() )
+        {
+            versions.setEnabled( false );
+        }
+        else
+        {
+            versions.setEnabled( true );
+        }
+    }
+
+
+    public void versionsChanged( VersionRange range )
+    {
+        this.range = range;
+        if ( range == null )
+        {
+            setErrorMessage( "Invalid version" );
+        }
+        else
+        {
+            setErrorMessage( null );
+        }
+    }
+
+
+    public void setVersions( VersionRange range )
+    {
+        this.range = range;
+    }
+
+
+    public IPackageImport getImport()
+    {
+        IPackageImport packageImport = ModelElementFactory.getInstance().newModelElement( IPackageImport.class );
+        packageImport.setPackageName( ( String ) getSelected()[0] );
+        packageImport.setVersions( getVersions() );
+        return packageImport;
+    }
 }

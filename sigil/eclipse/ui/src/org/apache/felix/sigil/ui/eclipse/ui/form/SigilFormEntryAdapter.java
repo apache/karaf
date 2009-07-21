@@ -19,10 +19,15 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.form;
 
-public class SigilFormEntryAdapter implements ISigilFormEntryListener{
-	public void browseButtonSelected(SigilFormEntry form) {
-	}
 
-	public void textValueChanged(SigilFormEntry form) {
-	}
+public class SigilFormEntryAdapter implements ISigilFormEntryListener
+{
+    public void browseButtonSelected( SigilFormEntry form )
+    {
+    }
+
+
+    public void textValueChanged( SigilFormEntry form )
+    {
+    }
 }

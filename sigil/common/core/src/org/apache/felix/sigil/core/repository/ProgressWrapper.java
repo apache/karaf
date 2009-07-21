@@ -19,53 +19,74 @@
 
 package org.apache.felix.sigil.core.repository;
 
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.apache.felix.sigil.repository.IResolutionMonitor;
 
-public class ProgressWrapper implements IProgressMonitor {
 
-	private IResolutionMonitor monitor;
-	
-	public ProgressWrapper(IResolutionMonitor monitor) {
-		this.monitor = monitor;
-	}
+public class ProgressWrapper implements IProgressMonitor
+{
 
-	public boolean isCanceled() {
-		return monitor.isCanceled();
-	}
+    private IResolutionMonitor monitor;
 
-	public void beginTask(String name, int totalWork) {
-		// TODO Auto-generated method stub
 
-	}
+    public ProgressWrapper( IResolutionMonitor monitor )
+    {
+        this.monitor = monitor;
+    }
 
-	public void done() {
-		// TODO Auto-generated method stub
 
-	}
+    public boolean isCanceled()
+    {
+        return monitor.isCanceled();
+    }
 
-	public void internalWorked(double work) {
-		// TODO Auto-generated method stub
 
-	}
+    public void beginTask( String name, int totalWork )
+    {
+        // TODO Auto-generated method stub
 
-	public void setCanceled(boolean value) {
-		// TODO Auto-generated method stub
+    }
 
-	}
 
-	public void setTaskName(String name) {
-		// TODO Auto-generated method stub
+    public void done()
+    {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	public void subTask(String name) {
-		// TODO Auto-generated method stub
 
-	}
+    public void internalWorked( double work )
+    {
+        // TODO Auto-generated method stub
 
-	public void worked(int work) {
-		// TODO Auto-generated method stub
+    }
 
-	}
+
+    public void setCanceled( boolean value )
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+
+    public void setTaskName( String name )
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+
+    public void subTask( String name )
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+
+    public void worked( int work )
+    {
+        // TODO Auto-generated method stub
+
+    }
 }

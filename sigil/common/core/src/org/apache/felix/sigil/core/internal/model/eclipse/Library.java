@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.core.internal.model.eclipse;
 
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -29,58 +30,82 @@ import org.apache.felix.sigil.model.osgi.IPackageImport;
 import org.apache.felix.sigil.model.osgi.IRequiredBundle;
 import org.osgi.framework.Version;
 
-public class Library extends AbstractCompoundModelElement implements ILibrary {
 
-	private static final long serialVersionUID = 1L;
-	
-	private String name;
-	private Version version;
-	private Set<IRequiredBundle> bundles;
-	private Set<IPackageImport> imports;
-	
-	public Library() {
-		super("Library");
-		bundles = new HashSet<IRequiredBundle>();
-		imports = new HashSet<IPackageImport>();
-	}
-	
-	public void addBundle(IRequiredBundle bundle) {
-		bundles.add(bundle);
-	}
+public class Library extends AbstractCompoundModelElement implements ILibrary
+{
 
-	public void addImport(IPackageImport pi) {
-		imports.add(pi);
-	}
+    private static final long serialVersionUID = 1L;
 
-	public Collection<IRequiredBundle> getBundles() {
-		return bundles;
-	}
+    private String name;
+    private Version version;
+    private Set<IRequiredBundle> bundles;
+    private Set<IPackageImport> imports;
 
-	public Collection<IPackageImport> getImports() {
-		return imports;
-	}
 
-	public String getName() {
-		return name;
-	}
+    public Library()
+    {
+        super( "Library" );
+        bundles = new HashSet<IRequiredBundle>();
+        imports = new HashSet<IPackageImport>();
+    }
 
-	public Version getVersion() {
-		return version;
-	}
 
-	public void removeBundle(IRequiredBundle bundle) {
-		bundles.remove(bundle);
-	}
+    public void addBundle( IRequiredBundle bundle )
+    {
+        bundles.add( bundle );
+    }
 
-	public void removeImport(IPackageImport pi) {
-		imports.remove(pi);
-	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void addImport( IPackageImport pi )
+    {
+        imports.add( pi );
+    }
 
-	public void setVersion(Version version) {
-		this.version = version;
-	}
+
+    public Collection<IRequiredBundle> getBundles()
+    {
+        return bundles;
+    }
+
+
+    public Collection<IPackageImport> getImports()
+    {
+        return imports;
+    }
+
+
+    public String getName()
+    {
+        return name;
+    }
+
+
+    public Version getVersion()
+    {
+        return version;
+    }
+
+
+    public void removeBundle( IRequiredBundle bundle )
+    {
+        bundles.remove( bundle );
+    }
+
+
+    public void removeImport( IPackageImport pi )
+    {
+        imports.remove( pi );
+    }
+
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
+
+    public void setVersion( Version version )
+    {
+        this.version = version;
+    }
 }

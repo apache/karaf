@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.core.repository;
 
+
 import java.io.File;
 import java.util.Properties;
 
@@ -27,16 +28,19 @@ import org.apache.felix.sigil.repository.IRepositoryProvider;
 import org.apache.felix.sigil.repository.RepositoryException;
 import org.eclipse.core.runtime.Path;
 
-public class FileSystemRepositoryProvider implements IRepositoryProvider {
 
-	public IBundleRepository createRepository(String id, Properties preferences)
-			throws RepositoryException {
-		String dir = preferences.getProperty("dir");
-		if (!new File(dir).isDirectory()) {
-			throw new RepositoryException("directory '" + dir +"' does not exist.");
-		}
-		boolean recurse = Boolean.valueOf(preferences.getProperty("recurse"));
-		return new FileSystemRepository(id, new Path(dir), recurse);		
-	}
+public class FileSystemRepositoryProvider implements IRepositoryProvider
+{
+
+    public IBundleRepository createRepository( String id, Properties preferences ) throws RepositoryException
+    {
+        String dir = preferences.getProperty( "dir" );
+        if ( !new File( dir ).isDirectory() )
+        {
+            throw new RepositoryException( "directory '" + dir + "' does not exist." );
+        }
+        boolean recurse = Boolean.valueOf( preferences.getProperty( "recurse" ) );
+        return new FileSystemRepository( id, new Path( dir ), recurse );
+    }
 
 }

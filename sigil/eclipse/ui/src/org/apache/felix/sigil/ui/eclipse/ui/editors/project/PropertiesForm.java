@@ -27,23 +27,30 @@ import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileSourceView
 import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jface.preference.IPreferenceStore;
 
+
 @SuppressWarnings("restriction")
-public class PropertiesForm extends SigilSourcePage {
+public class PropertiesForm extends SigilSourcePage
+{
 
     public static final String PAGE_ID = "properties";
-    
-	public PropertiesForm(SigilProjectEditorPart editor, ISigilProjectModel project) {
-		super(PAGE_ID);
-		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
-		setPreferenceStore(store);
-		setSourceViewerConfiguration(new PropertiesFileSourceViewerConfiguration(textTools.getColorManager(), store, this, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING));
-        /*IFileEditorInput fileInput = (IFileEditorInput) editor.getEditorInput();
-		this.setDocumentProvider(fileInput);*/
-	}
 
-	@Override
-	public boolean isSaveAsAllowed() {
-		return false;
-	}	
+
+    public PropertiesForm( SigilProjectEditorPart editor, ISigilProjectModel project )
+    {
+        super( PAGE_ID );
+        JavaTextTools textTools = JavaPlugin.getDefault().getJavaTextTools();
+        IPreferenceStore store = JavaPlugin.getDefault().getCombinedPreferenceStore();
+        setPreferenceStore( store );
+        setSourceViewerConfiguration( new PropertiesFileSourceViewerConfiguration( textTools.getColorManager(), store,
+            this, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING ) );
+        /*IFileEditorInput fileInput = (IFileEditorInput) editor.getEditorInput();
+        this.setDocumentProvider(fileInput);*/
+    }
+
+
+    @Override
+    public boolean isSaveAsAllowed()
+    {
+        return false;
+    }
 }

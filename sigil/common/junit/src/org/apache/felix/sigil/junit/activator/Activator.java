@@ -19,29 +19,36 @@
 
 package org.apache.felix.sigil.junit.activator;
 
+
 import org.apache.felix.sigil.junit.server.JUnitService;
 import org.apache.felix.sigil.junit.server.impl.JUnitServiceFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
+
 /**
  * @author dave
  */
-public class Activator implements BundleActivator {
-	private ServiceRegistration reg;
-	private JUnitServiceFactory service;
+public class Activator implements BundleActivator
+{
+    private ServiceRegistration reg;
+    private JUnitServiceFactory service;
 
-	public void start(final BundleContext ctx) {
-		service = new JUnitServiceFactory();
-		service.start(ctx);
-		reg = ctx.registerService(JUnitService.class.getName(), service, null);
+
+    public void start( final BundleContext ctx )
+    {
+        service = new JUnitServiceFactory();
+        service.start( ctx );
+        reg = ctx.registerService( JUnitService.class.getName(), service, null );
     }
 
-    public void stop(BundleContext ctx) {
-    	reg.unregister();
-    	reg = null;
-    	service.stop(ctx);
-    	service = null;
+
+    public void stop( BundleContext ctx )
+    {
+        reg.unregister();
+        reg = null;
+        service.stop( ctx );
+        service = null;
     }
 }

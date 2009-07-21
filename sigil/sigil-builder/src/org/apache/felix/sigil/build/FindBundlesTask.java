@@ -18,6 +18,7 @@
  */
 package org.apache.felix.sigil.build;
 
+
 import java.io.File;
 import java.io.FilenameFilter;
 
@@ -25,77 +26,98 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 import org.osgi.framework.Version;
 
-public class FindBundlesTask extends Task {
 
-	private File dir;
-	private String symbolicName;
-	private String property;
+public class FindBundlesTask extends Task
+{
 
-	public File getDir() {
-		return dir;
-	}
+    private File dir;
+    private String symbolicName;
+    private String property;
 
-	public void setDir(File dir) {
-		this.dir = dir;
-	}
 
-	public String getSymbolicName() {
-		return symbolicName;
-	}
+    public File getDir()
+    {
+        return dir;
+    }
 
-	public void setSymbolicName(String symbolicName) {
-		this.symbolicName = symbolicName;
-	}
 
-	public String getProperty() {
-		return property;
-	}
+    public void setDir( File dir )
+    {
+        this.dir = dir;
+    }
 
-	public void setProperty(String property) {
-		this.property = property;
-	}
 
-	@Override
-	public void execute() throws BuildException {
-		System.out.println("Searching " + dir + " for bundle '" + symbolicName + "'");
-		final String prefix = symbolicName + "_";
-		String[] files = dir.list(new FilenameFilter() {
-			public boolean accept(File dir, String name) {
-				return name.startsWith(prefix);
-			}
-		});
-		if (files == null)
-		    files = new String[0];
+    public String getSymbolicName()
+    {
+        return symbolicName;
+    }
 
-		System.out.println("Found " + files.length + " file(s) starting with " + symbolicName);
 
-		Version highest = null;
-		for (String filename : files) {
-			System.out.println("Testing " + filename);
-			// Drop the prefix
-			int startIndex = prefix.length();
+    public void setSymbolicName( String symbolicName )
+    {
+        this.symbolicName = symbolicName;
+    }
 
-			// Drop the ".jar" suffix if present
-			int endIndex = filename.length();
-			if (filename.toLowerCase().endsWith(".jar")) {
-				endIndex -= 4;
-			}
 
-			String versionString = filename.substring(startIndex, endIndex);
-			System.out.println("Version string is '" + versionString + "'");
+    public String getProperty()
+    {
+        return property;
+    }
 
-			Version version = new Version(versionString);
-			if (highest == null || version.compareTo(highest) > 0) {
-				highest = version;
-			}
-		}
 
-		if (highest == null) {
-			throw new BuildException("No matches for symbolic name '"
-					+ symbolicName + "'");
-		}
+    public void setProperty( String property )
+    {
+        this.property = property;
+    }
 
-		getProject().setNewProperty(property, highest.toString());
-	}
+
+    @Override
+    public void execute() throws BuildException
+    {
+        System.out.println( "Searching " + dir + " for bundle '" + symbolicName + "'" );
+        final String prefix = symbolicName + "_";
+        String[] files = dir.list( new FilenameFilter()
+        {
+            public boolean accept( File dir, String name )
+            {
+                return name.startsWith( prefix );
+            }
+        } );
+        if ( files == null )
+            files = new String[0];
+
+        System.out.println( "Found " + files.length + " file(s) starting with " + symbolicName );
+
+        Version highest = null;
+        for ( String filename : files )
+        {
+            System.out.println( "Testing " + filename );
+            // Drop the prefix
+            int startIndex = prefix.length();
+
+            // Drop the ".jar" suffix if present
+            int endIndex = filename.length();
+            if ( filename.toLowerCase().endsWith( ".jar" ) )
+            {
+                endIndex -= 4;
+            }
+
+            String versionString = filename.substring( startIndex, endIndex );
+            System.out.println( "Version string is '" + versionString + "'" );
+
+            Version version = new Version( versionString );
+            if ( highest == null || version.compareTo( highest ) > 0 )
+            {
+                highest = version;
+            }
+        }
+
+        if ( highest == null )
+        {
+            throw new BuildException( "No matches for symbolic name '" + symbolicName + "'" );
+        }
+
+        getProject().setNewProperty( property, highest.toString() );
+    }
 
 }

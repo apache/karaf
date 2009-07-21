@@ -19,44 +19,63 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.editors.project;
 
+
 import org.eclipse.jface.fieldassist.IContentProposal;
 
-public class WrappedContentProposal<T> implements IContentProposal {
-	
-	private final T element;
-	private final IElementDescriptor<? super T> descriptor;
 
-	private WrappedContentProposal(T element, IElementDescriptor<? super T> descriptor) {
-		this.element = element;
-		this.descriptor = descriptor;
-	}
-	
-	public static <T> WrappedContentProposal<T> newInstance(T element, IElementDescriptor<? super T> descriptor) {
-		return new WrappedContentProposal<T>(element, descriptor);
-	}
+public class WrappedContentProposal<T> implements IContentProposal
+{
 
-	public String getContent() {
-		return descriptor.getName(element);
-	}
+    private final T element;
+    private final IElementDescriptor<? super T> descriptor;
 
-	public int getCursorPosition() {
-		return 0;
-	}
 
-	public String getDescription() {
-		return null;
-	}
+    private WrappedContentProposal( T element, IElementDescriptor<? super T> descriptor )
+    {
+        this.element = element;
+        this.descriptor = descriptor;
+    }
 
-	public String getLabel() {
-		return descriptor.getLabel(element);
-	}
 
-	public T getElement() {
-		return element;
-	}
+    public static <T> WrappedContentProposal<T> newInstance( T element, IElementDescriptor<? super T> descriptor )
+    {
+        return new WrappedContentProposal<T>( element, descriptor );
+    }
 
-	@Override
-	public String toString() {
-		return getLabel();
-	}
+
+    public String getContent()
+    {
+        return descriptor.getName( element );
+    }
+
+
+    public int getCursorPosition()
+    {
+        return 0;
+    }
+
+
+    public String getDescription()
+    {
+        return null;
+    }
+
+
+    public String getLabel()
+    {
+        return descriptor.getLabel( element );
+    }
+
+
+    public T getElement()
+    {
+        return element;
+    }
+
+
+    @Override
+    public String toString()
+    {
+        return getLabel();
+    }
 }

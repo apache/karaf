@@ -19,7 +19,10 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.util;
 
+
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
-public abstract class DefaultTreeContentProvider extends DefaultContentProvider implements ITreeContentProvider {
+
+public abstract class DefaultTreeContentProvider extends DefaultContentProvider implements ITreeContentProvider
+{
 }

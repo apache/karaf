@@ -19,35 +19,48 @@
 
 package org.apache.felix.sigil.core.internal.model.eclipse;
 
+
 import org.apache.felix.sigil.model.AbstractModelElement;
 import org.apache.felix.sigil.model.common.VersionRange;
 import org.apache.felix.sigil.model.eclipse.ILibraryImport;
 
-public class LibraryImport extends AbstractModelElement implements ILibraryImport {
 
-	private static final long serialVersionUID = 1L;
+public class LibraryImport extends AbstractModelElement implements ILibraryImport
+{
 
-	public LibraryImport() {
-		super("Library Import");
-	}
+    private static final long serialVersionUID = 1L;
 
-	private String libraryName;
-	private VersionRange range = VersionRange.ANY_VERSION;
-	
-	public String getLibraryName() {
-		return libraryName;
-	}
 
-	public VersionRange getVersions() {
-		return range;
-	}
+    public LibraryImport()
+    {
+        super( "Library Import" );
+    }
 
-	public void setLibraryName(String name) {
-		this.libraryName = name;
-	}
+    private String libraryName;
+    private VersionRange range = VersionRange.ANY_VERSION;
 
-	public void setVersions(VersionRange range) {
-		this.range = range;
-	}
+
+    public String getLibraryName()
+    {
+        return libraryName;
+    }
+
+
+    public VersionRange getVersions()
+    {
+        return range;
+    }
+
+
+    public void setLibraryName( String name )
+    {
+        this.libraryName = name;
+    }
+
+
+    public void setVersions( VersionRange range )
+    {
+        this.range = range;
+    }
 
 }

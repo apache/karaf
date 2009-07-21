@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.obr;
 
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -29,23 +30,30 @@ import org.apache.felix.sigil.repository.IBundleRepository;
 import org.apache.felix.sigil.repository.IRepositoryProvider;
 import org.apache.felix.sigil.repository.RepositoryException;
 
-public class OBRRepositoryProvider implements IRepositoryProvider {
-	public IBundleRepository createRepository(String id, Properties preferences) throws RepositoryException {
-		try {
-			URL repositoryURL = new URL( preferences.getProperty("url") );
-			File indexCache = new File( preferences.getProperty("index") );
-			File localCache = new File( preferences.getProperty("cache") );
-			// TODO create user configurable updatePeriod
-			long updatePeriod = TimeUnit.MILLISECONDS.convert(60*60*24*7, TimeUnit.SECONDS);
-			if ( preferences.getProperty("inmemory") == null ) {
-				return new NonCachingOBRBundleRepository(id, repositoryURL, indexCache, localCache, updatePeriod);
-			}
-			else {
-				return new CachingOBRBundleRepository(id, repositoryURL, indexCache, localCache, updatePeriod);
-			}
-		}
-		catch (MalformedURLException e) {
-			throw new RepositoryException("Invalid repository url", e);
-		}
-	}
+
+public class OBRRepositoryProvider implements IRepositoryProvider
+{
+    public IBundleRepository createRepository( String id, Properties preferences ) throws RepositoryException
+    {
+        try
+        {
+            URL repositoryURL = new URL( preferences.getProperty( "url" ) );
+            File indexCache = new File( preferences.getProperty( "index" ) );
+            File localCache = new File( preferences.getProperty( "cache" ) );
+            // TODO create user configurable updatePeriod
+            long updatePeriod = TimeUnit.MILLISECONDS.convert( 60 * 60 * 24 * 7, TimeUnit.SECONDS );
+            if ( preferences.getProperty( "inmemory" ) == null )
+            {
+                return new NonCachingOBRBundleRepository( id, repositoryURL, indexCache, localCache, updatePeriod );
+            }
+            else
+            {
+                return new CachingOBRBundleRepository( id, repositoryURL, indexCache, localCache, updatePeriod );
+            }
+        }
+        catch ( MalformedURLException e )
+        {
+            throw new RepositoryException( "Invalid repository url", e );
+        }
+    }
 }

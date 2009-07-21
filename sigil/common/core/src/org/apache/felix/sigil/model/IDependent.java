@@ -19,6 +19,8 @@
 
 package org.apache.felix.sigil.model;
 
-public interface IDependent extends IModelElement {
-	IDependency getDepender();
+
+public interface IDependent extends IModelElement
+{
+    IDependency getDepender();
 }

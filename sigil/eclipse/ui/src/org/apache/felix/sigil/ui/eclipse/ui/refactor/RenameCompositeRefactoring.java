@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.refactor;
 
+
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
@@ -28,32 +29,40 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-public class RenameCompositeRefactoring extends Refactoring {
 
-	@Override
-	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException,
-			OperationCanceledException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+public class RenameCompositeRefactoring extends Refactoring
+{
 
-	@Override
-	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException,
-			OperationCanceledException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public RefactoringStatus checkFinalConditions( IProgressMonitor pm ) throws CoreException,
+        OperationCanceledException
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public Change createChange(IProgressMonitor pm) throws CoreException,
-			OperationCanceledException {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
-	@Override
-	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public RefactoringStatus checkInitialConditions( IProgressMonitor pm ) throws CoreException,
+        OperationCanceledException
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+
+    @Override
+    public Change createChange( IProgressMonitor pm ) throws CoreException, OperationCanceledException
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+
+    @Override
+    public String getName()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

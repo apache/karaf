@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.util;
 
+
 import java.util.concurrent.Callable;
 
 import org.apache.felix.sigil.eclipse.SigilCore;
@@ -29,51 +30,72 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
-public class ProjectUtils {
-	public static boolean runTaskWithRebuildCheck(final Runnable task, Shell shell) {
-		return runTaskWithRebuildCheck( new Callable<Boolean>() {
-			public Boolean call() throws Exception {
-				task.run();
-				return true;
-			}
-		}, shell);
-	}
-	
-	public static boolean runTaskWithRebuildCheck(Callable<Boolean> callable,
-			Shell shell) {
-		int result = checkRebuild(shell);
-		if ( result == IDialogConstants.CANCEL_ID ) {
-			return false;
-		}
-		else {
-			try {
-				if ( Boolean.TRUE == callable.call() ) {
-					if ( result == IDialogConstants.YES_ID ) {
-						SigilUI.runWorkspaceOperation( new WorkspaceModifyOperation() {
-							@Override
-							protected void execute(IProgressMonitor monitor) {
-								SigilCore.rebuildAllBundleDependencies(monitor);
-							}
-						}, shell );
-					}
-					return true;
-				}
-				else {
-					return false;
-				}
-			} catch (Exception e) {
-				SigilCore.error( "Failed to run caller", e);
-				return false;
-			}
-		}
-	}
-	
-	private static int checkRebuild(Shell shell) {
-		if ( SigilCore.getRoot().getProjects().isEmpty() ) {
-			return IDialogConstants.NO_ID;
-		}
-		else {
-			return OptionalPrompt.optionallyPromptWithCancel(SigilCore.getDefault().getPreferenceStore(), SigilCore.PREFERENCES_REBUILD_PROJECTS, "Rebuild", "Do you wish to rebuild all Sigil projects", shell );
-		}
-	}
+
+public class ProjectUtils
+{
+    public static boolean runTaskWithRebuildCheck( final Runnable task, Shell shell )
+    {
+        return runTaskWithRebuildCheck( new Callable<Boolean>()
+        {
+            public Boolean call() throws Exception
+            {
+                task.run();
+                return true;
+            }
+        }, shell );
+    }
+
+
+    public static boolean runTaskWithRebuildCheck( Callable<Boolean> callable, Shell shell )
+    {
+        int result = checkRebuild( shell );
+        if ( result == IDialogConstants.CANCEL_ID )
+        {
+            return false;
+        }
+        else
+        {
+            try
+            {
+                if ( Boolean.TRUE == callable.call() )
+                {
+                    if ( result == IDialogConstants.YES_ID )
+                    {
+                        SigilUI.runWorkspaceOperation( new WorkspaceModifyOperation()
+                        {
+                            @Override
+                            protected void execute( IProgressMonitor monitor )
+                            {
+                                SigilCore.rebuildAllBundleDependencies( monitor );
+                            }
+                        }, shell );
+                    }
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch ( Exception e )
+            {
+                SigilCore.error( "Failed to run caller", e );
+                return false;
+            }
+        }
+    }
+
+
+    private static int checkRebuild( Shell shell )
+    {
+        if ( SigilCore.getRoot().getProjects().isEmpty() )
+        {
+            return IDialogConstants.NO_ID;
+        }
+        else
+        {
+            return OptionalPrompt.optionallyPromptWithCancel( SigilCore.getDefault().getPreferenceStore(),
+                SigilCore.PREFERENCES_REBUILD_PROJECTS, "Rebuild", "Do you wish to rebuild all Sigil projects", shell );
+        }
+    }
 }

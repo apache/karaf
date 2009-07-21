@@ -19,32 +19,43 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.preferences.repository;
 
+
 import org.apache.felix.sigil.eclipse.model.repository.IRepositoryModel;
 import org.eclipse.jface.wizard.Wizard;
 
-public class NewRepositoryWizard extends Wizard {
 
-	private IRepositoryModel repository;
-	
-	private RepositoryTypeSelectionPage page = new RepositoryTypeSelectionPage();
-	
-	public void addPages() {
-		addPage( page );
-	}
-	
-	@Override
-	public boolean performFinish() {
-		repository = page.getRepository();
-		return true;
-	}
-	@Override
-	public boolean needsPreviousAndNextButtons() {
-		return true;
-	}
+public class NewRepositoryWizard extends Wizard
+{
 
-	public IRepositoryModel getRepository() {
-		return repository;
-	}
+    private IRepositoryModel repository;
 
+    private RepositoryTypeSelectionPage page = new RepositoryTypeSelectionPage();
+
+
+    public void addPages()
+    {
+        addPage( page );
+    }
+
+
+    @Override
+    public boolean performFinish()
+    {
+        repository = page.getRepository();
+        return true;
+    }
+
+
+    @Override
+    public boolean needsPreviousAndNextButtons()
+    {
+        return true;
+    }
+
+
+    public IRepositoryModel getRepository()
+    {
+        return repository;
+    }
 
 }

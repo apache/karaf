@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.core.internal.model.osgi;
 
+
 import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,7 +35,9 @@ import org.apache.felix.sigil.model.osgi.IPackageImport;
 import org.apache.felix.sigil.model.osgi.IRequiredBundle;
 import org.osgi.framework.Version;
 
-public class BundleModelElement extends AbstractCompoundModelElement implements IBundleModelElement {
+
+public class BundleModelElement extends AbstractCompoundModelElement implements IBundleModelElement
+{
     /**
      * 
      */
@@ -59,13 +62,15 @@ public class BundleModelElement extends AbstractCompoundModelElement implements 
     private String vendor;
     private String contactAddress;
     private String copyright;
-    
+
     // internal values
     private String activator;
     private Set<ILibraryImport> libraries;
 
-    public BundleModelElement() {
-    	super( "OSGi Bundle" );
+
+    public BundleModelElement()
+    {
+        super( "OSGi Bundle" );
         this.imports = new HashSet<IPackageImport>();
         this.exports = new HashSet<IPackageExport>();
         this.requires = new HashSet<IRequiredBundle>();
@@ -73,223 +78,321 @@ public class BundleModelElement extends AbstractCompoundModelElement implements 
         this.libraries = new HashSet<ILibraryImport>();
     }
 
-	public String getActivator() {
-		return activator;
-	}
 
-	public void setActivator(String activator) {
-		this.activator = activator;
-	}
-	
-	public void addLibraryImport(ILibraryImport library) {
-    	libraries.add(library);
-	}
+    public String getActivator()
+    {
+        return activator;
+    }
 
-	public Set<ILibraryImport> getLibraryImports() {
-		return libraries;
-	}
 
-	public void removeLibraryImport(ILibraryImport library) {
-		libraries.remove(library);
-	}
+    public void setActivator( String activator )
+    {
+        this.activator = activator;
+    }
 
-    public String getCategory() {
+
+    public void addLibraryImport( ILibraryImport library )
+    {
+        libraries.add( library );
+    }
+
+
+    public Set<ILibraryImport> getLibraryImports()
+    {
+        return libraries;
+    }
+
+
+    public void removeLibraryImport( ILibraryImport library )
+    {
+        libraries.remove( library );
+    }
+
+
+    public String getCategory()
+    {
         return category;
     }
 
-    public void setCategory(String category) {
+
+    public void setCategory( String category )
+    {
         this.category = category;
     }
 
-    public String getContactAddress() {
+
+    public String getContactAddress()
+    {
         return contactAddress;
     }
 
-    public void setContactAddress(String contactAddress) {
+
+    public void setContactAddress( String contactAddress )
+    {
         this.contactAddress = contactAddress;
     }
 
-    public String getCopyright() {
+
+    public String getCopyright()
+    {
         return copyright;
     }
 
-    public void setCopyright(String copyright) {
+
+    public void setCopyright( String copyright )
+    {
         this.copyright = copyright;
     }
 
-    public URI getDocURI() {
+
+    public URI getDocURI()
+    {
         return docURI;
     }
 
-    public void setDocURI(URI docURI) {
+
+    public void setDocURI( URI docURI )
+    {
         this.docURI = docURI;
     }
 
-    public Set<IPackageExport> getExports() {
+
+    public Set<IPackageExport> getExports()
+    {
         return exports;
     }
 
-    public void addExport(IPackageExport packageExport) {
-        exports.add(packageExport);
-        packageExport.setParent(this);
+
+    public void addExport( IPackageExport packageExport )
+    {
+        exports.add( packageExport );
+        packageExport.setParent( this );
     }
 
-    public void removeExport(IPackageExport packageExport) {
-    	if ( exports.remove(packageExport) ) {
-    		packageExport.setParent(null);
-    	}
+
+    public void removeExport( IPackageExport packageExport )
+    {
+        if ( exports.remove( packageExport ) )
+        {
+            packageExport.setParent( null );
+        }
     }
-    
-    public Set<IPackageImport> getImports() {
+
+
+    public Set<IPackageImport> getImports()
+    {
         return imports;
     }
 
-    public void addImport(IPackageImport packageImport) {
-        imports.add(packageImport);
-        packageImport.setParent(this);
+
+    public void addImport( IPackageImport packageImport )
+    {
+        imports.add( packageImport );
+        packageImport.setParent( this );
     }
-    
-    public void removeImport(IPackageImport packageImport) {
-    	if ( imports.remove( packageImport ) ) {
-    		packageImport.setParent(null);
-    	}
+
+
+    public void removeImport( IPackageImport packageImport )
+    {
+        if ( imports.remove( packageImport ) )
+        {
+            packageImport.setParent( null );
+        }
     }
-    
-    public Set<IRequiredBundle> getRequiredBundles() {
+
+
+    public Set<IRequiredBundle> getRequiredBundles()
+    {
         return requires;
     }
 
-    public void addRequiredBundle(IRequiredBundle bundle) {
+
+    public void addRequiredBundle( IRequiredBundle bundle )
+    {
         requires.add( bundle );
-        bundle.setParent(this);
+        bundle.setParent( this );
     }
 
-    public void removeRequiredBundle(IRequiredBundle bundle) {
-    	if ( requires.remove(bundle) ) {
-    		bundle.setParent(null);
-    	}
+
+    public void removeRequiredBundle( IRequiredBundle bundle )
+    {
+        if ( requires.remove( bundle ) )
+        {
+            bundle.setParent( null );
+        }
     }
-    
-    public URI getLicenseURI() {
+
+
+    public URI getLicenseURI()
+    {
         return licenseURI;
     }
 
-    public void setLicenseURI(URI licenseURI) {
+
+    public void setLicenseURI( URI licenseURI )
+    {
         this.licenseURI = licenseURI;
     }
 
-    public URI getSourceLocation() {
+
+    public URI getSourceLocation()
+    {
         return sourceLocation;
     }
 
-    public void setSourceLocation(URI sourceLocation) {
+
+    public void setSourceLocation( URI sourceLocation )
+    {
         this.sourceLocation = sourceLocation;
     }
 
-    public String getSymbolicName() {
+
+    public String getSymbolicName()
+    {
         return symbolicName;
     }
 
-    public void setSymbolicName(String symbolicName) {
+
+    public void setSymbolicName( String symbolicName )
+    {
         this.symbolicName = symbolicName == null ? null : symbolicName.intern();
     }
 
-    public URI getUpdateLocation() {
+
+    public URI getUpdateLocation()
+    {
         return updateLocation;
     }
 
-    public void setUpdateLocation(URI updateLocation) {
+
+    public void setUpdateLocation( URI updateLocation )
+    {
         this.updateLocation = updateLocation;
     }
 
-    public String getVendor() {
-    		return vendor;
+
+    public String getVendor()
+    {
+        return vendor;
     }
 
-    public void setVendor(String vendor) {
+
+    public void setVendor( String vendor )
+    {
         this.vendor = vendor;
     }
 
-    public Version getVersion() {
-    	return version;
+
+    public Version getVersion()
+    {
+        return version;
     }
 
-    public void setVersion(Version version) {
+
+    public void setVersion( Version version )
+    {
         this.version = version == null ? Version.emptyVersion : version;
     }
 
-    public void checkValid() throws InvalidModelException {
-        if (symbolicName == null)
-            throw new InvalidModelException(this, "Bundle symbolic name not set");
+
+    public void checkValid() throws InvalidModelException
+    {
+        if ( symbolicName == null )
+            throw new InvalidModelException( this, "Bundle symbolic name not set" );
     }
 
-    public BundleModelElement clone() {
-        BundleModelElement bd = (BundleModelElement) super.clone();
+
+    public BundleModelElement clone()
+    {
+        BundleModelElement bd = ( BundleModelElement ) super.clone();
 
         bd.imports = new HashSet<IPackageImport>();
         bd.exports = new HashSet<IPackageExport>();
         bd.requires = new HashSet<IRequiredBundle>();
-        
-        for (IPackageImport pi : imports ) {
-            bd.imports.add((IPackageImport) pi.clone());
+
+        for ( IPackageImport pi : imports )
+        {
+            bd.imports.add( ( IPackageImport ) pi.clone() );
         }
 
-        for (IPackageExport pe : exports ) {
-            bd.exports.add((IPackageExport) pe.clone());
+        for ( IPackageExport pe : exports )
+        {
+            bd.exports.add( ( IPackageExport ) pe.clone() );
         }
-        
-        for ( IRequiredBundle rb : requires ) {
-            bd.requires.add((IRequiredBundle) rb.clone());
+
+        for ( IRequiredBundle rb : requires )
+        {
+            bd.requires.add( ( IRequiredBundle ) rb.clone() );
         }
 
         return bd;
     }
 
-    public String toString() {
+
+    public String toString()
+    {
         StringBuffer buf = new StringBuffer();
 
-        buf.append("BundleModelElement[");
-        buf.append(symbolicName);
-        buf.append(", ");
-        buf.append(version);
-        buf.append("]");
+        buf.append( "BundleModelElement[" );
+        buf.append( symbolicName );
+        buf.append( ", " );
+        buf.append( version );
+        buf.append( "]" );
 
         return buf.toString();
     }
 
-	public String getName() {
-		return name;
-	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public String getName()
+    {
+        return name;
+    }
 
-	public String getDescription() {
-		return description;
-	}
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setName( String name )
+    {
+        this.name = name;
+    }
 
-	public void addClasspath(String path) {
-		classpathElements.add( path );
-	}
 
-	public Collection<String> getClasspaths() {
-		return classpathElements.isEmpty() ? Collections.singleton( "." ) : classpathElements;
-	}
+    public String getDescription()
+    {
+        return description;
+    }
 
-	public void removeClasspath(String path) {
-		classpathElements.remove( path );
-	}
 
-	public IRequiredBundle getFragmentHost() {
-		return fragmentHost;
-	}
+    public void setDescription( String description )
+    {
+        this.description = description;
+    }
 
-	public void setFragmentHost(IRequiredBundle fragmentHost) {
-		this.fragmentHost = fragmentHost;
-	}
+
+    public void addClasspath( String path )
+    {
+        classpathElements.add( path );
+    }
+
+
+    public Collection<String> getClasspaths()
+    {
+        return classpathElements.isEmpty() ? Collections.singleton( "." ) : classpathElements;
+    }
+
+
+    public void removeClasspath( String path )
+    {
+        classpathElements.remove( path );
+    }
+
+
+    public IRequiredBundle getFragmentHost()
+    {
+        return fragmentHost;
+    }
+
+
+    public void setFragmentHost( IRequiredBundle fragmentHost )
+    {
+        this.fragmentHost = fragmentHost;
+    }
 }

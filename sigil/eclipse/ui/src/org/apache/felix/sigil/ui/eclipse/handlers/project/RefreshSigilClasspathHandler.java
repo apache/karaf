@@ -19,14 +19,18 @@
 
 package org.apache.felix.sigil.ui.eclipse.handlers.project;
 
+
 import org.apache.felix.sigil.ui.eclipse.handlers.IResourceCommandHandler;
 import org.apache.felix.sigil.ui.eclipse.handlers.SelectionResourceCommandHandler;
 
-public class RefreshSigilClasspathHandler extends SelectionResourceCommandHandler {
 
-	@Override
-	protected IResourceCommandHandler getResourceCommandHandler() {
-		return new RefreshSigilClasspathCommandHandler();
-	}
+public class RefreshSigilClasspathHandler extends SelectionResourceCommandHandler
+{
+
+    @Override
+    protected IResourceCommandHandler getResourceCommandHandler()
+    {
+        return new RefreshSigilClasspathCommandHandler();
+    }
 
 }

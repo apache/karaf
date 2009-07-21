@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.repository;
 
+
 import java.util.List;
 import java.util.Set;
 
@@ -26,10 +27,20 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.apache.felix.sigil.model.IModelElement;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 
-public interface IResolution {
-	Set<ISigilBundle> getBundles();
-	ISigilBundle getProvider(IModelElement requirement);
-	List<IModelElement> getMatchedRequirements(ISigilBundle bundle);
-	void synchronize(IProgressMonitor monitor);
-	boolean isSynchronized();
+
+public interface IResolution
+{
+    Set<ISigilBundle> getBundles();
+
+
+    ISigilBundle getProvider( IModelElement requirement );
+
+
+    List<IModelElement> getMatchedRequirements( ISigilBundle bundle );
+
+
+    void synchronize( IProgressMonitor monitor );
+
+
+    boolean isSynchronized();
 }

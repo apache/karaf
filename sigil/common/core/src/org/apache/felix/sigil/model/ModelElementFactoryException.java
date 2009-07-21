@@ -19,16 +19,22 @@
 
 package org.apache.felix.sigil.model;
 
-public class ModelElementFactoryException extends RuntimeException {
 
-	private static final long serialVersionUID = 1L;
+public class ModelElementFactoryException extends RuntimeException
+{
 
-	public ModelElementFactoryException(Throwable t) {
-		super(t);
-	}
+    private static final long serialVersionUID = 1L;
 
-	public ModelElementFactoryException(String msg) {
-		super(msg);
-	}
+
+    public ModelElementFactoryException( Throwable t )
+    {
+        super( t );
+    }
+
+
+    public ModelElementFactoryException( String msg )
+    {
+        super( msg );
+    }
 
 }

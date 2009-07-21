@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.eclipse.internal.repository.eclipse;
 
+
 import java.util.List;
 
 import org.apache.felix.sigil.eclipse.SigilCore;
@@ -26,17 +27,21 @@ import org.apache.felix.sigil.eclipse.internal.repository.eclipse.SigilRepositor
 import org.apache.felix.sigil.eclipse.model.repository.IRepositoryModel;
 import org.apache.felix.sigil.repository.IRepositoryManager;
 
-public class GlobalRepositoryManager extends SigilRepositoryManager implements
-		IRepositoryManager {
 
-	public GlobalRepositoryManager() {
-		super(null);
-	}
+public class GlobalRepositoryManager extends SigilRepositoryManager implements IRepositoryManager
+{
 
-	@Override
-	protected IRepositoryModel[] findRepositories() {
-		List<IRepositoryModel> repos = SigilCore.getRepositoryConfiguration().loadRepositories();
-		return repos.toArray( new IRepositoryModel[repos.size()]);
-	}
+    public GlobalRepositoryManager()
+    {
+        super( null );
+    }
+
+
+    @Override
+    protected IRepositoryModel[] findRepositories()
+    {
+        List<IRepositoryModel> repos = SigilCore.getRepositoryConfiguration().loadRepositories();
+        return repos.toArray( new IRepositoryModel[repos.size()] );
+    }
 
 }

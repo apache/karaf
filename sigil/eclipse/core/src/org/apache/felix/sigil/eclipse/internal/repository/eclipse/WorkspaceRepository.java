@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.eclipse.internal.repository.eclipse;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,91 +37,126 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 
-public class WorkspaceRepository extends AbstractBundleRepository implements IResourceChangeListener {
-	
-	private static final int UPDATE_MASK = IResourceDelta.CONTENT | IResourceDelta.DESCRIPTION | IResourceDelta.OPEN;
-	private ISigilBundle[] bundles;
-	
-	public WorkspaceRepository(String id) {
-		super(id);
-	}
 
-	@Override
-	public void accept(IRepositoryVisitor visitor, int options) {
-		synchronized( this ) {
-			if ( bundles == null ) {
-				List<ISigilProjectModel> models = SigilCore.getRoot().getProjects();
-				ArrayList<ISigilBundle> tmp = new ArrayList<ISigilBundle>(models.size());
-				for ( ISigilProjectModel n : models ) {
-					ISigilBundle b = n.getBundle();
-					tmp.add(b);
-				}
-				bundles = tmp.toArray( new ISigilBundle[tmp.size()] );
-			}
-		}
-		
-		for ( ISigilBundle b : bundles ) {
-			visitor.visit(b);
-		}
-	}
-	
-	public void refresh() {
-		synchronized(this) {
-			bundles = null;
-		}
-	}
-	
-	@Override
-	protected void notifyChange() {
-		refresh();
-		super.notifyChange();
-	}
+public class WorkspaceRepository extends AbstractBundleRepository implements IResourceChangeListener
+{
 
-	public void resourceChanged(IResourceChangeEvent event) {
-		try {
-			event.getDelta().accept( new IResourceDeltaVisitor() {
-				public boolean visit(IResourceDelta delta) throws CoreException {
-					boolean result;
-					
-					IResource resource = delta.getResource();
-					if(resource instanceof IWorkspaceRoot) {
-						result = true;
-					} else if(resource instanceof IProject) {
-						IProject project = (IProject) resource;
-						if ( SigilCore.isSigilProject(project) ) {
-							switch (delta.getKind()) {
-							case IResourceDelta.CHANGED: 
-								if ( (delta.getFlags() & UPDATE_MASK) == 0 ) {
-									break;
-								}
-								// else 
-								// fall through on purpose
-							case IResourceDelta.ADDED: // fall through on purpose
-							case IResourceDelta.REMOVED: // fall through on purpose
-								notifyChange();
-								break;
-							}
-							result = true;
-						} else {
-							result = false;
-						}
-					} else if(resource.getName().equals(SigilCore.SIGIL_PROJECT_FILE)) {
-						switch(delta.getKind()) {
-						case IResourceDelta.CHANGED:
-						case IResourceDelta.ADDED:
-						case IResourceDelta.REMOVED:
-							notifyChange();
-						}
-						result = false;
-					} else {
-						result = false;
-					}
- 					return result;
-				}
-			});
-		} catch (CoreException e) {
-			SigilCore.error( "Workspace repository update failed", e ); 
-		}
-	}
+    private static final int UPDATE_MASK = IResourceDelta.CONTENT | IResourceDelta.DESCRIPTION | IResourceDelta.OPEN;
+    private ISigilBundle[] bundles;
+
+
+    public WorkspaceRepository( String id )
+    {
+        super( id );
+    }
+
+
+    @Override
+    public void accept( IRepositoryVisitor visitor, int options )
+    {
+        synchronized ( this )
+        {
+            if ( bundles == null )
+            {
+                List<ISigilProjectModel> models = SigilCore.getRoot().getProjects();
+                ArrayList<ISigilBundle> tmp = new ArrayList<ISigilBundle>( models.size() );
+                for ( ISigilProjectModel n : models )
+                {
+                    ISigilBundle b = n.getBundle();
+                    tmp.add( b );
+                }
+                bundles = tmp.toArray( new ISigilBundle[tmp.size()] );
+            }
+        }
+
+        for ( ISigilBundle b : bundles )
+        {
+            visitor.visit( b );
+        }
+    }
+
+
+    public void refresh()
+    {
+        synchronized ( this )
+        {
+            bundles = null;
+        }
+    }
+
+
+    @Override
+    protected void notifyChange()
+    {
+        refresh();
+        super.notifyChange();
+    }
+
+
+    public void resourceChanged( IResourceChangeEvent event )
+    {
+        try
+        {
+            event.getDelta().accept( new IResourceDeltaVisitor()
+            {
+                public boolean visit( IResourceDelta delta ) throws CoreException
+                {
+                    boolean result;
+
+                    IResource resource = delta.getResource();
+                    if ( resource instanceof IWorkspaceRoot )
+                    {
+                        result = true;
+                    }
+                    else if ( resource instanceof IProject )
+                    {
+                        IProject project = ( IProject ) resource;
+                        if ( SigilCore.isSigilProject( project ) )
+                        {
+                            switch ( delta.getKind() )
+                            {
+                                case IResourceDelta.CHANGED:
+                                    if ( ( delta.getFlags() & UPDATE_MASK ) == 0 )
+                                    {
+                                        break;
+                                    }
+                                    // else 
+                                    // fall through on purpose
+                                case IResourceDelta.ADDED: // fall through on purpose
+                                case IResourceDelta.REMOVED: // fall through on purpose
+                                    notifyChange();
+                                    break;
+                            }
+                            result = true;
+                        }
+                        else
+                        {
+                            result = false;
+                        }
+                    }
+                    else if ( resource.getName().equals( SigilCore.SIGIL_PROJECT_FILE ) )
+                    {
+                        switch ( delta.getKind() )
+                        {
+                            case IResourceDelta.CHANGED:
+                            case IResourceDelta.ADDED:
+                            case IResourceDelta.REMOVED:
+                                notifyChange();
+                        }
+                        result = false;
+                    }
+                    else
+                    {
+                        result = false;
+                    }
+                    return result;
+                }
+            } );
+        }
+        catch ( CoreException e )
+        {
+            SigilCore.error( "Workspace repository update failed", e );
+        }
+    }
 
 }

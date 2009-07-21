@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.util;
 
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -26,38 +27,55 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+
 @SuppressWarnings("unchecked")
-public class SingletonSelection implements IStructuredSelection {
+public class SingletonSelection implements IStructuredSelection
+{
 
-	private final Object singleton;
-	
-	public SingletonSelection(Object singleton) {
-		this.singleton = singleton;
-	}
+    private final Object singleton;
 
-	public Object getFirstElement() {
-		return singleton;
-	}
 
-	public Iterator iterator() {
-		return Collections.singleton(singleton).iterator();
-	}
+    public SingletonSelection( Object singleton )
+    {
+        this.singleton = singleton;
+    }
 
-	public int size() {
-		return 1;
-	}
 
-	public Object[] toArray() {
-		return new Object[] { singleton };
-	}
+    public Object getFirstElement()
+    {
+        return singleton;
+    }
 
-	public List toList() {
-		ArrayList list = new ArrayList(1);
-		list.add( singleton );
-		return list;
-	}
 
-	public boolean isEmpty() {
-		return false;
-	}
+    public Iterator iterator()
+    {
+        return Collections.singleton( singleton ).iterator();
+    }
+
+
+    public int size()
+    {
+        return 1;
+    }
+
+
+    public Object[] toArray()
+    {
+        return new Object[]
+            { singleton };
+    }
+
+
+    public List toList()
+    {
+        ArrayList list = new ArrayList( 1 );
+        list.add( singleton );
+        return list;
+    }
+
+
+    public boolean isEmpty()
+    {
+        return false;
+    }
 }

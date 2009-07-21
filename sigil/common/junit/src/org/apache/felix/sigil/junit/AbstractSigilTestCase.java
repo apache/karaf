@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.junit;
 
+
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,71 +31,99 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import junit.framework.TestCase;
 
-public abstract class AbstractSigilTestCase extends TestCase {
 
-	private final static List<ServiceTracker> trackers = new LinkedList<ServiceTracker>();
-	
-	private BundleContext ctx;
-	
-	public void setBundleContext(BundleContext ctx) {
-		this.ctx = ctx;
-	}
-	
-	protected BundleContext getBundleContext() {
-		return ctx;
-	}
-	
-	@Override
-	protected void setUp() {
-		for ( Class<?> c : getReferences() ) {
-			ServiceTracker t = createBindTracker(c);
-			t.open();
-			trackers.add( t );
-		}
-	}
+public abstract class AbstractSigilTestCase extends TestCase
+{
 
-	@Override
-	protected void tearDown() {
-		for ( ServiceTracker t : trackers ) {
-			t.close();
-		}
-		trackers.clear();
-	}
+    private final static List<ServiceTracker> trackers = new LinkedList<ServiceTracker>();
+
+    private BundleContext ctx;
 
 
-	private ServiceTracker createBindTracker(final Class<?> c) {
-		return new ServiceTracker(ctx, c.getName(), new ServiceTrackerCustomizer() {
-			public Object addingService(ServiceReference reference) {
-				Object o = ctx.getService(reference);
-				Method m = getBindMethod(c);
-				if ( m != null ) invoke( m, o );
-				return o;
-			}
+    public void setBundleContext( BundleContext ctx )
+    {
+        this.ctx = ctx;
+    }
 
-			public void modifiedService(ServiceReference reference,
-					Object service) {
-			}
 
-			public void removedService(ServiceReference reference,
-					Object service) {
-				Method m = getUnbindMethod(c);
-				if ( m != null ) invoke( m, service );
-				ctx.ungetService(reference);
-			}
-		});
-	}
-	
-	private void invoke(Method m, Object o) {
-		try {
-			m.invoke( this,  new Object[] { o } );
-		} catch (Exception e) {
-			throw new IllegalStateException( "Failed to invoke binding method " + m, e);
-		}
-	}
+    protected BundleContext getBundleContext()
+    {
+        return ctx;
+    }
 
-	protected abstract Class<?>[] getReferences();
-	
-	protected abstract Method getBindMethod(Class<?> clazz);
-	
-	protected abstract  Method getUnbindMethod(Class<?> clazz);
+
+    @Override
+    protected void setUp()
+    {
+        for ( Class<?> c : getReferences() )
+        {
+            ServiceTracker t = createBindTracker( c );
+            t.open();
+            trackers.add( t );
+        }
+    }
+
+
+    @Override
+    protected void tearDown()
+    {
+        for ( ServiceTracker t : trackers )
+        {
+            t.close();
+        }
+        trackers.clear();
+    }
+
+
+    private ServiceTracker createBindTracker( final Class<?> c )
+    {
+        return new ServiceTracker( ctx, c.getName(), new ServiceTrackerCustomizer()
+        {
+            public Object addingService( ServiceReference reference )
+            {
+                Object o = ctx.getService( reference );
+                Method m = getBindMethod( c );
+                if ( m != null )
+                    invoke( m, o );
+                return o;
+            }
+
+
+            public void modifiedService( ServiceReference reference, Object service )
+            {
+            }
+
+
+            public void removedService( ServiceReference reference, Object service )
+            {
+                Method m = getUnbindMethod( c );
+                if ( m != null )
+                    invoke( m, service );
+                ctx.ungetService( reference );
+            }
+        } );
+    }
+
+
+    private void invoke( Method m, Object o )
+    {
+        try
+        {
+            m.invoke( this, new Object[]
+                { o } );
+        }
+        catch ( Exception e )
+        {
+            throw new IllegalStateException( "Failed to invoke binding method " + m, e );
+        }
+    }
+
+
+    protected abstract Class<?>[] getReferences();
+
+
+    protected abstract Method getBindMethod( Class<?> clazz );
+
+
+    protected abstract Method getUnbindMethod( Class<?> clazz );
 }

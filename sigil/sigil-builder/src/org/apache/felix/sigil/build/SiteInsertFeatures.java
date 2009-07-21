@@ -18,6 +18,7 @@
  */
 package org.apache.felix.sigil.build;
 
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -42,138 +43,210 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
-public class SiteInsertFeatures extends Task {
 
-	private File siteXmlFile;
-	private String features;
-	private String versionPropPrefix;
-	private String categoryPropPrefix;
-	
-	public File getSiteXmlFile() {
-		return siteXmlFile;
-	}
-	public void setSiteXmlFile(File siteXmlFile) {
-		this.siteXmlFile = siteXmlFile;
-	}
-	public String getFeatures() {
-		return features;
-	}
-	public void setFeatures(String features) {
-		this.features = features;
-	}
-	public String getVersionPropPrefix() {
-		return versionPropPrefix;
-	}
-	public void setVersionPropPrefix(String versionPropPrefix) {
-		this.versionPropPrefix = versionPropPrefix;
-	}
-	public String getCategoryPropPrefix() {
-		return categoryPropPrefix;
-	}
-	public void setCategoryPropPrefix(String categoryPropPrefix) {
-		this.categoryPropPrefix = categoryPropPrefix;
-	}
-	
-	@Override
-	public void execute() throws BuildException {
-		Project project = getProject();
-		
-		List<Feature> featureList = new ArrayList<Feature>(); 
-		StringTokenizer tokenizer = new StringTokenizer(features, ",");
-		while(tokenizer.hasMoreTokens()) {
-			Feature feature = new Feature();
-			feature.id = tokenizer.nextToken().trim();
-			
-			// Find the version property
-			String versionProp;
-			if(versionPropPrefix == null) {
-				versionProp = feature.id;
-			} else {
-				versionProp = versionPropPrefix + "." + feature.id;
-			}
-			feature.version = project.getProperty(versionProp);
-			
-			// Find the categories for this feature
-			feature.categories = new String[0];
-			if(categoryPropPrefix != null) {
-				String categoriesStr = project.getProperty(categoryPropPrefix + "." + feature.id);
-				if(categoriesStr != null) {
-					StringTokenizer categoriesTokenizer = new StringTokenizer(categoriesStr, ",");
-					feature.categories = new String[categoriesTokenizer.countTokens()];
-					for(int i=0; i<feature.categories.length; i++) {
-						feature.categories[i] = categoriesTokenizer.nextToken();
-					}
-				}
-			}
+public class SiteInsertFeatures extends Task
+{
 
-			if(feature.version != null) {
-				feature.url = "features/" + feature.id + "_" + feature.version + ".jar";
-				featureList.add(feature);
-			} else {
-				System.out.println("Skipping feature " + feature.id);
-			}
-		}
-		
-		if(!siteXmlFile.isFile()) {
-			throw new BuildException(siteXmlFile + " does not exist or is not a normal file");
-		}
-		try {
-			// Generate new XML into a temporary file
-			File tempFile = File.createTempFile("tmp", ".xml", siteXmlFile.getParentFile());
-			tempFile.deleteOnExit();
+    private File siteXmlFile;
+    private String features;
+    private String versionPropPrefix;
+    private String categoryPropPrefix;
 
-			SAXTransformerFactory transformerFactory = (SAXTransformerFactory) SAXTransformerFactory.newInstance();
-			TransformerHandler transformerHandler = transformerFactory.newTransformerHandler();
-			transformerHandler.setResult(new StreamResult(tempFile));
-			
-			SAXParserFactory parserFactory = SAXParserFactory.newInstance();
-			SAXParser parser = parserFactory.newSAXParser();
-			
-			SiteInsertFeatureContentHandler contentHandler = new SiteInsertFeatureContentHandler(transformerHandler, featureList);
-			
-			XMLReader reader = parser.getXMLReader();
-			reader.setContentHandler(contentHandler);
-			reader.parse(new InputSource(new FileInputStream(siteXmlFile)));
-			
-			// Backup original file
-			File backup = new File(siteXmlFile.getParentFile(), siteXmlFile.getName() + ".bak");
-			copyFile(siteXmlFile, backup);
-			
-			// Replace original file
-			copyFile(tempFile, siteXmlFile);
-			
-		} catch (IOException e) {
-			throw new BuildException(e);
-		} catch (TransformerConfigurationException e) {
-			throw new BuildException(e);
-		} catch (IllegalArgumentException e) {
-			throw new BuildException(e);
-		} catch (TransformerFactoryConfigurationError e) {
-			throw new BuildException(e);
-		} catch (ParserConfigurationException e) {
-			throw new BuildException(e);
-		} catch (SAXException e) {
-			throw new BuildException(e);
-		}
-	}
-	
-	private void copyFile(File source, File dest) throws IOException {
-		FileInputStream in = null;
-		FileOutputStream out = null;
-		try {
-			in = new FileInputStream(source);
-			out = new FileOutputStream(dest);
-			
-			byte[] buffer = new byte[1024];
-			
-			int read;
-			while((read = in.read(buffer, 0, 1024)) > -1) {
-				out.write(buffer, 0, read);
-			}
-		} finally {
-			try { if(in != null) in.close(); } catch(IOException e) {}
-			try { if(out != null) out.close(); } catch(IOException e) {}
-		}
-		
-	}
+
+    public File getSiteXmlFile()
+    {
+        return siteXmlFile;
+    }
+
+
+    public void setSiteXmlFile( File siteXmlFile )
+    {
+        this.siteXmlFile = siteXmlFile;
+    }
+
+
+    public String getFeatures()
+    {
+        return features;
+    }
+
+
+    public void setFeatures( String features )
+    {
+        this.features = features;
+    }
+
+
+    public String getVersionPropPrefix()
+    {
+        return versionPropPrefix;
+    }
+
+
+    public void setVersionPropPrefix( String versionPropPrefix )
+    {
+        this.versionPropPrefix = versionPropPrefix;
+    }
+
+
+    public String getCategoryPropPrefix()
+    {
+        return categoryPropPrefix;
+    }
+
+
+    public void setCategoryPropPrefix( String categoryPropPrefix )
+    {
+        this.categoryPropPrefix = categoryPropPrefix;
+    }
+
+
+    @Override
+    public void execute() throws BuildException
+    {
+        Project project = getProject();
+
+        List<Feature> featureList = new ArrayList<Feature>();
+        StringTokenizer tokenizer = new StringTokenizer( features, "," );
+        while ( tokenizer.hasMoreTokens() )
+        {
+            Feature feature = new Feature();
+            feature.id = tokenizer.nextToken().trim();
+
+            // Find the version property
+            String versionProp;
+            if ( versionPropPrefix == null )
+            {
+                versionProp = feature.id;
+            }
+            else
+            {
+                versionProp = versionPropPrefix + "." + feature.id;
+            }
+            feature.version = project.getProperty( versionProp );
+
+            // Find the categories for this feature
+            feature.categories = new String[0];
+            if ( categoryPropPrefix != null )
+            {
+                String categoriesStr = project.getProperty( categoryPropPrefix + "." + feature.id );
+                if ( categoriesStr != null )
+                {
+                    StringTokenizer categoriesTokenizer = new StringTokenizer( categoriesStr, "," );
+                    feature.categories = new String[categoriesTokenizer.countTokens()];
+                    for ( int i = 0; i < feature.categories.length; i++ )
+                    {
+                        feature.categories[i] = categoriesTokenizer.nextToken();
+                    }
+                }
+            }
+
+            if ( feature.version != null )
+            {
+                feature.url = "features/" + feature.id + "_" + feature.version + ".jar";
+                featureList.add( feature );
+            }
+            else
+            {
+                System.out.println( "Skipping feature " + feature.id );
+            }
+        }
+
+        if ( !siteXmlFile.isFile() )
+        {
+            throw new BuildException( siteXmlFile + " does not exist or is not a normal file" );
+        }
+        try
+        {
+            // Generate new XML into a temporary file
+            File tempFile = File.createTempFile( "tmp", ".xml", siteXmlFile.getParentFile() );
+            tempFile.deleteOnExit();
+
+            SAXTransformerFactory transformerFactory = ( SAXTransformerFactory ) SAXTransformerFactory.newInstance();
+            TransformerHandler transformerHandler = transformerFactory.newTransformerHandler();
+            transformerHandler.setResult( new StreamResult( tempFile ) );
+
+            SAXParserFactory parserFactory = SAXParserFactory.newInstance();
+            SAXParser parser = parserFactory.newSAXParser();
+
+            SiteInsertFeatureContentHandler contentHandler = new SiteInsertFeatureContentHandler( transformerHandler,
+                featureList );
+
+            XMLReader reader = parser.getXMLReader();
+            reader.setContentHandler( contentHandler );
+            reader.parse( new InputSource( new FileInputStream( siteXmlFile ) ) );
+
+            // Backup original file
+            File backup = new File( siteXmlFile.getParentFile(), siteXmlFile.getName() + ".bak" );
+            copyFile( siteXmlFile, backup );
+
+            // Replace original file
+            copyFile( tempFile, siteXmlFile );
+
+        }
+        catch ( IOException e )
+        {
+            throw new BuildException( e );
+        }
+        catch ( TransformerConfigurationException e )
+        {
+            throw new BuildException( e );
+        }
+        catch ( IllegalArgumentException e )
+        {
+            throw new BuildException( e );
+        }
+        catch ( TransformerFactoryConfigurationError e )
+        {
+            throw new BuildException( e );
+        }
+        catch ( ParserConfigurationException e )
+        {
+            throw new BuildException( e );
+        }
+        catch ( SAXException e )
+        {
+            throw new BuildException( e );
+        }
+    }
+
+
+    private void copyFile( File source, File dest ) throws IOException
+    {
+        FileInputStream in = null;
+        FileOutputStream out = null;
+        try
+        {
+            in = new FileInputStream( source );
+            out = new FileOutputStream( dest );
+
+            byte[] buffer = new byte[1024];
+
+            int read;
+            while ( ( read = in.read( buffer, 0, 1024 ) ) > -1 )
+            {
+                out.write( buffer, 0, read );
+            }
+        }
+        finally
+        {
+            try
+            {
+                if ( in != null )
+                    in.close();
+            }
+            catch ( IOException e )
+            {
+            }
+            try
+            {
+                if ( out != null )
+                    out.close();
+            }
+            catch ( IOException e )
+            {
+            }
+        }
+
+    }
 }

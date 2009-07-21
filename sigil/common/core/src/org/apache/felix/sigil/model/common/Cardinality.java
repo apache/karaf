@@ -19,25 +19,29 @@
 
 package org.apache.felix.sigil.model.common;
 
+
 import java.io.Serializable;
+
 
 /**
  * Immutable class representing cardinality constraints between two entities.
  * 
  */
-public class Cardinality implements Serializable {
+public class Cardinality implements Serializable
+{
 
     /**
      * 
      */
     private static final long serialVersionUID = 1L;
-    public static final Cardinality ZERO_TO_MANY = new Cardinality(0, -1);
-    public static final Cardinality ONE_TO_MANY = new Cardinality(1, -1);
-    public static final Cardinality ZERO_TO_ONE = new Cardinality(0, 1);
-    public static final Cardinality ONE_TO_ONE = new Cardinality(1, 1);
+    public static final Cardinality ZERO_TO_MANY = new Cardinality( 0, -1 );
+    public static final Cardinality ONE_TO_MANY = new Cardinality( 1, -1 );
+    public static final Cardinality ZERO_TO_ONE = new Cardinality( 0, 1 );
+    public static final Cardinality ONE_TO_ONE = new Cardinality( 1, 1 );
 
     private int min;
     private int max;
+
 
     /**
      * @param min
@@ -45,109 +49,143 @@ public class Cardinality implements Serializable {
      * @param max
      *            >=min or -1 to indicate an unbounded maximum
      */
-    public Cardinality(int min, int max) {
-        if (min < 0) {
-            throw new IllegalArgumentException("Min cannot be less than 0");
+    public Cardinality( int min, int max )
+    {
+        if ( min < 0 )
+        {
+            throw new IllegalArgumentException( "Min cannot be less than 0" );
         }
 
-        if ((max < min) && (max != -1)) {
-            throw new IllegalArgumentException("Max cannot be less than min");
+        if ( ( max < min ) && ( max != -1 ) )
+        {
+            throw new IllegalArgumentException( "Max cannot be less than min" );
         }
 
         this.min = min;
         this.max = max;
     }
 
-    public int getMin() {
+
+    public int getMin()
+    {
         return min;
     }
 
-    public int getMax() {
+
+    public int getMax()
+    {
         return max;
     }
 
-    public String toString() {
-        return min + ".." + ((max == -1) ? ("n") : (Integer.toString(max)));
+
+    public String toString()
+    {
+        return min + ".." + ( ( max == -1 ) ? ( "n" ) : ( Integer.toString( max ) ) );
     }
 
-    public boolean isDefined(Cardinality cardinality) {
-        return (min <= cardinality.min) && ((max == -1) || (max >= cardinality.max));
+
+    public boolean isDefined( Cardinality cardinality )
+    {
+        return ( min <= cardinality.min ) && ( ( max == -1 ) || ( max >= cardinality.max ) );
     }
 
-    public boolean isSingleton() {
-        return (min == 1) && (max == 1);
+
+    public boolean isSingleton()
+    {
+        return ( min == 1 ) && ( max == 1 );
     }
 
-    public static Cardinality parse(String stringRep) throws IllegalArgumentException {
+
+    public static Cardinality parse( String stringRep ) throws IllegalArgumentException
+    {
         stringRep = stringRep.trim();
 
-        int dotdot = stringRep.indexOf("..");
+        int dotdot = stringRep.indexOf( ".." );
 
-        if (dotdot == -1) {
-            throw new IllegalArgumentException("Invalid cardinality string representation, expected ..");
+        if ( dotdot == -1 )
+        {
+            throw new IllegalArgumentException( "Invalid cardinality string representation, expected .." );
         }
 
-        String minStr = stringRep.substring(0, dotdot);
-        String maxStr = stringRep.substring(dotdot + 2);
+        String minStr = stringRep.substring( 0, dotdot );
+        String maxStr = stringRep.substring( dotdot + 2 );
 
-        int min = Integer.parseInt(minStr);
+        int min = Integer.parseInt( minStr );
         int max = min;
 
-        if ("n".equals(maxStr)) {
+        if ( "n".equals( maxStr ) )
+        {
             max = -1;
         }
-        else {
-            max = Integer.parseInt(maxStr);
+        else
+        {
+            max = Integer.parseInt( maxStr );
         }
 
-        return cardinality(min, max);
+        return cardinality( min, max );
     }
 
-    public static Cardinality cardinality(int min, int max) {
+
+    public static Cardinality cardinality( int min, int max )
+    {
         Cardinality c = null;
 
-        if (min == 0) {
-            if (max == 1) {
+        if ( min == 0 )
+        {
+            if ( max == 1 )
+            {
                 c = ZERO_TO_ONE;
             }
-            else if (max == -1) {
+            else if ( max == -1 )
+            {
                 c = ZERO_TO_MANY;
             }
         }
-        else if (min == 1) {
-            if (max == 1) {
+        else if ( min == 1 )
+        {
+            if ( max == 1 )
+            {
                 c = ONE_TO_ONE;
             }
-            else if (max == -1) {
+            else if ( max == -1 )
+            {
                 c = ONE_TO_MANY;
             }
         }
 
-        if (c == null)
-            c = new Cardinality(min, max);
+        if ( c == null )
+            c = new Cardinality( min, max );
 
         return c;
     }
 
-    public int hashCode() {
+
+    public int hashCode()
+    {
         return max ^ min;
     }
 
-    public boolean equals(Object o) {
-        if (o == this) {
+
+    public boolean equals( Object o )
+    {
+        if ( o == this )
+        {
             return true;
         }
 
-        if (o == null) {
+        if ( o == null )
+        {
             return false;
         }
 
-        try {
-            Cardinality c = (Cardinality) o;
+        try
+        {
+            Cardinality c = ( Cardinality ) o;
 
-            return (min == c.min) && (max == c.max);
+            return ( min == c.min ) && ( max == c.max );
         }
-        catch (ClassCastException cce) {
+        catch ( ClassCastException cce )
+        {
             return false;
         }
     }

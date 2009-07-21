@@ -19,8 +19,11 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.editors.project;
 
+
 import org.apache.felix.sigil.model.common.VersionRange;
 
-public interface VersionsChangeListener {
-	void versionsChanged(VersionRange range);
+
+public interface VersionsChangeListener
+{
+    void versionsChanged( VersionRange range );
 }

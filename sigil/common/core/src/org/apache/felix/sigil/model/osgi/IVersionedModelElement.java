@@ -19,12 +19,16 @@
 
 package org.apache.felix.sigil.model.osgi;
 
+
 import org.osgi.framework.Version;
 
-public interface IVersionedModelElement {
 
-	Version getVersion();
+public interface IVersionedModelElement
+{
 
-	void setVersion(Version version);
+    Version getVersion();
+
+
+    void setVersion( Version version );
 
 }

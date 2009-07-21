@@ -19,32 +19,34 @@
 
 package org.apache.felix.sigil.config;
 
-public class BldAttr {
-	// Sigil attributes
-	
-	public static final String KIND_ATTRIBUTE = "kind";
-	
-	public static final String RESOLVE_ATTRIBUTE = "resolve";
-	public static final String RESOLVE_AUTO = "auto";
-	public static final String RESOLVE_COMPILE = "compile";
-	public static final String RESOLVE_RUNTIME = "runtime";
-	public static final String RESOLVE_IGNORE = "ignore";
-	
-	public static final String PUBLISH_ATTRIBUTE = "publish";
-	public static final String PUBTYPE_ATTRIBUTE = "type";
-	public static final String PATH_ATTRIBUTE = "path";
-	public static final Object ZONE_ATTRIBUTE = "zone";
-	
-	// Sigil options
-	
-	public static final String OPTION_ADD_IMPORTS = "addMissingImports";
-	public static final String OPTION_OMIT_IMPORTS = "omitUnusedImports";
-	
-	// OSGi attributes
-	
-	public static final String RESOLUTION_ATTRIBUTE = "resolution";
-	public static final String RESOLUTION_OPTIONAL = "optional";
-	
-	public static final String VERSION_ATTRIBUTE = "version";
+
+public class BldAttr
+{
+    // Sigil attributes
+
+    public static final String KIND_ATTRIBUTE = "kind";
+
+    public static final String RESOLVE_ATTRIBUTE = "resolve";
+    public static final String RESOLVE_AUTO = "auto";
+    public static final String RESOLVE_COMPILE = "compile";
+    public static final String RESOLVE_RUNTIME = "runtime";
+    public static final String RESOLVE_IGNORE = "ignore";
+
+    public static final String PUBLISH_ATTRIBUTE = "publish";
+    public static final String PUBTYPE_ATTRIBUTE = "type";
+    public static final String PATH_ATTRIBUTE = "path";
+    public static final Object ZONE_ATTRIBUTE = "zone";
+
+    // Sigil options
+
+    public static final String OPTION_ADD_IMPORTS = "addMissingImports";
+    public static final String OPTION_OMIT_IMPORTS = "omitUnusedImports";
+
+    // OSGi attributes
+
+    public static final String RESOLUTION_ATTRIBUTE = "resolution";
+    public static final String RESOLUTION_OPTIONAL = "optional";
+
+    public static final String VERSION_ATTRIBUTE = "version";
 
 }

@@ -19,27 +19,35 @@
 
 package org.apache.felix.sigil.model;
 
+
 /**
  * @author dave
  * 
  */
-public class InvalidModelException extends RuntimeException {
-	
-	private static final long serialVersionUID = 1L;
-	
-	private IModelElement target;
-	
-    public InvalidModelException(IModelElement target, String msg) {
-        super(msg);
+public class InvalidModelException extends RuntimeException
+{
+
+    private static final long serialVersionUID = 1L;
+
+    private IModelElement target;
+
+
+    public InvalidModelException( IModelElement target, String msg )
+    {
+        super( msg );
         this.target = target;
     }
 
-    public InvalidModelException(IModelElement target, String msg, Throwable t) {
-        super(msg, t);
+
+    public InvalidModelException( IModelElement target, String msg, Throwable t )
+    {
+        super( msg, t );
         this.target = target;
     }
-    
-    public IModelElement getTarget() {
-    	return target;
+
+
+    public IModelElement getTarget()
+    {
+        return target;
     }
 }

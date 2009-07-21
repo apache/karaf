@@ -19,6 +19,8 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.util;
 
-public interface IExportToImportConverter<E,I> {
-	I convert(E exportElement);
+
+public interface IExportToImportConverter<E, I>
+{
+    I convert( E exportElement );
 }

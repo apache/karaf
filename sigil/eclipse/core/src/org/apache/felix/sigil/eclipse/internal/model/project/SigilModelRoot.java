@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.eclipse.internal.model.project;
 
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -44,83 +45,109 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-public class SigilModelRoot implements ISigilModelRoot {
-	public List<ISigilProjectModel> getProjects() {
-		IProject[] all = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		ArrayList<ISigilProjectModel> projects = new ArrayList<ISigilProjectModel>(all.length);
-		for (IProject p : all) {
-			try {
-				if (p.isOpen() && p.hasNature(SigilCore.NATURE_ID)) {
-					ISigilProjectModel n = SigilCore.create(p);
-					projects.add(n);
-				}
-			} catch (CoreException e) {
-				SigilCore.error("Failed to build model element", e);
-			}
-		}
 
-		return projects;
-	}
+public class SigilModelRoot implements ISigilModelRoot
+{
+    public List<ISigilProjectModel> getProjects()
+    {
+        IProject[] all = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+        ArrayList<ISigilProjectModel> projects = new ArrayList<ISigilProjectModel>( all.length );
+        for ( IProject p : all )
+        {
+            try
+            {
+                if ( p.isOpen() && p.hasNature( SigilCore.NATURE_ID ) )
+                {
+                    ISigilProjectModel n = SigilCore.create( p );
+                    projects.add( n );
+                }
+            }
+            catch ( CoreException e )
+            {
+                SigilCore.error( "Failed to build model element", e );
+            }
+        }
 
-	public Collection<ISigilProjectModel> resolveDependentProjects(
-			ISigilProjectModel sigil, IProgressMonitor monitor) {
-		HashSet<ISigilProjectModel> dependents = new HashSet<ISigilProjectModel>();
+        return projects;
+    }
 
-		for (ISigilProjectModel n : getProjects()) {
-			if (!sigil.equals(n)) {
-				for (IPackageExport pe : sigil.getBundle().getBundleInfo().getExports()) {
-					for (IPackageImport i : n.getBundle().getBundleInfo()
-							.getImports()) {
-						if (pe.getPackageName().equals(i.getPackageName())
-								&& i.getVersions().contains(pe.getVersion())) {
-							dependents.add(n);
-						}
-					}
 
-					for (ILibraryImport l : n.getBundle().getBundleInfo().getLibraryImports()) {
-						ILibrary lib = SigilCore.getRepositoryManager(sigil).resolveLibrary(l);
+    public Collection<ISigilProjectModel> resolveDependentProjects( ISigilProjectModel sigil, IProgressMonitor monitor )
+    {
+        HashSet<ISigilProjectModel> dependents = new HashSet<ISigilProjectModel>();
 
-						if (lib != null) {
-							for (IPackageImport i : lib.getImports()) {
-								if (pe.getPackageName().equals(
-										i.getPackageName())
-										&& i.getVersions().contains(
-												pe.getVersion())) {
-									dependents.add(n);
-								}
-							}
-						} else {
-							SigilCore.error("No library found for " + l);
-						}
-					}
-				}
+        for ( ISigilProjectModel n : getProjects() )
+        {
+            if ( !sigil.equals( n ) )
+            {
+                for ( IPackageExport pe : sigil.getBundle().getBundleInfo().getExports() )
+                {
+                    for ( IPackageImport i : n.getBundle().getBundleInfo().getImports() )
+                    {
+                        if ( pe.getPackageName().equals( i.getPackageName() )
+                            && i.getVersions().contains( pe.getVersion() ) )
+                        {
+                            dependents.add( n );
+                        }
+                    }
 
-				for (IRequiredBundle r : n.getBundle().getBundleInfo().getRequiredBundles()) {
-					if (sigil.getSymbolicName().equals(r.getSymbolicName())
-							&& r.getVersions().contains(sigil.getVersion())) {
-						dependents.add(n);
-					}
-				}
-			}
-		}
+                    for ( ILibraryImport l : n.getBundle().getBundleInfo().getLibraryImports() )
+                    {
+                        ILibrary lib = SigilCore.getRepositoryManager( sigil ).resolveLibrary( l );
 
-		return dependents;
-	}
+                        if ( lib != null )
+                        {
+                            for ( IPackageImport i : lib.getImports() )
+                            {
+                                if ( pe.getPackageName().equals( i.getPackageName() )
+                                    && i.getVersions().contains( pe.getVersion() ) )
+                                {
+                                    dependents.add( n );
+                                }
+                            }
+                        }
+                        else
+                        {
+                            SigilCore.error( "No library found for " + l );
+                        }
+                    }
+                }
 
-	public Collection<ISigilBundle> resolveBundles(ISigilProjectModel sigil, IModelElement element, boolean includeOptional, IProgressMonitor monitor) throws CoreException {
-		int options = ResolutionConfig.INCLUDE_DEPENDENTS;
-		if ( includeOptional ) {
-			options |= ResolutionConfig.INCLUDE_OPTIONAL;
-		}
-		
-		ResolutionConfig config = new ResolutionConfig(options);
-		try {
-			IBundleResolver resolver = SigilCore.getRepositoryManager(sigil).getBundleResolver();
-			IResolution resolution = resolver.resolve(element, config, new ResolutionMonitorAdapter(monitor));
-			resolution.synchronize(monitor);
-			return resolution.getBundles();
-		} catch (ResolutionException e) {
-			throw SigilCore.newCoreException(e.getMessage(), e);
-		}
-	}
+                for ( IRequiredBundle r : n.getBundle().getBundleInfo().getRequiredBundles() )
+                {
+                    if ( sigil.getSymbolicName().equals( r.getSymbolicName() )
+                        && r.getVersions().contains( sigil.getVersion() ) )
+                    {
+                        dependents.add( n );
+                    }
+                }
+            }
+        }
+
+        return dependents;
+    }
+
+
+    public Collection<ISigilBundle> resolveBundles( ISigilProjectModel sigil, IModelElement element,
+        boolean includeOptional, IProgressMonitor monitor ) throws CoreException
+    {
+        int options = ResolutionConfig.INCLUDE_DEPENDENTS;
+        if ( includeOptional )
+        {
+            options |= ResolutionConfig.INCLUDE_OPTIONAL;
+        }
+
+        ResolutionConfig config = new ResolutionConfig( options );
+        try
+        {
+            IBundleResolver resolver = SigilCore.getRepositoryManager( sigil ).getBundleResolver();
+            IResolution resolution = resolver.resolve( element, config, new ResolutionMonitorAdapter( monitor ) );
+            resolution.synchronize( monitor );
+            return resolution.getBundles();
+        }
+        catch ( ResolutionException e )
+        {
+            throw SigilCore.newCoreException( e.getMessage(), e );
+        }
+    }
 }

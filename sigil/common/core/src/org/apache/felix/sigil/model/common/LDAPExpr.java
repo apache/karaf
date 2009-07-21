@@ -19,21 +19,30 @@
 
 package org.apache.felix.sigil.model.common;
 
+
 import java.io.Serializable;
 import java.util.Map;
 
-public interface LDAPExpr extends Serializable {
 
-    public static final LDAPExpr[] CHILDLESS = new LDAPExpr[] {};
+public interface LDAPExpr extends Serializable
+{
+
+    public static final LDAPExpr[] CHILDLESS = new LDAPExpr[]
+        {};
     public static LDAPExpr ACCEPT_ALL = Expressions.T;
+
 
     LDAPExpr[] getChildren();
 
-    void visit(ExprVisitor v);
 
-    boolean equals(Object other);
+    void visit( ExprVisitor v );
+
+
+    boolean equals( Object other );
+
 
     int hashCode();
 
-    boolean eval(Map<String, ?> map);
+
+    boolean eval( Map<String, ?> map );
 }

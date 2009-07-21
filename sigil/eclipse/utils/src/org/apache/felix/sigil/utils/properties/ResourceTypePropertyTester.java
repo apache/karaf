@@ -19,34 +19,41 @@
 
 package org.apache.felix.sigil.utils.properties;
 
+
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
 
-public class ResourceTypePropertyTester extends PropertyTester {
 
-	public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
-		if (!(receiver instanceof IResource)) {
-			return false;
-		}
+public class ResourceTypePropertyTester extends PropertyTester
+{
 
-		boolean result = false;
+    public boolean test( Object receiver, String property, Object[] args, Object expectedValue )
+    {
+        if ( !( receiver instanceof IResource ) )
+        {
+            return false;
+        }
 
-		IResource resource = (IResource) receiver;
-		if ("isResourceOfType".equals(property)) {
-			IContentType[] types = Platform.getContentTypeManager().findContentTypesFor(
-					resource.getName());
+        boolean result = false;
 
-			for (IContentType type : types) {
-				if (type.getId().equals(expectedValue)) {
-					result = true;
-					break;
-				}
-			}
-		}
+        IResource resource = ( IResource ) receiver;
+        if ( "isResourceOfType".equals( property ) )
+        {
+            IContentType[] types = Platform.getContentTypeManager().findContentTypesFor( resource.getName() );
 
-		return result;
-	}
+            for ( IContentType type : types )
+            {
+                if ( type.getId().equals( expectedValue ) )
+                {
+                    result = true;
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
 
 }

@@ -19,42 +19,54 @@
 
 package org.apache.felix.sigil.model;
 
+
 import java.util.HashMap;
 import java.util.Map;
+
 
 /**
  * @author dave
  * 
  */
-public enum OverrideOptions {
+public enum OverrideOptions
+{
     NO("no"), MAY("may"), MUST("must");
 
     private String str;
 
     private static Map<String, OverrideOptions> map = new HashMap<String, OverrideOptions>();
 
-    static {
-        for (OverrideOptions option : OverrideOptions.values()) {
-            map.put(option.str.toLowerCase(), option);
+    static
+    {
+        for ( OverrideOptions option : OverrideOptions.values() )
+        {
+            map.put( option.str.toLowerCase(), option );
         }
     }
 
-    private OverrideOptions(String str) {
+
+    private OverrideOptions( String str )
+    {
         this.str = str;
     }
 
-    public static OverrideOptions parse(String val) {
-        OverrideOptions option = map.get(val.toLowerCase());
 
-        if (option == null) {
-            throw new IllegalArgumentException("Invalid override value " + val);
+    public static OverrideOptions parse( String val )
+    {
+        OverrideOptions option = map.get( val.toLowerCase() );
+
+        if ( option == null )
+        {
+            throw new IllegalArgumentException( "Invalid override value " + val );
         }
 
         return option;
     }
-    
+
+
     @Override
-    public String toString() {
+    public String toString()
+    {
         return str;
     }
 

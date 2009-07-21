@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.wizard;
 
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
@@ -29,28 +30,35 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
+
 /**
  * @author dave
  *
  */
-public abstract class SigilNewResourceWizard extends BasicNewResourceWizard implements INewWizard {
+public abstract class SigilNewResourceWizard extends BasicNewResourceWizard implements INewWizard
+{
 
-    protected void selectRevealAndShow(IFile file) {
-        selectAndReveal(file);
-    
+    protected void selectRevealAndShow( IFile file )
+    {
+        selectAndReveal( file );
+
         // Open editor on new file.
         IWorkbenchWindow dw = getWorkbench().getActiveWorkbenchWindow();
-        try {
-            if (dw != null) {
+        try
+        {
+            if ( dw != null )
+            {
                 IWorkbenchPage page = dw.getActivePage();
-                if (page != null) {
-                    IDE.openEditor(page, file, true);
+                if ( page != null )
+                {
+                    IDE.openEditor( page, file, true );
                 }
             }
         }
-        catch (PartInitException e) {
-            MessageDialog.openError(Display.getCurrent().getActiveShell(), "Initialisation error",
-                    "Failed to open " + file);
+        catch ( PartInitException e )
+        {
+            MessageDialog.openError( Display.getCurrent().getActiveShell(), "Initialisation error", "Failed to open "
+                + file );
         }
     }
 

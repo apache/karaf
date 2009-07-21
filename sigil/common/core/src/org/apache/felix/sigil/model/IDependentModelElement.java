@@ -19,19 +19,23 @@
 
 package org.apache.felix.sigil.model;
 
-public interface IDependentModelElement extends IModelElement {
+
+public interface IDependentModelElement extends IModelElement
+{
     /**
      * @return
      */
     IDependency[] getDependencies();
-    
+
+
     /**
      * @param dependency
      */
-    void addDependency(IModelElement dependency);
-    
+    void addDependency( IModelElement dependency );
+
+
     /**
      * @param dependency
      */
-    void removeDependency(IModelElement dependency);
+    void removeDependency( IModelElement dependency );
 }

@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.utils.properties;
 
+
 import org.apache.felix.sigil.utils.SigilUtils;
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.resources.IFile;
@@ -27,25 +28,31 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
 
-public class EditorPropertyTester extends PropertyTester {
 
-	public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
-		IWorkbenchPart part = (IWorkbenchPart) receiver;
+public class EditorPropertyTester extends PropertyTester
+{
 
-		boolean result = false;
-		
-		if(part instanceof IEditorPart) {
-			IEditorInput input = ((IEditorPart) part).getEditorInput();
-			if(input instanceof IFileEditorInput) {
-				IFile file = ((IFileEditorInput) input).getFile();
-				
-				if("isEditorOfType".equals(property)) {
-					result = SigilUtils.isResourceType(file, (String) expectedValue);
-				}
-			}
-		}
-		
-		return result;
-	}
+    public boolean test( Object receiver, String property, Object[] args, Object expectedValue )
+    {
+        IWorkbenchPart part = ( IWorkbenchPart ) receiver;
+
+        boolean result = false;
+
+        if ( part instanceof IEditorPart )
+        {
+            IEditorInput input = ( ( IEditorPart ) part ).getEditorInput();
+            if ( input instanceof IFileEditorInput )
+            {
+                IFile file = ( ( IFileEditorInput ) input ).getFile();
+
+                if ( "isEditorOfType".equals( property ) )
+                {
+                    result = SigilUtils.isResourceType( file, ( String ) expectedValue );
+                }
+            }
+        }
+
+        return result;
+    }
 
 }

@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.eclipse.preferences;
 
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,39 +27,52 @@ import java.util.List;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.text.StrTokenizer;
 
-public class PrefsUtils {
 
-	private PrefsUtils() {
-	}
+public class PrefsUtils
+{
 
-	public static final String arrayToString(String[] array) {
-		StringBuilder builder = new StringBuilder();
+    private PrefsUtils()
+    {
+    }
 
-		for (int i = 0; i < array.length; i++) {
-			if (i > 0)
-				builder.append(',');
-			builder.append(StringEscapeUtils.escapeCsv(array[i]));
-		}
 
-		return builder.toString();
-	}
+    public static final String arrayToString( String[] array )
+    {
+        StringBuilder builder = new StringBuilder();
 
-	public static final String[] stringToArray(String string) {
-		StrTokenizer tokenizer = new StrTokenizer(string, ',', '"');
-		String[] array = new String[tokenizer.size()];
+        for ( int i = 0; i < array.length; i++ )
+        {
+            if ( i > 0 )
+                builder.append( ',' );
+            builder.append( StringEscapeUtils.escapeCsv( array[i] ) );
+        }
 
-		for (int i = 0; i < array.length; i++) {
-			array[i] = tokenizer.nextToken();
-		}
+        return builder.toString();
+    }
 
-		return array;
-	}
 
-	public static String listToString(List<String> names) {
-		return arrayToString(names.toArray( new String[names.size()]));
-	}
+    public static final String[] stringToArray( String string )
+    {
+        StrTokenizer tokenizer = new StrTokenizer( string, ',', '"' );
+        String[] array = new String[tokenizer.size()];
 
-	public static List<String> stringToList(String string) {
-		return new ArrayList<String>(Arrays.asList(stringToArray(string)));
-	}
+        for ( int i = 0; i < array.length; i++ )
+        {
+            array[i] = tokenizer.nextToken();
+        }
+
+        return array;
+    }
+
+
+    public static String listToString( List<String> names )
+    {
+        return arrayToString( names.toArray( new String[names.size()] ) );
+    }
+
+
+    public static List<String> stringToList( String string )
+    {
+        return new ArrayList<String>( Arrays.asList( stringToArray( string ) ) );
+    }
 }

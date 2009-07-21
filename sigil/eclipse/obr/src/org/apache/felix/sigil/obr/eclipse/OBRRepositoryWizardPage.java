@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.obr.eclipse;
 
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -33,79 +34,105 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 
-public class OBRRepositoryWizardPage extends RepositoryWizardPage implements IWizardPage {
 
-	private StringFieldEditor urlEditor;
-	private StringFieldEditor cacheEditor;
+public class OBRRepositoryWizardPage extends RepositoryWizardPage implements IWizardPage
+{
 
-	protected OBRRepositoryWizardPage(RepositoryWizard parent) {
-		super("OSGi Bundle Repository", parent);
-	}
+    private StringFieldEditor urlEditor;
+    private StringFieldEditor cacheEditor;
 
-	@Override
-	public void createFieldEditors() {
-		createField( urlEditor = new StringFieldEditor("url", "URL:", getFieldEditorParent()) );
-		createField( cacheEditor = new DirectoryFieldEditor("cache", "Cache:", getFieldEditorParent()) );
-		addField( new BooleanFieldEditor( "inmemory", "In Memory:", getFieldEditorParent() ));
-	}
 
-	private void createField(StringFieldEditor editor) {
-		editor.getTextControl(getFieldEditorParent()).addModifyListener( new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				checkPageComplete();
-			}
-		});
-		addField(editor);
-	}
+    protected OBRRepositoryWizardPage( RepositoryWizard parent )
+    {
+        super( "OSGi Bundle Repository", parent );
+    }
 
-	@Override
-	protected void checkPageComplete() {
-		super.checkPageComplete();
-		if ( isPageComplete() && checkURLComplete() ) {
-			checkCacheComplete();
-		}
-	}
 
-	private boolean checkCacheComplete() {
-		setPageComplete(cacheEditor.getStringValue().length() > 0);
-		
-		if ( isPageComplete() ) {
-			if ( new File( cacheEditor.getStringValue() ).isDirectory() ) {
-				setErrorMessage(null);				
-			}
-			else {
-				setErrorMessage("Invalid cache directory");
-				setPageComplete(false);
-			}
-		}
-		
-		return isPageComplete();
-	}
+    @Override
+    public void createFieldEditors()
+    {
+        createField( urlEditor = new StringFieldEditor( "url", "URL:", getFieldEditorParent() ) );
+        createField( cacheEditor = new DirectoryFieldEditor( "cache", "Cache:", getFieldEditorParent() ) );
+        addField( new BooleanFieldEditor( "inmemory", "In Memory:", getFieldEditorParent() ) );
+    }
 
-	private boolean checkURLComplete() {
-		setPageComplete(urlEditor.getStringValue().length() > 0);
-		
-		if ( isPageComplete() ) {
-			try {
-				new URL(urlEditor.getStringValue());
-				setErrorMessage(null);
-			}
-			catch (MalformedURLException e) {
-				if ( !new File(urlEditor.getStringValue()).isFile() ) {
-					setErrorMessage("Invalid repository url: " + e.getMessage());
-					setPageComplete(false);
-				}
-			}
-		}
-		
-		return isPageComplete();
-	}
 
-	@Override
-	public void storeFields() {
-		super.storeFields();
-		IPath dir = Activator.getDefault().getStateLocation();
-		getModel().getPreferences().setValue( "index", dir.append( getModel().getId() + ".obr" ).toOSString() );
-	}
-	
+    private void createField( StringFieldEditor editor )
+    {
+        editor.getTextControl( getFieldEditorParent() ).addModifyListener( new ModifyListener()
+        {
+            public void modifyText( ModifyEvent e )
+            {
+                checkPageComplete();
+            }
+        } );
+        addField( editor );
+    }
+
+
+    @Override
+    protected void checkPageComplete()
+    {
+        super.checkPageComplete();
+        if ( isPageComplete() && checkURLComplete() )
+        {
+            checkCacheComplete();
+        }
+    }
+
+
+    private boolean checkCacheComplete()
+    {
+        setPageComplete( cacheEditor.getStringValue().length() > 0 );
+
+        if ( isPageComplete() )
+        {
+            if ( new File( cacheEditor.getStringValue() ).isDirectory() )
+            {
+                setErrorMessage( null );
+            }
+            else
+            {
+                setErrorMessage( "Invalid cache directory" );
+                setPageComplete( false );
+            }
+        }
+
+        return isPageComplete();
+    }
+
+
+    private boolean checkURLComplete()
+    {
+        setPageComplete( urlEditor.getStringValue().length() > 0 );
+
+        if ( isPageComplete() )
+        {
+            try
+            {
+                new URL( urlEditor.getStringValue() );
+                setErrorMessage( null );
+            }
+            catch ( MalformedURLException e )
+            {
+                if ( !new File( urlEditor.getStringValue() ).isFile() )
+                {
+                    setErrorMessage( "Invalid repository url: " + e.getMessage() );
+                    setPageComplete( false );
+                }
+            }
+        }
+
+        return isPageComplete();
+    }
+
+
+    @Override
+    public void storeFields()
+    {
+        super.storeFields();
+        IPath dir = Activator.getDefault().getStateLocation();
+        getModel().getPreferences().setValue( "index", dir.append( getModel().getId() + ".obr" ).toOSString() );
+    }
+
 }

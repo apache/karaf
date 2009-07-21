@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.editors.project;
 
+
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.IDocument;
@@ -33,83 +34,117 @@ import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.forms.editor.IFormPage;
 import org.eclipse.ui.ide.IDE;
 
-public class SigilSourcePage extends TextEditor implements IFormPage {
-	private final String id;
-	private int index;
-	private SigilProjectEditorPart editor;
-	private boolean active;
-	private Control control;
-	
-	public SigilSourcePage(String id) {
-		this.id = id;
-	}
 
-	@Override
-	public void createPartControl(Composite parent) {
-		super.createPartControl(parent);
-		Control[] children = parent.getChildren();
-		control = children[children.length - 1];
-		getSourceViewer().addTextListener( new ITextListener() {
-			public void textChanged(TextEvent event) {
-				if ( editor != null ) {
-					editor.refreshAllPages();
-				}
-			}
-		});
-		//PlatformUI.getWorkbench().getHelpSystem().setHelp(fControl, IHelpContextIds.MANIFEST_SOURCE_PAGE);
-	}
+public class SigilSourcePage extends TextEditor implements IFormPage
+{
+    private final String id;
+    private int index;
+    private SigilProjectEditorPart editor;
+    private boolean active;
+    private Control control;
 
-	public void initialize(FormEditor editor) {
-		this.editor = (SigilProjectEditorPart) editor;
-	}
 
-	public FormEditor getEditor() {
-		return editor;
-	}
+    public SigilSourcePage( String id )
+    {
+        this.id = id;
+    }
 
-	public String getId() {
-		return id;
-	}
 
-	public int getIndex() {
-		return index;
-	}
-	
-	public void setIndex(int index) {
-		this.index = index;
-	}	
+    @Override
+    public void createPartControl( Composite parent )
+    {
+        super.createPartControl( parent );
+        Control[] children = parent.getChildren();
+        control = children[children.length - 1];
+        getSourceViewer().addTextListener( new ITextListener()
+        {
+            public void textChanged( TextEvent event )
+            {
+                if ( editor != null )
+                {
+                    editor.refreshAllPages();
+                }
+            }
+        } );
+        //PlatformUI.getWorkbench().getHelpSystem().setHelp(fControl, IHelpContextIds.MANIFEST_SOURCE_PAGE);
+    }
 
-	public boolean isActive() {
-		return active;
-	}
 
-	public void setActive(boolean active) {
-		this.active = active;
-	}
-	
-	public Control getPartControl() {
-		return control;
-	}
+    public void initialize( FormEditor editor )
+    {
+        this.editor = ( SigilProjectEditorPart ) editor;
+    }
 
-	public boolean selectReveal(Object object) {
-		if (object instanceof IMarker) {
-			IDE.gotoMarker(this, (IMarker) object);
-			return true;
-		}
-		return false;
-	}
 
-	// static impls
-	public boolean isEditor() {
-		return true;
-	}
+    public FormEditor getEditor()
+    {
+        return editor;
+    }
 
-	public boolean canLeaveThePage() {
-		return true;
-	}
 
-	public IManagedForm getManagedForm() {
-		// this is not a form
-		return null;
-	}
+    public String getId()
+    {
+        return id;
+    }
+
+
+    public int getIndex()
+    {
+        return index;
+    }
+
+
+    public void setIndex( int index )
+    {
+        this.index = index;
+    }
+
+
+    public boolean isActive()
+    {
+        return active;
+    }
+
+
+    public void setActive( boolean active )
+    {
+        this.active = active;
+    }
+
+
+    public Control getPartControl()
+    {
+        return control;
+    }
+
+
+    public boolean selectReveal( Object object )
+    {
+        if ( object instanceof IMarker )
+        {
+            IDE.gotoMarker( this, ( IMarker ) object );
+            return true;
+        }
+        return false;
+    }
+
+
+    // static impls
+    public boolean isEditor()
+    {
+        return true;
+    }
+
+
+    public boolean canLeaveThePage()
+    {
+        return true;
+    }
+
+
+    public IManagedForm getManagedForm()
+    {
+        // this is not a form
+        return null;
+    }
 }

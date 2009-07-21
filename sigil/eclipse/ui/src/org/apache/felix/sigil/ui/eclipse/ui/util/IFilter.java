@@ -19,6 +19,8 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.util;
 
-public interface IFilter<T> {
-	boolean select(T element);
+
+public interface IFilter<T>
+{
+    boolean select( T element );
 }

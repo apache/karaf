@@ -19,75 +19,99 @@
 
 package org.apache.felix.sigil.eclipse.install;
 
+
 import java.util.Arrays;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IPath;
 
-public class OSGiInstall implements IOSGiInstall {
 
-	private String id;
-	private IPath installLocation;
-	private String[] launchArgs;
-	private Map<String, String> properties;
-	private IPath varDirectory;
-	private IOSGiInstallType type;
-	
-	public IPath getVarDirectory() {
-		return varDirectory;
-	}
+public class OSGiInstall implements IOSGiInstall
+{
 
-	public void setVarDirectory(IPath varDirectory) {
-		this.varDirectory = varDirectory;
-	}
+    private String id;
+    private IPath installLocation;
+    private String[] launchArgs;
+    private Map<String, String> properties;
+    private IPath varDirectory;
+    private IOSGiInstallType type;
 
-	public OSGiInstall(String id) {
-		this.id = id;
-	}
 
-	public String getId() {
-		return id;
-	}
+    public IPath getVarDirectory()
+    {
+        return varDirectory;
+    }
 
-	public IPath getInstallLocation() {
-		return installLocation;
-	}
 
-	public void setInstallLocation(IPath installLocation) {
-		this.installLocation = installLocation;
-	}
+    public void setVarDirectory( IPath varDirectory )
+    {
+        this.varDirectory = varDirectory;
+    }
 
-	public String[] getLaunchArguments() {
-		return launchArgs;
-	}
-	
-	public void setLaunchArguments(String[] launchArgs) {
-		this.launchArgs = launchArgs;
-	}
 
-	public Map<String, String> getProperties() {
-		return properties;
-	}
-	
-	public void setProperties(Map<String,String> properties) {
-		this.properties = properties;
-	}
+    public OSGiInstall( String id )
+    {
+        this.id = id;
+    }
 
-	public String toString() {
-		return "OSGiInstall[\n" + 
-			"id=" + id + "\n" +
-			"type=" + type + "\n" +
-			"installLocation=" + installLocation + "\n" +
-			"launchArgs=" + Arrays.asList(launchArgs) + "\n" +
-			"properties=" + properties + "\n" +
-			"]";
-	}
 
-        public IOSGiInstallType getType() {
-                return type;
-        }
-        
-        public void setType(IOSGiInstallType type) {
-                this.type = type;
-        }
+    public String getId()
+    {
+        return id;
+    }
+
+
+    public IPath getInstallLocation()
+    {
+        return installLocation;
+    }
+
+
+    public void setInstallLocation( IPath installLocation )
+    {
+        this.installLocation = installLocation;
+    }
+
+
+    public String[] getLaunchArguments()
+    {
+        return launchArgs;
+    }
+
+
+    public void setLaunchArguments( String[] launchArgs )
+    {
+        this.launchArgs = launchArgs;
+    }
+
+
+    public Map<String, String> getProperties()
+    {
+        return properties;
+    }
+
+
+    public void setProperties( Map<String, String> properties )
+    {
+        this.properties = properties;
+    }
+
+
+    public String toString()
+    {
+        return "OSGiInstall[\n" + "id=" + id + "\n" + "type=" + type + "\n" + "installLocation=" + installLocation
+            + "\n" + "launchArgs=" + Arrays.asList( launchArgs ) + "\n" + "properties=" + properties + "\n" + "]";
+    }
+
+
+    public IOSGiInstallType getType()
+    {
+        return type;
+    }
+
+
+    public void setType( IOSGiInstallType type )
+    {
+        this.type = type;
+    }
 }

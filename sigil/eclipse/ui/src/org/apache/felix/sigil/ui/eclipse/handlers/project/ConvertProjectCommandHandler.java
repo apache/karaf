@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.handlers.project;
 
+
 import org.apache.felix.sigil.eclipse.SigilCore;
 import org.apache.felix.sigil.eclipse.model.project.ISigilProjectModel;
 import org.apache.felix.sigil.ui.eclipse.handlers.IResourceCommandHandler;
@@ -34,36 +35,43 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
-public class ConvertProjectCommandHandler implements IResourceCommandHandler {
 
-	public Object execute(IResource[] resources, ExecutionEvent event)
-			throws ExecutionException {
-		for ( IResource r : resources ) {
-			final IProject project = (IProject) r;
-			if ( project != null ) {
-				WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
-					@Override
-					protected void execute(IProgressMonitor monitor)
-							throws CoreException {
-						SigilCore.makeSigilProject(project, monitor);
-						IJavaProject java = JavaCore.create(project);
-						ISigilProjectModel sigil = SigilCore.create(project);
-						IClasspathEntry[] entries = java.getRawClasspath();
-						for (int i = 0; i < entries.length; i++) {
-							IClasspathEntry entry = entries[i];
-							if(entry.getEntryKind()==IClasspathEntry.CPE_SOURCE) {
-								String encodedClasspath = sigil.getJavaModel().encodeClasspathEntry( entry );
-								sigil.getBundle().addClasspathEntry(encodedClasspath);
-							}
-						}
-						sigil.save(monitor);
-					}				
-				};
-				SigilUI.runWorkspaceOperation(op, null);
-			}
-		}
-		
-		return null;
-	}
+public class ConvertProjectCommandHandler implements IResourceCommandHandler
+{
+
+    public Object execute( IResource[] resources, ExecutionEvent event ) throws ExecutionException
+    {
+        for ( IResource r : resources )
+        {
+            final IProject project = ( IProject ) r;
+            if ( project != null )
+            {
+                WorkspaceModifyOperation op = new WorkspaceModifyOperation()
+                {
+                    @Override
+                    protected void execute( IProgressMonitor monitor ) throws CoreException
+                    {
+                        SigilCore.makeSigilProject( project, monitor );
+                        IJavaProject java = JavaCore.create( project );
+                        ISigilProjectModel sigil = SigilCore.create( project );
+                        IClasspathEntry[] entries = java.getRawClasspath();
+                        for ( int i = 0; i < entries.length; i++ )
+                        {
+                            IClasspathEntry entry = entries[i];
+                            if ( entry.getEntryKind() == IClasspathEntry.CPE_SOURCE )
+                            {
+                                String encodedClasspath = sigil.getJavaModel().encodeClasspathEntry( entry );
+                                sigil.getBundle().addClasspathEntry( encodedClasspath );
+                            }
+                        }
+                        sigil.save( monitor );
+                    }
+                };
+                SigilUI.runWorkspaceOperation( op, null );
+            }
+        }
+
+        return null;
+    }
 
 }

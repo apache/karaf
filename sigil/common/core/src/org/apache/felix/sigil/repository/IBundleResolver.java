@@ -19,8 +19,12 @@
 
 package org.apache.felix.sigil.repository;
 
+
 import org.apache.felix.sigil.model.IModelElement;
 
-public interface IBundleResolver {
-	IResolution resolve(IModelElement element, ResolutionConfig config, IResolutionMonitor monitor) throws ResolutionException;
+
+public interface IBundleResolver
+{
+    IResolution resolve( IModelElement element, ResolutionConfig config, IResolutionMonitor monitor )
+        throws ResolutionException;
 }

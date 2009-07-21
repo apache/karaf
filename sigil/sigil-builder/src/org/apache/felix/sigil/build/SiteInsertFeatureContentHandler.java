@@ -18,6 +18,7 @@
  */
 package org.apache.felix.sigil.build;
 
+
 import java.util.List;
 
 import org.xml.sax.Attributes;
@@ -26,79 +27,106 @@ import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
-class SiteInsertFeatureContentHandler implements ContentHandler {
-	
-	private final ContentHandler output;
-	private final List<org.apache.felix.sigil.build.Feature> featureList;
 
-	public SiteInsertFeatureContentHandler(ContentHandler output,
-			List<Feature> featureList) {
-		this.output = output;
-		this.featureList = featureList;
-	}
+class SiteInsertFeatureContentHandler implements ContentHandler
+{
 
-	public void characters(char[] ch, int start, int length) throws SAXException {
-		output.characters(ch, start, length);
-	}
+    private final ContentHandler output;
+    private final List<org.apache.felix.sigil.build.Feature> featureList;
 
-	public void endDocument() throws SAXException {
-		output.endDocument();
-	}
 
-	public void endElement(String uri, String localName, String name) throws SAXException {
-		output.endElement(uri, localName, name);
-	}
+    public SiteInsertFeatureContentHandler( ContentHandler output, List<Feature> featureList )
+    {
+        this.output = output;
+        this.featureList = featureList;
+    }
 
-	public void endPrefixMapping(String prefix) throws SAXException {
-		output.endPrefixMapping(prefix);
-	}
 
-	public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
-		//output.ignorableWhitespace(ch, start, length);
-	}
+    public void characters( char[] ch, int start, int length ) throws SAXException
+    {
+        output.characters( ch, start, length );
+    }
 
-	public void processingInstruction(String target, String data) throws SAXException {
-		output.processingInstruction(target, data);
-	}
 
-	public void setDocumentLocator(Locator locator) {
-		output.setDocumentLocator(locator);
-	}
+    public void endDocument() throws SAXException
+    {
+        output.endDocument();
+    }
 
-	public void skippedEntity(String name) throws SAXException {
-		output.skippedEntity(name);
-	}
 
-	public void startDocument() throws SAXException {
-		output.startDocument();
-	}
+    public void endElement( String uri, String localName, String name ) throws SAXException
+    {
+        output.endElement( uri, localName, name );
+    }
 
-	public void startElement(String uri, String localName, String name, Attributes atts)
-			throws SAXException {
-		output.startElement(uri, localName, name, atts);
-		
-		if("site".equals(name)) {
-			for (Feature feature : featureList) {
-				AttributesImpl featureAtts = new AttributesImpl();
-				featureAtts.addAttribute("", "", "url", "CDATA", feature.url);
-				featureAtts.addAttribute("", "", "id", "CDATA", feature.id);
-				featureAtts.addAttribute("", "", "version", "CDATA", feature.version);
-				output.startElement("", "", "feature", featureAtts);
-				
-				for (int i = 0; i < feature.categories.length; i++) {
-					AttributesImpl categoryAtts = new AttributesImpl();
-					categoryAtts.addAttribute("", "", "name", "CDATA", feature.categories[i]);
-					output.startElement("", "", "category", categoryAtts);
-					output.endElement("", "", "category");
-				}
-				
-				output.endElement("", "", "feature");
-			}
-		}
-	}
 
-	public void startPrefixMapping(String prefix, String uri) throws SAXException {
-		output.startPrefixMapping(prefix, uri);
-	}
+    public void endPrefixMapping( String prefix ) throws SAXException
+    {
+        output.endPrefixMapping( prefix );
+    }
+
+
+    public void ignorableWhitespace( char[] ch, int start, int length ) throws SAXException
+    {
+        //output.ignorableWhitespace(ch, start, length);
+    }
+
+
+    public void processingInstruction( String target, String data ) throws SAXException
+    {
+        output.processingInstruction( target, data );
+    }
+
+
+    public void setDocumentLocator( Locator locator )
+    {
+        output.setDocumentLocator( locator );
+    }
+
+
+    public void skippedEntity( String name ) throws SAXException
+    {
+        output.skippedEntity( name );
+    }
+
+
+    public void startDocument() throws SAXException
+    {
+        output.startDocument();
+    }
+
+
+    public void startElement( String uri, String localName, String name, Attributes atts ) throws SAXException
+    {
+        output.startElement( uri, localName, name, atts );
+
+        if ( "site".equals( name ) )
+        {
+            for ( Feature feature : featureList )
+            {
+                AttributesImpl featureAtts = new AttributesImpl();
+                featureAtts.addAttribute( "", "", "url", "CDATA", feature.url );
+                featureAtts.addAttribute( "", "", "id", "CDATA", feature.id );
+                featureAtts.addAttribute( "", "", "version", "CDATA", feature.version );
+                output.startElement( "", "", "feature", featureAtts );
+
+                for ( int i = 0; i < feature.categories.length; i++ )
+                {
+                    AttributesImpl categoryAtts = new AttributesImpl();
+                    categoryAtts.addAttribute( "", "", "name", "CDATA", feature.categories[i] );
+                    output.startElement( "", "", "category", categoryAtts );
+                    output.endElement( "", "", "category" );
+                }
+
+                output.endElement( "", "", "feature" );
+            }
+        }
+    }
+
+
+    public void startPrefixMapping( String prefix, String uri ) throws SAXException
+    {
+        output.startPrefixMapping( prefix, uri );
+    }
 
 }

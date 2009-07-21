@@ -19,35 +19,43 @@
 
 package org.apache.felix.sigil.core.util;
 
+
 import java.util.ArrayList;
 
-public class QuoteUtil {
-	public static String[] split(String str) {
-		ArrayList<String> split = new ArrayList<String>();
-		boolean quote = false;
-		StringBuffer buf = new StringBuffer(str.length());
-		
-		for ( int i = 0; i < str.length(); i++ ) {
-			char c = str.charAt(i);
-			switch ( c ) {
-			case '"':
-				quote = !quote;
-				break;
-			case ',':
-				if ( !quote ) {
-					split.add( buf.toString().trim() );
-					buf.setLength(0);
-					break;
-				}
-				// else fall through on purpose
-			default:
-				buf.append( c );
-			}
-		}
-		
-		if ( buf.length() > 0 ) {
-			split.add( buf.toString().trim() );
-		}
-		return split.toArray( new String[split.size()] );
-	}	
+
+public class QuoteUtil
+{
+    public static String[] split( String str )
+    {
+        ArrayList<String> split = new ArrayList<String>();
+        boolean quote = false;
+        StringBuffer buf = new StringBuffer( str.length() );
+
+        for ( int i = 0; i < str.length(); i++ )
+        {
+            char c = str.charAt( i );
+            switch ( c )
+            {
+                case '"':
+                    quote = !quote;
+                    break;
+                case ',':
+                    if ( !quote )
+                    {
+                        split.add( buf.toString().trim() );
+                        buf.setLength( 0 );
+                        break;
+                    }
+                    // else fall through on purpose
+                default:
+                    buf.append( c );
+            }
+        }
+
+        if ( buf.length() > 0 )
+        {
+            split.add( buf.toString().trim() );
+        }
+        return split.toArray( new String[split.size()] );
+    }
 }

@@ -19,37 +19,46 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.util;
 
+
 import java.util.Collection;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 
-public abstract class DefaultTableProvider extends DefaultContentProvider implements IStructuredContentProvider {
 
-	/**
-	 * Utility method to convert the input element to an Object[].
-	 * 
-	 * @param inputElement
-	 * 
-	 * @return if inputElement is null -> empty array <br/>
-	 *         if inputElement is a {@link Collection} returns {@link Collection#toArray()}<br/>
-	 *         if inputElement is an Array class cast of inputElement to Object[]<br/>
-	 *  
-	 * @throws IllegalArgumentException if the element cannot be converted. 
-	 */
-	public Object[] toArray(Object inputElement) {
-		if ( inputElement == null ) {
-			return new Object[] {};
-		}
-		else if ( inputElement instanceof Collection ) {
-			Collection<?> col = (Collection<?>) inputElement;
-			return col.toArray();
-		}
-		else if ( inputElement.getClass().isArray() ) {
-			return (Object[]) inputElement;
-		}
-		else {
-			throw new IllegalArgumentException( "Invalid inputElement " + inputElement.getClass() );
-		}		
-	}
-	
+public abstract class DefaultTableProvider extends DefaultContentProvider implements IStructuredContentProvider
+{
+
+    /**
+     * Utility method to convert the input element to an Object[].
+     * 
+     * @param inputElement
+     * 
+     * @return if inputElement is null -> empty array <br/>
+     *         if inputElement is a {@link Collection} returns {@link Collection#toArray()}<br/>
+     *         if inputElement is an Array class cast of inputElement to Object[]<br/>
+     *  
+     * @throws IllegalArgumentException if the element cannot be converted. 
+     */
+    public Object[] toArray( Object inputElement )
+    {
+        if ( inputElement == null )
+        {
+            return new Object[]
+                {};
+        }
+        else if ( inputElement instanceof Collection )
+        {
+            Collection<?> col = ( Collection<?> ) inputElement;
+            return col.toArray();
+        }
+        else if ( inputElement.getClass().isArray() )
+        {
+            return ( Object[] ) inputElement;
+        }
+        else
+        {
+            throw new IllegalArgumentException( "Invalid inputElement " + inputElement.getClass() );
+        }
+    }
+
 }

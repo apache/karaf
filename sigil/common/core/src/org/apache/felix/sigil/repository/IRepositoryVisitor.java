@@ -19,14 +19,17 @@
 
 package org.apache.felix.sigil.repository;
 
+
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 
-public interface IRepositoryVisitor {
-	/**
-	 * Visit the next bundle in the repository. 
-	 * Return true if should continue visiting other bundles, false otherwise.
-	 * @param bundle
-	 * @return
-	 */
-	boolean visit(ISigilBundle bundle);
+
+public interface IRepositoryVisitor
+{
+    /**
+     * Visit the next bundle in the repository. 
+     * Return true if should continue visiting other bundles, false otherwise.
+     * @param bundle
+     * @return
+     */
+    boolean visit( ISigilBundle bundle );
 }

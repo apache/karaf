@@ -19,20 +19,28 @@
 
 package org.apache.felix.sigil.model.osgi;
 
+
 import org.apache.felix.sigil.model.IModelElement;
 import org.apache.felix.sigil.model.IRequirementModelElement;
 import org.apache.felix.sigil.model.common.VersionRange;
 
-public interface IRequiredBundle extends IModelElement, IRequirementModelElement, Comparable<IRequiredBundle> {
-	String getSymbolicName();
 
-	void setSymbolicName(String symbolicName);
+public interface IRequiredBundle extends IModelElement, IRequirementModelElement, Comparable<IRequiredBundle>
+{
+    String getSymbolicName();
 
-	VersionRange getVersions();
 
-	void setVersions(VersionRange versions);
+    void setSymbolicName( String symbolicName );
 
-	boolean isOptional();
-	
-	void setOptional(boolean optional);
+
+    VersionRange getVersions();
+
+
+    void setVersions( VersionRange versions );
+
+
+    boolean isOptional();
+
+
+    void setOptional( boolean optional );
 }

@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.model.eclipse;
 
+
 import java.io.IOException;
 import java.util.Set;
 
@@ -30,112 +31,148 @@ import org.apache.felix.sigil.model.osgi.IPackageExport;
 import org.apache.felix.sigil.model.osgi.IPackageImport;
 import org.apache.felix.sigil.model.osgi.IVersionedModelElement;
 
+
 /**
  * @author dave
  *
  */
-public interface ISigilBundle extends ICompoundModelElement, IVersionedModelElement {
-	void synchronize(IProgressMonitor monitor) throws IOException;
-	
-	boolean isSynchronized();	
-	
+public interface ISigilBundle extends ICompoundModelElement, IVersionedModelElement
+{
+    void synchronize( IProgressMonitor monitor ) throws IOException;
+
+
+    boolean isSynchronized();
+
+
     IBundleModelElement getBundleInfo();
-    
-	String getSymbolicName();
-    
-    void setBundleInfo(IBundleModelElement bundle);
-    
+
+
+    String getSymbolicName();
+
+
+    void setBundleInfo( IBundleModelElement bundle );
+
+
     IDownloadJar getDownloadJar();
-    
-    void setDownloadJar(IDownloadJar download);
-    
-    void addComposite(ISCAComposite composite);
-    
-    void removeComposite(ISCAComposite composite);
-    
+
+
+    void setDownloadJar( IDownloadJar download );
+
+
+    void addComposite( ISCAComposite composite );
+
+
+    void removeComposite( ISCAComposite composite );
+
+
     Set<ISCAComposite> getComposites();
 
-    void addLibraryPath(IPath path);
 
-    void removeLibraryPath(IPath path);
+    void addLibraryPath( IPath path );
+
+
+    void removeLibraryPath( IPath path );
+
 
     Set<IPath> getLibraryPaths();
 
-    void addSourcePath(IPath path);
 
-    void removeSourcePath(IPath path);
+    void addSourcePath( IPath path );
+
+
+    void removeSourcePath( IPath path );
+
 
     Set<IPath> getSourcePaths();
 
-	void clearSourcePaths();
 
-	Set<String> getClasspathEntrys();
-	
-	void addClasspathEntry(String encodedClasspath);
-	
-	void removeClasspathEntry(String encodedClasspath);
+    void clearSourcePaths();
 
-	IPath getLocation();
-	
-	void setLocation(IPath location);
 
-	IPath getSourcePathLocation();
-	
-	void setSourcePathLocation( IPath location );
+    Set<String> getClasspathEntrys();
 
-	IPath getSourceRootPath();
-	
-	void setSourceRootPath( IPath location );
 
-	void setLicencePathLocation(IPath cacheSourceLocation);
-	
-	IPath getLicencePathLocation();
-	
-	/**
-	 * get package names included in bundle.
-	 * Can contain wildcards e.g. org.foo.*
-	 */
-	Set<String> getPackages();
-	
-	/**
-	 * remove package name from those included in bundle.
-	 */
-	boolean removePackage(String pkg);
-	
-	/**
-	 * add package name to be included in bundle.
-	 */
-	void addPackage(String pkg);
-	
-	
-	/**
-	 * get package names included in download jar.
-	 * Can contain wildcards e.g. org.foo.*
-	 */
-	Set<String> getDownloadPackages();
-	
-	/**
-	 * remove package name from those included in download jar.
-	 */
-	boolean removeDownloadPackage(String pkg);
-	
-	/**
-	 * add package name to be included in download jar.
-	 */
-	void addDownloadPackage(String pkg);
+    void addClasspathEntry( String encodedClasspath );
 
-	/**
-	 * Attempt to find a package export that matches the given name or return null if none specified
-	 * 
-	 * @param elementName
-	 * @return
-	 */
-	IPackageExport findExport(String elementName);
 
-	/**
-	 * Attempt to find a package import that matches the given name or return null if none specified
-	 * @param packageName
-	 * @return
-	 */
-	IPackageImport findImport(String packageName);
+    void removeClasspathEntry( String encodedClasspath );
+
+
+    IPath getLocation();
+
+
+    void setLocation( IPath location );
+
+
+    IPath getSourcePathLocation();
+
+
+    void setSourcePathLocation( IPath location );
+
+
+    IPath getSourceRootPath();
+
+
+    void setSourceRootPath( IPath location );
+
+
+    void setLicencePathLocation( IPath cacheSourceLocation );
+
+
+    IPath getLicencePathLocation();
+
+
+    /**
+     * get package names included in bundle.
+     * Can contain wildcards e.g. org.foo.*
+     */
+    Set<String> getPackages();
+
+
+    /**
+     * remove package name from those included in bundle.
+     */
+    boolean removePackage( String pkg );
+
+
+    /**
+     * add package name to be included in bundle.
+     */
+    void addPackage( String pkg );
+
+
+    /**
+     * get package names included in download jar.
+     * Can contain wildcards e.g. org.foo.*
+     */
+    Set<String> getDownloadPackages();
+
+
+    /**
+     * remove package name from those included in download jar.
+     */
+    boolean removeDownloadPackage( String pkg );
+
+
+    /**
+     * add package name to be included in download jar.
+     */
+    void addDownloadPackage( String pkg );
+
+
+    /**
+     * Attempt to find a package export that matches the given name or return null if none specified
+     * 
+     * @param elementName
+     * @return
+     */
+    IPackageExport findExport( String elementName );
+
+
+    /**
+     * Attempt to find a package import that matches the given name or return null if none specified
+     * @param packageName
+     * @return
+     */
+    IPackageImport findImport( String packageName );
 }

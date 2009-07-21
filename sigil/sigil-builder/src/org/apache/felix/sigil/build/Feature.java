@@ -21,7 +21,9 @@
  */
 package org.apache.felix.sigil.build;
 
-class Feature {
-	String id, version, url;
-	String[] categories;
+
+class Feature
+{
+    String id, version, url;
+    String[] categories;
 }

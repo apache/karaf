@@ -19,6 +19,8 @@
 
 package org.apache.felix.sigil.model;
 
-public interface IRequirementModelElement {
-	boolean accepts(IModelElement provider);
+
+public interface IRequirementModelElement
+{
+    boolean accepts( IModelElement provider );
 }

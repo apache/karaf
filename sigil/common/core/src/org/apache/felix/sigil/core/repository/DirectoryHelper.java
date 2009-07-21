@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.core.repository;
 
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -34,61 +35,85 @@ import org.apache.felix.sigil.repository.AbstractBundleRepository;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
-public class DirectoryHelper {
-	public static void scanBundles(AbstractBundleRepository repository, List<ISigilBundle> bundles, IPath path, IPath source, boolean recursive) {
-		File dir = path.toFile();
-		
-		if ( dir.exists() ) {
-			for ( File f : dir.listFiles() ){
-				if ( f.isDirectory() ) {
-					if ( recursive ) {
-						scanBundles( repository, bundles, new Path( f.getAbsolutePath() ), source, recursive );
-					}
-				}
-				else if ( f.isFile() && f.getName().endsWith( ".jar" )){
-					JarFile jar = null;
-					try {
-						jar = new JarFile(f);
-						ISigilBundle bundle = buildBundle(repository, jar.getManifest(), f );
-						if ( bundle != null ) {
-							bundle.setSourcePathLocation( source );
-							bundle.setSourceRootPath( new Path( "src" ) );
-							bundles.add( bundle );
-						}
-					} catch (IOException e) {
-						BldCore.error( "Failed to read jar file " + f, e );
-					} catch (ModelElementFactoryException e) {
-						BldCore.error( "Failed to build bundle " + f , e );
-					} catch (RuntimeException e) {
-						BldCore.error( "Failed to build bundle " + f , e );
-					}
-					finally {
-						if ( jar != null ) {
-							try {
-								jar.close();
-							} catch (IOException e) {
-								BldCore.error( "Failed to close jar file", e );
-							}
-						}
-					}
-				}
-			}
-		}
-	}
 
-	private static ISigilBundle buildBundle(
-			AbstractBundleRepository repository, Manifest manifest, File f) {
-		IBundleModelElement info = repository.buildBundleModelElement( manifest );
+public class DirectoryHelper
+{
+    public static void scanBundles( AbstractBundleRepository repository, List<ISigilBundle> bundles, IPath path,
+        IPath source, boolean recursive )
+    {
+        File dir = path.toFile();
 
-		ISigilBundle bundle = null;
+        if ( dir.exists() )
+        {
+            for ( File f : dir.listFiles() )
+            {
+                if ( f.isDirectory() )
+                {
+                    if ( recursive )
+                    {
+                        scanBundles( repository, bundles, new Path( f.getAbsolutePath() ), source, recursive );
+                    }
+                }
+                else if ( f.isFile() && f.getName().endsWith( ".jar" ) )
+                {
+                    JarFile jar = null;
+                    try
+                    {
+                        jar = new JarFile( f );
+                        ISigilBundle bundle = buildBundle( repository, jar.getManifest(), f );
+                        if ( bundle != null )
+                        {
+                            bundle.setSourcePathLocation( source );
+                            bundle.setSourceRootPath( new Path( "src" ) );
+                            bundles.add( bundle );
+                        }
+                    }
+                    catch ( IOException e )
+                    {
+                        BldCore.error( "Failed to read jar file " + f, e );
+                    }
+                    catch ( ModelElementFactoryException e )
+                    {
+                        BldCore.error( "Failed to build bundle " + f, e );
+                    }
+                    catch ( RuntimeException e )
+                    {
+                        BldCore.error( "Failed to build bundle " + f, e );
+                    }
+                    finally
+                    {
+                        if ( jar != null )
+                        {
+                            try
+                            {
+                                jar.close();
+                            }
+                            catch ( IOException e )
+                            {
+                                BldCore.error( "Failed to close jar file", e );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-		if ( info != null ) {
-			bundle = ModelElementFactory.getInstance().newModelElement( ISigilBundle.class );
-			bundle.addChild(info);
-			bundle.setLocation( new Path( f.getAbsolutePath() ) );
-		}
 
-		return bundle;
-	}
+    private static ISigilBundle buildBundle( AbstractBundleRepository repository, Manifest manifest, File f )
+    {
+        IBundleModelElement info = repository.buildBundleModelElement( manifest );
+
+        ISigilBundle bundle = null;
+
+        if ( info != null )
+        {
+            bundle = ModelElementFactory.getInstance().newModelElement( ISigilBundle.class );
+            bundle.addChild( info );
+            bundle.setLocation( new Path( f.getAbsolutePath() ) );
+        }
+
+        return bundle;
+    }
 
 }

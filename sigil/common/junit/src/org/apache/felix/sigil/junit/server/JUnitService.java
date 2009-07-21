@@ -19,16 +19,21 @@
 
 package org.apache.felix.sigil.junit.server;
 
+
 import java.util.Set;
 
 import org.osgi.framework.BundleContext;
 
 import junit.framework.TestSuite;
 
-public interface JUnitService {
-	Set<String> getTests();
-	
-	TestSuite createTest(String test);
-	
-	TestSuite createTest(String test, BundleContext ctx);
+
+public interface JUnitService
+{
+    Set<String> getTests();
+
+
+    TestSuite createTest( String test );
+
+
+    TestSuite createTest( String test, BundleContext ctx );
 }

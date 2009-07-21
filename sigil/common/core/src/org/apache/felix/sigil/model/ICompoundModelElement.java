@@ -19,20 +19,29 @@
 
 package org.apache.felix.sigil.model;
 
+
 import java.util.Set;
 
-public interface ICompoundModelElement extends IModelElement {
-    boolean addChild(IModelElement children) throws InvalidModelException;
-    
-    boolean removeChild(IModelElement children);
-    
+
+public interface ICompoundModelElement extends IModelElement
+{
+    boolean addChild( IModelElement children ) throws InvalidModelException;
+
+
+    boolean removeChild( IModelElement children );
+
+
     IModelElement[] children();
-    
-    void visit(IModelWalker walker);
-    
+
+
+    void visit( IModelWalker walker );
+
+
     <T extends IModelElement> T[] childrenOfType( Class<T> type );
-    
+
+
     Set<Class<? extends IModelElement>> getRequiredChildren();
-    
-    Set<Class<? extends IModelElement>> getOptionalChildren();    
+
+
+    Set<Class<? extends IModelElement>> getOptionalChildren();
 }

@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ivy;
 
+
 import java.util.Map;
 import java.util.Properties;
 
@@ -30,59 +31,85 @@ import org.apache.felix.sigil.repository.IResolutionMonitor;
 import org.apache.felix.sigil.repository.ResolutionConfig;
 import org.apache.felix.sigil.repository.ResolutionException;
 
-public class BldResolver implements IBldResolver {
-	private Map<String, Properties> repos;
-	private BldRepositoryManager manager;
-	
-	static {
-		try {
-			BldCore.init();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	};
-	
-	public BldResolver(Map<String,Properties> repos) {
-		this.repos = repos;
-	}
 
-	public IResolution resolve(IModelElement element, boolean transitive) {
-		int options = ResolutionConfig.IGNORE_ERRORS | ResolutionConfig.INCLUDE_OPTIONAL;
-		if (transitive) options |= ResolutionConfig.INCLUDE_DEPENDENTS;
-		
-		ResolutionConfig config = new ResolutionConfig(options);
-		try {
-			return resolve(element, config);
-		} catch (ResolutionException e) {
-			throw new IllegalStateException("eek! this shouldn't happen when ignoreErrors=true", e);
-		}
-	}
-		
-	public IResolution resolveOrFail(IModelElement element, boolean transitive) throws ResolutionException {
-		int options = 0;
-		if ( transitive ) options |= ResolutionConfig.INCLUDE_DEPENDENTS;
-		ResolutionConfig config = new ResolutionConfig(options);
-		return resolve(element, config);
-	}
-	
-	private IResolution resolve(IModelElement element, ResolutionConfig config) throws ResolutionException {
-		if (manager == null) {
-			manager = new BldRepositoryManager(repos);
-		}
+public class BldResolver implements IBldResolver
+{
+    private Map<String, Properties> repos;
+    private BldRepositoryManager manager;
 
-		IResolutionMonitor nullMonitor = new IResolutionMonitor() {
-			public void endResolution(IModelElement requirement, ISigilBundle sigilBundle) {
-			}
+    static
+    {
+        try
+        {
+            BldCore.init();
+        }
+        catch ( Exception e )
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    };
 
-			public boolean isCanceled() {
-				return false;
-			}
 
-			public void startResolution(IModelElement requirement) {
-			}
-		};
+    public BldResolver( Map<String, Properties> repos )
+    {
+        this.repos = repos;
+    }
 
-		return manager.getBundleResolver().resolve(element, config, nullMonitor);
-	}
+
+    public IResolution resolve( IModelElement element, boolean transitive )
+    {
+        int options = ResolutionConfig.IGNORE_ERRORS | ResolutionConfig.INCLUDE_OPTIONAL;
+        if ( transitive )
+            options |= ResolutionConfig.INCLUDE_DEPENDENTS;
+
+        ResolutionConfig config = new ResolutionConfig( options );
+        try
+        {
+            return resolve( element, config );
+        }
+        catch ( ResolutionException e )
+        {
+            throw new IllegalStateException( "eek! this shouldn't happen when ignoreErrors=true", e );
+        }
+    }
+
+
+    public IResolution resolveOrFail( IModelElement element, boolean transitive ) throws ResolutionException
+    {
+        int options = 0;
+        if ( transitive )
+            options |= ResolutionConfig.INCLUDE_DEPENDENTS;
+        ResolutionConfig config = new ResolutionConfig( options );
+        return resolve( element, config );
+    }
+
+
+    private IResolution resolve( IModelElement element, ResolutionConfig config ) throws ResolutionException
+    {
+        if ( manager == null )
+        {
+            manager = new BldRepositoryManager( repos );
+        }
+
+        IResolutionMonitor nullMonitor = new IResolutionMonitor()
+        {
+            public void endResolution( IModelElement requirement, ISigilBundle sigilBundle )
+            {
+            }
+
+
+            public boolean isCanceled()
+            {
+                return false;
+            }
+
+
+            public void startResolution( IModelElement requirement )
+            {
+            }
+        };
+
+        return manager.getBundleResolver().resolve( element, config, nullMonitor );
+    }
 }

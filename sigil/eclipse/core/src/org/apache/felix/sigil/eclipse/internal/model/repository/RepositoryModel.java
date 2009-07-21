@@ -19,63 +19,86 @@
 
 package org.apache.felix.sigil.eclipse.internal.model.repository;
 
+
 import org.apache.felix.sigil.eclipse.model.repository.IRepositoryModel;
 import org.apache.felix.sigil.eclipse.model.repository.IRepositoryType;
 import org.eclipse.jface.preference.PreferenceStore;
 
-public class RepositoryModel implements IRepositoryModel {
-	private String id;
-	
-	private String name;
-	
-	private IRepositoryType type;
-	
-	private PreferenceStore preferences;
-		
-	public RepositoryModel(String id, String name, IRepositoryType type, PreferenceStore preferences) {
-		this.id = id;
-		this.name = name;
-		this.type = type;
-		this.preferences = preferences;
-	}
-	
-	public PreferenceStore getPreferences() {
-		return preferences;
-	}
 
-	public IRepositoryType getType() {
-		return type;
-	}
+public class RepositoryModel implements IRepositoryModel
+{
+    private String id;
 
-	public String getId() {
-		return id;
-	}
+    private String name;
 
-	public String getName() {
-		return name;
-	}
-	
-	public void setName(String name) {
-		this.name = name;
-	}
+    private IRepositoryType type;
 
-	@Override
-	public boolean equals(Object obj) {
-		try {
-			RepositoryModel e = (RepositoryModel) obj;
-			return id.equals(e.id);
-		}
-		catch (ClassCastException e) {
-			return false;
-		}
-	}
+    private PreferenceStore preferences;
 
-	@Override
-	public int hashCode() {
-		return id.hashCode();
-	}
-	
-	public String toString() {
-		return type.getId() + ":" + id + ":" + name;
-	}
+
+    public RepositoryModel( String id, String name, IRepositoryType type, PreferenceStore preferences )
+    {
+        this.id = id;
+        this.name = name;
+        this.type = type;
+        this.preferences = preferences;
+    }
+
+
+    public PreferenceStore getPreferences()
+    {
+        return preferences;
+    }
+
+
+    public IRepositoryType getType()
+    {
+        return type;
+    }
+
+
+    public String getId()
+    {
+        return id;
+    }
+
+
+    public String getName()
+    {
+        return name;
+    }
+
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
+
+    @Override
+    public boolean equals( Object obj )
+    {
+        try
+        {
+            RepositoryModel e = ( RepositoryModel ) obj;
+            return id.equals( e.id );
+        }
+        catch ( ClassCastException e )
+        {
+            return false;
+        }
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        return id.hashCode();
+    }
+
+
+    public String toString()
+    {
+        return type.getId() + ":" + id + ":" + name;
+    }
 }

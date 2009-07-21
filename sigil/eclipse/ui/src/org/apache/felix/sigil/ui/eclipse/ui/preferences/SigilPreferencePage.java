@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.preferences;
 
+
 import org.apache.felix.sigil.eclipse.SigilCore;
 import org.apache.felix.sigil.eclipse.preferences.PromptablePreference;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
@@ -27,33 +28,42 @@ import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
-public class SigilPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
-	@Override
-	protected void createFieldEditors() {
-		RadioGroupFieldEditor impExpField = new RadioGroupFieldEditor(SigilCore.PREFERENCES_ADD_IMPORT_FOR_EXPORT, "Add Imports for New Exports", 1, new String[][] {
-				new String[] { "Always (Recommended)", PromptablePreference.Always.toString() },
-				new String[] { "Prompt", PromptablePreference.Prompt.toString() },
-				new String[] { "Never", PromptablePreference.Never.toString() }
-		}, getFieldEditorParent(), true);
-		
-		addField(impExpField);
-		
-		RadioGroupFieldEditor rebuildExpField = new RadioGroupFieldEditor(SigilCore.PREFERENCES_REBUILD_PROJECTS, "Rebuild Projects On Install Change", 1, new String[][] {
-				new String[] { "Always (Recommended)", PromptablePreference.Always.toString() },
-				new String[] { "Prompt", PromptablePreference.Prompt.toString() },
-				new String[] { "Never", PromptablePreference.Never.toString() }
-		}, getFieldEditorParent(), true);
-		
-		addField(rebuildExpField);		
-	}
-	
-	@Override
-	protected IPreferenceStore doGetPreferenceStore() {
-		return SigilCore.getDefault().getPreferenceStore();
-	}
+public class SigilPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage
+{
 
-	public void init(IWorkbench workbench) {
-	}
+    @Override
+    protected void createFieldEditors()
+    {
+        RadioGroupFieldEditor impExpField = new RadioGroupFieldEditor( SigilCore.PREFERENCES_ADD_IMPORT_FOR_EXPORT,
+            "Add Imports for New Exports", 1, new String[][]
+                { new String[]
+                    { "Always (Recommended)", PromptablePreference.Always.toString() }, new String[]
+                    { "Prompt", PromptablePreference.Prompt.toString() }, new String[]
+                    { "Never", PromptablePreference.Never.toString() } }, getFieldEditorParent(), true );
+
+        addField( impExpField );
+
+        RadioGroupFieldEditor rebuildExpField = new RadioGroupFieldEditor( SigilCore.PREFERENCES_REBUILD_PROJECTS,
+            "Rebuild Projects On Install Change", 1, new String[][]
+                { new String[]
+                    { "Always (Recommended)", PromptablePreference.Always.toString() }, new String[]
+                    { "Prompt", PromptablePreference.Prompt.toString() }, new String[]
+                    { "Never", PromptablePreference.Never.toString() } }, getFieldEditorParent(), true );
+
+        addField( rebuildExpField );
+    }
+
+
+    @Override
+    protected IPreferenceStore doGetPreferenceStore()
+    {
+        return SigilCore.getDefault().getPreferenceStore();
+    }
+
+
+    public void init( IWorkbench workbench )
+    {
+    }
 
 }

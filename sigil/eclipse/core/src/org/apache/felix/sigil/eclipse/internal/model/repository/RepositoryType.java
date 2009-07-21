@@ -19,57 +19,77 @@
 
 package org.apache.felix.sigil.eclipse.internal.model.repository;
 
+
 import org.apache.felix.sigil.eclipse.model.repository.IRepositoryType;
 import org.eclipse.swt.graphics.Image;
 
-public class RepositoryType implements IRepositoryType {
-	private String type;
-	private String id;
-	private Image icon;
-	private boolean dynamic;
-	
-	public RepositoryType(String id, String type, boolean dynamic,
-			Image icon) {
-		this.id = id;
-		this.type = type;
-		this.dynamic = dynamic;
-		this.icon = icon;
-	}
 
-	public String getType() {
-		return type;
-	}
+public class RepositoryType implements IRepositoryType
+{
+    private String type;
+    private String id;
+    private Image icon;
+    private boolean dynamic;
 
-	public String getId() {
-		return id;
-	}
 
-	public Image getIcon() {
-		return icon;
-	}
+    public RepositoryType( String id, String type, boolean dynamic, Image icon )
+    {
+        this.id = id;
+        this.type = type;
+        this.dynamic = dynamic;
+        this.icon = icon;
+    }
 
-	public boolean isDynamic() {
-		return dynamic;
-	}
 
-	@Override
-	public boolean equals(Object obj) {
-		try {
-			RepositoryType t = (RepositoryType) obj;
-			return t.id.equals( id );
-		}
-		catch (ClassCastException e) {
-			return false;
-		}
-	}
+    public String getType()
+    {
+        return type;
+    }
 
-	@Override
-	public int hashCode() {
-		return id.hashCode();
-	}
 
-	@Override
-	public String toString() {
-		return type;
-	}
+    public String getId()
+    {
+        return id;
+    }
+
+
+    public Image getIcon()
+    {
+        return icon;
+    }
+
+
+    public boolean isDynamic()
+    {
+        return dynamic;
+    }
+
+
+    @Override
+    public boolean equals( Object obj )
+    {
+        try
+        {
+            RepositoryType t = ( RepositoryType ) obj;
+            return t.id.equals( id );
+        }
+        catch ( ClassCastException e )
+        {
+            return false;
+        }
+    }
+
+
+    @Override
+    public int hashCode()
+    {
+        return id.hashCode();
+    }
+
+
+    @Override
+    public String toString()
+    {
+        return type;
+    }
 }

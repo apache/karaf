@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.eclipse.internal.repository.eclipse;
 
+
 import java.util.Properties;
 
 import org.apache.felix.sigil.repository.IBundleRepository;
@@ -26,18 +27,25 @@ import org.apache.felix.sigil.repository.IRepositoryProvider;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-public class WorkspaceRepositoryProvider implements IRepositoryProvider {
-	private static WorkspaceRepository repository;
-	
-	public static WorkspaceRepository getWorkspaceRepository() {
-		return repository;	
-	}
-	
-	public IBundleRepository createRepository(String id, Properties preferences) {
-		if ( repository == null ) {
-			repository = new WorkspaceRepository(id);
-			ResourcesPlugin.getWorkspace().addResourceChangeListener(repository, IResourceChangeEvent.POST_CHANGE);
-		}
-		return repository;
-	}
+
+public class WorkspaceRepositoryProvider implements IRepositoryProvider
+{
+    private static WorkspaceRepository repository;
+
+
+    public static WorkspaceRepository getWorkspaceRepository()
+    {
+        return repository;
+    }
+
+
+    public IBundleRepository createRepository( String id, Properties preferences )
+    {
+        if ( repository == null )
+        {
+            repository = new WorkspaceRepository( id );
+            ResourcesPlugin.getWorkspace().addResourceChangeListener( repository, IResourceChangeEvent.POST_CHANGE );
+        }
+        return repository;
+    }
 }

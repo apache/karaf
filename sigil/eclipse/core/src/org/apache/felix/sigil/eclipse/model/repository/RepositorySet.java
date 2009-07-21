@@ -19,45 +19,62 @@
 
 package org.apache.felix.sigil.eclipse.model.repository;
 
+
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class RepositorySet implements IRepositorySet {
 
-	private static final IRepositoryModel[] EMPTY = new IRepositoryModel[0];
-	
-	private IRepositoryModel[] reps;
+public class RepositorySet implements IRepositorySet
+{
 
-	public RepositorySet() {
-		this( EMPTY );
-	}
-	
-	public RepositorySet(Collection<IRepositoryModel> reps) {
-		this( reps.toArray( new IRepositoryModel[reps.size()] ) );
-	}
+    private static final IRepositoryModel[] EMPTY = new IRepositoryModel[0];
 
-	public RepositorySet(IRepositoryModel[] repositories) {
-		this.reps = repositories;
-	}
-	
-	public void setRepository(IRepositoryModel id, int position) {
-		ArrayList<IRepositoryModel> tmp = new ArrayList<IRepositoryModel>(reps.length + 1);
-		tmp.remove(id);
-		tmp.add(position, id);
-		reps = tmp.toArray( new IRepositoryModel[tmp.size()] );
-	}
+    private IRepositoryModel[] reps;
 
-	public IRepositoryModel[] getRepositories() {
-		return reps;
-	}
 
-	public void removeRepository(IRepositoryModel id) {
-		ArrayList<IRepositoryModel> tmp = new ArrayList<IRepositoryModel>(reps.length + 1);
-		tmp.remove(id);
-		reps = tmp.toArray( new IRepositoryModel[tmp.size()] );
-	}
+    public RepositorySet()
+    {
+        this( EMPTY );
+    }
 
-	public void setRepositories(IRepositoryModel[] repositories) {
-		reps = repositories == null ? EMPTY : repositories;
-	}
+
+    public RepositorySet( Collection<IRepositoryModel> reps )
+    {
+        this( reps.toArray( new IRepositoryModel[reps.size()] ) );
+    }
+
+
+    public RepositorySet( IRepositoryModel[] repositories )
+    {
+        this.reps = repositories;
+    }
+
+
+    public void setRepository( IRepositoryModel id, int position )
+    {
+        ArrayList<IRepositoryModel> tmp = new ArrayList<IRepositoryModel>( reps.length + 1 );
+        tmp.remove( id );
+        tmp.add( position, id );
+        reps = tmp.toArray( new IRepositoryModel[tmp.size()] );
+    }
+
+
+    public IRepositoryModel[] getRepositories()
+    {
+        return reps;
+    }
+
+
+    public void removeRepository( IRepositoryModel id )
+    {
+        ArrayList<IRepositoryModel> tmp = new ArrayList<IRepositoryModel>( reps.length + 1 );
+        tmp.remove( id );
+        reps = tmp.toArray( new IRepositoryModel[tmp.size()] );
+    }
+
+
+    public void setRepositories( IRepositoryModel[] repositories )
+    {
+        reps = repositories == null ? EMPTY : repositories;
+    }
 }

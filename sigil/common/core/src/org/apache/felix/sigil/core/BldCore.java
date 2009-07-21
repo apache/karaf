@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.core;
 
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -46,53 +47,64 @@ import org.apache.felix.sigil.model.osgi.IRequiredBundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-public class BldCore implements BundleActivator {
-	private static LicenseManager licenceManager = new LicenseManager();
-	
-	private static final Logger log = Logger.getLogger(BldCore.class.getName());
 
-	public static void error(String string, Throwable e) {
-		// TODO 
-		log.log( Level.WARNING, string, e );
-	}
+public class BldCore implements BundleActivator
+{
+    private static LicenseManager licenceManager = new LicenseManager();
 
-	public static void error(String string) {
-		log.log( Level.WARNING, string );
-	}
+    private static final Logger log = Logger.getLogger( BldCore.class.getName() );
 
-	public static ILicenseManager getLicenseManager() {
-		return licenceManager;
-	}
 
-	public void start(BundleContext context) throws Exception {
-		init();
-	}
-	
-	public static void init() throws Exception {
-		String uri = "http://sigil.codecauldron.org/xml/sigil-namespace";
-		ModelElementFactory.getInstance().register(ISigilBundle.class,
-				SigilBundle.class, "bundle", "sigil", uri);
-		ModelElementFactory.getInstance().register(IDownloadJar.class,
-				DownloadJar.class, "download", "sigil", uri);
-		ModelElementFactory.getInstance().register(ILibrary.class,
-				Library.class, "library", "sigil", uri);
-		ModelElementFactory.getInstance().register(ILibraryImport.class,
-				LibraryImport.class, "library-import", "sigil", uri);
-		
-		// osgi elements
-		ModelElementFactory.getInstance().register(IBundleModelElement.class,
-				BundleModelElement.class, "bundle", null, null);
-		ModelElementFactory.getInstance().register(IPackageExport.class,
-				PackageExport.class, "package.export", null, null);
-		ModelElementFactory.getInstance().register(IPackageImport.class,
-				PackageImport.class, "package.import", null, null);
-		ModelElementFactory.getInstance().register(IRequiredBundle.class,
-				RequiredBundle.class, "required.bundle", null, null);
-	}
+    public static void error( String string, Throwable e )
+    {
+        // TODO 
+        log.log( Level.WARNING, string, e );
+    }
 
-	public void stop(BundleContext context) throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
+
+    public static void error( String string )
+    {
+        log.log( Level.WARNING, string );
+    }
+
+
+    public static ILicenseManager getLicenseManager()
+    {
+        return licenceManager;
+    }
+
+
+    public void start( BundleContext context ) throws Exception
+    {
+        init();
+    }
+
+
+    public static void init() throws Exception
+    {
+        String uri = "http://sigil.codecauldron.org/xml/sigil-namespace";
+        ModelElementFactory.getInstance().register( ISigilBundle.class, SigilBundle.class, "bundle", "sigil", uri );
+        ModelElementFactory.getInstance().register( IDownloadJar.class, DownloadJar.class, "download", "sigil", uri );
+        ModelElementFactory.getInstance().register( ILibrary.class, Library.class, "library", "sigil", uri );
+        ModelElementFactory.getInstance().register( ILibraryImport.class, LibraryImport.class, "library-import",
+            "sigil", uri );
+
+        // osgi elements
+        ModelElementFactory.getInstance().register( IBundleModelElement.class, BundleModelElement.class, "bundle",
+            null, null );
+        ModelElementFactory.getInstance().register( IPackageExport.class, PackageExport.class, "package.export", null,
+            null );
+        ModelElementFactory.getInstance().register( IPackageImport.class, PackageImport.class, "package.import", null,
+            null );
+        ModelElementFactory.getInstance().register( IRequiredBundle.class, RequiredBundle.class, "required.bundle",
+            null, null );
+    }
+
+
+    public void stop( BundleContext context ) throws Exception
+    {
+        // TODO Auto-generated method stub
+
+    }
 
 }

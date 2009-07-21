@@ -19,45 +19,63 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.editors.project;
 
+
 import org.apache.felix.sigil.ui.eclipse.ui.util.DefaultTreeContentProvider;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugPlugin;
 
-public class ContainerTreeProvider extends DefaultTreeContentProvider {
 
-	private static final Object[] EMPTY = new Object[] {};
-	
-	public Object[] getChildren(Object parentElement) {
-		if ( parentElement instanceof IContainer ) {
-			IContainer f = (IContainer) parentElement;
-			try {
-				return f.members();
-			} catch (CoreException e) {
-				DebugPlugin.log( e.getStatus() );
-			}
-		}
-		return EMPTY;	
-	}
+public class ContainerTreeProvider extends DefaultTreeContentProvider
+{
 
-	public Object getParent(Object element) {
-		IResource r = (IResource) element;
-		return r.getParent();
-	}
+    private static final Object[] EMPTY = new Object[]
+        {};
 
-	public boolean hasChildren(Object element) {
-		if ( element instanceof IContainer ) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
 
-	public Object[] getElements(Object inputElement) {
-		IContainer container = (IContainer) inputElement;
-		return getChildren(container);
-	}
+    public Object[] getChildren( Object parentElement )
+    {
+        if ( parentElement instanceof IContainer )
+        {
+            IContainer f = ( IContainer ) parentElement;
+            try
+            {
+                return f.members();
+            }
+            catch ( CoreException e )
+            {
+                DebugPlugin.log( e.getStatus() );
+            }
+        }
+        return EMPTY;
+    }
+
+
+    public Object getParent( Object element )
+    {
+        IResource r = ( IResource ) element;
+        return r.getParent();
+    }
+
+
+    public boolean hasChildren( Object element )
+    {
+        if ( element instanceof IContainer )
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+
+    public Object[] getElements( Object inputElement )
+    {
+        IContainer container = ( IContainer ) inputElement;
+        return getChildren( container );
+    }
 
 }

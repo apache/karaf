@@ -19,8 +19,11 @@
 
 package org.apache.felix.sigil.repository;
 
+
 import java.util.Properties;
 
-public interface IRepositoryProvider {
-    IBundleRepository createRepository(String id, Properties properties) throws RepositoryException;
+
+public interface IRepositoryProvider
+{
+    IBundleRepository createRepository( String id, Properties properties ) throws RepositoryException;
 }

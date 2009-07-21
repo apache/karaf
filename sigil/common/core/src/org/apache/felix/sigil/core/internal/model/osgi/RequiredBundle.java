@@ -19,115 +19,156 @@
 
 package org.apache.felix.sigil.core.internal.model.osgi;
 
+
 import org.apache.felix.sigil.model.AbstractModelElement;
 import org.apache.felix.sigil.model.IModelElement;
 import org.apache.felix.sigil.model.common.VersionRange;
 import org.apache.felix.sigil.model.osgi.IBundleModelElement;
 import org.apache.felix.sigil.model.osgi.IRequiredBundle;
 
-public class RequiredBundle extends AbstractModelElement implements IRequiredBundle {
-	private static final long serialVersionUID = 1L;
-	
-	private String symbolicName;
+
+public class RequiredBundle extends AbstractModelElement implements IRequiredBundle
+{
+    private static final long serialVersionUID = 1L;
+
+    private String symbolicName;
     private VersionRange versions = VersionRange.ANY_VERSION;
     private boolean optional;
-    
-	public RequiredBundle() {
-		super("OSGi Bundle Requirement");
-	}
 
-    public String getSymbolicName() {
+
+    public RequiredBundle()
+    {
+        super( "OSGi Bundle Requirement" );
+    }
+
+
+    public String getSymbolicName()
+    {
         return symbolicName;
     }
 
-    public void setSymbolicName(String symbolicName) {
+
+    public void setSymbolicName( String symbolicName )
+    {
         this.symbolicName = symbolicName == null ? null : symbolicName.intern();
     }
 
-    public VersionRange getVersions() {
+
+    public VersionRange getVersions()
+    {
         return versions;
     }
 
-    public void setVersions(VersionRange versions) {
+
+    public void setVersions( VersionRange versions )
+    {
         this.versions = versions == null ? VersionRange.ANY_VERSION : versions;
     }
 
-	public boolean isOptional() {
-		return optional;
-	}
 
-	public void setOptional(boolean optional) {
-		this.optional = optional;
-	}
-	
-	@Override
-	public String toString() {
-		return "RequiredBundle[" + symbolicName + ":" + versions + ":" + (optional ? "optional" : "mandatory") + "]";
-	}
+    public boolean isOptional()
+    {
+        return optional;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-        if (this == obj)
+
+    public void setOptional( boolean optional )
+    {
+        this.optional = optional;
+    }
+
+
+    @Override
+    public String toString()
+    {
+        return "RequiredBundle[" + symbolicName + ":" + versions + ":" + ( optional ? "optional" : "mandatory" ) + "]";
+    }
+
+
+    @Override
+    public boolean equals( Object obj )
+    {
+        if ( this == obj )
             return true;
-        if (obj == null)
+        if ( obj == null )
             return false;
-        
-		if ( obj instanceof RequiredBundle ) {
-			RequiredBundle rb = (RequiredBundle) obj;
-			return symbolicName.equals( rb.symbolicName ) && versions.equals( rb.versions ) && optional == rb.optional;
-		}
-		else {
-			return false;
-		}
-	}
 
-	@Override
-	public int hashCode() {
-		int hc = symbolicName.hashCode() * versions.hashCode();
-		
-		if ( optional ) {
-			hc *= -1;
-		}
-		
-		return hc;
-	}
+        if ( obj instanceof RequiredBundle )
+        {
+            RequiredBundle rb = ( RequiredBundle ) obj;
+            return symbolicName.equals( rb.symbolicName ) && versions.equals( rb.versions ) && optional == rb.optional;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
-	public boolean accepts(IModelElement provider) {
-		if ( provider instanceof IBundleModelElement ) {
-			IBundleModelElement bndl = (IBundleModelElement) provider;
-			return symbolicName.equals( bndl.getSymbolicName() ) && versions.contains( bndl.getVersion() );
-		}
-		else {
-			return false;
-		}
-	}
-	
-	public int compareTo(IRequiredBundle o) {
-		int i = symbolicName.compareTo(o.getSymbolicName());
-		
-		if ( i == 0 ) {
-			i = compareVersion(o.getVersions());
-		}
-		
-		return i;
-	}
 
-	private int compareVersion(VersionRange range) {
-		if ( versions == null ) {
-			if ( range == null ) {
-				return 0;
-			}
-			else {
-				return 1;
-			}
-		}
-		else {
-			if ( range == null ) {
-				return -1;
-			}
-			else {
-				return versions.getCeiling().compareTo(range.getCeiling());
-			}
-		}
-	}
+    @Override
+    public int hashCode()
+    {
+        int hc = symbolicName.hashCode() * versions.hashCode();
+
+        if ( optional )
+        {
+            hc *= -1;
+        }
+
+        return hc;
+    }
+
+
+    public boolean accepts( IModelElement provider )
+    {
+        if ( provider instanceof IBundleModelElement )
+        {
+            IBundleModelElement bndl = ( IBundleModelElement ) provider;
+            return symbolicName.equals( bndl.getSymbolicName() ) && versions.contains( bndl.getVersion() );
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+
+    public int compareTo( IRequiredBundle o )
+    {
+        int i = symbolicName.compareTo( o.getSymbolicName() );
+
+        if ( i == 0 )
+        {
+            i = compareVersion( o.getVersions() );
+        }
+
+        return i;
+    }
+
+
+    private int compareVersion( VersionRange range )
+    {
+        if ( versions == null )
+        {
+            if ( range == null )
+            {
+                return 0;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+        else
+        {
+            if ( range == null )
+            {
+                return -1;
+            }
+            else
+            {
+                return versions.getCeiling().compareTo( range.getCeiling() );
+            }
+        }
+    }
 }

@@ -20,6 +20,7 @@
 package org.apache.felix.sigil.model;
 
 
-public interface IModelWalker {
-	boolean visit( IModelElement element );
+public interface IModelWalker
+{
+    boolean visit( IModelElement element );
 }

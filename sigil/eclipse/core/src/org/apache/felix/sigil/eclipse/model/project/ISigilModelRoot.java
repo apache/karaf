@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.eclipse.model.project;
 
+
 import java.util.Collection;
 import java.util.List;
 
@@ -27,10 +28,15 @@ import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-public interface ISigilModelRoot {
-	List<ISigilProjectModel> getProjects();
-	
-	Collection<ISigilProjectModel> resolveDependentProjects(ISigilProjectModel sigil, IProgressMonitor monitor);
 
-	Collection<ISigilBundle> resolveBundles(ISigilProjectModel sigil, IModelElement element, boolean includeOptional, IProgressMonitor monitor) throws CoreException;
+public interface ISigilModelRoot
+{
+    List<ISigilProjectModel> getProjects();
+
+
+    Collection<ISigilProjectModel> resolveDependentProjects( ISigilProjectModel sigil, IProgressMonitor monitor );
+
+
+    Collection<ISigilBundle> resolveBundles( ISigilProjectModel sigil, IModelElement element, boolean includeOptional,
+        IProgressMonitor monitor ) throws CoreException;
 }

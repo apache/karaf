@@ -19,9 +19,17 @@
 
 package org.apache.felix.sigil.model;
 
-public interface INamedModelElement extends IModelElement {
-	void setName(String name);
-	String getName();
+
+public interface INamedModelElement extends IModelElement
+{
+    void setName( String name );
+
+
+    String getName();
+
+
     OverrideOptions getOverride();
-    void setOverride(OverrideOptions override);	
+
+
+    void setOverride( OverrideOptions override );
 }

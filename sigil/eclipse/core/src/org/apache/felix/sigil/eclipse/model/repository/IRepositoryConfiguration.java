@@ -19,31 +19,43 @@
 
 package org.apache.felix.sigil.eclipse.model.repository;
 
+
 import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.sigil.eclipse.internal.model.repository.RepositoryType;
 import org.eclipse.core.runtime.CoreException;
 
-public interface IRepositoryConfiguration {
 
-	List<IRepositoryModel> loadRepositories();
-	
-	IRepositoryModel findRepository(String id);
+public interface IRepositoryConfiguration
+{
 
-	void saveRepositories(List<IRepositoryModel> repositories) throws CoreException;
+    List<IRepositoryModel> loadRepositories();
 
-	List<RepositoryType> loadRepositoryTypes();
 
-	IRepositoryModel newRepositoryElement(IRepositoryType type);
-	
-	IRepositorySet getDefaultRepositorySet();
+    IRepositoryModel findRepository( String id );
 
-	void setDefaultRepositorySet(IRepositorySet defaultSet);
-	
-	IRepositorySet getRepositorySet(String name);
-	
-	Map<String, IRepositorySet> loadRepositorySets();
-	
-	void saveRepositorySets(Map<String, IRepositorySet> sets);
+
+    void saveRepositories( List<IRepositoryModel> repositories ) throws CoreException;
+
+
+    List<RepositoryType> loadRepositoryTypes();
+
+
+    IRepositoryModel newRepositoryElement( IRepositoryType type );
+
+
+    IRepositorySet getDefaultRepositorySet();
+
+
+    void setDefaultRepositorySet( IRepositorySet defaultSet );
+
+
+    IRepositorySet getRepositorySet( String name );
+
+
+    Map<String, IRepositorySet> loadRepositorySets();
+
+
+    void saveRepositorySets( Map<String, IRepositorySet> sets );
 }

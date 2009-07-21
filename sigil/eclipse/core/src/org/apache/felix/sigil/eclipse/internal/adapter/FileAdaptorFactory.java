@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.eclipse.internal.adapter;
 
+
 import org.apache.felix.sigil.eclipse.SigilCore;
 import org.apache.felix.sigil.eclipse.model.project.ISigilProjectModel;
 import org.apache.felix.sigil.model.ModelElementFactory;
@@ -29,58 +30,75 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdapterFactory;
 
+
 /**
  * @author savage
  *
  */
-public class FileAdaptorFactory implements IAdapterFactory {
+public class FileAdaptorFactory implements IAdapterFactory
+{
 
-	public FileAdaptorFactory() {
-		
-	}
-	private Class<?>[] types = new Class<?>[] { ISigilBundle.class };
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.IAdapterFactory#getAdapter(java.lang.Object, java.lang.Class)
-	 */
-	@SuppressWarnings("unchecked")
-	public Object getAdapter( Object adaptableObject, Class adapterType ) {
+    public FileAdaptorFactory()
+    {
+
+    }
+
+    private Class<?>[] types = new Class<?>[]
+        { ISigilBundle.class };
+
+
+    /* (non-Javadoc)
+     * @see org.eclipse.core.runtime.IAdapterFactory#getAdapter(java.lang.Object, java.lang.Class)
+     */
+    @SuppressWarnings("unchecked")
+    public Object getAdapter( Object adaptableObject, Class adapterType )
+    {
         Object adapted = null;
-        
-        IFile file = (IFile) adaptableObject;
-        
-        if ( ISigilBundle.class.equals( adapterType ) ) {
-        	adapted = adaptBundle(file);
+
+        IFile file = ( IFile ) adaptableObject;
+
+        if ( ISigilBundle.class.equals( adapterType ) )
+        {
+            adapted = adaptBundle( file );
         }
-		
-		return adapted;
-	}
-    
-    private Object adaptBundle(IFile file) {
+
+        return adapted;
+    }
+
+
+    private Object adaptBundle( IFile file )
+    {
         Object adapted = null;
         IProject project = file.getProject();
-        try {
-            if ( SigilCore.hasProjectNature( project ) ) {
+        try
+        {
+            if ( SigilCore.hasProjectNature( project ) )
+            {
                 ISigilProjectModel sigil = SigilCore.create( project );
                 ISigilBundle bundle = ModelElementFactory.getInstance().newModelElement( ISigilBundle.class );
                 bundle.setParent( sigil );
                 adapted = bundle;
             }
         }
-        catch ( CoreException e ) {
-			SigilCore.error( "Failed to construct bundle", e );
-        } catch (ModelElementFactoryException e) {
-			SigilCore.error( "Failed to construct bundle", e );
-		}
-        
-        return adapted;
-	}
+        catch ( CoreException e )
+        {
+            SigilCore.error( "Failed to construct bundle", e );
+        }
+        catch ( ModelElementFactoryException e )
+        {
+            SigilCore.error( "Failed to construct bundle", e );
+        }
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.IAdapterFactory#getAdapterList()
-	 */
-	@SuppressWarnings("unchecked")
-	public Class[] getAdapterList() {
-		return types;
-	}
+        return adapted;
+    }
+
+
+    /* (non-Javadoc)
+     * @see org.eclipse.core.runtime.IAdapterFactory#getAdapterList()
+     */
+    @SuppressWarnings("unchecked")
+    public Class[] getAdapterList()
+    {
+        return types;
+    }
 }

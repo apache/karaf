@@ -19,30 +19,38 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.util;
 
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-public class FileUtils {
-	public static void loadFile( Shell shell, Text text, String msg, boolean isDirectory ) {
-		if ( isDirectory ) {
-			DirectoryDialog dialog = new DirectoryDialog(shell, SWT.NONE);
-			dialog.setMessage(msg);
-			String value = dialog.open();
-			if ( value != null ) {
-				text.setText( value );
-			}
-		}
-		else {
-			FileDialog dialog = new FileDialog(shell, SWT.NONE);
-			dialog.setText(msg);
-			String value = dialog.open();
-			if ( value != null ) {
-				text.setText( value );
-			}
-		}
-	}
+
+public class FileUtils
+{
+    public static void loadFile( Shell shell, Text text, String msg, boolean isDirectory )
+    {
+        if ( isDirectory )
+        {
+            DirectoryDialog dialog = new DirectoryDialog( shell, SWT.NONE );
+            dialog.setMessage( msg );
+            String value = dialog.open();
+            if ( value != null )
+            {
+                text.setText( value );
+            }
+        }
+        else
+        {
+            FileDialog dialog = new FileDialog( shell, SWT.NONE );
+            dialog.setText( msg );
+            String value = dialog.open();
+            if ( value != null )
+            {
+                text.setText( value );
+            }
+        }
+    }
 
 }

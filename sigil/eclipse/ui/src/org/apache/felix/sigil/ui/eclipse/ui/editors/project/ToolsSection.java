@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.editors.project;
 
+
 import org.apache.felix.sigil.eclipse.model.project.ISigilProjectModel;
 import org.apache.felix.sigil.ui.eclipse.actions.PruneProjectDependenciesAction;
 import org.apache.felix.sigil.ui.eclipse.actions.ResolveProjectDependenciesAction;
@@ -32,51 +33,68 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 
-public class ToolsSection extends SigilSection {
-	
-	public ToolsSection(SigilPage page, Composite parent, ISigilProjectModel project) throws CoreException {
-		super( page, parent, project );
-	}    
 
-    protected void createSection(Section section,FormToolkit toolkit ) {
-        setTitle("Tools");
-        
-		Composite body = createTableWrapBody(1, toolkit);
+public class ToolsSection extends SigilSection
+{
 
-        toolkit.createLabel( body, "Tools to help manage this project:" );
-        
-        Hyperlink launch = toolkit.createHyperlink( body, "Resolve missing dependencies", SWT.NULL );
-        launch.setHref( "resolve" );
-        launch.addHyperlinkListener(this);
-        
-        Hyperlink debug = toolkit.createHyperlink( body, "Prune unused dependencies", SWT.NULL );
-        debug.setHref( "prune" );
-        debug.addHyperlinkListener(this);
+    public ToolsSection( SigilPage page, Composite parent, ISigilProjectModel project ) throws CoreException
+    {
+        super( page, parent, project );
     }
 
-	public void linkActivated(HyperlinkEvent e) {
-		String href = (String) e.getHref();
-		if ( "resolve".equals( href ) ) {
-			handleResolve();
-		}
-		else if ( "prune".equals( href ) ) {
-			handlePrune();
-		}
-	}
 
-	private void handlePrune() {
-		new PruneProjectDependenciesAction(getProjectModel()).run();
-	}
+    protected void createSection( Section section, FormToolkit toolkit )
+    {
+        setTitle( "Tools" );
 
-	private void handleResolve() {
-		final ISigilProjectModel project = getProjectModel();
-		new ResolveProjectDependenciesAction(project, true).run();
-	}
+        Composite body = createTableWrapBody( 1, toolkit );
 
-	public void linkEntered(HyperlinkEvent e) {
-	}
+        toolkit.createLabel( body, "Tools to help manage this project:" );
 
-	public void linkExited(HyperlinkEvent e) {
-	}
-	
+        Hyperlink launch = toolkit.createHyperlink( body, "Resolve missing dependencies", SWT.NULL );
+        launch.setHref( "resolve" );
+        launch.addHyperlinkListener( this );
+
+        Hyperlink debug = toolkit.createHyperlink( body, "Prune unused dependencies", SWT.NULL );
+        debug.setHref( "prune" );
+        debug.addHyperlinkListener( this );
+    }
+
+
+    public void linkActivated( HyperlinkEvent e )
+    {
+        String href = ( String ) e.getHref();
+        if ( "resolve".equals( href ) )
+        {
+            handleResolve();
+        }
+        else if ( "prune".equals( href ) )
+        {
+            handlePrune();
+        }
+    }
+
+
+    private void handlePrune()
+    {
+        new PruneProjectDependenciesAction( getProjectModel() ).run();
+    }
+
+
+    private void handleResolve()
+    {
+        final ISigilProjectModel project = getProjectModel();
+        new ResolveProjectDependenciesAction( project, true ).run();
+    }
+
+
+    public void linkEntered( HyperlinkEvent e )
+    {
+    }
+
+
+    public void linkExited( HyperlinkEvent e )
+    {
+    }
+
 }

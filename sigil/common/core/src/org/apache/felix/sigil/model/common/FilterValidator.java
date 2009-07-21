@@ -19,15 +19,20 @@
 
 package org.apache.felix.sigil.model.common;
 
-public interface FilterValidator {
+
+public interface FilterValidator
+{
 
     public static FilterValidator ACCEPT_ALL = new AcceptEverythingValidator();
 
-    boolean validate(LDAPExpr filter);
 
-    static class AcceptEverythingValidator implements FilterValidator {
+    boolean validate( LDAPExpr filter );
 
-        public boolean validate(LDAPExpr filter) {
+    static class AcceptEverythingValidator implements FilterValidator
+    {
+
+        public boolean validate( LDAPExpr filter )
+        {
             return true;
         }
 

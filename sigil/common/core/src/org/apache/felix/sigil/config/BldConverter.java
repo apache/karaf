@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.config;
 
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,418 +48,486 @@ import org.osgi.framework.Version;
 
 import aQute.lib.osgi.Constants;
 
-public class BldConverter {
-	private static final String classpathFormat = "<classpathentry kind=\"%s\" path=\"%s\"/>";
-	private BldConfig config;
-	private Properties packageDefaults;
-	private TreeSet<String> packageWildDefaults;
 
-	public BldConverter(BldConfig config) {
-		this.config = config;
-	}
+public class BldConverter
+{
+    private static final String classpathFormat = "<classpathentry kind=\"%s\" path=\"%s\"/>";
+    private BldConfig config;
+    private Properties packageDefaults;
+    private TreeSet<String> packageWildDefaults;
 
-	/**
-	 * converts to an ISigilBundle.
-	 * @param id
-	 * @param bundle
-	 * @return
-	 */
-	public ISigilBundle getBundle(String id, IBldBundle bundle) {
 
-		ISigilBundle sigilBundle = new SigilBundle();
-		IBundleModelElement info = new BundleModelElement();
-		sigilBundle.setBundleInfo(info);
+    public BldConverter( BldConfig config )
+    {
+        this.config = config;
+    }
 
-		// exports
-		// FIXME: UI doesn't understand export wildcard packages
-		for (IPackageExport export : bundle.getExports()) {
-			IPackageExport clone = (IPackageExport) export.clone();
-			clone.setParent(null);
-			info.addExport(clone);
-		}
 
-		// imports
-		for (IPackageImport import1 : bundle.getImports()) {
-			IPackageImport clone = (IPackageImport) import1.clone();
-			clone.setParent(null);
-			info.addImport(clone);
-		}
+    /**
+     * converts to an ISigilBundle.
+     * @param id
+     * @param bundle
+     * @return
+     */
+    public ISigilBundle getBundle( String id, IBldBundle bundle )
+    {
 
-		// requires
-		for (IRequiredBundle require : bundle.getRequires()) {
-			IRequiredBundle clone = (IRequiredBundle) require.clone();
-			clone.setParent(null);
-			info.addRequiredBundle(clone);
-		}
+        ISigilBundle sigilBundle = new SigilBundle();
+        IBundleModelElement info = new BundleModelElement();
+        sigilBundle.setBundleInfo( info );
 
-		// fragment
-		IRequiredBundle fragment = bundle.getFragmentHost();
-		if (fragment != null) {
-			info.setFragmentHost(fragment);
-		}
-		
-		// contents
-		for (String pkg : bundle.getContents()) {
-			sigilBundle.addPackage(pkg);
-		}
-		
-		// downloads
-		for (String pkg : bundle.getDownloadContents()) {
-			sigilBundle.addDownloadPackage(pkg);
-		}
-		
-		// sources
-		for (String source : config.getList(null, BldConfig.L_SRC_CONTENTS) ) {
-			sigilBundle.addClasspathEntry(String.format(classpathFormat, "src", source));
-		}
+        // exports
+        // FIXME: UI doesn't understand export wildcard packages
+        for ( IPackageExport export : bundle.getExports() )
+        {
+            IPackageExport clone = ( IPackageExport ) export.clone();
+            clone.setParent( null );
+            info.addExport( clone );
+        }
 
-		// libs
-		Map<String, Map<String, String>> libs = bundle.getLibs();
-		
-		for (String path : libs.keySet()) {
-			Map<String, String> attr = libs.get(path);
-			String kind = attr.get(BldAttr.KIND_ATTRIBUTE);
-			String publish = attr.get(BldAttr.PUBLISH_ATTRIBUTE);
-			
-			if (publish != null) {
-        		// FIXME: UI doesn't understand publish=name
-				BldCore.error("Can't convert -libs publish=" + publish);
-				continue;	
-			}
-			
-			if ("classpath".equals(kind)) {
-    			sigilBundle.addClasspathEntry(String.format(classpathFormat, "lib", path));
-			} else {
-				BldCore.error("Can't convert -libs kind=" + kind);
-			}
-		}
+        // imports
+        for ( IPackageImport import1 : bundle.getImports() )
+        {
+            IPackageImport clone = ( IPackageImport ) import1.clone();
+            clone.setParent( null );
+            info.addImport( clone );
+        }
 
-		// resources
-		// FIXME: UI doesn't support -resources: path1=path2
-		Map<String, String> resources = bundle.getResources();
-		for (String resource : resources.keySet()) {
-			String fsPath = resources.get(resource);
-			if (!"".equals(fsPath)) {
-    			BldCore.error("FIXME: can't convert resource: " + resource + "=" + fsPath);
-			}
-			sigilBundle.addSourcePath(new Path(resource));
-		}
-		
-		////////////////////
-		// simple headers
+        // requires
+        for ( IRequiredBundle require : bundle.getRequires() )
+        {
+            IRequiredBundle clone = ( IRequiredBundle ) require.clone();
+            clone.setParent( null );
+            info.addRequiredBundle( clone );
+        }
 
-		info.setSymbolicName(bundle.getSymbolicName());
+        // fragment
+        IRequiredBundle fragment = bundle.getFragmentHost();
+        if ( fragment != null )
+        {
+            info.setFragmentHost( fragment );
+        }
 
-		info.setVersion(Version.parseVersion(bundle.getVersion()));
+        // contents
+        for ( String pkg : bundle.getContents() )
+        {
+            sigilBundle.addPackage( pkg );
+        }
 
-		String activator = bundle.getActivator();
-		if (activator != null)
-			info.setActivator(activator);
-		
-		Properties headers = config.getProps(id, BldConfig.P_HEADER);
-		String header;
+        // downloads
+        for ( String pkg : bundle.getDownloadContents() )
+        {
+            sigilBundle.addDownloadPackage( pkg );
+        }
 
-		header = headers.getProperty("CATEGORY");
-		if (header != null)
-			info.setCategory(header);
+        // sources
+        for ( String source : config.getList( null, BldConfig.L_SRC_CONTENTS ) )
+        {
+            sigilBundle.addClasspathEntry( String.format( classpathFormat, "src", source ) );
+        }
 
-		header = headers.getProperty(Constants.BUNDLE_CONTACTADDRESS);
-		if (header != null)
-			info.setContactAddress(header);
+        // libs
+        Map<String, Map<String, String>> libs = bundle.getLibs();
 
-		header = headers.getProperty(Constants.BUNDLE_COPYRIGHT);
-		if (header != null)
-			info.setCopyright(header);
+        for ( String path : libs.keySet() )
+        {
+            Map<String, String> attr = libs.get( path );
+            String kind = attr.get( BldAttr.KIND_ATTRIBUTE );
+            String publish = attr.get( BldAttr.PUBLISH_ATTRIBUTE );
 
-		header = headers.getProperty(Constants.BUNDLE_DESCRIPTION);
-		if (header != null)
-			info.setDescription(header);
+            if ( publish != null )
+            {
+                // FIXME: UI doesn't understand publish=name
+                BldCore.error( "Can't convert -libs publish=" + publish );
+                continue;
+            }
 
-		header = headers.getProperty(Constants.BUNDLE_VENDOR);
-		if (header != null)
-			info.setVendor(header);
+            if ( "classpath".equals( kind ) )
+            {
+                sigilBundle.addClasspathEntry( String.format( classpathFormat, "lib", path ) );
+            }
+            else
+            {
+                BldCore.error( "Can't convert -libs kind=" + kind );
+            }
+        }
 
-		header = headers.getProperty(Constants.BUNDLE_NAME);
-		if (header != null)
-			info.setName(header);
+        // resources
+        // FIXME: UI doesn't support -resources: path1=path2
+        Map<String, String> resources = bundle.getResources();
+        for ( String resource : resources.keySet() )
+        {
+            String fsPath = resources.get( resource );
+            if ( !"".equals( fsPath ) )
+            {
+                BldCore.error( "FIXME: can't convert resource: " + resource + "=" + fsPath );
+            }
+            sigilBundle.addSourcePath( new Path( resource ) );
+        }
 
-		header = headers.getProperty(Constants.BUNDLE_DOCURL);
-		if (header != null)
-			info.setDocURI(URI.create(header));
+        ////////////////////
+        // simple headers
 
-		header = headers.getProperty(Constants.BUNDLE_LICENSE);
-		if (header != null)
-			info.setDocURI(URI.create(header));
+        info.setSymbolicName( bundle.getSymbolicName() );
 
-		return sigilBundle;
-	}
+        info.setVersion( Version.parseVersion( bundle.getVersion() ) );
 
-	private VersionRange defaultVersion(VersionRange current, String defaultRange) {
-		if (current.equals(VersionRange.ANY_VERSION) ||
-			current.equals(VersionRange.parseVersionRange(defaultRange))) {
-			return null;
-		}
-		return current;
-	}
-	
-	// FIXME - copied from BldProject
-	private String getDefaultPackageVersion(String name) {
-		if (packageDefaults == null) {
-    		packageDefaults = config.getProps(null, BldConfig.P_PACKAGE_VERSION);
-    		packageWildDefaults = new TreeSet<String>();
-    		
-    		for (Object key : packageDefaults.keySet()) {
-    			String pkg = (String)key;
-    			if (pkg.endsWith("*")) {
-    				packageWildDefaults.add(pkg.substring(0, pkg.length() - 1));
-    			}
-    		}
-		}
-		
-		String version = packageDefaults.getProperty(name);
-		
-		if (version == null) {
-			for (String pkg : packageWildDefaults) {
-				if (name.startsWith(pkg)) {
-					version = packageDefaults.getProperty(pkg + "*");
-					// break; -- don't break, as we want the longest match
-				}
-			}
-		}
-		
-	    return version;
-	}
-	
-	
-	/**
-	 * converts from an ISigilBundle.
-	 * 
-	 * @param id
-	 * @param bundle
-	 */
-	public void setBundle(String id, ISigilBundle bundle) {
-		IBundleModelElement info = bundle.getBundleInfo();
-		String bundleVersion = config.getString(id, BldConfig.S_VERSION);
+        String activator = bundle.getActivator();
+        if ( activator != null )
+            info.setActivator( activator );
 
-		// exports
-		Map<String, Map<String, String>> exports = new TreeMap<String, Map<String,String>>();
-		for (IPackageExport export : info.getExports()) {
-			Map<String, String> map2 = new TreeMap<String, String>();
-			String version = export.getVersion().toString();
-			if (!version.equals(bundleVersion))
-				map2.put(BldAttr.VERSION_ATTRIBUTE, version);
-			exports.put(export.getPackageName(), map2);
-		}
-		
-		if (!exports.isEmpty() || !config.getMap(id, BldConfig.M_EXPORTS).isEmpty()) {
-			config.setMap(id, BldConfig.M_EXPORTS, exports);
-		}
+        Properties headers = config.getProps( id, BldConfig.P_HEADER );
+        String header;
 
-		// imports
-		Map<String, Map<String, String>> imports = new TreeMap<String, Map<String,String>>();
+        header = headers.getProperty( "CATEGORY" );
+        if ( header != null )
+            info.setCategory( header );
 
-		// FIXME: default version logic is wrong here
-		//    if the version to be saved is the same as the default version,
-		//    then we should _remove_ the version from the value being saved,
-		//    since config.getMap() does not apply default versions.
-		for (IPackageImport import1 : info.getImports()) {
-			Map<String, String> map2 = new TreeMap<String, String>();
-			String name = import1.getPackageName();
-			VersionRange versions = defaultVersion(import1.getVersions(), getDefaultPackageVersion(name));
-			
-			boolean isDependency = import1.isDependency();
-			Map<String, String> selfImport = exports.get(name);
-			
-			if (selfImport != null) {
-    			// avoid saving self-import attributes, e.g.
-    			// org.cauldron.newton.example.fractal.engine;resolve=auto;version=1.0.0
-				isDependency = true;
-				
-				if (versions != null) {
-    				String exportVersion = selfImport.get(BldAttr.VERSION_ATTRIBUTE);
-    				if (exportVersion == null)
-    					exportVersion = bundleVersion;
-    				
-    				if (exportVersion.equals(versions.toString())) {
-    					versions = null;
-    				}
-				}
-			}
+        header = headers.getProperty( Constants.BUNDLE_CONTACTADDRESS );
+        if ( header != null )
+            info.setContactAddress( header );
 
-			if (versions != null) {
-				map2.put(BldAttr.VERSION_ATTRIBUTE, versions.toString());
-			}
-			
-			if (import1.isOptional()) {
-				map2.put(BldAttr.RESOLUTION_ATTRIBUTE, BldAttr.RESOLUTION_OPTIONAL);
-			}
-			
-			String resolve = BldProject.getResolve(import1, isDependency);
-			if (resolve != null)
-				map2.put(BldAttr.RESOLVE_ATTRIBUTE, resolve);
-			
-			imports.put(name, map2);
-		}
-		if (!imports.isEmpty() || !config.getMap(id, BldConfig.M_IMPORTS).isEmpty()) {
-			config.setMap(id, BldConfig.M_IMPORTS, imports);
-		}
+        header = headers.getProperty( Constants.BUNDLE_COPYRIGHT );
+        if ( header != null )
+            info.setCopyright( header );
 
-		// requires
-		Properties defaultBundles = config.getProps(null, BldConfig.P_BUNDLE_VERSION);
-		Map<String, Map<String, String>> requires = new TreeMap<String, Map<String,String>>();
-		
-		for (IRequiredBundle require : info.getRequiredBundles()) {
-			Map<String, String> map2 = new TreeMap<String, String>();
-			String name = require.getSymbolicName();
-			VersionRange versions = defaultVersion(require.getVersions(), defaultBundles.getProperty(name));
-			if (versions != null)
-    			map2.put(BldAttr.VERSION_ATTRIBUTE, versions.toString());
-			requires.put(name, map2);
-		}
-		if (!requires.isEmpty() || !config.getMap(id, BldConfig.M_REQUIRES).isEmpty()) {
-			config.setMap(id, BldConfig.M_REQUIRES, requires);
-		}
+        header = headers.getProperty( Constants.BUNDLE_DESCRIPTION );
+        if ( header != null )
+            info.setDescription( header );
 
-		// fragment
-		Map<String, Map<String, String>> fragments = new TreeMap<String, Map<String,String>>();
-		IRequiredBundle fragment = info.getFragmentHost();
-		if (fragment != null) {
-			Map<String, String> map2 = new TreeMap<String, String>();
-			String name = fragment.getSymbolicName();
-			VersionRange versions = defaultVersion(fragment.getVersions(), defaultBundles.getProperty(name));
-			if (versions != null)
-    			map2.put(BldAttr.VERSION_ATTRIBUTE, versions.toString());
-			fragments.put(name, map2);
-		}
-		if (!fragments.isEmpty() || !config.getMap(id, BldConfig.M_FRAGMENT).isEmpty()) {
-			config.setMap(id, BldConfig.M_FRAGMENT, fragments);
-		}
-	
-		// contents
-		List<String> contents = new ArrayList<String>();
-		for (String pkg : bundle.getPackages()) {
-			contents.add(pkg);
-		}
-		if (!contents.isEmpty() || !config.getList(id, BldConfig.L_CONTENTS).isEmpty()) {
-			config.setList(id, BldConfig.L_CONTENTS, contents);
-		}
-		
-		// dl contents
-		List<String> dlcontents = new ArrayList<String>();
-		for (String pkg : bundle.getDownloadPackages()) {
-			dlcontents.add(pkg);
-		}
-		if (!dlcontents.isEmpty() || !config.getList(id, BldConfig.L_DL_CONTENTS).isEmpty()) {
-			config.setList(id, BldConfig.L_DL_CONTENTS, dlcontents);
-		}
+        header = headers.getProperty( Constants.BUNDLE_VENDOR );
+        if ( header != null )
+            info.setVendor( header );
 
-		// libs
-		Map<String, Map<String, String>> libs = new TreeMap<String, Map<String,String>>();
-		List<String> sources = new ArrayList<String>();
+        header = headers.getProperty( Constants.BUNDLE_NAME );
+        if ( header != null )
+            info.setName( header );
 
-		// classpathEntries map to -libs or -sources
-		for (String entry : bundle.getClasspathEntrys()) {
-			// <classpathentry kind="lib" path="lib/dependee.jar"/>
-			// <classpathentry kind="src" path="src"/>
-			final String regex = ".* kind=\"([^\"]+)\" path=\"([^\"]+)\".*";
-			Pattern pattern = Pattern.compile(regex);
-			Matcher matcher = pattern.matcher(entry);
-			if (matcher.matches()) {
-				String kind = matcher.group(1);
-				String path = matcher.group(2);
-				if (kind.equals("lib")) {
-    				Map<String, String> map2 = new TreeMap<String, String>();
-    				map2.put(BldAttr.KIND_ATTRIBUTE, "classpath");
-    				libs.put(path, map2);
-				} else if (kind.equals("src")) {
-					sources.add(path);
-				} else {
-    				BldCore.error("unknown classpathentry kind=" + kind);
-				}
-			} else {
-				BldCore.error("can't match classpathEntry in: " + entry);
-			}
-		}
+        header = headers.getProperty( Constants.BUNDLE_DOCURL );
+        if ( header != null )
+            info.setDocURI( URI.create( header ) );
 
-		if (!libs.isEmpty() || !config.getMap(id, BldConfig.M_LIBS).isEmpty()) {
-			config.setMap(id, BldConfig.M_LIBS, libs);
-		}
+        header = headers.getProperty( Constants.BUNDLE_LICENSE );
+        if ( header != null )
+            info.setDocURI( URI.create( header ) );
 
-		if (!sources.isEmpty() || !config.getList(id, BldConfig.L_SRC_CONTENTS).isEmpty()) {
-			config.setList(id, BldConfig.L_SRC_CONTENTS, sources);
-		}
+        return sigilBundle;
+    }
 
-		// composites
-		ArrayList<String> composites = new ArrayList<String>();
-		for (ISCAComposite composite : bundle.getComposites()) {
-			String path = composite.getLocation().toString();
-			// TODO relativize
-			composites.add(path);
-		}
-		
-		if (!composites.isEmpty() || !config.getList(id, BldConfig.L_COMPOSITES).isEmpty()) {
-			Collections.sort(composites);
-			config.setList(id, BldConfig.L_COMPOSITES, composites);
-		}
-		
-		// resources
-		ArrayList<String> resources = new ArrayList<String>();
-		for (IPath ipath : bundle.getSourcePaths()) {
-			resources.add(ipath.toString());
-		}
-		
-		if (!resources.isEmpty() || !config.getList(id, BldConfig.L_RESOURCES).isEmpty()) {
-    		Collections.sort(resources);
-			config.setList(id, BldConfig.L_RESOURCES, resources);
-		}
-		
-		if (info.getSourceLocation() != null) {
-			BldCore.error("SourceLocation conversion not yet implemented.");
-		}
 
-		if (!info.getLibraryImports().isEmpty()) {
-			BldCore.error("LibraryImports conversion not yet implemented.");
-		}
+    private VersionRange defaultVersion( VersionRange current, String defaultRange )
+    {
+        if ( current.equals( VersionRange.ANY_VERSION )
+            || current.equals( VersionRange.parseVersionRange( defaultRange ) ) )
+        {
+            return null;
+        }
+        return current;
+    }
 
-		////////////////////
-		// simple headers
 
-		List<String> ids = config.getList(null, BldConfig.C_BUNDLES);
-		String idBsn = id != null ? id : ids.get(0);
-		String oldBsn = config.getString(id, BldConfig.S_SYM_NAME);
-		String bsn = info.getSymbolicName();
-		
-		if (!bsn.equals(idBsn) || oldBsn != null)
-			config.setString(id, BldConfig.S_SYM_NAME, bsn);
+    // FIXME - copied from BldProject
+    private String getDefaultPackageVersion( String name )
+    {
+        if ( packageDefaults == null )
+        {
+            packageDefaults = config.getProps( null, BldConfig.P_PACKAGE_VERSION );
+            packageWildDefaults = new TreeSet<String>();
 
-		String version = info.getVersion().toString();
-		if (version != null)
-			config.setString(id, BldConfig.S_VERSION, version);
+            for ( Object key : packageDefaults.keySet() )
+            {
+                String pkg = ( String ) key;
+                if ( pkg.endsWith( "*" ) )
+                {
+                    packageWildDefaults.add( pkg.substring( 0, pkg.length() - 1 ) );
+                }
+            }
+        }
 
-		String activator = info.getActivator();
-		if (activator != null)
-    		config.setString(id, BldConfig.S_ACTIVATOR, activator);
-		
-		Properties headers = config.getProps(null, BldConfig.P_HEADER);
-		
-		setHeader(headers, id, "CATEGORY", info.getCategory());
-		setHeader(headers, id, Constants.BUNDLE_CONTACTADDRESS, info.getContactAddress());
-		setHeader(headers, id, Constants.BUNDLE_COPYRIGHT, info.getCopyright());
-		setHeader(headers, id, Constants.BUNDLE_DESCRIPTION, info.getDescription());
-		setHeader(headers, id, Constants.BUNDLE_VENDOR, info.getVendor());
-		setHeader(headers, id, Constants.BUNDLE_NAME, info.getName());
+        String version = packageDefaults.getProperty( name );
 
-		if (info.getDocURI() != null)
-			config.setProp(id, BldConfig.P_HEADER, Constants.BUNDLE_DOCURL, info.getDocURI().toString());
+        if ( version == null )
+        {
+            for ( String pkg : packageWildDefaults )
+            {
+                if ( name.startsWith( pkg ) )
+                {
+                    version = packageDefaults.getProperty( pkg + "*" );
+                    // break; -- don't break, as we want the longest match
+                }
+            }
+        }
 
-		if (info.getLicenseURI() != null)
-			config.setProp(id, BldConfig.P_HEADER, Constants.BUNDLE_LICENSE, info.getLicenseURI().toString());
-	}
-	
-	private void setHeader(Properties headers, String id, String key, String value) {
-		if (value == null)
-			value = "";
-		if (!value.equals(headers.getProperty(key, "")))
-    		config.setProp(id, BldConfig.P_HEADER, key, value);
-	}
+        return version;
+    }
+
+
+    /**
+     * converts from an ISigilBundle.
+     * 
+     * @param id
+     * @param bundle
+     */
+    public void setBundle( String id, ISigilBundle bundle )
+    {
+        IBundleModelElement info = bundle.getBundleInfo();
+        String bundleVersion = config.getString( id, BldConfig.S_VERSION );
+
+        // exports
+        Map<String, Map<String, String>> exports = new TreeMap<String, Map<String, String>>();
+        for ( IPackageExport export : info.getExports() )
+        {
+            Map<String, String> map2 = new TreeMap<String, String>();
+            String version = export.getVersion().toString();
+            if ( !version.equals( bundleVersion ) )
+                map2.put( BldAttr.VERSION_ATTRIBUTE, version );
+            exports.put( export.getPackageName(), map2 );
+        }
+
+        if ( !exports.isEmpty() || !config.getMap( id, BldConfig.M_EXPORTS ).isEmpty() )
+        {
+            config.setMap( id, BldConfig.M_EXPORTS, exports );
+        }
+
+        // imports
+        Map<String, Map<String, String>> imports = new TreeMap<String, Map<String, String>>();
+
+        // FIXME: default version logic is wrong here
+        //    if the version to be saved is the same as the default version,
+        //    then we should _remove_ the version from the value being saved,
+        //    since config.getMap() does not apply default versions.
+        for ( IPackageImport import1 : info.getImports() )
+        {
+            Map<String, String> map2 = new TreeMap<String, String>();
+            String name = import1.getPackageName();
+            VersionRange versions = defaultVersion( import1.getVersions(), getDefaultPackageVersion( name ) );
+
+            boolean isDependency = import1.isDependency();
+            Map<String, String> selfImport = exports.get( name );
+
+            if ( selfImport != null )
+            {
+                // avoid saving self-import attributes, e.g.
+                // org.cauldron.newton.example.fractal.engine;resolve=auto;version=1.0.0
+                isDependency = true;
+
+                if ( versions != null )
+                {
+                    String exportVersion = selfImport.get( BldAttr.VERSION_ATTRIBUTE );
+                    if ( exportVersion == null )
+                        exportVersion = bundleVersion;
+
+                    if ( exportVersion.equals( versions.toString() ) )
+                    {
+                        versions = null;
+                    }
+                }
+            }
+
+            if ( versions != null )
+            {
+                map2.put( BldAttr.VERSION_ATTRIBUTE, versions.toString() );
+            }
+
+            if ( import1.isOptional() )
+            {
+                map2.put( BldAttr.RESOLUTION_ATTRIBUTE, BldAttr.RESOLUTION_OPTIONAL );
+            }
+
+            String resolve = BldProject.getResolve( import1, isDependency );
+            if ( resolve != null )
+                map2.put( BldAttr.RESOLVE_ATTRIBUTE, resolve );
+
+            imports.put( name, map2 );
+        }
+        if ( !imports.isEmpty() || !config.getMap( id, BldConfig.M_IMPORTS ).isEmpty() )
+        {
+            config.setMap( id, BldConfig.M_IMPORTS, imports );
+        }
+
+        // requires
+        Properties defaultBundles = config.getProps( null, BldConfig.P_BUNDLE_VERSION );
+        Map<String, Map<String, String>> requires = new TreeMap<String, Map<String, String>>();
+
+        for ( IRequiredBundle require : info.getRequiredBundles() )
+        {
+            Map<String, String> map2 = new TreeMap<String, String>();
+            String name = require.getSymbolicName();
+            VersionRange versions = defaultVersion( require.getVersions(), defaultBundles.getProperty( name ) );
+            if ( versions != null )
+                map2.put( BldAttr.VERSION_ATTRIBUTE, versions.toString() );
+            requires.put( name, map2 );
+        }
+        if ( !requires.isEmpty() || !config.getMap( id, BldConfig.M_REQUIRES ).isEmpty() )
+        {
+            config.setMap( id, BldConfig.M_REQUIRES, requires );
+        }
+
+        // fragment
+        Map<String, Map<String, String>> fragments = new TreeMap<String, Map<String, String>>();
+        IRequiredBundle fragment = info.getFragmentHost();
+        if ( fragment != null )
+        {
+            Map<String, String> map2 = new TreeMap<String, String>();
+            String name = fragment.getSymbolicName();
+            VersionRange versions = defaultVersion( fragment.getVersions(), defaultBundles.getProperty( name ) );
+            if ( versions != null )
+                map2.put( BldAttr.VERSION_ATTRIBUTE, versions.toString() );
+            fragments.put( name, map2 );
+        }
+        if ( !fragments.isEmpty() || !config.getMap( id, BldConfig.M_FRAGMENT ).isEmpty() )
+        {
+            config.setMap( id, BldConfig.M_FRAGMENT, fragments );
+        }
+
+        // contents
+        List<String> contents = new ArrayList<String>();
+        for ( String pkg : bundle.getPackages() )
+        {
+            contents.add( pkg );
+        }
+        if ( !contents.isEmpty() || !config.getList( id, BldConfig.L_CONTENTS ).isEmpty() )
+        {
+            config.setList( id, BldConfig.L_CONTENTS, contents );
+        }
+
+        // dl contents
+        List<String> dlcontents = new ArrayList<String>();
+        for ( String pkg : bundle.getDownloadPackages() )
+        {
+            dlcontents.add( pkg );
+        }
+        if ( !dlcontents.isEmpty() || !config.getList( id, BldConfig.L_DL_CONTENTS ).isEmpty() )
+        {
+            config.setList( id, BldConfig.L_DL_CONTENTS, dlcontents );
+        }
+
+        // libs
+        Map<String, Map<String, String>> libs = new TreeMap<String, Map<String, String>>();
+        List<String> sources = new ArrayList<String>();
+
+        // classpathEntries map to -libs or -sources
+        for ( String entry : bundle.getClasspathEntrys() )
+        {
+            // <classpathentry kind="lib" path="lib/dependee.jar"/>
+            // <classpathentry kind="src" path="src"/>
+            final String regex = ".* kind=\"([^\"]+)\" path=\"([^\"]+)\".*";
+            Pattern pattern = Pattern.compile( regex );
+            Matcher matcher = pattern.matcher( entry );
+            if ( matcher.matches() )
+            {
+                String kind = matcher.group( 1 );
+                String path = matcher.group( 2 );
+                if ( kind.equals( "lib" ) )
+                {
+                    Map<String, String> map2 = new TreeMap<String, String>();
+                    map2.put( BldAttr.KIND_ATTRIBUTE, "classpath" );
+                    libs.put( path, map2 );
+                }
+                else if ( kind.equals( "src" ) )
+                {
+                    sources.add( path );
+                }
+                else
+                {
+                    BldCore.error( "unknown classpathentry kind=" + kind );
+                }
+            }
+            else
+            {
+                BldCore.error( "can't match classpathEntry in: " + entry );
+            }
+        }
+
+        if ( !libs.isEmpty() || !config.getMap( id, BldConfig.M_LIBS ).isEmpty() )
+        {
+            config.setMap( id, BldConfig.M_LIBS, libs );
+        }
+
+        if ( !sources.isEmpty() || !config.getList( id, BldConfig.L_SRC_CONTENTS ).isEmpty() )
+        {
+            config.setList( id, BldConfig.L_SRC_CONTENTS, sources );
+        }
+
+        // composites
+        ArrayList<String> composites = new ArrayList<String>();
+        for ( ISCAComposite composite : bundle.getComposites() )
+        {
+            String path = composite.getLocation().toString();
+            // TODO relativize
+            composites.add( path );
+        }
+
+        if ( !composites.isEmpty() || !config.getList( id, BldConfig.L_COMPOSITES ).isEmpty() )
+        {
+            Collections.sort( composites );
+            config.setList( id, BldConfig.L_COMPOSITES, composites );
+        }
+
+        // resources
+        ArrayList<String> resources = new ArrayList<String>();
+        for ( IPath ipath : bundle.getSourcePaths() )
+        {
+            resources.add( ipath.toString() );
+        }
+
+        if ( !resources.isEmpty() || !config.getList( id, BldConfig.L_RESOURCES ).isEmpty() )
+        {
+            Collections.sort( resources );
+            config.setList( id, BldConfig.L_RESOURCES, resources );
+        }
+
+        if ( info.getSourceLocation() != null )
+        {
+            BldCore.error( "SourceLocation conversion not yet implemented." );
+        }
+
+        if ( !info.getLibraryImports().isEmpty() )
+        {
+            BldCore.error( "LibraryImports conversion not yet implemented." );
+        }
+
+        ////////////////////
+        // simple headers
+
+        List<String> ids = config.getList( null, BldConfig.C_BUNDLES );
+        String idBsn = id != null ? id : ids.get( 0 );
+        String oldBsn = config.getString( id, BldConfig.S_SYM_NAME );
+        String bsn = info.getSymbolicName();
+
+        if ( !bsn.equals( idBsn ) || oldBsn != null )
+            config.setString( id, BldConfig.S_SYM_NAME, bsn );
+
+        String version = info.getVersion().toString();
+        if ( version != null )
+            config.setString( id, BldConfig.S_VERSION, version );
+
+        String activator = info.getActivator();
+        if ( activator != null )
+            config.setString( id, BldConfig.S_ACTIVATOR, activator );
+
+        Properties headers = config.getProps( null, BldConfig.P_HEADER );
+
+        setHeader( headers, id, "CATEGORY", info.getCategory() );
+        setHeader( headers, id, Constants.BUNDLE_CONTACTADDRESS, info.getContactAddress() );
+        setHeader( headers, id, Constants.BUNDLE_COPYRIGHT, info.getCopyright() );
+        setHeader( headers, id, Constants.BUNDLE_DESCRIPTION, info.getDescription() );
+        setHeader( headers, id, Constants.BUNDLE_VENDOR, info.getVendor() );
+        setHeader( headers, id, Constants.BUNDLE_NAME, info.getName() );
+
+        if ( info.getDocURI() != null )
+            config.setProp( id, BldConfig.P_HEADER, Constants.BUNDLE_DOCURL, info.getDocURI().toString() );
+
+        if ( info.getLicenseURI() != null )
+            config.setProp( id, BldConfig.P_HEADER, Constants.BUNDLE_LICENSE, info.getLicenseURI().toString() );
+    }
+
+
+    private void setHeader( Properties headers, String id, String key, String value )
+    {
+        if ( value == null )
+            value = "";
+        if ( !value.equals( headers.getProperty( key, "" ) ) )
+            config.setProp( id, BldConfig.P_HEADER, key, value );
+    }
 }

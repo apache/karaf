@@ -19,43 +19,59 @@
 
 package org.apache.felix.sigil.repository;
 
-public class ResolutionConfig {
-	private int options;
-	
-	public static final int INCLUDE_DEPENDENTS = 1;
-	public static final int INCLUDE_OPTIONAL = 2;
-	public static final int IGNORE_ERRORS = 4;
-	/** Return only bundles that are indexed locally */
-	public static final int INDEXED_ONLY = 8;
-	/** Return only bundles that are stored or cached locally */
-	public static final int LOCAL_ONLY = 16;
 
-	public ResolutionConfig() {
-		this(INCLUDE_DEPENDENTS);
-	}
-	
-	public ResolutionConfig(int options) {
-		this.options = options;
-	}
+public class ResolutionConfig
+{
+    private int options;
 
-	public int getOptions() {
-		return options;
-	}
+    public static final int INCLUDE_DEPENDENTS = 1;
+    public static final int INCLUDE_OPTIONAL = 2;
+    public static final int IGNORE_ERRORS = 4;
+    /** Return only bundles that are indexed locally */
+    public static final int INDEXED_ONLY = 8;
+    /** Return only bundles that are stored or cached locally */
+    public static final int LOCAL_ONLY = 16;
 
-	public boolean isDependents() {
-		return (options & INCLUDE_DEPENDENTS) != 0;
-	}
 
-	public boolean isIgnoreErrors() {
-		return (options & IGNORE_ERRORS) != 0;
-	}
-	
-	public boolean isOptional() {
-		return (options & INCLUDE_OPTIONAL) != 0;
-	}
+    public ResolutionConfig()
+    {
+        this( INCLUDE_DEPENDENTS );
+    }
 
-	public boolean isCalculateLocalDependencies() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+
+    public ResolutionConfig( int options )
+    {
+        this.options = options;
+    }
+
+
+    public int getOptions()
+    {
+        return options;
+    }
+
+
+    public boolean isDependents()
+    {
+        return ( options & INCLUDE_DEPENDENTS ) != 0;
+    }
+
+
+    public boolean isIgnoreErrors()
+    {
+        return ( options & IGNORE_ERRORS ) != 0;
+    }
+
+
+    public boolean isOptional()
+    {
+        return ( options & INCLUDE_OPTIONAL ) != 0;
+    }
+
+
+    public boolean isCalculateLocalDependencies()
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

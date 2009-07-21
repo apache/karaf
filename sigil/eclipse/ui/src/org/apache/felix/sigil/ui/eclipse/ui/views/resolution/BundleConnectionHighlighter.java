@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.views.resolution;
 
+
 import java.util.Set;
 
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
@@ -31,89 +32,117 @@ import org.eclipse.zest.core.widgets.GraphConnection;
 import org.eclipse.zest.core.widgets.GraphItem;
 import org.eclipse.zest.core.widgets.GraphNode;
 
-public class BundleConnectionHighlighter implements ISelectionChangedListener {
 
-	private BundleResolverView view;
-	
-	public BundleConnectionHighlighter(BundleResolverView view) {
-		this.view = view;
-	}
-	
-	public void selectionChanged(SelectionChangedEvent event) {
-		ISelection selection = event.getSelection();
-		if ( !selection.isEmpty() ) {
-			IStructuredSelection str = (IStructuredSelection) selection;
+public class BundleConnectionHighlighter implements ISelectionChangedListener
+{
 
-			Object sel = str.getFirstElement();
-			
-			if ( sel instanceof ISigilBundle ) {
-				BundleGraph graph = (BundleGraph) view.getBundlegraph();
+    private BundleResolverView view;
 
-				ISigilBundle selected = (ISigilBundle) sel;
-				Set<ISigilBundle> connected = graph.getTargets(selected);
 
-				highlightLinks(graph, selected, connected);
-				highlightBundles(graph, selected, connected);
-			}
-			else if ( sel instanceof Link ) {
-				GraphConnection c = (GraphConnection) findGraphItem(sel);
-				if ( c != null ) {
-					c.unhighlight();
-					c.setHighlightColor(ColorConstants.blue);
-					c.highlight();
-				}
-			}
-		}
-		else {
-			// TODO clear highlights...
-		}
-	}
+    public BundleConnectionHighlighter( BundleResolverView view )
+    {
+        this.view = view;
+    }
 
-	private void highlightBundles(BundleGraph graph, ISigilBundle selected, Set<ISigilBundle> connected) {
-		for ( ISigilBundle bundle : graph.getBundles() ) {
-			GraphNode node = (GraphNode) findGraphItem(bundle);
-			if ( node != null ) {
-				node.unhighlight();
 
-				if ( bundle == selected ) {
-					node.setHighlightColor(ColorConstants.yellow);
-					node.highlight();
-				}
-				else if ( view.isDisplayed(BundleResolverView.DEPENDENTS) ) {
-					if ( connected.contains(bundle) ) {
-						node.setHighlightColor(ColorConstants.lightBlue);
-						node.highlight();
-					}
-				}
-			}
-		}
-	}
-	
-	private void highlightLinks(BundleGraph graph, ISigilBundle selected, Set<ISigilBundle> connected) {
-		for ( Link l : graph.getLinks() ) {
-			GraphConnection c = (GraphConnection) findGraphItem(l);
-			if ( c != null ) {
-				c.unhighlight();
+    public void selectionChanged( SelectionChangedEvent event )
+    {
+        ISelection selection = event.getSelection();
+        if ( !selection.isEmpty() )
+        {
+            IStructuredSelection str = ( IStructuredSelection ) selection;
 
-				if ( view.isDisplayed(BundleResolverView.DEPENDENTS) ) {
-					if ( l.getSource() == selected && connected.contains( l.getTarget() ) ) {
-						c.setHighlightColor(ColorConstants.lightBlue);
-						c.highlight();
-					}
-				}
-			}
-		}
-	}
+            Object sel = str.getFirstElement();
 
-	private GraphItem findGraphItem(Object l) {
-		try {
-			return view.getGraphViewer().findGraphItem(l);
-		}
-		catch (ArrayIndexOutOfBoundsException e) {
-			// temporary fix for issue 
-			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=242523
-			return null;
-		}
-	}
+            if ( sel instanceof ISigilBundle )
+            {
+                BundleGraph graph = ( BundleGraph ) view.getBundlegraph();
+
+                ISigilBundle selected = ( ISigilBundle ) sel;
+                Set<ISigilBundle> connected = graph.getTargets( selected );
+
+                highlightLinks( graph, selected, connected );
+                highlightBundles( graph, selected, connected );
+            }
+            else if ( sel instanceof Link )
+            {
+                GraphConnection c = ( GraphConnection ) findGraphItem( sel );
+                if ( c != null )
+                {
+                    c.unhighlight();
+                    c.setHighlightColor( ColorConstants.blue );
+                    c.highlight();
+                }
+            }
+        }
+        else
+        {
+            // TODO clear highlights...
+        }
+    }
+
+
+    private void highlightBundles( BundleGraph graph, ISigilBundle selected, Set<ISigilBundle> connected )
+    {
+        for ( ISigilBundle bundle : graph.getBundles() )
+        {
+            GraphNode node = ( GraphNode ) findGraphItem( bundle );
+            if ( node != null )
+            {
+                node.unhighlight();
+
+                if ( bundle == selected )
+                {
+                    node.setHighlightColor( ColorConstants.yellow );
+                    node.highlight();
+                }
+                else if ( view.isDisplayed( BundleResolverView.DEPENDENTS ) )
+                {
+                    if ( connected.contains( bundle ) )
+                    {
+                        node.setHighlightColor( ColorConstants.lightBlue );
+                        node.highlight();
+                    }
+                }
+            }
+        }
+    }
+
+
+    private void highlightLinks( BundleGraph graph, ISigilBundle selected, Set<ISigilBundle> connected )
+    {
+        for ( Link l : graph.getLinks() )
+        {
+            GraphConnection c = ( GraphConnection ) findGraphItem( l );
+            if ( c != null )
+            {
+                c.unhighlight();
+
+                if ( view.isDisplayed( BundleResolverView.DEPENDENTS ) )
+                {
+                    if ( l.getSource() == selected && connected.contains( l.getTarget() ) )
+                    {
+                        c.setHighlightColor( ColorConstants.lightBlue );
+                        c.highlight();
+                    }
+                }
+            }
+        }
+    }
+
+
+    private GraphItem findGraphItem( Object l )
+    {
+        try
+        {
+            return view.getGraphViewer().findGraphItem( l );
+        }
+        catch ( ArrayIndexOutOfBoundsException e )
+        {
+            // temporary fix for issue 
+            // https://bugs.eclipse.org/bugs/show_bug.cgi?id=242523
+            return null;
+        }
+    }
 
 }

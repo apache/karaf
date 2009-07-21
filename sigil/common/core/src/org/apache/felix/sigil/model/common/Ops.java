@@ -19,26 +19,30 @@
 
 package org.apache.felix.sigil.model.common;
 
-public enum Ops {
+
+public enum Ops
+{
     EQ, GE, LE, GT, LT, APPROX;
 
     @Override
-    public String toString() {
-        switch (this) {
-        case EQ:
-            return "=";
-        case GE:
-            return ">=";
-        case LE:
-            return "<=";
-        case GT:
-            return ">";
-        case LT:
-            return "<";
-        case APPROX:
-            return "~=";
-        default:
-            return super.toString();
+    public String toString()
+    {
+        switch ( this )
+        {
+            case EQ:
+                return "=";
+            case GE:
+                return ">=";
+            case LE:
+                return "<=";
+            case GT:
+                return ">";
+            case LT:
+                return "<";
+            case APPROX:
+                return "~=";
+            default:
+                return super.toString();
         }
     }
 

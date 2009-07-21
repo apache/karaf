@@ -19,21 +19,28 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.util;
 
+
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.graphics.Image;
 
-public class ColumnModelLabelProvider extends ColumnLabelProvider {
 
-	private ModelLabelProvider provider = new ModelLabelProvider();
-	
-	@Override
-	public Image getImage(Object element) {
-		return provider.getImage(element);
-	}
+public class ColumnModelLabelProvider extends ColumnLabelProvider
+{
 
-	@Override
-	public String getText(Object element) {
-		return provider.getText(element);
-	}
+    private ModelLabelProvider provider = new ModelLabelProvider();
+
+
+    @Override
+    public Image getImage( Object element )
+    {
+        return provider.getImage( element );
+    }
+
+
+    @Override
+    public String getText( Object element )
+    {
+        return provider.getText( element );
+    }
 
 }

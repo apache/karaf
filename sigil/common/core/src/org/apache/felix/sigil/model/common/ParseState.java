@@ -19,13 +19,16 @@
 
 package org.apache.felix.sigil.model.common;
 
+
 import java.io.Serializable;
+
 
 /**
  * @author dave
  * 
  */
-class ParseState implements Serializable {
+class ParseState implements Serializable
+{
     /**
      * 
      */
@@ -35,48 +38,67 @@ class ParseState implements Serializable {
 
     String str;
 
-    ParseState(String str) {
+
+    ParseState( String str )
+    {
         this.str = str;
     }
 
-    public boolean lookingAt(String start) {
-        return str.substring(pos).startsWith(start);
+
+    public boolean lookingAt( String start )
+    {
+        return str.substring( pos ).startsWith( start );
     }
 
-    public CharSequence skip(int n) {
+
+    public CharSequence skip( int n )
+    {
         int end = pos + n < str.length() ? pos + n : str.length();
         int start = pos;
         pos = end;
-        return str.subSequence(start, end);
+        return str.subSequence( start, end );
     }
 
-    public char read() {
-        char ch = str.charAt(pos);
-        if (pos < str.length()) {
+
+    public char read()
+    {
+        char ch = str.charAt( pos );
+        if ( pos < str.length() )
+        {
             pos++;
         }
         return ch;
     }
 
-    public char readAndSkipWhiteSpace() {
+
+    public char readAndSkipWhiteSpace()
+    {
         char ch = read();
         skipWhitespace();
         return ch;
     }
 
-    char peek() {
-        if (isEndOfString()) {
-            return (char) -1;
+
+    char peek()
+    {
+        if ( isEndOfString() )
+        {
+            return ( char ) -1;
         }
-        return str.charAt(pos);
+        return str.charAt( pos );
     }
 
-    boolean isEndOfString() {
+
+    boolean isEndOfString()
+    {
         return pos == str.length();
     }
 
-    void skipWhitespace() {
-        while (pos < str.length() && Character.isWhitespace(str.charAt(pos))) {
+
+    void skipWhitespace()
+    {
+        while ( pos < str.length() && Character.isWhitespace( str.charAt( pos ) ) )
+        {
             pos++;
         }
     }

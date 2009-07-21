@@ -19,11 +19,16 @@
 
 package org.apache.felix.sigil.ivy;
 
+
 import org.apache.felix.sigil.model.IModelElement;
 import org.apache.felix.sigil.repository.IResolution;
 import org.apache.felix.sigil.repository.ResolutionException;
 
-public interface IBldResolver {
-	IResolution resolveOrFail(IModelElement element, boolean transitive) throws ResolutionException;
-	IResolution resolve(IModelElement element, boolean transitive);
+
+public interface IBldResolver
+{
+    IResolution resolveOrFail( IModelElement element, boolean transitive ) throws ResolutionException;
+
+
+    IResolution resolve( IModelElement element, boolean transitive );
 }

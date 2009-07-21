@@ -19,47 +19,57 @@
 
 package org.apache.felix.sigil.model.osgi;
 
+
 import org.apache.felix.sigil.model.IRequirementModelElement;
 
-public interface IPackageImport extends IPackageModelElement, IVersionRangeModelElement, IRequirementModelElement, Comparable<IPackageImport> {
-	/**
-	 * indicates whether the OSGi attribute "resolution=optional" is specified.
-	 */
-	boolean isOptional();
-	
-	void setOptional(boolean optional);
 
-	/**
-	 * indicates whether import is needed at compile-time.
-	 * Default true. Used in conjunction with OSGiHeader.ALWAYS,
-	 * to add an OSGI import, without creating a dependency.
-	 */
-	boolean isDependency();
-	
-	void setDependency(boolean dependency);
-	
-	/**
-	 * indicates whether import should be added to OSGi Package-Import header.
-	 * Default: AUTO.
-	 */
-	OSGiImport getOSGiImport();
-	
-	void setOSGiImport(OSGiImport osgiImport);
-	
-	enum OSGiImport {
-		/**
-		 * only add to OSGi header, if it appears to be needed.
-		 */
-		AUTO,
-		
-		/**
-		 * always add to OSGi header, even if it appears unnecessary.
-		 */
-		ALWAYS,
-		
-		/**
-		 * never add to OSGi header.
-		 */
-		NEVER
-	}
+public interface IPackageImport extends IPackageModelElement, IVersionRangeModelElement, IRequirementModelElement,
+    Comparable<IPackageImport>
+{
+    /**
+     * indicates whether the OSGi attribute "resolution=optional" is specified.
+     */
+    boolean isOptional();
+
+
+    void setOptional( boolean optional );
+
+
+    /**
+     * indicates whether import is needed at compile-time.
+     * Default true. Used in conjunction with OSGiHeader.ALWAYS,
+     * to add an OSGI import, without creating a dependency.
+     */
+    boolean isDependency();
+
+
+    void setDependency( boolean dependency );
+
+
+    /**
+     * indicates whether import should be added to OSGi Package-Import header.
+     * Default: AUTO.
+     */
+    OSGiImport getOSGiImport();
+
+
+    void setOSGiImport( OSGiImport osgiImport );
+
+    enum OSGiImport
+    {
+        /**
+         * only add to OSGi header, if it appears to be needed.
+         */
+        AUTO,
+
+        /**
+         * always add to OSGi header, even if it appears unnecessary.
+         */
+        ALWAYS,
+
+        /**
+         * never add to OSGi header.
+         */
+        NEVER
+    }
 }

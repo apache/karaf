@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.internal.repository;
 
+
 import java.io.File;
 
 import org.apache.felix.sigil.ui.eclipse.ui.wizard.repository.RepositoryWizard;
@@ -29,43 +30,56 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 
-public class FileSystemRepositoryWizardPage extends RepositoryWizardPage
-		implements IWizardPage {
 
-	private DirectoryFieldEditor dirEditor;
+public class FileSystemRepositoryWizardPage extends RepositoryWizardPage implements IWizardPage
+{
 
-	protected FileSystemRepositoryWizardPage(RepositoryWizard parent) {
-		super("File System Repository", parent);
-	}
+    private DirectoryFieldEditor dirEditor;
 
-	@Override
-	public void createFieldEditors() {
-		dirEditor = new DirectoryFieldEditor("dir", "Directory:", getFieldEditorParent() );
-		dirEditor.getTextControl( getFieldEditorParent() ).addModifyListener( new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				checkPageComplete();
-			} 
-		} );
-		
-		addField( dirEditor );
-		addField(new BooleanFieldEditor("recurse", "Recurse:", getFieldEditorParent() ) );
-	}
 
-	@Override
-	protected void checkPageComplete() {
-		super.checkPageComplete();
-		if ( isPageComplete() ) {
-			setPageComplete(dirEditor.getStringValue().length() > 0);
-			if ( isPageComplete() ) {
-				if ( new File( dirEditor.getStringValue()).isDirectory() ) {
-					setPageComplete(true);
-					setErrorMessage(null);
-				}
-				else {
-					setPageComplete(false);
-					setErrorMessage("Invalid directory");
-				}
-			}
-		}
-	}
+    protected FileSystemRepositoryWizardPage( RepositoryWizard parent )
+    {
+        super( "File System Repository", parent );
+    }
+
+
+    @Override
+    public void createFieldEditors()
+    {
+        dirEditor = new DirectoryFieldEditor( "dir", "Directory:", getFieldEditorParent() );
+        dirEditor.getTextControl( getFieldEditorParent() ).addModifyListener( new ModifyListener()
+        {
+            public void modifyText( ModifyEvent e )
+            {
+                checkPageComplete();
+            }
+        } );
+
+        addField( dirEditor );
+        addField( new BooleanFieldEditor( "recurse", "Recurse:", getFieldEditorParent() ) );
+    }
+
+
+    @Override
+    protected void checkPageComplete()
+    {
+        super.checkPageComplete();
+        if ( isPageComplete() )
+        {
+            setPageComplete( dirEditor.getStringValue().length() > 0 );
+            if ( isPageComplete() )
+            {
+                if ( new File( dirEditor.getStringValue() ).isDirectory() )
+                {
+                    setPageComplete( true );
+                    setErrorMessage( null );
+                }
+                else
+                {
+                    setPageComplete( false );
+                    setErrorMessage( "Invalid directory" );
+                }
+            }
+        }
+    }
 }

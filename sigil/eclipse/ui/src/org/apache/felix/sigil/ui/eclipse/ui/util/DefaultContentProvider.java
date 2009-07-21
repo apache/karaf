@@ -19,14 +19,20 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.util;
 
+
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
-public class DefaultContentProvider implements IContentProvider {
 
-	public void dispose() {
-	}
+public class DefaultContentProvider implements IContentProvider
+{
 
-	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-	}
+    public void dispose()
+    {
+    }
+
+
+    public void inputChanged( Viewer viewer, Object oldInput, Object newInput )
+    {
+    }
 }

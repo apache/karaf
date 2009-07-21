@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.classpath;
 
+
 import org.apache.felix.sigil.eclipse.SigilCore;
 import org.apache.felix.sigil.eclipse.job.ThreadProgressMonitor;
 import org.apache.felix.sigil.eclipse.model.project.ISigilProjectModel;
@@ -29,67 +30,88 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 
+
 /**
  * @author dave
  *
  */
-public class SigilClassPathContainer implements IClasspathContainer {
+public class SigilClassPathContainer implements IClasspathContainer
+{
 
     private IClasspathEntry[] entries;
     private ISigilProjectModel sigil;
 
-    public SigilClassPathContainer(ISigilProjectModel sigil) {
-    	this.sigil = sigil;
-	}
 
-	/* (non-Javadoc)
+    public SigilClassPathContainer( ISigilProjectModel sigil )
+    {
+        this.sigil = sigil;
+    }
+
+
+    /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IClasspathContainer#getClasspathEntries()
      */
-    public IClasspathEntry[] getClasspathEntries() {
-        if ( entries == null ) {
-        	buildClassPathEntries();
+    public IClasspathEntry[] getClasspathEntries()
+    {
+        if ( entries == null )
+        {
+            buildClassPathEntries();
         }
-        
+
         return entries;
     }
+
 
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IClasspathContainer#getDescription()
      */
-    public String getDescription() {
+    public String getDescription()
+    {
         return "Bundle Context Classpath";
     }
+
 
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IClasspathContainer#getKind()
      */
-    public int getKind() {
+    public int getKind()
+    {
         return K_SYSTEM;
     }
+
 
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IClasspathContainer#getPath()
      */
-    public IPath getPath() {
+    public IPath getPath()
+    {
         return new Path( SigilCore.CLASSPATH_CONTAINER_PATH );
     }
+
 
     /**
      * @return
      * @throws CoreException 
      * @throws CoreException 
      */
-    private void buildClassPathEntries() {
-		try {
-			IProgressMonitor monitor = ThreadProgressMonitor.getProgressMonitor();
-			entries = sigil.findExternalClasspath(monitor).toArray( new IClasspathEntry[0] );
-		} catch (CoreException e) {
-    		SigilCore.error( "Failed to build classpath entries", e);
-		}
-		finally {
-			if ( entries == null ) {
-	    		entries = new IClasspathEntry[] {};
-			}
-		}
+    private void buildClassPathEntries()
+    {
+        try
+        {
+            IProgressMonitor monitor = ThreadProgressMonitor.getProgressMonitor();
+            entries = sigil.findExternalClasspath( monitor ).toArray( new IClasspathEntry[0] );
+        }
+        catch ( CoreException e )
+        {
+            SigilCore.error( "Failed to build classpath entries", e );
+        }
+        finally
+        {
+            if ( entries == null )
+            {
+                entries = new IClasspathEntry[]
+                    {};
+            }
+        }
     }
 }

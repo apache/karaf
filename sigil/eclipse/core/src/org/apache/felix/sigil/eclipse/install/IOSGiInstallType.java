@@ -19,50 +19,61 @@
 
 package org.apache.felix.sigil.eclipse.install;
 
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.swt.graphics.Image;
 
+
 //import org.eclipse.swt.graphics.Image;
 
-public interface IOSGiInstallType {
-	/**
-	 * @return
-	 */
-	String getName();
+public interface IOSGiInstallType
+{
+    /**
+     * @return
+     */
+    String getName();
 
-	/**
-	 * 
-	 * @return
-	 */
-	String getVersion();
-	
-	/**
-	 * @return
-	 */
-	String getMainClass();
-	
-	/**
-	 * @return
-	 */
-	String[] getClassPath();
 
-	/**
-	 * @return
-	 */
-	IPath getSourceLocation();
-	
-	/**
-	 * @return
-	 */
-	IPath getJavaDocLocation();
-	
-	/**
-	 * Return the paths of any bundles that are started by default in this OSGi instance.
-	 * @return
-	 */
-	IPath[] getDefaultBundleLocations();
+    /**
+     * 
+     * @return
+     */
+    String getVersion();
 
-	String getId();
 
-	Image getIcon();
+    /**
+     * @return
+     */
+    String getMainClass();
+
+
+    /**
+     * @return
+     */
+    String[] getClassPath();
+
+
+    /**
+     * @return
+     */
+    IPath getSourceLocation();
+
+
+    /**
+     * @return
+     */
+    IPath getJavaDocLocation();
+
+
+    /**
+     * Return the paths of any bundles that are started by default in this OSGi instance.
+     * @return
+     */
+    IPath[] getDefaultBundleLocations();
+
+
+    String getId();
+
+
+    Image getIcon();
 }

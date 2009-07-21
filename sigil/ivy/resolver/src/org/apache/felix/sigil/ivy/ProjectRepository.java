@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ivy;
 
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -46,75 +47,96 @@ import org.apache.ivy.core.module.id.ModuleRevisionId;
 
 import org.osgi.framework.Version;
 
-public class ProjectRepository extends AbstractBundleRepository {
+
+public class ProjectRepository extends AbstractBundleRepository
+{
     private ArrayList<ISigilBundle> bundles;
     private ArrayList<ISigilBundle> wildBundles;
     private String projectFilePattern;
 
-    /* package */ProjectRepository(String id, String projectFilePattern) {
-        super(id);
-        this.projectFilePattern = projectFilePattern.replaceAll("\\[sigilproject\\]",
-                IBldProject.PROJECT_FILE);
+
+    /* package */ProjectRepository( String id, String projectFilePattern )
+    {
+        super( id );
+        this.projectFilePattern = projectFilePattern.replaceAll( "\\[sigilproject\\]", IBldProject.PROJECT_FILE );
     }
 
+
     @Override
-    public void accept(IRepositoryVisitor visitor, int options) {
-        for (ISigilBundle b : getBundles()) {
-            if (!visitor.visit(b)) {
+    public void accept( IRepositoryVisitor visitor, int options )
+    {
+        for ( ISigilBundle b : getBundles() )
+        {
+            if ( !visitor.visit( b ) )
+            {
                 break;
             }
         }
     }
 
+
     // override to provide fuzzy matching for wild-card exports.
     @Override
-    public Collection<ISigilBundle> findAllProviders(final IPackageImport pi, int options) {
-        return findProviders(pi, options, false);
+    public Collection<ISigilBundle> findAllProviders( final IPackageImport pi, int options )
+    {
+        return findProviders( pi, options, false );
     }
 
+
     @Override
-    public ISigilBundle findProvider(IPackageImport pi, int options) {
-        Collection<ISigilBundle> found = findProviders(pi, options, true);
+    public ISigilBundle findProvider( IPackageImport pi, int options )
+    {
+        Collection<ISigilBundle> found = findProviders( pi, options, true );
         return found.isEmpty() ? null : found.iterator().next();
     }
 
-    private Collection<ISigilBundle> findProviders(final IPackageImport pi, int options,
-            boolean findFirst) {
+
+    private Collection<ISigilBundle> findProviders( final IPackageImport pi, int options, boolean findFirst )
+    {
         ArrayList<ISigilBundle> found = new ArrayList<ISigilBundle>();
-        ILicensePolicy policy = findPolicy(pi);
+        ILicensePolicy policy = findPolicy( pi );
         String name = pi.getPackageName();
         VersionRange versions = pi.getVersions();
 
         // find exact match(es)
-        for (ISigilBundle bundle : getBundles()) {
-            if (policy.accept(bundle)) {
-                for (IPackageExport exp : bundle.getBundleInfo().getExports()) {
-                    if (name.equals(exp.getPackageName())
-                            && versions.contains(exp.getVersion())) {
-                        found.add(bundle);
-                        if (findFirst)
+        for ( ISigilBundle bundle : getBundles() )
+        {
+            if ( policy.accept( bundle ) )
+            {
+                for ( IPackageExport exp : bundle.getBundleInfo().getExports() )
+                {
+                    if ( name.equals( exp.getPackageName() ) && versions.contains( exp.getVersion() ) )
+                    {
+                        found.add( bundle );
+                        if ( findFirst )
                             return found;
                     }
                 }
             }
         }
 
-        if (!found.isEmpty())
+        if ( !found.isEmpty() )
             return found;
 
         // find best fuzzy match
         ISigilBundle fuzzyMatch = null;
         int fuzzyLen = 0;
 
-        for (ISigilBundle bundle : getWildBundles()) {
-            if (policy.accept(bundle)) {
-                for (IPackageExport exp : bundle.getBundleInfo().getExports()) {
+        for ( ISigilBundle bundle : getWildBundles() )
+        {
+            if ( policy.accept( bundle ) )
+            {
+                for ( IPackageExport exp : bundle.getBundleInfo().getExports() )
+                {
                     String export = exp.getPackageName();
-                    if (export.endsWith("*")) {
-                        String export1 = export.substring(0, export.length() - 1);
-                        if ((name.startsWith(export1) || export1.equals(name + "."))
-                                && versions.contains(exp.getVersion())) {
-                            if (export1.length() > fuzzyLen) {
+                    if ( export.endsWith( "*" ) )
+                    {
+                        String export1 = export.substring( 0, export.length() - 1 );
+                        if ( ( name.startsWith( export1 ) || export1.equals( name + "." ) )
+                            && versions.contains( exp.getVersion() ) )
+                        {
+                            if ( export1.length() > fuzzyLen )
+                            {
                                 fuzzyLen = export1.length();
                                 fuzzyMatch = bundle;
                             }
@@ -124,65 +146,89 @@ public class ProjectRepository extends AbstractBundleRepository {
             }
         }
 
-        if (fuzzyMatch != null)
-            found.add(fuzzyMatch);
+        if ( fuzzyMatch != null )
+            found.add( fuzzyMatch );
 
         return found;
     }
 
-    private synchronized void init() {
-        System.out.println("Sigil: loading Project Repository: " + projectFilePattern);
+
+    private synchronized void init()
+    {
+        System.out.println( "Sigil: loading Project Repository: " + projectFilePattern );
 
         ArrayList<File> projects = new ArrayList<File>();
 
-        for (String pattern : projectFilePattern.split("\\s+")) {
-            try {
-                Collection<File> files = FindUtil.findFiles(pattern);
-                if (files.isEmpty()) {
-                    Log.warn("ProjectRepository: no projects match: " + pattern);
-                } else {
-                    projects.addAll(files);
+        for ( String pattern : projectFilePattern.split( "\\s+" ) )
+        {
+            try
+            {
+                Collection<File> files = FindUtil.findFiles( pattern );
+                if ( files.isEmpty() )
+                {
+                    Log.warn( "ProjectRepository: no projects match: " + pattern );
                 }
-            } catch (IOException e) {
+                else
+                {
+                    projects.addAll( files );
+                }
+            }
+            catch ( IOException e )
+            {
                 // pattern root dir does not exist
-                Log.error("ProjectRepository: " + pattern + ": " + e.getMessage());
+                Log.error( "ProjectRepository: " + pattern + ": " + e.getMessage() );
             }
         }
 
-        if (projects.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "ProjectRepository: no projects found using pattern: "
-                            + projectFilePattern);
+        if ( projects.isEmpty() )
+        {
+            throw new IllegalArgumentException( "ProjectRepository: no projects found using pattern: "
+                + projectFilePattern );
         }
 
         bundles = new ArrayList<ISigilBundle>();
 
-        for (File proj : projects) {
-            try {
-                addBundles(proj, bundles);
-            } catch (IOException e) {
-                Log.warn("Skipping project: " + proj + ": " + e.getMessage());
-            } catch (ParseException e) {
-                Log.warn("Skipping project: " + proj + ": " + e.getMessage());
+        for ( File proj : projects )
+        {
+            try
+            {
+                addBundles( proj, bundles );
+            }
+            catch ( IOException e )
+            {
+                Log.warn( "Skipping project: " + proj + ": " + e.getMessage() );
+            }
+            catch ( ParseException e )
+            {
+                Log.warn( "Skipping project: " + proj + ": " + e.getMessage() );
             }
         }
     }
 
-    private List<ISigilBundle> getBundles() {
-        if (bundles == null) {
+
+    private List<ISigilBundle> getBundles()
+    {
+        if ( bundles == null )
+        {
             init();
         }
         return bundles;
     }
 
-    private List<ISigilBundle> getWildBundles() {
-        if (wildBundles == null) {
+
+    private List<ISigilBundle> getWildBundles()
+    {
+        if ( wildBundles == null )
+        {
             wildBundles = new ArrayList<ISigilBundle>();
-            for (ISigilBundle bundle : getBundles()) {
-                for (IPackageExport exp : bundle.getBundleInfo().getExports()) {
+            for ( ISigilBundle bundle : getBundles() )
+            {
+                for ( IPackageExport exp : bundle.getBundleInfo().getExports() )
+                {
                     String export = exp.getPackageName();
-                    if (export.endsWith("*")) {
-                        wildBundles.add(bundle);
+                    if ( export.endsWith( "*" ) )
+                    {
+                        wildBundles.add( bundle );
                         break;
                     }
                 }
@@ -191,100 +237,125 @@ public class ProjectRepository extends AbstractBundleRepository {
         return wildBundles;
     }
 
-    public void refresh() {
+
+    public void refresh()
+    {
         bundles = null;
         wildBundles = null;
         notifyChange();
     }
 
-    private void addBundles(File file, List<ISigilBundle> list) throws IOException,
-            ParseException {
-        URI uri = file.getCanonicalFile().toURI();
-        IBldProject project = BldFactory.getProject(uri);
 
-        for (IBldBundle bb : project.getBundles()) {
+    private void addBundles( File file, List<ISigilBundle> list ) throws IOException, ParseException
+    {
+        URI uri = file.getCanonicalFile().toURI();
+        IBldProject project = BldFactory.getProject( uri );
+
+        for ( IBldBundle bb : project.getBundles() )
+        {
             IBundleModelElement info = new BundleModelElement();
 
-            for (IPackageExport pexport : bb.getExports()) {
-                info.addExport(pexport);
+            for ( IPackageExport pexport : bb.getExports() )
+            {
+                info.addExport( pexport );
             }
 
-            for (IPackageImport import1 : bb.getImports()) {
-                IPackageImport clone = (IPackageImport) import1.clone();
-                clone.setParent(null);
-                info.addImport(clone);
+            for ( IPackageImport import1 : bb.getImports() )
+            {
+                IPackageImport clone = ( IPackageImport ) import1.clone();
+                clone.setParent( null );
+                info.addImport( clone );
             }
 
-            for (IRequiredBundle require : bb.getRequires()) {
-                IRequiredBundle clone = (IRequiredBundle) require.clone();
-                clone.setParent(null);
-                info.addRequiredBundle(clone);
+            for ( IRequiredBundle require : bb.getRequires() )
+            {
+                IRequiredBundle clone = ( IRequiredBundle ) require.clone();
+                clone.setParent( null );
+                info.addRequiredBundle( clone );
             }
 
-            info.setSymbolicName(bb.getSymbolicName());
+            info.setSymbolicName( bb.getSymbolicName() );
 
-            Version version = new Version(bb.getVersion());
-            info.setVersion(version);
+            Version version = new Version( bb.getVersion() );
+            info.setVersion( version );
 
             ProjectBundle pb = new ProjectBundle();
-            pb.setBundleInfo(info);
-            pb.setId(bb.getId());
+            pb.setBundleInfo( info );
+            pb.setId( bb.getId() );
 
-            ModuleDescriptor md = SigilParser.instance().parseDescriptor(uri.toURL());
+            ModuleDescriptor md = SigilParser.instance().parseDescriptor( uri.toURL() );
 
             ModuleRevisionId mrid = md.getModuleRevisionId();
-            pb.setModule(mrid.getName());
-            pb.setOrg(mrid.getOrganisation());
+            pb.setModule( mrid.getName() );
+            pb.setOrg( mrid.getOrganisation() );
             // XXX: should revision be configurable?
-            pb.setRevision("latest." + md.getStatus());
+            pb.setRevision( "latest." + md.getStatus() );
 
-            list.add(pb);
-            Log.debug("ProjectRepository: added " + pb);
-            Log.debug("ProjectRepository: exports " + bb.getExports());
+            list.add( pb );
+            Log.debug( "ProjectRepository: added " + pb );
+            Log.debug( "ProjectRepository: exports " + bb.getExports() );
         }
     }
 
-    public static class ProjectBundle extends SigilBundle {
+    public static class ProjectBundle extends SigilBundle
+    {
         private String id;
         private String module;
         private String org;
         private String revision;
 
+
         @Override
-        public String toString() {
-            return "ProjectBundle[" + org + "@" + module + (id == null ? "" : "$" + id)
-                    + "#" + revision + "]";
+        public String toString()
+        {
+            return "ProjectBundle[" + org + "@" + module + ( id == null ? "" : "$" + id ) + "#" + revision + "]";
         }
 
-        public String getModule() {
+
+        public String getModule()
+        {
             return module;
         }
 
-        public void setModule(String module) {
+
+        public void setModule( String module )
+        {
             this.module = module;
         }
 
-        public String getId() {
+
+        public String getId()
+        {
             return id;
         }
 
-        public void setId(String id) {
+
+        public void setId( String id )
+        {
             this.id = id;
         }
 
-        public String getRevision() {
+
+        public String getRevision()
+        {
             return revision;
         }
 
-        public void setRevision(String rev) {
+
+        public void setRevision( String rev )
+        {
             this.revision = rev;
         }
 
-        public String getOrg() {
+
+        public String getOrg()
+        {
             return org;
         }
 
-        public void setOrg(String org) {
+
+        public void setOrg( String org )
+        {
             this.org = org;
         }
     }

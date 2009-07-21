@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.editors.project;
 
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -45,118 +46,151 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 import org.eclipse.ui.forms.widgets.TableWrapLayout;
 
-public abstract class BundleDependencySection extends SigilSection {
 
-	private Set<? extends IModelElement> unresolvedElements;
-	
-	protected ProjectTableViewer viewer;
-	private Button add;
-	private Button edit;
-	private Button remove;
+public abstract class BundleDependencySection extends SigilSection
+{
 
-	public BundleDependencySection(SigilPage page, Composite parent, ISigilProjectModel project, Set<IModelElement> unresolvedElements) throws CoreException {
-		super(page, parent, project);
-		viewer.setUnresolvedElements(unresolvedElements);
-	}
-	
-	public BundleDependencySection(SigilPage page, Composite parent, ISigilProjectModel project) throws CoreException {
-		this(page, parent, project, null);
-	}
-	
-	protected abstract String getTitle();
-	
-	protected abstract Label createLabel(Composite parent, FormToolkit toolkit);
-	
-	protected abstract IContentProvider getContentProvider();
+    private Set<? extends IModelElement> unresolvedElements;
 
-	protected abstract void handleAdd();
-	
-	protected abstract void handleEdit();
-	
-	protected abstract void handleRemoved();
-	
-	@Override
-	public void refresh() {
-		super.refresh();
-		viewer.refresh();
-	}
-	
-	protected ISelection getSelection() {
-		return viewer.getSelection();
-	}
+    protected ProjectTableViewer viewer;
+    private Button add;
+    private Button edit;
+    private Button remove;
 
-	@Override
-	protected void createSection(Section section, FormToolkit toolkit) {
-		setTitle( getTitle() );
-		
-		Composite body = createGridBody(2, false, toolkit);
-		
-        Label label = createLabel(body, toolkit);
-        
-        label.setLayoutData( new GridData(SWT.LEFT, SWT.CENTER, true, true, 2, 1 ) );
-        
-		Table bundleTable = toolkit.createTable(body, SWT.MULTI | SWT.FULL_SELECTION | SWT.VIRTUAL | SWT.BORDER);
-		GridData data = new GridData( GridData.FILL_BOTH );
-		data.heightHint = 600;
+
+    public BundleDependencySection( SigilPage page, Composite parent, ISigilProjectModel project,
+        Set<IModelElement> unresolvedElements ) throws CoreException
+    {
+        super( page, parent, project );
+        viewer.setUnresolvedElements( unresolvedElements );
+    }
+
+
+    public BundleDependencySection( SigilPage page, Composite parent, ISigilProjectModel project ) throws CoreException
+    {
+        this( page, parent, project, null );
+    }
+
+
+    protected abstract String getTitle();
+
+
+    protected abstract Label createLabel( Composite parent, FormToolkit toolkit );
+
+
+    protected abstract IContentProvider getContentProvider();
+
+
+    protected abstract void handleAdd();
+
+
+    protected abstract void handleEdit();
+
+
+    protected abstract void handleRemoved();
+
+
+    @Override
+    public void refresh()
+    {
+        super.refresh();
+        viewer.refresh();
+    }
+
+
+    protected ISelection getSelection()
+    {
+        return viewer.getSelection();
+    }
+
+
+    @Override
+    protected void createSection( Section section, FormToolkit toolkit )
+    {
+        setTitle( getTitle() );
+
+        Composite body = createGridBody( 2, false, toolkit );
+
+        Label label = createLabel( body, toolkit );
+
+        label.setLayoutData( new GridData( SWT.LEFT, SWT.CENTER, true, true, 2, 1 ) );
+
+        Table bundleTable = toolkit.createTable( body, SWT.MULTI | SWT.FULL_SELECTION | SWT.VIRTUAL | SWT.BORDER );
+        GridData data = new GridData( GridData.FILL_BOTH );
+        data.heightHint = 600;
         bundleTable.setLayoutData( data );
-        bundleTable.setLinesVisible(false);        
-        createButtons(body, toolkit);        
+        bundleTable.setLinesVisible( false );
+        createButtons( body, toolkit );
         createViewer( bundleTable );
-	}
-	
-	protected void createButtons(Composite body, FormToolkit toolkit) {
-	    Composite buttons = toolkit.createComposite(body);
-	    TableWrapLayout layout = new TableWrapLayout();
-	    layout.numColumns = 1;
-	    layout.topMargin = 0;
-	    layout.leftMargin = 0;
-	    layout.rightMargin = 0;
-	    layout.bottomMargin = 0;
-	    buttons.setLayout( layout );
-	    GridData data = new GridData();
-	    data.verticalAlignment = SWT.TOP;
-	    buttons.setLayoutData(data);
-	    
-	    add = toolkit.createButton(buttons, "Add", SWT.NULL);
-	    add.setLayoutData( new TableWrapData( TableWrapData.FILL ) );
-	    add.addSelectionListener( new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				handleAdd();
-			}        	
-	    } );
-	    
-	    edit = toolkit.createButton(buttons, "Edit", SWT.NULL);
-	    edit.setLayoutData( new TableWrapData( TableWrapData.FILL ) );
-	    edit.addSelectionListener( new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				handleEdit();
-			}        	
-	    } );
-	    
-	    remove = toolkit.createButton(buttons, "Remove", SWT.NULL);
-	    remove.setLayoutData( new TableWrapData( TableWrapData.FILL ) );
-	    remove.addSelectionListener( new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				handleRemoved();
-			}
-	    } );
-	    
-	    setSelected(false);
-	}
+    }
 
-	protected void createViewer(Table bundleTable) {
-	    viewer = new ProjectTableViewer(bundleTable);
-	    viewer.setContentProvider(getContentProvider());  
-	    viewer.addSelectionChangedListener( new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				setSelected(!event.getSelection().isEmpty());
-			}
-	    });
-	}
 
-	private void setSelected(boolean selected) {
-		edit.setEnabled(selected);
-		remove.setEnabled(selected);
-	}
+    protected void createButtons( Composite body, FormToolkit toolkit )
+    {
+        Composite buttons = toolkit.createComposite( body );
+        TableWrapLayout layout = new TableWrapLayout();
+        layout.numColumns = 1;
+        layout.topMargin = 0;
+        layout.leftMargin = 0;
+        layout.rightMargin = 0;
+        layout.bottomMargin = 0;
+        buttons.setLayout( layout );
+        GridData data = new GridData();
+        data.verticalAlignment = SWT.TOP;
+        buttons.setLayoutData( data );
+
+        add = toolkit.createButton( buttons, "Add", SWT.NULL );
+        add.setLayoutData( new TableWrapData( TableWrapData.FILL ) );
+        add.addSelectionListener( new SelectionAdapter()
+        {
+            public void widgetSelected( SelectionEvent e )
+            {
+                handleAdd();
+            }
+        } );
+
+        edit = toolkit.createButton( buttons, "Edit", SWT.NULL );
+        edit.setLayoutData( new TableWrapData( TableWrapData.FILL ) );
+        edit.addSelectionListener( new SelectionAdapter()
+        {
+            public void widgetSelected( SelectionEvent e )
+            {
+                handleEdit();
+            }
+        } );
+
+        remove = toolkit.createButton( buttons, "Remove", SWT.NULL );
+        remove.setLayoutData( new TableWrapData( TableWrapData.FILL ) );
+        remove.addSelectionListener( new SelectionAdapter()
+        {
+            public void widgetSelected( SelectionEvent e )
+            {
+                handleRemoved();
+            }
+        } );
+
+        setSelected( false );
+    }
+
+
+    protected void createViewer( Table bundleTable )
+    {
+        viewer = new ProjectTableViewer( bundleTable );
+        viewer.setContentProvider( getContentProvider() );
+        viewer.addSelectionChangedListener( new ISelectionChangedListener()
+        {
+            public void selectionChanged( SelectionChangedEvent event )
+            {
+                setSelected( !event.getSelection().isEmpty() );
+            }
+        } );
+    }
+
+
+    private void setSelected( boolean selected )
+    {
+        edit.setEnabled( selected );
+        remove.setEnabled( selected );
+    }
 
 }

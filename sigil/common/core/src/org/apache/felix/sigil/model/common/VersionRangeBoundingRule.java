@@ -19,6 +19,8 @@
 
 package org.apache.felix.sigil.model.common;
 
-public enum VersionRangeBoundingRule {
-	Exact, Micro, Minor, Major, Any
+
+public enum VersionRangeBoundingRule
+{
+    Exact, Micro, Minor, Major, Any
 }

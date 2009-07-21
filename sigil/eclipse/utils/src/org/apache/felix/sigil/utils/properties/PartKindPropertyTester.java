@@ -19,32 +19,46 @@
 
 package org.apache.felix.sigil.utils.properties;
 
+
 import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
 
-public class PartKindPropertyTester extends PropertyTester{
 
-	public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
-		IWorkbenchPart part = (IWorkbenchPart) receiver;
-		
-		Object value;
-		if("partKind".equals(property)) {
-			if(part instanceof IEditorPart) {
-				value = "editor";
-			} else if(part instanceof IViewPart) {
-				value = "view";
-			} else {
-				value = null;
-			}
-		} else if("partId".equals(property)) {
-			value = part.getSite().getId();
-		} else {
-			value = null;
-		}
-		
-		return expectedValue.equals(value);
-	}
-	
+public class PartKindPropertyTester extends PropertyTester
+{
+
+    public boolean test( Object receiver, String property, Object[] args, Object expectedValue )
+    {
+        IWorkbenchPart part = ( IWorkbenchPart ) receiver;
+
+        Object value;
+        if ( "partKind".equals( property ) )
+        {
+            if ( part instanceof IEditorPart )
+            {
+                value = "editor";
+            }
+            else if ( part instanceof IViewPart )
+            {
+                value = "view";
+            }
+            else
+            {
+                value = null;
+            }
+        }
+        else if ( "partId".equals( property ) )
+        {
+            value = part.getSite().getId();
+        }
+        else
+        {
+            value = null;
+        }
+
+        return expectedValue.equals( value );
+    }
+
 }

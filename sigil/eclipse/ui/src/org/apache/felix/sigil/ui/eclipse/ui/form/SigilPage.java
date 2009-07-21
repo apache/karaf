@@ -19,13 +19,17 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.form;
 
+
 import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.forms.editor.FormPage;
 
-public class SigilPage extends FormPage {
 
-	public SigilPage(FormEditor editor, String id, String title) {
-		super(editor, id, title);
-	}
-	
+public class SigilPage extends FormPage
+{
+
+    public SigilPage( FormEditor editor, String id, String title )
+    {
+        super( editor, id, title );
+    }
+
 }

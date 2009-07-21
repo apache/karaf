@@ -19,17 +19,25 @@
 
 package org.apache.felix.sigil.model.eclipse;
 
+
 import java.util.Set;
 
 import org.apache.felix.sigil.model.IModelElement;
 import org.eclipse.core.runtime.IPath;
 
-public interface IDownloadJar extends IModelElement {
-	void addEntry(IPath entry);
-	void removeEntry(IPath entry);
-	// XXX bad spelling on purpose so that ModelElementSupport picks up method
-	// TODO fix in ModelElementSupport
-	Set<IPath> getEntrys();
-	
-	void clearEntries();
+
+public interface IDownloadJar extends IModelElement
+{
+    void addEntry( IPath entry );
+
+
+    void removeEntry( IPath entry );
+
+
+    // XXX bad spelling on purpose so that ModelElementSupport picks up method
+    // TODO fix in ModelElementSupport
+    Set<IPath> getEntrys();
+
+
+    void clearEntries();
 }

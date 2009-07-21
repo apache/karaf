@@ -19,28 +19,36 @@
 
 package org.apache.felix.sigil.eclipse.cheatsheets.actions;
 
+
 import org.apache.felix.sigil.ui.eclipse.ui.wizard.project.SigilProjectWizard;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.cheatsheets.ICheatSheetAction;
 import org.eclipse.ui.cheatsheets.ICheatSheetManager;
 
-public class OpenEmptySigilProjectWizardAction extends AbstractNewWizardAction implements ICheatSheetAction {
 
-	private String name;
-	
-	public void run(String[] params, ICheatSheetManager manager) {
-		if ( params != null && params.length > 0 )  {
-			name = params[0];
-		}
-		
-		run();
-	}
+public class OpenEmptySigilProjectWizardAction extends AbstractNewWizardAction implements ICheatSheetAction
+{
 
-	@Override
-	protected INewWizard createWizard() throws CoreException {
-		SigilProjectWizard wizard = new SigilProjectWizard();
-		wizard.setName(name);
-		return wizard;
-	}
+    private String name;
+
+
+    public void run( String[] params, ICheatSheetManager manager )
+    {
+        if ( params != null && params.length > 0 )
+        {
+            name = params[0];
+        }
+
+        run();
+    }
+
+
+    @Override
+    protected INewWizard createWizard() throws CoreException
+    {
+        SigilProjectWizard wizard = new SigilProjectWizard();
+        wizard.setName( name );
+        return wizard;
+    }
 }

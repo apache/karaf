@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.eclipse.model.project;
 
+
 import java.util.Collection;
 
 import org.apache.felix.sigil.config.IBldProject;
@@ -37,6 +38,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.osgi.framework.Version;
 import org.osgi.service.prefs.Preferences;
 
+
 /**
  * Represents a sigil project. To get a reference to a ISigilProjectModel you can use the 
  * helper method {@link BldCore#create(IProject)}.
@@ -44,62 +46,81 @@ import org.osgi.service.prefs.Preferences;
  * @author dave
  *
  */
-public interface ISigilProjectModel extends ICompoundModelElement {
-    
+public interface ISigilProjectModel extends ICompoundModelElement
+{
+
     /**
      * @return
      */
     IProject getProject();
-	
-	// shortcut to getProject().getName()
-	String getName();
-	
-	Preferences getPreferences();
-    
+
+
+    // shortcut to getProject().getName()
+    String getName();
+
+
+    Preferences getPreferences();
+
+
     /**
-	 * 
-	 * @param monitor
-	 *            The progress monitor to use for reporting progress to the
-	 *            user. It is the caller's responsibility to call done() on the
-	 *            given monitor. Accepts null, indicating that no progress
-	 *            should be reported and that the operation cannot be cancelled
-	 * @throws CoreException
-	 */
-	void save(IProgressMonitor monitor) throws CoreException;
-    
-	/**
-	 * @return
-	 */
-	Version getVersion();
-	    
-	String getSymbolicName();
-	
-	ISigilBundle getBundle();
-	
-	void setBundle(ISigilBundle bundle);
-	
-	/**
-	 * @return
-	 */
-	IJavaProject getJavaModel();
-	
-	Collection<ISigilProjectModel> findDependentProjects(IProgressMonitor monitor);
+     * 
+     * @param monitor
+     *            The progress monitor to use for reporting progress to the
+     *            user. It is the caller's responsibility to call done() on the
+     *            given monitor. Accepts null, indicating that no progress
+     *            should be reported and that the operation cannot be cancelled
+     * @throws CoreException
+     */
+    void save( IProgressMonitor monitor ) throws CoreException;
 
-	void resetClasspath(IProgressMonitor monitor) throws CoreException;
-	
-	IPath findBundleLocation() throws CoreException;
 
-	IModelElement findImport(String packageName, IProgressMonitor monitor);
+    /**
+     * @return
+     */
+    Version getVersion();
 
-	boolean isInClasspath(String packageName, IProgressMonitor monitor) throws CoreException;
 
-	boolean isInClasspath(ISigilBundle bundle);
-	
-	boolean isInBundleClasspath(IPackageFragmentRoot root) throws JavaModelException;
-	
-	IPath findOutputLocation() throws CoreException;
+    String getSymbolicName();
 
-	IBldProject getBldProject() throws CoreException;
 
-	Collection<IClasspathEntry> findExternalClasspath(IProgressMonitor monitor) throws CoreException;
+    ISigilBundle getBundle();
+
+
+    void setBundle( ISigilBundle bundle );
+
+
+    /**
+     * @return
+     */
+    IJavaProject getJavaModel();
+
+
+    Collection<ISigilProjectModel> findDependentProjects( IProgressMonitor monitor );
+
+
+    void resetClasspath( IProgressMonitor monitor ) throws CoreException;
+
+
+    IPath findBundleLocation() throws CoreException;
+
+
+    IModelElement findImport( String packageName, IProgressMonitor monitor );
+
+
+    boolean isInClasspath( String packageName, IProgressMonitor monitor ) throws CoreException;
+
+
+    boolean isInClasspath( ISigilBundle bundle );
+
+
+    boolean isInBundleClasspath( IPackageFragmentRoot root ) throws JavaModelException;
+
+
+    IPath findOutputLocation() throws CoreException;
+
+
+    IBldProject getBldProject() throws CoreException;
+
+
+    Collection<IClasspathEntry> findExternalClasspath( IProgressMonitor monitor ) throws CoreException;
 }

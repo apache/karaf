@@ -19,14 +19,25 @@
 
 package org.apache.felix.sigil.core.licence;
 
+
 import java.util.Set;
 import java.util.regex.Pattern;
 
-public interface ILicenseManager {
-	void addLicense(String name, Pattern pattern);
-	void removeLicense(String name);
-	Set<String> getLicenseNames();
-	Pattern getLicensePattern(String name);
-	ILicensePolicy getDefaultPolicy();
-	//ILicensePolicy getPolicy(ISigilProjectModel project);
+
+public interface ILicenseManager
+{
+    void addLicense( String name, Pattern pattern );
+
+
+    void removeLicense( String name );
+
+
+    Set<String> getLicenseNames();
+
+
+    Pattern getLicensePattern( String name );
+
+
+    ILicensePolicy getDefaultPolicy();
+    //ILicensePolicy getPolicy(ISigilProjectModel project);
 }

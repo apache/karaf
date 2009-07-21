@@ -19,15 +19,19 @@
 
 package org.apache.felix.sigil.model.eclipse;
 
+
 import org.apache.felix.sigil.model.IModelElement;
 import org.eclipse.core.runtime.IPath;
+
 
 /**
  * @author dave
  *
  */
-public interface ISCAComposite extends IModelElement {
+public interface ISCAComposite extends IModelElement
+{
     IPath getLocation();
-    
-    void setLocation(IPath location);
+
+
+    void setLocation( IPath location );
 }

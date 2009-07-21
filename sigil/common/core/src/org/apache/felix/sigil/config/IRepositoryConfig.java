@@ -19,18 +19,22 @@
 
 package org.apache.felix.sigil.config;
 
+
 import java.util.Map;
 import java.util.Properties;
 
-public interface IRepositoryConfig {
-	static final String REPOSITORY_PROVIDER = "provider";
-	static final String REPOSITORY_LEVEL = "level";
 
-	/**
-	 * get properties with which to instantiate repositories.
-	 * The key REPOSITORY_PROVIDER will be set to the fully qualified class name of the IRepositoryProvider.
-	 * The key REPOSITORY_LEVEL indicates repository search order.
-	 * @return
-	 */
-	Map<String,Properties> getRepositoryConfig();
+public interface IRepositoryConfig
+{
+    static final String REPOSITORY_PROVIDER = "provider";
+    static final String REPOSITORY_LEVEL = "level";
+
+
+    /**
+     * get properties with which to instantiate repositories.
+     * The key REPOSITORY_PROVIDER will be set to the fully qualified class name of the IRepositoryProvider.
+     * The key REPOSITORY_LEVEL indicates repository search order.
+     * @return
+     */
+    Map<String, Properties> getRepositoryConfig();
 }

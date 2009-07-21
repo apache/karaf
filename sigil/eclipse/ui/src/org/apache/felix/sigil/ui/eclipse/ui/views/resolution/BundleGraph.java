@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.views.resolution;
 
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,79 +31,102 @@ import java.util.Set;
 import org.apache.felix.sigil.model.IModelElement;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 
-public class BundleGraph {
 
-	private HashMap<ISigilBundle, LinkedList<Link>> lookup = new HashMap<ISigilBundle, LinkedList<Link>>();
-	private LinkedList<Link> links = new LinkedList<Link>();
-	private HashSet<ISigilBundle> bundles = new HashSet<ISigilBundle>();
-	
-	public void startResolution(IModelElement requirement) {
-	}
+public class BundleGraph
+{
 
-	public void endResolution(IModelElement requirement, ISigilBundle target) {
-		ISigilBundle source = requirement.getAncestor(ISigilBundle.class);
+    private HashMap<ISigilBundle, LinkedList<Link>> lookup = new HashMap<ISigilBundle, LinkedList<Link>>();
+    private LinkedList<Link> links = new LinkedList<Link>();
+    private HashSet<ISigilBundle> bundles = new HashSet<ISigilBundle>();
 
-		bundles.add(source);
-		bundles.add(target);
 
-		LinkedList<Link> links = lookup.get(source);
+    public void startResolution( IModelElement requirement )
+    {
+    }
 
-		if ( links == null ) {
-			links = new LinkedList<Link>();
-			lookup.put(source, links);
-		}
 
-		Link l = null;
-		for ( Link c : links ) {
-			if ( c.getTarget() == target ) {
-				l = c;
-				break;
-			}
-		}
+    public void endResolution( IModelElement requirement, ISigilBundle target )
+    {
+        ISigilBundle source = requirement.getAncestor( ISigilBundle.class );
 
-		if ( l == null ) {
-			l = new Link(source, target);
-			links.add(l);
-			this.links.add(l);
-		}
+        bundles.add( source );
+        bundles.add( target );
 
-		l.addRequirement(requirement);
-	}
-	
-	public List<Link> getLinks() {
-		return links;
-	}
+        LinkedList<Link> links = lookup.get( source );
 
-	public Set<ISigilBundle> getBundles() {
-		return bundles;
-	}
+        if ( links == null )
+        {
+            links = new LinkedList<Link>();
+            lookup.put( source, links );
+        }
 
-	public Set<ISigilBundle> getTargets(ISigilBundle bundle) {
-		HashSet<ISigilBundle> targets = new HashSet<ISigilBundle>();
-		
-		for ( Link l : getLinks(bundle) ) {
-			targets.add(l.getTarget());
-		}
-		
-		return targets;
-	}
+        Link l = null;
+        for ( Link c : links )
+        {
+            if ( c.getTarget() == target )
+            {
+                l = c;
+                break;
+            }
+        }
 
-	public List<Link> getLinks(ISigilBundle selected) {
-		List<Link> l = lookup.get(selected);
-		return l == null ? Collections.<Link>emptyList() : l;
-	}
+        if ( l == null )
+        {
+            l = new Link( source, target );
+            links.add( l );
+            this.links.add( l );
+        }
 
-	public List<Link> getDependentLinks(ISigilBundle bundle) {
-		ArrayList<Link> found = new ArrayList<Link>(links.size());
-		
-		for  (Link l : links) {
-			if ( l.getTarget() == bundle ) {
-				found.add( l );
-			}
-		}
-		
-		found.trimToSize();
-		
-		return found;
-	}
+        l.addRequirement( requirement );
+    }
+
+
+    public List<Link> getLinks()
+    {
+        return links;
+    }
+
+
+    public Set<ISigilBundle> getBundles()
+    {
+        return bundles;
+    }
+
+
+    public Set<ISigilBundle> getTargets( ISigilBundle bundle )
+    {
+        HashSet<ISigilBundle> targets = new HashSet<ISigilBundle>();
+
+        for ( Link l : getLinks( bundle ) )
+        {
+            targets.add( l.getTarget() );
+        }
+
+        return targets;
+    }
+
+
+    public List<Link> getLinks( ISigilBundle selected )
+    {
+        List<Link> l = lookup.get( selected );
+        return l == null ? Collections.<Link> emptyList() : l;
+    }
+
+
+    public List<Link> getDependentLinks( ISigilBundle bundle )
+    {
+        ArrayList<Link> found = new ArrayList<Link>( links.size() );
+
+        for ( Link l : links )
+        {
+            if ( l.getTarget() == bundle )
+            {
+                found.add( l );
+            }
+        }
+
+        found.trimToSize();
+
+        return found;
+    }
 }

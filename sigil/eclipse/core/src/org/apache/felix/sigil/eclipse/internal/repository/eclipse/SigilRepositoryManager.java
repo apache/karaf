@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.eclipse.internal.repository.eclipse;
 
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -47,146 +48,197 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
-public class SigilRepositoryManager extends AbstractRepositoryManager implements IRepositoryManager, IPropertyChangeListener {
-	
-	private final String repositorySet;
-	
-	private HashMap<String, RepositoryCache> cachedRepositories = new HashMap<String, RepositoryCache>();
-	
-	class RepositoryCache {
-		private final Properties pref;
-		private final IBundleRepository repo;
 
-		RepositoryCache(Properties pref, IBundleRepository repo) {
-			this.pref = pref;
-			this.repo = repo;
-		}
-	}
-	
-	public SigilRepositoryManager(String repositorySet) {
-		this.repositorySet = repositorySet;
-	}
-	
-	@Override
-	public void initialise() {
-		super.initialise();
-		SigilCore.getDefault().getPreferenceStore().addPropertyChangeListener(this);
-	}
-	
-	public void destroy() {
-		IPreferenceStore prefs = SigilCore.getDefault().getPreferenceStore();
-		if ( prefs != null ) {
-			prefs.removePropertyChangeListener(this);
-		}
-	}
-		
-	@Override
-	protected void loadRepositories() {
-		IPreferenceStore prefs = SigilCore.getDefault().getPreferenceStore();
-		
-		ArrayList<IBundleRepository> repos = new ArrayList<IBundleRepository>();
-		HashSet<String> ids = new HashSet<String>();
-		
-		for ( IRepositoryModel repo : findRepositories() ) {
-			try {
-				IRepositoryProvider provider = findProvider( repo.getType() );
-				String id = repo.getId();
-				IBundleRepository repoImpl = null;
-				if ( repo.getType().isDynamic() ) {
-					String instance = "repository." + repo.getType().getId() + "." + id; 
-					String loc = prefs.getString( instance + ".loc" );
-					Properties pref = loadPreferences(loc);
-					repoImpl = loadRepository(id, pref, provider);
-				}
-				else {
-					repoImpl = loadRepository(id, null, provider);
-				}
-				
-				repos.add( repoImpl );
-				ids.add( id );
-			} catch (Exception e) {
-				SigilCore.error( "Failed to load repository for " + repo, e);
-			}
-		}
+public class SigilRepositoryManager extends AbstractRepositoryManager implements IRepositoryManager,
+    IPropertyChangeListener
+{
 
-		setRepositories(repos.toArray( new IBundleRepository[repos.size()] ) );
-		
-		for ( Iterator<String> i = cachedRepositories.keySet().iterator(); i.hasNext(); ) {
-			if ( !ids.contains(i.next()) ) {
-				i.remove();
-			}
-		}
-	}
+    private final String repositorySet;
 
-	private IRepositoryProvider findProvider(IRepositoryType repositoryType) throws CoreException {
-		String id = repositoryType.getId();
-		
-		IExtensionRegistry registry = Platform.getExtensionRegistry();
-		IExtensionPoint p = registry.getExtensionPoint(SigilCore.REPOSITORY_PROVIDER_EXTENSION_POINT_ID);
-		
-		for ( IExtension e : p.getExtensions() ) {
-			for ( IConfigurationElement c : e.getConfigurationElements() ) {
-				if ( id.equals( c.getAttribute("id") ) ) {
-					IRepositoryProvider provider = (IRepositoryProvider) c.createExecutableExtension("class");
-					return provider;
-				}
-			}
-		}
+    private HashMap<String, RepositoryCache> cachedRepositories = new HashMap<String, RepositoryCache>();
 
-		return null;
-	}
+    class RepositoryCache
+    {
+        private final Properties pref;
+        private final IBundleRepository repo;
 
-	protected IRepositoryModel[] findRepositories() {
-		if ( repositorySet == null ) {
-			return SigilCore.getRepositoryConfiguration().getDefaultRepositorySet().getRepositories();
-		}
-		else {
-			IRepositorySet set = SigilCore.getRepositoryConfiguration().getRepositorySet(repositorySet);
-			return set.getRepositories();
-		}	
-	}
 
-	private IBundleRepository loadRepository(String id, Properties pref, IRepositoryProvider provider) throws RepositoryException {
-		try {
-			if ( pref == null ) {
-				pref = new Properties();
-			}
+        RepositoryCache( Properties pref, IBundleRepository repo )
+        {
+            this.pref = pref;
+            this.repo = repo;
+        }
+    }
 
-			RepositoryCache cache = cachedRepositories.get(id);
-			
-			if ( cache == null || !cache.pref.equals(pref) ) {
-				IBundleRepository repo = provider.createRepository(id, pref);
-				cache = new RepositoryCache(pref, repo);
-				cachedRepositories.put( id, cache );
-			}
-			
-			return cache.repo;
-		} catch (RuntimeException e) {
-			throw new RepositoryException( "Failed to build repositories", e);
-		}		
-	}
 
-	private Properties loadPreferences(String loc) throws FileNotFoundException, IOException {
-		FileInputStream in = null;
-		try {
-			Properties pref = new Properties();
-			pref.load(new FileInputStream(loc));
-			return pref;
-		}
-		finally {
-			if ( in != null ) {
-				try {
-					in.close();
-				} catch (IOException e) {
-					SigilCore.error( "Failed to close file", e );
-				}
-			}
-		}
-	}
-	
-	public void propertyChange(PropertyChangeEvent event) {
-		if ( event.getProperty().equals( "repository.timestamp" ) ) {
-			loadRepositories();
-		}
-	}	
+    public SigilRepositoryManager( String repositorySet )
+    {
+        this.repositorySet = repositorySet;
+    }
+
+
+    @Override
+    public void initialise()
+    {
+        super.initialise();
+        SigilCore.getDefault().getPreferenceStore().addPropertyChangeListener( this );
+    }
+
+
+    public void destroy()
+    {
+        IPreferenceStore prefs = SigilCore.getDefault().getPreferenceStore();
+        if ( prefs != null )
+        {
+            prefs.removePropertyChangeListener( this );
+        }
+    }
+
+
+    @Override
+    protected void loadRepositories()
+    {
+        IPreferenceStore prefs = SigilCore.getDefault().getPreferenceStore();
+
+        ArrayList<IBundleRepository> repos = new ArrayList<IBundleRepository>();
+        HashSet<String> ids = new HashSet<String>();
+
+        for ( IRepositoryModel repo : findRepositories() )
+        {
+            try
+            {
+                IRepositoryProvider provider = findProvider( repo.getType() );
+                String id = repo.getId();
+                IBundleRepository repoImpl = null;
+                if ( repo.getType().isDynamic() )
+                {
+                    String instance = "repository." + repo.getType().getId() + "." + id;
+                    String loc = prefs.getString( instance + ".loc" );
+                    Properties pref = loadPreferences( loc );
+                    repoImpl = loadRepository( id, pref, provider );
+                }
+                else
+                {
+                    repoImpl = loadRepository( id, null, provider );
+                }
+
+                repos.add( repoImpl );
+                ids.add( id );
+            }
+            catch ( Exception e )
+            {
+                SigilCore.error( "Failed to load repository for " + repo, e );
+            }
+        }
+
+        setRepositories( repos.toArray( new IBundleRepository[repos.size()] ) );
+
+        for ( Iterator<String> i = cachedRepositories.keySet().iterator(); i.hasNext(); )
+        {
+            if ( !ids.contains( i.next() ) )
+            {
+                i.remove();
+            }
+        }
+    }
+
+
+    private IRepositoryProvider findProvider( IRepositoryType repositoryType ) throws CoreException
+    {
+        String id = repositoryType.getId();
+
+        IExtensionRegistry registry = Platform.getExtensionRegistry();
+        IExtensionPoint p = registry.getExtensionPoint( SigilCore.REPOSITORY_PROVIDER_EXTENSION_POINT_ID );
+
+        for ( IExtension e : p.getExtensions() )
+        {
+            for ( IConfigurationElement c : e.getConfigurationElements() )
+            {
+                if ( id.equals( c.getAttribute( "id" ) ) )
+                {
+                    IRepositoryProvider provider = ( IRepositoryProvider ) c.createExecutableExtension( "class" );
+                    return provider;
+                }
+            }
+        }
+
+        return null;
+    }
+
+
+    protected IRepositoryModel[] findRepositories()
+    {
+        if ( repositorySet == null )
+        {
+            return SigilCore.getRepositoryConfiguration().getDefaultRepositorySet().getRepositories();
+        }
+        else
+        {
+            IRepositorySet set = SigilCore.getRepositoryConfiguration().getRepositorySet( repositorySet );
+            return set.getRepositories();
+        }
+    }
+
+
+    private IBundleRepository loadRepository( String id, Properties pref, IRepositoryProvider provider )
+        throws RepositoryException
+    {
+        try
+        {
+            if ( pref == null )
+            {
+                pref = new Properties();
+            }
+
+            RepositoryCache cache = cachedRepositories.get( id );
+
+            if ( cache == null || !cache.pref.equals( pref ) )
+            {
+                IBundleRepository repo = provider.createRepository( id, pref );
+                cache = new RepositoryCache( pref, repo );
+                cachedRepositories.put( id, cache );
+            }
+
+            return cache.repo;
+        }
+        catch ( RuntimeException e )
+        {
+            throw new RepositoryException( "Failed to build repositories", e );
+        }
+    }
+
+
+    private Properties loadPreferences( String loc ) throws FileNotFoundException, IOException
+    {
+        FileInputStream in = null;
+        try
+        {
+            Properties pref = new Properties();
+            pref.load( new FileInputStream( loc ) );
+            return pref;
+        }
+        finally
+        {
+            if ( in != null )
+            {
+                try
+                {
+                    in.close();
+                }
+                catch ( IOException e )
+                {
+                    SigilCore.error( "Failed to close file", e );
+                }
+            }
+        }
+    }
+
+
+    public void propertyChange( PropertyChangeEvent event )
+    {
+        if ( event.getProperty().equals( "repository.timestamp" ) )
+        {
+            loadRepositories();
+        }
+    }
 }

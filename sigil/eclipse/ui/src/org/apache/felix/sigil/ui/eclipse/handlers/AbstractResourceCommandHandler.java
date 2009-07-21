@@ -19,10 +19,13 @@
 
 package org.apache.felix.sigil.ui.eclipse.handlers;
 
+
 import org.eclipse.core.commands.AbstractHandler;
 
-public abstract class AbstractResourceCommandHandler extends AbstractHandler {
 
-	protected abstract IResourceCommandHandler getResourceCommandHandler();
+public abstract class AbstractResourceCommandHandler extends AbstractHandler
+{
+
+    protected abstract IResourceCommandHandler getResourceCommandHandler();
 
 }

@@ -42,94 +42,127 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 
-public class RequiresBundleSection extends BundleDependencySection {
-	
-	public RequiresBundleSection(SigilPage page, Composite parent, ISigilProjectModel project, Set<IModelElement> unresolvedElements) throws CoreException {
-		super( page, parent, project, unresolvedElements );
-	}
-	
-	@Override
-	protected String getTitle() {
-		return "Requires Bundles";
-	}
-	
-	@Override
-	protected Label createLabel(Composite parent, FormToolkit toolkit) {
-		return toolkit.createLabel( parent, "Specify which bundles this bundle depends on." );
-	}
-	
-	@Override
-	protected IContentProvider getContentProvider() {
-		return new DefaultTableProvider() {
-			public Object[] getElements(Object inputElement) {
-				return getBundle().getBundleInfo().getRequiredBundles().toArray();
-			}
-		};
-	}
 
-	protected ISigilBundle getBundle() {
-		return getProjectModel().getBundle();
-	}
+public class RequiresBundleSection extends BundleDependencySection
+{
 
-	@Override
-	protected void handleAdd() {
-		try {
-			NewResourceSelectionDialog<IBundleModelElement> dialog = ResourcesDialogHelper.createRequiredBundleDialog( getSection().getShell(), "Add Required Bundle", getProjectModel(), null, getBundle().getBundleInfo().getRequiredBundles() );
-			
-			if (dialog.open() == Window.OK) {
-				IRequiredBundle required = ModelElementFactory.getInstance().newModelElement( IRequiredBundle.class );
-				required.setSymbolicName(dialog.getSelectedName());
-				required.setVersions(dialog.getSelectedVersions());
-				required.setOptional(dialog.isOptional());
-				
-				getBundle().getBundleInfo().addRequiredBundle(required);
-				refresh();
-				markDirty();
-			}
-		}
-		catch (ModelElementFactoryException e) {
-			SigilCore.error( "Failed to build required bundle", e );
-		}
-	}
+    public RequiresBundleSection( SigilPage page, Composite parent, ISigilProjectModel project,
+        Set<IModelElement> unresolvedElements ) throws CoreException
+    {
+        super( page, parent, project, unresolvedElements );
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	protected void handleEdit() {
-		IStructuredSelection selection = (IStructuredSelection) getSelection();
-		
-		boolean changed = false;
-		
-		if ( !selection.isEmpty() ) {
-			for ( Iterator<IRequiredBundle> i = selection.iterator(); i.hasNext(); ) {	
-				IRequiredBundle requiredBundle = i.next();
-				NewResourceSelectionDialog<IBundleModelElement> dialog = ResourcesDialogHelper.createRequiredBundleDialog(getSection().getShell(), "Edit Imported Package", getProjectModel(), requiredBundle, getBundle().getBundleInfo().getRequiredBundles() );
-				if ( dialog.open() == Window.OK ) {
-					changed = true;
-					requiredBundle.setSymbolicName(dialog.getSelectedName());
-					requiredBundle.setVersions(dialog.getSelectedVersions());
-					requiredBundle.setOptional(dialog.isOptional());
-				}
-			}					
-		}
-		
-		if ( changed ) {
-			refresh();
-			markDirty();
-		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	protected void handleRemoved() {
-		IStructuredSelection selection = (IStructuredSelection) getSelection();
 
-		if ( !selection.isEmpty() ) {
-			for ( Iterator<IRequiredBundle> i = selection.iterator(); i.hasNext(); ) {			
-				getBundle().getBundleInfo().removeRequiredBundle( i.next() );
-			}		
-			
-			refresh();
-			markDirty();
-		}
-	}
+    @Override
+    protected String getTitle()
+    {
+        return "Requires Bundles";
+    }
+
+
+    @Override
+    protected Label createLabel( Composite parent, FormToolkit toolkit )
+    {
+        return toolkit.createLabel( parent, "Specify which bundles this bundle depends on." );
+    }
+
+
+    @Override
+    protected IContentProvider getContentProvider()
+    {
+        return new DefaultTableProvider()
+        {
+            public Object[] getElements( Object inputElement )
+            {
+                return getBundle().getBundleInfo().getRequiredBundles().toArray();
+            }
+        };
+    }
+
+
+    protected ISigilBundle getBundle()
+    {
+        return getProjectModel().getBundle();
+    }
+
+
+    @Override
+    protected void handleAdd()
+    {
+        try
+        {
+            NewResourceSelectionDialog<IBundleModelElement> dialog = ResourcesDialogHelper.createRequiredBundleDialog(
+                getSection().getShell(), "Add Required Bundle", getProjectModel(), null, getBundle().getBundleInfo()
+                    .getRequiredBundles() );
+
+            if ( dialog.open() == Window.OK )
+            {
+                IRequiredBundle required = ModelElementFactory.getInstance().newModelElement( IRequiredBundle.class );
+                required.setSymbolicName( dialog.getSelectedName() );
+                required.setVersions( dialog.getSelectedVersions() );
+                required.setOptional( dialog.isOptional() );
+
+                getBundle().getBundleInfo().addRequiredBundle( required );
+                refresh();
+                markDirty();
+            }
+        }
+        catch ( ModelElementFactoryException e )
+        {
+            SigilCore.error( "Failed to build required bundle", e );
+        }
+    }
+
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected void handleEdit()
+    {
+        IStructuredSelection selection = ( IStructuredSelection ) getSelection();
+
+        boolean changed = false;
+
+        if ( !selection.isEmpty() )
+        {
+            for ( Iterator<IRequiredBundle> i = selection.iterator(); i.hasNext(); )
+            {
+                IRequiredBundle requiredBundle = i.next();
+                NewResourceSelectionDialog<IBundleModelElement> dialog = ResourcesDialogHelper
+                    .createRequiredBundleDialog( getSection().getShell(), "Edit Imported Package", getProjectModel(),
+                        requiredBundle, getBundle().getBundleInfo().getRequiredBundles() );
+                if ( dialog.open() == Window.OK )
+                {
+                    changed = true;
+                    requiredBundle.setSymbolicName( dialog.getSelectedName() );
+                    requiredBundle.setVersions( dialog.getSelectedVersions() );
+                    requiredBundle.setOptional( dialog.isOptional() );
+                }
+            }
+        }
+
+        if ( changed )
+        {
+            refresh();
+            markDirty();
+        }
+    }
+
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected void handleRemoved()
+    {
+        IStructuredSelection selection = ( IStructuredSelection ) getSelection();
+
+        if ( !selection.isEmpty() )
+        {
+            for ( Iterator<IRequiredBundle> i = selection.iterator(); i.hasNext(); )
+            {
+                getBundle().getBundleInfo().removeRequiredBundle( i.next() );
+            }
+
+            refresh();
+            markDirty();
+        }
+    }
 }

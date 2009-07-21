@@ -19,12 +19,16 @@
 
 package org.apache.felix.sigil.model.osgi;
 
+
 import org.apache.felix.sigil.model.common.VersionRange;
 
-public interface IVersionRangeModelElement {
 
-	VersionRange getVersions();
+public interface IVersionRangeModelElement
+{
 
-	void setVersions(VersionRange version);
+    VersionRange getVersions();
+
+
+    void setVersions( VersionRange version );
 
 }

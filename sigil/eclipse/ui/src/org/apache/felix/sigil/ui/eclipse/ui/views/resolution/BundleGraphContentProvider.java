@@ -19,33 +19,45 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.views.resolution;
 
+
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.zest.core.viewers.IGraphContentProvider;
 
-public class BundleGraphContentProvider implements IGraphContentProvider {
 
-	public Object[] getElements(Object input) {
-		BundleGraph graph = (BundleGraph) input;
-		return graph.getLinks().toArray();
-	}
+public class BundleGraphContentProvider implements IGraphContentProvider
+{
 
-	public Object getDestination(Object element) {
-		Link l = (Link) element;
-		return l.isSatisfied() ? l.getTarget() : new Link.Unsatisfied();
-	}
+    public Object[] getElements( Object input )
+    {
+        BundleGraph graph = ( BundleGraph ) input;
+        return graph.getLinks().toArray();
+    }
 
-	public Object getSource(Object element) {
-		Link l = (Link) element;
-		return l.getSource();
-	}
 
-	public void dispose() {
-		// TODO Auto-generated method stub
-		
-	}
+    public Object getDestination( Object element )
+    {
+        Link l = ( Link ) element;
+        return l.isSatisfied() ? l.getTarget() : new Link.Unsatisfied();
+    }
 
-	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		
-	}
+
+    public Object getSource( Object element )
+    {
+        Link l = ( Link ) element;
+        return l.getSource();
+    }
+
+
+    public void dispose()
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+
+    public void inputChanged( Viewer viewer, Object oldInput, Object newInput )
+    {
+
+    }
 
 }

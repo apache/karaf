@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.core.repository;
 
+
 import java.util.ArrayList;
 
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
@@ -26,40 +27,53 @@ import org.apache.felix.sigil.repository.AbstractBundleRepository;
 import org.apache.felix.sigil.repository.IRepositoryVisitor;
 import org.eclipse.core.runtime.IPath;
 
-public class FileSystemRepository extends AbstractBundleRepository {
 
-	private ArrayList<ISigilBundle> bundles;
-	private IPath path;
-	private boolean recurse;
-	
-	public FileSystemRepository(String id, IPath path, boolean recurse) {
-		super(id);
-		this.path = path;
-		this.recurse = recurse;
-	}
+public class FileSystemRepository extends AbstractBundleRepository
+{
 
-	@Override
-	public void accept(IRepositoryVisitor visitor, int options) {
-		synchronized( this ) {
-			if ( bundles == null ) {
-				bundles = new ArrayList<ISigilBundle>();
-				DirectoryHelper.scanBundles(this, bundles, path, null, recurse);
-			}
-		}
-		
-		for ( ISigilBundle b : bundles ) {
-			if ( !visitor.visit(b) ) {
-				break;
-			}
-		}		
-	}
+    private ArrayList<ISigilBundle> bundles;
+    private IPath path;
+    private boolean recurse;
 
-	public void refresh() {
-		synchronized( this ) {
-			bundles = null;
-		}
-		
-		notifyChange();
-	}
+
+    public FileSystemRepository( String id, IPath path, boolean recurse )
+    {
+        super( id );
+        this.path = path;
+        this.recurse = recurse;
+    }
+
+
+    @Override
+    public void accept( IRepositoryVisitor visitor, int options )
+    {
+        synchronized ( this )
+        {
+            if ( bundles == null )
+            {
+                bundles = new ArrayList<ISigilBundle>();
+                DirectoryHelper.scanBundles( this, bundles, path, null, recurse );
+            }
+        }
+
+        for ( ISigilBundle b : bundles )
+        {
+            if ( !visitor.visit( b ) )
+            {
+                break;
+            }
+        }
+    }
+
+
+    public void refresh()
+    {
+        synchronized ( this )
+        {
+            bundles = null;
+        }
+
+        notifyChange();
+    }
 
 }

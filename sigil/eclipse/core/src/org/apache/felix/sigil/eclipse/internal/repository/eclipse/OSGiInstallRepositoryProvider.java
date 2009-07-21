@@ -19,13 +19,17 @@
 
 package org.apache.felix.sigil.eclipse.internal.repository.eclipse;
 
+
 import java.util.Properties;
 
 import org.apache.felix.sigil.repository.IBundleRepository;
 import org.apache.felix.sigil.repository.IRepositoryProvider;
 
-public class OSGiInstallRepositoryProvider implements IRepositoryProvider {
-	public IBundleRepository createRepository(String id, Properties preferences) {
-		return new OSGiInstallRepository(id);
-	}
+
+public class OSGiInstallRepositoryProvider implements IRepositoryProvider
+{
+    public IBundleRepository createRepository( String id, Properties preferences )
+    {
+        return new OSGiInstallRepository( id );
+    }
 }

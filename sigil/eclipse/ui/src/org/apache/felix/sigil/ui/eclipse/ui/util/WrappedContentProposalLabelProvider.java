@@ -19,41 +19,55 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.util;
 
+
 import org.apache.felix.sigil.ui.eclipse.ui.editors.project.IElementDescriptor;
 import org.apache.felix.sigil.ui.eclipse.ui.editors.project.WrappedContentProposal;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
-public class WrappedContentProposalLabelProvider<E> extends LabelProvider {
-	
-	private final IElementDescriptor<? super E> descriptor;
-	private final ModelLabelProvider projectLabelProvider;
 
-	public WrappedContentProposalLabelProvider(IElementDescriptor<? super E> descriptor) {
-		this.descriptor = descriptor;
-		projectLabelProvider = new ModelLabelProvider();
-	}
-	
-	@SuppressWarnings("unchecked")
-	private E adapt(Object element) {
-		E result;
-		if(element instanceof WrappedContentProposal<?>) {
-			WrappedContentProposal<?> proposal = (WrappedContentProposal<?>) element;
-			result = (E) proposal.getElement();
-		} else {
-			result = (E) element;
-		}
-		return result;
-	}
-	
-	@Override
-	public Image getImage(Object element) {
-		Object value = adapt(element);
-		return projectLabelProvider.getImage(value);
-	}
-	
-	@Override
-	public String getText(Object element) {
-		return descriptor.getLabel(adapt(element));
-	}
+public class WrappedContentProposalLabelProvider<E> extends LabelProvider
+{
+
+    private final IElementDescriptor<? super E> descriptor;
+    private final ModelLabelProvider projectLabelProvider;
+
+
+    public WrappedContentProposalLabelProvider( IElementDescriptor<? super E> descriptor )
+    {
+        this.descriptor = descriptor;
+        projectLabelProvider = new ModelLabelProvider();
+    }
+
+
+    @SuppressWarnings("unchecked")
+    private E adapt( Object element )
+    {
+        E result;
+        if ( element instanceof WrappedContentProposal<?> )
+        {
+            WrappedContentProposal<?> proposal = ( WrappedContentProposal<?> ) element;
+            result = ( E ) proposal.getElement();
+        }
+        else
+        {
+            result = ( E ) element;
+        }
+        return result;
+    }
+
+
+    @Override
+    public Image getImage( Object element )
+    {
+        Object value = adapt( element );
+        return projectLabelProvider.getImage( value );
+    }
+
+
+    @Override
+    public String getText( Object element )
+    {
+        return descriptor.getLabel( adapt( element ) );
+    }
 }

@@ -19,12 +19,16 @@
 
 package org.apache.felix.sigil.obr.eclipse;
 
+
 import org.apache.felix.sigil.ui.eclipse.ui.wizard.repository.RepositoryWizard;
 
-public class OBRRepositoryWizard extends RepositoryWizard {
-	
-	@Override
-	public void addPages() {
-		addPage( new OBRRepositoryWizardPage(this) );
-	}
+
+public class OBRRepositoryWizard extends RepositoryWizard
+{
+
+    @Override
+    public void addPages()
+    {
+        addPage( new OBRRepositoryWizardPage( this ) );
+    }
 }

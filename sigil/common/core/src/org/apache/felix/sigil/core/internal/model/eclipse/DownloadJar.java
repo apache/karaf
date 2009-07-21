@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.core.internal.model.eclipse;
 
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,29 +27,41 @@ import org.apache.felix.sigil.model.AbstractCompoundModelElement;
 import org.apache.felix.sigil.model.eclipse.IDownloadJar;
 import org.eclipse.core.runtime.IPath;
 
-public class DownloadJar extends AbstractCompoundModelElement implements IDownloadJar {
 
-	private static final long serialVersionUID = 1L;
+public class DownloadJar extends AbstractCompoundModelElement implements IDownloadJar
+{
 
-	private Set<IPath> entries = new HashSet<IPath>();
-	
-	public DownloadJar() {
-		super("RMI Classpath Download Jar");
-	}
-	
-	public void addEntry(IPath entry) {
-		entries.add( entry );
-	}
-	
-	public void removeEntry(IPath entry) {
-		entries.remove( entry );
-	}
-	
-	public Set<IPath> getEntrys() {
-		return entries;
-	}
+    private static final long serialVersionUID = 1L;
 
-	public void clearEntries() {
-		entries.clear();
-	}
+    private Set<IPath> entries = new HashSet<IPath>();
+
+
+    public DownloadJar()
+    {
+        super( "RMI Classpath Download Jar" );
+    }
+
+
+    public void addEntry( IPath entry )
+    {
+        entries.add( entry );
+    }
+
+
+    public void removeEntry( IPath entry )
+    {
+        entries.remove( entry );
+    }
+
+
+    public Set<IPath> getEntrys()
+    {
+        return entries;
+    }
+
+
+    public void clearEntries()
+    {
+        entries.clear();
+    }
 }

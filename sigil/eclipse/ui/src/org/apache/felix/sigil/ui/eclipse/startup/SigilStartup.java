@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.startup;
 
+
 import org.apache.felix.sigil.eclipse.SigilCore;
 import org.apache.felix.sigil.eclipse.job.ResolveProjectsJob;
 import org.apache.felix.sigil.repository.IRepositoryChangeListener;
@@ -27,27 +28,34 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.ui.IStartup;
 
-public class SigilStartup implements IStartup {
 
-	public void earlyStartup() {
-		// Create a task to run the resolver
-		final Runnable resolver = new Runnable() {
-			public void run() {
-				IWorkspace workspace = ResourcesPlugin.getWorkspace();
-				ResolveProjectsJob job = new ResolveProjectsJob(workspace);
-				job.setSystem(true);
-				job.schedule();
-			}
-		};
-		
-		// Register a repository change listener to re-run the resolver when repository changes
-		SigilCore.getGlobalRepositoryManager().addRepositoryChangeListener(new IRepositoryChangeListener() {
-			public void repositoryChanged(RepositoryChangeEvent event) {
-				resolver.run();
-			}
-		});
+public class SigilStartup implements IStartup
+{
 
-		// Run the resolver now
-		resolver.run();
-	}
+    public void earlyStartup()
+    {
+        // Create a task to run the resolver
+        final Runnable resolver = new Runnable()
+        {
+            public void run()
+            {
+                IWorkspace workspace = ResourcesPlugin.getWorkspace();
+                ResolveProjectsJob job = new ResolveProjectsJob( workspace );
+                job.setSystem( true );
+                job.schedule();
+            }
+        };
+
+        // Register a repository change listener to re-run the resolver when repository changes
+        SigilCore.getGlobalRepositoryManager().addRepositoryChangeListener( new IRepositoryChangeListener()
+        {
+            public void repositoryChanged( RepositoryChangeEvent event )
+            {
+                resolver.run();
+            }
+        } );
+
+        // Run the resolver now
+        resolver.run();
+    }
 }

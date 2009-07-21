@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.wizard.repository;
 
+
 import java.util.ArrayList;
 
 import org.apache.felix.sigil.eclipse.model.repository.IRepositoryModel;
@@ -31,79 +32,104 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
-public abstract class RepositoryWizardPage extends WizardPage {
 
-	private StringFieldEditor nameEditor;
-	private ArrayList<FieldEditor> editors = new ArrayList<FieldEditor>();
-	private RepositoryWizard wizard;
-	
-	protected RepositoryWizardPage(String pageName, RepositoryWizard parent) {
-		super(pageName);
-		setTitle(pageName);
-		this.wizard = parent;
-	}
-	
-	public abstract void createFieldEditors();
+public abstract class RepositoryWizardPage extends WizardPage
+{
 
-	public void addField(FieldEditor editor) {
-		editors.add( editor );
-	}
-	
-	public void createControl(Composite parent) {
-		Composite control = new Composite(parent, SWT.NONE);
-		setControl(control);
-		
-		if ( getModel().getType().isDynamic() ) {
-			nameEditor = new StringFieldEditor("name", "Name:", control);
-			nameEditor.setStringValue(getModel().getName());
-			nameEditor.getTextControl(getFieldEditorParent()).addModifyListener( new ModifyListener() {
-				public void modifyText(ModifyEvent e) {
-					checkPageComplete();
-				}
-			});
-		}
-		
-		createFieldEditors();
+    private StringFieldEditor nameEditor;
+    private ArrayList<FieldEditor> editors = new ArrayList<FieldEditor>();
+    private RepositoryWizard wizard;
 
-		int cols = nameEditor == null ? 0 : nameEditor.getNumberOfControls();
-		for ( FieldEditor e : editors ) {
-			cols = Math.max(cols, e.getNumberOfControls());
-		}
-		
-		control.setLayout( new GridLayout(cols, false) );
-		
-		if ( nameEditor != null ) {
-			nameEditor.fillIntoGrid(getFieldEditorParent(), cols);
-		}
 
-		for ( FieldEditor e : editors ) {
-			e.fillIntoGrid(getFieldEditorParent(), cols);
-			e.setPreferenceStore(getModel().getPreferences());
-			e.load();
-		}
-		
-		checkPageComplete();
-	}
+    protected RepositoryWizardPage( String pageName, RepositoryWizard parent )
+    {
+        super( pageName );
+        setTitle( pageName );
+        this.wizard = parent;
+    }
 
-	protected void checkPageComplete() {
-		if ( nameEditor != null ) {
-			setPageComplete(nameEditor.getStringValue().length() > 0);
-		}
-	}
 
-	public IRepositoryModel getModel() {
-		return wizard.getModel();
-	}
+    public abstract void createFieldEditors();
 
-	protected Composite getFieldEditorParent() {
-		return (Composite) getControl();
-	}
 
-	public void storeFields() {
-		getModel().setName(nameEditor.getStringValue());
-		for ( FieldEditor e : editors ) {
-			e.store();
-		}
-	}
-	
+    public void addField( FieldEditor editor )
+    {
+        editors.add( editor );
+    }
+
+
+    public void createControl( Composite parent )
+    {
+        Composite control = new Composite( parent, SWT.NONE );
+        setControl( control );
+
+        if ( getModel().getType().isDynamic() )
+        {
+            nameEditor = new StringFieldEditor( "name", "Name:", control );
+            nameEditor.setStringValue( getModel().getName() );
+            nameEditor.getTextControl( getFieldEditorParent() ).addModifyListener( new ModifyListener()
+            {
+                public void modifyText( ModifyEvent e )
+                {
+                    checkPageComplete();
+                }
+            } );
+        }
+
+        createFieldEditors();
+
+        int cols = nameEditor == null ? 0 : nameEditor.getNumberOfControls();
+        for ( FieldEditor e : editors )
+        {
+            cols = Math.max( cols, e.getNumberOfControls() );
+        }
+
+        control.setLayout( new GridLayout( cols, false ) );
+
+        if ( nameEditor != null )
+        {
+            nameEditor.fillIntoGrid( getFieldEditorParent(), cols );
+        }
+
+        for ( FieldEditor e : editors )
+        {
+            e.fillIntoGrid( getFieldEditorParent(), cols );
+            e.setPreferenceStore( getModel().getPreferences() );
+            e.load();
+        }
+
+        checkPageComplete();
+    }
+
+
+    protected void checkPageComplete()
+    {
+        if ( nameEditor != null )
+        {
+            setPageComplete( nameEditor.getStringValue().length() > 0 );
+        }
+    }
+
+
+    public IRepositoryModel getModel()
+    {
+        return wizard.getModel();
+    }
+
+
+    protected Composite getFieldEditorParent()
+    {
+        return ( Composite ) getControl();
+    }
+
+
+    public void storeFields()
+    {
+        getModel().setName( nameEditor.getStringValue() );
+        for ( FieldEditor e : editors )
+        {
+            e.store();
+        }
+    }
+
 }

@@ -19,6 +19,7 @@
 
 package org.apache.felix.sigil.ui.eclipse.ui.editors.project;
 
+
 import org.apache.felix.sigil.eclipse.SigilCore;
 import org.apache.felix.sigil.eclipse.model.project.ISigilProjectModel;
 import org.apache.felix.sigil.ui.eclipse.ui.form.SigilPage;
@@ -30,23 +31,29 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 import org.eclipse.ui.forms.widgets.TableWrapLayout;
 
-public class ExportsForm extends SigilPage  {
 
-	public static final String PAGE_ID = "exports";
-	
-	private ISigilProjectModel project;
-	
-	public ExportsForm(FormEditor editor, ISigilProjectModel project) {
-		super(editor, PAGE_ID, "Exports");
-		this.project = project;
-	}
-	
+public class ExportsForm extends SigilPage
+{
+
+    public static final String PAGE_ID = "exports";
+
+    private ISigilProjectModel project;
+
+
+    public ExportsForm( FormEditor editor, ISigilProjectModel project )
+    {
+        super( editor, PAGE_ID, "Exports" );
+        this.project = project;
+    }
+
+
     @Override
-    protected void createFormContent(IManagedForm managedForm) {
+    protected void createFormContent( IManagedForm managedForm )
+    {
         ScrolledForm form = managedForm.getForm();
         form.setText( "Exports" );
-        
-        Composite body = form.getBody();        
+
+        Composite body = form.getBody();
         TableWrapLayout layout = new TableWrapLayout();
         layout.bottomMargin = 10;
         layout.topMargin = 5;
@@ -55,15 +62,17 @@ public class ExportsForm extends SigilPage  {
         layout.numColumns = 1;
         layout.horizontalSpacing = 10;
         layout.verticalSpacing = 20;
-        body.setLayout(layout);
-        body.setLayoutData(new TableWrapData(TableWrapData.FILL));
-                       
-        try {
-	        ExportPackagesSection exportPackages = new ExportPackagesSection( this, body, project );
-	        managedForm.addPart( exportPackages );
+        body.setLayout( layout );
+        body.setLayoutData( new TableWrapData( TableWrapData.FILL ) );
+
+        try
+        {
+            ExportPackagesSection exportPackages = new ExportPackagesSection( this, body, project );
+            managedForm.addPart( exportPackages );
         }
-        catch (CoreException e) {
-        	SigilCore.error( "Failed to create contents form", e);
+        catch ( CoreException e )
+        {
+            SigilCore.error( "Failed to create contents form", e );
         }
     }
 }
