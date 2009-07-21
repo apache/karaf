@@ -533,6 +533,7 @@ public class SigilParser implements ModuleDescriptorParser
                 if ( name == null )
                 {
                     // e.g. SystemProvider with framework=null
+                    Log.verbose( "Discarding system bundle" );
                     continue;
                 }
 
