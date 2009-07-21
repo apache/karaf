@@ -22,9 +22,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.Util;
 import org.apache.felix.framework.util.manifestparser.Capability;
@@ -36,20 +39,27 @@ import org.apache.felix.moduleloader.ICapability;
 import org.apache.felix.moduleloader.IModule;
 import org.apache.felix.moduleloader.IRequirement;
 import org.apache.felix.moduleloader.IWire;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
 public class Resolver
 {
     private final Logger m_logger;
 
+    // Execution environment.
+    private final String m_fwkExecEnvStr;
+    private final Set m_fwkExecEnvSet;
+
     // Reusable empty array.
     private static final IWire[] m_emptyWires = new IWire[0];
     private static final IModule[] m_emptyModules = new IModule[0];
     private static final PackageSource[] m_emptySources = new PackageSource[0];
 
-    public Resolver(Logger logger)
+    public Resolver(Logger logger, String fwkExecEnvStr)
     {
         m_logger = logger;
+        m_fwkExecEnvStr = fwkExecEnvStr.trim();
+        m_fwkExecEnvSet = parseExecutionEnvironments(fwkExecEnvStr);
     }
 
     // Returns a map of resolved bundles where the key is the module
@@ -336,7 +346,7 @@ public class Resolver
         return populateWireMap(state, candidatesMap, provider, new HashMap());
     }
 
-    private static void populateCandidatesMap(
+    private void populateCandidatesMap(
         ResolverState state, Map candidatesMap, IModule targetModule)
         throws ResolveException
     {
@@ -346,39 +356,15 @@ public class Resolver
             return;
         }
 
-        // First, try to resolve any native code, since the module is
-        // not resolvable if its native code cannot be loaded.
-        R4Library[] libs = targetModule.getNativeLibraries();
-        if (libs != null)
-        {
-            String msg = null;
-            // Verify that all native libraries exist in advance; this will
-            // throw an exception if the native library does not exist.
-            for (int libIdx = 0; (msg == null) && (libIdx < libs.length); libIdx++)
-            {
-                String entryName = libs[libIdx].getEntryName();
-                if (entryName != null)
-                {
-                    if (!targetModule.getContent().hasEntry(entryName))
-                    {
-                        msg = "Native library does not exist: " + entryName;
-                    }
-                }
-            }
-            // If we have a zero-length native library array, then
-            // this means no native library class could be selected
-            // so we should fail to resolve.
-            if (libs.length == 0)
-            {
-                msg = "No matching native libraries found.";
-            }
-            if (msg != null)
-            {
-                throw new ResolveException(msg, targetModule, null);
-            }
-        }
+        // Verify that any required execution environment is satisfied.
+        verifyExecutionEnvironment(m_fwkExecEnvStr, m_fwkExecEnvSet, targetModule);
 
-        // List to hold the resolving candidate sets for the target
+        // Verify that any native libraries match the current platform.
+        verifyNativeLibraries(targetModule);
+
+        // Finally, resolve any dependencies the module may have.
+
+        // Create list to hold the resolving candidate sets for the target
         // module's requirements.
         List candSetList = new ArrayList();
 
@@ -1557,6 +1543,106 @@ public class Resolver
     //
     // Utility methods.
     //
+
+    private static void verifyNativeLibraries(IModule module)
+        throws ResolveException
+    {
+        // Next, try to resolve any native code, since the module is
+        // not resolvable if its native code cannot be loaded.
+        R4Library[] libs = module.getNativeLibraries();
+        if (libs != null)
+        {
+            String msg = null;
+            // Verify that all native libraries exist in advance; this will
+            // throw an exception if the native library does not exist.
+            for (int libIdx = 0; (msg == null) && (libIdx < libs.length); libIdx++)
+            {
+                String entryName = libs[libIdx].getEntryName();
+                if (entryName != null)
+                {
+                    if (!module.getContent().hasEntry(entryName))
+                    {
+                        msg = "Native library does not exist: " + entryName;
+                    }
+                }
+            }
+            // If we have a zero-length native library array, then
+            // this means no native library class could be selected
+            // so we should fail to resolve.
+            if (libs.length == 0)
+            {
+                msg = "No matching native libraries found.";
+            }
+            if (msg != null)
+            {
+                throw new ResolveException(msg, module, null);
+            }
+        }
+    }
+
+    /**
+     * Checks to see if the passed in module's required execution environment
+     * is provided by the framework.
+     * @param fwkExecEvnStr The original property value of the framework's
+     *        supported execution environments.
+     * @param fwkExecEnvSet Parsed set of framework's supported execution environments.
+     * @param module The module whose required execution environment is to be to verified.
+     * @throws ResolveException if the module's required execution environment does
+     *         not match the framework's supported execution environment.
+    **/
+    private static void verifyExecutionEnvironment(
+        String fwkExecEnvStr, Set fwkExecEnvSet, IModule module)
+        throws ResolveException
+    {
+        String bundleExecEnvStr = (String)
+            module.getHeaders().get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT);
+        if (bundleExecEnvStr != null)
+        {
+            bundleExecEnvStr = bundleExecEnvStr.trim();
+
+            // If the bundle has specified an execution environment and the
+            // framework has an execution environment specified, then we must
+            // check for a match.
+            if (!bundleExecEnvStr.equals("")
+                && (fwkExecEnvStr != null)
+                && (fwkExecEnvStr.length() > 0))
+            {
+                StringTokenizer tokens = new StringTokenizer(bundleExecEnvStr, ",");
+                boolean found = false;
+                while (tokens.hasMoreTokens() && !found)
+                {
+                    if (fwkExecEnvSet.contains(tokens.nextToken().trim()))
+                    {
+                        found = true;
+                    }
+                }
+                if (!found)
+                {
+                    throw new ResolveException(
+                        "Execution environment not supported: "
+                        + bundleExecEnvStr, module, null);
+                }
+            }
+        }
+    }
+
+    /**
+     * Updates the framework wide execution environment string and a cached Set of
+     * execution environment tokens from the comma delimited list specified by the
+     * system variable 'org.osgi.framework.executionenvironment'.
+     * @param frameworkEnvironment Comma delimited string of provided execution environments
+    **/
+    private static Set parseExecutionEnvironments(String frameworkEnvironment)
+    {
+        StringTokenizer tokens = new StringTokenizer(frameworkEnvironment, ",");
+
+        Set newSet = new HashSet(tokens.countTokens());
+        while (tokens.hasMoreTokens())
+        {
+            newSet.add(tokens.nextToken().trim());
+        }
+        return newSet;
+    }
 
     private static IModule[] shrinkModuleArray(IModule[] modules)
     {

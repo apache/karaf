@@ -113,10 +113,6 @@ public class Felix extends BundleImpl implements Framework
     // Reusable bundle URL stream handler.
     private final URLStreamHandler m_bundleStreamHandler;
 
-    // Execution environment.
-    private String m_executionEnvironment = "";
-    private Set m_executionEnvironmentCache = new HashSet();
-
     // Boot package delegation.
     private final String[] m_bootPkgs;
     private final boolean[] m_bootPkgWildcards;
@@ -295,7 +291,10 @@ public class Felix extends BundleImpl implements Framework
 
         // Create a resolver and its state.
         m_resolverState = new FelixResolverState(m_logger);
-        m_felixResolver = new FelixResolver(new Resolver(m_logger), m_resolverState);
+        m_felixResolver = new FelixResolver(
+            new Resolver(m_logger,
+                (String) m_configMap.get(Constants.FRAMEWORK_EXECUTIONENVIRONMENT)),
+            m_resolverState);
 
         // Create the extension manager, which we will use as the module
         // definition for creating the system bundle module.
@@ -2410,8 +2409,6 @@ ex.printStackTrace();
                     releaseGlobalLock();
                 }
 
-                verifyExecutionEnvironment(bundle);
-
                 if (!bundle.isExtension())
                 {
                     Object sm = System.getSecurityManager();
@@ -2530,98 +2527,6 @@ ex.printStackTrace();
 
         // Return new bundle.
         return bundle;
-    }
-
-    /**
-     * Checks the passed in bundle and checks to see if there is a required execution environment.
-     * If there is, it gets the execution environment string and verifies that the framework provides it.
-     * @param bundle The bundle to verify
-     * @throws BundleException if the bundle's required execution environment does
-     *         not match the current execution environment.
-    **/
-    private void verifyExecutionEnvironment(BundleImpl bundle)
-        throws ResolveException
-    {
-        String bundleEnvironment = (String)
-            bundle.getCurrentModule().getHeaders().get(
-                Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT);
-        if (bundleEnvironment != null)
-        {
-            bundleEnvironment = bundleEnvironment.trim();
-            if (!bundleEnvironment.equals(""))
-            {
-                if (!isMatchingExecutionEnvironment(bundleEnvironment))
-                {
-                    throw new ResolveException(
-                        "Execution Environment not supported: " + bundleEnvironment, null, null);
-                }
-            }
-        }
-    }
-
-    /**
-     * Check the required bundle execution environment against the framework provided
-     * exectution environment.
-     * @param bundleEnvironment The required execution environment string
-     *        (from Bundle-RequiredExecutionEnvironment manifest header
-     * @return True if the required bundle execution environment is provided by the framework
-     *         False if none of the provided framework execution environments match
-    **/
-    private boolean isMatchingExecutionEnvironment(String bundleEnvironment)
-    {
-        String frameworkEnvironment = getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
-        if (frameworkEnvironment == null)
-        {
-            // If no framework execution environment is set, then all are valid
-            return true;
-        }
-
-        frameworkEnvironment = frameworkEnvironment.trim();
-        if ("".equals(frameworkEnvironment))
-        {
-            // If no framework execution environment is set, then all are valid
-            return true;
-        }
-
-        // The execution environment has changed, so update the cache and EE set
-        if (!m_executionEnvironment.equals(frameworkEnvironment))
-        {
-            updateFrameworkExecutionEnvironment(frameworkEnvironment);
-        }
-
-        StringTokenizer tokens = new StringTokenizer(bundleEnvironment, ",");
-        while (tokens.hasMoreTokens())
-        {
-            if (m_executionEnvironmentCache.contains(tokens.nextToken().trim()))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Updates the framework wide execution environment string and a cached Set of
-     * execution environment tokens from the comma delimited list specified by the
-     * system variable 'org.osgi.framework.executionenvironment'.
-     * @param frameworkEnvironment Comma delimited string of provided execution environments
-    **/
-    private void updateFrameworkExecutionEnvironment(String frameworkEnvironment)
-    {
-        StringTokenizer tokens = new StringTokenizer(frameworkEnvironment, ",");
-
-        Set newSet = new HashSet(tokens.countTokens());
-        while (tokens.hasMoreTokens())
-        {
-            newSet.add(tokens.nextToken().trim());
-        }
-
-        synchronized (m_executionEnvironmentCache)
-        {
-            m_executionEnvironment = frameworkEnvironment;
-            m_executionEnvironmentCache = newSet;
-        }
     }
 
     /**
@@ -3989,8 +3894,6 @@ ex.printStackTrace();
                             }
                         }
                     }
-
-                    verifyExecutionEnvironment(bundle);
 
                     // Before trying to resolve, tell the resolver state to
                     // merge all fragments into host, which may result in the
