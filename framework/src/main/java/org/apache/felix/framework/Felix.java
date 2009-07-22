@@ -321,7 +321,7 @@ public class Felix extends BundleImpl implements Framework
         for (int i = 0; i < m_bootPkgs.length; i++)
         {
             s = st.nextToken();
-            if (s.endsWith("*"))
+            if (s.equals("*") || s.endsWith(".*"))
             {
                 m_bootPkgWildcards[i] = true;
                 s = s.substring(0, s.length() - 1);

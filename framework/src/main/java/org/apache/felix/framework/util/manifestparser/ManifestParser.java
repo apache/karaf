@@ -229,6 +229,11 @@ public class ManifestParser
                 throw new BundleException(
                     "Dynamically importing java.* packages not allowed: " + pkgName);
             }
+            else if (pkgName.endsWith("*") && !pkgName.endsWith(".*"))
+            {
+                throw new BundleException(
+                    "Partial package name wild carding is not allowed: " + pkgName);
+            }
         }
 
         //
