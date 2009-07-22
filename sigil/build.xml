@@ -17,11 +17,17 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<project name="sigil" default="build-list">
+<project name="sigil" default="build">
   <import file="bldcommon/common.xml"/>
   <fileset id="my.projects" dir="${basedir}">
     <exclude name="ivy/**/${build_xml}"/>
     <exclude name="bldcommon/**/${build_xml}" />
     <include name="**/${build_xml}"/>
   </fileset>
+  <target name="init">
+    <subant buildpath="bldcommon/prepare" target="resolve" />
+  </target>
+
+  <target name="clean" depends="clean-list" />
+  <target name="build" depends="build-list" />
 </project>
