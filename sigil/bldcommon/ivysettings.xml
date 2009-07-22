@@ -19,7 +19,7 @@
 -->
 <ivysettings>
   <properties file="${ivy.settings.dir}/build.properties"/>
-  <caches defaultCacheDir="${cache.dir}" />
+  <caches defaultCacheDir="${cache.dir}/all" />
 
   <settings defaultResolver="default" circularDependencyStrategy="error" />
 
@@ -45,7 +45,8 @@
   <resolvers>
     <sigil name="sigil"
 	   config="${ivy.settings.dir}/sigil-repos.properties"
-	   extractBCP="true"/>
+	   extractBCP="true"
+           cache="sigil"/>
 
     <chain name="default" returnFirst="true">
       <filesystem name="local">
@@ -59,14 +60,37 @@
       </filesystem>
 
     </chain>
+
     <url name="eclipse">
       <artifact pattern="http://download.eclipse.org/releases/ganymede/plugins/[module]_[revision].[ext]" />
       <artifact pattern="http://download.eclipse.org/releases/ganymede/[module].[artifact]_[revision].[ext]" />
     </url>
+
+    <url name="eclipse2" cache="eclipse2" >
+      <artifact pattern="http://download.eclipse.org/releases/ganymede/plugins/[module]_[revision].[ext]" />
+      <artifact pattern="http://download.eclipse.org/releases/ganymede/[module].[artifact]_[revision].[ext]" />
+    </url>
+
+    <url name="apache" m2compatible="true">
+      <artifact pattern="http://repo1.maven.org/maven2/[organisation]/[module]/[artifact]/[revision]/[artifact]-[revision].[ext]"/>
+    </url>
+
+    <url name="aQute" m2compatible="true">
+      <artifact pattern="http://www.aQute.biz/repo/[organisation]/[module]/[revision]/[artifact]-[revision].[ext]"/>
+    </url>
   </resolvers>
+
+  <caches>
+    <cache name="sigil" basedir="${cache.dir}/sigil" />
+    <cache name="eclipse2" basedir="${cache.dir}/eclipse2" />
+  </caches>
 
   <modules>
     <module organisation="sigil" resolver="sigil"/>
     <module organisation="org.eclipse" resolver="eclipse"/>
+    <module organisation="org.eclipse2" resolver="eclipse2"/>
+    <module organisation="org.apache" name="felix\.sigil.*" matcher="regexp" resolver="default"/>
+    <module organisation="org.apache" resolver="apache"/>
+    <module organisation="biz.aQute" resolver="aQute"/>
   </modules>
 </ivysettings>
