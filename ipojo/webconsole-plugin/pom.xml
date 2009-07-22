@@ -86,7 +86,7 @@
           <useEclipseDefaultExcludes>true</useEclipseDefaultExcludes>
           <useMavenDefaultExcludes>true</useMavenDefaultExcludes>
           <excludes>
-            <param>doc/*</param>
+            <param>doc/**/*</param>
             <param>maven-eclipse.xml</param>
             <param>.checkstyle</param>
             <param>.externalToolBuilders/*</param>
