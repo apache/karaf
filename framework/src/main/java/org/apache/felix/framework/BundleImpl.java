@@ -26,7 +26,6 @@ import java.util.*;
 
 import org.apache.felix.framework.cache.BundleArchive;
 import org.apache.felix.framework.ext.SecurityProvider;
-import org.apache.felix.framework.ModuleImpl;
 import org.apache.felix.framework.util.StringMap;
 import org.apache.felix.moduleloader.IModule;
 import org.osgi.framework.*;
@@ -334,26 +333,33 @@ class BundleImpl implements Bundle
                     basename = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
                 }
 
+                // Create ordered list of modules to search for localization
+                // property resources.
+                List moduleList = createLocalizationModuleList((ModuleImpl) getCurrentModule());
+
                 // Create ordered list of files to load properties from
-                List resourceList = createResourceList(basename, locale);
+                List resourceList = createLocalizationResourceList(basename, locale);
 
                 // Create a merged props file with all available props for this locale
                 boolean found = false;
                 Properties mergedProperties = new Properties();
-                for (Iterator it = resourceList.iterator(); it.hasNext(); )
+                for (int modIdx = 0; modIdx < moduleList.size(); modIdx++)
                 {
-                    URL temp = getCurrentModule().getResourceByDelegation(
-                        it.next() + ".properties");
-                    if (temp != null)
+                    for (Iterator it = resourceList.iterator(); it.hasNext(); )
                     {
-                        found = true;
-                        try
+                        URL temp = ((IModule) moduleList.get(modIdx)).getEntry(
+                            it.next() + ".properties");
+                        if (temp != null)
                         {
-                            mergedProperties.load(temp.openConnection().getInputStream());
-                        }
-                        catch (IOException ex)
-                        {
-                            // File doesn't exist, just continue loop
+                            found = true;
+                            try
+                            {
+                                mergedProperties.load(temp.openConnection().getInputStream());
+                            }
+                            catch (IOException ex)
+                            {
+                                // File doesn't exist, just continue loop
+                            }
                         }
                     }
                 }
@@ -403,7 +409,40 @@ class BundleImpl implements Bundle
         }
     }
 
-    private List createResourceList(String basename, String locale)
+    private static List createLocalizationModuleList(ModuleImpl module)
+    {
+        // If the module is a fragment, then we actually need
+        // to search its host and associated fragments for its
+        // localization information. So, check to see if there
+        // are any hosts and then use the one with the highest
+        // version instead of the fragment itself. If there are
+        // no hosts, but the module is a fragment, then just
+        // search the module itself.
+        IModule[] hosts = module.getDependentHosts();
+        if ((hosts != null) && (hosts.length > 0))
+        {
+            module = (ModuleImpl) hosts[0];
+            for (int hostIdx = 1; hostIdx < hosts.length; hostIdx++)
+            {
+                if (module.getVersion().compareTo(hosts[hostIdx].getVersion()) < 0)
+                {
+                    module = (ModuleImpl) hosts[hostIdx];
+                }
+            }
+        }
+
+        // Create a list of the module and any attached fragments.
+        List result = new ArrayList();
+        result.add(module);
+        IModule[] fragments = module.getFragments();
+        for (int i = 0; (fragments != null) && (i < fragments.length); i++)
+        {
+            result.add(fragments[i]);
+        }
+        return result;
+    }
+
+    private static List createLocalizationResourceList(String basename, String locale)
     {
         List result = new ArrayList(4);
 
