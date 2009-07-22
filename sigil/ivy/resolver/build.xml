@@ -33,8 +33,8 @@
 
     <property name="java-src.dir" value="${basedir}/src" />
 
-    <property name="sigil-plugins.dir" location="../sigil-builder/target/tmp/eclipse/plugins" />
-    <property name="bnd-plugins.dir" location="../org.cauldron.bld.core/lib" />
+    <property name="sigil-plugins.dir" location="../../build/repository/local/" />
+    <property name="bnd-plugins.dir" location="../../common/core/lib" />
 
     <target name="init" depends="find-plugins">
 
@@ -65,12 +65,12 @@
       <property name="equinox-common.jar" value="${lib.dir}/runtime/equinox.common.jar"/>
 
       <fileset id="bld-core" dir="${sigil-plugins.dir}"
-	includes="org.cauldron.bld.core_*.jar" />
+	includes="felix.sigil.common.core/*/jars/org.apache.felix.sigil.common.core.jar" />
       <property name="bld-core" refid="bld-core"/>
       <property name="bld-core.jar" location="${sigil-plugins.dir}/${bld-core}"/>
 
       <fileset id="bld-obr" dir="${sigil-plugins.dir}"
-	includes="org.cauldron.bld.obr*.jar" />
+	includes="felix.sigil.common.obr/*/jars/org.apache.felix.sigil.common.obr.jar" />
       <property name="bld-obr" refid="bld-obr"/>
       <property name="bld-obr.jar" location="${sigil-plugins.dir}/${bld-obr}"/>
     </target>
