@@ -50,11 +50,24 @@
         <dependency org="org.eclipse" name="org.eclipse.zest.core" rev="1.0.0.v20080115" />
         <dependency org="org.eclipse" name="org.eclipse.zest.layouts" rev="1.0.0.v20080226" />
 	<!-- fragments -->
-        <dependency org="org.eclipse" name="org.eclipse.core.runtime" rev="3.4.0.v20080512" />
-        <dependency org="org.eclipse" name="org.eclipse.equinox.preferences" rev="3.2.201.R34x_v20080709" />
-        <dependency org="org.eclipse" name="org.eclipse.equinox.registry" rev="3.4.0.v20080516-0950" />
-        <dependency org="org.eclipse" name="org.eclipse.swt" rev="3.4.2.v3452b" />
-        <dependency org="org.eclipse" name="org.eclipse.text" rev="3.4.0.v20080605-1800" />
-        <dependency org="org.eclipse" name="org.eclipse.ui.workbench.texteditor" rev="3.4.1.r341_v20080827-1100" />
+        <dependency org="org.eclipse2" name="org.eclipse.core.runtime" rev="3.4.0.v20080512" />
+        <dependency org="org.eclipse2" name="org.eclipse.equinox.preferences" rev="3.2.201.R34x_v20080709" />
+        <dependency org="org.eclipse2" name="org.eclipse.equinox.registry" rev="3.4.0.v20080516-0950" />
+        <dependency org="org.eclipse2" name="org.eclipse.swt" rev="3.4.2.v3452b" />
+        <dependency org="org.eclipse2" name="org.eclipse.text" rev="3.4.0.v20080605-1800" />
+        <dependency org="org.eclipse2" name="org.eclipse.ui.workbench.texteditor" rev="3.4.1.r341_v20080827-1100" />
+
+        <dependency org="org.apache" name="bcel" rev="5.2">
+          <artifact name="bcel" type="jar" />
+        </dependency>
+
+        <dependency org="biz.aQute" name="bndlib" rev="0.0.312">
+          <artifact name="bndlib" type="jar" />
+        </dependency>
+
+        <dependency org="org.apache" name="felix" rev="1.2.0">
+          <artifact name="org.osgi.core" type="jar" />
+          <artifact name="org.osgi.compendium" type="jar" />
+        </dependency>
     </dependencies>
 </ivy-module>
