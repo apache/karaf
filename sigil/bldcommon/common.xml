@@ -86,7 +86,7 @@
     <!-- ================================= 
           target: resolve              
          ================================= -->
-    <target name="resolve" depends="load-ivy"
+    <target name="resolve" depends="common-init"
     	description="--> resolve and retrieve dependencies with ivy">
 	<mkdir dir="${deps.dir}"/>
     	<ivy:resolve file="${ivy.file}" log="${resolve.log}"/>
@@ -276,9 +276,21 @@
 
 
     <!-- ================================= 
+          target: common-init
+         ================================= -->
+    <target name="common-init" depends="load-ivy,init">
+    </target>
+
+    <!-- ================================= 
+          target: init
+         ================================= -->
+    <target name="init">
+    </target>
+
+    <!-- ================================= 
           target: buildlist
          ================================= -->
-    <target name="buildlist" depends="load-ivy">
+    <target name="buildlist" depends="common-init">
       <ivy:buildlist reference="ordered-list"
 		  onMissingDescriptor="skip">
 	<fileset refid="my.projects"/>
