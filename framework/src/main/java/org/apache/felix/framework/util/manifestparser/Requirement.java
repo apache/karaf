@@ -18,7 +18,6 @@
  */
 package org.apache.felix.framework.util.manifestparser;
 
-import org.apache.felix.framework.FilterImpl;
 import org.apache.felix.framework.util.MapToDictionary;
 import org.apache.felix.framework.util.VersionRange;
 import org.apache.felix.moduleloader.ICapability;
@@ -39,7 +38,7 @@ public class Requirement implements IRequirement
     public Requirement(String namespace, String filterStr) throws InvalidSyntaxException
     {
         m_namespace = namespace;
-        m_filter = new FilterImpl(filterStr);
+        m_filter = FrameworkUtil.createFilter(filterStr);
         m_directives = null;
         m_attributes = null;
         m_isOptional = false;
@@ -362,7 +361,7 @@ public class Requirement implements IRequirement
 
         try
         {
-            return new FilterImpl(sb.toString());
+            return FrameworkUtil.createFilter(sb.toString());
         }
         catch (InvalidSyntaxException ex)
         {

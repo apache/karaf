@@ -99,7 +99,7 @@ class BundleContextImpl implements FelixBundleContext
     {
         checkValidity();
 
-        return new FilterImpl(m_logger, expr);
+        return FrameworkUtil.createFilter(expr);
     }
 
     public Bundle installBundle(String location)

@@ -20,7 +20,6 @@ package org.apache.felix.framework.util.manifestparser;
 
 import java.util.*;
 
-import org.apache.felix.framework.FilterImpl;
 import org.apache.felix.framework.Logger;
 import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.VersionRange;
@@ -214,7 +213,7 @@ public class R4LibraryClause
         // Compute expression
         try
         {
-            FilterImpl filter = new FilterImpl(expr);
+            Filter filter = FrameworkUtil.createFilter(expr);
             return filter.match(dict);
         }
         catch (Exception ex)

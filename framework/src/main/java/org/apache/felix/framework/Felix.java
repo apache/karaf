@@ -2623,7 +2623,7 @@ ex.printStackTrace();
         throws InvalidSyntaxException
     {
         m_dispatcher.addListener(
-            bundle, ServiceListener.class, l, (f == null) ? null : new FilterImpl(m_logger, f));
+            bundle, ServiceListener.class, l, (f == null) ? null : FrameworkUtil.createFilter(f));
 
         // Invoke the ListenerHook.added() on all hooks.
         List listenerHooks = m_registry.getListenerHooks();
@@ -2795,7 +2795,7 @@ ex.printStackTrace();
         Filter filter = null;
         if (expr != null)
         {
-            filter = new FilterImpl(m_logger, expr);
+            filter = FrameworkUtil.createFilter(expr);
         }
 
         // Ask the service registry for all matching service references.
