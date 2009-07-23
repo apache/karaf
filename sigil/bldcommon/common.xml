@@ -341,7 +341,7 @@
     <isset property="env.SIGIL_HOME" />
   </condition>
 
-  <property name="sigil.home" value="cache/ant" />
+  <property name="sigil.home" value="${common.dir}/../cache/ant" />
   <property name="sigil.jar.dir" value="${sigil.home}/lib" />
   <property name="ivy.jar.file" value="${sigil.jar.dir}/ivy.jar" />
   <property name="sigil.jar.file" value="${sigil.jar.dir}/sigil-ivy-plugin.jar" />
