@@ -90,6 +90,16 @@ public class Closure extends Reflective implements Function
         }
 
         Pipe last = pipes.get(pipes.size() - 1);
+
+        for (Pipe pipe : pipes)
+        {
+            if (pipe.exception != null)
+            {
+                // can't throw exception, as result is defined by last pipe
+                System.err.println("pipe: " + pipe.exception);
+            }
+        }
+
         if (last.exception != null)
         {
             throw last.exception;
