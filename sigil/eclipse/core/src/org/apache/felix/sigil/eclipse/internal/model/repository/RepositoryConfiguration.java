@@ -37,7 +37,6 @@ import org.apache.felix.sigil.eclipse.model.repository.IRepositorySet;
 import org.apache.felix.sigil.eclipse.model.repository.IRepositoryType;
 import org.apache.felix.sigil.eclipse.model.repository.RepositorySet;
 import org.apache.felix.sigil.eclipse.preferences.PrefsUtils;
-import org.apache.felix.sigil.repository.IBundleRepository;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
