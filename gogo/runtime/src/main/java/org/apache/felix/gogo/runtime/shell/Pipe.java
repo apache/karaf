@@ -16,19 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// DWB16: redirect System.err when creating pipe
 package org.apache.felix.gogo.runtime.shell;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.io.PrintStream;
+import java.util.List;
 
 import org.osgi.service.command.Converter;
 
-import java.io.*;
-import java.util.List;
-
 public class Pipe extends Thread
 {
+    static final ThreadLocal<InputStream> tIn = new ThreadLocal<InputStream>();
+    static final ThreadLocal<PrintStream> tOut = new ThreadLocal<PrintStream>();
+    static final ThreadLocal<PrintStream> tErr = new ThreadLocal<PrintStream>();
     InputStream in;
     PrintStream out;
-    PrintStream err;    // derek
+    PrintStream err;
     PipedOutputStream pout;
     Closure closure;
     Exception exception;
@@ -40,6 +46,10 @@ public class Pipe extends Thread
         super("pipe-" + statements);
         this.closure = closure;
         this.statements = statements;
+
+        in = tIn.get();
+        out = tOut.get();
+        err = tErr.get();
     }
 
     public void setIn(InputStream in)
@@ -65,13 +75,15 @@ public class Pipe extends Thread
         next.setIn(new PipedInputStream(pout));
         out = new PrintStream(pout);
         return next;
-
     }
 
     public void run()
     {
-        //closure.session.service.threadIO.setStreams(in, out, System.err);
-        closure.session.service.threadIO.setStreams(in, out, err);    // derek
+        tIn.set(in);
+        tOut.set(out);
+        tErr.set(err);
+        closure.session.service.threadIO.setStreams(in, out, err);
+
         try
         {
             for (List<CharSequence> statement : statements)
@@ -91,6 +103,10 @@ public class Pipe extends Thread
         {
             out.flush();
             closure.session.service.threadIO.close();
+            tIn.set(in);
+            tOut.set(out);
+            tErr.set(err);
+
             try
             {
                 if (in instanceof PipedInputStream)

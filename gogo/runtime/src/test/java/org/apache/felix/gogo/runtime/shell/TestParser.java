@@ -85,7 +85,11 @@ public class TestParser extends TestCase
         c.addCommand("echo", this);
         c.addCommand("capture", this);
         c.addCommand("grep", this);
+        c.addCommand("echoout", this);
+        c.execute("myecho = { echoout $args }");
         assertEquals("def", c.execute("echo def|grep (d.*)|capture"));
+        assertEquals("def", c.execute("echoout def|grep (d.*)|capture"));
+        assertEquals("def", c.execute("myecho def|grep (d.*)|capture"));
         assertEquals("def", c.execute("echo abc; echo def; echo ghi|grep (d.*)|capture"));
         assertEquals("hello world", c.execute("echo hello world|capture"));
         assertEquals("defghi", c.execute("echo abc; echo def; echo ghi|grep (def|ghi)|capture"));
@@ -239,6 +243,11 @@ public class TestParser extends TestCase
             }
         }
         return sb;
+    }
+
+    public void echoout(Object args[])
+    {
+        System.out.println(echo(args));
     }
 
     public void testContext() throws Exception

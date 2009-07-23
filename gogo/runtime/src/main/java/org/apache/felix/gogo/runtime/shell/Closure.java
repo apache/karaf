@@ -54,9 +54,12 @@ public class Closure extends Reflective implements Function
 
             if (pipes.isEmpty())
             {
-                current.setIn(session.in);
-                current.setOut(session.out);
-                current.setErr(session.err);    // XXX: derek.baum@paremus.com
+		if (current.out == null)
+		{
+		    current.setIn(session.in);
+		    current.setOut(session.out);
+		    current.setErr(session.err);
+		}
             }
             else
             {
