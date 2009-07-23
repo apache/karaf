@@ -106,7 +106,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
         m_extensionManager = extensionManager;
     }
 
-    private Logger m_logger = null;
+    private final Logger m_logger;
     private final Map m_headerMap = new StringMap(false);
     private final IModule m_module;
     private ICapability[] m_capabilities = null;
@@ -120,6 +120,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
     // classloader.
     private ExtensionManager()
     {
+        m_logger = null;
         m_module = null;
         m_extensions = new ArrayList();
         m_names = new HashSet();
@@ -188,7 +189,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
         }
     }
 
-    private ICapability[] aliasSymbolicName(ICapability[] caps)
+    private static ICapability[] aliasSymbolicName(ICapability[] caps)
     {
         if (caps == null)
         {
@@ -258,7 +259,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
      *          AdminPermission.EXTENSIONLIFECYCLE and security is enabled.
      * @throws Exception in case something goes wrong.
      */
-    void addExtensionBundle(Felix felix, BundleImpl bundle)
+    synchronized void addExtensionBundle(Felix felix, BundleImpl bundle)
         throws SecurityException, BundleException, Exception
     {
         Object sm = System.getSecurityManager();
@@ -283,9 +284,6 @@ class ExtensionManager extends URLStreamHandler implements IContent
                 dir.getValue(), new UnsupportedOperationException(
                 "Unsupported Extension Bundle type!"));
         }
-
-        // Not sure whether this is a good place to do it but we need to lock
-        felix.acquireBundleLock(felix, Bundle.RESOLVED | Bundle.STARTING | Bundle.ACTIVE);
 
         try
         {
@@ -334,10 +332,6 @@ class ExtensionManager extends URLStreamHandler implements IContent
 // TODO: EXTENSIONMANAGER - Should we be setting this?
 //            bundle.setExtension(false);
             throw ex;
-        }
-        finally
-        {
-            felix.releaseBundleLock(felix);
         }
 
         felix.setBundleStateAndNotify(bundle, Bundle.RESOLVED);
@@ -400,7 +394,7 @@ class ExtensionManager extends URLStreamHandler implements IContent
         }
     }
 
-    void setCapabilities(ICapability[] capabilities)
+    private void setCapabilities(ICapability[] capabilities)
     {
         m_capabilities = capabilities;
         m_headerMap.put(Constants.EXPORT_PACKAGE, convertCapabilitiesToHeaders(m_headerMap));
@@ -627,12 +621,18 @@ class ExtensionManager extends URLStreamHandler implements IContent
 
         public Map getHeaders()
         {
-            return m_headerMap;
+            synchronized (ExtensionManager.this)
+            {
+                return m_headerMap;
+            }
         }
 
         public ICapability[] getCapabilities()
         {
-            return m_capabilities;
+            synchronized (ExtensionManager.this)
+            {
+                return m_capabilities;
+            }
         }
 
         public String getSymbolicName()
@@ -647,9 +647,12 @@ class ExtensionManager extends URLStreamHandler implements IContent
 
         public Class getClassByDelegation(String name) throws ClassNotFoundException
         {
-            if (!m_exportNames.contains(Util.getClassPackage(name)))
+            synchronized (ExtensionManager.this)
             {
-                throw new ClassNotFoundException(name);
+                if (!m_exportNames.contains(Util.getClassPackage(name)))
+                {
+                    throw new ClassNotFoundException(name);
+                }
             }
 
             return getClass().getClassLoader().loadClass(name);

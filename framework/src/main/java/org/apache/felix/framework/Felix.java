@@ -1898,25 +1898,7 @@ ex.printStackTrace();
                 }
                 else
                 {
-                    // Acquire bundle lock.
-                    try
-                    {
-                        acquireBundleLock(this, Bundle.RESOLVED | Bundle.STARTING | Bundle.ACTIVE);
-                    }
-                    catch (IllegalStateException ex)
-                    {
-                        throw new BundleException(
-                            "System bundle must be active to attach an extension.");
-                    }
-
-                    try
-                    {
-                        m_extensionManager.startExtensionBundle(this, bundle);
-                    }
-                    finally
-                    {
-                        releaseBundleLock(this);
-                    }
+                    m_extensionManager.startExtensionBundle(this, bundle);
                 }
 
                 fireBundleEvent(BundleEvent.UNRESOLVED, bundle);
@@ -2482,25 +2464,7 @@ ex.printStackTrace();
 
             if (bundle.isExtension())
             {
-                // Acquire bundle lock.
-                try
-                {
-                    acquireBundleLock(this, Bundle.RESOLVED | Bundle.STARTING | Bundle.ACTIVE);
-                }
-                catch (IllegalStateException ex)
-                {
-                    throw new BundleException(
-                        "System bundle must be active to attach an extension.");
-                }
-
-                try
-                {
-                    m_extensionManager.startExtensionBundle(this, bundle);
-                }
-                finally
-                {
-                    releaseBundleLock(this);
-                }
+                m_extensionManager.startExtensionBundle(this, bundle);
             }
         }
         finally
