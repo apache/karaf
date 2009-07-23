@@ -838,7 +838,8 @@ class BundleImpl implements Bundle
 
     public Map getSignerCertificates(int signersType)
     {
-        throw new UnsupportedOperationException("Not yet implemented.");
+        // TODO: SECURITY - This needs to be adapted to our security mechanisms.
+        return new HashMap();
     }
 
     Object getSignerMatcher()
