@@ -294,26 +294,6 @@ public class BldProject implements IBldProject, IRepositoryConfig
             }
         }
 
-        boolean containsComposite = false;
-
-        for ( IBldBundle bundle : getBundles() )
-        {
-            if ( !bundle.getComposites().isEmpty() )
-            {
-                containsComposite = true;
-                break;
-            }
-        }
-
-        // add dependency on component activator
-        if ( containsComposite )
-        {
-            PackageImport pi = new PackageImport();
-            pi.setPackageName( BundleBuilder.COMPONENT_ACTIVATOR_PKG );
-            pi.setOSGiImport( OSGiImport.NEVER );
-            dependencies.addImport( pi );
-        }
-
         return dependencies;
     }
 

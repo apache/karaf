@@ -216,12 +216,6 @@ public interface IBldProject
 
 
         /**
-         * gets SCA composites.
-         */
-        List<String> getComposites();
-
-
-        /**
          * gets the additional resources.
          * @return map with key as path in bundle, value as path in file system.
          * Paths are resolved relative to location of project file and also from classpath.

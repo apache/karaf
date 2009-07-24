@@ -40,7 +40,6 @@ import java.util.jar.Attributes;
 import org.apache.felix.sigil.config.BldAttr;
 import org.apache.felix.sigil.config.IBldProject;
 import org.apache.felix.sigil.config.IBldProject.IBldBundle;
-import org.apache.felix.sigil.core.internal.model.osgi.PackageImport;
 import org.apache.felix.sigil.core.repository.SystemRepositoryProvider;
 import org.apache.felix.sigil.model.common.VersionRange;
 import org.apache.felix.sigil.model.osgi.IPackageExport;
@@ -56,14 +55,6 @@ import aQute.lib.osgi.Processor;
 
 public class BundleBuilder
 {
-    public static final String COMPONENT_ACTIVATOR_PKG = "XXX-FIXME-XXX";
-    public static final String COMPONENT_ACTIVATOR = COMPONENT_ACTIVATOR_PKG + ".Activator";
-    public static final String[] COMPONENT_ACTIVATOR_DEPS =
-        { "XXX-FIXME-XXX", "org.osgi.framework", "org.osgi.util.tracker" };
-    public static final String COMPONENT_DIR = "META-INF/XXX-FIXME-XXX";
-    public static final String COMPONENT_FLAG = "Installable-Component";
-    public static final String COMPONENT_LIST = "Installable-Component-Templates";
-
     private IBldProject project;
     private File[] classpath;
     private String destPattern;
@@ -455,7 +446,7 @@ public class BundleBuilder
         spec.setProperty( Constants.NOEXTRAHEADERS, "true" ); // Created-By,
         // Bnd-LastModified
         // and Tool
-        spec.setProperty( Constants.CREATED_BY, "sigil.codecauldron.org" );
+        spec.setProperty( Constants.CREATED_BY, "sigil.felix.apache.org" );
 
         Properties headers = bundle.getHeaders();
         // XXX: catch attempts to set headers that conflict with Bnd
@@ -473,7 +464,7 @@ public class BundleBuilder
 
         List<String> exports = addExports( bundle, spec );
 
-        String composites = addResources( bundle, spec );
+        addResources( bundle, spec );
 
         ArrayList<String> contents = new ArrayList<String>();
         contents.addAll( bundle.getContents() );
@@ -488,20 +479,6 @@ public class BundleBuilder
             {
                 contents.addAll( exports );
             }
-        }
-
-        if ( composites.length() > 0 )
-        {
-            if ( spec.containsKey( Constants.BUNDLE_ACTIVATOR ) )
-                warnings.add( "-activator ignored when -composites specified." );
-            spec.setProperty( Constants.BUNDLE_ACTIVATOR, COMPONENT_ACTIVATOR );
-            spec.setProperty( COMPONENT_FLAG, "true" );
-            spec.setProperty( COMPONENT_LIST, composites );
-            // add activator pkg directly, to avoid needing to add jar to
-            // Bundle-ClassPath.
-            // split-package directive needed to stop Bnd whinging when using
-            // other bundles containing the component-activator.
-            contents.add( COMPONENT_ACTIVATOR_PKG + ";-split-package:=merge-first" );
         }
 
         List<String> srcPkgs = addLibs( bundle, dest, spec );
@@ -668,24 +645,9 @@ public class BundleBuilder
     }
 
 
-    private String addResources( IBldBundle bundle, Properties spec )
+    private void addResources( IBldBundle bundle, Properties spec )
     {
         Map<String, String> resources = bundle.getResources();
-        StringBuilder composites = new StringBuilder();
-
-        for ( String composite : bundle.getComposites() )
-        {
-            File path = bundle.resolve( composite );
-            String name = path.getName();
-
-            String bPath = COMPONENT_DIR + "/" + name;
-            resources.put( bPath, path.getPath() );
-
-            if ( composites.length() > 0 )
-                composites.append( "," );
-            composites.append( bPath );
-        }
-
         StringBuilder sb = new StringBuilder();
 
         for ( String bPath : resources.keySet() )
@@ -734,8 +696,6 @@ public class BundleBuilder
 
         if ( sb.length() > 0 )
             spec.setProperty( Constants.INCLUDE_RESOURCE, sb.toString() );
-
-        return composites.toString();
     }
 
 
@@ -747,22 +707,6 @@ public class BundleBuilder
         for ( IPackageImport pi : imports )
         {
             pkgs.add( pi.getPackageName() );
-        }
-
-        // add component activator imports
-        if ( !bundle.getComposites().isEmpty() )
-        {
-            for ( String pkg : BundleBuilder.COMPONENT_ACTIVATOR_DEPS )
-            {
-                if ( pkgs.contains( pkg ) )
-                    continue;
-                PackageImport pi = new PackageImport();
-                pi.setPackageName( pkg );
-                String versions = project.getDefaultPackageVersion( pkg );
-                if ( versions != null )
-                    pi.setVersions( VersionRange.parseVersionRange( versions ) );
-                imports.add( pi );
-            }
         }
 
         return imports;
