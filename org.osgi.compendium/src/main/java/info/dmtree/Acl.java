@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/info.dmtree/src/info/dmtree/Acl.java,v 1.6 2006/07/12 21:21:37 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,22 +15,27 @@
  */
 package info.dmtree;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.Vector;
 
 /**
- * <code>Acl</code> is an immutable class representing structured access to
- * DMT ACLs. Under OMA DM the ACLs are defined as strings with an internal
- * syntax.
+ * <code>Acl</code> is an immutable class representing structured access to DMT
+ * ACLs. Under OMA DM the ACLs are defined as strings with an internal syntax.
  * <p>
  * The methods of this class taking a principal as parameter accept remote
- * server IDs (as passed to
- * {@link DmtAdmin#getSession(String, String, int) DmtAdmin.getSession}), as
- * well as &quot; <code>*</code> &quot; indicating any principal.
+ * server IDs (as passed to {@link DmtAdmin#getSession(String, String, int)
+ * DmtAdmin.getSession}), as well as &quot; <code>*</code> &quot; indicating any
+ * principal.
  * <p>
  * The syntax for valid remote server IDs:<br>
- * &lt;<i>server-identifier</i>&gt; ::= All printable characters except 
- *   <code>'='</code>, <code>'&amp;'</code>, <code>'*'</code>, <code>'+'</code>
- *    or white-space characters.
+ * &lt;<i>server-identifier</i>&gt; ::= All printable characters except
+ * <code>'='</code>, <code>'&amp;'</code>, <code>'*'</code>, <code>'+'</code> or white-space
+ * characters.
+ * 
+ * @version $Revision: 5673 $
  */
 public final class Acl {
 

@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.application/src/org/osgi/service/application/ApplicationAdminPermission.java,v 1.34 2006/07/12 21:22:11 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,21 +17,27 @@
 package org.osgi.service.application;
 
 import java.security.Permission;
-import java.util.*;
+import java.util.Hashtable;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
-import org.osgi.framework.*;
+import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
 
 /**
- * This class implements permissions for manipulating applications and
- * their instances.
+ * This class implements permissions for manipulating applications and their
+ * instances.
  * <P>
  * ApplicationAdminPermission can be targeted to applications that matches the
  * specified filter.
  * <P>
  * ApplicationAdminPermission may be granted for different actions:
- * <code>lifecycle</code>, <code>schedule</code> and <code>lock</code>.
- * The permission <code>schedule</code> implies the permission
+ * <code>lifecycle</code>, <code>schedule</code> and <code>lock</code>. The
+ * permission <code>schedule</code> implies the permission
  * <code>lifecycle</code>.
+ * 
+ * @version $Revision: 6860 $
  */
 public class ApplicationAdminPermission extends Permission {
 	private static final long serialVersionUID = 1L;
@@ -146,7 +150,7 @@ public class ApplicationAdminPermission extends Permission {
 			try {
 				newPerm = new ApplicationAdminPermission( this.filter, this.actions );
 			}catch( InvalidSyntaxException e ) {
-				throw new RuntimeException( "Internal error" ); /* this can never happen */
+				throw new RuntimeException(e); /* this can never happen */
 			}
 		}
 		else	
@@ -303,6 +307,9 @@ public class ApplicationAdminPermission extends Permission {
   	private String pattern;
   	private ApplicationDescriptor appDesc;
   	
+  	/**
+  	 * @param pattern
+  	 */
   	public SignerWrapper(String pattern) {
   		this.pattern = pattern;    			
   	}
@@ -333,71 +340,9 @@ public class ApplicationAdminPermission extends Permission {
   }
   
   private Filter getFilter() {
-  	String transformedFilter = filter;
-  	
   	if (appliedFilter == null) {
   		try {
-  			int pos = filter.indexOf("signer"); //$NON-NLS-1$
-  			if (pos != -1){ 
-  			
-  				//there may be a signer attribute 
-    			StringBuffer filterBuf = new StringBuffer(filter);
-    			int numAsteriskFound = 0; //use as offset to replace in buffer
-    			
-    			int walkbackPos; //temp pos
-
-    			//find occurences of (signer= and escape out *'s
-    			while (pos != -1) {
-
-    				//walk back and look for '(' to see if this is an attr
-    				walkbackPos = pos-1; 
-    				
-    				//consume whitespace
-    				while(walkbackPos >= 0 && Character.isWhitespace(filter.charAt(walkbackPos))) {
-    					walkbackPos--;
-    				}
-    				if (walkbackPos <0) {
-    					//filter is invalid - FilterImpl will throw error
-    					break;
-    				}
-    				
-    				//check to see if we have unescaped '('
-    				if (filter.charAt(walkbackPos) != '(' || (walkbackPos > 0 && filter.charAt(walkbackPos-1) == '\\')) {
-    					//'(' was escaped or not there
-    					pos = filter.indexOf("signer",pos+6); //$NON-NLS-1$
-    					continue;
-    				}     				
-    				pos+=6; //skip over 'signer'
-
-    				//found signer - consume whitespace before '='
-    				while (Character.isWhitespace(filter.charAt(pos))) {
-    					pos++;
-    				}
-
-    				//look for '='
-    				if (filter.charAt(pos) != '=') {
-    					//attr was signerx - keep looking
-    					pos = filter.indexOf("signer",pos); //$NON-NLS-1$
-    					continue;
-    				}
-    				pos++; //skip over '='
-    				
-    				//found signer value - escape '*'s
-    				while (!(filter.charAt(pos) == ')' && filter.charAt(pos-1) != '\\')) {
-    					if (filter.charAt(pos) == '*') {
-    						filterBuf.insert(pos+numAsteriskFound,'\\');
-    						numAsteriskFound++;
-    					}
-    					pos++;
-    				}
-
-    				//end of signer value - look for more?
-    				pos = filter.indexOf("signer",pos); //$NON-NLS-1$
-    			} //end while (pos != -1)
-    			transformedFilter = filterBuf.toString();
-  			} //end if (pos != -1)
-
-  			appliedFilter = FrameworkUtil.createFilter( transformedFilter );
+  			appliedFilter = FrameworkUtil.createFilter(filter);
 		} catch (InvalidSyntaxException e) {
 			//we will return null
 		}

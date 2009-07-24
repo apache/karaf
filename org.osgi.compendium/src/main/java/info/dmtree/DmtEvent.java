@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/info.dmtree/src/info/dmtree/DmtEvent.java,v 1.8 2006/07/04 12:12:16 tszeredi Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +25,8 @@ package info.dmtree;
  * actually performed.
  * <p>
  * An event is generated for each group of nodes added, deleted, replaced,
- * renamed or copied, in this order.  Events are also generated when sessions
- * are opened and closed.
+ * renamed or copied, in this order. Events are also generated when sessions are
+ * opened and closed.
  * <p>
  * The <code>type</code> of the event describes the change that triggered the
  * event delivery. Each event carries the unique identifier of the session in
@@ -41,14 +39,16 @@ package info.dmtree;
  * decision is based on the principal specified when the listener was
  * registered:
  * <ul>
- * <li> If the listener was registered specifying an explicit principal, using
+ * <li>If the listener was registered specifying an explicit principal, using
  * the {@link DmtAdmin#addEventListener(String, int, String, DmtEventListener)}
  * method, then the target node ACLs should be checked for providing GET access
  * to the specified principal;
- * <li> When the listener was registered without an explicit principal then the
- * listener needs GET {@link info.dmtree.security.DmtPermission} for
- * the corresponding node.
+ * <li>When the listener was registered without an explicit principal then the
+ * listener needs GET {@link info.dmtree.security.DmtPermission} for the
+ * corresponding node.
  * </ul>
+ * 
+ * @version $Revision: 5673 $
  */
 public interface DmtEvent {
 

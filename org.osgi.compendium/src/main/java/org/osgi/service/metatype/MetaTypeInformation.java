@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.metatype/src/org/osgi/service/metatype/MetaTypeInformation.java,v 1.8 2006/06/16 16:31:23 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2005, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +21,7 @@ import org.osgi.framework.Bundle;
  * A MetaType Information object is created by the MetaTypeService to return
  * meta type information for a specific bundle.
  * 
- * @version $Revision: 1.8 $
+ * @version $Revision: 5673 $
  * @since 1.1
  */
 public interface MetaTypeInformation extends MetaTypeProvider {

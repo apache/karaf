@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.util.measurement/src/org/osgi/util/measurement/Unit.java,v 1.15 2006/06/16 16:31:34 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2008). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +28,8 @@ import java.util.Hashtable;
  * +63. Any operation which produces an exponent outside of this range will
  * result in a <code>Unit</code> object with undefined exponents.
  * 
- * @version $Revision: 1.15 $
+ * @Immutable
+ * @version $Revision: 5715 $
  */
 /*
  * This local class maintains the information about units. It can calculate new
@@ -279,9 +278,11 @@ public class Unit {
 	private final static Unit[]	allUnits	= new Unit[] {m, s, kg, K, A, mol,
 			cd, rad, m_s, m_s2, m2, m3, Hz, N, Pa, J, W, C, V, F, Ohm, S, Wb,
 			T, lx, Gy, kat, unity			};
+	
+	/* @GuardedBy("this") */
 	private static Hashtable	base;
-	private String				name;
-	private long				type;
+	private final String		name;
+	private final long			type;
 
 	/**
 	 * Creates a new <code>Unit</code> instance.
@@ -290,6 +291,9 @@ public class Unit {
 	 * @param type the type of the <code>Unit</code>
 	 */
 	private Unit(String name, long type) {
+		if (name == null) {
+			name = computeName(type);
+		}
 		this.name = name;
 		this.type = type;
 		//System.out.println( name + " " + Long.toHexString( type ) );
@@ -338,7 +342,7 @@ public class Unit {
 	 * @return This object's hash code.
 	 */
 	public int hashCode() {
-		return (int) ((type >>> 32) ^ type);
+		return 31 * 17 + (int) (type ^ (type >>> 32));
 	}
 
 	/**
@@ -435,16 +439,12 @@ public class Unit {
 	 * 
 	 * @return the <code>Unit</code>
 	 */
-	static Unit find(long type) {
+	static synchronized Unit find(long type) {
 		if (base == null) {
-			synchronized (Unit.class) {
-				if (base == null) {
-					int size = allUnits.length;
-					base = new Hashtable(size << 1);
-					for (int i = 0; i < size; i++) {
-						base.put(allUnits[i], allUnits[i]);
-					}
-				}
+			int size = allUnits.length;
+			base = new Hashtable(size << 1);
+			for (int i = 0; i < size; i++) {
+				base.put(allUnits[i], allUnits[i]);
 			}
 		}
 		Unit unit = new Unit(null, type);
@@ -462,43 +462,39 @@ public class Unit {
 	 * @return A <code>String</code> object representing the <code>Unit</code>
 	 */
 	public String toString() {
-		if (name == null) {
-			int m = (int) (((type >> m_SHIFT) & MASK) - ZERO);
-			int s = (int) (((type >> s_SHIFT) & MASK) - ZERO);
-			int kg = (int) (((type >> kg_SHIFT) & MASK) - ZERO);
-			int K = (int) (((type >> K_SHIFT) & MASK) - ZERO);
-			int A = (int) (((type >> A_SHIFT) & MASK) - ZERO);
-			int mol = (int) (((type >> mol_SHIFT) & MASK) - ZERO);
-			int cd = (int) (((type >> cd_SHIFT) & MASK) - ZERO);
-			int rad = (int) (((type >> rad_SHIFT) & MASK) - ZERO);
-			StringBuffer numerator = new StringBuffer();
-			StringBuffer denominator = new StringBuffer();
-			addSIname(m, "m", numerator, denominator);
-			addSIname(s, "s", numerator, denominator);
-			addSIname(kg, "kg", numerator, denominator);
-			addSIname(K, "K", numerator, denominator);
-			addSIname(A, "A", numerator, denominator);
-			addSIname(mol, "mol", numerator, denominator);
-			addSIname(cd, "cd", numerator, denominator);
-			addSIname(rad, "rad", numerator, denominator);
-			if (denominator.length() > 0) {
-				if (numerator.length() == 0) {
-					numerator.append("1");
-				}
-				numerator.append("/");
-				numerator.append((Object) denominator); /*
-														 * we use (Object) to
-														 * avoid using new 1.4
-														 * method
-														 * append(StringBuffer)
-														 */
-			}
-			name = numerator.toString();
-		}
 		return name;
 	}
 
-	private void addSIname(int si, String name, StringBuffer numerator,
+	private static String computeName(long type) {
+		int m = (int) (((type >> m_SHIFT) & MASK) - ZERO);
+		int s = (int) (((type >> s_SHIFT) & MASK) - ZERO);
+		int kg = (int) (((type >> kg_SHIFT) & MASK) - ZERO);
+		int K = (int) (((type >> K_SHIFT) & MASK) - ZERO);
+		int A = (int) (((type >> A_SHIFT) & MASK) - ZERO);
+		int mol = (int) (((type >> mol_SHIFT) & MASK) - ZERO);
+		int cd = (int) (((type >> cd_SHIFT) & MASK) - ZERO);
+		int rad = (int) (((type >> rad_SHIFT) & MASK) - ZERO);
+		StringBuffer numerator = new StringBuffer();
+		StringBuffer denominator = new StringBuffer();
+		addSIname(m, "m", numerator, denominator);
+		addSIname(s, "s", numerator, denominator);
+		addSIname(kg, "kg", numerator, denominator);
+		addSIname(K, "K", numerator, denominator);
+		addSIname(A, "A", numerator, denominator);
+		addSIname(mol, "mol", numerator, denominator);
+		addSIname(cd, "cd", numerator, denominator);
+		addSIname(rad, "rad", numerator, denominator);
+		if (denominator.length() > 0) {
+			if (numerator.length() == 0) {
+				numerator.append("1");
+			}
+			numerator.append("/");
+			numerator.append(denominator.toString()); 
+		}
+		return numerator.toString();
+	}
+	
+	private static void addSIname(int si, String name, StringBuffer numerator,
 			StringBuffer denominator) {
 		if (si != 0) {
 			StringBuffer sb = (si > 0) ? numerator : denominator;

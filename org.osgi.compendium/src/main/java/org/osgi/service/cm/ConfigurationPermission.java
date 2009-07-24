@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.cm/src/org/osgi/service/cm/ConfigurationPermission.java,v 1.22 2006/07/08 00:42:00 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +16,9 @@
 
 package org.osgi.service.cm;
 
-import java.security.*;
+import java.security.BasicPermission;
+import java.security.Permission;
+import java.security.PermissionCollection;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
 
@@ -27,7 +27,8 @@ import java.util.NoSuchElementException;
  * 
  * This permission has only a single action: CONFIGURE.
  * 
- * @version $Revision: 1.22 $
+ * @ThreadSafe
+ * @version $Revision: 6381 $
  * @since 1.2
  */
 
@@ -92,7 +93,9 @@ public final class ConfigurationPermission extends BasicPermission {
 	 */
 
 	public int hashCode() {
-		return getName().hashCode() ^ getActions().hashCode();
+		int h = 31 * 17 + getName().hashCode();
+		h = 31 * h + getActions().hashCode();
+		return h;
 	}
 
 	/**
@@ -135,7 +138,7 @@ final class ConfigurationPermissionCollection extends PermissionCollection {
 	 * 
 	 * @serial
 	 */
-	private boolean		hasElement;
+	private volatile boolean	hasElement;
 
 	/**
 	 * Creates an empty <tt>ConfigurationPermissionCollection</tt> object.
@@ -214,5 +217,4 @@ final class ConfigurationPermissionCollection extends PermissionCollection {
 			}
 		};
 	}
-
 }

@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.prefs/src/org/osgi/service/prefs/BackingStoreException.java,v 1.12 2006/07/11 13:15:55 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,63 +19,57 @@ package org.osgi.service.prefs;
  * Thrown to indicate that a preferences operation could not complete because of
  * a failure in the backing store, or a failure to contact the backing store.
  * 
- * @version $Revision: 1.12 $
+ * @version $Revision: 6083 $
  */
 public class BackingStoreException extends Exception {
     static final long serialVersionUID = -1415637364122829574L;
-	/**
-	 * Nested exception.
-	 */
-	private final Throwable	cause;
 
 	/**
 	 * Constructs a <code>BackingStoreException</code> with the specified detail
 	 * message.
 	 * 
-	 * @param s The detail message.
+	 * @param message The detail message.
 	 */
-	public BackingStoreException(String s) {
-		super(s);
-		this.cause = null;
+	public BackingStoreException(String message) {
+		super(message);
 	}
 	
 	/**
 	 * Constructs a <code>BackingStoreException</code> with the specified detail
 	 * message.
 	 * 
-	 * @param s The detail message.
+	 * @param message The detail message.
 	 * @param cause The cause of the exception. May be <code>null</code>.
 	 * @since 1.1 
 	 */
-	public BackingStoreException(String s, Throwable cause) {
-		super(s);
-		this.cause = cause;
+	public BackingStoreException(String message, Throwable cause) {
+		super(message, cause);
 	}
-	
+
 	/**
 	 * Returns the cause of this exception or <code>null</code> if no cause was
-	 * specified when this exception was created.
+	 * set.
 	 * 
 	 * @return The cause of this exception or <code>null</code> if no cause was
-	 *         specified.
-	 * @since 1.1 
+	 *         set.
+	 * @since 1.1
 	 */
 	public Throwable getCause() {
-		return cause;
+		return super.getCause();
 	}
 
 	/**
-	 * The cause of this exception can only be set when constructed.
+	 * Initializes the cause of this exception to the specified value.
 	 * 
-	 * @param cause Cause of the exception.
-	 * @return This object.
-	 * @throws java.lang.IllegalStateException This method will always throw an
-	 *         <code>IllegalStateException</code> since the cause of this
-	 *         exception can only be set when constructed.
-	 * @since 1.1 
+	 * @param cause The cause of this exception.
+	 * @return This exception.
+	 * @throws IllegalArgumentException If the specified cause is this
+	 *         exception.
+	 * @throws IllegalStateException If the cause of this exception has already
+	 *         been set.
+	 * @since 1.1
 	 */
 	public Throwable initCause(Throwable cause) {
-		throw new IllegalStateException();
+		return super.initCause(cause);
 	}
-
 }

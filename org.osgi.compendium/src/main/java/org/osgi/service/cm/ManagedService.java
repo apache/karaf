@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.cm/src/org/osgi/service/cm/ManagedService.java,v 1.12 2006/06/16 16:31:28 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2008). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +24,7 @@ import java.util.Dictionary;
  * <p>
  * A Managed Service is a service that needs configuration data. Such an object
  * should be registered with the Framework registry with the
- * <code>service.pid</code> property set to some unique identitifier called a
+ * <code>service.pid</code> property set to some unique identifier called a
  * PID.
  * 
  * <p>
@@ -107,7 +105,7 @@ import java.util.Dictionary;
  * registration properties. This will allow the Configuration Admin service to
  * set properties on services which can then be used by other applications.
  * 
- * @version $Revision: 1.12 $
+ * @version $Revision: 5673 $
  */
 public interface ManagedService {
 	/**

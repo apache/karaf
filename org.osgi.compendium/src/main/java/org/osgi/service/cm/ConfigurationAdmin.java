@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.cm/src/org/osgi/service/cm/ConfigurationAdmin.java,v 1.17 2006/09/26 13:33:09 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2008). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,27 +48,28 @@ import org.osgi.framework.InvalidSyntaxException;
  * <p>
  * Bundles that require configuration should register a Managed Service or a
  * Managed Service Factory in the service registry. A registration property
- * named <code>service.pid</code> (persistent identifier or PID) must be used
- * to identify this Managed Service or Managed Service Factory to the
- * Configuration Admin service.
+ * named <code>service.pid</code> (persistent identifier or PID) must be used to
+ * identify this Managed Service or Managed Service Factory to the Configuration
+ * Admin service.
  * 
  * <p>
  * When the ConfigurationAdmin detects the registration of a Managed Service, it
- * checks its persistent storage for a configuration object whose PID matches
- * the PID registration property (<code>service.pid</code>) of the Managed
- * Service. If found, it calls {@link ManagedService#updated} method with the
- * new properties. The implementation of a Configuration Admin service must run
- * these call-backs asynchronously to allow proper synchronization.
+ * checks its persistent storage for a configuration object whose
+ * <code>service.pid</code> property matches the PID service property (
+ * <code>service.pid</code>) of the Managed Service. If found, it calls
+ * {@link ManagedService#updated} method with the new properties. The
+ * implementation of a Configuration Admin service must run these call-backs
+ * asynchronously to allow proper synchronization.
  * 
  * <p>
  * When the Configuration Admin service detects a Managed Service Factory
  * registration, it checks its storage for configuration objects whose
- * <code>factoryPid</code> matches the PID of the Managed Service Factory. For
- * each such <code>Configuration</code> objects, it calls the
- * <code>ManagedServiceFactory.updated</code> method asynchronously with the
- * new properties. The calls to the <code>updated</code> method of a
- * <code>ManagedServiceFactory</code> must be executed sequentially and not
- * overlap in time.
+ * <code>service.factoryPid</code> property matches the PID service property of
+ * the Managed Service Factory. For each such <code>Configuration</code>
+ * objects, it calls the <code>ManagedServiceFactory.updated</code> method
+ * asynchronously with the new properties. The calls to the <code>updated</code>
+ * method of a <code>ManagedServiceFactory</code> must be executed sequentially
+ * and not overlap in time.
  * 
  * <p>
  * In general, bundles having permission to use the Configuration Admin service
@@ -79,16 +78,16 @@ import org.osgi.framework.InvalidSyntaxException;
  * <code>ConfigurationPermission[*,CONFIGURE]</code>.
  * 
  * <p>
- * <code>Configuration</code> objects can be <i>bound </i> to a specified
- * bundle location. In this case, if a matching Managed Service or Managed
- * Service Factory is registered by a bundle with a different location, then the
+ * <code>Configuration</code> objects can be <i>bound </i> to a specified bundle
+ * location. In this case, if a matching Managed Service or Managed Service
+ * Factory is registered by a bundle with a different location, then the
  * Configuration Admin service must not do the normal callback, and it should
  * log an error. In the case where a <code>Configuration</code> object is not
  * bound, its location field is <code>null</code>, the Configuration Admin
  * service will bind it to the location of the bundle that registers the first
  * Managed Service or Managed Service Factory that has a corresponding PID
  * property. When a <code>Configuration</code> object is bound to a bundle
- * location in this manner, the Confguration Admin service must detect if the
+ * location in this manner, the Configuration Admin service must detect if the
  * bundle corresponding to the location is uninstalled. If this occurs, the
  * <code>Configuration</code> object is unbound, that is its location field is
  * set back to <code>null</code>.
@@ -100,20 +99,20 @@ import org.osgi.framework.InvalidSyntaxException;
  * <code>ConfigurationAdmin</code> must use a
  * {@link org.osgi.framework.ServiceFactory} to support this concept.
  * 
- * @version $Revision: 1.17 $
+ * @version $Revision: 7356 $
  */
 public interface ConfigurationAdmin {
 	/**
-	 * Service property naming the Factory PID in the configuration dictionary.
-	 * The property's value is of type <code>String</code>.
+	 * Configuration property naming the Factory PID in the configuration
+	 * dictionary. The property's value is of type <code>String</code>.
 	 * 
 	 * @since 1.1
 	 */
 	public final static String	SERVICE_FACTORYPID		= "service.factoryPid";
 	/**
-	 * Service property naming the location of the bundle that is associated
-	 * with a a <code>Configuration</code> object. This property can be
-	 * searched for but must not appear in the configuration dictionary for
+	 * Configuration property naming the location of the bundle that is
+	 * associated with a a <code>Configuration</code> object. This property can
+	 * be searched for but must not appear in the configuration dictionary for
 	 * security reason. The property's value is of type <code>String</code>.
 	 * 
 	 * @since 1.1
@@ -226,26 +225,26 @@ public interface ConfigurationAdmin {
 	 * 
 	 * <p>
 	 * Normally only <code>Configuration</code> objects that are bound to the
-	 * location of the calling bundle are returned, or all if the caller has 
+	 * location of the calling bundle are returned, or all if the caller has
 	 * <code>ConfigurationPermission[*,CONFIGURE]</code>.
 	 * 
 	 * <p>
-	 * The syntax of the filter string is as defined in the {@link org.osgi.framework.Filter}
-	 * class. The filter can test any configuration parameters including the
-	 * following system properties:
+	 * The syntax of the filter string is as defined in the
+	 * {@link org.osgi.framework.Filter} class. The filter can test any
+	 * configuration properties including the following:
 	 * <ul>
-	 * <li><code>service.pid</code>-<code>String</code>- the PID under
-	 * which this is registered</li>
-	 * <li><code>service.factoryPid</code>-<code>String</code>- the
-	 * factory if applicable</li>
-	 * <li><code>service.bundleLocation</code>-<code>String</code>- the
-	 * bundle location</li>
+	 * <li><code>service.pid</code>-<code>String</code>- the PID under which
+	 * this is registered</li>
+	 * <li><code>service.factoryPid</code>-<code>String</code>- the factory if
+	 * applicable</li>
+	 * <li><code>service.bundleLocation</code>-<code>String</code>- the bundle
+	 * location</li>
 	 * </ul>
 	 * The filter can also be <code>null</code>, meaning that all
 	 * <code>Configuration</code> objects should be returned.
 	 * 
-	 * @param filter A filter string, or <code>null</code> to
-	 *        retrieve all <code>Configuration</code> objects.
+	 * @param filter A filter string, or <code>null</code> to retrieve all
+	 *        <code>Configuration</code> objects.
 	 * @return All matching <code>Configuration</code> objects, or
 	 *         <code>null</code> if there aren't any.
 	 * @throws IOException if access to persistent storage fails

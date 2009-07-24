@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.application/src/org/osgi/application/ApplicationServiceEvent.java,v 1.6 2006/07/11 13:19:02 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2005, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +38,7 @@ import org.osgi.framework.ServiceReference;
  * @see org.osgi.framework.ServiceEvent
  * @see ApplicationServiceListener
  * 
- * @version $Revision: 1.6 $
+ * @version $Revision: 5673 $
  */
 public class ApplicationServiceEvent extends ServiceEvent {
 

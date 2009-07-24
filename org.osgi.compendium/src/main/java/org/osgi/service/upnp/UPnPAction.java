@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.upnp/src/org/osgi/service/upnp/UPnPAction.java,v 1.10 2006/06/16 16:31:46 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2008). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +22,8 @@ import java.util.Dictionary;
  * 
  * Each UPnP service contains zero or more actions. Each action may have zero or
  * more UPnP state variables as arguments.
- *  
+ * 
+ * @version $Revision: 5673 $
  */
 public interface UPnPAction {
 	/**

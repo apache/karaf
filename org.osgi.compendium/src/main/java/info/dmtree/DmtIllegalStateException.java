@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/info.dmtree/src/info/dmtree/DmtIllegalStateException.java,v 1.4 2006/07/13 13:42:12 tszeredi Exp $
- *
- * Copyright (c) OSGi Alliance (2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2006, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,23 +17,19 @@
 package info.dmtree;
 
 /**
- * Unchecked illegal state exception. This class is used in DMT because 
+ * Unchecked illegal state exception. This class is used in DMT because
  * java.lang.IllegalStateException does not exist in CLDC.
+ * 
+ * @version $Revision: 6083 $
  */
 public class DmtIllegalStateException extends RuntimeException {
     private static final long serialVersionUID = 2015244852018469700L;
-
-    /**
-     * Nested exception.
-     */
-    private final Throwable cause;
 
     /**
      * Create an instance of the exception with no message.
      */
     public DmtIllegalStateException() {
         super();
-        cause = null;
     }
 
     /**
@@ -45,7 +39,6 @@ public class DmtIllegalStateException extends RuntimeException {
      */
     public DmtIllegalStateException(String message) {
         super(message);
-        cause = null;
     }
 
     /**
@@ -55,8 +48,7 @@ public class DmtIllegalStateException extends RuntimeException {
      * @param cause the cause of the exception
      */
     public DmtIllegalStateException(Throwable cause) {
-        super();
-        this.cause = cause;
+        super(cause);
     }
 
     /**
@@ -67,18 +59,32 @@ public class DmtIllegalStateException extends RuntimeException {
      * @param cause the cause of the exception
      */
     public DmtIllegalStateException(String message, Throwable cause) {
-        super(message);
-        this.cause = cause;
+        super(message, cause);
     }
 
-    /**
-     * Returns the cause of this exception or <code>null</code> if no cause
-     * was specified when this exception was created.
-     * 
-     * @return the cause of this exception or <code>null</code> if no cause
-     *         was specified
-     */
+	/**
+	 * Returns the cause of this exception or <code>null</code> if no cause was
+	 * set.
+	 * 
+	 * @return The cause of this exception or <code>null</code> if no cause was
+	 *         set.
+	 */
     public Throwable getCause() {
-        return cause;
+        return super.getCause();
+    }
+
+	/**
+	 * Initializes the cause of this exception to the specified value.
+	 * 
+	 * @param cause The cause of this exception.
+	 * @return This exception.
+	 * @throws IllegalArgumentException If the specified cause is this
+	 *         exception.
+	 * @throws IllegalStateException If the cause of this exception has already
+	 *         been set.
+	 * @since 1.0.1
+	 */
+	public Throwable initCause(Throwable cause) {
+		return super.initCause(cause);
     }
 }

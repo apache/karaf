@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.wireadmin/src/org/osgi/service/wireadmin/WirePermission.java,v 1.13 2006/07/12 21:22:14 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2009). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +16,17 @@
 package org.osgi.service.wireadmin;
 
 import java.io.IOException;
-import java.security.*;
+import java.security.BasicPermission;
+import java.security.Permission;
+import java.security.PermissionCollection;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
 /**
  * Permission for the scope of a <code>Wire</code> object. When a
- * <code>Envelope</code> object is used for communication with the <code>poll</code>
- * or <code>update</code> method, and the scope is set, then the <code>Wire</code>
- * object must verify that the Consumer service has
+ * <code>Envelope</code> object is used for communication with the
+ * <code>poll</code> or <code>update</code> method, and the scope is set, then
+ * the <code>Wire</code> object must verify that the Consumer service has
  * <code>WirePermission[name,CONSUME]</code> and the Producer service has
  * <code>WirePermission[name,PRODUCE]</code> for all names in the scope.
  * <p>
@@ -35,43 +35,45 @@ import java.util.Hashtable;
  * scope names starting with the string "Door". The last period is required due
  * to the implementations of the <code>BasicPermission</code> class.
  * 
- * @version $Revision: 1.13 $
+ * @ThreadSafe
+ * @version $Revision: 6381 $
  */
 final public class WirePermission extends BasicPermission {
-    static final long serialVersionUID = -5583709391516569321L;
+	static final long			serialVersionUID	= -5583709391516569321L;
 	/**
-	 * The action string for the <code>PRODUCE</code> action: value is "produce".
+	 * The action string for the <code>produce</code> action.
 	 */
-	public static final String	PRODUCE			= "produce";
+	public static final String	PRODUCE				= "produce";
 	/**
-	 * The action string for the <code>CONSUME</code> action: value is "consume".
+	 * The action string for the <code>consume</code> action.
 	 */
-	public static final String	CONSUME			= "consume";
-	private final static int	ACTION_PRODUCE	= 0x00000001;
-	private final static int	ACTION_CONSUME	= 0x00000002;
-	private final static int	ACTION_ALL		= ACTION_PRODUCE
-														| ACTION_CONSUME;
-	private final static int	ACTION_NONE		= 0;
+	public static final String	CONSUME				= "consume";
+	private final static int	ACTION_PRODUCE		= 0x00000001;
+	private final static int	ACTION_CONSUME		= 0x00000002;
+	private final static int	ACTION_ALL			= ACTION_PRODUCE
+															| ACTION_CONSUME;
+	private final static int	ACTION_NONE			= 0;
 	/**
 	 * The actions mask.
 	 */
-	private transient int		action_mask		= ACTION_NONE;
+	private transient int		action_mask;
 	/**
 	 * The actions in canonical form.
 	 * 
 	 * @serial
 	 */
-	private String				actions			= null;
+	private volatile String		actions				= null;
 
 	/**
 	 * Create a new WirePermission with the given name (may be wildcard) and
 	 * actions.
+	 * 
 	 * @param name Wire name.
-	 * @param actions <code>produce</code>, <code>consume</code>
-	 *        (canonical order).
+	 * @param actions <code>produce</code>, <code>consume</code> (canonical
+	 *        order).
 	 */
 	public WirePermission(String name, String actions) {
-		this(name, getMask(actions));
+		this(name, parseActions(actions));
 	}
 
 	/**
@@ -82,7 +84,7 @@ final public class WirePermission extends BasicPermission {
 	 */
 	WirePermission(String name, int mask) {
 		super(name);
-		init(mask);
+		setTransients(mask);
 	}
 
 	/**
@@ -90,11 +92,21 @@ final public class WirePermission extends BasicPermission {
 	 * 
 	 * @param mask action mask
 	 */
-	private void init(int mask) {
+	private synchronized void setTransients(int mask) {
 		if ((mask == ACTION_NONE) || ((mask & ACTION_ALL) != mask)) {
 			throw new IllegalArgumentException("invalid action string");
 		}
 		action_mask = mask;
+	}
+
+	/**
+	 * Returns the current action mask. Used by the WirePermissionCollection
+	 * object.
+	 * 
+	 * @return The actions mask.
+	 */
+	synchronized int getActionsMask() {
+		return action_mask;
 	}
 
 	/**
@@ -103,7 +115,7 @@ final public class WirePermission extends BasicPermission {
 	 * @param actions Action string.
 	 * @return action mask.
 	 */
-	private static int getMask(String actions) {
+	private static int parseActions(String actions) {
 		boolean seencomma = false;
 		int mask = ACTION_NONE;
 		if (actions == null) {
@@ -155,7 +167,7 @@ final public class WirePermission extends BasicPermission {
 				switch (a[i - matchlen]) {
 					case ',' :
 						seencomma = true;
-					/* FALLTHROUGH */
+						/* FALLTHROUGH */
 					case ' ' :
 					case '\r' :
 					case '\n' :
@@ -178,15 +190,14 @@ final public class WirePermission extends BasicPermission {
 	}
 
 	/**
-	 * Checks if this <code>WirePermission</code> object <code>implies</code> the
-	 * specified permission.
+	 * Checks if this <code>WirePermission</code> object <code>implies</code>
+	 * the specified permission.
 	 * <P>
 	 * More specifically, this method returns <code>true</code> if:
 	 * <p>
 	 * <ul>
 	 * <li><i>p </i> is an instanceof the <code>WirePermission</code> class,
-	 * <li><i>p </i>'s actions are a proper subset of this object's actions,
-	 * and
+	 * <li><i>p </i>'s actions are a proper subset of this object's actions, and
 	 * <li><i>p </i>'s name is implied by this object's name. For example,
 	 * <code>java.*</code> implies <code>java.home</code>.
 	 * </ul>
@@ -198,8 +209,9 @@ final public class WirePermission extends BasicPermission {
 	 */
 	public boolean implies(Permission p) {
 		if (p instanceof WirePermission) {
-			WirePermission target = (WirePermission) p;
-			return ((action_mask & target.action_mask) == target.action_mask)
+			WirePermission requested = (WirePermission) p;
+			int requestedMask = requested.getActionsMask();
+			return ((getActionsMask() & requestedMask) == requestedMask)
 					&& super.implies(p);
 		}
 		return false;
@@ -213,29 +225,31 @@ final public class WirePermission extends BasicPermission {
 	 * @return The canonical string representation of the actions.
 	 */
 	public String getActions() {
-		if (actions == null) {
+		String result = actions;
+		if (result == null) {
 			StringBuffer sb = new StringBuffer();
 			boolean comma = false;
-			if ((action_mask & ACTION_PRODUCE) == ACTION_PRODUCE) {
+			int mask = getActionsMask();
+			if ((mask & ACTION_PRODUCE) == ACTION_PRODUCE) {
 				sb.append(PRODUCE);
 				comma = true;
 			}
-			if ((action_mask & ACTION_CONSUME) == ACTION_CONSUME) {
+			if ((mask & ACTION_CONSUME) == ACTION_CONSUME) {
 				if (comma)
 					sb.append(',');
 				sb.append(CONSUME);
 			}
-			actions = sb.toString();
+			actions = result = sb.toString();
 		}
-		return actions;
+		return result;
 	}
 
 	/**
 	 * Returns a new <code>PermissionCollection</code> object for storing
 	 * <code>WirePermission</code> objects.
 	 * 
-	 * @return A new <code>PermissionCollection</code> object suitable for storing
-	 *         <code>WirePermission</code> objects.
+	 * @return A new <code>PermissionCollection</code> object suitable for
+	 *         storing <code>WirePermission</code> objects.
 	 */
 	public PermissionCollection newPermissionCollection() {
 		return new WirePermissionCollection();
@@ -248,8 +262,8 @@ final public class WirePermission extends BasicPermission {
 	 * <code>WirePermission</code> object.
 	 * 
 	 * @param obj The object to test for equality.
-	 * @return true if <code>obj</code> is a <code>WirePermission</code>, and has
-	 *         the same name and actions as this <code>WirePermission</code>
+	 * @return true if <code>obj</code> is a <code>WirePermission</code>, and
+	 *         has the same name and actions as this <code>WirePermission</code>
 	 *         object; <code>false</code> otherwise.
 	 */
 	public boolean equals(Object obj) {
@@ -259,8 +273,9 @@ final public class WirePermission extends BasicPermission {
 		if (!(obj instanceof WirePermission)) {
 			return false;
 		}
-		WirePermission p = (WirePermission) obj;
-		return (action_mask == p.action_mask) && getName().equals(p.getName());
+		WirePermission wp = (WirePermission) obj;
+		return (getActionsMask() == wp.getActionsMask())
+				&& getName().equals(wp.getName());
 	}
 
 	/**
@@ -269,17 +284,9 @@ final public class WirePermission extends BasicPermission {
 	 * @return Hash code value for this object.
 	 */
 	public int hashCode() {
-		return getName().hashCode() ^ getActions().hashCode();
-	}
-
-	/**
-	 * Returns the current action mask. Used by the WirePermissionCollection
-	 * object.
-	 * 
-	 * @return The actions mask.
-	 */
-	int getMask() {
-		return action_mask;
+		int h = 31 * 17 + getName().hashCode();
+		h = 31 * h + getActions().hashCode();
+		return h;
 	}
 
 	/**
@@ -297,8 +304,11 @@ final public class WirePermission extends BasicPermission {
 		sb.append(getClass().getName());
 		sb.append(" \"");
 		sb.append(getName());
-		sb.append("\" \"");
-		sb.append(getActions());
+		String a = getActions();
+		if (a.length() > 0) {
+			sb.append("\" \"");
+			sb.append(a);
+		}
 		sb.append("\")");
 		return sb.toString();
 	}
@@ -325,32 +335,35 @@ final public class WirePermission extends BasicPermission {
 			throws IOException, ClassNotFoundException {
 		// Read in the action, then initialize the rest
 		s.defaultReadObject();
-		init(getMask(actions));
+		setTransients(parseActions(actions));
 	}
 }
+
 /**
- * A <code>WirePermissionCollection</code> stores a set of <code>WirePermission</code>
- * permissions.
+ * A <code>WirePermissionCollection</code> stores a set of
+ * <code>WirePermission</code> permissions.
  */
 
 final class WirePermissionCollection extends PermissionCollection {
-    static final long serialVersionUID = 2617521094909826016L;
+	static final long		serialVersionUID	= 2617521094909826016L;
 	/**
 	 * Table of permissions.
 	 * 
+	 * @GuardedBy this
 	 * @serial
 	 */
-	private Hashtable	permissions;
+	private final Hashtable	permissions;
 	/**
 	 * Boolean saying if "*" is in the collection.
 	 * 
+	 * @GuardedBy this
 	 * @serial
 	 */
-	private boolean		all_allowed;
+	private boolean			all_allowed;
 
 	/**
 	 * Creates an empty WirePermissionCollection object.
-	 *  
+	 * 
 	 */
 	public WirePermissionCollection() {
 		permissions = new Hashtable();
@@ -363,35 +376,40 @@ final class WirePermissionCollection extends PermissionCollection {
 	 * @param permission The Permission object to add.
 	 * 
 	 * @throws IllegalArgumentException If the permission is not a
-	 *            WirePermission object.
+	 *         WirePermission object.
 	 * 
 	 * @throws SecurityException If this PermissionCollection has been marked
-	 *            read-only.
+	 *         read-only.
 	 */
 	public void add(Permission permission) {
-		if (!(permission instanceof WirePermission))
+		if (!(permission instanceof WirePermission)) {
 			throw new IllegalArgumentException("invalid permission: "
 					+ permission);
-		if (isReadOnly())
+		}
+		if (isReadOnly()) {
 			throw new SecurityException("attempt to add a Permission to a "
 					+ "readonly PermissionCollection");
-		WirePermission p = (WirePermission) permission;
-		String name = p.getName();
-		WirePermission existing = (WirePermission) permissions.get(name);
-		if (existing != null) {
-			int oldMask = existing.getMask();
-			int newMask = p.getMask();
-			if (oldMask != newMask) {
-				permissions.put(name, new WirePermission(name, oldMask
-						| newMask));
+		}
+		WirePermission wp = (WirePermission) permission;
+		String name = wp.getName();
+		synchronized (this) {
+			WirePermission existing = (WirePermission) permissions.get(name);
+			if (existing != null) {
+				int oldMask = existing.getActionsMask();
+				int newMask = wp.getActionsMask();
+				if (oldMask != newMask) {
+					permissions.put(name, new WirePermission(name, oldMask
+							| newMask));
+				}
 			}
-		}
-		else {
-			permissions.put(name, permission);
-		}
-		if (!all_allowed) {
-			if (name.equals("*"))
-				all_allowed = true;
+			else {
+				permissions.put(name, wp);
+			}
+			if (!all_allowed) {
+				if (name.equals("*")) {
+					all_allowed = true;
+				}
+			}
 		}
 	}
 
@@ -401,46 +419,53 @@ final class WirePermissionCollection extends PermissionCollection {
 	 * 
 	 * @param permission The Permission object to compare.
 	 * 
-	 * @return <code>true</code> if <code>permission</code> is a proper subset of a
-	 *         permission in the set; <code>false</code> otherwise.
+	 * @return <code>true</code> if <code>permission</code> is a proper subset
+	 *         of a permission in the set; <code>false</code> otherwise.
 	 */
 	public boolean implies(Permission permission) {
-		if (!(permission instanceof WirePermission))
+		if (!(permission instanceof WirePermission)) {
 			return false;
-		WirePermission p = (WirePermission) permission;
-		WirePermission x;
-		int desired = p.getMask();
-		int effective = 0;
-		// short circuit if the "*" Permission was added
-		if (all_allowed) {
-			x = (WirePermission) permissions.get("*");
-			if (x != null) {
-				effective |= x.getMask();
-				if ((effective & desired) == desired)
-					return true;
-			}
 		}
-		// strategy:
-		// Check for full match first. Then work our way up the
-		// name looking for matches on a.b.*
-		String name = p.getName();
-		x = (WirePermission) permissions.get(name);
+		WirePermission requested = (WirePermission) permission;
+		WirePermission x;
+		int desired = requested.getActionsMask();
+		int effective = 0;
+		String name = requested.getName();
+		synchronized (this) {
+			// short circuit if the "*" Permission was added
+			if (all_allowed) {
+				x = (WirePermission) permissions.get("*");
+				if (x != null) {
+					effective |= x.getActionsMask();
+					if ((effective & desired) == desired)
+						return true;
+				}
+			}
+			// strategy:
+			// Check for full match first. Then work our way up the
+			// name looking for matches on a.b.*
+			x = (WirePermission) permissions.get(name);
+		}
 		if (x != null) {
 			// we have a direct hit!
-			effective |= x.getMask();
-			if ((effective & desired) == desired)
+			effective |= x.getActionsMask();
+			if ((effective & desired) == desired) {
 				return true;
+			}
 		}
 		// work our way up the tree...
-		int last, offset;
-		offset = name.length() - 1;
+		int last;
+		int offset = name.length() - 1;
 		while ((last = name.lastIndexOf(".", offset)) != -1) {
 			name = name.substring(0, last + 1) + "*";
-			x = (WirePermission) permissions.get(name);
+			synchronized (this) {
+				x = (WirePermission) permissions.get(name);
+			}
 			if (x != null) {
-				effective |= x.getMask();
-				if ((effective & desired) == desired)
+				effective |= x.getActionsMask();
+				if ((effective & desired) == desired) {
 					return (true);
+				}
 			}
 			offset = last - 1;
 		}

@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.component/src/org/osgi/service/component/ComponentException.java,v 1.13 2006/07/11 13:15:56 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +19,10 @@ package org.osgi.service.component;
 /**
  * Unchecked exception which may be thrown by the Service Component Runtime.
  * 
- * @version $Revision: 1.13 $
+ * @version $Revision: 6083 $
  */
 public class ComponentException extends RuntimeException {
 	static final long	serialVersionUID	= -7438212656298726924L;
-	/**
-	 * Nested exception.
-	 */
-	private final Throwable	cause;
 
 	/**
 	 * Construct a new ComponentException with the specified message and cause.
@@ -37,8 +31,7 @@ public class ComponentException extends RuntimeException {
 	 * @param cause The cause of the exception. May be <code>null</code>.
 	 */
 	public ComponentException(String message, Throwable cause) {
-		super(message);
-		this.cause = cause;
+		super(message, cause);
 	}
 
 	/**
@@ -48,7 +41,6 @@ public class ComponentException extends RuntimeException {
 	 */
 	public ComponentException(String message) {
 		super(message);
-		this.cause = null;
 	}
 
 	/**
@@ -57,31 +49,31 @@ public class ComponentException extends RuntimeException {
 	 * @param cause The cause of the exception. May be <code>null</code>.
 	 */
 	public ComponentException(Throwable cause) {
-		super();
-		this.cause = cause;
+		super(cause);
 	}
-
+	
 	/**
-	 * Returns the cause of this exception or <code>null</code> if no cause
-	 * was specified when this exception was created.
+	 * Returns the cause of this exception or <code>null</code> if no cause was
+	 * set.
 	 * 
-	 * @return The cause of this exception or <code>null</code> if no cause
-	 *         was specified.
+	 * @return The cause of this exception or <code>null</code> if no cause was
+	 *         set.
 	 */
 	public Throwable getCause() {
-		return cause;
+		return super.getCause();
 	}
 
 	/**
-	 * The cause of this exception can only be set when constructed.
+	 * Initializes the cause of this exception to the specified value.
 	 * 
-	 * @param cause Cause of the exception.
-	 * @return This object.
-	 * @throws java.lang.IllegalStateException This method will always throw an
-	 *         <code>IllegalStateException</code> since the cause of this
-	 *         exception can only be set when constructed.
+	 * @param cause The cause of this exception.
+	 * @return This exception.
+	 * @throws IllegalArgumentException If the specified cause is this
+	 *         exception.
+	 * @throws IllegalStateException If the cause of this exception has already
+	 *         been set.
 	 */
 	public Throwable initCause(Throwable cause) {
-		throw new IllegalStateException();
+		return super.initCause(cause);
 	}
 }

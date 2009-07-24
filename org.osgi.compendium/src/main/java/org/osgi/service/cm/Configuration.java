@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.cm/src/org/osgi/service/cm/Configuration.java,v 1.17 2006/06/16 16:31:28 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2008). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +58,7 @@ import java.util.Dictionary;
  * Managed Service Factory and a Managed Service. When it is important to
  * differentiate between these two the term "factory configuration" is used.
  * 
- * @version $Revision: 1.17 $
+ * @version $Revision: 5673 $
  */
 public interface Configuration {
 	/**
@@ -109,7 +107,7 @@ public interface Configuration {
 	 * callback is delayed until aforementioned registration occurs.
 	 * 
 	 * <p>
-	 * Also intiates an asynchronous call to all
+	 * Also initiates an asynchronous call to all
 	 * <code>ConfigurationListener</code>s with a
 	 * <code>ConfigurationEvent.CM_UPDATED</code> event.
 	 * 
@@ -133,7 +131,7 @@ public interface Configuration {
 	 * call to its <code>deleted</code> method.
 	 * 
 	 * <p>
-	 * Also intiates an asynchronous call to all
+	 * Also initiates an asynchronous call to all
 	 * <code>ConfigurationListener</code>s with a
 	 * <code>ConfigurationEvent.CM_DELETED</code> event.
 	 * 
@@ -160,7 +158,7 @@ public interface Configuration {
 	 * 
 	 * <p>
 	 * This is the only way for a bundle that uses a Configuration Plugin
-	 * service to initate a callback. For example, when that bundle detects a
+	 * service to initiate a callback. For example, when that bundle detects a
 	 * change that requires an update of the Managed Service or Managed Service
 	 * Factory via its <code>ConfigurationPlugin</code> object.
 	 * 

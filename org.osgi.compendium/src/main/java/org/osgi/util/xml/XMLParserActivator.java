@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.util.xml/src/org/osgi/util/xml/XMLParserActivator.java,v 1.11 2006/10/27 18:17:06 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +16,28 @@
 
 package org.osgi.util.xml;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 
-import javax.xml.parsers.*;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.FactoryConfigurationError;
+import javax.xml.parsers.SAXParserFactory;
 
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 
 /**
  * A BundleActivator class that allows any JAXP compliant XML Parser to register
@@ -50,8 +63,8 @@ import org.osgi.framework.*;
  * An XMLParserActivator assumes that it can find the class file names of the
  * factory classes in the following files:
  * <ul>
- * <li><code>/META-INF/services/javax.xml.parsers.SAXParserFactory</code> is
- * a file contained in a jar available to the runtime which contains the
+ * <li><code>/META-INF/services/javax.xml.parsers.SAXParserFactory</code> is a
+ * file contained in a jar available to the runtime which contains the
  * implementation class name(s) of the SAXParserFactory.
  * <li><code>/META-INF/services/javax.xml.parsers.DocumentBuilderFactory</code>
  * is a file contained in a jar available to the runtime which contains the
@@ -63,11 +76,11 @@ import org.osgi.framework.*;
  * 
  * <p>
  * <code>XMLParserActivator</code> attempts to instantiate both the
- * <code>SAXParserFactory</code> and the <code>DocumentBuilderFactory</code>.
- * It registers each factory with the framework along with service properties:
+ * <code>SAXParserFactory</code> and the <code>DocumentBuilderFactory</code>. It
+ * registers each factory with the framework along with service properties:
  * <ul>
- * <li>{@link #PARSER_VALIDATING}- indicates if this factory supports
- * validating parsers. It's value is a <code>Boolean</code>.
+ * <li>{@link #PARSER_VALIDATING}- indicates if this factory supports validating
+ * parsers. It's value is a <code>Boolean</code>.
  * <li>{@link #PARSER_NAMESPACEAWARE}- indicates if this factory supports
  * namespace aware parsers It's value is a <code>Boolean</code>.
  * </ul>
@@ -76,48 +89,51 @@ import org.osgi.framework.*;
  * or attributes which could be used to select a parser with a filter. These can
  * be added by extending this class and overriding the
  * <code>setSAXProperties</code> and <code>setDOMProperties</code> methods.
+ * 
+ * @ThreadSafe
+ * @version $Revision: 5900 $
  */
 public class XMLParserActivator implements BundleActivator, ServiceFactory {
 	/** Context of this bundle */
-	private BundleContext		context;
+	private volatile BundleContext	context;
 	/**
 	 * Filename containing the SAX Parser Factory Class name. Also used as the
 	 * basis for the <code>SERVICE_PID<code> registration property.
 	 */
-	public static final String	SAXFACTORYNAME			= "javax.xml.parsers.SAXParserFactory";
+	public static final String		SAXFACTORYNAME			= "javax.xml.parsers.SAXParserFactory";
 	/**
 	 * Filename containing the DOM Parser Factory Class name. Also used as the
 	 * basis for the <code>SERVICE_PID</code> registration property.
 	 */
-	public static final String	DOMFACTORYNAME			= "javax.xml.parsers.DocumentBuilderFactory";
+	public static final String		DOMFACTORYNAME			= "javax.xml.parsers.DocumentBuilderFactory";
 	/** Path to the factory class name files */
-	private static final String	PARSERCLASSFILEPATH		= "/META-INF/services/";
+	private static final String		PARSERCLASSFILEPATH		= "/META-INF/services/";
 	/** Fully qualified path name of SAX Parser Factory Class Name file */
-	public static final String	SAXCLASSFILE			= PARSERCLASSFILEPATH
-																+ SAXFACTORYNAME;
+	public static final String		SAXCLASSFILE			= PARSERCLASSFILEPATH
+																	+ SAXFACTORYNAME;
 	/** Fully qualified path name of DOM Parser Factory Class Name file */
-	public static final String	DOMCLASSFILE			= PARSERCLASSFILEPATH
-																+ DOMFACTORYNAME;
+	public static final String		DOMCLASSFILE			= PARSERCLASSFILEPATH
+																	+ DOMFACTORYNAME;
 	/** SAX Factory Service Description */
-	private static final String	SAXFACTORYDESCRIPTION	= "A JAXP Compliant SAX Parser";
+	private static final String		SAXFACTORYDESCRIPTION	= "A JAXP Compliant SAX Parser";
 	/** DOM Factory Service Description */
-	private static final String	DOMFACTORYDESCRIPTION	= "A JAXP Compliant DOM Parser";
+	private static final String		DOMFACTORYDESCRIPTION	= "A JAXP Compliant DOM Parser";
 	/**
 	 * Service property specifying if factory is configured to support
 	 * validating parsers. The value is of type <code>Boolean</code>.
 	 */
-	public static final String	PARSER_VALIDATING		= "parser.validating";
+	public static final String		PARSER_VALIDATING		= "parser.validating";
 	/**
 	 * Service property specifying if factory is configured to support namespace
 	 * aware parsers. The value is of type <code>Boolean</code>.
 	 */
-	public static final String	PARSER_NAMESPACEAWARE	= "parser.namespaceAware";
+	public static final String		PARSER_NAMESPACEAWARE	= "parser.namespaceAware";
 	/**
 	 * Key for parser factory name property - this must be saved in the parsers
 	 * properties hashtable so that the parser factory can be instantiated from
 	 * a ServiceReference
 	 */
-	private static final String	FACTORYNAMEKEY			= "parser.factoryname";
+	private static final String		FACTORYNAMEKEY			= "parser.factoryname";
 
 	/**
 	 * Called when this bundle is started so the Framework can perform the
@@ -141,20 +157,12 @@ public class XMLParserActivator implements BundleActivator, ServiceFactory {
 	public void start(BundleContext context) throws Exception {
 		this.context = context;
 		Bundle parserBundle = context.getBundle();
-		try {
-			// check for sax parsers
-			registerSAXParsers(getParserFactoryClassNames(parserBundle
-					.getResource(SAXCLASSFILE)));
-			// check for dom parsers
-			registerDOMParsers(getParserFactoryClassNames(parserBundle
-					.getResource(DOMCLASSFILE)));
-		}
-		catch (IOException ioe) {
-			// if there were any IO errors accessing the resource files
-			// containing the class names
-			ioe.printStackTrace();
-			throw new FactoryConfigurationError(ioe);
-		}
+		// check for sax parsers
+		registerSAXParsers(getParserFactoryClassNames(parserBundle
+				.getResource(SAXCLASSFILE)));
+		// check for dom parsers
+		registerDOMParsers(getParserFactoryClassNames(parserBundle
+				.getResource(DOMCLASSFILE)));
 	}
 
 	/**
@@ -168,6 +176,7 @@ public class XMLParserActivator implements BundleActivator, ServiceFactory {
 	 *         bundle, and release all services used by the bundle.
 	 */
 	public void stop(BundleContext context) throws Exception {
+		// framework will automatically unregister the parser services
 	}
 
 	/**
@@ -177,77 +186,70 @@ public class XMLParserActivator implements BundleActivator, ServiceFactory {
 	 * 
 	 * @param parserUrl The URL of the service file containing the parser class
 	 *        names
-	 * @return A vector of strings containing the parser class names or null if
-	 *         parserUrl is null
+	 * @return A List of strings containing the parser class names.
 	 * @throws IOException if there is a problem reading the URL input stream
 	 */
-	private Vector getParserFactoryClassNames(URL parserUrl) throws IOException {
-		Vector v = new Vector(1);
-		if (parserUrl != null) {
-			String parserFactoryClassName = null;
-			InputStream is = parserUrl.openStream();
-			BufferedReader br = new BufferedReader(new InputStreamReader(is));
-			while (true) {
-				parserFactoryClassName = br.readLine();
-				if (parserFactoryClassName == null) {
-					break; // end of file reached
-				}
-				String pfcName = parserFactoryClassName.trim();
-				if (pfcName.length() == 0) {
-					continue; // blank line
-				}
-				int commentIdx = pfcName.indexOf("#");
-				if (commentIdx == 0) { // comment line
-					continue;
-				}
-				else
-					if (commentIdx < 0) { // no comment on this line
-						v.addElement(pfcName);
-					}
-					else {
-						v.addElement(pfcName.substring(0, commentIdx).trim());
-					}
+	private List getParserFactoryClassNames(URL parserUrl) throws IOException {
+		if (parserUrl == null) {
+			return Collections.EMPTY_LIST;
+		}
+		List v = new ArrayList(1);
+		String parserFactoryClassName = null;
+		InputStream is = parserUrl.openStream();
+		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		while (true) {
+			parserFactoryClassName = br.readLine();
+			if (parserFactoryClassName == null) {
+				break; // end of file reached
 			}
-			return v;
+			String pfcName = parserFactoryClassName.trim();
+			if (pfcName.length() == 0) {
+				continue; // blank line
+			}
+			int commentIdx = pfcName.indexOf("#");
+			if (commentIdx == 0) { // comment line
+				continue;
+			}
+			else
+				if (commentIdx < 0) { // no comment on this line
+					v.add(pfcName);
+				}
+				else {
+					v.add(pfcName.substring(0, commentIdx).trim());
+				}
 		}
-		else {
-			return null;
-		}
+		return v;
 	}
 
 	/**
 	 * Register SAX Parser Factory Services with the framework.
 	 * 
-	 * @param parserFactoryClassNames - a <code>Vector</code> of
+	 * @param parserFactoryClassNames - a <code>List</code> of
 	 *        <code>String</code> objects containing the names of the parser
 	 *        Factory Classes
 	 * @throws FactoryConfigurationError if thrown from <code>getFactory</code>
 	 */
-	private void registerSAXParsers(Vector parserFactoryClassNames)
+	private void registerSAXParsers(List parserFactoryClassNames)
 			throws FactoryConfigurationError {
-		if (parserFactoryClassNames != null) {
-			Enumeration e = parserFactoryClassNames.elements();
-			int index = 0;
-			while (e.hasMoreElements()) {
-				String parserFactoryClassName = (String) e.nextElement();
-				// create a sax parser factory just to get it's default
-				// properties. It will never be used since
-				// this class will operate as a service factory and give each
-				// service requestor it's own SaxParserFactory
-				SAXParserFactory factory = (SAXParserFactory) getFactory(parserFactoryClassName);
-				Hashtable properties = new Hashtable(7);
-				// figure out the default properties of the parser
-				setDefaultSAXProperties(factory, properties, index);
-				// store the parser factory class name in the properties so that
-				// it can be retrieved when getService is called
-				// to return a parser factory
-				properties.put(FACTORYNAMEKEY, parserFactoryClassName);
-				// release the factory
-				factory = null;
-				// register the factory as a service
-				context.registerService(SAXFACTORYNAME, this, properties);
-				index++;
-			}
+		Iterator e = parserFactoryClassNames.iterator();
+		int index = 0;
+		while (e.hasNext()) {
+			String parserFactoryClassName = (String) e.next();
+			// create a sax parser factory just to get it's default
+			// properties. It will never be used since
+			// this class will operate as a service factory and give each
+			// service requestor it's own SaxParserFactory
+			SAXParserFactory factory = (SAXParserFactory) getFactory(parserFactoryClassName);
+			Hashtable properties = new Hashtable(7);
+			// figure out the default properties of the parser
+			setDefaultSAXProperties(factory, properties, index);
+			// store the parser factory class name in the properties so that
+			// it can be retrieved when getService is called
+			// to return a parser factory
+			properties.put(FACTORYNAMEKEY, parserFactoryClassName);
+			// register the factory as a service
+			context.registerService(SAXFACTORYNAME, this, properties);
+			index++;
 		}
 	}
 
@@ -280,10 +282,9 @@ public class XMLParserActivator implements BundleActivator, ServiceFactory {
 	 * Set the customizable SAX Parser Service Properties.
 	 * 
 	 * <p>
-	 * This method attempts to instantiate a validating parser and a
-	 * namespaceaware parser to determine if the parser can support those
-	 * features. The appropriate properties are then set in the specified
-	 * properties object.
+	 * This method attempts to instantiate a validating parser and a namespace
+	 * aware parser to determine if the parser can support those features. The
+	 * appropriate properties are then set in the specified properties object.
 	 * 
 	 * <p>
 	 * This method can be overridden to add additional SAX2 features and
@@ -328,36 +329,32 @@ public class XMLParserActivator implements BundleActivator, ServiceFactory {
 	/**
 	 * Register DOM Parser Factory Services with the framework.
 	 * 
-	 * @param parserFactoryClassNames - a <code>Vector</code> of
+	 * @param parserFactoryClassNames - a <code>List</code> of
 	 *        <code>String</code> objects containing the names of the parser
 	 *        Factory Classes
 	 * @throws FactoryConfigurationError if thrown from <code>getFactory</code>
 	 */
-	private void registerDOMParsers(Vector parserFactoryClassNames)
+	private void registerDOMParsers(List parserFactoryClassNames)
 			throws FactoryConfigurationError {
-		if (parserFactoryClassNames != null) {
-			Enumeration e = parserFactoryClassNames.elements();
-			int index = 0;
-			while (e.hasMoreElements()) {
-				String parserFactoryClassName = (String) e.nextElement();
-				// create a dom parser factory just to get it's default
-				// properties. It will never be used since
-				// this class will operate as a service factory and give each
-				// service requestor it's own DocumentBuilderFactory
-				DocumentBuilderFactory factory = (DocumentBuilderFactory) getFactory(parserFactoryClassName);
-				Hashtable properties = new Hashtable(7);
-				// figure out the default properties of the parser
-				setDefaultDOMProperties(factory, properties, index);
-				// store the parser factory class name in the properties so that
-				// it can be retrieved when getService is called
-				// to return a parser factory
-				properties.put(FACTORYNAMEKEY, parserFactoryClassName);
-				// release the factory
-				factory = null;
-				// register the factory as a service
-				context.registerService(DOMFACTORYNAME, this, properties);
-				index++;
-			}
+		Iterator e = parserFactoryClassNames.iterator();
+		int index = 0;
+		while (e.hasNext()) {
+			String parserFactoryClassName = (String) e.next();
+			// create a dom parser factory just to get it's default
+			// properties. It will never be used since
+			// this class will operate as a service factory and give each
+			// service requestor it's own DocumentBuilderFactory
+			DocumentBuilderFactory factory = (DocumentBuilderFactory) getFactory(parserFactoryClassName);
+			Hashtable properties = new Hashtable(7);
+			// figure out the default properties of the parser
+			setDefaultDOMProperties(factory, properties, index);
+			// store the parser factory class name in the properties so that
+			// it can be retrieved when getService is called
+			// to return a parser factory
+			properties.put(FACTORYNAMEKEY, parserFactoryClassName);
+			// register the factory as a service
+			context.registerService(DOMFACTORYNAME, this, properties);
+			index++;
 		}
 	}
 
@@ -388,10 +385,9 @@ public class XMLParserActivator implements BundleActivator, ServiceFactory {
 	 * Set the customizable DOM Parser Service Properties.
 	 * 
 	 * <p>
-	 * This method attempts to instantiate a validating parser and a
-	 * namespaceaware parser to determine if the parser can support those
-	 * features. The appropriate properties are then set in the specified props
-	 * object.
+	 * This method attempts to instantiate a validating parser and a namespace
+	 * aware parser to determine if the parser can support those features. The
+	 * appropriate properties are then set in the specified props object.
 	 * 
 	 * <p>
 	 * This method can be overridden to add additional DOM2 features and
@@ -443,20 +439,16 @@ public class XMLParserActivator implements BundleActivator, ServiceFactory {
 	 */
 	private Object getFactory(String parserFactoryClassName)
 			throws FactoryConfigurationError {
-		Exception e = null;
 		try {
-			return Class.forName(parserFactoryClassName).newInstance();
+			return context.getBundle().loadClass(parserFactoryClassName)
+					.newInstance();
 		}
-		catch (ClassNotFoundException cnfe) {
-			e = cnfe;
+		catch (RuntimeException e) {
+			throw e;
 		}
-		catch (InstantiationException ie) {
-			e = ie;
+		catch (Exception e) {
+			throw new FactoryConfigurationError(e);
 		}
-		catch (IllegalAccessException iae) {
-			e = iae;
-		}
-		throw new FactoryConfigurationError(e);
 	}
 
 	/**
@@ -484,32 +476,26 @@ public class XMLParserActivator implements BundleActivator, ServiceFactory {
 		ServiceReference sref = registration.getReference();
 		String parserFactoryClassName = (String) sref
 				.getProperty(FACTORYNAMEKEY);
-		try {
-			// need to set factory properties
-			Object factory = getFactory(parserFactoryClassName);
-			if (factory instanceof SAXParserFactory) {
-				((SAXParserFactory) factory).setValidating(((Boolean) sref
-						.getProperty(PARSER_VALIDATING)).booleanValue());
-				((SAXParserFactory) factory).setNamespaceAware(((Boolean) sref
-						.getProperty(PARSER_NAMESPACEAWARE)).booleanValue());
+		// need to set factory properties
+		Object factory = getFactory(parserFactoryClassName);
+		if (factory instanceof SAXParserFactory) {
+			((SAXParserFactory) factory).setValidating(((Boolean) sref
+					.getProperty(PARSER_VALIDATING)).booleanValue());
+			((SAXParserFactory) factory).setNamespaceAware(((Boolean) sref
+					.getProperty(PARSER_NAMESPACEAWARE)).booleanValue());
+		}
+		else {
+			if (factory instanceof DocumentBuilderFactory) {
+				((DocumentBuilderFactory) factory)
+						.setValidating(((Boolean) sref
+								.getProperty(PARSER_VALIDATING)).booleanValue());
+				((DocumentBuilderFactory) factory)
+						.setNamespaceAware(((Boolean) sref
+								.getProperty(PARSER_NAMESPACEAWARE))
+								.booleanValue());
 			}
-			else
-				if (factory instanceof DocumentBuilderFactory) {
-					((DocumentBuilderFactory) factory)
-							.setValidating(((Boolean) sref
-									.getProperty(PARSER_VALIDATING))
-									.booleanValue());
-					((DocumentBuilderFactory) factory)
-							.setNamespaceAware(((Boolean) sref
-									.getProperty(PARSER_NAMESPACEAWARE))
-									.booleanValue());
-				}
-			return factory;
 		}
-		catch (FactoryConfigurationError fce) {
-			fce.printStackTrace();
-			return null;
-		}
+		return factory;
 	}
 
 	/**

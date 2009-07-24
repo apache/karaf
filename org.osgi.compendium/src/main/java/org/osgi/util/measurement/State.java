@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.util.measurement/src/org/osgi/util/measurement/State.java,v 1.8 2006/06/16 16:31:34 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2008). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +25,13 @@ package org.osgi.util.measurement;
  * <p>
  * A <code>State</code> object is immutable so that it may be easily shared.
  * 
- * @version $Revision: 1.8 $
+ * @Immutable
+ * @version $Revision: 5715 $
  */
 public class State {
-	final int		value;
-	final long		time;
-	final String	name;
+	private final int		value;
+	private final long		time;
+	private final String	name;
 
 	/**
 	 * Create a new <code>State</code> object.
@@ -108,9 +107,9 @@ public class State {
 	 * @return A hash code value for this object.
 	 */
 	public int hashCode() {
-		int hash = value;
+		int hash = 31 * 17 + value;
 		if (name != null) {
-			hash ^= name.hashCode();
+			hash = 31 * hash + name.hashCode();
 		}
 		return hash;
 	}

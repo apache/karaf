@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.monitor/src/org/osgi/service/monitor/MonitorPermission.java,v 1.17 2006/06/21 15:17:16 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2005, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,18 +22,20 @@ import java.util.StringTokenizer;
 
 /**
  * Indicates the callers authority to publish, read or reset
- * <code>StatusVariable</code>s, to switch event sending on or off or to
- * start monitoring jobs. The target of the permission is the identifier of the
+ * <code>StatusVariable</code>s, to switch event sending on or off or to start
+ * monitoring jobs. The target of the permission is the identifier of the
  * <code>StatusVariable</code>, the action can be <code>read</code>,
  * <code>publish</code>, <code>reset</code>, <code>startjob</code>,
- * <code>switchevents</code>, or the combination of these separated by
- * commas.  Action names are interpreted case-insensitively, but the canonical 
- * action string returned by {@link #getActions} uses the forms defined by the 
- * action constants.
+ * <code>switchevents</code>, or the combination of these separated by commas.
+ * Action names are interpreted case-insensitively, but the canonical action
+ * string returned by {@link #getActions} uses the forms defined by the action
+ * constants.
  * <p>
- * If the wildcard <code>*</code> appears in the actions field, all legal 
- * monitoring commands are allowed on the designated target(s) by the owner of 
+ * If the wildcard <code>*</code> appears in the actions field, all legal
+ * monitoring commands are allowed on the designated target(s) by the owner of
  * the permission.
+ * 
+ * @version $Revision: 5673 $
  */
 public class MonitorPermission extends Permission {
 

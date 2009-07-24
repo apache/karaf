@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.application/src/org/osgi/service/application/ApplicationHandle.java,v 1.41 2006/07/10 12:02:31 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +18,9 @@ package org.osgi.service.application;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.security.*;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
 
 import org.osgi.framework.Constants;
 
@@ -29,6 +29,8 @@ import org.osgi.framework.Constants;
  * of an application. It provides the functionality to query and manipulate the
  * lifecycle state of the represented application instance. It defines constants
  * for the lifecycle states.
+ * 
+ * @version $Revision: 5901 $
  */
 public abstract class ApplicationHandle {
 	/*
@@ -50,9 +52,17 @@ public abstract class ApplicationHandle {
 	public final static String APPLICATION_DESCRIPTOR	= "application.descriptor";
 	
 	/**
-	 * The property key for the state of this appliction instance.
+	 * The property key for the state of this application instance.
 	 */
 	public final static String APPLICATION_STATE		= "application.state";
+
+	/**
+	 * The property key for the supports exit value property of this application
+	 * instance.
+	 * 
+	 * @since 1.1
+	 */
+	public final static String APPLICATION_SUPPORTS_EXITVALUE = "application.supports.exitvalue";
 
 	/**
 	 * The application instance is running. This is the initial state of a newly
@@ -137,6 +147,45 @@ public abstract class ApplicationHandle {
 	public abstract String getState();
 
 	/**
+	 * Returns the exit value for the application instance. The timeout
+	 * specifies how the method behaves when the application has not yet
+	 * terminated. A negative, zero or positive value may be used.
+	 * <ul>
+	 * <li> negative - The method does not wait for termination. If the
+	 * application has not terminated then an <code>ApplicationException</code>
+	 * is thrown.</li>
+	 * 
+	 * <li> zero - The method waits until the application terminates.</li>
+	 * 
+	 * <li> positive - The method waits until the application terminates or the
+	 * timeout expires. If the timeout expires and the application has not
+	 * terminated then an <code>ApplicationException</code> is thrown.</li>
+	 * </ul>
+	 * <p>
+	 * The default implementation throws an
+	 * <code>UnsupportedOperationException</code>. The application model should
+	 * override this method if exit values are supported.
+	 * </p>
+	 * 
+	 * @param timeout The maximum time in milliseconds to wait for the
+	 *        application to timeout.
+	 * @return The exit value for the application instance. The value is
+	 *         application specific.
+	 * @throws UnsupportedOperationException If the application model does not
+	 *         support exit values.
+	 * @throws InterruptedException If the thread is interrupted while waiting
+	 *         for the timeout.
+	 * @throws ApplicationException If the application has not terminated. The
+	 *         error code will be
+	 *         {@link ApplicationException#APPLICATION_EXITVALUE_NOT_AVAILABLE}.
+	 * 
+	 * @since 1.1
+	 */
+	public Object getExitValue(long timeout) throws ApplicationException, InterruptedException{
+		throw new UnsupportedOperationException();
+	}
+
+	/**
 	 * Returns the unique identifier of this instance. This value is also
 	 * available as a service property of this application handle's service.pid.
 	 * 
@@ -181,7 +230,7 @@ public abstract class ApplicationHandle {
 		}catch( SecurityException se ) {
 			descriptor.isLaunchableSpecific(); /* check whether the bundle was uninstalled */
 			                                   /* if yes, throws IllegalStateException */
-			throw se;                          /* otherwise throw the catched SecurityException */
+			throw se; /* otherwise throw the caught SecurityException */
 		}
 		destroySpecific();
 	}
@@ -265,7 +314,7 @@ public abstract class ApplicationHandle {
 				throw e;
 			}
 			catch (Throwable e) {
-				throw new RuntimeException(e.toString());
+				throw new RuntimeException(e);
 			}
 		}
 		void destroy() {
@@ -284,7 +333,7 @@ public abstract class ApplicationHandle {
 				throw e;
 			}
 			catch (Throwable e) {
-				throw new RuntimeException(e.toString());
+				throw new RuntimeException(e);
 			}
 		}
 	}

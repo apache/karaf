@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.component/src/org/osgi/service/component/ComponentFactory.java,v 1.19 2006/06/16 16:31:26 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +25,8 @@ import java.util.Dictionary;
  * created and activated rather than automatically creating and activating
  * component configuration as necessary.
  * 
- * @version $Revision: 1.19 $
+ * @ThreadSafe
+ * @version $Revision: 5654 $
  */
 public interface ComponentFactory {
 	/**

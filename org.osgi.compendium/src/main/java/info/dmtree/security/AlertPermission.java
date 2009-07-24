@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/info.dmtree/src/info/dmtree/security/AlertPermission.java,v 1.4 2006/07/12 21:21:52 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +17,22 @@ package info.dmtree.security;
 
 import java.security.Permission;
 import java.security.PermissionCollection;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Iterator;
 
 /**
  * Indicates the callers authority to send alerts to management servers,
  * identified by their principal names.
  * <p>
- * <code>AlertPermission</code> has a target string which controls the
- * principal names where alerts can be sent. A wildcard is allowed at the end of
- * the target string, to allow sending alerts to any principal with a name
- * matching the given prefix. The &quot;*&quot; target means that alerts can be
- * sent to any destination.
+ * <code>AlertPermission</code> has a target string which controls the principal
+ * names where alerts can be sent. A wildcard is allowed at the end of the
+ * target string, to allow sending alerts to any principal with a name matching
+ * the given prefix. The &quot;*&quot; target means that alerts can be sent to
+ * any destination.
+ * 
+ * @version $Revision: 5673 $
  */
 public class AlertPermission extends Permission {
     private static final long serialVersionUID = -3206463101788245739L;

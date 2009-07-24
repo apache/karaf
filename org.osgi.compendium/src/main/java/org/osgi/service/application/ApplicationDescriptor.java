@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.application/src/org/osgi/service/application/ApplicationDescriptor.java,v 1.61 2006/07/10 12:02:31 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +18,9 @@ package org.osgi.service.application;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.security.*;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
 import java.util.Map;
 
 import org.osgi.framework.Constants;
@@ -30,6 +30,8 @@ import org.osgi.framework.InvalidSyntaxException;
  * An OSGi service that represents an installed application and stores
  * information about it. The application descriptor can be used for instance
  * creation.
+ * 
+ * @version $Revision: 6860 $
  */
 
 public abstract class ApplicationDescriptor {
@@ -263,8 +265,9 @@ public abstract class ApplicationDescriptor {
 	 * The following steps are made:
 	 * <UL>
 	 * <LI>Check for the appropriate permission.
-	 * <LI>Check the locking state of the application. If locked then return
-	 * null otherwise continue.
+	 * <LI>Check the locking state of the application. If locked then throw
+	 *     an {@link ApplicationException} with the reason code 
+	 *     {@link ApplicationException#APPLICATION_LOCKED}.
 	 * <LI>Calls the <code>launchSpecific()</code> method to create and start an application
 	 * instance.
 	 * <LI>Returns the <code>ApplicationHandle</code> returned by the 
@@ -290,7 +293,7 @@ public abstract class ApplicationDescriptor {
 	 *       <code>org.osgi.</code>.</li>
 	 * </ul>
 	 * <P>
-	 * The method is synchonous, it return only when the application instance was
+	 * The method is synchronous, it return only when the application instance was
 	 * successfully started or the attempt to start it failed.
 	 * <P>
 	 * This method never returns <code>null</code>. If launching an application fails,
@@ -386,7 +389,9 @@ public abstract class ApplicationDescriptor {
 	 * <p>
 	 * The <code>Map</code> argument of the  method contains startup 
 	 * arguments for the application. The keys used in the Map must be non-null, 
-	 * non-empty <code>String<code> objects.
+	 * non-empty <code>String<code> objects. The argument values must be
+     * of primitive types, wrapper classes of primitive types, <code>String</code>
+     * or arrays or collections of these.
      * <p>
      * The created schedules have a unique identifier within the scope of this
      * <code>ApplicationDescriptor</code>. This identifier can be specified
@@ -428,6 +433,9 @@ public abstract class ApplicationDescriptor {
      *               <li> {@link ApplicationException#APPLICATION_SCHEDULING_FAILED}
      *                 if the scheduling failed due to some internal reason
      *                 (e.g. persistent storage error).
+     *               <li> {@link ApplicationException#APPLICATION_INVALID_STARTUP_ARGUMENT}
+     *                 if the specified startup argument doesn't satisfy the 
+	 *                 type or value constraints of startup arguments.
      *              </ul>
 	 * @throws SecurityException
 	 *             if the caller doesn't have "schedule"
@@ -594,7 +602,7 @@ public abstract class ApplicationDescriptor {
 				throw e;
 			}
 			catch (Throwable e) {
-				throw new RuntimeException(e.toString());
+				throw new RuntimeException(e);
 			}
 		}
 
@@ -614,7 +622,7 @@ public abstract class ApplicationDescriptor {
 				throw e;
 			}
 			catch (Throwable e) {
-				throw new RuntimeException(e.toString());
+				throw new RuntimeException(e);
 			}
 		}
 
@@ -634,7 +642,7 @@ public abstract class ApplicationDescriptor {
 				throw e;
 			}
 			catch (Throwable e) {
-				throw new RuntimeException(e.toString());
+				throw new RuntimeException(e);
 			}
 		}
 
@@ -654,7 +662,7 @@ public abstract class ApplicationDescriptor {
 				throw e;
 			}
 			catch (Throwable e) {
-				throw new RuntimeException(e.toString());
+				throw new RuntimeException(e);
 			}
 		}
 
@@ -682,7 +690,7 @@ public abstract class ApplicationDescriptor {
 				throw e;
 			}
 			catch (Throwable e) {
-				throw new RuntimeException(e.toString());
+				throw new RuntimeException(e);
 			}
 		}
 
@@ -705,7 +713,7 @@ public abstract class ApplicationDescriptor {
 				throw e;
 			}
 			catch (Throwable e) {
-				throw new RuntimeException(e.toString());
+				throw new RuntimeException(e);
 			}
 		}
 	}

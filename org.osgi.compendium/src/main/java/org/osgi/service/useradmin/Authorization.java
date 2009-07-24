@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.useradmin/src/org/osgi/service/useradmin/Authorization.java,v 1.11 2007/02/07 18:53:08 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2001, 2007). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2008). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +58,7 @@ package org.osgi.service.useradmin;
  * <code>Authorization</code> object), the service explicitly checks that the
  * calling bundle has permission to make the call.
  * 
- * @version $Revision: 1.11 $
+ * @version $Revision: 5673 $
  */
 public interface Authorization {
 	/**

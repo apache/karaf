@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/info.dmtree/src/info/dmtree/notification/NotificationService.java,v 1.5 2006/07/04 12:26:50 tszeredi Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +22,8 @@ import info.dmtree.DmtSession;
  * NotificationService enables sending aynchronous notifications to a management
  * server. The implementation of <code>NotificationService</code> should
  * register itself in the OSGi service registry as a service.
+ * 
+ * @version $Revision: 5673 $
  */
 public interface NotificationService {
 

@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.cm/src/org/osgi/service/cm/ManagedServiceFactory.java,v 1.12 2006/07/11 00:54:03 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2008). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +92,7 @@ import java.util.Dictionary;
  *   
  * </pre>
  * 
- * @version $Revision: 1.12 $
+ * @version $Revision: 5673 $
  */
 public interface ManagedServiceFactory {
 	/**

@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.deploymentadmin/src/org/osgi/service/deploymentadmin/spi/ResourceProcessorException.java,v 1.7 2006/07/12 21:22:10 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2005, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,8 +58,6 @@ public class ResourceProcessorException extends Exception {
 	public static final int	CODE_OTHER_ERROR				= 463;
 
 	private final int				code;
-	private final String			message;
-	private final Throwable		cause;
 
 	/**
 	 * Create an instance of the exception.
@@ -72,9 +68,8 @@ public class ResourceProcessorException extends Exception {
 	 * @param cause the originating exception
 	 */
 	public ResourceProcessorException(int code, String message, Throwable cause) {
+		super(message, cause);
 		this.code = code;
-		this.message = message;
-		this.cause = cause;
 	}
 
 	/**
@@ -86,7 +81,8 @@ public class ResourceProcessorException extends Exception {
 	 * @param message Message associated with the exception
 	 */
 	public ResourceProcessorException(int code, String message) {
-		this(code, message, null);
+		super(message);
+		this.code = code;
 	}
 
 	/**
@@ -97,14 +93,34 @@ public class ResourceProcessorException extends Exception {
 	 *        predefined integer values (<code>CODE_X</code>).
 	 */
 	public ResourceProcessorException(int code) {
-		this(code, null, null);
+		super();
+		this.code = code;
 	}
 
 	/**
-	 * @return Returns the cause.
+	 * Returns the cause of this exception or <code>null</code> if no cause was
+	 * set.
+	 * 
+	 * @return The cause of this exception or <code>null</code> if no cause was
+	 *         set.
 	 */
 	public Throwable getCause() {
-		return cause;
+		return super.getCause();
+	}
+
+	/**
+	 * Initializes the cause of this exception to the specified value.
+	 * 
+	 * @param cause The cause of this exception.
+	 * @return This exception.
+	 * @throws IllegalArgumentException If the specified cause is this
+	 *         exception.
+	 * @throws IllegalStateException If the cause of this exception has already
+	 *         been set.
+	 * @since 1.0.1
+	 */
+	public Throwable initCause(Throwable cause) {
+		return super.initCause(cause);
 	}
 
 	/**
@@ -112,12 +128,5 @@ public class ResourceProcessorException extends Exception {
 	 */
 	public int getCode() {
 		return code;
-	}
-
-	/**
-	 * @return Returns the message.
-	 */
-	public String getMessage() {
-	    return message;
 	}
 }

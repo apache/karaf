@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.deploymentadmin/src/org/osgi/service/deploymentadmin/DeploymentAdmin.java,v 1.28 2007/02/07 18:53:07 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2005, 2007). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

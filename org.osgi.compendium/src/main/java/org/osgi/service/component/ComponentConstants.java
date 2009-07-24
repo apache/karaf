@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.component/src/org/osgi/service/component/ComponentConstants.java,v 1.14 2006/06/16 16:31:26 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +19,12 @@ package org.osgi.service.component;
 /**
  * Defines standard names for Service Component constants.
  * 
- * @version $Revision: 1.14 $
+ * @version $Revision: 6454 $
  */
 public interface ComponentConstants {
 	/**
-	 * Manifest header (named &quot;Service-Component&quot;) specifying the XML
-	 * documents within a bundle that contain the bundle's Service Component
-	 * descriptions.
+	 * Manifest header specifying the XML documents within a bundle that contain
+	 * the bundle's Service Component descriptions.
 	 * <p>
 	 * The attribute value may be retrieved from the <code>Dictionary</code>
 	 * object returned by the <code>Bundle.getHeaders</code> method.
@@ -37,14 +34,15 @@ public interface ComponentConstants {
 	/**
 	 * A component property for a component configuration that contains the name
 	 * of the component as specified in the <code>name</code> attribute of the
-	 * <code>component</code> element. The type of this property must be
-	 * <code>String</code>.
+	 * <code>component</code> element. The value of this property must be of
+	 * type <code>String</code>.
 	 */
 	public final static String	COMPONENT_NAME			= "component.name";
 
 	/**
 	 * A component property that contains the generated id for a component
-	 * configuration. The type of this property must be <code>Long</code>.
+	 * configuration. The value of this property must be of type
+	 * <code>Long</code>.
 	 * 
 	 * <p>
 	 * The value of this property is assigned by the Service Component Runtime
@@ -57,15 +55,64 @@ public interface ComponentConstants {
 
 	/**
 	 * A service registration property for a Component Factory that contains the
-	 * value of the <code>factory</code> attribute. The type of this property
-	 * must be <code>String</code>.
+	 * value of the <code>factory</code> attribute. The value of this property
+	 * must be of type <code>String</code>.
 	 */
 	public final static String	COMPONENT_FACTORY		= "component.factory";
 
 	/**
 	 * The suffix for reference target properties. These properties contain the
-	 * filter to select the target services for a reference. The type of this
-	 * property must be <code>String</code>.
+	 * filter to select the target services for a reference. The value of this
+	 * property must be of type <code>String</code>.
 	 */
 	public final static String	REFERENCE_TARGET_SUFFIX	= ".target";
+	
+	/**
+	 * The reason the component configuration was deactivated is unspecified.
+	 *  
+	 * @since 1.1
+	 */
+	public static final int DEACTIVATION_REASON_UNSPECIFIED = 0;
+	
+	/**
+	 * The component configuration was deactivated because the component was disabled.
+	 *  
+	 * @since 1.1
+	 */
+	public static final int DEACTIVATION_REASON_DISABLED = 1;
+	
+	/**
+	 * The component configuration was deactivated because a reference became unsatisfied.
+	 *  
+	 * @since 1.1
+	 */
+	public static final int DEACTIVATION_REASON_REFERENCE = 2;
+	
+	/**
+	 * The component configuration was deactivated because its configuration was changed.
+	 *  
+	 * @since 1.1
+	 */
+	public static final int DEACTIVATION_REASON_CONFIGURATION_MODIFIED = 3;
+	
+	/**
+	 * The component configuration was deactivated because its configuration was deleted.
+	 *  
+	 * @since 1.1
+	 */
+	public static final int DEACTIVATION_REASON_CONFIGURATION_DELETED = 4;
+	
+	/**
+	 * The component configuration was deactivated because the component was disposed.
+	 *  
+	 * @since 1.1
+	 */
+	public static final int DEACTIVATION_REASON_DISPOSED = 5;
+
+	/**
+	 * The component configuration was deactivated because the bundle was stopped.
+	 *  
+	 * @since 1.1
+	 */
+	public static final int DEACTIVATION_REASON_BUNDLE_STOPPED = 6;
 }

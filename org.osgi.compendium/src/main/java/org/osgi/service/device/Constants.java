@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.device/src/org/osgi/service/device/Constants.java,v 1.9 2006/07/11 00:54:08 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2008). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +23,7 @@ package org.osgi.service.device;
  * The values associated with these keys are of type <code>java.lang.String</code>,
  * unless otherwise stated.
  * 
- * @version $Revision: 1.9 $
+ * @version $Revision: 5673 $
  * @since 1.1
  * @see Device
  * @see Driver

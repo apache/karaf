@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.log/src/org/osgi/service/log/LogListener.java,v 1.9 2006/06/16 16:31:49 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2008). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +28,8 @@ import java.util.EventListener;
  * unregistered by calling the <code>LogReaderService.removeLogListener</code>
  * method.
  * 
- * @version $Revision: 1.9 $
+ * @ThreadSafe
+ * @version $Revision: 5654 $
  * @see LogReaderService
  * @see LogEntry
  * @see LogReaderService#addLogListener(LogListener)

@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.cm/src/org/osgi/service/cm/ConfigurationEvent.java,v 1.9 2006/06/16 16:31:28 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +14,8 @@
  * limitations under the License.
  */
 package org.osgi.service.cm;
+
+import java.util.Dictionary;
 
 import org.osgi.framework.ServiceReference;
 
@@ -46,7 +46,7 @@ import org.osgi.framework.ServiceReference;
  * 
  * @see ConfigurationListener
  * 
- * @version $Revision: 1.9 $
+ * @version $Revision: 6180 $
  * @since 1.2
  */
 public class ConfigurationEvent {
@@ -57,7 +57,7 @@ public class ConfigurationEvent {
 	 * This <code>ConfigurationEvent</code> type that indicates that a
 	 * <code>Configuration</code> object has been updated with new properties.
 	 * 
-	 * An event is fired when a call to <code>Configuration.update</code>
+	 * An event is fired when a call to {@link Configuration#update(Dictionary)}
 	 * successfully changes a configuration.
 	 * 
 	 * <p>
@@ -71,7 +71,7 @@ public class ConfigurationEvent {
 	 * This <code>ConfigurationEvent</code> type that indicates that a
 	 * <code>Configuration</code> object has been deleted.
 	 * 
-	 * An event is fired when a call to <code>Configuration.delete</code>
+	 * An event is fired when a call to {@link Configuration#delete()}
 	 * successfully deletes a configuration.
 	 * 
 	 * <p>
@@ -116,6 +116,9 @@ public class ConfigurationEvent {
 		this.type = type;
 		this.factoryPid = factoryPid;
 		this.pid = pid;
+		if ((reference == null) || (pid == null)) {
+			throw new NullPointerException("reference and pid must not be null");
+		}
 	}
 
 	/**

@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.deploymentadmin/src/org/osgi/service/deploymentadmin/DeploymentException.java,v 1.20 2006/07/12 21:22:10 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2005, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -203,8 +201,6 @@ public class DeploymentException extends Exception {
 	public static final int	CODE_TIMEOUT					= 465;
 
 	private final int				code;
-	private final String			message;
-	private final Throwable		cause;
 
 	/**
 	 * Create an instance of the exception.
@@ -215,9 +211,8 @@ public class DeploymentException extends Exception {
 	 * @param cause the originating exception
 	 */
 	public DeploymentException(int code, String message, Throwable cause) {
+		super(message, cause);
 		this.code = code;
-		this.message = message;
-		this.cause = cause;
 	}
 
 	/**
@@ -229,7 +224,8 @@ public class DeploymentException extends Exception {
 	 * @param message Message associated with the exception
 	 */
 	public DeploymentException(int code, String message) {
-		this(code, message, null);
+		super(message);
+		this.code = code;
 	}
 
 	/**
@@ -240,14 +236,34 @@ public class DeploymentException extends Exception {
 	 *        predefined integer values (<code>CODE_X</code>).
 	 */
 	public DeploymentException(int code) {
-		this(code, null, null);
+		super();
+		this.code = code;
 	}
 
 	/**
-	 * @return Returns the cause.
+	 * Returns the cause of this exception or <code>null</code> if no cause was
+	 * set.
+	 * 
+	 * @return The cause of this exception or <code>null</code> if no cause was
+	 *         set.
 	 */
 	public Throwable getCause() {
-		return cause;
+		return super.getCause();
+	}
+
+	/**
+	 * Initializes the cause of this exception to the specified value.
+	 * 
+	 * @param cause The cause of this exception.
+	 * @return This exception.
+	 * @throws IllegalArgumentException If the specified cause is this
+	 *         exception.
+	 * @throws IllegalStateException If the cause of this exception has already
+	 *         been set.
+	 * @since 1.1
+	 */
+	public Throwable initCause(Throwable cause) {
+		return super.initCause(cause);
 	}
 
 	/**
@@ -255,12 +271,5 @@ public class DeploymentException extends Exception {
 	 */
 	public int getCode() {
 		return code;
-	}
-
-	/**
-	 * @return Returns the message.
-	 */
-	public String getMessage() {
-	    return message;
 	}
 }

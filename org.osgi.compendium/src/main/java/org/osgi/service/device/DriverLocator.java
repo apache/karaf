@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.device/src/org/osgi/service/device/DriverLocator.java,v 1.10 2006/07/12 21:22:12 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2008). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +28,9 @@ import java.util.Dictionary;
  * providers and encapsulate all provider-specific details related to the
  * location and acquisition of driver bundles.
  * 
- * @version $Revision: 1.10 $
+ * @version $Revision: 5654 $
  * @see Driver
+ * @ThreadSafe
  */
 public interface DriverLocator {
 	/**
@@ -56,9 +55,9 @@ public interface DriverLocator {
 	 * 
 	 * @param id the <code>DRIVER_ID</code> of the driver that needs to be
 	 *        installed.
-	 * @return An <code>InputStream</code> object from which the driver bundle can
-	 *         be installed or <code>null</code> if the driver with the given ID
-	 *         cannot be located
+	 * @return An <code>InputStream</code> object from which the driver bundle
+	 *         can be installed or <code>null</code> if the driver with the
+	 *         given ID cannot be located
 	 * @throws java.io.IOException the input stream for the bundle cannot be
 	 *         created
 	 */

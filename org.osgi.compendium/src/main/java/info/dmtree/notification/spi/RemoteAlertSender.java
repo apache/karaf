@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/info.dmtree/src/info/dmtree/notification/spi/RemoteAlertSender.java,v 1.2 2006/06/16 16:31:59 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,26 +21,26 @@ import info.dmtree.notification.AlertItem;
 /**
  * The RemoteAlertSender can be used to send notifications to (remote) entities
  * identified by principal names. This service is provided by Protocol Adapters,
- * and is used by the
- * {@link info.dmtree.notification.NotificationService} when sending
- * alerts. Implementations of this interface have to be able to connect and send
- * alerts to one or more management servers in a protocol specific way.
+ * and is used by the {@link info.dmtree.notification.NotificationService} when
+ * sending alerts. Implementations of this interface have to be able to connect
+ * and send alerts to one or more management servers in a protocol specific way.
  * <p>
  * The properties of the service registration should specify a list of
  * destinations (principals) where the service is capable of sending alerts.
- * This can be done by providing a <code>String</code> array of principal
- * names in the <code>principals</code> registration property. If this property
- * is not registered, the service will be treated as the default sender. The
- * default alert sender is only used when a more specific alert sender cannot be
- * found.
+ * This can be done by providing a <code>String</code> array of principal names
+ * in the <code>principals</code> registration property. If this property is not
+ * registered, the service will be treated as the default sender. The default
+ * alert sender is only used when a more specific alert sender cannot be found.
  * <p>
  * The <code>principals</code> registration property is used when the
- * {@link info.dmtree.notification.NotificationService#sendNotification}
- * method is called, to find the proper <code>RemoteAlertSender</code> for the
- * given destination. If the caller does not specify a principal, the alert is
- * only sent if the Notification Sender finds a default alert sender, or if the
+ * {@link info.dmtree.notification.NotificationService#sendNotification} method
+ * is called, to find the proper <code>RemoteAlertSender</code> for the given
+ * destination. If the caller does not specify a principal, the alert is only
+ * sent if the Notification Sender finds a default alert sender, or if the
  * choice is unambiguous for some other reason (for example if only one alert
  * sender is registered).
+ * 
+ * @version $Revision: 5673 $
  */
 public interface RemoteAlertSender {
     /**

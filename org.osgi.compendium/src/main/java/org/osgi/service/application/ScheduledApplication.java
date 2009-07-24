@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.application/src/org/osgi/service/application/ScheduledApplication.java,v 1.20 2006/07/06 14:59:29 sboshev Exp $
- * 
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +27,12 @@ import java.util.Map;
  * Each <code>ScheduledApplication</code> instance has an identifier which is
  * unique within the scope of the application being scheduled.
  * <p>
- * <code>ScheduledApplication</code> instances are registered as services.
- * The {@link #APPLICATION_PID} service property contains the PID of the
- * application being scheduled, the {@link #SCHEDULE_ID} service property
- * contains the schedule identifier.
+ * <code>ScheduledApplication</code> instances are registered as services. The
+ * {@link #APPLICATION_PID} service property contains the PID of the application
+ * being scheduled, the {@link #SCHEDULE_ID} service property contains the
+ * schedule identifier.
+ * 
+ * @version $Revision: 5673 $
  */
 public interface ScheduledApplication {
     

@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.useradmin/src/org/osgi/service/useradmin/UserAdminEvent.java,v 1.9 2006/07/11 00:54:01 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2008). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +33,7 @@ import org.osgi.framework.ServiceReference;
  * @see UserAdmin
  * @see UserAdminListener
  * 
- * @version $Revision: 1.9 $
+ * @version $Revision: 5673 $
  */
 public class UserAdminEvent {
 	private ServiceReference	ref;

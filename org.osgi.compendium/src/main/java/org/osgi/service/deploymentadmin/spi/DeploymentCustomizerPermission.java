@@ -1,8 +1,6 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.deploymentadmin/src/org/osgi/service/deploymentadmin/spi/DeploymentCustomizerPermission.java,v 1.6 2006/06/21 15:16:13 hargrave Exp $
  * 
- * 
- * Copyright (c) OSGi Alliance (2005, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +19,10 @@ package org.osgi.service.deploymentadmin.spi;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.security.*;
+import java.security.AccessController;
+import java.security.Permission;
+import java.security.PermissionCollection;
+import java.security.PrivilegedAction;
 
 import org.osgi.service.deploymentadmin.DeploymentAdminPermission;
 
@@ -65,7 +66,7 @@ public class DeploymentCustomizerPermission extends Permission {
                     return c.getConstructor(new Class[] {String.class, String.class});    
                 }
                 catch (Exception e) {
-                    throw new RuntimeException(e.getMessage());
+                    throw new RuntimeException(e);
                 }
             }});
     }
@@ -112,7 +113,7 @@ public class DeploymentCustomizerPermission extends Permission {
 			throw e;
 		}
 		catch (Throwable e) {
-			throw new RuntimeException(e.toString());
+			throw new RuntimeException(e);
 		}
     }
 

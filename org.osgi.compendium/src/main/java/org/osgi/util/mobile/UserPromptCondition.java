@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.util.mobile/src/org/osgi/util/mobile/UserPromptCondition.java,v 1.26 2006/07/10 08:18:30 pnagy Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.upnp/src/org/osgi/service/upnp/UPnPLocalStateVariable.java,v 1.12 2006/06/16 16:31:46 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2005, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2008). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +27,8 @@ package org.osgi.service.upnp;
  * be queried.
  * 
  * @since 1.1
+ * 
+ * @version $Revision: 5673 $
  */
 public interface UPnPLocalStateVariable extends UPnPStateVariable {
 	/**

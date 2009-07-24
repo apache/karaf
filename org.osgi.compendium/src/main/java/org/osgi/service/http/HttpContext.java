@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.http/src/org/osgi/service/http/HttpContext.java,v 1.12 2006/07/12 21:22:13 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2008). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +35,7 @@ import javax.servlet.http.HttpServletResponse;
  * <p>
  * This interface is implemented by users of the <code>HttpService</code>.
  * 
- * @version $Revision: 1.12 $
+ * @version $Revision: 5673 $
  */
 public interface HttpContext {
 	/**

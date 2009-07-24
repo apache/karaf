@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/info.dmtree/src/info/dmtree/registry/DmtServiceFactory.java,v 1.5 2006/07/11 09:38:25 tszeredi Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +21,6 @@ import info.dmtree.notification.NotificationService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
-
 /**
  * This class is the central access point for Device Management services.
  * Applications can use the static factory methods provided in this class to
@@ -32,7 +29,9 @@ import org.osgi.framework.ServiceReference;
  * sending notifications to management servers.
  * <p>
  * These methods are not needed in an OSGi environment, clients should retrieve
- * the required service objects from the OSGi Service Registry. 
+ * the required service objects from the OSGi Service Registry.
+ * 
+ * @version $Revision: 5673 $
  */
 public final class DmtServiceFactory {
     private static BundleContext context = null;

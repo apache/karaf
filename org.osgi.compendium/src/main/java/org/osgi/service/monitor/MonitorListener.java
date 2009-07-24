@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.monitor/src/org/osgi/service/monitor/MonitorListener.java,v 1.11 2006/06/16 16:31:25 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +17,13 @@
 package org.osgi.service.monitor;
 
 /**
- * The <code>MonitorListener</code> is used by <code>Monitorable</code>
- * services to send notifications when a <code>StatusVariable</code> value is
- * changed. The <code>MonitorListener</code> should register itself as a
- * service at the OSGi Service Registry. This interface must (only) be 
- * implemented by the Monitor Admin component.
+ * The <code>MonitorListener</code> is used by <code>Monitorable</code> services
+ * to send notifications when a <code>StatusVariable</code> value is changed.
+ * The <code>MonitorListener</code> should register itself as a service at the
+ * OSGi Service Registry. This interface must (only) be implemented by the
+ * Monitor Admin component.
+ * 
+ * @version $Revision: 5673 $
  */
 public interface MonitorListener {
     /**

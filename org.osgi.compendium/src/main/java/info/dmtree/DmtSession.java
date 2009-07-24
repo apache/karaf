@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/info.dmtree/src/info/dmtree/DmtSession.java,v 1.7 2006/07/11 16:58:20 tszeredi Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +20,9 @@ import java.util.Date;
 /**
  * DmtSession provides concurrent access to the DMT. All DMT manipulation
  * commands for management applications are available on the
- * <code>DmtSession</code> interface. The session is associated with a root
- * node which limits the subtree in which the operations can be executed within
- * this session.
+ * <code>DmtSession</code> interface. The session is associated with a root node
+ * which limits the subtree in which the operations can be executed within this
+ * session.
  * <p>
  * Most of the operations take a node URI as parameter, which can be either an
  * absolute URI (starting with &quot;./&quot;) or a URI relative to the root
@@ -38,10 +36,12 @@ import java.util.Date;
  * exception is thrown. The only exception is the {@link #isNodeUri(String)}
  * method which returns <code>false</code> in case of an invalid URI.
  * <p>
- * Each method of <code>DmtSession</code> that accesses the tree in any way
- * can throw <code>DmtIllegalStateException</code> if the session has been
- * closed or invalidated (due to timeout, fatal exceptions, or unexpectedly
- * unregistered plugins).
+ * Each method of <code>DmtSession</code> that accesses the tree in any way can
+ * throw <code>DmtIllegalStateException</code> if the session has been closed or
+ * invalidated (due to timeout, fatal exceptions, or unexpectedly unregistered
+ * plugins).
+ * 
+ * @version $Revision: 5673 $
  */
 public interface DmtSession {
     /**
@@ -1210,7 +1210,7 @@ public interface DmtSession {
     /**
      * Get the list of children names of a node. The returned array contains the
      * names - not the URIs - of the immediate children nodes of the given node.
-     * The returned child names are mangled ({@link Uri#mangle}). The elements
+     * The returned child names are mangled ({@link Uri#mangle(String)}). The elements
      * are in no particular order. The returned array must not contain
      * <code>null</code> entries.
      * 

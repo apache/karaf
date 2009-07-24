@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/info.dmtree/src/info/dmtree/DmtData.java,v 1.8 2006/07/10 21:37:07 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +36,8 @@ import java.util.Hashtable;
  * of future data formats. When using these formats, the actual format name is
  * specified as a <code>String</code>. The application is responsible for the
  * proper encoding of the data according to the specified format.
+ * 
+ * @version $Revision: 5673 $
  */
 public final class DmtData {
 

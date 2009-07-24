@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.wireadmin/src/org/osgi/service/wireadmin/WireAdmin.java,v 1.11 2006/07/12 21:22:14 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2008). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +36,7 @@ import org.osgi.framework.InvalidSyntaxException;
  * <code>ServicePermission[WireAdmin,GET]</code> to get the Wire Admin service to
  * create, modify, find, and delete <code>Wire</code> objects.
  * 
- * @version $Revision: 1.11 $
+ * @version $Revision: 5673 $
  */
 public interface WireAdmin {
 	/**

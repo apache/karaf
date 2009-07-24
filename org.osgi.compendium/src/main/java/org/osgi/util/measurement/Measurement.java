@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.util.measurement/src/org/osgi/util/measurement/Measurement.java,v 1.14 2006/07/11 00:54:06 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2008). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +14,6 @@
  * limitations under the License.
  */
 package org.osgi.util.measurement;
-
 
 /**
  * Represents a value with an error, a unit and a time-stamp.
@@ -46,15 +43,16 @@ package org.osgi.util.measurement;
  * Note: This class has a natural ordering that is inconsistent with equals. See
  * {@link #compareTo}.
  * 
- * @version $Revision: 1.14 $
+ * @Immutable
+ * @version $Revision: 5715 $
  */
 public class Measurement implements Comparable {
-	/* package private so it can be accessed by Unit */
-	final double	value;
-	final double	error;
-	final long		time;
-	final Unit		unit;
-	private transient String	name;
+	private final double				value;
+	private final double				error;
+	private final long					time;
+	private final Unit					unit;
+	private transient volatile String	name;
+	private transient volatile int		hashCode;
 
 	/**
 	 * Create a new <code>Measurement</code> object.
@@ -370,7 +368,8 @@ public class Measurement implements Comparable {
 	 *         object.
 	 */
 	public String toString() {
-		if (name == null) {
+		String result = name;
+		if (result == null) {
 			StringBuffer sb = new StringBuffer();
 			sb.append(value);
 			if (error != 0.0d) {
@@ -382,9 +381,10 @@ public class Measurement implements Comparable {
 				sb.append(" ");
 				sb.append(u);
 			}
-			name = sb.toString();
+			result = sb.toString();
+			name = result;
 		}
-		return name;
+		return result;
 	}
 
 	/**
@@ -422,25 +422,20 @@ public class Measurement implements Comparable {
 			throw new ArithmeticException("Cannot compare " + this + " and "
 					+ that);
 		}
-		if (value == that.value) {
+		int result = Double.compare(value, that.value);
+		if (result == 0) {
 			return 0;
 		}
-		if (value < that.value) {
-			if ((value + error) >= (that.value - that.error)) {
+		if (result < 0) {
+			if (Double.compare(value + error, that.value - that.error) >= 0) {
 				return 0;
 			}
-			else {
-				return -1;
-			}
+			return -1;
 		}
-		else {
-			if ((value - error) <= (that.value + that.error)) {
-				return 0;
-			}
-			else {
-				return 1;
-			}
+		if (Double.compare(value - error, that.value + that.error) <= 0) {
+			return 0;
 		}
+		return 1;
 	}
 
 	/**
@@ -449,8 +444,16 @@ public class Measurement implements Comparable {
 	 * @return A hash code value for this object.
 	 */
 	public int hashCode() {
-		long bits = Double.doubleToLongBits(value + error);
-		return ((int) (bits ^ (bits >>> 32))) ^ unit.hashCode();
+		int h = hashCode;
+		if (h == 0) {
+			long bits = Double.doubleToLongBits(value);
+			h = 31 * 17 + ((int) (bits ^ (bits >>> 32)));
+			bits = Double.doubleToLongBits(error);
+			h = 31 * h + ((int) (bits ^ (bits >>> 32)));
+			h = 31 * h + unit.hashCode();
+			hashCode = h;
+		}
+		return h;
 	}
 
 	/**
@@ -474,7 +477,8 @@ public class Measurement implements Comparable {
 			return false;
 		}
 		Measurement that = (Measurement) obj;
-		return (value == that.value) && (error == that.error)
+		return (Double.compare(value, that.value) == 0)
+				&& (Double.compare(error, that.error) == 0)
 				&& unit.equals(that.unit);
 	}
 }

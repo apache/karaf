@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.device/src/org/osgi/service/device/Driver.java,v 1.11 2006/07/11 00:54:08 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2008). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +25,10 @@ import org.osgi.framework.ServiceReference;
  * highest for a particular <code>Device</code> object will be instructed by the
  * device manager to attach to the <code>Device</code> object.
  * 
- * @version $Revision: 1.11 $
+ * @version $Revision: 5654 $
  * @see Device
  * @see DriverLocator
+ * @ThreadSafe
  */
 public interface Driver {
 	/**
@@ -43,8 +42,8 @@ public interface Driver {
 	 * <p>
 	 * The return value must be one of the possible match values defined in the
 	 * device category definition for the given Device service, or
-	 * <code>Device.MATCH_NONE</code> if the category of the Device service is not
-	 * recognized.
+	 * <code>Device.MATCH_NONE</code> if the category of the Device service is
+	 * not recognized.
 	 * 
 	 * <p>
 	 * In order to make its decision, this Driver service may examine the
@@ -61,15 +60,15 @@ public interface Driver {
 	 * The match function is called by the device manager during the matching
 	 * process.
 	 * 
-	 * @param reference the <code>ServiceReference</code> object of the device to
-	 *        match
+	 * @param reference the <code>ServiceReference</code> object of the device
+	 *        to match
 	 * 
 	 * @return value indicating how well this driver can support the given
 	 *         Device service, or <code>Device.MATCH_NONE</code> if it cannot
 	 *         support the Device service at all
 	 * 
 	 * @throws java.lang.Exception if this Driver service cannot examine the
-	 *            Device service
+	 *         Device service
 	 */
 	public int match(ServiceReference reference) throws Exception;
 
@@ -78,13 +77,13 @@ public interface Driver {
 	 * given <code>ServiceReference</code> object.
 	 * 
 	 * <p>
-	 * A return value of <code>null</code> indicates that this Driver service has
-	 * successfully attached to the given Device service. If this Driver service
-	 * is unable to attach to the given Device service, but knows of a more
-	 * suitable Driver service, it must return the <code>DRIVER_ID</code> of that
-	 * Driver service. This allows for the implementation of referring drivers
-	 * whose only purpose is to refer to other drivers capable of handling a
-	 * given Device service.
+	 * A return value of <code>null</code> indicates that this Driver service
+	 * has successfully attached to the given Device service. If this Driver
+	 * service is unable to attach to the given Device service, but knows of a
+	 * more suitable Driver service, it must return the <code>DRIVER_ID</code>
+	 * of that Driver service. This allows for the implementation of referring
+	 * drivers whose only purpose is to refer to other drivers capable of
+	 * handling a given Device service.
 	 * 
 	 * <p>
 	 * After having attached to the Device service, this driver may register the
@@ -94,15 +93,15 @@ public interface Driver {
 	 * <p>
 	 * This method is called by the device manager.
 	 * 
-	 * @param reference the <code>ServiceReference</code> object of the device to
-	 *        attach to
+	 * @param reference the <code>ServiceReference</code> object of the device
+	 *        to attach to
 	 * 
-	 * @return <code>null</code> if this Driver service has successfully attached
-	 *         to the given Device service, or the <code>DRIVER_ID</code> of a
-	 *         more suitable driver
+	 * @return <code>null</code> if this Driver service has successfully
+	 *         attached to the given Device service, or the
+	 *         <code>DRIVER_ID</code> of a more suitable driver
 	 * 
 	 * @throws java.lang.Exception if the driver cannot attach to the given
-	 *            device and does not know of a more suitable driver
+	 *         device and does not know of a more suitable driver
 	 */
 	public String attach(ServiceReference reference) throws Exception;
 }

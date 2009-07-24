@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/info.dmtree/src/info/dmtree/spi/ReadableDataSession.java,v 1.4 2006/07/12 21:21:52 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +15,9 @@
  */
 package info.dmtree.spi;
 
-import info.dmtree.*;
+import info.dmtree.DmtData;
+import info.dmtree.DmtException;
+import info.dmtree.MetaNode;
 
 import java.util.Date;
 
@@ -38,15 +38,14 @@ import java.util.Date;
  * <p>
  * <strong>Error handling</strong>
  * <p>
- * When a tree access command is called on the DmtAdmin service, it must
- * perform an extensive set of checks on the parameters and the authority of the
- * caller before delegating the call to a plugin. Therefore plugins can take
- * certain circumstances for granted: that the path is valid and is within the
- * subtree of the plugin and the session, the command can be applied to the
- * given node (e.g. the target of <code>getChildNodeNames</code> is an
- * interior node), etc. All errors described by the error codes
- * {@link DmtException#INVALID_URI}, {@link DmtException#URI_TOO_LONG},
- * {@link DmtException#PERMISSION_DENIED},
+ * When a tree access command is called on the DmtAdmin service, it must perform
+ * an extensive set of checks on the parameters and the authority of the caller
+ * before delegating the call to a plugin. Therefore plugins can take certain
+ * circumstances for granted: that the path is valid and is within the subtree
+ * of the plugin and the session, the command can be applied to the given node
+ * (e.g. the target of <code>getChildNodeNames</code> is an interior node), etc.
+ * All errors described by the error codes {@link DmtException#INVALID_URI},
+ * {@link DmtException#URI_TOO_LONG}, {@link DmtException#PERMISSION_DENIED},
  * {@link DmtException#COMMAND_NOT_ALLOWED} and
  * {@link DmtException#TRANSACTION_ERROR} are fully filtered out before control
  * reaches the plugin.
@@ -58,19 +57,21 @@ import java.util.Date;
  * indicate such discrepancies.
  * <p>
  * The DmtAdmin also ensures that the targeted nodes exist before calling the
- * plugin (except, of course, before the <code>isNodeUri</code> call).
- * However, some small amount of time elapses between the check and the call, so
- * in case of plugins where the node structure can change independantly from the
- * DMT, the target node might disappear in that time. For example, a whole
- * subtree can disappear when a Monitorable application is unregistered, which
- * might happen in the middle of a DMT session accessing it. Plugins managing
- * such nodes always need to check whether they still exist and throw
+ * plugin (except, of course, before the <code>isNodeUri</code> call). However,
+ * some small amount of time elapses between the check and the call, so in case
+ * of plugins where the node structure can change independantly from the DMT,
+ * the target node might disappear in that time. For example, a whole subtree
+ * can disappear when a Monitorable application is unregistered, which might
+ * happen in the middle of a DMT session accessing it. Plugins managing such
+ * nodes always need to check whether they still exist and throw
  * {@link DmtException#NODE_NOT_FOUND} as necessary, but for more static
  * subtrees there is no need for the plugin to use this error code.
  * <p>
  * The plugin can use the remaining error codes as needed. If an error does not
  * fit into any other category, the {@link DmtException#COMMAND_FAILED} code
  * should be used.
+ * 
+ * @version $Revision: 5673 $
  */
 public interface ReadableDataSession {
     /**
@@ -118,7 +119,7 @@ public interface ReadableDataSession {
     /**
      * Get the list of children names of a node. The returned array contains the
      * names - not the URIs - of the immediate children nodes of the given node.
-     * The returned child names must be mangled ({@link info.dmtree.Uri#mangle}).
+     * The returned child names must be mangled ({@link info.dmtree.Uri#mangle(String)}).
      * The returned array may contain <code>null</code> entries, but these are
      * removed by the DmtAdmin before returning it to the client.
      * 

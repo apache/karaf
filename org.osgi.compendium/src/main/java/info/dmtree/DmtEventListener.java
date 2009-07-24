@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/info.dmtree/src/info/dmtree/DmtEventListener.java,v 1.6 2006/07/04 12:12:16 tszeredi Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +21,8 @@ package info.dmtree;
  * successful DMT change, and also when sessions are opened or closed. If a
  * {@link DmtSession} is opened in atomic mode, DMT events are only sent when
  * the session is committed, when the changes are actually performed.
+ * 
+ * @version $Revision: 5673 $
  */
 public interface DmtEventListener {
 

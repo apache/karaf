@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.monitor/src/org/osgi/service/monitor/MonitoringJob.java,v 1.14 2006/06/16 16:31:25 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,28 +18,29 @@ package org.osgi.service.monitor;
 
 /**
  * A Monitoring Job is a request for scheduled or event based notifications on
- * update of a set of <code>StatusVariable</code>s. The job is a data
- * structure that holds a non-empty list of <code>StatusVariable</code> names,
- * an identification of the initiator of the job, and the sampling parameters.
+ * update of a set of <code>StatusVariable</code>s. The job is a data structure
+ * that holds a non-empty list of <code>StatusVariable</code> names, an
+ * identification of the initiator of the job, and the sampling parameters.
  * There are two kinds of monitoring jobs: time based and change based. Time
- * based jobs take samples of all <code>StatusVariable</code>s with a
- * specified frequency. The number of samples to be taken before the job
- * finishes may be specified. Change based jobs are only interested in the
- * changes of the monitored <code>StatusVariable</code>s. In this case, the
- * number of changes that must take place between two notifications can be
- * specified.
+ * based jobs take samples of all <code>StatusVariable</code>s with a specified
+ * frequency. The number of samples to be taken before the job finishes may be
+ * specified. Change based jobs are only interested in the changes of the
+ * monitored <code>StatusVariable</code>s. In this case, the number of changes
+ * that must take place between two notifications can be specified.
  * <p>
  * The job can be started on the <code>MonitorAdmin</code> interface. Running
- * the job (querying the <code>StatusVariable</code>s, listening to changes,
- * and sending out notifications on updates) is the task of the
+ * the job (querying the <code>StatusVariable</code>s, listening to changes, and
+ * sending out notifications on updates) is the task of the
  * <code>MonitorAdmin</code> implementation.
  * <p>
  * Whether a monitoring job keeps track dynamically of the
- * <code>StatusVariable</code>s it monitors is not specified. This means that
- * if we monitor a <code>StatusVariable</code> of a <code>Monitorable</code>
+ * <code>StatusVariable</code>s it monitors is not specified. This means that if
+ * we monitor a <code>StatusVariable</code> of a <code>Monitorable</code>
  * service which disappears and later reappears then it is implementation
  * specific whether we still receive updates of the <code>StatusVariable</code>
  * changes or not.
+ * 
+ * @version $Revision: 5673 $
  */
 public interface MonitoringJob {
     /**

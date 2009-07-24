@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.component/src/org/osgi/service/component/ComponentInstance.java,v 1.13 2006/06/16 16:31:26 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +25,8 @@ package org.osgi.service.component;
  * ComponentInstances are never reused. A new ComponentInstance object will be
  * created when the component configuration is activated again.
  * 
- * @version $Revision: 1.13 $
+ * @ThreadSafe
+ * @version $Revision: 5654 $
  */
 public interface ComponentInstance {
 	/**

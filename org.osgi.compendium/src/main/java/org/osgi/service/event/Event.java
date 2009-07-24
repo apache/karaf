@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.event/src/org/osgi/service/event/Event.java,v 1.8 2006/07/12 13:17:04 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2005, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +16,12 @@
 
 package org.osgi.service.event;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import org.osgi.framework.Filter;
 
@@ -26,48 +29,81 @@ import org.osgi.framework.Filter;
  * An event.
  * 
  * <code>Event</code> objects are delivered to <code>EventHandler</code>
- * services which subsrcibe to the topic of the event.
+ * services which subscribe to the topic of the event.
  * 
- * @version $Revision: 1.8 $
+ * @Immutable
+ * @version $Revision: 7003 $
  */
 public class Event {
 	/**
 	 * The topic of this event.
 	 */
-	String	topic;
+	private final String	topic;
 	/**
 	 * The properties carried by this event. Keys are strings and values are
 	 * objects
 	 */
-	Hashtable	properties;
+	private final Map		/* <String,Object> */properties;
 
 	/**
 	 * Constructs an event.
 	 * 
 	 * @param topic The topic of the event.
-	 * @param properties The event's properties (may be <code>null</code>).
-	 * 
+	 * @param properties The event's properties (may be <code>null</code>). A
+	 *        property whose key is not of type <code>String</code> will be
+	 *        ignored.
 	 * @throws IllegalArgumentException If topic is not a valid topic name.
+	 * @since 1.2
 	 */
-	public Event(String topic, Dictionary properties) {
+	public Event(String topic, Map/* <String,Object> */properties) {
+		validateTopicName(topic);
 		this.topic = topic;
-		validateTopicName();
-		this.properties = new Hashtable();
+		int size = (properties == null) ? 1 : (properties.size() + 1);
+		Map p = new HashMap(size);
 		if (properties != null) {
-			for (Enumeration e = properties.keys(); e.hasMoreElements();) {
-				String key = (String) e.nextElement();
-				Object value = properties.get(key);
-				this.properties.put(key, value);
+			for (Iterator iter = properties.keySet().iterator(); iter.hasNext();) {
+				Object key = iter.next();
+				if (key instanceof String) {
+					Object value = properties.get(key);
+					p.put(key, value);
+				}
 			}
 		}
-		this.properties.put(EventConstants.EVENT_TOPIC, topic);
+		p.put(EventConstants.EVENT_TOPIC, topic);
+		this.properties = p; // safely publish the map
+	}
+
+	/**
+	 * Constructs an event.
+	 * 
+	 * @param topic The topic of the event.
+	 * @param properties The event's properties (may be <code>null</code>). A
+	 *        property whose key is not of type <code>String</code> will be
+	 *        ignored.
+	 * @throws IllegalArgumentException If topic is not a valid topic name.
+	 */
+	public Event(String topic, Dictionary/* <String,Object> */properties) {
+		validateTopicName(topic);
+		this.topic = topic;
+		int size = (properties == null) ? 1 : (properties.size() + 1);
+		Map p = new HashMap(size);
+		if (properties != null) {
+			for (Enumeration e = properties.keys(); e.hasMoreElements();) {
+				Object key = e.nextElement();
+				if (key instanceof String) {
+					Object value = properties.get(key);
+					p.put(key, value);
+				}
+			}
+		}
+		p.put(EventConstants.EVENT_TOPIC, topic);
+		this.properties = p; // safely publish the map
 	}
 
 	/**
 	 * Retrieves a property.
 	 * 
 	 * @param name the name of the property to retrieve
-	 * 
 	 * @return The value of the property, or <code>null</code> if not found.
 	 */
 	public final Object getProperty(String name) {
@@ -80,12 +116,8 @@ public class Event {
 	 * @return A non-empty array with one element per property.
 	 */
 	public final String[] getPropertyNames() {
-		String[] names = new String[properties.size()];
-		Enumeration keys = properties.keys();
-		for (int i = 0; keys.hasMoreElements(); i++) {
-			names[i] = (String) keys.nextElement();
-		}
-		return names;
+		return (String[]) properties.keySet().toArray(
+				new String[properties.size()]);
 	}
 
 	/**
@@ -98,31 +130,30 @@ public class Event {
 	}
 
 	/**
-	 * Tests this event's properties against the given filter.
+	 * Tests this event's properties against the given filter using a case
+	 * sensitive match.
 	 * 
 	 * @param filter The filter to test.
-	 * 
 	 * @return true If this event's properties match the filter, false
 	 *         otherwise.
 	 */
 	public final boolean matches(Filter filter) {
-		return filter.matchCase(properties);
+		return filter.matchCase(new UnmodifiableDictionary(properties));
 	}
 
 	/**
 	 * Compares this <code>Event</code> object to another object.
 	 * 
 	 * <p>
-	 * An event is considered to be <b>equal to </b> another
-	 * event if the topic is equal and the properties are equal.
+	 * An event is considered to be <b>equal to</b> another event if the topic
+	 * is equal and the properties are equal.
 	 * 
 	 * @param object The <code>Event</code> object to be compared.
-	 * @return <code>true</code> if <code>object</code> is a
-	 *         <code>Event</code> and is equal to this object;
-	 *         <code>false</code> otherwise.
+	 * @return <code>true</code> if <code>object</code> is a <code>Event</code>
+	 *         and is equal to this object; <code>false</code> otherwise.
 	 */
 	public boolean equals(Object object) {
-		if (object == this) { // quicktest
+		if (object == this) { // quick test
 			return true;
 		}
 
@@ -140,7 +171,9 @@ public class Event {
 	 * @return An integer which is a hash code value for this object.
 	 */
 	public int hashCode() {
-		return topic.hashCode() ^ properties.hashCode();
+		int h = 31 * 17 + topic.hashCode();
+		h = 31 * h + properties.hashCode();
+		return h;
 	}
 
 	/**
@@ -149,47 +182,82 @@ public class Event {
 	 * @return The string representation of this event.
 	 */
 	public String toString() {
-		return getClass().getName() + " [topic=" + topic + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+		return getClass().getName() + " [topic=" + topic + "]";  
 	}
-
-	private static final String	SEPARATOR	= "/"; //$NON-NLS-1$
 
 	/**
 	 * Called by the constructor to validate the topic name.
 	 * 
+	 * @param topic The topic name to validate.
 	 * @throws IllegalArgumentException If the topic name is invalid.
 	 */
-	private void validateTopicName() {
-		try {
-			StringTokenizer st = new StringTokenizer(topic, SEPARATOR, true);
-			validateToken(st.nextToken());
-
-			while (st.hasMoreTokens()) {
-				st.nextToken(); // consume delimiter
-				validateToken(st.nextToken());
-			}
+	private static void validateTopicName(String topic) {
+	    char[] chars = topic.toCharArray();
+	    int length = chars.length;
+	    if (length == 0) {
+			throw new IllegalArgumentException("empty topic");
 		}
-		catch (NoSuchElementException e) {
-			throw new IllegalArgumentException("invalid topic"); //$NON-NLS-1$
-		}
+		for (int i = 0; i < length; i++) {
+	        char ch = chars[i];
+	        if (ch == '/') {
+	        	// Can't start or end with a '/' but anywhere else is okay
+				if (i == 0 || (i == length - 1)) {
+	                throw new IllegalArgumentException(
+							"invalid topic: "
+							+ topic); 
+	            }
+	            // Can't have "//" as that implies empty token
+	            if (chars[i-1] == '/') {
+	                throw new IllegalArgumentException(
+							"invalid topic: "
+							+ topic); 
+	            }
+	            continue;
+	        }
+	        if (('A' <= ch) && (ch <= 'Z')) {
+	            continue;
+	        }
+	        if (('a' <= ch) && (ch <= 'z')) {
+	            continue;
+	        }
+	        if (('0' <= ch) && (ch <= '9')) {
+	            continue;
+	        }
+	        if ((ch == '_') || (ch == '-')) {
+	            continue;
+	        }
+	        throw new IllegalArgumentException("invalid topic: " + topic); 
+	    }
 	}
-
-	private static final String	tokenAlphabet	= "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-"; //$NON-NLS-1$
-
+	
 	/**
-	 * Validate a token.
-	 * 
-	 * @throws IllegalArgumentException If the token is invalid.
+	 * Unmodifiable wrapper for Dictionary.
 	 */
-	private void validateToken(String token) {
-		int length = token.length();
-		if (length < 1) {	// token must contain at least one character
-			throw new IllegalArgumentException("invalid topic"); //$NON-NLS-1$
+	private static class UnmodifiableDictionary extends Dictionary {
+		private final Map	wrapped;
+		UnmodifiableDictionary(Map wrapped) {
+			this.wrapped = wrapped;
 		}
-		for (int i = 0; i < length; i++) { // each character in the token must be from the token alphabet
-			if (tokenAlphabet.indexOf(token.charAt(i)) == -1) { //$NON-NLS-1$
-				throw new IllegalArgumentException("invalid topic"); //$NON-NLS-1$
-			}
+		public Enumeration elements() {
+			return Collections.enumeration(wrapped.values());
+		}
+		public Object get(Object key) {
+			return wrapped.get(key);
+		}
+		public boolean isEmpty() {
+			return wrapped.isEmpty();
+		}
+		public Enumeration keys() {
+			return Collections.enumeration(wrapped.keySet());
+		}
+		public Object put(Object key, Object value) {
+			throw new UnsupportedOperationException();
+		}
+		public Object remove(Object key) {
+			throw new UnsupportedOperationException();
+		}
+		public int size() {
+			return wrapped.size();
 		}
 	}
 }

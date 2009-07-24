@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/info.dmtree/src/info/dmtree/DmtException.java,v 1.9 2006/07/12 21:21:37 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,14 +36,16 @@ import java.util.Vector;
  * close multiple plugins, and has to report the exceptions of all failures.
  * <p>
  * Each constructor has two variants, one accepts a <code>String</code> node
- * URI, the other accepts a <code>String[]</code> node path. The former is
- * used by the DmtAdmin implementation, the latter by the plugins, who receive
- * the node URI as an array of segment names. The constructors are otherwise
+ * URI, the other accepts a <code>String[]</code> node path. The former is used
+ * by the DmtAdmin implementation, the latter by the plugins, who receive the
+ * node URI as an array of segment names. The constructors are otherwise
  * identical.
  * <p>
  * Getter methods are provided to retrieve the values of the additional
  * parameters, and the <code>printStackTrace(PrintWriter)</code> method is
  * extended to print the stack trace of all causing throwables as well.
+ * 
+ * @version $Revision: 5837 $
  */
 public class DmtException extends Exception {
     private static final long serialVersionUID = -63006267148118655L;
@@ -331,16 +331,16 @@ public class DmtException extends Exception {
      */
     private final int code;
 
-    /**
-     * The message associated with the exception, or <code>null</code> if
-     * there is no error message.
-     */
-    private final String message;
+	/**
+	 * The message associated with the exception, or <code>null</code> if there
+	 * is no error message.
+	 */
+	private final String		message;
 
-    /**
-     * The list of originating exceptions, or empty list or <code>null</code>
-     * if there are no originating exceptions.
-     */
+	/**
+	 * The list of originating exceptions, or empty list or <code>null</code> if
+	 * there are no originating exceptions.
+	 */
     private final Throwable[] causes;
 
     /**
@@ -416,6 +416,7 @@ public class DmtException extends Exception {
     
     private DmtException(String uri, int code, String message, 
             Throwable[] causes, boolean fatal) {
+    	super((Throwable) null);
         this.uri = uri;
         this.code = code;
         this.message = message;
@@ -521,7 +522,7 @@ public class DmtException extends Exception {
         if (uri != null)
             sb.append(": '").append(uri).append('\'');
         if (message != null)
-            sb.append(": ").append(message);
+			sb.append(": ").append(message);
 
         return sb.toString();
     }

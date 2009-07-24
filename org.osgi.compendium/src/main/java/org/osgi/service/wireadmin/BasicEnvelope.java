@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.wireadmin/src/org/osgi/service/wireadmin/BasicEnvelope.java,v 1.9 2006/06/16 16:31:43 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2008). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +19,7 @@ package org.osgi.service.wireadmin;
  * <code>BasicEnvelope</code> is an implementation of the {@link Envelope}
  * interface
  * 
- * @version $Revision: 1.9 $
+ * @version $Revision: 5673 $
  */
 public class BasicEnvelope implements Envelope {
 	Object	value;

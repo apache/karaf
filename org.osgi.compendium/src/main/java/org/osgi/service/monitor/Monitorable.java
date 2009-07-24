@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.monitor/src/org/osgi/service/monitor/Monitorable.java,v 1.17 2006/06/16 16:31:25 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +18,11 @@ package org.osgi.service.monitor;
 
 /**
  * A <code>Monitorable</code> can provide information about itself in the form
- * of <code>StatusVariables</code>. Instances of this interface should
- * register themselves at the OSGi Service Registry. The
- * <code>MonitorAdmin</code> listens to the registration of
- * <code>Monitorable</code> services, and makes the information they provide
- * available also through the Device Management Tree (DMT) for remote access.
+ * of <code>StatusVariables</code>. Instances of this interface should register
+ * themselves at the OSGi Service Registry. The <code>MonitorAdmin</code>
+ * listens to the registration of <code>Monitorable</code> services, and makes
+ * the information they provide available also through the Device Management
+ * Tree (DMT) for remote access.
  * <p>
  * The monitorable service is identified by its PID string which must be a non-
  * <code>null</code>, non-empty string that conforms to the "symbolic-name"
@@ -32,17 +30,19 @@ package org.osgi.service.monitor;
  * characters [-_.a-zA-Z0-9] may be used. The length of the PID must not exceed
  * 20 characters.
  * <p>
- * A <code>Monitorable</code> may optionally support sending notifications
- * when the status of its <code>StatusVariables</code> change. Support for
- * change notifications can be defined per <code>StatusVariable</code>.
+ * A <code>Monitorable</code> may optionally support sending notifications when
+ * the status of its <code>StatusVariables</code> change. Support for change
+ * notifications can be defined per <code>StatusVariable</code>.
  * <p>
  * Publishing <code>StatusVariables</code> requires the presence of the
- * <code>MonitorPermission</code> with the <code>publish</code> action
- * string. This permission, however, is not checked during registration of the
+ * <code>MonitorPermission</code> with the <code>publish</code> action string.
+ * This permission, however, is not checked during registration of the
  * <code>Monitorable</code> service. Instead, the <code>MonitorAdmin</code>
  * implemenatation must make sure that when a <code>StatusVariable</code> is
  * queried, it is shown only if the <code>Monitorable</code> is authorized to
  * publish the given <code>StatusVariable</code>.
+ * 
+ * @version $Revision: 5673 $
  */
 public interface Monitorable {
     /**

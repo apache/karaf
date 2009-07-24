@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/info.dmtree/src/info/dmtree/Uri.java,v 1.12 2006/10/24 17:54:28 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +16,9 @@
 package info.dmtree;
 
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -30,26 +30,27 @@ import java.util.List;
  * Syntax of valid DMT URIs:
  * <ul>
  * <li>A slash (<code>'/'</code> &#92;u002F) is the separator of the node names.
- * Slashes used in node name must therefore be escaped using a backslash slash 
- * (<code>"\/"</code>). The backslash must be escaped with a double backslash 
- * sequence. A backslash found must be ignored when it is not followed by a 
- * slash or backslash.
- * <li>The node name can be constructed using full Unicode character set
- * (except the Supplementary code, not being supported by CLDC/CDC). However,
- * using the full Unicode character set for node names is discouraged because
- * the encoding in the underlying storage as well as the encoding needed in
- * communications can create significant performance and memory usage overhead.
- * Names that are restricted to the URI set <code>[-a-zA-Z0-9_.!~*'()]</code>
- * are most efficient.
+ * Slashes used in node name must therefore be escaped using a backslash slash (
+ * <code>"\/"</code>). The backslash must be escaped with a double backslash sequence. A
+ * backslash found must be ignored when it is not followed by a slash or
+ * backslash.
+ * <li>The node name can be constructed using full Unicode character set (except
+ * the Supplementary code, not being supported by CLDC/CDC). However, using the
+ * full Unicode character set for node names is discouraged because the encoding
+ * in the underlying storage as well as the encoding needed in communications
+ * can create significant performance and memory usage overhead. Names that are
+ * restricted to the URI set <code>[-a-zA-Z0-9_.!~*'()]</code> are most efficient.
  * <li>URIs used in the DMT must be treated and interpreted as case sensitive.
  * <li>No End Slash: URI must not end with the delimiter slash (<code>'/'</code>
- * &#92;u002F). This implies that the root node must be denoted as 
+ * &#92;u002F). This implies that the root node must be denoted as
  * <code>"."</code> and not <code>"./"</code>.
  * <li>No parent denotation: URI must not be constructed using the character
  * sequence <code>"../"</code> to traverse the tree upwards.
  * <li>Single Root: The character sequence <code>"./"</code> must not be used
  * anywhere else but in the beginning of a URI.
  * </ul>
+ * 
+ * @version $Revision: 5673 $
  */
 public final class Uri {
 	/*

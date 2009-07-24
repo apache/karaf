@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/info.dmtree/src/info/dmtree/spi/DataPlugin.java,v 1.4 2006/06/16 16:31:59 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +34,8 @@ import info.dmtree.DmtSession;
  * method depends on the lock type of the current session. In case of
  * {@link #openReadWriteSession(String[], DmtSession)} and
  * {@link #openAtomicSession(String[], DmtSession)}, the plugin may return
- * <code>null</code> to indicate that the specified lock type is not
- * supported. In this case the DmtAdmin may call
+ * <code>null</code> to indicate that the specified lock type is not supported.
+ * In this case the DmtAdmin may call
  * {@link #openReadOnlySession(String[], DmtSession)} to start a read-only
  * plugin session, which can be used as long as there are no write operations on
  * the nodes handled by this plugin.
@@ -47,6 +45,8 @@ import info.dmtree.DmtSession;
  * is an absolute path, so the first segment is always &quot;.&quot;. Special
  * characters appear escaped in the segments.
  * <p>
+ * 
+ * @version $Revision: 5673 $
  */
 public interface DataPlugin {
 

@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.metatype/src/org/osgi/service/metatype/AttributeDefinition.java,v 1.13 2006/06/16 16:31:23 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +22,7 @@ package org.osgi.service.metatype;
  * An <code>AttributeDefinition</code> object defines a description of the data
  * type of a property/attribute.
  * 
- * @version $Revision: 1.13 $
+ * @version $Revision: 5673 $
  */
 public interface AttributeDefinition {
 	/**

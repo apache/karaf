@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.application/src/org/osgi/application/ApplicationServiceListener.java,v 1.6 2006/07/12 21:21:34 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2005, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +52,7 @@ import org.osgi.framework.*;
  * objects is further filtered according to package sources as defined in
  * {@link ServiceReference#isAssignableTo(Bundle, String)}.
  * 
- * @version $Revision: 1.6 $
+ * @version $Revision: 5673 $
  * @see ApplicationServiceEvent
  * @see ServicePermission
  */

@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.application/src/org/osgi/application/ApplicationContext.java,v 1.15 2006/07/11 13:19:02 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2005, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,26 +22,26 @@ import java.util.Map;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 
-
 /**
  * <code>ApplicationContext</code> is the access point for an OSGi-aware
  * application to the features of the OSGi Service Platform. Each application
  * instance will have its own <code>ApplicationContext</code> instance, which
  * will not be reused after destorying the corresponding application instace.
  * <p>
- * Application instances can obtain their <code>ApplicationContext</code>
- * using the {@link Framework#getApplicationContext} method.
+ * Application instances can obtain their <code>ApplicationContext</code> using
+ * the {@link Framework#getApplicationContext} method.
  * <p>
- * The lifecycle of an <code>ApplicationContext</code> instance is bound to
- * the lifecycle of the corresponding application instance. The 
+ * The lifecycle of an <code>ApplicationContext</code> instance is bound to the
+ * lifecycle of the corresponding application instance. The
  * <code>ApplicationContext</code> becomes available when the application is
  * started and it is invalidated when the application instance is stopped (i.e.
- * the "stop" method of the application activator object returned).
- * All method calls (except {@link #getApplicationId()} and 
- * {@link #getInstanceId()}) to an invalidated context object result an 
- * <code>IllegalStateException</code>.
+ * the "stop" method of the application activator object returned). All method
+ * calls (except {@link #getApplicationId()} and {@link #getInstanceId()}) to an
+ * invalidated context object result an <code>IllegalStateException</code>.
  * 
  * @see org.osgi.application.Framework
+ * 
+ * @version $Revision: 5673 $
  */
 public interface ApplicationContext {
 

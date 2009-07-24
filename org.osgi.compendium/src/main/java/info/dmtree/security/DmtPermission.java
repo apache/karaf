@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/info.dmtree/src/info/dmtree/security/DmtPermission.java,v 1.10 2006/10/19 13:32:53 tszeredi Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +20,11 @@ import info.dmtree.Uri;
 
 import java.security.Permission;
 import java.security.PermissionCollection;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.StringTokenizer;
 
 /**
  * Controls access to management objects in the Device Management Tree (DMT). It
@@ -46,15 +48,16 @@ import java.util.*;
  * 
  * This means that owner of this permission has Get access on every child node
  * of ./OSGi/bundles. The asterix does not necessarily have to follow a '/'
- * character. For example the
- * <code>&quot;./OSGi/a*&quot;</code> target matches the 
- * <code>./OSGi/applications</code> subtree.
+ * character. For example the <code>&quot;./OSGi/a*&quot;</code> target matches
+ * the <code>./OSGi/applications</code> subtree.
  * <p>
- * If wildcard is present in the actions field, all legal OMA DM commands are 
- * allowed on the designated nodes(s) by the owner of the permission.  Action
+ * If wildcard is present in the actions field, all legal OMA DM commands are
+ * allowed on the designated nodes(s) by the owner of the permission. Action
  * names are interpreted case-insensitively, but the canonical action string
- * returned by {@link #getActions} uses the forms defined by the action 
+ * returned by {@link #getActions} uses the forms defined by the action
  * constants.
+ * 
+ * @version $Revision: 5673 $
  */
 public class DmtPermission extends Permission {
     private static final long serialVersionUID = -1910969921419407809L;

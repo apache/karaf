@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.device/src/org/osgi/service/device/Device.java,v 1.10 2006/07/11 00:54:08 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2008). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +23,8 @@ package org.osgi.service.device;
  * A service must implement this interface or use the
  * {@link Constants#DEVICE_CATEGORY} registration property to indicate that it
  * is a device. Any services implementing this interface or registered with the
- * <code>DEVICE_CATEGORY</code> property will be discovered by the device manager.
+ * <code>DEVICE_CATEGORY</code> property will be discovered by the device
+ * manager.
  * 
  * <p>
  * Device services implementing this interface give the device manager the
@@ -37,8 +36,9 @@ package org.osgi.service.device;
  * Specialized device implementations will extend this interface by adding
  * methods appropriate to their device category to it.
  * 
- * @version $Revision: 1.10 $
+ * @version $Revision: 5654 $
  * @see Driver
+ * @ThreadSafe
  */
 public interface Device {
 	/**

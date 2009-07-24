@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.component/src/org/osgi/service/component/ComponentContext.java,v 1.20 2006/06/16 16:31:26 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +18,9 @@ package org.osgi.service.component;
 
 import java.util.Dictionary;
 
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 /**
  * A Component Context object is used by a component instance to interact with
@@ -28,38 +28,31 @@ import org.osgi.framework.*;
  * component instance has a unique Component Context.
  * 
  * <p>
- * A component's implementation class may optionaly implement an activate
- * method:
- * 
- * <pre>
- * protected void activate(ComponentContext context);
- * </pre>
- * 
- * If a component implements this method, this method will be called when a
- * component configuration is activated to provide the component instance's
- * Component Context object.
- * 
- * <p>
- * A component's implementation class may optionaly implement a deactivate
- * method:
- * 
- * <pre>
- * protected void deactivate(ComponentContext context);
- * </pre>
- * 
- * If a component implements this method, this method will be called when the
- * component configuration is deactivated.
+ * A component instance may have an activate method. If a component instance has
+ * a suitable and accessible activate method, this method will be called when a
+ * component configuration is activated. If the activate method takes a
+ * <code>ComponentContext</code> argument, it will be passed the component
+ * instance's Component Context object. If the activate method takes a
+ * <code>BundleContext</code> argument, it will be passed the component
+ * instance's Bundle Context object. If the activate method takes a
+ * <code>Map</code> argument, it will be passed an unmodifiable Map containing
+ * the component properties.
  * 
  * <p>
- * The activate and deactivate methods will be called using reflection and must
- * be protected or public accessible. These methods should not be public methods
- * so that they do not appear as public methods on the component instance when
- * used as a service object. These methods will be located by looking through
- * the component's implementation class hierarchy for the first declaration of
- * the method. If the method is found, if it is declared protected or public,
- * the method will be called. Otherwise, the method will not be called.
+ * A component instance may have a deactivate method. If a component instance
+ * has a suitable and accessible deactivate method, this method will be called
+ * when the component configuration is deactivated. If the deactivate method
+ * takes a <code>ComponentContext</code> argument, it will be passed the
+ * component instance's Component Context object. If the deactivate method takes
+ * a <code>BundleContext</code> argument, it will be passed the component
+ * instance's Bundle Context object. If the deactivate method takes a
+ * <code>Map</code> argument, it will be passed an unmodifiable Map containing
+ * the component properties. If the deactivate method takes an <code>int</code>
+ * or <code>Integer</code> argument, it will be passed the reason code for the
+ * component instance's deactivation.
  * 
- * @version $Revision: 1.20 $
+ * @ThreadSafe
+ * @version $Revision: 6462 $
  */
 public interface ComponentContext {
 	/**
@@ -77,10 +70,10 @@ public interface ComponentContext {
 	 * If the cardinality of the reference is <code>0..n</code> or
 	 * <code>1..n</code> and multiple services are bound to the reference, the
 	 * service with the highest ranking (as specified in its
-	 * <code>Constants.SERVICE_RANKING</code> property) is returned. If there
-	 * is a tie in ranking, the service with the lowest service ID (as specified
-	 * in its <code>Constants.SERVICE_ID</code> property); that is, the
-	 * service that was registered first is returned.
+	 * <code>Constants.SERVICE_RANKING</code> property) is returned. If there is
+	 * a tie in ranking, the service with the lowest service ID (as specified in
+	 * its <code>Constants.SERVICE_ID</code> property); that is, the service
+	 * that was registered first is returned.
 	 * 
 	 * @param name The name of a reference as specified in a
 	 *        <code>reference</code> element in this component's description.
@@ -117,16 +110,18 @@ public interface ComponentContext {
 	 *        <code>reference</code> element in this component's description.
 	 * @return An array of service objects for the referenced service or
 	 *         <code>null</code> if the reference cardinality is
-	 *         <code>0..1</code> or <code>0..n</code> and no bound service
-	 *         is available.
+	 *         <code>0..1</code> or <code>0..n</code> and no bound service is
+	 *         available. If the reference cardinality is <code>0..1</code> or
+	 *         <code>1..1</code> and a bound service is available, the array
+	 *         will have exactly one element.
 	 * @throws ComponentException If the Service Component Runtime catches an
 	 *         exception while activating a bound service.
 	 */
 	public Object[] locateServices(String name);
 
 	/**
-	 * Returns the <code>BundleContext</code> of the bundle which contains
-	 * this component.
+	 * Returns the <code>BundleContext</code> of the bundle which contains this
+	 * component.
 	 * 
 	 * @return The <code>BundleContext</code> of the bundle containing this
 	 *         component.
@@ -135,20 +130,19 @@ public interface ComponentContext {
 
 	/**
 	 * If the component instance is registered as a service using the
-	 * <code>servicefactory=&quot;true&quot;</code> attribute, then this
-	 * method returns the bundle using the service provided by the component
-	 * instance.
+	 * <code>servicefactory=&quot;true&quot;</code> attribute, then this method
+	 * returns the bundle using the service provided by the component instance.
 	 * <p>
 	 * This method will return <code>null</code> if:
 	 * <ul>
 	 * <li>The component instance is not a service, then no bundle can be using
 	 * it as a service.
 	 * <li>The component instance is a service but did not specify the
-	 * <code>servicefactory=&quot;true&quot;</code> attribute, then all
-	 * bundles using the service provided by the component instance will share
-	 * the same component instance.
-	 * <li>The service provided by the component instance is not currently
-	 * being used by any bundle.
+	 * <code>servicefactory=&quot;true&quot;</code> attribute, then all bundles
+	 * using the service provided by the component instance will share the same
+	 * component instance.
+	 * <li>The service provided by the component instance is not currently being
+	 * used by any bundle.
 	 * </ul>
 	 * 
 	 * @return The bundle using the component instance as a service or
@@ -168,8 +162,8 @@ public interface ComponentContext {
 	 * Enables the specified component name. The specified component name must
 	 * be in the same bundle as this component.
 	 * 
-	 * @param name The name of a component or <code>null</code> to indicate
-	 *        all components in the bundle.
+	 * @param name The name of a component or <code>null</code> to indicate all
+	 *        components in the bundle.
 	 */
 	public void enableComponent(String name);
 
@@ -194,5 +188,4 @@ public interface ComponentContext {
 	 *         registered as a service.
 	 */
 	public ServiceReference getServiceReference();
-
 }

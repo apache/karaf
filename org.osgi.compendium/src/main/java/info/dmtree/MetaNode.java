@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/info.dmtree/src/info/dmtree/MetaNode.java,v 1.4 2006/07/04 12:26:16 tszeredi Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +16,8 @@
 package info.dmtree;
 
 /**
- * The MetaNode contains meta data as standardized by OMA DM but extends it 
- * (without breaking the compatibility) to provide for better DMT data quality 
+ * The MetaNode contains meta data as standardized by OMA DM but extends it
+ * (without breaking the compatibility) to provide for better DMT data quality
  * in an environment where many software components manipulate this data.
  * <p>
  * The interface has several types of functions to describe the nodes in the
@@ -31,15 +29,15 @@ package info.dmtree;
  * <p>
  * Most methods in this interface receive no input, just return information
  * about some aspect of the node. However, there are two methods that behave
- * differently, {@link #isValidName} and {@link #isValidValue}. These
- * validation methods are given a potential node name or value (respectively),
- * and can decide whether it is valid for the given node. Passing the validation
- * methods is a necessary condition for a name or value to be used, but it is
- * not necessarily sufficient: the plugin may carry out more thorough (more
+ * differently, {@link #isValidName} and {@link #isValidValue}. These validation
+ * methods are given a potential node name or value (respectively), and can
+ * decide whether it is valid for the given node. Passing the validation methods
+ * is a necessary condition for a name or value to be used, but it is not
+ * necessarily sufficient: the plugin may carry out more thorough (more
  * expensive) checks when the node is actually created or set.
  * <p>
- * If a <code>MetaNode</code> is available for a node, the DmtAdmin must use
- * the information provided by it to filter out invalid requests on that node.
+ * If a <code>MetaNode</code> is available for a node, the DmtAdmin must use the
+ * information provided by it to filter out invalid requests on that node.
  * However, not all methods on this interface are actually used for this
  * purpose, as many of them (e.g. {@link #getFormat} or {@link #getValidNames})
  * can be substituted with the validating methods. For example,
@@ -50,9 +48,11 @@ package info.dmtree;
  * enforce the constraints defined by it - such methods are only for external
  * use, for example in user interfaces.
  * <p>
- * Most of the methods of this class return <code>null</code> if a certain
- * piece of meta information is not defined for the node or providing this
- * information is not supported. Methods of this class do not throw exceptions.
+ * Most of the methods of this class return <code>null</code> if a certain piece
+ * of meta information is not defined for the node or providing this information
+ * is not supported. Methods of this class do not throw exceptions.
+ * 
+ * @version $Revision: 5673 $
  */
 public interface MetaNode {
 

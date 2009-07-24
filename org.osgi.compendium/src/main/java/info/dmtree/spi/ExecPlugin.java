@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/info.dmtree/src/info/dmtree/spi/ExecPlugin.java,v 1.3 2006/06/16 16:31:59 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +26,8 @@ import info.dmtree.DmtSession;
  * service registry specifying the list of root node URIs in a
  * <code>String</code> array in the <code>execRootURIs</code> registration
  * parameter.
+ * 
+ * @version $Revision: 5673 $
  */
 public interface ExecPlugin {
 

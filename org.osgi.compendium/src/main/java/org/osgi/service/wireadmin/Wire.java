@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.wireadmin/src/org/osgi/service/wireadmin/Wire.java,v 1.10 2006/07/11 00:54:10 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2008). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +53,7 @@ import java.util.Dictionary;
  * is used in communication. The semantics of the names depend on the Producer
  * service and must not be interpreted by the Wire Admin service.
  * 
- * @version $Revision: 1.10 $
+ * @version $Revision: 5673 $
  */
 public interface Wire {
 	/**

@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.cm/src/org/osgi/service/cm/ConfigurationListener.java,v 1.10 2006/06/16 16:31:28 hargrave Exp $
- * 
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +35,7 @@ package org.osgi.service.cm;
  * require <code>ServicePermission[ConfigurationListener,REGISTER]</code> to
  * register a <code>ConfigurationListener</code> service.
  * 
- * @version $Revision: 1.10 $
+ * @version $Revision: 5673 $
  * @since 1.2
  */
 public interface ConfigurationListener {

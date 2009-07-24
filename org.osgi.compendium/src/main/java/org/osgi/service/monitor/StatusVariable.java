@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.monitor/src/org/osgi/service/monitor/StatusVariable.java,v 1.14 2006/06/16 16:31:25 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +31,8 @@ import java.util.Date;
  * definition in the OSGi core specification. This means that only the
  * characters [-_.a-zA-Z0-9] may be used. The length of the ID must not exceed
  * 32 bytes when UTF-8 encoded.
+ * 
+ * @version $Revision: 5673 $
  */
 public final class StatusVariable {
     //----- Public constants -----//

@@ -1,7 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.useradmin/src/org/osgi/service/useradmin/UserAdmin.java,v 1.12 2006/07/12 21:21:33 hargrave Exp $
- *
- * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2008). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +43,7 @@ import org.osgi.framework.InvalidSyntaxException;
  * <code>Role</code> objects, in which each <code>Role</code> object has a unique
  * name.
  * 
- * @version $Revision: 1.12 $
+ * @version $Revision: 5673 $
  */
 public interface UserAdmin {
 	/**
@@ -74,7 +72,7 @@ public interface UserAdmin {
 
 	/**
 	 * Removes the <code>Role</code> object with the given name from this User
-	 * Admin service.
+	 * Admin service and all groups it is a member of.
 	 * 
 	 * <p>
 	 * If the <code>Role</code> object was removed, a <code>UserAdminEvent</code>
