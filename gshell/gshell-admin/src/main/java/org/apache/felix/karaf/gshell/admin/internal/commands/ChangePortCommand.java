@@ -17,7 +17,9 @@
 package org.apache.felix.karaf.gshell.admin.internal.commands;
 
 import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
 
+@Command(scope = "admin", name = "change-port", description = "Change the port of an existing instance.")
 public class ChangePortCommand extends AdminCommandSupport {
 
     @Argument(index=0, required=true, description="The instance name")

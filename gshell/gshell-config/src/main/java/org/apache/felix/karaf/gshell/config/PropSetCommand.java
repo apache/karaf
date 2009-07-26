@@ -19,8 +19,10 @@ package org.apache.felix.karaf.gshell.config;
 import java.util.Dictionary;
 
 import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
 import org.osgi.service.cm.ConfigurationAdmin;
 
+@Command(scope = "config", name = "propset", description = "Set a property on the edited configuration.")
 public class PropSetCommand extends ConfigCommandSupport {
 
     @Argument(index = 0, required = true, description = "the property to set")

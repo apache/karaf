@@ -18,6 +18,7 @@ package org.apache.felix.karaf.gshell.admin.internal.commands;
 
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Option;
+import org.apache.felix.gogo.commands.Command;
 
 
 /**
@@ -25,6 +26,7 @@ import org.apache.felix.gogo.commands.Option;
  *
  * @version $Rev: 679826 $ $Date: 2008-07-25 17:00:12 +0200 (Fri, 25 Jul 2008) $
  */
+@Command(scope = "admin", name = "create", description = "Create a new instance.")
 public class CreateCommand extends AdminCommandSupport
 {
     @Option(name = "-p", aliases = { "--port"}, description = "Port number for remote shell connection")

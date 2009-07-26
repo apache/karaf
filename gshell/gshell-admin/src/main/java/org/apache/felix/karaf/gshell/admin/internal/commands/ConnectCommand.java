@@ -20,7 +20,9 @@ package org.apache.felix.karaf.gshell.admin.internal.commands;
 
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
 
+@Command(scope = "admin", name = "connect", description = "Connect to an existing instance.")
 public class ConnectCommand extends AdminCommandSupport {
 
     @Argument(index=0, name="INSTANCE", required=true, description="The instance name")

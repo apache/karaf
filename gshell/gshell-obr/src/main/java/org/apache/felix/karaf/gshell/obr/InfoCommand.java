@@ -23,11 +23,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
 import org.osgi.service.obr.Capability;
 import org.osgi.service.obr.RepositoryAdmin;
 import org.osgi.service.obr.Requirement;
 import org.osgi.service.obr.Resource;
 
+@Command(scope = "obr", name = "info", description = "Print informations about OBR bundles")
 public class InfoCommand extends ObrCommandSupport {
 
     @Argument(required = true, multiValued = true)

@@ -21,9 +21,11 @@ import java.util.List;
 
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
 import org.osgi.service.obr.RepositoryAdmin;
 import org.osgi.service.obr.Resource;
 
+@Command(scope = "obr", name = "source", description = "Download the sources for an OBR bundle.")
 public class SourceCommand extends ObrCommandSupport {
 
     @Option(name = "-x", description = "Extract")

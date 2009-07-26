@@ -18,7 +18,9 @@ package org.apache.felix.karaf.gshell.log;
 
 import org.ops4j.pax.logging.spi.PaxLoggingEvent;
 import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
+import org.apache.felix.gogo.commands.Command;
 
+@Command(scope = "log", name = "display-exception", description = "Display the last exception from the log.")
 public class DisplayException extends OsgiCommandSupport {
 
     protected LruList events;

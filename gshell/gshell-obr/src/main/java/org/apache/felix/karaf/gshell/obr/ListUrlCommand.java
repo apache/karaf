@@ -18,7 +18,9 @@ package org.apache.felix.karaf.gshell.obr;
 
 import org.osgi.service.obr.Repository;
 import org.osgi.service.obr.RepositoryAdmin;
+import org.apache.felix.gogo.commands.Command;
 
+@Command(scope = "obr", name = "listUrl", description = "Display the repository URLs currently associated with the OBR service.")
 public class ListUrlCommand extends ObrCommandSupport {
 
     protected void doExecute(RepositoryAdmin admin) {

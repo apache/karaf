@@ -20,7 +20,9 @@ import java.util.Dictionary;
 
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.apache.felix.gogo.commands.Command;
 
+@Command(scope = "config", name = "update", description = "Save and propagate changes from the configuration being edited.")
 public class UpdateCommand extends ConfigCommandSupport {
 
     protected void doExecute(ConfigurationAdmin admin) throws Exception {

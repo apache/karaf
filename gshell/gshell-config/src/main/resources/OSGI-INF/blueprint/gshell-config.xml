@@ -51,6 +51,13 @@
                 <null/>
             </completers>
         </command>
+        <command name="config/propappend">
+            <action class="org.apache.felix.karaf.gshell.config.PropAppendCommand"/>
+            <completers>
+                <ref component-id="configPropertyCompleter" />
+                <null/>
+            </completers>
+        </command>
         <command name="config/update">
             <action class="org.apache.felix.karaf.gshell.config.UpdateCommand"/>
         </command>
