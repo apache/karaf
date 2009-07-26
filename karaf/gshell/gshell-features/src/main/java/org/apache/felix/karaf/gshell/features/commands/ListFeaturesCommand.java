@@ -18,7 +18,9 @@ package org.apache.felix.karaf.gshell.features.commands;
 
 import org.apache.felix.karaf.gshell.features.FeaturesService;
 import org.apache.felix.gogo.commands.Option;
+import org.apache.felix.gogo.commands.Command;
 
+@Command(scope = "features", name = "list", description = "List existing features.")
 public class ListFeaturesCommand extends FeaturesCommandSupport {
 
     @Option(name = "-i", aliases={"--installed"}, description="Display the list of installed features")

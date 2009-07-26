@@ -17,12 +17,14 @@
 package org.apache.felix.karaf.gshell.admin.internal.commands;
 
 import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
 
 /**
  * Destroy an existing Karaf instance
  *
  * @version $Rev: 679826 $ $Date: 2008-07-25 17:00:12 +0200 (Fri, 25 Jul 2008) $
  */
+@Command(scope = "admin", name = "destroy", description = "Destroy an existing instance.")
 public class DestroyCommand extends AdminCommandSupport
 {
     @Argument(index=0, required=true, description="The name of the Karaf instance to destroy")

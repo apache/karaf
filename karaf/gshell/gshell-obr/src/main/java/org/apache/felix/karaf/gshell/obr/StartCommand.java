@@ -17,7 +17,9 @@
 package org.apache.felix.karaf.gshell.obr;
 
 import org.osgi.service.obr.RepositoryAdmin;
+import org.apache.felix.gogo.commands.Command;
 
+@Command(scope = "obr", name = "start", description = "Deploy and start a list of bundles using OBR.")
 public class StartCommand extends DeployCommand {
 
     protected void doExecute(RepositoryAdmin admin) throws Exception {

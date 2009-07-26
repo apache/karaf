@@ -19,11 +19,13 @@ package org.apache.felix.karaf.gshell.config;
 import java.util.Dictionary;
 
 import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * Appends a value to the current property value.
  */
+@Command(scope = "config", name = "propappend", description = "Append the given value to an existing property or create the property with the specified value.")
 public class PropAppendCommand extends ConfigCommandSupport {
 
     @Argument(index = 0, required = true, description = "the property to set")

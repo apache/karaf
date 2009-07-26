@@ -27,7 +27,9 @@ import org.osgi.framework.Constants;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
 
+@Command(scope = "packages", name = "imports", description = "Display imported packages")
 public class ImportsCommand extends PackageCommandSupport {
 
     @Argument(required = false, multiValued = true, description = "bundle ids")

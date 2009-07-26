@@ -18,7 +18,9 @@ package org.apache.felix.karaf.gshell.features.commands;
 
 import org.apache.felix.karaf.gshell.features.FeaturesService;
 import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
 
+@Command(scope = "features", name = "install", description = "Install a feature.")
 public class InstallFeatureCommand extends FeaturesCommandSupport {
 
     @Argument(required = true, description = "The name of the feature")

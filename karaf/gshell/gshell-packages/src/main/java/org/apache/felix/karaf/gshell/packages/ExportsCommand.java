@@ -21,11 +21,13 @@ import java.util.List;
 
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Option;
+import org.apache.felix.gogo.commands.Command;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 
+@Command(scope = "packages", name = "exports", description = "Display exported packages")
 public class ExportsCommand extends PackageCommandSupport {
 
     @Option(name = "-i", aliases = { "--imports"}, description = "List bundles importing the packages")

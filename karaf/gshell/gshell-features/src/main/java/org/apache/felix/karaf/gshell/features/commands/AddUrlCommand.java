@@ -21,7 +21,9 @@ import java.util.List;
 
 import org.apache.felix.karaf.gshell.features.FeaturesService;
 import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
 
+@Command(scope = "features", name = "addUrl", description = "Add a list of repository URLs to the features service.")
 public class AddUrlCommand extends FeaturesCommandSupport {
 
     @Argument(required = true, multiValued = true, description = "Repository URLs")

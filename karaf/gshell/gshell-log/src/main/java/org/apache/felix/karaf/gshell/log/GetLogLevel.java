@@ -26,13 +26,15 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
 import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
 
 /**
  * Get the log level for a given logger
  */
+@Command(scope = "log", name = "get", description = "Show log level.")
 public class GetLogLevel extends OsgiCommandSupport {
 
-    @Argument(required = false, description = "Logger name, ALL or ROOT (default)")
+    @Argument(required = false, name = "LOGGER", description = "Logger name, ALL or ROOT (default)")
     String logger;
 
     static final String CONFIGURATION_PID  = "org.ops4j.pax.logging";

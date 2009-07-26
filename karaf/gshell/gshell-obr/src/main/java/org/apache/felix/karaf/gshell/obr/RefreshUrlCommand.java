@@ -22,7 +22,9 @@ import java.util.List;
 import org.osgi.service.obr.Repository;
 import org.osgi.service.obr.RepositoryAdmin;
 import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
 
+@Command(scope = "obr", name = "refreshUrl", description = "Reload the repositories to obtain a fresh list of bundles.")
 public class RefreshUrlCommand extends ObrCommandSupport {
 
     @Argument(required = false, multiValued = true, description = "Repository URLs (leave empty for all)")

@@ -20,8 +20,10 @@ import java.net.URL;
 import java.util.List;
 
 import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
 import org.osgi.service.obr.RepositoryAdmin;
 
+@Command(scope = "obr", name = "removeUrl", description = "Remove a list of repository URLs from the OBR service.")
 public class RemoveUrlCommand extends ObrCommandSupport {
 
     @Argument(required = true, multiValued = true, description = "Repository URLs")

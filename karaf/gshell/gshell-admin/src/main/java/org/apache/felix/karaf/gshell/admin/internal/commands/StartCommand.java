@@ -18,7 +18,9 @@ package org.apache.felix.karaf.gshell.admin.internal.commands;
 
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
 
+@Command(scope = "admin", name = "start", description = "Start an existing instance.")
 public class StartCommand extends AdminCommandSupport {
 
     @Option(name = "-o", aliases = { "--java-opts"}, description = "Java options when launching the instance")

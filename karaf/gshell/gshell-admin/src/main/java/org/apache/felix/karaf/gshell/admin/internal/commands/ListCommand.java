@@ -17,11 +17,13 @@
 package org.apache.felix.karaf.gshell.admin.internal.commands;
 
 import org.apache.felix.gogo.commands.Option;
+import org.apache.felix.gogo.commands.Command;
 import org.apache.felix.karaf.gshell.admin.Instance;
 
 /**
  * List available instances
  */
+@Command(scope = "admin", name = "list", description = "List existing instances.")
 public class ListCommand extends AdminCommandSupport {
 
     @Option(name = "-l", aliases = { "--location" }, description = "Display instances location")
