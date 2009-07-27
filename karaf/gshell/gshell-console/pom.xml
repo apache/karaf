@@ -107,6 +107,7 @@
                             !org.apache.felix.gogo.commands*,
                             !jline,
                             com.sun.jna*;resolution:=optional,
+                            org.apache.felix.karaf.branding;resolution:=optional,
                             *
                         </Import-Package>
                         <Export-Package>
