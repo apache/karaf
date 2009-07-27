@@ -37,9 +37,8 @@ public class BlueprintDeploymentListenerTest extends TestCase {
         File f = new File(getClass().getClassLoader().getResource("test.xml").toURI());
         Set<String> pkgs = BlueprintTransformer.analyze(new DOMSource(BlueprintTransformer.parse(f.toURL())));
         assertNotNull(pkgs);
-        assertEquals(2, pkgs.size());
+        assertEquals(1, pkgs.size());
         Iterator<String> it = pkgs.iterator();
-        assertEquals("java.lang", it.next());
         assertEquals("org.apache.geronimo.blueprint.sample", it.next());
     }
 
