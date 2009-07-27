@@ -208,7 +208,10 @@ public class SpringTransformer {
                 for (int i = 0; i < parts.length; i++) {
                     int n = parts[i].lastIndexOf('.');
                     if (n > 0) {
-                        refers.add(parts[i].substring(0, n));
+                        String pkg = parts[i].substring(0, n);
+                        if (!pkg.startsWith("java.")) {
+                            refers.add(parts[i].substring(0, n));
+                        }
                     }
                 }
             }

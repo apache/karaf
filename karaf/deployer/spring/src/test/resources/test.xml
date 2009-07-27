@@ -52,4 +52,8 @@
         </osgi:service-properties>
     </osgi:service>
 
+    <bean id="uri" class="java.net.URI">
+        <constructor-arg value="urn:resource"/>
+    </bean>
+
 </beans>
