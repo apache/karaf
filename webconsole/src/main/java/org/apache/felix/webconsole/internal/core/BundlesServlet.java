@@ -937,10 +937,10 @@ public class BundlesServlet extends BaseWebConsolePlugin
         String marker = null;
         val.append( name );
         val.append( ",version=" ).append( version );
-        val.append( " from " );
 
         if ( export != null )
         {
+            val.append( " from " );
             val.append( getBundleDescriptor( export.getExportingBundle(), pluginRoot ) );
 
             if ( bootDel )
