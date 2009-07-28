@@ -233,5 +233,11 @@ public interface IBldProject
          * resolves a relative path against the project file location.
          */
         File resolve( String path );
+
+
+        /**
+         * @return
+         */
+        boolean isSingleton();
     }
 }

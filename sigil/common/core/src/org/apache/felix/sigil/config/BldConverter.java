@@ -36,7 +36,6 @@ import org.apache.felix.sigil.core.BldCore;
 import org.apache.felix.sigil.core.internal.model.eclipse.SigilBundle;
 import org.apache.felix.sigil.core.internal.model.osgi.BundleModelElement;
 import org.apache.felix.sigil.model.common.VersionRange;
-import org.apache.felix.sigil.model.eclipse.ISCAComposite;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.model.osgi.IBundleModelElement;
 import org.apache.felix.sigil.model.osgi.IPackageExport;
@@ -272,23 +271,226 @@ public class BldConverter
     {
         IBundleModelElement info = bundle.getBundleInfo();
         String bundleVersion = config.getString( id, BldConfig.S_VERSION );
-
-        // exports
         Map<String, Map<String, String>> exports = new TreeMap<String, Map<String, String>>();
-        for ( IPackageExport export : info.getExports() )
+        
+        setSimpleHeaders(id, info);
+        setExports(id, bundleVersion, info, exports);
+        setImports(id, bundleVersion, info, exports);
+        setRequires(id, bundleVersion, info);
+        setFragments(id, info);
+        setContents(id, info, bundle);
+        setLibraries(id, info, bundle);
+        setResources(id, info, bundle);
+
+        if ( info.getSourceLocation() != null )
+        {
+            BldCore.error( "SourceLocation conversion not yet implemented." );
+        }
+
+        if ( !info.getLibraryImports().isEmpty() )
+        {
+            BldCore.error( "LibraryImports conversion not yet implemented." );
+        }
+    }
+
+
+    /**
+     * @param id
+     * @param info
+     */
+    private void setSimpleHeaders( String id, IBundleModelElement info )
+    {
+        List<String> ids = config.getList( null, BldConfig.C_BUNDLES );
+        String idBsn = id != null ? id : ids.get( 0 );
+        String oldBsn = config.getString( id, BldConfig.S_SYM_NAME );
+        String bsn = info.getSymbolicName();
+
+        if ( !bsn.equals( idBsn ) || oldBsn != null )
+            config.setString( id, BldConfig.S_SYM_NAME, bsn );
+
+        String version = info.getVersion().toString();
+        if ( version != null )
+            config.setString( id, BldConfig.S_VERSION, version );
+
+        String activator = info.getActivator();
+        if ( activator != null )
+            config.setString( id, BldConfig.S_ACTIVATOR, activator );
+
+        Properties headers = config.getProps( null, BldConfig.P_HEADER );
+
+        setHeader( headers, id, "CATEGORY", info.getCategory() );
+        setHeader( headers, id, Constants.BUNDLE_CONTACTADDRESS, info.getContactAddress() );
+        setHeader( headers, id, Constants.BUNDLE_COPYRIGHT, info.getCopyright() );
+        setHeader( headers, id, Constants.BUNDLE_DESCRIPTION, info.getDescription() );
+        setHeader( headers, id, Constants.BUNDLE_VENDOR, info.getVendor() );
+        setHeader( headers, id, Constants.BUNDLE_NAME, info.getName() );
+
+        if ( info.getDocURI() != null )
+            config.setProp( id, BldConfig.P_HEADER, Constants.BUNDLE_DOCURL, info.getDocURI().toString() );
+
+        if ( info.getLicenseURI() != null )
+            config.setProp( id, BldConfig.P_HEADER, Constants.BUNDLE_LICENSE, info.getLicenseURI().toString() );
+    }
+
+
+    /**
+     * @param id
+     * @param info
+     * @param bundle 
+     */
+    private void setResources( String id, IBundleModelElement info, ISigilBundle bundle )
+    {
+        // resources
+        ArrayList<String> resources = new ArrayList<String>();
+        for ( IPath ipath : bundle.getSourcePaths() )
+        {
+            resources.add( ipath.toString() );
+        }
+
+        if ( !resources.isEmpty() || !config.getList( id, BldConfig.L_RESOURCES ).isEmpty() )
+        {
+            Collections.sort( resources );
+            config.setList( id, BldConfig.L_RESOURCES, resources );
+        }
+    }
+
+
+    /**
+     * @param id 
+     * @param info
+     * @param bundle 
+     */
+    private void setLibraries( String id, IBundleModelElement info, ISigilBundle bundle )
+    {
+        // libs
+        Map<String, Map<String, String>> libs = new TreeMap<String, Map<String, String>>();
+        List<String> sources = new ArrayList<String>();
+
+        // classpathEntries map to -libs or -sources
+        for ( String entry : bundle.getClasspathEntrys() )
+        {
+            // <classpathentry kind="lib" path="lib/dependee.jar"/>
+            // <classpathentry kind="src" path="src"/>
+            final String regex = ".* kind=\"([^\"]+)\" path=\"([^\"]+)\".*";
+            Pattern pattern = Pattern.compile( regex );
+            Matcher matcher = pattern.matcher( entry );
+            if ( matcher.matches() )
+            {
+                String kind = matcher.group( 1 );
+                String path = matcher.group( 2 );
+                if ( kind.equals( "lib" ) )
+                {
+                    Map<String, String> map2 = new TreeMap<String, String>();
+                    map2.put( BldAttr.KIND_ATTRIBUTE, "classpath" );
+                    libs.put( path, map2 );
+                }
+                else if ( kind.equals( "src" ) )
+                {
+                    sources.add( path );
+                }
+                else
+                {
+                    BldCore.error( "unknown classpathentry kind=" + kind );
+                }
+            }
+            else
+            {
+                BldCore.error( "can't match classpathEntry in: " + entry );
+            }
+        }
+
+        if ( !libs.isEmpty() || !config.getMap( id, BldConfig.M_LIBS ).isEmpty() )
+        {
+            config.setMap( id, BldConfig.M_LIBS, libs );
+        }
+
+        if ( !sources.isEmpty() || !config.getList( id, BldConfig.L_SRC_CONTENTS ).isEmpty() )
+        {
+            config.setList( id, BldConfig.L_SRC_CONTENTS, sources );
+        }
+
+    }
+
+
+    /**
+     * @param id 
+     * @param info
+     * @param bundle 
+     */
+    private void setContents( String id, IBundleModelElement info, ISigilBundle bundle )
+    {
+        // contents
+        List<String> contents = new ArrayList<String>();
+        for ( String pkg : bundle.getPackages() )
+        {
+            contents.add( pkg );
+        }
+        if ( !contents.isEmpty() || !config.getList( id, BldConfig.L_CONTENTS ).isEmpty() )
+        {
+            config.setList( id, BldConfig.L_CONTENTS, contents );
+        }
+    }
+
+
+    /**
+     * @param id
+     * @param info
+     */
+    private void setFragments( String id, IBundleModelElement info )
+    {
+        Properties defaultBundles = config.getProps( null, BldConfig.P_BUNDLE_VERSION );
+        Map<String, Map<String, String>> fragments = new TreeMap<String, Map<String, String>>();
+        IRequiredBundle fragment = info.getFragmentHost();
+        if ( fragment != null )
         {
             Map<String, String> map2 = new TreeMap<String, String>();
-            String version = export.getVersion().toString();
-            if ( !version.equals( bundleVersion ) )
-                map2.put( BldAttr.VERSION_ATTRIBUTE, version );
-            exports.put( export.getPackageName(), map2 );
+            String name = fragment.getSymbolicName();
+            VersionRange versions = defaultVersion( fragment.getVersions(), defaultBundles.getProperty( name ) );
+            if ( versions != null )
+                map2.put( BldAttr.VERSION_ATTRIBUTE, versions.toString() );
+            fragments.put( name, map2 );
         }
-
-        if ( !exports.isEmpty() || !config.getMap( id, BldConfig.M_EXPORTS ).isEmpty() )
+        if ( !fragments.isEmpty() || !config.getMap( id, BldConfig.M_FRAGMENT ).isEmpty() )
         {
-            config.setMap( id, BldConfig.M_EXPORTS, exports );
+            config.setMap( id, BldConfig.M_FRAGMENT, fragments );
         }
+    }
 
+
+    /**
+     * @param id
+     * @param bundleVersion
+     * @param info
+     */
+    private void setRequires( String id, String bundleVersion, IBundleModelElement info )
+    {
+        // requires
+        Properties defaultBundles = config.getProps( null, BldConfig.P_BUNDLE_VERSION );
+        Map<String, Map<String, String>> requires = new TreeMap<String, Map<String, String>>();
+
+        for ( IRequiredBundle require : info.getRequiredBundles() )
+        {
+            Map<String, String> map2 = new TreeMap<String, String>();
+            String name = require.getSymbolicName();
+            VersionRange versions = defaultVersion( require.getVersions(), defaultBundles.getProperty( name ) );
+            if ( versions != null )
+                map2.put( BldAttr.VERSION_ATTRIBUTE, versions.toString() );
+            requires.put( name, map2 );
+        }
+        if ( !requires.isEmpty() || !config.getMap( id, BldConfig.M_REQUIRES ).isEmpty() )
+        {
+            config.setMap( id, BldConfig.M_REQUIRES, requires );
+        }
+    }
+
+
+    /**
+     * @param bundleVersion 
+     * @param info
+     * @param exports 
+     */
+    private void setImports( String id, String bundleVersion, IBundleModelElement info, Map<String, Map<String, String>> exports )
+    {
         // imports
         Map<String, Map<String, String>> imports = new TreeMap<String, Map<String, String>>();
 
@@ -344,182 +546,31 @@ public class BldConverter
         {
             config.setMap( id, BldConfig.M_IMPORTS, imports );
         }
+    }
 
-        // requires
-        Properties defaultBundles = config.getProps( null, BldConfig.P_BUNDLE_VERSION );
-        Map<String, Map<String, String>> requires = new TreeMap<String, Map<String, String>>();
 
-        for ( IRequiredBundle require : info.getRequiredBundles() )
+    /**
+     * @param id 
+     * @param info 
+     * @param bundleVersion 
+     * @param exports 
+     * 
+     */
+    private void setExports(String id, String bundleVersion, IBundleModelElement info, Map<String, Map<String, String>> exports)
+    {
+        for ( IPackageExport export : info.getExports() )
         {
             Map<String, String> map2 = new TreeMap<String, String>();
-            String name = require.getSymbolicName();
-            VersionRange versions = defaultVersion( require.getVersions(), defaultBundles.getProperty( name ) );
-            if ( versions != null )
-                map2.put( BldAttr.VERSION_ATTRIBUTE, versions.toString() );
-            requires.put( name, map2 );
+            String version = export.getVersion().toString();
+            if ( !version.equals( bundleVersion ) )
+                map2.put( BldAttr.VERSION_ATTRIBUTE, version );
+            exports.put( export.getPackageName(), map2 );
         }
-        if ( !requires.isEmpty() || !config.getMap( id, BldConfig.M_REQUIRES ).isEmpty() )
+
+        if ( !exports.isEmpty() || !config.getMap( id, BldConfig.M_EXPORTS ).isEmpty() )
         {
-            config.setMap( id, BldConfig.M_REQUIRES, requires );
+            config.setMap( id, BldConfig.M_EXPORTS, exports );
         }
-
-        // fragment
-        Map<String, Map<String, String>> fragments = new TreeMap<String, Map<String, String>>();
-        IRequiredBundle fragment = info.getFragmentHost();
-        if ( fragment != null )
-        {
-            Map<String, String> map2 = new TreeMap<String, String>();
-            String name = fragment.getSymbolicName();
-            VersionRange versions = defaultVersion( fragment.getVersions(), defaultBundles.getProperty( name ) );
-            if ( versions != null )
-                map2.put( BldAttr.VERSION_ATTRIBUTE, versions.toString() );
-            fragments.put( name, map2 );
-        }
-        if ( !fragments.isEmpty() || !config.getMap( id, BldConfig.M_FRAGMENT ).isEmpty() )
-        {
-            config.setMap( id, BldConfig.M_FRAGMENT, fragments );
-        }
-
-        // contents
-        List<String> contents = new ArrayList<String>();
-        for ( String pkg : bundle.getPackages() )
-        {
-            contents.add( pkg );
-        }
-        if ( !contents.isEmpty() || !config.getList( id, BldConfig.L_CONTENTS ).isEmpty() )
-        {
-            config.setList( id, BldConfig.L_CONTENTS, contents );
-        }
-
-        // dl contents
-        List<String> dlcontents = new ArrayList<String>();
-        for ( String pkg : bundle.getDownloadPackages() )
-        {
-            dlcontents.add( pkg );
-        }
-        if ( !dlcontents.isEmpty() || !config.getList( id, BldConfig.L_DL_CONTENTS ).isEmpty() )
-        {
-            config.setList( id, BldConfig.L_DL_CONTENTS, dlcontents );
-        }
-
-        // libs
-        Map<String, Map<String, String>> libs = new TreeMap<String, Map<String, String>>();
-        List<String> sources = new ArrayList<String>();
-
-        // classpathEntries map to -libs or -sources
-        for ( String entry : bundle.getClasspathEntrys() )
-        {
-            // <classpathentry kind="lib" path="lib/dependee.jar"/>
-            // <classpathentry kind="src" path="src"/>
-            final String regex = ".* kind=\"([^\"]+)\" path=\"([^\"]+)\".*";
-            Pattern pattern = Pattern.compile( regex );
-            Matcher matcher = pattern.matcher( entry );
-            if ( matcher.matches() )
-            {
-                String kind = matcher.group( 1 );
-                String path = matcher.group( 2 );
-                if ( kind.equals( "lib" ) )
-                {
-                    Map<String, String> map2 = new TreeMap<String, String>();
-                    map2.put( BldAttr.KIND_ATTRIBUTE, "classpath" );
-                    libs.put( path, map2 );
-                }
-                else if ( kind.equals( "src" ) )
-                {
-                    sources.add( path );
-                }
-                else
-                {
-                    BldCore.error( "unknown classpathentry kind=" + kind );
-                }
-            }
-            else
-            {
-                BldCore.error( "can't match classpathEntry in: " + entry );
-            }
-        }
-
-        if ( !libs.isEmpty() || !config.getMap( id, BldConfig.M_LIBS ).isEmpty() )
-        {
-            config.setMap( id, BldConfig.M_LIBS, libs );
-        }
-
-        if ( !sources.isEmpty() || !config.getList( id, BldConfig.L_SRC_CONTENTS ).isEmpty() )
-        {
-            config.setList( id, BldConfig.L_SRC_CONTENTS, sources );
-        }
-
-        // composites
-        ArrayList<String> composites = new ArrayList<String>();
-        for ( ISCAComposite composite : bundle.getComposites() )
-        {
-            String path = composite.getLocation().toString();
-            // TODO relativize
-            composites.add( path );
-        }
-
-        if ( !composites.isEmpty() || !config.getList( id, BldConfig.L_COMPOSITES ).isEmpty() )
-        {
-            Collections.sort( composites );
-            config.setList( id, BldConfig.L_COMPOSITES, composites );
-        }
-
-        // resources
-        ArrayList<String> resources = new ArrayList<String>();
-        for ( IPath ipath : bundle.getSourcePaths() )
-        {
-            resources.add( ipath.toString() );
-        }
-
-        if ( !resources.isEmpty() || !config.getList( id, BldConfig.L_RESOURCES ).isEmpty() )
-        {
-            Collections.sort( resources );
-            config.setList( id, BldConfig.L_RESOURCES, resources );
-        }
-
-        if ( info.getSourceLocation() != null )
-        {
-            BldCore.error( "SourceLocation conversion not yet implemented." );
-        }
-
-        if ( !info.getLibraryImports().isEmpty() )
-        {
-            BldCore.error( "LibraryImports conversion not yet implemented." );
-        }
-
-        ////////////////////
-        // simple headers
-
-        List<String> ids = config.getList( null, BldConfig.C_BUNDLES );
-        String idBsn = id != null ? id : ids.get( 0 );
-        String oldBsn = config.getString( id, BldConfig.S_SYM_NAME );
-        String bsn = info.getSymbolicName();
-
-        if ( !bsn.equals( idBsn ) || oldBsn != null )
-            config.setString( id, BldConfig.S_SYM_NAME, bsn );
-
-        String version = info.getVersion().toString();
-        if ( version != null )
-            config.setString( id, BldConfig.S_VERSION, version );
-
-        String activator = info.getActivator();
-        if ( activator != null )
-            config.setString( id, BldConfig.S_ACTIVATOR, activator );
-
-        Properties headers = config.getProps( null, BldConfig.P_HEADER );
-
-        setHeader( headers, id, "CATEGORY", info.getCategory() );
-        setHeader( headers, id, Constants.BUNDLE_CONTACTADDRESS, info.getContactAddress() );
-        setHeader( headers, id, Constants.BUNDLE_COPYRIGHT, info.getCopyright() );
-        setHeader( headers, id, Constants.BUNDLE_DESCRIPTION, info.getDescription() );
-        setHeader( headers, id, Constants.BUNDLE_VENDOR, info.getVendor() );
-        setHeader( headers, id, Constants.BUNDLE_NAME, info.getName() );
-
-        if ( info.getDocURI() != null )
-            config.setProp( id, BldConfig.P_HEADER, Constants.BUNDLE_DOCURL, info.getDocURI().toString() );
-
-        if ( info.getLicenseURI() != null )
-            config.setProp( id, BldConfig.P_HEADER, Constants.BUNDLE_LICENSE, info.getLicenseURI().toString() );
     }
 
 

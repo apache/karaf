@@ -42,7 +42,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeSet;
 
-import org.apache.felix.sigil.bnd.BundleBuilder;
 import org.apache.felix.sigil.core.internal.model.osgi.BundleModelElement;
 import org.apache.felix.sigil.core.internal.model.osgi.PackageExport;
 import org.apache.felix.sigil.core.internal.model.osgi.PackageImport;
@@ -53,8 +52,8 @@ import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.model.osgi.IBundleModelElement;
 import org.apache.felix.sigil.model.osgi.IPackageExport;
 import org.apache.felix.sigil.model.osgi.IPackageImport;
-import org.apache.felix.sigil.model.osgi.IRequiredBundle;
 import org.apache.felix.sigil.model.osgi.IPackageImport.OSGiImport;
+import org.apache.felix.sigil.model.osgi.IRequiredBundle;
 import org.osgi.framework.Version;
 
 
@@ -182,6 +181,7 @@ public class BldProject implements IBldProject, IRepositoryConfig
                 }
 
                 Properties p = new Properties();
+                // FIXME stream not closed
                 p.load( url.openStream() );
                 dflt.merge( p );
 
@@ -430,6 +430,22 @@ public class BldProject implements IBldProject, IRepositoryConfig
         List<String> sourceContents = getSourcePkgs();
         HashSet<String> exports = new HashSet<String>();
 
+        parseExports(reqs, exports);
+        
+        parseImports(reqs, sourceContents, exports);
+        
+        parseRequires(reqs);
+        
+        return reqs;
+    }
+
+
+    /**
+     * @param reqs
+     * @param exports
+     */
+    private void parseExports( BundleModelElement reqs, HashSet<String> exports )
+    {
         for ( IBldBundle bundle : getBundles() )
         {
             for ( IPackageExport export : bundle.getExports() )
@@ -437,7 +453,62 @@ public class BldProject implements IBldProject, IRepositoryConfig
                 exports.add( export.getPackageName() );
             }
         }
+    }
 
+
+    /**
+     * @param reqs
+     * @throws IOException 
+     */
+    private void parseRequires( BundleModelElement reqs ) throws IOException
+    {
+        Map<String, Map<String, String>> requires = config.getMap( null, BldConfig.M_REQUIRES );
+        Properties bundleDefaults = config.getProps( null, BldConfig.P_BUNDLE_VERSION );
+
+        if ( requires != null )
+        {
+            for ( String name : requires.keySet() )
+            {
+                Map<String, String> attr = requires.get( name );
+                String versions = attr.containsKey( BldAttr.VERSION_ATTRIBUTE ) ? attr.get( BldAttr.VERSION_ATTRIBUTE )
+                    : bundleDefaults.getProperty( name );
+                String resolution = attr.get( BldAttr.RESOLUTION_ATTRIBUTE );
+
+                RequiredBundle rb = new RequiredBundle();
+                rb.setSymbolicName( name );
+                rb.setVersions( VersionRange.parseVersionRange( versions ) );
+
+                if ( BldAttr.RESOLUTION_OPTIONAL.equals( resolution ) )
+                {
+                    rb.setOptional( true );
+                }
+                else if ( resolution != null )
+                {
+                    throw new IOException( "Bad attribute value: " + BldAttr.RESOLUTION_ATTRIBUTE + "=" + resolution );
+                }
+
+                reqs.addRequiredBundle( rb );
+            }
+        }
+
+        for ( IBldBundle bundle : getBundles() )
+        {
+            IRequiredBundle fh = bundle.getFragmentHost();
+            if ( fh != null )
+                reqs.addRequiredBundle( fh );
+        }
+    }
+
+
+    /**
+     * @param reqs 
+     * @param exports 
+     * @param sourceContents 
+     * @throws IOException 
+     * 
+     */
+    private void parseImports(BundleModelElement reqs, List<String> sourceContents, HashSet<String> exports) throws IOException
+    {
         Map<String, Map<String, String>> imports = config.getMap( null, BldConfig.M_IMPORTS );
 
         for ( String name : imports.keySet() )
@@ -482,34 +553,6 @@ public class BldProject implements IBldProject, IRepositoryConfig
 
             reqs.addImport( pi );
         }
-
-        Map<String, Map<String, String>> requires = config.getMap( null, BldConfig.M_REQUIRES );
-        Properties bundleDefaults = config.getProps( null, BldConfig.P_BUNDLE_VERSION );
-
-        if ( requires != null )
-        {
-            for ( String name : requires.keySet() )
-            {
-                Map<String, String> attr = requires.get( name );
-                String versions = attr.containsKey( BldAttr.VERSION_ATTRIBUTE ) ? attr.get( BldAttr.VERSION_ATTRIBUTE )
-                    : bundleDefaults.getProperty( name );
-
-                RequiredBundle rb = new RequiredBundle();
-                rb.setSymbolicName( name );
-                rb.setVersions( VersionRange.parseVersionRange( versions ) );
-
-                reqs.addRequiredBundle( rb );
-            }
-        }
-
-        for ( IBldBundle bundle : getBundles() )
-        {
-            IRequiredBundle fh = bundle.getFragmentHost();
-            if ( fh != null )
-                reqs.addRequiredBundle( fh );
-        }
-
-        return reqs;
     }
 
 
@@ -809,6 +852,12 @@ public class BldProject implements IBldProject, IRepositoryConfig
         }
 
 
+        private boolean getBoolean( String key )
+        {
+            return Boolean.parseBoolean( getString( key ) );
+        }
+
+
         private List<String> getList( String key )
         {
             List<String> list = config.getList( id, key );
@@ -851,6 +900,12 @@ public class BldProject implements IBldProject, IRepositoryConfig
         {
             String name = getString( BldConfig.S_SYM_NAME );
             return name != null ? name : getId();
+        }
+
+
+        public boolean isSingleton()
+        {
+            return getBoolean( BldConfig.S_SINGLETON );
         }
 
 

@@ -43,11 +43,12 @@ public class BldConfig
     // string properties
     public static final String S_ACTIVATOR = "-activator";
     public static final String S_DEFAULTS = "-defaults";
+    public static final String S_SINGLETON = "-singleton";
     public static final String S_ID = "id";
     public static final String S_SYM_NAME = "name";
     public static final String S_VERSION = "version";
     public static final String[] STRING_KEYS =
-        { S_ACTIVATOR, S_DEFAULTS, S_ID, S_SYM_NAME, S_VERSION };
+        { S_ACTIVATOR, S_DEFAULTS, S_ID, S_SYM_NAME, S_VERSION, S_SINGLETON };
 
     // list properties
     public static final String L_COMPOSITES = "-composites";

@@ -453,7 +453,9 @@ public class BundleBuilder
         // instructions we generate?
         spec.putAll( headers );
 
-        spec.setProperty( Constants.BUNDLE_SYMBOLICNAME, bundle.getSymbolicName() );
+        String sn = bundle.isSingleton() ? bundle.getSymbolicName() + ";singleton:=true" : bundle.getSymbolicName();
+        
+        spec.setProperty( Constants.BUNDLE_SYMBOLICNAME, sn );
         spec.setProperty( Constants.BUNDLE_VERSION, bundle.getVersion() );
 
         String activator = bundle.getActivator();
@@ -733,13 +735,50 @@ public class BundleBuilder
             omitUnusedImports = false;
         }
 
-        List<IPackageImport> imports = getImports( bundle );
-
         sb.setLength( 0 );
 
         // allow existing header;Package-Import to specify ignored packages
         sb.append( spec.getProperty( Constants.IMPORT_PACKAGE, "" ) );
 
+        buildImports(sb, getImports( bundle ));
+        
+        if ( sb.length() > 0 )
+        {
+            spec.setProperty( Constants.IMPORT_PACKAGE, sb.toString() );
+        }
+
+        sb.setLength( 0 );
+        
+        buildRequires(sb, bundle.getRequires());
+
+        if ( sb.length() > 0 )
+        {
+            spec.setProperty( Constants.REQUIRE_BUNDLE, sb.toString() );
+        }
+    }
+
+
+    /**
+     * @param sb
+     * @param list 
+     */
+    private void buildRequires( StringBuilder sb, List<IRequiredBundle> requires )
+    {
+        for ( IRequiredBundle rb : requires )
+        {
+            if ( sb.length() > 0 )
+                sb.append( "," );
+            sb.append( rb.getSymbolicName() );
+            addVersions( rb.getVersions(), sb );
+        }
+    }
+
+
+    /**
+     * @param sb
+     */
+    private void buildImports( StringBuilder sb, List<IPackageImport> imports )
+    {
         for ( IPackageImport pi : imports )
         {
             switch ( pi.getOSGiImport() )
@@ -788,22 +827,6 @@ public class BundleBuilder
             if ( sb.length() > 0 )
                 sb.append( "," );
             sb.append( "*" );
-        }
-
-        spec.setProperty( Constants.IMPORT_PACKAGE, sb.toString() );
-
-        sb.setLength( 0 );
-        for ( IRequiredBundle rb : bundle.getRequires() )
-        {
-            if ( sb.length() > 0 )
-                sb.append( "," );
-            sb.append( rb.getSymbolicName() );
-            addVersions( rb.getVersions(), sb );
-        }
-
-        if ( sb.length() > 0 )
-        {
-            spec.setProperty( Constants.REQUIRE_BUNDLE, sb.toString() );
         }
     }
 
