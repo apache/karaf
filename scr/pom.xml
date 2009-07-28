@@ -57,6 +57,37 @@
             <artifactId>kxml2</artifactId>
             <version>2.2.2</version>
         </dependency>
+        
+        <!-- Integration Testing with Pax Exam -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam</artifactId>
+            <version>0.6.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-junit</artifactId>
+            <version>0.6.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.exam</groupId>
+            <artifactId>pax-exam-container-default</artifactId>
+            <version>0.6.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.swissbox</groupId>
+            <artifactId>pax-swissbox-tinybundles</artifactId>
+            <version>1.0.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -96,6 +127,92 @@
                     </instructions>
                 </configuration>
             </plugin>
+
+            <!--
+                configure default compilation for Java 1.3 and integration
+                test compilation for Java 5 (since integration tests use
+                Java Annotations for Pax Exam)
+            -->
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>test-compile-java5</id>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                        <configuration>
+                            <source>1.5</source>
+                            <target>1.5</target>
+                            <testIncludes>
+                                <testInclude>**/integration/**</testInclude>
+                            </testIncludes>
+                            <testExcludes>
+                                <testExclude>**/impl/**</testExclude>
+                            </testExcludes>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <testExcludes>
+                        <testExclude>**/integration/**</testExclude>
+                    </testExcludes>
+                </configuration>
+            </plugin>
+
+            <!--
+                Exclude Integration tests in (default) unit tests and
+                conversely enable integration tests for integration testing
+                only. Helper classes are completely excluded from testing. 
+            -->
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>surefire-it</id>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/components/**</exclude>
+                            </excludes>
+                            <includes>
+                                <include>**/integration/*</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <excludes>
+                        <exclude>**/integration/**</exclude>
+                        <exclude>**/components/**</exclude>
+                        <exclude>**/instances/**</exclude>
+                        <exclude>**/instances2/**</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+    
+    <!-- repositories for Pax Exam and BND tool -->
+    <repositories>
+    	<repository>
+    		<id>ops4j</id>
+    		<name>ops4j</name>
+    		<url>http://repository.ops4j.org/maven2</url>
+    		<snapshots>
+    			<enabled>false</enabled>
+    		</snapshots>
+    	</repository>
+    	<repository>
+    		<id>aqute</id>
+    		<name>aqute</name>
+    		<url>http://www.aqute.biz/repo</url>
+    		<snapshots>
+    			<enabled>false</enabled>
+    		</snapshots>
+    	</repository>
+    </repositories>
 </project>
