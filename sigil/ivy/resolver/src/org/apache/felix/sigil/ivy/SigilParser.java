@@ -558,8 +558,12 @@ public class SigilParser implements ModuleDescriptorParser
                 }
                 else
                 {
-                    VersionRange version = versions.get( name );
-                    String rev = version != null ? version.toString() : info.getVersion().toString();
+                    // XXX see FELIX-1395 
+                    // The following code has been commented out as it causes
+                    // problems with require bundle dependencies
+                    // VersionRange version = versions.get( name );
+                    // String rev = version != null ? version.toString() : info.getVersion().toString();
+                    String rev = info.getVersion().toString();
                     mrid = ModuleRevisionId.newInstance( SigilResolver.ORG_SIGIL, name, rev );
                     dd = new SigilDependencyDescriptor( md, mrid, force, changing, transitive );
                 }
