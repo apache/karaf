@@ -522,14 +522,20 @@ public class DependencyManager implements ServiceListener, Reference
      */
     ServiceReference[] getFrameworkServiceReferences()
     {
+        return getFrameworkServiceReferences( getTarget() );
+    }
+
+
+    private ServiceReference[] getFrameworkServiceReferences( String targetFilter )
+    {
         try
         {
             return m_componentManager.getActivator().getBundleContext().getServiceReferences(
-                m_dependencyMetadata.getInterface(), getTarget() );
+                m_dependencyMetadata.getInterface(), targetFilter );
         }
         catch ( InvalidSyntaxException ise )
         {
-            m_componentManager.log( LogService.LOG_ERROR, "Unexpected problem with filter '" + getTarget() + "'",
+            m_componentManager.log( LogService.LOG_ERROR, "Unexpected problem with filter '" + targetFilter + "'",
                 m_componentManager.getComponentMetadata(), ise );
             return null;
         }
@@ -1298,6 +1304,74 @@ public class DependencyManager implements ServiceListener, Reference
 
 
     //------------- Service target filter support -----------------------------
+
+    /**
+     * Returns <code>true</code> if the <code>properties</code> can be
+     * dynamically applied to the component to which the dependency manager
+     * belongs.
+     * <p>
+     * This method applies the following heuristics (in the given order):
+     * <ol>
+     * <li>If there is no change in the target filter for this dependency, the
+     * properties can be applied</li>
+     * <li>If the dependency is static and there are changes in the target
+     * filter we cannot dynamically apply the configuration because the filter
+     * may (assume they do for simplicity here) cause the bindings to change.</li>
+     * <li>If there is still at least one service matching the new target filter
+     * we can apply the configuration because the depdency is dynamic.</li>
+     * <li>If there are no more services matching the filter, we can still
+     * apply the configuration if the dependency is optional.</li>
+     * <li>Ultimately, if all other checks do not apply we cannot dynamically
+     * apply.</li>
+     * </ol>
+     */
+    boolean canUpdateDynamically( Dictionary properties )
+    {
+        // 1. no target filter change
+        final String targetFilter = ( String ) properties.get( m_dependencyMetadata.getTargetPropertyName() );
+        if ( ( getTarget() == null && targetFilter == null ) || getTarget().equals( targetFilter ) )
+        {
+            // can update if target filter is not changed, since there is
+            // no change is service binding
+            return true;
+        }
+        // invariant: target filter change
+
+        // 2. if static policy, cannot update dynamically
+        // (for simplicity assuming change in target service binding)
+        if ( m_dependencyMetadata.isStatic() )
+        {
+            // cannot update if services are statically bound and the target
+            // filter is modified, since there is (potentially at least)
+            // a change is service bindings
+            return false;
+        }
+        // invariant: target filter change + dynamic policy
+
+        // 3. check target services matching the new filter
+        ServiceReference[] refs = getFrameworkServiceReferences( targetFilter );
+        if ( refs != null && refs.length > 0 )
+        {
+            // can update since there is at least on service matching the
+            // new target filter and the services may be exchanged dynamically
+            return true;
+        }
+        // invariant: target filter change + dynamic policy + no more matching service
+
+        // 4. check optionality
+        if ( m_dependencyMetadata.isOptional() )
+        {
+            // can update since even if no service matches the new filter, this
+            // makes no difference because the dependency is optional
+            return true;
+        }
+        // invariant: target filter change + dynamic policy + no more matching service + required
+
+        // 5. cannot dynamically update because the target filter results in
+        // no more applicable services which is not acceptable
+        return false;
+    }
+
 
     /**
      * Sets the target filter from target filter property contained in the
