@@ -94,6 +94,10 @@ public class ComponentTag extends AbstractTag {
                 return Util.getEnumValue(annotation, "policy", ConfigurationPolicy.class, Component.class, false);
             }
 
+            public boolean getMetatypeFactoryPid() {
+                return Util.getBooleanValue(annotation, "getMetatypeFactoryPid", Component.class);
+            }
+
             public Class<? extends java.lang.annotation.Annotation> annotationType() {
                 return null;
             }
@@ -114,6 +118,8 @@ public class ComponentTag extends AbstractTag {
         map.put(Constants.COMPONENT_DESCRIPTION, emptyToNull(this.annotation.description()));
         map.put(Constants.COMPONENT_ENABLED, String.valueOf(this.annotation.enabled()));
         map.put(Constants.COMPONENT_FACTORY, emptyToNull(this.annotation.factory()));
+        map.put(Constants.COMPONENT_SET_METATYPE_FACTORY_PID, String.valueOf(this.annotation.getMetatypeFactoryPid()));
+
         // FELIX-593: immediate attribute does not default to true all the
         // times hence we only set it if declared in the tag
         if ( this.sourceAnnotation.getNamedParameter("immediate") != null) {

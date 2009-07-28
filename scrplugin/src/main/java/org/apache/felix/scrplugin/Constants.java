@@ -56,6 +56,8 @@ public class Constants {
 
     public static final String COMPONENT_CREATE_PID = "create-pid";
 
+    public static final String COMPONENT_SET_METATYPE_FACTORY_PID = "set-metatype-factory-pid";
+
     // The component configuration policy (V1.1)
     public static final String COMPONENT_CONFIG_POLICY = "policy";
     public static final String COMPONENT_CONFIG_POLICY_OPTIONAL = "optional";

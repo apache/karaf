@@ -108,6 +108,12 @@ public @interface Component {
     boolean createPid() default true;
 
     /**
+     * Set the metatype factory pid property (only for non factory components).
+     * @since 1.0
+     */
+    boolean getMetatypeFactoryPid() default false;
+
+    /**
      * The configuration policy
      * @since 1.0
      */

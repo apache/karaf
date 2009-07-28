@@ -367,7 +367,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
         // set implementation
         component.setImplementation(new Implementation(description.getName()));
 
-        final OCD ocd = this.doComponent(componentTag, component, metaData);
+        final OCD ocd = this.doComponent(componentTag, component, metaData, iLog);
 
         boolean inherited = getBoolean(componentTag, Constants.COMPONENT_INHERIT, true);
         this.doServices(description.getTagsByName(Constants.SERVICE, inherited), component, description);
@@ -443,7 +443,8 @@ public class SCRDescriptorMojo extends AbstractMojo {
      * @param tag
      * @param component
      */
-    protected OCD doComponent(JavaTag tag, Component component, MetaData metaData) {
+    protected OCD doComponent(JavaTag tag, Component component, MetaData metaData,
+            final IssueLog iLog) {
 
         // check if this is an abstract definition
         final String abstractType = tag.getNamedParameter(Constants.COMPONENT_ABSTRACT);
@@ -513,8 +514,17 @@ public class SCRDescriptorMojo extends AbstractMojo {
             final Designate designate = new Designate();
             metaData.addDesignate(designate);
             designate.setPid(component.getName());
-            if (component.getFactory() != null) {
-                designate.setFactoryPid( component.getFactory() );
+
+            // factory pid
+            final String setFactoryPidValue = tag.getNamedParameter(Constants.COMPONENT_SET_METATYPE_FACTORY_PID);
+            final boolean setFactoryPid = setFactoryPidValue != null &&
+                ("yes".equalsIgnoreCase(setFactoryPidValue) || "true".equalsIgnoreCase(setFactoryPidValue));
+            if ( setFactoryPid ) {
+                if ( component.getFactory() == null ) {
+                    designate.setFactoryPid( component.getName() );
+                } else {
+                    iLog.addWarning("Component factory " + component.getName() + " should not set metatype factory pid.");
+                }
             }
             // designate.object
             final MTObject mtobject = new MTObject();
