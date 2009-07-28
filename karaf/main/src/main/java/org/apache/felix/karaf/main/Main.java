@@ -74,11 +74,11 @@ public class Main {
     /**
      * The property name prefix for the launcher's auto-install property.
      */
-    public static final String PROPERTY_AUTO_INSTALL = "felix.auto.install";
+    public static final String PROPERTY_AUTO_INSTALL = "karaf.auto.install";
     /**
      * The property for auto-discovering the bundles
      */
-    public static final String PROPERTY_AUTO_START = "felix.auto.start";
+    public static final String PROPERTY_AUTO_START = "karaf.auto.start";
     /**
      * The system property for specifying the Karaf home directory.  The home directory
      * hold the binary install of Karaf.
@@ -348,6 +348,17 @@ public class Main {
         // to set the start level of the installed bundles.
         StartLevel sl = (StartLevel) context.getService(
                 context.getServiceReference(org.osgi.service.startlevel.StartLevel.class.getName()));
+
+        // Set the default bundle start level
+        int ibsl = 60;
+        try {
+            String str = configProps.getProperty("karaf.startlevel.bundle");
+            if (str != null) {
+                ibsl = Integer.parseInt(str);
+            }
+        } catch (Throwable t) {
+        }
+        sl.setInitialBundleStartLevel(ibsl);
 
         // The auto-install property specifies a space-delimited list of
         // bundle URLs to be automatically installed into each new profile;
