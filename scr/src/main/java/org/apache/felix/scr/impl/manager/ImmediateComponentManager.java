@@ -26,11 +26,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.felix.scr.impl.BundleComponentActivator;
-import org.apache.felix.scr.impl.ComponentRegistry;
 import org.apache.felix.scr.impl.helper.ReflectionHelper;
 import org.apache.felix.scr.impl.metadata.ComponentMetadata;
 import org.apache.felix.scr.impl.metadata.ReferenceMetadata;
-import org.osgi.service.cm.Configuration;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.log.LogService;
@@ -55,6 +54,9 @@ public class ImmediateComponentManager extends AbstractComponentManager
     // the deactivate method
     private Method deactivateMethod = ReflectionHelper.SENTINEL;
 
+    // the modify method
+    private Method modifyMethod = ReflectionHelper.SENTINEL;
+
     // optional properties provided in the ComponentFactory.newInstance method
     private Dictionary m_factoryProperties;
 
@@ -72,22 +74,9 @@ public class ImmediateComponentManager extends AbstractComponentManager
      * @param activator
      * @param metadata
      */
-    public ImmediateComponentManager( BundleComponentActivator activator, ComponentMetadata metadata,
-        ComponentRegistry componentRegistry )
+    public ImmediateComponentManager( BundleComponentActivator activator, ComponentMetadata metadata )
     {
-        super( activator, metadata, componentRegistry );
-
-        // only ask for configuration if not created by a Component Factory, in
-        // which case the configuration is provided by the Component Factory
-        if ( !getComponentMetadata().isFactory() )
-        {
-            Configuration cfg = componentRegistry.getConfiguration( activator.getBundleContext(),
-                getComponentMetadata().getName() );
-            if ( cfg != null )
-            {
-                m_configurationProperties = cfg.getProperties();
-            }
-        }
+        super( activator, metadata );
     }
 
 
@@ -278,6 +267,12 @@ public class ImmediateComponentManager extends AbstractComponentManager
     }
 
 
+    public boolean hasConfiguration()
+    {
+        return m_configurationProperties != null;
+    }
+
+
     /**
      * Returns the (private copy) of the Component properties to be used
      * for the ComponentContext as well as eventual service registration.
@@ -357,16 +352,133 @@ public class ImmediateComponentManager extends AbstractComponentManager
         // clear the current properties to force using the configuration data
         m_properties = null;
 
+        if ( getState() == STATE_UNSATISFIED && configuration != null
+            && getComponentMetadata().isConfigurationRequired() )
+        {
+            activateInternal();
+            return;
+        }
+
         // reactivate the component to ensure it is provided with the
         // configuration data
-        if ( ( getState() & ( STATE_ACTIVE | STATE_FACTORY | STATE_REGISTERED ) ) != 0 )
+        if ( ( getState() & ( STATE_ACTIVE | STATE_FACTORY | STATE_REGISTERED ) ) == 0 )
+        {
+            // nothing to do for inactive components, leave this method
+            return;
+        }
+
+        // if the configuration has been deleted but configuration is required
+        // this component must be deactivated
+        if ( configuration == null && getComponentMetadata().isConfigurationRequired() )
+        {
+            deactivateInternal( ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_DELETED );
+        }
+        else if ( !modify() )
         {
             log( LogService.LOG_DEBUG, "Deactivating and Activating to reconfigure from configuration",
                 getComponentMetadata(), null );
             int reason = ( configuration == null ) ? ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_DELETED
-                : ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_DELETED;
+                : ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_MODIFIED;
             reactivate( reason );
         }
+    }
+
+    private boolean modify() {
+        // 1. no live update if there is no declared method
+        if ( getComponentMetadata().getModified() == null )
+        {
+            return false;
+        }
+        // invariant: we have a modified method name
+
+        // 2. get and check configured method
+        Method modifyMethod = getModifyMethod();
+        if ( modifyMethod == null )
+        {
+            // log an error if the declared method cannot be found
+            log( LogService.LOG_ERROR, "Declared modify method '" + getComponentMetadata().getModified()
+                + "' cannot be found, configuring by reactivation", getComponentMetadata(), null );
+            return false;
+        }
+        // invariant: modify method is configured and found
+
+        // 3. check whether we can dynamically apply the configuration if
+        // any target filters influence the bound services
+        final Dictionary props = getProperties();
+        Iterator it = getDependencyManagers();
+        while ( it.hasNext() )
+        {
+            DependencyManager dm = ( DependencyManager ) it.next();
+            if ( !dm.canUpdateDynamically( props ) )
+            {
+                log( LogService.LOG_INFO,
+                    "Cannot dynamically update the configuration due to dependency changes induced on dependency "
+                        + dm.getName(), getComponentMetadata(), null );
+                return false;
+            }
+        }
+        // invariant: modify method existing and no static bound service changes
+
+        // 4. call method (nothing to do when failed, since it has already been logged)
+        invokeMethod( modifyMethod, m_implementationObject, m_componentContext, -1 );
+
+        // 5. update the target filter on the services now, this may still
+        // result in unsatisfied dependencies, in which case we abort
+        // this dynamic update and have the component be deactivated
+        if ( !verifyDependencyManagers( props ) )
+        {
+            log(
+                LogService.LOG_ERROR,
+                "Updating the service references caused at least on reference to become unsatisifed, deactivating component",
+                getComponentMetadata(), null );
+            return false;
+        }
+
+        // 6. update service registration properties
+        ServiceRegistration sr = getServiceRegistration();
+        if ( sr != null )
+        {
+            try
+            {
+                final Dictionary regProps = copyTo( null, props );
+                sr.setProperties( regProps );
+            }
+            catch ( IllegalStateException ise )
+            {
+                // service has been unregistered asynchronously, ignore
+            }
+            catch ( IllegalArgumentException iae )
+            {
+                log( LogService.LOG_ERROR,
+                    "Unexpected configuration property problem when updating service registration",
+                    getComponentMetadata(), iae );
+            }
+            catch ( Throwable t )
+            {
+                log( LogService.LOG_ERROR, "Unexpected problem when updating service registration",
+                    getComponentMetadata(), t );
+            }
+        }
+
+        // 7. everything set and done, the component has been udpated
+        return true;
+    }
+
+
+    /**
+     * Returns the configured modify method or <code>null</code> if the
+     * configured method cannot be found.
+     */
+    private Method getModifyMethod()
+    {
+        // ensure the method object is known
+        if ( modifyMethod == ReflectionHelper.SENTINEL )
+        {
+            modifyMethod = getMethod( m_implementationObject, getComponentMetadata().getModified(),
+                ReflectionHelper.ACTIVATE_ACCEPTED_PARAMETERS );
+        }
+
+        return modifyMethod;
     }
 
 
@@ -448,7 +560,7 @@ public class ImmediateComponentManager extends AbstractComponentManager
                 }
                 else if ( paramTypes[i] == ReflectionHelper.MAP_CLASS )
                 {
-                    // note: getProperties() returns a Hashtable which is a Map
+                    // note: getProperties() returns a ReadOnlyDictionary which is a Map
                     param[i] = componentContext.getProperties();
                 }
                 else if ( paramTypes[i] == ReflectionHelper.INTEGER_CLASS || paramTypes[i] == Integer.TYPE)
