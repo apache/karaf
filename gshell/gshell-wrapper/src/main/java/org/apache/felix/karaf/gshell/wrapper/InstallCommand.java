@@ -28,12 +28,14 @@ import java.util.Scanner;
 
 import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
 import org.apache.felix.gogo.commands.Option;
+import org.apache.felix.gogo.commands.Command;
 
 /**
  * Installs this Karaf instance as a service in your operating systems.
  *
  * @version $Rev: 603634 $ $Date: 2007-12-12 16:07:16 +0100 (Wed, 12 Dec 2007) $
  */
+@Command(scope = "wrapper", name = "install", description = "Install Karaf as a system service in the OS.")
 public class InstallCommand extends OsgiCommandSupport
 {
 	
