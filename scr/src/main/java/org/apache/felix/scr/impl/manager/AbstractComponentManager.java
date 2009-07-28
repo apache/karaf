@@ -29,7 +29,6 @@ import org.apache.felix.scr.Component;
 import org.apache.felix.scr.Reference;
 import org.apache.felix.scr.impl.BundleComponentActivator;
 import org.apache.felix.scr.impl.ComponentActivatorTask;
-import org.apache.felix.scr.impl.ComponentRegistry;
 import org.apache.felix.scr.impl.metadata.ComponentMetadata;
 import org.apache.felix.scr.impl.metadata.ReferenceMetadata;
 import org.osgi.framework.Bundle;
@@ -273,6 +272,16 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
             acm.log( LogService.LOG_DEBUG, "Activating component", componentMetadata, null );
 
             // Before creating the implementation object, we are going to
+            // test if we have configuration if such is required
+            if ( !acm.hasConfiguration() && acm.getComponentMetadata().isConfigurationRequired() )
+            {
+                acm.log( LogService.LOG_INFO, "Missing required configuration, cannot activate", componentMetadata,
+                    null );
+                acm.changeState( Unsatisfied.getInstance() );
+                return;
+            }
+
+            // Before creating the implementation object, we are going to
             // test if all the mandatory dependencies are satisfied
             if ( !acm.verifyDependencyManagers( acm.getProperties()) )
             {
@@ -458,14 +467,14 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
      *
      * @param activator
      * @param metadata
-     * @param componentId
      */
-    protected AbstractComponentManager( BundleComponentActivator activator, ComponentMetadata metadata,
-        ComponentRegistry componentRegistry )
+    protected AbstractComponentManager( BundleComponentActivator activator, ComponentMetadata metadata )
     {
         m_activator = activator;
         m_componentMetadata = metadata;
-        m_componentId = componentRegistry.createComponentId();
+
+        // for some testing, the activator may be null
+        m_componentId = ( activator != null ) ? activator.registerComponentId( this ) : -1;
 
         m_state = Disabled.getInstance();
         loadDependencyManagers( metadata );
@@ -753,11 +762,19 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
         return m_serviceRegistration;
     }
 
+
     void clear()
     {
-        m_activator = null;
+        // for some testing, the activator may be null
+        if ( m_activator != null )
+        {
+            m_activator.unregisterComponentId( this );
+            m_activator = null;
+        }
+
         m_dependencyManagers.clear();
     }
+
 
     void log( int level, String message, ComponentMetadata metadata, Throwable ex )
     {
@@ -782,17 +799,6 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
                 activateInternal();
             }
         });
-    }
-
-    /**
-     * Reconfigures this component by deactivating and activating it. During
-     * activation the new configuration data is retrieved from the Configuration
-     * Admin Service.
-     */
-    public final void reconfigure( final int reason )
-    {
-        log( LogService.LOG_DEBUG, "Deactivating and Activating to reconfigure", m_componentMetadata, null );
-        reactivate( reason );
     }
 
     /**
@@ -851,7 +857,7 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
         }
     }
 
-    private boolean verifyDependencyManagers( Dictionary properties )
+    protected boolean verifyDependencyManagers( Dictionary properties )
     {
         // indicates whether all dependencies are satisfied
         boolean satisfied = true;
@@ -913,6 +919,8 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
      * @return the object that implements the services
      */
     public abstract Object getInstance();
+
+    public abstract boolean hasConfiguration();
 
     public abstract Dictionary getProperties();
 

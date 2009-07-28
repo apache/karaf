@@ -25,11 +25,10 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 
 import org.apache.felix.scr.impl.BundleComponentActivator;
-import org.apache.felix.scr.impl.ComponentRegistry;
+import org.apache.felix.scr.impl.config.ComponentHolder;
 import org.apache.felix.scr.impl.metadata.ComponentMetadata;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.cm.Configuration;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentFactory;
 import org.osgi.service.component.ComponentInstance;
@@ -38,11 +37,8 @@ import org.osgi.service.log.LogService;
 /**
  * The <code>ComponentFactoryImpl</code> TODO
  */
-public class ComponentFactoryImpl extends AbstractComponentManager implements ComponentFactory
+public class ComponentFactoryImpl extends AbstractComponentManager implements ComponentFactory, ComponentHolder
 {
-
-    // The component registry used to retrieve component IDs
-    private ComponentRegistry m_componentRegistry;
 
     // The map of components created from Configuration objects
     // maps PID to ImmediateComponentManager for configuration updating
@@ -53,13 +49,20 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
     // no IdentityHashSet and HashSet internally uses a HashMap anyway
     private final Map m_createdComponents;
 
+    // configuration of the component factory
+    private Dictionary m_configuration;
 
-    public ComponentFactoryImpl( BundleComponentActivator activator, ComponentMetadata metadata,
-        ComponentRegistry componentRegistry )
+    // whether this instance supports creating component instances for factory
+    // configuration instances. This is backwards compatibility behaviour and
+    // contradicts the specification (Section 112.7)
+    private final boolean m_isConfigurationFactory;
+
+
+    public ComponentFactoryImpl( BundleComponentActivator activator, ComponentMetadata metadata )
     {
-        super( activator, metadata, componentRegistry );
-        m_componentRegistry = componentRegistry;
+        super( activator, metadata );
         m_createdComponents = new IdentityHashMap();
+        m_isConfigurationFactory = "true".equals( activator.getBundleContext().getProperty( "ds.factory.enabled" ) );
     }
 
 
@@ -94,16 +97,6 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
     {
         log( LogService.LOG_DEBUG, "registering component factory", getComponentMetadata(), null );
 
-        Configuration[] cfg = m_componentRegistry.getConfigurations( getActivator().getBundleContext(),
-            getComponentMetadata().getName() );
-        if ( cfg != null )
-        {
-            for ( int i = 0; i < cfg.length; i++ )
-            {
-                updated( cfg[i].getPid(), cfg[i].getProperties() );
-            }
-        }
-
         Dictionary serviceProperties = getProperties();
         return getActivator().getBundleContext().registerService( new String[]
             { ComponentFactory.class.getName() }, getService(), serviceProperties );
@@ -114,6 +107,12 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
     {
         // this does not return the component instance actually
         return null;
+    }
+
+
+    public boolean hasConfiguration()
+    {
+        return true;
     }
 
 
@@ -143,63 +142,129 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
     }
 
 
-    //---------- ManagedServiceFactory interface ------------------------------
-
-    public void updated( String pid, Dictionary configuration )
-    {
-        if ( getState() == STATE_FACTORY )
-        {
-            ImmediateComponentManager cm;
-            if ( m_configuredServices != null )
-            {
-                cm = ( ImmediateComponentManager ) m_configuredServices.get( pid );
-            }
-            else
-            {
-                m_configuredServices = new HashMap();
-                cm = null;
-            }
-
-            if ( cm == null )
-            {
-                // create a new instance with the current configuration
-                cm = createComponentManager( configuration, false );
-
-                // keep a reference for future updates
-                m_configuredServices.put( pid, cm );
-            }
-            else
-            {
-                // update the configuration as if called as ManagedService
-                cm.reconfigure( configuration );
-            }
-        }
-    }
-
-    public void deleted( String pid )
-    {
-        if ( getState() == STATE_FACTORY && m_configuredServices != null )
-        {
-            ImmediateComponentManager cm = ( ImmediateComponentManager ) m_configuredServices.remove( pid );
-            if ( cm != null )
-            {
-                log( LogService.LOG_DEBUG, "Disposing component after configuration deletion", getComponentMetadata(),
-                        null );
-
-                disposeComponentManager( cm, ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_DELETED );
-            }
-        }
-
-    }
-
-
     public String getName()
     {
         return "Component Factory " + getComponentMetadata().getName();
     }
 
 
-    //---------- internal -----------------------------------------------------
+    //---------- ComponentHolder interface
+
+    public void configurationDeleted( String pid )
+    {
+        if ( pid.equals( getComponentMetadata().getName() ) )
+        {
+            m_configuration = null;
+            reconfigureComponents( null );
+        }
+        else if ( m_isConfigurationFactory && getState() == STATE_FACTORY && m_configuredServices != null )
+        {
+            ImmediateComponentManager cm = ( ImmediateComponentManager ) m_configuredServices.remove( pid );
+            if ( cm != null )
+            {
+                log( LogService.LOG_DEBUG, "Disposing component after configuration deletion", getComponentMetadata(),
+                    null );
+
+                disposeComponentManager( cm, ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_DELETED );
+            }
+        }
+    }
+
+
+    public void configurationUpdated( String pid, Dictionary configuration )
+    {
+        if ( pid.equals( getComponentMetadata().getName() ) )
+        {
+            m_configuration = configuration;
+            reconfigureComponents( configuration );
+        }
+        else if ( m_isConfigurationFactory )
+        {
+            if ( getState() == STATE_FACTORY )
+            {
+                // configuration for factory configuration instances
+
+                ImmediateComponentManager cm;
+                if ( m_configuredServices != null )
+                {
+                    cm = ( ImmediateComponentManager ) m_configuredServices.get( pid );
+                }
+                else
+                {
+                    m_configuredServices = new HashMap();
+                    cm = null;
+                }
+
+                if ( cm == null )
+                {
+                    // create a new instance with the current configuration
+                    cm = createComponentManager( configuration, false );
+
+                    // keep a reference for future updates
+                    m_configuredServices.put( pid, cm );
+                }
+                else
+                {
+                    // update the configuration as if called as ManagedService
+                    cm.reconfigure( configuration );
+                }
+            }
+        }
+        else
+        {
+            // 112.7 Factory Configuration not allowed for factory component
+            getActivator().log( LogService.LOG_ERROR,
+                "Component Factory cannot be configured by factory configuration", getComponentMetadata(), null );
+        }
+    }
+
+
+    // TODO: correct ???
+    public void enableComponents()
+    {
+        ImmediateComponentManager[] cms = getComponentManagers( false );
+        for ( int i = 0; i < cms.length; i++ )
+        {
+            cms[i].enable();
+        }
+    }
+
+
+    // update components with this configuration
+    private void reconfigureComponents( Dictionary configuration )
+    {
+        ImmediateComponentManager[] cms = getComponentManagers( false );
+        for ( int i = 0; i < cms.length; i++ )
+        {
+            cms[i].reconfigure( configuration );
+        }
+    }
+
+
+    // TODO: correct ???
+    public void disableComponents()
+    {
+        ImmediateComponentManager[] cms = getComponentManagers( false );
+        for ( int i = 0; i < cms.length; i++ )
+        {
+            cms[i].disable();
+        }
+    }
+
+
+    // TODO: correct ???
+    public void disposeComponents( int reason )
+    {
+        ImmediateComponentManager[] cms = getComponentManagers( true );
+        for ( int i = 0; i < cms.length; i++ )
+        {
+            cms[i].dispose( reason );
+        }
+    }
+
+
+    //---------- internal
+
     /**
      * ComponentManager instances created by this method are not registered
      * with the ComponentRegistry. Therefore, any configuration update to these
@@ -218,11 +283,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
      */
     private ImmediateComponentManager createComponentManager( Dictionary configuration, boolean isNewInstance )
     {
-        ImmediateComponentManager cm = new ImmediateComponentManager( getActivator(), getComponentMetadata(),
-            m_componentRegistry );
-
-        // add the new component to the activators instances
-        getActivator().getInstanceReferences().add( cm );
+        ImmediateComponentManager cm = new ImmediateComponentManager( getActivator(), getComponentMetadata() );
 
         // register with the internal set of created components
         m_createdComponents.put( cm, cm );
@@ -231,6 +292,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         if ( isNewInstance )
         {
             cm.setFactoryProperties( configuration );
+            cm.reconfigure( m_configuration );
             // enable synchronously
             cm.enableInternal();
             cm.activateInternal();
@@ -252,10 +314,24 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         // remove from created components
         m_createdComponents.remove( cm );
 
-        // remove from activators list
-        getActivator().getInstanceReferences().remove( cm );
-
         // finally dispose it
         cm.dispose( reason );
+    }
+
+
+    private ImmediateComponentManager[] getComponentManagers( boolean clear )
+    {
+        synchronized ( m_createdComponents )
+        {
+            ImmediateComponentManager[] cm = new ImmediateComponentManager[m_createdComponents.size()];
+            m_createdComponents.keySet().toArray( cm );
+
+            if ( clear )
+            {
+                m_createdComponents.clear();
+            }
+
+            return cm;
+        }
     }
 }

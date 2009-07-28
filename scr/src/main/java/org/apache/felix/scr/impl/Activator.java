@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.felix.scr.impl.config.ConfigurationComponentRegistry;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -78,7 +79,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener
     {
         m_context = context;
         m_componentBundles = new HashMap();
-        m_componentRegistry = new ComponentRegistry( m_context );
+        m_componentRegistry = createComponentRegistry( context);
 
         // require the log service
         m_logService = new ServiceTracker( context, LOGSERVICE_CLASS, null );
@@ -135,7 +136,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener
         // 112.8.2 dispose off all active components
         disposeAllComponents();
 
-        // dispose off the component registry
+        // dispose component registry
         m_componentRegistry.dispose();
 
         // terminate the actor thread and wait for it for a limited time
@@ -293,6 +294,22 @@ public class Activator implements BundleActivator, SynchronousBundleListener
     }
 
 
+    public static ComponentRegistry createComponentRegistry( BundleContext bundleContext )
+    {
+        try
+        {
+            return new ConfigurationComponentRegistry( bundleContext );
+        }
+        catch ( Throwable t )
+        {
+            log( LogService.LOG_INFO, bundleContext.getBundle(),
+                "ConfigurationAdmin supporting ComponentRegistry not available, not using ConfigurationAdmin", t );
+        }
+
+        return new ComponentRegistry( bundleContext );
+    }
+
+
     /**
      * Returns the <code>BundleContext</code> of the bundle.
      * <p>
@@ -426,7 +443,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener
      * @param ex An optional <code>Throwable</code> whose stack trace is written,
      *      or <code>null</code> to not log a stack trace.
      */
-    static void log( int level, Bundle bundle, String message, Throwable ex )
+    public static void log( int level, Bundle bundle, String message, Throwable ex )
     {
         if ( m_logLevel >= level )
         {

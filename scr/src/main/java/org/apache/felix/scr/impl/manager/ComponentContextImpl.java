@@ -50,7 +50,7 @@ public class ComponentContextImpl implements ComponentContext
         return m_componentManager;
     }
 
-    public Dictionary getProperties()
+    public final Dictionary getProperties()
     {
         // 112.11.3.5 The Dictionary is read-only and cannot be modified
         return new ReadOnlyDictionary( m_componentManager.getProperties() );

@@ -29,17 +29,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.apache.felix.scr.impl.config.ComponentHolder;
 import org.apache.felix.scr.impl.helper.Logger;
 import org.apache.felix.scr.impl.manager.AbstractComponentManager;
-import org.apache.felix.scr.impl.manager.ComponentFactoryImpl;
-import org.apache.felix.scr.impl.manager.DelayedComponentManager;
-import org.apache.felix.scr.impl.manager.ImmediateComponentManager;
-import org.apache.felix.scr.impl.manager.ServiceFactoryComponentManager;
 import org.apache.felix.scr.impl.metadata.ComponentMetadata;
 import org.apache.felix.scr.impl.metadata.XmlHandler;
 import org.apache.felix.scr.impl.parser.KXml2SAXParser;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentException;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
@@ -60,9 +56,6 @@ public class BundleComponentActivator implements Logger
 
     // This is a list of component instance managers that belong to a particular bundle
     private List m_managers = new ArrayList();
-
-    // The Configuration Admin tracker providing configuration for components
-    private ServiceTracker m_configurationAdmin;
 
     // The Configuration Admin tracker providing configuration for components
     private ServiceTracker m_logService;
@@ -88,8 +81,8 @@ public class BundleComponentActivator implements Logger
      *
      * @throws ComponentException if any error occurrs initializing this class
      */
-    BundleComponentActivator( ComponentRegistry componentRegistry, ComponentActorThread componentActor,
-        BundleContext context, int logLevel ) throws ComponentException
+    BundleComponentActivator( ComponentRegistry componentRegistry,
+        ComponentActorThread componentActor, BundleContext context, int logLevel ) throws ComponentException
     {
         // keep the parameters for later
         m_componentRegistry = componentRegistry;
@@ -98,10 +91,6 @@ public class BundleComponentActivator implements Logger
 
         // mark this instance active
         m_active = true;
-
-        // have the Configuration Admin Service handy (if available)
-        m_configurationAdmin = new ServiceTracker( context, ConfigurationAdmin.class.getName(), null );
-        m_configurationAdmin.open();
 
         // have the LogService handy (if available)
         m_logService = new ServiceTracker( context, Activator.LOGSERVICE_CLASS, null );
@@ -176,46 +165,18 @@ public class BundleComponentActivator implements Logger
                         metadata.validate( this );
 
                         // Request creation of the component manager
-                        AbstractComponentManager manager;
-                        if ( metadata.isFactory() )
-                        {
-                            // 112.2.4 SCR must register a Component Factory
-                            // service on behalf ot the component
-                            // as soon as the component factory is satisfied
-                            manager = new ComponentFactoryImpl( this, metadata, m_componentRegistry );
-                        }
-                        else if ( metadata.isImmediate() )
-                        {
-                            manager = new ImmediateComponentManager( this, metadata, m_componentRegistry );
-                        }
-                        else if ( metadata.getServiceMetadata() != null )
-                        {
-                            if ( metadata.getServiceMetadata().isServiceFactory() )
-                            {
-                                manager = new ServiceFactoryComponentManager( this, metadata, m_componentRegistry );
-                            }
-                            else
-                            {
-                                manager = new DelayedComponentManager( this, metadata, m_componentRegistry );
-                            }
-                        }
-                        else
-                        {
-                            // if we get here, which is not expected after all, we fail
-                            throw new IllegalArgumentException( "Cannot create a component manager for "
-                                + metadata.getName() );
-                        }
+                        ComponentHolder holder = m_componentRegistry.createComponentHolder( this, metadata );
 
                         // register the component after validation
-                        m_componentRegistry.registerComponent( metadata.getName(), manager );
-                        m_managers.add( manager );
+                        m_componentRegistry.registerComponent( metadata.getName(), holder );
+                        m_managers.add( holder );
 
                         // enable the component
                         if ( metadata.isEnabled() )
                         {
-                            manager.enable();
+                            holder.enableComponents();
                         }
-                    }
+                   }
                     catch ( Throwable t )
                     {
                         // There is a problem with this particular component, we'll log the error
@@ -275,28 +236,22 @@ public class BundleComponentActivator implements Logger
 
         while ( m_managers.size() != 0 )
         {
-            AbstractComponentManager manager = ( AbstractComponentManager ) m_managers.get( 0 );
+            ComponentHolder holder = ( ComponentHolder ) m_managers.get( 0 );
             try
             {
-                m_managers.remove( manager );
-                manager.dispose( reason );
+                m_managers.remove( holder );
+                holder.disposeComponents( reason );
             }
             catch ( Exception e )
             {
-                log( LogService.LOG_ERROR, "BundleComponentActivator : Exception invalidating", manager
+                log( LogService.LOG_ERROR, "BundleComponentActivator : Exception invalidating", holder
                     .getComponentMetadata(), e );
             }
             finally
             {
-                m_componentRegistry.unregisterComponent( manager.getComponentMetadata().getName() );
+                m_componentRegistry.unregisterComponent( holder.getComponentMetadata().getName() );
             }
 
-        }
-
-        // close the Configuration Admin tracker
-        if ( m_configurationAdmin != null )
-        {
-            m_configurationAdmin.close();
         }
 
         log( LogService.LOG_DEBUG, "BundleComponentActivator : Bundle [" + m_context.getBundle().getBundleId()
@@ -319,17 +274,6 @@ public class BundleComponentActivator implements Logger
 
 
     /**
-     * Returns the list of instance references currently associated to this activator
-     *
-     * @return the list of instance references
-     */
-    public List getInstanceReferences()
-    {
-        return m_managers;
-    }
-
-
-    /**
     * Returns the BundleContext
     *
     * @return the BundleContext
@@ -337,18 +281,6 @@ public class BundleComponentActivator implements Logger
     public BundleContext getBundleContext()
     {
         return m_context;
-    }
-
-
-    /**
-     * Returns the <code>ConfigurationAdmin</code> service used to retrieve
-     * configuration data for components managed by this activator or
-     * <code>null</code> if no Configuration Admin Service is available in the
-     * framework.
-     */
-    protected ConfigurationAdmin getConfigurationAdmin()
-    {
-        return ( ConfigurationAdmin ) m_configurationAdmin.getService();
     }
 
 
@@ -365,21 +297,21 @@ public class BundleComponentActivator implements Logger
      */
     public void enableComponent( String name )
     {
-        final AbstractComponentManager[] cm = getSelectedComponents( name );
-        if ( cm == null )
+        final ComponentHolder[] holder = getSelectedComponents( name );
+        if ( holder == null )
         {
             return;
         }
 
-        for ( int i = 0; i < cm.length; i++ )
+        for ( int i = 0; i < holder.length; i++ )
         {
             try
             {
-                cm[i].enable();
+                holder[i].enableComponents();
             }
             catch ( Throwable t )
             {
-                log( LogService.LOG_ERROR, "Cannot enable component", cm[i].getComponentMetadata(), t );
+                log( LogService.LOG_ERROR, "Cannot enable component", holder[i].getComponentMetadata(), t );
             }
         }
     }
@@ -398,22 +330,22 @@ public class BundleComponentActivator implements Logger
      */
     public void disableComponent( String name )
     {
-        final AbstractComponentManager[] cm = getSelectedComponents( name );
-        if ( cm == null )
+        final ComponentHolder[] holder = getSelectedComponents( name );
+        if ( holder == null )
         {
             return;
         }
 
-        for ( int i = 0; i < cm.length; i++ )
+        for ( int i = 0; i < holder.length; i++ )
         {
             try
             {
-                log( LogService.LOG_DEBUG, "Disabling Component", cm[i].getComponentMetadata(), null );
-                cm[i].disable();
+                log( LogService.LOG_DEBUG, "Disabling Component", holder[i].getComponentMetadata(), null );
+                holder[i].disableComponents();
             }
             catch ( Throwable t )
             {
-                log( LogService.LOG_ERROR, "Cannot disable component", cm[i].getComponentMetadata(), t );
+                log( LogService.LOG_ERROR, "Cannot disable component", holder[i].getComponentMetadata(), t );
             }
         }
     }
@@ -434,12 +366,12 @@ public class BundleComponentActivator implements Logger
      *      to the <code>name</code> parameter or <code>null</code> if no
      *      component manager with the given name is currently registered.
      */
-    private AbstractComponentManager[] getSelectedComponents( String name )
+    private ComponentHolder[] getSelectedComponents( String name )
     {
         // if all components are selected
         if ( name == null )
         {
-            return (org.apache.felix.scr.impl.manager.AbstractComponentManager[] ) m_managers.toArray( new AbstractComponentManager[m_managers.size()] );
+            return ( ComponentHolder[] ) m_managers.toArray( new ComponentHolder[m_managers.size()] );
         }
 
         if ( m_componentRegistry.getComponent( name ) != null )
@@ -448,10 +380,10 @@ public class BundleComponentActivator implements Logger
             Iterator it = m_managers.iterator();
             while ( it.hasNext() )
             {
-                AbstractComponentManager cm = ( AbstractComponentManager ) it.next();
+                ComponentHolder cm = ( ComponentHolder ) it.next();
                 if ( name.equals( cm.getComponentMetadata().getName() ) )
                 {
-                    return new AbstractComponentManager[]
+                    return new ComponentHolder[]
                         { cm };
                 }
             }
@@ -461,6 +393,16 @@ public class BundleComponentActivator implements Logger
         return null;
     }
 
+
+    //---------- Component ID support
+
+    public long registerComponentId(AbstractComponentManager componentManager) {
+        return m_componentRegistry.registerComponentId(componentManager);
+    }
+
+    public void unregisterComponentId(AbstractComponentManager componentManager) {
+        m_componentRegistry.unregisterComponentId(componentManager.getId());
+    }
 
     //---------- Asynchronous Component Handling ------------------------------
 

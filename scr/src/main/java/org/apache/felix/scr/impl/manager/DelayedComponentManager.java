@@ -20,7 +20,6 @@ package org.apache.felix.scr.impl.manager;
 
 
 import org.apache.felix.scr.impl.BundleComponentActivator;
-import org.apache.felix.scr.impl.ComponentRegistry;
 import org.apache.felix.scr.impl.metadata.ComponentMetadata;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
@@ -36,12 +35,10 @@ public class DelayedComponentManager extends ImmediateComponentManager implement
     /**
      * @param activator
      * @param metadata
-     * @param componentId
      */
-    public DelayedComponentManager( BundleComponentActivator activator, ComponentMetadata metadata,
-        ComponentRegistry componentRegistry )
+    public DelayedComponentManager( BundleComponentActivator activator, ComponentMetadata metadata )
     {
-        super( activator, metadata, componentRegistry );
+        super( activator, metadata );
     }
 
 

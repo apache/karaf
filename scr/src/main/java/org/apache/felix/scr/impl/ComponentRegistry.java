@@ -19,7 +19,6 @@
 package org.apache.felix.scr.impl;
 
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -29,44 +28,69 @@ import java.util.Map;
 
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.ScrService;
+import org.apache.felix.scr.impl.config.ComponentHolder;
+import org.apache.felix.scr.impl.config.UnconfiguredComponentHolder;
 import org.apache.felix.scr.impl.manager.AbstractComponentManager;
 import org.apache.felix.scr.impl.manager.ComponentFactoryImpl;
-import org.apache.felix.scr.impl.manager.ImmediateComponentManager;
+import org.apache.felix.scr.impl.metadata.ComponentMetadata;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.cm.ConfigurationEvent;
-import org.osgi.service.cm.ConfigurationListener;
 import org.osgi.service.component.ComponentException;
 
 
 /**
- * The <code>ComponentRegistry</code> TODO
- *
- * @author fmeschbe
+ * The <code>ComponentRegistry</code> class acts as the global registry for
+ * components by name and by component ID. As such the component registry also
+ * registers itself as the {@link ScrService} to support access to the
+ * registered components.
  */
-public class ComponentRegistry implements ScrService, ConfigurationListener
+public class ComponentRegistry implements ScrService
 {
 
-    // Known and registered ComponentManager instances
+    /**
+     * The map of known components indexed by component name. The values are
+     * either the component names (for name reservations) or implementations
+     * of the {@link ComponentHolder} interface.
+     * <p>
+     * The {@link #checkComponentName(String)} will first add an entry to this
+     * map being the name of the component to reserve the name. After setting up
+     * the component, the {@link #registerComponent(String, ComponentHolder)}
+     * method replaces the value of the named entry with the actual
+     * {@link ComponentHolder}.
+     *
+     * @see #checkComponentName(String)
+     * @see #registerComponent(String, ComponentHolder)
+     * @see #unregisterComponent(String)
+     */
     private Map m_componentsByName;
 
-    // components registered by their component ID
+    /**
+     * Map of components by component ID. This map indexed by the component
+     * ID number (<code>java.lang.Long</code>) contains the actual
+     * {@link AbstractComponentManager} instances existing in the system.
+     *
+     * @see #registerComponentId(AbstractComponentManager)
+     * @see #unregisterComponentId(long)
+     */
     private Map m_componentsById;
 
-    // component id counter
-    private long m_componentCounter;
+    /**
+     * Counter to setup the component IDs as issued by the
+     * {@link #registerComponentId(AbstractComponentManager)} method. This
+     * counter is only incremented.
+     */
+    private volatile long m_componentCounter;
 
-    // the service m_registration of the ConfigurationListener service
+    /**
+     * The OSGi service registration for the ScrService provided by this
+     * instance.
+     */
     private ServiceRegistration m_registration;
 
 
-    ComponentRegistry( BundleContext context )
+    protected ComponentRegistry( BundleContext context )
     {
         m_componentsByName = new HashMap();
         m_componentsById = new HashMap();
@@ -77,11 +101,11 @@ public class ComponentRegistry implements ScrService, ConfigurationListener
         props.put( Constants.SERVICE_DESCRIPTION, "Declarative Services Management Agent" );
         props.put( Constants.SERVICE_VENDOR, "The Apache Software Foundation" );
         m_registration = context.registerService( new String[]
-            { ScrService.class.getName(), ConfigurationListener.class.getName() }, this, props );
+            { ScrService.class.getName(), }, this, props );
     }
 
 
-    void dispose()
+    public void dispose()
     {
         if ( m_registration != null )
         {
@@ -142,157 +166,80 @@ public class ComponentRegistry implements ScrService, ConfigurationListener
     }
 
 
-    //---------- ConfigurationListener
+    //---------- ComponentManager registration by component Id
 
-    public void configurationEvent( ConfigurationEvent event )
+    /**
+     * Assigns a unique ID to the component, internally registers the
+     * component under that ID and returns the assigned component ID.
+     *
+     * @param componentManager The {@link AbstractComponentManager} for which
+     *      to assign a component ID and which is to be internally registered
+     *
+     * @return the assigned component ID
+     */
+    final long registerComponentId( final AbstractComponentManager componentManager )
     {
-        final String pid = event.getPid();
-        final String factoryPid = event.getFactoryPid();
-
-        final AbstractComponentManager cm;
-        if ( factoryPid == null )
+        long componentId;
+        synchronized ( this )
         {
-            cm = getComponent( pid );
-        }
-        else
-        {
-            cm = getComponent( factoryPid );
+            m_componentCounter++;
+            componentId = m_componentCounter;
         }
 
-        if (cm == null) {
-            // this configuration is not for a SCR component
-            return;
-        }
+        m_componentsById.put( new Long( componentId ), componentManager );
 
-        switch ( event.getType() )
-        {
-            case ConfigurationEvent.CM_DELETED:
-                if ( cm instanceof ImmediateComponentManager )
-                {
-                    ( ( ImmediateComponentManager ) cm ).reconfigure( null );
-                }
-                else if ( cm instanceof ComponentFactoryImpl )
-                {
-                    ( ( ComponentFactoryImpl ) cm ).deleted( pid );
-                }
-                break;
-            case ConfigurationEvent.CM_UPDATED:
-                BundleContext ctx = cm.getActivator().getBundleContext();
-                Dictionary dict = getConfiguration( event.getReference(), ctx, pid );
-                if ( dict != null )
-                {
-                    if ( cm instanceof ImmediateComponentManager )
-                    {
-                        ( ( ImmediateComponentManager ) cm ).reconfigure( dict );
-                    }
-                    else if ( cm instanceof ComponentFactoryImpl )
-                    {
-                        ( ( ComponentFactoryImpl ) cm ).updated( pid, dict );
-                    }
-                }
-                break;
-        }
-
+        return componentId;
     }
 
 
-    private Dictionary getConfiguration( final ServiceReference cfgAdmin, final BundleContext ctx, final String pid )
+    /**
+     * Unregisters the component with the given component ID from the internal
+     * registry. After unregistration, the component ID should be considered
+     * invalid.
+     *
+     * @param componentId The ID of the component to be removed from the
+     *      internal component registry.
+     */
+    final void unregisterComponentId( final long componentId )
     {
-        final ConfigurationAdmin ca = ( ConfigurationAdmin ) ctx.getService( cfgAdmin );
-        if ( ca != null )
-        {
-            try
-            {
-                final Configuration cfg = ca.getConfiguration( pid );
-                if ( ctx.getBundle().getLocation().equals( cfg.getBundleLocation() ) )
-                {
-                    return cfg.getProperties();
-                }
-            }
-            catch ( IOException ioe )
-            {
-                // TODO: log
-            }
-            finally
-            {
-                ctx.ungetService( cfgAdmin );
-            }
-        }
-
-        return null;
+        m_componentsById.remove( new Long( componentId ) );
     }
 
 
-    public Configuration getConfiguration( final BundleContext ctx, final String pid )
-    {
-        final String filter = "(service.pid=" + pid + ")";
-        Configuration[] cfg = getConfigurationInternal( ctx, filter );
-        return ( cfg == null || cfg.length == 0 ) ? null : cfg[0];
-    }
+    //---------- ComponentHolder registration by component name
 
-
-    public Configuration[] getConfigurations( final BundleContext ctx, final String factoryPid )
-    {
-        final String filter = "(service.factoryPid=" + factoryPid + ")";
-        return getConfigurationInternal( ctx, filter );
-    }
-
-
-    private Configuration[] getConfigurationInternal( final BundleContext ctx, final String filter )
-    {
-        final ServiceReference cfgAdmin = ctx.getServiceReference( ConfigurationAdmin.class.getName() );
-        final ConfigurationAdmin ca = ( ConfigurationAdmin ) ctx.getService( cfgAdmin );
-        if ( ca != null )
-        {
-            try
-            {
-                return ca.listConfigurations( filter );
-            }
-            catch ( IOException ioe )
-            {
-                // TODO: log
-            }
-            catch ( InvalidSyntaxException ise )
-            {
-                // TODO: log
-            }
-            finally
-            {
-                ctx.ungetService( cfgAdmin );
-            }
-        }
-
-        return null;
-    }
-
-
-    //---------- ComponentManager registration support
-
-    public long createComponentId()
-    {
-        m_componentCounter++;
-        return m_componentCounter;
-    }
-
-
-    public void checkComponentName( String name )
+    /**
+     * Checks whether the component name is "globally" unique or not. If it is
+     * unique, it is reserved until the actual component is registered with
+     * {@link #registerComponent(String, AbstractComponentManager)} or until
+     * it is unreserved by calling {@link #unregisterComponent(String)}.
+     * If a component with the same name has already been reserved or registered
+     * a ComponentException is thrown with a descriptive message.
+     *
+     * @param name the component name to check and reserve
+     * @throws ComponentException if the name is already in use by another
+     *      component.
+     */
+    final void checkComponentName( String name )
     {
         if ( m_componentsByName.containsKey( name ) )
         {
             String message = "The component name '" + name + "' has already been registered";
 
             Object co = m_componentsByName.get( name );
-            if ( co instanceof AbstractComponentManager )
+            if ( co instanceof ComponentHolder )
             {
-                AbstractComponentManager c = ( AbstractComponentManager ) co;
+                ComponentHolder c = ( ComponentHolder ) co;
+                Bundle cBundle = c.getActivator().getBundleContext().getBundle();
+                ComponentMetadata cMeta = c.getComponentMetadata();
+
                 StringBuffer buf = new StringBuffer( message );
-                buf.append( " by Bundle " ).append( c.getBundle().getBundleId() );
-                if ( c.getBundle().getSymbolicName() != null )
+                buf.append( " by Bundle " ).append( cBundle.getBundleId() );
+                if ( cBundle.getSymbolicName() != null )
                 {
-                    buf.append( " (" ).append( c.getBundle().getSymbolicName() ).append( ")" );
+                    buf.append( " (" ).append( cBundle.getSymbolicName() ).append( ")" );
                 }
-                buf.append( " as Component " ).append( c.getId() );
-                buf.append( " of Class " ).append( c.getClassName() );
+                buf.append( " as Component of Class " ).append( cMeta.getImplementationClassName() );
                 message = buf.toString();
             }
 
@@ -304,7 +251,18 @@ public class ComponentRegistry implements ScrService, ConfigurationListener
     }
 
 
-    void registerComponent( String name, AbstractComponentManager component )
+    /**
+     * Registers the given component under the given name. If the name has not
+     * already been reserved calling {@link #checkComponentName(String)} this
+     * method throws a {@link ComponentException}.
+     *
+     * @param name The name to register the component under
+     * @param component The component to register
+     *
+     * @throws ComponentException if the name has not been reserved through
+     *      {@link #checkComponentName(String)} yet.
+     */
+    final void registerComponent( String name, ComponentHolder component )
     {
         // only register the component if there is a m_registration for it !
         if ( !name.equals( m_componentsByName.get( name ) ) )
@@ -314,31 +272,56 @@ public class ComponentRegistry implements ScrService, ConfigurationListener
         }
 
         m_componentsByName.put( name, component );
-        m_componentsById.put( new Long( component.getId() ), component );
     }
 
 
-    AbstractComponentManager getComponent( String name )
+    /**
+     * Returns the component registered under the given name or <code>null</code>
+     * if no component is registered yet.
+     */
+    public final ComponentHolder getComponent( String name )
     {
         Object entry = m_componentsByName.get( name );
 
         // only return the entry if non-null and not a reservation
-        if ( entry instanceof AbstractComponentManager )
+        if ( entry instanceof ComponentHolder )
         {
-            return ( AbstractComponentManager ) entry;
+            return ( ComponentHolder ) entry;
         }
 
         return null;
     }
 
 
-    void unregisterComponent( String name )
+    /**
+     * Removes the component registered under that name. If no component is
+     * yet registered but the name is reserved, it is unreserved.
+     * <p>
+     * After calling this method, the name can be reused by other components.
+     */
+    final void unregisterComponent( String name )
     {
-        Object entry = m_componentsByName.remove( name );
-        if ( entry instanceof AbstractComponentManager )
-        {
-            Long id = new Long( ( ( AbstractComponentManager ) entry ).getId() );
-            m_componentsById.remove( id );
-        }
+        m_componentsByName.remove( name );
     }
+
+
+    //---------- base configuration support
+
+    /**
+     * Factory method to issue {@link ComponentHolder} instances to manage
+     * components described by the given component <code>metadata</code>.
+     */
+    public ComponentHolder createComponentHolder( BundleComponentActivator activator, ComponentMetadata metadata )
+    {
+        if ( metadata.isFactory() )
+        {
+            // 112.2.4 SCR must register a Component Factory
+            // service on behalf ot the component
+            // as soon as the component factory is satisfied
+            return new ComponentFactoryImpl( activator, metadata );
+        }
+
+        return new UnconfiguredComponentHolder( activator, metadata );
+    }
+
 }

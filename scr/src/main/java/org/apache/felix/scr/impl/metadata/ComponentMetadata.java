@@ -494,6 +494,36 @@ public class ComponentMetadata
 
 
     /**
+     * Returns <code>true</code> if the configuration policy is configured to
+     * {@link #CONFIGURATION_POLICY_REQUIRE}.
+     */
+    public boolean isConfigurationRequired()
+    {
+        return CONFIGURATION_POLICY_REQUIRE.equals( m_configurationPolicy );
+    }
+
+
+    /**
+     * Returns <code>true</code> if the configuration policy is configured to
+     * {@link #CONFIGURATION_POLICY_IGNORE}.
+     */
+    public boolean isConfigurationIgnored()
+    {
+        return CONFIGURATION_POLICY_IGNORE.equals( m_configurationPolicy );
+    }
+
+
+    /**
+     * Returns <code>true</code> if the configuration policy is configured to
+     * {@link #CONFIGURATION_POLICY_OPTIONAL}.
+     */
+    public boolean isConfigurationOptional()
+    {
+        return CONFIGURATION_POLICY_OPTIONAL.equals( m_configurationPolicy );
+    }
+
+
+    /**
      * Method used to verify if the semantics of this metadata are correct
      */
     public void validate( Logger logger )
