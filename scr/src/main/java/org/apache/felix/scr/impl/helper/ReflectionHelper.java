@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 
 
@@ -45,6 +46,7 @@ public final class ReflectionHelper
     // class references to simplify parameter checking
     public static final Class COMPONENT_CONTEXT_CLASS = ComponentContext.class;
     public static final Class BUNDLE_CONTEXT_CLASS = BundleContext.class;
+    public static final Class SERVICE_REFERENCE_CLASS = ServiceReference.class;
     public static final Class MAP_CLASS = Map.class;
     public static final Class INTEGER_CLASS = Integer.class;
 

@@ -77,13 +77,13 @@ public class DependencyManager implements ServiceListener, Reference
     private transient Object m_componentInstance;
 
     // the bind method
-    private Method m_bind;
+    private BindMethod m_bind;
 
     // whether the bind method takes a service reference
     private boolean m_bindUsesReference;
 
     // the unbind method
-    private Method m_unbind;
+    private UnbindMethod m_unbind;
 
     // whether the unbind method takes a service reference
     private boolean m_unbindUsesReference;
@@ -113,6 +113,39 @@ public class DependencyManager implements ServiceListener, Reference
             + getTarget() + ", interface=" + m_dependencyMetadata.getInterface(), m_componentManager
             .getComponentMetadata(), null );
     }
+
+    /**
+     * Initialize binding methods.
+     */
+    private void initBindingMethods()
+    {
+        BindMethod.Logger logger = new BindMethod.Logger()
+        {
+
+            public void log( int level, String message )
+            {
+                log( level, message, null );
+            }
+
+            public void log( int level, String message, Throwable ex )
+            {
+                m_componentManager.log( level, message, m_componentManager.getComponentMetadata(), ex );
+            }
+        };
+        m_bind = new BindMethod( m_dependencyMetadata.getBind(),
+                                 m_componentInstance.getClass(),
+                                 m_dependencyMetadata.getName(),
+                                 m_dependencyMetadata.getInterface(),
+                                 logger
+        );
+        m_unbind = new UnbindMethod( m_dependencyMetadata.getUnbind(),
+                                     m_componentInstance.getClass(),
+                                     m_dependencyMetadata.getName(),
+                                     m_dependencyMetadata.getInterface(),
+                                     logger
+        );
+    }
+
 
 
     //---------- ServiceListener interface ------------------------------------
@@ -486,10 +519,6 @@ public class DependencyManager implements ServiceListener, Reference
                 ungetService( boundRefs[i] );
             }
         }
-
-        // drop the method references (to help GC)
-        m_bind = null;
-        m_unbind = null;
     }
 
 
@@ -855,6 +884,7 @@ public class DependencyManager implements ServiceListener, Reference
     boolean open( Object instance )
     {
         m_componentInstance = instance;
+        initBindingMethods();
         return bind();
     }
 
@@ -872,6 +902,9 @@ public class DependencyManager implements ServiceListener, Reference
         finally
         {
             m_componentInstance = null;
+            m_bind = null;
+            m_unbind = null;
+
         }
     }
 
@@ -969,120 +1002,6 @@ public class DependencyManager implements ServiceListener, Reference
         }
     }
 
-
-    /**
-     * Gets a bind or unbind method according to the policies described in the
-     * specification
-     *
-     * @param methodname The name of the method
-     * @param targetClass the class to which the method belongs to
-     * @param parameterClassName the name of the class of the parameter that is
-     *            passed to the method
-     * @param serviceBundle the bundle of the registered service.
-     * @return the method or null
-     * @throws ClassNotFoundException if the class for parameterClassName cannot
-     *      be found.
-     * @throws InvocationTargetException If an unexpected error occurrs trying
-     *      to get the method from the targetClass.
-     */
-    private Method getBindingMethod( String methodname, Class targetClass, String parameterClassName )
-        throws InvocationTargetException
-    {
-        Class parameterClass = null;
-
-        // 112.3.1 The method is searched for using the following priority
-        // 1. The method's parameter type is org.osgi.framework.ServiceReference
-        // 2. The method's parameter type is the type specified by the
-        // reference's interface attribute
-        // 3. The method's parameter type is assignable from the type specified
-        // by the reference's interface attribute
-        try
-        {
-            // Case 1 - ServiceReference parameter
-            return ReflectionHelper.getMethod( targetClass, methodname, new Class[]
-                { SERVICE_REFERENCE_CLASS }, false, false );
-        }
-        catch ( NoSuchMethodException ex )
-        {
-
-            try
-            {
-                // Case2 - Service object parameter
-
-                // need the class loader of the target class, which may be the
-                // system classloader, which case getClassLoader may retur null
-                ClassLoader loader = targetClass.getClassLoader();
-                if ( loader == null )
-                {
-                    loader = ClassLoader.getSystemClassLoader();
-                }
-
-                parameterClass = loader.loadClass( parameterClassName );
-                return ReflectionHelper.getMethod( targetClass, methodname, new Class[]
-                    { parameterClass }, false, false );
-            }
-            catch ( NoSuchMethodException ex2 )
-            {
-
-                // Case 3 - Service interface assignement compatible methods
-
-                // Get all potential bind methods
-                Method candidateBindMethods[] = targetClass.getDeclaredMethods();
-
-                // Iterate over them
-                for ( int i = 0; i < candidateBindMethods.length; i++ )
-                {
-                    Method method = candidateBindMethods[i];
-
-                    // Get the parameters for the current method
-                    Class[] parameters = method.getParameterTypes();
-
-                    // Select only the methods that receive a single
-                    // parameter
-                    // and a matching name
-                    if ( parameters.length == 1 && method.getName().equals( methodname ) )
-                    {
-
-                        // Get the parameter type
-                        Class theParameter = parameters[0];
-
-                        // Check if the parameter type is ServiceReference
-                        // or is assignable from the type specified by the
-                        // reference's interface attribute
-                        if ( theParameter.isAssignableFrom( parameterClass ) )
-                        {
-
-                            // Final check: it must be public or protected
-                            if ( Modifier.isPublic( method.getModifiers() )
-                                || Modifier.isProtected( method.getModifiers() ) )
-                            {
-                                if ( !method.isAccessible() )
-                                {
-                                    method.setAccessible( true );
-                                }
-                                return method;
-                            }
-                        }
-                    }
-                }
-            }
-            catch ( ClassNotFoundException ex2 )
-            {
-                // if we can't load the class, perhaps the method is declared in a super class
-                // so we try this class next
-            }
-
-
-            // TODO: Case 4: same as case 2, but + Map param
-            // TODO: Case 5: same as case 3, but + Map param
-        }
-
-        // if we get here, we have no method, so check the super class
-        targetClass = targetClass.getSuperclass();
-        return ( targetClass != null ) ? getBindingMethod( methodname, targetClass, parameterClassName ) : null;
-    }
-
-
     /**
      * Calls the bind method. In case there is an exception while calling the
      * bind method, the service is not considered to be bound to the instance
@@ -1099,86 +1018,30 @@ public class DependencyManager implements ServiceListener, Reference
      *      be handed over to the bind method but the service cannot be
      *      retrieved using the service reference.
      */
-    private boolean invokeBindMethod( ServiceReference ref )
+    private boolean invokeBindMethod( final ServiceReference ref )
     {
         // The bind method is only invoked if the implementation object is not
         // null. This is valid for both immediate and delayed components
-        if ( m_componentInstance != null )
+        if( m_componentInstance != null )
         {
-            try
-            {
-                // Get the bind method
-                m_componentManager.log( LogService.LOG_DEBUG, "getting bind: " + m_dependencyMetadata.getBind(),
-                    m_componentManager.getComponentMetadata(), null );
-                if ( m_bind == null )
+            return m_bind.invoke(
+                m_componentInstance,
+                new BindMethod.Service()
                 {
-                    m_bind = getBindingMethod( m_dependencyMetadata.getBind(), m_componentInstance.getClass(),
-                        m_dependencyMetadata.getInterface() );
-
-                    // 112.3.1 If the method is not found , SCR must log an error
-                    // message with the log service, if present, and ignore the
-                    // method
-                    if ( m_bind == null )
+                    public ServiceReference getReference()
                     {
-                        m_componentManager.log( LogService.LOG_ERROR, "bind() method not found", m_componentManager
-                            .getComponentMetadata(), null );
-                        return true;
+                        bindService( ref );
+                        return ref;
                     }
 
-                    // cache whether the bind method takes a reference
-                    m_bindUsesReference = SERVICE_REFERENCE_CLASS.equals( m_bind.getParameterTypes()[0] );
-                }
-
-                // Get the parameter
-                Object parameter;
-                if ( m_bindUsesReference )
-                {
-                    parameter = ref;
-
-                    // mark this service as bound using the special sentinel
-                    bindService( ref );
-                }
-                else
-                {
-                    // get the service, fail binding if the service is not
-                    // available (any more)
-                    parameter = getService( ref );
-                    if ( parameter == null )
+                    public Object getInstance()
                     {
-                        m_componentManager.log( LogService.LOG_INFO, "Dependency Manager: Service " + ref
-                            + " has already gone, not binding", m_componentManager.getComponentMetadata(), null );
-                        return false;
+                        return getService( ref );
                     }
                 }
-
-                // Invoke the method
-                m_bind.invoke( m_componentInstance, new Object[]
-                    { parameter } );
-
-                m_componentManager.log( LogService.LOG_DEBUG, "bound: " + getName() + "/"
-                    + ref.getProperty( Constants.SERVICE_ID ), m_componentManager.getComponentMetadata(), null );
-
-                return true;
-            }
-            catch ( IllegalAccessException ex )
-            {
-                // 112.3.1 If the method is not is not declared protected or
-                // public, SCR must log an error message with the log service,
-                // if present, and ignore the method
-                m_componentManager.log( LogService.LOG_ERROR, "bind() method cannot be called", m_componentManager
-                    .getComponentMetadata(), ex );
-                return true;
-            }
-            catch ( InvocationTargetException ex )
-            {
-                // 112.5.7 If a bind method throws an exception, SCR must log an
-                // error message containing the exception [...]
-                m_componentManager.log( LogService.LOG_ERROR, "DependencyManager : exception while invoking "
-                    + m_dependencyMetadata.getBind() + "()", m_componentManager.getComponentMetadata(), ex );
-                return true;
-            }
+            );
         }
-        else if ( m_componentManager.getComponentMetadata().isImmediate() == false )
+        else if ( !m_componentManager.getComponentMetadata().isImmediate() )
         {
             m_componentManager.log( LogService.LOG_DEBUG,
                 "DependencyManager : Delayed component not yet created, assuming bind method call succeeded",
@@ -1222,74 +1085,27 @@ public class DependencyManager implements ServiceListener, Reference
      *            unbound
      * @return true if the call was successful, false otherwise
      */
-    private void invokeUnbindMethod( ServiceReference ref )
+    private void invokeUnbindMethod( final ServiceReference ref )
     {
         // The unbind method is only invoked if the implementation object is not
         // null. This is valid for both immediate and delayed components
         if ( m_componentInstance != null )
         {
-            try
-            {
-                // Get the bind method
-                m_componentManager.log( LogService.LOG_DEBUG, "getting unbind: " + m_dependencyMetadata.getUnbind(),
-                    m_componentManager.getComponentMetadata(), null );
-                if ( m_unbind == null )
+            m_unbind.invoke(
+                m_componentInstance,
+                new BindMethod.Service()
                 {
-                    m_unbind = getBindingMethod( m_dependencyMetadata.getUnbind(), m_componentInstance.getClass(),
-                        m_dependencyMetadata.getInterface() );
-
-                    if ( m_unbind == null )
+                    public ServiceReference getReference()
                     {
-                        // 112.3.1 If the method is not found, SCR must log an error
-                        // message with the log service, if present, and ignore the
-                        // method
-                        m_componentManager.log( LogService.LOG_ERROR, "unbind() method not found", m_componentManager
-                            .getComponentMetadata(), null );
+                        return ref;
                     }
-                    // cache whether the unbind method takes a reference
-                    m_unbindUsesReference = SERVICE_REFERENCE_CLASS.equals( m_unbind.getParameterTypes()[0] );
-                }
 
-                // Get the parameter
-                Object parameter = null;
-                if ( m_unbindUsesReference )
-                {
-                    parameter = ref;
-                }
-                else
-                {
-                    parameter = getService( ref );
-                    if ( parameter == null )
+                    public Object getInstance()
                     {
-                        m_componentManager.log( LogService.LOG_INFO, "Dependency Manager: Service " + ref
-                            + " has already gone, not unbinding", m_componentManager.getComponentMetadata(), null );
+                        return getService( ref );
                     }
                 }
-
-                m_unbind.invoke( m_componentInstance, new Object[]
-                    { parameter } );
-
-                m_componentManager.log( LogService.LOG_DEBUG, "unbound: " + getName() + "/"
-                    + ref.getProperty( Constants.SERVICE_ID ), m_componentManager.getComponentMetadata(), null );
-            }
-            catch ( IllegalAccessException ex )
-            {
-                // 112.3.1 If the method is not is not declared protected or
-                // public, SCR must log an error message with the log service,
-                // if present, and ignore the method
-                m_componentManager.log( LogService.LOG_ERROR, "unbind() method cannot be called", m_componentManager
-                    .getComponentMetadata(), ex );
-            }
-            catch ( InvocationTargetException ex )
-            {
-                // 112.5.13 If an unbind method throws an exception, SCR must
-                // log an error message containing the exception [...]
-                m_componentManager
-                    .log( LogService.LOG_ERROR, "DependencyManager : exception while invoking "
-                        + m_dependencyMetadata.getUnbind() + "()", m_componentManager.getComponentMetadata(), ex
-                        .getCause() );
-            }
-
+            );
         }
         else
         {
