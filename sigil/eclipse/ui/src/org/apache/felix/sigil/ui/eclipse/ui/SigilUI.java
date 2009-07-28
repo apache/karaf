@@ -34,7 +34,6 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -53,9 +52,8 @@ public class SigilUI extends AbstractUIPlugin
     public static final String PREF_NOPROMPT_INSTALL_COMPOSITE_WITH_ERRORS = "nopromptInstallCompositeError";
     public static final String PREF_INSTALL_COMPOSITE_WITH_ERRORS_ANSWER = "answerInstallCompositeError";
 
-    public static final String ID_REPOSITORY_VIEW = "org.cauldron.sigil.ui.repositoryBrowser";
-    public static final String ID_DEPENDENCY_VIEW = "org.cauldron.sigil.ui.bundleDependencyView";
-    public static final String ID_INSTANCES_VIEW = "org.cauldron.sigil.runtime.newtonInstancesView";
+    public static final String ID_REPOSITORY_VIEW = "org.apache.felix.sigil.ui.repositoryBrowser";
+    public static final String ID_DEPENDENCY_VIEW = "org.apache.felix.sigil.ui.bundleDependencyView";
 
     // The shared instance
     private static SigilUI plugin;

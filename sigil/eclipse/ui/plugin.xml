@@ -72,7 +72,7 @@
             category="org.apache.felix.sigil.ui.preferences.SigilPreferencePage"
             class="org.apache.felix.sigil.ui.eclipse.ui.preferences.installs.OSGiInstallsPreferencePage"
             id="org.apache.felix.sigil.ui.preferences.osgiInstalls"
-            name="Newton Installs">
+            name="OSGi Installs">
       </page>
    </extension>
    <extension

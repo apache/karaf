@@ -35,8 +35,6 @@ public class SigilPerspectiveFactory implements IPerspectiveFactory
     private static final String ID_PROJECT_EXPLORER = "org.eclipse.ui.navigator.ProjectExplorer"; //$NON-NLS-1$
     private static final String ID_SEARCH_VIEW = "org.eclipse.search.ui.views.SearchView"; //$NON-NLS-1$
     private static final String ID_CONSOLE_VIEW = "org.eclipse.ui.console.ConsoleView"; //$NON-NLS-1$
-    private static final String ID_TEMPLATES_VIEW = "org.eclipse.ui.texteditor.TemplatesView"; //$NON-NLS-N$
-
 
     public void createInitialLayout( IPageLayout layout )
     {
@@ -62,7 +60,6 @@ public class SigilPerspectiveFactory implements IPerspectiveFactory
         outputfolder.addPlaceholder( IPageLayout.ID_BOOKMARKS );
         outputfolder.addPlaceholder( IProgressConstants.PROGRESS_VIEW_ID );
         outputfolder.addPlaceholder( SigilUI.ID_DEPENDENCY_VIEW );
-        outputfolder.addPlaceholder( SigilUI.ID_INSTANCES_VIEW );
 
         layout.addActionSet( IDebugUIConstants.LAUNCH_ACTION_SET );
         layout.addActionSet( JavaUI.ID_ACTION_SET );
@@ -72,7 +69,6 @@ public class SigilPerspectiveFactory implements IPerspectiveFactory
         // views - sigil
         layout.addShowViewShortcut( SigilUI.ID_REPOSITORY_VIEW );
         layout.addShowViewShortcut( SigilUI.ID_DEPENDENCY_VIEW );
-        layout.addShowViewShortcut( SigilUI.ID_INSTANCES_VIEW );
 
         // views - java
         layout.addShowViewShortcut( JavaUI.ID_PACKAGES );
