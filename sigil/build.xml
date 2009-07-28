@@ -17,17 +17,36 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<project name="sigil" default="build">
+<project name="sigil" default="build" 
+  xmlns:ivy="antlib:org.apache.ivy.ant">
   <import file="bldcommon/common.xml"/>
   <fileset id="my.projects" dir="${basedir}">
     <exclude name="ivy/**/${build_xml}"/>
     <exclude name="bldcommon/**/${build_xml}" />
     <include name="**/${build_xml}"/>
   </fileset>
+
   <target name="init">
     <subant buildpath="bldcommon/prepare" target="resolve" />
   </target>
 
-  <target name="clean" depends="clean-list" />
+  <target name="clean" depends="clean-list, clean-site" />
   <target name="build" depends="build-list" />
+
+  <target name="site" depends="common-init">
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.common.core" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.common.junit" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.common.obr" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.core" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.help" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.obr" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.search" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.ui" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.utils" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
+    <ivy:retrieve organisation="biz.aQute" module="bndlib" revision="0.0.312" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
+  </target>
+
+  <target name="clean-site">
+    <delete dir="${site.dir}" />
+  </target>
 </project>
