@@ -19,8 +19,13 @@
 package org.apache.felix.scr.impl.helper;
 
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -28,39 +33,53 @@ import java.util.Enumeration;
  * {@link #put(Object, Object)} and {@link #remove(Object)} methods have
  * no effect and always return <code>null</code>.
  */
-public class ReadOnlyDictionary extends Dictionary
+public class ReadOnlyDictionary extends Dictionary implements Map
 {
 
-    private final Dictionary delegatee;
+    private final Hashtable m_delegatee;
 
 
     public ReadOnlyDictionary( final Dictionary delegatee )
     {
-        this.delegatee = delegatee;
+        if ( delegatee instanceof Hashtable )
+        {
+            this.m_delegatee = ( Hashtable ) delegatee;
+        }
+        else
+        {
+            this.m_delegatee = new Hashtable();
+            for ( Enumeration ke = delegatee.elements(); ke.hasMoreElements(); )
+            {
+                Object key = ke.nextElement();
+                this.m_delegatee.put( key, delegatee.get( key ) );
+            }
+        }
     }
 
 
+    //---------- Dictionary API
+
     public Enumeration elements()
     {
-        return delegatee.elements();
+        return m_delegatee.elements();
     }
 
 
     public Object get( final Object key )
     {
-        return delegatee.get( key );
+        return m_delegatee.get( key );
     }
 
 
     public boolean isEmpty()
     {
-        return delegatee.isEmpty();
+        return m_delegatee.isEmpty();
     }
 
 
     public Enumeration keys()
     {
-        return delegatee.keys();
+        return m_delegatee.keys();
     }
 
 
@@ -86,12 +105,56 @@ public class ReadOnlyDictionary extends Dictionary
 
     public int size()
     {
-        return delegatee.size();
+        return m_delegatee.size();
     }
 
 
     public String toString()
     {
-        return delegatee.toString();
+        return m_delegatee.toString();
+    }
+
+
+    //---------- Map API
+
+    public void clear()
+    {
+        // nop, this map is read only
+    }
+
+
+    public boolean containsKey( Object key )
+    {
+        return m_delegatee.containsKey( key );
+    }
+
+
+    public boolean containsValue( Object value )
+    {
+        return m_delegatee.containsValue( value );
+    }
+
+
+    public Set entrySet()
+    {
+        return Collections.unmodifiableSet( m_delegatee.entrySet() );
+    }
+
+
+    public Set keySet()
+    {
+        return Collections.unmodifiableSet( m_delegatee.keySet() );
+    }
+
+
+    public void putAll( Map m )
+    {
+        // nop, this map is read only
+    }
+
+
+    public Collection values()
+    {
+        return Collections.unmodifiableCollection( m_delegatee.values() );
     }
 }
