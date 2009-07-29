@@ -1084,7 +1084,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
             {
                 bundleInfo = info.substring(1);
             }
-            if ( bundleInfo == null )
+            if ( bundleInfo == null || bundleInfo.length() == 0 )
             {
                 bundle = null;
                 bundleRequested = false;
