@@ -788,21 +788,4 @@ public class ServiceRegistry
     {
         void serviceChanged(ServiceEvent event, Dictionary oldProps);
     }
-    
-    private static class ServiceRankingComparator implements Comparator 
-    {
-        public int compare(Object o1, Object o2) 
-        {
-            if (!(o1 instanceof ServiceRegistration) ||
-                !(o2 instanceof ServiceRegistration)) 
-            {
-                return 0;
-            }
-            
-            ServiceReference r1 = ((ServiceRegistration) o1).getReference();
-            ServiceReference r2 = ((ServiceRegistration) o2).getReference();
-
-            return -r1.compareTo(r2);
-        }        
-    }
 }
