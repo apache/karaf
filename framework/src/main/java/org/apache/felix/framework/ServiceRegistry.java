@@ -277,75 +277,56 @@ public class ServiceRegistry
             m_lockedRegsMap.put(reg, Thread.currentThread());
 
             // Make sure the service registration is still valid.
-            if (!reg.isValid())
-            {
-                // If the service registration is not valid, then this means
-                // that the service provider unregistered the service. The spec
-                // says that calls to get an unregistered service should always
-                // return null (assumption: even if it is currently cached
-                // by the bundle). So in this case, flush the service reference
-                // from the cache and return null.
-                flushUsageCount(bundle, ref);
-
-                // It is not necessary to unget the service object from
-                // the providing bundle, since the associated service is
-                // unregistered and hence not in the list of registered services
-                // of the providing bundle. This is precisely why the service
-                // registration was not found above in the first place.
-            }
-            else
+            if (reg.isValid())
             {
                 // Get the usage count, if any.
                 usage = getUsageCount(bundle, ref);
 
-                // If the service object is cached, then increase the usage
-                // count and return the cached service object.
-                if (usage != null)
+                // If we don't have a usage count, then create one and
+                // since the spec says we increment usage count before
+                // actually getting the service object.
+                if (usage == null)
                 {
-                    usage.m_count++;
-                    svcObj = usage.m_svcObj;
+                    usage = addUsageCount(bundle, ref);
                 }
+
+                // Increment the usage count and grab the already retrieved
+                // service object, if one exists.
+                usage.m_count++;
+                svcObj = usage.m_svcObj;
             }
         }
 
-        // If we have a valid registration, but no usage count, that means we
-        // don't have a cached service object, so we need to create one now
-        // without holding the lock, since we will potentially call out to a
-        // service factory.
+        // If we have a usage count, but no service object, then we haven't
+        // cached the service object yet, so we need to create one now without
+        // holding the lock, since we will potentially call out to a service
+        // factory.
         try
         {
-            if (reg.isValid() && (usage == null))
+            if ((usage != null) && (svcObj == null))
             {
-                // Get service object from service registration.
                 svcObj = reg.getService(bundle);
-
-                // Cache the service object.
-                if (svcObj != null)
-                {
-                    synchronized (this)
-                    {
-                        // Unregistration can happen concurrently, so we need
-                        // to double-check that we are still valid.
-                        if (reg.isValid())
-                        {
-                            addUsageCount(bundle, ref, svcObj);
-                        }
-                        else
-                        {
-                            // The service must have been unregistered in the
-                            // middle of our get operation, so null it.
-                            svcObj = null;
-                        }
-                    }
-                }
             }
         }
         finally
         {
-            // Finally, unlock the service registration so that any threads
-            // waiting for it can continue.
+            // If we successfully retrieved a service object, then we should
+            // cache it in the usage count. If not, we should flush the usage
+            // count. Either way, we need to unlock the service registration
+            // so that any threads waiting for it can continue.
             synchronized (this)
             {
+                // Before caching the service object, double check to see if
+                // the registration is still valid, since it may have been
+                // unregistered while we didn't hold the lock.
+                if (!reg.isValid() || (svcObj == null))
+                {
+                    flushUsageCount(bundle, ref);
+                }
+                else
+                {
+                    usage.m_svcObj = svcObj;
+                }
                 m_lockedRegsMap.remove(reg);
                 notifyAll();
             }
@@ -392,48 +373,42 @@ public class ServiceRegistry
 
             // Lock the service registration.
             m_lockedRegsMap.put(reg, Thread.currentThread());
-
-            // Make sure the service registration is still valid.
-            if (!reg.isValid())
-            {
-                // If the service registration is not valid, then this means
-                // that the service provider unregistered the service, so just
-                // flush the usage count and we are done.
-                flushUsageCount(bundle, ref);
-            }
-            else if (reg.isValid())
-            {
-                // Decrement usage count.
-                usage.m_count--;
-            }
-
-            // If the usage count has reached zero, the flush it.
-            if (usage.m_count == 0)
-            {
-                flushUsageCount(bundle, ref);
-            }
         }
 
-        // If usage count goes to zero, then unget the service
+        // If usage count will go to zero, then unget the service
         // from the registration; we do this outside the lock
         // since this might call out to the service factory.
         try
         {
-            if (usage.m_count == 0)
+            if (usage.m_count == 1)
             {
                 // Remove reference from usages array.
                 ((ServiceRegistrationImpl.ServiceReferenceImpl) ref)
                     .getServiceRegistration().ungetService(bundle, usage.m_svcObj);
-                usage.m_svcObj = null;
             }
-
         }
         finally
         {
-            // Finally, unlock the service registration so that any threads
-            // waiting for it can continue.
+            // Finally, decrement usage count and flush if it goes to zero or
+            // the registration became invalid while we were not holding the
+            // lock. Either way, unlock the service registration so that any
+            // threads waiting for it can continue.
             synchronized (this)
             {
+                // Decrement usage count, which spec says should happen after
+                // ungetting the service object.
+                usage.m_count--;
+
+                // If the registration is invalid or the usage count has reached
+                // zero, then flush it.
+                if (!reg.isValid() || (usage.m_count <= 0))
+                {
+                    usage.m_svcObj = null;
+                    flushUsageCount(bundle, ref);
+                }
+
+                // Release the registration lock so any waiting threads can
+                // continue.
                 m_lockedRegsMap.remove(reg);
                 notifyAll();
             }
@@ -598,14 +573,12 @@ public class ServiceRegistry
      * @param ref The service reference of the acquired service.
      * @param svcObj The service object of the acquired service.
     **/
-    private void addUsageCount(Bundle bundle, ServiceReference ref, Object svcObj)
+    private UsageCount addUsageCount(Bundle bundle, ServiceReference ref)
     {
         UsageCount[] usages = (UsageCount[]) m_inUseMap.get(bundle);
 
         UsageCount usage = new UsageCount();
         usage.m_ref = ref;
-        usage.m_svcObj = svcObj;
-        usage.m_count++;
 
         if (usages == null)
         {
@@ -620,6 +593,8 @@ public class ServiceRegistry
         }
 
         m_inUseMap.put(bundle, usages);
+
+        return usage;
     }
 
     /**
