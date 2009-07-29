@@ -45,6 +45,7 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServicePermission;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.framework.hooks.service.EventHook;
 import org.osgi.framework.hooks.service.ListenerHook;
@@ -175,7 +176,7 @@ public class EventDispatcher
         }
     }
 
-    public void addListener(Bundle bundle, Class clazz, EventListener l, Filter filter)
+    public Filter addListener(Bundle bundle, Class clazz, EventListener l, Filter filter)
     {
         // Verify the listener.
         if (l == null)
@@ -190,9 +191,10 @@ public class EventDispatcher
 
         // See if we can simply update the listener, if so then
         // return immediately.
-        if (updateListener(bundle, clazz, l, filter))
+        Filter oldFilter = updateListener(bundle, clazz, l, filter);
+        if (oldFilter != null)
         {
-            return;
+            return oldFilter;
         }
 
         // Lock the object to add the listener.
@@ -282,8 +284,9 @@ public class EventDispatcher
                 m_serviceListeners = listeners;
             }
         }
+        return null;
     }
-
+    
     public ListenerHook.ListenerInfo removeListener(
         Bundle bundle, Class clazz, EventListener l)
     {
@@ -341,7 +344,7 @@ public class EventDispatcher
                     // the listener for the ListenerHook callback.
                     if (ServiceListener.class == clazz)
                     {
-                        listenerInfo = wrapListener(listeners, i);
+                        listenerInfo = wrapListener(listeners, i, true);
                     }
                     idx = i;
                     break;
@@ -481,7 +484,7 @@ public class EventDispatcher
         }
     }
 
-    public boolean updateListener(Bundle bundle, Class clazz, EventListener l, Filter filter)
+    public Filter updateListener(Bundle bundle, Class clazz, EventListener l, Filter filter)
     {
         synchronized (this)
         {
@@ -515,6 +518,7 @@ public class EventDispatcher
                     (listeners[i + LISTENER_CLASS_OFFSET] == clazz) &&
                     (listeners[i + LISTENER_OBJECT_OFFSET] == l))
                 {
+                    Filter oldFilter = null;
                     if (clazz == FrameworkListener.class)
                     {
                         // The spec says to ignore this case.
@@ -526,14 +530,15 @@ public class EventDispatcher
                     else if (clazz == ServiceListener.class)
                     {
                         // The spec says to update the filter in this case.
+                        oldFilter = (Filter) listeners[i + LISTENER_FILTER_OFFSET];
                         listeners[i + LISTENER_FILTER_OFFSET] = filter;
                     }
-                    return true;
+                    return oldFilter;
                 }
             }
         }
 
-        return false;
+        return null;
     }
 
     /**
@@ -543,7 +548,7 @@ public class EventDispatcher
      * @return Returns all existing service listener information into a collection of
      *         ListenerHook.ListenerInfo objects
     **/
-    public Collection /* <? extends ListenerHook.ListenerInfo> */ wrapAllServiceListeners()
+    public Collection /* <? extends ListenerHook.ListenerInfo> */ wrapAllServiceListeners(boolean removed)
     {
         Object[] listeners = null;
         synchronized (this)
@@ -554,7 +559,7 @@ public class EventDispatcher
         List existingListeners = new ArrayList();
         for (int i = 0, j = 0; i < listeners.length; i += LISTENER_ARRAY_INCREMENT, j++)
         {
-            existingListeners.add(wrapListener(listeners, i));
+            existingListeners.add(wrapListener(listeners, i, removed));
         }
         return existingListeners;
     }
@@ -566,13 +571,15 @@ public class EventDispatcher
      * @param offset The offset into the array of the listener to wrap.
      * @return A ListenerHook.ListenerInfo object for the specified listener.
      */
-    private static ListenerHook.ListenerInfo wrapListener(Object[] listeners, int offset)
+    private static ListenerHook.ListenerInfo wrapListener(Object[] listeners, int offset, boolean removed)
     {
         Filter filter = ((Filter)listeners[offset + LISTENER_FILTER_OFFSET]);
 
         return new ListenerHookInfoImpl(
             ((Bundle)listeners[offset + LISTENER_BUNDLE_OFFSET]).getBundleContext(),
-            filter == null ? null : filter.toString());
+            (ServiceListener) listeners[offset + LISTENER_OBJECT_OFFSET], 
+            filter == null ? null : filter.toString(),
+            removed);
     }
 
     public void fireFrameworkEvent(FrameworkEvent event)
@@ -631,17 +638,19 @@ public class EventDispatcher
             {
                 final ListenerBundleContextCollectionWrapper wrapper =
                     new ListenerBundleContextCollectionWrapper(listeners);
+                InvokeHookCallback callback = new InvokeHookCallback() 
+                {
+                    public void invokeHook(Object hook) 
+                    {
+                        ((EventHook) hook).event(event, wrapper);                            
+                    }                        
+                }; 
                 for (int i = 0; i < eventHooks.size(); i++)
                 {
-                    if (felix != null)
+                    if (felix != null) 
                     {
-                        ServiceRegistry.invokeHook(eventHooks.get(i), felix, new InvokeHookCallback()
-                        {
-                            public void invokeHook(Object hook)
-                            {
-                                ((EventHook) hook).event(event, wrapper);
-                            }
-                        });
+                        m_serviceRegistry.invokeHook(
+                            (ServiceReference) eventHooks.get(i), felix, callback);
                     }
                 }
 

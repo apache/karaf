@@ -2586,22 +2586,34 @@ ex.printStackTrace();
     void addServiceListener(Bundle bundle, ServiceListener l, String f)
         throws InvalidSyntaxException
     {
-        m_dispatcher.addListener(
+        Filter oldFilter = m_dispatcher.addListener(
             bundle, ServiceListener.class, l, (f == null) ? null : FrameworkUtil.createFilter(f));
 
-        // Invoke the ListenerHook.added() on all hooks.
         List listenerHooks = m_registry.getListenerHooks();
-        final Collection c = Collections.singleton(
-            new ListenerHookInfoImpl(bundle.getBundleContext(), f));
+        if (oldFilter != null)
+        {
+            final Collection removed = Collections.singleton(
+                new ListenerHookInfoImpl(bundle.getBundleContext(), l, oldFilter.toString(), true));
+            InvokeHookCallback removedCallback = new ListenerHookRemovedCallback(removed);
+            for (int i = 0; i < listenerHooks.size(); i++)
+            {
+                m_registry.invokeHook((ServiceReference) listenerHooks.get(i), this, removedCallback);
+            };
+        }
+
+        // Invoke the ListenerHook.added() on all hooks.
+        final Collection added = Collections.singleton(
+            new ListenerHookInfoImpl(bundle.getBundleContext(), l, f, false));
+        InvokeHookCallback addedCallback = new InvokeHookCallback()
+        {
+            public void invokeHook(Object hook)
+            {
+                ((ListenerHook) hook).added(added);
+            }
+        };
         for (int i = 0; i < listenerHooks.size(); i++)
         {
-            ServiceRegistry.invokeHook(listenerHooks.get(i), this, new InvokeHookCallback()
-            {
-                public void invokeHook(Object hook)
-                {
-                    ((ListenerHook) hook).added(c);
-                }
-            });
+            m_registry.invokeHook((ServiceReference) listenerHooks.get(i), this, addedCallback);
         }
     }
 
@@ -2622,9 +2634,10 @@ ex.printStackTrace();
             // Invoke the ListenerHook.removed() on all hooks.
             List listenerHooks = m_registry.getListenerHooks();
             Collection c = Collections.singleton(listener);
+            InvokeHookCallback callback = new ListenerHookRemovedCallback(c);
             for (int i = 0; i < listenerHooks.size(); i++)
             {
-                ((ListenerHook) listenerHooks.get(i)).removed(c);
+                m_registry.invokeHook((ServiceReference) listenerHooks.get(i), this, callback);
             }
         }
     }
@@ -2719,13 +2732,12 @@ ex.printStackTrace();
         // to invoke the callback with all existing service listeners.
         if (m_registry.isHook(classNames, ListenerHook.class, svcObj))
         {
-            Object hookRef = ServiceRegistry.getHookRef(svcObj, reg);
-            ServiceRegistry.invokeHook(hookRef, this, new InvokeHookCallback()
+            m_registry.invokeHook(reg.getReference(), this, new InvokeHookCallback()
             {
                 public void invokeHook(Object hook)
                 {
                     ((ListenerHook) hook).
-                        added(m_dispatcher.wrapAllServiceListeners());
+                        added(m_dispatcher.wrapAllServiceListeners(false));
                 }
             });
         }
@@ -2784,19 +2796,20 @@ ex.printStackTrace();
 
         // activate findhooks
         List findHooks = m_registry.getFindHooks();
+        InvokeHookCallback callback = new InvokeHookCallback()
+        {
+            public void invokeHook(Object hook)
+            {
+                ((FindHook) hook).find(bundle.getBundleContext(),
+                    className,
+                    expr,
+                    !checkAssignable,
+                    new ShrinkableCollection(refList));
+            }
+        };
         for (int i = 0; i < findHooks.size(); i++)
         {
-            ServiceRegistry.invokeHook(findHooks.get(i), this, new InvokeHookCallback()
-            {
-                public void invokeHook(Object hook)
-                {
-                    ((FindHook) hook).find(bundle.getBundleContext(),
-                        className,
-                        expr,
-                        !checkAssignable,
-                        new ShrinkableCollection(refList));
-                }
-            });
+            m_registry.invokeHook((ServiceReference) findHooks.get(i), this, callback);
         }
 
         if (refList.size() > 0)
@@ -4294,6 +4307,21 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1])
                     fireFrameworkEvent(FrameworkEvent.ERROR, m_bundle, ex);
                 }
             }
+        }
+    }
+
+    private static class ListenerHookRemovedCallback implements InvokeHookCallback
+    {
+        private final Collection /* ListenerHookInfo */ m_removed;
+
+        ListenerHookRemovedCallback(Collection /* ListenerHookInfo */ removed)
+        {
+            m_removed = removed;
+        }
+
+        public void invokeHook(Object hook)
+        {
+            ((ListenerHook) hook).removed(m_removed);
         }
     }
 

@@ -19,10 +19,10 @@
 package org.apache.felix.framework.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -78,20 +78,11 @@ public class EventDispatcherTest extends TestCase
         };
 
         Logger logger = new Logger();
-        ServiceRegistry registry = new ServiceRegistry(logger, null)
-        {
-            public List getEventHooks()
-            {
-                return Collections.unmodifiableList(
-                    Arrays.asList(new EventHook[]
-                    {
-                        eh1, eh2
-                    }));
-            }
-        };
+        ServiceRegistry registry = new ServiceRegistry(logger, null);
+        registry.registerService(null, new String [] {EventHook.class.getName()}, eh1, new Hashtable());
+        registry.registerService(null, new String [] {EventHook.class.getName()}, eh2, new Hashtable());
 
         // -- Set up event dispatcher
-
         EventDispatcher ed = EventDispatcher.start(logger);
         EventDispatcher.shutdown(); // stop the thread - would be nicer if we could create one without a thread for testing
         ed.setServiceRegistry(registry);

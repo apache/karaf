@@ -367,7 +367,7 @@ class ServiceRegistrationImpl implements ServiceRegistration
     {
         private ServiceReferenceImpl() {}
 
-        ServiceRegistrationImpl getServiceRegistration()
+        ServiceRegistrationImpl getRegistration()
         {
             return ServiceRegistrationImpl.this;
         }
@@ -465,7 +465,7 @@ class ServiceRegistrationImpl implements ServiceRegistration
                         // Get the service registration and ask it to check
                         // if the service object is assignable to the requesting
                         // bundle's class.
-                        allow = getServiceRegistration().isClassAccessible(requestClass);
+                        allow = getRegistration().isClassAccessible(requestClass);
                     }
                     catch (Exception ex)
                     {
