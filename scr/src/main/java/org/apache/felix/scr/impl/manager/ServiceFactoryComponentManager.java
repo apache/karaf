@@ -109,16 +109,16 @@ public class ServiceFactoryComponentManager extends ImmediateComponentManager im
             serviceContexts.put( service, serviceContext );
 
             // if this is the first use of this component, switch to ACTIVE state
-			if (getState() == STATE_REGISTERED)
-			{
-				synchronized(this)
-				{
-					if (getState() == STATE_REGISTERED)
-					{
-						changeState(Active.getInstance());
-					}
-				}
-			}
+            if ( getState() == STATE_REGISTERED )
+            {
+                synchronized ( this )
+                {
+                    if ( getState() == STATE_REGISTERED )
+                    {
+                        changeState( Active.getInstance() );
+                    }
+                }
+            }
         }
 
         return service;
