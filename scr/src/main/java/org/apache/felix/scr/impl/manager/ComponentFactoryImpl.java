@@ -35,33 +35,62 @@ import org.osgi.service.component.ComponentInstance;
 import org.osgi.service.log.LogService;
 
 /**
- * The <code>ComponentFactoryImpl</code> TODO
+ * The <code>ComponentFactoryImpl</code> extends the {@link AbstractComponentManager}
+ * class to implement the component factory functionality. As such the
+ * OSGi Declarative Services <code>ComponentFactory</code> interface is
+ * implemented.
+ * <p>
+ * In addition the {@link ComponentHolder} interface is implemented to use this
+ * class directly as the holder for component instances created by the
+ * {@link #newInstance(Dictionary)} method.
+ * <p>
+ * Finally, if the <code>ds.factory.enabled</code> bundle context property is
+ * set to <code>true</code>, component instances can be created by factory
+ * configurations. This functionality is present for backwards compatibility
+ * with earlier releases of the Apache Felix Declarative Services implementation.
+ * But keep in mind, that this is non-standard behaviour.
  */
 public class ComponentFactoryImpl extends AbstractComponentManager implements ComponentFactory, ComponentHolder
 {
 
-    // The map of components created from Configuration objects
-    // maps PID to ImmediateComponentManager for configuration updating
-    // this map is lazily created
-    private Map m_configuredServices;
+    /**
+     * Contains the component instances created by calling the
+     * {@link #newInstance(Dictionary)} method. These component instances are
+     * provided with updated configuration (or deleted configuration) if
+     * such modifications for the component factory takes place.
+     * <p>
+     * The map is keyed by the component manager instances. The value of each
+     * entry is the same as the entry's key.
+     */
+    private final Map m_componentInstances;
 
-    // Actually we only use the identity key stuff, but there is
-    // no IdentityHashSet and HashSet internally uses a HashMap anyway
-    private final Map m_createdComponents;
-
-    // configuration of the component factory
+    /**
+     * The configuration for the component factory. This configuration is
+     * supplied as the base configuration for each component instance created
+     * by the {@link #newInstance(Dictionary)} method.
+     */
     private Dictionary m_configuration;
 
-    // whether this instance supports creating component instances for factory
-    // configuration instances. This is backwards compatibility behaviour and
-    // contradicts the specification (Section 112.7)
+    /**
+     * The map of components created from Configuration objects maps PID to
+     * {@link ImmediateComponentManager} for configuration updating this map is
+     * lazily created. This map is only used if the {@link #m_isConfigurationFactory}
+     * field is <code>true</code>.
+     */
+    private Map m_configuredServices;
+
+    /**
+     * Whether this instance supports creating component instances for factory
+     * configuration instances. This is backwards compatibility behaviour and
+     * contradicts the specification (Section 112.7)
+     */
     private final boolean m_isConfigurationFactory;
 
 
     public ComponentFactoryImpl( BundleComponentActivator activator, ComponentMetadata metadata )
     {
         super( activator, metadata );
-        m_createdComponents = new IdentityHashMap();
+        m_componentInstances = new IdentityHashMap();
         m_isConfigurationFactory = "true".equals( activator.getBundleContext().getProperty( "ds.factory.enabled" ) );
     }
 
@@ -71,24 +100,53 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
      */
     public ComponentInstance newInstance( Dictionary dictionary )
     {
-        return createComponentManager( dictionary, true );
+        ImmediateComponentManager cm = createComponentManager();
+
+        // register with the internal set of created components
+        m_componentInstances.put( cm, cm );
+
+        cm.setFactoryProperties( dictionary );
+        cm.reconfigure( m_configuration );
+        // enable synchronously
+        cm.enableInternal();
+        cm.activateInternal();
+
+        return cm;
     }
 
 
+    /**
+     * The component factory does not have a component to create.
+     * <p>
+     * But in the backwards compatible case any instances created for factory
+     * configuration instances are to enabled as a consequence of activating
+     * the component factory.
+     */
     protected boolean createComponent()
     {
-        // not component to create, newInstance must be used instead
+        ImmediateComponentManager[] cms = getComponentManagers( m_configuredServices );
+        for ( int i = 0; i < cms.length; i++ )
+        {
+            cms[i].enable();
+        }
+
         return true;
     }
 
 
+    /**
+     * The component factory does not have a component to delete.
+     * <p>
+     * But in the backwards compatible case any instances created for factory
+     * configuration instances are to disabled as a consequence of deactivating
+     * the component factory.
+     */
     protected void deleteComponent( int reason )
     {
-        // though we have nothing to delete really, we have to remove all
-        // references to the components created for configuration
-        m_createdComponents.clear();
-        if (m_configuredServices != null) {
-            m_configuredServices = null;
+        ImmediateComponentManager[] cms = getComponentManagers( m_configuredServices );
+        for ( int i = 0; i < cms.length; i++ )
+        {
+            cms[i].disable();
         }
     }
 
@@ -157,7 +215,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
             m_configuration = null;
             reconfigureComponents( null );
         }
-        else if ( m_isConfigurationFactory && getState() == STATE_FACTORY && m_configuredServices != null )
+        else if ( m_isConfigurationFactory && m_configuredServices != null )
         {
             ImmediateComponentManager cm = ( ImmediateComponentManager ) m_configuredServices.remove( pid );
             if ( cm != null )
@@ -165,7 +223,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
                 log( LogService.LOG_DEBUG, "Disposing component after configuration deletion", getComponentMetadata(),
                     null );
 
-                disposeComponentManager( cm, ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_DELETED );
+                cm.dispose();
             }
         }
     }
@@ -180,34 +238,40 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         }
         else if ( m_isConfigurationFactory )
         {
-            if ( getState() == STATE_FACTORY )
+            ImmediateComponentManager cm;
+            if ( m_configuredServices != null )
             {
-                // configuration for factory configuration instances
+                cm = ( ImmediateComponentManager ) m_configuredServices.get( pid );
+            }
+            else
+            {
+                m_configuredServices = new HashMap();
+                cm = null;
+            }
 
-                ImmediateComponentManager cm;
-                if ( m_configuredServices != null )
+            if ( cm == null )
+            {
+                // create a new instance with the current configuration
+                cm = createComponentManager();
+
+                // this should not call component reactivation because it is
+                // not active yet
+                cm.reconfigure( configuration );
+
+                // enable asynchronously if components are already enabled
+                if ( getState() == STATE_FACTORY )
                 {
-                    cm = ( ImmediateComponentManager ) m_configuredServices.get( pid );
-                }
-                else
-                {
-                    m_configuredServices = new HashMap();
-                    cm = null;
+                    cm.enable();
                 }
 
-                if ( cm == null )
-                {
-                    // create a new instance with the current configuration
-                    cm = createComponentManager( configuration, false );
+                // keep a reference for future updates
+                m_configuredServices.put( pid, cm );
 
-                    // keep a reference for future updates
-                    m_configuredServices.put( pid, cm );
-                }
-                else
-                {
-                    // update the configuration as if called as ManagedService
-                    cm.reconfigure( configuration );
-                }
+            }
+            else
+            {
+                // update the configuration as if called as ManagedService
+                cm.reconfigure( configuration );
             }
         }
         else
@@ -219,21 +283,31 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
     }
 
 
-    // TODO: correct ???
+    /**
+     * A component factory component holder enables the held components by
+     * enabling itself.
+     */
     public void enableComponents()
     {
-        ImmediateComponentManager[] cms = getComponentManagers( false );
-        for ( int i = 0; i < cms.length; i++ )
-        {
-            cms[i].enable();
-        }
+        enable();
     }
 
 
-    // update components with this configuration
+    /**
+     * Reconfigure all components created calling the
+     * {@link #newInstance(Dictionary)} method to update them with the new
+     * configuration from the configuration admin.
+     * <p>
+     * This method is not used to reconfigure components created as part of
+     * backwards compatible support for configuration factories since they
+     * are reconfigured directly by {@link #configurationUpdated(String, Dictionary)}
+     * and {@link #configurationDeleted(String)}
+     *
+     * @param configuration the new configuration
+     */
     private void reconfigureComponents( Dictionary configuration )
     {
-        ImmediateComponentManager[] cms = getComponentManagers( false );
+        ImmediateComponentManager[] cms = getComponentManagers( m_componentInstances );
         for ( int i = 0; i < cms.length; i++ )
         {
             cms[i].reconfigure( configuration );
@@ -241,97 +315,71 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
     }
 
 
-    // TODO: correct ???
+    /**
+     * A component factory component holder disables the held components by
+     * disabling itself.
+     */
     public void disableComponents()
     {
-        ImmediateComponentManager[] cms = getComponentManagers( false );
-        for ( int i = 0; i < cms.length; i++ )
-        {
-            cms[i].disable();
-        }
+        disable();
     }
 
 
-    // TODO: correct ???
+    /**
+     * Disposes off all components ever created by this component holder. This
+     * method is called if either the Declarative Services runtime is stopping
+     * or if the owning bundle is stopped. In both cases all components created
+     * by this holder must be disposed off.
+     */
     public void disposeComponents( int reason )
     {
-        ImmediateComponentManager[] cms = getComponentManagers( true );
+        ImmediateComponentManager[] cms = getComponentManagers( m_componentInstances );
         for ( int i = 0; i < cms.length; i++ )
         {
             cms[i].dispose( reason );
         }
+
+        m_componentInstances.clear();
+
+        cms = getComponentManagers( m_configuredServices );
+        for ( int i = 0; i < cms.length; i++ )
+        {
+            cms[i].dispose( reason );
+        }
+
+        m_configuredServices = null;
+
+        // finally dispose the component factory itself
+        dispose( reason );
     }
 
 
     //---------- internal
 
     /**
-     * ComponentManager instances created by this method are not registered
-     * with the ComponentRegistry. Therefore, any configuration update to these
-     * components must be effected by this class !
-     *
-     * @param configuration The (initial) configuration for the new
-     *      component manager
-     * @param isNewInstance <code>true</code> if this component manager is
-     *      created as per {@link #newInstance(Dictionary)}. In this case the
-     *      given configuration is used as the factory configuration and the
-     *      component is immediately enabled (synchronously). Otherwise the
-     *      component is created because a new configuration instance of
-     *      this factory has been created. In this case the configuration is
-     *      used as the normal configuration from configuration admin (not the
-     *      factory configuration) and the component is enabled asynchronously.
+     * Creates an {@link ImmediateComponentManager} instance with the
+     * {@link BundleComponentActivator} and {@link ComponentMetadata} of this
+     * instance. The component manager is kept in the internal set of created
+     * components. The component is neither configured nor enabled.
      */
-    private ImmediateComponentManager createComponentManager( Dictionary configuration, boolean isNewInstance )
+    private ImmediateComponentManager createComponentManager()
     {
-        ImmediateComponentManager cm = new ImmediateComponentManager( getActivator(), getComponentMetadata() );
-
-        // register with the internal set of created components
-        m_createdComponents.put( cm, cm );
-
-        // inject configuration
-        if ( isNewInstance )
-        {
-            cm.setFactoryProperties( configuration );
-            cm.reconfigure( m_configuration );
-            // enable synchronously
-            cm.enableInternal();
-            cm.activateInternal();
-        }
-        else
-        {
-            // this should not call component reactivation because it is
-            // not active yet
-            cm.reconfigure( configuration );
-            // enable asynchronously
-            cm.enable();
-        }
-
-        return cm;
-    }
-
-    private void disposeComponentManager( ImmediateComponentManager cm, int reason )
-    {
-        // remove from created components
-        m_createdComponents.remove( cm );
-
-        // finally dispose it
-        cm.dispose( reason );
+        return new ImmediateComponentManager( getActivator(), getComponentMetadata() );
     }
 
 
-    private ImmediateComponentManager[] getComponentManagers( boolean clear )
+    private ImmediateComponentManager[] getComponentManagers( Map componentMap )
     {
-        synchronized ( m_createdComponents )
+        if ( componentMap != null )
         {
-            ImmediateComponentManager[] cm = new ImmediateComponentManager[m_createdComponents.size()];
-            m_createdComponents.keySet().toArray( cm );
-
-            if ( clear )
+            synchronized ( componentMap )
             {
-                m_createdComponents.clear();
+                ImmediateComponentManager[] cm = new ImmediateComponentManager[componentMap.size()];
+                componentMap.values().toArray( cm );
+                return cm;
             }
-
-            return cm;
         }
+
+        return new ImmediateComponentManager[0];
     }
 }
