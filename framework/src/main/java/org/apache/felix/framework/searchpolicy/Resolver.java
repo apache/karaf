@@ -90,7 +90,7 @@ public class Resolver
         // this map will be resolved, only the target module and
         // any candidates selected to resolve its requirements and the
         // transitive requirements this implies.
-        populateCandidatesMap(state, candidatesMap, rootModule);
+        populateCandidatesMap(state, candidatesMap, new HashMap(), null, rootModule);
 
         // The next step is to use the candidates map to determine if
         // the class space for the root module is consistent. This
@@ -146,9 +146,11 @@ public class Resolver
                         // the "resolved" candidates first.
                         PackageSource[] resolved = state.getResolvedCandidates(target);
                         PackageSource[] unresolved = state.getUnresolvedCandidates(target);
-                        PackageSource[] candidates = new PackageSource[resolved.length + unresolved.length];
+                        PackageSource[] candidates =
+                            new PackageSource[resolved.length + unresolved.length];
                         System.arraycopy(resolved, 0, candidates, 0, resolved.length);
-                        System.arraycopy(unresolved, 0, candidates, resolved.length, unresolved.length);
+                        System.arraycopy(
+                            unresolved, 0, candidates, resolved.length, unresolved.length);
 
                         // Take the first candidate that can resolve.
                         for (int candIdx = 0;
@@ -178,7 +180,8 @@ public class Resolver
                             // Create the wire and add it to the module.
                             Object[] result = new Object[2];
                             result[0] = new R4Wire(
-                                importer, dynamics[dynIdx], candidate.m_module, candidate.m_capability);
+                                importer, dynamics[dynIdx], candidate.m_module,
+                                candidate.m_capability);
                             result[1] = resolvedModuleWireMap;
                             return result;
                         }
@@ -273,7 +276,7 @@ public class Resolver
         Map candidatesMap = new HashMap();
         if (!provider.isResolved())
         {
-            populateCandidatesMap(state, candidatesMap, provider);
+            populateCandidatesMap(state, candidatesMap, new HashMap(), null, provider);
             findConsistentClassSpace(state, candidatesMap, provider);
         }
 
@@ -347,11 +350,12 @@ public class Resolver
     }
 
     private void populateCandidatesMap(
-        ResolverState state, Map candidatesMap, IModule targetModule)
+        ResolverState state, Map candidatesMap, Map byproductMap,
+        IModule instigatingModule, IModule targetModule)
         throws ResolveException
     {
         // Detect cycles.
-        if (candidatesMap.get(targetModule) != null)
+        if (candidatesMap.containsKey(targetModule))
         {
             return;
         }
@@ -364,14 +368,12 @@ public class Resolver
 
         // Finally, resolve any dependencies the module may have.
 
+        // Add target module to the candidates map so we can detect cycles.
+        candidatesMap.put(targetModule, null);
+
         // Create list to hold the resolving candidate sets for the target
         // module's requirements.
         List candSetList = new ArrayList();
-
-        // Even though the candidate set list is currently empty, we
-        // record it in the candidates map early so we can use it to
-        // detect cycles.
-        candidatesMap.put(targetModule, candSetList);
 
         // Loop through each requirement and calculate its resolving
         // set of candidates.
@@ -401,7 +403,9 @@ public class Resolver
                         // are not already resolved.
                         if (!candidates[candIdx].m_module.isResolved())
                         {
-                            populateCandidatesMap(state, candidatesMap, candidates[candIdx].m_module);
+                            populateCandidatesMap(
+                                state, candidatesMap, byproductMap,
+                                targetModule, candidates[candIdx].m_module);
                         }
                     }
                     catch (ResolveException ex)
@@ -429,6 +433,12 @@ public class Resolver
                 // it is invalid.
                 candidatesMap.remove(targetModule);
 
+                // Also remove any byproduct resolved modules.
+// TODO: FELIX-1422 - Maybe this goes too far and should only discard the
+//       the failing module as a candidate, since some modules may have
+//       resolved correctly because they didn't depend on the failing module.
+                removeByproductModules(candidatesMap, byproductMap, targetModule);
+
                 // If we have received an exception while trying to populate
                 // the candidates map, rethrow that exception since it might
                 // be useful. NOTE: This is not necessarily the "only"
@@ -449,6 +459,45 @@ public class Resolver
             {
                 candSetList.add(
                     new CandidateSet(CandidateSet.NORMAL, targetModule, reqs[reqIdx], candidates));
+            }
+        }
+
+        // Now that the module's candidates have been calculated, add the
+        // candidate set list to the candidates map to be used for calculating
+        // uses constraints and ultimately wires.
+        candidatesMap.put(targetModule, candSetList);
+
+        // Also add this module as a byproduct of the instigating module,
+        // since it caused it to be resolved; this is necessary if we have
+        // a failure to resolver somewhere higher up.
+        if (instigatingModule != null)
+        {
+            IModule[] modules = (IModule[]) byproductMap.get(instigatingModule);
+            if (modules == null)
+            {
+                modules = new IModule[] { targetModule };
+            }
+            else
+            {
+                IModule[] tmp = new IModule[modules.length + 1];
+                System.arraycopy(modules, 0, tmp, 0, modules.length);
+                tmp[modules.length] = targetModule;
+                modules = tmp;
+            }
+            byproductMap.put(instigatingModule, modules);
+        }
+    }
+
+    private static void removeByproductModules(
+        Map candidatesMap, Map byproductMap, IModule targetModule)
+    {
+        IModule[] modules = (IModule[]) byproductMap.remove(targetModule);
+        if (modules != null)
+        {
+            for (int i = 0; i < modules.length; i++)
+            {
+                candidatesMap.remove(modules[i]);
+                removeByproductModules(candidatesMap, byproductMap, modules[i]);
             }
         }
     }
@@ -658,7 +707,8 @@ public class Resolver
                 PackageSource ps = (PackageSource) rp.m_sourceList.get(srcIdx);
                 if (!ps.m_module.isResolved())
                 {
-                    return areCandidatesSingletonConsistent(state, ps.m_module, singletonMap, moduleMap, cycleMap, candidatesMap);
+                    return areCandidatesSingletonConsistent(
+                        state, ps.m_module, singletonMap, moduleMap, cycleMap, candidatesMap);
                 }
             }
         }
@@ -1025,7 +1075,9 @@ public class Resolver
         // Loop through all candidate sets that represent import dependencies
         // for the target module and add the current candidate's package source
         // to the imported package map.
-        for (int candSetIdx = 0; (candSetList != null) && (candSetIdx < candSetList.size()); candSetIdx++)
+        for (int candSetIdx = 0;
+            (candSetList != null) && (candSetIdx < candSetList.size());
+            candSetIdx++)
         {
             CandidateSet cs = (CandidateSet) candSetList.get(candSetIdx);
             PackageSource ps = cs.m_candidates[cs.m_idx];
@@ -1062,7 +1114,8 @@ public class Resolver
                     wires[wireIdx].getCapability().getProperties().get(ICapability.PACKAGE_PROPERTY);
                 ResolvedPackage rp = (ResolvedPackage) pkgMap.get(pkgName);
                 rp = (rp == null) ? new ResolvedPackage(pkgName, null) : rp;
-                rp.m_sourceList.add(new PackageSource(wires[wireIdx].getExporter(), wires[wireIdx].getCapability()));
+                rp.m_sourceList.add(new PackageSource(wires[wireIdx].getExporter(),
+                    wires[wireIdx].getCapability()));
                 pkgMap.put(rp.m_name, rp);
             }
         }
@@ -1109,7 +1162,9 @@ public class Resolver
         // Loop through target module's candidate list for candidates
         // for its module dependencies and merge re-exported packages.
         List candSetList = (List) candidatesMap.get(targetModule);
-        for (int candSetIdx = 0; (candSetList != null) && (candSetIdx < candSetList.size()); candSetIdx++)
+        for (int candSetIdx = 0;
+            (candSetList != null) && (candSetIdx < candSetList.size());
+            candSetIdx++)
         {
             CandidateSet cs = (CandidateSet) candSetList.get(candSetIdx);
             PackageSource ps = cs.m_candidates[cs.m_idx];
@@ -1365,7 +1420,8 @@ public class Resolver
 
                 // Recursively calculate the required packages for the
                 // wire's exporting module.
-                Map requiredMap = calculateExportedAndReexportedPackagesResolved(wires[i].getExporter(), cycleMap);
+                Map requiredMap = calculateExportedAndReexportedPackagesResolved(
+                    wires[i].getExporter(), cycleMap);
 
                 // Merge the wires exported and re-exported packages
                 // into the complete set of required packages.
@@ -1441,7 +1497,8 @@ public class Resolver
         return pkgMap;
     }
 
-    private static Map calculateCandidateRequiredPackages(IModule module, PackageSource psTarget, Map candidatesMap)
+    private static Map calculateCandidateRequiredPackages(
+        IModule module, PackageSource psTarget, Map candidatesMap)
     {
 //System.out.println("calculateCandidateRequiredPackages("+module+")");
         Map cycleMap = new HashMap();
@@ -1513,7 +1570,8 @@ public class Resolver
                     cs.m_requirement,
                     cs.m_candidates[cs.m_idx].m_module,
                     cs.m_candidates[cs.m_idx].m_capability,
-                    calculateCandidateRequiredPackages(importer, cs.m_candidates[cs.m_idx], candidatesMap)));
+                    calculateCandidateRequiredPackages(
+                        importer, cs.m_candidates[cs.m_idx], candidatesMap)));
             }
             // Create a package wire for package dependencies.
             // Filter out the case where a module imports from
