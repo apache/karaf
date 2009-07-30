@@ -201,7 +201,7 @@ public class ResourceImpl implements Resource
         {
             if (key.equals(VERSION))
             {
-                value = new Version(value.toString());
+                value = Version.parseVersion(value.toString());
             }
             else if (key.equals(SIZE))
             {
