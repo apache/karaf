@@ -61,11 +61,9 @@ public class ManifestParser
                 "Unknown 'Bundle-ManifestVersion' value: " + manifestVersion);
         }
 
-        // Create map to check for duplicate imports/exports
-        // and lists to hold capabilities and requirements.
+        // Create lists to hold capabilities and requirements.
         List capList = new ArrayList();
         List reqList = new ArrayList();
-        Map dupeMap = new HashMap();
 
         //
         // Parse bundle version.
@@ -180,14 +178,13 @@ public class ManifestParser
         IRequirement[] importReqs = parseImportHeader(
             (String) headerMap.get(Constants.IMPORT_PACKAGE));
 
-        // Create non-duplicated import array.
-        dupeMap.clear();
+        // Verify there are no duplicate import declarations.
+        Set dupeSet = new HashSet();
         for (int reqIdx = 0; reqIdx < importReqs.length; reqIdx++)
         {
             // Verify that the named package has not already been declared.
             String pkgName = ((Requirement) importReqs[reqIdx]).getTargetName();
-
-            if (dupeMap.get(pkgName) == null)
+            if (!dupeSet.contains(pkgName))
             {
                 // Verify that java.* packages are not imported.
                 if (pkgName.startsWith("java."))
@@ -195,17 +192,16 @@ public class ManifestParser
                     throw new BundleException(
                         "Importing java.* packages not allowed: " + pkgName);
                 }
-                dupeMap.put(pkgName, importReqs[reqIdx]);
+                dupeSet.add(pkgName);
             }
             else
             {
-                throw new BundleException(
-                    "Duplicate import - " + pkgName);
+                throw new BundleException("Duplicate import - " + pkgName);
             }
+            // If it has not already been imported, then add it to the list
+            // of requirements.
+            reqList.add(importReqs[reqIdx]);
         }
-
-        // Add import package requirements to requirement list.
-        reqList.addAll(dupeMap.values());
 
         // Create an array of all requirements.
         m_requirements = (IRequirement[]) reqList.toArray(new IRequirement[reqList.size()]);
