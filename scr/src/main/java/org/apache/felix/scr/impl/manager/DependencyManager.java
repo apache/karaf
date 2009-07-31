@@ -19,9 +19,6 @@
 package org.apache.felix.scr.impl.manager;
 
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -30,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.scr.Reference;
-import org.apache.felix.scr.impl.helper.ReflectionHelper;
 import org.apache.felix.scr.impl.metadata.ReferenceMetadata;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -266,21 +262,6 @@ public class DependencyManager implements ServiceListener, Reference
 
                     m_componentManager.reactivate( ComponentConstants.DEACTIVATION_REASON_REFERENCE );
                 }
-                else
-                {
-                    // single service binding only which already exists
-                    // we have to check whether the bound service is to be
-                    // replaced
-                    ServiceReference[] boundRefs = getBoundServiceReferences();
-                    if ( isHigher( reference, boundRefs[0] ) )
-                    {
-                        m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Service "
-                            + m_dependencyMetadata.getName() + " with higher ranking registered, reactivate component",
-                            m_componentManager.getComponentMetadata(), null );
-
-                        m_componentManager.reactivate( ComponentConstants.DEACTIVATION_REASON_REFERENCE );
-                    }
-                }
             }
 
             // otherwise bind if we have a bind method and the service needs
@@ -292,21 +273,6 @@ public class DependencyManager implements ServiceListener, Reference
                 {
                     // bind the service, getting it if required
                     invokeBindMethod( reference );
-                }
-                else
-                {
-                    // single service binding only which already exists
-                    // we have to check whether the bound service is to be
-                    // replaced
-                    ServiceReference[] boundRefs = getBoundServiceReferences();
-                    if ( isHigher( reference, boundRefs[0] ) )
-                    {
-                        // bind the service, getting it if required
-                        invokeBindMethod( reference );
-
-                        // unbind the old service reference
-                        unbind( boundRefs );
-                    }
                 }
             }
         }
@@ -660,56 +626,6 @@ public class DependencyManager implements ServiceListener, Reference
         }
 
         return ( services.size() > 0 ) ? services.toArray() : null;
-    }
-
-
-    /**
-     * Returns <code>true</code> if the <code>newReference</code> has a higher
-     * ranking than the <code>oldReference</code>, otherwise <code>false</code>
-     * is returned.
-     * <p>
-     * The higher ranking of a service reference is defined in the OSGi
-     * Compendium Services Specification as the service with the highest service
-     * ranking as specified by the service.ranking property. If both services
-     * have the same service ranking, then the service with the lowest service
-     * ID as specified by the service.id property is chosen.
-     *
-     * @param newReference The ServiceReference representing the newly added
-     *      Service
-     * @param oldReference The ServiceReference representing the service which
-     *      is already bound to the component
-     *
-     * @return <code>true</code> if <code>newReference</code> has higher ranking
-     */
-    private boolean isHigher( ServiceReference newReference, ServiceReference oldReference )
-    {
-        // get and compare the service.ranking properties
-        int nrRank = getServiceRanking( newReference );
-        int orRank = getServiceRanking( oldReference );
-        if ( nrRank > orRank )
-        {
-            return true;
-        }
-        else if ( nrRank < orRank )
-        {
-            return false;
-        }
-
-        // no ranks are equal, compare the service ids. These ids are never equal,
-        // so unless a problem exists, this should be decisive
-        try
-        {
-            return getServiceId( newReference ) < getServiceId( oldReference );
-        }
-        catch ( Exception e )
-        {
-            // ignore, we don't expect an exception, since the servid.id
-            // property is set by the framework as a Long value; so we neither
-            // expect this property to be null nor to be anything else than Long
-        }
-
-        // fall back to newReference not being higher
-        return false;
     }
 
 
