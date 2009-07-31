@@ -181,16 +181,24 @@ public class DependencyManager implements ServiceListener, Reference
                     m_componentManager.getComponentMetadata(), null );
 
                 // remove the service first
-                serviceRemoved( ref );
+                // only continue with further event handling if the service
+                // removal did not cause the component to be deactivated
+                if ( serviceRemoved( ref ) )
+                {
+                    // recalculate the number of services matching the filter
+                    // because we don't know whether this service previously matched
+                    // or not
+                    ServiceReference refs[] = getFrameworkServiceReferences();
+                    m_size = ( refs == null ) ? 0 : refs.length;
 
-                // recalculate the number of services matching the filter
-                // because we don't know whether this service previously matched
-                // or not
-                ServiceReference refs[] = getFrameworkServiceReferences();
-                m_size = ( refs == null ) ? 0 : refs.length;
+                    // now try to bind the service - if it matches the target filter
+                    // without recalculating the size (already done).
+                    if ( targetFilterMatch( ref ) )
+                    {
+                        serviceAdded( ref );
+                    }
+                }
 
-                // now try to bind the service
-                serviceAdded( ref );
                 break;
 
             case ServiceEvent.UNREGISTERING:
@@ -248,20 +256,14 @@ public class DependencyManager implements ServiceListener, Reference
         else if ( handleServiceEvent() )
         {
 
-            // if the dependency is static and adding the service has an
-            // influence on service binding because the dependency is multiple
-            // or optional and unbound, the component needs to be reactivated
+            // FELIX-1413: if the dependency is static and the component is
+            // satisfied (active) added services are not considered until
+            // the component is reactivated for other reasons.
             if ( m_dependencyMetadata.isStatic() )
             {
-                // only reactivate if the service has an influence on binding
-                if ( m_dependencyMetadata.isMultiple() || !isBound() )
-                {
-                    m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Service "
-                        + m_dependencyMetadata.getName() + " registered, reactivate component", m_componentManager
-                        .getComponentMetadata(), null );
-
-                    m_componentManager.reactivate( ComponentConstants.DEACTIVATION_REASON_REFERENCE );
-                }
+                m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Added service "
+                    + m_dependencyMetadata.getName() + " is ignored for static reference", m_componentManager
+                    .getComponentMetadata(), null );
             }
 
             // otherwise bind if we have a bind method and the service needs
@@ -298,8 +300,14 @@ public class DependencyManager implements ServiceListener, Reference
      *
      * @param reference The reference to the service unregistering or being
      *      modified.
+     *
+     * @return <code>true</code> if the service has been removed without the
+     *      component being deactivated. <code>true</code> is also returned
+     *      if the service was not bound at all. <code>false</code> is returned
+     *      if the component has been deactivated due to this service being
+     *      removed.
      */
-    private void serviceRemoved( ServiceReference reference )
+    private boolean serviceRemoved( ServiceReference reference )
     {
         // check whether we are bound to that service, do nothing if not
         if ( getBoundService( reference ) == null )
@@ -307,7 +315,9 @@ public class DependencyManager implements ServiceListener, Reference
             m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Ignoring removed Service for "
                 + m_dependencyMetadata.getName() + " : Service " + reference.getProperty( Constants.SERVICE_ID )
                 + " not bound", m_componentManager.getComponentMetadata(), null );
-            return;
+
+            // service was not bound, we can continue without interruption
+            return true;
         }
 
         // otherwise check whether the component is in a state to handle the event
@@ -327,6 +337,9 @@ public class DependencyManager implements ServiceListener, Reference
 
                 // deactivate the component now
                 m_componentManager.deactivateInternal( ComponentConstants.DEACTIVATION_REASON_REFERENCE );
+
+                // component is deactivated, this does all for this service
+                return false;
             }
 
             // if the dependency is static, we have to reactivate the component
@@ -346,6 +359,9 @@ public class DependencyManager implements ServiceListener, Reference
                     m_componentManager.log( LogService.LOG_ERROR, "Exception while recreating dependency ",
                         m_componentManager.getComponentMetadata(), ex );
                 }
+
+                // static reference removal causes reactivation, nothing more to do
+                return false;
             }
 
             // dynamic dependency, multiple or single but this service is the bound one
@@ -366,8 +382,9 @@ public class DependencyManager implements ServiceListener, Reference
                                 + " not satisfied", m_componentManager.getComponentMetadata(), null );
                         m_componentManager.deactivateInternal( ComponentConstants.DEACTIVATION_REASON_REFERENCE );
 
-                        // abort here we do not need to do more
-                        return;
+                        // required service could not be replaced, component
+                        // is deactivated and we are done
+                        return false;
                     }
                 }
 
@@ -389,6 +406,9 @@ public class DependencyManager implements ServiceListener, Reference
 					+ m_componentManager.state(),
 					m_componentManager.getComponentMetadata(), null );
         }
+
+        // everything is fine, the component is still active and we continue
+        return true;
     }
 
 
