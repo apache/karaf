@@ -96,6 +96,48 @@ public class SecureAction
         }
     }
 
+    public ClassLoader getParentClassLoader(ClassLoader loader)
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                Actions actions = (Actions) m_actions.get();
+                actions.set(Actions.GET_PARENT_CLASS_LOADER_ACTION, loader);
+                return (ClassLoader) AccessController.doPrivileged(actions, m_acc);
+            }
+            catch (PrivilegedActionException ex)
+            {
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            return loader.getParent();
+        }
+    }
+
+    public ClassLoader getSystemClassLoader()
+    {
+        if (System.getSecurityManager() != null)
+        {
+            try
+            {
+                Actions actions = (Actions) m_actions.get();
+                actions.set(Actions.GET_SYSTEM_CLASS_LOADER_ACTION);
+                return (ClassLoader) AccessController.doPrivileged(actions, m_acc);
+            }
+            catch (PrivilegedActionException ex)
+            {
+                throw (RuntimeException) ex.getException();
+            }
+        }
+        else
+        {
+            return ClassLoader.getSystemClassLoader();
+        }
+    }
+
     public Class forName(String name) throws ClassNotFoundException
     {
         if (System.getSecurityManager() != null)
@@ -1007,22 +1049,24 @@ public class SecureAction
         public static final int GET_METHOD_ACTION = 19;
         public static final int GET_POLICY_ACTION = 20;
         public static final int GET_PROPERTY_ACTION = 21;
-        public static final int GET_URL_INPUT_ACTION = 22;
-        public static final int INVOKE_CONSTRUCTOR_ACTION = 23;
-        public static final int INVOKE_DIRECTMETHOD_ACTION = 24;
-        public static final int INVOKE_METHOD_ACTION = 25;
-        public static final int LIST_DIRECTORY_ACTION = 26;
-        public static final int MAKE_DIRECTORIES_ACTION = 27;
-        public static final int MAKE_DIRECTORY_ACTION = 28;
-        public static final int OPEN_JARX_ACTION = 29;
-        public static final int OPEN_JARX_VERIFY_ACTION = 30;
-        public static final int OPEN_URLCONNECTION_ACTION = 31;
-        public static final int RENAME_FILE_ACTION = 32;
-        public static final int SET_ACCESSIBLE_ACTION = 33;
-        public static final int START_ACTIVATOR_ACTION = 34;
-        public static final int STOP_ACTIVATOR_ACTION = 35;
-        public static final int SWAP_FIELD_ACTION = 36;
-        public static final int SYSTEM_EXIT_ACTION = 37;
+        public static final int GET_PARENT_CLASS_LOADER_ACTION = 22;
+        public static final int GET_SYSTEM_CLASS_LOADER_ACTION = 23;
+        public static final int GET_URL_INPUT_ACTION = 24;
+        public static final int INVOKE_CONSTRUCTOR_ACTION = 25;
+        public static final int INVOKE_DIRECTMETHOD_ACTION = 26;
+        public static final int INVOKE_METHOD_ACTION = 27;
+        public static final int LIST_DIRECTORY_ACTION = 28;
+        public static final int MAKE_DIRECTORIES_ACTION = 29;
+        public static final int MAKE_DIRECTORY_ACTION = 30;
+        public static final int OPEN_JARX_ACTION = 31;
+        public static final int OPEN_JARX_VERIFY_ACTION = 32;
+        public static final int OPEN_URLCONNECTION_ACTION = 33;
+        public static final int RENAME_FILE_ACTION = 34;
+        public static final int SET_ACCESSIBLE_ACTION = 35;
+        public static final int START_ACTIVATOR_ACTION = 36;
+        public static final int STOP_ACTIVATOR_ACTION = 37;
+        public static final int SWAP_FIELD_ACTION = 38;
+        public static final int SYSTEM_EXIT_ACTION = 39;
 
         private int m_action = -1;
         private Object m_arg1 = null;
@@ -1030,6 +1074,11 @@ public class SecureAction
         private Object m_arg3 = null;
         private Object m_arg4 = null;
         private Object m_arg5 = null;
+
+        public void set(int action)
+        {
+            m_action = action;
+        }
 
         public void set(int action, Object arg1)
         {
@@ -1101,6 +1150,14 @@ public class SecureAction
             else if (action == GET_PROPERTY_ACTION)
             {
                 return System.getProperty((String) arg1, (String) arg2);
+            }
+            else if (action == GET_PARENT_CLASS_LOADER_ACTION)
+            {
+                return ((ClassLoader) arg1).getParent();
+            }
+            else if (action == GET_SYSTEM_CLASS_LOADER_ACTION)
+            {
+                return ClassLoader.getSystemClassLoader();
             }
             else if (action == FOR_NAME_ACTION)
             {

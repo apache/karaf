@@ -1275,11 +1275,11 @@ public class ModuleImpl implements IModule
             final ClassLoader parent;
             if (cfg.equalsIgnoreCase(Constants.FRAMEWORK_BUNDLE_PARENT_APP))
             {
-                parent = ClassLoader.getSystemClassLoader();
+                parent = m_secureAction.getSystemClassLoader();
             }
             else if (cfg.equalsIgnoreCase(Constants.FRAMEWORK_BUNDLE_PARENT_EXT))
             {
-                parent = ClassLoader.getSystemClassLoader().getParent();
+                parent = m_secureAction.getSystemClassLoader().getParent();
             }
             else if (cfg.equalsIgnoreCase(Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK))
             {
@@ -1290,7 +1290,7 @@ public class ModuleImpl implements IModule
             // class loader by default instead, which is not really spec.
             else if (m_bootClassLoader == null)
             {
-                parent = ClassLoader.getSystemClassLoader();
+                parent = m_secureAction.getSystemClassLoader();
             }
             else
             {
