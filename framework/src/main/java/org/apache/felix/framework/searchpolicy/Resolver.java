@@ -39,7 +39,6 @@ import org.apache.felix.moduleloader.ICapability;
 import org.apache.felix.moduleloader.IModule;
 import org.apache.felix.moduleloader.IRequirement;
 import org.apache.felix.moduleloader.IWire;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
 public class Resolver

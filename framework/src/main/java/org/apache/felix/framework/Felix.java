@@ -2598,7 +2598,7 @@ ex.printStackTrace();
             for (int i = 0; i < listenerHooks.size(); i++)
             {
                 m_registry.invokeHook((ServiceReference) listenerHooks.get(i), this, removedCallback);
-            };
+            }
         }
 
         // Invoke the ListenerHook.added() on all hooks.
@@ -2730,7 +2730,7 @@ ex.printStackTrace();
 
         // Check to see if this a listener hook; if so, then we need
         // to invoke the callback with all existing service listeners.
-        if (m_registry.isHook(classNames, ListenerHook.class, svcObj))
+        if (ServiceRegistry.isHook(classNames, ListenerHook.class, svcObj))
         {
             m_registry.invokeHook(reg.getReference(), this, new InvokeHookCallback()
             {
@@ -3873,8 +3873,8 @@ ex.printStackTrace();
                     }
 
                     // Before trying to resolve, tell the resolver state to
-                    // merge all fragments into host, which may result in the
-                    // rootModule changing if the real root is a module.
+                    // merge all fragments into hosts, which may result in the
+                    // rootModule changing if the root is a fragment.
                     IModule newRootModule;
                     try
                     {
@@ -3930,6 +3930,18 @@ ex.printStackTrace();
                         {
                             return wires[i];
                         }
+                    }
+
+                    // Before trying to resolve, tell the resolver state to
+                    // merge all fragments into their hosts.
+                    try
+                    {
+                        m_resolverState.mergeFragments(null);
+                    }
+                    catch (Exception ex)
+                    {
+                        ex.printStackTrace();
+                        throw new ResolveException("Unable to merge fragments", importer, null);
                     }
 
                     Object[] result = m_resolver.resolveDynamicImport(m_resolverState, importer, pkgName);
