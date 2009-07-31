@@ -20,6 +20,7 @@ package org.apache.felix.framework;
 
 import java.util.*;
 
+import org.apache.felix.framework.util.Util;
 import org.apache.felix.moduleloader.IModule;
 
 class FindEntriesEnumeration implements Enumeration
@@ -77,7 +78,7 @@ class FindEntriesEnumeration implements Enumeration
         // File pattern defaults to "*" if not specified.
         filePattern = (filePattern == null) ? "*" : filePattern;
 
-        m_filePattern = parseSubstring(filePattern);
+        m_filePattern = Util.parseSubstring(filePattern);
 
         m_next = findNext();
     }
@@ -137,7 +138,7 @@ class FindEntriesEnumeration implements Enumeration
                         String lastElement = entryName.substring(startIdx, endIdx);
 
                         // See if the file pattern matches the last element of the path.
-                        if (checkSubstring(m_filePattern, lastElement))
+                        if (Util.checkSubstring(m_filePattern, lastElement))
                         {
                             // Convert entry name into an entry URL.
                             return m_modules[m_moduleIndex].getEntry(entryName);
@@ -149,143 +150,5 @@ class FindEntriesEnumeration implements Enumeration
         }
 
         return null;
-    }
-
-    //
-    // The following substring-related code was lifted and modified
-    // from the LDAP parser code.
-    //
-
-    private static String[] parseSubstring(String target)
-    {
-        List pieces = new ArrayList();
-        StringBuffer ss = new StringBuffer();
-        // int kind = SIMPLE; // assume until proven otherwise
-        boolean wasStar = false; // indicates last piece was a star
-        boolean leftstar = false; // track if the initial piece is a star
-        boolean rightstar = false; // track if the final piece is a star
-
-        int idx = 0;
-
-        // We assume (sub)strings can contain leading and trailing blanks
-        for (;;)
-        {
-            if (idx >= target.length())
-            {
-                if (wasStar)
-                {
-                    // insert last piece as "" to handle trailing star
-                    rightstar = true;
-                }
-                else
-                {
-                    pieces.add(ss.toString());
-                    // accumulate the last piece
-                    // note that in the case of
-                    // (cn=); this might be
-                    // the string "" (!=null)
-                }
-                ss.setLength(0);
-                break;
-            }
-
-            char c = target.charAt(idx++);
-            if (c == '*')
-            {
-                if (wasStar)
-                {
-                    // encountered two successive stars;
-                    // I assume this is illegal
-                    throw new IllegalArgumentException("Invalid filter string: " + target);
-                }
-                if (ss.length() > 0)
-                {
-                    pieces.add(ss.toString()); // accumulate the pieces
-                    // between '*' occurrences
-                }
-                ss.setLength(0);
-                // if this is a leading star, then track it
-                if (pieces.size() == 0)
-                {
-                    leftstar = true;
-                }
-                ss.setLength(0);
-                wasStar = true;
-            }
-            else
-            {
-                wasStar = false;
-                ss.append(c);
-            }
-        }
-        if (leftstar || rightstar || pieces.size() > 1)
-        {
-            // insert leading and/or trailing "" to anchor ends
-            if (rightstar)
-            {
-                pieces.add("");
-            }
-            if (leftstar)
-            {
-                pieces.add(0, "");
-            }
-        }
-
-        return (String[]) pieces.toArray(new String[pieces.size()]);
-    }
-
-    private static boolean checkSubstring(String[] pieces, String s)
-    {
-        // Walk the pieces to match the string
-        // There are implicit stars between each piece,
-        // and the first and last pieces might be "" to anchor the match.
-        // assert (pieces.length > 1)
-        // minimal case is <string>*<string>
-
-        boolean result = false;
-        int len = pieces.length;
-        int index = 0;
-
-        for (int i = 0; i < len; i++)
-        {
-            String piece = (String) pieces[i];
-            if (i == len - 1)
-            {
-                // this is the last piece
-                if (s.endsWith(piece))
-                {
-                    result = true;
-                }
-                else
-                {
-                    result = false;
-                }
-                break;
-            }
-            // initial non-star; assert index == 0
-            else if (i == 0)
-            {
-                if (!s.startsWith(piece))
-                {
-                    result = false;
-                    break;
-                }
-            }
-            // assert i > 0 && i < len-1
-            else
-            {
-                // Sure wish stringbuffer supported e.g. indexOf
-                index = s.indexOf(piece, index);
-                if (index < 0)
-                {
-                    result = false;
-                    break;
-                }
-            }
-            // start beyond the matching piece
-            index += piece.length();
-        }
-
-        return result;
     }
 }
