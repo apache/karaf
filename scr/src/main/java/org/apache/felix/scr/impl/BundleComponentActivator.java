@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -35,6 +36,7 @@ import org.apache.felix.scr.impl.manager.AbstractComponentManager;
 import org.apache.felix.scr.impl.metadata.ComponentMetadata;
 import org.apache.felix.scr.impl.metadata.XmlHandler;
 import org.apache.felix.scr.impl.parser.KXml2SAXParser;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentException;
 import org.osgi.service.log.LogService;
@@ -127,8 +129,8 @@ public class BundleComponentActivator implements Logger
         {
             String descriptorLocation = st.nextToken();
 
-            URL descriptorURL = m_context.getBundle().getResource( descriptorLocation );
-            if ( descriptorURL == null )
+            URL[] descriptorURLs = findDescriptors( m_context.getBundle(), descriptorLocation );
+            if ( descriptorURLs.length == 0 )
             {
                 // 112.4.1 If an XML document specified by the header cannot be located in the bundle and its attached
                 // fragments, SCR must log an error message with the Log Service, if present, and continue.
@@ -137,80 +139,150 @@ public class BundleComponentActivator implements Logger
                 continue;
             }
 
-            InputStream stream = null;
-            try
+            // load from the descriptors
+            for ( int i = 0; i < descriptorURLs.length; i++ )
             {
-                stream = descriptorURL.openStream();
+                loadDescriptor( descriptorURLs[i] );
+            }
+        }
+    }
 
-                BufferedReader in = new BufferedReader( new InputStreamReader( stream ) );
-                XmlHandler handler = new XmlHandler( m_context.getBundle(), this );
-                KXml2SAXParser parser;
 
-                parser = new KXml2SAXParser( in );
+    /**
+     * Finds component descriptors based on descriptor location.
+     *
+     * @param bundle bundle to search for descriptor files
+     * @param descriptorLocation descriptor location
+     * @return array of descriptors or empty array if none found
+     */
+    static URL[] findDescriptors( final Bundle bundle, final String descriptorLocation )
+    {
+        if ( bundle == null || descriptorLocation == null || descriptorLocation.trim().length() == 0 )
+        {
+            return new URL[0];
+        }
 
-                parser.parseXML( handler );
+        // for compatibility with previoues versions (<= 1.0.8) use getResource() for non wildcarded entries
+        if ( descriptorLocation.indexOf( "*" ) == -1 )
+        {
+            final URL descriptor = bundle.getResource( descriptorLocation );
+            if ( descriptor == null )
+            {
+                return new URL[0];
+            }
+            return new URL[]
+                { descriptor };
+        }
 
-                // 112.4.2 Component descriptors may contain a single, root component element
-                // or one or more component elements embedded in a larger document
-                Iterator i = handler.getComponentMetadataList().iterator();
-                while ( i.hasNext() )
+        // split pattern and path
+        final int lios = descriptorLocation.lastIndexOf( "/" );
+        final String path;
+        final String filePattern;
+        if ( lios > 0 )
+        {
+            path = descriptorLocation.substring( 0, lios );
+            filePattern = descriptorLocation.substring( lios + 1 );
+        }
+        else
+        {
+            path = "/";
+            filePattern = descriptorLocation;
+        }
+
+        // find the entries
+        final Enumeration entries = bundle.findEntries( path, filePattern, false );
+        if ( entries == null || !entries.hasMoreElements() )
+        {
+            return new URL[0];
+        }
+
+        // create the result list
+        List urls = new ArrayList();
+        while ( entries.hasMoreElements() )
+        {
+            urls.add( entries.nextElement() );
+        }
+        return ( URL[] ) urls.toArray( new URL[urls.size()] );
+    }
+
+
+    private void loadDescriptor( final URL descriptorURL )
+    {
+        // simple path for log messages
+        final String descriptorLocation = descriptorURL.getPath();
+
+        InputStream stream = null;
+        try
+        {
+            stream = descriptorURL.openStream();
+
+            BufferedReader in = new BufferedReader( new InputStreamReader( stream ) );
+            XmlHandler handler = new XmlHandler( m_context.getBundle(), this );
+            KXml2SAXParser parser;
+
+            parser = new KXml2SAXParser( in );
+
+            parser.parseXML( handler );
+
+            // 112.4.2 Component descriptors may contain a single, root component element
+            // or one or more component elements embedded in a larger document
+            Iterator i = handler.getComponentMetadataList().iterator();
+            while ( i.hasNext() )
+            {
+                ComponentMetadata metadata = ( ComponentMetadata ) i.next();
+                try
                 {
-                    ComponentMetadata metadata = ( ComponentMetadata ) i.next();
-                    try
+                    // check and reserve the component name
+                    m_componentRegistry.checkComponentName( metadata.getName() );
+
+                    // validate the component metadata
+                    metadata.validate( this );
+
+                    // Request creation of the component manager
+                    ComponentHolder holder = m_componentRegistry.createComponentHolder( this, metadata );
+
+                    // register the component after validation
+                    m_componentRegistry.registerComponent( metadata.getName(), holder );
+                    m_managers.add( holder );
+
+                    // enable the component
+                    if ( metadata.isEnabled() )
                     {
-                        // check and reserve the component name
-                        m_componentRegistry.checkComponentName( metadata.getName() );
-
-                        // validate the component metadata
-                        metadata.validate( this );
-
-                        // Request creation of the component manager
-                        ComponentHolder holder = m_componentRegistry.createComponentHolder( this, metadata );
-
-                        // register the component after validation
-                        m_componentRegistry.registerComponent( metadata.getName(), holder );
-                        m_managers.add( holder );
-
-                        // enable the component
-                        if ( metadata.isEnabled() )
-                        {
-                            holder.enableComponents();
-                        }
-                   }
-                    catch ( Throwable t )
-                    {
-                        // There is a problem with this particular component, we'll log the error
-                        // and proceed to the next one
-                        log( LogService.LOG_ERROR, "Cannot register Component", metadata, t );
-
-                        // make sure the name is not reserved any more
-                        m_componentRegistry.unregisterComponent( metadata.getName() );
+                        holder.enableComponents();
                     }
                 }
-            }
-            catch ( IOException ex )
-            {
-                // 112.4.1 If an XML document specified by the header cannot be located in the bundle and its attached
-                // fragments, SCR must log an error message with the Log Service, if present, and continue.
-
-                log( LogService.LOG_ERROR, "Problem reading descriptor entry '" + descriptorLocation + "'", null, ex );
-            }
-            catch ( Exception ex )
-            {
-                log( LogService.LOG_ERROR, "General problem with descriptor entry '" + descriptorLocation + "'", null,
-                    ex );
-            }
-            finally
-            {
-                if ( stream != null )
+                catch ( Throwable t )
                 {
-                    try
-                    {
-                        stream.close();
-                    }
-                    catch ( IOException ignore )
-                    {
-                    }
+                    // There is a problem with this particular component, we'll log the error
+                    // and proceed to the next one
+                    log( LogService.LOG_ERROR, "Cannot register Component", metadata, t );
+
+                    // make sure the name is not reserved any more
+                    m_componentRegistry.unregisterComponent( metadata.getName() );
+                }
+            }
+        }
+        catch ( IOException ex )
+        {
+            // 112.4.1 If an XML document specified by the header cannot be located in the bundle and its attached
+            // fragments, SCR must log an error message with the Log Service, if present, and continue.
+
+            log( LogService.LOG_ERROR, "Problem reading descriptor entry '" + descriptorLocation + "'", null, ex );
+        }
+        catch ( Exception ex )
+        {
+            log( LogService.LOG_ERROR, "General problem with descriptor entry '" + descriptorLocation + "'", null, ex );
+        }
+        finally
+        {
+            if ( stream != null )
+            {
+                try
+                {
+                    stream.close();
+                }
+                catch ( IOException ignore )
+                {
                 }
             }
         }
