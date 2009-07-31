@@ -73,7 +73,8 @@
                         </Export-Package>
                         <Private-Package>
                             org.apache.felix.metatype.internal,
-                            org.apache.felix.metatype.internal.l10n
+                            org.apache.felix.metatype.internal.l10n,
+                            org.osgi.util.tracker
                         </Private-Package>
                         <Bundle-Activator>
                             org.apache.felix.metatype.internal.Activator
