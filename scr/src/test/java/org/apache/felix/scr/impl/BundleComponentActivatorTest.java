@@ -82,7 +82,7 @@ public class BundleComponentActivatorTest extends TestCase
         throws MalformedURLException
     {
         URL descriptor = new URL( "file:foo.xml" );
-        final Bundle bundle = EasyMock.createNiceMock( Bundle.class );
+        final Bundle bundle = (Bundle) EasyMock.createNiceMock( Bundle.class );
         EasyMock.expect( bundle.getResource( "/some/location/foo.xml" ) ).andReturn( descriptor );
 
         EasyMock.replay( new Object[]{ bundle } );
@@ -105,7 +105,7 @@ public class BundleComponentActivatorTest extends TestCase
                 new URL( "file:foo2.xml" )
             };
         final Enumeration de = new Vector( Arrays.asList( urls ) ).elements();
-        final Bundle bundle = EasyMock.createNiceMock( Bundle.class );
+        final Bundle bundle = (Bundle) EasyMock.createNiceMock( Bundle.class );
         EasyMock.expect( bundle.findEntries( path, filePattern, false ) ).andReturn( de );
 
         EasyMock.replay( new Object[]{ bundle } );
@@ -150,7 +150,7 @@ public class BundleComponentActivatorTest extends TestCase
     public void test_findDescriptors_withWildcardLocation_nullEnum()
         throws MalformedURLException
     {
-        final Bundle bundle = EasyMock.createNiceMock( Bundle.class );
+        final Bundle bundle = (Bundle) EasyMock.createNiceMock( Bundle.class );
         EasyMock.expect( bundle.findEntries( "/", "*.xml", false ) ).andReturn( null );
 
         EasyMock.replay( new Object[]{ bundle } );
@@ -169,7 +169,7 @@ public class BundleComponentActivatorTest extends TestCase
     public void test_findDescriptors_withWildcardLocation_emptyEnum()
         throws MalformedURLException
     {
-        final Bundle bundle = EasyMock.createNiceMock( Bundle.class );
+        final Bundle bundle = (Bundle) EasyMock.createNiceMock( Bundle.class );
         EasyMock.expect( bundle.findEntries( "/", "*.xml", false ) ).andReturn( new Vector().elements() );
 
         EasyMock.replay( new Object[]{ bundle } );
