@@ -52,6 +52,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -62,6 +63,8 @@ public class ComponentConfigurationTest
 
     @Inject
     private BundleContext bundleContext;
+
+    private Bundle bundle;
 
     private ServiceTracker scrTracker;
 
@@ -80,13 +83,10 @@ public class ComponentConfigurationTest
     @Configuration
     public static Option[] configuration()
     {
-        return options(
-            provision(
-                scanDir( "target" ).filter( "*.jar" )
-                , mavenBundle( "org.ops4j.pax.swissbox", "pax-swissbox-tinybundles", "1.0.0" )
-                , mavenBundle( "org.apache.felix", "org.apache.felix.configadmin", "1.0.10" )
-            )
-//            , PaxRunnerOptions.vmOption( "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=30303" )
+        return options( provision( scanDir( "target" ).filter( "*.jar" ), mavenBundle( "org.ops4j.pax.swissbox",
+            "pax-swissbox-tinybundles", "1.0.0" ), mavenBundle( "org.apache.felix", "org.apache.felix.configadmin",
+            "1.0.10" ) )
+        //            , PaxRunnerOptions.vmOption( "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=30303" )
         //            PaxRunnerOptions.timeout( 0 )
 
         );
@@ -94,18 +94,32 @@ public class ComponentConfigurationTest
 
 
     @Before
-    public void setUp()
+    public void setUp() throws BundleException
     {
         scrTracker = new ServiceTracker( bundleContext, ScrService.class.getName(), null );
         scrTracker.open();
         configAdminTracker = new ServiceTracker( bundleContext, ConfigurationAdmin.class.getName(), null );
         configAdminTracker.open();
+
+        //        final InputStream bundleStream = newBundle()
+        final InputStream bundleStream = new MyTinyBundle().addResource( "OSGI-INF/components.xml",
+            getClass().getResource( "/integration_test_simple_components.xml" ) ).prepare(
+            withBnd().set( Constants.BUNDLE_SYMBOLICNAME, "simplecomponent" ).set( Constants.BUNDLE_VERSION, "0.0.11" )
+                .set( Constants.IMPORT_PACKAGE, "org.apache.felix.scr.integration.components" ).set(
+                    "Service-Component", "OSGI-INF/components.xml" ) ).build( TinyBundles.asStream() );
+
+        bundle = bundleContext.installBundle( "test:SimpleComponent", bundleStream );
+
+        bundle.start();
     }
 
 
     @After
-    public void tearDown()
+    public void tearDown() throws BundleException
     {
+        bundle.stop();
+        bundle.uninstall();
+
         configAdminTracker.close();
         configAdminTracker = null;
         scrTracker.close();
@@ -114,37 +128,44 @@ public class ComponentConfigurationTest
 
 
     @Test
-    public void test_SimpleComponent() throws BundleException
+    public void test_SimpleComponent_configuration_ignore()
     {
-        //        final InputStream bundleStream = newBundle()
-        final InputStream bundleStream = new MyTinyBundle()
-            .addResource( "OSGI-INF/components.xml", getClass().getResource( "/integration_test_simple_components.xml" ) )
-            .prepare(
-                withBnd()
-                .set( Constants.BUNDLE_SYMBOLICNAME, "simplecomponent" )
-                .set( Constants.BUNDLE_VERSION, "0.0.11" )
-                .set( Constants.IMPORT_PACKAGE, "org.apache.felix.scr.integration.components" )
-                .set( "Service-Component", "OSGI-INF/components.xml" ) ).build( TinyBundles.asStream() );
+        test_configuration_ignore( "SimpleComponent" );
+    }
 
-        final Bundle bundle = bundleContext.installBundle( "test:SimpleComponent", bundleStream );
 
-        bundle.start();
+    @Test
+    public void test_SimpleComponent_configuration_optional()
+    {
+        test_configuration_optional( "SimpleComponent" );
+    }
 
-        try
-        {
-            test_configuration_ignore( "SimpleComponent" );
-            test_configuration_optional( "SimpleComponent" );
-            test_configuration_require( "SimpleComponent" );
 
-            test_dynamic_configuration( "DynamicConfigurationComponent" );
+    @Test
+    public void test_SimpleComponent_configuration_require()
+    {
+        test_configuration_require( "SimpleComponent" );
+    }
 
-            test_factory_configuration( "FactoryConfigurationComponent" );
-        }
-        finally
-        {
-            bundle.stop();
-            bundle.uninstall();
-        }
+
+    @Test
+    public void test_SimpleComponent_dynamic_configuration()
+    {
+        test_dynamic_configuration( "DynamicConfigurationComponent" );
+    }
+
+
+    @Test
+    public void test_SimpleComponent_factory_configuration()
+    {
+        test_factory_configuration( "FactoryConfigurationComponent" );
+    }
+
+
+    @Test
+    public void test_SimpleComponent_service()
+    {
+        test_service( "ServiceComponent" );
     }
 
 
@@ -388,7 +409,7 @@ public class ComponentConfigurationTest
         delay();
 
         // expect a single unsatisifed component
-        final Component[] configsDeleted= findComponentsByName( factoryPid );
+        final Component[] configsDeleted = findComponentsByName( factoryPid );
         TestCase.assertNotNull( configsDeleted );
         TestCase.assertEquals( 1, configsDeleted.length );
         TestCase.assertEquals( Component.STATE_UNSATISFIED, configsDeleted[0].getState() );
@@ -396,6 +417,52 @@ public class ComponentConfigurationTest
         TestCase.assertFalse( SimpleComponent.INSTANCES.containsKey( pid0 ) );
         TestCase.assertFalse( SimpleComponent.INSTANCES.containsKey( pid1 ) );
 
+    }
+
+
+    private void test_service( final String componentName )
+    {
+        final String pid = componentName;
+
+        // one single component exists without configuration
+        final Component component = findComponentByName( pid );
+        TestCase.assertNotNull( component );
+        TestCase.assertEquals( Component.STATE_DISABLED, component.getState() );
+
+        component.enable();
+        delay();
+
+        final SimpleComponent instance = SimpleComponent.INSTANCE;
+        TestCase.assertEquals( Component.STATE_ACTIVE, component.getState() );
+        TestCase.assertNotNull( instance );
+
+        // assert component properties (all !)
+        TestCase.assertEquals( "required", instance.getProperty( "prop.public" ) );
+        TestCase.assertEquals( "private", instance.getProperty( ".prop.private" ) );
+
+        // get the service
+        ServiceReference reference = bundleContext.getServiceReference( "java.lang.Object" );
+        TestCase.assertNotNull( reference );
+        try
+        {
+            TestCase.assertEquals( instance, bundleContext.getService( reference ) );
+        }
+        finally
+        {
+            bundleContext.ungetService( reference );
+        }
+
+        // check service properties
+        TestCase.assertEquals( "required", reference.getProperty( "prop.public" ) );
+        TestCase.assertNull( reference.getProperty( ".prop.private" ) );
+
+        // check property keys do not contain private keys
+        for ( String propKey : reference.getPropertyKeys() )
+        {
+            TestCase.assertTrue( "Property key [" + propKey
+                + "] must have at least one character and not start with a dot", propKey.length() > 0
+                && !propKey.startsWith( "." ) );
+        }
     }
 
 

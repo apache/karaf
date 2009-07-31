@@ -52,4 +52,17 @@
         configuration-policy="require" >
         <implementation class="org.apache.felix.scr.integration.components.SimpleComponent" />
     </scr:component>
+
+    <!-- component is a stupid service to verify non-use of private props -->
+    <scr:component name="ServiceComponent"
+        enabled="false" immediate="true"
+        configuration-policy="ignore" >
+        <implementation class="org.apache.felix.scr.integration.components.SimpleComponent" />
+        <property name="prop.public" value="required" />
+        <property name=".prop.private" value="private" />
+        <service>
+            <provide interface="java.lang.Object" />
+        </service>
+    </scr:component>
+
 </components>
