@@ -440,7 +440,7 @@ public class ImmediateComponentManager extends AbstractComponentManager
         {
             try
             {
-                final Dictionary regProps = copyTo( null, props );
+                final Dictionary regProps = getServiceProperties();
                 sr.setProperties( regProps );
             }
             catch ( IllegalStateException ise )

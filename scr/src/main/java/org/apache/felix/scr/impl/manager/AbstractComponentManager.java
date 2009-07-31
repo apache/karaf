@@ -723,7 +723,7 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
             log( LogService.LOG_DEBUG, "registering services", m_componentMetadata, null );
 
             // get a copy of the component properties as service properties
-            Dictionary serviceProperties = copyTo( null, getProperties() );
+            final Dictionary serviceProperties = getServiceProperties();
 
             return getActivator().getBundleContext().registerService(
                     getComponentMetadata().getServiceMetadata().getProvides(),
@@ -925,6 +925,17 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
     public abstract Dictionary getProperties();
 
     /**
+     * Returns the subset of component properties to be used as service
+     * properties. These properties are all component properties where property
+     * name does not start with dot (.), properties which are considered
+     * private.
+     */
+    public Dictionary getServiceProperties()
+    {
+        return copyTo( null, getProperties(), false);
+    }
+
+    /**
      * Copies the properties from the <code>source</code> <code>Dictionary</code>
      * into the <code>target</code> <code>Dictionary</code>.
      *
@@ -938,7 +949,31 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
      *      <code>source</code> is <code>null</code> or empty and
      *      <code>target</code> was <code>null</code>.
      */
-    protected Dictionary copyTo( Dictionary target, Dictionary source )
+    protected static Dictionary copyTo( Dictionary target, Dictionary source )
+    {
+        return copyTo( target, source, true );
+    }
+
+    /**
+     * Copies the properties from the <code>source</code> <code>Dictionary</code>
+     * into the <code>target</code> <code>Dictionary</code> except for private
+     * properties (whose name has a leading dot) which are only copied if the
+     * <code>allProps</code> parameter is <code>true</code>.
+     *
+     * @param target    The <code>Dictionary</code> into which to copy the
+     *                  properties. If <code>null</code> a new <code>Hashtable</code> is
+     *                  created.
+     * @param source    The <code>Dictionary</code> providing the properties to
+     *                  copy. If <code>null</code> or empty, nothing is copied.
+     * @param allProps  Whether all properties (<code>true</code>) or only the
+     *                  public properties (<code>false</code>) are to be copied.
+     *
+     * @return The <code>target</code> is returned, which may be empty if
+     *         <code>source</code> is <code>null</code> or empty and
+     *         <code>target</code> was <code>null</code> or all properties are
+     *         private and had not to be copied
+     */
+    protected static Dictionary copyTo( Dictionary target, final Dictionary source, final boolean allProps )
     {
         if ( target == null )
         {
@@ -949,13 +984,18 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
         {
             for ( Enumeration ce = source.keys(); ce.hasMoreElements(); )
             {
-                Object key = ce.nextElement();
-                target.put( key, source.get( key ) );
+                // cast is save, because key must be a string as per the spec
+                String key = ( String ) ce.nextElement();
+                if ( allProps || key.charAt( 0 ) != '.' )
+                {
+                    target.put( key, source.get( key ) );
+                }
             }
         }
 
         return target;
     }
+
 
     /**
      *
