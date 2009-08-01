@@ -49,6 +49,12 @@ public class ComponentMetadata
     // set of valid configuration policy settings
     private static final Set CONFIGURATION_POLICY_VALID;
 
+    // marker value indicating duplicate implementation class setting
+    private static final String IMPLEMENTATION_CLASS_DUPLICATE = "icd";
+
+    // marker value indicating duplicate service setting
+    private static final ServiceMetadata SERVICE_DUPLICATE = new ServiceMetadata();
+
     // the namespace code of the namespace declaring this component, this is
     // one of the XmlHandler.DS_VERSION_* constants
     private final int m_namespaceCode;
@@ -186,7 +192,16 @@ public class ComponentMetadata
         {
             return;
         }
-        m_implementationClassName = implementationClassName;
+
+        // set special flag value if implementation class is already set
+        if ( m_implementationClassName != null )
+        {
+            m_implementationClassName = IMPLEMENTATION_CLASS_DUPLICATE;
+        }
+        else
+        {
+            m_implementationClassName = implementationClassName;
+        }
     }
 
 
@@ -284,7 +299,16 @@ public class ComponentMetadata
         {
             return;
         }
-        m_service = service;
+
+        // set special flag value if implementation class is already set
+        if ( m_service != null )
+        {
+            m_service = SERVICE_DUPLICATE;
+        }
+        else
+        {
+            m_service = service;
+        }
     }
 
 
@@ -550,6 +574,10 @@ public class ComponentMetadata
         {
             throw validationFailure( "Implementation class name missing" );
         }
+        else if ( m_implementationClassName == IMPLEMENTATION_CLASS_DUPLICATE )
+        {
+            throw validationFailure( "Implementation element must occur exactly once" );
+        }
 
         // 112.4.3 configuration-policy (since DS 1.1)
         if ( m_configurationPolicy == null )
@@ -614,7 +642,11 @@ public class ComponentMetadata
         m_propertyMetaData.clear();
 
         // Check that the provided services are valid too
-        if ( m_service != null )
+        if ( m_service == SERVICE_DUPLICATE )
+        {
+            throw validationFailure( "Service element must occur at most once" );
+        }
+        else if ( m_service != null )
         {
             m_service.validate( this );
         }

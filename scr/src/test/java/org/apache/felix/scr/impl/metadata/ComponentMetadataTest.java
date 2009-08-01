@@ -474,6 +474,72 @@ public class ComponentMetadataTest extends TestCase
     }
 
 
+    public void test_duplicate_implementation_ds10()
+    {
+        final ComponentMetadata cm = createComponentMetadata( Boolean.TRUE, null );
+        cm.setImplementationClassName( "second.implementation.class" );
+        try
+        {
+            cm.validate( logger );
+            fail( "Expect validation failure for duplicate implementation element" );
+        }
+        catch ( ComponentException ce )
+        {
+            // expected
+        }
+    }
+
+
+    public void test_duplicate_implementation_ds11()
+    {
+        final ComponentMetadata cm = createComponentMetadata11( Boolean.TRUE, null );
+        cm.setImplementationClassName( "second.implementation.class" );
+        try
+        {
+            cm.validate( logger );
+            fail( "Expect validation failure for duplicate implementation element" );
+        }
+        catch ( ComponentException ce )
+        {
+            // expected
+        }
+    }
+
+
+    public void test_duplicate_service_ds10()
+    {
+        final ComponentMetadata cm = createComponentMetadata( Boolean.TRUE, null );
+        cm.setService( createServiceMetadata( Boolean.TRUE ) );
+        cm.setService( createServiceMetadata( Boolean.TRUE ) );
+        try
+        {
+            cm.validate( logger );
+            fail( "Expect validation failure for duplicate service element" );
+        }
+        catch ( ComponentException ce )
+        {
+            // expected
+        }
+    }
+
+
+    public void test_duplicate_service_ds11()
+    {
+        final ComponentMetadata cm = createComponentMetadata11( Boolean.TRUE, null );
+        cm.setService( createServiceMetadata( Boolean.TRUE ) );
+        cm.setService( createServiceMetadata( Boolean.TRUE ) );
+        try
+        {
+            cm.validate( logger );
+            fail( "Expect validation failure for duplicate service element" );
+        }
+        catch ( ComponentException ce )
+        {
+            // expected
+        }
+    }
+
+
     //---------- Helper methods
 
     // Creates DS 1.0 Component Metadata

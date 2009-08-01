@@ -198,6 +198,74 @@ public class XmlHandlerTest extends TestCase
     }
 
 
+    public void test_duplicate_implementation_class_10() throws Exception
+    {
+        final List metadataList10 = readMetadata( "/components_duplicate_implementation_10.xml" );
+        assertEquals( "Component Descriptors", 1, metadataList10.size() );
+        final ComponentMetadata cm10 = ( ComponentMetadata ) metadataList10.get( 0 );
+        try
+        {
+            cm10.validate( logger );
+            fail( "Expect validation failure for duplicate implementation element" );
+        }
+        catch ( ComponentException ce )
+        {
+            // expected
+        }
+    }
+
+
+    public void test_duplicate_implementation_class_11() throws Exception
+    {
+        final List metadataList11 = readMetadata( "/components_duplicate_implementation_11.xml" );
+        assertEquals( "Component Descriptors", 1, metadataList11.size() );
+        final ComponentMetadata cm11 = ( ComponentMetadata ) metadataList11.get( 0 );
+        try
+        {
+            cm11.validate( logger );
+            fail( "Expect validation failure for duplicate implementation element" );
+        }
+        catch ( ComponentException ce )
+        {
+            // expected
+        }
+    }
+
+
+    public void test_duplicate_service_10() throws Exception
+    {
+        final List metadataList10 = readMetadata( "/components_duplicate_service_10.xml" );
+        assertEquals( "Component Descriptors", 1, metadataList10.size() );
+        final ComponentMetadata cm10 = ( ComponentMetadata ) metadataList10.get( 0 );
+        try
+        {
+            cm10.validate( logger );
+            fail( "Expect validation failure for duplicate service element" );
+        }
+        catch ( ComponentException ce )
+        {
+            // expected
+        }
+    }
+
+
+    public void test_duplicate_service_11() throws Exception
+    {
+        final List metadataList11 = readMetadata( "/components_duplicate_service_11.xml" );
+        assertEquals( "Component Descriptors", 1, metadataList11.size() );
+        final ComponentMetadata cm11 = ( ComponentMetadata ) metadataList11.get( 0 );
+        try
+        {
+            cm11.validate( logger );
+            fail( "Expect validation failure for duplicate service element" );
+        }
+        catch ( ComponentException ce )
+        {
+            // expected
+        }
+    }
+
+
     //---------- helper
 
     private List readMetadata( String filename ) throws IOException, ComponentException, XmlPullParserException,
