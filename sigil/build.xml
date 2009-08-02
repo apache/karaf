@@ -44,6 +44,7 @@
     <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.ui" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
     <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.utils" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
     <ivy:retrieve organisation="biz.aQute" module="bndlib" revision="0.0.312" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
+    <ivy:retrieve organisation="sigil" module="com.springsource.org.apache.commons.lang" revision="2.4.0" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
   </target>
 
   <target name="clean-site">
