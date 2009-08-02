@@ -169,8 +169,12 @@ public class RepositoryConfiguration implements IRepositoryConfiguration
         //int level = findLevel( key + LEVEL, type, prefs );
         ArrayList<IRepositoryModel> reps = new ArrayList<IRepositoryModel>();
         for ( String s : PrefsUtils.stringToArray( getPreferences().getString( REPOSITORY_DEFAULT_SET ) ) )
-        {
-            reps.add( findRepository( s ) );
+        {   
+            IRepositoryModel rep = findRepository( s );
+            if ( rep == null ) {
+                throw new IllegalStateException( "Missing repository for " + s );
+            }
+            reps.add( rep );
         }
         return new RepositorySet( reps );
     }
@@ -184,7 +188,11 @@ public class RepositoryConfiguration implements IRepositoryConfiguration
             ArrayList<IRepositoryModel> reps = new ArrayList<IRepositoryModel>();
             for ( String s : PrefsUtils.stringToArray( getPreferences().getString( key ) ) )
             {
-                reps.add( findRepository( s ) );
+                IRepositoryModel rep = findRepository( s );
+                if ( rep == null ) {
+                    throw new IllegalStateException( "Missing repository for " + s );
+                }
+                reps.add( rep );
             }
             return new RepositorySet( reps );
         }
