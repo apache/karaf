@@ -17,7 +17,7 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<project name="sigil" default="build" 
+<project name="sigil" default="dist" 
   xmlns:ivy="antlib:org.apache.ivy.ant">
   <import file="bldcommon/common.xml"/>
   <fileset id="my.projects" dir="${basedir}">
@@ -30,8 +30,19 @@
     <subant buildpath="bldcommon/prepare" target="resolve" />
   </target>
 
-  <target name="clean" depends="clean-list, clean-site" />
-  <target name="build" depends="build-list" />
+  <target name="dist" depends="build, site" />
+
+  <target name="clean" depends="clean-list, clean-site, clean-ivy" />
+
+  <target name="build" depends="build-list, build-ivy" />
+
+  <target name="build-ivy">
+    <subant buildpath="ivy/resolver" />
+  </target>
+
+  <target name="clean-ivy">
+    <subant buildpath="ivy/resolver" target="clean" />
+  </target>
 
   <target name="site" depends="common-init">
     <ivy:retrieve organisation="org.apache" module="felix.sigil.common.core" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
