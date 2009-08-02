@@ -52,6 +52,6 @@ public class SigilPreferencesInitializer extends AbstractPreferenceInitializer
 
         store.setDefault( SigilCore.PREFERENCES_REBUILD_PROJECTS, PromptablePreference.Prompt.name() );
 
-        store.setDefault( RepositoryConfiguration.REPOSITORY_DEFAULT_SET, "org.cauldron.sigil.core.workspaceprovider" );
+        store.setDefault( RepositoryConfiguration.REPOSITORY_DEFAULT_SET, "org.apache.felix.sigil.core.workspaceprovider" );
     }
 }
