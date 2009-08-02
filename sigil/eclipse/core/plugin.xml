@@ -49,7 +49,7 @@
          name="Sigil Nature"
          point="org.eclipse.core.resources.natures">
       <runtime>
-         <run class="org.apache.felix.sigil.nature.SigilProjectNature"/>
+         <run class="org.apache.felix.sigil.eclipse.nature.SigilProjectNature"/>
       </runtime>
    </extension>
    <extension
@@ -65,7 +65,7 @@
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="org.apache.felix.sigil.preferences.SigilPreferencesInitializer">
+            class="org.apache.felix.sigil.eclipse.preferences.SigilPreferencesInitializer">
       </initializer>
    </extension>
    <extension
