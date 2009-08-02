@@ -3,5 +3,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.cauldron.sigil.core.classpathContainer"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.swt.carbon.macosx.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
