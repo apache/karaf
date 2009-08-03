@@ -47,7 +47,7 @@ public class SigilUI extends AbstractUIPlugin
     // The plug-in ID
     public static final String PLUGIN_ID = "org.cauldron.sigil.ui";
 
-    public static final String REPOSITORY_WIZARD_EXTENSION_POINT_ID = "org.cauldron.sigil.ui.repositorywizard";
+    public static final String REPOSITORY_WIZARD_EXTENSION_POINT_ID = "org.apache.felix.sigil.ui.repositorywizard";
 
     public static final String PREF_NOPROMPT_INSTALL_COMPOSITE_WITH_ERRORS = "nopromptInstallCompositeError";
     public static final String PREF_INSTALL_COMPOSITE_WITH_ERRORS_ANSWER = "answerInstallCompositeError";
