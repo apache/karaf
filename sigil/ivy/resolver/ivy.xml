@@ -17,10 +17,12 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<project name="ivy.resolver" default="build"
-  xmlns:ivy="antlib:org.apache.ivy.ant">
-  <import file="../build.xml"/>
-  <target name="init">
-    <!--ivy:retrieve organisation="org.eclipse" module="org.eclipse.swt.carbon.macosx" revision="3.4.1.v3452b" inline="true" pattern="lib/[artifact].[ext]" transitive="false"/-->
-  </target>
-</project>
+<ivy-module version="1.0">
+  <info 
+        organisation="org.apache"
+        module="felix.sigil.ivy.resolver"
+        status="integration"/>
+   <publications>
+     <artifact name="org.apache.felix.sigil.ivy.resolver" />
+   </publications>
+</ivy-module>

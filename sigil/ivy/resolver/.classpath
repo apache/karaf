@@ -2,10 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/runtime/equinox.common.jar"/>
-	<classpathentry kind="lib" path="lib/runtime/osgi.core.jar"/>
-	<classpathentry kind="lib" path="lib/compile/ant.jar"/>
-	<classpathentry kind="lib" path="lib/compile/ivy-2.0.0-rc1.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.apache.felix.sigil.common.core"/>
+	<classpathentry kind="con" path="org.cauldron.sigil.core.classpathContainer"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

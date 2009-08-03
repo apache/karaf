@@ -21,7 +21,8 @@
   xmlns:ivy="antlib:org.apache.ivy.ant">
   <import file="bldcommon/common.xml"/>
   <fileset id="my.projects" dir="${basedir}">
-    <exclude name="ivy/**/${build_xml}"/>
+    <exclude name="ivy/resolver/test/**/${build_xml}"/>
+    <exclude name="ivy/resolver/example/**/${build_xml}"/>
     <exclude name="bldcommon/**/${build_xml}" />
     <include name="**/${build_xml}"/>
   </fileset>
@@ -36,15 +37,8 @@
 
   <target name="build" depends="build-list" />
 
-  <target name="build-ivy">
-    <subant buildpath="ivy/resolver" />
-  </target>
-
-  <target name="clean-ivy">
-    <subant buildpath="ivy/resolver" target="clean" />
-  </target>
-
   <target name="site" depends="common-init">
+    <!-- eclipse -->
     <ivy:retrieve organisation="org.apache" module="felix.sigil.common.core" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
     <ivy:retrieve organisation="org.apache" module="felix.sigil.common.junit" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
     <ivy:retrieve organisation="org.apache" module="felix.sigil.common.obr" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
@@ -56,6 +50,9 @@
     <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.utils" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
     <ivy:retrieve organisation="biz.aQute" module="bndlib" revision="0.0.312" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
     <ivy:retrieve organisation="sigil" module="com.springsource.org.apache.commons.lang" revision="2.4.0" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
+    
+    <!-- ivy -->
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.ivy.resolver" revision="latest.integration" inline="true" pattern="${site.dir}/ivy/[artifact].[ext]" transitive="false"/>
   </target>
 
   <target name="clean-site">
