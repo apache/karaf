@@ -419,11 +419,9 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
                 dcm.changeState( Active.getInstance() );
                 return dcm.getInstance();
             }
-            else
-            {
-                deactivateInternal( dcm, ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED );
-                return null;
-            }
+
+            super.deactivateInternal( dcm, ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED );
+            return null;
         }
     }
 
