@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.felix.sigil.obr;
+package org.apache.felix.sigil.obr.impl;
 
 
 import java.util.ArrayList;

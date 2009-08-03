@@ -26,6 +26,8 @@ import java.net.URL;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.felix.sigil.obr.impl.CachingOBRBundleRepository;
+import org.apache.felix.sigil.obr.impl.NonCachingOBRBundleRepository;
 import org.apache.felix.sigil.repository.IBundleRepository;
 import org.apache.felix.sigil.repository.IRepositoryProvider;
 import org.apache.felix.sigil.repository.RepositoryException;
