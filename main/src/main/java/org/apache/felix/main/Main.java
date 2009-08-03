@@ -40,6 +40,11 @@ import org.osgi.framework.launch.Framework;
 public class Main
 {
     /**
+     * Switch for specifying bundle directory.
+    **/
+    public static final String BUNDLE_DIR_SWITCH = "-b";
+
+    /**
      * The property name used to specify an URL to the system
      * property file.
     **/
@@ -163,11 +168,34 @@ public class Main
     **/
     public static void main(String[] args) throws Exception
     {
+// TODO: MAIN - SHOULD WE ADD A SHUTDOWN HOOK?
+
+        // Look for bundle directory and/or cache directory.
         // We support at most one argument, which is the bundle
         // cache directory.
-        if (args.length > 1)
+        String bundleDir = null;
+        String cacheDir = null;
+        boolean expectBundleDir = false;
+        for (int i = 0; i < args.length; i++)
         {
-            System.out.println("Usage: [<bundle-cache-dir>]");
+            if (args[i].equals(BUNDLE_DIR_SWITCH))
+            {
+                expectBundleDir = true;
+            }
+            else if (expectBundleDir)
+            {
+                bundleDir = args[i];
+                expectBundleDir = false;
+            }
+            else
+            {
+                cacheDir = args[i];
+            }
+        }
+
+        if ((args.length > 3) || (expectBundleDir && bundleDir == null))
+        {
+            System.out.println("Usage: [-b <bundle-deploy-dir>] [<bundle-cache-dir>]");
             System.exit(0);
         }
 
@@ -187,11 +215,18 @@ public class Main
         // Copy framework properties from the system properties.
         Main.copySystemProperties(configProps);
 
+        // If there is a passed in bundle auto-deploy directory, then
+        // that overwrites anything in the config file.
+        if (bundleDir != null)
+        {
+            configProps.setProperty(AutoActivator.AUTO_DEPLOY_DIR_PROPERY, bundleDir);
+        }
+
         // If there is a passed in bundle cache directory, then
         // that overwrites anything in the config file.
-        if (args.length > 0)
+        if (cacheDir != null)
         {
-            configProps.setProperty(Constants.FRAMEWORK_STORAGE, args[0]);
+            configProps.setProperty(Constants.FRAMEWORK_STORAGE, cacheDir);
         }
 
         // Create a list for custom framework activators and

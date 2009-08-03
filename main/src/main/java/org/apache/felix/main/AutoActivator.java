@@ -18,16 +18,34 @@
  */
 package org.apache.felix.main;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.service.startlevel.StartLevel;
 
 public class AutoActivator implements BundleActivator
 {
+    /**
+     * The property name used for the bundle directory.
+    **/
+    public static final String AUTO_DEPLOY_DIR_PROPERY = "felix.auto.deploy.dir";
+    /**
+     * The default name used for the bundle directory.
+    **/
+    public static final String AUTO_DEPLOY_DIR_VALUE = "bundle";
+    /**
+     * The property name used to enable/disable automatic bundle deployment.
+    **/
+    public static final String AUTO_DEPLOY_PROP = "felix.auto.deploy";
     /**
      * The property name prefix for the launcher's auto-install property.
     **/
@@ -37,7 +55,7 @@ public class AutoActivator implements BundleActivator
     **/
     public static final String AUTO_START_PROP = "felix.auto.start";
 
-    private Map m_configMap;
+    private final Map m_configMap;
 
     public AutoActivator(Map configMap)
     {
@@ -52,6 +70,7 @@ public class AutoActivator implements BundleActivator
     **/
     public void start(BundleContext context)
     {
+        processAutoDeploy(context);
         processAutoProperties(context);
     }
 
@@ -62,6 +81,68 @@ public class AutoActivator implements BundleActivator
     public void stop(BundleContext context)
     {
         // Do nothing.
+    }
+
+    private void processAutoDeploy(BundleContext context)
+    {
+        // Determine if auto deploy is enabled; default is enabled.
+        String enabled = (String) m_configMap.get(AUTO_DEPLOY_PROP);
+        enabled = (enabled == null) ? Boolean.TRUE.toString() : enabled;
+        if (Boolean.valueOf(enabled).booleanValue())
+        {
+            // Get the auto deploy directory.
+            String autoDir = (String) m_configMap.get(AUTO_DEPLOY_DIR_PROPERY);
+            autoDir = (autoDir == null) ? AUTO_DEPLOY_DIR_VALUE : autoDir;
+            // Look in the specified bundle directory to create a list
+            // of all JAR files to install.
+            File[] files = new File(autoDir).listFiles();
+            if (files != null)
+            {
+                Arrays.sort(files);
+                List bundleList = new ArrayList();
+                for (int i = 0; i < files.length; i++)
+                {
+                    if (files[i].getName().endsWith(".jar"))
+                    {
+                        bundleList.add(files[i]);
+                    }
+                }
+
+                // Install bundle JAR files and remember the bundle objects.
+                final List installedList = new ArrayList();
+                for (int i = 0; i < bundleList.size(); i++)
+                {
+                    try
+                    {
+                        Bundle b = context.installBundle(
+                            ((File) bundleList.get(i)).toURI().toString());
+                        installedList.add(b);
+                    }
+                    catch (BundleException ex)
+                    {
+                        System.err.println("Auto-deploy install: "
+                            + ex + ((ex.getCause() != null) ? " - " + ex.getCause() : ""));
+                    }
+                }
+
+                // Start all installed bundles.
+                for (int i = 0; i < installedList.size(); i++)
+                {
+                    try
+                    {
+                        if (!isFragment((Bundle) installedList.get(i)))
+                        {
+                            ((Bundle) installedList.get(i)).start();
+                        }
+                    }
+                    catch (BundleException ex)
+                    {
+                        System.err.println("Auto-deploy start: "
+                            + ex + ((ex.getCause() != null) ? " - " + ex.getCause() : ""));
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -211,5 +292,10 @@ public class AutoActivator implements BundleActivator
         }
 
         return retVal;
+    }
+
+    private static boolean isFragment(Bundle bundle)
+    {
+        return bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null;
     }
 }

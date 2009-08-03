@@ -68,6 +68,10 @@
           <groupId>${pom.groupId}</groupId>
           <artifactId>org.osgi.core</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>${pom.groupId}</groupId>
+          <artifactId>org.osgi.compendium</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -78,6 +82,10 @@
         <exclusion>
           <groupId>${pom.groupId}</groupId>
           <artifactId>org.osgi.core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>${pom.groupId}</groupId>
+          <artifactId>org.osgi.compendium</artifactId>
         </exclusion>
         <exclusion>
           <groupId>${pom.groupId}</groupId>
