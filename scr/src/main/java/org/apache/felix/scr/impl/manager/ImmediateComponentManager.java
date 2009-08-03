@@ -159,7 +159,7 @@ public class ImmediateComponentManager extends AbstractComponentManager
         {
             // failed to instantiate, return null
             log( LogService.LOG_ERROR, "Error during instantiation of the implementation object",
-                getComponentMetadata(), ex );
+                ex );
             return null;
         }
 
@@ -174,7 +174,7 @@ public class ImmediateComponentManager extends AbstractComponentManager
             if ( !dm.open( implementationObject ) )
             {
                 log( LogService.LOG_ERROR, "Cannot create component instance due to failure to bind reference "
-                    + dm.getName(), getComponentMetadata(), null );
+                    + dm.getName(), null );
 
                 // make sure, we keep no bindings
                 it = getDependencyManagers();
@@ -340,8 +340,7 @@ public class ImmediateComponentManager extends AbstractComponentManager
         // nothing to do if there is no configuration (see FELIX-714)
         if ( configuration == null && m_configurationProperties == null )
         {
-            log( LogService.LOG_DEBUG, "No configuration provided (or deleted), nothing to do", getComponentMetadata(),
-                null );
+            log( LogService.LOG_DEBUG, "No configuration provided (or deleted), nothing to do", null );
             return;
         }
 
@@ -375,7 +374,7 @@ public class ImmediateComponentManager extends AbstractComponentManager
         else if ( !modify() )
         {
             log( LogService.LOG_DEBUG, "Deactivating and Activating to reconfigure from configuration",
-                getComponentMetadata(), null );
+                null );
             int reason = ( configuration == null ) ? ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_DELETED
                 : ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_MODIFIED;
             reactivate( reason );
@@ -408,7 +407,7 @@ public class ImmediateComponentManager extends AbstractComponentManager
             {
                 log( LogService.LOG_INFO,
                     "Cannot dynamically update the configuration due to dependency changes induced on dependency "
-                        + dm.getName(), getComponentMetadata(), null );
+                        + dm.getName(), null );
                 return false;
             }
         }
@@ -419,7 +418,7 @@ public class ImmediateComponentManager extends AbstractComponentManager
         {
             // log an error if the declared method cannot be found
             log( LogService.LOG_ERROR, "Declared modify method '" + getComponentMetadata().getModified()
-                + "' cannot be found, configuring by reactivation", getComponentMetadata(), null );
+                + "' cannot be found, configuring by reactivation", null );
             return false;
         }
 
@@ -431,7 +430,7 @@ public class ImmediateComponentManager extends AbstractComponentManager
             log(
                 LogService.LOG_ERROR,
                 "Updating the service references caused at least on reference to become unsatisifed, deactivating component",
-                getComponentMetadata(), null );
+                null );
             return false;
         }
 
@@ -452,12 +451,12 @@ public class ImmediateComponentManager extends AbstractComponentManager
             {
                 log( LogService.LOG_ERROR,
                     "Unexpected configuration property problem when updating service registration",
-                    getComponentMetadata(), iae );
+                    iae );
             }
             catch ( Throwable t )
             {
                 log( LogService.LOG_ERROR, "Unexpected problem when updating service registration",
-                    getComponentMetadata(), t );
+                    t );
             }
         }
 

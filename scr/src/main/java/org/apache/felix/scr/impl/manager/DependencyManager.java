@@ -108,8 +108,7 @@ public class DependencyManager implements ServiceListener, Reference
         setTargetFilter( m_dependencyMetadata.getTarget() );
 
         m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager " + getName() + " created: filter="
-            + getTarget() + ", interface=" + m_dependencyMetadata.getInterface(), m_componentManager
-            .getComponentMetadata(), null );
+            + getTarget() + ", interface=" + m_dependencyMetadata.getInterface(), null );
     }
 
     /**
@@ -149,7 +148,7 @@ public class DependencyManager implements ServiceListener, Reference
         {
             case ServiceEvent.REGISTERED:
                 m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Adding " + serviceString,
-                    m_componentManager.getComponentMetadata(), null );
+                    null );
 
                 // consider the service if the filter matches
                 if ( targetFilterMatch( ref ) )
@@ -161,13 +160,13 @@ public class DependencyManager implements ServiceListener, Reference
                 {
                     m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Ignoring added Service for "
                         + m_dependencyMetadata.getName() + " : does not match target filter " + getTarget(),
-                        m_componentManager.getComponentMetadata(), null );
+                        null );
                 }
                 break;
 
             case ServiceEvent.MODIFIED:
                 m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Updating " + serviceString,
-                    m_componentManager.getComponentMetadata(), null );
+                    null );
 
                 // remove the service first
                 // only continue with further event handling if the service
@@ -192,7 +191,7 @@ public class DependencyManager implements ServiceListener, Reference
 
             case ServiceEvent.UNREGISTERING:
                 m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Removing " + serviceString,
-                    m_componentManager.getComponentMetadata(), null );
+                    null );
 
                 // manage the service counter if the filter matchs
                 if ( targetFilterMatch( ref ) )
@@ -203,8 +202,7 @@ public class DependencyManager implements ServiceListener, Reference
                 {
                     m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Not counting Service for "
                         + m_dependencyMetadata.getName() + " : Service " + ref.getProperty( Constants.SERVICE_ID )
-                        + " does not match target filter " + getTarget(), m_componentManager.getComponentMetadata(),
-                        null );
+                        + " does not match target filter " + getTarget(), null );
                 }
 
                 // remove the service ignoring the filter match because if the
@@ -235,8 +233,7 @@ public class DependencyManager implements ServiceListener, Reference
         if ( m_componentManager.getState() == AbstractComponentManager.STATE_ENABLED )
         {
             m_componentManager.log( LogService.LOG_INFO, "Dependency Manager: Service "
-                + m_dependencyMetadata.getName() + " registered, activate component", m_componentManager
-                .getComponentMetadata(), null );
+                + m_dependencyMetadata.getName() + " registered, activate component", null );
 
             m_componentManager.activate();
         }
@@ -251,8 +248,7 @@ public class DependencyManager implements ServiceListener, Reference
             if ( m_dependencyMetadata.isStatic() )
             {
                 m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Added service "
-                    + m_dependencyMetadata.getName() + " is ignored for static reference", m_componentManager
-                    .getComponentMetadata(), null );
+                    + m_dependencyMetadata.getName() + " is ignored for static reference", null );
             }
 
             // otherwise bind if we have a bind method and the service needs
@@ -273,7 +269,7 @@ public class DependencyManager implements ServiceListener, Reference
             m_componentManager.log( LogService.LOG_DEBUG,
 					"Dependency Manager: Ignoring service addition, wrong state "
 					+ m_componentManager.state(),
-					m_componentManager.getComponentMetadata(), null );
+					null );
         }
     }
 
@@ -303,7 +299,7 @@ public class DependencyManager implements ServiceListener, Reference
         {
             m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Ignoring removed Service for "
                 + m_dependencyMetadata.getName() + " : Service " + reference.getProperty( Constants.SERVICE_ID )
-                + " not bound", m_componentManager.getComponentMetadata(), null );
+                + " not bound", null );
 
             // service was not bound, we can continue without interruption
             return true;
@@ -339,14 +335,14 @@ public class DependencyManager implements ServiceListener, Reference
                 {
                     m_componentManager.log( LogService.LOG_DEBUG, "Dependency Manager: Static dependency on "
                         + m_dependencyMetadata.getName() + "/" + m_dependencyMetadata.getInterface() + " is broken",
-                        m_componentManager.getComponentMetadata(), null );
+                        null );
                     m_componentManager.deactivateInternal( ComponentConstants.DEACTIVATION_REASON_REFERENCE );
                     m_componentManager.activate();
                 }
                 catch ( Exception ex )
                 {
                     m_componentManager.log( LogService.LOG_ERROR, "Exception while recreating dependency ",
-                        m_componentManager.getComponentMetadata(), ex );
+                        ex );
                 }
 
                 // static reference removal causes reactivation, nothing more to do
@@ -368,7 +364,7 @@ public class DependencyManager implements ServiceListener, Reference
                         m_componentManager.log( LogService.LOG_DEBUG,
                             "Dependency Manager: Deactivating component due to mandatory dependency on "
                                 + m_dependencyMetadata.getName() + "/" + m_dependencyMetadata.getInterface()
-                                + " not satisfied", m_componentManager.getComponentMetadata(), null );
+                                + " not satisfied", null );
                         m_componentManager.deactivateInternal( ComponentConstants.DEACTIVATION_REASON_REFERENCE );
 
                         // required service could not be replaced, component
@@ -393,7 +389,7 @@ public class DependencyManager implements ServiceListener, Reference
             m_componentManager.log( LogService.LOG_DEBUG,
 					"Dependency Manager: Ignoring service removal, wrong state "
 					+ m_componentManager.state(),
-					m_componentManager.getComponentMetadata(), null );
+					null );
         }
 
         // everything is fine, the component is still active and we continue
@@ -469,7 +465,7 @@ public class DependencyManager implements ServiceListener, Reference
         m_componentManager.getActivator().getBundleContext().addServiceListener( this, filterString );
 
         m_componentManager.log( LogService.LOG_DEBUG, "Registered for service events, currently " + m_size
-            + " service(s) match the filter", m_componentManager.getComponentMetadata(), null );
+            + " service(s) match the filter", null );
     }
 
     /**
@@ -540,7 +536,7 @@ public class DependencyManager implements ServiceListener, Reference
         catch ( InvalidSyntaxException ise )
         {
             m_componentManager.log( LogService.LOG_ERROR, "Unexpected problem with filter '" + targetFilter + "'",
-                m_componentManager.getComponentMetadata(), ise );
+                ise );
             return null;
         }
     }
@@ -970,7 +966,7 @@ public class DependencyManager implements ServiceListener, Reference
         {
             m_componentManager.log( LogService.LOG_DEBUG,
                 "DependencyManager : Delayed component not yet created, assuming bind method call succeeded",
-                m_componentManager.getComponentMetadata(), null );
+                null );
 
             return true;
         }
@@ -981,7 +977,7 @@ public class DependencyManager implements ServiceListener, Reference
             // not a problem, because the open(Object) method will catch up
             // this services any way
             m_componentManager.log( LogService.LOG_DEBUG, "DependencyManager : Not yet open for activating component",
-                m_componentManager.getComponentMetadata(), null );
+                null );
 
             return true;
         }
@@ -992,7 +988,7 @@ public class DependencyManager implements ServiceListener, Reference
 
             m_componentManager.log( LogService.LOG_ERROR,
                 "DependencyManager : Immediate component not yet created, bind method cannot be called",
-                m_componentManager.getComponentMetadata(), null );
+                null );
 
             return false;
         }
@@ -1038,8 +1034,7 @@ public class DependencyManager implements ServiceListener, Reference
             // if the component instance has already been cleared by the
             // close() method
             m_componentManager.log( LogService.LOG_DEBUG,
-                "DependencyManager : Component not set, no need to call unbind method", m_componentManager
-                    .getComponentMetadata(), null );
+                "DependencyManager : Component not set, no need to call unbind method", null );
         }
     }
 

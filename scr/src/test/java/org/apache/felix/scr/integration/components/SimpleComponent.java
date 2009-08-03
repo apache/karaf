@@ -22,7 +22,10 @@ package org.apache.felix.scr.integration.components;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 
@@ -34,6 +37,8 @@ public class SimpleComponent
 
     public static final Map<String, SimpleComponent> INSTANCES = new HashMap<String, SimpleComponent>();
 
+    public static final Set<SimpleComponent> PREVIOUS_INSTANCES = new HashSet<SimpleComponent>();
+
     private Map<?, ?> m_config;
 
 
@@ -41,8 +46,21 @@ public class SimpleComponent
     private void activate( Map<?, ?> config )
     {
         INSTANCE = this;
-        INSTANCES.put( (String) config.get( Constants.SERVICE_PID), this );
+        INSTANCES.put( config.get( Constants.SERVICE_PID ).toString(), this );
         setConfig( config );
+
+        if ( PREVIOUS_INSTANCES.contains( this ) )
+        {
+            System.err.println();
+            System.err.println( "An instance has been reused !!!" );
+            System.err.println( "Existing: " + PREVIOUS_INSTANCES );
+            System.err.println( "New     : " + this );
+            System.err.println();
+        }
+        else
+        {
+            PREVIOUS_INSTANCES.add( this );
+        }
     }
 
 
@@ -56,8 +74,9 @@ public class SimpleComponent
     @SuppressWarnings("unused")
     private void deactivate()
     {
-        INSTANCES.remove( getProperty( Constants.SERVICE_PID ));
+        INSTANCES.remove( getProperty( Constants.SERVICE_PID ).toString() );
         INSTANCE = null;
+        setConfig( new HashMap<Object, Object>() );
     }
 
 
@@ -70,7 +89,7 @@ public class SimpleComponent
     protected void setConfig( Dictionary<?, ?> config )
     {
         Map<Object, Object> configMap = new HashMap<Object, Object>();
-        for ( Enumeration<?> ce = config.elements(); ce.hasMoreElements(); )
+        for ( Enumeration<?> ce = config.keys(); ce.hasMoreElements(); )
         {
             Object key = ce.nextElement();
             Object value = config.get( key );

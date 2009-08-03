@@ -121,41 +121,41 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
         {
             acm.log( LogService.LOG_DEBUG,
                     "Current state: " + m_name + ", Event: enable",
-                    acm.getComponentMetadata(), null );
+                    null );
         }
 
         void disableInternal( AbstractComponentManager acm )
         {
             acm.log( LogService.LOG_DEBUG,
                     "Current state: " + m_name + ", Event: disable",
-                    acm.getComponentMetadata(), null );
+                    null );
         }
 
         void activateInternal( AbstractComponentManager acm )
         {
             acm.log(LogService.LOG_DEBUG,
                     "Current state: " + m_name + ", Event: activate",
-                    acm.getComponentMetadata(), null);
+                    null);
         }
 
         void deactivateInternal( AbstractComponentManager acm, int reason )
         {
             acm.log( LogService.LOG_DEBUG, "Current state: " + m_name + ", Event: deactivate (reason: " + reason + ")",
-                acm.getComponentMetadata(), null );
+                null );
         }
 
         void disposeInternal( AbstractComponentManager acm )
         {
             acm.log( LogService.LOG_DEBUG,
                     "Current state: " + m_name + ", Event: dispose",
-                    acm.getComponentMetadata(), null );
+                    null );
         }
 
         Object getService( DelayedComponentManager dcm )
         {
             dcm.log( LogService.LOG_DEBUG,
                     "Current state: " + m_name + ", Event: getService",
-                    dcm.getComponentMetadata(), null );
+                    null );
             return null;
         }
     }
@@ -193,7 +193,7 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
         {
             acm.changeState( Enabled.getInstance() );
 
-            acm.log( LogService.LOG_DEBUG, "Component enabled", acm.getComponentMetadata(), null );
+            acm.log( LogService.LOG_DEBUG, "Component enabled", null );
         }
 
         void disposeInternal( AbstractComponentManager acm )
@@ -228,7 +228,7 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
             }
             catch (Exception e)
             {
-                acm.log( LogService.LOG_ERROR, "Failed enabling Component", componentMetadata, e );
+                acm.log( LogService.LOG_ERROR, "Failed enabling Component", e );
                 acm.disposeDependencyManagers();
                 acm.loadDependencyManagers( acm.getComponentMetadata() );
             }
@@ -238,7 +238,7 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
         {
             acm.changeState( Disabled.getInstance() );
 
-            acm.log( LogService.LOG_DEBUG, "Component disabled", acm.getComponentMetadata(), null );
+            acm.log( LogService.LOG_DEBUG, "Component disabled", null );
         }
 
         void disposeInternal( AbstractComponentManager acm )
@@ -246,7 +246,7 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
             acm.clear();
             acm.changeState( Destroyed.getInstance() );
 
-            acm.log( LogService.LOG_DEBUG, "Component disposed", acm.getComponentMetadata(), null );
+            acm.log( LogService.LOG_DEBUG, "Component disposed", null );
         }
     }
 
@@ -269,14 +269,13 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
             acm.changeState( Activating.getInstance() );
 
             ComponentMetadata componentMetadata = acm.getComponentMetadata();
-            acm.log( LogService.LOG_DEBUG, "Activating component", componentMetadata, null );
+            acm.log( LogService.LOG_DEBUG, "Activating component", null );
 
             // Before creating the implementation object, we are going to
             // test if we have configuration if such is required
             if ( !acm.hasConfiguration() && acm.getComponentMetadata().isConfigurationRequired() )
             {
-                acm.log( LogService.LOG_INFO, "Missing required configuration, cannot activate", componentMetadata,
-                    null );
+                acm.log( LogService.LOG_INFO, "Missing required configuration, cannot activate", null );
                 acm.changeState( Unsatisfied.getInstance() );
                 return;
             }
@@ -285,7 +284,7 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
             // test if all the mandatory dependencies are satisfied
             if ( !acm.verifyDependencyManagers( acm.getProperties()) )
             {
-                acm.log( LogService.LOG_INFO, "Not all dependencies satisified, cannot activate", componentMetadata, null );
+                acm.log( LogService.LOG_INFO, "Not all dependencies satisified, cannot activate", null );
                 acm.changeState( Unsatisfied.getInstance() );
                 return;
             }
@@ -298,7 +297,7 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
             {
                 // component creation failed, not active now
                 acm.log( LogService.LOG_ERROR, "Component instance could not be created, activation failed",
-                        componentMetadata, null );
+                        null );
 
                 // set state to unsatisfied
                 acm.changeState( Unsatisfied.getInstance() );
@@ -313,7 +312,7 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
         void disableInternal( AbstractComponentManager acm )
         {
             ComponentMetadata componentMetadata = acm.getComponentMetadata();
-            acm.log( LogService.LOG_DEBUG, "Disabling component", componentMetadata, null );
+            acm.log( LogService.LOG_DEBUG, "Disabling component", null );
 
             // dispose and recreate dependency managers
             acm.disposeDependencyManagers();
@@ -322,7 +321,7 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
             // we are now disabled, ready for re-enablement or complete destroyal
             acm.changeState( Disabled.getInstance() );
 
-            acm.log( LogService.LOG_DEBUG, "Component disabled", componentMetadata, null );
+            acm.log( LogService.LOG_DEBUG, "Component disabled", null );
         }
 
         void disposeInternal( AbstractComponentManager acm )
@@ -331,7 +330,7 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
             acm.clear();
             acm.changeState( Destroyed.getInstance() );
 
-            acm.log( LogService.LOG_DEBUG, "Component disposed", acm.getComponentMetadata(), null );
+            acm.log( LogService.LOG_DEBUG, "Component disposed", null );
         }
     }
 
@@ -380,7 +379,7 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
             acm.changeState(Deactivating.getInstance());
 
             ComponentMetadata componentMetadata = acm.getComponentMetadata();
-            acm.log( LogService.LOG_DEBUG, "Deactivating component", componentMetadata, null );
+            acm.log( LogService.LOG_DEBUG, "Deactivating component", null );
 
             // catch any problems from deleting the component to prevent the
             // component to remain in the deactivating state !
@@ -391,11 +390,11 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
             }
             catch ( Throwable t )
             {
-                acm.log( LogService.LOG_WARNING, "Component deactivation threw an exception", componentMetadata, t );
+                acm.log( LogService.LOG_WARNING, "Component deactivation threw an exception", t );
             }
 
             acm.changeState( Unsatisfied.getInstance() );
-            acm.log( LogService.LOG_DEBUG, "Component deactivated", componentMetadata, null );
+            acm.log( LogService.LOG_DEBUG, "Component deactivated", null );
         }
     }
 
@@ -477,7 +476,7 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
         m_state = Disabled.getInstance();
         loadDependencyManagers( metadata );
 
-        log( LogService.LOG_DEBUG, "Component created", metadata, null );
+        log( LogService.LOG_DEBUG, "Component created", null );
     }
 
 
@@ -718,7 +717,7 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
     {
         if ( getComponentMetadata().getServiceMetadata() != null )
         {
-            log( LogService.LOG_DEBUG, "registering services", m_componentMetadata, null );
+            log( LogService.LOG_DEBUG, "registering services", null );
 
             // get a copy of the component properties as service properties
             final Dictionary serviceProperties = getServiceProperties();
@@ -742,7 +741,7 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
 
         if ( m_serviceRegistration != null )
         {
-            log( LogService.LOG_DEBUG, "unregistering the services", m_componentMetadata, null );
+            log( LogService.LOG_DEBUG, "unregistering the services", null );
 
             m_serviceRegistration.unregister();
             m_serviceRegistration = null;
@@ -774,12 +773,12 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
     }
 
 
-    public void log( int level, String message, ComponentMetadata metadata, Throwable ex )
+    public void log( int level, String message, Throwable ex )
     {
         BundleComponentActivator activator = getActivator();
         if ( activator != null )
         {
-            activator.log( level, message, metadata, ex );
+            activator.log( level, message, getComponentMetadata(), ex );
         }
     }
 
@@ -872,7 +871,7 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
             if ( !dm.isSatisfied() )
             {
                 // at least one dependency is not satisfied
-                log( LogService.LOG_INFO, "Dependency not satisfied: " + dm.getName(), m_componentMetadata, null );
+                log( LogService.LOG_INFO, "Dependency not satisfied: " + dm.getName(), null );
                 satisfied = false;
             }
         }
@@ -1020,7 +1019,7 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
     {
         log( LogService.LOG_DEBUG,
                 "State transition : " + m_state + " -> " + newState,
-                m_componentMetadata, null );
+                null );
 
         m_state = newState;
     }

@@ -86,7 +86,7 @@ public class ComponentConfigurationTest
         return options( provision( scanDir( "target" ).filter( "*.jar" ), mavenBundle( "org.ops4j.pax.swissbox",
             "pax-swissbox-tinybundles", "1.0.0" ), mavenBundle( "org.apache.felix", "org.apache.felix.configadmin",
             "1.0.10" ) )
-        //            , PaxRunnerOptions.vmOption( "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=30303" )
+//                    , PaxRunnerOptions.vmOption( "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=30303" )
         //            PaxRunnerOptions.timeout( 0 )
 
         );
@@ -229,23 +229,31 @@ public class ComponentConfigurationTest
         component.enable();
         delay();
 
+        final SimpleComponent firstInstance = SimpleComponent.INSTANCE;
         TestCase.assertEquals( Component.STATE_ACTIVE, component.getState() );
-        TestCase.assertNotNull( SimpleComponent.INSTANCE );
-        TestCase.assertNull( SimpleComponent.INSTANCE.getProperty( PROP_NAME ) );
+        TestCase.assertNotNull( firstInstance );
+        TestCase.assertNull( firstInstance.getProperty( PROP_NAME ) );
 
         configure( pid );
         delay();
 
+        final SimpleComponent secondInstance = SimpleComponent.INSTANCE;
         TestCase.assertEquals( Component.STATE_ACTIVE, component.getState() );
-        TestCase.assertNotNull( SimpleComponent.INSTANCE );
-        TestCase.assertEquals( PROP_NAME, SimpleComponent.INSTANCE.getProperty( PROP_NAME ) );
+        TestCase.assertNotNull( secondInstance );
+        TestCase.assertEquals( PROP_NAME, secondInstance.getProperty( PROP_NAME ) );
+
 
         deleteConfig( pid );
         delay();
 
+        final SimpleComponent thirdInstance = SimpleComponent.INSTANCE;
         TestCase.assertEquals( Component.STATE_ACTIVE, component.getState() );
-        TestCase.assertNotNull( SimpleComponent.INSTANCE );
-        TestCase.assertNull( SimpleComponent.INSTANCE.getProperty( PROP_NAME ) );
+        TestCase.assertNotNull( thirdInstance );
+        TestCase.assertNull( thirdInstance.getProperty( PROP_NAME ) );
+
+        TestCase.assertNotSame( "Expect new instance object after reconfiguration", firstInstance, secondInstance );
+        TestCase.assertNotSame( "Expect new instance object after configuration deletion (1)", firstInstance, thirdInstance);
+        TestCase.assertNotSame( "Expect new instance object after configuration deletion (2)", secondInstance, thirdInstance);
 
         component.disable();
         delay();
@@ -316,6 +324,7 @@ public class ComponentConfigurationTest
         TestCase.assertEquals( Component.STATE_ACTIVE, component.getState() );
         TestCase.assertNotNull( SimpleComponent.INSTANCE );
         TestCase.assertNull( SimpleComponent.INSTANCE.getProperty( PROP_NAME ) );
+        TestCase.assertEquals( pid, SimpleComponent.INSTANCE.getProperty( Constants.SERVICE_PID ) );
 
         final SimpleComponent instance = SimpleComponent.INSTANCE;
 
@@ -325,6 +334,7 @@ public class ComponentConfigurationTest
         TestCase.assertEquals( Component.STATE_ACTIVE, component.getState() );
         TestCase.assertEquals( instance, SimpleComponent.INSTANCE );
         TestCase.assertEquals( PROP_NAME, SimpleComponent.INSTANCE.getProperty( PROP_NAME ) );
+        TestCase.assertEquals( pid, SimpleComponent.INSTANCE.getProperty( Constants.SERVICE_PID ) );
 
         deleteConfig( pid );
         delay();
@@ -332,6 +342,7 @@ public class ComponentConfigurationTest
         TestCase.assertEquals( Component.STATE_ACTIVE, component.getState() );
         TestCase.assertEquals( instance, SimpleComponent.INSTANCE );
         TestCase.assertNull( SimpleComponent.INSTANCE.getProperty( PROP_NAME ) );
+        TestCase.assertEquals( pid, SimpleComponent.INSTANCE.getProperty( Constants.SERVICE_PID ) );
 
         component.disable();
         delay();

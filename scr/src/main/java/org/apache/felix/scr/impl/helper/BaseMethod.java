@@ -137,7 +137,7 @@ abstract class BaseMethod
                 // log and return null
                 getComponentManager().log( LogService.LOG_ERROR,
                     "DependencyManager : Suitable but non-accessible method found in class " + targetClass.getName(),
-                    null, null );
+                    null );
                 break;
             }
 
@@ -176,7 +176,7 @@ abstract class BaseMethod
         }
         catch ( IllegalStateException ise )
         {
-            getComponentManager().log( LogService.LOG_INFO, ise.getMessage(), null, null );
+            getComponentManager().log( LogService.LOG_INFO, ise.getMessage(), null );
             return false;
         }
         catch ( IllegalAccessException ex )
@@ -184,21 +184,21 @@ abstract class BaseMethod
             // 112.3.1 If the method is not is not declared protected or
             // public, SCR must log an error message with the log service,
             // if present, and ignore the method
-            getComponentManager().log( LogService.LOG_DEBUG, "Method " + m_methodName + " cannot be called", null, ex );
+            getComponentManager().log( LogService.LOG_DEBUG, "Method " + m_methodName + " cannot be called", ex );
         }
         catch ( InvocationTargetException ex )
         {
             // 112.5.7 If a bind method throws an exception, SCR must log an
             // error message containing the exception [...]
             getComponentManager().log( LogService.LOG_ERROR,
-                "The " + getMethodName() + " method has thrown an exception", null, ex.getCause() );
+                "The " + getMethodName() + " method has thrown an exception", ex.getCause() );
             return false;
         }
         catch ( Throwable t )
         {
             // anything else went wrong, log the message and fail the invocation
             getComponentManager().log( LogService.LOG_ERROR, "The " + getMethodName() + " method could not be called",
-                null, t );
+                t );
 
             // method invocation threw, so it was a failure
             return false;
@@ -393,7 +393,7 @@ abstract class BaseMethod
         public boolean invoke( final Object componentInstance, final Object rawParameter )
         {
             getComponentManager().log( LogService.LOG_DEBUG,
-                "getting " + getMethodNamePrefix() + "bind: " + m_methodName, null, null );
+                "getting " + getMethodNamePrefix() + "bind: " + m_methodName, null );
             try
             {
                 m_method = findMethod();
@@ -404,8 +404,7 @@ abstract class BaseMethod
             {
                 m_state = new NotFound();
                 // We can safely ignore this one
-                getComponentManager().log( LogService.LOG_WARNING, getMethodName() + " cannot be found", null,
-                    ex.getTargetException() );
+                getComponentManager().log( LogService.LOG_WARNING, getMethodName() + " cannot be found", ex.getTargetException() );
             }
             return true;
         }
@@ -420,7 +419,7 @@ abstract class BaseMethod
             // message with the log service, if present, and ignore the
             // method
             getComponentManager().log( LogService.LOG_ERROR,
-                getMethodNamePrefix() + "bind method [" + m_methodName + "] not found", null, null );
+                getMethodNamePrefix() + "bind method [" + m_methodName + "] not found", null );
             return true;
         }
     }
@@ -431,7 +430,7 @@ abstract class BaseMethod
         public boolean invoke( final Object componentInstance, final Object rawParameter )
         {
             getComponentManager().log( LogService.LOG_DEBUG,
-                "invoking " + getMethodNamePrefix() + "bind: " + m_methodName, null, null );
+                "invoking " + getMethodNamePrefix() + "bind: " + m_methodName, null );
             return invokeMethod( componentInstance, rawParameter );
         }
     }

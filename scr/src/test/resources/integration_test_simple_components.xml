@@ -24,6 +24,7 @@
         enabled="false"
         configuration-policy="ignore">
         <implementation class="org.apache.felix.scr.integration.components.SimpleComponent" />
+        <property name="service.pid" value="SimpleComponent.configuration.ignore" />
     </scr:component>
 
     <!-- component takes configuration as available -->
@@ -31,6 +32,7 @@
         enabled="false"
         configuration-policy="optional" >
         <implementation class="org.apache.felix.scr.integration.components.SimpleComponent" />
+        <property name="service.pid" value="SimpleComponent.configuration.optional" />
     </scr:component>
 
     <!-- component requires configuration -->
@@ -38,12 +40,14 @@
         enabled="false"
         configuration-policy="require" >
         <implementation class="org.apache.felix.scr.integration.components.SimpleComponent" />
+        <property name="service.pid" value="SimpleComponent.configuration.require" />
     </scr:component>
 
     <!-- component dynamically updates configuration -->
     <scr:component name="DynamicConfigurationComponent"
         enabled="false" modified="configure">
         <implementation class="org.apache.felix.scr.integration.components.SimpleComponent" />
+        <property name="service.pid" value="DynamicConfigurationComponent" />
     </scr:component>
 
     <!-- component instances created by factory configuration -->
@@ -51,6 +55,7 @@
         enabled="false"
         configuration-policy="require" >
         <implementation class="org.apache.felix.scr.integration.components.SimpleComponent" />
+        <property name="service.pid" value="FactoryConfigurationComponent" />
     </scr:component>
 
     <!-- component is a stupid service to verify non-use of private props -->
@@ -58,6 +63,7 @@
         enabled="false" immediate="true"
         configuration-policy="ignore" >
         <implementation class="org.apache.felix.scr.integration.components.SimpleComponent" />
+        <property name="service.pid" value="ServiceComponent" />
         <property name="prop.public" value="required" />
         <property name=".prop.private" value="private" />
         <service>
