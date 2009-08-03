@@ -1003,24 +1003,6 @@ public class BldProject implements IBldProject, IRepositoryConfig
         }
 
 
-        public List<String> getDownloadContents()
-        {
-            return getList( BldConfig.L_DL_CONTENTS );
-        }
-
-
-        public List<String> getComposites()
-        {
-            ArrayList<String> list = new ArrayList<String>();
-            for ( String composite : getList( BldConfig.L_COMPOSITES ) )
-            {
-                list.add( composite );
-            }
-
-            return list;
-        }
-
-
         public Map<String, String> getResources()
         {
             HashMap<String, String> map = new HashMap<String, String>();

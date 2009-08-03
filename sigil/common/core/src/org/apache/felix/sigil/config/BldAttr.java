@@ -32,10 +32,7 @@ public class BldAttr
     public static final String RESOLVE_RUNTIME = "runtime";
     public static final String RESOLVE_IGNORE = "ignore";
 
-    public static final String PUBLISH_ATTRIBUTE = "publish";
-    public static final String PUBTYPE_ATTRIBUTE = "type";
     public static final String PATH_ATTRIBUTE = "path";
-    public static final Object ZONE_ATTRIBUTE = "zone";
 
     // Sigil options
 

@@ -142,25 +142,6 @@ public interface ISigilBundle extends ICompoundModelElement, IVersionedModelElem
 
 
     /**
-     * get package names included in download jar.
-     * Can contain wildcards e.g. org.foo.*
-     */
-    Set<String> getDownloadPackages();
-
-
-    /**
-     * remove package name from those included in download jar.
-     */
-    boolean removeDownloadPackage( String pkg );
-
-
-    /**
-     * add package name to be included in download jar.
-     */
-    void addDownloadPackage( String pkg );
-
-
-    /**
      * Attempt to find a package export that matches the given name or return null if none specified
      * 
      * @param elementName

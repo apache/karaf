@@ -20,14 +20,10 @@
 package org.apache.felix.sigil.bnd;
 
 
-import static java.lang.String.format;
-
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -67,8 +63,6 @@ public class BundleBuilder
 
     private boolean addMissingImports;
     private boolean omitUnusedImports;
-    private String defaultPubtype;
-    private String codebaseFormat;
     private Set<String> systemPkgs;
 
     public interface Log
@@ -103,10 +97,6 @@ public class BundleBuilder
             && Boolean.parseBoolean( options.getProperty( BldAttr.OPTION_ADD_IMPORTS ) );
         omitUnusedImports = options.containsKey( BldAttr.OPTION_OMIT_IMPORTS )
             && Boolean.parseBoolean( options.getProperty( BldAttr.OPTION_OMIT_IMPORTS ) );
-
-        defaultPubtype = options.getProperty( BldAttr.PUBTYPE_ATTRIBUTE, "rmi.codebase" );
-
-        codebaseFormat = options.getProperty( "codebaseFormat", "cds://%1$s?bundle.symbolic.name=%2$s&type=%3$s" );
 
         for ( IBldBundle b : project.getBundles() )
         {
@@ -197,50 +187,6 @@ public class BundleBuilder
 
         errors.clear();
         warnings.clear();
-
-        if ( !bundle.getDownloadContents().isEmpty() )
-        {
-            // create dljar
-            Properties dlspec = new Properties();
-            StringBuilder sb = new StringBuilder();
-
-            for ( String pkg : bundle.getDownloadContents() )
-            {
-                if ( sb.length() > 0 )
-                    sb.append( "," );
-                sb.append( pkg );
-            }
-
-            dlspec.setProperty( Constants.PRIVATE_PACKAGE, sb.toString() );
-            dlspec.setProperty( Constants.BUNDLE_NAME, "Newton download jar" );
-            dlspec.setProperty( Constants.NOEXTRAHEADERS, "true" );
-            // stop it being a bundle, so cds doesn't scan it
-            dlspec.setProperty( Constants.REMOVE_HEADERS, Constants.BUNDLE_SYMBOLICNAME );
-
-            Builder builder = new Builder();
-            builder.setProperties( dlspec );
-            builder.setClasspath( classpath );
-
-            Jar dljar = builder.build();
-            convertErrors( "BND (dljar): ", builder.getErrors() );
-            convertWarnings( "BND (dljar): ", builder.getWarnings() );
-
-            String dldest = dest.replaceFirst( "\\.jar$", "-dl.jar" );
-            File dloutput = new File( dldest );
-            if ( !dloutput.exists() || dloutput.lastModified() <= dljar.lastModified() || force )
-            {
-                // jar.write(dldest) catches and ignores IOException
-                OutputStream out = new FileOutputStream( dldest );
-                dljar.write( out );
-                out.close();
-                dljar.close();
-                // XXX deleting dljar causes it to be rebuilt each time
-                // XXX but leaving it mean it may be installed where it's not
-                // wanted/needed.
-                dloutput.deleteOnExit();
-            }
-            builder.close();
-        }
 
         Properties spec = getBndSpec( bundle, dest );
 
@@ -483,9 +429,8 @@ public class BundleBuilder
             }
         }
 
-        List<String> srcPkgs = addLibs( bundle, dest, spec );
+        addLibs( bundle, dest, spec );
 
-        contents.addAll( srcPkgs );
         addContents( contents, spec );
 
         IRequiredBundle fh = bundle.getFragmentHost();
@@ -534,38 +479,17 @@ public class BundleBuilder
     }
 
 
-    private List<String> addLibs( IBldBundle bundle, String dest, Properties spec ) throws IOException
+    private void addLibs( IBldBundle bundle, String dest, Properties spec ) throws IOException
     {
         // final String cleanVersion =
         // Builder.cleanupVersion(bundle.getVersion());
-        final String name = bundle.getSymbolicName();
-
-        ArrayList<String> srcPkgs = new ArrayList<String>();
+        
         Map<String, Map<String, String>> libs = bundle.getLibs();
-
-        if ( !bundle.getDownloadContents().isEmpty() )
-        {
-            // implicitly add dljar
-            File fdest = new File( dest );
-            String dlname = fdest.getName().replaceFirst( "\\.jar$", "-dl.jar" );
-
-            HashMap<String, String> attr = new HashMap<String, String>();
-            attr.put( BldAttr.KIND_ATTRIBUTE, "codebase" );
-            attr.put( BldAttr.PUBLISH_ATTRIBUTE, dlname );
-
-            HashMap<String, Map<String, String>> lib2 = new HashMap<String, Map<String, String>>();
-            lib2.putAll( libs );
-            lib2.put( dlname, attr );
-            libs = lib2;
-        }
-
-        StringBuilder items = new StringBuilder();
 
         for ( String jarpath : libs.keySet() )
         {
             Map<String, String> attr = libs.get( jarpath );
             String kind = attr.get( BldAttr.KIND_ATTRIBUTE );
-            String publish = attr.get( BldAttr.PUBLISH_ATTRIBUTE );
 
             // first find the lib ..
             String path = attr.get( BldAttr.PATH_ATTRIBUTE );
@@ -605,45 +529,7 @@ public class BundleBuilder
                     spec.setProperty( Constants.BUNDLE_CLASSPATH, "." );
                 appendProperty( Constants.BUNDLE_CLASSPATH, jarpath, spec );
             }
-
-            if ( publish != null )
-            {
-                String pubtype = attr.get( BldAttr.PUBTYPE_ATTRIBUTE );
-                if ( pubtype == null )
-                    pubtype = defaultPubtype;
-
-                if ( "codebase".equals( kind ) )
-                {
-                    String codebase = format( codebaseFormat, publish, name, pubtype );
-                    String zone = attr.get( BldAttr.ZONE_ATTRIBUTE );
-                    if ( zone != null )
-                        codebase += "&zone=" + zone;
-                    appendProperty( "RMI-Codebase", codebase, spec );
-                }
-
-                // add item to publish xml
-                items.append( format( "<item name=\"%s\" path=\"%s\">\n", publish, jarpath ) );
-                items.append( format( "<attribute name=\"type\" value=\"%s\"/>\n", pubtype ) );
-                items.append( "</item>\n" );
-            }
         }
-
-        if ( items.length() > 0 )
-        {
-            File publishFile = new File( dest.replaceFirst( "\\.jar$", "-publish.xml" ) );
-            publishFile.deleteOnExit();
-            PrintWriter writer = new PrintWriter( new FileWriter( publishFile ) );
-
-            writer.println( "<publish>" );
-            writer.println( format( "<attribute name=\"bundle.symbolic.name\" value=\"%s\"/>", name ) );
-            writer.print( items.toString() );
-            writer.println( "</publish>" );
-            writer.close();
-
-            appendProperty( Constants.INCLUDE_RESOURCE, "publish.xml=" + publishFile, spec );
-        }
-
-        return srcPkgs;
     }
 
 

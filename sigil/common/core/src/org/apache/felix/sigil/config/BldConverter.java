@@ -113,12 +113,6 @@ public class BldConverter
             sigilBundle.addPackage( pkg );
         }
 
-        // downloads
-        for ( String pkg : bundle.getDownloadContents() )
-        {
-            sigilBundle.addDownloadPackage( pkg );
-        }
-
         // sources
         for ( String source : config.getList( null, BldConfig.L_SRC_CONTENTS ) )
         {
@@ -132,15 +126,7 @@ public class BldConverter
         {
             Map<String, String> attr = libs.get( path );
             String kind = attr.get( BldAttr.KIND_ATTRIBUTE );
-            String publish = attr.get( BldAttr.PUBLISH_ATTRIBUTE );
-
-            if ( publish != null )
-            {
-                // FIXME: UI doesn't understand publish=name
-                BldCore.error( "Can't convert -libs publish=" + publish );
-                continue;
-            }
-
+            
             if ( "classpath".equals( kind ) )
             {
                 sigilBundle.addClasspathEntry( String.format( classpathFormat, "lib", path ) );

@@ -51,13 +51,11 @@ public class BldConfig
         { S_ACTIVATOR, S_DEFAULTS, S_ID, S_SYM_NAME, S_VERSION, S_SINGLETON };
 
     // list properties
-    public static final String L_COMPOSITES = "-composites";
     public static final String L_CONTENTS = "-contents";
-    public static final String L_DL_CONTENTS = "-downloads";
     public static final String L_SRC_CONTENTS = "-sourcedirs";
     public static final String L_RESOURCES = "-resources";
     public static final String[] LIST_KEYS =
-        { L_COMPOSITES, L_CONTENTS, L_DL_CONTENTS, L_SRC_CONTENTS, L_RESOURCES };
+        { L_CONTENTS, L_SRC_CONTENTS, L_RESOURCES };
 
     // map properties
     public static final String M_EXPORTS = "-exports";

@@ -207,15 +207,6 @@ public interface IBldProject
 
 
         /**
-         * gets the bundle's associated dljar contents.
-         * This is a convenience which avoids having to define another bundle
-         * just for the dljar, which is then added to the parent bundle.
-         * @return list of package patterns.
-         */
-        List<String> getDownloadContents();
-
-
-        /**
          * gets the additional resources.
          * @return map with key as path in bundle, value as path in file system.
          * Paths are resolved relative to location of project file and also from classpath.
