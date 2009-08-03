@@ -80,7 +80,7 @@
       <provider
             class="org.apache.felix.sigil.core.repository.FileSystemRepositoryProvider"
             dynamic="true"
-            id="org.cauldron.sigil.core.file"
+            id="org.apache.felix.sigil.core.file"
             type="File System Repository">
       </provider>
    </extension>
