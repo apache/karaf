@@ -162,7 +162,7 @@ public class ReferenceMetadata
         }
 
         m_policy = policy;
-        
+
         // secondary property
         m_isStatic = POLICY_STATIC.equals( policy );
     }
@@ -354,7 +354,7 @@ public class ReferenceMetadata
         if ( m_name == null )
         {
             // 112.10 name attribute is optional, defaults to interface since DS 1.1
-            if ( componentMetadata.getNamespaceCode() < XmlHandler.DS_VERSION_1_1 )
+            if ( !componentMetadata.isDS11() )
             {
                 throw componentMetadata.validationFailure( "A name must be declared for the reference" );
             }
@@ -365,7 +365,7 @@ public class ReferenceMetadata
         {
             throw componentMetadata.validationFailure( "An interface must be declared for the reference" );
         }
-        
+
 
         if ( m_cardinality == null )
         {

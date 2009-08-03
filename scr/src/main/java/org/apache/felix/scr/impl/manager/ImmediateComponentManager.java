@@ -190,8 +190,17 @@ public class ImmediateComponentManager extends AbstractComponentManager
         // get the method
         if ( activateMethod == ReflectionHelper.SENTINEL )
         {
-            activateMethod = getMethod( implementationObject, getComponentMetadata().getActivate(),
-                ReflectionHelper.ACTIVATE_ACCEPTED_PARAMETERS );
+            // FELIX-1437: New signatures only with DS 1.1 namespace declaration
+            if ( getComponentMetadata().isDS11() )
+            {
+                activateMethod = getMethod( implementationObject, getComponentMetadata().getActivate(),
+                    ReflectionHelper.ACTIVATE_ACCEPTED_PARAMETERS );
+            }
+            else
+            {
+                activateMethod = getMethod( implementationObject, getComponentMetadata().getActivate(),
+                    ReflectionHelper.ACTIVATOR_10_ACCEPTED_PARAMETERS );
+            }
         }
 
         // 4. Call the activate method, if present
@@ -220,8 +229,17 @@ public class ImmediateComponentManager extends AbstractComponentManager
         // get the method
         if ( deactivateMethod == ReflectionHelper.SENTINEL )
         {
-            deactivateMethod = getMethod( implementationObject, getComponentMetadata().getDeactivate(),
-                ReflectionHelper.DEACTIVATE_ACCEPTED_PARAMETERS );
+            // FELIX-1437: New signatures only with DS 1.1 namespace declaration
+            if ( getComponentMetadata().isDS11() )
+            {
+                deactivateMethod = getMethod( implementationObject, getComponentMetadata().getDeactivate(),
+                    ReflectionHelper.DEACTIVATE_ACCEPTED_PARAMETERS );
+            }
+            else
+            {
+                deactivateMethod = getMethod( implementationObject, getComponentMetadata().getDeactivate(),
+                    ReflectionHelper.ACTIVATOR_10_ACCEPTED_PARAMETERS );
+            }
         }
 
         // 1. Call the deactivate method, if present

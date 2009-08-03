@@ -60,6 +60,7 @@ public class XmlHandlerTest extends TestCase
         final ComponentMetadata cm10 = ( ComponentMetadata ) metadataList10.get( 0 );
         cm10.validate( logger );
         assertEquals( "DS Version 1.0", XmlHandler.DS_VERSION_1_0, cm10.getNamespaceCode() );
+        assertFalse( "DS Version 1.0", cm10.isDS11() );
         assertEquals( "Expected Activate Method not set", "activate", cm10.getActivate() );
         assertEquals( "Expected Deactivate Method not set", "deactivate", cm10.getDeactivate() );
         assertNull( "Expected Modified Method not set", cm10.getModified() );
@@ -134,7 +135,8 @@ public class XmlHandlerTest extends TestCase
         // dont validate this, we test the raw reading
 
         // ds namespace
-        assertEquals( "ds name space", XmlHandler.DS_VERSION_1_0, cm10.getNamespaceCode() );
+        assertEquals( "DS Version 1.0", XmlHandler.DS_VERSION_1_0, cm10.getNamespaceCode() );
+        assertFalse( "DS Version 1.0", cm10.isDS11() );
 
         // base component attributes
         assertEquals( "component name", true, cm10.isEnabled() );

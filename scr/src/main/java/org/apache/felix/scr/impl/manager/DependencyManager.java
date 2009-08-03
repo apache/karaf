@@ -128,13 +128,15 @@ public class DependencyManager implements ServiceListener, Reference
                 m_componentManager.log( level, message, m_componentManager.getComponentMetadata(), ex );
             }
         };
-        m_bind = new BindMethod( m_dependencyMetadata.getBind(),
+        m_bind = new BindMethod( m_componentManager.getComponentMetadata().isDS11(),
+                                 m_dependencyMetadata.getBind(),
                                  m_componentInstance.getClass(),
                                  m_dependencyMetadata.getName(),
                                  m_dependencyMetadata.getInterface(),
                                  logger
         );
-        m_unbind = new UnbindMethod( m_dependencyMetadata.getUnbind(),
+        m_unbind = new UnbindMethod( m_componentManager.getComponentMetadata().isDS11(),
+                                     m_dependencyMetadata.getUnbind(),
                                      m_componentInstance.getClass(),
                                      m_dependencyMetadata.getName(),
                                      m_dependencyMetadata.getInterface(),

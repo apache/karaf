@@ -50,13 +50,16 @@ public final class ReflectionHelper
     public static final Class MAP_CLASS = Map.class;
     public static final Class INTEGER_CLASS = Integer.class;
 
-    // Helper used to find the best matching activate and modified methods
-    public static final ActivatorMethodTester ACTIVATE_ACCEPTED_PARAMETERS = new ActivatorMethodTester( new Class[]
+    // Helper used to find the best matching activate and modified methods (DS 1.1 and newer)
+    public static final MethodTester ACTIVATE_ACCEPTED_PARAMETERS = new ActivatorMethodTester( new Class[]
         { COMPONENT_CONTEXT_CLASS, BUNDLE_CONTEXT_CLASS, MAP_CLASS } );
 
-    // Helper used to find the best matching deactivate method
-    public static final ActivatorMethodTester DEACTIVATE_ACCEPTED_PARAMETERS = new ActivatorMethodTester( new Class[]
+    // Helper used to find the best matching deactivate method (DS 1.1 and newer)
+    public static final MethodTester DEACTIVATE_ACCEPTED_PARAMETERS = new ActivatorMethodTester( new Class[]
         { COMPONENT_CONTEXT_CLASS, BUNDLE_CONTEXT_CLASS, MAP_CLASS, Integer.TYPE, INTEGER_CLASS } );
+
+    // Helper used to find the best matching activate/deactivate method (DS 1.0)
+    public static final MethodTester ACTIVATOR_10_ACCEPTED_PARAMETERS = new ActivatorMethodTester10();
 
     static
     {
@@ -107,15 +110,16 @@ public final class ReflectionHelper
         throws NoSuchMethodException, InvocationTargetException
     {
         // whether we accept package private methods
-        boolean acceptPackage = true;
+        boolean acceptPackage = tester.acceptPackage();
         final String packageName = getPackageName( objectClass );
         final Class[] parameterTypesList = tester.getParameterLists();
 
         for ( Class clazz = objectClass; clazz != null; clazz = clazz.getSuperclass() )
         {
-            // turns false on first package not equal to the package of objectClass
-            acceptPackage &= packageName.equals( getPackageName( clazz ) );
-            final boolean acceptPrivate = clazz == objectClass;
+            // turns false on first package not equal to the package of objectClass (or different class loader)
+            acceptPackage &= packageName.equals( getPackageName( clazz ) )
+                && clazz.getClassLoader() == objectClass.getClassLoader();
+            final boolean acceptPrivate = tester.acceptPrivate() && clazz == objectClass;
 
             // check parameter types first
             for ( int i = 0; i < parameterTypesList.length; i++ )
@@ -158,7 +162,7 @@ public final class ReflectionHelper
                 try
                 {
                     // find the declared method in this class
-                    return getMethod( clazz, name, null, clazz == objectClass, acceptPackage );
+                    return getMethod( clazz, name, null, acceptPrivate, acceptPackage );
                 }
                 catch ( NoSuchMethodException nsme )
                 {
@@ -321,6 +325,15 @@ public final class ReflectionHelper
          */
         boolean acceptEmpty();
 
+        /**
+         * Returns <code>true</code> if private methods are allowed at all.
+         */
+        boolean acceptPrivate();
+
+        /**
+         * Returns <code>true</code> if package private methods are allowed at all.
+         */
+        boolean acceptPackage();
 
         /**
          * Returns <code>true</code> if the method <code>m</code> is suitable for
@@ -336,6 +349,11 @@ public final class ReflectionHelper
         Class[] getParameterLists();
     }
 
+    /**
+     * The <code>ActivatorMethodTester</code> class implements the {@link MethodTester}
+     * interface to test methods applicable for Components declared with the
+     * SCR 1.1 (or newer) specification namespace.
+     */
     public static final class ActivatorMethodTester implements ReflectionHelper.MethodTester
     {
         private final Class[] parameterLists;
@@ -351,6 +369,18 @@ public final class ReflectionHelper
 
 
         public boolean acceptEmpty()
+        {
+            return true;
+        }
+
+
+        public boolean acceptPrivate()
+        {
+            return true;
+        }
+
+
+        public boolean acceptPackage()
         {
             return true;
         }
@@ -384,6 +414,54 @@ public final class ReflectionHelper
             return parameterLists;
         }
 
+    }
+
+
+    /**
+     * The <code>ActivatorMethodTester10</code> class implements the
+     * {@link MethodTester} interface to test methods applicable for Components
+     * declared with the original SCR 1.0 specification namespace.
+     */
+    public static final class ActivatorMethodTester10 implements ReflectionHelper.MethodTester
+    {
+
+        private static final Class[] PARAMETER_LIST =
+            { COMPONENT_CONTEXT_CLASS };
+
+
+        public boolean acceptEmpty()
+        {
+            // DS 1.0 activator methods only accept ComponentContext
+            return false;
+        }
+
+
+        public boolean acceptPrivate()
+        {
+            // DS 1.0 activator methods may only be public or protected
+            return true;
+        }
+
+
+        public boolean acceptPackage()
+        {
+            // DS 1.0 activator methods may only be public or protected
+            return true;
+        }
+
+
+        public boolean isSuitable( Method m )
+        {
+            // DS 1.0 activator methods only accept ComponentContext
+            Class[] types = m.getParameterTypes();
+            return types.length == 1 && types[0] == COMPONENT_CONTEXT_CLASS;
+        }
+
+
+        public Class[] getParameterLists()
+        {
+            return PARAMETER_LIST;
+        }
     }
 
 }

@@ -345,6 +345,16 @@ public class ComponentMetadata
 
 
     /**
+     * Returns <code>true</code> if the metadata declaration has used the
+     * Declarative Services version 1.1 namespace or a later namespace.
+     */
+    public boolean isDS11()
+    {
+        return getNamespaceCode() >= XmlHandler.DS_VERSION_1_1;
+    }
+
+
+    /**
      * Returns the name of the component
      *
      * @return A string containing the name of the component

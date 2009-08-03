@@ -25,10 +25,10 @@ package org.apache.felix.scr.impl.manager;
 class UnbindMethod extends BindMethod
 {
 
-    UnbindMethod( final String methodName, final Class componentClass, final String referenceName,
-        final String referenceClassName, final Logger logger )
+    UnbindMethod( final boolean isDS11, final String methodName, final Class componentClass,
+        final String referenceName, final String referenceClassName, final Logger logger )
     {
-        super( methodName, componentClass, referenceName, referenceClassName, logger );
+        super( isDS11, methodName, componentClass, referenceName, referenceClassName, logger );
     }
 
 
