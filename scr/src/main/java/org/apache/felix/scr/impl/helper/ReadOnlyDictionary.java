@@ -27,11 +27,13 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
+import org.osgi.framework.ServiceReference;
+
 
 /**
- * The <code>ReadOnlyDictionary</code> is a <code>Dictionary</code> whose
- * {@link #put(Object, Object)} and {@link #remove(Object)} methods have
- * no effect and always return <code>null</code>.
+ * The <code>ReadOnlyDictionary</code> is both a <code>Dictionary</code> and
+ * a <code>Map</code> whose modificaiton methods (like {@link #put(Object, Object)},
+ * {@link #remove(Object)}, etc.) have no effect.
  */
 public class ReadOnlyDictionary extends Dictionary implements Map
 {
@@ -39,6 +41,10 @@ public class ReadOnlyDictionary extends Dictionary implements Map
     private final Hashtable m_delegatee;
 
 
+    /**
+     * Creates a wrapper for the given delegatee dictionary providing read
+     * only access to the data.
+     */
     public ReadOnlyDictionary( final Dictionary delegatee )
     {
         if ( delegatee instanceof Hashtable )
@@ -54,6 +60,26 @@ public class ReadOnlyDictionary extends Dictionary implements Map
                 this.m_delegatee.put( key, delegatee.get( key ) );
             }
         }
+    }
+
+
+    /**
+     * Creates a wrapper for the given service reference providing read only
+     * access to the reference properties.
+     */
+    public ReadOnlyDictionary( final ServiceReference serviceReference )
+    {
+        Hashtable properties = new Hashtable();
+        final String[] keys = serviceReference.getPropertyKeys();
+        if ( keys != null )
+        {
+            for ( int j = 0; j < keys.length; j++ )
+            {
+                final String key = keys[j];
+                properties.put( key, serviceReference.getProperty( key ) );
+            }
+        }
+        m_delegatee = properties;
     }
 
 
