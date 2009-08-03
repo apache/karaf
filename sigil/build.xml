@@ -33,7 +33,7 @@
 
   <target name="dist" depends="build, site" />
 
-  <target name="clean" depends="clean-list, clean-site, clean-ivy" />
+  <target name="clean" depends="clean-list, clean-site" />
 
   <target name="build" depends="build-list" />
 
