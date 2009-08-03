@@ -19,10 +19,13 @@
 package org.apache.felix.scr.impl.manager;
 
 
-import java.util.Map;
-
 import junit.framework.TestCase;
 
+import org.apache.felix.scr.impl.manager.components.FakeService;
+import org.apache.felix.scr.impl.manager.components.T1;
+import org.apache.felix.scr.impl.manager.components.T1a;
+import org.apache.felix.scr.impl.manager.components.T3;
+import org.apache.felix.scr.impl.manager.components2.T2;
 import org.easymock.EasyMock;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
@@ -64,281 +67,374 @@ public class BindMethodTest extends TestCase
 
     public void test_Unexistent()
     {
-        System.out.println();
-        final T1 t1 = new T1();
-        createMethod( "unexistent", T1.class ).invoke( t1, m_service );
-        assertNull( t1.callPerformed );
+        testMethod( "unexistent", new T1(), false, null );
+        testMethod( "unexistent", new T1(), true, null );
+        testMethod( "unexistent", new T2(), false, null );
+        testMethod( "unexistent", new T2(), true, null );
+        testMethod( "unexistent", new T3(), false, null );
+        testMethod( "unexistent", new T3(), true, null );
     }
 
 
     public void test_privateT1()
     {
-        System.out.println();
-        final T1 t1 = new T1();
-        createMethod( "privateT1", T1.class ).invoke( t1, m_service );
-        assertNull( t1.callPerformed );
+        testMethod( "privateT1", new T1(), false, null );
+        testMethod( "privateT1", new T1(), true, null );
+        testMethod( "privateT1", new T2(), false, null );
+        testMethod( "privateT1", new T2(), true, null );
+        testMethod( "privateT1", new T3(), false, null );
+        testMethod( "privateT1", new T3(), true, null );
+    }
+
+
+    public void test_privateT1SR()
+    {
+        testMethod( "privateT1SR", new T1(), false, null );
+        testMethod( "privateT1SR", new T1(), true, "privateT1SR" );
+        testMethod( "privateT1SR", new T2(), false, null );
+        testMethod( "privateT1SR", new T2(), true, null );
+    }
+
+
+    public void test_privateT1SI()
+    {
+        testMethod( "privateT1SI", new T1(), false, null );
+        testMethod( "privateT1SI", new T1(), true, "privateT1SI" );
+        testMethod( "privateT1SI", new T2(), false, null );
+        testMethod( "privateT1SI", new T2(), true, null );
+    }
+
+
+    public void test_privateT1SIMap()
+    {
+        testMethod( "privateT1SIMap", new T1(), false, null );
+        testMethod( "privateT1SIMap", new T1(), true, "privateT1SIMap" );
+        testMethod( "privateT1SIMap", new T2(), false, null );
+        testMethod( "privateT1SIMap", new T2(), true, null );
+    }
+
+
+    public void test_privateT1SSI()
+    {
+        testMethod( "privateT1SSI", new T1(), false, null );
+        testMethod( "privateT1SSI", new T1(), true, "privateT1SSI" );
+        testMethod( "privateT1SSI", new T2(), false, null );
+        testMethod( "privateT1SSI", new T2(), true, null );
+    }
+
+
+    public void test_privateT1SSIMap()
+    {
+        testMethod( "privateT1SSIMap", new T1(), false, null );
+        testMethod( "privateT1SSIMap", new T1(), true, "privateT1SSIMap" );
+        testMethod( "privateT1SSIMap", new T2(), false, null );
+        testMethod( "privateT1SSIMap", new T2(), true, null );
+    }
+
+
+    public void test_privateT2()
+    {
+        testMethod( "privateT2", new T1(), false, null );
+        testMethod( "privateT2", new T1(), true, null );
+        testMethod( "privateT2", new T2(), false, null );
+        testMethod( "privateT2", new T2(), true, null );
+    }
+
+
+    public void test_privateT2SR()
+    {
+        testMethod( "privateT2SR", new T1(), false, null );
+        testMethod( "privateT2SR", new T1(), true, null );
+        testMethod( "privateT2SR", new T2(), false, null );
+        testMethod( "privateT2SR", new T2(), true, "privateT2SR" );
+    }
+
+
+    public void test_privateT2SI()
+    {
+        testMethod( "privateT2SI", new T1(), false, null );
+        testMethod( "privateT2SI", new T1(), true, null );
+        testMethod( "privateT2SI", new T2(), false, null );
+        testMethod( "privateT2SI", new T2(), true, "privateT2SI" );
+    }
+
+
+    public void test_privateT2SIMap()
+    {
+        testMethod( "privateT2SIMap", new T1(), false, null );
+        testMethod( "privateT2SIMap", new T1(), true, null );
+        testMethod( "privateT2SIMap", new T2(), false, null );
+        testMethod( "privateT2SIMap", new T2(), true, "privateT2SIMap" );
+    }
+
+
+    public void test_privateT2SSI()
+    {
+        testMethod( "privateT2SSI", new T1(), false, null );
+        testMethod( "privateT2SSI", new T1(), true, null );
+        testMethod( "privateT2SSI", new T2(), false, null );
+        testMethod( "privateT2SSI", new T2(), true, "privateT2SSI" );
+    }
+
+
+    public void test_privateT2SSIMap()
+    {
+        testMethod( "privateT2SSIMap", new T1(), false, null );
+        testMethod( "privateT2SSIMap", new T1(), true, null );
+        testMethod( "privateT2SSIMap", new T2(), false, null );
+        testMethod( "privateT2SSIMap", new T2(), true, "privateT2SSIMap" );
+    }
+
+
+    public void test_packageT1()
+    {
+        testMethod( "packageT1", new T1(), false, null );
+        testMethod( "packageT1", new T1(), true, null );
+        testMethod( "packageT1", new T2(), false, null );
+        testMethod( "packageT1", new T2(), true, null );
+        testMethod( "packageT1", new T3(), false, null );
+        testMethod( "packageT1", new T3(), true, null );
+        testMethod( "packageT1", new T1a(), false, null );
+        testMethod( "packageT1", new T1a(), true, null );
+    }
+
+
+    public void test_packageT1SR()
+    {
+        testMethod( "packageT1SR", new T1(), false, null );
+        testMethod( "packageT1SR", new T1(), true, "packageT1SR" );
+        testMethod( "packageT1SR", new T2(), false, null );
+        testMethod( "packageT1SR", new T2(), true, null );
+        testMethod( "packageT1SR", new T3(), false, null );
+        testMethod( "packageT1SR", new T3(), true, null );
+        testMethod( "packageT1SR", new T1a(), false, null );
+        testMethod( "packageT1SR", new T1a(), true, "packageT1SR" );
+    }
+
+
+    public void test_packageT1SI()
+    {
+        testMethod( "packageT1SI", new T1(), false, null );
+        testMethod( "packageT1SI", new T1(), true, "packageT1SI" );
+        testMethod( "packageT1SI", new T2(), false, null );
+        testMethod( "packageT1SI", new T2(), true, null );
+        testMethod( "packageT1SI", new T3(), false, null );
+        testMethod( "packageT1SI", new T3(), true, null );
+        testMethod( "packageT1SI", new T1a(), false, null );
+        testMethod( "packageT1SI", new T1a(), true, "packageT1SI" );
+    }
+
+
+    public void test_packageT1SIMap()
+    {
+        testMethod( "packageT1SIMap", new T1(), false, null );
+        testMethod( "packageT1SIMap", new T1(), true, "packageT1SIMap" );
+        testMethod( "packageT1SIMap", new T2(), false, null );
+        testMethod( "packageT1SIMap", new T2(), true, null );
+        testMethod( "packageT1SIMap", new T3(), false, null );
+        testMethod( "packageT1SIMap", new T3(), true, null );
+        testMethod( "packageT1SIMap", new T1a(), false, null );
+        testMethod( "packageT1SIMap", new T1a(), true, "packageT1SIMap" );
+    }
+
+
+    public void test_packageT1SSI()
+    {
+        testMethod( "packageT1SSI", new T1(), false, null );
+        testMethod( "packageT1SSI", new T1(), true, "packageT1SSI" );
+        testMethod( "packageT1SSI", new T2(), false, null );
+        testMethod( "packageT1SSI", new T2(), true, null );
+        testMethod( "packageT1SSI", new T3(), false, null );
+        testMethod( "packageT1SSI", new T3(), true, null );
+        testMethod( "packageT1SSI", new T1a(), false, null );
+        testMethod( "packageT1SSI", new T1a(), true, "packageT1SSI" );
+    }
+
+
+    public void test_packageT1SSIMap()
+    {
+        testMethod( "packageT1SSIMap", new T1(), false, null );
+        testMethod( "packageT1SSIMap", new T1(), true, "packageT1SSIMap" );
+        testMethod( "packageT1SSIMap", new T2(), false, null );
+        testMethod( "packageT1SSIMap", new T2(), true, null );
+        testMethod( "packageT1SSIMap", new T3(), false, null );
+        testMethod( "packageT1SSIMap", new T3(), true, null );
+        testMethod( "packageT1SSIMap", new T1a(), false, null );
+        testMethod( "packageT1SSIMap", new T1a(), true, "packageT1SSIMap" );
+    }
+
+
+    public void test_packageT2()
+    {
+        testMethod( "packageT2", new T1(), false, null );
+        testMethod( "packageT2", new T1(), true, null );
+        testMethod( "packageT2", new T2(), false, null );
+        testMethod( "packageT2", new T2(), true, null );
+    }
+
+
+    public void test_packageT2SR()
+    {
+        testMethod( "packageT2SR", new T1(), false, null );
+        testMethod( "packageT2SR", new T1(), true, null );
+        testMethod( "packageT2SR", new T2(), false, null );
+        testMethod( "packageT2SR", new T2(), true, "packageT2SR" );
+    }
+
+
+    public void test_packageT2SI()
+    {
+        testMethod( "packageT2SI", new T1(), false, null );
+        testMethod( "packageT2SI", new T1(), true, null );
+        testMethod( "packageT2SI", new T2(), false, null );
+        testMethod( "packageT2SI", new T2(), true, "packageT2SI" );
+    }
+
+
+    public void test_packageT2SIMap()
+    {
+        testMethod( "packageT2SIMap", new T1(), false, null );
+        testMethod( "packageT2SIMap", new T1(), true, null );
+        testMethod( "packageT2SIMap", new T2(), false, null );
+        testMethod( "packageT2SIMap", new T2(), true, "packageT2SIMap" );
+    }
+
+
+    public void test_packageT2SSI()
+    {
+        testMethod( "packageT2SSI", new T1(), false, null );
+        testMethod( "packageT2SSI", new T1(), true, null );
+        testMethod( "packageT2SSI", new T2(), false, null );
+        testMethod( "packageT2SSI", new T2(), true, "packageT2SSI" );
+    }
+
+
+    public void test_packageT2SSIMap()
+    {
+        testMethod( "packageT2SSIMap", new T1(), false, null );
+        testMethod( "packageT2SSIMap", new T1(), true, null );
+        testMethod( "packageT2SSIMap", new T2(), false, null );
+        testMethod( "packageT2SSIMap", new T2(), true, "packageT2SSIMap" );
     }
 
 
     public void test_protectedT1()
     {
-        System.out.println();
-        final T1 t1 = new T1();
-        createMethod( "protectedT1", T1.class ).invoke( t1, m_service );
-        assertNull( t1.callPerformed );
+        testMethod( "protectedT1", new T1(), false, null );
+        testMethod( "protectedT1", new T1(), true, null );
+        testMethod( "protectedT1", new T2(), false, null );
+        testMethod( "protectedT1", new T2(), true, null );
     }
 
 
     public void test_protectedT1SR()
     {
-        System.out.println();
-        final T1 t1 = new T1();
-        createMethod( "protectedT1SR", T1.class ).invoke( t1, m_service );
-        assertEquals( "protectedT1SR", t1.callPerformed );
+        testMethod( "protectedT1SR", new T1(), false, "protectedT1SR" );
+        testMethod( "protectedT1SR", new T1(), true, "protectedT1SR" );
+        testMethod( "protectedT1SR", new T2(), false, "protectedT1SR" );
+        testMethod( "protectedT1SR", new T2(), true, "protectedT1SR" );
     }
 
 
     public void test_protectedT1SI()
     {
-        System.out.println();
-        final T1 t1 = new T1();
-        createMethod( "protectedT1SI", T1.class ).invoke( t1, m_service );
-        assertEquals( "protectedT1SI", t1.callPerformed );
+        testMethod( "protectedT1SI", new T1(), false, "protectedT1SI" );
+        testMethod( "protectedT1SI", new T1(), true, "protectedT1SI" );
+        testMethod( "protectedT1SI", new T2(), false, "protectedT1SI" );
+        testMethod( "protectedT1SI", new T2(), true, "protectedT1SI" );
     }
 
 
     public void test_protectedT1SSI()
     {
-        System.out.println();
-        final T1 t1 = new T1();
-        createMethod( "protectedT1SSI", T1.class ).invoke( t1, m_service );
-        assertEquals( "protectedT1SSI", t1.callPerformed );
-    }
-
-
-    public void test_protectedT1SSI_onT2()
-    {
-        System.out.println();
-        final T2 t2 = new T2();
-        createMethod( "protectedT1SSI", T2.class ).invoke( t2, m_service );
-        assertEquals( "protectedT1SSI", t2.callPerformed );
+        testMethod( "protectedT1SSI", new T1(), false, "protectedT1SSI" );
+        testMethod( "protectedT1SSI", new T1(), true, "protectedT1SSI" );
+        testMethod( "protectedT1SSI", new T2(), false, "protectedT1SSI" );
+        testMethod( "protectedT1SSI", new T2(), true, "protectedT1SSI" );
     }
 
 
     public void test_publicT1()
     {
-        System.out.println();
-        final T1 t1 = new T1();
-        createMethod( "publicT1", T1.class ).invoke( t1, m_service );
-        assertNull( t1.callPerformed );
+        testMethod( "publicT1", new T1(), false, null );
+        testMethod( "publicT1", new T1(), true, null );
+        testMethod( "publicT1", new T2(), false, null );
+        testMethod( "publicT1", new T2(), true, null );
     }
 
 
     public void test_publicT1SR()
     {
-        System.out.println();
-        final T1 t1 = new T1();
-        createMethod( "publicT1SR", T1.class ).invoke( t1, m_service );
-        assertEquals( "publicT1SR", t1.callPerformed );
-    }
-
-
-    public void test_publicT1SR_onT2()
-    {
-        System.out.println();
-        final T2 t2 = new T2();
-        createMethod( "publicT1SR", T2.class ).invoke( t2, m_service );
-        assertEquals( "publicT1SR", t2.callPerformed );
+        testMethod( "publicT1SR", new T1(), false, "publicT1SR" );
+        testMethod( "publicT1SR", new T1(), true, "publicT1SR" );
+        testMethod( "publicT1SR", new T2(), false, "publicT1SR" );
+        testMethod( "publicT1SR", new T2(), true, "publicT1SR" );
     }
 
 
     public void test_publicT1SI()
     {
-        System.out.println();
-        final T1 t1 = new T1();
-        createMethod( "publicT1SI", T1.class ).invoke( t1, m_service );
-        assertEquals( "publicT1SI", t1.callPerformed );
+        testMethod( "publicT1SI", new T1(), false, "publicT1SI" );
+        testMethod( "publicT1SI", new T1(), true, "publicT1SI" );
+        testMethod( "publicT1SI", new T2(), false, "publicT1SI" );
+        testMethod( "publicT1SI", new T2(), true, "publicT1SI" );
     }
 
 
     public void test_publicT1SIMap()
     {
-        System.out.println();
-        final T1 t1 = new T1();
-        createMethod( "publicT1SIMap", T1.class ).invoke( t1, m_service );
-        assertEquals( "publicT1SIMap", t1.callPerformed );
-    }
-
-
-    public void test_publicT1SI_onT2()
-    {
-        System.out.println();
-        final T2 t2 = new T2();
-        createMethod( "publicT1SI", T2.class ).invoke( t2, m_service );
-        assertEquals( "publicT1SI", t2.callPerformed );
+        testMethod( "publicT1SIMap", new T1(), false, null );
+        testMethod( "publicT1SIMap", new T1(), true, "publicT1SIMap" );
+        testMethod( "publicT1SIMap", new T2(), false, null );
+        testMethod( "publicT1SIMap", new T2(), true, "publicT1SIMap" );
     }
 
 
     public void test_publicT1SSI()
     {
-        System.out.println();
-        final T1 t1 = new T1();
-        createMethod( "publicT1SSI", T1.class ).invoke( t1, m_service );
-        assertEquals( "publicT1SSI", t1.callPerformed );
+        testMethod( "publicT1SSI", new T1(), false, "publicT1SSI" );
+        testMethod( "publicT1SSI", new T1(), true, "publicT1SSI" );
+        testMethod( "publicT1SSI", new T2(), false, "publicT1SSI" );
+        testMethod( "publicT1SSI", new T2(), true, "publicT1SSI" );
     }
 
 
-    public void test_publicT1SSI_onT2()
+    public void test_publicT1SSIMap()
     {
-        System.out.println();
-        final T2 t2 = new T2();
-        createMethod( "publicT1SSI", T2.class ).invoke( t2, m_service );
-        assertEquals( "publicT1SSI", t2.callPerformed );
-    }
-
-    private static interface SuperFakeService
-    {
-
-    }
-
-    private static interface FakeService extends SuperFakeService
-    {
-
-    }
-
-    private static class T1
-    {
-
-        String callPerformed = null;
-
-
-        private void privateT1()
-        {
-            callPerformed = "privateT1";
-        }
-
-
-        protected void protectedT1()
-        {
-            callPerformed = "protectedT1";
-        }
-
-
-        protected void protectedT1SR( ServiceReference sr )
-        {
-            if ( sr != null )
-            {
-                callPerformed = "protectedT1SR";
-            }
-            else
-            {
-                callPerformed = "protectedT1SR with null param";
-            }
-        }
-
-
-        protected void protectedT1SI( FakeService si )
-        {
-            if ( si != null )
-            {
-                callPerformed = "protectedT1SI";
-            }
-            else
-            {
-                callPerformed = "protectedT1SI with null param";
-            }
-        }
-
-
-        protected void protectedT1SSI( SuperFakeService si )
-        {
-            if ( si != null )
-            {
-                callPerformed = "protectedT1SSI";
-            }
-            else
-            {
-                callPerformed = "protectedT1SSI with null param";
-            }
-        }
-
-
-        protected void publicT1()
-        {
-            callPerformed = "publicT1";
-        }
-
-
-        public void publicT1SR( ServiceReference sr )
-        {
-            if ( sr != null )
-            {
-                callPerformed = "publicT1SR";
-            }
-            else
-            {
-                callPerformed = "publicT1SR with null param";
-            }
-        }
-
-
-        public void publicT1SI( FakeService si )
-        {
-            if ( si != null )
-            {
-                callPerformed = "publicT1SI";
-            }
-            else
-            {
-                callPerformed = "publicT1SI with null param";
-            }
-        }
-
-
-        public void publicT1SIMap( FakeService si, Map props )
-        {
-            if ( si != null && props != null && props.size() > 0 )
-            {
-                callPerformed = "publicT1SIMap";
-            }
-            else if ( si == null )
-            {
-                callPerformed = "publicT1SIMap with null service instance";
-            }
-            else if ( props == null )
-            {
-                callPerformed = "publicT1SIMap with null props";
-            }
-            else
-            {
-                callPerformed = "publicT1SIMap with empty props";
-            }
-
-        }
-
-
-        public void publicT1SSI( SuperFakeService si )
-        {
-            if ( si != null )
-            {
-                callPerformed = "publicT1SSI";
-            }
-            else
-            {
-                callPerformed = "publicT1SSI with null param";
-            }
-        }
-    }
-
-    private class T2 extends T1
-    {
-
+        testMethod( "publicT1SSIMap", new T1(), false, null );
+        testMethod( "publicT1SSIMap", new T1(), true, "publicT1SSIMap" );
+        testMethod( "publicT1SSIMap", new T2(), false, null );
+        testMethod( "publicT1SSIMap", new T2(), true, "publicT1SSIMap" );
     }
 
 
-    public BindMethod createMethod( final String methodName, final Class componentClass )
+    public void test_suitable()
     {
-        return new BindMethod( methodName, componentClass, "reference", FakeService.class.getName(), new SysOutLogger() );
+        // T1 should use its own public implementation
+        testMethod( "suitable", new T1(), false, "suitableT1" );
+        testMethod( "suitable", new T1(), true, "suitableT1" );
+
+        // T2's private implementation is only visible for DS 1.1
+        testMethod( "suitable", new T2(), false, null );
+        testMethod( "suitable", new T2(), true, "suitableT2" );
+
+        // T3 extends T2 and cannot see T2's private method
+        testMethod( "suitable", new T3(), false, null );
+        testMethod( "suitable", new T3(), true, null );
+
+        // T1a extends T1 and uses T1's public method
+        testMethod( "suitable", new T1a(), false, "suitableT1" );
+        testMethod( "suitable", new T1a(), true, "suitableT1" );
+    }
+
+
+    private void testMethod( final String methodName, final T1 component, final boolean isDS11,
+        final String expectCallPerformed )
+    {
+        BindMethod bm = new BindMethod( isDS11, methodName, component.getClass(), "reference", FakeService.class
+            .getName(), new SysOutLogger() );
+        bm.invoke( component, m_service );
+        assertEquals( expectCallPerformed, component.callPerformed );
     }
 
     private static class SysOutLogger implements BindMethod.Logger
