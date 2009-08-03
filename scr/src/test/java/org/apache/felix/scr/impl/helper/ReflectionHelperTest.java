@@ -184,6 +184,27 @@ public class ReflectionHelperTest extends TestCase
     }
 
 
+    public void test_suitable_method_selection() throws Exception
+    {
+        // this would be the protected BaseObject.activate_suitable
+        checkMethod( base, "activate_suitable" );
+        checkMethod( level1, "activate_suitable" );
+
+        // this would be the private Level2Object.activate_suitable
+        checkMethod( level2, "activate_suitable" );
+
+        // this must fail to find a method, since Level2Object's activate_suitable
+        // is private and terminates the search for Level3Object
+        try {
+            checkMethod( level3, "activate_suitable" );
+            fail("Level3Object must not find activate_suitable method");
+        } catch (NoSuchMethodException nsme) {
+            // expecting method lookup abort on suitable private
+            // method in Level2Object class
+        }
+    }
+
+
     //---------- internal
 
     /**

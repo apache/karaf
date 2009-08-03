@@ -114,12 +114,18 @@ public final class ReflectionHelper
         final String packageName = getPackageName( objectClass );
         final Class[] parameterTypesList = tester.getParameterLists();
 
-        for ( Class clazz = objectClass; clazz != null; clazz = clazz.getSuperclass() )
+        // flag indicating a suitable but inaccessible method has been found
+        boolean suitableMethodNotAccessible = false;
+
+        // lookup methods until there is no more super class or a class would
+        // have at least one suitable method but none is accessible
+        for ( Class clazz = objectClass; clazz != null && !suitableMethodNotAccessible; clazz = clazz.getSuperclass() )
         {
             // turns false on first package not equal to the package of objectClass (or different class loader)
             acceptPackage &= packageName.equals( getPackageName( clazz ) )
                 && clazz.getClassLoader() == objectClass.getClassLoader();
             final boolean acceptPrivate = tester.acceptPrivate() && clazz == objectClass;
+
 
             // check parameter types first
             for ( int i = 0; i < parameterTypesList.length; i++ )
@@ -136,6 +142,10 @@ public final class ReflectionHelper
                 {
                     // ignore for now
                 }
+                catch ( SuitableMethodNotAccessibleException smnae )
+                {
+                    suitableMethodNotAccessible = true;
+                }
                 catch ( Throwable throwable )
                 {
                     // unexpected problem accessing the method, don't let everything
@@ -148,11 +158,16 @@ public final class ReflectionHelper
             Method[] methods = clazz.getDeclaredMethods();
             for ( int i = 0; i < methods.length; i++ )
             {
-                if ( methods[i].getName().equals( name ) && tester.isSuitable( methods[i] )
-                    && accept( methods[i], acceptPrivate, acceptPackage ) )
+                if ( methods[i].getName().equals( name ) && tester.isSuitable( methods[i] ) )
                 {
-                    // check modifiers etc.
-                    return methods[i];
+                    if ( accept( methods[i], acceptPrivate, acceptPackage ) )
+                    {
+                        // check modifiers etc.
+                        return methods[i];
+                    }
+
+                    // method is suitable but not accessible, flag it
+                    suitableMethodNotAccessible = true;
                 }
             }
 
@@ -167,6 +182,10 @@ public final class ReflectionHelper
                 catch ( NoSuchMethodException nsme )
                 {
                     // ignore for now
+                }
+                catch ( SuitableMethodNotAccessibleException smnae )
+                {
+                    suitableMethodNotAccessible = true;
                 }
                 catch ( Throwable throwable )
                 {
@@ -199,11 +218,15 @@ public final class ReflectionHelper
      *
      * @throws NoSuchMethodException If no public or protected method with
      *      the given name can be found in the class or any of its super classes.
+     * @throws SuitableMethodNotAccessibleException If method with the given
+     *      name taking the parameters is found in the class but the method
+     *      is not accessible.
      * @throws InvocationTargetException If an unexpected Throwable is caught
      *      trying to access the desired method.
      */
     public static Method getMethod( Class clazz, String name, Class[] parameterTypes, boolean acceptPrivate,
-        boolean acceptPackage ) throws NoSuchMethodException, InvocationTargetException
+        boolean acceptPackage ) throws NoSuchMethodException, SuitableMethodNotAccessibleException,
+        InvocationTargetException
     {
         try
         {
@@ -228,9 +251,8 @@ public final class ReflectionHelper
             throw new InvocationTargetException( throwable, "Unexpected problem trying to get method " + name );
         }
 
-        // walked up the complete super class hierarchy and still not found
-        // anything, sigh ...
-        throw new NoSuchMethodException( name );
+        // suitable method found which is not accessible
+        throw new SuitableMethodNotAccessibleException();
     }
 
 

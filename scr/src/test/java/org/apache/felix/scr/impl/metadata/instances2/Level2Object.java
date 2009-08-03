@@ -31,7 +31,7 @@ public class Level2Object extends Level1Object
 
     private void activate_comp_map( ComponentContext ctx, Map map )
     {
-        throw new MethodNameException("activate_comp_map");
+        throw new MethodNameException( "activate_comp_map" );
     }
 
 
@@ -39,12 +39,18 @@ public class Level2Object extends Level1Object
     // Map has higher precedence
     public void activate_collision()
     {
-        throw new MethodNameException("not_expected_to_be_found");
+        throw new MethodNameException( "not_expected_to_be_found" );
     }
 
 
     public void activate_collision( Map map )
     {
-        throw new MethodNameException("activate_collision");
+        throw new MethodNameException( "activate_collision" );
+    }
+
+
+    private void activate_suitable( Map map )
+    {
+        throw new MethodNameException( "activate_suitable" );
     }
 }

@@ -23,6 +23,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import org.apache.felix.scr.impl.helper.ReadOnlyDictionary;
 import org.apache.felix.scr.impl.helper.ReflectionHelper;
+import org.apache.felix.scr.impl.helper.SuitableMethodNotAccessibleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
@@ -80,24 +81,33 @@ class BindMethod
      *      can be found in the target class or any super class.
      * @throws InvocationTargetException If an unexpected Throwable is caught
      *      trying to find the requested method.
-     * @throws SuitableMethodNotAccessibleException If a suitable method was
-     *      found which is not accessible
      */
     private Method findMethod( final Class targetClass, final boolean acceptPrivate, final boolean acceptPackage )
-        throws InvocationTargetException//, SuitableMethodNotAccessibleException
+        throws InvocationTargetException
     {
         // 112.3.1 The method is searched for using the following priority
-        // 1. The method's parameter type is org.osgi.framework.ServiceReference
-        // 2. The method's parameter type is the type specified by the
-        // reference's interface attribute
-        // 3. The method's parameter type is assignable from the type specified
-        // by the reference's interface attribute
+        // 1 - Service reference parameter
+        // 2 - Service object parameter
+        // 3 - Service interface assignement compatible methods
+        // 4 - same as 2, but with Map param (DS 1.1 only)
+        // 5 - same as 3, but with Map param (DS 1.1 only)
+
+        // flag indicating a suitable but inaccessible method has been found
+        boolean suitableMethodNotAccessible = false;
 
         // Case 1 - Service reference parameter
-        Method method = getServiceReferenceMethod( targetClass, acceptPrivate, acceptPackage );
-        if ( method != null )
+        Method method;
+        try
         {
-            return method;
+            method = getServiceReferenceMethod( targetClass, acceptPrivate, acceptPackage );
+            if ( method != null )
+            {
+                return method;
+            }
+        }
+        catch ( SuitableMethodNotAccessibleException ex )
+        {
+            suitableMethodNotAccessible = true;
         }
 
         // for further methods we need the class of the service object
@@ -105,15 +115,21 @@ class BindMethod
         if ( parameterClass != null )
         {
 
-            // Case2 - Service object parameter
-            method = getServiceObjectMethod( targetClass, parameterClass, acceptPrivate, acceptPackage );
-            if ( method != null )
+            // Case 2 - Service object parameter
+            try
             {
-                return method;
+                method = getServiceObjectMethod( targetClass, parameterClass, acceptPrivate, acceptPackage );
+                if ( method != null )
+                {
+                    return method;
+                }
+            }
+            catch ( SuitableMethodNotAccessibleException ex )
+            {
+                suitableMethodNotAccessible = true;
             }
 
             // Case 3 - Service interface assignement compatible methods
-            SuitableMethodNotAccessibleException methodAccessibleEx = null;
             try
             {
                 method = getServiceObjectAssignableMethod( targetClass, parameterClass, acceptPrivate, acceptPackage );
@@ -124,21 +140,28 @@ class BindMethod
             }
             catch ( SuitableMethodNotAccessibleException ex )
             {
-                methodAccessibleEx = ex;
+                suitableMethodNotAccessible = true;
             }
 
             // signatures taking a map are only supported starting with DS 1.1
             if ( m_isDS11 )
             {
 
-                // Case 4: same as case 2, but + Map param (DS 1.1 only)
-                method = getServiceObjectWithMapMethod( targetClass, parameterClass, acceptPrivate, acceptPackage );
-                if ( method != null )
+                // Case 4 - same as case 2, but + Map param (DS 1.1 only)
+                try
                 {
-                    return method;
+                    method = getServiceObjectWithMapMethod( targetClass, parameterClass, acceptPrivate, acceptPackage );
+                    if ( method != null )
+                    {
+                        return method;
+                    }
+                }
+                catch ( SuitableMethodNotAccessibleException ex )
+                {
+                    suitableMethodNotAccessible = true;
                 }
 
-                // Case 5: same as case 3, but + Map param (DS 1.1 only)
+                // Case 5 - same as case 3, but + Map param (DS 1.1 only)
                 try
                 {
                     method = getServiceObjectAssignableWithMapMethod( targetClass, parameterClass, acceptPrivate,
@@ -150,20 +173,20 @@ class BindMethod
                 }
                 catch ( SuitableMethodNotAccessibleException ex )
                 {
-                    methodAccessibleEx = ex;
+                    suitableMethodNotAccessible = true;
                 }
 
             }
 
-            // if at least one suitable method could be found but none of
-            // the suitable methods are accessible, we have to terminate
-            if ( methodAccessibleEx != null )
-            {
-                m_logger.log( LogService.LOG_ERROR,
-                    "DependencyManager : Suitable but non-accessible method found in class " + targetClass.getName() );
-                return null;
-            }
+        }
 
+        // if at least one suitable method could be found but none of
+        // the suitable methods are accessible, we have to terminate
+        if (suitableMethodNotAccessible )
+        {
+            m_logger.log( LogService.LOG_ERROR,
+                "DependencyManager : Suitable but non-accessible method found in class " + targetClass.getName() );
+            return null;
         }
 
         // if we get here, we have no method, so check the super class
@@ -231,11 +254,13 @@ class BindMethod
      *      be considered.
      * @return The requested method or <code>null</code> if no acceptable method
      *      can be found in the target class.
+     * @throws SuitableMethodNotAccessibleException If a suitable method was
+     *      found which is not accessible
      * @throws InvocationTargetException If an unexpected Throwable is caught
      *      trying to find the requested method.
      */
     private Method getServiceReferenceMethod( final Class targetClass, boolean acceptPrivate, boolean acceptPackage )
-        throws InvocationTargetException
+        throws SuitableMethodNotAccessibleException, InvocationTargetException
     {
         try
         {
@@ -264,11 +289,13 @@ class BindMethod
      *      be considered.
      * @return The requested method or <code>null</code> if no acceptable method
      *      can be found in the target class.
+     * @throws SuitableMethodNotAccessibleException If a suitable method was
+     *      found which is not accessible
      * @throws InvocationTargetException If an unexpected Throwable is caught
      *      trying to find the requested method.
      */
     private Method getServiceObjectMethod( final Class targetClass, final Class parameterClass, boolean acceptPrivate,
-        boolean acceptPackage ) throws InvocationTargetException
+        boolean acceptPackage ) throws SuitableMethodNotAccessibleException, InvocationTargetException
     {
         try
         {
@@ -366,11 +393,14 @@ class BindMethod
      *      be considered.
      * @return The requested method or <code>null</code> if no acceptable method
      *      can be found in the target class.
+     * @throws SuitableMethodNotAccessibleException If a suitable method was
+     *      found which is not accessible
      * @throws InvocationTargetException If an unexpected Throwable is caught
      *      trying to find the requested method.
      */
     private Method getServiceObjectWithMapMethod( final Class targetClass, final Class parameterClass,
-        boolean acceptPrivate, boolean acceptPackage ) throws InvocationTargetException
+        boolean acceptPrivate, boolean acceptPackage ) throws SuitableMethodNotAccessibleException,
+        InvocationTargetException
     {
         try
         {
@@ -601,12 +631,6 @@ class BindMethod
 
         void log( int level, String message, Throwable ex );
 
-    }
-
-    //---------- Logger ------------------------------------
-
-    static class SuitableMethodNotAccessibleException extends Exception
-    {
     }
 
 }

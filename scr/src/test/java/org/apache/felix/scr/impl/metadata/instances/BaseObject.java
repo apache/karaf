@@ -47,4 +47,10 @@ public class BaseObject
     {
         throw new MethodNameException( "activate_comp_bundle" );
     }
+
+
+    protected void activate_suitable( ComponentContext ctx )
+    {
+        throw new MethodNameException( "activate_suitable" );
+    }
 }
