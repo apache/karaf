@@ -34,7 +34,7 @@
 
   <target name="clean" depends="clean-list, clean-site, clean-ivy" />
 
-  <target name="build" depends="build-list, build-ivy" />
+  <target name="build" depends="build-list" />
 
   <target name="build-ivy">
     <subant buildpath="ivy/resolver" />
