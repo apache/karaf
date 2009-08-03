@@ -19,24 +19,29 @@
 package org.apache.felix.scr.impl.helper;
 
 
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Hashtable;
 
 import junit.framework.TestCase;
 
-import org.apache.felix.scr.impl.helper.ReflectionHelper;
+import org.apache.felix.scr.impl.manager.ImmediateComponentManager;
+import org.apache.felix.scr.impl.metadata.ComponentMetadata;
 import org.apache.felix.scr.impl.metadata.instances.AcceptMethod;
 import org.apache.felix.scr.impl.metadata.instances.BaseObject;
 import org.apache.felix.scr.impl.metadata.instances.Level1Object;
 import org.apache.felix.scr.impl.metadata.instances.Level3Object;
-import org.apache.felix.scr.impl.metadata.instances.MethodNameException;
 import org.apache.felix.scr.impl.metadata.instances2.Level2Object;
+import org.easymock.EasyMock;
+import org.osgi.service.component.ComponentContext;
 
 
-public class ReflectionHelperTest extends TestCase
+public class ActivateMethodTest extends TestCase
 {
 
     private static final Class ACCEPT_METHOD_CLASS = AcceptMethod.class;
+
+    private ComponentContext m_ctx;
 
     BaseObject base = new BaseObject();
 
@@ -46,10 +51,15 @@ public class ReflectionHelperTest extends TestCase
 
     Level3Object level3 = new Level3Object();
 
-
-    public void test_sentinel() throws Exception
+    protected void setUp() throws Exception
     {
-        assertNotNull( "Sentinel is null", ReflectionHelper.SENTINEL );
+        super.setUp();
+
+        m_ctx = ( ComponentContext ) EasyMock.createNiceMock( ComponentContext.class );
+        EasyMock.expect( m_ctx.getProperties() ).andReturn( new Hashtable() ).anyTimes();
+        EasyMock.replay( new Object[]
+            { m_ctx } );
+
     }
 
 
@@ -138,9 +148,9 @@ public class ReflectionHelperTest extends TestCase
     public void test_getPackage() throws Exception
     {
         Class dpc = getClass().getClassLoader().loadClass( "DefaultPackageClass" );
-        assertEquals( "", ReflectionHelper.getPackageName( dpc ) );
+        assertEquals( "", BaseMethod.getPackageName( dpc ) );
 
-        assertEquals( "org.apache.felix.scr.impl.metadata.instances", ReflectionHelper.getPackageName( base.getClass() ) );
+        assertEquals( "org.apache.felix.scr.impl.metadata.instances", BaseMethod.getPackageName( base.getClass() ) );
     }
 
 
@@ -195,13 +205,7 @@ public class ReflectionHelperTest extends TestCase
 
         // this must fail to find a method, since Level2Object's activate_suitable
         // is private and terminates the search for Level3Object
-        try {
-            checkMethod( level3, "activate_suitable" );
-            fail("Level3Object must not find activate_suitable method");
-        } catch (NoSuchMethodException nsme) {
-            // expecting method lookup abort on suitable private
-            // method in Level2Object class
-        }
+        ensureMethodNotFoundMethod( level3, "activate_suitable" );
     }
 
 
@@ -215,22 +219,22 @@ public class ReflectionHelperTest extends TestCase
      * @param obj
      * @param methodName
      */
-    private void checkMethod( Object obj, String methodName ) throws NoSuchMethodException, InvocationTargetException,
-        IllegalAccessException
+    private void checkMethod( BaseObject obj, String methodName )
     {
-        Method method = ReflectionHelper.getMethod( obj.getClass(), methodName,
-            ReflectionHelper.ACTIVATE_ACCEPTED_PARAMETERS );
-        try
+        ComponentMetadata metadata = new ComponentMetadata( 0 )
         {
-            method.invoke( obj, new Object[method.getParameterTypes().length] );
-            fail( "Expected MethodNameException being thrown" );
-        }
-        catch ( InvocationTargetException ite )
-        {
-            Throwable target = ite.getTargetException();
-            assertTrue( "Expected MethodNameException", target instanceof MethodNameException );
-            assertEquals( methodName, target.getMessage() );
-        }
+            public boolean isDS11()
+            {
+                return true;
+            }
+        };
+        ImmediateComponentManager icm = new ImmediateComponentManager( null, metadata );
+        ActivateMethod am = new ActivateMethod( icm, methodName, obj.getClass() );
+        am.invoke( obj, new ActivateMethod.ActivatorParameter( m_ctx, -1 ) );
+        Method m = get(am, "m_method");
+        assertNotNull( m );
+        assertEquals( methodName, m.getName() );
+        assertEquals( methodName, obj.getCalledMethod() );
     }
 
 
@@ -243,18 +247,20 @@ public class ReflectionHelperTest extends TestCase
      * @throws InvocationTargetException
      * @throws IllegalAccessException
      */
-    private void ensureMethodNotFoundMethod( Object obj, String methodName ) throws InvocationTargetException,
-        IllegalAccessException
+    private void ensureMethodNotFoundMethod( BaseObject obj, String methodName )
     {
-        try
+        ComponentMetadata metadata = new ComponentMetadata( 0 )
         {
-            checkMethod( obj, methodName );
-            fail( "Expected to not find method " + methodName + " for " + obj.getClass() );
-        }
-        catch ( NoSuchMethodException nsme )
-        {
-            // expected not to find a method
-        }
+            public boolean isDS11()
+            {
+                return true;
+            }
+        };
+        ImmediateComponentManager icm = new ImmediateComponentManager( null, metadata );
+        ActivateMethod am = new ActivateMethod( icm, methodName, obj.getClass() );
+        am.invoke( obj, new ActivateMethod.ActivatorParameter( m_ctx, -1 ) );
+        assertNull( get( am, "m_method" ) );
+        assertNull( obj.getCalledMethod() );
     }
 
 
@@ -262,7 +268,30 @@ public class ReflectionHelperTest extends TestCase
         throws NoSuchMethodException
     {
         Method method = ACCEPT_METHOD_CLASS.getDeclaredMethod( methodName, null );
-        boolean accepted = ReflectionHelper.accept( method, acceptPrivate, acceptPackage );
+        boolean accepted = BaseMethod.accept( method, acceptPrivate, acceptPackage );
         assertEquals( expected, accepted );
+    }
+
+
+    private static Method get( final BaseMethod baseMethod, final String fieldName )
+    {
+        try
+        {
+            Field field = BaseMethod.class.getDeclaredField( fieldName );
+            field.setAccessible( true );
+            Object value = field.get( baseMethod );
+            if ( value == null || value instanceof Method )
+            {
+                return ( Method ) value;
+            }
+            fail( "Field " + field + " is not of type Method" );
+        }
+        catch ( Throwable t )
+        {
+            fail( "Failure accessing field " + fieldName + " in " + baseMethod + ": " + t );
+        }
+
+        // Compiler does not know about fail()
+        return null;
     }
 }

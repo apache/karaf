@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.scr.Reference;
+import org.apache.felix.scr.impl.helper.BindMethod;
+import org.apache.felix.scr.impl.helper.UnbindMethod;
 import org.apache.felix.scr.impl.metadata.ReferenceMetadata;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -115,32 +117,17 @@ public class DependencyManager implements ServiceListener, Reference
      */
     private void initBindingMethods()
     {
-        BindMethod.Logger logger = new BindMethod.Logger()
-        {
-
-            public void log( int level, String message )
-            {
-                log( level, message, null );
-            }
-
-            public void log( int level, String message, Throwable ex )
-            {
-                m_componentManager.log( level, message, m_componentManager.getComponentMetadata(), ex );
-            }
-        };
-        m_bind = new BindMethod( m_componentManager.getComponentMetadata().isDS11(),
+        m_bind = new BindMethod( m_componentManager,
                                  m_dependencyMetadata.getBind(),
                                  m_componentInstance.getClass(),
                                  m_dependencyMetadata.getName(),
-                                 m_dependencyMetadata.getInterface(),
-                                 logger
+                                 m_dependencyMetadata.getInterface()
         );
-        m_unbind = new UnbindMethod( m_componentManager.getComponentMetadata().isDS11(),
+        m_unbind = new UnbindMethod( m_componentManager,
                                      m_dependencyMetadata.getUnbind(),
                                      m_componentInstance.getClass(),
                                      m_dependencyMetadata.getName(),
-                                     m_dependencyMetadata.getInterface(),
-                                     logger
+                                     m_dependencyMetadata.getInterface()
         );
     }
 

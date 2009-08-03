@@ -19,14 +19,14 @@
 package org.apache.felix.scr.impl.manager;
 
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.felix.scr.impl.BundleComponentActivator;
-import org.apache.felix.scr.impl.helper.ReflectionHelper;
+import org.apache.felix.scr.impl.helper.ActivateMethod;
+import org.apache.felix.scr.impl.helper.DeactivateMethod;
+import org.apache.felix.scr.impl.helper.ModifiedMethod;
 import org.apache.felix.scr.impl.metadata.ComponentMetadata;
 import org.apache.felix.scr.impl.metadata.ReferenceMetadata;
 import org.osgi.framework.ServiceRegistration;
@@ -49,13 +49,13 @@ public class ImmediateComponentManager extends AbstractComponentManager
     private ComponentContext m_componentContext;
 
     // the activate method
-    private Method activateMethod = ReflectionHelper.SENTINEL;
+    private ActivateMethod m_activateMethod;
 
     // the deactivate method
-    private Method deactivateMethod = ReflectionHelper.SENTINEL;
+    private DeactivateMethod m_deactivateMethod;
 
     // the modify method
-    private Method modifyMethod = ReflectionHelper.SENTINEL;
+    private ModifiedMethod m_modifyMethod;
 
     // optional properties provided in the ComponentFactory.newInstance method
     private Dictionary m_factoryProperties;
@@ -139,7 +139,8 @@ public class ImmediateComponentManager extends AbstractComponentManager
 
     protected Object createImplementationObject( ComponentContext componentContext )
     {
-        Object implementationObject;
+        final Class implementationObjectClass;
+        final Object implementationObject;
 
         // 1. Load the component implementation class
         // 2. Create the component instance and component context
@@ -147,12 +148,12 @@ public class ImmediateComponentManager extends AbstractComponentManager
         try
         {
             // 112.4.4 The class is retrieved with the loadClass method of the component's bundle
-            Class c = getActivator().getBundleContext().getBundle().loadClass(
+            implementationObjectClass = getActivator().getBundleContext().getBundle().loadClass(
                 getComponentMetadata().getImplementationClassName() );
 
             // 112.4.4 The class must be public and have a public constructor without arguments so component instances
             // may be created by the SCR with the newInstance method on Class
-            implementationObject = c.newInstance();
+            implementationObject = implementationObjectClass.newInstance();
         }
         catch ( Exception ex )
         {
@@ -188,23 +189,14 @@ public class ImmediateComponentManager extends AbstractComponentManager
         }
 
         // get the method
-        if ( activateMethod == ReflectionHelper.SENTINEL )
+        if ( m_activateMethod == null)
         {
-            // FELIX-1437: New signatures only with DS 1.1 namespace declaration
-            if ( getComponentMetadata().isDS11() )
-            {
-                activateMethod = getMethod( implementationObject, getComponentMetadata().getActivate(),
-                    ReflectionHelper.ACTIVATE_ACCEPTED_PARAMETERS );
-            }
-            else
-            {
-                activateMethod = getMethod( implementationObject, getComponentMetadata().getActivate(),
-                    ReflectionHelper.ACTIVATOR_10_ACCEPTED_PARAMETERS );
-            }
+            m_activateMethod = new ActivateMethod( this, getComponentMetadata().getActivate(), implementationObjectClass );
         }
 
         // 4. Call the activate method, if present
-        if ( activateMethod != null && !invokeMethod( activateMethod, implementationObject, componentContext, -1 ) )
+        if ( !m_activateMethod.invoke( implementationObject,
+            new ActivateMethod.ActivatorParameter( componentContext, 1 ) ) )
         {
             // 112.5.8 If the activate method throws an exception, SCR must log an error message
             // containing the exception with the Log Service and activation fails
@@ -215,7 +207,7 @@ public class ImmediateComponentManager extends AbstractComponentManager
                 dm.close();
             }
 
-            implementationObject = null;
+            return null;
         }
 
         return implementationObject;
@@ -227,29 +219,18 @@ public class ImmediateComponentManager extends AbstractComponentManager
     {
 
         // get the method
-        if ( deactivateMethod == ReflectionHelper.SENTINEL )
+        if ( m_deactivateMethod == null )
         {
-            // FELIX-1437: New signatures only with DS 1.1 namespace declaration
-            if ( getComponentMetadata().isDS11() )
-            {
-                deactivateMethod = getMethod( implementationObject, getComponentMetadata().getDeactivate(),
-                    ReflectionHelper.DEACTIVATE_ACCEPTED_PARAMETERS );
-            }
-            else
-            {
-                deactivateMethod = getMethod( implementationObject, getComponentMetadata().getDeactivate(),
-                    ReflectionHelper.ACTIVATOR_10_ACCEPTED_PARAMETERS );
-            }
+            m_deactivateMethod = new DeactivateMethod( this, getComponentMetadata().getDeactivate(), implementationObject
+                .getClass() );
         }
 
         // 1. Call the deactivate method, if present
         // don't care for the result, the error (acccording to 112.5.12 If the deactivate
         // method throws an exception, SCR must log an error message containing the
         // exception with the Log Service and continue) has already been logged
-        if ( deactivateMethod != null )
-        {
-            invokeMethod( deactivateMethod, implementationObject, componentContext, reason );
-        }
+        m_deactivateMethod.invoke( implementationObject, new ActivateMethod.ActivatorParameter( componentContext,
+            reason ) );
 
         // 2. Unbind any bound services
         Iterator it = getDependencyManagers();
@@ -410,13 +391,9 @@ public class ImmediateComponentManager extends AbstractComponentManager
         // invariant: we have a modified method name
 
         // 2. get and check configured method
-        Method modifyMethod = getModifyMethod();
-        if ( modifyMethod == null )
+        if ( m_modifyMethod == null )
         {
-            // log an error if the declared method cannot be found
-            log( LogService.LOG_ERROR, "Declared modify method '" + getComponentMetadata().getModified()
-                + "' cannot be found, configuring by reactivation", getComponentMetadata(), null );
-            return false;
+            m_modifyMethod = new ModifiedMethod( this, getComponentMetadata().getModified(), getInstance().getClass() );
         }
         // invariant: modify method is configured and found
 
@@ -438,7 +415,13 @@ public class ImmediateComponentManager extends AbstractComponentManager
         // invariant: modify method existing and no static bound service changes
 
         // 4. call method (nothing to do when failed, since it has already been logged)
-        invokeMethod( modifyMethod, m_implementationObject, m_componentContext, -1 );
+        if ( !m_modifyMethod.invoke( getInstance(), new ActivateMethod.ActivatorParameter( m_componentContext, -1 ) ) )
+        {
+            // log an error if the declared method cannot be found
+            log( LogService.LOG_ERROR, "Declared modify method '" + getComponentMetadata().getModified()
+                + "' cannot be found, configuring by reactivation", getComponentMetadata(), null );
+            return false;
+        }
 
         // 5. update the target filter on the services now, this may still
         // result in unsatisfied dependencies, in which case we abort
@@ -479,141 +462,6 @@ public class ImmediateComponentManager extends AbstractComponentManager
         }
 
         // 7. everything set and done, the component has been udpated
-        return true;
-    }
-
-
-    /**
-     * Returns the configured modify method or <code>null</code> if the
-     * configured method cannot be found.
-     */
-    private Method getModifyMethod()
-    {
-        // ensure the method object is known
-        if ( modifyMethod == ReflectionHelper.SENTINEL )
-        {
-            modifyMethod = getMethod( m_implementationObject, getComponentMetadata().getModified(),
-                ReflectionHelper.ACTIVATE_ACCEPTED_PARAMETERS );
-        }
-
-        return modifyMethod;
-    }
-
-
-    /**
-     * Find the method with the given name in the class hierarchy of the
-     * implementation object's class. This method looks for methods which have
-     * one of the parameter lists of the {@link #ACTIVATE_PARAMETER_LIST} array.
-     *
-     * @param implementationObject The object whose class (and its super classes)
-     *      may provide the method
-     * @param methodName Name of the method to look for
-     * @param methodTester The {@link ReflectionHelper.MethodTester} instance
-     *      used to select the actual method.
-     * @return The named method or <code>null</code> if no such method is available.
-     */
-    private Method getMethod( final Object implementationObject, final String methodName,
-        final ReflectionHelper.MethodTester methodTester )
-    {
-        try
-        {
-            return ReflectionHelper.getMethod( implementationObject.getClass(), methodName, methodTester );
-        }
-        catch ( InvocationTargetException ite )
-        {
-            // We can safely ignore this one
-            log( LogService.LOG_WARNING, methodName + " cannot be found", getComponentMetadata(), ite
-                .getTargetException() );
-        }
-        catch ( NoSuchMethodException ex )
-        {
-            // We can safely ignore this one
-            log( LogService.LOG_DEBUG, methodName + " method is not implemented", getComponentMetadata(), null );
-        }
-
-        return null;
-    }
-
-
-    /**
-     * Invokes the given method on the <code>implementationObject</code> using
-     * the <code>componentContext</code> as the base to create method argument
-     * list.
-     *
-     * @param method The method to call. This method must already have been
-     *      made accessible by calling
-     *      <code>Method.setAccessible(boolean)</code>.
-     * @param implementationObject The object on which to call the method.
-     * @param componentContext The <code>ComponentContext</code> used to
-     *      build the argument list
-     * @param reason The deactivation reason code. This should be one of the
-     *      values in the {@link ComponentConstants} interface. This parameter
-     *      is only of practical use for calling deactivate methods, which may
-     *      take a numeric argument indicating the deactivation reason.
-     *
-     * @return <code>true</code> if the method should be considered invoked
-     *      successfully. <code>false</code> is returned if the method threw
-     *      an exception.
-     *
-     * @throws NullPointerException if any of the parameters is <code>null</code>.
-     */
-    private boolean invokeMethod( final Method method, final Object implementationObject,
-        final ComponentContext componentContext, int reason )
-    {
-        final String methodName = method.getName();
-        try
-        {
-            // build argument list
-            Class[] paramTypes = method.getParameterTypes();
-            Object[] param = new Object[paramTypes.length];
-            for ( int i = 0; i < param.length; i++ )
-            {
-                if ( paramTypes[i] == ReflectionHelper.COMPONENT_CONTEXT_CLASS )
-                {
-                    param[i] = componentContext;
-                }
-                else if ( paramTypes[i] == ReflectionHelper.BUNDLE_CONTEXT_CLASS )
-                {
-                    param[i] = componentContext.getBundleContext();
-                }
-                else if ( paramTypes[i] == ReflectionHelper.MAP_CLASS )
-                {
-                    // note: getProperties() returns a ReadOnlyDictionary which is a Map
-                    param[i] = componentContext.getProperties();
-                }
-                else if ( paramTypes[i] == ReflectionHelper.INTEGER_CLASS || paramTypes[i] == Integer.TYPE)
-                {
-                    param[i] = new Integer(reason);
-                }
-            }
-
-            method.invoke( implementationObject, param );
-        }
-        catch ( IllegalAccessException ex )
-        {
-            // Ignored, but should it be logged?
-            log( LogService.LOG_DEBUG, methodName + " method cannot be called", getComponentMetadata(), null );
-        }
-        catch ( InvocationTargetException ex )
-        {
-            // 112.5.8 If the activate method throws an exception, SCR must log an error message
-            // containing the exception with the Log Service and activation fails
-            log( LogService.LOG_ERROR, "The " + methodName + " method has thrown an exception", getComponentMetadata(),
-                ex.getCause() );
-
-            // method threw, so it was a failure
-            return false;
-        }
-        catch ( Throwable t )
-        {
-            // anything else went wrong, log the message and fail the invocation
-            log( LogService.LOG_ERROR, "The " + methodName + " method could not be called", getComponentMetadata(), t );
-
-            // method invocation threw, so it was a failure
-            return false;
-        }
-
-        // assume success (also if the method is not available or accessible)
         return true;
     }
 }

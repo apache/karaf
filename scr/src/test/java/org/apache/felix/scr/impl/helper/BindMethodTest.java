@@ -16,16 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl.manager;
+package org.apache.felix.scr.impl.helper;
 
 
 import junit.framework.TestCase;
 
+import org.apache.felix.scr.impl.helper.BindMethod;
+import org.apache.felix.scr.impl.manager.ImmediateComponentManager;
 import org.apache.felix.scr.impl.manager.components.FakeService;
 import org.apache.felix.scr.impl.manager.components.T1;
 import org.apache.felix.scr.impl.manager.components.T1a;
 import org.apache.felix.scr.impl.manager.components.T3;
 import org.apache.felix.scr.impl.manager.components2.T2;
+import org.apache.felix.scr.impl.metadata.ComponentMetadata;
 import org.easymock.EasyMock;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
@@ -431,33 +434,15 @@ public class BindMethodTest extends TestCase
     private void testMethod( final String methodName, final T1 component, final boolean isDS11,
         final String expectCallPerformed )
     {
-        BindMethod bm = new BindMethod( isDS11, methodName, component.getClass(), "reference", FakeService.class
-            .getName(), new SysOutLogger() );
+        ComponentMetadata metadata = new ComponentMetadata( 0 ) {
+            public boolean isDS11() {
+                return isDS11;
+            }
+        };
+        ImmediateComponentManager icm = new ImmediateComponentManager( null, metadata );
+        BindMethod bm = new BindMethod( icm, methodName, component.getClass(), "reference",
+            FakeService.class.getName() );
         bm.invoke( component, m_service );
         assertEquals( expectCallPerformed, component.callPerformed );
     }
-
-    private static class SysOutLogger implements BindMethod.Logger
-    {
-
-        private static final String[] LEVELS = new String[]
-            { "ERROR", "WARNING", "INFO", "DEBUG" };
-
-
-        public void log( int level, String message )
-        {
-            log( level, message, null );
-        }
-
-
-        public void log( int level, String message, Throwable ex )
-        {
-            System.out.println( LEVELS[level - 1] + " - " + message );
-            if ( ex != null )
-            {
-                System.out.println( ex.getClass().getName() + "-" + ex.getMessage() );
-            }
-        }
-    }
-
 }

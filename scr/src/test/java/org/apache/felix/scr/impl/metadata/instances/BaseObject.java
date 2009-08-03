@@ -31,26 +31,41 @@ import org.osgi.service.component.ComponentContext;
 public class BaseObject
 {
 
+    private String m_calledMethod;
+
+
+    public String getCalledMethod()
+    {
+        String cm = m_calledMethod;
+        m_calledMethod = null;
+        return cm;
+    }
+
+
+    protected void setCalledMethod(String calledMethod) {
+        m_calledMethod = calledMethod;
+    }
+
     private void activate_no_arg()
     {
-        throw new MethodNameException( "activate_no_arg" );
+        setCalledMethod( "activate_no_arg" );
     }
 
 
     protected void activate_comp( ComponentContext ctx )
     {
-        throw new MethodNameException( "activate_comp" );
+        setCalledMethod( "activate_comp" );
     }
 
 
     void activate_comp_bundle( ComponentContext ctx, BundleContext bundle )
     {
-        throw new MethodNameException( "activate_comp_bundle" );
+        setCalledMethod( "activate_comp_bundle" );
     }
 
 
     protected void activate_suitable( ComponentContext ctx )
     {
-        throw new MethodNameException( "activate_suitable" );
+        setCalledMethod( "activate_suitable" );
     }
 }

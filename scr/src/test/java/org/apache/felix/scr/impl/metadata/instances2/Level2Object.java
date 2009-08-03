@@ -22,7 +22,6 @@ package org.apache.felix.scr.impl.metadata.instances2;
 import java.util.Map;
 
 import org.apache.felix.scr.impl.metadata.instances.Level1Object;
-import org.apache.felix.scr.impl.metadata.instances.MethodNameException;
 import org.osgi.service.component.ComponentContext;
 
 
@@ -31,7 +30,7 @@ public class Level2Object extends Level1Object
 
     private void activate_comp_map( ComponentContext ctx, Map map )
     {
-        throw new MethodNameException( "activate_comp_map" );
+        setCalledMethod( "activate_comp_map" );
     }
 
 
@@ -39,18 +38,18 @@ public class Level2Object extends Level1Object
     // Map has higher precedence
     public void activate_collision()
     {
-        throw new MethodNameException( "not_expected_to_be_found" );
+        setCalledMethod( "not_expected_to_be_found" );
     }
 
 
     public void activate_collision( Map map )
     {
-        throw new MethodNameException( "activate_collision" );
+        setCalledMethod( "activate_collision" );
     }
 
 
     private void activate_suitable( Map map )
     {
-        throw new MethodNameException( "activate_suitable" );
+        setCalledMethod( "activate_suitable" );
     }
 }

@@ -16,25 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl.manager;
+package org.apache.felix.scr.impl.helper;
 
 
-/**
- * Component method to be invoked on service unbinding.
- */
-class UnbindMethod extends BindMethod
+import org.apache.felix.scr.impl.manager.AbstractComponentManager;
+
+
+public class DeactivateMethod extends ActivateMethod
 {
 
-    UnbindMethod( final boolean isDS11, final String methodName, final Class componentClass,
-        final String referenceName, final String referenceClassName, final Logger logger )
+    public DeactivateMethod( final AbstractComponentManager componentManager, String methodName, Class componentClass )
     {
-        super( isDS11, methodName, componentClass, referenceName, referenceClassName, logger );
+        super( componentManager, methodName, componentClass );
     }
 
 
-    protected String getMethodNamePrefix()
+    protected Class[] getAcceptedParameterTypes()
     {
-        return "un";
-    }
+        if ( isDS11() )
+        {
+            return new Class[]
+                { COMPONENT_CONTEXT_CLASS, BUNDLE_CONTEXT_CLASS, MAP_CLASS, Integer.TYPE, INTEGER_CLASS };
+        }
 
+        return new Class[]
+            { COMPONENT_CONTEXT_CLASS };
+    }
 }

@@ -774,7 +774,7 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
     }
 
 
-    void log( int level, String message, ComponentMetadata metadata, Throwable ex )
+    public void log( int level, String message, ComponentMetadata metadata, Throwable ex )
     {
         BundleComponentActivator activator = getActivator();
         if ( activator != null )

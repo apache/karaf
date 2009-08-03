@@ -16,15 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl.manager;
+package org.apache.felix.scr.impl.helper;
 
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import org.apache.felix.scr.impl.helper.ReadOnlyDictionary;
-import org.apache.felix.scr.impl.helper.ReflectionHelper;
-import org.apache.felix.scr.impl.helper.SuitableMethodNotAccessibleException;
-import org.osgi.framework.Constants;
+
+import org.apache.felix.scr.impl.manager.AbstractComponentManager;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
 
@@ -32,37 +30,19 @@ import org.osgi.service.log.LogService;
 /**
  * Component method to be invoked on service (un)binding.
  */
-class BindMethod
+public class BindMethod extends BaseMethod
 {
 
-    private final boolean m_isDS11;
-    private final String m_methodName;
-    private final Class m_componentClass;
     private final String m_referenceName;
     private final String m_referenceClassName;
-    private final Logger m_logger;
-
-    private Method m_method = null;
-    private State m_state;
 
 
-    BindMethod( final boolean isDS11, final String methodName, final Class componentClass, final String referenceName,
-        final String referenceClassName, final Logger logger )
+    public BindMethod( final AbstractComponentManager componentManager, final String methodName,
+        final Class componentClass, final String referenceName, final String referenceClassName )
     {
-        m_isDS11 = isDS11;
-        m_methodName = methodName;
-        m_componentClass = componentClass;
+        super( componentManager, methodName, componentClass );
         m_referenceName = referenceName;
         m_referenceClassName = referenceClassName;
-        m_logger = logger;
-        if ( m_methodName == null )
-        {
-            m_state = new NotApplicable();
-        }
-        else
-        {
-            m_state = new NotResolved();
-        }
     }
 
 
@@ -82,8 +62,8 @@ class BindMethod
      * @throws InvocationTargetException If an unexpected Throwable is caught
      *      trying to find the requested method.
      */
-    private Method findMethod( final Class targetClass, final boolean acceptPrivate, final boolean acceptPackage )
-        throws InvocationTargetException
+    protected Method doFindMethod( Class targetClass, boolean acceptPrivate, boolean acceptPackage )
+        throws SuitableMethodNotAccessibleException, InvocationTargetException
     {
         // 112.3.1 The method is searched for using the following priority
         // 1 - Service reference parameter
@@ -144,7 +124,7 @@ class BindMethod
             }
 
             // signatures taking a map are only supported starting with DS 1.1
-            if ( m_isDS11 )
+            if ( isDS11() )
             {
 
                 // Case 4 - same as case 2, but + Map param (DS 1.1 only)
@@ -182,25 +162,16 @@ class BindMethod
 
         // if at least one suitable method could be found but none of
         // the suitable methods are accessible, we have to terminate
-        if (suitableMethodNotAccessible )
+        if ( suitableMethodNotAccessible )
         {
-            m_logger.log( LogService.LOG_ERROR,
-                "DependencyManager : Suitable but non-accessible method found in class " + targetClass.getName() );
-            return null;
+            getComponentManager().log( LogService.LOG_ERROR,
+                "DependencyManager : Suitable but non-accessible method found in class " + targetClass.getName(), null,
+                null );
+            throw new SuitableMethodNotAccessibleException();
         }
 
-        // if we get here, we have no method, so check the super class
-        final Class superClass = targetClass.getSuperclass();
-        if (superClass == null) {
-            return null;
-        }
-
-        // super class method check ignores private methods and accepts
-        // package methods only if in the same package and package
-        // methods are (still) allowed
-        final boolean withPackage = acceptPackage && targetClass.getClassLoader() == superClass.getClassLoader()
-            && ReflectionHelper.getPackageName( targetClass ).equals( ReflectionHelper.getPackageName( superClass ) );
-        return findMethod( superClass, false, withPackage);
+        // no method found
+        return null;
     }
 
 
@@ -264,8 +235,8 @@ class BindMethod
     {
         try
         {
-            return ReflectionHelper.getMethod( targetClass, m_methodName, new Class[]
-                { ReflectionHelper.SERVICE_REFERENCE_CLASS }, acceptPrivate, acceptPackage );
+            return getMethod( targetClass, getMethodName(), new Class[]
+                { SERVICE_REFERENCE_CLASS }, acceptPrivate, acceptPackage );
         }
         catch ( NoSuchMethodException e )
         {
@@ -299,7 +270,7 @@ class BindMethod
     {
         try
         {
-            return ReflectionHelper.getMethod( targetClass, m_methodName, new Class[]
+            return getMethod( targetClass, getMethodName(), new Class[]
                 { parameterClass }, acceptPrivate, acceptPackage );
         }
         catch ( NoSuchMethodException nsme )
@@ -346,7 +317,7 @@ class BindMethod
             // Select only the methods that receive a single
             // parameter
             // and a matching name
-            if ( parameters.length == 1 && method.getName().equals( m_methodName ) )
+            if ( parameters.length == 1 && method.getName().equals( getMethodName() ) )
             {
 
                 // Get the parameter type
@@ -357,7 +328,7 @@ class BindMethod
                 // reference's interface attribute
                 if ( theParameter.isAssignableFrom( parameterClass ) )
                 {
-                    if ( ReflectionHelper.accept( method, acceptPrivate, acceptPackage ) )
+                    if ( accept( method, acceptPrivate, acceptPackage ) )
                     {
                         return method;
                     }
@@ -404,8 +375,8 @@ class BindMethod
     {
         try
         {
-            return ReflectionHelper.getMethod( targetClass, m_methodName, new Class[]
-                { parameterClass, ReflectionHelper.MAP_CLASS }, acceptPrivate, acceptPackage );
+            return getMethod( targetClass, getMethodName(), new Class[]
+                { parameterClass, MAP_CLASS }, acceptPrivate, acceptPackage );
         }
         catch ( NoSuchMethodException nsme )
         {
@@ -446,13 +417,13 @@ class BindMethod
         {
             final Method method = candidateBindMethods[i];
             final Class[] parameters = method.getParameterTypes();
-            if ( parameters.length == 2 && method.getName().equals( m_methodName ) )
+            if ( parameters.length == 2 && method.getName().equals( getMethodName() ) )
             {
 
                 // parameters must be refclass,map
-                if ( parameters[0].isAssignableFrom( parameterClass ) && parameters[1] == ReflectionHelper.MAP_CLASS )
+                if ( parameters[0].isAssignableFrom( parameterClass ) && parameters[1] == MAP_CLASS )
                 {
-                    if ( ReflectionHelper.accept( method, acceptPrivate, acceptPackage ) )
+                    if ( accept( method, acceptPrivate, acceptPackage ) )
                     {
                         return method;
                     }
@@ -475,17 +446,18 @@ class BindMethod
     }
 
 
-    private boolean invokeMethod( final Object componentInstance, final Service service )
+    protected Object[] getParameters( Method method, Object rawParameter )
     {
-        final Class[] paramTypes = m_method.getParameterTypes();
+        final Service service = ( Service ) rawParameter;
+        final Class[] paramTypes = method.getParameterTypes();
         final Object[] params = new Object[paramTypes.length];
         for ( int i = 0; i < params.length; i++ )
         {
-            if ( paramTypes[i] == ReflectionHelper.SERVICE_REFERENCE_CLASS )
+            if ( paramTypes[i] == SERVICE_REFERENCE_CLASS )
             {
                 params[i] = service.getReference();
             }
-            else if ( paramTypes[i] == ReflectionHelper.MAP_CLASS )
+            else if ( paramTypes[i] == MAP_CLASS )
             {
                 params[i] = new ReadOnlyDictionary( service.getReference() );
             }
@@ -494,34 +466,13 @@ class BindMethod
                 params[i] = service.getInstance();
                 if ( params[i] == null )
                 {
-                    m_logger.log( LogService.LOG_INFO, "Dependency Manager: Service " + service.getReference()
+                    throw new IllegalStateException( "Dependency Manager: Service " + service.getReference()
                         + " has already gone, not " + getMethodNamePrefix() + "binding" );
-                    return false;
                 }
             }
         }
-        try
-        {
-            m_method.invoke( componentInstance, params );
-            m_logger.log( LogService.LOG_DEBUG, getMethodNamePrefix() + "bound: " + m_referenceName + "/"
-                + service.getReference().getProperty( Constants.SERVICE_ID ) );
-        }
-        catch ( IllegalAccessException ex )
-        {
-            // 112.3.1 If the method is not is not declared protected or
-            // public, SCR must log an error message with the log service,
-            // if present, and ignore the method
-            m_logger.log( LogService.LOG_ERROR, getMethodNamePrefix() + "bind method " + m_methodName + "] cannot be called",
-                ex );
-        }
-        catch ( InvocationTargetException ex )
-        {
-            // 112.5.7 If a bind method throws an exception, SCR must log an
-            // error message containing the exception [...]
-            m_logger.log( LogService.LOG_ERROR, "DependencyManager : exception while invoking " + m_methodName + "()",
-                ex.getCause() );
-        }
-        return true;
+
+        return params;
     }
 
 
@@ -530,106 +481,15 @@ class BindMethod
         return "";
     }
 
-
-    //---------- State management  ------------------------------------
-
-    boolean invoke( final Object componentInstance, final Service service )
-    {
-        return m_state.invoke( componentInstance, service );
-    }
-
-    private static interface State
-    {
-
-        boolean invoke( final Object componentInstance, final Service service );
-    }
-
-    private static class NotApplicable implements State
-    {
-
-        public boolean invoke( final Object componentInstance, final Service service )
-        {
-            return true;
-        }
-    }
-
-    private class NotResolved implements State
-    {
-
-        public boolean invoke( final Object componentInstance, final Service service )
-        {
-            m_logger.log( LogService.LOG_DEBUG, "getting " + getMethodNamePrefix() + "bind: " + m_methodName );
-            try
-            {
-                // if the owning component is declared with the DS 1.1 namespace
-                // (or newer), private and package private methods are accepted
-                m_method = findMethod( m_componentClass, m_isDS11, m_isDS11 );
-                if ( m_method == null )
-                {
-                    m_state = new NotFound();
-                }
-                else
-                {
-                    m_state = new Resolved();
-                }
-                return m_state.invoke( componentInstance, service );
-            }
-            catch ( InvocationTargetException ex )
-            {
-                m_state = new NotFound();
-                // 112.5.7 If a bind method throws an exception, SCR must log an
-                // error message containing the exception [...]
-                m_logger.log( LogService.LOG_ERROR, "DependencyManager : exception while finding " + m_methodName
-                    + "()", ex.getCause() );
-            }
-            return true;
-        }
-    }
-
-    private class NotFound implements State
-    {
-
-        public boolean invoke( final Object componentInstance, final Service service )
-        {
-            // 112.3.1 If the method is not found , SCR must log an error
-            // message with the log service, if present, and ignore the
-            // method
-            m_logger.log( LogService.LOG_ERROR, getMethodNamePrefix() + "bind method [" + m_methodName + "] not found" );
-            return true;
-        }
-    }
-
-    private class Resolved implements State
-    {
-
-        public boolean invoke( final Object componentInstance, final Service service )
-        {
-            m_logger.log( LogService.LOG_DEBUG, "invoking " + getMethodNamePrefix() + "bind: " + m_methodName );
-            return invokeMethod( componentInstance, service );
-        }
-    }
-
     //---------- Service abstraction ------------------------------------
 
-    static interface Service
+    public static interface Service
     {
 
         ServiceReference getReference();
 
 
         Object getInstance();
-
-    }
-
-    //---------- Logger ------------------------------------
-
-    static interface Logger
-    {
-
-        void log( int level, String message );
-
-
-        void log( int level, String message, Throwable ex );
 
     }
 

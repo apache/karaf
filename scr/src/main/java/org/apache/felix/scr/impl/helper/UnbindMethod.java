@@ -16,17 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl.metadata.instances;
+package org.apache.felix.scr.impl.helper;
 
 
-public final class MethodNameException extends RuntimeException
+import org.apache.felix.scr.impl.manager.AbstractComponentManager;
+
+
+/**
+ * Component method to be invoked on service unbinding.
+ */
+public class UnbindMethod extends BindMethod
 {
 
-    private static final long serialVersionUID = 1L;
-
-
-    public MethodNameException( String message )
+    public UnbindMethod( final AbstractComponentManager componentManager, final String methodName,
+        final Class componentClass, final String referenceName, final String referenceClassName )
     {
-        super( message );
+        super( componentManager, methodName, componentClass, referenceName, referenceClassName );
     }
+
+
+    protected String getMethodNamePrefix()
+    {
+        return "un";
+    }
+
 }

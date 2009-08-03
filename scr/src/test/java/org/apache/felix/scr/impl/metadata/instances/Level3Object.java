@@ -30,7 +30,7 @@ public class Level3Object extends Level2Object
 
     private void activate_comp_map( ComponentContext ctx, Map map )
     {
-        throw new MethodNameException("activate_comp_map");
+        setCalledMethod("activate_comp_map");
     }
 
 
@@ -38,12 +38,12 @@ public class Level3Object extends Level2Object
     // Map has higher precedence
     public void activate_collision()
     {
-        throw new MethodNameException("not_expected_to_be_found");
+        setCalledMethod("not_expected_to_be_found");
     }
 
 
     public void activate_collision( Map map )
     {
-        throw new MethodNameException("activate_collision");
+        setCalledMethod("activate_collision");
     }
 }

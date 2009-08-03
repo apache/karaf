@@ -16,26 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.scr.impl.metadata.instances;
+package org.apache.felix.scr.impl.helper;
 
 
-import java.util.Map;
-
-import org.osgi.framework.BundleContext;
+import org.apache.felix.scr.impl.manager.AbstractComponentManager;
 
 
-public class Level1Object extends BaseObject
+public class ModifiedMethod extends ActivateMethod
 {
 
-    private void activate_level1_bundle( BundleContext ctx )
+    public ModifiedMethod( final AbstractComponentManager componentManager, String methodName, Class componentClass )
     {
-        setCalledMethod("activate_level1_bundle");
+        super( componentManager, methodName, componentClass );
     }
 
 
-    protected void activate_level1_map( Map props )
+    protected boolean acceptEmpty()
     {
-        setCalledMethod("activate_level1_map");
+        return false;
     }
-
 }
