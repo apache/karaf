@@ -83,6 +83,12 @@ public class AutoActivator implements BundleActivator
         // Do nothing.
     }
 
+    /**
+     * <p>
+     * Processes bundles in the auto-deploy directory, installing and then
+     * starting each one.
+     * </p>
+     */
     private void processAutoDeploy(BundleContext context)
     {
         // Determine if auto deploy is enabled; default is enabled.
