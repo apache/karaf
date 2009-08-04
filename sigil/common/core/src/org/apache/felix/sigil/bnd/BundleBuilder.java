@@ -708,11 +708,16 @@ public class BundleBuilder
             }
         }
 
+        if ( sb.length() > 0 )
+            sb.append( "," );
+        
         if ( addMissingImports )
         {
-            if ( sb.length() > 0 )
-                sb.append( "," );
             sb.append( "*" );
+        }
+        else 
+        {
+            sb.append(  "!*" );
         }
     }
 
