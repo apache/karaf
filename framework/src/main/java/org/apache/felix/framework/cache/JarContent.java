@@ -59,17 +59,7 @@ public class JarContent implements IContent
 
     protected void finalize()
     {
-        if (m_jarFile != null)
-        {
-            try
-            {
-                m_jarFile.close();
-            }
-            catch (IOException ex)
-            {
-                // Not much we can do, so ignore it.
-            }
-        }
+        close();
     }
 
     public synchronized void close()
@@ -96,17 +86,7 @@ public class JarContent implements IContent
         // Open JAR file if not already opened.
         if (m_jarFile == null)
         {
-            try
-            {
-                openJarFile();
-            }
-            catch (IOException ex)
-            {
-                m_logger.log(
-                    Logger.LOG_ERROR,
-                    "JarContent: Unable to open JAR file.", ex);
-                return false;
-            }
+            openJarFile();
         }
 
         try
@@ -128,17 +108,7 @@ public class JarContent implements IContent
         // Open JAR file if not already opened.
         if (m_jarFile == null)
         {
-            try
-            {
-                openJarFile();
-            }
-            catch (IOException ex)
-            {
-                m_logger.log(
-                    Logger.LOG_ERROR,
-                    "JarContent: Unable to open JAR file.", ex);
-                return null;
-            }
+            openJarFile();
         }
 
         // Wrap entries enumeration to filter non-matching entries.
@@ -153,17 +123,7 @@ public class JarContent implements IContent
         // Open JAR file if not already opened.
         if (m_jarFile == null)
         {
-            try
-            {
-                openJarFile();
-            }
-            catch (IOException ex)
-            {
-                m_logger.log(
-                    Logger.LOG_ERROR,
-                    "JarContent: Unable to open JAR file.", ex);
-                return null;
-            }
+            openJarFile();
         }
 
         // Get the embedded resource.
@@ -224,17 +184,7 @@ public class JarContent implements IContent
         // Open JAR file if not already opened.
         if (m_jarFile == null)
         {
-            try
-            {
-                openJarFile();
-            }
-            catch (IOException ex)
-            {
-                m_logger.log(
-                    Logger.LOG_ERROR,
-                    "JarContent: Unable to open JAR file.", ex);
-                return null;
-            }
+            openJarFile();
         }
 
         // Get the embedded resource.
@@ -266,17 +216,7 @@ public class JarContent implements IContent
         // Open JAR file if not already opened.
         if (m_jarFile == null)
         {
-            try
-            {
-                openJarFile();
-            }
-            catch (IOException ex)
-            {
-                m_logger.log(
-                    Logger.LOG_ERROR,
-                    "JarContent: Unable to open JAR file.", ex);
-                return null;
-            }
+            openJarFile();
 
         }
 
@@ -366,18 +306,7 @@ public class JarContent implements IContent
         // Open JAR file if not already opened.
         if (m_jarFile == null)
         {
-            try
-            {
-                openJarFile();
-            }
-            catch (IOException ex)
-            {
-                m_logger.log(
-                    Logger.LOG_ERROR,
-                    "Unable to open JAR file.", ex);
-                return null;
-            }
-
+            openJarFile();
         }
 
         // Remove any leading slash.
@@ -491,11 +420,18 @@ public class JarContent implements IContent
         return m_file;
     }
 
-    private void openJarFile() throws IOException
+    private void openJarFile() throws RuntimeException
     {
         if (m_jarFile == null)
         {
-            m_jarFile = BundleCache.getSecureAction().openJAR(m_file, false);
+            try
+            {
+                m_jarFile = BundleCache.getSecureAction().openJAR(m_file, false);
+            }
+            catch (IOException ex)
+            {
+                throw new RuntimeException("Unable to open JAR file, probably deleted.", ex);
+            }
         }
     }
 
