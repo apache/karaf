@@ -25,7 +25,6 @@ import java.util.Collection;
 import org.apache.felix.sigil.model.IModelWalker;
 import org.apache.felix.sigil.model.eclipse.ILibrary;
 import org.apache.felix.sigil.model.eclipse.ILibraryImport;
-import org.eclipse.core.runtime.CoreException;
 
 
 public interface IRepositoryManager
