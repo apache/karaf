@@ -400,7 +400,7 @@ public class BundleBuilder
         spec.putAll( headers );
 
         String sn = bundle.isSingleton() ? bundle.getSymbolicName() + ";singleton:=true" : bundle.getSymbolicName();
-        
+
         spec.setProperty( Constants.BUNDLE_SYMBOLICNAME, sn );
         spec.setProperty( Constants.BUNDLE_VERSION, bundle.getVersion() );
 
@@ -483,7 +483,7 @@ public class BundleBuilder
     {
         // final String cleanVersion =
         // Builder.cleanupVersion(bundle.getVersion());
-        
+
         Map<String, Map<String, String>> libs = bundle.getLibs();
 
         for ( String jarpath : libs.keySet() )
@@ -626,16 +626,16 @@ public class BundleBuilder
         // allow existing header;Package-Import to specify ignored packages
         sb.append( spec.getProperty( Constants.IMPORT_PACKAGE, "" ) );
 
-        buildImports(sb, getImports( bundle ));
-        
+        buildImports( sb, getImports( bundle ) );
+
         if ( sb.length() > 0 )
         {
             spec.setProperty( Constants.IMPORT_PACKAGE, sb.toString() );
         }
 
         sb.setLength( 0 );
-        
-        buildRequires(sb, bundle.getRequires());
+
+        buildRequires( sb, bundle.getRequires() );
 
         if ( sb.length() > 0 )
         {
@@ -710,14 +710,14 @@ public class BundleBuilder
 
         if ( sb.length() > 0 )
             sb.append( "," );
-        
+
         if ( addMissingImports )
         {
             sb.append( "*" );
         }
-        else 
+        else
         {
-            sb.append(  "!*" );
+            sb.append( "!*" );
         }
     }
 
