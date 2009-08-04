@@ -11,14 +11,13 @@
 			</arguments>
 		</buildCommand>
 		<buildCommand>
-			<name>org.cauldron.sigil.core.newtonBuilder</name>
+			<name>org.apache.felix.sigil.eclipse.core.sigilBuilder</name>
 			<arguments>
 			</arguments>
 		</buildCommand>
 	</buildSpec>
 	<natures>
-		<nature>org.eclipse.pde.PluginNature</nature>
+		<nature>org.apache.felix.sigil.sigilnature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
-		<nature>org.cauldron.sigil.core.newtonnature</nature>
 	</natures>
 </projectDescription>
