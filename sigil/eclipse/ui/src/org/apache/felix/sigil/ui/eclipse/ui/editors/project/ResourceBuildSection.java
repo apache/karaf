@@ -20,6 +20,8 @@
 package org.apache.felix.sigil.ui.eclipse.ui.editors.project;
 
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.apache.felix.sigil.eclipse.SigilCore;
 import org.apache.felix.sigil.eclipse.model.project.ISigilProjectModel;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
@@ -37,6 +39,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Link;
@@ -179,18 +182,27 @@ public class ResourceBuildSection extends AbstractResourceSection implements ICh
         markDirty();
     }
 
-
+    private AtomicBoolean disposed = new AtomicBoolean();
+    
     @Override
     public void dispose()
     {
-        super.dispose();
+        disposed.set( true );
         SigilCore.getDefault().getPreferenceStore().removePropertyChangeListener( this );
+        super.dispose();
     }
 
 
     public void propertyChange( PropertyChangeEvent event )
     {
-        resourcesFilter.loadExclusions();
-        viewer.refresh();
+        if ( !disposed.get() ) {
+            resourcesFilter.loadExclusions();
+            try {
+                viewer.refresh();
+            }
+            catch (SWTException e) {
+                // can happen on dispose
+            }
+        }
     }
 }
