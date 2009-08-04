@@ -303,11 +303,6 @@ public class SigilIncrementalProjectBuilder extends IncrementalProjectBuilder
         {
             convert( cp, sigil, files );
         }
-
-        if ( !sigil.getBundle().getComposites().isEmpty() )
-        {
-            throw new IllegalStateException( "XXX-FIXME-XXX" );
-        }
     }
 
 

@@ -62,7 +62,7 @@ public class ContentsForm extends SigilPage
         layout.topMargin = 5;
         layout.leftMargin = 10;
         layout.rightMargin = 10;
-        layout.numColumns = 2;
+        layout.numColumns = 1;
         layout.horizontalSpacing = 10;
         body.setLayout( layout );
         body.setLayoutData( new TableWrapData( TableWrapData.FILL ) );
@@ -72,31 +72,22 @@ public class ContentsForm extends SigilPage
         layout.verticalSpacing = 20;
         top.setLayout( layout );
         TableWrapData data = new TableWrapData( TableWrapData.FILL_GRAB );
-        data.colspan = 2;
+        //data.colspan = 2;
         top.setLayoutData( data );
 
-        Composite left = toolkit.createComposite( body );
+        Composite bottom = toolkit.createComposite( body );
         layout = new TableWrapLayout();
         layout.verticalSpacing = 20;
-        left.setLayout( layout );
-        left.setLayoutData( new TableWrapData( TableWrapData.FILL_GRAB ) );
-
-        Composite right = toolkit.createComposite( body );
-        layout = new TableWrapLayout();
-        layout.verticalSpacing = 20;
-        right.setLayout( layout );
-        right.setLayoutData( new TableWrapData( TableWrapData.FILL_GRAB ) );
+        bottom.setLayout( layout );
+        bottom.setLayoutData( new TableWrapData( TableWrapData.FILL_GRAB ) );
 
         try
         {
             ClasspathSection classpath = new ClasspathSection( this, top, project );
             managedForm.addPart( classpath );
 
-            ResourceBuildSection runtimeBuild = new ResourceBuildSection( this, left, project );
+            ResourceBuildSection runtimeBuild = new ResourceBuildSection( this, bottom, project );
             managedForm.addPart( runtimeBuild );
-
-            DownloadSection download = new DownloadSection( this, right, project );
-            managedForm.addPart( download );
         }
         catch ( CoreException e )
         {

@@ -53,21 +53,6 @@ public interface ISigilBundle extends ICompoundModelElement, IVersionedModelElem
     void setBundleInfo( IBundleModelElement bundle );
 
 
-    IDownloadJar getDownloadJar();
-
-
-    void setDownloadJar( IDownloadJar download );
-
-
-    void addComposite( ISCAComposite composite );
-
-
-    void removeComposite( ISCAComposite composite );
-
-
-    Set<ISCAComposite> getComposites();
-
-
     void addLibraryPath( IPath path );
 
 

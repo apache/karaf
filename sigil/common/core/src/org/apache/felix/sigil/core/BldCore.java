@@ -24,7 +24,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.felix.sigil.core.internal.license.LicenseManager;
-import org.apache.felix.sigil.core.internal.model.eclipse.DownloadJar;
 import org.apache.felix.sigil.core.internal.model.eclipse.Library;
 import org.apache.felix.sigil.core.internal.model.eclipse.LibraryImport;
 import org.apache.felix.sigil.core.internal.model.eclipse.SigilBundle;
@@ -34,11 +33,8 @@ import org.apache.felix.sigil.core.internal.model.osgi.PackageImport;
 import org.apache.felix.sigil.core.internal.model.osgi.RequiredBundle;
 import org.apache.felix.sigil.core.licence.ILicenseManager;
 import org.apache.felix.sigil.model.ModelElementFactory;
-import org.apache.felix.sigil.model.eclipse.IDownloadJar;
 import org.apache.felix.sigil.model.eclipse.ILibrary;
 import org.apache.felix.sigil.model.eclipse.ILibraryImport;
-import org.apache.felix.sigil.model.eclipse.INewtonSystem;
-import org.apache.felix.sigil.model.eclipse.ISCAComposite;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.model.osgi.IBundleModelElement;
 import org.apache.felix.sigil.model.osgi.IPackageExport;
@@ -84,7 +80,6 @@ public class BldCore implements BundleActivator
     {
         String uri = "http://sigil.codecauldron.org/xml/sigil-namespace";
         ModelElementFactory.getInstance().register( ISigilBundle.class, SigilBundle.class, "bundle", "sigil", uri );
-        ModelElementFactory.getInstance().register( IDownloadJar.class, DownloadJar.class, "download", "sigil", uri );
         ModelElementFactory.getInstance().register( ILibrary.class, Library.class, "library", "sigil", uri );
         ModelElementFactory.getInstance().register( ILibraryImport.class, LibraryImport.class, "library-import",
             "sigil", uri );

@@ -48,7 +48,6 @@ import org.apache.felix.sigil.model.IModelWalker;
 import org.apache.felix.sigil.model.ModelElementFactory;
 import org.apache.felix.sigil.model.common.VersionRange;
 import org.apache.felix.sigil.model.common.VersionRangeBoundingRule;
-import org.apache.felix.sigil.model.eclipse.ISCAComposite;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.model.osgi.IBundleModelElement;
 import org.apache.felix.sigil.model.osgi.IPackageExport;
@@ -875,31 +874,9 @@ public class JavaHelper
         Set<String> imports = new HashSet<String>();
 
         findJavaModelImports( project, imports, monitor );
-        findSCAImports( project, imports, monitor );
         findTextImports( project, imports, monitor );
 
         return imports;
-    }
-
-
-    private static void findSCAImports( ISigilProjectModel project, Set<String> imports, IProgressMonitor monitor )
-    {
-        for ( ISCAComposite sca : project.getBundle().getComposites() )
-        {
-            IFile f = project.getProject().getFile( sca.getLocation() );
-            if ( f.exists() )
-            {
-                try
-                {
-                    // TODO for now just treats sca as text files - should build in richer model that is able to detect java elements
-                    parseText( f, imports );
-                }
-                catch ( CoreException e )
-                {
-                    SigilCore.error( "Failed to parse sca file " + f, e );
-                }
-            }
-        }
     }
 
 

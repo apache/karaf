@@ -35,8 +35,6 @@ import java.util.Set;
 
 import org.apache.felix.sigil.core.BldCore;
 import org.apache.felix.sigil.model.AbstractCompoundModelElement;
-import org.apache.felix.sigil.model.eclipse.IDownloadJar;
-import org.apache.felix.sigil.model.eclipse.ISCAComposite;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.model.osgi.IBundleModelElement;
 import org.apache.felix.sigil.model.osgi.IPackageExport;
@@ -57,10 +55,8 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
     private static final long serialVersionUID = 1L;
 
     private IBundleModelElement bundle;
-    private IDownloadJar download;
     private Set<IPath> sourcePaths;
     private Set<IPath> libraryPaths;
-    private Set<ISCAComposite> composites;
     private Set<String> classpath;
     private Set<String> packages;
     private Set<String> dlPackages;
@@ -77,7 +73,6 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
         super( "Sigil Bundle" );
         sourcePaths = new HashSet<IPath>();
         libraryPaths = new HashSet<IPath>();
-        composites = new HashSet<ISCAComposite>();
         classpath = new HashSet<String>();
         packages = new HashSet<String>();
         dlPackages = new HashSet<String>();
@@ -217,18 +212,6 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
     }
 
 
-    public IDownloadJar getDownloadJar()
-    {
-        return download;
-    }
-
-
-    public void setDownloadJar( IDownloadJar download )
-    {
-        this.download = download;
-    }
-
-
     public void addLibraryPath( IPath path )
     {
         libraryPaths.add( path );
@@ -268,28 +251,6 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
     public void clearSourcePaths()
     {
         sourcePaths.clear();
-    }
-
-
-    public void addComposite( ISCAComposite composite )
-    {
-        composites.add( composite );
-        composite.setParent( this );
-    }
-
-
-    public Set<ISCAComposite> getComposites()
-    {
-        return composites;
-    }
-
-
-    public void removeComposite( ISCAComposite composite )
-    {
-        if ( composites.remove( composite ) )
-        {
-            composite.setParent( null );
-        }
     }
 
 
