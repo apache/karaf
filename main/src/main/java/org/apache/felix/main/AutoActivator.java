@@ -19,18 +19,9 @@
 package org.apache.felix.main;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-import org.osgi.service.startlevel.StartLevel;
+import java.util.*;
+import org.osgi.framework.*;
+import org.osgi.service.startlevel.*;
 
 public class AutoActivator implements BundleActivator
 {
@@ -96,6 +87,14 @@ public class AutoActivator implements BundleActivator
         enabled = (enabled == null) ? Boolean.TRUE.toString() : enabled;
         if (Boolean.valueOf(enabled).booleanValue())
         {
+            // Get list of already installed bundles as a map.
+            Map bundleMap = new HashMap();
+            Bundle[] bundles = context.getBundles();
+            for (int i = 0; i < bundles.length; i++)
+            {
+                bundleMap.put(bundles[i].getLocation(), bundles[i]);
+            }
+
             // Get the auto deploy directory.
             String autoDir = (String) m_configMap.get(AUTO_DEPLOY_DIR_PROPERY);
             autoDir = (autoDir == null) ? AUTO_DEPLOY_DIR_VALUE : autoDir;
@@ -118,10 +117,19 @@ public class AutoActivator implements BundleActivator
                 final List installedList = new ArrayList();
                 for (int i = 0; i < bundleList.size(); i++)
                 {
+                    Bundle b = (Bundle) bundleMap.get(
+                        ((File) bundleList.get(i)).toURI().toString());
                     try
                     {
-                        Bundle b = context.installBundle(
-                            ((File) bundleList.get(i)).toURI().toString());
+                        if (b == null)
+                        {
+                            b = context.installBundle(
+                                ((File) bundleList.get(i)).toURI().toString());
+                        }
+                        else
+                        {
+                            b.update();
+                        }
                         installedList.add(b);
                     }
                     catch (BundleException ex)
