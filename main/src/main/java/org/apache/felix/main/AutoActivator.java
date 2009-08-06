@@ -34,9 +34,25 @@ public class AutoActivator implements BundleActivator
     **/
     public static final String AUTO_DEPLOY_DIR_VALUE = "bundle";
     /**
-     * The property name used to enable/disable automatic bundle deployment.
+     * The property name used to specify auto-deploy actions.
     **/
-    public static final String AUTO_DEPLOY_PROP = "felix.auto.deploy";
+    public static final String AUTO_DEPLOY_ACTION_PROPERY = "felix.auto.deploy.action";
+    /**
+     * The name used for the auto-deploy install action.
+    **/
+    public static final String AUTO_DEPLOY_INSTALL_VALUE = "install";
+    /**
+     * The name used for the auto-deploy start action.
+    **/
+    public static final String AUTO_DEPLOY_START_VALUE = "start";
+    /**
+     * The name used for the auto-deploy update action.
+    **/
+    public static final String AUTO_DEPLOY_UPDATE_VALUE = "update";
+    /**
+     * The name used for the auto-deploy uninstall action.
+    **/
+    public static final String AUTO_DEPLOY_UNINSTALL_VALUE = "uninstall";
     /**
      * The property name prefix for the launcher's auto-install property.
     **/
@@ -82,17 +98,32 @@ public class AutoActivator implements BundleActivator
      */
     private void processAutoDeploy(BundleContext context)
     {
-        // Determine if auto deploy is enabled; default is enabled.
-        String enabled = (String) m_configMap.get(AUTO_DEPLOY_PROP);
-        enabled = (enabled == null) ? Boolean.TRUE.toString() : enabled;
-        if (Boolean.valueOf(enabled).booleanValue())
+        // Determine if auto deploy actions to perform.
+        String action = (String) m_configMap.get(AUTO_DEPLOY_ACTION_PROPERY);
+        action = (action == null) ? "" : action;
+        List actionList = new ArrayList();
+        StringTokenizer st = new StringTokenizer(action, ",");
+        while (st.hasMoreTokens())
+        {
+            String s = st.nextToken().trim().toLowerCase();
+            if (s.equals(AUTO_DEPLOY_INSTALL_VALUE)
+                || s.equals(AUTO_DEPLOY_START_VALUE)
+                || s.equals(AUTO_DEPLOY_UPDATE_VALUE)
+                || s.equals(AUTO_DEPLOY_UNINSTALL_VALUE))
+            {
+                actionList.add(s);
+            }
+        }
+
+        // Perform auto-deploy actions.
+        if (actionList.size() > 0)
         {
             // Get list of already installed bundles as a map.
-            Map bundleMap = new HashMap();
+            Map installedBundleMap = new HashMap();
             Bundle[] bundles = context.getBundles();
             for (int i = 0; i < bundles.length; i++)
             {
-                bundleMap.put(bundles[i].getLocation(), bundles[i]);
+                installedBundleMap.put(bundles[i].getLocation(), bundles[i]);
             }
 
             // Get the auto deploy directory.
@@ -101,52 +132,92 @@ public class AutoActivator implements BundleActivator
             // Look in the specified bundle directory to create a list
             // of all JAR files to install.
             File[] files = new File(autoDir).listFiles();
+            List jarList = new ArrayList();
             if (files != null)
             {
                 Arrays.sort(files);
-                List bundleList = new ArrayList();
                 for (int i = 0; i < files.length; i++)
                 {
                     if (files[i].getName().endsWith(".jar"))
                     {
-                        bundleList.add(files[i]);
+                        jarList.add(files[i]);
                     }
                 }
+            }
 
-                // Install bundle JAR files and remember the bundle objects.
-                final List installedList = new ArrayList();
-                for (int i = 0; i < bundleList.size(); i++)
+            // Install bundle JAR files and remember the bundle objects.
+            final List startBundleList = new ArrayList();
+            for (int i = 0; i < jarList.size(); i++)
+            {
+                // Look up the bundle by location, removing it from
+                // the map of installed bundles so the remaining bundles
+                // indicate which bundles may need to be uninstalled.
+                Bundle b = (Bundle) installedBundleMap.remove(
+                    ((File) jarList.get(i)).toURI().toString());
+                try
                 {
-                    Bundle b = (Bundle) bundleMap.get(
-                        ((File) bundleList.get(i)).toURI().toString());
-                    try
+                    // If the bundle is not already installed, then install it
+                    // if the 'install' action is present.
+                    if ((b == null) && actionList.contains(AUTO_DEPLOY_INSTALL_VALUE))
                     {
-                        if (b == null)
-                        {
-                            b = context.installBundle(
-                                ((File) bundleList.get(i)).toURI().toString());
-                        }
-                        else
-                        {
-                            b.update();
-                        }
-                        installedList.add(b);
+                        b = context.installBundle(
+                            ((File) jarList.get(i)).toURI().toString());
                     }
-                    catch (BundleException ex)
+                    // If the bundle is already installed, then update it
+                    // if the 'update' action is present.
+                    else if (actionList.contains(AUTO_DEPLOY_UPDATE_VALUE))
                     {
-                        System.err.println("Auto-deploy install: "
+                        b.update();
+                    }
+
+                    // If we have found and/or successfully installed a bundle,
+                    // then add it to the list of bundles to potentially start.
+                    if (b != null)
+                    {
+                        startBundleList.add(b);
+                    }
+                }
+                catch (BundleException ex)
+                {
+                    System.err.println("Auto-deploy install: "
+                        + ex + ((ex.getCause() != null) ? " - " + ex.getCause() : ""));
+                }
+            }
+
+            // Uninstall all bundles not in the auto-deploy directory if
+            // the 'uninstall' action is present.
+            if (actionList.contains(AUTO_DEPLOY_UNINSTALL_VALUE))
+            {
+                for (Iterator it = installedBundleMap.entrySet().iterator(); it.hasNext(); )
+                {
+                    Map.Entry entry = (Map.Entry) it.next();
+                    Bundle b = (Bundle) entry.getValue();
+                    if (b.getBundleId() != 0)
+                    {
+                        try
+                        {
+                            b.uninstall();
+                        }
+                        catch (BundleException ex)
+                        {
+                        System.err.println("Auto-deploy uninstall: "
                             + ex + ((ex.getCause() != null) ? " - " + ex.getCause() : ""));
+                        }
                     }
                 }
+            }
 
-                // Start all installed bundles.
-                for (int i = 0; i < installedList.size(); i++)
+            // Start all installed and/or updated bundles if the 'start'
+            // action is present.
+            if (actionList.contains(AUTO_DEPLOY_START_VALUE))
+            {
+                for (int i = 0; i < startBundleList.size(); i++)
                 {
                     try
                     {
-                        if (!isFragment((Bundle) installedList.get(i)))
+                        if (!isFragment((Bundle) startBundleList.get(i)))
                         {
-                            ((Bundle) installedList.get(i)).start();
+                            ((Bundle) startBundleList.get(i)).start();
                         }
                     }
                     catch (BundleException ex)
