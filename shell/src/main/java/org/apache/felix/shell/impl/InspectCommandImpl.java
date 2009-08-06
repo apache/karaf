@@ -24,6 +24,7 @@ import java.util.StringTokenizer;
 import org.apache.felix.shell.Command;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -36,8 +37,8 @@ public class InspectCommandImpl implements Command
     public static final String FRAGMENT_TYPE = "fragment";
     public static final String SERVICE_TYPE = "service";
 
-    public static final String PROVIDE_DIRECTION = "provide";
-    public static final String REQUIRE_DIRECTION = "require";
+    public static final String CAPABILITY = "capability";
+    public static final String REQUIREMENT = "requirement";
 
     private final BundleContext m_context;
     private ServiceReference m_ref = null;
@@ -54,7 +55,7 @@ public class InspectCommandImpl implements Command
 
     public String getUsage()
     {
-        return "inspect (package|bundle|fragment|service) (require|provide) <id> ...";
+        return "inspect (package|bundle|fragment|service) (capability|requirement) <id> ...";
     }
 
     public String getShortDescription()
@@ -92,7 +93,7 @@ public class InspectCommandImpl implements Command
                 // Now determine what needs to be printed.
                 if (PACKAGE_TYPE.startsWith(type))
                 {
-                    if (PROVIDE_DIRECTION.startsWith(direction))
+                    if (CAPABILITY.startsWith(direction))
                     {
                         printExportedPackages(ids, out, err);
                     }
@@ -103,7 +104,7 @@ public class InspectCommandImpl implements Command
                 }
                 else if (BUNDLE_TYPE.startsWith(type))
                 {
-                    if (PROVIDE_DIRECTION.startsWith(direction))
+                    if (CAPABILITY.startsWith(direction))
                     {
                         printRequiringBundles(ids, out, err);
                     }
@@ -114,18 +115,18 @@ public class InspectCommandImpl implements Command
                 }
                 else if (FRAGMENT_TYPE.startsWith(type))
                 {
-                    if (PROVIDE_DIRECTION.startsWith(direction))
+                    if (CAPABILITY.startsWith(direction))
                     {
-                        out.println("Fragment inspection not yet implemented.");
+                        printFragmentHosts(ids, out, err);
                     }
                     else
                     {
-                        out.println("Fragment inspection not yet implemented.");
+                        printHostedFragments(ids, out, err);
                     }
                 }
                 else
                 {
-                    if (PROVIDE_DIRECTION.startsWith(direction))
+                    if (CAPABILITY.startsWith(direction))
                     {
                         printExportedServices(ids, out, err);
                     }
@@ -165,7 +166,7 @@ public class InspectCommandImpl implements Command
                         {
                             out.println("");
                         }
-                        String title = bundle + " provides packages:";
+                        String title = bundle + " exports packages:";
                         out.println(title);
                         out.println(Util.getUnderlineString(title));
                         if ((exports != null) && (exports.length > 0))
@@ -244,7 +245,7 @@ public class InspectCommandImpl implements Command
         else
         {
             ExportedPackage[] exports = pa.getExportedPackages((Bundle) null);
-            String title = bundle + " requires packages:";
+            String title = bundle + " imports packages:";
             out.println(title);
             out.println(Util.getUnderlineString(title));
             boolean found = false;
@@ -296,7 +297,7 @@ public class InspectCommandImpl implements Command
                                 {
                                     out.println("");
                                 }
-                                String title = bundle + " required by bundles:";
+                                String title = bundle + " is required by:";
                                 out.println(title);
                                 out.println(Util.getUnderlineString(title));
                                 if ((rbs[rbIdx].getRequiringBundles() != null)
@@ -400,6 +401,124 @@ public class InspectCommandImpl implements Command
                 out.println("Nothing");
             }
             ungetPackageAdmin();
+        }
+    }
+
+    private void printFragmentHosts(String[] ids, PrintStream out, PrintStream err)
+    {
+        PackageAdmin pa = getPackageAdmin();
+        if (pa == null)
+        {
+            out.println("PackageAdmin service is unavailable.");
+        }
+        else
+        {
+            for (int idIdx = 0; idIdx < ids.length; idIdx++)
+            {
+                // Print a separator for some whitespace.
+                if (idIdx > 0)
+                {
+                    out.println("");
+                }
+
+                try
+                {
+                    long l = Long.parseLong(ids[idIdx]);
+                    Bundle bundle = m_context.getBundle(l);
+                    if ((bundle != null) && isFragment(bundle))
+                    {
+                        String title = bundle + " is attached to:";
+                        out.println(title);
+                        out.println(Util.getUnderlineString(title));
+                        Bundle[] hosts = pa.getHosts(bundle);
+                        for (int hostIdx = 0;
+                            (hosts != null) && (hostIdx < hosts.length);
+                            hostIdx++)
+                        {
+                            out.println(hosts[hostIdx]);
+                        }
+                        if ((hosts == null) || (hosts.length == 0))
+                        {
+                            out.println("Nothing");
+                        }
+                    }
+                    else if ((bundle != null) && !isFragment(bundle))
+                    {
+                        out.println("Bundle " + bundle + " is not a fragment.");
+                    }
+                    else
+                    {
+                        err.println("Bundle ID " + ids[idIdx] + " is invalid.");
+                    }
+                }
+                catch (NumberFormatException ex)
+                {
+                    err.println("Unable to parse id '" + ids[idIdx] + "'.");
+                }
+                catch (Exception ex)
+                {
+                    err.println(ex.toString());
+                }
+            }
+        }
+    }
+
+    private void printHostedFragments(String[] ids, PrintStream out, PrintStream err)
+    {
+        PackageAdmin pa = getPackageAdmin();
+        if (pa == null)
+        {
+            out.println("PackageAdmin service is unavailable.");
+        }
+        else
+        {
+            for (int idIdx = 0; idIdx < ids.length; idIdx++)
+            {
+                // Print a separator for some whitespace.
+                if (idIdx > 0)
+                {
+                    out.println("");
+                }
+
+                try
+                {
+                    long l = Long.parseLong(ids[idIdx]);
+                    Bundle bundle = m_context.getBundle(l);
+                    if ((bundle != null) && !isFragment(bundle))
+                    {
+                        String title = bundle + " hosts:";
+                        out.println(title);
+                        out.println(Util.getUnderlineString(title));
+                        Bundle[] fragments = pa.getFragments(bundle);
+                        for (int fragIdx = 0;
+                            (fragments != null) && (fragIdx < fragments.length);
+                            fragIdx++)
+                        {
+                            out.println(fragments[fragIdx]);
+                        }
+                        if ((fragments == null) || (fragments.length == 0))
+                        {
+                            out.println("Nothing");
+                        }
+                    }
+                    else if ((bundle != null) && isFragment(bundle))
+                    {
+                        out.println("Bundle " + bundle + " is a fragment.");
+                    }
+                    else
+                    {
+                        err.println("Bundle ID " + ids[idIdx] + " is invalid.");
+                    }
+                }
+                catch (NumberFormatException ex)
+                {
+                    err.println("Unable to parse id '" + ids[idIdx] + "'.");
+                }
+                catch (Exception ex)
+                {
+                    err.println(ex.toString());
+                }
+            }
         }
     }
 
@@ -547,7 +666,12 @@ public class InspectCommandImpl implements Command
         return
             (((PACKAGE_TYPE.startsWith(type) || BUNDLE_TYPE.startsWith(type)
                 || FRAGMENT_TYPE.startsWith(type) || SERVICE_TYPE.startsWith(type)))
-            && (PROVIDE_DIRECTION.startsWith(direction)
-                || REQUIRE_DIRECTION.startsWith(direction)));
+            && (CAPABILITY.startsWith(direction)
+                || REQUIREMENT.startsWith(direction)));
+    }
+
+    private static boolean isFragment(Bundle bundle)
+    {
+        return bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null;
     }
 }
