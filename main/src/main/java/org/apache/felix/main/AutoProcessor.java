@@ -23,7 +23,7 @@ import java.util.*;
 import org.osgi.framework.*;
 import org.osgi.service.startlevel.*;
 
-public class AutoActivator implements BundleActivator
+public class AutoProcessor
 {
     /**
      * The property name used for the bundle directory.
@@ -62,32 +62,16 @@ public class AutoActivator implements BundleActivator
     **/
     public static final String AUTO_START_PROP = "felix.auto.start";
 
-    private final Map m_configMap;
-
-    public AutoActivator(Map configMap)
-    {
-        m_configMap = configMap;
-    }
-
     /**
-     * Used to instigate auto-install and auto-start configuration
-     * property processing via a custom framework activator during
-     * framework startup.
+     * Used to instigate auto-deploy directory process and auto-install/auto-start
+     * configuration property processing during.
+     * @param configMap Map of configuration properties.
      * @param context The system bundle context.
     **/
-    public void start(BundleContext context)
+    public static void process(Map configMap, BundleContext context)
     {
-        processAutoDeploy(context);
-        processAutoProperties(context);
-    }
-
-    /**
-     * Currently does nothing as part of framework shutdown.
-     * @param context The system bundle context.
-    **/
-    public void stop(BundleContext context)
-    {
-        // Do nothing.
+        processAutoDeploy(configMap, context);
+        processAutoProperties(configMap, context);
     }
 
     /**
@@ -96,10 +80,10 @@ public class AutoActivator implements BundleActivator
      * starting each one.
      * </p>
      */
-    private void processAutoDeploy(BundleContext context)
+    private static void processAutoDeploy(Map configMap, BundleContext context)
     {
         // Determine if auto deploy actions to perform.
-        String action = (String) m_configMap.get(AUTO_DEPLOY_ACTION_PROPERY);
+        String action = (String) configMap.get(AUTO_DEPLOY_ACTION_PROPERY);
         action = (action == null) ? "" : action;
         List actionList = new ArrayList();
         StringTokenizer st = new StringTokenizer(action, ",");
@@ -127,7 +111,7 @@ public class AutoActivator implements BundleActivator
             }
 
             // Get the auto deploy directory.
-            String autoDir = (String) m_configMap.get(AUTO_DEPLOY_DIR_PROPERY);
+            String autoDir = (String) configMap.get(AUTO_DEPLOY_DIR_PROPERY);
             autoDir = (autoDir == null) ? AUTO_DEPLOY_DIR_VALUE : autoDir;
             // Look in the specified bundle directory to create a list
             // of all JAR files to install.
@@ -236,7 +220,7 @@ public class AutoActivator implements BundleActivator
      * specified configuration properties.
      * </p>
      */
-    private void processAutoProperties(BundleContext context)
+    private static void processAutoProperties(Map configMap, BundleContext context)
     {
         // Retrieve the Start Level service, since it will be needed
         // to set the start level of the installed bundles.
@@ -252,7 +236,7 @@ public class AutoActivator implements BundleActivator
         // property name, where "n" is the desired start level for the list
         // of bundles. If no start level is specified, the default start
         // level is assumed.
-        for (Iterator i = m_configMap.keySet().iterator(); i.hasNext(); )
+        for (Iterator i = configMap.keySet().iterator(); i.hasNext(); )
         {
             String key = ((String) i.next()).toLowerCase();
 
@@ -279,7 +263,7 @@ public class AutoActivator implements BundleActivator
             }
 
             // Parse and install the bundles associated with the key.
-            StringTokenizer st = new StringTokenizer((String) m_configMap.get(key), "\" ", true);
+            StringTokenizer st = new StringTokenizer((String) configMap.get(key), "\" ", true);
             for (String location = nextLocation(st); location != null; location = nextLocation(st))
             {
                 try
@@ -296,12 +280,12 @@ public class AutoActivator implements BundleActivator
         }
 
         // Now loop through the auto-start bundles and start them.
-        for (Iterator i = m_configMap.keySet().iterator(); i.hasNext(); )
+        for (Iterator i = configMap.keySet().iterator(); i.hasNext(); )
         {
             String key = ((String) i.next()).toLowerCase();
             if (key.startsWith(AUTO_START_PROP))
             {
-                StringTokenizer st = new StringTokenizer((String) m_configMap.get(key), "\" ", true);
+                StringTokenizer st = new StringTokenizer((String) configMap.get(key), "\" ", true);
                 for (String location = nextLocation(st); location != null; location = nextLocation(st))
                 {
                     // Installing twice just returns the same bundle.

@@ -22,11 +22,10 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
-import org.apache.felix.framework.Felix;
-import org.apache.felix.framework.util.FelixConstants;
 import org.apache.felix.framework.util.Util;
 import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
+import org.osgi.framework.launch.FrameworkFactory;
 
 /**
  * <p>
@@ -67,7 +66,7 @@ public class Main
      */
     public static final String CONFIG_DIRECTORY = "conf";
 
-    private static Framework m_felix = null;
+    private static Framework m_fwk = null;
 
     /**
      * <p>
@@ -219,7 +218,7 @@ public class Main
         // that overwrites anything in the config file.
         if (bundleDir != null)
         {
-            configProps.setProperty(AutoActivator.AUTO_DEPLOY_DIR_PROPERY, bundleDir);
+            configProps.setProperty(AutoProcessor.AUTO_DEPLOY_DIR_PROPERY, bundleDir);
         }
 
         // If there is a passed in bundle cache directory, then
@@ -229,25 +228,24 @@ public class Main
             configProps.setProperty(Constants.FRAMEWORK_STORAGE, cacheDir);
         }
 
-        // Create a list for custom framework activators and
-        // add an instance of the auto-activator it for processing
-        // auto-install and auto-start properties. Add this list
-        // to the configuration properties.
-        List list = new ArrayList();
-        list.add(new AutoActivator(configProps));
-        configProps.put(FelixConstants.SYSTEMBUNDLE_ACTIVATORS_PROP, list);
-
         // Print welcome banner.
         System.out.println("\nWelcome to Felix.");
         System.out.println("=================\n");
 
         try
         {
-            // Create an instance and start the framework.
-            m_felix = new Felix(configProps);
-            m_felix.start();
+            // Create an instance of the framework.
+            FrameworkFactory factory = getFrameworkFactory();
+            m_fwk = factory.newFramework(configProps);
+            // Initialize the framework, but don't start it yet.
+            m_fwk.init();
+            // Use the system bundle context to process the auto-deploy
+            // and auto-install/auto-start properties.
+            AutoProcessor.process(configProps, m_fwk.getBundleContext());
+            // Start the framework.
+            m_fwk.start();
             // Wait for framework to stop to exit the VM.
-            m_felix.waitForStop(0);
+            m_fwk.waitForStop(0);
             System.exit(0);
         }
         catch (Exception ex)
@@ -256,6 +254,41 @@ public class Main
             ex.printStackTrace();
             System.exit(-1);
         }
+    }
+
+    /**
+     * Simple method to parse META-INF/services file for framework factory.
+     * Currently, it assumes the first non-commented line is the class name
+     * of the framework factory implementation.
+     * @return The created <tt>FrameworkFactory</tt> instance.
+     * @throws Exception if any errors occur.
+    **/
+    private static FrameworkFactory getFrameworkFactory() throws Exception
+    {
+        URL url = Main.class.getClassLoader().getResource(
+            "META-INF/services/org.osgi.framework.launch.FrameworkFactory");
+        if (url != null)
+        {
+            BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+            try
+            {
+                for (String s = br.readLine(); s != null; s = br.readLine())
+                {
+                    s = s.trim();
+                    // Try to load first non-empty, non-commented line.
+                    if ((s.length() > 0) && (s.charAt(0) != '#'))
+                    {
+                        return (FrameworkFactory) Class.forName(s).newInstance();
+                    }
+                }
+            }
+            finally
+            {
+                if (br != null) br.close();
+            }
+        }
+
+        throw new Exception("Could not find framework factory.");
     }
 
     /**
