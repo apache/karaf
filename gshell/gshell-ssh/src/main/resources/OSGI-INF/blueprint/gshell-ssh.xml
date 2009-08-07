@@ -90,7 +90,8 @@
     <reference id="commandProcessor" interface="org.osgi.service.command.CommandProcessor">
     </reference>
 
-    <reference-list id="functions" filter="(&amp;(osgi.command.scope=*)(osgi.command.function=*))" availability="optional">
+    <reference-list id="functions" filter="(&amp;(osgi.command.scope=*)(osgi.command.function=*))"
+                    availability="optional" activation="eager">
         <reference-listener ref="commandCompleter"
                             bind-method="register"
                             unbind-method="unregister"/>
