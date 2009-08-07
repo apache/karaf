@@ -57,10 +57,11 @@
         </config>
         <bundle>mvn:org.apache.felix/org.apache.felix.metatype/${felix.metatype.version}</bundle>
         <bundle>mvn:org.apache.felix/org.apache.felix.webconsole/${felix.webconsole.version}</bundle>
-        <bundle>mvn:org.apache.felix.karaf.webconsole/org.apache.felix.karaf.webconsole.plugins/${version}</bundle>
         <!-- TODO: uncomment when FELIX-1133 is resolved
         <bundle>mvn:org.apache.felix.karaf.webconsole/org.apache.felix.karaf.webconsole.branding/${version}</bundle>
         -->
+        <bundle>mvn:org.apache.felix.karaf.webconsole/org.apache.felix.karaf.webconsole.features/${version}</bundle>
+        <bundle>mvn:org.apache.felix.karaf.webconsole/org.apache.felix.karaf.webconsole.gogo/${version}</bundle>
     </feature>
     <feature name="ssh" version="${version}">
         <config name="org.apache.felix.karaf.gshell.ssh">
