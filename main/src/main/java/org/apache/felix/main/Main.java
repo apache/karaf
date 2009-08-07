@@ -229,8 +229,8 @@ public class Main
         }
 
         // Print welcome banner.
-        System.out.println("\nWelcome to Felix.");
-        System.out.println("=================\n");
+        System.out.println("\nWelcome to Felix");
+        System.out.println("================\n");
 
         try
         {
