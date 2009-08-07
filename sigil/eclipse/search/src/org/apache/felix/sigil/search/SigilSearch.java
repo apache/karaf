@@ -60,7 +60,7 @@ public class SigilSearch extends AbstractUIPlugin
 {
 
     // The plug-in ID
-    public static final String PLUGIN_ID = "org.cauldron.sigil.search";
+    public static final String PLUGIN_ID = "org.apache.felix.sigil.eclipse.search";
 
     private static final String CLASS_EXTENSION = ".class";
 

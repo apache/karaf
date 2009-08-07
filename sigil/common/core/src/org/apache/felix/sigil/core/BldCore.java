@@ -78,11 +78,10 @@ public class BldCore implements BundleActivator
 
     public static void init() throws Exception
     {
-        String uri = "http://sigil.codecauldron.org/xml/sigil-namespace";
-        ModelElementFactory.getInstance().register( ISigilBundle.class, SigilBundle.class, "bundle", "sigil", uri );
-        ModelElementFactory.getInstance().register( ILibrary.class, Library.class, "library", "sigil", uri );
+        ModelElementFactory.getInstance().register( ISigilBundle.class, SigilBundle.class, "bundle", "sigil", null );
+        ModelElementFactory.getInstance().register( ILibrary.class, Library.class, "library", "sigil", null );
         ModelElementFactory.getInstance().register( ILibraryImport.class, LibraryImport.class, "library-import",
-            "sigil", uri );
+            "sigil", null );
 
         // osgi elements
         ModelElementFactory.getInstance().register( IBundleModelElement.class, BundleModelElement.class, "bundle",

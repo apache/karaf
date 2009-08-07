@@ -465,9 +465,7 @@ public class SigilCore extends AbstractUIPlugin
     {
         // trick to get eclipse to lazy load BldCore for model elements
         BldCore.getLicenseManager();
-        String uri = "http://sigil.codecauldron.org/xml/sigil-namespace";
-        ModelElementFactory.getInstance().register( ISigilProjectModel.class, SigilProject.class, "project", "sigil",
-            uri );
+        ModelElementFactory.getInstance().register( ISigilProjectModel.class, SigilProject.class, "project", "sigil", null );
     }
 
 

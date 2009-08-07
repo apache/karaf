@@ -85,26 +85,30 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
         progress.subTask( "Synchronizing " + bundle.getSymbolicName() + " binary" );
         sync( location, bundle.getUpdateLocation(), progress.newChild( 45 ) );
 
-        try
-        {
-            progress.subTask( "Synchronizing " + bundle.getSymbolicName() + " source" );
-            sync( sourcePathLocation, bundle.getSourceLocation(), progress.newChild( 45 ) );
+        if ( bundle.getSourceLocation() != null ) {
+            try
+            {
+                progress.subTask( "Synchronizing " + bundle.getSymbolicName() + " source" );
+                sync( sourcePathLocation, bundle.getSourceLocation(), progress.newChild( 45 ) );
+            }
+            catch ( IOException e )
+            {
+                BldCore.error( "Failed to download source for " + bundle.getSymbolicName() + " " + bundle.getVersion(), e
+                    .getCause() );
+            }
         }
-        catch ( IOException e )
-        {
-            BldCore.error( "Failed to download source for " + bundle.getSymbolicName() + " " + bundle.getVersion(), e
-                .getCause() );
-        }
-
-        try
-        {
-            progress.subTask( "Synchronizing " + bundle.getSymbolicName() + " licence" );
-            sync( licencePathLocation, bundle.getLicenseURI(), progress.newChild( 10 ) );
-        }
-        catch ( IOException e )
-        {
-            BldCore.error( "Failed to download licence for " + bundle.getSymbolicName() + " " + bundle.getVersion(), e
-                .getCause() );
+        
+        if ( bundle.getLicenseURI() != null ) {
+            try
+            {
+                progress.subTask( "Synchronizing " + bundle.getSymbolicName() + " licence" );
+                sync( licencePathLocation, bundle.getLicenseURI(), progress.newChild( 10 ) );
+            }
+            catch ( IOException e )
+            {
+                BldCore.error( "Failed to download licence for " + bundle.getSymbolicName() + " " + bundle.getVersion(), e
+                    .getCause() );
+            }
         }
     }
 
@@ -119,9 +123,9 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
     {
         try
         {
-            if ( local != null && !local.toFile().exists() )
+            if ( remote != null )
             {
-                if ( remote != null )
+                if ( local != null && !local.toFile().exists() )
                 {
                     URL url = remote.toURL();
                     URLConnection connection = url.openConnection();
