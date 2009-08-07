@@ -160,6 +160,17 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
+            <outputFileNameMapping>org/apache/felix/karaf/features/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <includes>
+                <include>org.apache.felix.karaf.features:org.apache.felix.karaf.features.core</include>
+                <include>org.apache.felix.karaf.features:org.apache.felix.karaf.features.command</include>
+                <include>org.apache.felix.karaf.features:org.apache.felix.karaf.features.management</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>/system</outputDirectory>
+            <unpack>false</unpack>
+            <useProjectArtifact>false</useProjectArtifact>
             <outputFileNameMapping>org/apache/felix/karaf/deployer/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
                 <include>org.apache.felix.karaf.deployer:org.apache.felix.karaf.deployer.filemonitor</include>
@@ -178,7 +189,6 @@
                 <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.admin</include>
                 <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.osgi</include>
                 <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.log</include>
-                <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.features</include>
                 <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.config</include>
                 <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.packages</include>
                 <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.ssh</include>

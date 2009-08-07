@@ -46,8 +46,8 @@
             <artifactId>spring-osgi-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.felix.karaf.gshell</groupId>
-            <artifactId>org.apache.felix.karaf.gshell.features</artifactId>
+            <groupId>org.apache.felix.karaf.features</groupId>
+            <artifactId>org.apache.felix.karaf.features.core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.felix.karaf.deployer</groupId>

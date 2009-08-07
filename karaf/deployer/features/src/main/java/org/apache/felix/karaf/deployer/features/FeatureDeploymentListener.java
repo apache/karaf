@@ -40,18 +40,15 @@ import org.w3c.dom.Document;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.felix.karaf.gshell.features.Feature;
-import org.apache.felix.karaf.gshell.features.FeaturesService;
-import org.apache.felix.karaf.gshell.features.Repository;
+import org.apache.felix.karaf.features.Feature;
+import org.apache.felix.karaf.features.FeaturesService;
+import org.apache.felix.karaf.features.Repository;
 import org.apache.felix.karaf.deployer.filemonitor.DeploymentListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.Constants;
 import org.osgi.framework.SynchronousBundleListener;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.osgi.context.BundleContextAware;
 
 /**
  * A deployment listener able to hot deploy a feature descriptor
