@@ -32,7 +32,7 @@ import org.apache.felix.gogo.commands.Command;
 @Command(scope = "shell", name="grep", description="Print lines matching a pattern")
 public class GrepAction extends OsgiCommandSupport {
 
-    @Argument(required=true, description="Regular expression")
+    @Argument(name = "PATTERN", required = true, description = "Regular expression")
     private String regex;
 
     @Option(name="-n", aliases = { "--line-number" }, description="Prefix each line of output with the line number within its input file.")
@@ -52,6 +52,9 @@ public class GrepAction extends OsgiCommandSupport {
     @Option(name = "-x", aliases = { "--line-regexp" }, description = "Select only those matches that exactly match the whole line.")
     private boolean lineRegexp;
 
+    @Option(name = "-i", aliases = { "--ignore-case" }, description = "Ignore case distinctions in both the PATTERN and the input files.")
+    private boolean ignoreCase;
+
     protected Object doExecute() throws Exception {
         String regexp = regex;
         if (wordRegexp) {
@@ -62,13 +65,16 @@ public class GrepAction extends OsgiCommandSupport {
         } else {
             regexp = ".*" + regexp + ".*";
         }
+        if (ignoreCase) {
+            regexp = regexp.toUpperCase();
+        }
         Pattern p = Pattern.compile(regexp);
         try {
             int lineno = 1;
             String line;
             Reader r = new InputStreamReader(System.in);
             while ((line = readLine(r)) != null) {
-                if (p.matcher(line).matches() ^ invertMatch) {
+                if (p.matcher(ignoreCase ? line.toUpperCase() : line).matches() ^ invertMatch) {
                     if (lineNumber) {
                         System.out.print(String.format("%6d  ", lineno++));
                     }
