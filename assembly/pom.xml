@@ -59,6 +59,18 @@
             <artifactId>org.apache.felix.karaf.deployer.features</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.felix.karaf.features</groupId>
+            <artifactId>org.apache.felix.karaf.features.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix.karaf.features</groupId>
+            <artifactId>org.apache.felix.karaf.features.command</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix.karaf.features</groupId>
+            <artifactId>org.apache.felix.karaf.features.management</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.felix.karaf.gshell</groupId>
             <artifactId>org.apache.felix.karaf.gshell.console</artifactId>
         </dependency>
@@ -77,10 +89,6 @@
         <dependency>
             <groupId>org.apache.felix.karaf.gshell</groupId>
             <artifactId>org.apache.felix.karaf.gshell.log</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix.karaf.gshell</groupId>
-            <artifactId>org.apache.felix.karaf.gshell.features</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.felix.karaf.gshell</groupId>

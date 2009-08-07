@@ -36,6 +36,7 @@
 
     <modules>
         <module>main</module>
+        <module>features</module>
         <module>deployer</module>
         <module>gshell</module>
         <module>jaas</module>
@@ -247,6 +248,21 @@
                 <version>${pom.version}</version>
             </dependency> 
             <dependency>
+                <groupId>org.apache.felix.karaf.features</groupId>
+                <artifactId>org.apache.felix.karaf.features.core</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix.karaf.features</groupId>
+                <artifactId>org.apache.felix.karaf.features.command</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix.karaf.features</groupId>
+                <artifactId>org.apache.felix.karaf.features.management</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.felix.karaf.gshell</groupId>
                 <artifactId>org.apache.felix.karaf.gshell.core</artifactId>
                 <version>${pom.version}</version>
@@ -279,11 +295,6 @@
             <dependency>
                 <groupId>org.apache.felix.karaf.gshell</groupId>
                 <artifactId>org.apache.felix.karaf.gshell.log</artifactId>
-                <version>${pom.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.felix.karaf.gshell</groupId>
-                <artifactId>org.apache.felix.karaf.gshell.features</artifactId>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>

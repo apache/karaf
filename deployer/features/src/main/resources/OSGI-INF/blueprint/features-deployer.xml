@@ -28,7 +28,7 @@
           init-method="init" destroy-method="destroy" activation="lazy">
         <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="featuresService">
-            <reference interface="org.apache.felix.karaf.gshell.features.FeaturesService"/>
+            <reference interface="org.apache.felix.karaf.features.FeaturesService"/>
         </property>
     </bean>
 

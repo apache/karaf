@@ -24,6 +24,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -31,9 +32,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.felix.karaf.gshell.features.FeaturesService;
-import org.apache.felix.karaf.gshell.features.Repository;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.apache.felix.karaf.features.*;
 
 import org.json.JSONException;
 import org.json.JSONWriter;
@@ -404,10 +404,12 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin
             return features;
         }
 
-        String[] featureInfo = null;
+        List<org.apache.felix.karaf.features.Feature> allFeatures = null;
+        List<org.apache.felix.karaf.features.Feature> installedFeatures = null;
         try
         {
-            featureInfo = featuresService.listFeatures();
+            allFeatures = Arrays.asList(featuresService.listFeatures());
+            installedFeatures = Arrays.asList(featuresService.listInstalledFeatures());
         }
         catch ( Exception e )
         {
@@ -415,40 +417,18 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin
             return new Feature[0];
         }
 
-        features = new Feature[featureInfo.length];
-        for ( int i = 0; i < featureInfo.length; i++ )
+        features = new Feature[allFeatures.size()];
+        for ( int i = 0; i < features.length; i++ )
         {
-            String[] temp;
-            temp = getBracketedToken( featureInfo[i], 0 );
-            Feature.State state;
-            if ( "installed  ".equals( temp[0] ) )
+            Feature.State state = Feature.State.UNINSTALLED;
+            if ( installedFeatures.contains( allFeatures.get(i) ) )
             {
                 state = Feature.State.INSTALLED;
             }
-            else if ( "uninstalled".equals( temp[0] ) )
-            {
-                state = Feature.State.UNINSTALLED;
-            }
-            else
-            {
-                state = Feature.State.UNKNOWN;
-            }
-            temp = getBracketedToken( temp[1], 0 );
-            String version = temp[0];
-            features[i] = new Feature( temp[1].trim(), version, state );
+            features[i] = new Feature( allFeatures.get(i).getName(), allFeatures.get(i).getVersion(), state );
         }
         Arrays.sort( features, new FeatureComparator() );
         return features;
-    }
-
-    private String[] getBracketedToken( String str, int startIndex )
-    {
-        int start = str.indexOf( '[', startIndex ) + 1;
-        int end = str.indexOf( ']', start );
-        String token = str.substring( start, end );
-        String remainder = str.substring( end + 1 );
-        return new String[]
-            { token, remainder };
     }
 
 
