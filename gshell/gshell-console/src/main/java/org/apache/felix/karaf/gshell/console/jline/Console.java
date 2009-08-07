@@ -18,21 +18,22 @@
  */
 package org.apache.felix.karaf.gshell.console.jline;
 
-import jline.*;
-import org.osgi.service.command.CommandSession;
-import org.osgi.service.command.Converter;
-import org.osgi.service.command.CommandProcessor;
-import org.apache.felix.karaf.gshell.console.Completer;
-import org.fusesource.jansi.Ansi;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
-import java.io.PrintWriter;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.Properties;
+
+import jline.ConsoleReader;
+import jline.Terminal;
+import jline.UnsupportedTerminal;
+import org.apache.felix.karaf.gshell.console.Completer;
+import org.osgi.service.command.CommandProcessor;
+import org.osgi.service.command.CommandSession;
+import org.osgi.service.command.Converter;
 
 public class Console implements Runnable
 {

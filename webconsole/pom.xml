@@ -35,7 +35,8 @@
   <name>Apache Felix Karaf :: Web Console</name>
   
   <modules>
-    <module>plugins</module>
+    <module>features</module>
+    <module>gogo</module>
     <module>branding</module>
   </modules>
   

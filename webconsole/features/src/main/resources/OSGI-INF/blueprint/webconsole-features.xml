@@ -22,7 +22,7 @@
 
     <reference id="featuresService" interface="org.apache.felix.karaf.gshell.features.FeaturesService" />
 
-    <bean id="featuresPlugin" class="org.apache.felix.karaf.webconsole.FeaturesPlugin" init-method="start" destroy-method="stop">
+    <bean id="featuresPlugin" class="org.apache.felix.karaf.webconsole.features.FeaturesPlugin" init-method="start" destroy-method="stop">
         <property name="featuresService" ref="featuresService" />
         <property name="bundleContext" ref="blueprintBundleContext" />
     </bean>
