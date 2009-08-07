@@ -17,11 +17,13 @@
 package org.apache.felix.karaf.gshell.osgi;
 
 import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
+import org.apache.felix.gogo.commands.Command;
 import org.osgi.framework.Bundle;
 
 /**
  * Command to shut down Karaf
  */
+@Command(scope = "osgi", name = "shutdown", description = "Shut the framework down")
 public class Shutdown extends OsgiCommandSupport {
 
     protected Object doExecute() throws Exception {

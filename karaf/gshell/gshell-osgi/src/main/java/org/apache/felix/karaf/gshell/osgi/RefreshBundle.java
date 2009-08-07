@@ -18,10 +18,12 @@ package org.apache.felix.karaf.gshell.osgi;
 
 import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
 import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
 
+@Command(scope = "osgi", name = "refresh", description = "Refresh bundle(s)")
 public class RefreshBundle extends OsgiCommandSupport {
 
     @Argument(required = false)

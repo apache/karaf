@@ -17,10 +17,12 @@
 package org.apache.felix.karaf.gshell.osgi;
 
 import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.startlevel.StartLevel;
 
+@Command(scope = "osgi", name = "bundle-level", description = "Get or set the start level of a given bundle")
 public class BundleLevel extends BundleCommand {
 
     @Argument(required = false, index = 1)

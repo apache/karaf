@@ -20,8 +20,10 @@ import java.io.InputStream;
 import java.net.URL;
 
 import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
 import org.osgi.framework.Bundle;
 
+@Command(scope = "osgi", name = "update", description = "Update bundle")
 public class UpdateBundle extends BundleCommand {
 
 	@Argument(required = false, description = "Bundle location", index=1)
