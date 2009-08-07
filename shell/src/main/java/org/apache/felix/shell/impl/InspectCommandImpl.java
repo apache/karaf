@@ -88,7 +88,7 @@ public class InspectCommandImpl implements Command
                 ids[i] = st.nextToken().trim();
             }
             // Verify arguments.
-            if (validTypeAndDirection(type, direction))
+            if (isValidType(type) && isValidDirection(direction))
             {
                 // Now determine what needs to be printed.
                 if (PACKAGE_TYPE.startsWith(type))
@@ -138,7 +138,14 @@ public class InspectCommandImpl implements Command
             }
             else
             {
-                out.println("Invalid arguments.");
+                if (!isValidType(type))
+                {
+                    out.println("Invalid argument: " + type);
+                }
+                if (!isValidDirection(direction))
+                {
+                    out.println("Invalid argument: " + direction);
+                }
             }
         }
     }
@@ -161,6 +168,7 @@ public class InspectCommandImpl implements Command
             }
             else
             {
+                bundles = new Bundle[ids.length];
                 for (int idIdx = 0; idIdx < ids.length; idIdx++)
                 {
                     try
@@ -228,6 +236,7 @@ public class InspectCommandImpl implements Command
         }
         else
         {
+            bundles = new Bundle[ids.length];
             for (int idIdx = 0; idIdx < ids.length; idIdx++)
             {
                 try
@@ -322,6 +331,7 @@ public class InspectCommandImpl implements Command
             }
             else
             {
+                bundles = new Bundle[ids.length];
                 for (int idIdx = 0; idIdx < ids.length; idIdx++)
                 {
                     try
@@ -398,6 +408,7 @@ public class InspectCommandImpl implements Command
         }
         else
         {
+            bundles = new Bundle[ids.length];
             for (int idIdx = 0; idIdx < ids.length; idIdx++)
             {
                 try
@@ -489,6 +500,7 @@ public class InspectCommandImpl implements Command
             }
             else
             {
+                bundles = new Bundle[ids.length];
                 for (int idIdx = 0; idIdx < ids.length; idIdx++)
                 {
                     try
@@ -564,6 +576,7 @@ public class InspectCommandImpl implements Command
             }
             else
             {
+                bundles = new Bundle[ids.length];
                 for (int idIdx = 0; idIdx < ids.length; idIdx++)
                 {
                     try
@@ -632,6 +645,7 @@ public class InspectCommandImpl implements Command
         }
         else
         {
+            bundles = new Bundle[ids.length];
             for (int idIdx = 0; idIdx < ids.length; idIdx++)
             {
                 try
@@ -715,6 +729,7 @@ public class InspectCommandImpl implements Command
         }
         else
         {
+            bundles = new Bundle[ids.length];
             for (int idIdx = 0; idIdx < ids.length; idIdx++)
             {
                 try
@@ -808,13 +823,15 @@ public class InspectCommandImpl implements Command
         m_context.ungetService(m_ref);
     }
 
-    private boolean validTypeAndDirection(String type, String direction)
+    private static boolean isValidType(String type)
     {
-        return
-            (((PACKAGE_TYPE.startsWith(type) || BUNDLE_TYPE.startsWith(type)
-                || FRAGMENT_TYPE.startsWith(type) || SERVICE_TYPE.startsWith(type)))
-            && (CAPABILITY.startsWith(direction)
-                || REQUIREMENT.startsWith(direction)));
+        return (PACKAGE_TYPE.startsWith(type) || BUNDLE_TYPE.startsWith(type)
+            || FRAGMENT_TYPE.startsWith(type) || SERVICE_TYPE.startsWith(type));
+    }
+
+    private static boolean isValidDirection(String direction)
+    {
+        return (CAPABILITY.startsWith(direction) || REQUIREMENT.startsWith(direction));
     }
 
     private static boolean isFragment(Bundle bundle)
