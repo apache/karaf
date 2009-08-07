@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -55,7 +55,7 @@ public class InspectCommandImpl implements Command
 
     public String getUsage()
     {
-        return "inspect (package|bundle|fragment|service) (capability|requirement) <id> ...";
+        return "inspect (package|bundle|fragment|service) (capability|requirement) [<id> ...]";
     }
 
     public String getShortDescription()
@@ -70,7 +70,7 @@ public class InspectCommandImpl implements Command
         // Ignore the command name.
         st.nextToken();
 
-        if (st.countTokens() < 3)
+        if (st.countTokens() < 2)
         {
             out.println("Too few arguments.");
             out.println(getUsage());
@@ -153,20 +153,45 @@ public class InspectCommandImpl implements Command
         else
         {
             boolean separatorNeeded = false;
-            for (int idIdx = 0; idIdx < ids.length; idIdx++)
+
+            Bundle[] bundles = null;
+            if ((ids == null) || (ids.length == 0))
+            {
+                bundles = m_context.getBundles();
+            }
+            else
+            {
+                for (int idIdx = 0; idIdx < ids.length; idIdx++)
+                {
+                    try
+                    {
+                        long l = Long.parseLong(ids[idIdx]);
+                        Bundle b = m_context.getBundle(l);
+                        if (b == null)
+                        {
+                            err.println("Bundle ID " + ids[idIdx] + " is invalid.");
+                        }
+                        bundles[idIdx] = b;
+                    }
+                    catch (NumberFormatException ex)
+                    {
+                        err.println("Unable to parse id '" + ids[idIdx] + "'.");
+                    }
+                }
+            }
+
+            for (int bundleIdx = 0; bundleIdx < bundles.length; bundleIdx++)
             {
                 try
                 {
-                    long l = Long.parseLong(ids[idIdx]);
-                    Bundle bundle = m_context.getBundle(l);
-                    if (bundle != null)
+                    if (bundles[bundleIdx] != null)
                     {
-                        ExportedPackage[] exports = pa.getExportedPackages(bundle);
+                        ExportedPackage[] exports = pa.getExportedPackages(bundles[bundleIdx]);
                         if (separatorNeeded)
                         {
                             out.println("");
                         }
-                        String title = bundle + " exports packages:";
+                        String title = bundles[bundleIdx] + " exports packages:";
                         out.println(title);
                         out.println(Util.getUnderlineString(title));
                         if ((exports != null) && (exports.length > 0))
@@ -182,14 +207,6 @@ public class InspectCommandImpl implements Command
                         }
                         separatorNeeded = true;
                     }
-                    else
-                    {
-                        err.println("Bundle ID " + ids[idIdx] + " is invalid.");
-                    }
-                }
-                catch (NumberFormatException ex)
-                {
-                    err.println("Unable to parse id '" + ids[idIdx] + "'.");
                 }
                 catch (Exception ex)
                 {
@@ -203,29 +220,46 @@ public class InspectCommandImpl implements Command
     private void printImportedPackages(String[] ids, PrintStream out, PrintStream err)
     {
         boolean separatorNeeded = false;
-        for (int idIdx = 0; idIdx < ids.length; idIdx++)
+
+        Bundle[] bundles = null;
+        if ((ids == null) || (ids.length == 0))
+        {
+            bundles = m_context.getBundles();
+        }
+        else
+        {
+            for (int idIdx = 0; idIdx < ids.length; idIdx++)
+            {
+                try
+                {
+                    long l = Long.parseLong(ids[idIdx]);
+                    Bundle b = m_context.getBundle(l);
+                    if (b == null)
+                    {
+                        err.println("Bundle ID " + ids[idIdx] + " is invalid.");
+                    }
+                    bundles[idIdx] = b;
+                }
+                catch (NumberFormatException ex)
+                {
+                    err.println("Unable to parse id '" + ids[idIdx] + "'.");
+                }
+            }
+        }
+
+        for (int bundleIdx = 0; bundleIdx < bundles.length; bundleIdx++)
         {
             try
             {
-                long l = Long.parseLong(ids[idIdx]);
-                Bundle bundle = m_context.getBundle(l);
-                if (bundle != null)
+                if (bundles[bundleIdx] != null)
                 {
                     if (separatorNeeded)
                     {
                         out.println("");
                     }
-                    _printImportedPackages(bundle, out, err);
+                    _printImportedPackages(bundles[bundleIdx], out, err);
                     separatorNeeded = true;
                 }
-                else
-                {
-                    err.println("Bundle ID " + ids[idIdx] + " is invalid.");
-                }
-            }
-            catch (NumberFormatException ex)
-            {
-                err.println("Unable to parse id '" + ids[idIdx] + "'.");
             }
             catch (Exception ex)
             {
@@ -280,24 +314,50 @@ public class InspectCommandImpl implements Command
         else
         {
             boolean separatorNeeded = false;
-            for (int idIdx = 0; idIdx < ids.length; idIdx++)
+
+            Bundle[] bundles = null;
+            if ((ids == null) || (ids.length == 0))
+            {
+                bundles = m_context.getBundles();
+            }
+            else
+            {
+                for (int idIdx = 0; idIdx < ids.length; idIdx++)
+                {
+                    try
+                    {
+                        long l = Long.parseLong(ids[idIdx]);
+                        Bundle b = m_context.getBundle(l);
+                        if (b == null)
+                        {
+                            err.println("Bundle ID " + ids[idIdx] + " is invalid.");
+                        }
+                        bundles[idIdx] = b;
+                    }
+                    catch (NumberFormatException ex)
+                    {
+                        err.println("Unable to parse id '" + ids[idIdx] + "'.");
+                    }
+                }
+            }
+
+            for (int bundleIdx = 0; bundleIdx < bundles.length; bundleIdx++)
             {
                 try
                 {
-                    long l = Long.parseLong(ids[idIdx]);
-                    Bundle bundle = m_context.getBundle(l);
-                    if (bundle != null)
+                    if (bundles[bundleIdx] != null)
                     {
-                        RequiredBundle[] rbs = pa.getRequiredBundles(bundle.getSymbolicName());
+                        RequiredBundle[] rbs = pa.getRequiredBundles(
+                            bundles[bundleIdx].getSymbolicName());
                         for (int rbIdx = 0; (rbs != null) && (rbIdx < rbs.length); rbIdx++)
                         {
-                            if (rbs[rbIdx].getBundle() == bundle)
+                            if (rbs[rbIdx].getBundle() == bundles[bundleIdx])
                             {
                                 if (separatorNeeded)
                                 {
                                     out.println("");
                                 }
-                                String title = bundle + " is required by:";
+                                String title = bundles[bundleIdx] + " is required by:";
                                 out.println(title);
                                 out.println(Util.getUnderlineString(title));
                                 if ((rbs[rbIdx].getRequiringBundles() != null)
@@ -318,14 +378,6 @@ public class InspectCommandImpl implements Command
                             }
                         }
                     }
-                    else
-                    {
-                        err.println("Bundle ID " + ids[idIdx] + " is invalid.");
-                    }
-                }
-                catch (NumberFormatException ex)
-                {
-                    err.println("Unable to parse id '" + ids[idIdx] + "'.");
                 }
                 catch (Exception ex)
                 {
@@ -338,29 +390,46 @@ public class InspectCommandImpl implements Command
     private void printRequiredBundles(String[] ids, PrintStream out, PrintStream err)
     {
         boolean separatorNeeded = false;
-        for (int idIdx = 0; idIdx < ids.length; idIdx++)
+
+        Bundle[] bundles = null;
+        if ((ids == null) || (ids.length == 0))
+        {
+            bundles = m_context.getBundles();
+        }
+        else
+        {
+            for (int idIdx = 0; idIdx < ids.length; idIdx++)
+            {
+                try
+                {
+                    long l = Long.parseLong(ids[idIdx]);
+                    Bundle b = m_context.getBundle(l);
+                    if (b == null)
+                    {
+                        err.println("Bundle ID " + ids[idIdx] + " is invalid.");
+                    }
+                    bundles[idIdx] = b;
+                }
+                catch (NumberFormatException ex)
+                {
+                    err.println("Unable to parse id '" + ids[idIdx] + "'.");
+                }
+            }
+        }
+
+        for (int bundleIdx = 0; bundleIdx < bundles.length; bundleIdx++)
         {
             try
             {
-                long l = Long.parseLong(ids[idIdx]);
-                Bundle bundle = m_context.getBundle(l);
-                if (bundle != null)
+                if (bundles[bundleIdx] != null)
                 {
                     if (separatorNeeded)
                     {
                         out.println("");
                     }
-                    _printRequiredBundles(bundle, out, err);
+                    _printRequiredBundles(bundles[bundleIdx], out, err);
                     separatorNeeded = true;
                 }
-                else
-                {
-                    err.println("Bundle ID " + ids[idIdx] + " is invalid.");
-                }
-            }
-            catch (NumberFormatException ex)
-            {
-                err.println("Unable to parse id '" + ids[idIdx] + "'.");
             }
             catch (Exception ex)
             {
@@ -413,24 +482,48 @@ public class InspectCommandImpl implements Command
         }
         else
         {
-            for (int idIdx = 0; idIdx < ids.length; idIdx++)
+            Bundle[] bundles = null;
+            if ((ids == null) || (ids.length == 0))
+            {
+                bundles = m_context.getBundles();
+            }
+            else
+            {
+                for (int idIdx = 0; idIdx < ids.length; idIdx++)
+                {
+                    try
+                    {
+                        long l = Long.parseLong(ids[idIdx]);
+                        Bundle b = m_context.getBundle(l);
+                        if (b == null)
+                        {
+                            err.println("Bundle ID " + ids[idIdx] + " is invalid.");
+                        }
+                        bundles[idIdx] = b;
+                    }
+                    catch (NumberFormatException ex)
+                    {
+                        err.println("Unable to parse id '" + ids[idIdx] + "'.");
+                    }
+                }
+            }
+
+            for (int bundleIdx = 0; bundleIdx < bundles.length; bundleIdx++)
             {
                 // Print a separator for some whitespace.
-                if (idIdx > 0)
+                if (bundleIdx > 0)
                 {
                     out.println("");
                 }
 
                 try
                 {
-                    long l = Long.parseLong(ids[idIdx]);
-                    Bundle bundle = m_context.getBundle(l);
-                    if ((bundle != null) && isFragment(bundle))
+                    if ((bundles[bundleIdx] != null) && isFragment(bundles[bundleIdx]))
                     {
-                        String title = bundle + " is attached to:";
+                        String title = bundles[bundleIdx] + " is attached to:";
                         out.println(title);
                         out.println(Util.getUnderlineString(title));
-                        Bundle[] hosts = pa.getHosts(bundle);
+                        Bundle[] hosts = pa.getHosts(bundles[bundleIdx]);
                         for (int hostIdx = 0;
                             (hosts != null) && (hostIdx < hosts.length);
                             hostIdx++)
@@ -442,18 +535,10 @@ public class InspectCommandImpl implements Command
                             out.println("Nothing");
                         }
                     }
-                    else if ((bundle != null) && !isFragment(bundle))
+                    else if ((bundles[bundleIdx] != null) && !isFragment(bundles[bundleIdx]))
                     {
-                        out.println("Bundle " + bundle + " is not a fragment.");
+                        out.println("Bundle " + bundles[bundleIdx] + " is not a fragment.");
                     }
-                    else
-                    {
-                        err.println("Bundle ID " + ids[idIdx] + " is invalid.");
-                    }
-                }
-                catch (NumberFormatException ex)
-                {
-                    err.println("Unable to parse id '" + ids[idIdx] + "'.");
                 }
                 catch (Exception ex)
                 {
@@ -472,24 +557,48 @@ public class InspectCommandImpl implements Command
         }
         else
         {
-            for (int idIdx = 0; idIdx < ids.length; idIdx++)
+            Bundle[] bundles = null;
+            if ((ids == null) || (ids.length == 0))
+            {
+                bundles = m_context.getBundles();
+            }
+            else
+            {
+                for (int idIdx = 0; idIdx < ids.length; idIdx++)
+                {
+                    try
+                    {
+                        long l = Long.parseLong(ids[idIdx]);
+                        Bundle b = m_context.getBundle(l);
+                        if (b == null)
+                        {
+                            err.println("Bundle ID " + ids[idIdx] + " is invalid.");
+                        }
+                        bundles[idIdx] = b;
+                    }
+                    catch (NumberFormatException ex)
+                    {
+                        err.println("Unable to parse id '" + ids[idIdx] + "'.");
+                    }
+                }
+            }
+
+            for (int bundleIdx = 0; bundleIdx < bundles.length; bundleIdx++)
             {
                 // Print a separator for some whitespace.
-                if (idIdx > 0)
+                if (bundleIdx > 0)
                 {
                     out.println("");
                 }
 
                 try
                 {
-                    long l = Long.parseLong(ids[idIdx]);
-                    Bundle bundle = m_context.getBundle(l);
-                    if ((bundle != null) && !isFragment(bundle))
+                    if ((bundles[bundleIdx] != null) && !isFragment(bundles[bundleIdx]))
                     {
-                        String title = bundle + " hosts:";
+                        String title = bundles[bundleIdx] + " hosts:";
                         out.println(title);
                         out.println(Util.getUnderlineString(title));
-                        Bundle[] fragments = pa.getFragments(bundle);
+                        Bundle[] fragments = pa.getFragments(bundles[bundleIdx]);
                         for (int fragIdx = 0;
                             (fragments != null) && (fragIdx < fragments.length);
                             fragIdx++)
@@ -501,18 +610,10 @@ public class InspectCommandImpl implements Command
                             out.println("Nothing");
                         }
                     }
-                    else if ((bundle != null) && isFragment(bundle))
+                    else if ((bundles[bundleIdx] != null) && isFragment(bundles[bundleIdx]))
                     {
-                        out.println("Bundle " + bundle + " is a fragment.");
+                        out.println("Bundle " + bundles[bundleIdx] + " is a fragment.");
                     }
-                    else
-                    {
-                        err.println("Bundle ID " + ids[idIdx] + " is invalid.");
-                    }
-                }
-                catch (NumberFormatException ex)
-                {
-                    err.println("Unable to parse id '" + ids[idIdx] + "'.");
                 }
                 catch (Exception ex)
                 {
@@ -524,18 +625,48 @@ public class InspectCommandImpl implements Command
 
     public void printExportedServices(String[] ids, PrintStream out, PrintStream err)
     {
-        for (int i = 0; i < ids.length; i++)
+        Bundle[] bundles = null;
+        if ((ids == null) || (ids.length == 0))
         {
+            bundles = m_context.getBundles();
+        }
+        else
+        {
+            for (int idIdx = 0; idIdx < ids.length; idIdx++)
+            {
+                try
+                {
+                    long l = Long.parseLong(ids[idIdx]);
+                    Bundle b = m_context.getBundle(l);
+                    if (b == null)
+                    {
+                        err.println("Bundle ID " + ids[idIdx] + " is invalid.");
+                    }
+                    bundles[idIdx] = b;
+                }
+                catch (NumberFormatException ex)
+                {
+                    err.println("Unable to parse id '" + ids[idIdx] + "'.");
+                }
+            }
+        }
+
+        for (int bundleIdx = 0; bundleIdx < bundles.length; bundleIdx++)
+        {
+            // Print a separator for some whitespace.
+            if (bundleIdx > 0)
+            {
+                out.println("");
+            }
+
             try
             {
-                long l = Long.parseLong(ids[i]);
-                Bundle bundle = m_context.getBundle(l);
-                if (bundle != null)
+                if (bundles[bundleIdx] != null)
                 {
-                    ServiceReference[] refs = bundle.getRegisteredServices();
+                    ServiceReference[] refs = bundles[bundleIdx].getRegisteredServices();
 
                     // Print header if we have not already done so.
-                    String title = Util.getBundleName(bundle) + " provides services:";
+                    String title = Util.getBundleName(bundles[bundleIdx]) + " provides services:";
                     out.println(title);
                     out.println(Util.getUnderlineString(title));
 
@@ -567,14 +698,6 @@ public class InspectCommandImpl implements Command
                         }
                     }
                 }
-                else
-                {
-                    err.println("Bundle ID " + ids[i] + " is invalid.");
-                }
-            }
-            catch (NumberFormatException ex)
-            {
-                err.println("Unable to parse id '" + ids[i] + "'.");
             }
             catch (Exception ex)
             {
@@ -585,18 +708,48 @@ public class InspectCommandImpl implements Command
 
     public void printImportedServices(String[] ids, PrintStream out, PrintStream err)
     {
-        for (int i = 0; i < ids.length; i++)
+        Bundle[] bundles = null;
+        if ((ids == null) || (ids.length == 0))
         {
+            bundles = m_context.getBundles();
+        }
+        else
+        {
+            for (int idIdx = 0; idIdx < ids.length; idIdx++)
+            {
+                try
+                {
+                    long l = Long.parseLong(ids[idIdx]);
+                    Bundle b = m_context.getBundle(l);
+                    if (b == null)
+                    {
+                        err.println("Bundle ID " + ids[idIdx] + " is invalid.");
+                    }
+                    bundles[idIdx] = b;
+                }
+                catch (NumberFormatException ex)
+                {
+                    err.println("Unable to parse id '" + ids[idIdx] + "'.");
+                }
+            }
+        }
+
+        for (int bundleIdx = 0; bundleIdx < bundles.length; bundleIdx++)
+        {
+            // Print a separator for some whitespace.
+            if (bundleIdx > 0)
+            {
+                out.println("");
+            }
+
             try
             {
-                long l = Long.parseLong(ids[i]);
-                Bundle bundle = m_context.getBundle(l);
-                if (bundle != null)
+                if (bundles[bundleIdx] != null)
                 {
-                    ServiceReference[] refs = bundle.getServicesInUse();
+                    ServiceReference[] refs = bundles[bundleIdx].getServicesInUse();
 
                     // Print header if we have not already done so.
-                    String title = Util.getBundleName(bundle) + " requires services:";
+                    String title = Util.getBundleName(bundles[bundleIdx]) + " requires services:";
                     out.println(title);
                     out.println(Util.getUnderlineString(title));
 
@@ -610,6 +763,8 @@ public class InspectCommandImpl implements Command
                         (refs != null) && (refIdx < refs.length);
                         refIdx++)
                     {
+                        // Print the registering bundle.
+                        out.println("Registering bundle = " + refs[refIdx].getBundle());
                         // Print service properties.
                         String[] keys = refs[refIdx].getPropertyKeys();
                         for (int keyIdx = 0;
@@ -628,14 +783,6 @@ public class InspectCommandImpl implements Command
                         }
                     }
                 }
-                else
-                {
-                    err.println("Bundle ID " + ids[i] + " is invalid.");
-                }
-            }
-            catch (NumberFormatException ex)
-            {
-                err.println("Unable to parse id '" + ids[i] + "'.");
             }
             catch (Exception ex)
             {
