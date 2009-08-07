@@ -111,6 +111,9 @@ locateHome() {
     if [ "x$KARAF_HOME" != "x" ]; then
         warn "Ignoring predefined value for KARAF_HOME"
     fi
+    
+    # In POSIX shells, CDPATH may cause cd to write to stdout
+    (unset CDPATH) >/dev/null 2>&1 && unset CDPATH
 
     KARAF_HOME=`cd $DIRNAME/..; pwd`
     if [ ! -d "$KARAF_HOME" ]; then
