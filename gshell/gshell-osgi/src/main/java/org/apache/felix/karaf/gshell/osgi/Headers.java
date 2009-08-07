@@ -22,8 +22,10 @@ import java.util.List;
 
 import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
 import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
 import org.osgi.framework.Bundle;
 
+@Command(scope = "osgi", name = "headers", description = "Display OSGi headers of a given bundle")
 public class Headers extends OsgiCommandSupport {
 
     @Argument(required = false, multiValued = true, description = "Bundles ids")

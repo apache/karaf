@@ -17,7 +17,9 @@
 package org.apache.felix.karaf.gshell.osgi;
 
 import org.osgi.framework.Bundle;
+import org.apache.felix.gogo.commands.Command;
 
+@Command(scope = "osgi", name = "uninstall", description = "Uninstall bundle")
 public class UninstallBundle extends BundleCommand {
 
     protected void doExecute(Bundle bundle) throws Exception {

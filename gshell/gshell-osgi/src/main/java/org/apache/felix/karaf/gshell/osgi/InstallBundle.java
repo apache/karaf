@@ -23,9 +23,11 @@ import java.util.List;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
 import org.apache.felix.gogo.commands.Option;
+import org.apache.felix.gogo.commands.Command;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
+@Command(scope = "osgi", name = "install", description = "Install bundle(s)")
 public class InstallBundle extends OsgiCommandSupport {
 
     @Argument(required = true, multiValued = true, description = "Bundle URLs")

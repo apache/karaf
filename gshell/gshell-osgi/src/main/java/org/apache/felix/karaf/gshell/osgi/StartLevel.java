@@ -18,8 +18,10 @@ package org.apache.felix.karaf.gshell.osgi;
 
 import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
 import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
 import org.osgi.framework.ServiceReference;
 
+@Command(scope = "osgi", name = "start-level", description = "Get or set the start level")
 public class StartLevel extends OsgiCommandSupport {
 
     @Argument(required = false, index = 0)

@@ -19,7 +19,9 @@ package org.apache.felix.karaf.gshell.osgi;
 import java.util.List;
 
 import org.osgi.framework.Bundle;
+import org.apache.felix.gogo.commands.Command;
 
+@Command(scope = "osgi", name = "start", description = "Start bundle(s)")
 public class StartBundle extends BundlesCommand {
     
     protected void doExecute(List<Bundle> bundles) throws Exception {

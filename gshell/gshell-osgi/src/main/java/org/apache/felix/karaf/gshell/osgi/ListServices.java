@@ -21,10 +21,12 @@ import java.util.List;
 import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Option;
+import org.apache.felix.gogo.commands.Command;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.command.Function;
 
+@Command(scope = "osgi", name = "ls", description = "List services")
 public class ListServices extends OsgiCommandSupport {
 
     @Option(name = "-a", description = "Show all")

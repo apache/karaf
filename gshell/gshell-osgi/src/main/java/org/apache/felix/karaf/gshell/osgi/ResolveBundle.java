@@ -19,7 +19,9 @@ package org.apache.felix.karaf.gshell.osgi;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
+import org.apache.felix.gogo.commands.Command;
 
+@Command(scope = "osgi", name = "resolve", description = "Resolve bundle(s)")
 public class ResolveBundle extends BundleCommand {
 
     protected void doExecute(Bundle bundle) throws Exception {
