@@ -40,6 +40,9 @@
         <exec executable="${mvn}" failonerror="true">
             <arg line="-Dpackaging=osgi-bundle-mosgi clean" />
         </exec>
+        <exec executable="${mvn}" failonerror="true">
+            <arg line="-Dpackaging=karaf clean" />
+        </exec>
     </target>
     <target name="install" depends="init">
         <exec executable="${mvn}" failonerror="true">
@@ -57,6 +60,9 @@
         <exec executable="${mvn}" failonerror="true">
             <arg line="-Dpackaging=osgi-bundle-mosgi install" />
         </exec>
+        <exec executable="${mvn}" failonerror="true">
+            <arg line="-Dpackaging=karaf install" />
+        </exec>
     </target>
     <target name="all" depends="init">
         <exec executable="${mvn}" failonerror="true">
@@ -73,6 +79,9 @@
         </exec>
         <exec executable="${mvn}" failonerror="true">
             <arg line="-Dpackaging=osgi-bundle-mosgi clean install" />
+        </exec>
+        <exec executable="${mvn}" failonerror="true">
+            <arg line="-Dpackaging=karaf clean install" />
         </exec>
     </target>
 </project>

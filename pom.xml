@@ -149,5 +149,19 @@
 
       </modules>
     </profile>
+
+    <profile>
+      <id>packaging-karaf</id>
+      <activation>
+        <property>
+          <name>packaging</name>
+          <value>karaf</value>
+        </property>
+      </activation>
+      <modules>
+        <module>karaf</module>
+      </modules>
+    </profile>
+
   </profiles>
 </project>
