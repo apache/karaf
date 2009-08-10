@@ -211,7 +211,13 @@ public class FeaturesServiceImpl implements FeaturesService {
             bundles.add(b.getBundleId());
         }
         for (long id : bundles) {
-            bundleContext.getBundle(id).start();
+            Bundle b = bundleContext.getBundle(id);
+            // do not start fragment bundles.
+            Dictionary d = b.getHeaders();
+            String fragmentHostHeader = (String) d.get(Constants.FRAGMENT_HOST);
+            if (fragmentHostHeader == null || fragmentHostHeader.trim().length() == 0) {
+                b.start();
+            }
         }
 
         callListeners(new FeatureEvent(f, FeatureEvent.EventType.FeatureInstalled, false));
