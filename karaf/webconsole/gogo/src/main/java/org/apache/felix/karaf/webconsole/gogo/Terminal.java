@@ -247,7 +247,15 @@ public class Terminal {
     //
 
     private int[] peek(int y0, int x0, int y1, int x1) {
-        return Arrays.copyOfRange(screen, width * y0 + x0, width * (y1 - 1) + x1);
+        int from = width * y0 + x0;
+        int to = width * (y1 - 1) + x1; 
+        int newLength = to - from;
+        if (newLength < 0)
+            throw new IllegalArgumentException(from + " > " + to);
+        int[] copy = new int[newLength];
+        System.arraycopy(screen, from, copy, 0,
+                         Math.min(screen.length - from, newLength));
+        return copy;
     }
 
     private void poke(int y, int x, int[] s) {
