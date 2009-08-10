@@ -21,6 +21,7 @@ import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URI;
+import java.util.Hashtable;
 
 import junit.framework.TestCase;
 import org.apache.felix.karaf.features.internal.FeaturesServiceImpl;
@@ -105,6 +106,7 @@ public class FeaturesServiceTest extends TestCase {
                                            isA(InputStream.class))).andReturn(installedBundle);
         expect(installedBundle.getBundleId()).andReturn(12345L);
         expect(bundleContext.getBundle(12345L)).andReturn(installedBundle);
+        expect(installedBundle.getHeaders()).andReturn(new Hashtable());
         installedBundle.start();
 
         expect(preferencesService.getUserPreferences("FeaturesServiceState")).andStubReturn(prefs);
@@ -182,6 +184,7 @@ public class FeaturesServiceTest extends TestCase {
                                            isA(InputStream.class))).andReturn(installedBundle);
         expect(installedBundle.getBundleId()).andReturn(12345L);
         expect(bundleContext.getBundle(12345L)).andReturn(installedBundle);
+        expect(installedBundle.getHeaders()).andReturn(new Hashtable());
         installedBundle.start();
 
         expect(preferencesService.getUserPreferences("FeaturesServiceState")).andStubReturn(prefs);
@@ -201,6 +204,7 @@ public class FeaturesServiceTest extends TestCase {
                                            isA(InputStream.class))).andReturn(installedBundle);
         expect(installedBundle.getBundleId()).andReturn(123456L);
         expect(bundleContext.getBundle(123456L)).andReturn(installedBundle);
+        expect(installedBundle.getHeaders()).andReturn(new Hashtable());
         installedBundle.start();
 
         expect(preferencesService.getUserPreferences("FeaturesServiceState")).andStubReturn(prefs);
@@ -393,6 +397,7 @@ public class FeaturesServiceTest extends TestCase {
                                            isA(InputStream.class))).andReturn(installedBundle);
         expect(installedBundle.getBundleId()).andReturn(12345L);
         expect(bundleContext.getBundle(12345L)).andReturn(installedBundle);
+        expect(installedBundle.getHeaders()).andReturn(new Hashtable());
         installedBundle.start();
         
         expect(preferencesService.getUserPreferences("FeaturesServiceState")).andStubReturn(prefs);
@@ -412,6 +417,7 @@ public class FeaturesServiceTest extends TestCase {
                                            isA(InputStream.class))).andReturn(installedBundle);
         expect(installedBundle.getBundleId()).andReturn(123456L);
         expect(bundleContext.getBundle(123456L)).andReturn(installedBundle);
+        expect(installedBundle.getHeaders()).andReturn(new Hashtable());
         installedBundle.start();
         
         expect(preferencesService.getUserPreferences("FeaturesServiceState")).andStubReturn(prefs);
@@ -432,6 +438,7 @@ public class FeaturesServiceTest extends TestCase {
                                            isA(InputStream.class))).andReturn(installedBundle);
         expect(installedBundle.getBundleId()).andReturn(1234567L);
         expect(bundleContext.getBundle(1234567L)).andReturn(installedBundle);
+        expect(installedBundle.getHeaders()).andReturn(new Hashtable());
         installedBundle.start();
         
         expect(preferencesService.getUserPreferences("FeaturesServiceState")).andStubReturn(prefs);
@@ -595,6 +602,7 @@ public class FeaturesServiceTest extends TestCase {
                                            isA(InputStream.class))).andReturn(installedBundle);
         expect(installedBundle.getBundleId()).andReturn(12345L);
         expect(bundleContext.getBundle(12345L)).andReturn(installedBundle);
+        expect(installedBundle.getHeaders()).andReturn(new Hashtable());
         installedBundle.start();
         
         expect(preferencesService.getUserPreferences("FeaturesServiceState")).andStubReturn(prefs);
@@ -614,6 +622,7 @@ public class FeaturesServiceTest extends TestCase {
                                            isA(InputStream.class))).andReturn(installedBundle);
         expect(installedBundle.getBundleId()).andReturn(1234L);
         expect(bundleContext.getBundle(1234L)).andReturn(installedBundle);
+        expect(installedBundle.getHeaders()).andReturn(new Hashtable());
         installedBundle.start();
         
         expect(preferencesService.getUserPreferences("FeaturesServiceState")).andStubReturn(prefs);
