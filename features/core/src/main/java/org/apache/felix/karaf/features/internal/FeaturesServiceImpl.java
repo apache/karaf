@@ -432,7 +432,7 @@ public class FeaturesServiceImpl implements FeaturesService {
     protected Configuration getConfiguration(ConfigurationAdmin configurationAdmin,
                                              String pid, String factoryPid) throws IOException, InvalidSyntaxException {
         if (factoryPid != null) {
-            Configuration[] configs = configurationAdmin.listConfigurations("(|(" + ALIAS_KEY + "=" + pid + ")(.alias_factory_pid=" + factoryPid + "))");
+            Configuration[] configs = configurationAdmin.listConfigurations("(" + ALIAS_KEY + "=" + factoryPid + ")");
             if (configs == null || configs.length == 0) {
                 return configurationAdmin.createFactoryConfiguration(pid, null);
             } else {
