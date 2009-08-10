@@ -105,9 +105,9 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
                 if (parts.length > 2) {
                     version = parts[2];
                     if (parts.length > 3) {
-                        classifier = parts[3];
+                        type = parts[3];
                         if (parts.length > 4) {
-                            type = parts[4];
+                            classifier = parts[4];
                         }
                     }
                 }
