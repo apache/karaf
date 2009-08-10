@@ -488,9 +488,7 @@ public class FileMonitor {
         InvalidSyntaxException {
         ConfigurationAdmin configurationAdmin = activator.getConfigurationAdmin();
         if (factoryPid != null) {
-            Configuration[] configs = configurationAdmin.listConfigurations("(|(" + ALIAS_KEY + "=" + pid
-                                                                            + ")(.alias_factory_pid="
-                                                                            + factoryPid + "))");
+            Configuration[] configs = configurationAdmin.listConfigurations("(" + ALIAS_KEY + "=" + factoryPid + ")");
             if (configs == null || configs.length == 0) {
                 return configurationAdmin.createFactoryConfiguration(pid, null);
             } else {
