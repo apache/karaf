@@ -1,13 +1,9 @@
 package org.apache.felix.karaf.gshell.console.jline;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
-import java.io.IOException;
-
 import jline.Terminal;
-import jline.WindowsTerminal;
-import jline.UnixTerminal;
 import jline.UnsupportedTerminal;
+import jline.AnsiWindowsTerminal;
+import jline.NoInterruptUnixTerminal;
 
 public class TerminalFactory {
 
@@ -34,6 +30,7 @@ public class TerminalFactory {
                 term = t;
             }
         } catch (Throwable e) {
+            System.out.println("Using an unsupported terminal: " + e.toString());
             term = new UnsupportedTerminal();
         }
     }
@@ -41,28 +38,6 @@ public class TerminalFactory {
     public synchronized void destroy() throws Exception {
         term.restoreTerminal();
         term = null;
-    }
-
-    public static class AnsiWindowsTerminal extends WindowsTerminal {
-        @Override
-        public boolean isANSISupported() {
-            return true;
-        }
-    }
-
-    public static class NoInterruptUnixTerminal extends UnixTerminal {
-        @Override
-        public void initializeTerminal() throws IOException, InterruptedException {
-            super.initializeTerminal();
-            stty("intr undef");
-        }
-
-        @Override
-        public void restoreTerminal() throws Exception {
-            stty("intr ^C");
-            super.restoreTerminal();
-        }
-
     }
 
 }

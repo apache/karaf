@@ -30,6 +30,8 @@ import java.util.concurrent.BlockingQueue;
 import jline.ConsoleReader;
 import jline.Terminal;
 import jline.UnsupportedTerminal;
+import jline.WindowsTerminal;
+import jline.AnsiWindowsTerminal;
 import org.apache.felix.karaf.gshell.console.Completer;
 import org.osgi.service.command.CommandProcessor;
 import org.osgi.service.command.CommandSession;
@@ -44,7 +46,7 @@ public class Console implements Runnable
 
     private CommandSession session;
     private ConsoleReader reader;
-    private BlockingQueue<Integer> queue = new ArrayBlockingQueue<Integer>(1024);
+    private BlockingQueue<Integer> queue;
     private boolean interrupt;
     private Thread pipe;
     private boolean running;
@@ -66,11 +68,13 @@ public class Console implements Runnable
         this.in = in;
         this.out = out;
         this.err = err;
+        this.queue = new ArrayBlockingQueue<Integer>(1024);
+        this.terminal = term == null ? new UnsupportedTerminal() : term;
         this.consoleInput = new ConsoleInputStream();
         this.session = processor.createSession(this.consoleInput, this.out, this.err);
         this.session.put("SCOPE", "shell:osgi:*");
-        this.terminal = term == null ? new UnsupportedTerminal() : term;
         this.closeCallback = closeCallback;
+
         reader = new ConsoleReader(this.consoleInput,
                                    new PrintWriter(this.out),
                                    getClass().getResourceAsStream("keybinding.properties"),
@@ -227,7 +231,12 @@ public class Console implements Runnable
                 {
                     try
                     {
-                        int c = in.read();
+                        int c;
+                        if (terminal instanceof AnsiWindowsTerminal) {
+                            c = ((AnsiWindowsTerminal) terminal).readDirectChar(in);
+                        } else {
+                            c = terminal.readCharacter(in);
+                        }
                         if (c == -1 || c == 4)
                         {
                             //System.err.println("Received  " + c + " ... closing");
