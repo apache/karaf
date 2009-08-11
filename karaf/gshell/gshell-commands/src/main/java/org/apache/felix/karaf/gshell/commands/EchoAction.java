@@ -8,12 +8,12 @@ import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
 
 @Command(scope = "shell", name = "echo", description="Echo or print arguments to STDOUT")
-public class EchoCommand extends OsgiCommandSupport
+public class EchoAction extends OsgiCommandSupport
 {
     @Option(name="-n", description="Do not print the trailing newline character")
-    private boolean trailingNewline = true;
+    private boolean noTrailingNewline = false;
 
-    @Argument(description="Arguments")
+    @Argument(description="Arguments", multiValued = true)
     private List<String> args;
 
     protected Object doExecute() throws Exception {
@@ -28,7 +28,7 @@ public class EchoCommand extends OsgiCommandSupport
             }
         }
 
-        if (trailingNewline) {
+        if (!noTrailingNewline) {
             System.out.println();
         }
 
