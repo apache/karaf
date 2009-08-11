@@ -19,31 +19,19 @@ function renderFeatures( data ) {
     $(document).ready( function() {
         renderView();
         renderData( data );
-        $("#repository_table").tablesorter( {
-            headers: {
-                1: { sorter: false }
-            },
-            sortList: [[0,0]],
-        } );
-        $("#feature_table").tablesorter( {
-            headers: {
-                3: { sorter: false }
-            },
-            sortList: [[0,0]],
-        } );
     } );
 }
 
 function renderView() {
     renderStatusLine();
-    renderTable( "Feature Repositories", "repository_table", ["URL", "Actions"] );
+    renderTable( "Feature Repositories", "repository_table", ["Name", "URL", "Actions"] );
     var txt = "<form method='post'><div class='table'><table class='tablelayout'><tbody><tr>" +
         "<input type='hidden' name='action' value='addRepository'/>" +
         "<td><input id='url' type='text' name='url' style='width:100%'/></td>" +
-        "<td class='col_Actions'><input type='button' value='Add URL' onclick='addRepositoryUrl()'/></td>" +
+        "<td class='col_Actions'><input type='button' value='Add URL' onclick='addRepositoryUrl()' colspan='2'/></td>" +
         "</tr></tbody></table></div></form><br/>";
     $("#plugin_content").append( txt );
-    renderTable( "Features", "feature_table", ["Name", "Version", "Status", "Actions"] );
+    renderTable( "Features", "feature_table", ["Name", "Version", "Repository", "Status", "Actions"] );
     renderStatusLine();
 }
 
@@ -72,6 +60,18 @@ function renderData( /* Object */ data ) {
     renderStatusData( data.status );
     renderRepositoryTableData( data.repositories );
     renderFeatureTableData( data.features );
+    $("#repository_table").tablesorter( {
+        headers: {
+            2: { sorter: false }
+        },
+        sortList: [[0,0]],
+    } );
+    $("#feature_table").tablesorter( {
+        headers: {
+           4: { sorter: false }
+        },
+        sortList: [[0,0]],
+    } );
 }
 
 function renderStatusData( /* String */ status )  {
@@ -83,7 +83,7 @@ function renderRepositoryTableData( /* array of Objects */ repositories ) {
     var input;
     $("#repository_table > tbody > tr").remove();
     for ( var idx in repositories ) {
-        trElement = tr( null, { id: "repository-" + idx } );
+        trElement = tr( null, { id: "repository-" + repositories[idx].name } );
         renderRepositoryData( trElement, repositories[idx] );
         $("#repository_table > tbody").append( trElement ); 
     }
@@ -91,6 +91,7 @@ function renderRepositoryTableData( /* array of Objects */ repositories ) {
 }
 
 function renderRepositoryData( /* Element */ parent, /* Object */ repository ) {
+    parent.appendChild( td( null, null, [text( repository.name )] ) );
     parent.appendChild( td( null, null, [text( repository.url )] ) );
 
     var actionsTd = td( null, null );
@@ -134,7 +135,7 @@ function changeRepositoryState( /* String */ action, /* String */ url ) {
 function renderFeatureTableData( /* array of Objects */ features ) {
     $("#feature_table > tbody > tr").remove();
     for ( var idx in features ) {
-        var trElement = tr( null, { id: "feature-" + idx } );
+        var trElement = tr( null, { id: "feature-" + features[idx].id } );
         renderFeatureData( trElement, features[idx] );
         $("#feature_table > tbody").append( trElement ); 
     }
@@ -144,6 +145,7 @@ function renderFeatureTableData( /* array of Objects */ features ) {
 function renderFeatureData( /* Element */ parent, /* Object */ feature ) {
     parent.appendChild( td( null, null, [ text( feature.name ) ] ) );
     parent.appendChild( td( null, null, [ text( feature.version ) ] ) );
+    parent.appendChild( td( null, null, [ text( feature.repository ) ] ) );
     parent.appendChild( td( null, null, [ text( feature.state ) ] ) );
     var actionsTd = td( null, null );
     var div = createElement( "div", null, {

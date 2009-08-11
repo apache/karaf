@@ -47,12 +47,18 @@ import org.xml.sax.SAXException;
  */
 public class RepositoryImpl implements Repository {
 
+    private int unnamedRepoId = 0;
+    private String name;
     private URI uri;
     private List<Feature> features;
     private List<URI> repositories;
 
     public RepositoryImpl(URI uri) {
         this.uri = uri;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public URI getURI() {
@@ -81,6 +87,16 @@ public class RepositoryImpl implements Repository {
             URLConnection conn = uri.toURL().openConnection();
             conn.setDefaultUseCaches(false);
             Document doc = factory.newDocumentBuilder().parse(conn.getInputStream());
+            String temp = doc.getDocumentElement().getAttribute( "name" );
+            if ("".equals(temp)) {
+                name = "repo-" + String.valueOf(unnamedRepoId++);
+            }
+            else {
+                name = temp;
+            }
+            if ( uri.toString().startsWith( "bundle" ) ) {
+                name += "*";
+            }
             
             NodeList nodes = doc.getDocumentElement().getChildNodes();
             for (int i = 0; i < nodes.getLength(); i++) {

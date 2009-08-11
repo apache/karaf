@@ -23,6 +23,8 @@ import java.net.URI;
  */
 public interface Repository {
 
+    String getName();
+
     URI getURI();
 
     URI[] getRepositories() throws Exception;

@@ -166,21 +166,27 @@ public class FeatureDeploymentListener implements DeploymentListener, Synchronou
                     for (Repository repo : featuresService.listRepositories()) {
                         if (repo.getURI().equals(url.toURI())) {
                             for (Feature f : repo.getFeatures()) {
-                                featuresService.installFeature(f.getName(), f.getVersion());
+                                try {
+                                    featuresService.installFeature(f.getName(), f.getVersion());
+                                } catch (Exception e) {
+                                    LOGGER.error("Unable to install feature: " + f.getName(), e);
+                                }
                             }
                         }
                     }
-                    featuresService.removeRepository(url.toURI());
                 }
             } else if (bundleEvent.getType() == BundleEvent.UNINSTALLED) {
                 Enumeration featuresUrlEnumeration = bundle.findEntries("/META-INF/" + FEATURE_PATH + "/", "*.xml", false);
                 while (featuresUrlEnumeration != null && featuresUrlEnumeration.hasMoreElements()) {
                     URL url = (URL) featuresUrlEnumeration.nextElement();
-                    featuresService.addRepository(url.toURI());
                     for (Repository repo : featuresService.listRepositories()) {
                         if (repo.getURI().equals(url.toURI())) {
                             for (Feature f : repo.getFeatures()) {
-                                featuresService.uninstallFeature(f.getName(), f.getVersion());
+                                try {
+                                    featuresService.uninstallFeature(f.getName(), f.getVersion());
+                                } catch (Exception e) {
+                                    LOGGER.error("Unable to uninstall feature: " + f.getName(), e);
+                                }
                             }
                         }
                     }
