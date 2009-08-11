@@ -292,7 +292,7 @@ public class Main {
             main.launch();
             main.destroy(true);
         }
-        catch (Exception ex) {
+        catch (Throwable ex) {
             System.err.println("Error occured shutting down framework: " + ex);
             ex.printStackTrace();
         } finally {

@@ -204,7 +204,7 @@ public class InstallCommand extends OsgiCommandSupport
 			throw e;
 		}
 
-        return 0;
+        return null;
     }
 
 	private int chmod(File serviceFile, String mode) throws Exception {
