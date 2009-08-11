@@ -140,6 +140,7 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     protected RepositoryImpl internalAddRepository(URI uri) throws Exception {
         RepositoryImpl repo = new RepositoryImpl(uri);
+        repo.load();
         repositories.put(uri, repo);
         callListeners(new RepositoryEvent(repo, RepositoryEvent.EventType.RepositoryAdded, false));
         features = null;
