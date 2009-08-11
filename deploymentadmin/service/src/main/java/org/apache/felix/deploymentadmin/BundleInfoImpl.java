@@ -18,6 +18,7 @@
  */
 package org.apache.felix.deploymentadmin;
 
+import java.util.StringTokenizer;
 import java.util.jar.Attributes;
 
 import org.osgi.framework.Version;
@@ -49,7 +50,7 @@ public class BundleInfoImpl extends AbstractInfo implements BundleInfo {
         } else if (bundleSymbolicName.trim().equals("")) {
             throw new DeploymentException(DeploymentException.CODE_BAD_HEADER, "Invalid '" + org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME + "' header for manifest entry '" + getPath() + "'");
         } else {
-            m_symbolicName = bundleSymbolicName;
+            m_symbolicName = parseSymbolicName(bundleSymbolicName);
         }
 
         String version = attributes.getValue(org.osgi.framework.Constants.BUNDLE_VERSION);
@@ -63,6 +64,19 @@ public class BundleInfoImpl extends AbstractInfo implements BundleInfo {
         }
 
         m_customizer = parseBooleanHeader(attributes, Constants.DEPLOYMENTPACKAGE_CUSTOMIZER);
+    }
+    
+    /**
+     * Strips parameters from the bundle symbolic name such as "foo;singleton:=true".
+     * 
+     * @param name full name as found in the manifest of the deployment package
+     * @return name without parameters
+     */
+    private String parseSymbolicName(String name) {
+        // note that we don't explicitly check if there are tokens, because that
+        // check has already been made before we are invoked here
+        StringTokenizer st = new StringTokenizer(name, ";");
+        return st.nextToken();
     }
 
     public String getSymbolicName() {
