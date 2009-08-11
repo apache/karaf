@@ -66,7 +66,7 @@ import org.slf4j.LoggerFactory;
  */
 public class FeaturesServiceImpl implements FeaturesService {
 
-    private static final String ALIAS_KEY = "_alias_factory_pid";
+    public static final String CONFIG_KEY = "org.apache.felix.karaf.features.configKey";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FeaturesServiceImpl.class);
 
@@ -197,9 +197,8 @@ public class FeaturesServiceImpl implements FeaturesService {
         for (String config : f.getConfigurations().keySet()) {
             Dictionary<String,String> props = new Hashtable<String, String>(f.getConfigurations().get(config));
             String[] pid = parsePid(config);
-            if (pid[1] != null) {
-                props.put(ALIAS_KEY, pid[1]);
-            }
+            String key = (pid[1] == null ? pid[0] : pid[0] + "-" + pid[1]);
+            props.put(CONFIG_KEY, key);
             Configuration cfg = getConfiguration(configAdmin, pid[0], pid[1]);
             if (cfg.getBundleLocation() != null) {
                 cfg.setBundleLocation(null);
@@ -432,15 +431,30 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     protected Configuration getConfiguration(ConfigurationAdmin configurationAdmin,
                                              String pid, String factoryPid) throws IOException, InvalidSyntaxException {
-        if (factoryPid != null) {
-            Configuration[] configs = configurationAdmin.listConfigurations("(" + ALIAS_KEY + "=" + factoryPid + ")");
-            if (configs == null || configs.length == 0) {
+        Configuration oldConfiguration = findExistingConfiguration(configurationAdmin, pid, factoryPid);
+        if (oldConfiguration != null) {
+            return oldConfiguration;
+        } else {
+            if (factoryPid != null) {
                 return configurationAdmin.createFactoryConfiguration(pid, null);
             } else {
-                return configs[0];
+                return configurationAdmin.getConfiguration(pid, null);
             }
-        } else {
-            return configurationAdmin.getConfiguration(pid, null);
+        }
+    }
+
+    protected Configuration findExistingConfiguration(ConfigurationAdmin configurationAdmin,
+                                                      String pid, String factoryPid) throws IOException, InvalidSyntaxException {
+        String key = (factoryPid == null ? pid : pid + "-" + factoryPid);
+        String filter = "(" + CONFIG_KEY + "=" + key + ")";
+        Configuration[] configurations = configurationAdmin.listConfigurations(filter);
+        if (configurations != null && configurations.length > 0)
+        {
+            return configurations[0];
+        }
+        else
+        {
+            return null;
         }
     }
     

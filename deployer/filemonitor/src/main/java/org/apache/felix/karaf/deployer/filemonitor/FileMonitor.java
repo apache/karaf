@@ -76,7 +76,7 @@ public class FileMonitor {
     public final static String SCAN_INTERVAL = "org.apache.felix.karaf.filemonitor.scanInterval";
     public final static String PREFERENCE_KEY = "FileMonitor";
 
-    protected static final String ALIAS_KEY = "_alias_factory_pid";
+    protected static final String FILENAME = "org.apache.felix.karaf.filemonitor.filename";
 
     private static final Log LOGGER = LogFactory.getLog(FileMonitor.class);
 
@@ -447,10 +447,7 @@ public class FileMonitor {
                 String[] pid = parsePid(file);
                 Hashtable<Object, Object> hashtable = new Hashtable<Object, Object>();
                 hashtable.putAll(properties);
-                if (pid[1] != null) {
-                    hashtable.put(ALIAS_KEY, pid[1]);
-                }
-
+                hashtable.put(FILENAME, file.getName());
                 Configuration config = getConfiguration(pid[0], pid[1]);
                 if (config.getBundleLocation() != null) {
                     config.setBundleLocation(null);
@@ -484,18 +481,32 @@ public class FileMonitor {
         config.delete();
     }
 
-    protected Configuration getConfiguration(String pid, String factoryPid) throws IOException,
-        InvalidSyntaxException {
-        ConfigurationAdmin configurationAdmin = activator.getConfigurationAdmin();
-        if (factoryPid != null) {
-            Configuration[] configs = configurationAdmin.listConfigurations("(" + ALIAS_KEY + "=" + factoryPid + ")");
-            if (configs == null || configs.length == 0) {
+    protected Configuration getConfiguration(String pid, String factoryPid) throws IOException, InvalidSyntaxException {
+        Configuration oldConfiguration = findExistingConfiguration(pid, factoryPid);
+        if (oldConfiguration != null) {
+            return oldConfiguration;
+        } else {
+            ConfigurationAdmin configurationAdmin = activator.getConfigurationAdmin();
+            if (factoryPid != null) {
                 return configurationAdmin.createFactoryConfiguration(pid, null);
             } else {
-                return configs[0];
+                return configurationAdmin.getConfiguration(pid, null);
             }
-        } else {
-            return configurationAdmin.getConfiguration(pid, null);
+        }
+    }
+
+    protected Configuration findExistingConfiguration(String pid, String factoryPid) throws IOException, InvalidSyntaxException {
+        String suffix = factoryPid == null ? ".cfg" : "-" + factoryPid + ".cfg";
+        ConfigurationAdmin cm = activator.getConfigurationAdmin();
+        String filter = "(" + FILENAME + "=" + pid + suffix + ")";
+        Configuration[] configurations = cm.listConfigurations(filter);
+        if (configurations != null && configurations.length > 0)
+        {
+            return configurations[0];
+        }
+        else
+        {
+            return null;
         }
     }
 
