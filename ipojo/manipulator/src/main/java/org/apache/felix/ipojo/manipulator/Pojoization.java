@@ -227,7 +227,7 @@ public class Pojoization {
 
         // Start the manipulation
         manipulateJarFile(out);
-
+        
         // Check that all declared components are manipulated
         for (int i = 0; i < m_components.size(); i++) {
             ComponentInfo ci = (ComponentInfo) m_components.get(i);
@@ -457,7 +457,6 @@ public class Pojoization {
      * Manipulate classes of the input Jar.
      */
     private void manipulateComponents() {
-        //Enumeration entries = inputJar.entries();
         Enumeration entries = getClassFiles();
 
         while (entries.hasMoreElements()) {
@@ -483,7 +482,7 @@ public class Pojoization {
                     if (ci.m_classname.equals(curName)) {
                         byte[] outClazz = manipulateComponent(in, ci);
                         m_classes.put(ci.m_classname, outClazz);
-
+                        
                         // Manipulate inner classes ?
                         if (!ci.m_inners.isEmpty()) {
                             for (int k = 0; k < ci.m_inners.size(); k++) {
@@ -605,7 +604,8 @@ public class Pojoization {
      */
     private String computeRelativePath(String absolutePath) {
         String root = m_dir.getAbsolutePath();
-        return absolutePath.substring(root.length() + 1);
+        String path = absolutePath.substring(root.length() + 1);
+        return path.replace("\\", "/"); // To support Windows systems, the \ are replaced by /
     }
 
     /**
