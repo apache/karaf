@@ -605,7 +605,7 @@ public class Pojoization {
     private String computeRelativePath(String absolutePath) {
         String root = m_dir.getAbsolutePath();
         String path = absolutePath.substring(root.length() + 1);
-        return path.replace("\\", "/"); // To support Windows systems, the \ are replaced by /
+        return path.replace('\\', '/'); // To support Windows systems, the \ are replaced by /
     }
 
     /**
