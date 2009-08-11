@@ -35,6 +35,9 @@ import org.osgi.service.deploymentadmin.spi.DeploymentSession;
 import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.PackageAdmin;
 
+/**
+ * Represents a running deployment session.
+ */
 public class DeploymentSessionImpl implements DeploymentSession {
 
     private final AbstractDeploymentPackage m_target;
@@ -102,23 +105,45 @@ public class DeploymentSessionImpl implements DeploymentSession {
         return false;
     }
 
+    /**
+     * Retrieve the base directory of the persistent storage area according to 
+     * OSGi Core R4 6.1.6.10 for the given <code>BundleContext</code>.
+     * 
+     * @param bundle of which the storage area will be returned
+     * @return a <code>File</code> that represents the base directory of the
+     *     persistent storage area for the bundle
+     */
     public File getDataFile(Bundle bundle) {
         BundleContext context = null;
         try {
+            // try to find the method in the current class
             Method getBundleContext = bundle.getClass().getDeclaredMethod("getBundleContext", null);
             getBundleContext.setAccessible(true);
             context = (BundleContext) getBundleContext.invoke(bundle, null);
         }
-        catch (Exception ex) {
-            // TODO: log this
+        catch (Exception e) {
+            // if we cannot find the method at first, we try again below
+        }
+        if (context == null) {
+            try {
+                // try to find the method in superclasses
+                Method getBundleContext = bundle.getClass().getMethod("getBundleContext", null);
+                getBundleContext.setAccessible(true);
+                context = (BundleContext) getBundleContext.invoke(bundle, null);
+            }
+            catch (Exception e) {
+                // we still can't find the method, we will throw an exception indicating that below
+            }
         }
         File result = null;
         if (context != null) {
             result = context.getDataFile("");
         }
+        else {
+            throw new IllegalStateException("Could not retrieve valid bundle context from bundle " + bundle.getSymbolicName());
+        }
         if (result == null) {
-            // TODO: log this
-            throw new IllegalStateException("");
+            throw new IllegalStateException("Could not retrieve base directory for bundle " + bundle.getSymbolicName());
         }
         return result;
     }
