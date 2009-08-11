@@ -41,4 +41,6 @@ public interface FeaturesService {
 
     Feature[] listInstalledFeatures();
 
+    boolean isInstalled(Feature f);
+
 }
