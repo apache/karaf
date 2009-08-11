@@ -29,6 +29,7 @@ import java.util.Scanner;
 import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Command;
+import org.fusesource.jansi.Ansi;
 
 /**
  * Installs this Karaf instance as a service in your operating systems.
@@ -41,10 +42,13 @@ public class InstallCommand extends OsgiCommandSupport
 	
     @Option(name="-n", aliases={"--name"}, description="The service name that will be used when installing the service.")
     private String name="karaf";
+
     @Option(name="-d", aliases={"--display"}, description="The display name of the service.")
     private String displayName;
+
     @Option(name="-D", aliases={"--description"}, description="The description of the service.")
     private String description="";
+
     @Option(name="-s", aliases={"--start-type"}, description="Mode in which the service is installed.  AUTO_START or DEMAND_START")
     private String startType="AUTO_START";
 
@@ -119,7 +123,8 @@ public class InstallCommand extends OsgiCommandSupport
 			copyFilteredResourceTo(wrapperConf, "all/karaf-wrapper.conf", props);
 
 			System.out.println("");
-			System.out.println("Setup complete.  You may want to tweak the JVM properties in the wrapper configuration file: "+wrapperConf.getPath());
+			System.out.println("Setup complete.  You may want to tweak the JVM properties in the wrapper configuration file:");
+            System.out.println("\t" + wrapperConf.getPath());
 			System.out.println("before installing and starting the service.");
 			System.out.println("");
 			if( os.startsWith("Win") ) {
@@ -155,7 +160,7 @@ public class InstallCommand extends OsgiCommandSupport
 				// TODO: figure out if we can detect the Linux flavor
 				
 				System.out.println("");
-				System.out.println("@|cyan On Redhat/Fedora/CentOS Systems:|");
+                System.out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("On Redhat/Fedora/CentOS Systems:").a(Ansi.Attribute.RESET).toString());
 				System.out.println("  To install the service:");
 				System.out.println("    $ ln -s "+serviceFile.getPath()+" /etc/init.d/");
 				System.out.println("    $ chkconfig "+serviceFile.getName()+" --add");
@@ -177,7 +182,7 @@ public class InstallCommand extends OsgiCommandSupport
 				System.out.println("    $ rm /etc/init.d/"+serviceFile.getName());
 				
 				System.out.println("");
-				System.out.println("@|cyan On Ubuntu/Debian Systems:|");
+                System.out.println(Ansi.ansi().a(Ansi.Attribute.INTENSITY_BOLD).a("On Ubuntu/Debian Systems:").a(Ansi.Attribute.RESET).toString());
 				System.out.println("  To install the service:");
 				System.out.println("    $ ln -s "+serviceFile.getPath()+" /etc/init.d/");
 				System.out.println("");
@@ -222,7 +227,8 @@ public class InstallCommand extends OsgiCommandSupport
 
 	private void copyResourceTo(File outFile, String resource, boolean text) throws Exception {
 		if( !outFile.exists() ) {
-	        System.out.println("Creating file: @|green "+outFile.getPath()+"|");
+            System.out.println(Ansi.ansi().a("Creating file: ")
+                                          .a(Ansi.Attribute.INTENSITY_BOLD).a(outFile.getPath()).a(Ansi.Attribute.RESET).toString());
 			InputStream is = InstallCommand.class.getResourceAsStream(resource);
 			try {
 				if( text ) {
@@ -254,13 +260,16 @@ public class InstallCommand extends OsgiCommandSupport
 				safeClose(is);
 			}
 		} else {
-	        System.out.println("@|red File allready exists|. Move it out of the way if you want it re-created: "+outFile.getPath()+"");
+            System.out.println(Ansi.ansi()
+                                   .fg(Ansi.Color.RED).a("File already exists").a(Ansi.Attribute.RESET)
+                                   .a(". Move it out of the way if you want it re-created: ").a(outFile.getPath()).toString());
 		}
 	}
 	
 	private void copyFilteredResourceTo(File outFile, String resource, HashMap<String, String> props) throws Exception {
 		if( !outFile.exists() ) {
-	        System.out.println("Creating file: @|green "+outFile.getPath()+"|");
+            System.out.println(Ansi.ansi().a("Creating file: ")
+                                          .a(Ansi.Attribute.INTENSITY_BOLD).a(outFile.getPath()).a(Ansi.Attribute.RESET).toString());
 			InputStream is = InstallCommand.class.getResourceAsStream(resource);
 			try {
 				// Read it line at a time so that we can use the platform line ending when we write it out.
@@ -279,7 +288,9 @@ public class InstallCommand extends OsgiCommandSupport
 				safeClose(is);
 			}
 		} else {
-	        System.out.println("@|red File allready exists|. Move it out of the way if you want it re-created: "+outFile.getPath()+"");
+            System.out.println(Ansi.ansi()
+                                   .fg(Ansi.Color.RED).a("File already exists").a(Ansi.Attribute.RESET)
+                                   .a(". Move it out of the way if you want it re-created: ").a(outFile.getPath()).toString());
 		}
 	}
 
@@ -315,7 +326,8 @@ public class InstallCommand extends OsgiCommandSupport
 
 	private void mkdir(File file) {
 		if( !file.exists() ) {
-	        System.out.println("Creating missing directory: @|green "+file.getPath()+"|");
+            System.out.println(Ansi.ansi().a("Creating missing directory: ")
+                                          .a(Ansi.Attribute.INTENSITY_BOLD).a(file.getPath()).a(Ansi.Attribute.RESET).toString());
 			file.mkdirs();
 		}
 	}
