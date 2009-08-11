@@ -518,7 +518,8 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
      * Sets the name of the service that should be tracked. You can either specify
      * only the name, or the name and a filter. In the latter case, the filter is used
      * to track the service and should only return services of the type that was specified
-     * in the name.
+     * in the name. To make sure of this, the filter is actually extended internally to
+     * filter on the correct name.
      * 
      * @param serviceName the name of the service
      * @param serviceFilter the filter condition
@@ -530,7 +531,12 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
             throw new IllegalArgumentException("Service name cannot be null.");
         }
         m_trackedServiceName = serviceName;
-        m_trackedServiceFilter = serviceFilter;
+        if (serviceFilter != null) {
+            m_trackedServiceFilter ="(&(" + Constants.OBJECTCLASS + "=" + serviceName + ")" + serviceFilter + ")";
+        }
+        else {
+            m_trackedServiceFilter = null;
+        }
         m_trackedServiceReference = null;
         return this;
     }
