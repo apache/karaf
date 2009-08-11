@@ -83,6 +83,8 @@ public interface FeaturesServiceMBean {
     String[] FEATURE_EVENT = { FEATURE_NAME, FEATURE_VERSION, FEATURE_EVENT_EVENT_TYPE };
 
 
+    String REPOSITORY_NAME = "Name";
+
     String REPOSITORY_URI = "Uri";
 
     String REPOSITORY_REPOSITORIES = "Repositories";
@@ -103,12 +105,12 @@ public interface FeaturesServiceMBean {
     /**
      * The item names in the CompositeData representing a feature
      */
-    String[] REPOSITORY = { REPOSITORY_URI,  REPOSITORY_REPOSITORIES, REPOSITORY_FEATURES };
+    String[] REPOSITORY = { REPOSITORY_NAME, REPOSITORY_URI,  REPOSITORY_REPOSITORIES, REPOSITORY_FEATURES };
 
     /**
      * The item names in the CompositeData representing the event raised for
      * feature events within the OSGi container by this bean
      */
-    String[] REPOSITORY_EVENT = { REPOSITORY_URI, REPOSITORY_EVENT_EVENT_TYPE };
+    String[] REPOSITORY_EVENT = { REPOSITORY_NAME, REPOSITORY_URI, REPOSITORY_EVENT_EVENT_TYPE };
 
 }

@@ -46,9 +46,10 @@ public class JmxRepository {
         try {
             String[] itemNames = FeaturesServiceMBean.REPOSITORY;
             Object[] itemValues = new Object[itemNames.length];
-            itemValues[0] = repository.getURI().toString();
-            itemValues[1] = toStringArray(repository.getRepositories());
-            itemValues[2] = JmxFeature.getFeatureIdentifierTable(Arrays.asList(repository.getFeatures()));
+            itemValues[0] = repository.getName();
+            itemValues[1] = repository.getURI().toString();
+            itemValues[2] = toStringArray(repository.getRepositories());
+            itemValues[3] = JmxFeature.getFeatureIdentifierTable(Arrays.asList(repository.getFeatures()));
             data = new CompositeDataSupport(REPOSITORY, itemNames, itemValues);
         } catch (Exception e) {
             throw new IllegalStateException("Cannot form repository open data", e);
@@ -90,12 +91,14 @@ public class JmxRepository {
             OpenType[] itemTypes = new OpenType[itemNames.length];
             String[] itemDescriptions = new String[itemNames.length];
             itemTypes[0] = SimpleType.STRING;
-            itemTypes[1] = new ArrayType(1, SimpleType.STRING);
-            itemTypes[2] = JmxFeature.FEATURE_IDENTIFIER_TABLE;
+            itemTypes[1] = SimpleType.STRING;
+            itemTypes[2] = new ArrayType(1, SimpleType.STRING);
+            itemTypes[3] = JmxFeature.FEATURE_IDENTIFIER_TABLE;
 
-            itemDescriptions[0] = "The uri of the repository";
-            itemDescriptions[1] = "The dependent repositories";
-            itemDescriptions[2] = "The list of included features";
+            itemDescriptions[0] = "The name of the repository";
+            itemDescriptions[1] = "The uri of the repository";
+            itemDescriptions[2] = "The dependent repositories";
+            itemDescriptions[3] = "The list of included features";
 
             return new CompositeType("Repository", description, itemNames,
                     itemDescriptions, itemTypes);

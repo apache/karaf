@@ -22,9 +22,13 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URL;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -32,8 +36,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.felix.karaf.features.Feature;
+import org.apache.felix.karaf.features.FeaturesService;
+import org.apache.felix.karaf.features.Repository;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
-import org.apache.felix.karaf.features.*;
 
 import org.json.JSONException;
 import org.json.JSONWriter;
@@ -65,9 +71,9 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin
     private BundleContext bundleContext;
 
 
-    /*
-     * Blueprint lifecycle callback methods
-     */
+    //
+    // Blueprint lifecycle callback methods
+    //
     
     public void start()
     {
@@ -78,15 +84,18 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin
         this.log.info( LABEL + " plugin activated" );
     }
 
+
     public void stop()
     {
         this.log.info( LABEL + " plugin deactivated" );
         super.deactivate();
     }
 
+
     //
     // AbstractWebConsolePlugin interface
-    //    
+    //
+
     public String getLabel()
     {
         return NAME;
@@ -316,9 +325,9 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin
 
     private void writeJSON( final PrintWriter pw ) throws IOException
     {
-        final Feature[] features = this.getFeatures();
+        final List<Repository> repositories = this.getRepositories();
+        final List<ExtendedFeature> features = this.getFeatures( repositories );
         final String statusLine = this.getStatusLine( features );
-        final String[] repositories = this.getRepositories();
 
         final JSONWriter jw = new JSONWriter( pw );
 
@@ -329,27 +338,34 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin
             jw.key( "status" );
             jw.value( statusLine );
 
-            jw.key( "features" );
+            jw.key( "repositories" );
             jw.array();
-            for ( int i = 0; i < features.length; i++ )
+            for ( Repository r : repositories )
             {
-                featureInfo( jw, features[i] );
+                jw.object();
+                jw.key( "name" );
+                jw.value( r.getName() );
+                jw.key( "url" );
+                String uri = r.getURI().toString();
+                jw.value( uri );
+                jw.key( "actions" );
+                jw.array();
+                boolean enable = true;
+                if ( uri.startsWith( "bundle" ) ) {
+                    enable = false;
+                }
+                action( jw, enable, "refreshRepository", "Refresh", "refresh" );
+                action( jw, enable, "removeRepository", "Remove", "delete" );
+                jw.endArray();
+                jw.endObject();
             }
             jw.endArray();
 
-            jw.key( "repositories" );
+            jw.key( "features" );
             jw.array();
-            for ( int i = 0; i < repositories.length; i++ )
+            for ( ExtendedFeature f : features )
             {
-                jw.object();
-                jw.key( "url" );
-                jw.value( repositories[i] );
-                jw.key( "actions" );
-                jw.array();
-                action( jw, true, "refreshRepository", "Refresh", "refresh" );
-                action( jw, true, "removeRepository", "Uninstall", "delete" );
-                jw.endArray();
-                jw.endObject();
+                featureInfo( jw, f );
             }
             jw.endArray();
 
@@ -364,9 +380,9 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin
     }
 
 
-    private String[] getRepositories()
+    private List<Repository> getRepositories()
     {
-        String[] repositories = new String[0];
+        List<Repository> repositories = new ArrayList<Repository>();
 
         if ( featuresService == null )
         {
@@ -374,29 +390,24 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin
             return repositories;
         }
 
-        Repository[] repositoryInfo = null;
         try
         {
-            repositoryInfo = featuresService.listRepositories();
+            for ( Repository r : featuresService.listRepositories() ) {
+                repositories.add( r );
+            }
         }
         catch ( Exception e )
         {
             this.log.error( e.getMessage() );
-            return new String[0];
         }
 
-        repositories = new String[repositoryInfo.length];
-        for ( int i = 0; i < repositoryInfo.length; i++ )
-        {
-            repositories[i] = repositoryInfo[i].getURI().toString();
-        }
         return repositories;
     }
 
 
-    private Feature[] getFeatures()
+    private List<ExtendedFeature> getFeatures( List<Repository> repositories )
     {
-        Feature[] features = new Feature[0];
+        List<ExtendedFeature> features = new ArrayList<ExtendedFeature>();
 
         if ( featuresService == null )
         {
@@ -404,60 +415,54 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin
             return features;
         }
 
-        List<org.apache.felix.karaf.features.Feature> allFeatures = null;
-        List<org.apache.felix.karaf.features.Feature> installedFeatures = null;
         try
         {
-            allFeatures = Arrays.asList(featuresService.listFeatures());
-            installedFeatures = Arrays.asList(featuresService.listInstalledFeatures());
+            for ( Repository r : repositories )
+            {
+                for ( Feature f : r.getFeatures() )
+                {
+                    ExtendedFeature.State state =
+                        featuresService.isInstalled(f) ? ExtendedFeature.State.INSTALLED : ExtendedFeature.State.UNINSTALLED;
+                    features.add( new ExtendedFeature(  state, r.getName(), f ) );
+                }
+            }
         }
         catch ( Exception e )
         {
             this.log.error( e.getMessage() );
-            return new Feature[0];
         }
 
-        features = new Feature[allFeatures.size()];
-        for ( int i = 0; i < features.length; i++ )
-        {
-            Feature.State state = Feature.State.UNINSTALLED;
-            if ( installedFeatures.contains( allFeatures.get(i) ) )
-            {
-                state = Feature.State.INSTALLED;
-            }
-            features[i] = new Feature( allFeatures.get(i).getName(), allFeatures.get(i).getVersion(), state );
-        }
-        Arrays.sort( features, new FeatureComparator() );
+        Collections.sort( features, new ExtendedFeatureComparator() );
         return features;
     }
 
 
-    class FeatureComparator implements Comparator<Feature>
+    class ExtendedFeatureComparator implements Comparator<ExtendedFeature>
     {
-        public int compare( Feature o1, Feature o2 )
+        public int compare( ExtendedFeature o1, ExtendedFeature o2 )
         {
-            return o1.name.toLowerCase().compareTo( o2.name.toLowerCase() );
+            return o1.getName().toLowerCase().compareTo( o2.getName().toLowerCase() );
         }
     }
 
 
-    private String getStatusLine( final Feature[] features )
+    private String getStatusLine( final List<ExtendedFeature> features )
     {
         int installed = 0;
-        for ( int i = 0; i < features.length; i++ )
+        for ( ExtendedFeature f : features )
         {
-            if ( features[i].state == Feature.State.INSTALLED )
+            if ( f.getState() == ExtendedFeature.State.INSTALLED )
             {
                 installed++;
             }
         }
         final StringBuffer buffer = new StringBuffer();
         buffer.append( "Feature information: " );
-        appendFeatureInfoCount( buffer, "in total", features.length );
-        if ( installed == features.length )
+        appendFeatureInfoCount( buffer, "in total", features.size() );
+        if ( installed == features.size() )
         {
             buffer.append( " - all " );
-            appendFeatureInfoCount( buffer, "active.", features.length );
+            appendFeatureInfoCount( buffer, "active.", features.size() );
         }
         else
         {
@@ -483,24 +488,29 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin
     }
 
 
-    private void featureInfo( JSONWriter jw, Feature feature ) throws JSONException
+    private void featureInfo( JSONWriter jw, ExtendedFeature feature ) throws JSONException
     {
         jw.object();
+        jw.key( "id" );
+        jw.value( feature.getId() );
         jw.key( "name" );
-        jw.value( feature.name );
+        jw.value( feature.getName() );
         jw.key( "version" );
-        jw.value( feature.version );
+        jw.value( feature.getVersion() );
+        jw.key( "repository" );
+        jw.value( feature.getRepository() );
         jw.key( "state" );
-        jw.value( feature.state );
+        ExtendedFeature.State state = feature.getState();
+        jw.value( state.toString() );
 
         jw.key( "actions" );
         jw.array();
 
-        if ( feature.state == Feature.State.INSTALLED )
+        if ( state == ExtendedFeature.State.INSTALLED )
         {
             action( jw, true, "uninstallFeature", "Uninstall", "delete" );
         }
-        else
+        else if ( state == ExtendedFeature.State.UNINSTALLED )
         {
             action( jw, true, "installFeature", "Install", "start" );
         }
@@ -519,13 +529,18 @@ public class FeaturesPlugin extends AbstractWebConsolePlugin
         jw.key( "image" ).value( image );
         jw.endObject();
     }
-    
-    // DI setters
+
+
+    //
+    // Dependency Injection setters
+    //
+
     public void setFeaturesService(FeaturesService featuresService) 
     {
         this.featuresService = featuresService;
     }
-    
+
+
     public void setBundleContext(BundleContext bundleContext) 
     {
         this.bundleContext = bundleContext;

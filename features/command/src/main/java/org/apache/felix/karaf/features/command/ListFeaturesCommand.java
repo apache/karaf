@@ -17,10 +17,14 @@
 package org.apache.felix.karaf.features.command;
 
 import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.felix.karaf.features.FeaturesService;
 import org.apache.felix.karaf.features.Feature;
+import org.apache.felix.karaf.features.Repository;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Command;
 
@@ -30,53 +34,90 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
     @Option(name = "-i", aliases={"--installed"}, description="Display the list of installed features")
     boolean installed;
 
+    private static final String STATE = "State";
+    private static final String INSTALLED = "installed  ";
+    private static final String UNINSTALLED = "uninstalled";
+
+    private static final String VERSION = "Version";
+    private static final String NAME = "Name";
+    private static final String REPOSITORY = "Repository";
+
     protected void doExecute(FeaturesService admin) throws Exception {
-        List<Feature> features;
-        List<Feature> installedFeatures;
-        if (installed) {
-            features = Arrays.asList(admin.listInstalledFeatures());
-            installedFeatures = features;
-            if (features == null || features.size() == 0) {
-                System.out.println("No features installed.");
-                return;
-            }
-        } else {
-            features = Arrays.asList(admin.listFeatures());
-            installedFeatures = Arrays.asList(admin.listInstalledFeatures());
-            if (features == null || features.size() == 0) {
-                System.out.println("No features available.");
-                return;
+
+        // Get the feature data to print.
+        List<Feature> features = new ArrayList<Feature>();
+        Map<Feature, String> repositoryNames = new HashMap<Feature, String>();
+        for (Repository r : Arrays.asList(admin.listRepositories())) {
+            for (Feature f : r.getFeatures()) {
+                if (installed && !admin.isInstalled(f)) {
+                    continue;
+                }
+                features.add(f);
+                repositoryNames.put(f, r.getName());
             }
         }
-        int maxVersionSize = 7;
-        for (Feature feature : features) {
-            maxVersionSize = Math.max(maxVersionSize, feature.getVersion().length());
+        if (features.size() == 0) {
+            if (installed) {
+                System.out.println("No features installed.");
+            }
+            else {
+                System.out.println("No features available.");
+            }
+            return;
+        }
+
+        // Print column headers.
+        int maxVersionSize = VERSION.length();
+        for (Feature f : features) {
+            maxVersionSize = Math.max(maxVersionSize, f.getVersion().length());
+        }
+        int maxNameSize = NAME.length();
+        for (Feature f : features) {
+            maxNameSize = Math.max(maxNameSize, f.getName().length());
         }
         StringBuilder sb = new StringBuilder();
-        sb.append("  State         Version    ");
-        for (int i = 7; i < maxVersionSize; i++) {
+        sb.append(STATE).append("         ").append(VERSION).append("   ");
+        for (int i = VERSION.length(); i < maxVersionSize; i++) {
             sb.append(" ");
         }
-        sb.append("Name");
+        sb.append(NAME).append(" ");
+        for (int i = NAME.length(); i < maxNameSize; i++) {
+            sb.append(" ");
+        }
+        sb.append(REPOSITORY);
         System.out.println(sb.toString());
-        for (Feature feature : features) {
+
+        // Print the feature data.
+        for (Feature f : features) {
+
             sb.setLength(0);
             sb.append("[");
-            if (installedFeatures.contains(feature)) {
-                sb.append("installed  ");
+            if (admin.isInstalled(f)) {
+                sb.append(INSTALLED);
             } else {
-                sb.append("uninstalled");
+                sb.append(UNINSTALLED);
             }
+
             sb.append("] [");
-            String v = feature.getVersion();
-            sb.append(v);
-            for (int i = v.length(); i < maxVersionSize; i++) {
+            String str = f.getVersion();
+            sb.append(str);
+            for (int i = str.length(); i < maxVersionSize; i++) {
                 sb.append(" ");
             }
             sb.append("] ");
-            sb.append(feature.getName());
+
+            str = f.getName();
+            sb.append(str);
+            for (int i = str.length(); i < maxNameSize; i++) {
+                sb.append(" ");
+            }
+
+            sb.append(" ");
+            sb.append(repositoryNames.get(f));
             System.out.println(sb.toString());
+
         }
+
     }
 
 }
