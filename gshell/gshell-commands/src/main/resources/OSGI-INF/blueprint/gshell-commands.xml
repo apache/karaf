@@ -23,15 +23,31 @@
         <command name="shell/cat">
             <action class="org.apache.felix.karaf.gshell.commands.CatAction"/>
         </command>
+        <command name="shell/echo">
+            <action class="org.apache.felix.karaf.gshell.commands.EchoAction"/>
+        </command>
         <command name="shell/exec">
             <action class="org.apache.felix.karaf.gshell.commands.ExecuteAction"/>
         </command>
         <command name="shell/grep">
             <action class="org.apache.felix.karaf.gshell.commands.GrepAction"/>
         </command>
+        <!--
+        <command name="shell/history">
+            <action class="org.apache.felix.karaf.gshell.commands.HistoryAction"/>
+        </command>
+        -->
+        <command name="shell/info">
+            <action class="org.apache.felix.karaf.gshell.commands.InfoAction"/>
+        </command>
         <command name="shell/java">
             <action class="org.apache.felix.karaf.gshell.commands.JavaAction"/>
         </command>
+        <!--
+        <command name="shell/more">
+            <action class="org.apache.felix.karaf.gshell.commands.MoreAction"/>
+        </command>
+        -->
         <command name="shell/printf">
             <action class="org.apache.felix.karaf.gshell.commands.PrintfAction"/>
         </command>
@@ -41,6 +57,11 @@
         <command name="shell/sort">
             <action class="org.apache.felix.karaf.gshell.commands.SortAction"/>
         </command>
+        <!--
+        <command name="shell/source">
+            <action class="org.apache.felix.karaf.gshell.commands.SourceAction"/>
+        </command>
+        -->
     </command-bundle>
 
 </blueprint>
