@@ -34,6 +34,7 @@ import org.osgi.service.prefs.Preferences;
 import org.osgi.service.prefs.PreferencesService;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.fusesource.jansi.Ansi;
 
 public class AdminServiceImpl implements AdminService {
 
@@ -173,7 +174,7 @@ public class AdminServiceImpl implements AdminService {
     private void copyResourceToDir(File target, String resource, boolean text) throws Exception {
         File outFile = new File(target, resource);
         if( !outFile.exists() ) {
-            println("Creating file: @|bold " + outFile.getPath() + "|");
+            println(Ansi.ansi().a("Creating file: ").a(Ansi.Attribute.INTENSITY_BOLD).a(outFile.getPath()).a(Ansi.Attribute.RESET).toString());
             InputStream is = getClass().getClassLoader().getResourceAsStream("/org/apache/felix/karaf/gshell/admin/" + resource);
             try {
                 if( text ) {
@@ -213,7 +214,7 @@ public class AdminServiceImpl implements AdminService {
     private void copyFilteredResourceToDir(File target, String resource, HashMap<String, String> props) throws Exception {
         File outFile = new File(target, resource);
         if( !outFile.exists() ) {
-            println("Creating file: @|bold "+outFile.getPath()+"|");
+            println(Ansi.ansi().a("Creating file: ").a(Ansi.Attribute.INTENSITY_BOLD).a(outFile.getPath()).a(Ansi.Attribute.RESET).toString());
             InputStream is = getClass().getClassLoader().getResourceAsStream("/org/apache/felix/karaf/gshell/admin/" + resource);
             try {
                 // Read it line at a time so that we can use the platform line ending when we write it out.
@@ -269,7 +270,7 @@ public class AdminServiceImpl implements AdminService {
     private void mkdir(File serviceMixBase, String path) {
         File file = new File(serviceMixBase, path);
         if( !file.exists() ) {
-            println("Creating dir:  @|bold "+file.getPath()+"|");
+            println(Ansi.ansi().a("Creating dir:  ").a(Ansi.Attribute.INTENSITY_BOLD).a(file.getPath()).a(Ansi.Attribute.RESET).toString());
             file.mkdirs();
         }
     }
