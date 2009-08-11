@@ -532,7 +532,7 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
         }
         m_trackedServiceName = serviceName;
         if (serviceFilter != null) {
-            m_trackedServiceFilter ="(&(" + Constants.OBJECTCLASS + "=" + serviceName + ")" + serviceFilter + ")";
+            m_trackedServiceFilter ="(&(" + Constants.OBJECTCLASS + "=" + serviceName.getName() + ")" + serviceFilter + ")";
         }
         else {
             m_trackedServiceFilter = null;
