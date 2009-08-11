@@ -322,6 +322,10 @@ public class FeaturesServiceImpl implements FeaturesService {
         return result.toArray(new Feature[result.size()]);
     }
 
+    public boolean isInstalled(Feature f) {
+        return installed.containsKey(f);
+    }
+
     protected Feature getFeature(String name, String version) throws Exception {
         if (version != null) {
             version = version.trim();
