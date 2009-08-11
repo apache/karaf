@@ -620,8 +620,10 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
     }
     
     /**
-     * Sets the callbacks for this service. These callbacks can be used as hooks whenever
-     * a dependency is added or removed. They are called on the service implementation.
+     * Sets the callbacks for this service. These callbacks can be used as hooks whenever a
+     * dependency is added or removed. When you specify callbacks, the auto configuration 
+     * feature is automatically turned off, because we're assuming you don't need it in this 
+     * case.
      * 
      * @param added the method to call when a service was added
      * @param removed the method to call when a service was removed
@@ -630,16 +632,42 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
     public synchronized ServiceDependency setCallbacks(String added, String removed) {
         return setCallbacks(null, added, null, removed);
     }
+
+    /**
+     * Sets the callbacks for this service. These callbacks can be used as hooks whenever a
+     * dependency is added, changed or removed. When you specify callbacks, the auto 
+     * configuration feature is automatically turned off, because we're assuming you don't 
+     * need it in this case.
+     * 
+     * @param added the method to call when a service was added
+     * @param changed the method to call when a service was changed
+     * @param removed the method to call when a service was removed
+     * @return this service dependency
+     */
     public synchronized ServiceDependency setCallbacks(String added, String changed, String removed) {
         return setCallbacks(null, added, changed, removed);
     }
+
+    /**
+     * Sets the callbacks for this service. These callbacks can be used as hooks whenever a
+     * dependency is added or removed. They are called on the instance you provide. When you
+     * specify callbacks, the auto configuration feature is automatically turned off, because
+     * we're assuming you don't need it in this case.
+     * 
+     * @param instance the instance to call the callbacks on
+     * @param added the method to call when a service was added
+     * @param removed the method to call when a service was removed
+     * @return this service dependency
+     */
     public synchronized ServiceDependency setCallbacks(Object instance, String added, String removed) {
         return setCallbacks(instance, added, null, removed);
     }
     
     /**
-     * Sets the callbacks for this service. These callbacks can be used as hooks whenever
-     * a dependency is added or removed. They are called on the instance you provide.
+     * Sets the callbacks for this service. These callbacks can be used as hooks whenever a
+     * dependency is added, changed or removed. They are called on the instance you provide. When you
+     * specify callbacks, the auto configuration feature is automatically turned off, because
+     * we're assuming you don't need it in this case.
      * 
      * @param instance the instance to call the callbacks on
      * @param added the method to call when a service was added
@@ -649,6 +677,10 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
      */
     public synchronized ServiceDependency setCallbacks(Object instance, String added, String changed, String removed) {
         ensureNotActive();
+        // if at least one valid callback is specified, we turn off auto configuration
+        if (added != null || removed != null || changed != null) {
+            setAutoConfig(false);
+        }
         m_callbackInstance = instance;
         m_callbackAdded = added;
         m_callbackChanged = changed;
