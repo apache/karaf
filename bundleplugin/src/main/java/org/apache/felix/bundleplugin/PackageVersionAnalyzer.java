@@ -30,8 +30,7 @@ import aQute.lib.osgi.Jar;
 /**
  * Extension of {@link aQute.lib.osgi.Builder} to handle package versions
  * 
- * @author <a href="mailto:carlos@apache.org">Carlos Sanchez</a>
- * @version $Id$
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public final class PackageVersionAnalyzer extends Builder
 {

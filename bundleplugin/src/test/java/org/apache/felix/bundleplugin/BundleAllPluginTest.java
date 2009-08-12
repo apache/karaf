@@ -33,8 +33,7 @@ import org.apache.maven.shared.osgi.DefaultMaven2OsgiConverter;
 /**
  * Test for {@link BundleAllPlugin}
  * 
- * @author <a href="mailto:carlos@apache.org">Carlos Sanchez</a>
- * @version $Id$
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class BundleAllPluginTest extends AbstractBundlePluginTest
 {

@@ -36,8 +36,7 @@ import aQute.lib.osgi.Jar;
 /**
  * Test for {@link BundlePlugin}.
  * 
- * @author <a href="mailto:carlos@apache.org">Carlos Sanchez</a>
- * @version $Id$
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class BundlePluginTest extends AbstractBundlePluginTest
 {
