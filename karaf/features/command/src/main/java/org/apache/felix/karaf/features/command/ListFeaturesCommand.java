@@ -46,14 +46,14 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
 
         // Get the feature data to print.
         List<Feature> features = new ArrayList<Feature>();
-        Map<Feature, String> repositoryNames = new HashMap<Feature, String>();
+        List<Repository> repositories = new ArrayList<Repository>();
         for (Repository r : Arrays.asList(admin.listRepositories())) {
             for (Feature f : r.getFeatures()) {
                 if (installed && !admin.isInstalled(f)) {
                     continue;
                 }
                 features.add(f);
-                repositoryNames.put(f, r.getName());
+                repositories.add(r);
             }
         }
         if (features.size() == 0) {
@@ -88,6 +88,7 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
         System.out.println(sb.toString());
 
         // Print the feature data.
+        boolean needsLegend = false;
         for (Feature f : features) {
 
             sb.setLength(0);
@@ -113,9 +114,18 @@ public class ListFeaturesCommand extends FeaturesCommandSupport {
             }
 
             sb.append(" ");
-            sb.append(repositoryNames.get(f));
+            String name = repositories.get(0).getName();
+            sb.append(name);
+            repositories.remove(0);
             System.out.println(sb.toString());
+            if (name.charAt(name.length() - 1) == '*') {
+                needsLegend = true;
+            }
 
+        }
+
+        if (needsLegend) {
+            System.out.println("* Installed via deploy directory");
         }
 
     }

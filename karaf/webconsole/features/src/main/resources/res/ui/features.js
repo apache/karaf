@@ -25,10 +25,10 @@ function renderFeatures( data ) {
 function renderView() {
     renderStatusLine();
     renderTable( "Feature Repositories", "repository_table", ["Name", "URL", "Actions"] );
-    var txt = "<form method='post'><div class='table'><table class='tablelayout'><tbody><tr>" +
-        "<input type='hidden' name='action' value='addRepository'/>" +
-        "<td><input id='url' type='text' name='url' style='width:100%'/></td>" +
-        "<td class='col_Actions'><input type='button' value='Add URL' onclick='addRepositoryUrl()' colspan='2'/></td>" +
+    var txt = "<form method='post'><div class='table'><table id='repository_table_footer' class='tablelayout'><tbody>" +
+        "<tr><input type='hidden' name='action' value='addRepository'/>" +
+        "<td><input id='url' type='text' name='url' style='width:100%' colspan='2'/></td>" +
+        "<td class='col_Actions'><input type='button' value='Add URL' onclick='addRepositoryUrl()'/></td>" +
         "</tr></tbody></table></div></form><br/>";
     $("#plugin_content").append( txt );
     renderTable( "Features", "feature_table", ["Name", "Version", "Repository", "Status", "Actions"] );
@@ -81,18 +81,30 @@ function renderStatusData( /* String */ status )  {
 function renderRepositoryTableData( /* array of Objects */ repositories ) {
     var trElement;
     var input;
+    var needsLegend = false;
     $("#repository_table > tbody > tr").remove();
     for ( var idx in repositories ) {
-        trElement = tr( null, { id: "repository-" + repositories[idx].name } );
+        var name = repositories[idx].name;
+        trElement = tr( null, { id: "repository-" + name } );
         renderRepositoryData( trElement, repositories[idx] );
-        $("#repository_table > tbody").append( trElement ); 
+        $("#repository_table > tbody").append( trElement );
+        if ( name[ name.length - 1 ] == "*" ) {
+            needsLegend = true;
+        }
     }
     $("#repository_table").trigger( "update" );
+    if ( needsLegend ) {
+        trElement = tr( null, null ) ;
+        trElement.appendChild( td( null, { colspan: 3 },
+                                   [ text( "* Installed via deploy directory" ) ] ) );
+        $("#repository_table_footer > tbody").prepend( trElement );
+    }
+    $("#repository_table_footer").trigger( "update" );
 }
 
 function renderRepositoryData( /* Element */ parent, /* Object */ repository ) {
-    parent.appendChild( td( null, null, [text( repository.name )] ) );
-    parent.appendChild( td( null, null, [text( repository.url )] ) );
+    parent.appendChild( td( null, null, [ text( repository.name ) ] ) );
+    parent.appendChild( td( null, null, [ text( repository.url ) ] ) );
 
     var actionsTd = td( null, null );
     var div = createElement( "div", null, {
