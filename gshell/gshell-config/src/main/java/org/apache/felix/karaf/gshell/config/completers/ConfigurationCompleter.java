@@ -50,6 +50,9 @@ public class ConfigurationCompleter implements Completer, ConfigurationListener 
         Configuration[] configs;
         try {
             configs = admin.listConfigurations(null);
+            if (configs == null) {
+                return;
+            }
         } catch (Exception e) {
             return;
         }
