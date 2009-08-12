@@ -28,7 +28,7 @@ import java.util.Map;
  * The <code>MetaData</code> class represents the <code>MetaData</code>
  * element of the meta type descriptor.
  * 
- * @author fmeschbe
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class MetaData
 {

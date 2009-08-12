@@ -30,7 +30,7 @@ import aQute.libg.header.OSGiHeader;
 /**
  * Exclude selected dependencies from the classpath passed to BND.
  * 
- * @author mcculls@gmail.com (Stuart McCulloch)
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public final class DependencyExcluder extends AbstractDependencyFilter
 {

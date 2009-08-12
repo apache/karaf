@@ -29,8 +29,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
 /**
  * Bundle activator for the deployment admin bundle
  *
- * @author  Christian van Spaandonk
- * @version $Revision: 8712 $
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class Activator extends DependencyActivatorBase {
 

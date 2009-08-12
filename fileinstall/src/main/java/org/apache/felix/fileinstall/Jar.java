@@ -31,7 +31,7 @@ import org.osgi.framework.Constants;
  * equals methods so that it can be used in various Set operations.
  * It uses file's path as the primary key. 
  *
- * @author Sanjeeb.Sahoo@Sun.COM
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 class Jar
 {

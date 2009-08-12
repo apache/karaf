@@ -34,7 +34,7 @@ import org.codehaus.plexus.util.xml.Xpp3Dom;
 /**
  * Provide access to the archive configuration from the jar plugin
  * 
- * @author stuart.mcculloch@jayway.net (Stuart McCulloch)
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public final class JarPluginConfiguration
 {

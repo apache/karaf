@@ -23,7 +23,7 @@ import java.util.Properties;
 /**
  * The <code>Resources</code> TODO
  *
- * @author fmeschbe
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class Resources
 {

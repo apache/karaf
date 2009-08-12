@@ -33,7 +33,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * The <code>MetaDataReaderTest</code> class tests the
  * <code>MetaDataReader</code> class.
  *
- * @author fmeschbe
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class MetaDataReaderTest extends TestCase
 {

@@ -39,7 +39,7 @@ import org.osgi.service.metatype.ObjectClassDefinition;
  * methods: {@link #getName()}, {@link #getDescription()}, and
  * {@link #getIcon(int)}.
  *
- * @author fmeschbe
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class LocalizedObjectClassDefinition extends LocalizedBase implements ObjectClassDefinition
 {

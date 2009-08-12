@@ -33,7 +33,7 @@ import aQute.lib.osgi.Instruction;
 /**
  * Apply clause-based filter over given dependencies
  * 
- * @author mcculls@gmail.com (Stuart McCulloch)
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public abstract class AbstractDependencyFilter
 {

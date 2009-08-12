@@ -23,7 +23,7 @@ package org.apache.felix.metatype;
  * The <code>Designate</code> class represents the <code>Designate</code>
  * element of the meta type descriptor.
  * 
- * @author fmeschbe
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class Designate
 {

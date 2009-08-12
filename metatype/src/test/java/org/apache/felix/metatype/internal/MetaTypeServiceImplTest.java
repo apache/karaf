@@ -41,7 +41,7 @@ import org.osgi.service.metatype.ObjectClassDefinition;
  * The <code>MetaTypeServiceImplTest</code> class tests the
  * {@link MetaTypeServiceImpl}.
  *
- * @author fmeschbe
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class MetaTypeServiceImplTest extends TestCase
 {

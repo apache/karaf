@@ -45,7 +45,7 @@ import org.osgi.service.metatype.ObjectClassDefinition;
  * <code>ManagedServiceFactory</code> implementations to easily also implement
  * the <code>MetaTypeProvider</code> interface. 
  *
- * @author fmeschbe
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class DefaultMetaTypeProvider implements MetaTypeProvider
 {

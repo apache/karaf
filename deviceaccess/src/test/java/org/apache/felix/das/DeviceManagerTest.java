@@ -847,8 +847,7 @@ public class DeviceManagerTest
     }
 
     /**
-     * @author dennisg
-     *
+     * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
      */
     private class MatchAnswer implements Answer<Integer>
     {

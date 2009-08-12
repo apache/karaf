@@ -28,7 +28,7 @@ import org.osgi.service.log.LogService;
  * and string arrays on demand using a <code>ResourceBundle</code> specified
  * at construction time.
  *
- * @author fmeschbe
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 abstract class LocalizedBase
 {

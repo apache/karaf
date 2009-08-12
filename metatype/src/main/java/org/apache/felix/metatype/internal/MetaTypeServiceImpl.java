@@ -38,7 +38,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * <code>MetaTypeService</code> interface of the OSGi Metatype Service
  * Specification 1.1.  
  *
- * @author fmeschbe
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 class MetaTypeServiceImpl implements MetaTypeService
 {

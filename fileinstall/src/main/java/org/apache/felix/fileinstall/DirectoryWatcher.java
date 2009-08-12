@@ -49,8 +49,7 @@ import org.osgi.service.packageadmin.*;
  *   it tries to start all the managed bundle unless it has been configured
  *   to only install bundles.
  *
- * @author Peter Kriens
- * @author Sanjeeb Sahoo
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class DirectoryWatcher extends Thread
 {

@@ -30,7 +30,7 @@ import org.osgi.service.metatype.AttributeDefinition;
  * The <code>AD</code> class represents the <code>AD</code> element of the
  * meta type descriptor.
  *
- * @author fmeschbe
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class AD
 {

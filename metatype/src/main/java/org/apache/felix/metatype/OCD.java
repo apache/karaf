@@ -28,7 +28,7 @@ import java.util.Map;
  * The <code>OCD</code> class represents the <code>OCD</code> element of the
  * meta type descriptor.
  *
- * @author fmeschbe
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class OCD
 {

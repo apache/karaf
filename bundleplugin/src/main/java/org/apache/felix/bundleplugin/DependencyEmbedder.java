@@ -36,7 +36,7 @@ import aQute.libg.header.OSGiHeader;
 /**
  * Add BND directives to embed selected dependencies inside a bundle
  * 
- * @author stuart.mcculloch@jayway.net (Stuart McCulloch)
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public final class DependencyEmbedder extends AbstractDependencyFilter
 {

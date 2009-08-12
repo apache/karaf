@@ -26,10 +26,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.service.startlevel.StartLevel;
 
 /**
- * @author rickhall
- *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
+ * StartLevel service implementation.
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
 **/
 public class StartLevelImpl implements StartLevel, Runnable
 {

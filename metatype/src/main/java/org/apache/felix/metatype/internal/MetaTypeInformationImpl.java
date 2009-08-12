@@ -41,7 +41,7 @@ import org.osgi.service.metatype.ObjectClassDefinition;
  * <code>MetaTypeInformation</code> interface returned from the
  * <code>MetaTypeService</code>.
  *
- * @author fmeschbe
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class MetaTypeInformationImpl implements MetaTypeInformation {
 

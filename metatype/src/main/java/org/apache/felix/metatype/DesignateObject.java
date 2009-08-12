@@ -27,7 +27,7 @@ import java.util.List;
  * The <code>DesignateObject</code> class represents the <code>Object</code> element of
  * the meta type descriptor.
  * 
- * @author fmeschbe
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class DesignateObject
 {

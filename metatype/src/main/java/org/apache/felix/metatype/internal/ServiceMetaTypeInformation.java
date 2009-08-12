@@ -30,7 +30,7 @@ import org.osgi.service.metatype.MetaTypeProvider;
  * <code>ManagedService</code>s and <code>ManagedServiceFactory</code>s
  * also implementing the <code>MetaTypeProvider</code> interface.
  *
- * @author fmeschbe
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ServiceMetaTypeInformation extends MetaTypeInformationImpl implements ServiceListener
 {

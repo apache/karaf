@@ -31,7 +31,7 @@ import org.osgi.service.metatype.AttributeDefinition;
  * methods: {@link #getName()}, {@link #getDescription()},
  * {@link #getOptionLabels()}, and {@link #validate(String)}.
  *
- * @author fmeschbe
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 class LocalizedAttributeDefinition extends LocalizedBase implements AttributeDefinition
 {

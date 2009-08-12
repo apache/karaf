@@ -37,7 +37,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * logging goes to standard output or standard error (in case of level ERROR
  * messages).
  *
- * @author fmeschbe
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class Activator implements BundleActivator
 {

@@ -258,8 +258,7 @@ public class DeviceManager implements Log
      * worker thread) for the framework to start, or if it has already started,
      * returns immediately, freeing up the worker thread.
      * 
-     * @author dennisg
-     * 
+     * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
      */
     private class WaitForStartFramework implements Callable<Object>, FrameworkListener
     {
@@ -383,8 +382,7 @@ public class DeviceManager implements Log
     /**
      * Checks for Idle devices, and attaches them
      * 
-     * @author dennisg
-     * 
+     * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
      */
     private class CheckForIdleDevices implements Callable<Object>
     {
@@ -453,8 +451,7 @@ public class DeviceManager implements Log
      * 
      * Used to uninstall unused drivers
      * 
-     * @author dennisg
-     * 
+     * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
      */
     private class IdleDriverUninstallAlgorithm implements Callable<Object>
     {

@@ -48,7 +48,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * This class is not thread safe. Using instances of this class in multiple
  * threads concurrently is not supported and will fail.
  *
- * @author fmeschbe
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class MetaDataReader
 {

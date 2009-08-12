@@ -22,8 +22,7 @@ package org.apache.felix.metatype;
 /**
  * The <code>Attribute</code> TODO
  *
- * @author fmeschbe
- * @version $Rev$, $Date$
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class Attribute
 {

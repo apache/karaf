@@ -28,7 +28,7 @@ import org.osgi.service.metatype.AttributeDefinition;
  * The <code>ADTest</code> class tests the static helper methods of the
  * {@link AD} class.
  * 
- * @author fmeschbe
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class ADTest extends TestCase
 {
