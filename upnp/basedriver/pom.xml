@@ -76,7 +76,7 @@
         <dependency>
           <groupId>org.cybergarage.cyberlink</groupId>
           <artifactId>upnp-stack</artifactId>
-          <version>1.8.0-SNAPSHOT</version>
+          <version>1.8.0</version>
           <optional>true</optional>
 	  <exclusions>
 	    <exclusion>
@@ -170,6 +170,7 @@
     </plugins>
   </build>
 
+<!-- !!! UNABLE TO ACCESS THESE REPOS !!!
   <repositories>
     <repository>
       <id>release.domoware.isti.cnr.it</id>
@@ -184,7 +185,7 @@
       <releases><enabled>false</enabled></releases>
     </repository>
   </repositories>
-
+-->
 
   <dependencies>
     <dependency>
@@ -201,13 +202,13 @@
     <dependency>
       <groupId>it.cnr.isti.domoware.cyberdomo</groupId>
       <artifactId>upnp-stack</artifactId>
-      <version>1.9.0-SNAPSHOT</version>
+      <version>1.8.0</version>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>it.cnr.isti.domoware.cyberdomo</groupId>
       <artifactId>upnp-stack-jdk13</artifactId>
-      <version>1.8.1-SNAPSHOT</version>
+      <version>1.8.0</version>
       <optional>true</optional>
     </dependency>
   </dependencies>
