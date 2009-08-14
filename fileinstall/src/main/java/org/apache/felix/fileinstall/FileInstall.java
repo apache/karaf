@@ -58,6 +58,7 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory
         set(ht, DirectoryWatcher.POLL);
         set(ht, DirectoryWatcher.DIR);
         set(ht, DirectoryWatcher.DEBUG);
+        set(ht, DirectoryWatcher.FILTER);
         set(ht, DirectoryWatcher.START_NEW_BUNDLES);
         updated("initial", ht);
     }

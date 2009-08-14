@@ -57,11 +57,13 @@ public class DirectoryWatcher extends Thread
     public final static String POLL = "felix.fileinstall.poll";
     public final static String DIR = "felix.fileinstall.dir";
     public final static String DEBUG = "felix.fileinstall.debug";
+    public final static String FILTER = "felix.fileinstall.filter";
     public final static String START_NEW_BUNDLES =
         "felix.fileinstall.bundles.new.start";
     File watchedDirectory;
     long poll = 2000;
     long debug;
+    String filter;
     boolean startBundles = true; // by default, we start bundles.
     BundleContext context;
     boolean reported;
@@ -97,6 +99,8 @@ public class DirectoryWatcher extends Thread
         {
             startBundles = "true".equalsIgnoreCase((String)value);
         }
+
+        filter = (String) properties.get(FILTER);
     }
 
     /**
@@ -109,16 +113,32 @@ public class DirectoryWatcher extends Thread
         log("{" + POLL + " (ms) = " + poll + ", "
                 + DIR + " = " + watchedDirectory.getAbsolutePath() + ", "
                 + DEBUG + " = " + debug + ", "
+                + FILTER + " = " + filter + ", "
                 + START_NEW_BUNDLES + " = " + startBundles + "}", null);
         initializeCurrentManagedBundles();
         Map currentManagedConfigs = new HashMap(); // location -> Long(time)
+
+        FilenameFilter flt;
+        if (filter != null)
+        {
+            flt = new FilenameFilter()
+            {
+                public boolean accept(File dir, String name) {
+                    return name.matches(filter);
+                }
+            };
+        }
+        else
+        {
+            flt = null;
+        }
         while (!interrupted())
         {
             try
             {
                 Map/* <String, Jar> */ installed = new HashMap();
                 Set/* <String> */ configs = new HashSet();
-                traverse(installed, configs, watchedDirectory);
+                traverse(installed, configs, watchedDirectory, flt);
                 doInstalled(installed);
                 doConfigs(currentManagedConfigs, configs);
                 Thread.sleep(poll);
@@ -464,14 +484,16 @@ public class DirectoryWatcher extends Thread
      *            Returns the abspath -> file for found configurations
      * @param jardir
      *            The directory to traverse
+     * @param filter
+     *            A filter for file names
      */
-    void traverse(Map/* <String, Jar> */ jars, Set configs, File jardir)
+    void traverse(Map/* <String, Jar> */ jars, Set configs, File jardir, FilenameFilter filter)
     {
-        String list[] = jardir.list();
+        String list[] = jardir.list(filter);
         if (list == null)
         {
             prepareWatchedDir(jardir);
-            list = jardir.list();
+            list = jardir.list(filter);
         }
         for (int i = 0; (list != null) && (i < list.length); i++)
         {
