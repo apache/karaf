@@ -138,7 +138,8 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     private Map factories;
 
     // the cache of Configuration instances mapped by their PID
-    private Map configurations;
+    // have this always set to prevent NPE on bundle shutdown
+    private final Map configurations = new HashMap();
 
     // the maximum log level when no LogService is available
     private int logLevel = CM_LOG_LEVEL_DEFAULT;
@@ -173,7 +174,6 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         // set up some fields
         this.bundleContext = bundleContext;
         this.factories = new HashMap();
-        this.configurations = new HashMap();
 
         // configurationlistener support
         configurationListenerTracker = new ServiceTracker( bundleContext, ConfigurationListener.class.getName(), null );
@@ -205,8 +205,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         bundleContext.addBundleListener( this );
 
         // get all persistence managers to begin with
-        pmtCount = 1; // make sure to get the persistence managers at least
-        // once
+        pmtCount = 1; // make sure to get the persistence managers at least once
         persistenceManagerTracker = new ServiceTracker( bundleContext, PersistenceManager.class.getName(), null );
         persistenceManagerTracker.open();
 
@@ -227,6 +226,9 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     public void stop( BundleContext bundleContext )
     {
 
+        // stop handling bundle events immediately
+        handleBundleEvents = false;
+
         // immediately unregister the Configuration Admin before cleaning up
         // clearing the field before actually unregistering the service
         // prevents IllegalStateException in getServiceReference() if
@@ -246,7 +248,6 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
         // stop listening for events
         bundleContext.removeBundleListener( this );
-        handleBundleEvents = false;
 
         if ( configurationListenerTracker != null )
         {
@@ -274,8 +275,13 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             logTracker.close();
         }
 
+        // just ensure the configuration cache is cleared, not cleaning
+        synchronized ( configurations )
+        {
+            configurations.clear();
+        }
+
         this.bundleContext = null;
-        this.configurations = null;
     }
 
 
@@ -942,8 +948,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 }
 
                 // 104.3 Report an error in the log if more than one service
-                // with
-                // the same PID asks for the configuration
+                // with the same PID asks for the configuration
                 if ( cfg.getServiceReference() != null && !sr.equals( cfg.getServiceReference() ) )
                 {
                     log( LogService.LOG_ERROR, "Configuration for " + pid + " has already been used for service "
@@ -1189,17 +1194,31 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             {
                 if ( config.getFactoryPid() == null )
                 {
-                    ServiceReference[] sr = bundleContext.getServiceReferences( ManagedService.class.getName(), "("
-                        + Constants.SERVICE_PID + "=" + config.getPid() + ")" );
-                    if ( sr != null && sr.length > 0 )
+                    final ServiceReference[] srList = bundleContext.getServiceReferences( ManagedService.class
+                        .getName(), "(" + Constants.SERVICE_PID + "=" + config.getPid() + ")" );
+                    if ( srList != null && srList.length > 0 )
                     {
-                        ManagedService srv = ( ManagedService ) bundleContext.getService( sr[0] );
+                        final ServiceReference sr = srList[0];
+                        final ManagedService srv = ( ManagedService ) bundleContext.getService( sr );
+
+                        // 104.3 Report an error in the log if more than one service
+                        // with the same PID asks for the configuration
+                        if ( srList.length > 1 )
+                        {
+                            for ( int i = 1; i < srList.length; i++ )
+                            {
+                                log( LogService.LOG_ERROR, "Configuration for " + config.getPid()
+                                    + " is used for service " + sr
+                                    + "following services will not receive configuration: " + srList[i], null );
+                            }
+                        }
+
                         try
                         {
                             // bind the configuration, fail if bound to another
                             // bundle !!
                             // check bundle location of configuration
-                            String bundleLocation = sr[0].getBundle().getLocation();
+                            String bundleLocation = sr.getBundle().getLocation();
                             if ( config.getBundleLocation() == null )
                             {
                                 // bind to the location of the service if
@@ -1215,8 +1234,14 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                                 return;
                             }
 
+                            // record the delivery of the configuration
+                            if ( config.getServiceReference() == null )
+                            {
+                                config.setServiceReference( sr );
+                            }
+
                             // prepare the configuration for the service (call plugins)
-                            Dictionary dictionary = callPlugins( config.getPid(), sr[0], config );
+                            Dictionary dictionary = callPlugins( config.getPid(), sr, config );
 
                             // update the ManagedService with the properties
                             srv.updated( dictionary );
@@ -1224,23 +1249,24 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                         }
                         finally
                         {
-                            bundleContext.ungetService( sr[0] );
+                            bundleContext.ungetService( sr );
                         }
                     }
                 }
                 else
                 {
-                    ServiceReference[] sr = bundleContext.getServiceReferences( ManagedServiceFactory.class.getName(),
-                        "(" + Constants.SERVICE_PID + "=" + config.getFactoryPid() + ")" );
-                    if ( sr != null && sr.length > 0 )
+                    ServiceReference[] srList = bundleContext.getServiceReferences( ManagedServiceFactory.class
+                        .getName(), "(" + Constants.SERVICE_PID + "=" + config.getFactoryPid() + ")" );
+                    if ( srList != null && srList.length > 0 )
                     {
-                        ManagedServiceFactory srv = ( ManagedServiceFactory ) bundleContext.getService( sr[0] );
+                        final ServiceReference sr = srList[0];
+                        final ManagedServiceFactory srv = ( ManagedServiceFactory ) bundleContext.getService( sr );
                         try
                         {
                             // bind the configuration, fail if bound to another
                             // bundle !!
                             // check bundle location of configuration
-                            String bundleLocation = sr[0].getBundle().getLocation();
+                            String bundleLocation = sr.getBundle().getLocation();
                             if ( config.getBundleLocation() == null )
                             {
                                 // bind to the location of the service if
@@ -1259,7 +1285,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                             // prepare the configuration for the service (call plugins)
                             // call the plugins with cm.target set to the service's factory PID
                             // (clarification in Section 104.9.1 of Compendium 4.2)
-                            Dictionary dictionary = callPlugins( config.getFactoryPid(), sr[0], config );
+                            Dictionary dictionary = callPlugins( config.getFactoryPid(), sr, config );
 
                             // update the ManagedServiceFactory with the properties
                             // only, if there is non-null configuration data
@@ -1271,7 +1297,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                         }
                         finally
                         {
-                            bundleContext.ungetService( sr[0] );
+                            bundleContext.ungetService( sr );
                         }
                     }
                 }
@@ -1331,11 +1357,12 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             {
                 if ( factoryPid == null )
                 {
-                    ServiceReference[] sr = bundleContext.getServiceReferences( ManagedService.class.getName(), "("
+                    ServiceReference[] srList = bundleContext.getServiceReferences( ManagedService.class.getName(), "("
                         + Constants.SERVICE_PID + "=" + pid + ")" );
-                    if ( sr != null && sr.length > 0 )
+                    if ( srList != null && srList.length > 0 )
                     {
-                        ManagedService srv = ( ManagedService ) bundleContext.getService( sr[0] );
+                        final ServiceReference sr = srList[0];
+                        final ManagedService srv = ( ManagedService ) bundleContext.getService( sr );
                         try
                         {
                             srv.updated( null );
@@ -1343,7 +1370,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                         }
                         finally
                         {
-                            bundleContext.ungetService( sr[0] );
+                            bundleContext.ungetService( sr );
                         }
                     }
                 }
@@ -1354,11 +1381,12 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                     factory.removePID( pid );
                     factory.store();
 
-                    ServiceReference[] sr = bundleContext.getServiceReferences( ManagedServiceFactory.class.getName(),
-                        "(" + Constants.SERVICE_PID + "=" + factoryPid + ")" );
-                    if ( sr != null && sr.length > 0 )
+                    ServiceReference[] srList = bundleContext.getServiceReferences( ManagedServiceFactory.class
+                        .getName(), "(" + Constants.SERVICE_PID + "=" + factoryPid + ")" );
+                    if ( srList != null && srList.length > 0 )
                     {
-                        ManagedServiceFactory srv = ( ManagedServiceFactory ) bundleContext.getService( sr[0] );
+                        final ServiceReference sr = srList[0];
+                        final ManagedServiceFactory srv = ( ManagedServiceFactory ) bundleContext.getService( sr );
                         try
                         {
                             srv.deleted( pid );
@@ -1366,7 +1394,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                         }
                         finally
                         {
-                            bundleContext.ungetService( sr[0] );
+                            bundleContext.ungetService( sr );
                         }
                     }
                 }

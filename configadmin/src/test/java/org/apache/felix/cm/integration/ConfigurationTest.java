@@ -129,6 +129,10 @@ public class ConfigurationTest
         // give cm time for distribution
         delay();
 
+        // assert activater has configuration
+        TestCase.assertNotNull( "Expect Properties after Service Registration", tester.props );
+        TestCase.assertEquals( "Expect a single update call", 1, tester.numUpdatedCalls );
+
         // ensure a freshly retrieved object also has the location
         final Configuration beforeStop = getConfiguration( pid );
         TestCase.assertEquals( beforeStop.getBundleLocation(), bundle.getLocation() );
@@ -160,17 +164,100 @@ public class ConfigurationTest
         // ensure a freshly retrieved object also does not have the location
         final Configuration atEnd = getConfiguration( pid );
         TestCase.assertNull( atEnd.getBundleLocation() );
+
+        // remove the configuration for good
+        deleteConfig( pid );
     }
 
 
-    private Bundle installBundle( final String pid ) throws BundleException {
+    @Test
+    public void test_start_bundle_configure_stop_start_bundle() throws IOException, BundleException
+    {
+        String pid = "test_start_bundle_configure_stop_start_bundle";
+
+        // start the bundle and assert this
+        bundle = installBundle( pid );
+        bundle.start();
+        final TestActivator tester = TestActivator.INSTANCE;
+        TestCase.assertNotNull( "Activator not started !!", tester );
+
+        // give cm time for distribution
+        delay();
+
+        // assert activater has no configuration
+        TestCase.assertNull( "Expect no Properties after Service Registration", tester.props );
+        TestCase.assertEquals( "Expect no update call", 1, tester.numUpdatedCalls );
+
+        // configure after ManagedServiceRegistration --> configure via update
+        configure( pid );
+        delay();
+
+        // assert activater has configuration
+        TestCase.assertNotNull( "Expect Properties after Service Registration", tester.props );
+        TestCase.assertEquals( "Expect a single update call", 2, tester.numUpdatedCalls );
+
+        // stop the bundle now
+        bundle.stop();
+
+        // assert INSTANCE is null
+        TestCase.assertNull( TestActivator.INSTANCE );
+
+        delay();
+
+        // start the bundle again (and check)
+        bundle.start();
+        final TestActivator tester2 = TestActivator.INSTANCE;
+        TestCase.assertNotNull( "Activator not started the second time!!", tester2 );
+        TestCase.assertNotSame( "Instances must not be the same", tester, tester2 );
+
+        // give cm time for distribution
+        delay();
+
+        // assert activater has configuration
+        TestCase.assertNotNull( "Expect Properties after Service Registration", tester2.props );
+        TestCase.assertEquals( "Expect a second update call", 1, tester2.numUpdatedCalls );
+
+        // cleanup
+        bundle.uninstall();
+        bundle = null;
+
+        // remove the configuration for good
+        deleteConfig( pid );
+    }
+
+
+    /*
+    @Test
+    public void test_() throws BundleException
+    {
+        final int count = 2;
+        for (int i=0; i < count; i++) {
+            final Bundle bundle = installBundle( "dummy", FailureActivator.class );
+            bundle.start();
+            delay();
+            bundle.uninstall();
+            delay();
+        }
+    }
+    */
+
+
+    private Bundle installBundle( final String pid ) throws BundleException
+    {
+        return installBundle( pid, TestActivator.class );
+    }
+
+
+    private Bundle installBundle( final String pid, final Class<?> activatorClass )
+        throws BundleException
+    {
         final InputStream bundleStream = new MyTinyBundle()
             .prepare(
                 withBnd()
                 .set( Constants.BUNDLE_SYMBOLICNAME, "simpleconfiguration" )
                 .set( Constants.BUNDLE_VERSION, "0.0.11" )
                 .set( Constants.IMPORT_PACKAGE, "org.apache.felix.cm.integration.helper" )
-                .set( Constants.BUNDLE_ACTIVATOR, "org.apache.felix.cm.integration.helper.TestActivator" )
+                .set( Constants.BUNDLE_ACTIVATOR, activatorClass.getName() )
                 .set( TestActivator.HEADER_PID, pid )
             )
             .build( TinyBundles.asStream() );
