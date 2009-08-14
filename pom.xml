@@ -109,7 +109,9 @@
         <module>log</module>
         <module>eventadmin</module>
         <module>http.jetty</module>
+<!-- TEMPORARILY REMOVE UPNP FROM BUILD ***
         <module>upnp</module>
+**** TEMPORARILY REMOVE UPNP FROM BUILD -->
         <module>scr</module>
         <module>configadmin</module>
         <module>metatype</module>
