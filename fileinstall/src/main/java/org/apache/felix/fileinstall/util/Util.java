@@ -88,15 +88,9 @@ public class Util
 
         // If we do not have a start or stop delimiter, then just
         // return the existing value.
-        if ((startDelim < 0) && (stopDelim < 0))
+        if ((startDelim < 0) || (stopDelim < 0))
         {
             return val;
-        }
-        // At this point, we found a stop delimiter without a start,
-        // so throw an exception.
-        else if (((startDelim < 0) || (startDelim > stopDelim)) && (stopDelim >= 0))
-        {
-            throw new IllegalArgumentException("stop delimiter with no start delimiter: " + val);
         }
 
         // At this point, we have found a variable placeholder so

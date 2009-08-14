@@ -47,6 +47,12 @@ public class UtilTest extends TestCase
 
     }
 
+    public void testSubstitutionFailures()
+    {
+        assertEquals("a}", Util.substVars("a}", "b", null, new Hashtable()));
+        assertEquals("${a", Util.substVars("${a", "b", null, new Hashtable()));
+    }
+
     public void testCanRecognizeInvalidJar()
     {
         assertFalse(Util.isValidJar("src/test/resources/watched/firstjar.jar"));
