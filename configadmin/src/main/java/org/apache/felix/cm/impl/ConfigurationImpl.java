@@ -58,30 +58,30 @@ class ConfigurationImpl
      * been assigned with possible no data.
      */
     private static final String CONFIGURATION_NEW = "_felix_.cm.newConfiguration";
-    
+
     /**
      * The {@link ConfigurationManager configuration manager} instance which
      * caused this configuration object to be created.
      */
-    private ConfigurationManager configurationManager;
+    private final ConfigurationManager configurationManager;
 
     /**
      * The {@link PersistenceManager persistence manager} which loaded this
      * configuration instance and which is used to store and delete configuration
      * data.
      */
-    private PersistenceManager persistenceManager;
+    private volatile PersistenceManager persistenceManager;
 
     /**
      * The serviceReference PID of this configuration.
      */
-    private String pid;
+    private final String pid;
 
     /**
      * The factory serviceReference PID of this configuration or <code>null</code> if this
      * is not a factory configuration.
      */
-    private String factoryPID;
+    private final String factoryPID;
 
     /**
      * The location of the bundle to which this configuration instance is bound.
@@ -89,7 +89,7 @@ class ConfigurationImpl
      * {@link #configurationAdmin}. If this configuration is not bound to a
      * bundle, this field is <code>null</code>.
      */
-    private String bundleLocation;
+    private volatile String bundleLocation;
 
     /**
      * The <code>ServiceReference</code> of the serviceReference which first asked for
@@ -98,7 +98,7 @@ class ConfigurationImpl
      * or <code>ManagedServiceFactory.updated(String, Dictionary)</code>
      * method.
      */
-    private ServiceReference serviceReference;
+    private volatile ServiceReference serviceReference;
 
     /**
      * The configuration data of this configuration instance. This is a private
@@ -107,7 +107,7 @@ class ConfigurationImpl
      * the configuration has been created and never been updated with acutal
      * configuration properties.
      */
-    private CaseInsensitiveDictionary properties;
+    private volatile CaseInsensitiveDictionary properties;
 
     /**
      * Flag indicating that this configuration object has been delivered to the
@@ -119,17 +119,27 @@ class ConfigurationImpl
      * @see #setDelivered(boolean)
      * @see #isDelivered()
      */
-    private boolean delivered;
+    private volatile boolean delivered;
 
     ConfigurationImpl( ConfigurationManager configurationManager, PersistenceManager persistenceManager,
         Dictionary properties )
     {
+        if ( configurationManager == null )
+        {
+            throw new IllegalArgumentException( "ConfigurationManager must not be null" );
+        }
+
+        if ( persistenceManager == null )
+        {
+            throw new IllegalArgumentException( "PersistenceManager must not be null" );
+        }
+
         this.configurationManager = configurationManager;
         this.persistenceManager = persistenceManager;
 
-        pid = ( String ) properties.remove( Constants.SERVICE_PID );
-        factoryPID = ( String ) properties.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
-        bundleLocation = ( String ) properties.remove( ConfigurationAdmin.SERVICE_BUNDLELOCATION );
+        this.pid = ( String ) properties.remove( Constants.SERVICE_PID );
+        this.factoryPID = ( String ) properties.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
+        this.bundleLocation = ( String ) properties.remove( ConfigurationAdmin.SERVICE_BUNDLELOCATION );
 
         // set the properties internally
         configureFromPersistence( properties );
@@ -139,8 +149,19 @@ class ConfigurationImpl
     ConfigurationImpl( ConfigurationManager configurationManager, PersistenceManager persistenceManager, String pid,
         String factoryPid, String bundleLocation ) throws IOException
     {
+        if ( configurationManager == null )
+        {
+            throw new IllegalArgumentException( "ConfigurationManager must not be null" );
+        }
+
+        if ( persistenceManager == null )
+        {
+            throw new IllegalArgumentException( "PersistenceManager must not be null" );
+        }
+
         this.configurationManager = configurationManager;
         this.persistenceManager = persistenceManager;
+
         this.pid = pid;
         this.factoryPID = factoryPid;
         this.bundleLocation = bundleLocation;
@@ -181,19 +202,20 @@ class ConfigurationImpl
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.osgi.service.cm.Configuration#delete()
      */
     public void delete() throws IOException
     {
-        if ( !isDeleted() )
+        PersistenceManager localPersistenceManager = getPersistenceManager();
+        if ( localPersistenceManager != null )
         {
-            persistenceManager.delete( pid );
-            persistenceManager = null;
+            localPersistenceManager.delete( this.pid );
+            this.persistenceManager = null;
 
             // ensure configuration is being delivered
             setDelivered( false );
-            
+
             configurationManager.deleted( this );
         }
     }
@@ -234,7 +256,7 @@ class ConfigurationImpl
      * <code>deepCopy</code> parameter is true array and collection values are
      * copied into new arrays or collections. Otherwise just a new dictionary
      * referring to the same objects is returned.
-     * 
+     *
      * @param deepCopy
      *            <code>true</code> if a deep copy is to be returned.
      * @return
@@ -283,10 +305,11 @@ class ConfigurationImpl
      */
     public void update() throws IOException
     {
-        if ( !isDeleted() )
+        PersistenceManager localPersistenceManager = getPersistenceManager();
+        if ( localPersistenceManager != null )
         {
             // read configuration from persistence (again)
-            Dictionary properties = persistenceManager.load( pid );
+            Dictionary properties = localPersistenceManager.load( pid );
 
             // ensure serviceReference pid
             String servicePid = ( String ) properties.get( Constants.SERVICE_PID );
@@ -300,7 +323,7 @@ class ConfigurationImpl
 
             // ensure configuration is being delivered
             setDelivered( false );
-            
+
             configurationManager.updated( this );
         }
     }
@@ -311,16 +334,17 @@ class ConfigurationImpl
      */
     public void update( Dictionary properties ) throws IOException
     {
-        if ( !isDeleted() )
+        PersistenceManager localPersistenceManager = getPersistenceManager();
+        if ( localPersistenceManager != null )
         {
             CaseInsensitiveDictionary newProperties = new CaseInsensitiveDictionary( properties );
 
             setAutoProperties( newProperties, true );
 
-            persistenceManager.store( pid, newProperties );
+            localPersistenceManager.store( pid, newProperties );
 
             configure( newProperties );
-            
+
             // if this is a factory configuration, update the factory with
             String factoryPid = getFactoryPid();
             if ( factoryPid != null )
@@ -336,7 +360,7 @@ class ConfigurationImpl
 
             // ensure configuration is being delivered
             setDelivered( false );
-            
+
             configurationManager.updated( this );
         }
     }
@@ -423,19 +447,37 @@ class ConfigurationImpl
     }
 
 
+    /**
+     * Returns <code>true</code> if this configuration has already been deleted
+     * on the persistence.
+     */
     boolean isDeleted()
     {
-        if ( persistenceManager != null )
+        PersistenceManager persistenceManager = getPersistenceManager();
+        return persistenceManager == null;
+    }
+
+
+    /**
+     * Returns the persistence manager used to store this configuration or
+     * <code>null</code> if the configuration has been removed.
+     */
+    private PersistenceManager getPersistenceManager()
+    {
+        PersistenceManager localPersistenceManager = this.persistenceManager;
+        if ( localPersistenceManager != null )
         {
-            if ( properties == null || persistenceManager.exists( pid ) )
+            boolean exists = localPersistenceManager.exists( pid );
+
+            if ( this.properties == null || exists )
             {
-                return false;
+                return localPersistenceManager;
             }
 
-            persistenceManager = null;
+            this.persistenceManager = null;
         }
 
-        return true;
+        return null;
     }
 
 
@@ -452,7 +494,7 @@ class ConfigurationImpl
             this.properties = null;
         }
     }
-    
+
     private void configure( Dictionary properties )
     {
         // remove predefined properties

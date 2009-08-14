@@ -560,6 +560,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         if ( persistenceManagers == null || currentPmtCount > pmtCount )
         {
 
+            List pmList = new ArrayList();
             PersistenceManager[] pm;
 
             ServiceReference[] refs = persistenceManagerTracker.getServiceReferences();
@@ -577,16 +578,21 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 }
 
                 // create the service array from the sorted set of referenecs
-                pm = new PersistenceManager[pms.size()];
                 int pmIndex = 0;
-                for ( Iterator pi = pms.iterator(); pi.hasNext(); pmIndex++)
+                for ( Iterator pi = pms.iterator(); pi.hasNext(); pmIndex++ )
                 {
                     ServiceReference ref = ( ServiceReference ) pi.next();
-                    pm[pmIndex] = ( PersistenceManager ) persistenceManagerTracker.getService( ref );
+                    Object service = persistenceManagerTracker.getService( ref );
+                    if ( service != null )
+                    {
+                        pmList.add( service );
+                    }
                 }
+
+                pm = ( PersistenceManager[] ) pmList.toArray( new PersistenceManager[pmList.size()] );
             }
 
-            pmtCount = currentPmtCount;
+            pmtCount = pm.length;
             persistenceManagers = pm;
         }
 

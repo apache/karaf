@@ -34,8 +34,8 @@ import org.osgi.service.cm.Configuration;
 public class ConfigurationAdapter implements Configuration
 {
 
-    private ConfigurationAdminImpl configurationAdmin;
-    private ConfigurationImpl delegatee;
+    private final ConfigurationAdminImpl configurationAdmin;
+    private final ConfigurationImpl delegatee;
 
 
     ConfigurationAdapter( ConfigurationAdminImpl configurationAdmin, ConfigurationImpl delegatee )

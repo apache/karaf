@@ -371,7 +371,10 @@ public class FilePersistenceManager implements PersistenceManager
      */
     public void delete( String pid )
     {
-        getFile( pid ).delete();
+        synchronized ( this )
+        {
+            getFile( pid ).delete();
+        }
     }
 
 
@@ -385,7 +388,10 @@ public class FilePersistenceManager implements PersistenceManager
      */
     public boolean exists( String pid )
     {
-        return getFile( pid ).isFile();
+        synchronized ( this )
+        {
+            return getFile( pid ).isFile();
+        }
     }
 
 
@@ -436,14 +442,19 @@ public class FilePersistenceManager implements PersistenceManager
             // after writing the file, rename it but ensure, that no other
             // might at the same time open the new file
             // see load(File)
-            synchronized (this) {
+            synchronized ( this )
+            {
                 // make sure the cfg file does not exists (just for sanity)
-                if (cfgFile.exists()) {
+                if ( cfgFile.exists() )
+                {
                     cfgFile.delete();
                 }
 
                 // rename the temporary file to the new file
-                tmpFile.renameTo( cfgFile );
+                if ( !tmpFile.renameTo( cfgFile ) )
+                {
+                    throw new IOException( "Failed to rename configuration file from '" + tmpFile + "' to '" + cfgFile );
+                }
             }
         }
         finally
