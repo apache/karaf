@@ -273,8 +273,23 @@ public class DirectoryWatcher extends Thread
 
         Properties p = new Properties();
         InputStream in = new FileInputStream(f);
-        p.load(in);
-        in.close();
+        try
+        {
+            p.load(in);
+        }
+        finally
+        {
+            in.close();
+        }
+        for (Enumeration e = p.keys(); e.hasMoreElements(); )
+        {
+            String name = (String) e.nextElement();
+            Object value = p.get(name);
+            p.put(name,
+                value instanceof String
+                    ? Util.substVars((String) value, name, null, p)
+                    : value);
+        }
         String pid[] = parsePid(f.getName());
         Hashtable ht = new Hashtable();
         ht.putAll(p);
