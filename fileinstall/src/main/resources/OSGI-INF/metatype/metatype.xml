@@ -27,6 +27,7 @@
     <AD name="Poll interval"  id="felix.fileinstall.poll" required="false" type="String" default="5000"/>
     <AD name="Debug"  id="felix.fileinstall.debug" required="false" type="String" default="-1"/>
     <AD name="Start new bundles?"  id="felix.fileinstall.bundles.new.start" required="false" type="String" default="true"/>
+    <AD name="File name filter"  id="felix.fileinstall.filter" required="false" type="String" default=""/>
   </OCD>
   
     <Designate pid="org.apache.felix.fileinstall">
