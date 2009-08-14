@@ -25,6 +25,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.AccessControlContext;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.BitSet;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -119,6 +124,11 @@ public class FilePersistenceManager implements PersistenceManager
     private static final String TMP_EXT = ".tmp";
 
     private static final BitSet VALID_PATH_CHARS;
+
+    /**
+     * The access control context we use in the presence of a security manager.
+     */
+    private final AccessControlContext acc;
 
     /**
      * The abstract path name of the configuration files.
@@ -283,6 +293,16 @@ public class FilePersistenceManager implements PersistenceManager
      */
     public FilePersistenceManager( BundleContext bundleContext, String location )
     {
+        // setup the access control context from the calling setup
+        if ( System.getSecurityManager() != null )
+        {
+            acc = AccessController.getContext();
+        }
+        else
+        {
+            acc = null;
+        }
+
         // no configured location, use the config dir in the bundle persistent
         // area
         if ( location == null && bundleContext != null )
@@ -369,7 +389,33 @@ public class FilePersistenceManager implements PersistenceManager
      *
      * @param pid The identifier of the configuration file to delete.
      */
-    public void delete( String pid )
+    public void delete( final String pid )
+    {
+        if ( System.getSecurityManager() != null )
+        {
+            _privilegedDelete( pid );
+        }
+        else
+        {
+            _delete( pid );
+        }
+    }
+
+
+    private void _privilegedDelete( final String pid )
+    {
+        AccessController.doPrivileged( new PrivilegedAction()
+        {
+            public Object run()
+            {
+                _delete( pid );
+                return null;
+            }
+        }, acc );
+    }
+
+
+    private void _delete( final String pid )
     {
         synchronized ( this )
         {
@@ -386,7 +432,31 @@ public class FilePersistenceManager implements PersistenceManager
      *
      * @return <code>true</code> if the file exists
      */
-    public boolean exists( String pid )
+    public boolean exists( final String pid )
+    {
+        if ( System.getSecurityManager() != null )
+        {
+            return _privilegedExists( pid );
+        }
+
+        return _exists( pid );
+    }
+
+
+    private boolean _privilegedExists( final String pid )
+    {
+        final Object result = AccessController.doPrivileged( new PrivilegedAction()
+        {
+            public Object run()
+            {
+                return Boolean.valueOf( _exists( pid ) );
+            }
+        } );
+        return ( ( Boolean ) result ).booleanValue();
+    }
+
+
+    private boolean _exists( final String pid )
     {
         synchronized ( this )
         {
@@ -407,7 +477,85 @@ public class FilePersistenceManager implements PersistenceManager
      */
     public Dictionary load( String pid ) throws IOException
     {
-        return load( getFile( pid ) );
+        final File cfgFile = getFile( pid );
+
+        if ( System.getSecurityManager() != null )
+        {
+            return _privilegedLoad( cfgFile );
+        }
+
+        return _load( cfgFile );
+    }
+
+
+    private Dictionary _privilegedLoad( final File cfgFile ) throws IOException
+    {
+        try
+        {
+            Object result = AccessController.doPrivileged( new PrivilegedExceptionAction()
+            {
+                public Object run() throws IOException
+                {
+                    return _load( cfgFile );
+                }
+            } );
+
+            return ( Dictionary ) result;
+        }
+        catch ( PrivilegedActionException pae )
+        {
+            throw ( IOException ) pae.getCause();
+        }
+    }
+
+
+    /**
+     * Loads the contents of the <code>cfgFile</code> into a new
+     * <code>Dictionary</code> object.
+     *
+     * @param cfgFile
+     *            The file from which to load the data.
+     * @return A new <code>Dictionary</code> object providing the file contents.
+     * @throws java.io.FileNotFoundException
+     *             If the given file does not exist.
+     * @throws IOException
+     *             If an error occurrs reading the configuration file.
+     */
+    Dictionary _load( File cfgFile ) throws IOException
+    {
+        // this method is not part of the API of this class but is made
+        // package private to prevent the creation of a synthetic method
+        // for use by the DictionaryEnumeration._seek method
+
+        // synchronize this instance to make at least sure, the file is
+        // not at the same time accessed by another thread (see store())
+        // we have to synchronize the complete load time as the store
+        // method might want to replace the file while we are reading and
+        // still have the file open. This might be a problem e.g. in Windows
+        // environments, where files may not be removed which are still open
+        synchronized ( this )
+        {
+            InputStream ins = null;
+            try
+            {
+                ins = new FileInputStream( cfgFile );
+                return ConfigurationHandler.read( ins );
+            }
+            finally
+            {
+                if ( ins != null )
+                {
+                    try
+                    {
+                        ins.close();
+                    }
+                    catch ( IOException ioe )
+                    {
+                        // ignore
+                    }
+                }
+            }
+        }
     }
 
 
@@ -421,7 +569,40 @@ public class FilePersistenceManager implements PersistenceManager
      *
      * @throws IOException If an error occurrs writing the configuration data.
      */
-    public void store( String pid, Dictionary props ) throws IOException
+    public void store( final String pid, final Dictionary props ) throws IOException
+    {
+        if ( System.getSecurityManager() != null )
+        {
+            _privilegedStore( pid, props );
+        }
+        else
+        {
+            _store( pid, props );
+        }
+    }
+
+
+    private void _privilegedStore( final String pid, final Dictionary props ) throws IOException
+    {
+        try
+        {
+            AccessController.doPrivileged( new PrivilegedExceptionAction()
+            {
+                public Object run() throws IOException
+                {
+                    _store( pid, props );
+                    return null;
+                }
+            } );
+        }
+        catch ( PrivilegedActionException pae )
+        {
+            throw ( IOException ) pae.getCause();
+        }
+    }
+
+
+    private void _store( final String pid, final Dictionary props ) throws IOException
     {
         OutputStream out = null;
         File tmpFile = null;
@@ -480,51 +661,6 @@ public class FilePersistenceManager implements PersistenceManager
 
 
     /**
-     * Loads the contents of the <code>cfgFile</code> into a new
-     * <code>Dictionary</code> object.
-     *
-     * @param cfgFile The file from which to load the data.
-     *
-     * @return A new <code>Dictionary</code> object providing the file contents.
-     *
-     * @throws java.io.FileNotFoundException If the given file does not exist.
-     * @throws IOException If an error occurrs reading the configuration file.
-     */
-    private Dictionary load( File cfgFile ) throws IOException
-    {
-        // synchronize this instance to make at least sure, the file is
-        // not at the same time accessed by another thread (see store())
-        // we have to synchronize the complete load time as the store
-        // method might want to replace the file while we are reading and
-        // still have the file open. This might be a problem e.g. in Windows
-        // environments, where files may not be removed which are still open
-        synchronized ( this )
-        {
-            InputStream ins = null;
-            try
-            {
-                ins = new FileInputStream( cfgFile );
-                return ConfigurationHandler.read( ins );
-            }
-            finally
-            {
-                if ( ins != null )
-                {
-                    try
-                    {
-                        ins.close();
-                    }
-                    catch ( IOException ioe )
-                    {
-                        // ignore
-                    }
-                }
-            }
-        }
-    }
-
-
-    /**
      * Creates an abstract path name for the <code>pid</code> encoding it as
      * follows:
      * <ul>
@@ -539,8 +675,12 @@ public class FilePersistenceManager implements PersistenceManager
      *
      * @return The abstract path name, which the parent directory path created.
      */
-    private File getFile( String pid )
+    File getFile( String pid )
     {
+        // this method is not part of the API of this class but is made
+        // package private to prevent the creation of a synthetic method
+        // for use by the DictionaryEnumeration._seek method
+
         return new File( location, encodePid( pid ) + FILE_EXT );
     }
 
@@ -553,7 +693,7 @@ public class FilePersistenceManager implements PersistenceManager
      * This enumeration loads configuration lazily with a look ahead of one
      * dictionary.
      */
-    private class DictionaryEnumeration implements Enumeration
+    class DictionaryEnumeration implements Enumeration
     {
         private Stack dirStack;
         private File[] fileList;
@@ -567,7 +707,7 @@ public class FilePersistenceManager implements PersistenceManager
             fileList = null;
             idx = 0;
 
-            dirStack.push( location );
+            dirStack.push( getLocation() );
             next = seek();
         }
 
@@ -593,6 +733,30 @@ public class FilePersistenceManager implements PersistenceManager
 
         private Dictionary seek()
         {
+            if ( System.getSecurityManager() != null )
+            {
+                return _privilegedSeek();
+            }
+
+            return _seek();
+        }
+
+
+        protected Dictionary _privilegedSeek()
+        {
+            Object result = AccessController.doPrivileged( new PrivilegedAction()
+            {
+                public Object run()
+                {
+                    return _seek();
+                }
+            } );
+            return ( Dictionary ) result;
+        }
+
+
+        protected Dictionary _seek()
+        {
             while ( ( fileList != null && idx < fileList.length ) || !dirStack.isEmpty() )
             {
                 if ( fileList == null || idx >= fileList.length )
@@ -609,7 +773,7 @@ public class FilePersistenceManager implements PersistenceManager
                     {
                         try
                         {
-                            Dictionary dict =  load( cfgFile );
+                            Dictionary dict =  _load( cfgFile );
 
                             // use the dictionary if it has no PID or the PID
                             // derived file name matches the source file name
@@ -635,4 +799,5 @@ public class FilePersistenceManager implements PersistenceManager
             return null;
         }
     }
+
 }
