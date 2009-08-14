@@ -20,31 +20,31 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>ipojo.tests</groupId>
   <artifactId>BundleAsiPOJO</artifactId>
-  <version>1.3.0-SNAPSHOT</version>
+  <version>1.5.0-SNAPSHOT</version>
   <name>Apache Felix iPOJO TinyBundles Extension</name>
   <packaging>pom</packaging>
   
    <profiles>
-	<profile>
-		<id>java5</id>
-		<activation>
-			<jdk>1.5</jdk>
-		</activation>
-		<modules>
-			<module>bundleAsiPOJO</module>
-    		<module>tests</module>
-		</modules>
-	</profile>
-	<profile>
-		<id>java6</id>
-		<activation>
-			<jdk>1.6</jdk>
-		</activation>
-		<modules>
-			<module>bundleAsiPOJO</module>
-    		<module>tests</module>
-		</modules>
-	</profile>
+  <profile>
+    <id>java5</id>
+    <activation>
+      <jdk>1.5</jdk>
+    </activation>
+    <modules>
+      <module>bundleAsiPOJO</module>
+      <module>tests</module>
+    </modules>
+  </profile>
+  <profile>
+    <id>java6</id>
+    <activation>
+      <jdk>1.6</jdk>
+    </activation>
+    <modules>
+      <module>bundleAsiPOJO</module>
+      <module>tests</module>
+    </modules>
+  </profile>
   </profiles>
   
 </project>

@@ -22,7 +22,7 @@
 	<name>iPOJO Service Providing Strategy Test Suite</name>
 	<artifactId>tests.core.ps.strategy</artifactId>
 	<groupId>ipojo.tests</groupId>
-	<version>1.3.0-SNAPSHOT</version>
+	<version>1.5.0-SNAPSHOT</version>
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.felix</groupId>

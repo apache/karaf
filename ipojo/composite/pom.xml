@@ -31,7 +31,7 @@
   <version>1.5.0-SNAPSHOT</version>
 
   <properties>
-    <ipojo.package.version>1.4.0</ipojo.package.version>
+    <ipojo.package.version>1.6.0</ipojo.package.version>
   </properties>
   
   <description>

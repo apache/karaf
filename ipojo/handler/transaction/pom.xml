@@ -4,7 +4,7 @@
   <groupId>org.apache.felix</groupId>
   <artifactId>org.apache.felix.ipojo.handler.transaction
   </artifactId>
-  <version>1.3.0-SNAPSHOT</version>
+  <version>1.5.0-SNAPSHOT</version>
   <name>Apache Felix iPOJO Transaction Handler</name>
 
   <build>

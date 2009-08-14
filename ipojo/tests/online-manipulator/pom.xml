@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.felix</groupId>
   <artifactId>org.apache.felix.ipojo.online.manipulator.test</artifactId>
-  <version>1.3.0-SNAPSHOT</version>
+  <version>1.5.0-SNAPSHOT</version>
   <name>Online Manipulator Test</name>
   <packaging>jar</packaging>
     <build>
