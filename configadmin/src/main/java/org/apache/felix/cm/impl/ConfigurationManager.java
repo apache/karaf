@@ -90,7 +90,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     private static final String LOG_SERVICE_NAME = "org.osgi.service.log.LogService";
 
     private static final int CM_LOG_LEVEL_DEFAULT = 2;
-    
+
     // random number generator to create configuration PIDs for factory
     // configurations
     private static SecureRandom numberGenerator;
@@ -142,7 +142,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
     // the maximum log level when no LogService is available
     private int logLevel = CM_LOG_LEVEL_DEFAULT;
-    
+
     // flag indicating whether BundleChange events should be consumed (FELIX-979)
     private volatile boolean handleBundleEvents;
 
@@ -151,7 +151,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         // track the log service using a ServiceTracker
         logTracker = new ServiceTracker( bundleContext, LOG_SERVICE_NAME , null );
         logTracker.open();
-        
+
         // assign the log level
         String logLevelProp = bundleContext.getProperty( CM_LOG_LEVEL );
         if ( logLevelProp == null )
@@ -629,7 +629,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
      * Factory method to create a new configuration object. The configuration
      * object returned is not stored in configuration cache and only persisted
      * if the <code>factoryPid</code> parameter is <code>null</code>.
-     * 
+     *
      * @param pid
      *            The PID of the new configuration object. Must not be
      *            <code>null</code>.
@@ -708,15 +708,18 @@ public class ConfigurationManager implements BundleActivator, BundleListener
      * object unless the configuration has just been created and not been
      * updated yet.
      *
+     * @param targetPid The identification of the configuration update used to
+     *          select the plugins according to their cm.target service
+     *          property
      * @param sr The service reference of the managed service (factory) which
-     *            is to be updated with configuration
+     *          is to be updated with configuration
      * @param cfg The configuration object whose properties have to be passed
-     *            through the plugins
+     *          through the plugins
      * @return The properties from the configuration object passed through the
      *         plugins or <code>null</code> if the configuration object has
      *         been newly created and no properties exist yet.
      */
-    private Dictionary callPlugins( ServiceReference sr, ConfigurationImpl cfg )
+    private Dictionary callPlugins( final String targetPid, final ServiceReference sr, final ConfigurationImpl cfg )
     {
         // return a deep copy, since the plugins may tamper with the array
         // and collection elements, which should not modify the internal data
@@ -730,10 +733,8 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         ServiceReference[] plugins = null;
         try
         {
-            String pid = ( String ) sr.getProperty( Constants.SERVICE_PID );
-            String filter = "(|(!(cm.target=*))(cm.target=" + pid + "))";
+            String filter = "(|(!(cm.target=*))(cm.target=" + targetPid + "))";
             plugins = bundleContext.getServiceReferences( ConfigurationPlugin.class.getName(), filter );
-
         }
         catch ( InvalidSyntaxException ise )
         {
@@ -908,7 +909,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                     log( LogService.LOG_DEBUG, "Configuration " + pid + " has already been delivered", null );
                     return;
                 }
-                
+
                 Bundle serviceBundle = sr.getBundle();
                 if ( serviceBundle == null )
                 {
@@ -949,7 +950,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 }
 
                 // prepare the configuration for the service (call plugins)
-                dictionary = callPlugins( sr, cfg );
+                dictionary = callPlugins( pid, sr, cfg );
             }
             else
             {
@@ -987,7 +988,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 log( LogService.LOG_ERROR, sr + ": Unexpected problem updating configuration", t );
             }
         }
-        
+
         public String toString()
         {
             return "ManagedService Update: pid=" + pid;
@@ -1098,7 +1099,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                     log( LogService.LOG_DEBUG, "Configuration " + pid + " has already been updated", null );
                     continue;
                 }
-                
+
                 // check bundle location of configuration
                 if ( cfg.getBundleLocation() == null )
                 {
@@ -1115,7 +1116,9 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 }
 
                 // prepare the configuration for the service (call plugins)
-                Dictionary dictionary = callPlugins( sr, cfg );
+                // call the plugins with cm.target set to the service's factory PID
+                // (clarification in Section 104.9.1 of Compendium 4.2)
+                Dictionary dictionary = callPlugins( factoryPid, sr, cfg );
 
                 // update the service with the configuration
                 try
@@ -1148,8 +1151,8 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 }
             }
         }
-        
-        
+
+
         public String toString()
         {
             return "ManagedServiceFactory Update: factoryPid=" + factoryPid;
@@ -1175,7 +1178,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 log( LogService.LOG_DEBUG, "Configuration " + config.getPid() + " has already been updated", null );
                 return;
             }
-            
+
             try
             {
                 if ( config.getFactoryPid() == null )
@@ -1207,7 +1210,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                             }
 
                             // prepare the configuration for the service (call plugins)
-                            Dictionary dictionary = callPlugins( sr[0], config );
+                            Dictionary dictionary = callPlugins( config.getPid(), sr[0], config );
 
                             // update the ManagedService with the properties
                             srv.updated( dictionary );
@@ -1247,9 +1250,10 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                                 return;
                             }
 
-
                             // prepare the configuration for the service (call plugins)
-                            Dictionary dictionary = callPlugins( sr[0], config );
+                            // call the plugins with cm.target set to the service's factory PID
+                            // (clarification in Section 104.9.1 of Compendium 4.2)
+                            Dictionary dictionary = callPlugins( config.getFactoryPid(), sr[0], config );
 
                             // update the ManagedServiceFactory with the properties
                             // only, if there is non-null configuration data
@@ -1286,7 +1290,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
             fireConfigurationEvent( ConfigurationEvent.CM_UPDATED, config.getPid(), config.getFactoryPid() );
         }
-        
+
         public String toString()
         {
             return "Update: pid=" + config.getPid();
@@ -1316,7 +1320,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 log( LogService.LOG_DEBUG, "Deletion of configuration " + pid + " has already been delivered", null );
                 return;
             }
-            
+
             try
             {
                 if ( factoryPid == null )
@@ -1381,7 +1385,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
             fireConfigurationEvent( ConfigurationEvent.CM_DELETED, pid, factoryPid );
         }
-        
+
         public String toString()
         {
             return "Delete: pid=" + pid;
@@ -1429,7 +1433,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 }
             }
         }
-        
+
         public String toString()
         {
             return "Fire ConfigurationEvent: pid=" + pid;
@@ -1517,7 +1521,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
             return serviceObject;
         }
-        
+
         public void removedService( ServiceReference reference, Object service )
         {
             // check whether we can take back the configuration objects
