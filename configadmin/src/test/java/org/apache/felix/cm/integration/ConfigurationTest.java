@@ -226,6 +226,57 @@ public class ConfigurationTest
     }
 
 
+
+
+    @Test
+    public void test_configure_start_bundle_stop_start_bundle() throws IOException, BundleException
+    {
+        String pid = "test_configure_start_bundle_stop_start_bundle";
+        configure( pid );
+
+        // start the bundle and assert this
+        bundle = installBundle( pid );
+        bundle.start();
+        final TestActivator tester = TestActivator.INSTANCE;
+        TestCase.assertNotNull( "Activator not started !!", tester );
+
+        // give cm time for distribution
+        delay();
+
+        // assert activater has configuration
+        TestCase.assertNotNull( "Expect Properties after Service Registration", tester.props );
+        TestCase.assertEquals( "Expect no update call", 1, tester.numUpdatedCalls );
+
+        // stop the bundle now
+        bundle.stop();
+
+        // assert INSTANCE is null
+        TestCase.assertNull( TestActivator.INSTANCE );
+
+        delay();
+
+        // start the bundle again (and check)
+        bundle.start();
+        final TestActivator tester2 = TestActivator.INSTANCE;
+        TestCase.assertNotNull( "Activator not started the second time!!", tester2 );
+        TestCase.assertNotSame( "Instances must not be the same", tester, tester2 );
+
+        // give cm time for distribution
+        delay();
+
+        // assert activater has configuration
+        TestCase.assertNotNull( "Expect Properties after Service Registration", tester2.props );
+        TestCase.assertEquals( "Expect a second update call", 1, tester2.numUpdatedCalls );
+
+        // cleanup
+        bundle.uninstall();
+        bundle = null;
+
+        // remove the configuration for good
+        deleteConfig( pid );
+    }
+
+
     /*
     @Test
     public void test_() throws BundleException
