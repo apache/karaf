@@ -209,7 +209,9 @@ public class SigilProjectEditorPart extends FormEditor implements IResourceChang
     public void dispose()
     {
         ResourcesPlugin.getWorkspace().removeResourceChangeListener( this );
-        errorImage.dispose();
+        if ( errorImage != null ) {
+            errorImage.dispose();
+        }
         super.dispose();
     }
 
