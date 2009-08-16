@@ -18,13 +18,14 @@ public class EchoAction extends OsgiCommandSupport
 
     protected Object doExecute() throws Exception {
         if (args != null) {
-            int c=0;
-
+            boolean first = true;
             for (String arg : args) {
-                System.out.print(arg);
-                if (++c + 1 < args.size()) {
+                if (first) {
+                    first = false;
+                } else {
                     System.out.print(" ");
                 }
+                System.out.print(arg);
             }
         }
 
