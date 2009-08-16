@@ -187,20 +187,6 @@ public class Reflective
                     // No match, check for varargs
                     if (types[i].isArray() && i == types.length - 1)
                     {
-
-                        // derek - expand final array arg
-                        if (i < in.size())
-                        {
-                            Object arg = in.get(i);
-                            if (arg instanceof List)
-                            {
-                                List<Object> args = (List<Object>) arg;
-                                in = new ArrayList<Object>(in);
-                                in.remove(i);
-                                in.addAll(args);
-                            }
-                        }
-
                         // Try to parse the remaining arguments in an array
                         Class<?> component = types[i].getComponentType();
                         Object components = Array.newInstance(component, in.size() - i);
