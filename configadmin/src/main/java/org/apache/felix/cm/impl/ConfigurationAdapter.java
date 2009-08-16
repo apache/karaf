@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -84,7 +84,7 @@ public class ConfigurationAdapter implements Configuration
     {
         configurationAdmin.checkPermission();
         checkDeleted();
-        delegatee.setBundleLocation( bundleLocation );
+        delegatee.setBundleLocation( bundleLocation, true );
     }
 
 
@@ -117,7 +117,7 @@ public class ConfigurationAdapter implements Configuration
     public Dictionary getProperties()
     {
         checkDeleted();
-        
+
         // return a deep copy since the spec says, that modification of
         // any value should not modify the internal, stored value
         return delegatee.getProperties( true );

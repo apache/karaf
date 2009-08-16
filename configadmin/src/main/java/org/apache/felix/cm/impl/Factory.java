@@ -49,6 +49,9 @@ class Factory
     // the bundle location to which factory PID mapping is bound
     private String bundleLocation;
 
+    // whether the factory is statically bound to a bundle or not
+    private boolean staticallyBound;
+
     // the set of configuration PIDs belonging to this factory
     private Set pids;
 
@@ -89,7 +92,9 @@ class Factory
     {
         this.persistenceManager = persistenceManager;
         this.factoryPid = factoryPid;
-        pids = new HashSet();
+        this.pids = new HashSet();
+        this.bundleLocation = null;
+        this.staticallyBound = false;
     }
 
 
@@ -98,7 +103,8 @@ class Factory
         this( persistenceManager, factoryPid );
 
         // set bundle location
-        bundleLocation = ( String ) props.get( ConfigurationAdmin.SERVICE_BUNDLELOCATION );
+        this.bundleLocation = ( String ) props.get( ConfigurationAdmin.SERVICE_BUNDLELOCATION );
+        this.staticallyBound = this.bundleLocation != null;
 
         // set pids
         String[] pidList = ( String[] ) props.get( FACTORY_PID_LIST );
@@ -130,12 +136,20 @@ class Factory
     }
 
 
-    void setBundleLocation( String bundleLocation )
+    void setBundleLocation( String bundleLocation, boolean staticBinding )
     {
-        this.bundleLocation = bundleLocation;
+        if ( staticBinding )
+        {
+            this.bundleLocation = bundleLocation;
+            this.staticallyBound = true;
 
-        // 104.15.2.8 The bundle location will be set persistently
-        storeSilently();
+            // 104.15.2.8 The bundle location will be set persistently
+            storeSilently();
+        }
+        else if ( !this.staticallyBound )
+        {
+            this.bundleLocation = bundleLocation;
+        }
     }
 
 
@@ -161,7 +175,7 @@ class Factory
     {
         Hashtable props = new Hashtable();
 
-        if ( bundleLocation != null )
+        if ( bundleLocation != null && staticallyBound )
         {
             props.put( ConfigurationAdmin.SERVICE_BUNDLELOCATION, this.getBundleLocation() );
         }

@@ -135,7 +135,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     private int pmtCount;
 
     // the cache of Factory instances mapped by their factory PID
-    private Map factories;
+    private final Map factories = new HashMap();
 
     // the cache of Configuration instances mapped by their PID
     // have this always set to prevent NPE on bundle shutdown
@@ -173,7 +173,6 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
         // set up some fields
         this.bundleContext = bundleContext;
-        this.factories = new HashMap();
 
         // configurationlistener support
         configurationListenerTracker = new ServiceTracker( bundleContext, ConfigurationListener.class.getName(), null );
@@ -275,10 +274,16 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             logTracker.close();
         }
 
-        // just ensure the configuration cache is cleared, not cleaning
+        // just ensure the configuration cache is empty
         synchronized ( configurations )
         {
             configurations.clear();
+        }
+
+        // just ensure the factory cache is empty
+        synchronized ( factories )
+        {
+            factories.clear();
         }
 
         this.bundleContext = null;
@@ -296,11 +301,12 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     }
 
 
-    Iterator getCachedConfigurations()
+    ConfigurationImpl[] getCachedConfigurations()
     {
         synchronized ( configurations )
         {
-            return configurations.values().iterator();
+            return ( ConfigurationImpl[] ) configurations.values().toArray(
+                new ConfigurationImpl[configurations.size()] );
         }
     }
 
@@ -328,6 +334,34 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             configurations.remove( configuration.getPid() );
         }
     }
+
+
+    Factory getCachedFactory( String factoryPid )
+    {
+        synchronized ( factories )
+        {
+            return ( Factory ) factories.get( factoryPid );
+        }
+    }
+
+
+    Factory[] getCachedFactories()
+    {
+        synchronized ( factories )
+        {
+            return ( Factory[] ) factories.values().toArray( new Factory[factories.size()] );
+        }
+    }
+
+
+    void cacheFactory( Factory factory )
+    {
+        synchronized ( factories )
+        {
+            factories.put( factory.getFactoryPid(), factory );
+        }
+    }
+
 
 
     // ---------- ConfigurationAdminImpl support -------------------------------
@@ -502,57 +536,32 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     {
         if ( event.getType() == BundleEvent.UNINSTALLED && handleBundleEvents )
         {
-            String location = event.getBundle().getLocation();
+            final String location = event.getBundle().getLocation();
 
-            try
+            // we only reset dynamic bindings, which are only present in
+            // cached configurations, hence only consider cached configs here
+            final ConfigurationImpl[] configs = getCachedConfigurations();
+            for ( int i = 0; i < configs.length; i++ )
             {
-                PersistenceManager[] pmList = getPersistenceManagers();
-                for ( int i = 0; i < pmList.length; i++ )
+                final ConfigurationImpl cfg = configs[i];
+                if ( location.equals( cfg.getBundleLocation() ) )
                 {
-                    Enumeration configs = pmList[i].getDictionaries();
-                    while ( configs.hasMoreElements() )
-                    {
-                        Dictionary config = ( Dictionary ) configs.nextElement();
-
-                        String pid = ( String ) config.get( Constants.SERVICE_PID );
-                        if ( pid != null )
-                        {
-                            ConfigurationImpl cfg = getCachedConfiguration( pid );
-                            if ( cfg == null )
-                            {
-                                cfg = new ConfigurationImpl( this, pmList[i], config );
-                            }
-
-                            if ( location.equals( cfg.getBundleLocation() ) )
-                            {
-                                cfg.setBundleLocation( null );
-                            }
-                        }
-                        else
-                        {
-
-                            Factory factory = Factory.getFactory( pmList[i], config );
-                            if ( factory != null )
-                            {
-                                Factory cachedFactory = getCachedFactory( factory.getFactoryPid() );
-                                if ( cachedFactory != null )
-                                {
-                                    factory = cachedFactory;
-                                }
-
-                                if ( location.equals( factory.getBundleLocation() ) )
-                                {
-                                    factory.setBundleLocation( null );
-                                }
-                            }
-                        }
-                    }
+                    // reset dynamic binding
+                    cfg.setBundleLocation( null, false );
                 }
-
             }
-            catch ( Exception e )
+
+            // we only reset dynamic bindings, which are only present in
+            // cached factories, hence only consider cached factories here
+            final Factory[] factories = getCachedFactories();
+            for ( int i = 0; i < factories.length; i++ )
             {
-                log( LogService.LOG_WARNING, "Problem unbinding configurations for bundle " + location, e );
+                final Factory factory = factories[i];
+                if ( location.equals( factory.getBundleLocation() ) )
+                {
+                    // reset dynamic binding
+                    factory.setBundleLocation( null, false );
+                }
             }
         }
     }
@@ -619,10 +628,9 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         if ( pid != null )
         {
             ManagedServiceUpdate update = new ManagedServiceUpdate( pid, sr, service );
-            updateThread.schedule( update );
+                updateThread.schedule( update );
+            }
         }
-
-    }
 
 
     private void configure( ServiceReference sr, ManagedServiceFactory service )
@@ -631,10 +639,9 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         if ( pid != null )
         {
             ManagedServiceFactoryUpdate update = new ManagedServiceFactoryUpdate( pid, sr, service );
-            updateThread.schedule( update );
+                updateThread.schedule( update );
+            }
         }
-
-    }
 
 
     /**
@@ -647,13 +654,13 @@ public class ConfigurationManager implements BundleActivator, BundleListener
      *            <code>null</code>.
      * @param factoryPid
      *            The factory PID of the new configuration. Not
-     *            <code>null</code> if the new configuration object belongs to
-     *            a factory. The configuration object will not be persisted if
+     *            <code>null</code> if the new configuration object belongs to a
+     *            factory. The configuration object will not be persisted if
      *            this parameter is not <code>null</code>.
      * @param bundleLocation
      *            The bundle location of the bundle to which the configuration
-     *            belongs or <code>null</code> if the configuration is not
-     *            bound yet.
+     *            belongs or <code>null</code> if the configuration is not bound
+     *            yet.
      * @return The new configuration object
      * @throws IOException
      *             May be thrown if an error occurrs persisting the new
@@ -662,24 +669,6 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     ConfigurationImpl createConfiguration( String pid, String factoryPid, String bundleLocation ) throws IOException
     {
         return new ConfigurationImpl( this, getPersistenceManagers()[0], pid, factoryPid, bundleLocation );
-    }
-
-
-    Factory getCachedFactory( String factoryPid )
-    {
-        synchronized ( factories )
-        {
-            return ( Factory ) factories.get( factoryPid );
-        }
-    }
-
-
-    void cacheFactory( Factory factory )
-    {
-        synchronized ( factories )
-        {
-            factories.put( factory.getFactoryPid(), factory );
-        }
     }
 
 
@@ -938,7 +927,8 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 String bundleLocation = serviceBundle.getLocation();
                 if ( cfg.getBundleLocation() == null )
                 {
-                    cfg.setBundleLocation( bundleLocation );
+                    // dynamically bind to the location of the service if unbound
+                    cfg.setBundleLocation( bundleLocation, false );
                 }
                 else if ( !bundleLocation.equals( cfg.getBundleLocation() ) )
                 {
@@ -1048,7 +1038,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             if ( factory.getBundleLocation() == null )
             {
                 // bind to the location of the service if unbound
-                factory.setBundleLocation( bundleLocation );
+                factory.setBundleLocation( bundleLocation, false );
             }
             else if ( !bundleLocation.equals( factory.getBundleLocation() ) )
             {
@@ -1114,8 +1104,8 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 // check bundle location of configuration
                 if ( cfg.getBundleLocation() == null )
                 {
-                    // bind to the location of the service if unbound
-                    cfg.setBundleLocation( bundleLocation );
+                    // dynamically bind to the location of the service if unbound
+                    cfg.setBundleLocation( bundleLocation, false );
                 }
                 else if ( !bundleLocation.equals( cfg.getBundleLocation() ) )
                 {
@@ -1221,9 +1211,8 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                             String bundleLocation = sr.getBundle().getLocation();
                             if ( config.getBundleLocation() == null )
                             {
-                                // bind to the location of the service if
-                                // unbound
-                                config.setBundleLocation( bundleLocation );
+                                // dynamically bind to the location of the service if unbound
+                                config.setBundleLocation( bundleLocation, false );
                             }
                             else if ( !bundleLocation.equals( config.getBundleLocation() ) )
                             {
@@ -1269,9 +1258,8 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                             String bundleLocation = sr.getBundle().getLocation();
                             if ( config.getBundleLocation() == null )
                             {
-                                // bind to the location of the service if
-                                // unbound
-                                config.setBundleLocation( bundleLocation );
+                                // dynamically bind to the location of the service if unbound
+                                config.setBundleLocation( bundleLocation, false );
                             }
                             else if ( !bundleLocation.equals( config.getBundleLocation() ) )
                             {
@@ -1493,12 +1481,12 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             if ( pid != null )
             {
                 ConfigurationImpl cfg = cm.getCachedConfiguration( pid );
-                if ( cfg != null && reference.equals( cfg.getServiceReference() ) )
-                {
-                    cfg.setServiceReference( null );
-                    cfg.setDelivered( false );
+                    if ( cfg != null && reference.equals( cfg.getServiceReference() ) )
+                    {
+                        cfg.setServiceReference( null );
+                        cfg.setDelivered( false );
+                    }
                 }
-            }
 
             super.removedService( reference, service );
         }
@@ -1556,6 +1544,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             return serviceObject;
         }
 
+
         public void removedService( ServiceReference reference, Object service )
         {
             // check whether we can take back the configuration objects
@@ -1563,19 +1552,19 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             if ( factoryPid != null )
             {
                 Factory factory = cm.getCachedFactory( factoryPid );
-                if ( factory != null )
-                {
-                    for ( Iterator pi = factory.getPIDs().iterator(); pi.hasNext(); )
+                    if ( factory != null )
                     {
-                        String pid = ( String ) pi.next();
-                        ConfigurationImpl cfg = cm.getCachedConfiguration( pid );
-                        if ( cfg != null )
+                        for ( Iterator pi = factory.getPIDs().iterator(); pi.hasNext(); )
                         {
-                            cfg.setDelivered( false );
+                            String pid = ( String ) pi.next();
+                            ConfigurationImpl cfg = cm.getCachedConfiguration( pid );
+                            if ( cfg != null )
+                            {
+                                cfg.setDelivered( false );
+                            }
                         }
                     }
                 }
-            }
 
             super.removedService( reference, service );
         }

@@ -92,6 +92,12 @@ class ConfigurationImpl
     private volatile String bundleLocation;
 
     /**
+     * Flag indicating whether this configuration object is statically or
+     * dynamically bound.
+     */
+    private volatile boolean staticallyBound;
+
+    /**
      * The <code>ServiceReference</code> of the serviceReference which first asked for
      * this configuration. This field is <code>null</code> if the configuration
      * has not been handed to a serviceReference by way of the <code>ManagedService.update(Dictionary)</code>
@@ -140,6 +146,7 @@ class ConfigurationImpl
         this.pid = ( String ) properties.remove( Constants.SERVICE_PID );
         this.factoryPID = ( String ) properties.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
         this.bundleLocation = ( String ) properties.remove( ConfigurationAdmin.SERVICE_BUNDLELOCATION );
+        this.staticallyBound = bundleLocation != null;
 
         // set the properties internally
         configureFromPersistence( properties );
@@ -165,6 +172,7 @@ class ConfigurationImpl
         this.pid = pid;
         this.factoryPID = factoryPid;
         this.bundleLocation = bundleLocation;
+        this.staticallyBound = bundleLocation != null;
         this.properties = null;
 
         // this is a new configuration object, store immediately unless
@@ -172,7 +180,7 @@ class ConfigurationImpl
         // case the configuration is only stored when first updated
         if (factoryPid == null) {
             Dictionary props = new Hashtable();
-            setAutoProperties( props, true );
+            setAutoProperties( props, staticallyBound );
             props.put( CONFIGURATION_NEW, Boolean.TRUE );
             persistenceManager.store( pid, props );
         }
@@ -281,20 +289,30 @@ class ConfigurationImpl
     /* (non-Javadoc)
      * @see org.osgi.service.cm.Configuration#setBundleLocation(java.lang.String)
      */
-    public void setBundleLocation( String bundleLocation )
+    public void setBundleLocation( String bundleLocation, boolean staticBinding )
     {
         if ( !isDeleted() )
         {
-            this.bundleLocation = bundleLocation;
+            if ( staticBinding )
+            {
+                // set binding and mark static and store everything
+                this.bundleLocation = bundleLocation;
+                this.staticallyBound = staticBinding;
 
-            // 104.15.2.8 The bundle location will be set persistently
-            try
-            {
-                store();
+                // 104.15.2.8 The bundle location will be set persistently
+                try
+                {
+                    store();
+                }
+                catch ( IOException ioe )
+                {
+                    configurationManager.log( LogService.LOG_ERROR, "Persisting new bundle location failed", ioe );
+                }
             }
-            catch ( IOException ioe )
+            else if ( !staticallyBound )
             {
-                configurationManager.log( LogService.LOG_ERROR, "Persisting new bundle location failed", ioe );
+                // dynamic binding, no need to store
+                this.bundleLocation = bundleLocation;
             }
         }
     }
@@ -339,7 +357,7 @@ class ConfigurationImpl
         {
             CaseInsensitiveDictionary newProperties = new CaseInsensitiveDictionary( properties );
 
-            setAutoProperties( newProperties, true );
+            setAutoProperties( newProperties, staticallyBound );
 
             localPersistenceManager.store( pid, newProperties );
 
@@ -422,10 +440,11 @@ class ConfigurationImpl
         {
             props = new Hashtable();
 
-            // add automatic properties including the bundle location (if set)
-            setAutoProperties( props, true );
+            // add automatic properties including the bundle location (if
+            // statically bound)
+            setAutoProperties( props, staticallyBound );
         }
-        else if ( getBundleLocation() != null )
+        else if ( getBundleLocation() != null && staticallyBound )
         {
             props.put( ConfigurationAdmin.SERVICE_BUNDLELOCATION, getBundleLocation() );
         }
