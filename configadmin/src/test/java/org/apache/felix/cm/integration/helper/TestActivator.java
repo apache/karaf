@@ -19,6 +19,7 @@
 package org.apache.felix.cm.integration.helper;
 
 
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -47,9 +48,25 @@ public class TestActivator implements BundleActivator, ManagedService
         Object prop = context.getBundle().getHeaders().get( HEADER_PID );
         if ( prop instanceof String )
         {
-            String pid = ( String ) prop;
             Hashtable props = new Hashtable();
-            props.put( Constants.SERVICE_PID, pid );
+
+            // multi-value PID support
+            String pid = ( String ) prop;
+            if ( pid.indexOf( ',' ) > 0 )
+            {
+                String[] pids = pid.split( "," );
+                props.put( Constants.SERVICE_PID, pids );
+            }
+            else if ( pid.indexOf( ';' ) > 0 )
+            {
+                String[] pids = pid.split( ";" );
+                props.put( Constants.SERVICE_PID, Arrays.asList( pids ) );
+            }
+            else
+            {
+                props.put( Constants.SERVICE_PID, pid );
+            }
+
             context.registerService( ManagedService.class.getName(), this, props );
         }
         else
