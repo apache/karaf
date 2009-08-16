@@ -25,9 +25,6 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.pde.internal.ui.editor.FormLayoutFactory;
-import org.eclipse.pde.internal.ui.parts.FormEntry;
-import org.eclipse.pde.internal.ui.parts.IFormEntryListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -36,6 +33,7 @@ import org.eclipse.ui.forms.IFormPart;
 import org.eclipse.ui.forms.IPartSelectionListener;
 import org.eclipse.ui.forms.SectionPart;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
@@ -44,7 +42,7 @@ import org.eclipse.ui.forms.widgets.TableWrapLayout;
 
 
 @SuppressWarnings("restriction")
-public abstract class SigilSection extends SectionPart implements IFormEntryListener, IPartSelectionListener
+public abstract class SigilSection extends SectionPart implements IHyperlinkListener, IPartSelectionListener
 {
 
     private SigilPage page;
@@ -86,13 +84,27 @@ public abstract class SigilSection extends SectionPart implements IFormEntryList
     {
         Section section = getSection();
         section.setText( title );
-        section.setLayout( FormLayoutFactory.createClearTableWrapLayout( false, 1 ) );
+        
+		TableWrapLayout layout = new TableWrapLayout();
+
+		layout.topMargin = 2;
+		layout.bottomMargin = 2;
+		layout.leftMargin = 2;
+		layout.rightMargin = 2;
+
+		layout.horizontalSpacing = 0;
+		layout.verticalSpacing = 0;
+
+		layout.makeColumnsEqualWidth = false;
+		layout.numColumns = 1;
+
+        section.setLayout( layout );
+        
         TableWrapData data = new TableWrapData( TableWrapData.FILL_GRAB );
         section.setLayoutData( data );
     }
 
-
-    protected void setMarker( String type, String message, int priority, int severity ) throws CoreException
+	protected void setMarker( String type, String message, int priority, int severity ) throws CoreException
     {
         IFileEditorInput file = ( IFileEditorInput ) getPage().getEditor().getEditorInput();
         IMarker marker = file.getFile().createMarker( type );
@@ -144,46 +156,17 @@ public abstract class SigilSection extends SectionPart implements IFormEntryList
         return client;
     }
 
-
-    public void browseButtonSelected( FormEntry entry )
-    {
-    }
-
-
-    public void focusGained( FormEntry entry )
-    {
-    }
-
-
-    public void selectionChanged( FormEntry entry )
-    {
-    }
-
-
-    public void textDirty( FormEntry entry )
-    {
-    }
-
-
-    public void textValueChanged( FormEntry entry )
-    {
-    }
-
-
     public void linkActivated( HyperlinkEvent e )
+    {        
+    }
+    
+    public void linkExited(HyperlinkEvent e)
+    {	
+    }
+    
+    public void linkEntered(HyperlinkEvent e)
     {
     }
-
-
-    public void linkEntered( HyperlinkEvent e )
-    {
-    }
-
-
-    public void linkExited( HyperlinkEvent e )
-    {
-    }
-
 
     public void selectionChanged( IFormPart part, ISelection selection )
     {

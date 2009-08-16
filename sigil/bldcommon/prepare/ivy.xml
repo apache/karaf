@@ -37,7 +37,6 @@
         <dependency org="org.eclipse" name="org.eclipse.jface.text" rev="3.4.2.r342_v20081119-0800" />
         <dependency org="org.eclipse" name="org.eclipse.jface" rev="3.4.2.M20090107-0800" />
         <dependency org="org.eclipse" name="org.eclipse.ltk.core.refactoring" rev="3.4.2.r342_v20081028-0800" />
-        <dependency org="org.eclipse" name="org.eclipse.pde.ui" rev="3.4.0.v20090202" />
         <dependency org="org.eclipse" name="org.eclipse.swt.carbon.macosx" rev="3.4.1.v3452b" />
         <dependency org="org.eclipse" name="org.eclipse.ui.cheatsheets" rev="3.3.101.v20080702_34x" />
         <dependency org="org.eclipse" name="org.eclipse.ui.console" rev="3.3.1.v20090128_r342" />
