@@ -947,8 +947,8 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             // this will be set below to be given to the service
             Dictionary dictionary;
 
-            // check configuration and call plugins if existing and not new
-            if ( cfg != null && !cfg.isNew() )
+            // check configuration and call plugins if existing
+            if ( cfg != null )
             {
 
                 if ( cfg.isDelivered() )
