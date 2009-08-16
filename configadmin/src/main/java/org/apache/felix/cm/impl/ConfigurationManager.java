@@ -624,24 +624,30 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
     private void configure( ServiceReference sr, ManagedService service )
     {
-        String pid = ( String ) sr.getProperty( Constants.SERVICE_PID );
-        if ( pid != null )
+        String[] pids = getServicePid( sr );
+        if ( pids != null )
         {
-            ManagedServiceUpdate update = new ManagedServiceUpdate( pid, sr, service );
+            for ( int i = 0; i < pids.length; i++ )
+            {
+                ManagedServiceUpdate update = new ManagedServiceUpdate( pids[i], sr, service );
                 updateThread.schedule( update );
             }
         }
+    }
 
 
     private void configure( ServiceReference sr, ManagedServiceFactory service )
     {
-        String pid = ( String ) sr.getProperty( Constants.SERVICE_PID );
-        if ( pid != null )
+        String[] pids = getServicePid( sr );
+        if ( pids != null )
         {
-            ManagedServiceFactoryUpdate update = new ManagedServiceFactoryUpdate( pid, sr, service );
+            for ( int i = 0; i < pids.length; i++ )
+            {
+                ManagedServiceFactoryUpdate update = new ManagedServiceFactoryUpdate( pids[i], sr, service );
                 updateThread.schedule( update );
             }
         }
+    }
 
 
     /**
@@ -863,6 +869,46 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 t.printStackTrace( System.err );
             }
         }
+    }
+
+
+    /**
+     * Returns the <code>service.pid</code> property of the service reference as
+     * an array of strings or <code>null</code> if the service reference does
+     * not have a service PID property.
+     * <p>
+     * The service.pid property may be a single string, in which case a single
+     * element array is returned. If the property is an array of string, this
+     * array is returned. If the property is a collection it is assumed to be a
+     * collection of strings and the collection is converted to an array to be
+     * returned. Otherwise (also if the property is not set) <code>null</code>
+     * is returned.
+     *
+     * @throws NullPointerException
+     *             if reference is <code>null</code>
+     * @throws ArrayStoreException
+     *             if the service pid is a collection and not all elements are
+     *             strings.
+     */
+    static String[] getServicePid( ServiceReference reference )
+    {
+        Object pidObj = reference.getProperty( Constants.SERVICE_PID );
+        if ( pidObj instanceof String )
+        {
+            return new String[]
+                { ( String ) pidObj };
+        }
+        else if ( pidObj instanceof String[] )
+        {
+            return ( String[] ) pidObj;
+        }
+        else if ( pidObj instanceof Collection )
+        {
+            Collection pidCollection = ( Collection ) pidObj;
+            return ( String[] ) pidCollection.toArray( new String[pidCollection.size()] );
+        }
+
+        return null;
     }
 
     // ---------- inner classes ------------------------------------------------
@@ -1477,16 +1523,19 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         public void removedService( ServiceReference reference, Object service )
         {
             // check whether we can take back the configuration object
-            String pid = ( String ) reference.getProperty( Constants.SERVICE_PID );
-            if ( pid != null )
+            String[] pids = getServicePid( reference );
+            if ( pids != null )
             {
-                ConfigurationImpl cfg = cm.getCachedConfiguration( pid );
+                for ( int i = 0; i < pids.length; i++ )
+                {
+                    ConfigurationImpl cfg = cm.getCachedConfiguration( pids[i] );
                     if ( cfg != null && reference.equals( cfg.getServiceReference() ) )
                     {
                         cfg.setServiceReference( null );
                         cfg.setDelivered( false );
                     }
                 }
+            }
 
             super.removedService( reference, service );
         }
@@ -1548,10 +1597,12 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         public void removedService( ServiceReference reference, Object service )
         {
             // check whether we can take back the configuration objects
-            String factoryPid = ( String ) reference.getProperty( Constants.SERVICE_PID );
-            if ( factoryPid != null )
+            String[] factoryPids = getServicePid( reference );
+            if ( factoryPids != null )
             {
-                Factory factory = cm.getCachedFactory( factoryPid );
+                for ( int i = 0; i < factoryPids.length; i++ )
+                {
+                    Factory factory = cm.getCachedFactory( factoryPids[i] );
                     if ( factory != null )
                     {
                         for ( Iterator pi = factory.getPIDs().iterator(); pi.hasNext(); )
@@ -1565,6 +1616,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                         }
                     }
                 }
+            }
 
             super.removedService( reference, service );
         }
