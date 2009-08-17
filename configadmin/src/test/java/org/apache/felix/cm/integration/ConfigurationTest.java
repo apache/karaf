@@ -492,6 +492,65 @@ public class ConfigurationTest
 
 
     @Test
+    public void test_create_with_location_unbind_before_service_supply() throws BundleException, IOException
+    {
+
+        /*
+         * 1. create Configuration with pid and non-null location.
+         * 2. update the configuration with non-null props.
+         * 3. set location of the configuration to null.
+         * 4. bundleA registers a ManagedService service with the pid.
+         */
+
+        final String pid = "test_create_with_location_unbind_before_service_supply";
+        final String dummyLocation = "http://some/dummy/location";
+
+        // 1. create and statically bind the configuration
+        final ConfigurationAdmin ca = getConfigurationAdmin();
+        final Configuration config = ca.getConfiguration( pid, dummyLocation );
+        TestCase.assertEquals( pid, config.getPid() );
+        TestCase.assertEquals( dummyLocation, config.getBundleLocation() );
+
+        // 2. update configuration
+        Hashtable<String, String> props = new Hashtable<String, String>();
+        props.put( PROP_NAME, PROP_NAME );
+        config.update(props);
+        TestCase.assertEquals( PROP_NAME, config.getProperties().get( PROP_NAME ) );
+        TestCase.assertEquals( pid, config.getPid() );
+        TestCase.assertEquals( dummyLocation, config.getBundleLocation() );
+
+        // 3. (statically) set location to null
+        config.setBundleLocation( null );
+        TestCase.assertNull( config.getBundleLocation() );
+
+        // 4. install bundle with service
+        bundle = installBundle( pid);
+        bundle.start();
+        delay();
+
+        final TestActivator tester = TestActivator.INSTANCE;
+        TestCase.assertNotNull( "Activator not started !!", tester );
+
+        // assert activater has configuration (two calls, one per pid)
+        TestCase.assertNotNull( "Expect Properties after Service Registration", tester.props );
+        TestCase.assertEquals( "Expect a single update call", 1, tester.numUpdatedCalls );
+
+        TestCase.assertEquals( bundle.getLocation(), config.getBundleLocation() );
+
+        bundle.uninstall();
+        bundle = null;
+
+        delay();
+
+        // statically bound configurations must remain bound after bundle uninstall
+        TestCase.assertNull( config.getBundleLocation() );
+
+        // remove the configuration for good
+        deleteConfig( pid );
+    }
+
+
+    @Test
     public void test_statically_bound() throws BundleException
     {
         final String pid = "test_statically_bound";

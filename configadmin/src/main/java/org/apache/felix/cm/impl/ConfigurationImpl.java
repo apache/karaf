@@ -307,7 +307,7 @@ class ConfigurationImpl
             {
                 // set binding and mark static and store everything
                 this.bundleLocation = bundleLocation;
-                this.staticallyBound = staticBinding;
+                this.staticallyBound = bundleLocation != null;
 
                 // 104.15.2.8 The bundle location will be set persistently
                 try
