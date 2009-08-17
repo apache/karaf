@@ -31,6 +31,7 @@ import java.lang.reflect.Method;
 
 import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
 import org.apache.felix.gogo.commands.Command;
+import org.fusesource.jansi.Ansi;
 
 @Command(scope = "shell", name = "info", description = "Print Karaf informations")
 public class InfoAction extends OsgiCommandSupport {
@@ -151,7 +152,9 @@ public class InfoAction extends OsgiCommandSupport {
     }
 
     void printValue(String name, int pad, String value) {
-        System.out.println("  @|bold " + name + spaces(pad - name.length()) + "|   " + value);
+        System.out.println(Ansi.ansi().a("  ")
+                                .a(Ansi.Attribute.INTENSITY_BOLD).a(name).a(spaces(pad - name.length())).a(Ansi.Attribute.RESET)
+                                .a("   ").a(value).toString());
     }
 
     String spaces(int nb) {
