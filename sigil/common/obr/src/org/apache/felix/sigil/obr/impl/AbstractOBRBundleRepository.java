@@ -25,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -65,13 +66,32 @@ public abstract class AbstractOBRBundleRepository extends AbstractBundleReposito
         syncOBRIndex();
         OBRHandler handler = new OBRHandler( getObrURL(), getBundleCache(), listener );
         SAXParser parser = factory.newSAXParser();
-        parser.parse( getObrlCache(), handler );
+        parser.parse( findLocalOBR(), handler );
+    }
+
+
+    private File findLocalOBR()
+    {
+        if ( "file".equals( getObrURL().getProtocol() ) ) {
+            try
+            {
+               return new File( getObrURL().toURI() );
+            }
+            catch ( URISyntaxException e )
+            {
+                // should be impossible ?
+                throw new IllegalStateException( "Failed to convert file url to uri", e );
+            }
+        }
+        else {
+            return getObrlCache();
+        }
     }
 
 
     private void syncOBRIndex()
     {
-        if ( isUpdated() )
+        if ( !"file".equals( getObrURL().getProtocol() ) && isUpdated() )
         {
             InputStream in = null;
             OutputStream out = null;
@@ -159,27 +179,26 @@ public abstract class AbstractOBRBundleRepository extends AbstractBundleReposito
     }
 
 
-    public URL getObrURL()
+    private URL getObrURL()
     {
         return obrURL;
     }
 
 
-    public File getObrlCache()
+    private File getObrlCache()
     {
         return obrlCache;
     }
 
 
-    public File getBundleCache()
+    private File getBundleCache()
     {
         return bundleCache;
     }
 
 
-    public long getUpdatePeriod()
+    private long getUpdatePeriod()
     {
         return updatePeriod;
     }
-
 }

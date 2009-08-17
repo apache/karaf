@@ -142,7 +142,12 @@ final class OBRHandler extends DefaultHandler
                 info.setName( attributes.getValue( "", PRESENTATION_NAME ) );
                 URI l = makeAbsolute( uri );
                 info.setUpdateLocation( l );
-                b.setLocation( cachePath( info ) );
+                if ( "file".equals(  l.getScheme() ) ) {
+                    b.setLocation( new Path( new File( l ).getAbsolutePath() ) );
+                }
+                else {
+                    b.setLocation( cachePath( info ) );
+                }
                 b.setBundleInfo( info );
                 bundle = b;
             }
