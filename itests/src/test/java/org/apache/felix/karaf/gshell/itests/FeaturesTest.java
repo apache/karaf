@@ -16,27 +16,21 @@
  */
 package org.apache.felix.karaf.gshell.itests;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Properties;
-
-import org.apache.geronimo.gshell.shell.Shell;
-import org.apache.geronimo.gshell.command.Command;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.Option;
-import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.scanFeatures;
-import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.vmOption;
-import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.waitForRBCFor;
-import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.bootClasspathLibrary;
 import static org.ops4j.pax.exam.CoreOptions.felix;
 import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.systemPackages;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import static org.ops4j.pax.exam.CoreOptions.equinox;
+import org.ops4j.pax.exam.Option;
+import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.scanFeatures;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.osgi.service.command.CommandProcessor;
+import org.osgi.service.command.CommandSession;
 
 @RunWith(JUnit4TestRunner.class)
 public class FeaturesTest extends AbstractIntegrationTest {
@@ -45,9 +39,11 @@ public class FeaturesTest extends AbstractIntegrationTest {
     public void testFeatures() throws Exception {
         Thread.sleep(5000);
 
-        Shell shell = getOsgiService(Shell.class);
-        shell.execute("obr/listUrl");
-        shell.execute("wrapper/install --help");
+        CommandProcessor cp = getOsgiService(CommandProcessor.class);
+        CommandSession cs = cp.createSession(System.in, System.out, System.err);
+        cs.execute("obr:listUrl");
+        cs.execute("wrapper:install --help");
+        cs.close();
     }
 
     @Configuration
@@ -73,28 +69,15 @@ public class FeaturesTest extends AbstractIntegrationTest {
             mavenBundle("org.apache.felix", "org.apache.felix.configadmin"),
             // Felix Preferences Service
             mavenBundle("org.apache.felix", "org.apache.felix.prefs"),
-            // Spring-DM
-            mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.aopalliance"),
-            mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.cglib"),
-            mavenBundle("org.springframework", "spring-aop"),
-            mavenBundle("org.springframework", "spring-beans"),
-            mavenBundle("org.springframework", "spring-context"),
-            mavenBundle("org.springframework", "spring-core"),
-            mavenBundle("org.springframework.osgi", "spring-osgi-core"),
-            mavenBundle("org.springframework.osgi", "spring-osgi-extender"),
-            mavenBundle("org.springframework.osgi", "spring-osgi-io"),
+            // Blueprint
+            mavenBundle("org.apache.geronimo", "blueprint-bundle"),
 
             // Bundles
-            mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.jline"),
-            mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.commons-httpclient"),
-            mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.commons-jexl"),
-            mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.commons-vfs"),
             mavenBundle("org.apache.mina", "mina-core"),
-            mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.oro"),
-            mavenBundle("org.apache.felix.karaf.jaas", "org.apache.felix.karaf.jaas.config"),
             mavenBundle("org.apache.sshd", "sshd-core"),
-            mavenBundle("org.apache.felix.karaf.gshell", "org.apache.felix.karaf.gshell.core"),
-            mavenBundle("org.apache.felix.karaf.gshell", "org.apache.felix.karaf.gshell.run"),
+            mavenBundle("org.apache.felix.karaf.jaas", "org.apache.felix.karaf.jaas.config"),
+            mavenBundle("org.apache.felix.karaf.gshell", "org.apache.felix.karaf.gshell.console"),
+            mavenBundle("org.apache.felix.gogo", "org.apache.felix.gogo.runtime"),
             mavenBundle("org.apache.felix.karaf.gshell", "org.apache.felix.karaf.gshell.osgi"),
             mavenBundle("org.apache.felix.karaf.gshell", "org.apache.felix.karaf.gshell.log").noStart(),
 
@@ -103,7 +86,7 @@ public class FeaturesTest extends AbstractIntegrationTest {
                     "obr", "wrapper"
             ),
 
-            felix()
+            equinox()
         );
         return options;
     }
