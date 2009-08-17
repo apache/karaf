@@ -145,7 +145,7 @@ class Factory
         if ( staticBinding )
         {
             this.bundleLocation = bundleLocation;
-            this.staticallyBound = true;
+            this.staticallyBound = bundleLocation != null;
 
             // 104.15.2.8 The bundle location will be set persistently
             storeSilently();
