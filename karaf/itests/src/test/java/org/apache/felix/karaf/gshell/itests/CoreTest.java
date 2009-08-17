@@ -16,24 +16,22 @@
  */
 package org.apache.felix.karaf.gshell.itests;
 
-import org.apache.geronimo.gshell.commandline.CommandLineExecutionFailed;
-import org.apache.geronimo.gshell.registry.NoSuchCommandException;
-import org.apache.geronimo.gshell.shell.Shell;
-import org.apache.geronimo.gshell.command.Command;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.Option;
-import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.bootClasspathLibrary;
 import static org.ops4j.pax.exam.CoreOptions.felix;
+import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.systemPackages;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import static org.ops4j.pax.exam.CoreOptions.equinox;
+import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.osgi.framework.Bundle;
+import org.osgi.service.command.CommandProcessor;
+import org.osgi.service.command.CommandSession;
 
 @RunWith(JUnit4TestRunner.class)
 public class CoreTest extends AbstractIntegrationTest {
@@ -42,22 +40,24 @@ public class CoreTest extends AbstractIntegrationTest {
     public void testHelp() throws Exception {
         Thread.sleep(5000);
 
-        Shell shell = getOsgiService(Shell.class);
-        shell.execute("help");
+        CommandProcessor cp = getOsgiService(CommandProcessor.class);
+        CommandSession cs = cp.createSession(System.in, System.out, System.err);
+        cs.execute("osgi:list --help");
+        cs.close();
     }
 
     @Test
     public void testInstallCommand() throws Exception {
         Thread.sleep(5000);
 
-        Shell shell = getOsgiService(Shell.class);
+        CommandProcessor cp = getOsgiService(CommandProcessor.class);
+        CommandSession cs = cp.createSession(System.in, System.out, System.err);
 
         try {
-            shell.execute("log/display");
+            cs.execute("log:display");
             fail("command should not exist");
-        } catch (CommandLineExecutionFailed e) {
-            assertNotNull(e.getCause());
-            assertTrue(e.getCause() instanceof NoSuchCommandException);
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().indexOf("Command not found") >= 0);
         }
 
         Bundle b = getInstalledBundle("org.apache.felix.karaf.gshell.log");
@@ -65,44 +65,45 @@ public class CoreTest extends AbstractIntegrationTest {
 
         Thread.sleep(1000);
 
-        shell.execute("log/display");
+        cs.execute("log:display");
 
         b.stop();
 
         Thread.sleep(1000);
 
         try {
-            shell.execute("log/display");
+            cs.execute("log:display");
             fail("command should not exist");
-        } catch (CommandLineExecutionFailed e) {
-            assertNotNull(e.getCause());
-            assertTrue(e.getCause() instanceof NoSuchCommandException);
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().indexOf("Command not found") >= 0);
         }
+
+        cs.close();
     }
 
-    @Test
-    public void testCommandGroup() throws Exception {
-        Thread.sleep(5000);
-
-        Shell shell = getOsgiService(Shell.class);
-        shell.execute("osgi");
-        shell.execute("help");
-        shell.execute("..");
-    }
-    
-    @Test
-    public void testCommandGroupAfterInstall() throws Exception {
-        Bundle b = getInstalledBundle("org.apache.felix.karaf.gshell.log");
-        b.start();
-
-        Thread.sleep(5000);
-
-        Shell shell = getOsgiService(Shell.class);
-        shell.execute("log");
-        shell.execute("help");
-        shell.execute("..");
-    }
-
+//    @Test
+//    public void testCommandGroup() throws Exception {
+//        Thread.sleep(5000);
+//
+//        Shell shell = getOsgiService(Shell.class);
+//        shell.execute("osgi");
+//        shell.execute("help");
+//        shell.execute("..");
+//    }
+//
+//    @Test
+//    public void testCommandGroupAfterInstall() throws Exception {
+//        Bundle b = getInstalledBundle("org.apache.felix.karaf.gshell.log");
+//        b.start();
+//
+//        Thread.sleep(5000);
+//
+//        Shell shell = getOsgiService(Shell.class);
+//        shell.execute("log");
+//        shell.execute("help");
+//        shell.execute("..");
+//    }
+//
     @Configuration
     public static Option[] configuration() {
         Option[] options = options(
@@ -124,32 +125,19 @@ public class CoreTest extends AbstractIntegrationTest {
             mavenBundle("org.ops4j.pax.logging", "pax-logging-service"),
             // Felix Config Admin
             mavenBundle("org.apache.felix", "org.apache.felix.configadmin"),
-            // Spring-DM
-            mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.aopalliance"),
-            mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.cglib"),
-            mavenBundle("org.springframework", "spring-aop"),
-            mavenBundle("org.springframework", "spring-beans"),
-            mavenBundle("org.springframework", "spring-context"),
-            mavenBundle("org.springframework", "spring-core"),
-            mavenBundle("org.springframework.osgi", "spring-osgi-core"),
-            mavenBundle("org.springframework.osgi", "spring-osgi-extender"),
-            mavenBundle("org.springframework.osgi", "spring-osgi-io"),
+            // Blueprint
+            mavenBundle("org.apache.geronimo", "blueprint-bundle"),
 
             // Bundles
-            mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.jline"),
-            mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.commons-httpclient"),
-            mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.commons-jexl"),
-            mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.commons-vfs"),
             mavenBundle("org.apache.mina", "mina-core"),
-            mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.oro"),
-            mavenBundle("org.apache.felix.karaf.jaas", "org.apache.felix.karaf.jaas.config"),
             mavenBundle("org.apache.sshd", "sshd-core"),
-            mavenBundle("org.apache.felix.karaf.gshell", "org.apache.felix.karaf.gshell.core"),
-            mavenBundle("org.apache.felix.karaf.gshell", "org.apache.felix.karaf.gshell.run"),
+            mavenBundle("org.apache.felix.karaf.jaas", "org.apache.felix.karaf.jaas.config"),
+            mavenBundle("org.apache.felix.gogo", "org.apache.felix.gogo.runtime"),
+            mavenBundle("org.apache.felix.karaf.gshell", "org.apache.felix.karaf.gshell.console"),
             mavenBundle("org.apache.felix.karaf.gshell", "org.apache.felix.karaf.gshell.osgi"),
             mavenBundle("org.apache.felix.karaf.gshell", "org.apache.felix.karaf.gshell.log").noStart(),
 
-            felix()
+            equinox()
         );
         return options;
     }

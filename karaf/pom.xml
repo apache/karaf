@@ -46,8 +46,8 @@
         <module>assembly</module>
         <!--
         <module>demos</module>
-        <module>itests</module>
         -->
+        <module>itests</module>
         <module>tooling</module>
     </modules>
 
