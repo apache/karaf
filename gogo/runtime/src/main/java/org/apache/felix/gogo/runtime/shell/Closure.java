@@ -96,7 +96,7 @@ public class Closure extends Reflective implements Function
             if (pipe.exception != null)
             {
                 // can't throw exception, as result is defined by last pipe
-                System.err.println("pipe: " + pipe.exception);
+                session.err.println("pipe: " + pipe.exception);
             }
         }
 
