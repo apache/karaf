@@ -47,6 +47,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-DocURL>http://felix.apache.org/site/apache-felix-karaf.html</Bundle-DocURL>
                         <Fragment-Host>org.apache.felix.webconsole</Fragment-Host>
                         <Export-Package>!*</Export-Package>
