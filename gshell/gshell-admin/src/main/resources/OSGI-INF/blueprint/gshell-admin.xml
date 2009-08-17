@@ -87,5 +87,7 @@
     <bean id="instanceCompleter" class="org.apache.felix.karaf.gshell.admin.internal.completers.InstanceCompleter">
         <property name="adminService" ref="adminService" />
     </bean>
+    
+    <service ref="adminService" interface="org.apache.felix.karaf.gshell.admin.AdminService" />
 
 </blueprint>
