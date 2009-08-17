@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.apache.felix.cm.PersistenceManager;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.log.LogService;
 
 
 /**
@@ -40,20 +41,26 @@ class Factory
 
     public static final String FACTORY_PID_LIST = "factory.pidList";
 
+    /**
+     * The {@link ConfigurationManager configuration manager} instance which
+     * caused this configuration object to be created.
+     */
+    private final ConfigurationManager configurationManager;
+
     // the persistence manager storing this factory mapping
-    private PersistenceManager persistenceManager;
+    private final PersistenceManager persistenceManager;
 
     // the factory PID of this factory
-    private String factoryPid;
+    private final String factoryPid;
 
     // the bundle location to which factory PID mapping is bound
-    private String bundleLocation;
+    private volatile String bundleLocation;
 
     // whether the factory is statically bound to a bundle or not
-    private boolean staticallyBound;
+    private volatile boolean staticallyBound;
 
     // the set of configuration PIDs belonging to this factory
-    private Set pids;
+    private final Set pids;
 
 
     static boolean exists( PersistenceManager persistenceManager, String factoryPid )
@@ -62,23 +69,11 @@ class Factory
     }
 
 
-    static Factory load( PersistenceManager persistenceManager, String factoryPid ) throws IOException
+    static Factory load( ConfigurationManager configurationManager, PersistenceManager persistenceManager,
+        String factoryPid ) throws IOException
     {
         Dictionary dict = persistenceManager.load( factoryPidToIdentifier( factoryPid ) );
-        return new Factory( persistenceManager, factoryPid, dict );
-    }
-
-
-    static Factory getFactory( PersistenceManager persistenceManager, Dictionary props )
-    {
-        // ignore non-Configuration dictionaries
-        String factoryPid = ( String ) props.get( Factory.FACTORY_PID );
-        if ( factoryPid == null )
-        {
-            return null;
-        }
-
-        return new Factory( persistenceManager, factoryPid, props );
+        return new Factory( configurationManager, persistenceManager, factoryPid, dict );
     }
 
 
@@ -88,8 +83,9 @@ class Factory
     }
 
 
-    Factory( PersistenceManager persistenceManager, String factoryPid )
+    Factory( ConfigurationManager configurationManager, PersistenceManager persistenceManager, String factoryPid )
     {
+        this.configurationManager = configurationManager;
         this.persistenceManager = persistenceManager;
         this.factoryPid = factoryPid;
         this.pids = new HashSet();
@@ -98,13 +94,21 @@ class Factory
     }
 
 
-    Factory( PersistenceManager persistenceManager, String factoryPid, Dictionary props )
+    Factory( ConfigurationManager configurationManager, PersistenceManager persistenceManager, String factoryPid, Dictionary props )
     {
-        this( persistenceManager, factoryPid );
+        this( configurationManager, persistenceManager, factoryPid );
 
-        // set bundle location
+        // set bundle location from persistence and/or check for dynamic binding
         this.bundleLocation = ( String ) props.get( ConfigurationAdmin.SERVICE_BUNDLELOCATION );
-        this.staticallyBound = this.bundleLocation != null;
+        if ( bundleLocation != null )
+        {
+            this.staticallyBound = true;
+        }
+        else
+        {
+            this.staticallyBound = false;
+            this.bundleLocation = configurationManager.getDynamicBundleLocation( getFactoryPid() );
+        }
 
         // set pids
         String[] pidList = ( String[] ) props.get( FACTORY_PID_LIST );
@@ -148,7 +152,11 @@ class Factory
         }
         else if ( !this.staticallyBound )
         {
+            // dynamic binding
             this.bundleLocation = bundleLocation;
+
+            // keep the dynamic binding
+            this.configurationManager.setDynamicBundleLocation( this.getFactoryPid(), bundleLocation );
         }
     }
 
@@ -206,9 +214,7 @@ class Factory
         }
         catch ( IOException ioe )
         {
-            // should actually log this problem
-            // configurationManager.log( LogService.LOG_ERROR, "Persisting new
-            // bundle location failed", ioe );
+            configurationManager.log( LogService.LOG_ERROR, "Persisting new bundle location failed", ioe );
         }
     }
 }

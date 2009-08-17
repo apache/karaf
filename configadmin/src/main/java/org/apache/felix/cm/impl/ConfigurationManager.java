@@ -141,6 +141,19 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     // have this always set to prevent NPE on bundle shutdown
     private final Map configurations = new HashMap();
 
+    /**
+     * The map of dynamic configuration bindings. This maps the
+     * PID of the dynamically bound configuration or factory to its bundle
+     * location.
+     * <p>
+     * On bundle startup this map is loaded from persistence and validated
+     * against the locations of installed bundles: Entries pointing to bundle
+     * locations not currently installed are removed.
+     * <p>
+     * The map is written to persistence on each change.
+     */
+    private DynamicBindings dynamicBindings;
+
     // the maximum log level when no LogService is available
     private int logLevel = CM_LOG_LEVEL_DEFAULT;
 
@@ -193,6 +206,13 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             props.put( Constants.SERVICE_VENDOR, "Apache Software Foundation" );
             props.put( Constants.SERVICE_RANKING, new Integer( Integer.MIN_VALUE ) );
             bundleContext.registerService( PersistenceManager.class.getName(), fpm, props );
+
+            // setup dynamic configuration bindings
+            dynamicBindings = new DynamicBindings( bundleContext, fpm );
+        }
+        catch ( IOException ioe )
+        {
+            log( LogService.LOG_ERROR, "Failure setting up dynamic configuration bindings", ioe );
         }
         catch ( IllegalArgumentException iae )
         {
@@ -363,8 +383,37 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     }
 
 
+    // ---------- ConfigurationAdminImpl support
 
-    // ---------- ConfigurationAdminImpl support -------------------------------
+    void setDynamicBundleLocation( final String pid, final String location )
+    {
+        if ( dynamicBindings != null )
+        {
+            try
+            {
+                dynamicBindings.putLocation( pid, location );
+            }
+            catch ( IOException ioe )
+            {
+                log( LogService.LOG_ERROR, "Failed storing dynamic configuration binding for " + pid + " to "
+                    + location, ioe );
+            }
+        }
+    }
+
+
+    String getDynamicBundleLocation( final String pid )
+    {
+        if ( dynamicBindings != null )
+        {
+            return dynamicBindings.getLocation( pid );
+        }
+
+        return null;
+    }
+
+
+    // ---------- ConfigurationAdminImpl support
 
     /*
      * (non-Javadoc)
@@ -691,7 +740,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         {
             if ( Factory.exists( pmList[i], factoryPid ) )
             {
-                factory = Factory.load( pmList[i], factoryPid );
+                factory = Factory.load( this, pmList[i], factoryPid );
                 cacheFactory( factory );
                 return factory;
             }
@@ -704,7 +753,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
     Factory createFactory( String factoryPid )
     {
-        Factory factory = new Factory( getPersistenceManagers()[0], factoryPid );
+        Factory factory = new Factory( this, getPersistenceManagers()[0], factoryPid );
         cacheFactory( factory );
         return factory;
     }

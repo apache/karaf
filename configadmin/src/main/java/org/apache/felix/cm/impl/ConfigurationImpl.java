@@ -145,8 +145,18 @@ class ConfigurationImpl
 
         this.pid = ( String ) properties.remove( Constants.SERVICE_PID );
         this.factoryPID = ( String ) properties.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
+
+        // set bundle location from persistence and/or check for dynamic binding
         this.bundleLocation = ( String ) properties.remove( ConfigurationAdmin.SERVICE_BUNDLELOCATION );
-        this.staticallyBound = bundleLocation != null;
+        if ( bundleLocation != null )
+        {
+            this.staticallyBound = true;
+        }
+        else
+        {
+            this.staticallyBound = false;
+            this.bundleLocation = configurationManager.getDynamicBundleLocation( this.pid );
+        }
 
         // set the properties internally
         configureFromPersistence( properties );
@@ -289,7 +299,7 @@ class ConfigurationImpl
     /* (non-Javadoc)
      * @see org.osgi.service.cm.Configuration#setBundleLocation(java.lang.String)
      */
-    public void setBundleLocation( String bundleLocation, boolean staticBinding )
+    public void setBundleLocation( final String bundleLocation, final boolean staticBinding )
     {
         if ( !isDeleted() )
         {
@@ -311,8 +321,11 @@ class ConfigurationImpl
             }
             else if ( !staticallyBound )
             {
-                // dynamic binding, no need to store
+                // dynamic binding
                 this.bundleLocation = bundleLocation;
+
+                // keep the dynamic binding
+                this.configurationManager.setDynamicBundleLocation( this.getPid(), bundleLocation );
             }
         }
     }

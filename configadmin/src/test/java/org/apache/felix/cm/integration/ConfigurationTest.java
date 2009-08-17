@@ -535,6 +535,95 @@ public class ConfigurationTest
     }
 
 
+    @Test
+    public void test_static_binding_and_unbinding() throws BundleException
+    {
+        final String pid = "test_static_binding_and_unbinding";
+        final String location = bundleContext.getBundle().getLocation();
+
+        // create and statically bind the configuration
+        configure( pid );
+        final Configuration config = getConfiguration( pid );
+        TestCase.assertEquals( pid, config.getPid() );
+        TestCase.assertNull( config.getBundleLocation() );
+
+        // bind the configuration
+        config.setBundleLocation( location );
+        TestCase.assertEquals( location, config.getBundleLocation() );
+
+        // restart CM bundle
+        final Bundle cmBundle = getCmBundle();
+        cmBundle.stop();
+        delay();
+        cmBundle.start();
+
+        // assert configuration still bound
+        final Configuration configAfterRestart = getConfiguration( pid );
+        TestCase.assertEquals( pid, configAfterRestart.getPid() );
+        TestCase.assertEquals( location, configAfterRestart.getBundleLocation() );
+
+        // unbind the configuration
+        configAfterRestart.setBundleLocation( null );
+        TestCase.assertNull( configAfterRestart.getBundleLocation() );
+
+        // restart CM bundle
+        cmBundle.stop();
+        delay();
+        cmBundle.start();
+
+        // assert configuration unbound
+        final Configuration configUnboundAfterRestart = getConfiguration( pid );
+        TestCase.assertEquals( pid, configUnboundAfterRestart.getPid() );
+        TestCase.assertNull( configUnboundAfterRestart.getBundleLocation() );
+    }
+
+
+    @Test
+    public void test_dynamic_binding_and_unbinding() throws BundleException
+    {
+        final String pid = "test_dynamic_binding_and_unbinding";
+
+        // create and statically bind the configuration
+        configure( pid );
+        final Configuration config = getConfiguration( pid );
+        TestCase.assertEquals( pid, config.getPid() );
+        TestCase.assertNull( config.getBundleLocation() );
+
+        // dynamically bind the configuration
+        bundle = installBundle( pid );
+        final String location = bundle.getLocation();
+        bundle.start();
+        delay();
+        TestCase.assertEquals( location, config.getBundleLocation() );
+
+        // restart CM bundle
+        final Bundle cmBundle = getCmBundle();
+        cmBundle.stop();
+        delay();
+        cmBundle.start();
+
+        // assert configuration still bound
+        final Configuration configAfterRestart = getConfiguration( pid );
+        TestCase.assertEquals( pid, configAfterRestart.getPid() );
+        TestCase.assertEquals( location, configAfterRestart.getBundleLocation() );
+
+        // stop bundle (configuration remains bound !!)
+        bundle.stop();
+        delay();
+        TestCase.assertEquals( location, configAfterRestart.getBundleLocation() );
+
+        // restart CM bundle
+        cmBundle.stop();
+        delay();
+        cmBundle.start();
+
+        // assert configuration still bound
+        final Configuration configBoundAfterRestart = getConfiguration( pid );
+        TestCase.assertEquals( pid, configBoundAfterRestart.getPid() );
+        TestCase.assertEquals( location, configBoundAfterRestart.getBundleLocation() );
+    }
+
+
     /*
     @Test
     public void test_() throws BundleException
