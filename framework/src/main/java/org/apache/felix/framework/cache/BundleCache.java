@@ -275,7 +275,7 @@ public class BundleCache
 
     protected static boolean deleteDirectoryTree(File target)
     {
-        if (!deleteDirectoryTreeRecursiv(target))
+        if (!deleteDirectoryTreeRecursive(target))
         {
             // We might be talking windows and native libs -- hence,
             // try to trigger a gc and try again. The hope is that
@@ -284,12 +284,12 @@ public class BundleCache
             // would not be used anymore. 
             System.gc();
             System.gc();
-            return deleteDirectoryTreeRecursiv(target);
+            return deleteDirectoryTreeRecursive(target);
         }
         return true;
     }
 
-    private static boolean deleteDirectoryTreeRecursiv(File target)
+    private static boolean deleteDirectoryTreeRecursive(File target)
     {
     	if (!getSecureAction().fileExists(target))
         {
@@ -301,7 +301,7 @@ public class BundleCache
             File[] files = getSecureAction().listDirectory(target);
             for (int i = 0; i < files.length; i++)
             {
-                deleteDirectoryTreeRecursiv(files[i]);
+                deleteDirectoryTreeRecursive(files[i]);
             }
         }
 
