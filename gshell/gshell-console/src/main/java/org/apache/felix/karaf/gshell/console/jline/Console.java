@@ -24,6 +24,8 @@ import java.io.InterruptedIOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Properties;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -41,8 +43,7 @@ public class Console implements Runnable
 {
 
     public static final String PROMPT = "PROMPT";
-    public static final String DEFAULT_PROMPT =
-             "\"\u001B\\[1m${USER}\u001B\\[0m@${APPLICATION}> \"";
+    public static final String DEFAULT_PROMPT = "\u001B[1m${USER}\u001B[0m@${APPLICATION}> ";
 
     private CommandSession session;
     private ConsoleReader reader;
@@ -174,9 +175,13 @@ public class Console implements Runnable
             } catch (Throwable t) {
                 prompt = DEFAULT_PROMPT;
             }
-            Object v = session.execute(prompt);
-            if (v != null) {
-                prompt = v.toString();
+            Matcher matcher = Pattern.compile("\\$\\{([^}]+)\\}").matcher(prompt);
+            while (matcher.find()) {
+                Object rep = session.get(matcher.group(1));
+                if (rep != null) {
+                    prompt = prompt.replace(matcher.group(0), rep.toString());
+                    matcher.reset(prompt);
+                }
             }
             return prompt;
         } catch (Throwable t) {
