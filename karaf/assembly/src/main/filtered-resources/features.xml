@@ -60,6 +60,7 @@
         <!-- TODO: uncomment when FELIX-1133 is resolved
         <bundle>mvn:org.apache.felix.karaf.webconsole/org.apache.felix.karaf.webconsole.branding/${version}</bundle>
         -->
+        <bundle>mvn:org.apache.felix.karaf.webconsole/org.apache.felix.karaf.webconsole.admin/${version}</bundle>
         <bundle>mvn:org.apache.felix.karaf.webconsole/org.apache.felix.karaf.webconsole.features/${version}</bundle>
         <bundle>mvn:org.apache.felix.karaf.webconsole/org.apache.felix.karaf.webconsole.gogo/${version}</bundle>
     </feature>
