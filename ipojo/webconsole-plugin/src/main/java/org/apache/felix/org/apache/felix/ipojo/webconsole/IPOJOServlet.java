@@ -92,7 +92,7 @@ public class IPOJOServlet extends AbstractWebConsolePlugin {
      * Label used by the web console.
      */
     @ServiceProperty(name = "felix.webconsole.label")
-    private String m_label = "ipojo";
+    private String m_label = "iPOJO";
 
     /**
      * Title used by the web console.
@@ -161,7 +161,7 @@ public class IPOJOServlet extends AbstractWebConsolePlugin {
      */
     private int getValidCount() {
         int i = 0;
-        for (Architecture a : m_archs) {
+        for (Architecture a : m_archs) { // Cannot be null, an empty list is returned.
             if (a.getInstanceDescription().getState() == ComponentInstance.VALID) {
                 i ++;
             }
@@ -175,7 +175,7 @@ public class IPOJOServlet extends AbstractWebConsolePlugin {
      */
     private int getInvalidCount() {
         int i = 0;
-        for (Architecture a : m_archs) {
+        for (Architecture a : m_archs) {  // Cannot be null, an empty list is returned.
             if (a.getInstanceDescription().getState() == ComponentInstance.INVALID) {
                 i ++;
             }
@@ -271,7 +271,7 @@ public class IPOJOServlet extends AbstractWebConsolePlugin {
      */
     private void printFactoryDetail(PrintWriter pw, String name) {
         List<ComponentTypeDescription> fs = new ArrayList<ComponentTypeDescription>();
-        for (Factory f : this.m_factories) {
+        for (Factory f : this.m_factories) { // Cannot be null, an empty list is returned.
             if (f.getName().equals(name)) {
                 fs.add(f.getComponentDescription());
             }
@@ -332,20 +332,20 @@ public class IPOJOServlet extends AbstractWebConsolePlugin {
                 + "</tr>"
                 + "</thead>"
                 + "<tbody>";
-        for (PropertyDescription pd : properties) {
-            String name = pd.getName();
-            String type = pd.getType();
-            boolean mandatory = pd.isMandatory();
-            boolean immutable = pd.isImmutable();
-            String value = pd.getValue();
-            s += "<tr>"
-                + "<td>" + name + "</td>"
-                + "<td>" + type + "</td>"
-                + "<td>" + "" + mandatory + "</td>"
-                + "<td>" + "" + immutable + "</td>"
-                + "<td>" + (value == null ? "<i>No Value</i>" : value) + "</td>"
-                + "</tr>";
-        }
+        if (properties != null) {
+            for (PropertyDescription pd : properties) {
+                String name = pd.getName();
+                String type = pd.getType();
+                boolean mandatory = pd.isMandatory();
+                boolean immutable = pd.isImmutable();
+                String value = pd.getValue();
+                s += "<tr>" + "<td>" + name + "</td>" + "<td>" + type + "</td>"
+                        + "<td>" + "" + mandatory + "</td>" + "<td>" + ""
+                        + immutable + "</td>" + "<td>"
+                        + (value == null ? "<i>No Value</i>" : value) + "</td>"
+                        + "</tr>";
+            }
+        }  // Else don't print anything.
         s += "</tbody></table>";
         return s;
     }
@@ -366,7 +366,7 @@ public class IPOJOServlet extends AbstractWebConsolePlugin {
                 + "</thead>"
                 + "<tbody>");
 
-        for (Architecture arch : m_archs) {
+        for (Architecture arch : m_archs) { // Cannot be null, an empty list is returned.
             InstanceDescription id = arch.getInstanceDescription();
             String name = id.getName();
             String factory = id.getComponentDescription().getName();
@@ -414,8 +414,7 @@ public class IPOJOServlet extends AbstractWebConsolePlugin {
      */
     private String getFactoryLinkIfPossible(InstanceDescription id) {
         String n = id.getComponentDescription().getName();
-        System.out.println("Look for " + n);
-        for (Factory f : m_factories) {
+        for (Factory f : m_factories) { // Cannot be null, an empty list is returned.
             if (f.getName().equals(n)) {
                 return "<a href=\"ipojo?factory=" + n + "\">" + n + "</a>";
             }
@@ -431,9 +430,11 @@ public class IPOJOServlet extends AbstractWebConsolePlugin {
      */
     private String getInvalidHandlerList(HandlerDescription[] hl) {
         List<String> list = new ArrayList<String>();
-        for (HandlerDescription hd : hl) {
-            if (! hd.isValid()) {
-                list.add(hd.getHandlerName());
+        if (hl != null) {
+            for (HandlerDescription hd : hl) {
+                if (! hd.isValid()) {
+                    list.add(hd.getHandlerName());
+                }
             }
         }
         return list.toString();
@@ -503,7 +504,7 @@ public class IPOJOServlet extends AbstractWebConsolePlugin {
      */
     private String getInstanceList(String factory) {
         String s = "<ul>";
-        for (Architecture arch : m_archs) {
+        for (Architecture arch : m_archs) { // Cannot be null, an empty list is returned.
             String n = arch.getInstanceDescription().getComponentDescription().getName();
             if (factory.equals(n)) {
                 s += "<li>" + getInstanceLink(arch.getInstanceDescription().getName()) + "</li>";
@@ -521,16 +522,18 @@ public class IPOJOServlet extends AbstractWebConsolePlugin {
      */
     private String getServiceReferenceList(List<ServiceReference> refs) {
         String s = "<ul>";
-        for (ServiceReference ref : refs) {
-            s += "<li>";
-            if (ref.getProperty("instance.name") == null) {
-                s += ref.getProperty(Constants.SERVICE_ID);
-            } else {
-                s += "<a href=\"ipojo?instance="
+        if (refs != null) {
+            for (ServiceReference ref : refs) {
+                s += "<li>";
+                if (ref.getProperty("instance.name") == null) {
+                    s += ref.getProperty(Constants.SERVICE_ID);
+                } else {
+                    s += "<a href=\"ipojo?instance="
                         + ref.getProperty("instance.name") + "\">"
                         + ref.getProperty("instance.name") + " (" +  ref.getProperty(Constants.SERVICE_ID) + ")</a>";
+                }
+                s += "</li>";
             }
-            s += "</li>";
         }
         s += "</ul>";
         return s;
@@ -609,7 +612,7 @@ public class IPOJOServlet extends AbstractWebConsolePlugin {
      * @return the instance description or <code>null</code> if not found
      */
     private InstanceDescription getInstanceDescriptionByName(String name) {
-        for (Architecture arch : m_archs) {
+        for (Architecture arch : m_archs) { 
             if (name.equals(arch.getInstanceDescription().getName())) {
                 return arch.getInstanceDescription();
             }
@@ -644,7 +647,7 @@ public class IPOJOServlet extends AbstractWebConsolePlugin {
             pw.write("<tr>"
                     + "<td><a href=\"ipojo?factory=" + name + "\">"
                         + (version == null ? name : name + " (" + version + ")")
-                        + "</a></td>" //TODO Link
+                        + "</a></td>"
                     + "<td>" + bundle + "</td>"
                     + "<td>" + state + "</td>"
                     + "</tr>");
@@ -699,7 +702,7 @@ public class IPOJOServlet extends AbstractWebConsolePlugin {
      * @param state the state.
      * @return the String form of the state.
      */
-    private String getInstanceState(int state) {
+    private static String getInstanceState(int state) {
         switch(state) {
             case ComponentInstance.VALID :
                 return "valid";
@@ -719,7 +722,7 @@ public class IPOJOServlet extends AbstractWebConsolePlugin {
      * @param state the state.
      * @return the String form of the state.
      */
-    private String getFactoryState(int state) {
+    private static String getFactoryState(int state) {
         switch(state) {
             case Factory.VALID :
                 return "valid";
@@ -735,7 +738,7 @@ public class IPOJOServlet extends AbstractWebConsolePlugin {
      * @param state the state.
      * @return the String form of the state.
      */
-    private String getDependencyState(int state) {
+    private static String getDependencyState(int state) {
         switch(state) {
             case DependencyModel.RESOLVED :
                 return "resolved";
@@ -753,7 +756,7 @@ public class IPOJOServlet extends AbstractWebConsolePlugin {
      * @param policy the policy.
      * @return the String form of the policy.
      */
-    private String getDependencyBindingPolicy(int policy) {
+    private static String getDependencyBindingPolicy(int policy) {
         switch(policy) {
             case DependencyModel.DYNAMIC_BINDING_POLICY :
                 return "dynamic";
@@ -771,7 +774,7 @@ public class IPOJOServlet extends AbstractWebConsolePlugin {
      * @param state the state.
      * @return the String form of the state.
      */
-    private String getProvidedServiceState(int state) {
+    private static String getProvidedServiceState(int state) {
         switch(state) {
             case ProvidedService.REGISTERED :
                 return "registered";

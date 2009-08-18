@@ -27,7 +27,7 @@
   <packaging>bundle</packaging>
   <artifactId>org.apache.felix.ipojo.webconsole</artifactId>
   <version>1.5.0-SNAPSHOT</version>
-  <name>Apache Felix iPOJO WebConsole Plugin</name>
+  <name>Apache Felix iPOJO WebConsole Plugins</name>
   
   <description>
   iPOJO plugin for the Apache Felix Web Console. This plugin allows introspecting an iPOJO system with the Apache Felix
