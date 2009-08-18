@@ -611,18 +611,6 @@ public class BldProject implements IBldProject, IRepositoryConfig
     {
         HashMap<String, Properties> map = new HashMap<String, Properties>();
 
-        final Map<String, String> env = System.getenv();
-        final Properties props = new Properties();
-        try
-        {
-            // supports ${.} and ${..} expansions
-            props.setProperty( ".", resolve( "." ).getCanonicalPath() );
-            props.setProperty( "..", resolve( ".." ).getCanonicalPath() );
-        }
-        catch ( IOException e )
-        {
-        }
-
         for ( String name : config.getList( null, BldConfig.C_REPOSITORIES ) )
         {
             Properties repo = config.getProps( null, name );
@@ -632,13 +620,7 @@ public class BldProject implements IBldProject, IRepositoryConfig
                 String key = ( String ) k;
                 String value = repo.getProperty( key );
 
-                String expand = BldUtil.expand( value, new Properties()
-                {
-                    public String getProperty( String name )
-                    {
-                        return props.getProperty( name, env.get( name ) );
-                    }
-                } );
+                String expand = BldUtil.expand( value, new BldProperties(this));
 
                 if ( !value.equals( expand ) )
                 {

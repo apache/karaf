@@ -167,15 +167,6 @@ public class BldUtil
 
     public static String expand( String s )
     {
-        final Map<String, String> env = System.getenv();
-
-        return expand( s, new Properties()
-        {
-            public String getProperty( String name )
-            {
-                return System.getProperty( name, env.get( name ) );
-            }
-        } );
-    }
-
+        return expand( s, BldProperties.global() );
+    }    
 }
