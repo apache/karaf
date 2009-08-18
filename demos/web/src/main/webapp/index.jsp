@@ -16,18 +16,18 @@
 --%>
 <html>
 <head>
-<title>Apache ServiceMix Kernel</title>
+<title>Apache Felix Karaf</title>
 </head>
 <body>
 
 <h2>Welcome!</h2>
 
 <p>
-Welcome to Apache ServiceMix Kernel web application demo
+Welcome to Apache Karaf web application demo
 </p>
 
 <p>
-You can find more information about ServiceMix Kernel on the <a href="http://servicemix.apache.org/kernel">Apache ServiceMix Kernel Site</a>
+You can find more information about Karaf on the <a href="http://felix.apache.org/site/apache-felix-karaf.html">Apache Karaf Site</a>
 </p>
 </body>
 </html>

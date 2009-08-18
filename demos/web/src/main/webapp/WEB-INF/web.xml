@@ -22,11 +22,11 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
                              http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 
-  <description>ServiceMix 4 Embedded Example</description>
-  <display-name>ServiceMix 4 Embedded Example</display-name>
+  <description>Karaf Embedded Example</description>
+  <display-name>Karaf Embedded Example</display-name>
 
   <listener>
-    <listener-class>org.apache.servicemix.smx4webex.WebAppListener</listener-class>
+    <listener-class>org.apache.felix.karaf.web.WebAppListener</listener-class>
   </listener>
 
   <welcome-file-list>

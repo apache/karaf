@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.servicemix.smx4webex;
+package org.apache.felix.karaf.web;
 
 import java.io.File;
 
@@ -22,6 +22,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import org.apache.felix.karaf.main.Main;
+import org.apache.felix.karaf.main.Bootstrap;
 
 public class WebAppListener implements ServletContextListener {
 	
@@ -30,14 +31,13 @@ public class WebAppListener implements ServletContextListener {
 	public void contextInitialized(ServletContextEvent sce) {
 		try {
 			System.err.println("contextInitialized");
-			String root = new File(sce.getServletContext().getRealPath("/") + "WEB-INF/servicemix").getAbsolutePath();
+			String root = new File(sce.getServletContext().getRealPath("/") + "WEB-INF/karaf").getAbsolutePath();
 			System.err.println("Root: " + root);
 			System.setProperty("karaf.home", root);
 			System.setProperty("karaf.base", root);
 			System.setProperty("karaf.startLocalConsole", "false");
 			System.setProperty("karaf.startRemoteShell", "true");
-			main = new Main(new String[0]);
-			main.launch();
+			main = Bootstrap.launch(new String[0]);
 		} catch (Exception e) {
 			main = null;
 			e.printStackTrace();
