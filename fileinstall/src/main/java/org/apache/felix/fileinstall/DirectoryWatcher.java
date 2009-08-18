@@ -421,18 +421,15 @@ public class DirectoryWatcher extends Thread
             refresh();
         }
 
-        // Try to start all the bundles that we could not start last time.
-        // Make a copy, because start() changes the underlying collection
-        start(new HashSet(startupFailures));
-
-        if (startBundles
-            && ((uninstalledBundles.size() > 0)
-                || (updatedBundles.size() > 0)
-                || (installedBundles.size() > 0)))
+        if (startBundles)
         {
-            // Something has changed in the system, so
-            // try to start all the bundles.
-            startAllBundles();
+            // Try to start all the bundles that we could not start last time.
+            // Make a copy, because start() changes the underlying collection
+            start(new HashSet(startupFailures));
+            // Start updated bundles.
+            start(updatedBundles);
+            // Start newly installed bundles.
+            start(installedBundles);
         }
     }
 
@@ -869,16 +866,4 @@ public class DirectoryWatcher extends Thread
         }
     }
 
-    /**
-     * Start all bundles that we are currently managing.
-     */
-    private void startAllBundles()
-    {
-        for (Iterator jars = currentManagedBundles.values().iterator(); jars.hasNext(); )
-        {
-            Jar jar = (Jar) jars.next();
-            Bundle bundle = context.getBundle(jar.getBundleId());
-            start(bundle);
-        }
-    }
 }
