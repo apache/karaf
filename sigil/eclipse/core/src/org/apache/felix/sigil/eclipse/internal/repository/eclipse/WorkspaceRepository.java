@@ -63,7 +63,14 @@ public class WorkspaceRepository extends AbstractBundleRepository implements IRe
                 for ( ISigilProjectModel n : models )
                 {
                     ISigilBundle b = n.getBundle();
-                    tmp.add( b );
+                    if ( b == null )
+                    {
+                        SigilCore.error( "No bundle found for project " + n.getProject().getName() );
+                    }
+                    else
+                    {
+                        tmp.add( b );
+                    }
                 }
                 bundles = tmp.toArray( new ISigilBundle[tmp.size()] );
             }
