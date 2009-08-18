@@ -33,6 +33,8 @@
         <dependency org="org.eclipse" name="org.eclipse.debug.ui" rev="3.4.2.v20090110_r342" />
         <dependency org="org.eclipse" name="org.eclipse.equinox.common" rev="3.4.0.v20080421-2006" />
         <dependency org="org.eclipse" name="org.eclipse.jdt.core" rev="3.4.4.v_894_R34x" />
+        <dependency org="org.eclipse" name="org.eclipse.jdt.debug.ui" rev="3.3.1.v20080730_r341" />
+        <dependency org="org.eclipse" name="org.eclipse.jdt.launching" rev="3.4.1.v20080729_r341" />
         <dependency org="org.eclipse" name="org.eclipse.jdt.ui" rev="3.4.2.r342_v20090107-0800" />
         <dependency org="org.eclipse" name="org.eclipse.jface.text" rev="3.4.2.r342_v20081119-0800" />
         <dependency org="org.eclipse" name="org.eclipse.jface" rev="3.4.2.M20090107-0800" />
