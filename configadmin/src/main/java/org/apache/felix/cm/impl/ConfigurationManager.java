@@ -999,7 +999,6 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             // check configuration and call plugins if existing
             if ( cfg != null )
             {
-
                 if ( cfg.isDelivered() )
                 {
                     log( LogService.LOG_DEBUG, "Configuration " + pid + " has already been delivered", null );
@@ -1064,7 +1063,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 if ( cfg != null )
                 {
                     cfg.setDelivered( true );
-                }
+	            }
             }
             catch ( ConfigurationException ce )
             {
@@ -1269,14 +1268,14 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
         public void run()
         {
-            if ( config.isDelivered() )
-            {
-                log( LogService.LOG_DEBUG, "Configuration " + config.getPid() + " has already been updated", null );
-                return;
-            }
-
             try
             {
+                if ( config.isDelivered() )
+                {
+                    log( LogService.LOG_DEBUG, "Configuration " + config.getPid() + " has already been updated", null );
+                    return;
+                }
+
                 if ( config.getFactoryPid() == null )
                 {
                     final ServiceReference[] srList = bundleContext.getServiceReferences( ManagedService.class
@@ -1402,8 +1401,12 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             {
                 log( LogService.LOG_ERROR, "Unexpected problem updating configuration", t );
             }
-
-            fireConfigurationEvent( ConfigurationEvent.CM_UPDATED, config.getPid(), config.getFactoryPid() );
+            finally
+            {
+                // the update event has to be sent regardless of whether the
+                // configuration was updated in a managed service or not
+                fireConfigurationEvent( ConfigurationEvent.CM_UPDATED, config.getPid(), config.getFactoryPid() );
+            }
         }
 
         public String toString()
@@ -1430,14 +1433,14 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
         public void run()
         {
-            if ( config.isDelivered() )
-            {
-                log( LogService.LOG_DEBUG, "Deletion of configuration " + pid + " has already been delivered", null );
-                return;
-            }
-
             try
             {
+                if ( config.isDelivered() )
+                {
+                    log( LogService.LOG_DEBUG, "Deletion of configuration " + pid + " has already been delivered", null );
+                    return;
+                }
+
                 if ( factoryPid == null )
                 {
                     ServiceReference[] srList = bundleContext.getServiceReferences( ManagedService.class.getName(), "("
@@ -1499,8 +1502,12 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             {
                 log( LogService.LOG_ERROR, "Unexpected problem updating configuration", t );
             }
-
-            fireConfigurationEvent( ConfigurationEvent.CM_DELETED, pid, factoryPid );
+            finally
+            {
+                // the delete event has to be sent regardless of whether the
+                // configuration was updated in a managed service or not
+                fireConfigurationEvent( ConfigurationEvent.CM_DELETED, pid, factoryPid );
+            }
         }
 
         public String toString()
