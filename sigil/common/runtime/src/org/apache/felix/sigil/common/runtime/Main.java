@@ -1,3 +1,22 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.apache.felix.sigil.common.runtime;
 
 
@@ -33,7 +52,7 @@ public class Main
         options = new Options();
         options.addOption( "?", "help", false, "Print help for the Sigil launcher" );
         options.addOption( "p", "port", true, "Port to launch server on (0 implies auto allocate) [default 0]" );
-        options.addOption( "a", "address", true, "Address to bind server to [default all]");
+        options.addOption( "a", "address", true, "Address to bind server to [default all]" );
     }
 
 
@@ -94,6 +113,7 @@ public class Main
         }
     }
 
+
     /**
      * Simple method to parse META-INF/services file for framework factory.
      * Currently, it assumes the first non-commented line is the class name
@@ -104,31 +124,33 @@ public class Main
     private static FrameworkFactory getFrameworkFactory() throws Exception
     {
         URL url = Main.class.getClassLoader().getResource(
-            "META-INF/services/org.osgi.framework.launch.FrameworkFactory");
-        if (url != null)
+            "META-INF/services/org.osgi.framework.launch.FrameworkFactory" );
+        if ( url != null )
         {
-            BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+            BufferedReader br = new BufferedReader( new InputStreamReader( url.openStream() ) );
             try
             {
-                for (String s = br.readLine(); s != null; s = br.readLine())
+                for ( String s = br.readLine(); s != null; s = br.readLine() )
                 {
                     s = s.trim();
                     // Try to load first non-empty, non-commented line.
-                    if ((s.length() > 0) && (s.charAt(0) != '#'))
+                    if ( ( s.length() > 0 ) && ( s.charAt( 0 ) != '#' ) )
                     {
-                        return (FrameworkFactory) Class.forName(s).newInstance();
+                        return ( FrameworkFactory ) Class.forName( s ).newInstance();
                     }
                 }
             }
             finally
             {
-                if (br != null) br.close();
+                if ( br != null )
+                    br.close();
             }
         }
 
-        throw new Exception("Could not find framework factory.");
+        throw new Exception( "Could not find framework factory." );
     }
-    
+
+
     private static Map<String, String> buildConfig( CommandLine cl )
     {
         HashMap<String, String> config = new HashMap<String, String>();
@@ -139,7 +161,7 @@ public class Main
     private static Server launch( CommandLine line ) throws IOException
     {
         Server server = new Server( framework );
-        String v = line.getOptionValue('a');
+        String v = line.getOptionValue( 'a' );
         InetAddress addr = v == null ? null : InetAddress.getByName( v );
         int port = Integer.parseInt( line.getOptionValue( 'p', "0" ) );
         server.start( addr, port );
