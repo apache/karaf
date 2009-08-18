@@ -352,9 +352,6 @@ class ConfigurationImpl
 
             configureFromPersistence( properties );
 
-            // ensure configuration is being delivered
-            setDelivered( false );
-
             configurationManager.updated( this );
         }
     }
@@ -372,9 +369,8 @@ class ConfigurationImpl
 
             setAutoProperties( newProperties, staticallyBound );
 
+            // persist new configuration
             localPersistenceManager.store( pid, newProperties );
-
-            configure( newProperties );
 
             // if this is a factory configuration, update the factory with
             String factoryPid = getFactoryPid();
@@ -385,12 +381,20 @@ class ConfigurationImpl
                 {
                     // only write back if the pid was not already registered
                     // with the factory
-                    factory.store();
+                    try
+                    {
+                        factory.store();
+                    }
+                    catch ( IOException ioe )
+                    {
+                        configurationManager.log( LogService.LOG_ERROR, "Failure storing factory " + factoryPid
+                            + " with new configuration " + pid, ioe );
+                    }
                 }
             }
 
-            // ensure configuration is being delivered
-            setDelivered( false );
+            // finally assign the configuration for use
+            configure( newProperties );
 
             configurationManager.updated( this );
         }
@@ -485,8 +489,7 @@ class ConfigurationImpl
      */
     boolean isDeleted()
     {
-        PersistenceManager persistenceManager = getPersistenceManager();
-        return persistenceManager == null;
+        return getPersistenceManager() == null;
     }
 
 
@@ -523,23 +526,36 @@ class ConfigurationImpl
         }
         else
         {
-            this.properties = null;
+            configure( null );
         }
     }
 
-    private void configure( Dictionary properties )
+    private void configure( final Dictionary properties )
     {
-        // remove predefined properties
-        clearAutoProperties( properties );
-
-        // ensure CaseInsensitiveDictionary
-        if ( properties instanceof CaseInsensitiveDictionary )
+        final CaseInsensitiveDictionary newProperties;
+        if ( properties == null )
         {
-            this.properties = ( CaseInsensitiveDictionary ) properties;
+            newProperties = null;
         }
         else
         {
-            this.properties = new CaseInsensitiveDictionary( properties );
+            // remove predefined properties
+            clearAutoProperties( properties );
+
+            // ensure CaseInsensitiveDictionary
+            if ( properties instanceof CaseInsensitiveDictionary )
+            {
+                newProperties = ( CaseInsensitiveDictionary ) properties;
+            }
+            else
+            {
+                newProperties = new CaseInsensitiveDictionary( properties );
+            }
+        }
+
+        synchronized (this) {
+            this.properties = newProperties;
+            this.setDelivered( false );
         }
     }
 
