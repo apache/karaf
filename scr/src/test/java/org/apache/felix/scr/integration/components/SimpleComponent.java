@@ -26,7 +26,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.osgi.framework.Constants;
+import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
 
 
@@ -35,7 +35,7 @@ public class SimpleComponent
 
     public static SimpleComponent INSTANCE;
 
-    public static final Map<String, SimpleComponent> INSTANCES = new HashMap<String, SimpleComponent>();
+    public static final Map<Long, SimpleComponent> INSTANCES = new HashMap<Long, SimpleComponent>();
 
     public static final Set<SimpleComponent> PREVIOUS_INSTANCES = new HashSet<SimpleComponent>();
 
@@ -46,7 +46,7 @@ public class SimpleComponent
     private void activate( Map<?, ?> config )
     {
         INSTANCE = this;
-        INSTANCES.put( config.get( Constants.SERVICE_PID ).toString(), this );
+        INSTANCES.put( ( Long ) config.get( ComponentConstants.COMPONENT_ID ), this );
         setConfig( config );
 
         if ( PREVIOUS_INSTANCES.contains( this ) )
@@ -74,7 +74,7 @@ public class SimpleComponent
     @SuppressWarnings("unused")
     private void deactivate()
     {
-        INSTANCES.remove( getProperty( Constants.SERVICE_PID ).toString() );
+        INSTANCES.remove( getProperty( ComponentConstants.COMPONENT_ID ) );
         INSTANCE = null;
         setConfig( new HashMap<Object, Object>() );
     }
