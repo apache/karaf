@@ -19,18 +19,165 @@
 package org.apache.felix.cm.integration;
 
 
+import java.io.IOException;
+import java.util.Dictionary;
+
 import junit.framework.TestCase;
 
+import org.apache.felix.cm.integration.helper.ManagedServiceFactoryTestActivator;
 import org.apache.felix.cm.integration.helper.ManagedServiceTestActivator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 
 @RunWith(JUnit4TestRunner.class)
 public class ConfigurationBaseTest extends ConfigurationTestBase
 {
+
+    @Test
+    public void test_basic_configuration_configure_then_start() throws BundleException, IOException
+    {
+        // 1. create config with pid and locationA
+        // 2. update config with properties
+        final String pid = "test_basic_configuration_configure_then_start";
+        final Configuration config = configure( pid, null, true );
+
+        // 3. register ManagedService ms1 with pid from said locationA
+        bundle = installBundle( pid, ManagedServiceTestActivator.class );
+        bundle.start();
+        delay();
+
+        // ==> configuration supplied to the service ms1
+        final ManagedServiceTestActivator tester = ManagedServiceTestActivator.INSTANCE;
+        TestCase.assertNotNull( tester.props );
+        TestCase.assertEquals( pid, tester.props.get( Constants.SERVICE_PID ) );
+        TestCase.assertNull( tester.props.get( ConfigurationAdmin.SERVICE_FACTORYPID ) );
+        TestCase.assertNull( tester.props.get( ConfigurationAdmin.SERVICE_BUNDLELOCATION ) );
+        TestCase.assertEquals( PROP_NAME, tester.props.get( PROP_NAME ) );
+        TestCase.assertEquals( 1, tester.numManagedServiceUpdatedCalls );
+
+        // delete
+        config.delete();
+        delay();
+
+        // ==> update with null
+        TestCase.assertNull( tester.props );
+        TestCase.assertEquals( 2, tester.numManagedServiceUpdatedCalls );
+    }
+
+
+    @Test
+    public void test_basic_configuration_start_then_configure() throws BundleException, IOException
+    {
+        final String pid = "test_basic_configuration_start_then_configure";
+
+        // 1. register ManagedService ms1 with pid from said locationA
+        bundle = installBundle( pid, ManagedServiceTestActivator.class );
+        bundle.start();
+        delay();
+
+        // 1. create config with pid and locationA
+        // 2. update config with properties
+        final Configuration config = configure( pid, null, true );
+        delay();
+
+        // ==> configuration supplied to the service ms1
+        final ManagedServiceTestActivator tester = ManagedServiceTestActivator.INSTANCE;
+        TestCase.assertNotNull( tester.props );
+        TestCase.assertEquals( pid, tester.props.get( Constants.SERVICE_PID ) );
+        TestCase.assertNull( tester.props.get( ConfigurationAdmin.SERVICE_FACTORYPID ) );
+        TestCase.assertNull( tester.props.get( ConfigurationAdmin.SERVICE_BUNDLELOCATION ) );
+        TestCase.assertEquals( PROP_NAME, tester.props.get( PROP_NAME ) );
+        TestCase.assertEquals( 2, tester.numManagedServiceUpdatedCalls );
+
+        // delete
+        config.delete();
+        delay();
+
+        // ==> update with null
+        TestCase.assertNull( tester.props );
+        TestCase.assertEquals( 3, tester.numManagedServiceUpdatedCalls );
+    }
+
+
+    @Test
+    public void test_basic_configuration_factory_configure_then_start() throws BundleException, IOException
+    {
+        final String factoryPid = "test_basic_configuration_factory_configure_then_start";
+        bundle = installBundle( factoryPid, ManagedServiceFactoryTestActivator.class );
+        bundle.start();
+        delay();
+
+        final Configuration config = createFactoryConfiguration( factoryPid, null, true );
+        final String pid = config.getPid();
+        delay();
+
+        // ==> configuration supplied to the service ms1
+        final ManagedServiceFactoryTestActivator tester = ManagedServiceFactoryTestActivator.INSTANCE;
+        Dictionary<?, ?> props = tester.configs.get( pid );
+        TestCase.assertNotNull( props );
+        TestCase.assertEquals( pid, props.get( Constants.SERVICE_PID ) );
+        TestCase.assertEquals( factoryPid, props.get( ConfigurationAdmin.SERVICE_FACTORYPID ) );
+        TestCase.assertNull( props.get( ConfigurationAdmin.SERVICE_BUNDLELOCATION ) );
+        TestCase.assertEquals( PROP_NAME, props.get( PROP_NAME ) );
+        TestCase.assertEquals( 0, tester.numManagedServiceUpdatedCalls );
+        TestCase.assertEquals( 1, tester.numManagedServiceFactoryUpdatedCalls );
+        TestCase.assertEquals( 0, tester.numManagedServiceFactoryDeleteCalls );
+
+        // delete
+        config.delete();
+        delay();
+
+        // ==> update with null
+        TestCase.assertNull( tester.configs.get( pid ));
+        TestCase.assertEquals( 0, tester.numManagedServiceUpdatedCalls );
+        TestCase.assertEquals( 1, tester.numManagedServiceFactoryUpdatedCalls );
+        TestCase.assertEquals( 1, tester.numManagedServiceFactoryDeleteCalls );
+    }
+
+
+    @Test
+    public void test_basic_configuration_factory_start_then_configure() throws BundleException, IOException
+    {
+        // 1. create config with pid and locationA
+        // 2. update config with properties
+        final String factoryPid = "test_basic_configuration_factory_start_then_configure";
+        final Configuration config = createFactoryConfiguration( factoryPid, null, true );
+        final String pid = config.getPid();
+
+        // 3. register ManagedService ms1 with pid from said locationA
+        bundle = installBundle( factoryPid, ManagedServiceFactoryTestActivator.class );
+        bundle.start();
+        delay();
+
+        // ==> configuration supplied to the service ms1
+        final ManagedServiceFactoryTestActivator tester = ManagedServiceFactoryTestActivator.INSTANCE;
+        Dictionary<?, ?> props = tester.configs.get( pid );
+        TestCase.assertNotNull( props );
+        TestCase.assertEquals( pid, props.get( Constants.SERVICE_PID ) );
+        TestCase.assertEquals( factoryPid, props.get( ConfigurationAdmin.SERVICE_FACTORYPID ) );
+        TestCase.assertNull( props.get( ConfigurationAdmin.SERVICE_BUNDLELOCATION ) );
+        TestCase.assertEquals( PROP_NAME, props.get( PROP_NAME ) );
+        TestCase.assertEquals( 0, tester.numManagedServiceUpdatedCalls );
+        TestCase.assertEquals( 1, tester.numManagedServiceFactoryUpdatedCalls );
+        TestCase.assertEquals( 0, tester.numManagedServiceFactoryDeleteCalls );
+
+        // delete
+        config.delete();
+        delay();
+
+        // ==> update with null
+        TestCase.assertNull( tester.configs.get( pid ));
+        TestCase.assertEquals( 0, tester.numManagedServiceUpdatedCalls );
+        TestCase.assertEquals( 1, tester.numManagedServiceFactoryUpdatedCalls );
+        TestCase.assertEquals( 1, tester.numManagedServiceFactoryDeleteCalls );
+    }
+
 
     @Test
     public void test_start_bundle_configure_stop_start_bundle() throws BundleException

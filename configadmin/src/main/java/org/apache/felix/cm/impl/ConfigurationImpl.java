@@ -123,7 +123,6 @@ class ConfigurationImpl extends ConfigurationBase
     {
         this.isDeleted = true;
         getPersistenceManager().delete( this.getPid() );
-        setDynamicBundleLocation( null );
         getConfigurationManager().deleted( this );
     }
 

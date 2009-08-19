@@ -1473,16 +1473,19 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     private class DeleteConfiguration implements Runnable
     {
 
-        private ConfigurationImpl config;
-        private String pid;
-        private String factoryPid;
+        private final String pid;
+        private final String factoryPid;
+        private final String configLocation;
 
 
         DeleteConfiguration( ConfigurationImpl config )
         {
-            this.config = config;
             this.pid = config.getPid();
             this.factoryPid = config.getFactoryPid();
+            this.configLocation = config.getBundleLocation();
+
+            // immediately unbind the configuration
+            config.setDynamicBundleLocation( null );
         }
 
 
@@ -1490,8 +1493,6 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         {
             try
             {
-                final String configLocation = config.getBundleLocation();
-
                 if ( factoryPid == null )
                 {
                     ServiceReference[] srList = bundleContext.getServiceReferences( ManagedService.class.getName(), "("
