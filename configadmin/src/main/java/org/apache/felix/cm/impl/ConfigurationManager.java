@@ -558,17 +558,33 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     }
 
 
-    void deleted( ConfigurationImpl config, boolean fireEvent )
+    void deleted( ConfigurationImpl config )
     {
         // remove the configuration from the cache
         removeConfiguration( config );
-        updateThread.schedule( new DeleteConfiguration( config, fireEvent ) );
+        updateThread.schedule( new DeleteConfiguration( config, true ) );
     }
 
 
-    void updated( ConfigurationImpl config, boolean fireEvent )
+    void updated( ConfigurationImpl config )
     {
-        updateThread.schedule( new UpdateConfiguration( config, fireEvent ) );
+        updateThread.schedule( new UpdateConfiguration( config, true ) );
+    }
+
+
+    void revokeConfiguration( ConfigurationImpl config )
+    {
+        updateThread.schedule( new DeleteConfiguration( config, false ) );
+
+        // immediately unbind the configuration
+        config.setDynamicBundleLocation( null );
+        config.setServiceReference( null );
+    }
+
+
+    void reassignConfiguration( ConfigurationImpl config )
+    {
+        updateThread.schedule( new UpdateConfiguration( config, false ) );
     }
 
 
@@ -1508,10 +1524,6 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             this.factoryPid = config.getFactoryPid();
             this.configLocation = config.getBundleLocation();
             this.fireEvent = fireEvent;
-
-            // immediately unbind the configuration
-            config.setDynamicBundleLocation( null );
-            config.setServiceReference( null );
         }
 
 

@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.util.Dictionary;
 import org.apache.felix.cm.PersistenceManager;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.log.LogService;
 
 
@@ -65,7 +64,7 @@ abstract class ConfigurationBase
 
 
     protected ConfigurationBase( final ConfigurationManager configurationManager,
-        final PersistenceManager persistenceManager, final String baseId, final Dictionary props )
+        final PersistenceManager persistenceManager, final String baseId, final String bundleLocation )
     {
         if ( configurationManager == null )
         {
@@ -82,11 +81,7 @@ abstract class ConfigurationBase
         this.baseId = baseId;
 
         // set bundle location from persistence and/or check for dynamic binding
-        if ( props != null )
-        {
-            this.staticBundleLocation = ( String ) props.get( ConfigurationAdmin.SERVICE_BUNDLELOCATION );
-        }
-
+        this.staticBundleLocation = bundleLocation;
         this.dynamicBundleLocation = configurationManager.getDynamicBundleLocation( baseId );
     }
 
@@ -154,25 +149,24 @@ abstract class ConfigurationBase
 
     void setStaticBundleLocation( final String bundleLocation )
     {
-        // FELIX-1488: If a configuration is bound to a location and a new
-        // location is statically set, the old binding must be removed
-        // by removing the configuration from the targets and the new binding
-        // must be setup by updating the configuration for new targets
-        boolean replace = ( this instanceof ConfigurationImpl ) && ( bundleLocation != null );
-        if ( replace && getDynamicBundleLocation() != null && !bundleLocation.equals( getDynamicBundleLocation() ) )
-        {
-            // remove configuration from current managed service [factory]
-            getConfigurationManager().deleted( ( ConfigurationImpl ) this, false );
-        }
-
         // 104.15.2.8 The bundle location will be set persistently
         this.staticBundleLocation = bundleLocation;
         storeSilently();
 
-        // check whether we have to assign the configuration to new targets
-        if ( replace )
+        // FELIX-1488: If a configuration is bound to a location and a new
+        // location is statically set, the old binding must be removed
+        // by removing the configuration from the targets and the new binding
+        // must be setup by updating the configuration for new targets
+        if ( ( this instanceof ConfigurationImpl ) && ( bundleLocation != null ) )
         {
-            getConfigurationManager().updated( ( ConfigurationImpl ) this, false );
+            // remove configuration from current managed service [factory]
+            if ( getDynamicBundleLocation() != null && !bundleLocation.equals( getDynamicBundleLocation() ) )
+            {
+                getConfigurationManager().revokeConfiguration( ( ConfigurationImpl ) this );
+            }
+
+            // check whether we have to assign the configuration to new targets
+            getConfigurationManager().reassignConfiguration( ( ConfigurationImpl ) this );
         }
     }
 
@@ -181,6 +175,14 @@ abstract class ConfigurationBase
     {
         this.dynamicBundleLocation = bundleLocation;
         this.configurationManager.setDynamicBundleLocation( this.getBaseId(), bundleLocation );
+
+        // FELIX-1488: If a dynamically bound configuration is unbound and not
+        // statically bound, it may be rebound to another bundle asking for it
+        // (unless the dynamic unbind happens due to configuration deletion)
+        if ( bundleLocation == null && getStaticBundleLocation() == null && ( this instanceof ConfigurationImpl ) )
+        {
+            getConfigurationManager().reassignConfiguration( ( ConfigurationImpl ) this );
+        }
     }
 
 

@@ -72,8 +72,8 @@ class Factory extends ConfigurationBase
 
     Factory( ConfigurationManager configurationManager, PersistenceManager persistenceManager, String factoryPid, Dictionary props )
     {
-        super(configurationManager, persistenceManager, factoryPid, props);
-
+        super( configurationManager, persistenceManager, factoryPid, ( String ) props
+            .get( ConfigurationAdmin.SERVICE_BUNDLELOCATION ) );
 
         // set pids
         String[] pidList = ( String[] ) props.get( FACTORY_PID_LIST );

@@ -165,7 +165,8 @@ public class MultiServiceFactoryPIDTest extends ConfigurationTestBase
 
             delay();
 
-            TestCase.assertNull( config.getBundleLocation() );
+            // expect configuration reassigned
+            TestCase.assertEquals( bundle2.getLocation(), config.getBundleLocation() );
 
             // remove the configuration for good
             deleteConfig( pid );
@@ -230,7 +231,8 @@ public class MultiServiceFactoryPIDTest extends ConfigurationTestBase
 
                 delay();
 
-                TestCase.assertNull( config.getBundleLocation() );
+                // expect configuration reassigned
+                TestCase.assertEquals( bundle2.getLocation(), config.getBundleLocation() );
             }
             else if ( bundle2.getLocation().equals( config.getBundleLocation() ) )
             {
@@ -247,8 +249,8 @@ public class MultiServiceFactoryPIDTest extends ConfigurationTestBase
 
                 delay();
 
-                // really ??
-                TestCase.assertNull( config.getBundleLocation() );
+                // expect configuration reassigned
+                TestCase.assertEquals( bundle.getLocation(), config.getBundleLocation() );
             }
             else
             {

@@ -22,13 +22,25 @@ package org.apache.felix.cm.impl;
 public class MockConfigurationManager extends ConfigurationManager
 {
 
-    void updated( ConfigurationImpl config, boolean fireEvent )
+    void updated( ConfigurationImpl config )
     {
         // do nothing, might register the update call
     }
 
 
-    void deleted( ConfigurationImpl config, boolean fireEvent )
+    void deleted( ConfigurationImpl config )
+    {
+        // do nothing, might register the update call
+    }
+
+
+    void revokeConfiguration( ConfigurationImpl config )
+    {
+        // do nothing, might register the update call
+    }
+
+
+    void reassignConfiguration( ConfigurationImpl config )
     {
         // do nothing, might register the update call
     }

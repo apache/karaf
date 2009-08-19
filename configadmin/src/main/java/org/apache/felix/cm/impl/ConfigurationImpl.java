@@ -84,7 +84,8 @@ class ConfigurationImpl extends ConfigurationBase
     ConfigurationImpl( ConfigurationManager configurationManager, PersistenceManager persistenceManager,
         Dictionary properties )
     {
-        super( configurationManager, persistenceManager, ( String ) properties.remove( Constants.SERVICE_PID ), properties );
+        super( configurationManager, persistenceManager, ( String ) properties.remove( Constants.SERVICE_PID ),
+            ( String ) properties.remove( ConfigurationAdmin.SERVICE_BUNDLELOCATION ) );
 
         this.factoryPID = ( String ) properties.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
         this.isDeleted = false;
@@ -97,14 +98,11 @@ class ConfigurationImpl extends ConfigurationBase
     ConfigurationImpl( ConfigurationManager configurationManager, PersistenceManager persistenceManager, String pid,
         String factoryPid, String bundleLocation ) throws IOException
     {
-        super( configurationManager, persistenceManager, pid, null );
+        super( configurationManager, persistenceManager, pid, bundleLocation );
 
         this.factoryPID = factoryPid;
         this.isDeleted = false;
         this.properties = null;
-
-        // static bundle binding here
-        setStaticBundleLocation( bundleLocation );
 
         // this is a new configuration object, store immediately unless
         // the new configuration object is created from a factory, in which
@@ -123,7 +121,8 @@ class ConfigurationImpl extends ConfigurationBase
     {
         this.isDeleted = true;
         getPersistenceManager().delete( this.getPid() );
-        getConfigurationManager().deleted( this, true );
+        getConfigurationManager().setDynamicBundleLocation( this.getPid(), null );
+        getConfigurationManager().deleted( this );
     }
 
 
@@ -190,7 +189,7 @@ class ConfigurationImpl extends ConfigurationBase
 
             configureFromPersistence( properties );
 
-            getConfigurationManager().updated( this, true );
+            getConfigurationManager().updated( this );
         }
     }
 
@@ -241,7 +240,7 @@ class ConfigurationImpl extends ConfigurationBase
             // finally assign the configuration for use
             configure( newProperties );
 
-            getConfigurationManager().updated( this, true );
+            getConfigurationManager().updated( this );
         }
     }
 

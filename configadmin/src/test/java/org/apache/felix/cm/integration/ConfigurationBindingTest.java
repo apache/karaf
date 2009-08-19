@@ -42,7 +42,7 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
      @Test
     public void test_configuration_unbound_on_uninstall() throws BundleException
     {
-        String pid = "test.pid";
+        String pid = "test_configuration_unbound_on_uninstall";
         configure( pid );
 
         // ensure configuration is unbound
@@ -111,7 +111,7 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
      @Test
     public void test_configuration_unbound_on_uninstall_with_cm_restart() throws BundleException
     {
-        final String pid = "test.pid";
+        final String pid = "test_configuration_unbound_on_uninstall_with_cm_restart";
         configure( pid );
         final Bundle cmBundle = getCmBundle();
 
@@ -620,6 +620,7 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
         // 5. Call Configuration.setBundleLocation( "locationB" )
         config.setBundleLocation( locationB );
         delay();
+        delay();
 
         // ==> configuration is bound to locationB
         TestCase.assertEquals( locationB, config.getBundleLocation() );
@@ -668,6 +669,7 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
         // 5. Call Configuration.setBundleLocation( "locationB" )
         config.setBundleLocation( locationB );
         delay();
+        delay();
 
         // ==> configuration is bound to locationB
         TestCase.assertEquals( locationB, config.getBundleLocation() );
@@ -693,6 +695,8 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
         final Configuration config = createFactoryConfiguration( factoryPid, null, true );
         final String pid = config.getPid();
 
+        TestCase.assertNull( config.getBundleLocation() );
+
         // 3. register ManagedService ms1 with pid from said locationA
         final Bundle bundleA = installBundle( factoryPid, ManagedServiceFactoryTestActivator.class, locationA );
         bundleA.start();
@@ -702,6 +706,7 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
         final ManagedServiceFactoryTestActivator testerA1 = ManagedServiceFactoryTestActivator.INSTANCE;
         TestCase.assertNotNull( testerA1.configs.get( pid ) );
         TestCase.assertEquals( 1, testerA1.numManagedServiceFactoryUpdatedCalls );
+        TestCase.assertEquals( locationA, config.getBundleLocation() );
 
         // 4. register ManagedService ms2 with pid from locationB
         final String locationB = "test:location/B/" + factoryPid;
@@ -713,9 +718,11 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
         final ManagedServiceFactoryTestActivator2 testerB1 = ManagedServiceFactoryTestActivator2.INSTANCE;
         TestCase.assertNull( testerB1.configs.get( pid ));
         TestCase.assertEquals( 0, testerB1.numManagedServiceFactoryUpdatedCalls );
+        TestCase.assertEquals( locationA, config.getBundleLocation() );
 
         // 5. Call Configuration.setBundleLocation( "locationB" )
         config.setBundleLocation( locationB );
+        delay();
         delay();
 
         // ==> configuration is bound to locationB
@@ -725,6 +732,104 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
         TestCase.assertNull( testerA1.configs.get( pid ));
         TestCase.assertEquals( 1, testerA1.numManagedServiceFactoryUpdatedCalls );
         TestCase.assertEquals( 1, testerA1.numManagedServiceFactoryDeleteCalls );
+
+        // ==> configuration supplied to the service ms2
+        TestCase.assertNotNull( testerB1.configs.get( pid ) );
+        TestCase.assertEquals( 1, testerB1.numManagedServiceFactoryUpdatedCalls );
+    }
+
+
+    @Test
+    public void test_switch_dynamic_binding_after_uninstall() throws BundleException
+    {
+        // 1. create config with pid with null location
+        // 2. update config with properties
+        final String pid = "test_switch_dynamic_binding";
+        final String locationA = "test:location/A/" + pid;
+        final Configuration config = configure( pid, null, true );
+
+        TestCase.assertNull( config.getBundleLocation() );
+
+        // 3. register ManagedService ms1 with pid from locationA
+        final Bundle bundleA = installBundle( pid, ManagedServiceTestActivator.class, locationA );
+        bundleA.start();
+        delay();
+
+        // ==> configuration supplied to the service ms1
+        final ManagedServiceTestActivator testerA1 = ManagedServiceTestActivator.INSTANCE;
+        TestCase.assertNotNull( testerA1.props );
+        TestCase.assertEquals( 1, testerA1.numManagedServiceUpdatedCalls );
+
+        // ==> configuration is dynamically bound to locationA
+        TestCase.assertEquals( locationA, config.getBundleLocation() );
+
+        // 4. register ManagedService ms2 with pid from locationB
+        final String locationB = "test:location/B/" + pid;
+        final Bundle bundleB = installBundle( pid, ManagedServiceTestActivator2.class, locationB );
+        bundleB.start();
+        delay();
+
+        // ==> configuration not supplied to service ms2
+        final ManagedServiceTestActivator2 testerB1 = ManagedServiceTestActivator2.INSTANCE;
+        TestCase.assertNull( testerB1.props );
+        TestCase.assertEquals( 0, testerB1.numManagedServiceUpdatedCalls );
+
+        // 5. Uninstall bundle A
+        bundleA.uninstall();
+        delay();
+        delay();
+
+        // ==> configuration is bound to locationB
+        TestCase.assertEquals( locationB, config.getBundleLocation() );
+
+        // ==> configuration supplied to the service ms2
+        TestCase.assertNotNull( testerB1.props );
+        TestCase.assertEquals( 1, testerB1.numManagedServiceUpdatedCalls );
+    }
+
+
+    @Test
+    public void test_switch_dynamic_binding_factory_after_uninstall() throws BundleException
+    {
+        // 1. create config with pid and locationA
+        // 2. update config with properties
+        final String factoryPid = "test_switch_static_binding_factory";
+        final String locationA = "test:location/A/" + factoryPid;
+        final Configuration config = createFactoryConfiguration( factoryPid, null, true );
+        final String pid = config.getPid();
+
+        TestCase.assertNull( config.getBundleLocation() );
+
+        // 3. register ManagedService ms1 with pid from said locationA
+        final Bundle bundleA = installBundle( factoryPid, ManagedServiceFactoryTestActivator.class, locationA );
+        bundleA.start();
+        delay();
+
+        // ==> configuration supplied to the service ms1
+        final ManagedServiceFactoryTestActivator testerA1 = ManagedServiceFactoryTestActivator.INSTANCE;
+        TestCase.assertNotNull( testerA1.configs.get( pid ) );
+        TestCase.assertEquals( 1, testerA1.numManagedServiceFactoryUpdatedCalls );
+        TestCase.assertEquals( locationA, config.getBundleLocation() );
+
+        // 4. register ManagedService ms2 with pid from locationB
+        final String locationB = "test:location/B/" + factoryPid;
+        final Bundle bundleB = installBundle( factoryPid, ManagedServiceFactoryTestActivator2.class, locationB );
+        bundleB.start();
+        delay();
+
+        // ==> configuration not supplied to service ms2
+        final ManagedServiceFactoryTestActivator2 testerB1 = ManagedServiceFactoryTestActivator2.INSTANCE;
+        TestCase.assertNull( testerB1.configs.get( pid ));
+        TestCase.assertEquals( 0, testerB1.numManagedServiceFactoryUpdatedCalls );
+        TestCase.assertEquals( locationA, config.getBundleLocation() );
+
+        // 5. Uninstall bundle A
+        bundleA.uninstall();
+        delay();
+        delay();
+
+        // ==> configuration is bound to locationB
+        TestCase.assertEquals( locationB, config.getBundleLocation() );
 
         // ==> configuration supplied to the service ms2
         TestCase.assertNotNull( testerB1.configs.get( pid ) );
