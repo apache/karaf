@@ -16,30 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// DWB16: coerce() doesn't support static methods
-// DWB17: coerce() doesn't support static void main(String[]) in rfc132
-// DWB18: coerce() doesn't extract cause from InvocationTargetException
-// DWB19: coerce() won't add empty array to satisfy Object[] argument
 package org.apache.felix.gogo.runtime.shell;
-
-import org.osgi.service.command.CommandSession;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.osgi.service.command.CommandSession;
 
 public class Reflective
 {
     public final static Object NO_MATCH = new Object();
     public final static Set<String> KEYWORDS = new HashSet<String>(Arrays.asList(new String[]{"abstract", "continue", "for", "new", "switch", "assert", "default", "goto", "package", "synchronized", "boolean", "do", "if", "private", "this", "break", "double", "implements", "protected", "throw", "byte", "else", "import", "public", "throws", "case", "enum", "instanceof", "return", "transient", "catch", "extends", "int", "short", "try", "char", "final", "interface", "static", "void", "class", "finally", "long", "strictfp", "volatile", "const", "float", "native", "super", "while"}));
-
+    public final static String MAIN = "_main";
+    
     public Object method(CommandSession session, Object target, String name, List<Object> args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, Exception
     {
-        // derek - support static methods
-        //Method[] methods = target.getClass().getMethods();
-        Class<?> tc = (target instanceof Class) ? (Class<?>) target : target.getClass();
-        Method[] methods = tc.getMethods();
+        Method[] methods = target.getClass().getMethods();
         name = name.toLowerCase();
 
         String get = "get" + name;
@@ -50,19 +48,39 @@ public class Reflective
         {
             name = "_" + name;
         }
+        
+        if (target instanceof Class)
+        {
+            Method[] staticMethods = ((Class<?>)target).getMethods();
+            for (Method m : staticMethods)
+            {
+                String mname = m.getName().toLowerCase();
+                if (mname.equals(name) || mname.equals(get) || mname.equals(set) || mname.equals(is) || mname.equals(MAIN))
+                {
+                    methods = staticMethods;
+                    break;
+                }
+            }
+        }
 
         Method bestMethod = null;
         Object[] bestArgs = null;
         int match = -1;
-        ArrayList<Class<?>[]> possibleTypes = new ArrayList<Class<?>[]>();    // derek
+        ArrayList<Class<?>[]> possibleTypes = new ArrayList<Class<?>[]>();
 
         for (Method m : methods)
         {
             String mname = m.getName().toLowerCase();
-            if (mname.equals(name) || mname.equals(get) || mname.equals(set) || mname.equals(is) || mname.equals("_main"))
-            {    // derek - added _main
+            if (mname.equals(name) || mname.equals(get) || mname.equals(set) || mname.equals(is) || mname.equals(MAIN))
+            {
                 Class<?>[] types = m.getParameterTypes();
-                ArrayList<Object> xargs = new ArrayList<Object>(args); // derek - BUGFIX don't modify args
+                ArrayList<Object> xargs = new ArrayList<Object>(args);
+
+                // pass command name as argv[0] to main, so it can handle multiple commands
+                if (mname.equals(MAIN))
+                {
+                    xargs.add(0, name);
+                }
 
                 // Check if the command takes a session
                 if (types.length > 0 && CommandSession.class.isAssignableFrom(types[0]))
@@ -89,7 +107,7 @@ public class Reflective
                 }
                 else
                 {
-                    possibleTypes.add(types);    // derek
+                    possibleTypes.add(types);
                 }
                 // }
                 // if (match == -1 && types.length == 1
