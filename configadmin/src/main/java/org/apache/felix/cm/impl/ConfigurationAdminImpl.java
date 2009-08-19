@@ -93,10 +93,9 @@ public class ConfigurationAdminImpl implements ConfigurationAdmin
     {
         ConfigurationImpl config = configurationManager.getConfiguration( pid, getBundle().getLocation() );
 
-        if ( config.getBundleLocation() == null )
+        if ( config.getStaticBundleLocation() == null )
         {
-            // statically bind the configuration
-            config.setBundleLocation( this.getBundle().getLocation(), true );
+            config.setStaticBundleLocation( this.getBundle().getLocation() );
         }
         else if ( !config.getBundleLocation().equals( this.getBundle().getLocation() ) )
         {

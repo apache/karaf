@@ -84,7 +84,7 @@ public class ConfigurationAdapter implements Configuration
     {
         configurationAdmin.checkPermission();
         checkDeleted();
-        delegatee.setBundleLocation( bundleLocation, true );
+        delegatee.setStaticBundleLocation( bundleLocation );
     }
 
 

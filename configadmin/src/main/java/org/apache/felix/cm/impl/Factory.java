@@ -27,40 +27,21 @@ import java.util.Set;
 
 import org.apache.felix.cm.PersistenceManager;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.log.LogService;
 
 
 /**
  * The <code>Factory</code> class is used to manage mappings between factory
  * PIDs the configuration PID belonging to it.
  */
-class Factory
+class Factory extends ConfigurationBase
 {
 
     public static final String FACTORY_PID = "factory.pid";
 
     public static final String FACTORY_PID_LIST = "factory.pidList";
 
-    /**
-     * The {@link ConfigurationManager configuration manager} instance which
-     * caused this configuration object to be created.
-     */
-    private final ConfigurationManager configurationManager;
-
-    // the persistence manager storing this factory mapping
-    private final PersistenceManager persistenceManager;
-
-    // the factory PID of this factory
-    private final String factoryPid;
-
-    // the bundle location to which factory PID mapping is bound
-    private volatile String bundleLocation;
-
-    // whether the factory is statically bound to a bundle or not
-    private volatile boolean staticallyBound;
-
     // the set of configuration PIDs belonging to this factory
-    private final Set pids;
+    private final Set pids = new HashSet();;
 
 
     static boolean exists( PersistenceManager persistenceManager, String factoryPid )
@@ -85,30 +66,14 @@ class Factory
 
     Factory( ConfigurationManager configurationManager, PersistenceManager persistenceManager, String factoryPid )
     {
-        this.configurationManager = configurationManager;
-        this.persistenceManager = persistenceManager;
-        this.factoryPid = factoryPid;
-        this.pids = new HashSet();
-        this.bundleLocation = null;
-        this.staticallyBound = false;
+        super(configurationManager, persistenceManager, factoryPid, null);
     }
 
 
     Factory( ConfigurationManager configurationManager, PersistenceManager persistenceManager, String factoryPid, Dictionary props )
     {
-        this( configurationManager, persistenceManager, factoryPid );
+        super(configurationManager, persistenceManager, factoryPid, props);
 
-        // set bundle location from persistence and/or check for dynamic binding
-        this.bundleLocation = ( String ) props.get( ConfigurationAdmin.SERVICE_BUNDLELOCATION );
-        if ( bundleLocation != null )
-        {
-            this.staticallyBound = true;
-        }
-        else
-        {
-            this.staticallyBound = false;
-            this.bundleLocation = configurationManager.getDynamicBundleLocation( getFactoryPid() );
-        }
 
         // set pids
         String[] pidList = ( String[] ) props.get( FACTORY_PID_LIST );
@@ -122,42 +87,9 @@ class Factory
     }
 
 
-    PersistenceManager getPersistenceManager()
-    {
-        return persistenceManager;
-    }
-
-
     String getFactoryPid()
     {
-        return factoryPid;
-    }
-
-
-    String getBundleLocation()
-    {
-        return bundleLocation;
-    }
-
-
-    void setBundleLocation( String bundleLocation, boolean staticBinding )
-    {
-        if ( staticBinding )
-        {
-            this.bundleLocation = bundleLocation;
-            this.staticallyBound = bundleLocation != null;
-
-            // 104.15.2.8 The bundle location will be set persistently
-            storeSilently();
-        }
-        else if ( !this.staticallyBound )
-        {
-            // dynamic binding
-            this.bundleLocation = bundleLocation;
-
-            // keep the dynamic binding
-            this.configurationManager.setDynamicBundleLocation( this.getFactoryPid(), bundleLocation );
-        }
+        return getBaseId();
     }
 
 
@@ -183,10 +115,7 @@ class Factory
     {
         Hashtable props = new Hashtable();
 
-        if ( bundleLocation != null && staticallyBound )
-        {
-            props.put( ConfigurationAdmin.SERVICE_BUNDLELOCATION, this.getBundleLocation() );
-        }
+        replaceProperty( props, ConfigurationAdmin.SERVICE_BUNDLELOCATION, getStaticBundleLocation() );
 
         if ( !pids.isEmpty() )
         {
@@ -196,25 +125,12 @@ class Factory
         String id = factoryPidToIdentifier( this.getFactoryPid() );
         if ( props.isEmpty() )
         {
-            persistenceManager.delete( id );
+            getPersistenceManager().delete( id );
         }
         else
         {
             props.put( FACTORY_PID, this.getFactoryPid() );
-            persistenceManager.store( id, props );
-        }
-    }
-
-
-    void storeSilently()
-    {
-        try
-        {
-            this.store();
-        }
-        catch ( IOException ioe )
-        {
-            configurationManager.log( LogService.LOG_ERROR, "Persisting new bundle location failed", ioe );
+            getPersistenceManager().store( id, props );
         }
     }
 }
