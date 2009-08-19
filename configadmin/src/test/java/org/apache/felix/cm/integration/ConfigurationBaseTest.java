@@ -29,6 +29,7 @@ import org.apache.felix.cm.integration.helper.ManagedServiceTestActivator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.Configuration;
@@ -134,7 +135,7 @@ public class ConfigurationBaseTest extends ConfigurationTestBase
         delay();
 
         // ==> update with null
-        TestCase.assertNull( tester.configs.get( pid ));
+        TestCase.assertNull( tester.configs.get( pid ) );
         TestCase.assertEquals( 0, tester.numManagedServiceUpdatedCalls );
         TestCase.assertEquals( 1, tester.numManagedServiceFactoryUpdatedCalls );
         TestCase.assertEquals( 1, tester.numManagedServiceFactoryDeleteCalls );
@@ -172,7 +173,7 @@ public class ConfigurationBaseTest extends ConfigurationTestBase
         delay();
 
         // ==> update with null
-        TestCase.assertNull( tester.configs.get( pid ));
+        TestCase.assertNull( tester.configs.get( pid ) );
         TestCase.assertEquals( 0, tester.numManagedServiceUpdatedCalls );
         TestCase.assertEquals( 1, tester.numManagedServiceFactoryUpdatedCalls );
         TestCase.assertEquals( 1, tester.numManagedServiceFactoryDeleteCalls );
@@ -282,4 +283,63 @@ public class ConfigurationBaseTest extends ConfigurationTestBase
         // remove the configuration for good
         deleteConfig( pid );
     }
+
+
+    @Test
+    public void test_listConfiguration() throws BundleException, IOException
+    {
+        // 1. create a new Conf1 with pid1 and null location.
+        // 2. Conf1#update(props) is called.
+        final String pid = "test_listConfiguration";
+        final Configuration config = configure( pid, null, true );
+
+        // 3. bundleA will locationA registers ManagedServiceA with pid1.
+        bundle = installBundle( pid );
+        bundle.start();
+        delay();
+
+        // ==> ManagedServiceA is called back.
+        final ManagedServiceTestActivator tester = ManagedServiceTestActivator.INSTANCE;
+        TestCase.assertNotNull( tester );
+        TestCase.assertNotNull( tester.props );
+        TestCase.assertEquals( 1, tester.numManagedServiceUpdatedCalls );
+
+        // 4. bundleA is stopped but *NOT uninstalled*.
+        bundle.stop();
+        delay();
+
+        // 5. test bundle calls cm.listConfigurations(null).
+        final Configuration listed = getConfiguration( pid );
+
+        // ==> Conf1 is included in the returned list and
+        // it has locationA.
+        // (In debug mode, dynamicBundleLocation==locationA
+        // and staticBundleLocation==null)
+        TestCase.assertNotNull( listed );
+        TestCase.assertEquals( bundle.getLocation(), listed.getBundleLocation() );
+
+        // 6. test bundle calls cm.getConfiguration(pid1)
+        final Configuration get = getConfigurationAdmin().getConfiguration( pid );
+        TestCase.assertEquals( bundle.getLocation(), get.getBundleLocation() );
+
+        final Bundle cmBundle = getCmBundle();
+        cmBundle.stop();
+        delay();
+        cmBundle.start();
+        delay();
+
+        // 5. test bundle calls cm.listConfigurations(null).
+        final Configuration listed2 = getConfiguration( pid );
+
+        // ==> Conf1 is included in the returned list and
+        // it has locationA.
+        // (In debug mode, dynamicBundleLocation==locationA
+        // and staticBundleLocation==null)
+        TestCase.assertNotNull( listed2 );
+        TestCase.assertEquals( bundle.getLocation(), listed2.getBundleLocation() );
+
+        // 6. test bundle calls cm.getConfiguration(pid1)
+        final Configuration get2 = getConfigurationAdmin().getConfiguration( pid );
+        TestCase.assertEquals( bundle.getLocation(), get2.getBundleLocation() );
+}
 }
