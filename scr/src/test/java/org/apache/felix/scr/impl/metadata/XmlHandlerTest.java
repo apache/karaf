@@ -52,6 +52,16 @@ public class XmlHandlerTest extends TestCase
     }
 
 
+    public void test_no_namespace() throws Exception
+    {
+        final List metadataList = readMetadata( "/components_no_namespace.xml" );
+        assertEquals( "1 Descriptor expected", 1, metadataList.size() );
+
+        final ComponentMetadata metadata = ( ComponentMetadata ) metadataList.get( 0 );
+        assertEquals( "Expect NS 1.0.0", XmlHandler.DS_VERSION_1_0, metadata.getNamespaceCode() );
+    }
+
+
     public void test_component_attributes_11() throws Exception
     {
         final List metadataList10 = readMetadata( "/components_activate_10.xml" );
