@@ -31,8 +31,9 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import junit.framework.TestCase;
 
+import org.apache.felix.cm.integration.helper.ManagedServiceTestActivator;
 import org.apache.felix.cm.integration.helper.MyTinyBundle;
-import org.apache.felix.cm.integration.helper.TestActivator;
+import org.apache.felix.cm.integration.helper.BaseTestActivator;
 import org.junit.After;
 import org.junit.Before;
 import org.ops4j.pax.exam.Inject;
@@ -72,12 +73,10 @@ public abstract class ConfigurationTestBase
     @org.ops4j.pax.exam.junit.Configuration
     public static Option[] configuration()
     {
-        return options(
-            provision(
-                scanDir( "target" ).filter( "*.jar" ),
-                mavenBundle( "org.ops4j.pax.swissbox", "pax-swissbox-tinybundles", "1.0.0" )
-            )
-//          , PaxRunnerOptions.vmOption( "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=30303" )
+        return options( provision( scanDir( "target" ).filter( "*.jar" ), mavenBundle( "org.ops4j.pax.swissbox",
+            "pax-swissbox-tinybundles", "1.0.0" ) )
+//         , PaxRunnerOptions.vmOption("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=30303" )
+        // , PaxRunnerOptions.logProfile()
         );
     }
 
@@ -105,21 +104,22 @@ public abstract class ConfigurationTestBase
 
     protected Bundle installBundle( final String pid ) throws BundleException
     {
-        return installBundle( pid, TestActivator.class );
+        return installBundle( pid, ManagedServiceTestActivator.class );
     }
 
 
     protected Bundle installBundle( final String pid, final Class<?> activatorClass ) throws BundleException
     {
+        final String activatorClassName = activatorClass.getName();
         final InputStream bundleStream = new MyTinyBundle().prepare(
-            withBnd().set( Constants.BUNDLE_SYMBOLICNAME, "simpleconfiguration" ).set( Constants.BUNDLE_VERSION,
-                "0.0.11" ).set( Constants.IMPORT_PACKAGE, "org.apache.felix.cm.integration.helper" ).set(
-                Constants.BUNDLE_ACTIVATOR, activatorClass.getName() ).set( TestActivator.HEADER_PID, pid ) ).build(
+            withBnd().set( Constants.BUNDLE_SYMBOLICNAME, activatorClassName ).set( Constants.BUNDLE_VERSION, "0.0.11" )
+                .set( Constants.IMPORT_PACKAGE, "org.apache.felix.cm.integration.helper" ).set(
+                    Constants.BUNDLE_ACTIVATOR, activatorClassName ).set( BaseTestActivator.HEADER_PID, pid ) ).build(
             TinyBundles.asStream() );
 
         try
         {
-            return bundleContext.installBundle( "test:SimpleComponent", bundleStream );
+            return bundleContext.installBundle( "test:" + activatorClassName, bundleStream );
         }
         finally
         {
@@ -165,28 +165,66 @@ public abstract class ConfigurationTestBase
     }
 
 
-    protected void configure( String pid )
+    protected Configuration configure( final String pid )
     {
-        ConfigurationAdmin ca = getConfigurationAdmin();
+        return configure( pid, null, true );
+    }
+
+
+    protected Configuration configure( final String pid, final String location, final boolean withProps )
+    {
+        final ConfigurationAdmin ca = getConfigurationAdmin();
         try
         {
-            org.osgi.service.cm.Configuration config = ca.getConfiguration( pid, null );
-            config.update( theConfig );
+            final Configuration config = ca.getConfiguration( pid, location );
+            if ( withProps )
+            {
+                config.update( theConfig );
+            }
+            return config;
         }
         catch ( IOException ioe )
         {
             TestCase.fail( "Failed updating configuration " + pid + ": " + ioe.toString() );
+            return null; // keep the compiler quiet
+        }
+    }
+
+
+    protected Configuration createFactoryConfiguration( final String factoryPid )
+    {
+        return createFactoryConfiguration( factoryPid, null, true );
+    }
+
+
+    protected Configuration createFactoryConfiguration( final String factoryPid, final String location,
+        final boolean withProps )
+    {
+        final ConfigurationAdmin ca = getConfigurationAdmin();
+        try
+        {
+            final Configuration config = ca.createFactoryConfiguration( factoryPid, null );
+            if ( withProps )
+            {
+                config.update( theConfig );
+            }
+            return config;
+        }
+        catch ( IOException ioe )
+        {
+            TestCase.fail( "Failed updating factory configuration " + factoryPid + ": " + ioe.toString() );
+            return null; // keep the compiler quiet
         }
     }
 
 
     protected Configuration getConfiguration( final String pid )
     {
-        ConfigurationAdmin ca = getConfigurationAdmin();
+        final ConfigurationAdmin ca = getConfigurationAdmin();
         try
         {
             final String filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
-            org.osgi.service.cm.Configuration[] configs = ca.listConfigurations( filter );
+            final Configuration[] configs = ca.listConfigurations( filter );
             if ( configs != null && configs.length > 0 )
             {
                 return configs[0];
@@ -206,34 +244,17 @@ public abstract class ConfigurationTestBase
     }
 
 
-    protected void deleteConfig( String pid )
+    protected void deleteConfig( final String pid )
     {
-        ConfigurationAdmin ca = getConfigurationAdmin();
+        final ConfigurationAdmin ca = getConfigurationAdmin();
         try
         {
-            org.osgi.service.cm.Configuration config = ca.getConfiguration( pid );
+            final Configuration config = ca.getConfiguration( pid );
             config.delete();
         }
         catch ( IOException ioe )
         {
             TestCase.fail( "Failed deleting configuration " + pid + ": " + ioe.toString() );
-        }
-    }
-
-
-    protected String createFactoryConfiguration( String factoryPid )
-    {
-        ConfigurationAdmin ca = getConfigurationAdmin();
-        try
-        {
-            org.osgi.service.cm.Configuration config = ca.createFactoryConfiguration( factoryPid, null );
-            config.update( theConfig );
-            return config.getPid();
-        }
-        catch ( IOException ioe )
-        {
-            TestCase.fail( "Failed updating factory configuration " + factoryPid + ": " + ioe.toString() );
-            return null;
         }
     }
 
@@ -244,10 +265,10 @@ public abstract class ConfigurationTestBase
         try
         {
             final String filter = "(service.factoryPid=" + factoryPid + ")";
-            org.osgi.service.cm.Configuration[] configs = ca.listConfigurations( filter );
+            Configuration[] configs = ca.listConfigurations( filter );
             if ( configs != null )
             {
-                for ( org.osgi.service.cm.Configuration configuration : configs )
+                for ( Configuration configuration : configs )
                 {
                     configuration.delete();
                 }

@@ -23,14 +23,13 @@ import java.io.IOException;
 import java.util.Hashtable;
 import junit.framework.TestCase;
 
-import org.apache.felix.cm.integration.helper.TestActivator;
+import org.apache.felix.cm.integration.helper.ManagedServiceTestActivator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 
 
 @RunWith(JUnit4TestRunner.class)
@@ -55,7 +54,7 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
         TestCase.assertNull( beforeStart.getBundleLocation() );
 
         bundle.start();
-        final TestActivator tester = TestActivator.INSTANCE;
+        final ManagedServiceTestActivator tester = ManagedServiceTestActivator.INSTANCE;
         TestCase.assertNotNull( "Activator not started !!", tester );
 
         // give cm time for distribution
@@ -63,7 +62,7 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
 
         // assert activater has configuration
         TestCase.assertNotNull( "Expect Properties after Service Registration", tester.props );
-        TestCase.assertEquals( "Expect a single update call", 1, tester.numUpdatedCalls );
+        TestCase.assertEquals( "Expect a single update call", 1, tester.numManagedServiceUpdatedCalls );
 
         // ensure a freshly retrieved object also has the location
         final Configuration beforeStop = getConfiguration( pid );
@@ -125,7 +124,7 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
         TestCase.assertNull( beforeStart.getBundleLocation() );
 
         bundle.start();
-        final TestActivator tester = TestActivator.INSTANCE;
+        final ManagedServiceTestActivator tester = ManagedServiceTestActivator.INSTANCE;
         TestCase.assertNotNull( "IOActivator not started !!", tester );
 
         // give cm time for distribution
@@ -133,7 +132,7 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
 
         // assert activater has configuration
         TestCase.assertNotNull( "Expect Properties after Service Registration", tester.props );
-        TestCase.assertEquals( "Expect a single update call", 1, tester.numUpdatedCalls );
+        TestCase.assertEquals( "Expect a single update call", 1, tester.numManagedServiceUpdatedCalls );
 
         // ensure a freshly retrieved object also has the location
         final Configuration beforeStop = getConfiguration( pid );
@@ -187,8 +186,7 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
         final String pid = "test_not_updated_new_configuration_not_bound_after_bundle_uninstall";
 
         // create a configuration but do not update with properties
-        final ConfigurationAdmin ca = getConfigurationAdmin();
-        final Configuration newConfig = ca.getConfiguration( pid, null );
+        final Configuration newConfig = configure( pid, null, false );
         TestCase.assertNull( newConfig.getProperties() );
         TestCase.assertNull( newConfig.getBundleLocation() );
 
@@ -198,10 +196,10 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
         delay();
 
         // ensure no properties provided to bundle
-        final TestActivator tester = TestActivator.INSTANCE;
+        final ManagedServiceTestActivator tester = ManagedServiceTestActivator.INSTANCE;
         TestCase.assertNotNull( "Activator not started !!", tester );
         TestCase.assertNull( "Expect no properties after Service Registration", tester.props );
-        TestCase.assertEquals( "Expect a single update call", 1, tester.numUpdatedCalls );
+        TestCase.assertEquals( "Expect a single update call", 1, tester.numManagedServiceUpdatedCalls );
 
         // assert configuration is still unset but bound
         TestCase.assertNull( newConfig.getProperties() );
@@ -226,19 +224,11 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
     public void test_create_with_location_unbind_before_service_supply() throws BundleException, IOException
     {
 
-        /*
-         * 1. create Configuration with pid and non-null location. 2. update the
-         * configuration with non-null props. 3. set location of the
-         * configuration to null. 4. bundleA registers a ManagedService service
-         * with the pid.
-         */
-
         final String pid = "test_create_with_location_unbind_before_service_supply";
         final String dummyLocation = "http://some/dummy/location";
 
         // 1. create and statically bind the configuration
-        final ConfigurationAdmin ca = getConfigurationAdmin();
-        final Configuration config = ca.getConfiguration( pid, dummyLocation );
+        final Configuration config = configure( pid, dummyLocation, false );
         TestCase.assertEquals( pid, config.getPid() );
         TestCase.assertEquals( dummyLocation, config.getBundleLocation() );
 
@@ -259,12 +249,12 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
         bundle.start();
         delay();
 
-        final TestActivator tester = TestActivator.INSTANCE;
+        final ManagedServiceTestActivator tester = ManagedServiceTestActivator.INSTANCE;
         TestCase.assertNotNull( "Activator not started !!", tester );
 
         // assert activater has configuration (two calls, one per pid)
         TestCase.assertNotNull( "Expect Properties after Service Registration", tester.props );
-        TestCase.assertEquals( "Expect a single update call", 1, tester.numUpdatedCalls );
+        TestCase.assertEquals( "Expect a single update call", 1, tester.numManagedServiceUpdatedCalls );
 
         TestCase.assertEquals( bundle.getLocation(), config.getBundleLocation() );
 
@@ -304,12 +294,12 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
         // give cm time for distribution
         delay();
 
-        final TestActivator tester = TestActivator.INSTANCE;
+        final ManagedServiceTestActivator tester = ManagedServiceTestActivator.INSTANCE;
         TestCase.assertNotNull( "Activator not started !!", tester );
 
         // assert activater has configuration (two calls, one per pid)
         TestCase.assertNotNull( "Expect Properties after Service Registration", tester.props );
-        TestCase.assertEquals( "Expect a single update call", 1, tester.numUpdatedCalls );
+        TestCase.assertEquals( "Expect a single update call", 1, tester.numManagedServiceUpdatedCalls );
 
         TestCase.assertEquals( location, config.getBundleLocation() );
 
@@ -415,10 +405,132 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
         TestCase.assertEquals( location, configBoundAfterRestart.getBundleLocation() );
     }
 
-    /*
-     * @Test public void test_() throws BundleException { final int count = 2;
-     * for (int i=0; i < count; i++) { final Bundle bundle = installBundle(
-     * "dummy", FailureActivator.class ); bundle.start(); delay();
-     * bundle.uninstall(); delay(); } }
-     */
+
+    @Test
+    public void test_static_binding() throws BundleException
+    {
+        final String pid = "test_static_binding";
+
+        // install a bundle to get a location for binding
+        bundle = installBundle( pid );
+        final String location = bundle.getLocation();
+
+        // create and statically bind the configuration
+        configure( pid );
+        final Configuration config = getConfiguration( pid );
+        TestCase.assertEquals( pid, config.getPid() );
+        TestCase.assertNull( config.getBundleLocation() );
+        config.setBundleLocation( location );
+        TestCase.assertEquals( location, config.getBundleLocation() );
+
+        // start the bundle
+        bundle.start();
+        delay();
+        TestCase.assertEquals( location, config.getBundleLocation() );
+
+        // assert the configuration is supplied
+        final ManagedServiceTestActivator tester = ManagedServiceTestActivator.INSTANCE;
+        TestCase.assertNotNull( "Activator not started !!", tester );
+        TestCase.assertNotNull( "Expect Properties after Service Registration", tester.props );
+        TestCase.assertEquals( "Expect a single update call", 1, tester.numManagedServiceUpdatedCalls );
+
+        // remove the static binding and assert still bound
+        config.setBundleLocation( null );
+        TestCase.assertEquals( location, config.getBundleLocation() );
+
+        // uninstall bundle and assert configuration unbound
+        bundle.uninstall();
+        bundle = null;
+        delay();
+        TestCase.assertNull( config.getBundleLocation() );
+    }
+
+
+    @Test
+    public void test_two_bundles_one_pid() throws BundleException, IOException
+    {
+        // 1. Bundle registers service with pid1
+        final String pid = "test_two_bundles_one_pid";
+        final Bundle bundleA = installBundle( pid, ManagedServiceTestActivator.class );
+        final String locationA = bundleA.getLocation();
+        bundleA.start();
+        delay();
+
+        // call back with null
+        final ManagedServiceTestActivator tester = ManagedServiceTestActivator.INSTANCE;
+        TestCase.assertNull( tester.props );
+        TestCase.assertEquals( 1, tester.numManagedServiceUpdatedCalls );
+
+        // 2. create new Conf with pid1 and locationA.
+        final Configuration config = configure( pid, locationA, false );
+        delay();
+
+        // ==> No call back.
+        TestCase.assertNull( tester.props );
+        TestCase.assertEquals( 1, tester.numManagedServiceUpdatedCalls );
+
+        // 3. Configuration#update(prop) is called.
+        config.update( theConfig );
+        delay();
+
+        // ==> call back with the prop.
+        TestCase.assertNotNull( tester.props );
+        TestCase.assertEquals( 2, tester.numManagedServiceUpdatedCalls );
+
+        // 4. Stop BundleA
+        bundleA.stop();
+        delay();
+
+        // 5. Start BundleA
+        bundleA.start();
+        delay();
+
+        // ==> call back with the prop.
+        final ManagedServiceTestActivator tester2 = ManagedServiceTestActivator.INSTANCE;
+        TestCase.assertNotNull( tester2.props );
+        TestCase.assertEquals( 1, tester2.numManagedServiceUpdatedCalls );
+
+        // 6. Configuration#deleted() is called.
+        config.delete();
+        delay();
+
+        // ==> call back with null.
+        TestCase.assertNull( tester2.props );
+        TestCase.assertEquals( 2, tester2.numManagedServiceUpdatedCalls );
+
+        // 7. uninstall Bundle A for cleanup.
+        bundleA.uninstall();
+        delay();
+
+        // Test 2
+
+        // 8. BundleA registers ManagedService with pid1.
+        final Bundle bundleA2 = installBundle( pid, ManagedServiceTestActivator.class );
+        final String locationA2 = bundleA.getLocation();
+        bundleA2.start();
+        delay();
+
+        // call back with null
+        final ManagedServiceTestActivator tester21 = ManagedServiceTestActivator.INSTANCE;
+        TestCase.assertNull( tester21.props );
+        TestCase.assertEquals( 1, tester21.numManagedServiceUpdatedCalls );
+
+        // 9. create new Conf with pid1 and locationB.
+        final String locationB = "test:locationB/" + pid;
+        final Configuration configB = configure( pid, locationB, false );
+        delay();
+
+        // ==> No call back.
+        TestCase.assertNull( tester21.props );
+        TestCase.assertEquals( 1, tester21.numManagedServiceUpdatedCalls );
+
+        // 10. Configuration#update(prop) is called.
+        configB.update( theConfig );
+        delay();
+
+        // ==> No call back because the Conf is not bound to locationA.
+        TestCase.assertNull( tester21.props );
+        TestCase.assertEquals( 1, tester21.numManagedServiceUpdatedCalls );
+    }
+
 }

@@ -21,7 +21,7 @@ package org.apache.felix.cm.integration;
 
 import junit.framework.TestCase;
 
-import org.apache.felix.cm.integration.helper.TestActivator;
+import org.apache.felix.cm.integration.helper.ManagedServiceTestActivator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
@@ -40,7 +40,7 @@ public class ConfigurationBaseTest extends ConfigurationTestBase
         // start the bundle and assert this
         bundle = installBundle( pid );
         bundle.start();
-        final TestActivator tester = TestActivator.INSTANCE;
+        final ManagedServiceTestActivator tester = ManagedServiceTestActivator.INSTANCE;
         TestCase.assertNotNull( "Activator not started !!", tester );
 
         // give cm time for distribution
@@ -48,7 +48,7 @@ public class ConfigurationBaseTest extends ConfigurationTestBase
 
         // assert activater has no configuration
         TestCase.assertNull( "Expect no Properties after Service Registration", tester.props );
-        TestCase.assertEquals( "Expect no update call", 1, tester.numUpdatedCalls );
+        TestCase.assertEquals( "Expect no update call", 1, tester.numManagedServiceUpdatedCalls );
 
         // configure after ManagedServiceRegistration --> configure via update
         configure( pid );
@@ -56,19 +56,19 @@ public class ConfigurationBaseTest extends ConfigurationTestBase
 
         // assert activater has configuration
         TestCase.assertNotNull( "Expect Properties after Service Registration", tester.props );
-        TestCase.assertEquals( "Expect a single update call", 2, tester.numUpdatedCalls );
+        TestCase.assertEquals( "Expect a single update call", 2, tester.numManagedServiceUpdatedCalls );
 
         // stop the bundle now
         bundle.stop();
 
         // assert INSTANCE is null
-        TestCase.assertNull( TestActivator.INSTANCE );
+        TestCase.assertNull( ManagedServiceTestActivator.INSTANCE );
 
         delay();
 
         // start the bundle again (and check)
         bundle.start();
-        final TestActivator tester2 = TestActivator.INSTANCE;
+        final ManagedServiceTestActivator tester2 = ManagedServiceTestActivator.INSTANCE;
         TestCase.assertNotNull( "Activator not started the second time!!", tester2 );
         TestCase.assertNotSame( "Instances must not be the same", tester, tester2 );
 
@@ -77,7 +77,7 @@ public class ConfigurationBaseTest extends ConfigurationTestBase
 
         // assert activater has configuration
         TestCase.assertNotNull( "Expect Properties after Service Registration", tester2.props );
-        TestCase.assertEquals( "Expect a second update call", 1, tester2.numUpdatedCalls );
+        TestCase.assertEquals( "Expect a second update call", 1, tester2.numManagedServiceUpdatedCalls );
 
         // cleanup
         bundle.uninstall();
@@ -97,7 +97,7 @@ public class ConfigurationBaseTest extends ConfigurationTestBase
         // start the bundle and assert this
         bundle = installBundle( pid );
         bundle.start();
-        final TestActivator tester = TestActivator.INSTANCE;
+        final ManagedServiceTestActivator tester = ManagedServiceTestActivator.INSTANCE;
         TestCase.assertNotNull( "Activator not started !!", tester );
 
         // give cm time for distribution
@@ -105,19 +105,19 @@ public class ConfigurationBaseTest extends ConfigurationTestBase
 
         // assert activater has configuration
         TestCase.assertNotNull( "Expect Properties after Service Registration", tester.props );
-        TestCase.assertEquals( "Expect no update call", 1, tester.numUpdatedCalls );
+        TestCase.assertEquals( "Expect no update call", 1, tester.numManagedServiceUpdatedCalls );
 
         // stop the bundle now
         bundle.stop();
 
         // assert INSTANCE is null
-        TestCase.assertNull( TestActivator.INSTANCE );
+        TestCase.assertNull( ManagedServiceTestActivator.INSTANCE );
 
         delay();
 
         // start the bundle again (and check)
         bundle.start();
-        final TestActivator tester2 = TestActivator.INSTANCE;
+        final ManagedServiceTestActivator tester2 = ManagedServiceTestActivator.INSTANCE;
         TestCase.assertNotNull( "Activator not started the second time!!", tester2 );
         TestCase.assertNotSame( "Instances must not be the same", tester, tester2 );
 
@@ -126,7 +126,7 @@ public class ConfigurationBaseTest extends ConfigurationTestBase
 
         // assert activater has configuration
         TestCase.assertNotNull( "Expect Properties after Service Registration", tester2.props );
-        TestCase.assertEquals( "Expect a second update call", 1, tester2.numUpdatedCalls );
+        TestCase.assertEquals( "Expect a second update call", 1, tester2.numManagedServiceUpdatedCalls );
 
         // cleanup
         bundle.uninstall();

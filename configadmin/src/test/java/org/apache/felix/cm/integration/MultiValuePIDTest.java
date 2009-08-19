@@ -21,7 +21,7 @@ package org.apache.felix.cm.integration;
 
 import junit.framework.TestCase;
 
-import org.apache.felix.cm.integration.helper.TestActivator;
+import org.apache.felix.cm.integration.helper.ManagedServiceTestActivator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
@@ -57,12 +57,12 @@ public class MultiValuePIDTest extends ConfigurationTestBase
         // give cm time for distribution
         delay();
 
-        final TestActivator tester = TestActivator.INSTANCE;
+        final ManagedServiceTestActivator tester = ManagedServiceTestActivator.INSTANCE;
         TestCase.assertNotNull( "Activator not started !!", tester );
 
         // assert activater has configuration (two calls, one per pid)
         TestCase.assertNotNull( "Expect Properties after Service Registration", tester.props );
-        TestCase.assertEquals( "Expect a single update call", 2, tester.numUpdatedCalls );
+        TestCase.assertEquals( "Expect a single update call", 2, tester.numManagedServiceUpdatedCalls );
 
         TestCase.assertEquals( bundle.getLocation(), config1.getBundleLocation() );
         TestCase.assertEquals( bundle.getLocation(), config2.getBundleLocation() );
@@ -105,12 +105,12 @@ public class MultiValuePIDTest extends ConfigurationTestBase
         // give cm time for distribution
         delay();
 
-        final TestActivator tester = TestActivator.INSTANCE;
+        final ManagedServiceTestActivator tester = ManagedServiceTestActivator.INSTANCE;
         TestCase.assertNotNull( "Activator not started !!", tester );
 
         // assert activater has configuration (two calls, one per pid)
         TestCase.assertNotNull( "Expect Properties after Service Registration", tester.props );
-        TestCase.assertEquals( "Expect a single update call", 2, tester.numUpdatedCalls );
+        TestCase.assertEquals( "Expect a single update call", 2, tester.numManagedServiceUpdatedCalls );
 
         TestCase.assertEquals( bundle.getLocation(), config1.getBundleLocation() );
         TestCase.assertEquals( bundle.getLocation(), config2.getBundleLocation() );

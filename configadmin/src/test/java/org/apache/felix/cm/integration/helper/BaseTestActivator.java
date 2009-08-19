@@ -21,45 +21,80 @@ package org.apache.felix.cm.integration.helper;
 
 import java.util.Arrays;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ManagedService;
+import org.osgi.service.cm.ManagedServiceFactory;
 
 
-public class TestActivator implements BundleActivator, ManagedService
+public abstract class BaseTestActivator implements BundleActivator, ManagedService, ManagedServiceFactory
 {
 
     // the bundle manifest header naming a pid of configurations we require
     public static final String HEADER_PID = "The-Test-PID";
 
-    public static TestActivator INSTANCE = null;
-
-    public int numUpdatedCalls = 0;
+    public int numManagedServiceUpdatedCalls = 0;
+    public int numManagedServiceFactoryUpdatedCalls = 0;
+    public int numManagedServiceFactoryDeleteCalls = 0;
 
     public Dictionary props = null;
 
+    public Map<String, Dictionary> configs = new HashMap<String, Dictionary>();
 
-    public void start( BundleContext context ) throws Exception
+
+    // ---------- ManagedService
+
+    public void updated( Dictionary props )
     {
+        numManagedServiceUpdatedCalls++;
+        this.props = props;
+    }
 
-        Object prop = context.getBundle().getHeaders().get( HEADER_PID );
+
+    // ---------- ManagedServiceFactory
+
+    public String getName()
+    {
+        return getClass().getName();
+    }
+
+
+    public void deleted( String pid )
+    {
+        numManagedServiceFactoryDeleteCalls++;
+        this.configs.remove( pid );
+    }
+
+
+    public void updated( String pid, Dictionary props )
+    {
+        numManagedServiceFactoryUpdatedCalls++;
+        this.configs.put( pid, props );
+    }
+
+
+    protected Dictionary getServiceProperties( BundleContext bundleContext ) throws Exception
+    {
+        final Object prop = bundleContext.getBundle().getHeaders().get( HEADER_PID );
         if ( prop instanceof String )
         {
-            Hashtable props = new Hashtable();
+            final Hashtable props = new Hashtable();
 
             // multi-value PID support
-            String pid = ( String ) prop;
+            final String pid = ( String ) prop;
             if ( pid.indexOf( ',' ) > 0 )
             {
-                String[] pids = pid.split( "," );
+                final String[] pids = pid.split( "," );
                 props.put( Constants.SERVICE_PID, pids );
             }
             else if ( pid.indexOf( ';' ) > 0 )
             {
-                String[] pids = pid.split( ";" );
+                final String[] pids = pid.split( ";" );
                 props.put( Constants.SERVICE_PID, Arrays.asList( pids ) );
             }
             else
@@ -67,28 +102,11 @@ public class TestActivator implements BundleActivator, ManagedService
                 props.put( Constants.SERVICE_PID, pid );
             }
 
-            context.registerService( ManagedService.class.getName(), this, props );
-        }
-        else
-        {
-            // missing pid, fail
-            throw new Exception( "Missing " + HEADER_PID + " manifest header, cannot start" );
+            return props;
         }
 
-        INSTANCE = this;
-    }
-
-
-    public void stop( BundleContext context ) throws Exception
-    {
-        INSTANCE = null;
-    }
-
-
-    public void updated( Dictionary props )
-    {
-        numUpdatedCalls++;
-        this.props = props;
+        // missing pid, fail
+        throw new Exception( "Missing " + HEADER_PID + " manifest header, cannot start" );
     }
 
 }
