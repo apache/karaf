@@ -20,9 +20,9 @@
 package org.apache.felix.sigil.common.runtime.io;
 
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,7 +40,7 @@ import static org.osgi.framework.Constants.BUNDLE_VERSION;
 public class StatusAction extends Action<Void, Map<Long, String>>
 {
 
-    public StatusAction( InputStream in, OutputStream out ) throws IOException
+    public StatusAction( DataInputStream in, DataOutputStream out ) throws IOException
     {
         super( in, out );
     }
@@ -50,6 +50,7 @@ public class StatusAction extends Action<Void, Map<Long, String>>
     public Map<Long, String> client( Void in ) throws IOException
     {
         writeInt(STATUS);
+        flush();
         int num = readInt();
         HashMap<Long, String> map = new HashMap<Long, String>(num);
         
@@ -66,12 +67,29 @@ public class StatusAction extends Action<Void, Map<Long, String>>
     @Override
     public void server( Framework fw ) throws IOException
     {
+        log( "Read status" );
         Bundle[] bundles = fw.getBundleContext().getBundles();
         writeInt( bundles.length );
         for ( Bundle b : bundles ) {
             writeLong(b.getBundleId());
-            String symbol = b.getSymbolicName() + ":" + b.getHeaders().get( BUNDLE_VERSION );
+            String symbol = b.getSymbolicName() + ":" + b.getHeaders().get( BUNDLE_VERSION ) + ":" + state(b);
             writeString(symbol);
+        }
+        
+        flush();
+    }
+
+
+    private String state( Bundle b )
+    {
+        switch ( b.getState() ) {
+            case Bundle.ACTIVE: return "active";
+            case Bundle.INSTALLED: return "installed";
+            case Bundle.RESOLVED: return "resolved";
+            case Bundle.STARTING: return "starting";
+            case Bundle.STOPPING: return "stopping";
+            case Bundle.UNINSTALLED: return "uninstalled";
+            default: return "unknown";
         }
     }
 

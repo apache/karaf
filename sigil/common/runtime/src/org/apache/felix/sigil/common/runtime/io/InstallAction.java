@@ -20,9 +20,9 @@
 package org.apache.felix.sigil.common.runtime.io;
 
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -38,7 +38,7 @@ import static org.apache.felix.sigil.common.runtime.io.Constants.INSTALL;
 public class InstallAction extends Action<String, Long>
 {
 
-    public InstallAction( InputStream in, OutputStream out ) throws IOException
+    public InstallAction( DataInputStream in, DataOutputStream out ) throws IOException
     {
         super( in, out );
     }
@@ -49,6 +49,7 @@ public class InstallAction extends Action<String, Long>
     {
         writeInt( INSTALL );
         writeString( url );
+        flush();
         if ( checkOk() )
         {
             return readLong();
@@ -68,6 +69,7 @@ public class InstallAction extends Action<String, Long>
         try
         {
             Bundle val = fw.getBundleContext().installBundle( url );
+            log( "Installed " + url );
             writeOk();
             writeLong( val.getBundleId() );
         }
@@ -76,7 +78,7 @@ public class InstallAction extends Action<String, Long>
             writeError();
             writeString( e.getMessage() );
         }
-
+        flush();
     }
 
 }

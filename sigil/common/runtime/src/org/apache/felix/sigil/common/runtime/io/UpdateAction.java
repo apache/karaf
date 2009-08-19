@@ -20,9 +20,10 @@
 package org.apache.felix.sigil.common.runtime.io;
 
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -51,9 +52,10 @@ public class UpdateAction extends Action<UpdateAction.Update, Void>
     }
 
 
-    public UpdateAction( InputStream in, OutputStream out ) throws IOException
+    public UpdateAction( DataInputStream in, DataOutputStream out ) throws IOException
     {
         super( in, out );
+        // TODO Auto-generated constructor stub
     }
 
 

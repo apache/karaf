@@ -20,10 +20,11 @@
 package org.apache.felix.sigil.common.runtime;
 
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Map;
 import java.util.Properties;
@@ -48,22 +49,50 @@ public class Client
     public static final String ADDRESS_PROPERTY = "address";
     
     private Socket socket;
-    private InputStream in;
-    private OutputStream out;
+    private DataInputStream in;
+    private DataOutputStream out;
 
 
     public Client()
     {
     }
+    
+    public static void main(String[] args) throws IOException, BundleException {
+        Client cl = new Client();
+        Properties props = new Properties();
+        props.put( ADDRESS_PROPERTY, "localhost" );
+        props.put( PORT_PROPERTY, "9090" );
+        cl.connect(  props );
+        System.out.println( cl.status() );
+        long id = cl.install( "file:/Users/dave/.m2/repository/org/apache/felix/org.apache.felix.log/1.1.0-SNAPSHOT/org.apache.felix.log-1.1.0-SNAPSHOT.jar" );
+        System.out.println( cl.status() );
+        cl.start( id );
+        System.out.println( cl.status() );
+        
+        id = cl.install( "file:/Users/dave/.m2/repository/org/apache/felix/org.apache.felix.shell/1.3.0-SNAPSHOT/org.apache.felix.shell-1.3.0-SNAPSHOT.jar" );
+        cl.start( id );
+        
+        id = cl.install( "file:/Users/dave/.m2/repository/org/apache/felix/org.apache.felix.shell.tui/1.3.0-SNAPSHOT/org.apache.felix.shell.tui-1.3.0-SNAPSHOT.jar" );
+        cl.start( id );
+        
+        System.out.println( cl.status() );
+    }
 
 
     public void connect(Properties props) throws IOException
     {
-        InetAddress address = InetAddress.getByName( props.getProperty( ADDRESS_PROPERTY ) );
+        String v = props.getProperty( ADDRESS_PROPERTY );
+        InetAddress address = v == null ? null : InetAddress.getByName( v );
         int port = Integer.parseInt( props.getProperty( PORT_PROPERTY, "0" ) );
-        socket = new Socket( address, port );
-        in = socket.getInputStream();
-        out = socket.getOutputStream();
+        InetSocketAddress endpoint = new InetSocketAddress(address, port);
+        
+        socket = new Socket();
+        socket.connect( endpoint );
+        
+        Main.log( "Connected to " + endpoint );
+        
+        in = new DataInputStream( socket.getInputStream() );
+        out = new DataOutputStream( socket.getOutputStream() );
     }
 
 
@@ -81,19 +110,19 @@ public class Client
 
     public void start( long bundle ) throws IOException, BundleException
     {
-        new StartAction( in, out ).client();
+        new StartAction( in, out ).client( bundle );
     }
 
 
     public void stop( long bundle ) throws IOException, BundleException
     {
-        new StopAction( in, out ).client();
+        new StopAction( in, out ).client( bundle );
     }
 
 
     public void uninstall( long bundle ) throws IOException, BundleException
     {
-        new UninstallAction( in, out ).client();
+        new UninstallAction( in, out ).client( bundle );
     }
 
 

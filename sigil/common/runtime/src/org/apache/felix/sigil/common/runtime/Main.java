@@ -53,6 +53,7 @@ public class Main
         options.addOption( "?", "help", false, "Print help for the Sigil launcher" );
         options.addOption( "p", "port", true, "Port to launch server on (0 implies auto allocate) [default 0]" );
         options.addOption( "a", "address", true, "Address to bind server to [default all]" );
+        options.addOption( "c", "clean", false, "Clean bundle cache directory on init" );
     }
 
 
@@ -111,6 +112,10 @@ public class Main
             e.printStackTrace();
             System.exit( 1 );
         }
+        catch (Error e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 
 
@@ -154,6 +159,8 @@ public class Main
     private static Map<String, String> buildConfig( CommandLine cl )
     {
         HashMap<String, String> config = new HashMap<String, String>();
+        if ( cl.hasOption( 'c' ))
+        config.put(  "org.osgi.framework.storage.clean", "onFirstInit" );
         return config;
     }
 
@@ -173,5 +180,9 @@ public class Main
     {
         HelpFormatter f = new HelpFormatter();
         f.printHelp( COMMAND_LINE_SYNTAX, options );
+    }
+    
+    public static void log(String msg) {
+        System.out.println( msg );
     }
 }

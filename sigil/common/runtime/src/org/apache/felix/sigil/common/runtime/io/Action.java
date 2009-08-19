@@ -20,11 +20,10 @@
 package org.apache.felix.sigil.common.runtime.io;
 
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -32,6 +31,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.launch.Framework;
 
 import org.apache.commons.io.input.CountingInputStream;
+import org.apache.felix.sigil.common.runtime.Main;
 
 import static org.apache.felix.sigil.common.runtime.io.Constants.OK;
 import static org.apache.felix.sigil.common.runtime.io.Constants.ERROR;
@@ -43,14 +43,15 @@ import static org.apache.felix.sigil.common.runtime.io.Constants.ERROR;
  */
 public abstract class Action<I, O>
 {
-    private final ObjectInputStream in;
-    private final ObjectOutputStream out;
+    private static final String ASCII = "ASCII";
+    private final DataInputStream in;
+    private final DataOutputStream out;
 
 
-    public Action( InputStream in, OutputStream out ) throws IOException
+    public Action( DataInputStream in, DataOutputStream out ) throws IOException
     {
-        this.in = new ObjectInputStream( in );
-        this.out = new ObjectOutputStream( out );
+        this.in = in;
+        this.out = out;
     }
 
 
@@ -95,13 +96,18 @@ public abstract class Action<I, O>
 
     protected String readString() throws IOException
     {
-        return in.readUTF();
+        int l = in.readInt();
+        byte[] buf = new byte[l];
+        in.readFully( buf );
+        return new String(buf, ASCII);
     }
 
 
     protected void writeString( String str ) throws IOException
     {
-        out.writeUTF( str );
+        byte[] buf = str.getBytes( ASCII );
+        out.writeInt( buf.length );
+        out.write( buf );
     }
 
 
@@ -118,7 +124,7 @@ public abstract class Action<I, O>
 
 
     protected void writeLong( long l ) throws IOException
-    {
+    {        
         out.writeLong( l );
     }
 
@@ -196,5 +202,9 @@ public abstract class Action<I, O>
     protected void flush() throws IOException
     {
         out.flush();
+    }
+    
+    protected void log(String msg) {
+        Main.log( msg );
     }
 }

@@ -20,14 +20,14 @@
 package org.apache.felix.sigil.common.runtime;
 
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketAddress;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -70,7 +70,7 @@ public class Server
         
         socket.bind( socketAddress );
 
-        System.out.println( "Started server listening on " + socket.getLocalSocketAddress() + ":" + socket.getLocalPort() );
+        Main.log( "Started server listening on " + socket.getLocalSocketAddress() + ":" + socket.getLocalPort() );
         
         accept = new Thread( new Runnable()
         {
@@ -90,6 +90,10 @@ public class Server
                 }
             }
         } );
+        
+        accept.start();
+        
+        Main.log( "Started thread!" );
     }
 
 
@@ -120,14 +124,19 @@ public class Server
          */
         public void run()
         {
+            Main.log( "Accepted " + socket.getInetAddress() + ":" + socket.getLocalPort() );
+            
             try
             {
-                InputStream in = socket.getInputStream();
-                OutputStream out = socket.getOutputStream();
+                DataInputStream in = new DataInputStream( socket.getInputStream() );
+                DataOutputStream out = new DataOutputStream( socket.getOutputStream() );
+                
                 while ( !stopped.get() )
                 {
-                    int action = in.read();
+                    int action = in.readInt();
+                    
                     Action<?, ?> task = null;
+                    
                     switch ( action )
                     {
                         case INSTALL:
@@ -149,13 +158,33 @@ public class Server
                             task = new StatusAction( in, out );
                             break;
                     }
-                    task.server( fw );
+                    
+                    if ( task == null ) {
+                        Main.log( "Invalid action " + action );
+                    }
+                    else {
+                        task.server( fw );
+                    }
                 }
+            }
+            catch ( EOFException e ) {
+                // fine
             }
             catch ( IOException e )
             {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
+            }
+            finally {
+                try
+                {
+                    socket.close();
+                }
+                catch ( IOException e )
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         }
     }

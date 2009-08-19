@@ -20,9 +20,9 @@
 package org.apache.felix.sigil.common.runtime.io;
 
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -38,10 +38,9 @@ import static org.apache.felix.sigil.common.runtime.io.Constants.UNINSTALL;
 public class UninstallAction extends Action<Long, Void>
 {
 
-    public UninstallAction( InputStream in, OutputStream out ) throws IOException
+    public UninstallAction( DataInputStream in, DataOutputStream out ) throws IOException
     {
         super( in, out );
-        // TODO Auto-generated constructor stub
     }
 
 

@@ -27,8 +27,8 @@ public interface Constants
 
     public static final int INSTALL = 1;
     public static final int START = 2;
-    public static final int STOP = 4;
-    public static final int UNINSTALL = 8;
-    public static final int UPDATE = 16;
-    public static final int STATUS = 32;
+    public static final int STOP = 3;
+    public static final int UNINSTALL = 4;
+    public static final int UPDATE = 5;
+    public static final int STATUS = 6;
 }

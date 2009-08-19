@@ -20,9 +20,9 @@
 package org.apache.felix.sigil.common.runtime.io;
 
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -38,7 +38,7 @@ import static org.apache.felix.sigil.common.runtime.io.Constants.START;
 public class StartAction extends Action<Long, Void>
 {
 
-    public StartAction( InputStream in, OutputStream out ) throws IOException
+    public StartAction( DataInputStream in, DataOutputStream out ) throws IOException
     {
         super( in, out );
     }
@@ -49,6 +49,7 @@ public class StartAction extends Action<Long, Void>
     {
         writeInt( START );
         writeLong( bundle );
+        flush();
         if ( !checkOk() )
         {
             String msg = readString();
@@ -74,6 +75,7 @@ public class StartAction extends Action<Long, Void>
             {
                 b.start();
                 writeOk();
+                log( "Started " + b.getSymbolicName() );
             }
             catch ( BundleException e )
             {
@@ -81,6 +83,7 @@ public class StartAction extends Action<Long, Void>
                 writeString( e.getMessage() );
             }
         }
+        flush();
     }
 
 }
