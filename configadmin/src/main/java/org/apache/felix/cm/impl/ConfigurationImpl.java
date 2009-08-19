@@ -123,7 +123,7 @@ class ConfigurationImpl extends ConfigurationBase
     {
         this.isDeleted = true;
         getPersistenceManager().delete( this.getPid() );
-        getConfigurationManager().deleted( this );
+        getConfigurationManager().deleted( this, true );
     }
 
 
@@ -190,7 +190,7 @@ class ConfigurationImpl extends ConfigurationBase
 
             configureFromPersistence( properties );
 
-            getConfigurationManager().updated( this );
+            getConfigurationManager().updated( this, true );
         }
     }
 
@@ -241,7 +241,7 @@ class ConfigurationImpl extends ConfigurationBase
             // finally assign the configuration for use
             configure( newProperties );
 
-            getConfigurationManager().updated( this );
+            getConfigurationManager().updated( this, true );
         }
     }
 

@@ -110,6 +110,13 @@ public abstract class ConfigurationTestBase
 
     protected Bundle installBundle( final String pid, final Class<?> activatorClass ) throws BundleException
     {
+        return installBundle( pid, activatorClass, activatorClass.getName() );
+    }
+
+
+    protected Bundle installBundle( final String pid, final Class<?> activatorClass, final String location )
+        throws BundleException
+    {
         final String activatorClassName = activatorClass.getName();
         final InputStream bundleStream = new MyTinyBundle().prepare(
             withBnd().set( Constants.BUNDLE_SYMBOLICNAME, activatorClassName ).set( Constants.BUNDLE_VERSION, "0.0.11" )
@@ -119,7 +126,7 @@ public abstract class ConfigurationTestBase
 
         try
         {
-            return bundleContext.installBundle( "test:" + activatorClassName, bundleStream );
+            return bundleContext.installBundle( location, bundleStream );
         }
         finally
         {

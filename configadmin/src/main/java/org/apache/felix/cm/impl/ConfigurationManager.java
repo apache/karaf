@@ -558,17 +558,17 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     }
 
 
-    void deleted( ConfigurationImpl config )
+    void deleted( ConfigurationImpl config, boolean fireEvent )
     {
         // remove the configuration from the cache
         removeConfiguration( config );
-        updateThread.schedule( new DeleteConfiguration( config ) );
+        updateThread.schedule( new DeleteConfiguration( config, fireEvent ) );
     }
 
 
-    void updated( ConfigurationImpl config )
+    void updated( ConfigurationImpl config, boolean fireEvent )
     {
-        updateThread.schedule( new UpdateConfiguration( config ) );
+        updateThread.schedule( new UpdateConfiguration( config, fireEvent ) );
     }
 
 
@@ -1276,14 +1276,15 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     {
 
         private final ConfigurationImpl config;
-
         private final Dictionary properties;
+        private final boolean fireEvent;
 
 
-        UpdateConfiguration( final ConfigurationImpl config )
+        UpdateConfiguration( final ConfigurationImpl config, boolean fireEvent )
         {
             this.config = config;
             this.properties = config.getProperties( true );
+            this.fireEvent = fireEvent;
         }
 
 
@@ -1299,7 +1300,8 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                     {
                         // find the primary configuration owner
                         final ServiceReference ownerRef = getOwner( config, srList );
-                        final String bundleLocation = ownerRef.getBundle().getLocation();
+                        final String bundleLocation = ( ownerRef != null ) ? ownerRef.getBundle().getLocation()
+                            : config.getBundleLocation();
 
                         // if the configuration is unbound, bind to owner
                         if ( config.getBundleLocation() == null )
@@ -1361,7 +1363,8 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                     {
                         // find the primary configuration owner
                         final ServiceReference ownerRef = getOwner( config, srList );
-                        final String bundleLocation = ownerRef.getBundle().getLocation();
+                        final String bundleLocation = ( ownerRef != null ) ? ownerRef.getBundle().getLocation()
+                            : config.getBundleLocation();
 
                         // if the configuration is unbound, bind to owner
                         if ( config.getBundleLocation() == null )
@@ -1437,7 +1440,10 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             {
                 // the update event has to be sent regardless of whether the
                 // configuration was updated in a managed service or not
-                fireConfigurationEvent( ConfigurationEvent.CM_UPDATED, config.getPid(), config.getFactoryPid() );
+                if ( fireEvent )
+                {
+                    fireConfigurationEvent( ConfigurationEvent.CM_UPDATED, config.getPid(), config.getFactoryPid() );
+                }
             }
         }
 
@@ -1455,8 +1461,25 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                     }
                 }
             }
-
             // configuration has never been supplied or the binding is stale
+
+            // if the configuration is location bound, find a service reference
+            // from the same bundle
+            final String configLocation = config.getBundleLocation();
+            if (configLocation != null) {
+                for ( int i = 0; i < srList.length; i++ )
+                {
+                    if ( configLocation.equals(srList[i].getBundle().getLocation() ) )
+                    {
+                        return srList[i];
+                    }
+                }
+                // no service from the same bundle found, thus we cannot
+                // find a new owner !!
+                return null;
+            }
+            // configuration is not location bound (yet)
+
             // just use the first entry in the list as the new owner
             final ServiceReference ownerRef = srList[0];
             config.setServiceReference( ownerRef );
@@ -1476,16 +1499,19 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         private final String pid;
         private final String factoryPid;
         private final String configLocation;
+        private final boolean fireEvent;
 
 
-        DeleteConfiguration( ConfigurationImpl config )
+        DeleteConfiguration( ConfigurationImpl config, boolean fireEvent )
         {
             this.pid = config.getPid();
             this.factoryPid = config.getFactoryPid();
             this.configLocation = config.getBundleLocation();
+            this.fireEvent = fireEvent;
 
             // immediately unbind the configuration
             config.setDynamicBundleLocation( null );
+            config.setServiceReference( null );
         }
 
 
@@ -1571,7 +1597,10 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             {
                 // the delete event has to be sent regardless of whether the
                 // configuration was updated in a managed service or not
-                fireConfigurationEvent( ConfigurationEvent.CM_DELETED, pid, factoryPid );
+                if ( fireEvent )
+                {
+                    fireConfigurationEvent( ConfigurationEvent.CM_DELETED, pid, factoryPid );
+                }
             }
         }
 

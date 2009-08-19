@@ -154,9 +154,26 @@ abstract class ConfigurationBase
 
     void setStaticBundleLocation( final String bundleLocation )
     {
+        // FELIX-1488: If a configuration is bound to a location and a new
+        // location is statically set, the old binding must be removed
+        // by removing the configuration from the targets and the new binding
+        // must be setup by updating the configuration for new targets
+        boolean replace = ( this instanceof ConfigurationImpl ) && ( bundleLocation != null );
+        if ( replace && getDynamicBundleLocation() != null && !bundleLocation.equals( getDynamicBundleLocation() ) )
+        {
+            // remove configuration from current managed service [factory]
+            getConfigurationManager().deleted( ( ConfigurationImpl ) this, false );
+        }
+
         // 104.15.2.8 The bundle location will be set persistently
         this.staticBundleLocation = bundleLocation;
         storeSilently();
+
+        // check whether we have to assign the configuration to new targets
+        if ( replace )
+        {
+            getConfigurationManager().updated( ( ConfigurationImpl ) this, false );
+        }
     }
 
 
