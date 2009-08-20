@@ -42,9 +42,11 @@
     <ivy:retrieve organisation="org.apache" module="felix.sigil.common.core" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
     <ivy:retrieve organisation="org.apache" module="felix.sigil.common.junit" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
     <ivy:retrieve organisation="org.apache" module="felix.sigil.common.obr" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.common.runtime" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
     <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.core" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
     <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.help" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
     <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.obr" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.runtime" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
     <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.search" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
     <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.ui" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
     <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.utils" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
