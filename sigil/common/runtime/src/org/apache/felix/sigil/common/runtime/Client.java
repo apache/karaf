@@ -38,6 +38,9 @@ import org.apache.felix.sigil.common.runtime.io.UpdateAction;
 import org.apache.felix.sigil.common.runtime.io.UpdateAction.Update;
 import org.osgi.framework.BundleException;
 
+import static org.apache.felix.sigil.common.runtime.Runtime.PORT_PROPERTY;
+import static org.apache.felix.sigil.common.runtime.Runtime.ADDRESS_PROPERTY;
+
 
 /**
  * @author dave
@@ -45,9 +48,6 @@ import org.osgi.framework.BundleException;
  */
 public class Client
 {
-    public static final String PORT_PROPERTY = "port";
-    public static final String ADDRESS_PROPERTY = "address";
-    
     private Socket socket;
     private DataInputStream in;
     private DataOutputStream out;
@@ -57,33 +57,16 @@ public class Client
     {
     }
     
-    public static void main(String[] args) throws IOException, BundleException {
-        Client cl = new Client();
-        Properties props = new Properties();
-        props.put( ADDRESS_PROPERTY, "localhost" );
-        props.put( PORT_PROPERTY, "9090" );
-        cl.connect(  props );
-        System.out.println( cl.status() );
-        long id = cl.install( "file:/Users/dave/.m2/repository/org/apache/felix/org.apache.felix.log/1.1.0-SNAPSHOT/org.apache.felix.log-1.1.0-SNAPSHOT.jar" );
-        System.out.println( cl.status() );
-        cl.start( id );
-        System.out.println( cl.status() );
-        
-        id = cl.install( "file:/Users/dave/.m2/repository/org/apache/felix/org.apache.felix.shell/1.3.0-SNAPSHOT/org.apache.felix.shell-1.3.0-SNAPSHOT.jar" );
-        cl.start( id );
-        
-        id = cl.install( "file:/Users/dave/.m2/repository/org/apache/felix/org.apache.felix.shell.tui/1.3.0-SNAPSHOT/org.apache.felix.shell.tui-1.3.0-SNAPSHOT.jar" );
-        cl.start( id );
-        
-        System.out.println( cl.status() );
-    }
-
-
     public void connect(Properties props) throws IOException
     {
         String v = props.getProperty( ADDRESS_PROPERTY );
         InetAddress address = v == null ? null : InetAddress.getByName( v );
         int port = Integer.parseInt( props.getProperty( PORT_PROPERTY, "0" ) );
+        
+        if ( port < 1 ) {
+            throw new IOException( "Missing or invalid port" );
+        }
+        
         InetSocketAddress endpoint = new InetSocketAddress(address, port);
         
         socket = new Socket();
@@ -92,42 +75,53 @@ public class Client
         Main.log( "Connected to " + endpoint );
         
         in = new DataInputStream( socket.getInputStream() );
-        out = new DataOutputStream( socket.getOutputStream() );
+        out = new DataOutputStream( socket.getOutputStream() );        
     }
 
-
-    public void close() throws IOException
+    public boolean isConnected() {
+        return socket != null;
+    }
+    
+    public void disconnect() throws IOException
     {
         socket.close();
+        socket = null;
+        in = null;
+        out = null;
     }
 
 
     public long install( String url ) throws IOException, BundleException
     {
+        if ( socket == null ) throw new IllegalStateException( "Not connected" );
         return new InstallAction( in, out ).client( url );
     }
 
 
     public void start( long bundle ) throws IOException, BundleException
     {
+        if ( socket == null ) throw new IllegalStateException( "Not connected" );
         new StartAction( in, out ).client( bundle );
     }
 
 
     public void stop( long bundle ) throws IOException, BundleException
     {
+        if ( socket == null ) throw new IllegalStateException( "Not connected" );
         new StopAction( in, out ).client( bundle );
     }
 
 
     public void uninstall( long bundle ) throws IOException, BundleException
     {
+        if ( socket == null ) throw new IllegalStateException( "Not connected" );
         new UninstallAction( in, out ).client( bundle );
     }
 
 
     public void update( long bundle ) throws IOException, BundleException
     {
+        if ( socket == null ) throw new IllegalStateException( "Not connected" );
         Update update = new UpdateAction.Update(bundle, null);
         new UpdateAction( in, out ).client(update);
     }
@@ -135,6 +129,7 @@ public class Client
 
     public void update( long bundle, String url ) throws IOException, BundleException
     {
+        if ( socket == null ) throw new IllegalStateException( "Not connected" );
         Update update = new UpdateAction.Update(bundle, url);
         new UpdateAction( in, out ).client(update);
     }
@@ -142,6 +137,7 @@ public class Client
 
     public Map<Long, String> status() throws IOException, BundleException
     {
+        if ( socket == null ) throw new IllegalStateException( "Not connected" );
         return new StatusAction( in, out ).client();
     }
 }

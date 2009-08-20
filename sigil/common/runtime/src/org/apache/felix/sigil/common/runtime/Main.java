@@ -20,21 +20,24 @@
 package org.apache.felix.sigil.common.runtime;
 
 
+import static org.apache.felix.sigil.common.runtime.Runtime.ADDRESS_PROPERTY;
+import static org.apache.felix.sigil.common.runtime.Runtime.PORT_PROPERTY;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Properties;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.Parser;
-import org.apache.commons.cli.PosixParser;
+import org.apache.felix.sigil.common.runtime.cli.CommandLine;
+import org.apache.felix.sigil.common.runtime.cli.HelpFormatter;
+import org.apache.felix.sigil.common.runtime.cli.Options;
+import org.apache.felix.sigil.common.runtime.cli.ParseException;
+import org.apache.felix.sigil.common.runtime.cli.Parser;
+import org.apache.felix.sigil.common.runtime.cli.PosixParser;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
@@ -54,6 +57,7 @@ public class Main
         options.addOption( "p", "port", true, "Port to launch server on (0 implies auto allocate) [default 0]" );
         options.addOption( "a", "address", true, "Address to bind server to [default all]" );
         options.addOption( "c", "clean", false, "Clean bundle cache directory on init" );
+        options.addOption( "s", "startLevel", true, "Start level for framework" );
     }
 
 
@@ -76,6 +80,7 @@ public class Main
 
                 framework = factory.newFramework( config );
                 framework.init();
+                framework.start();
 
                 Server server = launch( cl );
 
@@ -160,7 +165,11 @@ public class Main
     {
         HashMap<String, String> config = new HashMap<String, String>();
         if ( cl.hasOption( 'c' ))
-        config.put(  "org.osgi.framework.storage.clean", "onFirstInit" );
+            config.put(  "org.osgi.framework.storage.clean", "onFirstInit" );
+        
+        if ( cl.hasOption( 's' ) )
+            config.put( "org.osgi.framework.startlevel.beginning", cl.getOptionValue( 's' ) );
+        
         return config;
     }
 
@@ -168,10 +177,10 @@ public class Main
     private static Server launch( CommandLine line ) throws IOException
     {
         Server server = new Server( framework );
-        String v = line.getOptionValue( 'a' );
-        InetAddress addr = v == null ? null : InetAddress.getByName( v );
-        int port = Integer.parseInt( line.getOptionValue( 'p', "0" ) );
-        server.start( addr, port );
+        Properties props = new Properties();
+        props.put( ADDRESS_PROPERTY, line.getOptionValue( 'a' ) );
+        props.put( PORT_PROPERTY, line.getOptionValue( 'p' ) );
+        server.start( props );
         return server;
     }
 

@@ -23,14 +23,10 @@ package org.apache.felix.sigil.common.runtime.io;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
 
 import org.osgi.framework.BundleException;
 import org.osgi.framework.launch.Framework;
 
-import org.apache.commons.io.input.CountingInputStream;
 import org.apache.felix.sigil.common.runtime.Main;
 
 import static org.apache.felix.sigil.common.runtime.io.Constants.OK;
@@ -141,62 +137,6 @@ public abstract class Action<I, O>
     
     protected boolean readBoolean() throws IOException {
         return in.readBoolean();
-    }
-    
-    protected void writeStream( String location ) throws IOException {
-        URL url = new URL( location );
-        URLConnection conn = url.openConnection();
-        conn.connect();
-        
-        int l = conn.getContentLength();
-        writeInt( l );
-        InputStream uin = conn.getInputStream();
-        byte[] buf = new byte[1024*1024];
-        for (;;) {
-            int r = uin.read( buf );
-            if ( r == -1 ) break;
-            out.write( buf, 0, r );
-        }
-    }
-    
-    protected InputStream readStream() throws IOException {
-        final int length = readInt();
-        return new CountingInputStream(in) {
-            @Override
-            public int read() throws IOException
-            {
-                if ( getCount() < length )
-                    return super.read();
-                else
-                    return -1;
-            }
-
-            @Override
-            public int read( byte[] b, int off, int len ) throws IOException
-            {
-                len = (getCount() + len) > length ? (length - getCount()) : len;
-                if ( len == 0 )
-                    return -1;
-                else 
-                    return super.read( b, off, len );
-            }
-
-            @Override
-            public int read( byte[] b ) throws IOException
-            {
-                return read( b, 0, b.length );
-            }
-
-            @Override
-            public long skip( long len ) throws IOException
-            {
-                len = (getCount() + len) > length ? (length - getCount()) : len;
-                if ( len == 0 )
-                    return -1;
-                else 
-                    return super.skip( len );
-            }  
-        };
     }
     
     protected void flush() throws IOException

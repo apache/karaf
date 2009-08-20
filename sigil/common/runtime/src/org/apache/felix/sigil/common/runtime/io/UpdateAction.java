@@ -24,6 +24,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -71,8 +72,9 @@ public class UpdateAction extends Action<UpdateAction.Update, Void>
         else
         {
             writeBoolean( true );
-            writeStream( update.location );
+            writeString( update.location );
         }
+        flush();
 
         if ( !checkOk() )
         {
@@ -101,8 +103,21 @@ public class UpdateAction extends Action<UpdateAction.Update, Void>
                 boolean remote = readBoolean();
                 if ( remote )
                 {
-                    InputStream in = readStream();
-                    b.update(in);
+                    String loc = readString();
+                    try {
+                        InputStream in = open( loc );
+                        try {
+                            b.update(in);
+                            writeOk();
+                        }
+                        finally {
+                            in.close();
+                        }
+                    }
+                    catch (IOException e) {
+                        writeError();
+                        writeString(e.getMessage());
+                    }
                 }
                 else
                 {
@@ -117,5 +132,13 @@ public class UpdateAction extends Action<UpdateAction.Update, Void>
             }
         }
 
+        flush();
+    }
+
+
+    private InputStream open( String loc ) throws IOException
+    {
+        URL url = new URL( loc );
+        return url.openStream();
     }
 }

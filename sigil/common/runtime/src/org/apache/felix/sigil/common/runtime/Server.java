@@ -28,6 +28,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -41,6 +42,8 @@ import org.apache.felix.sigil.common.runtime.io.UninstallAction;
 import org.apache.felix.sigil.common.runtime.io.UpdateAction;
 import org.osgi.framework.launch.Framework;
 
+import static org.apache.felix.sigil.common.runtime.Runtime.ADDRESS_PROPERTY;
+import static org.apache.felix.sigil.common.runtime.Runtime.PORT_PROPERTY;
 import static org.apache.felix.sigil.common.runtime.io.Constants.*;
 
 
@@ -63,11 +66,15 @@ public class Server
     }
 
 
-    public void start( InetAddress inetAddress, int port ) throws IOException
+    public void start( Properties props ) throws IOException
     {
         final ServerSocket socket = new ServerSocket();
-        InetSocketAddress socketAddress = new InetSocketAddress(inetAddress, port);
         
+        String v = props.getProperty( ADDRESS_PROPERTY );
+        InetAddress address = v == null ? null : InetAddress.getByName( v );
+        int port = Integer.parseInt( props.getProperty( PORT_PROPERTY, "0" ) );
+        
+        InetSocketAddress socketAddress = new InetSocketAddress(address, port);        
         socket.bind( socketAddress );
 
         Main.log( "Started server listening on " + socket.getLocalSocketAddress() + ":" + socket.getLocalPort() );
