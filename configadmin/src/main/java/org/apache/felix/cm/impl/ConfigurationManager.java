@@ -1316,7 +1316,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                         // find the primary configuration owner
                         final ServiceReference ownerRef = getOwner( config, srList );
                         final String bundleLocation = ( ownerRef != null ) ? ownerRef.getBundle().getLocation()
-                            : config.getBundleLocation();
+                            : config.getBoundBundleLocation();
 
                         // if the configuration is unbound, bind to owner
                         if ( config.getBundleLocation() == null )
@@ -1383,13 +1383,14 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                         // find the primary configuration owner
                         final ServiceReference ownerRef = getOwner( config, srList );
                         final String bundleLocation = ( ownerRef != null ) ? ownerRef.getBundle().getLocation()
-                            : config.getBundleLocation();
+                            : config.getBoundBundleLocation();
 
                         // if the configuration is unbound, bind to owner
                         if ( config.getBundleLocation() == null )
                         {
                             config.setDynamicBundleLocation( bundleLocation );
                         }
+                        final String configBundleLocation = config.getBundleLocation();
 
                         // provide configuration to all services from the
                         // correct bundle
@@ -1399,11 +1400,11 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                             final String refLocation = ref.getBundle().getLocation();
 
                             // only consider the entry if in the same bundle
-                            if ( !refLocation.equals( config.getBundleLocation() ) )
+                            if ( !refLocation.equals( configBundleLocation ) )
                             {
                                 log( LogService.LOG_ERROR, "Cannot use configuration " + config.getPid() + " (factory "
                                     + config.getFactoryPid() + ") for " + ConfigurationManager.toString( ref )
-                                    + ": Configuration bound to bundle " + config.getBundleLocation(), null );
+                                    + ": Configuration bound to bundle " + configBundleLocation, null );
 
                                 continue;
                             }
@@ -1475,7 +1476,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
             // if the configuration is location bound, find a service reference
             // from the same bundle
-            final String configLocation = config.getBundleLocation();
+            final String configLocation = config.getBoundBundleLocation();
             if (configLocation != null) {
                 for ( int i = 0; i < srList.length; i++ )
                 {
@@ -1519,7 +1520,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
              * final and cannot be reset.
              */
             this.config = config;
-            this.configLocation = config.getBundleLocation();
+            this.configLocation = config.getBoundBundleLocation();
             this.fireEvent = fireEvent;
         }
 

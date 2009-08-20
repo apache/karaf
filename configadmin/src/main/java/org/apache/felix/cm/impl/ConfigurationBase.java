@@ -104,7 +104,37 @@ abstract class ConfigurationBase
     }
 
 
+    /**
+     * Returns the "official" bundle location as visible from the outside
+     * world of code calling into the Configuration.getBundleLocation() method.
+     * <p>
+     * In other words: The {@link #getStaticBundleLocation()} is returned if
+     * not <code>null</code>. Otherwise the {@link #getDynamicBundleLocation()}
+     * is returned (which may also be <code>null</code>).
+     */
     String getBundleLocation()
+    {
+        if ( staticBundleLocation != null )
+        {
+            return staticBundleLocation;
+        }
+
+        return dynamicBundleLocation;
+    }
+
+
+    /**
+     * Returns the bundle location according to actual configuration binding.
+     * <p>
+     * This may be different from the {@link #getBundleLocation()} result if
+     * the <code>Configuration.setBundleLocation(String)</code> method has been
+     * called after the configuration has been dynamically bound to a bundle.
+     * <p>
+     * In other words: The {@link #getDynamicBundleLocation()} is returned if
+     * not <code>null</code>. Otherwise the {@link #getStaticBundleLocation()}
+     * is returned (which may also be <code>null</code>).
+     */
+    String getBoundBundleLocation()
     {
         if ( dynamicBundleLocation != null )
         {
@@ -124,14 +154,6 @@ abstract class ConfigurationBase
     String getStaticBundleLocation()
     {
         return staticBundleLocation;
-    }
-
-
-    boolean isStaticallyBound()
-    {
-        // TODO: consider static location too ? to indicate whether we are
-        // actually bound ?
-        return dynamicBundleLocation == null;
     }
 
 
@@ -157,6 +179,10 @@ abstract class ConfigurationBase
         // location is statically set, the old binding must be removed
         // by removing the configuration from the targets and the new binding
         // must be setup by updating the configuration for new targets
+        /*
+         * According to BJ Hargrave configuration is not re-dispatched
+         * due to setting the static bundle location.
+         * The following code is therefore disabled for now
         if ( ( this instanceof ConfigurationImpl ) && ( bundleLocation != null ) )
         {
             // remove configuration from current managed service [factory]
@@ -168,6 +194,8 @@ abstract class ConfigurationBase
             // check whether we have to assign the configuration to new targets
             getConfigurationManager().reassignConfiguration( ( ConfigurationImpl ) this );
         }
+         *
+         */
     }
 
 
@@ -179,10 +207,16 @@ abstract class ConfigurationBase
         // FELIX-1488: If a dynamically bound configuration is unbound and not
         // statically bound, it may be rebound to another bundle asking for it
         // (unless the dynamic unbind happens due to configuration deletion)
+        /*
+         * According to BJ Hargrave configuration is not re-dispatched
+         * due to setting the static bundle location.
+         * The following code is therefore disabled for now
         if ( bundleLocation == null && getStaticBundleLocation() == null && ( this instanceof ConfigurationImpl ) )
         {
             getConfigurationManager().reassignConfiguration( ( ConfigurationImpl ) this );
         }
+         *
+         */
     }
 
 
