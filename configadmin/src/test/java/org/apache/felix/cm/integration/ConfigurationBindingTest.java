@@ -605,7 +605,7 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
 
 
     @Test
-    public void test_switch_dynamic_binding() throws BundleException
+    public void test_switch_dynamic_binding() throws BundleException, IOException
     {
         // 1. create config with pid with null location
         // 2. update config with properties
@@ -672,11 +672,19 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
             TestCase.assertNull( testerB1.props );
             TestCase.assertEquals( 0, testerB1.numManagedServiceUpdatedCalls );
         }
+
+        // 6. Update configuration now
+        config.update();
+        delay();
+
+        // ==> configuration supplied to the service ms2
+        TestCase.assertNotNull( testerB1.props );
+        TestCase.assertEquals( 1, testerB1.numManagedServiceUpdatedCalls );
     }
 
 
     @Test
-    public void test_switch_static_binding_factory() throws BundleException
+    public void test_switch_static_binding_factory() throws BundleException, IOException
     {
         // 1. create config with pid and locationA
         // 2. update config with properties
@@ -743,11 +751,19 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
             TestCase.assertNull( testerB1.configs.get( pid ) );
             TestCase.assertEquals( 0, testerB1.numManagedServiceFactoryUpdatedCalls );
         }
-    }
+
+        // 6. Update configuration now
+        config.update();
+        delay();
+
+        // ==> configuration supplied to the service ms2
+        TestCase.assertNotNull( testerB1.configs.get( pid ) );
+        TestCase.assertEquals( 1, testerB1.numManagedServiceFactoryUpdatedCalls );
+   }
 
 
     @Test
-    public void test_switch_dynamic_binding_factory() throws BundleException
+    public void test_switch_dynamic_binding_factory() throws BundleException, IOException
     {
         // 1. create config with pid and locationA
         // 2. update config with properties
@@ -818,11 +834,19 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
             TestCase.assertNull( testerB1.configs.get( pid ) );
             TestCase.assertEquals( 0, testerB1.numManagedServiceFactoryUpdatedCalls );
         }
+
+        // 6. Update configuration now
+        config.update();
+        delay();
+
+        // ==> configuration supplied to the service ms2
+        TestCase.assertNotNull( testerB1.configs.get( pid ) );
+        TestCase.assertEquals( 1, testerB1.numManagedServiceFactoryUpdatedCalls );
     }
 
 
     @Test
-    public void test_switch_dynamic_binding_after_uninstall() throws BundleException
+    public void test_switch_dynamic_binding_after_uninstall() throws BundleException, IOException
     {
         // 1. create config with pid with null location
         // 2. update config with properties
@@ -886,11 +910,19 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
             TestCase.assertNull( testerB1.props );
             TestCase.assertEquals( 0, testerB1.numManagedServiceUpdatedCalls );
         }
+
+        // 6. Update configuration now
+        config.update();
+        delay();
+
+        // ==> configuration supplied to the service ms2
+        TestCase.assertNotNull( testerB1.props );
+        TestCase.assertEquals( 1, testerB1.numManagedServiceUpdatedCalls );
     }
 
 
     @Test
-    public void test_switch_dynamic_binding_factory_after_uninstall() throws BundleException
+    public void test_switch_dynamic_binding_factory_after_uninstall() throws BundleException, IOException
     {
         // 1. create config with pid and locationA
         // 2. update config with properties
@@ -954,5 +986,13 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
             TestCase.assertNull( testerB1.configs.get( pid ) );
             TestCase.assertEquals( 0, testerB1.numManagedServiceFactoryUpdatedCalls );
         }
+
+        // 6. Update configuration now
+        config.update();
+        delay();
+
+        // ==> configuration supplied to the service ms2
+        TestCase.assertNotNull( testerB1.configs.get( pid ) );
+        TestCase.assertEquals( 1, testerB1.numManagedServiceFactoryUpdatedCalls );
     }
 }

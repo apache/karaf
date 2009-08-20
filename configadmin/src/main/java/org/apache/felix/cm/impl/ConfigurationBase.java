@@ -196,6 +196,18 @@ abstract class ConfigurationBase
         }
          *
          */
+
+        // corrollary to not reassigning configurations: we have to check
+        // whether the dynamic bundle location is different from the static
+        // now. If so, the dynamic bundle location has to be removed.
+        // also set the service reference to null because we assume to not
+        // be bound to a service anymore
+        if ( bundleLocation != null && getDynamicBundleLocation() != null
+            && !bundleLocation.equals( getDynamicBundleLocation() ) )
+        {
+            setDynamicBundleLocation( null );
+            setServiceReference( null );
+        }
     }
 
 
