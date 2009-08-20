@@ -28,7 +28,6 @@ import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.ComponentInstance;
 import org.osgi.service.log.LogService;
 
 
@@ -81,7 +80,7 @@ public class ServiceFactoryComponentManager extends ImmediateComponentManager im
     /* (non-Javadoc)
      * @see org.apache.felix.scr.AbstractComponentManager#getInstance()
      */
-    public Object getInstance()
+    Object getInstance()
     {
         // this method is not expected to be called as the base call is
         // overwritten in the BundleComponentContext class
@@ -154,7 +153,7 @@ public class ServiceFactoryComponentManager extends ImmediateComponentManager im
         }
     }
 
-    private static class BundleComponentContext extends ComponentContextImpl implements ComponentInstance
+    private static class BundleComponentContext extends ComponentContextImpl
     {
 
         private Bundle m_usingBundle;
@@ -181,23 +180,11 @@ public class ServiceFactoryComponentManager extends ImmediateComponentManager im
         }
 
 
-        public ComponentInstance getComponentInstance()
-        {
-            return this;
-        }
-
-
         //---------- ComponentInstance interface ------------------------------
 
         public Object getInstance()
         {
             return m_implementationObject;
-        }
-
-
-        public void dispose()
-        {
-            getComponentManager().dispose();
         }
     }
 }

@@ -32,6 +32,7 @@ import org.apache.felix.scr.impl.metadata.ReferenceMetadata;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.ComponentInstance;
 import org.osgi.service.log.LogService;
 
 
@@ -46,7 +47,7 @@ public class ImmediateComponentManager extends AbstractComponentManager
     private Object m_implementationObject;
 
     // The context that will be passed to the implementationObject
-    private ComponentContext m_componentContext;
+    private ComponentContextImpl m_componentContext;
 
     // the activate method
     private ActivateMethod m_activateMethod;
@@ -99,7 +100,7 @@ public class ImmediateComponentManager extends AbstractComponentManager
     // also be overwritten
     protected boolean createComponent()
     {
-        ComponentContext tmpContext = new ComponentContextImpl( this );
+        ComponentContextImpl tmpContext = new ComponentContextImpl( this );
         Object tmpComponent = createImplementationObject( tmpContext );
 
         // if something failed creating the component instance, return false
@@ -124,6 +125,18 @@ public class ImmediateComponentManager extends AbstractComponentManager
     }
 
 
+    ComponentContext getComponentContext()
+    {
+        return m_componentContext;
+    }
+
+
+    ComponentInstance getComponentInstance()
+    {
+        return m_componentContext;
+    }
+
+
     //**********************************************************************************************************
 
     /**
@@ -131,7 +144,7 @@ public class ImmediateComponentManager extends AbstractComponentManager
     *
     * @return the object that implements the services
     */
-    public Object getInstance()
+    Object getInstance()
     {
         return m_implementationObject;
     }

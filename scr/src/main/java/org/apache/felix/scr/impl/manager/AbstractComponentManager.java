@@ -36,7 +36,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentConstants;
-import org.osgi.service.component.ComponentInstance;
 import org.osgi.service.log.LogService;
 
 /**
@@ -44,7 +43,7 @@ import org.osgi.service.log.LogService;
  * implementation object's lifecycle.
  *
  */
-public abstract class AbstractComponentManager implements Component, ComponentInstance
+public abstract class AbstractComponentManager implements Component
 {
     // the ID of this component
     private long m_componentId;
@@ -522,8 +521,15 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
         });
     }
 
-    // implements the ComponentInstance.dispose() method
-    public void dispose()
+    /**
+     * Get the object that is implementing this descriptor
+     *
+     * @return the object that implements the services
+     */
+    abstract Object getInstance();
+
+    // supports the ComponentInstance.dispose() method
+    void dispose()
     {
         dispose( ComponentConstants.DEACTIVATION_REASON_DISPOSED );
     }
@@ -909,13 +915,6 @@ public abstract class AbstractComponentManager implements Component, ComponentIn
             dm.dispose();
         }
     }
-
-    /**
-     * Get the object that is implementing this descriptor
-     *
-     * @return the object that implements the services
-     */
-    public abstract Object getInstance();
 
     public abstract boolean hasConfiguration();
 

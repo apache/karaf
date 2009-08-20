@@ -33,7 +33,7 @@ import org.osgi.service.component.ComponentInstance;
  * Implementation for the ComponentContext interface
  *
  */
-public class ComponentContextImpl implements ComponentContext
+public class ComponentContextImpl implements ComponentContext, ComponentInstance
 {
 
     private AbstractComponentManager m_componentManager;
@@ -92,7 +92,7 @@ public class ComponentContextImpl implements ComponentContext
 
     public ComponentInstance getComponentInstance()
     {
-        return m_componentManager;
+        return this;
     }
 
 
@@ -111,5 +111,19 @@ public class ComponentContextImpl implements ComponentContext
     public ServiceReference getServiceReference()
     {
         return m_componentManager.getServiceReference();
+    }
+
+
+    //---------- ComponentInstance interface ------------------------------
+
+    public Object getInstance()
+    {
+        return getComponentManager().getInstance();
+    }
+
+
+    public void dispose()
+    {
+        getComponentManager().dispose();
     }
 }

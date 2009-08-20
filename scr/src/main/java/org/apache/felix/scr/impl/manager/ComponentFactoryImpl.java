@@ -100,10 +100,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
      */
     public ComponentInstance newInstance( Dictionary dictionary )
     {
-        ImmediateComponentManager cm = createComponentManager();
-
-        // register with the internal set of created components
-        m_componentInstances.put( cm, cm );
+        final ImmediateComponentManager cm = createComponentManager();
 
         cm.setFactoryProperties( dictionary );
         cm.reconfigure( m_configuration );
@@ -111,7 +108,10 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
         cm.enableInternal();
         cm.activateInternal();
 
-        return cm;
+        final ComponentInstance instance = cm.getComponentInstance();
+        m_componentInstances.put( cm, instance );
+
+        return instance;
     }
 
 
@@ -197,12 +197,6 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
     protected Object getService()
     {
         return this;
-    }
-
-
-    public String getName()
-    {
-        return "Component Factory " + getComponentMetadata().getName();
     }
 
 
