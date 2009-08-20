@@ -566,9 +566,9 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     }
 
 
-    void updated( ConfigurationImpl config )
+    void updated( ConfigurationImpl config, boolean fireEvent )
     {
-        updateThread.schedule( new UpdateConfiguration( config, true ) );
+        updateThread.schedule( new UpdateConfiguration( config, fireEvent ) );
     }
 
 
@@ -988,6 +988,33 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         return oc;
     }
 
+
+    void handleCallBackError( final Throwable error, final ServiceReference target, final ConfigurationImpl config )
+    {
+        if ( error instanceof ConfigurationException )
+        {
+            final ConfigurationException ce = ( ConfigurationException ) error;
+            if ( ce.getProperty() != null )
+            {
+                log( LogService.LOG_ERROR, toString( target ) + ": Updating configuration property " + ce.getProperty()
+                    + " caused a problem: " + ce.getReason(), ce );
+            }
+            else
+            {
+                log( LogService.LOG_ERROR, toString( target ) + ": Updating configuration caused a problem: "
+                    + ce.getReason(), ce );
+
+            }
+        }
+        else
+        {
+            {
+                log( LogService.LOG_ERROR, toString( target ) + ": Unexpected problem updating " + config, error );
+            }
+
+        }
+    }
+
     // ---------- inner classes ------------------------------------------------
 
     private class ManagedServiceUpdate implements Runnable
@@ -1084,22 +1111,9 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             {
                 service.updated( properties );
             }
-            catch ( ConfigurationException ce )
-            {
-                if ( ce.getProperty() != null )
-                {
-                    log( LogService.LOG_ERROR, sr + ": Updating configuration property " + ce.getProperty()
-                        + " caused a problem: " + ce.getReason(), ce );
-                }
-                else
-                {
-                    log( LogService.LOG_ERROR, sr + ": Updating configuration caused a problem: " + ce.getReason(), ce );
-
-                }
-            }
             catch ( Throwable t )
             {
-                log( LogService.LOG_ERROR, sr + ": Unexpected problem updating configuration", t );
+                handleCallBackError( t, sr, config );
             }
         }
 
@@ -1250,33 +1264,18 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 // (clarification in Section 104.9.1 of Compendium 4.2)
                 callPlugins( properties, factoryPid, sr, cfg );
 
-                // update the service with the configuration
-                try
+                // update the service with the configuration (if non-null)
+                if ( properties != null )
                 {
-                    // only, if there is non-null configuration data
-                    if ( properties  != null )
+                    log( LogService.LOG_DEBUG, sr + ": Updating configuration pid=" + cfg.getPid(), null );
+                    try
                     {
-                        log( LogService.LOG_DEBUG, sr + ": Updating configuration pid=" + cfg.getPid(), null );
                         service.updated( cfg.getPid(), properties );
                     }
-                }
-                catch ( ConfigurationException ce )
-                {
-                    if ( ce.getProperty() != null )
+                    catch ( Throwable t )
                     {
-                        log( LogService.LOG_ERROR, sr + ": Updating configuration property " + ce.getProperty()
-                            + " caused a problem: " + ce.getReason(), ce );
+                        handleCallBackError( t, sr, cfg );
                     }
-                    else
-                    {
-                        log( LogService.LOG_ERROR, sr + ": Updating configuration caused a problem: " + ce.getReason(),
-                            ce );
-
-                    }
-                }
-                catch ( Throwable t )
-                {
-                    log( LogService.LOG_ERROR, sr + ": Unexpected problem updating configuration", t );
                 }
             }
         }
@@ -1364,6 +1363,10 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                                     srv.updated( props );
                                 }
                             }
+                            catch ( Throwable t )
+                            {
+                                handleCallBackError( t, userRef, config );
+                            }
                             finally
                             {
                                 bundleContext.ungetService( userRef );
@@ -1427,6 +1430,10 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                                     srv.updated( config.getPid(), props );
                                 }
                             }
+                            catch ( Throwable t )
+                            {
+                                handleCallBackError( t, ref, config );
+                            }
                             finally
                             {
                                 bundleContext.ungetService( ref );
@@ -1435,22 +1442,9 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                     }
                 }
             }
-            catch ( ConfigurationException ce )
+            catch ( InvalidSyntaxException ise )
             {
-                if ( ce.getProperty() != null )
-                {
-                    log( LogService.LOG_ERROR, "Updating configuration property " + ce.getProperty()
-                        + " caused a problem: " + ce.getReason(), ce );
-                }
-                else
-                {
-                    log( LogService.LOG_ERROR, "Updating configuration caused a problem: " + ce.getReason(), ce );
-
-                }
-            }
-            catch ( Throwable t )
-            {
-                log( LogService.LOG_ERROR, "Unexpected problem updating configuration", t );
+                log( LogService.LOG_ERROR, "Service selection filter is invalid to update " + config, ise );
             }
             finally
             {
@@ -1512,16 +1506,19 @@ public class ConfigurationManager implements BundleActivator, BundleListener
     private class DeleteConfiguration implements Runnable
     {
 
-        private final String pid;
-        private final String factoryPid;
+        private final ConfigurationImpl config;
         private final String configLocation;
         private final boolean fireEvent;
 
 
         DeleteConfiguration( ConfigurationImpl config, boolean fireEvent )
         {
-            this.pid = config.getPid();
-            this.factoryPid = config.getFactoryPid();
+            /*
+             * NOTE: We keep the configuration because it might be cleared just
+             * after calling this method. The pid and factoryPid fields are
+             * final and cannot be reset.
+             */
+            this.config = config;
             this.configLocation = config.getBundleLocation();
             this.fireEvent = fireEvent;
         }
@@ -1529,6 +1526,9 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
         public void run()
         {
+            final String pid = config.getPid();
+            final String factoryPid = config.getFactoryPid();
+
             try
             {
                 if ( factoryPid == null )
@@ -1548,9 +1548,13 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                                 {
                                     srv.updated( null );
                                 }
+                                catch ( Throwable t )
+                                {
+                                    handleCallBackError( t, sr, config );
+                                }
                                 finally
                                 {
-                                    bundleContext.ungetService( sr );
+                                   bundleContext.ungetService( sr );
                                 }
                             }
                         }
@@ -1559,9 +1563,16 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 else
                 {
                     // remove the pid from the factory
-                    Factory factory = getFactory( factoryPid );
-                    factory.removePID( pid );
-                    factory.store();
+                    try
+                    {
+                        Factory factory = getFactory( factoryPid );
+                        factory.removePID( pid );
+                        factory.store();
+                    }
+                    catch ( IOException ioe )
+                    {
+                        log( LogService.LOG_ERROR, "Failed removing " + pid + " from the factory " + factoryPid, ioe );
+                    }
 
                     ServiceReference[] srList = bundleContext.getServiceReferences( ManagedServiceFactory.class
                         .getName(), "(" + Constants.SERVICE_PID + "=" + factoryPid + ")" );
@@ -1579,6 +1590,10 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                                 {
                                     srv.deleted( pid );
                                 }
+                                catch ( Throwable t )
+                                {
+                                    handleCallBackError( t, sr, config );
+                                }
                                 finally
                                 {
                                     bundleContext.ungetService( sr );
@@ -1588,22 +1603,9 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                     }
                 }
             }
-            catch ( ConfigurationException ce )
+            catch ( InvalidSyntaxException ise )
             {
-                if ( ce.getProperty() != null )
-                {
-                    log( LogService.LOG_ERROR, "Updating configuration property " + ce.getProperty()
-                        + " caused a problem: " + ce.getReason(), ce );
-                }
-                else
-                {
-                    log( LogService.LOG_ERROR, "Updating configuration caused a problem: " + ce.getReason(), ce );
-
-                }
-            }
-            catch ( Throwable t )
-            {
-                log( LogService.LOG_ERROR, "Unexpected problem updating configuration", t );
+                log( LogService.LOG_ERROR, "Service selection filter is invalid to update " + config, ise );
             }
             finally
             {
@@ -1618,7 +1620,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
         public String toString()
         {
-            return "Delete: pid=" + pid;
+            return "Delete: pid=" + config.getPid();
         }
     }
 
