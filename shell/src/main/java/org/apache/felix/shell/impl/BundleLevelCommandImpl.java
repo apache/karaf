@@ -27,6 +27,8 @@ import org.osgi.service.startlevel.StartLevel;
 
 public class BundleLevelCommandImpl implements Command
 {
+    private static final String INITIAL_LEVEL_SWITCH = "-i";
+
     private BundleContext m_context = null;
 
     public BundleLevelCommandImpl(BundleContext context)
@@ -41,12 +43,12 @@ public class BundleLevelCommandImpl implements Command
 
     public String getUsage()
     {
-        return "bundlelevel <level> <id> ... | <id>";
+        return "bundlelevel <level> <id> ... | <id> | -i <level>";
     }
 
     public String getShortDescription()
     {
-        return "set or get bundle start level.";
+        return "set/get bundle start level or set initial bundle start level.";
     }
 
     public void execute(String s, PrintStream out, PrintStream err)
@@ -116,49 +118,76 @@ public class BundleLevelCommandImpl implements Command
             String token = null;
             int startLevel = -1;
 
-            try
-            {
-                token = st.nextToken();
-                startLevel = Integer.parseInt(token);
-            }
-            catch (NumberFormatException ex)
-            {
-                err.println("Unable to parse start level '" + token + "'.");
-            }
+            token = st.nextToken().trim();
 
-            // Ignore invalid start levels.
-            if (startLevel > 0)
+            // If next token is the initial level switch,
+            // then set it.
+            if (token.equals(INITIAL_LEVEL_SWITCH))
             {
-                // Set the start level for each specified bundle.
-                while (st.hasMoreTokens())
+                if (st.countTokens() == 1)
                 {
                     try
                     {
-                        token = st.nextToken();
-                        long id = Long.parseLong(token);
-                        bundle = m_context.getBundle(id);
-                        if (bundle != null)
-                        {
-                            sl.setBundleStartLevel(bundle, startLevel);
-                        }
-                        else
-                        {
-                            err.println("Bundle ID '" + token + "' is invalid.");
-                        }
+                        token = st.nextToken().trim();
+                        startLevel = Integer.parseInt(token);
+                        sl.setInitialBundleStartLevel(startLevel);
                     }
                     catch (NumberFormatException ex)
                     {
-                        err.println("Unable to parse bundle ID '" + token + "'.");
-                    }
-                    catch (Exception ex)
-                    {
-                        err.println(ex.toString());
+                        err.println("Unable to parse start level '" + token + "'.");
                     }
                 }
+                else
+                {
+                    err.println("Incorrect number of arguments.");
+                }
             }
+            // Otherwise, set the start level for the specified bundles.
             else
             {
-                err.println("Invalid start level.");
+                try
+                {
+                    startLevel = Integer.parseInt(token);
+                }
+                catch (NumberFormatException ex)
+                {
+                    err.println("Unable to parse start level '" + token + "'.");
+                }
+
+                // Ignore invalid start levels.
+                if (startLevel > 0)
+                {
+                    // Set the start level for each specified bundle.
+                    while (st.hasMoreTokens())
+                    {
+                        try
+                        {
+                            token = st.nextToken();
+                            long id = Long.parseLong(token);
+                            bundle = m_context.getBundle(id);
+                            if (bundle != null)
+                            {
+                                sl.setBundleStartLevel(bundle, startLevel);
+                            }
+                            else
+                            {
+                                err.println("Bundle ID '" + token + "' is invalid.");
+                            }
+                        }
+                        catch (NumberFormatException ex)
+                        {
+                            err.println("Unable to parse bundle ID '" + token + "'.");
+                        }
+                        catch (Exception ex)
+                        {
+                            err.println(ex.toString());
+                        }
+                    }
+                }
+                else
+                {
+                    err.println("Invalid start level.");
+                }
             }
         }
         else
