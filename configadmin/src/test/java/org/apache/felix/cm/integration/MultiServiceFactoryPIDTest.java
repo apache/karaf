@@ -165,8 +165,23 @@ public class MultiServiceFactoryPIDTest extends ConfigurationTestBase
 
             delay();
 
-            // expect configuration reassigned
-            TestCase.assertEquals( bundle2.getLocation(), config.getBundleLocation() );
+            /*
+             * According to BJ Hargrave configuration is not re-dispatched
+             * due to setting the bundle location.
+             * <p>
+             * Therefore, we have two sets one with re-dispatch expectation and
+             * one without re-dispatch expectation.
+             */
+            if ( REDISPATCH_CONFIGURATION_ON_SET_BUNDLE_LOCATION )
+            {
+                // expect configuration reassigned
+                TestCase.assertEquals( bundle2.getLocation(), config.getBundleLocation() );
+            }
+            else
+            {
+                // expected configuration unbound
+                TestCase.assertNull( config.getBundleLocation() );
+            }
 
             // remove the configuration for good
             deleteConfig( pid );
@@ -231,8 +246,23 @@ public class MultiServiceFactoryPIDTest extends ConfigurationTestBase
 
                 delay();
 
-                // expect configuration reassigned
-                TestCase.assertEquals( bundle2.getLocation(), config.getBundleLocation() );
+                /*
+                 * According to BJ Hargrave configuration is not re-dispatched
+                 * due to setting the bundle location.
+                 * <p>
+                 * Therefore, we have two sets one with re-dispatch expectation and
+                 * one without re-dispatch expectation.
+                 */
+                if ( REDISPATCH_CONFIGURATION_ON_SET_BUNDLE_LOCATION )
+                {
+                    // expect configuration reassigned
+                    TestCase.assertEquals( bundle2.getLocation(), config.getBundleLocation() );
+                }
+                else
+                {
+                    // expected configuration unbound
+                    TestCase.assertNull( config.getBundleLocation() );
+                }
             }
             else if ( bundle2.getLocation().equals( config.getBundleLocation() ) )
             {
@@ -249,8 +279,23 @@ public class MultiServiceFactoryPIDTest extends ConfigurationTestBase
 
                 delay();
 
-                // expect configuration reassigned
-                TestCase.assertEquals( bundle.getLocation(), config.getBundleLocation() );
+                /*
+                 * According to BJ Hargrave configuration is not re-dispatched
+                 * due to setting the bundle location.
+                 * <p>
+                 * Therefore, we have two sets one with re-dispatch expectation and
+                 * one without re-dispatch expectation.
+                 */
+                if ( REDISPATCH_CONFIGURATION_ON_SET_BUNDLE_LOCATION )
+                {
+                    // expect configuration reassigned
+                    TestCase.assertEquals( bundle.getLocation(), config.getBundleLocation() );
+                }
+                else
+                {
+                    // expected configuration unbound
+                    TestCase.assertNull( config.getBundleLocation() );
+                }
             }
             else
             {

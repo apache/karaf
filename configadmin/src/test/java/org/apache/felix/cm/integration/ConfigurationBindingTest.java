@@ -574,13 +574,33 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
         // ==> configuration is bound to locationB
         TestCase.assertEquals( locationB, config.getBundleLocation() );
 
-        // ==> configuration removed from service ms1
-        TestCase.assertNull( testerA1.props );
-        TestCase.assertEquals( 2, testerA1.numManagedServiceUpdatedCalls );
+        /*
+         * According to BJ Hargrave configuration is not re-dispatched
+         * due to setting the bundle location.
+         * <p>
+         * Therefore, we have two sets one with re-dispatch expectation and
+         * one without re-dispatch expectation.
+         */
+        if ( REDISPATCH_CONFIGURATION_ON_SET_BUNDLE_LOCATION )
+        {
+            // ==> configuration removed from service ms1
+            TestCase.assertNull( testerA1.props );
+            TestCase.assertEquals( 2, testerA1.numManagedServiceUpdatedCalls );
 
-        // ==> configuration supplied to the service ms2
-        TestCase.assertNotNull( testerB1.props );
-        TestCase.assertEquals( 1, testerB1.numManagedServiceUpdatedCalls );
+            // ==> configuration supplied to the service ms2
+            TestCase.assertNotNull( testerB1.props );
+            TestCase.assertEquals( 1, testerB1.numManagedServiceUpdatedCalls );
+        }
+        else
+        {
+            // ==> configuration remains for service ms1
+            TestCase.assertNotNull( testerA1.props );
+            TestCase.assertEquals( 1, testerA1.numManagedServiceUpdatedCalls );
+
+            // ==> configuration not supplied to the service ms2
+            TestCase.assertNull( testerB1.props );
+            TestCase.assertEquals( 0, testerB1.numManagedServiceUpdatedCalls );
+        }
     }
 
 
@@ -625,13 +645,33 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
         // ==> configuration is bound to locationB
         TestCase.assertEquals( locationB, config.getBundleLocation() );
 
-        // ==> configuration removed from service ms1
-        TestCase.assertNull( testerA1.props );
-        TestCase.assertEquals( 2, testerA1.numManagedServiceUpdatedCalls );
+        /*
+         * According to BJ Hargrave configuration is not re-dispatched
+         * due to setting the bundle location.
+         * <p>
+         * Therefore, we have two sets one with re-dispatch expectation and
+         * one without re-dispatch expectation.
+         */
+        if ( REDISPATCH_CONFIGURATION_ON_SET_BUNDLE_LOCATION )
+        {
+            // ==> configuration removed from service ms1
+            TestCase.assertNull( testerA1.props );
+            TestCase.assertEquals( 2, testerA1.numManagedServiceUpdatedCalls );
 
-        // ==> configuration supplied to the service ms2
-        TestCase.assertNotNull( testerB1.props );
-        TestCase.assertEquals( 1, testerB1.numManagedServiceUpdatedCalls );
+            // ==> configuration supplied to the service ms2
+            TestCase.assertNotNull( testerB1.props );
+            TestCase.assertEquals( 1, testerB1.numManagedServiceUpdatedCalls );
+        }
+        else
+        {
+            // ==> configuration remains for service ms1
+            TestCase.assertNotNull( testerA1.props );
+            TestCase.assertEquals( 1, testerA1.numManagedServiceUpdatedCalls );
+
+            // ==> configuration not supplied to the service ms2
+            TestCase.assertNull( testerB1.props );
+            TestCase.assertEquals( 0, testerB1.numManagedServiceUpdatedCalls );
+        }
     }
 
 
@@ -674,14 +714,35 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
         // ==> configuration is bound to locationB
         TestCase.assertEquals( locationB, config.getBundleLocation() );
 
-        // ==> configuration removed from service ms1
-        TestCase.assertNull( testerA1.configs.get( pid ));
-        TestCase.assertEquals( 1, testerA1.numManagedServiceFactoryUpdatedCalls );
-        TestCase.assertEquals( 1, testerA1.numManagedServiceFactoryDeleteCalls );
+        /*
+         * According to BJ Hargrave configuration is not re-dispatched
+         * due to setting the bundle location.
+         * <p>
+         * Therefore, we have two sets one with re-dispatch expectation and
+         * one without re-dispatch expectation.
+         */
+        if ( REDISPATCH_CONFIGURATION_ON_SET_BUNDLE_LOCATION )
+        {
+            // ==> configuration removed from service ms1
+            TestCase.assertNull( testerA1.configs.get( pid ));
+            TestCase.assertEquals( 1, testerA1.numManagedServiceFactoryUpdatedCalls );
+            TestCase.assertEquals( 1, testerA1.numManagedServiceFactoryDeleteCalls );
 
-        // ==> configuration supplied to the service ms2
-        TestCase.assertNotNull( testerB1.configs.get( pid ) );
-        TestCase.assertEquals( 1, testerB1.numManagedServiceFactoryUpdatedCalls );
+            // ==> configuration supplied to the service ms2
+            TestCase.assertNotNull( testerB1.configs.get( pid ) );
+            TestCase.assertEquals( 1, testerB1.numManagedServiceFactoryUpdatedCalls );
+        }
+        else
+        {
+            // ==> configuration not removed from service ms1
+            TestCase.assertNotNull( testerA1.configs.get( pid ));
+            TestCase.assertEquals( 1, testerA1.numManagedServiceFactoryUpdatedCalls );
+            TestCase.assertEquals( 0, testerA1.numManagedServiceFactoryDeleteCalls );
+
+            // ==> configuration not supplied to the service ms2
+            TestCase.assertNull( testerB1.configs.get( pid ) );
+            TestCase.assertEquals( 0, testerB1.numManagedServiceFactoryUpdatedCalls );
+        }
     }
 
 
@@ -728,14 +789,35 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
         // ==> configuration is bound to locationB
         TestCase.assertEquals( locationB, config.getBundleLocation() );
 
-        // ==> configuration removed from service ms1
-        TestCase.assertNull( testerA1.configs.get( pid ));
-        TestCase.assertEquals( 1, testerA1.numManagedServiceFactoryUpdatedCalls );
-        TestCase.assertEquals( 1, testerA1.numManagedServiceFactoryDeleteCalls );
+        /*
+         * According to BJ Hargrave configuration is not re-dispatched
+         * due to setting the bundle location.
+         * <p>
+         * Therefore, we have two sets one with re-dispatch expectation and
+         * one without re-dispatch expectation.
+         */
+        if ( REDISPATCH_CONFIGURATION_ON_SET_BUNDLE_LOCATION )
+        {
+            // ==> configuration removed from service ms1
+            TestCase.assertNull( testerA1.configs.get( pid ));
+            TestCase.assertEquals( 1, testerA1.numManagedServiceFactoryUpdatedCalls );
+            TestCase.assertEquals( 1, testerA1.numManagedServiceFactoryDeleteCalls );
 
-        // ==> configuration supplied to the service ms2
-        TestCase.assertNotNull( testerB1.configs.get( pid ) );
-        TestCase.assertEquals( 1, testerB1.numManagedServiceFactoryUpdatedCalls );
+            // ==> configuration supplied to the service ms2
+            TestCase.assertNotNull( testerB1.configs.get( pid ) );
+            TestCase.assertEquals( 1, testerB1.numManagedServiceFactoryUpdatedCalls );
+        }
+        else
+        {
+            // ==> configuration not removed from service ms1
+            TestCase.assertNotNull( testerA1.configs.get( pid ));
+            TestCase.assertEquals( 1, testerA1.numManagedServiceFactoryUpdatedCalls );
+            TestCase.assertEquals( 0, testerA1.numManagedServiceFactoryDeleteCalls );
+
+            // ==> configuration not supplied to the service ms2
+            TestCase.assertNull( testerB1.configs.get( pid ) );
+            TestCase.assertEquals( 0, testerB1.numManagedServiceFactoryUpdatedCalls );
+        }
     }
 
 
@@ -779,12 +861,31 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
         delay();
         delay();
 
-        // ==> configuration is bound to locationB
-        TestCase.assertEquals( locationB, config.getBundleLocation() );
+        /*
+         * According to BJ Hargrave configuration is not re-dispatched
+         * due to setting the bundle location.
+         * <p>
+         * Therefore, we have two sets one with re-dispatch expectation and
+         * one without re-dispatch expectation.
+         */
+        if ( REDISPATCH_CONFIGURATION_ON_SET_BUNDLE_LOCATION )
+        {
+            // ==> configuration is bound to locationB
+            TestCase.assertEquals( locationB, config.getBundleLocation() );
 
-        // ==> configuration supplied to the service ms2
-        TestCase.assertNotNull( testerB1.props );
-        TestCase.assertEquals( 1, testerB1.numManagedServiceUpdatedCalls );
+            // ==> configuration supplied to the service ms2
+            TestCase.assertNotNull( testerB1.props );
+            TestCase.assertEquals( 1, testerB1.numManagedServiceUpdatedCalls );
+        }
+        else
+        {
+            // ==> configuration is unbound
+            TestCase.assertNull( config.getBundleLocation() );
+
+            // ==> configuration not supplied to the service ms2
+            TestCase.assertNull( testerB1.props );
+            TestCase.assertEquals( 0, testerB1.numManagedServiceUpdatedCalls );
+        }
     }
 
 
@@ -828,11 +929,30 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
         delay();
         delay();
 
-        // ==> configuration is bound to locationB
-        TestCase.assertEquals( locationB, config.getBundleLocation() );
+        /*
+         * According to BJ Hargrave configuration is not re-dispatched
+         * due to setting the bundle location.
+         * <p>
+         * Therefore, we have two sets one with re-dispatch expectation and
+         * one without re-dispatch expectation.
+         */
+        if ( REDISPATCH_CONFIGURATION_ON_SET_BUNDLE_LOCATION )
+        {
+            // ==> configuration is bound to locationB
+            TestCase.assertEquals( locationB, config.getBundleLocation() );
 
-        // ==> configuration supplied to the service ms2
-        TestCase.assertNotNull( testerB1.configs.get( pid ) );
-        TestCase.assertEquals( 1, testerB1.numManagedServiceFactoryUpdatedCalls );
+            // ==> configuration supplied to the service ms2
+            TestCase.assertNotNull( testerB1.configs.get( pid ) );
+            TestCase.assertEquals( 1, testerB1.numManagedServiceFactoryUpdatedCalls );
+        }
+        else
+        {
+            // ==> configuration is unbound
+            TestCase.assertNull( config.getBundleLocation() );
+
+            // ==> configuration not supplied to the service ms2
+            TestCase.assertNull( testerB1.configs.get( pid ) );
+            TestCase.assertEquals( 0, testerB1.numManagedServiceFactoryUpdatedCalls );
+        }
     }
 }

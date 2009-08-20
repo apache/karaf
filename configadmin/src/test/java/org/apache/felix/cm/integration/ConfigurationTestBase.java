@@ -53,6 +53,24 @@ import org.osgi.util.tracker.ServiceTracker;
 public abstract class ConfigurationTestBase
 {
 
+    /**
+     * There is currently an open issue in the specification in whether a
+     * call to Configuration.setBundleLocation() might trigger a configuration
+     * update or not.
+     * We have test cases in our integration test suite for both cases. To
+     * enable the respective tests set this field accordingly:
+     * <dl>
+     * <dt>false</dt>
+     * <dd>Expect configuration to <b>NOT</b> be redispatched. That is existing
+     * configurations are kept and other services are not updated</dd>
+     * <dt>true</dt>
+     * <dd>Expect configuration to be redispatched. That is existing configuration
+     * is revoked (update(null) or delete calls) and new matching services are
+     * updated.</dd>
+     * </dl>
+     */
+    public static final boolean REDISPATCH_CONFIGURATION_ON_SET_BUNDLE_LOCATION = false;
+
     @Inject
     protected BundleContext bundleContext;
 
