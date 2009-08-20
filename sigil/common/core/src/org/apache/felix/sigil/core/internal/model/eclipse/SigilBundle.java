@@ -56,7 +56,6 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
 
     private IBundleModelElement bundle;
     private Set<IPath> sourcePaths;
-    private Set<IPath> libraryPaths;
     private Set<String> classpath;
     private Set<String> packages;
     private Set<String> dlPackages;
@@ -72,7 +71,6 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
     {
         super( "Sigil Bundle" );
         sourcePaths = new HashSet<IPath>();
-        libraryPaths = new HashSet<IPath>();
         classpath = new HashSet<String>();
         packages = new HashSet<String>();
         dlPackages = new HashSet<String>();
@@ -213,24 +211,6 @@ public class SigilBundle extends AbstractCompoundModelElement implements ISigilB
             bundle.setParent( this );
         }
         this.bundle = bundle;
-    }
-
-
-    public void addLibraryPath( IPath path )
-    {
-        libraryPaths.add( path );
-    }
-
-
-    public void removeLibraryPath( IPath path )
-    {
-        libraryPaths.remove( path );
-    }
-
-
-    public Set<IPath> getLibraryPaths()
-    {
-        return libraryPaths;
     }
 
 

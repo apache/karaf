@@ -53,15 +53,6 @@ public interface ISigilBundle extends ICompoundModelElement, IVersionedModelElem
     void setBundleInfo( IBundleModelElement bundle );
 
 
-    void addLibraryPath( IPath path );
-
-
-    void removeLibraryPath( IPath path );
-
-
-    Set<IPath> getLibraryPaths();
-
-
     void addSourcePath( IPath path );
 
 
