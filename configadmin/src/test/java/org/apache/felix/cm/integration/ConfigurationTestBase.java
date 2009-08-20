@@ -19,23 +19,20 @@
 package org.apache.felix.cm.integration;
 
 
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.provision;
-import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.scanDir;
-import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.withBnd;
-
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
+
 import junit.framework.TestCase;
 
+import org.apache.felix.cm.integration.helper.BaseTestActivator;
 import org.apache.felix.cm.integration.helper.ManagedServiceTestActivator;
 import org.apache.felix.cm.integration.helper.MyTinyBundle;
-import org.apache.felix.cm.integration.helper.BaseTestActivator;
 import org.junit.After;
 import org.junit.Before;
+import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Inject;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.swissbox.tinybundles.core.TinyBundles;
@@ -91,8 +88,11 @@ public abstract class ConfigurationTestBase
     @org.ops4j.pax.exam.junit.Configuration
     public static Option[] configuration()
     {
-        return options( provision( scanDir( "target" ).filter( "*.jar" ), mavenBundle( "org.ops4j.pax.swissbox",
-            "pax-swissbox-tinybundles", "1.0.0" ) )
+        return CoreOptions.options(
+            CoreOptions.provision(
+                CoreOptions.bundle( new File("target/configadmin.jar").toURI().toString() ),
+                CoreOptions.mavenBundle( "org.ops4j.pax.swissbox", "pax-swissbox-tinybundles", "1.0.0" )
+            )
 //         , PaxRunnerOptions.vmOption("-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=30303" )
         // , PaxRunnerOptions.logProfile()
         );
@@ -136,11 +136,15 @@ public abstract class ConfigurationTestBase
         throws BundleException
     {
         final String activatorClassName = activatorClass.getName();
-        final InputStream bundleStream = new MyTinyBundle().prepare(
-            withBnd().set( Constants.BUNDLE_SYMBOLICNAME, activatorClassName ).set( Constants.BUNDLE_VERSION, "0.0.11" )
-                .set( Constants.IMPORT_PACKAGE, "org.apache.felix.cm.integration.helper" ).set(
-                    Constants.BUNDLE_ACTIVATOR, activatorClassName ).set( BaseTestActivator.HEADER_PID, pid ) ).build(
-            TinyBundles.asStream() );
+        final InputStream bundleStream = new MyTinyBundle()
+            .prepare(
+                TinyBundles.withBnd()
+                .set( Constants.BUNDLE_SYMBOLICNAME, activatorClassName )
+                .set( Constants.BUNDLE_VERSION, "0.0.11" )
+                .set( Constants.IMPORT_PACKAGE, "org.apache.felix.cm.integration.helper" )
+                .set( Constants.BUNDLE_ACTIVATOR, activatorClassName )
+                .set( BaseTestActivator.HEADER_PID, pid )
+            ).build( TinyBundles.asStream() );
 
         try
         {
