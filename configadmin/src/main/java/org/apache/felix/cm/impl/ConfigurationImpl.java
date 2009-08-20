@@ -189,7 +189,8 @@ class ConfigurationImpl extends ConfigurationBase
 
             configureFromPersistence( properties );
 
-            getConfigurationManager().updated( this );
+            // update the service but do not fire an CM_UPDATED event
+            getConfigurationManager().updated( this, false );
         }
     }
 
@@ -240,7 +241,8 @@ class ConfigurationImpl extends ConfigurationBase
             // finally assign the configuration for use
             configure( newProperties );
 
-            getConfigurationManager().updated( this );
+            // update the service and fire an CM_UPDATED event
+            getConfigurationManager().updated( this, true );
         }
     }
 
