@@ -27,12 +27,17 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceReference;
 
 
 @RunWith(JUnit4TestRunner.class)
 public class ComponentConfigurationTest extends ComponentTestBase
 {
+    static
+    {
+        // uncomment to enable debugging of this test class
+        // paxRunnerVmOption = DEBUG_VM_OPTION;
+    }
+
 
     @Test
     public void test_SimpleComponent_configuration_ignore()
@@ -65,7 +70,79 @@ public class ComponentConfigurationTest extends ComponentTestBase
     @Test
     public void test_SimpleComponent_factory_configuration()
     {
-        test_factory_configuration( "FactoryConfigurationComponent" );
+        final String factoryPid = "FactoryConfigurationComponent";
+
+        deleteFactoryConfigurations( factoryPid );
+        delay();
+
+        // one single component exists without configuration
+        final Component[] noConfigurations = findComponentsByName( factoryPid );
+        TestCase.assertNotNull( noConfigurations );
+        TestCase.assertEquals( 1, noConfigurations.length );
+        TestCase.assertEquals( Component.STATE_DISABLED, noConfigurations[0].getState() );
+        TestCase.assertTrue( SimpleComponent.INSTANCES.isEmpty() );
+
+        // enable the component, configuration required, hence unsatisfied
+        noConfigurations[0].enable();
+        delay();
+
+        final Component[] enabledNoConfigs = findComponentsByName( factoryPid );
+        TestCase.assertNotNull( enabledNoConfigs );
+        TestCase.assertEquals( 1, enabledNoConfigs.length );
+        TestCase.assertEquals( Component.STATE_UNSATISFIED, enabledNoConfigs[0].getState() );
+        TestCase.assertTrue( SimpleComponent.INSTANCES.isEmpty() );
+
+        // create two factory configurations expecting two components
+        final String pid0 = createFactoryConfiguration( factoryPid );
+        final String pid1 = createFactoryConfiguration( factoryPid );
+        delay();
+
+        // expect two components, only first is active, second is disabled
+        final Component[] twoConfigs = findComponentsByName( factoryPid );
+        TestCase.assertNotNull( twoConfigs );
+        TestCase.assertEquals( 2, twoConfigs.length );
+        TestCase.assertEquals( Component.STATE_ACTIVE, twoConfigs[0].getState() );
+        TestCase.assertEquals( Component.STATE_DISABLED, twoConfigs[1].getState() );
+        TestCase.assertEquals( 1, SimpleComponent.INSTANCES.size() );
+        TestCase.assertTrue( SimpleComponent.INSTANCES.containsKey( twoConfigs[0].getId() ) );
+        TestCase.assertFalse( SimpleComponent.INSTANCES.containsKey( twoConfigs[1].getId() ) );
+
+        // enable second component
+        twoConfigs[1].enable();
+        delay();
+
+        // ensure both components active
+        TestCase.assertEquals( Component.STATE_ACTIVE, twoConfigs[0].getState() );
+        TestCase.assertEquals( Component.STATE_ACTIVE, twoConfigs[1].getState() );
+        TestCase.assertEquals( 2, SimpleComponent.INSTANCES.size() );
+        TestCase.assertTrue( SimpleComponent.INSTANCES.containsKey( twoConfigs[0].getId() ) );
+        TestCase.assertTrue( SimpleComponent.INSTANCES.containsKey( twoConfigs[1].getId() ) );
+
+        // delete a configuration
+        deleteConfig( pid0 );
+        delay();
+
+        // expect one component
+        final Component[] oneConfig = findComponentsByName( factoryPid );
+        TestCase.assertNotNull( oneConfig );
+        TestCase.assertEquals( 1, oneConfig.length );
+        TestCase.assertEquals( Component.STATE_ACTIVE, oneConfig[0].getState() );
+        TestCase.assertEquals( 1, SimpleComponent.INSTANCES.size() );
+        TestCase.assertFalse( SimpleComponent.INSTANCES.containsKey( twoConfigs[0].getId() ) );
+        TestCase.assertTrue( SimpleComponent.INSTANCES.containsKey( twoConfigs[1].getId() ) );
+
+        // delete second configuration
+        deleteConfig( pid1 );
+        delay();
+
+        // expect a single unsatisifed component
+        final Component[] configsDeleted = findComponentsByName( factoryPid );
+        TestCase.assertNotNull( configsDeleted );
+        TestCase.assertEquals( 1, configsDeleted.length );
+        TestCase.assertEquals( Component.STATE_UNSATISFIED, configsDeleted[0].getState() );
+        TestCase.assertEquals( 0, SimpleComponent.INSTANCES.size() );
+        TestCase.assertFalse( SimpleComponent.INSTANCES.containsKey( twoConfigs[0].getId() ) );
+        TestCase.assertFalse( SimpleComponent.INSTANCES.containsKey( twoConfigs[1].getId() ) );
     }
 
 
@@ -250,130 +327,5 @@ public class ComponentConfigurationTest extends ComponentTestBase
 
         TestCase.assertEquals( Component.STATE_DISABLED, component.getState() );
         TestCase.assertNull( SimpleComponent.INSTANCE );
-    }
-
-
-    private void test_factory_configuration( final String componentName )
-    {
-        final String factoryPid = componentName;
-
-        deleteFactoryConfigurations( factoryPid );
-        delay();
-
-        // one single component exists without configuration
-        final Component[] noConfigurations = findComponentsByName( factoryPid );
-        TestCase.assertNotNull( noConfigurations );
-        TestCase.assertEquals( 1, noConfigurations.length );
-        TestCase.assertEquals( Component.STATE_DISABLED, noConfigurations[0].getState() );
-        TestCase.assertTrue( SimpleComponent.INSTANCES.isEmpty() );
-
-        // enable the component, configuration required, hence unsatisfied
-        noConfigurations[0].enable();
-        delay();
-
-        final Component[] enabledNoConfigs = findComponentsByName( factoryPid );
-        TestCase.assertNotNull( enabledNoConfigs );
-        TestCase.assertEquals( 1, enabledNoConfigs.length );
-        TestCase.assertEquals( Component.STATE_UNSATISFIED, enabledNoConfigs[0].getState() );
-        TestCase.assertTrue( SimpleComponent.INSTANCES.isEmpty() );
-
-        // create two factory configurations expecting two components
-        final String pid0 = createFactoryConfiguration( factoryPid );
-        final String pid1 = createFactoryConfiguration( factoryPid );
-        delay();
-
-        // expect two components, only first is active, second is disabled
-        final Component[] twoConfigs = findComponentsByName( factoryPid );
-        TestCase.assertNotNull( twoConfigs );
-        TestCase.assertEquals( 2, twoConfigs.length );
-        TestCase.assertEquals( Component.STATE_ACTIVE, twoConfigs[0].getState() );
-        TestCase.assertEquals( Component.STATE_DISABLED, twoConfigs[1].getState() );
-        TestCase.assertEquals( 1, SimpleComponent.INSTANCES.size() );
-        TestCase.assertTrue( SimpleComponent.INSTANCES.containsKey( twoConfigs[0].getId() ) );
-        TestCase.assertFalse( SimpleComponent.INSTANCES.containsKey( twoConfigs[1].getId() ) );
-
-        // enable second component
-        twoConfigs[1].enable();
-        delay();
-
-        // ensure both components active
-        TestCase.assertEquals( Component.STATE_ACTIVE, twoConfigs[0].getState() );
-        TestCase.assertEquals( Component.STATE_ACTIVE, twoConfigs[1].getState() );
-        TestCase.assertEquals( 2, SimpleComponent.INSTANCES.size() );
-        TestCase.assertTrue( SimpleComponent.INSTANCES.containsKey( twoConfigs[0].getId() ) );
-        TestCase.assertTrue( SimpleComponent.INSTANCES.containsKey( twoConfigs[1].getId() ) );
-
-        // delete a configuration
-        deleteConfig( pid0 );
-        delay();
-
-        // expect one component
-        final Component[] oneConfig = findComponentsByName( factoryPid );
-        TestCase.assertNotNull( oneConfig );
-        TestCase.assertEquals( 1, oneConfig.length );
-        TestCase.assertEquals( Component.STATE_ACTIVE, oneConfig[0].getState() );
-        TestCase.assertEquals( 1, SimpleComponent.INSTANCES.size() );
-        TestCase.assertFalse( SimpleComponent.INSTANCES.containsKey( twoConfigs[0].getId() ) );
-        TestCase.assertTrue( SimpleComponent.INSTANCES.containsKey( twoConfigs[1].getId() ) );
-
-        // delete second configuration
-        deleteConfig( pid1 );
-        delay();
-
-        // expect a single unsatisifed component
-        final Component[] configsDeleted = findComponentsByName( factoryPid );
-        TestCase.assertNotNull( configsDeleted );
-        TestCase.assertEquals( 1, configsDeleted.length );
-        TestCase.assertEquals( Component.STATE_UNSATISFIED, configsDeleted[0].getState() );
-        TestCase.assertEquals( 0, SimpleComponent.INSTANCES.size() );
-        TestCase.assertFalse( SimpleComponent.INSTANCES.containsKey( twoConfigs[0].getId() ) );
-        TestCase.assertFalse( SimpleComponent.INSTANCES.containsKey( twoConfigs[1].getId() ) );
-
-    }
-
-
-    private void test_service( final String componentName )
-    {
-        final String pid = componentName;
-
-        // one single component exists without configuration
-        final Component component = findComponentByName( pid );
-        TestCase.assertNotNull( component );
-        TestCase.assertEquals( Component.STATE_DISABLED, component.getState() );
-
-        component.enable();
-        delay();
-
-        final SimpleComponent instance = SimpleComponent.INSTANCE;
-        TestCase.assertEquals( Component.STATE_ACTIVE, component.getState() );
-        TestCase.assertNotNull( instance );
-
-        // assert component properties (all !)
-        TestCase.assertEquals( "required", instance.getProperty( "prop.public" ) );
-        TestCase.assertEquals( "private", instance.getProperty( ".prop.private" ) );
-
-        // get the service
-        ServiceReference reference = bundleContext.getServiceReference( "java.lang.Object" );
-        TestCase.assertNotNull( reference );
-        try
-        {
-            TestCase.assertEquals( instance, bundleContext.getService( reference ) );
-        }
-        finally
-        {
-            bundleContext.ungetService( reference );
-        }
-
-        // check service properties
-        TestCase.assertEquals( "required", reference.getProperty( "prop.public" ) );
-        TestCase.assertNull( reference.getProperty( ".prop.private" ) );
-
-        // check property keys do not contain private keys
-        for ( String propKey : reference.getPropertyKeys() )
-        {
-            TestCase.assertTrue( "Property key [" + propKey
-                + "] must have at least one character and not start with a dot", propKey.length() > 0
-                && !propKey.startsWith( "." ) );
-        }
     }
 }

@@ -22,11 +22,12 @@ package org.apache.felix.scr.integration;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.provision;
-import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.scanDir;
 import static org.ops4j.pax.swissbox.tinybundles.core.TinyBundles.withBnd;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -38,8 +39,11 @@ import org.apache.felix.scr.ScrService;
 import org.apache.felix.scr.integration.components.MyTinyBundle;
 import org.junit.After;
 import org.junit.Before;
+import org.ops4j.pax.exam.CoreOptions;
 import org.ops4j.pax.exam.Inject;
 import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.OptionUtils;
+import org.ops4j.pax.exam.container.def.PaxRunnerOptions;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.swissbox.tinybundles.core.TinyBundles;
 import org.osgi.framework.Bundle;
@@ -66,6 +70,14 @@ public abstract class ComponentTestBase
     protected static final String PROP_NAME = "theValue";
     protected static final Dictionary<String, String> theConfig;
 
+    // the JVM option to set to enable remote debugging
+    protected static final String DEBUG_VM_OPTION = "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=30303";
+
+    // the actual JVM option set, extensions may implement a static
+    // initializer overwriting this value to have the configuration()
+    // method include it when starting the OSGi framework JVM
+    protected static String paxRunnerVmOption = null;
+
     static
     {
         theConfig = new Hashtable<String, String>();
@@ -76,14 +88,15 @@ public abstract class ComponentTestBase
     @Configuration
     public static Option[] configuration()
     {
-        return options(
+        final Option[] base = options(
             provision(
-                scanDir( "target" ).filter( "*.jar" ),
+                CoreOptions.bundle( new File("target/scr.jar").toURI().toString() ),
                 mavenBundle( "org.ops4j.pax.swissbox", "pax-swissbox-tinybundles", "1.0.0" ),
                 mavenBundle( "org.apache.felix", "org.apache.felix.configadmin", "1.0.10" )
              )
-//             , PaxRunnerOptions.vmOption( "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=30303" )
         );
+        final Option vmOption = ( paxRunnerVmOption != null ) ? PaxRunnerOptions.vmOption( paxRunnerVmOption ) : null;
+        return OptionUtils.combine( base, vmOption );
     }
 
 
@@ -265,5 +278,44 @@ public abstract class ComponentTestBase
         {
             TestCase.fail( "Failed deleting configurations " + factoryPid + ": " + ioe.toString() );
         }
+    }
+
+
+    protected static Class<?> getType( Object object, String desiredName )
+    {
+        Class<?> ccImpl = object.getClass();
+        while ( ccImpl != null && !desiredName.equals( ccImpl.getSimpleName() ) )
+        {
+            ccImpl = ccImpl.getSuperclass();
+        }
+        if ( ccImpl == null )
+        {
+            TestCase.fail( "ComponentContext " + object + " is not a " + desiredName );
+        }
+
+        return ccImpl;
+    }
+
+
+    protected static Object getFieldValue( Object object, String fieldName )
+    {
+        try
+        {
+            final Field m_componentsField = getField( object.getClass(), fieldName );
+            return m_componentsField.get( object );
+        }
+        catch ( Throwable t )
+        {
+            TestCase.fail( "Cannot get " + fieldName + " from " + object + ": " + t );
+            return null; // keep the compiler happy
+        }
+    }
+
+
+    protected static Field getField( Class<?> type, String fieldName ) throws NoSuchFieldException
+    {
+        Field field = type.getDeclaredField( fieldName );
+        field.setAccessible( true );
+        return field;
     }
 }

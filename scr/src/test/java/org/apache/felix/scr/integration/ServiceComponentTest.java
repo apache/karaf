@@ -32,6 +32,12 @@ import org.osgi.framework.ServiceReference;
 @RunWith(JUnit4TestRunner.class)
 public class ServiceComponentTest extends ComponentTestBase
 {
+    static
+    {
+        // uncomment to enable debugging of this test class
+        // paxRunnerVmOption = DEBUG_VM_OPTION;
+    }
+
 
     @Test
     public void test_SimpleComponent_service()
