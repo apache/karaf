@@ -1,5 +1,0 @@
-04/21/2006
-
-This version of the declarative services is derived from the service binder's original source.
-At this point, it supports the declaration of components that provide services and references.
-The components may be immediate or delayed.
