@@ -51,17 +51,17 @@ abstract class AbstractComponentHolder implements ComponentHolder
         }
         else if ( m_componentMetadata.isImmediate() )
         {
-            manager = new ImmediateComponentManager( m_activator, m_componentMetadata );
+            manager = new ImmediateComponentManager( m_activator, this, m_componentMetadata );
         }
         else if ( m_componentMetadata.getServiceMetadata() != null )
         {
             if ( m_componentMetadata.getServiceMetadata().isServiceFactory() )
             {
-                manager = new ServiceFactoryComponentManager( m_activator, m_componentMetadata );
+                manager = new ServiceFactoryComponentManager( m_activator, this, m_componentMetadata );
             }
             else
             {
-                manager = new DelayedComponentManager( m_activator, m_componentMetadata );
+                manager = new DelayedComponentManager( m_activator, this, m_componentMetadata );
             }
         }
         else

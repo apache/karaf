@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.felix.scr.impl.BundleComponentActivator;
+import org.apache.felix.scr.impl.config.ComponentHolder;
 import org.apache.felix.scr.impl.helper.ActivateMethod;
 import org.apache.felix.scr.impl.helper.DeactivateMethod;
 import org.apache.felix.scr.impl.helper.ModifiedMethod;
@@ -48,6 +49,9 @@ public class ImmediateComponentManager extends AbstractComponentManager
 
     // The context that will be passed to the implementationObject
     private ComponentContextImpl m_componentContext;
+
+    // the component holder responsible for managing this component
+    private ComponentHolder m_componentHolder;
 
     // the activate method
     private ActivateMethod m_activateMethod;
@@ -75,9 +79,12 @@ public class ImmediateComponentManager extends AbstractComponentManager
      * @param activator
      * @param metadata
      */
-    public ImmediateComponentManager( BundleComponentActivator activator, ComponentMetadata metadata )
+    public ImmediateComponentManager( BundleComponentActivator activator, ComponentHolder componentHolder,
+        ComponentMetadata metadata )
     {
         super( activator, metadata );
+
+        m_componentHolder = componentHolder;
     }
 
 
@@ -89,6 +96,23 @@ public class ImmediateComponentManager extends AbstractComponentManager
     {
         // really dispose off this manager instance
         disposeInternal( reason );
+    }
+
+
+    ComponentHolder getComponentHolder()
+    {
+        return m_componentHolder;
+    }
+
+
+    void clear()
+    {
+        if ( m_componentHolder != null )
+        {
+            m_componentHolder.disposed( this );
+        }
+
+        super.clear();
     }
 
 

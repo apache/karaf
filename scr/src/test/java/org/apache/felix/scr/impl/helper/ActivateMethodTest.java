@@ -55,7 +55,7 @@ public class ActivateMethodTest extends TestCase
     {
         super.setUp();
 
-        m_ctx = ( ComponentContext ) EasyMock.createNiceMock( ComponentContext.class );
+        m_ctx = (ComponentContext) EasyMock.createNiceMock( ComponentContext.class );
         EasyMock.expect( m_ctx.getProperties() ).andReturn( new Hashtable() ).anyTimes();
         EasyMock.replay( new Object[]
             { m_ctx } );
@@ -228,7 +228,7 @@ public class ActivateMethodTest extends TestCase
                 return true;
             }
         };
-        ImmediateComponentManager icm = new ImmediateComponentManager( null, metadata );
+        ImmediateComponentManager icm = new ImmediateComponentManager( null, null, metadata );
         ActivateMethod am = new ActivateMethod( icm, methodName, obj.getClass() );
         am.invoke( obj, new ActivateMethod.ActivatorParameter( m_ctx, -1 ) );
         Method m = get(am, "m_method");
@@ -256,7 +256,7 @@ public class ActivateMethodTest extends TestCase
                 return true;
             }
         };
-        ImmediateComponentManager icm = new ImmediateComponentManager( null, metadata );
+        ImmediateComponentManager icm = new ImmediateComponentManager( null, null, metadata );
         ActivateMethod am = new ActivateMethod( icm, methodName, obj.getClass() );
         am.invoke( obj, new ActivateMethod.ActivatorParameter( m_ctx, -1 ) );
         assertNull( get( am, "m_method" ) );

@@ -71,4 +71,10 @@ public class UnconfiguredComponentHolder extends AbstractComponentHolder
     {
         m_component.dispose( reason );
     }
+
+
+    public void disposed( ImmediateComponentManager component )
+    {
+        // nothing to do here...
+    }
 }

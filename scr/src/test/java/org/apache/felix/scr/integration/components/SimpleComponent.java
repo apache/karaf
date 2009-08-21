@@ -41,12 +41,19 @@ public class SimpleComponent
 
     private Map<?, ?> m_config;
 
+    public long m_id;
+
+    public ComponentContext m_activateContext;
+
 
     @SuppressWarnings("unused")
-    private void activate( Map<?, ?> config )
+    private void activate( ComponentContext activateContext, Map<?, ?> config )
     {
+        m_id = ( Long ) config.get( ComponentConstants.COMPONENT_ID );
+        m_activateContext = activateContext;
+
         INSTANCE = this;
-        INSTANCES.put( ( Long ) config.get( ComponentConstants.COMPONENT_ID ), this );
+        INSTANCES.put( m_id, this );
         setConfig( config );
 
         if ( PREVIOUS_INSTANCES.contains( this ) )
@@ -75,6 +82,8 @@ public class SimpleComponent
     private void deactivate()
     {
         INSTANCES.remove( getProperty( ComponentConstants.COMPONENT_ID ) );
+
+        m_activateContext = null;
         INSTANCE = null;
         setConfig( new HashMap<Object, Object>() );
     }

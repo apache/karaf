@@ -22,6 +22,7 @@ package org.apache.felix.scr.impl.config;
 import java.util.Dictionary;
 
 import org.apache.felix.scr.impl.BundleComponentActivator;
+import org.apache.felix.scr.impl.manager.ImmediateComponentManager;
 import org.apache.felix.scr.impl.metadata.ComponentMetadata;
 
 
@@ -86,4 +87,11 @@ public interface ComponentHolder
      * @param reason
      */
     void disposeComponents( int reason );
+
+
+    /**
+     * Informs the holder that the component has been disposed as a result of
+     * calling the dispose method.
+     */
+    void disposed( ImmediateComponentManager component );
 }

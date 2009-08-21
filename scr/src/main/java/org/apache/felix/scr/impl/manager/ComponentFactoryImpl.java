@@ -347,6 +347,15 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
     }
 
 
+    public void disposed( ImmediateComponentManager component )
+    {
+        synchronized ( m_componentInstances )
+        {
+            m_componentInstances.remove( component );
+        }
+    }
+
+
     //---------- internal
 
     /**
@@ -357,7 +366,7 @@ public class ComponentFactoryImpl extends AbstractComponentManager implements Co
      */
     private ImmediateComponentManager createComponentManager()
     {
-        return new ImmediateComponentManager( getActivator(), getComponentMetadata() );
+        return new ImmediateComponentManager( getActivator(), this, getComponentMetadata() );
     }
 
 

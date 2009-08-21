@@ -221,7 +221,7 @@ public class ConfiguredComponentHolderTest extends TestCase
 
         protected ImmediateComponentManager createComponentManager()
         {
-            return new MockImmediateComponentManager( getActivator(), getComponentMetadata() );
+            return new MockImmediateComponentManager( getActivator(), this, getComponentMetadata() );
         }
     }
 
@@ -231,9 +231,9 @@ public class ConfiguredComponentHolderTest extends TestCase
         private Dictionary m_configuration;
 
 
-        public MockImmediateComponentManager( BundleComponentActivator activator, ComponentMetadata metadata )
+        public MockImmediateComponentManager( BundleComponentActivator activator, ComponentHolder componentHolder, ComponentMetadata metadata )
         {
-            super( activator, metadata );
+            super( activator, componentHolder, metadata );
         }
 
 

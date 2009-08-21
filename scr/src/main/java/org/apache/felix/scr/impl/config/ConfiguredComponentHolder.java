@@ -21,6 +21,7 @@ package org.apache.felix.scr.impl.config;
 
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.felix.scr.impl.BundleComponentActivator;
@@ -273,6 +274,42 @@ public class ConfiguredComponentHolder extends AbstractComponentHolder
             for ( int i = 0; i < cms.length; i++ )
             {
                 cms[i].dispose( reason );
+            }
+        }
+    }
+
+
+    public void disposed( ImmediateComponentManager component )
+    {
+        // ensure the component is removed from the components map
+        synchronized ( m_components )
+        {
+            for ( Iterator vi = m_components.values().iterator(); vi.hasNext(); )
+            {
+                if ( component == vi.next() )
+                {
+                    vi.remove();
+                    break;
+                }
+            }
+        }
+
+        // if the component is the single component, we have to replace it
+        // by another entry in the map
+        if ( component == m_singleComponent )
+        {
+            synchronized ( m_components )
+            {
+                if ( m_components.isEmpty() )
+                {
+                    // now what ??
+                    // is it correct to create a new manager ???
+                    m_singleComponent = createComponentManager();
+                }
+                else
+                {
+                    m_singleComponent = ( ImmediateComponentManager ) m_components.values().iterator().next();
+                }
             }
         }
     }

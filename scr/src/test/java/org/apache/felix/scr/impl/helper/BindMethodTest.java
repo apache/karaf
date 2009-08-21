@@ -44,8 +44,8 @@ public class BindMethodTest extends TestCase
 
     public void setUp()
     {
-        m_serviceReference = ( ServiceReference ) EasyMock.createNiceMock( ServiceReference.class );
-        m_serviceInstance = ( FakeService ) EasyMock.createNiceMock( FakeService.class );
+        m_serviceReference = (ServiceReference) EasyMock.createNiceMock( ServiceReference.class );
+        m_serviceInstance = (FakeService) EasyMock.createNiceMock( FakeService.class );
         m_service = new BindMethod.Service()
         {
             public ServiceReference getReference()
@@ -439,7 +439,7 @@ public class BindMethodTest extends TestCase
                 return isDS11;
             }
         };
-        ImmediateComponentManager icm = new ImmediateComponentManager( null, metadata );
+        ImmediateComponentManager icm = new ImmediateComponentManager( null, null, metadata );
         BindMethod bm = new BindMethod( icm, methodName, component.getClass(), "reference",
             FakeService.class.getName() );
         bm.invoke( component, m_service );
