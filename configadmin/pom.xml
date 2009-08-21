@@ -158,7 +158,7 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <copy file="${pom.build.directory}/${pom.build.finalName}.jar" tofile="${pom.build.directory}/configadmin.jar" />
+                                <copy file="${project.build.directory}/${project.build.finalName}.jar" tofile="${project.build.directory}/configadmin.jar" />
                             </tasks>
                         </configuration>
                     </execution>
@@ -170,7 +170,7 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <delete file="${pom.build.directory}/configadmin.jar" />
+                                <delete file="${project.build.directory}/configadmin.jar" />
                             </tasks>
                         </configuration>
                     </execution>
