@@ -1,3 +1,9 @@
+Changes from the 1.4.0 to 1.4.2
+-------------------------------
+** Bug
+    * [FELIX-1518] - iPOJO manipulator is really slow even when annotation are ignored
+    
+
 Version 1.4.0
 -------------
 ** Improvement

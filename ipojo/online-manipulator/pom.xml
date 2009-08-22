@@ -66,12 +66,15 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-ipojo-plugin</artifactId>
-        <version>${pom.version}</version>
+        <version>1.4.0</version>
         <executions>
           <execution>
             <goals>
               <goal>ipojo-bundle</goal>
             </goals>
+            <configuration>
+              <ignoreAnnotations>true</ignoreAnnotations>
+            </configuration>
           </execution>
         </executions>
       </plugin>
