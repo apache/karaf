@@ -452,6 +452,28 @@ public class Pojoization {
         }
 
     }
+    
+    /**
+     * Reads the entry to extract the byte array.
+     * This method should be called only if the class has to be read.
+     * The cost of this method is not negligible.
+     * @param name name of the entry to read from the input jar
+     * @return the read byte array
+     * @throws IOException occurs when the entry cannot be read
+     */
+    private byte[] readEntry(String name) throws IOException {
+        InputStream currIn = getInputStream(name);
+        byte[] in = new byte[0];
+        int c;
+        while ((c = currIn.read()) >= 0) {
+            byte[] in2 = new byte[in.length + 1];
+            System.arraycopy(in, 0, in2, 0, in.length);
+            in2[in.length] = (byte) c;
+            in = in2;
+        }
+        currIn.close();
+        return in;
+    }
 
     /**
      * Manipulate classes of the input Jar.
@@ -462,17 +484,10 @@ public class Pojoization {
         while (entries.hasMoreElements()) {
             String curName = (String) entries.nextElement();
             try {
-                InputStream currIn = getInputStream(curName);
-                byte[] in = new byte[0];
-                int c;
-                while ((c = currIn.read()) >= 0) {
-                    byte[] in2 = new byte[in.length + 1];
-                    System.arraycopy(in, 0, in2, 0, in.length);
-                    in2[in.length] = (byte) c;
-                    in = in2;
-                }
-                currIn.close();
+                byte[] in = null; // Will store the bytes of the entry if required.
                 if (!m_ignoreAnnotations) {
+                    // If we need to process annotations, all classes has to be read.
+                    in = readEntry(curName);
                     computeAnnotations(in); // This method adds the class to the
                                             // component list.
                 }
@@ -480,6 +495,11 @@ public class Pojoization {
                 for (int i = 0; i < m_components.size(); i++) {
                     ComponentInfo ci = (ComponentInfo) m_components.get(i);
                     if (ci.m_classname.equals(curName)) {
+                        // So, we have to manipulate the class, if not already read, read the input class
+                        // Else reuse the same one.
+                        if (in == null) {
+                            in = readEntry(curName);
+                        }
                         byte[] outClazz = manipulateComponent(in, ci);
                         m_classes.put(ci.m_classname, outClazz);
                         
