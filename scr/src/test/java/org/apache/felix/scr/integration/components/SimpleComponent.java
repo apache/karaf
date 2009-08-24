@@ -45,6 +45,10 @@ public class SimpleComponent
 
     public ComponentContext m_activateContext;
 
+    public SimpleService m_singleRef;
+
+    public final Set<SimpleService> m_multiRef = new HashSet<SimpleService>();
+
 
     @SuppressWarnings("unused")
     private void activate( ComponentContext activateContext, Map<?, ?> config )
@@ -111,5 +115,36 @@ public class SimpleComponent
     public Object getProperty( Object name )
     {
         return m_config.get( name );
+    }
+
+
+    // bind method for single service binding
+    public void setSimpleService( SimpleService simpleService )
+    {
+        this.m_singleRef = simpleService;
+    }
+
+
+    // unbind method for single service binding
+    public void unsetSimpleService( SimpleService simpleService )
+    {
+        if ( this.m_singleRef == simpleService )
+        {
+            this.m_singleRef = null;
+        }
+    }
+
+
+    // bind method for multi-service binding
+    public void bindSimpleService( SimpleService simpleService )
+    {
+        this.m_multiRef.add( simpleService );
+    }
+
+
+    // unbind method for multi-service binding
+    public void unbindSimpleService( SimpleService simpleService )
+    {
+        this.m_multiRef.remove( simpleService );
     }
 }

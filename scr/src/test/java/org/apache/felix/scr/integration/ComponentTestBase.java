@@ -78,6 +78,9 @@ public abstract class ComponentTestBase
     // method include it when starting the OSGi framework JVM
     protected static String paxRunnerVmOption = null;
 
+    // the descriptor file to use for the installed test bundle
+    protected static String descriptorFile = "/integration_test_simple_components.xml";
+
     static
     {
         theConfig = new Hashtable<String, String>();
@@ -108,15 +111,7 @@ public abstract class ComponentTestBase
         configAdminTracker = new ServiceTracker( bundleContext, ConfigurationAdmin.class.getName(), null );
         configAdminTracker.open();
 
-        //        final InputStream bundleStream = newBundle()
-        final InputStream bundleStream = new MyTinyBundle().addResource( "OSGI-INF/components.xml",
-            getClass().getResource( "/integration_test_simple_components.xml" ) ).prepare(
-            withBnd().set( Constants.BUNDLE_SYMBOLICNAME, "simplecomponent" ).set( Constants.BUNDLE_VERSION, "0.0.11" )
-                .set( Constants.IMPORT_PACKAGE, "org.apache.felix.scr.integration.components" ).set(
-                    "Service-Component", "OSGI-INF/components.xml" ) ).build( TinyBundles.asStream() );
-
-        bundle = bundleContext.installBundle( "test:SimpleComponent", bundleStream );
-
+        bundle = installBundle( descriptorFile );
         bundle.start();
     }
 
@@ -124,8 +119,11 @@ public abstract class ComponentTestBase
     @After
     public void tearDown() throws BundleException
     {
-        bundle.stop();
-        bundle.uninstall();
+        if ( bundle != null && bundle.getState() != Bundle.UNINSTALLED )
+        {
+            bundle.uninstall();
+            bundle = null;
+        }
 
         configAdminTracker.close();
         configAdminTracker = null;
@@ -318,4 +316,36 @@ public abstract class ComponentTestBase
         field.setAccessible( true );
         return field;
     }
+
+
+    protected Bundle installBundle( final String descriptorFile ) throws BundleException
+    {
+        final InputStream bundleStream = new MyTinyBundle()
+            .addResource( "OSGI-INF/components.xml", getClass().getResource( descriptorFile ) )
+            .prepare(
+                withBnd()
+                .set( Constants.BUNDLE_SYMBOLICNAME, "simplecomponent" )
+                .set( Constants.BUNDLE_VERSION, "0.0.11" )
+                .set( Constants.IMPORT_PACKAGE, "org.apache.felix.scr.integration.components" )
+                .set( "Service-Component", "OSGI-INF/components.xml" )
+            )
+            .build( TinyBundles.asStream() );
+
+        try
+        {
+            final String location = "test:SimpleComponent/" + System.currentTimeMillis();
+            return bundleContext.installBundle( location, bundleStream );
+        }
+        finally
+        {
+            try
+            {
+                bundleStream.close();
+            }
+            catch ( IOException ioe )
+            {
+            }
+        }
+    }
+
 }
