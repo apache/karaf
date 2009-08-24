@@ -175,6 +175,9 @@ public class AddFeaturesToRepoMojo extends MojoSupport {
     private void addFeatures(List<String> features, Set<String> transitiveFeatures, Map<String, Feature> featuresMap) {
         for (String feature : features) {
             Feature f = featuresMap.get(feature);
+            if (f == null) {
+                throw new IllegalArgumentException("Unable to find the feature '" + feature + "'");
+            }
             transitiveFeatures.add(feature);
             addFeatures(f.getDependencies(), transitiveFeatures, featuresMap);
         }
