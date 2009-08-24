@@ -315,7 +315,11 @@ public class Pojoization {
                 String name = m_metadata[m_metadata.length - 1].getAttribute("classname");
                 name = name.replace('.', '/');
                 name += ".class";
-                m_components.add(new ComponentInfo(name, m_metadata[m_metadata.length - 1]));
+
+                // Creates the ComponentInfo and store bytecode
+                ComponentInfo info = new ComponentInfo(name, m_metadata[m_metadata.length - 1]);
+                info.m_bytecode = inC;
+                m_components.add(info);
             }
         }
     }
@@ -348,11 +352,13 @@ public class Pojoization {
             Enumeration entries = m_inputJar.entries();
             while (entries.hasMoreElements()) {
                 JarEntry curEntry = (JarEntry) entries.nextElement();
-                // Check if we need to manipulate the class
+
+                // If the class was manipulated, write out the manipulated
+                // version of the bytecode
                 if (m_classes.containsKey(curEntry.getName())) {
                     JarEntry je = new JarEntry(curEntry.getName());
                     byte[] outClazz = (byte[]) m_classes.get(curEntry.getName());
-                    if (outClazz.length != 0) {
+                    if (outClazz != null && outClazz.length != 0) {
                         jos.putNextEntry(je); // copy the entry header to jos
                         jos.write(outClazz);
                         jos.closeEntry();
@@ -452,76 +458,104 @@ public class Pojoization {
         }
 
     }
-    
-    /**
-     * Reads the entry to extract the byte array.
-     * This method should be called only if the class has to be read.
-     * The cost of this method is not negligible.
-     * @param name name of the entry to read from the input jar
-     * @return the read byte array
-     * @throws IOException occurs when the entry cannot be read
-     */
-    private byte[] readEntry(String name) throws IOException {
-        InputStream currIn = getInputStream(name);
-        byte[] in = new byte[0];
-        int c;
-        while ((c = currIn.read()) >= 0) {
-            byte[] in2 = new byte[in.length + 1];
-            System.arraycopy(in, 0, in2, 0, in.length);
-            in2[in.length] = (byte) c;
-            in = in2;
-        }
-        currIn.close();
-        return in;
-    }
 
     /**
      * Manipulate classes of the input Jar.
      */
     private void manipulateComponents() {
-        Enumeration entries = getClassFiles();
 
-        while (entries.hasMoreElements()) {
-            String curName = (String) entries.nextElement();
-            try {
-                byte[] in = null; // Will store the bytes of the entry if required.
-                if (!m_ignoreAnnotations) {
-                    // If we need to process annotations, all classes has to be read.
-                    in = readEntry(curName);
-                    computeAnnotations(in); // This method adds the class to the
-                                            // component list.
+        // 1. Discover components described with annotations
+        // Only do this if annotations are enabled
+        if (!m_ignoreAnnotations) {
+            Enumeration entries = getClassFiles();
+
+            while (entries.hasMoreElements()) {
+                String curName = (String) entries.nextElement();
+                try {
+
+                    // Need to load the bytecode for each .class entry
+                    byte[] in = getBytecode(curName);
+
+                    // This method adds the class to the component list
+                    // if that bytecode is annotated with @Component.
+                    computeAnnotations(in);
+                } catch (IOException e) {
+                    error("Cannot read the class : " + curName);
+                    return;
                 }
-                // Check if we need to manipulate the class
-                for (int i = 0; i < m_components.size(); i++) {
-                    ComponentInfo ci = (ComponentInfo) m_components.get(i);
-                    if (ci.m_classname.equals(curName)) {
-                        // So, we have to manipulate the class, if not already read, read the input class
-                        // Else reuse the same one.
-                        if (in == null) {
-                            in = readEntry(curName);
-                        }
-                        byte[] outClazz = manipulateComponent(in, ci);
-                        m_classes.put(ci.m_classname, outClazz);
-                        
-                        // Manipulate inner classes ?
-                        if (!ci.m_inners.isEmpty()) {
-                            for (int k = 0; k < ci.m_inners.size(); k++) {
-                                String innerCN = (String) ci.m_inners.get(k)
-                                        + ".class";
-                                InputStream innerStream = getInputStream(innerCN);
-                                // manipulateInnerClass(inputJar, inner,
-                                // (String) ci.m_inners.get(k), ci);
-                                manipulateInnerClass(innerStream, innerCN, ci);
-                            }
-                        }
+            }
+        }
+
+        // 2. Iterates over the list of discovered components
+        // Note that this list includes components from metadata.xml AND from annotations
+
+        for (int i = 0; i < m_components.size(); i++) {
+            ComponentInfo info = (ComponentInfo) m_components.get(i);
+
+            // Get the bytecode if necessary
+            if (info.m_bytecode == null) {
+                try {
+                    info.m_bytecode = getBytecode(info.m_classname);
+                } catch (IOException e) {
+                    error("Cannot extract bytecode for component '" + info.m_classname + "'");
+                    return;
+                }
+            }
+            // Manipulate the original bytecode and store the modified one
+            byte[] outClazz = manipulateComponent(info.m_bytecode, info);
+            m_classes.put(info.m_classname, outClazz);
+
+            // Are there any inner classes to be manipulated ?
+            if (!info.m_inners.isEmpty()) {
+                for (int k = 0; k < info.m_inners.size(); k++) {
+                    String innerCN = (String) info.m_inners.get(k) + ".class";
+                    try {
+                        // Get the bytecode and start manipulation
+                        byte[] innerClassBytecode = getBytecode(innerCN);
+                        manipulateInnerClass(innerClassBytecode, innerCN, info);
+                    } catch (IOException e) {
+                        error("Cannot manipulate inner class '" + innerCN + "'");
+                        return;
                     }
                 }
-            } catch (IOException e) {
-                error("Cannot read the class : " + curName);
-                return;
             }
-
         }
+    }
+
+    /**
+     * Return a byte array that contains the bytecode of the given classname.
+     * @param classname name of a class to be read
+     * @return a byte array
+     * @throws IOException if the classname cannot be read
+     */
+    private byte[] getBytecode(final String classname) throws IOException {
+
+        InputStream currIn = null;
+        byte[] in = new byte[0];
+        try {
+            // Get the stream to read
+            currIn = getInputStream(classname);
+            int c;
+
+            // Fill the byte array with IS content
+            while ((c = currIn.read()) >= 0) {
+                byte[] in2 = new byte[in.length + 1];
+                System.arraycopy(in, 0, in2, 0, in.length);
+                in2[in.length] = (byte) c;
+                in = in2;
+            }
+        } finally {
+            // Close the stream
+            if (currIn != null) {
+                try {
+                    currIn.close();
+                } catch (IOException e) {
+                    // Ignored
+                }
+            }
+        }
+
+        return in;
     }
 
     /**
@@ -533,6 +567,7 @@ public class Pojoization {
      */
     private InputStream getInputStream(String classname) throws IOException {
         if (m_inputJar != null) {
+            // Fix entry name if needed
             if (! classname.endsWith(".class")) {
                 classname += ".class";
             }
@@ -630,22 +665,15 @@ public class Pojoization {
 
     /**
      * Manipulates an inner class.
-     * @param clazz input stream on the inner file to manipulate
+     * @param in input bytecode of the inner file to manipulate
      * @param cn the inner class name (ends with .class)
      * @param ci component info of the component owning the inner class
      * @throws IOException the inner class cannot be read
      */
-    private void manipulateInnerClass(InputStream clazz, String cn, ComponentInfo ci) throws IOException {
-        byte[] in = new byte[0];
-        int c;
-        while ((c = clazz.read()) >= 0) {
-            byte[] in2 = new byte[in.length + 1];
-            System.arraycopy(in, 0, in2, 0, in.length);
-            in2[in.length] = (byte) c;
-            in = in2;
-        }
+    private void manipulateInnerClass(byte[] in, String cn, ComponentInfo ci) throws IOException {
         // Remove '.class' from class name.
-        InnerClassManipulator man = new InnerClassManipulator(ci.m_classname.substring(0, ci.m_classname.length() - 6), ci.m_fields);
+        String name = ci.m_classname.substring(0, ci.m_classname.length() - 6);
+        InnerClassManipulator man = new InnerClassManipulator(name, ci.m_fields);
         byte[] out = man.manipulate(in);
 
         m_classes.put(cn, out);
@@ -772,6 +800,12 @@ public class Pojoization {
          * Set of fields of the implementation class.
          */
         Set m_fields;
+
+        /**
+         * Initial (unmodified) bytecode of the component's class.
+         * May be null !!
+         */
+        byte[] m_bytecode;
 
         /**
          * Constructor.
