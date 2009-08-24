@@ -52,7 +52,11 @@ public class Bootstrap {
 
     private static void updateClassLoader() throws Exception {
         File home = Utils.getKarafHome();
-        File file = new File(new File(home, "etc"), FRAMEWORK_PROPERTIES_FILE_NAME);
+        File base = Utils.getKarafBase(home);
+        File file = new File(new File(base, "etc"), FRAMEWORK_PROPERTIES_FILE_NAME);
+        if (!file.exists()) {
+            file = new File(new File(home, "etc"), FRAMEWORK_PROPERTIES_FILE_NAME);
+        }
         if (!file.exists()) {
             throw new FileNotFoundException(file.getAbsolutePath());
         }
@@ -69,7 +73,10 @@ public class Bootstrap {
         if (bundle == null) {
             throw new IllegalArgumentException("Property " + KARAF_FRAMEWORK + "." + framework + " must be set in the etc/" + FRAMEWORK_PROPERTIES_FILE_NAME + " configuration file");
         }
-        File bundleFile = new File(home, bundle);
+        File bundleFile = new File(base, bundle);
+        if (!bundleFile.exists()) {
+            bundleFile = new File(home, bundle);
+        }
         if (!bundleFile.exists()) {
             throw new FileNotFoundException(bundleFile.getAbsolutePath());
         }
