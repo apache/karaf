@@ -144,7 +144,7 @@ public class Main {
 
     public void launch() throws Exception {
         karafHome = Utils.getKarafHome();
-        karafBase = getKarafBase(karafHome);
+        karafBase = Utils.getKarafBase(karafHome);
 
         //System.out.println("Karaf Home: "+main.servicemixHome.getPath());
         //System.out.println("Karaf Base: "+main.servicemixBase.getPath());
@@ -298,27 +298,6 @@ public class Main {
         } finally {
             System.exit(main.getExitCode());
         }
-    }
-
-    private static File getKarafBase(File defaultValue) {
-        File rc = null;
-
-        String path = System.getProperty(PROP_KARAF_BASE);
-        if (path != null) {
-            rc = Utils.validateDirectoryExists(path, "Invalid " + PROP_KARAF_BASE + " system property");
-        }
-
-        if (rc == null) {
-            path = System.getenv(ENV_KARAF_BASE);
-            if (path != null) {
-                rc = Utils.validateDirectoryExists(path, "Invalid " + ENV_KARAF_BASE + " environment variable");
-            }
-        }
-
-        if (rc == null) {
-            rc = defaultValue;
-        }
-        return rc;
     }
 
     private static void processSecurityProperties(Properties m_configProps) {

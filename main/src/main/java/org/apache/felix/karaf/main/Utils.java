@@ -90,4 +90,25 @@ public class Utils {
         }
         return rc;
     }
+
+    public static File getKarafBase(File defaultValue) {
+        File rc = null;
+
+        String path = System.getProperty(Main.PROP_KARAF_BASE);
+        if (path != null) {
+            rc = validateDirectoryExists(path, "Invalid " + Main.PROP_KARAF_BASE + " system property");
+        }
+
+        if (rc == null) {
+            path = System.getenv(Main.ENV_KARAF_BASE);
+            if (path != null) {
+                rc = validateDirectoryExists(path, "Invalid " + Main.ENV_KARAF_BASE + " environment variable");
+            }
+        }
+
+        if (rc == null) {
+            rc = defaultValue;
+        }
+        return rc;
+    }
 }
