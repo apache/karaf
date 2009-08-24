@@ -45,38 +45,34 @@ public class TestParser extends TestCase
     public void testQuotes() throws Exception {
         Context c = new Context();
         c.addCommand("echo", this);
-        c.addCommand("capture", this);
         c.set("c", "a");
 
-        assertEquals("a b", c.execute("echo a b | capture"));
-        assertEquals("a b", c.execute("echo 'a b' | capture"));
-        assertEquals("a b", c.execute("echo \"a b\" | capture"));
-        assertEquals("a b", c.execute("echo a  b | capture"));
-        assertEquals("a  b", c.execute("echo 'a  b' | capture"));
-        assertEquals("a  b", c.execute("echo \"a  b\" | capture"));
-        assertEquals("a b", c.execute("echo $c  b | capture"));
-        assertEquals("$c  b", c.execute("echo '$c  b' | capture"));
-        assertEquals("a  b", c.execute("echo \"$c  b\" | capture"));
-        assertEquals("a b", c.execute("echo ${c}  b | capture"));
-        assertEquals("${c}  b", c.execute("echo '${c}  b' | capture"));
-        assertEquals("a  b", c.execute("echo \"${c}  b\" | capture"));
-        assertEquals("aa", c.execute("echo $c$c | capture"));
-        assertEquals("a ;a", c.execute("echo a\\ \\;a | capture"));
-        assertEquals("baabab", c.execute("echo b${c}${c}b${c}b | capture"));
+        assertEquals("a b", c.execute("echo a b"));
+        assertEquals("a b", c.execute("echo 'a b'"));
+        assertEquals("a b", c.execute("echo \"a b\""));
+        assertEquals("a b", c.execute("echo a  b"));
+        assertEquals("a  b", c.execute("echo 'a  b'"));
+        assertEquals("a  b", c.execute("echo \"a  b\""));
+        assertEquals("a b", c.execute("echo $c  b"));
+        assertEquals("$c  b", c.execute("echo '$c  b'"));
+        assertEquals("a  b", c.execute("echo \"$c  b\""));
+        assertEquals("a b", c.execute("echo ${c}  b"));
+        assertEquals("${c}  b", c.execute("echo '${c}  b'"));
+        assertEquals("a  b", c.execute("echo \"${c}  b\""));
+        assertEquals("aa", c.execute("echo $c$c"));
+        assertEquals("a ;a", c.execute("echo a\\ \\;a"));
+        assertEquals("baabab", c.execute("echo b${c}${c}b${c}b"));
 
         c.set("d", "a  b ");
-        assertEquals("a  b ", c.execute("echo \"$d\" | capture"));
-//        assertEquals("a b", c.execute("echo $d | capture"));
-//        assertEquals("a b", c.execute("echo <echo $d> | capture"));
+        assertEquals("a  b ", c.execute("echo \"$d\""));
     }
 
     public void testScope() throws Exception
     {
         Context c = new Context();
         c.addCommand("echo", this);
-        c.addCommand("capture", this);
-        assertEquals("$a", c.execute("test:echo \\$a | capture"));
-        assertEquals("file://poo", c.execute("test:echo file://poo|capture"));
+        assertEquals("$a", c.execute("test:echo \\$a"));
+        assertEquals("file://poo", c.execute("test:echo file://poo"));
     }
 
     public void testPipe() throws Exception
@@ -99,24 +95,22 @@ public class TestParser extends TestCase
     {
         Context c = new Context();
         c.addCommand("echo", this);
-        c.addCommand("capture", this);
         c.addCommand("grep", this);
-        assertEquals("a", c.execute("a = a; echo $$a").toString());
+        assertEquals("a", c.execute("a = a; echo $$a"));
 
-        assertEquals("hello", c.execute("echo hello|capture").toString());
-        assertEquals("hello", c.execute("a = <echo hello|capture>").toString());
-        assertEquals("a", c.execute("a = a; echo $<echo a>").toString());
-        assertEquals("3", c.execute("a=3; echo $a").toString());
-        assertEquals("3", c.execute("a = 3; echo $a").toString());
-        assertEquals("a", c.execute("a = a; echo $$a").toString());
+        assertEquals("hello", c.execute("echo hello"));
+        assertEquals("hello", c.execute("a = <echo hello>"));
+        assertEquals("a", c.execute("a = a; echo $<echo a>"));
+        assertEquals("3", c.execute("a=3; echo $a"));
+        assertEquals("3", c.execute("a = 3; echo $a"));
+        assertEquals("a", c.execute("a = a; echo $$a"));
     }
 
     public void testComment() throws Exception
     {
         Context c = new Context();
         c.addCommand("echo", this);
-        assertEquals("1", c.execute("echo 1 // hello").toString());
-
+        assertEquals("1", c.execute("echo 1 // hello"));
     }
 
     public void testClosure() throws Exception
@@ -125,28 +119,27 @@ public class TestParser extends TestCase
         c.addCommand("echo", this);
         c.addCommand("capture", this);
 
-        assertEquals("http://www.aqute.biz?com=2&biz=1", c.execute("['http://www.aqute.biz?com=2&biz=1'] get 0").toString());
+        assertEquals("http://www.aqute.biz?com=2&biz=1", c.execute("['http://www.aqute.biz?com=2&biz=1'] get 0"));
         assertEquals("{a=2, b=3}", c.execute("[a=2 b=3]").toString());
-        assertEquals("3", c.execute("[a=2 <b>=<3>] get b").toString());
+        assertEquals("3", c.execute("[a=2 b=3] get b"));
         assertEquals("[3, 4]", c.execute("[1 2 [3 4] 5 6] get 2").toString());
         assertEquals(5, c.execute("[1 2 [3 4] 5 6] size"));
-        assertEquals("a", c.execute("e = { echo $0 } ; <e a   b | capture>"));
-        assertEquals("b", c.execute("e = { echo $1 } ; <e a   b | capture>"));
-        assertEquals("b", c.execute("e = { $args } ; <e echo  b | capture>"));
-        assertEquals("ca b", c.execute("e = { echo c$args } ; <e a  b | capture>"));
-        assertEquals("c a b", c.execute("e = { echo c $args } ; <e a  b | capture>"));
-        assertEquals("ca  b", c.execute("e = { echo c$args } ; <e 'a  b' | capture>"));
+        assertEquals("a", c.execute("e = { echo $0 } ; e a   b"));
+        assertEquals("b", c.execute("e = { echo $1 } ; e a   b"));
+        assertEquals("b", c.execute("e = { $args } ; e echo  b"));
+        assertEquals("ca b", c.execute("e = { echo c$args } ; e a  b"));
+        assertEquals("c a b", c.execute("e = { echo c $args } ; e a  b"));
+        assertEquals("ca  b", c.execute("e = { echo c$args } ; e 'a  b'"));
     }
 
     public void testArray() throws Exception
     {
         Context c = new Context();
-        assertEquals("http://www.aqute.biz?com=2&biz=1", c.execute("['http://www.aqute.biz?com=2&biz=1'] get 0").toString());
+        assertEquals("http://www.aqute.biz?com=2&biz=1", c.execute("['http://www.aqute.biz?com=2&biz=1'] get 0"));
         assertEquals("{a=2, b=3}", c.execute("[a=2 b=3]").toString());
-        assertEquals("3", c.execute("[a=2 <b>=<3>] get b").toString());
+        assertEquals("3", c.execute("[a=2 b=3] get b"));
         assertEquals("[3, 4]", c.execute("[1 2 [3 4] 5 6] get 2").toString());
         assertEquals(5, c.execute("[1 2 [3 4] 5 6] size"));
-
     }
 
     public void testEscape()
@@ -157,7 +150,6 @@ public class TestParser extends TestCase
         assertEquals("'a|b;c'", new Parser(cs).unescape());
         assertEquals("$a", new Parser("\\$a").unescape());
     }
-
 
     public void testParentheses()
     {
@@ -210,9 +202,9 @@ public class TestParser extends TestCase
         Context c = new Context();
         c.addCommand("echo", this);
 
-        assertEquals("", c.execute("echo ${very.likely.that.this.does.not.exist}").toString());
+        assertEquals("", c.execute("echo ${very.likely.that.this.does.not.exist}"));
         assertNotNull(c.execute("echo ${java.shell.name}"));
-        assertEquals("a", c.execute("a = a; echo ${a}").toString());
+        assertEquals("a", c.execute("a = a; echo ${a}"));
     }
 
     public void testFunny() throws Exception
@@ -222,6 +214,7 @@ public class TestParser extends TestCase
         assertEquals("a", c.execute("echo a") + "");
         assertEquals("a", c.execute("<echo echo> a") + "");
         assertEquals("a", c.execute("<<echo echo> echo> <echo a>") + "");
+        assertEquals("3", c.execute("[a=2 <echo b>=<echo 3>] get b").toString());
     }
 
     public CharSequence echo(Object args[])
@@ -232,17 +225,16 @@ public class TestParser extends TestCase
         }
 
         StringBuilder sb = new StringBuilder();
-        String del = "";
         for (Object arg : args)
         {
-            sb.append(del);
             if (arg != null)
             {
+		if (sb.length() > 0)
+		    sb.append(' ');
                 sb.append(arg);
-                del = " ";
             }
         }
-        return sb;
+        return sb.toString();
     }
 
     public void echoout(Object args[])
@@ -270,7 +262,6 @@ public class TestParser extends TestCase
         Integer result = (Integer) c.execute("ls <ls 5>");
         assertEquals(10, beentheredonethat);
         assertEquals((Integer) 5, result);
-
     }
 
     public void ls()

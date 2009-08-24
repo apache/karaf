@@ -38,7 +38,7 @@ public class TestCommands extends TestCase {
         c.set("USER", "gnodet");
         c.set("APPLICATION", "karaf");
         //c.set("SCOPE", "");
-        Object p = c.execute("\"@|bold ${USER}|@${APPLICATION}:@|bold ${SCOPE}|> \"");
+        Object p = c.execute("echo \"@|bold ${USER}|@${APPLICATION}:@|bold ${SCOPE}|> \"");
         System.out.println("Prompt: " + p);
     }
 
