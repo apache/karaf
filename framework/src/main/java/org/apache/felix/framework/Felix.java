@@ -2218,6 +2218,12 @@ ex.printStackTrace();
                     Logger.LOG_ERROR, "Unable to remove bundle from installed map!");
             }
 
+            setBundleStateAndNotify(bundle, Bundle.INSTALLED);
+
+            // Unfortunately, fire UNRESOLVED event while holding the lock,
+            // since we still need to change the bundle state.
+            fireBundleEvent(BundleEvent.UNRESOLVED, bundle);
+
             // Set state to uninstalled.
             setBundleStateAndNotify(bundle, Bundle.UNINSTALLED);
             bundle.setLastModified(System.currentTimeMillis());
@@ -2227,9 +2233,6 @@ ex.printStackTrace();
             // Always release bundle lock.
             releaseBundleLock(bundle);
         }
-
-        // Fire UNRESOLVED event without holding the lock.
-        fireBundleEvent(BundleEvent.UNRESOLVED, bundle);
 
         // Fire UNINSTALLED event without holding the lock.
         fireBundleEvent(BundleEvent.UNINSTALLED, bundle);
