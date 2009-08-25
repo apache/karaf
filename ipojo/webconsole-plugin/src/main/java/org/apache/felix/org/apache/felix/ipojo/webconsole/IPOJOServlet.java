@@ -209,7 +209,7 @@ public class IPOJOServlet extends AbstractWebConsolePlugin {
                 + getInvalidCount() + " invalid instances."
                 +        "</div></div>");
         // Button Line
-        writer.write("<form action=\"ipojo\" method=\"get\">"
+        writer.write("<form action=\"iPOJO\" method=\"get\">"
                 + "<div class=\"fullwidth\">"
                 + "<div class=\"buttons\">"
                 + "<button style=\"margin-left: 30px;\" name=\"" + INSTANCE + "\" value=\"all\" type=\"submit\">Instances</button>"
@@ -244,7 +244,7 @@ public class IPOJOServlet extends AbstractWebConsolePlugin {
         }
 
         // Button Line
-        writer.write("<form action=\"ipojo\" method=\"get\">"
+        writer.write("<form action=\"iPOJO\" method=\"get\">"
                 + "<div class=\"fullwidth\">"
                 + "<div class=\"buttons\">"
                 + "<button style=\"margin-left: 30px;\" name=\"" + INSTANCE + "\" value=\"all\" type=\"submit\">Instances</button>"
@@ -416,7 +416,7 @@ public class IPOJOServlet extends AbstractWebConsolePlugin {
         String n = id.getComponentDescription().getName();
         for (Factory f : m_factories) { // Cannot be null, an empty list is returned.
             if (f.getName().equals(n)) {
-                return "<a href=\"ipojo?factory=" + n + "\">" + n + "</a>";
+                return "<a href=\"iPOJO?factory=" + n + "\">" + n + "</a>";
             }
         }
 
@@ -477,7 +477,7 @@ public class IPOJOServlet extends AbstractWebConsolePlugin {
      * @return the HTML link targetting the instance detail
      */
     private String getInstanceLink(String name) {
-        return "<a href=\"ipojo?instance=" + name + "\">" + name + "</a>";
+        return "<a href=\"iPOJO?instance=" + name + "\">" + name + "</a>";
     }
 
     /**
@@ -528,7 +528,7 @@ public class IPOJOServlet extends AbstractWebConsolePlugin {
                 if (ref.getProperty("instance.name") == null) {
                     s += ref.getProperty(Constants.SERVICE_ID);
                 } else {
-                    s += "<a href=\"ipojo?instance="
+                    s += "<a href=\"iPOJO?instance="
                         + ref.getProperty("instance.name") + "\">"
                         + ref.getProperty("instance.name") + " (" +  ref.getProperty(Constants.SERVICE_ID) + ")</a>";
                 }
@@ -645,7 +645,7 @@ public class IPOJOServlet extends AbstractWebConsolePlugin {
             String bundle = factory.getBundleContext().getBundle().getSymbolicName()
                 + " (" + factory.getBundleContext().getBundle().getBundleId() + ")";
             pw.write("<tr>"
-                    + "<td><a href=\"ipojo?factory=" + name + "\">"
+                    + "<td><a href=\"iPOJO?factory=" + name + "\">"
                         + (version == null ? name : name + " (" + version + ")")
                         + "</a></td>"
                     + "<td>" + bundle + "</td>"
