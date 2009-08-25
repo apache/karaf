@@ -39,7 +39,7 @@ import javax.security.auth.x500.X500Principal;
  * 
  * @since 1.3
  * @ThreadSafe
- * @version $Revision: 6888 $
+ * @version $Revision: 7761 $
  */
 public class FrameworkUtil {
 	/**
@@ -186,7 +186,7 @@ public class FrameworkUtil {
 	 */
 	public static boolean matchDistinguishedNameChain(String matchPattern,
 			List /* <String> */dnChain) {
-		return DNChainMatching.match(matchPattern, new ArrayList(dnChain));
+		return DNChainMatching.match(matchPattern, dnChain);
 	}
 
 	/**
@@ -1704,11 +1704,11 @@ public class FrameworkUtil {
 		/**
 		 * Check the name/value pairs of the rdn against the pattern.
 		 * 
-		 * @param rdn ArrayList of name value pairs for a given RDN.
-		 * @param rdnPattern ArrayList of name value pattern pairs.
+		 * @param rdn List of name value pairs for a given RDN.
+		 * @param rdnPattern List of name value pattern pairs.
 		 * @return true if the list of name value pairs match the pattern.
 		 */
-		private static boolean rdnmatch(ArrayList rdn, ArrayList rdnPattern) {
+		private static boolean rdnmatch(List rdn, List rdnPattern) {
 			if (rdn.size() != rdnPattern.size()) {
 				return false;
 			}
@@ -1732,7 +1732,7 @@ public class FrameworkUtil {
 			return true;
 		}
 
-		private static boolean dnmatch(ArrayList dn, ArrayList dnPattern) {
+		private static boolean dnmatch(List dn, List dnPattern) {
 			int dnStart = 0;
 			int patStart = 0;
 			int patLen = dnPattern.size();
@@ -1750,8 +1750,7 @@ public class FrameworkUtil {
 				if (dn.size() > patLen) {
 					if (!dnPattern.get(0).equals(STAR_WILDCARD)) {
 						// If the number of rdns do not match we must have a
-						// prefix
-						// map
+						// prefix map
 						return false;
 					}
 					// The rdnPattern and rdn must have the same number of
@@ -1760,8 +1759,8 @@ public class FrameworkUtil {
 				}
 			}
 			for (int i = 0; i < patLen; i++) {
-				if (!rdnmatch((ArrayList) dn.get(i + dnStart),
-						(ArrayList) dnPattern.get(i + patStart))) {
+				if (!rdnmatch((List) dn.get(i + dnStart), (List) dnPattern
+						.get(i + patStart))) {
 					return false;
 				}
 			}
@@ -1769,24 +1768,24 @@ public class FrameworkUtil {
 		}
 
 		/**
-		 * Parses a distinguished name chain pattern and returns an ArrayList
-		 * where each element represents a distinguished name (DN) in the chain
-		 * of DNs. Each element will be either a String, if the element
-		 * represents a wildcard ("*" or "-"), or an ArrayList representing an
-		 * RDN. Each element in the RDN ArrayList will be a String, if the
-		 * element represents a wildcard ("*"), or an ArrayList of Strings, each
-		 * String representing a name/value pair in the RDN.
+		 * Parses a distinguished name chain pattern and returns a List where
+		 * each element represents a distinguished name (DN) in the chain of
+		 * DNs. Each element will be either a String, if the element represents
+		 * a wildcard ("*" or "-"), or a List representing an RDN. Each element
+		 * in the RDN List will be a String, if the element represents a
+		 * wildcard ("*"), or a List of Strings, each String representing a
+		 * name/value pair in the RDN.
 		 * 
 		 * @param dnChain
 		 * @return a list of DNs.
 		 * @throws IllegalArgumentException
 		 */
-		private static ArrayList parseDNchainPattern(String dnChain) {
+		private static List parseDNchainPattern(String dnChain) {
 			if (dnChain == null) {
 				throw new IllegalArgumentException(
 						"The DN chain must not be null.");
 			}
-			ArrayList parsed = new ArrayList();
+			List parsed = new ArrayList();
 			int startIndex = 0;
 			startIndex = skipSpaces(dnChain, startIndex);
 			while (startIndex < dnChain.length()) {
@@ -1814,23 +1813,22 @@ public class FrameworkUtil {
 				startIndex = endIndex + 1;
 				startIndex = skipSpaces(dnChain, startIndex);
 			}
-			parseDNchain(parsed);
-			return parsed;
+			return parseDNchain(parsed);
 		}
 
 		private static List parseDNchain(List chain) {
 			if (chain == null) {
 				throw new IllegalArgumentException("DN chain must not be null.");
 			}
-			// Now we parse is a list of strings, lets make ArrayList of rdn out
-			// of
-			// them
+			chain = new ArrayList(chain);
+			// Now we parse is a list of strings, lets make List of rdn out
+			// of them
 			for (int i = 0; i < chain.size(); i++) {
 				String dn = (String) chain.get(i);
 				if (dn.equals(STAR_WILDCARD) || dn.equals(MINUS_WILDCARD)) {
 					continue;
 				}
-				ArrayList rdns = new ArrayList();
+				List rdns = new ArrayList();
 				if (dn.charAt(0) == '*') {
 					if (dn.charAt(1) != ',') {
 						throw new IllegalArgumentException(
@@ -1870,13 +1868,13 @@ public class FrameworkUtil {
 		 * rdnArray with the extracted RDNs.
 		 * 
 		 * @param dn the distinguished name in canonical form.
-		 * @param rdnArray the array to fill in with RDNs extracted from the dn
+		 * @param rdn the list to fill in with RDNs extracted from the dn
 		 * @throws IllegalArgumentException if a formatting error is found.
 		 */
-		private static void parseDN(String dn, ArrayList rdnArray) {
+		private static void parseDN(String dn, List rdn) {
 			int startIndex = 0;
 			char c = '\0';
-			ArrayList nameValues = new ArrayList();
+			List nameValues = new ArrayList();
 			while (startIndex < dn.length()) {
 				int endIndex;
 				for (endIndex = startIndex; endIndex < dn.length(); endIndex++) {
@@ -1894,7 +1892,7 @@ public class FrameworkUtil {
 				}
 				nameValues.add(dn.substring(startIndex, endIndex));
 				if (c != '+') {
-					rdnArray.add(nameValues);
+					rdn.add(nameValues);
 					if (endIndex != dn.length()) {
 						nameValues = new ArrayList();
 					}
@@ -1912,7 +1910,7 @@ public class FrameworkUtil {
 
 		/**
 		 * This method will return an 'index' which points to a non-wildcard DN
-		 * or the end-of-arraylist.
+		 * or the end-of-list.
 		 */
 		private static int skipWildCards(List dnChainPattern,
 				int dnChainPatternIndex) {
@@ -1928,22 +1926,19 @@ public class FrameworkUtil {
 					// otherwise continue skipping over wild cards
 				}
 				else {
-					if (dnPattern instanceof ArrayList) {
-						// if its an arraylist then we have our 'non-wildcard'
-						// DN
+					if (dnPattern instanceof List) {
+						// if its a list then we have our 'non-wildcard' DN
 						break;
 					}
 					else {
 						// unknown member of the DNChainPattern
 						throw new IllegalArgumentException(
-								"expected String or Arraylist in DN Pattern");
+								"expected String or List in DN Pattern");
 					}
 				}
 			}
-			// i either points to end-of-arraylist, or to the first
-			// non-wildcard
-			// pattern
-			// after dnChainPatternIndex
+			// i either points to end-of-list, or to the first
+			// non-wildcard pattern after dnChainPatternIndex
 			return i;
 		}
 
@@ -1986,9 +1981,8 @@ public class FrameworkUtil {
 				}
 				//
 				// we will now recursively call to see if the rest of the
-				// DNChainPattern
-				// matches increasingly smaller portions of the rest of the
-				// DNChain
+				// DNChainPattern matches increasingly smaller portions of the
+				// rest of the DNChain
 				//
 				if (dnPattern.equals(STAR_WILDCARD)) {
 					// '*' option: only wildcard on 0 or 1
@@ -2008,13 +2002,12 @@ public class FrameworkUtil {
 				// failure
 			}
 			else {
-				if (dnPattern instanceof ArrayList) {
+				if (dnPattern instanceof List) {
 					// here we have to do a deeper check for each DN in the
-					// pattern
-					// until we hit a wild card
+					// pattern until we hit a wild card
 					do {
-						if (!dnmatch((ArrayList) dnChain.get(dnChainIndex),
-								(ArrayList) dnPattern)) {
+						if (!dnmatch((List) dnChain.get(dnChainIndex),
+								(List) dnPattern)) {
 							return false;
 						}
 						// go to the next set of DN's in both chains
@@ -2027,24 +2020,18 @@ public class FrameworkUtil {
 							return true;
 						}
 						// if the DN Chain is finished, but the pattern isn't
-						// finished
-						// then if the rest of the pattern is not wildcard then
-						// we
-						// are
-						// done
+						// finished then if the rest of the pattern is not
+						// wildcard then we are done
 						if (dnChainIndex >= dnChain.size()) {
 							dnChainPatternIndex = skipWildCards(dnChainPattern,
 									dnChainPatternIndex);
 							// return TRUE iff the pattern index moved past the
-							// array-size
-							// (implying that the rest of the pattern is all
-							// wildcards)
+							// list-size (implying that the rest of the pattern
+							// is all wildcards)
 							return dnChainPatternIndex >= dnChainPattern.size();
 						}
 						// if the pattern finished, but the chain continues then
-						// we
-						// have
-						// a mis-match
+						// we have a mis-match
 						if (dnChainPatternIndex >= dnChainPattern.size()) {
 							return false;
 						}
@@ -2062,23 +2049,20 @@ public class FrameworkUtil {
 									dnChainPattern, dnChainPatternIndex);
 						}
 						else {
-							if (!(dnPattern instanceof ArrayList)) {
+							if (!(dnPattern instanceof List)) {
 								throw new IllegalArgumentException(
-										"expected String or Arraylist in DN Pattern");
+										"expected String or List in DN Pattern");
 							}
 						}
 						// if we are here, then we will just continue to the
-						// match
-						// the
-						// next set of DN's from the DNChain, and the
-						// DNChainPattern
-						// since both are array-lists
+						// match the next set of DN's from the DNChain, and the
+						// DNChainPattern since both are lists
 					} while (true);
 					// should never reach here?
 				}
 				else {
 					throw new IllegalArgumentException(
-							"expected String or Arraylist in DN Pattern");
+							"expected String or List in DN Pattern");
 				}
 			}
 			// if we get here, the the default return is 'mis-match'
@@ -2124,16 +2108,20 @@ public class FrameworkUtil {
 			try {
 				parsedDNChain = parseDNchain(dnChain);
 			}
-			catch (IllegalArgumentException e) {
-				throw (IllegalArgumentException) new IllegalArgumentException(
-						"Invalid DN chain: " + toString(dnChain)).initCause(e);
+			catch (RuntimeException e) {
+				IllegalArgumentException iae = new IllegalArgumentException(
+						"Invalid DN chain: " + toString(dnChain));
+				iae.initCause(e);
+				throw iae;
 			}
 			try {
 				parsedDNPattern = parseDNchainPattern(pattern);
 			}
-			catch (IllegalArgumentException e) {
-				throw (IllegalArgumentException) new IllegalArgumentException(
-						"Invalid match pattern: " + pattern).initCause(e);
+			catch (RuntimeException e) {
+				IllegalArgumentException iae = new IllegalArgumentException(
+						"Invalid match pattern: " + pattern);
+				iae.initCause(e);
+				throw iae;
 			}
 			return dnChainMatch(parsedDNChain, 0, parsedDNPattern, 0);
 		}

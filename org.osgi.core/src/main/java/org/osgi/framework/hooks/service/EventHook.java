@@ -28,7 +28,7 @@ import org.osgi.framework.ServiceEvent;
  * (register, modify, and unregister service) operations.
  * 
  * @ThreadSafe
- * @version $Revision: 6860 $
+ * @version $Revision: 6967 $
  */
 
 public interface EventHook {
@@ -50,5 +50,5 @@ public interface EventHook {
 	 *        synchronized.
 	 */
 	void event(ServiceEvent event,
-			Collection/* <? extends BundleContext> */contexts);
+			Collection/* <BundleContext> */contexts);
 }

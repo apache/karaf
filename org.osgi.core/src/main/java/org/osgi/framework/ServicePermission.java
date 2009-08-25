@@ -51,7 +51,7 @@ import java.util.Map;
  * <code>ServicePermission</code> to get the specific service.
  * 
  * @ThreadSafe
- * @version $Revision: 6530 $
+ * @version $Revision: 7189 $
  */
 
 public final class ServicePermission extends BasicPermission {
@@ -166,9 +166,9 @@ public final class ServicePermission extends BasicPermission {
 	 * 
 	 * @param name The service class name
 	 * @param actions <code>get</code>,<code>register</code> (canonical order)
-	 * @throw IllegalArgumentException If the specified name is a filter
-	 *        expression and either the specified action is not <code>get</code>
-	 *        or the filter has an invalid syntax.
+	 * @throws IllegalArgumentException If the specified name is a filter
+	 *         expression and either the specified action is not
+	 *         <code>get</code> or the filter has an invalid syntax.
 	 */
 	public ServicePermission(String name, String actions) {
 		this(name, parseActions(actions));
@@ -188,8 +188,8 @@ public final class ServicePermission extends BasicPermission {
 	 * 
 	 * @param reference The requested service.
 	 * @param actions The action <code>get</code>.
-	 * @throw IllegalArgumentException If the specified action is not
-	 *        <code>get</code> or reference is <code>null</code>.
+	 * @throws IllegalArgumentException If the specified action is not
+	 *         <code>get</code> or reference is <code>null</code>.
 	 * @since 1.5
 	 */
 	public ServicePermission(ServiceReference reference, String actions) {

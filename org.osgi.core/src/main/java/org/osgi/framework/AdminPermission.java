@@ -87,7 +87,7 @@ import java.util.Map;
  * Filter attribute names are processed in a case sensitive manner.
  * 
  * @ThreadSafe
- * @version $Revision: 6867 $
+ * @version $Revision: 7743 $
  */
 
 public final class AdminPermission extends BasicPermission {
@@ -211,6 +211,12 @@ public final class AdminPermission extends BasicPermission {
 	 * cached in this object.
 	 */
 	private transient volatile Dictionary	properties;
+
+	/**
+	 * ThreadLocal used to determine if we have recursively called
+	 * getProperties.
+	 */
+	private static final ThreadLocal		recurse						= new ThreadLocal();
 
 	/**
 	 * Creates a new <code>AdminPermission</code> object that matches all
@@ -647,7 +653,17 @@ public final class AdminPermission extends BasicPermission {
 		if (requested.bundle == null) {
 			return false;
 		}
-		return f.matchCase(requested.getProperties());
+		Dictionary requestedProperties = requested.getProperties();
+		if (requestedProperties == null) {
+			/*
+			 * If the requested properties are null, then we have detected a
+			 * recursion getting the bundle location. So we return true to
+			 * permit the bundle location request in the AdminPermission check
+			 * up the stack to succeed.
+			 */
+			return true;
+		}
+		return f.matchCase(requestedProperties);
 	}
 
 	/**
@@ -808,10 +824,10 @@ public final class AdminPermission extends BasicPermission {
 	}
 
 	/**
-	 * Called by <code><@link AdminPermission#implies(Permission)></code> on an
-	 * AdminPermission which was constructed with a Bundle. This method loads a
-	 * dictionary with the filter-matchable properties of this bundle. The
-	 * dictionary is cached so this lookup only happens once.
+	 * Called by <code>implies0</code> on an AdminPermission which was
+	 * constructed with a Bundle. This method loads a dictionary with the
+	 * filter-matchable properties of this bundle. The dictionary is cached so
+	 * this lookup only happens once.
 	 * 
 	 * This method should only be called on an AdminPermission which was
 	 * constructed with a bundle
@@ -823,23 +839,38 @@ public final class AdminPermission extends BasicPermission {
 		if (result != null) {
 			return result;
 		}
-		final Dictionary dict = new Hashtable(4);
-		AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
-				dict.put("id", new Long(bundle.getBundleId()));
-				dict.put("location", bundle.getLocation());
-				String name = bundle.getSymbolicName();
-				if (name != null) {
-					dict.put("name", name);
+		/*
+		 * We may have recursed here due to the Bundle.getLocation call in the
+		 * doPrivileged below. If this is the case, return null to allow implies
+		 * to return true.
+		 */
+		final Object mark = recurse.get();
+		if (mark == bundle) {
+			return null;
+		}
+		recurse.set(bundle);
+		try {
+			final Dictionary dict = new Hashtable(4);
+			AccessController.doPrivileged(new PrivilegedAction() {
+				public Object run() {
+					dict.put("id", new Long(bundle.getBundleId()));
+					dict.put("location", bundle.getLocation());
+					String name = bundle.getSymbolicName();
+					if (name != null) {
+						dict.put("name", name);
+					}
+					SignerProperty signer = new SignerProperty(bundle);
+					if (signer.isBundleSigned()) {
+						dict.put("signer", signer);
+					}
+					return null;
 				}
-				SignerProperty signer = new SignerProperty(bundle);
-				if (signer.isBundleSigned()) {
-					dict.put("signer", signer); 
-				}
-				return null;
-			}
-		});
-		return properties = dict;
+			});
+			return properties = dict;
+		}
+		finally {
+			recurse.set(null);
+		}
 	}
 }
 

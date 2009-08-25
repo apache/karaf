@@ -28,7 +28,7 @@ import org.osgi.framework.BundleContext;
  * (get service references) operations.
  * 
  * @ThreadSafe
- * @version $Revision: 6860 $
+ * @version $Revision: 6967 $
  */
 
 public interface FindHook {
@@ -59,5 +59,5 @@ public interface FindHook {
 	 */
 	void find(BundleContext context, String name, String filter,
 			boolean allServices,
-			Collection/* <? extends ServiceReference> */references);
+			Collection/* <ServiceReference> */references);
 }
