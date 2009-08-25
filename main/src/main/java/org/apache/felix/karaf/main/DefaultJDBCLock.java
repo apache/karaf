@@ -147,6 +147,7 @@ public class DefaultJDBCLock implements Lock {
         if (lockConnection != null && !lockConnection.isClosed()) {
             lockConnection.rollback();
             lockConnection.close();
+            lockConnection = null;
         }
     }
 
@@ -197,7 +198,11 @@ public class DefaultJDBCLock implements Lock {
         Connection conn = null;
         try {
             Class.forName(driver);
-            conn = DriverManager.getConnection(url + ";create=true", username, password);
+            if (url.startsWith("jdbc:derby:")) {
+                conn = DriverManager.getConnection(url + ";create=true", username, password);
+            } else {
+                conn = DriverManager.getConnection(url, username, password);
+            }
         } catch (Exception e) {
             System.err.println("Error occured while setting up JDBC connection: " + e);
             throw e; 
