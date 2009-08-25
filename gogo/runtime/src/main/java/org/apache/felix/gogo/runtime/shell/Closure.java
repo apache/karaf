@@ -16,9 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// DWB5: session.err is not redirected when creating pipeline
-// DWB6: add 'set -x' trace feature if echo is set
-// DWB7: removing variable via 'execute("name=") throws OutOfBoundsException
 package org.apache.felix.gogo.runtime.shell;
 
 import org.osgi.service.command.CommandSession;
@@ -89,7 +86,7 @@ public class Closure extends Reflective implements Function
             }
         }
 
-        Pipe last = pipes.get(pipes.size() - 1);
+        Pipe last = pipes.remove(pipes.size() - 1);
 
         for (Pipe pipe : pipes)
         {
@@ -114,15 +111,12 @@ public class Closure extends Reflective implements Function
 
     Object executeStatement(List<CharSequence> statement) throws Exception
     {
-        // derek: FEATURE: add set -x facility if echo is set
+        // add set -x facility if echo is set
         if (Boolean.TRUE.equals(session.get("echo"))) {
-            StringBuilder buf = new StringBuilder("+ ");
+            StringBuilder buf = new StringBuilder("+");
             for (CharSequence token : statement)
             {
-                if (buf.length() > 0)
-                {
-                    buf.append(' ');
-                }
+		buf.append(' ');
                 buf.append(token);
             }
             System.err.println(buf);
@@ -179,8 +173,7 @@ public class Closure extends Reflective implements Function
 
             if (values.size() > 0 && "=".equals(values.get(0)))
             {
-                //if (values.size() == 0)
-                if (values.size() == 1)            // derek: BUGFIX
+                if (values.size() == 1)
                 {
                     return session.variables.remove(scmd);
                 }
@@ -231,7 +224,7 @@ public class Closure extends Reflective implements Function
         }
     }
 
-    private Object assignment(Object name, Object value)
+    private Object assignment(String name, Object value)
     {
         session.variables.put(name, value);
         return value;
