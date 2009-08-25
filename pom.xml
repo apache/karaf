@@ -83,7 +83,7 @@
         <felix.metatype.version>1.0.2</felix.metatype.version>
         <geronimo.blueprint.version>1.0.0-SNAPSHOT</geronimo.blueprint.version>
         <geronimo.servlet.version>1.1.2</geronimo.servlet.version>
-        <jansi.version>1.0-SNAPSHOT</jansi.version>
+        <jansi.version>1.0</jansi.version>
         <jetty.bundle.version>6.1.14_1</jetty.bundle.version>
         <junit.version>3.8.2_1</junit.version>
         <jline.version>0.9.95-SNAPSHOT</jline.version>
@@ -192,8 +192,18 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
-    </repositories>
-
+          <repository>
+            <id>jansi.release.m2</id>
+            <name>jansi Release Repository</name>
+            <url>http://jansi.fusesource.org/repo/release</url>
+            <snapshots>
+              <enabled>false</enabled>
+            </snapshots>
+            <releases>
+              <enabled>true</enabled>
+            </releases>
+          </repository>
+        </repositories>
     <pluginRepositories>
         <!-- ServiceMix repo -->
         <pluginRepository>
