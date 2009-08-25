@@ -184,6 +184,15 @@ public class Closure extends Reflective implements Function
                 {
                     return session.variables.remove(scmd);
                 }
+                else if (values.size() == 2)
+                {
+                    Object value = values.get(1);
+                    if (value instanceof CharSequence)
+                    {
+                        value = eval((CharSequence) value);
+                    }
+                    return assignment(scmd, value);
+                }
                 else
                 {
                     Object value = execute(values.get(1), values.subList(2, values.size()));
@@ -203,10 +212,6 @@ public class Closure extends Reflective implements Function
                     x = get(scopedFunction);
                     if (x == null || !(x instanceof Function))
                     {
-                        if (values.isEmpty())
-                        {
-                            return scmd;
-                        }
                         throw new IllegalArgumentException("Command not found:  " + scopedFunction);
                     }
                 }
@@ -438,10 +443,11 @@ public class Closure extends Reflective implements Function
 
     private Object var(CharSequence var) throws Exception
     {
-        Object v = eval(var);
-        if (v instanceof Closure) {
-            v = ((Closure) v).execute(session, null);
+        if (var.charAt(0) == '{')
+        {
+            var = var.subSequence(1, var.length() - 1);
         }
+        Object v = eval(var);
         String name = v.toString();
         return get(name);
     }

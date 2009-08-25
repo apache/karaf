@@ -35,7 +35,8 @@ public class TestParser extends TestCase
 {
     int beentheredonethat = 0;
 
-    public void testEvaluatation() throws Exception {
+    public void testEvaluatation() throws Exception
+    {
         Context c = new Context();
         c.addCommand("echo", this);
         c.addCommand("capture", this);
@@ -45,14 +46,30 @@ public class TestParser extends TestCase
         assertEquals("a", c.execute("<<echo a>> | capture"));
     }
 
-    public void testSpecialValues() throws Exception {
+    public void testUnknownCommand() throws Exception
+    {
+        Context c = new Context();
+        try
+        {
+            c.execute("echo");
+            fail("Execution should have failed due to missing command");
+        }
+        catch (IllegalArgumentException e)
+        {
+            // expected
+        }
+    }
+
+    public void testSpecialValues() throws Exception
+    {
         Context c = new Context();
         assertEquals(false, c.execute("false"));
         assertEquals(true, c.execute("true"));
         assertEquals(null, c.execute("null"));
     }
 
-    public void testQuotes() throws Exception {
+    public void testQuotes() throws Exception
+    {
         Context c = new Context();
         c.addCommand("echo", this);
         c.set("c", "a");
