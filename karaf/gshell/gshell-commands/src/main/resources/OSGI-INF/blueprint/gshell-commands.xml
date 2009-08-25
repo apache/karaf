@@ -62,6 +62,9 @@
             <action class="org.apache.felix.karaf.gshell.commands.SourceAction"/>
         </command>
         -->
+        <command name="shell/tac">
+            <action class="org.apache.felix.karaf.gshell.commands.TacAction"/>
+        </command>
     </command-bundle>
 
 </blueprint>
