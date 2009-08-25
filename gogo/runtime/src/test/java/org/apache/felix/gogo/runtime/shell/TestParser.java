@@ -35,6 +35,16 @@ public class TestParser extends TestCase
 {
     int beentheredonethat = 0;
 
+    public void testEvaluatation() throws Exception {
+        Context c = new Context();
+        c.addCommand("echo", this);
+        c.addCommand("capture", this);
+
+        assertEquals("a", c.execute("echo a | capture"));
+        assertEquals("a", c.execute("<echo a> | capture"));
+        assertEquals("a", c.execute("<<echo a>> | capture"));
+    }
+
     public void testSpecialValues() throws Exception {
         Context c = new Context();
         assertEquals(false, c.execute("false"));

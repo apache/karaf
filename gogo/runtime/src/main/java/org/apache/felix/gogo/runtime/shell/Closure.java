@@ -128,6 +128,11 @@ public class Closure extends Reflective implements Function
             System.err.println(buf);
         }
 
+        if (statement.size() == 1 && statement.get(0).charAt(0) == '<')
+        {
+            return eval(statement.get(0));
+        }
+
         Object result;
         List<Object> values = new ArrayList<Object>();
         for (CharSequence token : statement)
