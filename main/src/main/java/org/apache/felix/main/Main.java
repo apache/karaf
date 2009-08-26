@@ -44,6 +44,11 @@ public class Main
     public static final String BUNDLE_DIR_SWITCH = "-b";
 
     /**
+     * The property name used to specify whether the launcher should
+     * install a shutdown hook.
+    **/
+    public static final String SHUTDOWN_HOOK_PROP = "felix.shutdown.hook";
+    /**
      * The property name used to specify an URL to the system
      * property file.
     **/
@@ -226,6 +231,30 @@ public class Main
         if (cacheDir != null)
         {
             configProps.setProperty(Constants.FRAMEWORK_STORAGE, cacheDir);
+        }
+
+        // If enabled, register a shutdown hook to make sure the framework is
+        // cleanly shutdown when the VM exits.
+        String enableHook = configProps.getProperty(SHUTDOWN_HOOK_PROP);
+        if ((enableHook == null) || !enableHook.equalsIgnoreCase("false"))
+        {
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                public void run()
+                {
+                    try
+                    {
+                        if (m_fwk != null)
+                        {
+                            m_fwk.stop();
+                            m_fwk.waitForStop(0);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.err.println("Error stopping framework: " + ex);
+                    }
+                }
+            });
         }
 
         // Print welcome banner.
