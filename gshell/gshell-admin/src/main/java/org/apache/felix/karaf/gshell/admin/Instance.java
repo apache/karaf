@@ -21,6 +21,7 @@ public interface Instance {
     String STOPPED = "Stopped";
     String STARTING = "Starting";
     String STARTED = "Started";
+    String ERROR = "Error";
 
     String getName();
 
@@ -28,7 +29,7 @@ public interface Instance {
 
     int getPid();
 
-    int getPort() throws Exception;
+    int getPort();
 
     void changePort(int port) throws Exception;
 

@@ -45,7 +45,7 @@ public class AdminServiceMBeanImpl implements AdminServiceMBean {
         return names;
     }
 
-    public int getPort(String name) throws Exception {
+    public int getPort(String name) {
         return getExistingInstance(name).getPort();
     }
 

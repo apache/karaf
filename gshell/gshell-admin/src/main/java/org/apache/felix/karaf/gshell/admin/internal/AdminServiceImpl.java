@@ -22,16 +22,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.FileInputStream;
 import java.net.ServerSocket;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Properties;
 
 import org.apache.felix.karaf.gshell.admin.AdminService;
 import org.apache.felix.karaf.gshell.admin.Instance;
-import org.osgi.service.prefs.BackingStoreException;
-import org.osgi.service.prefs.Preferences;
-import org.osgi.service.prefs.PreferencesService;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.fusesource.jansi.Ansi;
@@ -40,30 +39,56 @@ public class AdminServiceImpl implements AdminService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AdminServiceImpl.class);
 
-    private PreferencesService preferences;
-
     private Map<String, Instance> instances = new HashMap<String, Instance>();
 
     private int defaultPortStart = 8101;
 
-    public PreferencesService getPreferences() {
-        return preferences;
+    private File storageLocation;
+
+    public File getStorageLocation() {
+        return storageLocation;
     }
 
-    public void setPreferences(PreferencesService preferences) {
-        this.preferences = preferences;
+    public void setStorageLocation(File storage) {
+        this.storageLocation = storage;
+    }
+
+    private Properties loadStorage(File location) throws IOException {
+        InputStream is = null;
+        try {
+            is = new FileInputStream(location);
+            Properties props = new Properties();
+            props.load(is);
+            return props;
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+        }
+    }
+
+    private void saveStorage(Properties props, File location) throws IOException {
+        OutputStream os = null;
+        try {
+            os = new FileOutputStream(location);
+            props.store(os, "Admin Service storage");
+        } finally {
+            if (os != null) {
+                os.close();
+            }
+        }
     }
 
     public synchronized void init() throws Exception {
         try {
-            Preferences prefs = preferences.getUserPreferences("AdminServiceState");
-            Preferences child = prefs.node("Instances");
-            int count = child.getInt("count", 0);
+            Properties storage = loadStorage(storageLocation);
+            int count = Integer.parseInt(storage.getProperty("count", "0"));
+            defaultPortStart = Integer.parseInt(storage.getProperty("port", Integer.toString(defaultPortStart)));
             Map<String, Instance> newInstances = new HashMap<String, Instance>();
             for (int i = 0; i < count; i++) {
-                String name = child.get("item." + i + ".name", null);
-                String loc = child.get("item." + i + ".loc", null);
-                int pid = child.getInt("item." + i + ".pid", 0);
+                String name = storage.getProperty("item." + i + ".name", null);
+                String loc = storage.getProperty("item." + i + ".loc", null);
+                int pid = Integer.parseInt(storage.getProperty("item." + i + ".pid", "0"));
                 if (name != null) {
                     InstanceImpl instance = new InstanceImpl(this, name, loc);
                     if (pid > 0) {
@@ -89,23 +114,7 @@ public class AdminServiceImpl implements AdminService {
         File serviceMixBase = new File(location != null ? location : ("instances/" + name)).getCanonicalFile();
         int sshPort = port;
         if (sshPort <= 0) {
-            try {
-                Preferences prefs = preferences.getUserPreferences("AdminServiceState");
-                sshPort = prefs.getInt("port", defaultPortStart + 1);
-                prefs.putInt("port", sshPort + 1);
-                prefs.flush();
-                prefs.sync();
-            } catch (Exception e) {
-                try {
-                    ServerSocket ss = new ServerSocket(0);
-                    sshPort = ss.getLocalPort();
-                    ss.close();
-                } catch (Exception t) {
-                }
-            }
-            if (sshPort <= 0) {
-                sshPort = defaultPortStart;
-            }
+            sshPort = ++defaultPortStart;
         }
         println("Creating new instance on port " + sshPort + " at: @|bold " + serviceMixBase + "|");
 
@@ -156,19 +165,17 @@ public class AdminServiceImpl implements AdminService {
         instances.remove(name);
     }
 
-    synchronized void saveState() throws IOException, BackingStoreException {
-        Preferences prefs = preferences.getUserPreferences("AdminServiceState");
-        Preferences child = prefs.node("Instances");
-        child.clear();
+    synchronized void saveState() throws IOException {
+        Properties storage = new Properties();
         Instance[] data = getInstances();
-        child.putInt("count", data.length);
+        storage.setProperty("port", Integer.toString(defaultPortStart));
+        storage.setProperty("count", Integer.toString(data.length));
         for (int i = 0; i < data.length; i++) {
-            child.put("item." + i + ".name", data[i].getName());
-            child.put("item." + i + ".loc", data[i].getLocation());
-            child.putInt("item." + i + ".pid", data[i].getPid());
+            storage.setProperty("item." + i + ".name", data[i].getName());
+            storage.setProperty("item." + i + ".loc", data[i].getLocation());
+            storage.setProperty("item." + i + ".pid", Integer.toString(data[i].getPid()));
         }
-        prefs.flush();
-        prefs.sync();
+        saveStorage(storage, storageLocation);
     }
 
     private void copyResourceToDir(File target, String resource, boolean text) throws Exception {
