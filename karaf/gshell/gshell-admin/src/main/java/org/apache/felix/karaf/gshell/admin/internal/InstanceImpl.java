@@ -64,12 +64,16 @@ public class InstanceImpl implements Instance {
         return location;
     }
 
+    public boolean exists() {
+        return new File(location).isDirectory();
+    }
+
     public int getPid() {
         checkProcess();
         return this.process != null ? this.process.getPid() : 0;
     }
 
-    public int getPort() throws Exception {
+    public int getPort() {
         InputStream is = null;
         try {
             File f = new File(location, "etc/org.apache.felix.karaf.shell.cfg");
@@ -78,9 +82,15 @@ public class InstanceImpl implements Instance {
             props.load(is);
             String loc = props.getProperty("sshPort");
             return Integer.parseInt(loc);
+        } catch (Exception e) {
+            return 0;
         } finally {
             if (is != null) {
-                is.close();
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    // Ignore
+                }
             }
         }
     }
@@ -165,12 +175,15 @@ public class InstanceImpl implements Instance {
 
 
     public synchronized String getState() {
+        int port = getPort();
+        if (!exists() || port <= 0) {
+            return ERROR;
+        }
         checkProcess();
         if (this.process == null) {
             return STOPPED;
         } else {
             try {
-                int port = getPort();
                 Socket s = new Socket("localhost", port);
                 s.close();
                 return STARTED;

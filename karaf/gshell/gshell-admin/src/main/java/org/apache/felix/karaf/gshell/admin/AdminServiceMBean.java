@@ -22,7 +22,7 @@ public interface AdminServiceMBean {
 
     String[] getInstances();
 
-    int getPort(String name) throws Exception;
+    int getPort(String name);
 
     void changePort(String name, int port) throws Exception;
 
