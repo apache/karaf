@@ -619,7 +619,8 @@ public class ModuleImpl implements IModule
                     try
                     {
                         // Get the appropriate class loader for delegation.
-                        ClassLoader parent = m_classLoader.getParent();
+                        ClassLoader parent = (m_classLoader == null)
+                            ? determineParentClassLoader() : m_classLoader.getParent();
                         parent = (parent == null) ? m_bootClassLoader : parent;
                         result = (isClass)
                             ? (Object) parent.loadClass(name)
@@ -1267,35 +1268,6 @@ public class ModuleImpl implements IModule
     {
         if (m_classLoader == null)
         {
-            // Determine the class loader's parent based on the
-            // configuration property; use boot class loader by
-            // default.
-            String cfg = (String) m_configMap.get(Constants.FRAMEWORK_BUNDLE_PARENT);
-            cfg = (cfg == null) ? Constants.FRAMEWORK_BUNDLE_PARENT_BOOT : cfg;
-            final ClassLoader parent;
-            if (cfg.equalsIgnoreCase(Constants.FRAMEWORK_BUNDLE_PARENT_APP))
-            {
-                parent = m_secureAction.getSystemClassLoader();
-            }
-            else if (cfg.equalsIgnoreCase(Constants.FRAMEWORK_BUNDLE_PARENT_EXT))
-            {
-                parent = m_secureAction.getSystemClassLoader().getParent();
-            }
-            else if (cfg.equalsIgnoreCase(Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK))
-            {
-                parent = ModuleImpl.class.getClassLoader();
-            }
-            // On Android we cannot set the parent class loader to be null, so
-            // we special case that situation here and set it to the system
-            // class loader by default instead, which is not really spec.
-            else if (m_bootClassLoader == null)
-            {
-                parent = m_secureAction.getSystemClassLoader();
-            }
-            else
-            {
-                parent = null;
-            }
             if (System.getSecurityManager() != null)
             {
                 try
@@ -1303,7 +1275,7 @@ public class ModuleImpl implements IModule
                     Constructor ctor = (Constructor) m_secureAction.getConstructor(
                         ModuleClassLoader.class, new Class[] { ClassLoader.class });
                     m_classLoader = (ModuleClassLoader)
-                        m_secureAction.invoke(ctor, new Object[] { parent });
+                        m_secureAction.invoke(ctor, new Object[] { determineParentClassLoader() });
                 }
                 catch (Exception ex)
                 {
@@ -1312,10 +1284,44 @@ public class ModuleImpl implements IModule
             }
             else
             {
-                m_classLoader = new ModuleClassLoader(parent);
+                m_classLoader = new ModuleClassLoader(determineParentClassLoader());
             }
         }
         return m_classLoader;
+    }
+
+    private ClassLoader determineParentClassLoader()
+    {
+        // Determine the class loader's parent based on the
+        // configuration property; use boot class loader by
+        // default.
+        String cfg = (String) m_configMap.get(Constants.FRAMEWORK_BUNDLE_PARENT);
+        cfg = (cfg == null) ? Constants.FRAMEWORK_BUNDLE_PARENT_BOOT : cfg;
+        final ClassLoader parent;
+        if (cfg.equalsIgnoreCase(Constants.FRAMEWORK_BUNDLE_PARENT_APP))
+        {
+            parent = m_secureAction.getSystemClassLoader();
+        }
+        else if (cfg.equalsIgnoreCase(Constants.FRAMEWORK_BUNDLE_PARENT_EXT))
+        {
+            parent = m_secureAction.getSystemClassLoader().getParent();
+        }
+        else if (cfg.equalsIgnoreCase(Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK))
+        {
+            parent = ModuleImpl.class.getClassLoader();
+        }
+        // On Android we cannot set the parent class loader to be null, so
+        // we special case that situation here and set it to the system
+        // class loader by default instead, which is not really spec.
+        else if (m_bootClassLoader == null)
+        {
+            parent = m_secureAction.getSystemClassLoader();
+        }
+        else
+        {
+            parent = null;
+        }
+        return parent;
     }
 
     private Object searchImports(String name, boolean isClass)
