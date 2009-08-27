@@ -104,7 +104,6 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <karaf.osgi.version>0.9.0</karaf.osgi.version>
         <bnd.version.policy>[$(version;==;$(@)),$(version;+;$(@)))</bnd.version.policy>
     </properties>
 
