@@ -33,6 +33,7 @@ import org.apache.felix.framework.util.*;
 import org.apache.felix.framework.util.manifestparser.*;
 import org.apache.felix.moduleloader.*;
 import org.osgi.framework.*;
+import org.osgi.framework.BundleReference;
 import org.osgi.framework.hooks.service.*;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.startlevel.StartLevel;
@@ -2938,13 +2939,13 @@ ex.printStackTrace();
     **/
     Bundle getBundle(Class clazz)
     {
-        if (clazz.getClassLoader() instanceof ModuleClassLoader)
+        if (clazz.getClassLoader() instanceof BundleReference)
         {
             // Only return the bundle if it is from this framework.
-            ModuleImpl module = (ModuleImpl)
-                ((ModuleClassLoader) clazz.getClassLoader()).getModule();
-            return (((BundleImpl) module.getBundle()).getFramework() == this)
-                ? module.getBundle() : null;
+            BundleReference br = (BundleReference) clazz.getClassLoader();
+            return ((br.getBundle() instanceof BundleImpl)
+                && (((BundleImpl) br.getBundle()).getFramework() == this))
+                    ? br.getBundle() : null;
         }
         try
         {

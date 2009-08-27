@@ -1596,11 +1596,6 @@ public class ModuleImpl implements IModule
             return ModuleImpl.this.getBundle();
         }
 
-        IModule getModule()
-        {
-            return ModuleImpl.this;
-        }
-
         protected Class loadClass(String name, boolean resolve)
             throws ClassNotFoundException
         {
