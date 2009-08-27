@@ -34,7 +34,13 @@ public class Logger {
     /**
      * The iPOJO default log level property.
      */
-    public static final String IPOJO_LOG_LEVEL = "ipojo.log.level";
+    public static final String IPOJO_LOG_LEVEL_PROP = "ipojo.log.level";
+    
+    /**
+     * iPOJO log level manifest header.
+     * Use an upper case to support bnd.
+     */
+    public static final String IPOJO_LOG_LEVEL_HEADER = "IPOJO-log-level";
 
     /**
      * The Log Level ERROR.
@@ -257,14 +263,19 @@ public class Logger {
      */
     private static int getDefaultLevel(BundleContext context) {
         // First check in the framework and in the system properties
-        String level = context.getProperty(IPOJO_LOG_LEVEL);
+        String level = context.getProperty(IPOJO_LOG_LEVEL_PROP);
         
-        // If null, look in bundle manifest
+        // If null, look in the bundle manifest
         if (level == null) {
-            String key = IPOJO_LOG_LEVEL.replace('.', '-');
+            String key = IPOJO_LOG_LEVEL_PROP.replace('.', '-');
             level = (String) context.getBundle().getHeaders().get(key);
         }
         
+        // if still null try the second header
+        if (level == null) {
+            level = (String) context.getBundle().getHeaders().get(IPOJO_LOG_LEVEL_HEADER);
+        }
+                
         if (level != null) {
             if (level.equalsIgnoreCase("info")) {
                 return INFO;

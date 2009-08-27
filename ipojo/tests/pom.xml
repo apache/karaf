@@ -42,6 +42,7 @@
   <module>core/handler</module>
   <module>core/external-handlers</module>
   <module>core/bad-configurations</module>
+  <module>core/logger</module>
   <module>composite/composite-runtime</module>
   <module>composite/import-export</module>
   <module>composite/service-instance</module>

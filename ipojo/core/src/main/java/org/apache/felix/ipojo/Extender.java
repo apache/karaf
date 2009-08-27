@@ -116,7 +116,7 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
      * @param event the bundle event.
      * @see org.osgi.framework.BundleListener#bundleChanged(org.osgi.framework.BundleEvent)
      */
-    public synchronized void bundleChanged(final BundleEvent event) {
+    public void bundleChanged(final BundleEvent event) {
         if (event.getBundle() == m_bundle) { return; }
 
         switch (event.getType()) {
@@ -304,6 +304,8 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
                 }
             }
         }
+        
+        m_logger.log(Logger.INFO, "iPOJO Runtime started");
     }
 
     /**
@@ -338,6 +340,8 @@ public class Extender implements SynchronousBundleListener, BundleActivator {
 
         m_factoryTypes = null;
         m_creator = null;
+        
+        m_logger.log(Logger.INFO, "iPOJO Runtime stopped");
     }
     
     /**

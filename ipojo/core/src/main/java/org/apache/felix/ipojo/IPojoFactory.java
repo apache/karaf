@@ -165,6 +165,8 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
         }
 
         m_requiredHandlers = getRequiredHandlerList(); // Call sub-class to get the list of required handlers.
+        
+        m_logger.log(Logger.INFO, "New factory created : " + m_factoryName);
     }
 
     /**
@@ -298,11 +300,14 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
             ComponentInstance instance = createInstance(configuration, context, handlers); // This method is called with the lock.
             INSTANCE_NAME.add(name);
             m_componentInstances.put(name, instance);
+            m_logger.log(Logger.INFO, "Instance " + name + " from factory " + m_factoryName + " created");
             return instance;
         } catch (ConfigurationException e) {
             m_logger.log(Logger.ERROR, e.getMessage());
             throw new ConfigurationException(e.getMessage(), m_factoryName);
         }
+        
+
     }
 
     /**
@@ -539,6 +544,9 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
         m_described = false;
         m_componentDesc = null;
         m_componentInstances.clear();
+        
+        m_logger.log(Logger.INFO, "Factory " + m_factoryName + " stopped");
+
     }
 
     /**
@@ -581,6 +589,9 @@ public abstract class IPojoFactory implements Factory, ManagedServiceFactory {
                     m_context.registerService(m_componentDesc.getFactoryInterfacesToPublish(), this, m_componentDesc
                             .getPropertiesToPublish());
         }
+        
+        m_logger.log(Logger.INFO, "Factory " + m_factoryName + " started");
+
     }
 
     /**
