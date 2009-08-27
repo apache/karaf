@@ -123,6 +123,9 @@ public class ModuleImpl implements IModule
     private final String[] m_bootPkgs;
     private final boolean[] m_bootPkgWildcards;
 
+    // Boolean flag to enable/disable implicit boot delegation.
+    private final boolean m_implicitBootDelegation;
+
     // Re-usable security manager for accessing class context.
     private static SecurityManagerEx m_sm = new SecurityManagerEx();
 
@@ -167,6 +170,7 @@ public class ModuleImpl implements IModule
         m_declaredActivationPolicy = EAGER_ACTIVATION;
         m_activationExcludes = null;
         m_activationIncludes = null;
+        m_implicitBootDelegation = false;
     }
 
     public ModuleImpl(
@@ -186,6 +190,12 @@ public class ModuleImpl implements IModule
         m_streamHandler = streamHandler;
         m_bootPkgs = bootPkgs;
         m_bootPkgWildcards = bootPkgWildcards;
+
+        m_implicitBootDelegation =
+            (m_configMap.get(FelixConstants.IMPLICIT_BOOT_DELEGATION_PROP) == null)
+            || Boolean.valueOf(
+                (String) m_configMap.get(
+                    FelixConstants.IMPLICIT_BOOT_DELEGATION_PROP)).booleanValue();
 
         ManifestParser mp = new ManifestParser(m_logger, m_configMap, m_headerMap);
 
@@ -1374,82 +1384,87 @@ public class ModuleImpl implements IModule
                 : (Object) wire.getResource(name);
         }
 
-        // At this point, the class/resource could not be found by the bundle's
-        // static or dynamic imports, nor its own content. Before we throw
-        // an exception, we will try to determine if the instigator of the
-        // class/resource load was a class from a bundle or not. This is necessary
-        // because the specification mandates that classes on the class path
-        // should be hidden (except for java.*), but it does allow for these
-        // classes/resources to be exposed by the system bundle as an export.
-        // However, in some situations classes on the class path make the faulty
-        // assumption that they can access everything on the class path from
-        // every other class loader that they come in contact with. This is
-        // not true if the class loader in question is from a bundle. Thus,
-        // this code tries to detect that situation. If the class
-        // instigating the load request was NOT from a bundle, then we will
-        // make the assumption that the caller actually wanted to use the
-        // parent class loader and we will delegate to it. If the class was
-        // from a bundle, then we will enforce strict class loading rules
-        // for the bundle and throw an exception.
-
-        // Get the class context to see the classes on the stack.
-        Class[] classes = m_sm.getClassContext();
-        // Start from 1 to skip security manager class.
-        for (int i = 1; i < classes.length; i++)
+        // If implicit boot delegation is enabled, then try to guess whether
+        // we should boot delegate.
+        if (m_implicitBootDelegation)
         {
-            // Find the first class on the call stack that is not from
-            // the class loader that loaded the Felix classes or is not
-            // a class loader or class itself, because we want to ignore
-            // calls to ClassLoader.loadClass() and Class.forName() since
-            // we are trying to find out who instigated the class load.
-            // Also ignore inner classes of class loaders, since we can
-            // assume they are a class loader too.
+            // At this point, the class/resource could not be found by the bundle's
+            // static or dynamic imports, nor its own content. Before we throw
+            // an exception, we will try to determine if the instigator of the
+            // class/resource load was a class from a bundle or not. This is necessary
+            // because the specification mandates that classes on the class path
+            // should be hidden (except for java.*), but it does allow for these
+            // classes/resources to be exposed by the system bundle as an export.
+            // However, in some situations classes on the class path make the faulty
+            // assumption that they can access everything on the class path from
+            // every other class loader that they come in contact with. This is
+            // not true if the class loader in question is from a bundle. Thus,
+            // this code tries to detect that situation. If the class instigating
+            // the load request was NOT from a bundle, then we will make the
+            // assumption that the caller actually wanted to use the parent class
+            // loader and we will delegate to it. If the class was
+            // from a bundle, then we will enforce strict class loading rules
+            // for the bundle and throw an exception.
+
+            // Get the class context to see the classes on the stack.
+            Class[] classes = m_sm.getClassContext();
+            // Start from 1 to skip security manager class.
+            for (int i = 1; i < classes.length; i++)
+            {
+                // Find the first class on the call stack that is not from
+                // the class loader that loaded the Felix classes or is not
+                // a class loader or class itself, because we want to ignore
+                // calls to ClassLoader.loadClass() and Class.forName() since
+                // we are trying to find out who instigated the class load.
+                // Also ignore inner classes of class loaders, since we can
+                // assume they are a class loader too.
 
 // TODO: FRAMEWORK - This check is a hack and we should see if we can think
 // of another way to do it, since it won't necessarily work in all situations.
-            // Since Felix uses threads for changing the start level
-            // and refreshing packages, it is possible that there is no
-            // module classes on the call stack; therefore, as soon as we
-            // see Thread on the call stack we exit this loop. Other cases
-            // where modules actually use threads are not an issue because
-            // the module classes will be on the call stack before the
-            // Thread class.
-            if (Thread.class.equals(classes[i]))
-            {
-                break;
-            }
-            else if (isClassNotLoadedFromBundle(classes[i]))
-            {
-                // If the instigating class was not from a bundle,
-                // then delegate to the parent class loader; otherwise,
-                // break out of loop and return null.
-                boolean delegate = true;
-                for (ClassLoader cl = classes[i].getClassLoader(); cl != null; cl = cl.getClass().getClassLoader())
+                // Since Felix uses threads for changing the start level
+                // and refreshing packages, it is possible that there is no
+                // module classes on the call stack; therefore, as soon as we
+                // see Thread on the call stack we exit this loop. Other cases
+                // where modules actually use threads are not an issue because
+                // the module classes will be on the call stack before the
+                // Thread class.
+                if (Thread.class.equals(classes[i]))
                 {
-                    if (ModuleClassLoader.class.isInstance(cl))
-                    {
-                        delegate = false;
-                        break;
-                    }
+                    break;
                 }
-                // Delegate to the parent class loader unless this call
-                // is due to outside code calling a method on the bundle
-                // interface (e.g., Bundle.loadClass()).
-                if (delegate && !Bundle.class.isAssignableFrom(classes[i - 1]))
+                else if (isClassNotLoadedFromBundle(classes[i]))
                 {
-                    try
+                    // If the instigating class was not from a bundle,
+                    // then delegate to the parent class loader; otherwise,
+                    // break out of loop and return null.
+                    boolean delegate = true;
+                    for (ClassLoader cl = classes[i].getClassLoader(); cl != null; cl = cl.getClass().getClassLoader())
                     {
-                        // Return the class or resource from the parent class loader.
-                        return (isClass)
-                            ? (Object) this.getClass().getClassLoader().loadClass(name)
-                            : (Object) this.getClass().getClassLoader().getResource(name);
+                        if (ModuleClassLoader.class.isInstance(cl))
+                        {
+                            delegate = false;
+                            break;
+                        }
                     }
-                    catch (NoClassDefFoundError ex)
+                    // Delegate to the parent class loader unless this call
+                    // is due to outside code calling a method on the bundle
+                    // interface (e.g., Bundle.loadClass()).
+                    if (delegate && !Bundle.class.isAssignableFrom(classes[i - 1]))
                     {
-                        // Ignore, will return null
+                        try
+                        {
+                            // Return the class or resource from the parent class loader.
+                            return (isClass)
+                                ? (Object) this.getClass().getClassLoader().loadClass(name)
+                                : (Object) this.getClass().getClassLoader().getResource(name);
+                        }
+                        catch (NoClassDefFoundError ex)
+                        {
+                            // Ignore, will return null
+                        }
                     }
+                    break;
                 }
-                break;
             }
         }
 
