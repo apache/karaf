@@ -20,7 +20,6 @@ package org.apache.felix.cm.impl;
 
 
 import java.io.IOException;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
@@ -147,30 +146,38 @@ public class ConfigurationAdminImpl implements ConfigurationAdmin
 
 
     /**
-     * Checks whether the bundle to which this instance has been given has the
-     * <code>CONFIGURE</code> permission and returns <code>true</code> in this
-     * case.
+     * Returns <code>true</code> if the current access control context (call
+     * stack) has the CONFIGURE permission.
      */
     boolean hasPermission()
     {
-        return bundle.hasPermission( new ConfigurationPermission( "*", ConfigurationPermission.CONFIGURE ) );
+        try
+        {
+            checkPermission();
+            return true;
+        }
+        catch ( SecurityException se )
+        {
+            return false;
+        }
     }
 
 
     /**
-     * Checks whether the bundle to which this instance has been given has the
-     * <code>CONFIGURE</code> permission and throws a <code>SecurityException</code>
-     * if this is not the case.
+     * Checks whether the current access control context (call stack) has the
+     * <code>CONFIGURE</code> permission and throws a
+     * <code>SecurityException</code> if this is not the case.
      *
-     * @throws SecurityException if the bundle to which this instance belongs
-     *      does not have the <code>CONFIGURE</code> permission.
+     * @throws SecurityException if the access control context does not have the
+     *             <code>CONFIGURE</code> permission.
      */
     void checkPermission()
     {
-        if ( !this.hasPermission() )
+        // the caller's permission must be checked
+        final SecurityManager sm = System.getSecurityManager();
+        if ( sm != null )
         {
-            throw new SecurityException( "Bundle " + bundle.getSymbolicName()
-                + " not permitted for Configuration Tasks" );
+            sm.checkPermission( new ConfigurationPermission( "*", ConfigurationPermission.CONFIGURE ) );
         }
     }
 
