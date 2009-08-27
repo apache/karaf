@@ -1,4 +1,4 @@
-/*
+/* 
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -45,7 +45,7 @@ public @interface Transactionnal {
     /**
      * Sets the exceptions that do not rollback the current transaction.
      */
-    String[] norollbackfor() default {};
+    String[] norollbackfor() default { };
 
     /**
      * Sets if the transaction rollback throws an exception.
