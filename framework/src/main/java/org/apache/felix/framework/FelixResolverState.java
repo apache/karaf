@@ -89,8 +89,8 @@ public class FelixResolverState implements Resolver.ResolverState
                 }
 
                 // Need to remove any previously attached, but not resolved fragments.
-                // TODO: FRAGMENT - Would be better to have the previous resolves
-                //       not leave fragments attached.
+// TODO: FRAGMENT - We need to rethink how we do fragment merging...probably merging
+//       as bundles are installed would be better.
                 ((ModuleImpl) host).attachFragments(null);
 
                 // Fragments are grouped by symbolic name and descending version.

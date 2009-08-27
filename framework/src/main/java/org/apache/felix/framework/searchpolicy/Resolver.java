@@ -196,7 +196,11 @@ public class Resolver
         return null;
     }
 
-    private static boolean isDynamicImportAllowed(IModule importer, String pkgName)
+// TODO: FRAGMENT - This is only public so we could avoid merging fragments when
+//       when it wasn't necessary for dynamic imports. We need to rethink how we
+//       do fragment merging...probably merging as bundles are installed would be
+//       better.
+    public static boolean isDynamicImportAllowed(IModule importer, String pkgName)
     {
         // If any of the module exports this package, then we cannot
         // attempt to dynamically import it.

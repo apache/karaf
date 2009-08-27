@@ -3938,14 +3938,19 @@ ex.printStackTrace();
 
                     // Before trying to resolve, tell the resolver state to
                     // merge all fragments into their hosts.
-                    try
+// TODO: FRAGMENT - We need to rethink how we do fragment merging...probably merging
+//       as bundles are installed would be better.
+                    if (Resolver.isDynamicImportAllowed(importer, pkgName))
                     {
-                        m_resolverState.mergeFragments(null);
-                    }
-                    catch (Exception ex)
-                    {
-                        ex.printStackTrace();
-                        throw new ResolveException("Unable to merge fragments", importer, null);
+                        try
+                        {
+                            m_resolverState.mergeFragments(null);
+                        }
+                        catch (Exception ex)
+                        {
+                            ex.printStackTrace();
+                            throw new ResolveException("Unable to merge fragments", importer, null);
+                        }
                     }
 
                     Object[] result = m_resolver.resolveDynamicImport(m_resolverState, importer, pkgName);
