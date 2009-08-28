@@ -219,7 +219,7 @@ public class Console implements Runnable
             } else {
                 i = queue.poll();
             }
-            if (i == null || i == 4) {
+            if (i == null) {
                 return -1;
             }
             return i;
@@ -275,34 +275,30 @@ public class Console implements Runnable
                         } else {
                             c = terminal.readCharacter(in);
                         }
-                        if (c == -1 || c == 4)
+                        if (c == -1)
                         {
-                            //System.err.println("Received  " + c + " ... closing");
-                            err.println("^D");
                             queue.put(c);
                             return;
+                        }
+                        else if (c == 4)
+                        {
+                            err.println("^D");
                         }
                         else if (c == 3)
                         {
                             err.println("^C");
                             reader.getCursorBuffer().clearBuffer();
                             interrupt();
-                            queue.put(c);
                         }
-                        else
-                        {
-                            queue.put(c);
-                        }
+                        queue.put(c);
                     }
                     catch (Throwable t) {
-                        //System.err.println("Exception in pipe: " + t);
                         return;
                     }
                 }
             }
             finally
             {
-                //System.err.println("Exiting pipe thread");
                 close();
             }
         }
