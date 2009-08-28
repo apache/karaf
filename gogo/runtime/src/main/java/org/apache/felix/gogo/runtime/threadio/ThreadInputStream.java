@@ -23,7 +23,7 @@ import java.io.InputStream;
 
 public class ThreadInputStream extends InputStream
 {
-    ThreadLocal<InputStream> map = new ThreadLocal<InputStream>();
+    ThreadLocal<InputStream> map = new InheritableThreadLocal<InputStream>();
     InputStream dflt;
 
     public ThreadInputStream(InputStream in)

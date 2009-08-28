@@ -26,7 +26,7 @@ import java.util.Locale;
 public class ThreadPrintStream extends PrintStream
 {
     PrintStream dflt;
-    ThreadLocal<PrintStream> map = new ThreadLocal<PrintStream>();
+    ThreadLocal<PrintStream> map = new InheritableThreadLocal<PrintStream>();
 
     public ThreadPrintStream(PrintStream out)
     {

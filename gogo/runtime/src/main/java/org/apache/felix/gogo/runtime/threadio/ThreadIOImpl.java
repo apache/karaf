@@ -31,7 +31,7 @@ public class ThreadIOImpl implements ThreadIO
     ThreadPrintStream err = new ThreadPrintStream(System.err);
     ThreadPrintStream out = new ThreadPrintStream(System.out);
     ThreadInputStream in = new ThreadInputStream(System.in);
-    ThreadLocal<Marker> current = new ThreadLocal<Marker>();
+    ThreadLocal<Marker> current = new InheritableThreadLocal<Marker>();
 
     public void start()
     {
