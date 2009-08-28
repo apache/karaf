@@ -23,6 +23,7 @@ import org.apache.sshd.SshServer;
 import org.apache.felix.karaf.gshell.console.BlueprintContainerAware;
 import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
 import org.apache.felix.gogo.commands.Option;
+import org.apache.felix.gogo.commands.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.osgi.service.blueprint.container.BlueprintContainer;
@@ -32,6 +33,7 @@ import org.osgi.service.blueprint.container.BlueprintContainer;
  *
  * @version $Rev: 720411 $ $Date: 2008-11-25 05:32:43 +0100 (Tue, 25 Nov 2008) $
  */
+@Command(scope = "ssh", name = "sshd", description = "Create an SSH server")
 public class SshServerAction extends OsgiCommandSupport implements BlueprintContainerAware
 {
     private final Logger log = LoggerFactory.getLogger(getClass());

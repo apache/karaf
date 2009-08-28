@@ -31,6 +31,7 @@ import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
 import org.apache.felix.karaf.gshell.console.BlueprintContainerAware;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.osgi.service.blueprint.container.BlueprintContainer;
@@ -40,6 +41,7 @@ import org.osgi.service.blueprint.container.BlueprintContainer;
  *
  * @version $Rev: 721244 $ $Date: 2008-11-27 18:19:56 +0100 (Thu, 27 Nov 2008) $
  */
+@Command(scope = "ssh", name = "ssh", description = "Connect to a remote SSH server")
 public class SshAction
     extends OsgiCommandSupport implements BlueprintContainerAware
 {
