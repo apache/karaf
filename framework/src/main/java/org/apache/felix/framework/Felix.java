@@ -2166,20 +2166,10 @@ ex.printStackTrace();
 
         try
         {
-            // Extension Bundles are not removed until the framework is shutdown
-            if (bundle.isExtension())
-            {
-                bundle.setPersistentStateUninstalled();
-                bundle.setRemovalPending(true);
-                rememberUninstalledBundle(bundle);
-                setBundleStateAndNotify(bundle, Bundle.INSTALLED);
-                return;
-            }
-
             // The spec says that uninstall should always succeed, so
             // catch an exception here if stop() doesn't succeed and
             // rethrow it at the end.
-            if (bundle.getState() == Bundle.ACTIVE)
+            if (!bundle.isExtension() && (bundle.getState() == Bundle.ACTIVE))
             {
                 try
                 {
