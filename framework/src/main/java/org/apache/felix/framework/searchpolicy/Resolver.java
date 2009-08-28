@@ -353,13 +353,33 @@ public class Resolver
     }
 
     private void populateCandidatesMap(
-        ResolverState state, Map candidatesMap, Map byproductMap,
+        ResolverState state, Map candidatesMap, Map cycleByproductMap,
         IModule instigatingModule, IModule targetModule)
         throws ResolveException
     {
         // Detect cycles.
         if (candidatesMap.containsKey(targetModule))
         {
+            // Check to see if we are really in a cyclical dependency so
+            // we can add the instigating module to the target module's
+            // byproduct map. We know we are in a cycle if the target module's
+            // candidates map entry is null.
+            if ((instigatingModule != null) && (candidatesMap.get(targetModule) == null))
+            {
+                IModule[] modules = (IModule[]) cycleByproductMap.get(targetModule);
+                if (modules == null)
+                {
+                    modules = new IModule[] { instigatingModule };
+                }
+                else
+                {
+                    IModule[] tmp = new IModule[modules.length + 1];
+                    System.arraycopy(modules, 0, tmp, 0, modules.length);
+                    tmp[modules.length] = instigatingModule;
+                    modules = tmp;
+                }
+                cycleByproductMap.put(targetModule, modules);
+            }
             return;
         }
 
@@ -407,7 +427,7 @@ public class Resolver
                         if (!candidates[candIdx].m_module.isResolved())
                         {
                             populateCandidatesMap(
-                                state, candidatesMap, byproductMap,
+                                state, candidatesMap, cycleByproductMap,
                                 targetModule, candidates[candIdx].m_module);
                         }
                     }
@@ -436,11 +456,8 @@ public class Resolver
                 // it is invalid.
                 candidatesMap.remove(targetModule);
 
-                // Also remove any byproduct resolved modules.
-// TODO: FELIX-1422 - Maybe this goes too far and should only discard the
-//       the failing module as a candidate, since some modules may have
-//       resolved correctly because they didn't depend on the failing module.
-                removeByproductModules(candidatesMap, byproductMap, targetModule);
+                // Also remove any cycle byproduct resolved modules.
+               removeCycleByproducts(candidatesMap, cycleByproductMap, targetModule);
 
                 // If we have received an exception while trying to populate
                 // the candidates map, rethrow that exception since it might
@@ -469,38 +486,18 @@ public class Resolver
         // candidate set list to the candidates map to be used for calculating
         // uses constraints and ultimately wires.
         candidatesMap.put(targetModule, candSetList);
-
-        // Also add this module as a byproduct of the instigating module,
-        // since it caused it to be resolved; this is necessary if we have
-        // a failure to resolver somewhere higher up.
-        if (instigatingModule != null)
-        {
-            IModule[] modules = (IModule[]) byproductMap.get(instigatingModule);
-            if (modules == null)
-            {
-                modules = new IModule[] { targetModule };
-            }
-            else
-            {
-                IModule[] tmp = new IModule[modules.length + 1];
-                System.arraycopy(modules, 0, tmp, 0, modules.length);
-                tmp[modules.length] = targetModule;
-                modules = tmp;
-            }
-            byproductMap.put(instigatingModule, modules);
-        }
     }
 
-    private static void removeByproductModules(
-        Map candidatesMap, Map byproductMap, IModule targetModule)
+    private static void removeCycleByproducts(
+        Map candidatesMap, Map cycleByproductMap, IModule targetModule)
     {
-        IModule[] modules = (IModule[]) byproductMap.remove(targetModule);
+        IModule[] modules = (IModule[]) cycleByproductMap.remove(targetModule);
         if (modules != null)
         {
             for (int i = 0; i < modules.length; i++)
             {
                 candidatesMap.remove(modules[i]);
-                removeByproductModules(candidatesMap, byproductMap, modules[i]);
+                removeCycleByproducts(candidatesMap, cycleByproductMap, modules[i]);
             }
         }
     }
