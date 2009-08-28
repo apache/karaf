@@ -27,7 +27,6 @@ import java.util.*;
 import org.apache.felix.framework.cache.*;
 import org.apache.felix.framework.ext.SecurityProvider;
 import org.apache.felix.framework.searchpolicy.*;
-import org.apache.felix.framework.ModuleImpl.ModuleClassLoader;
 import org.apache.felix.framework.ServiceRegistry.ServiceRegistryCallbacks;
 import org.apache.felix.framework.util.*;
 import org.apache.felix.framework.util.manifestparser.*;
@@ -3389,12 +3388,6 @@ ex.printStackTrace();
                 }
             }
 
-            if (restart)
-            {
-// TODO: Extension Bundle - We need a way to restart the framework
-                m_logger.log(Logger.LOG_WARNING, "Framework restart not implemented.");
-            }
-
             // Remove any targeted bundles from the uninstalled bundles
             // array, since they will be removed from the system after
             // the refresh.
@@ -3436,6 +3429,18 @@ ex.printStackTrace();
                     {
                         helpers[i].restart();
                     }
+                }
+            }
+
+            if (restart)
+            {
+                try
+                {
+                    update();
+                }
+                catch (BundleException ex)
+                {
+                    m_logger.log(Logger.LOG_ERROR, "Framework restart error.", ex);
                 }
             }
         }
