@@ -116,7 +116,7 @@ public class AdminServiceImpl implements AdminService {
         if (sshPort <= 0) {
             sshPort = ++defaultPortStart;
         }
-        println("Creating new instance on port " + sshPort + " at: @|bold " + serviceMixBase + "|");
+        println(Ansi.ansi().a("Creating new instance on port ").a(sshPort).a(" at: ").a(Ansi.Attribute.INTENSITY_BOLD).a(serviceMixBase).a(Ansi.Attribute.RESET).toString());
 
         mkdir(serviceMixBase, "bin");
         mkdir(serviceMixBase, "etc");
