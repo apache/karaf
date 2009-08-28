@@ -202,28 +202,61 @@ public class Console implements Runnable
 
     private class ConsoleInputStream extends InputStream
     {
+        private int read(boolean wait) throws IOException
+        {
+            if (!running) {
+                return -1;
+            }
+            checkInterrupt();
+            Integer i;
+            if (wait) {
+                try {
+                    i = queue.take();
+                } catch (InterruptedException e) {
+                    throw new InterruptedIOException();
+                }
+                checkInterrupt();
+            } else {
+                i = queue.poll();
+            }
+            if (i == null || i == 4) {
+                return -1;
+            }
+            return i;
+        }
+
         @Override
         public int read() throws IOException
         {
-            if (!running)
-            {
+            return read(true);
+        }
+
+        @Override
+        public int read(byte b[], int off, int len) throws IOException
+        {
+            if (b == null) {
+                throw new NullPointerException();
+            } else if (off < 0 || len < 0 || len > b.length - off) {
+                throw new IndexOutOfBoundsException();
+            } else if (len == 0) {
+                return 0;
+            }
+
+            int nb = 1;
+            int i = read(true);
+            if (i < 0) {
                 return -1;
             }
-            checkInterrupt();
-            int i;
-            try {
-                i = queue.take();
+            b[off++] = (byte) i;
+            while (nb < len) {
+                i = read(false);
+                if (i < 0) {
+                    return nb;
+                }
+                b[off++] = (byte) i;
+                nb++;
             }
-            catch (InterruptedException e)
-            {
-                throw new InterruptedIOException();
-            }
-            if (i == 4)
-            {
-                return -1;
-            }
-            checkInterrupt();
-            return i;
+            return nb;
         }
     }
 
