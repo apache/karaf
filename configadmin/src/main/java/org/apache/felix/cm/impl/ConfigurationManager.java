@@ -1064,7 +1064,7 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                 Bundle serviceBundle = sr.getBundle();
                 if ( serviceBundle == null )
                 {
-                    log( LogService.LOG_INFO, "ServiceFactory for PID " + pid
+                    log( LogService.LOG_INFO, "Service for PID " + pid
                         + " seems to already have been unregistered, not updating with configuration", null );
                     return;
                 }
@@ -1114,6 +1114,12 @@ public class ConfigurationManager implements BundleActivator, BundleListener
             catch ( Throwable t )
             {
                 handleCallBackError( t, sr, config );
+            }
+
+            // update the lastUpdatedTime if there is configuration
+            if ( config != null )
+            {
+                config.setLastUpdatedTime();
             }
         }
 
@@ -1276,6 +1282,9 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                     {
                         handleCallBackError( t, sr, cfg );
                     }
+
+                    // update the lastUpdatedTime
+                    cfg.setLastUpdatedTime();
                 }
             }
         }
@@ -1292,13 +1301,18 @@ public class ConfigurationManager implements BundleActivator, BundleListener
 
         private final ConfigurationImpl config;
         private final Dictionary properties;
+        private final long lastModificationTime;
         private final boolean fireEvent;
 
 
         UpdateConfiguration( final ConfigurationImpl config, boolean fireEvent )
         {
             this.config = config;
-            this.properties = config.getProperties( true );
+            synchronized ( config )
+            {
+                this.properties = config.getProperties( true );
+                this.lastModificationTime = config.getLastModificationTime();
+            }
             this.fireEvent = fireEvent;
         }
 
@@ -1307,6 +1321,18 @@ public class ConfigurationManager implements BundleActivator, BundleListener
         {
             try
             {
+                // only update configuration if lastModificationTime is
+                // less than lastUpdateTime
+                // (this must be inside the try-catch-finally to ensure
+                // the event is sent regardless of ManagedService[Factory]
+                // update)
+                if ( lastModificationTime < config.getLastUpdatedTime() )
+                {
+                    log( LogService.LOG_DEBUG, "Configuration " + config.getPid()
+                        + " has already been updated, nothing to be done anymore.", null );
+                    return;
+                }
+
                 if ( config.getFactoryPid() == null )
                 {
                     final ServiceReference[] srList = bundleContext.getServiceReferences( ManagedService.class
@@ -1371,6 +1397,9 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                             {
                                 bundleContext.ungetService( userRef );
                             }
+
+                            // update the lastUpdatedTime
+                            config.setLastUpdatedTime();
                         }
                     }
                 }
@@ -1439,6 +1468,9 @@ public class ConfigurationManager implements BundleActivator, BundleListener
                             {
                                 bundleContext.ungetService( ref );
                             }
+
+                            // update the lastUpdatedTime
+                            config.setLastUpdatedTime();
                         }
                     }
                 }

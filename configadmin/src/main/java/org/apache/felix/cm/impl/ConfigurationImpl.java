@@ -40,6 +40,51 @@ import org.osgi.service.log.LogService;
 class ConfigurationImpl extends ConfigurationBase
 {
 
+    /*
+     * Concurrency note: There is a slight (but real) chance of a race condition
+     * between a configuration update and a ManagedService[Factory] registration.
+     * Per the specification a ManagedService must be called with configuration
+     * or null when registered and a ManagedService must be called with currently
+     * existing configuration when registered. Also the ManagedService[Factory]
+     * must be updated when the configuration is updated.
+     *
+     * Consider now this situation of two threads T1 and T2:
+     *
+     *    T1. create and update configuration
+     *      ConfigurationImpl.update persists configuration and sets field
+     *      Thread preempted
+     *
+     *    T2. ManagedServiceUpdate constructor reads configuration
+     *      Uses configuration already persisted by T1 for update
+     *      Schedules task to update service with the configuration
+     *
+     *    T1. Runs again creating the UpdateConfiguration task with the
+     *         configuration persisted before being preempted
+     *      Schedules task to update service
+     *
+     *    Update Thread:
+     *      Updates ManagedService with configuration prepared by T2
+     *      Updates ManagedService with configuration prepared by T1
+     *
+     * The correct behaviour would be here, that the second call to update
+     * would not take place.
+     *
+     * This concurrency safety is implemented with the help of the
+     * lastModificationTime field updated by the configure(Dictionary) method
+     * when setting the properties field and the lastUpdatedTime field updated
+     * in the Update Thread after calling the update(Dictionary) method of
+     * the ManagedService[Factory] service.
+     *
+     * The UpdateConfiguration task compares the lastModificationTime to the
+     * lastUpdateTime. If the configuration has been modified after being
+     * updated the last time, it is updated in the ManagedService[Factory]. If
+     * the configuration has already been updated since being modified (as in
+     * the case above), the UpdateConfiguration thread does not call the update
+     * method (but still sends the CM_UPDATED event).
+     *
+     * See also FELIX-1542.
+     */
+
     /**
      * The name of a synthetic property stored in the persisted configuration
      * data to indicate that the configuration data is new, that is created but
@@ -80,6 +125,30 @@ class ConfigurationImpl extends ConfigurationBase
      */
     private volatile boolean isDeleted;
 
+    /**
+     * Time of last configuration properties update.
+     * This is intended to be managed by the {@link #configure(Dictionary)}
+     * method when setting the properties field.
+     * <p>
+     * This field is set to the current time upon construction and every time
+     * the {@link #configure(Dictionary)} method sets the {@link #properties}
+     * field.
+     */
+    private volatile long lastModificationTime;
+
+    /**
+     * Time of last submission of the configuration properties to the (or more)
+     * ManagedService[Factory] services this is managed by the update thread
+     * and must solely be handled on the Update Thread.
+     * <p>
+     * This field is initialized to -1 in the constructors and is set to the
+     * current time when the configuration properties are supplied to the
+     * ManagedService[Factory] in the Update Thread.
+     *
+     * @see #lastModificationTime
+     */
+    private volatile long lastUpdatedTime;
+
 
     ConfigurationImpl( ConfigurationManager configurationManager, PersistenceManager persistenceManager,
         Dictionary properties )
@@ -89,6 +158,7 @@ class ConfigurationImpl extends ConfigurationBase
 
         this.factoryPID = ( String ) properties.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
         this.isDeleted = false;
+        this.lastUpdatedTime = -1;
 
         // set the properties internally
         configureFromPersistence( properties );
@@ -103,6 +173,8 @@ class ConfigurationImpl extends ConfigurationBase
         this.factoryPID = factoryPid;
         this.isDeleted = false;
         this.properties = null;
+        this.lastModificationTime = System.currentTimeMillis();
+        this.lastUpdatedTime = -1;
 
         // this is a new configuration object, store immediately unless
         // the new configuration object is created from a factory, in which
@@ -306,6 +378,42 @@ class ConfigurationImpl extends ConfigurationBase
 
 
     /**
+     * Returns the time of the last update of this configuration object. In
+     * particular this is the time at which the properties field has been
+     * set to new values.
+     * <p>
+     * This value may be compared to the {@link #getLastUpdatedTime()} to
+     * decide whether to update the ManagedService[Factory] or not.
+     */
+    long getLastModificationTime()
+    {
+        return lastModificationTime;
+    }
+
+    /**
+     * Returns the time of the last update of this configuration to the
+     * subscribing ManagedService or ManagedServiceFactory. This time may be
+     * compared to the {@link #getLastModificationTime()} to decide whether
+     * the configuration should be updated or not.
+     */
+    long getLastUpdatedTime()
+    {
+        return lastUpdatedTime;
+    }
+
+    /**
+     * Sets the time of the last update of this configuration to the
+     * ManagedService or ManagedServiceFactory subscribed to this configuration.
+     * <p>
+     * This method should only be called from the Update Thread after supplying
+     * the configuration to the ManagedService[Factory].
+     */
+    void setLastUpdatedTime( )
+    {
+        this.lastUpdatedTime = System.currentTimeMillis();
+    }
+
+    /**
      * Returns <code>false</code> if this configuration contains configuration
      * properties. Otherwise <code>true</code> is returned and this is a
      * newly creted configuration object whose {@link #update(Dictionary)}
@@ -364,7 +472,11 @@ class ConfigurationImpl extends ConfigurationBase
             }
         }
 
-        this.properties = newProperties;
+        synchronized ( this )
+        {
+            this.properties = newProperties;
+            this.lastModificationTime = System.currentTimeMillis();
+        }
     }
 
 
