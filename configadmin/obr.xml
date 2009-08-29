@@ -34,7 +34,7 @@
     <capability name="service">
         <p n="service" v="org.osgi.service.cm.ConfigurationAdmin" />
         <p n="service.description"
-            v="Configuration Admin Service Specification 1.2 Implementation" />
+            v="Configuration Admin Service Specification 1.3 Implementation" />
         <p n="service.pid" v="org.apache.felix.cm.ConfigurationAdmin" />
 
         <p n="service.vendor" v="Apache Software Foundation" />
