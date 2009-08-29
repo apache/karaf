@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
     /*
-    * $Revision: 7562 $
+    * $Revision: 7774 $
     *
     * Copyright (c) OSGi Alliance (2008, 2009). All Rights Reserved.
     *
@@ -298,7 +298,7 @@
 				<xsd:attribute name="destroy-method" use="prohibited" />
 				<xsd:attribute name="factory-method" type="Tmethod" />
 				<xsd:attribute name="factory-ref" type="Tidref" />
-				<xsd:attribute name="scope" use="prohibited" fixed="prototype" />
+				<xsd:attribute name="scope" use="prohibited" />
 				<xsd:anyAttribute namespace="##other"
 					processContents="strict" />
 			</xsd:restriction>
@@ -1197,10 +1197,19 @@
 	</xsd:simpleType>
 
 	<xsd:simpleType name="Tscope">
-		<xsd:restriction base="xsd:NMTOKEN">
-			<xsd:enumeration value="singleton" />
-			<xsd:enumeration value="prototype" />
-		</xsd:restriction>
+		<xsd:union>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:NMTOKEN">
+					<xsd:enumeration value="singleton" />
+					<xsd:enumeration value="prototype" />
+				</xsd:restriction>
+			</xsd:simpleType>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:QName">
+					<xsd:pattern value=".+:.+" />
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:union>
 	</xsd:simpleType>
 
 	<xsd:simpleType name="Tservice-use">

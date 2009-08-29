@@ -24,7 +24,7 @@ import java.util.List;
  * This is specified by the <code>bean</code> element.
  * 
  * @ThreadSafe
- * @version $Revision: 7563 $
+ * @version $Revision: 7773 $
  */
 public interface BeanMetadata extends Target, ComponentMetadata {
 
@@ -135,7 +135,8 @@ public interface BeanMetadata extends Target, ComponentMetadata {
 	/**
 	 * Return the scope for the bean.
 	 * 
-	 * @return The scope for the bean.
+	 * @return The scope for the bean. Returns <code>null</code> if the scope
+	 *         has not been explicitly specified in the bean definition.
 	 * @see #SCOPE_SINGLETON
 	 * @see #SCOPE_PROTOTYPE
 	 */
