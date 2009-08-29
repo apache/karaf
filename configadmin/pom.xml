@@ -96,7 +96,7 @@
                         <Export-Package>
                             org.apache.felix.cm;
                             org.apache.felix.cm.file;version=1.0,
-                            org.osgi.service.cm;version=1.3
+                            org.osgi.service.cm;-split-package:=merge-first
                         </Export-Package>
                         <Private-Package>
                             org.apache.felix.cm.impl,
