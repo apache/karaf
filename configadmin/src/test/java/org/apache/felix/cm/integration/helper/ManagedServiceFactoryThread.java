@@ -78,7 +78,6 @@ public class ManagedServiceFactoryThread extends TestThread implements ManagedSe
     public void doRun()
     {
         service = bundleContext.registerService( ManagedServiceFactory.class.getName(), this, serviceProps );
-        System.out.println( "   " + serviceProps.get( Constants.SERVICE_PID ) + " - ManagedServiceFactory registered" );
     }
 
 

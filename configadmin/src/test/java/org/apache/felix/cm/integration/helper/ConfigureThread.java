@@ -68,7 +68,6 @@ public class ConfigureThread extends TestThread
         try
         {
             config.update( props );
-            System.out.println( "   " + config.getPid() + " - Configuration updated" );
         }
         catch ( IOException ioe )
         {
