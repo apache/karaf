@@ -1,4 +1,4 @@
-/* 
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -31,17 +31,21 @@ import org.osgi.service.log.LogService;
 public class UpdateThread extends Thread
 {
 
+    // the base name of the thread which is set while there is no
+    // task to run
+    private static final String BASE_THREAD_NAME = "Configuration Updater";
+
     // the configuration manager on whose behalf this thread is started
     // (this is mainly used for logging)
     private ConfigurationManager configurationManager;
-    
+
     // the queue of Runnable instances  to be run
     private LinkedList updateTasks;
 
 
     public UpdateThread( ConfigurationManager configurationManager )
     {
-        super( "Configuration Updater" );
+        super( BASE_THREAD_NAME );
 
         this.configurationManager = configurationManager;
         this.updateTasks = new LinkedList();
@@ -84,12 +88,20 @@ public class UpdateThread extends Thread
             // otherwise execute the task, log any issues
             try
             {
+                // set the thread name indicating the current task
+                setName( BASE_THREAD_NAME + " (" + task + ")" );
+
                 configurationManager.log( LogService.LOG_DEBUG, "Running task " + task, null );
                 task.run();
             }
             catch ( Throwable t )
             {
                 configurationManager.log( LogService.LOG_ERROR, "Unexpected problem executing task", t );
+            }
+            finally
+            {
+                // reset the thread name to "idle"
+                setName( BASE_THREAD_NAME );
             }
         }
     }
@@ -112,7 +124,7 @@ public class UpdateThread extends Thread
 
             // append to the task queue
             updateTasks.add( update );
-            
+
             // notify the waiting thread
             updateTasks.notifyAll();
         }
