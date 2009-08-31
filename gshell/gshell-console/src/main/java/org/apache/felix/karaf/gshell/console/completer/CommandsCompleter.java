@@ -52,7 +52,9 @@ public class CommandsCompleter implements Completer {
     }
 
     public void unregister(ServiceReference reference) {
-        completers.remove(reference);
+        if (reference != null) {
+            completers.remove(reference);
+        }
     }
 
     private Set<String> getNames(ServiceReference reference) {
