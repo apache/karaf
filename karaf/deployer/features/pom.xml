@@ -50,8 +50,12 @@
             <artifactId>org.apache.felix.karaf.features.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.felix.karaf.deployer</groupId>
-            <artifactId>org.apache.felix.karaf.deployer.filemonitor</artifactId>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.fileinstall</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>

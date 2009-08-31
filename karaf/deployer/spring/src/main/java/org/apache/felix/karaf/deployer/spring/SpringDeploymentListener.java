@@ -27,13 +27,13 @@ import org.w3c.dom.Document;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.felix.karaf.deployer.filemonitor.DeploymentListener;
+import org.apache.felix.fileinstall.listener.ArtifactTransformer;
 
 /**
  * A deployment listener that listens for spring xml applications
  * and creates bundles for these.
  */
-public class SpringDeploymentListener implements DeploymentListener {
+public class SpringDeploymentListener implements ArtifactTransformer {
 
     private static final Log LOGGER = LogFactory.getLog(SpringDeploymentListener.class);
 
@@ -55,7 +55,7 @@ public class SpringDeploymentListener implements DeploymentListener {
         return false;
     }
 
-    public File handle(File artifact, File tmpDir) {
+    public File transform(File artifact, File tmpDir) {
         try {
             File destFile = new File(tmpDir, artifact.getName() + ".jar");
             FileOutputStream os = new FileOutputStream(destFile);

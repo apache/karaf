@@ -43,7 +43,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.felix.karaf.features.Feature;
 import org.apache.felix.karaf.features.FeaturesService;
 import org.apache.felix.karaf.features.Repository;
-import org.apache.felix.karaf.deployer.filemonitor.DeploymentListener;
+import org.apache.felix.fileinstall.listener.ArtifactTransformer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -53,7 +53,7 @@ import org.osgi.framework.SynchronousBundleListener;
 /**
  * A deployment listener able to hot deploy a feature descriptor
  */
-public class FeatureDeploymentListener implements DeploymentListener, SynchronousBundleListener {
+public class FeatureDeploymentListener implements ArtifactTransformer, SynchronousBundleListener {
 
     public static final String FEATURE_PATH = "org.apache.felix.karaf.gshell.features";
 
@@ -106,7 +106,7 @@ public class FeatureDeploymentListener implements DeploymentListener, Synchronou
         return false;
     }
 
-    public File handle(File artifact, File tmpDir) {
+    public File transform(File artifact, File tmpDir) {
         // We can't really install the feature right now and just return nothing.
         // We would not be aware of the fact that the bundle has been uninstalled
         // and therefore require the feature to be uninstalled.

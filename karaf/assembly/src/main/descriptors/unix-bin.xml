@@ -124,6 +124,7 @@
                 <include>org.apache.felix:org.apache.felix.configadmin</include>
                 <include>org.apache.felix:org.apache.felix.prefs</include>
                 <include>org.apache.felix:org.apache.felix.framework</include>
+                <include>org.apache.felix:org.apache.felix.fileinstall</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -181,7 +182,6 @@
             <useProjectArtifact>false</useProjectArtifact>
             <outputFileNameMapping>org/apache/felix/karaf/deployer/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
-                <include>org.apache.felix.karaf.deployer:org.apache.felix.karaf.deployer.filemonitor</include>
                 <include>org.apache.felix.karaf.deployer:org.apache.felix.karaf.deployer.spring</include>
                 <include>org.apache.felix.karaf.deployer:org.apache.felix.karaf.deployer.blueprint</include>
                 <include>org.apache.felix.karaf.deployer:org.apache.felix.karaf.deployer.features</include>
