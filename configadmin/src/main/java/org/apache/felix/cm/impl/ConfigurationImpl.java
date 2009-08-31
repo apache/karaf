@@ -83,6 +83,17 @@ class ConfigurationImpl extends ConfigurationBase
      * method (but still sends the CM_UPDATED event).
      *
      * See also FELIX-1542.
+     *
+     * FELIX-1545 provides further update to the concurrency situation defining
+     * three more failure cases:
+     *
+     *    (1) System.currentTimeMillis() may be too coarse graind to protect
+     *        against race condition.
+     *    (2) ManagedService update sets last update time regardless of whether
+     *        configuration was provided or not. This may cause a configuration
+     *        update to be lost.
+     *    (3) ManagedService update does not respect last update time which
+     *        in turn may cause duplicate configuration delivery.
      */
 
     /**
@@ -126,24 +137,19 @@ class ConfigurationImpl extends ConfigurationBase
     private volatile boolean isDeleted;
 
     /**
-     * Time of last configuration properties update.
-     * This is intended to be managed by the {@link #configure(Dictionary)}
-     * method when setting the properties field.
-     * <p>
-     * This field is set to the current time upon construction and every time
-     * the {@link #configure(Dictionary)} method sets the {@link #properties}
-     * field.
+     * Current configuration modification counter. This field is incremented
+     * each time the {@link #properties} field is set (in the constructor or the
+     * {@link #configure(Dictionary)} method. field.
      */
     private volatile long lastModificationTime;
 
     /**
-     * Time of last submission of the configuration properties to the (or more)
-     * ManagedService[Factory] services this is managed by the update thread
-     * and must solely be handled on the Update Thread.
-     * <p>
-     * This field is initialized to -1 in the constructors and is set to the
-     * current time when the configuration properties are supplied to the
-     * ManagedService[Factory] in the Update Thread.
+     * Value of the {@link #lastModificationTime} counter at the time the non-
+     * <code>null</code> properties of this configuration have been updated to a
+     * ManagedService[Factory]. This field is initialized to -1 in the
+     * constructors and set to the value of the {@link #lastModificationTime} by
+     * the {@link #setLastUpdatedTime()} method called from the respective task
+     * updating the configuration.
      *
      * @see #lastModificationTime
      */
@@ -172,9 +178,11 @@ class ConfigurationImpl extends ConfigurationBase
 
         this.factoryPID = factoryPid;
         this.isDeleted = false;
-        this.properties = null;
-        this.lastModificationTime = System.currentTimeMillis();
         this.lastUpdatedTime = -1;
+
+        // first "update"
+        this.properties = null;
+        setLastModificationTime();
 
         // this is a new configuration object, store immediately unless
         // the new configuration object is created from a factory, in which
@@ -378,39 +386,64 @@ class ConfigurationImpl extends ConfigurationBase
 
 
     /**
-     * Returns the time of the last update of this configuration object. In
-     * particular this is the time at which the properties field has been
-     * set to new values.
+     * Increments the last modification counter of this configuration to cause
+     * the ManagedService or ManagedServiceFactory subscribed to this
+     * configuration to be updated.
      * <p>
-     * This value may be compared to the {@link #getLastUpdatedTime()} to
-     * decide whether to update the ManagedService[Factory] or not.
+     * This method is intended to only be called by the constructor(s) of this
+     * class and the {@link #update(Dictionary)} method to indicate to the
+     * update threads, the configuration is ready for distribution.
+     * <p>
+     * Setting the properties field and incrementing this counter should be
+     * done synchronized on this instance.
+     */
+    void setLastModificationTime( )
+    {
+        this.lastModificationTime++;
+    }
+
+
+    /**
+     * Returns the modification counter of the last modification of the
+     * properties of this configuration object.
+     * <p>
+     * This value may be compared to the {@link #getLastUpdatedTime()} to decide
+     * whether to update the ManagedService[Factory] or not.
+     * <p>
+     * Getting the properties of this configuration and this counter should be
+     * done synchronized on this instance.
      */
     long getLastModificationTime()
     {
         return lastModificationTime;
     }
 
+
     /**
-     * Returns the time of the last update of this configuration to the
-     * subscribing ManagedService or ManagedServiceFactory. This time may be
-     * compared to the {@link #getLastModificationTime()} to decide whether
-     * the configuration should be updated or not.
+     * Returns the modification counter of the last update of this configuration
+     * to the subscribing ManagedService or ManagedServiceFactory. This value
+     * may be compared to the {@link #getLastModificationTime()} to decide
+     * whether the configuration should be updated or not.
      */
     long getLastUpdatedTime()
     {
         return lastUpdatedTime;
     }
 
+
     /**
-     * Sets the time of the last update of this configuration to the
-     * ManagedService or ManagedServiceFactory subscribed to this configuration.
+     * Sets the last update time field to the current value of the last
+     * modification time field to indicate the properties of this configuration
+     * have been updated in the ManagedService[Factory].
      * <p>
      * This method should only be called from the Update Thread after supplying
      * the configuration to the ManagedService[Factory].
      */
     void setLastUpdatedTime( )
     {
-        this.lastUpdatedTime = System.currentTimeMillis();
+        synchronized (this) {
+            this.lastUpdatedTime = getLastModificationTime();
+        }
     }
 
     /**
@@ -475,7 +508,7 @@ class ConfigurationImpl extends ConfigurationBase
         synchronized ( this )
         {
             this.properties = newProperties;
-            this.lastModificationTime = System.currentTimeMillis();
+            setLastModificationTime();
         }
     }
 
