@@ -820,7 +820,8 @@ public class ModuleImpl implements IModule
             try
             {
                 // Get the appropriate class loader for delegation.
-                ClassLoader parent = m_classLoader.getParent();
+                ClassLoader parent = (m_classLoader == null)
+                    ? determineParentClassLoader() : m_classLoader.getParent();
                 parent = (parent == null) ? m_bootClassLoader : parent;
                 urls = parent.getResources(name);
             }
