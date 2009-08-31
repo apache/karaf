@@ -81,6 +81,12 @@ public class AdminServiceImpl implements AdminService {
 
     public synchronized void init() throws Exception {
         try {
+            if (!storageLocation.isFile()) {
+                if (storageLocation.exists()) {
+                    LOGGER.error("Instances storage location should be a file: " + storageLocation);
+                }
+                return;
+            }
             Properties storage = loadStorage(storageLocation);
             int count = Integer.parseInt(storage.getProperty("count", "0"));
             defaultPortStart = Integer.parseInt(storage.getProperty("port", Integer.toString(defaultPortStart)));
