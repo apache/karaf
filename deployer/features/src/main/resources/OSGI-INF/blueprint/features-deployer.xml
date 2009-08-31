@@ -21,8 +21,7 @@
            xmlns:cm="http://www.osgi.org/xmlns/blueprint-cm/v1.0.0"
            default-activation="lazy">
 
-    <service interface="org.apache.felix.karaf.deployer.filemonitor.DeploymentListener"
-             ref="featureDeploymentListener"/>
+    <service ref="featureDeploymentListener" auto-export="interfaces"/>
 
     <bean id="featureDeploymentListener" class="org.apache.felix.karaf.deployer.features.FeatureDeploymentListener"
           init-method="init" destroy-method="destroy" activation="lazy">

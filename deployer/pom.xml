@@ -34,7 +34,6 @@
     <name>Apache Felix Karaf :: Deployer</name>
 
     <modules>
-        <module>filemonitor</module>
         <module>spring</module>
         <module>blueprint</module>
         <module>features</module>
