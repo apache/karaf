@@ -53,9 +53,4 @@ public class UtilTest extends TestCase
         assertEquals("${a", Util.substVars("${a", "b", null, new Hashtable()));
     }
 
-    public void testCanRecognizeInvalidJar()
-    {
-        assertFalse(Util.isValidJar("src/test/resources/watched/firstjar.jar"));
-        assertFalse(Util.isValidJar("src/test/resources/watched/notexistentfile.jar"));
-    }
 }

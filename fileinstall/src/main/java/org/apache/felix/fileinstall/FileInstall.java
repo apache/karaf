@@ -21,6 +21,9 @@ package org.apache.felix.fileinstall;
 import java.util.*;
 
 import org.apache.felix.fileinstall.util.Util;
+import org.apache.felix.fileinstall.listener.ArtifactListener;
+import org.apache.felix.fileinstall.listener.ArtifactInstaller;
+import org.apache.felix.fileinstall.listener.ArtifactTransformer;
 import org.osgi.framework.*;
 import org.osgi.service.cm.*;
 import org.osgi.service.packageadmin.*;
@@ -36,12 +39,16 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory
 {
     static ServiceTracker padmin;
     static ServiceTracker cmTracker;
+    static List /* <ArtifactListener> */ listeners = new ArrayList /* <ArtifactListener> */();
     BundleContext context;
     Map watchers = new HashMap();
+    ConfigInstaller configInstaller;
+    ServiceTracker listenersTracker;
 
     public void start(BundleContext context) throws Exception
     {
         this.context = context;
+        addListener(new BundleTransformer());
         Hashtable props = new Hashtable();
         props.put(Constants.SERVICE_PID, getName());
         context.registerService(ManagedServiceFactory.class.getName(), this,
@@ -49,8 +56,39 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory
 
         padmin = new ServiceTracker(context, PackageAdmin.class.getName(), null);
         padmin.open();
-        cmTracker = new ServiceTracker(context, ConfigurationAdmin.class.getName(), null);
+        cmTracker = new ServiceTracker(context, ConfigurationAdmin.class.getName(), null)
+        {
+            public Object addingService(ServiceReference serviceReference)
+            {
+                ConfigurationAdmin cm = (ConfigurationAdmin) super.addingService(serviceReference);
+                configInstaller = new ConfigInstaller(context);
+                addListener(configInstaller);
+                return cm;
+            }
+            public void removedService(ServiceReference serviceReference, Object o)
+            {
+                configInstaller = null;
+                removeListener(configInstaller);
+                super.removedService(serviceReference, o);
+            }
+        };
         cmTracker.open();
+        String flt = "(|(" + Constants.OBJECTCLASS + "=" + ArtifactInstaller.class.getName() + ")"
+                     + "(" + Constants.OBJECTCLASS + "=" + ArtifactTransformer.class.getName() + "))";
+        listenersTracker = new ServiceTracker(context, FrameworkUtil.createFilter(flt), null)
+        {
+            public Object addingService(ServiceReference serviceReference)
+            {
+                ArtifactListener listener = (ArtifactListener) super.addingService(serviceReference);
+                addListener(listener);
+                return listener;
+            }
+            public void removedService(ServiceReference serviceReference, Object o)
+            {
+                removeListener((ArtifactListener) o);
+            }
+        };
+        listenersTracker.open();
 
         // Created the initial configuration
         Hashtable ht = new Hashtable();
@@ -59,6 +97,7 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory
         set(ht, DirectoryWatcher.DIR);
         set(ht, DirectoryWatcher.DEBUG);
         set(ht, DirectoryWatcher.FILTER);
+        set(ht, DirectoryWatcher.TMPDIR);
         set(ht, DirectoryWatcher.START_NEW_BUNDLES);
         updated("initial", ht);
     }
@@ -93,6 +132,7 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory
                 // Ignore
             }
         }
+        listenersTracker.close();
         cmTracker.close();
         padmin.close();
     }
@@ -115,23 +155,71 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory
         throws ConfigurationException
     {
         deleted(pid);
-        performSubstitution(properties);    
+        Util.performSubstitution(properties);    
         
         DirectoryWatcher watcher = new DirectoryWatcher(properties, context);
         watchers.put(pid, watcher);
         watcher.start();
     }
 
-    private void performSubstitution(Dictionary properties)
+    private void addListener(ArtifactListener listener)
     {
-        for (Enumeration e = properties.keys(); e.hasMoreElements(); )
+        synchronized (listeners)
         {
-            String name = (String) e.nextElement();
-            Object value = properties.get(name);
-            properties.put(name,
-                value instanceof String
-                    ? Util.substVars((String) value, name, null, properties)
-                    : value);
+            listeners.add(listener);
         }
     }
+
+    private void removeListener(ArtifactListener listener)
+    {
+        synchronized (listeners)
+        {
+            listeners.remove(listener);
+        }
+    }
+
+    static List getListeners()
+    {
+        synchronized (listeners)
+        {
+            return new ArrayList(listeners);
+        }
+    }
+
+    static PackageAdmin getPackageAdmin()
+    {
+        return getPackageAdmin(10000);
+    }
+
+    static PackageAdmin getPackageAdmin(long timeout)
+    {
+        try
+        {
+            return (PackageAdmin) padmin.waitForService(timeout);
+        }
+        catch (InterruptedException e)
+        {
+            Thread.currentThread().interrupt();
+            return null;
+        }
+    }
+
+    static ConfigurationAdmin getConfigurationAdmin()
+    {
+        return getConfigurationAdmin(10000);
+    }
+
+    static ConfigurationAdmin getConfigurationAdmin(long timeout)
+    {
+        try
+        {
+            return (ConfigurationAdmin) cmTracker.waitForService(timeout);
+        }
+        catch (InterruptedException e)
+        {
+            Thread.currentThread().interrupt();
+            return null;
+        }
+    }
+
 }

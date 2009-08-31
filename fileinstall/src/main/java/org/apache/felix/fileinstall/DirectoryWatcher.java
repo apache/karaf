@@ -21,12 +21,16 @@ package org.apache.felix.fileinstall;
 import java.io.*;
 import java.util.*;
 import java.net.URISyntaxException;
+import java.net.URI;
 
 import org.apache.felix.fileinstall.util.Util;
+import org.apache.felix.fileinstall.listener.ArtifactInstaller;
+import org.apache.felix.fileinstall.listener.ArtifactTransformer;
+import org.apache.felix.fileinstall.listener.ArtifactListener;
 import org.osgi.framework.*;
-import org.osgi.service.cm.*;
-import org.osgi.service.log.*;
 import org.osgi.service.packageadmin.*;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * -DirectoryWatcher-
@@ -57,69 +61,49 @@ public class DirectoryWatcher extends Thread
     public final static String POLL = "felix.fileinstall.poll";
     public final static String DIR = "felix.fileinstall.dir";
     public final static String DEBUG = "felix.fileinstall.debug";
+    public final static String TMPDIR = "felix.fileinstall.tmpdir";
     public final static String FILTER = "felix.fileinstall.filter";
-    public final static String START_NEW_BUNDLES =
-        "felix.fileinstall.bundles.new.start";
+    public final static String START_NEW_BUNDLES = "felix.fileinstall.bundles.new.start";
+
     File watchedDirectory;
-    long poll = 2000;
+    File tmpDir;
+    long poll;
     long debug;
+    boolean startBundles;
     String filter;
-    boolean startBundles = true; // by default, we start bundles.
     BundleContext context;
-    boolean reported;
     String originatingFileName;
-    
-    Map/* <String, Jar> */ currentManagedBundles = new HashMap();
 
-    // Represents jars that could not be installed
-    Map/* <String, Jar> */ installationFailures = new HashMap();
+    // Map of all installed artifacts
+    Map/* <File, Artifact> */ currentManagedArtifacts = new HashMap/* <File, Artifact> */();
 
-    // Represents jars that could not be installed
-    Set/* <Bundle> */ startupFailures = new HashSet();
+    // The scanner to report files changes
+    Scanner scanner;
+
+    // Represents files that could not be processed because of a missing artifact listener
+    Set/* <File> */ processingFailures = new HashSet/* <File> */();
+
+    // Represents artifacts that could not be installed
+    Map/* <File, Artifact> */ installationFailures = new HashMap/* <File, Artifact> */();
+
+    // Represents artifacts that could not be installed
+    Set/* <Bundle> */ startupFailures = new HashSet/* <Bundle> */();
     
     public DirectoryWatcher(Dictionary properties, BundleContext context)
     {
         super(properties.toString());
         this.context = context;
-        poll = getLong(properties, POLL, poll);
+        poll = getLong(properties, POLL, 2000);
         debug = getLong(properties, DEBUG, -1);
         originatingFileName = (String) properties.get(FILENAME);
-        
-        String dir = (String) properties.get(DIR);
-        if (dir == null)
-        {
-            dir = "./load";
-        }
-        watchedDirectory = new File(dir);
-        
-        prepareWatchedDir(watchedDirectory);
-        
-        Object value = properties.get(START_NEW_BUNDLES);
-        if (value != null)
-        {
-            startBundles = "true".equalsIgnoreCase((String)value);
-        }
-
+        watchedDirectory = getFile(properties, DIR, new File("./load"));
+        prepareDir(watchedDirectory);
+        tmpDir = getFile(properties, TMPDIR, new File("./tmp"));
+        startBundles = getBoolean(properties, START_NEW_BUNDLES, true);  // by default, we start bundles.
         filter = (String) properties.get(FILTER);
-    }
-
-    /**
-     * Main run loop, will traverse the directory, and then handle the delta
-     * between installed and newly found/lost bundles and configurations.
-     *
-     */
-    public void run()
-    {
-        log("{" + POLL + " (ms) = " + poll + ", "
-                + DIR + " = " + watchedDirectory.getAbsolutePath() + ", "
-                + DEBUG + " = " + debug + ", "
-                + FILTER + " = " + filter + ", "
-                + START_NEW_BUNDLES + " = " + startBundles + "}", null);
-        initializeCurrentManagedBundles();
-        Map currentManagedConfigs = new HashMap(); // location -> Long(time)
 
         FilenameFilter flt;
-        if (filter != null)
+        if (filter != null && filter.length() > 0)
         {
             flt = new FilenameFilter()
             {
@@ -132,15 +116,175 @@ public class DirectoryWatcher extends Thread
         {
             flt = null;
         }
+        scanner = new Scanner(watchedDirectory, flt);
+    }
+
+    /**
+     * Main run loop, will traverse the directory, and then handle the delta
+     * between installed and newly found/lost bundles and configurations.
+     *
+     */
+    public void run()
+    {
+        log("{" + POLL + " (ms) = " + poll + ", "
+                + DIR + " = " + watchedDirectory.getAbsolutePath() + ", "
+                + DEBUG + " = " + debug + ", "
+                + START_NEW_BUNDLES + " = " + startBundles + ", "
+                + TMPDIR + " = " + tmpDir + ", "
+                + FILTER + " = " + filter + "}", null);
+
+        initializeCurrentManagedBundles();
+
+        scanner.initialize(currentManagedArtifacts.keySet());
+
         while (!interrupted())
         {
             try
             {
-                Map/* <String, Jar> */ installed = new HashMap();
-                Set/* <String> */ configs = new HashSet();
-                traverse(installed, configs, watchedDirectory, flt);
-                doInstalled(installed);
-                doConfigs(currentManagedConfigs, configs);
+                Set/*<File>*/ files = scanner.scan();
+                List/*<ArtifactListener>*/ listeners = FileInstall.getListeners();
+                List/*<Artifact>*/ deleted = new ArrayList/*<Artifact>*/();
+                List/*<Artifact>*/ modified = new ArrayList/*<Artifact>*/();
+                List/*<Artifact>*/ created = new ArrayList/*<Artifact>*/();
+
+                // Try to process again files that could not be processed
+                files.addAll(processingFailures);
+                processingFailures.clear();
+
+                for (Iterator it = files.iterator(); it.hasNext();)
+                {
+                    File file = (File) it.next();
+                    boolean exists = file.exists();
+                    Artifact artifact = (Artifact) currentManagedArtifacts.get(file);
+                    // File has been deleted
+                    if (!exists && artifact != null)
+                    {
+                        deleteJaredDirectory(artifact);
+                        deleteTransformedFile(artifact);
+                        deleted.add(artifact);
+                    }
+                    else
+                    {
+                        File jar  = file;
+                        // Jar up the directory if needed
+                        if (file.isDirectory())
+                        {
+                            prepareDir(tmpDir);
+                            try
+                            {
+                                jar = new File(tmpDir, file.getName() + ".jar");
+                                Util.jarDir(file, jar);
+
+                            }
+                            catch (IOException e)
+                            {
+                                log("Unable to create jar for: " + file.getAbsolutePath(), e);
+                                continue;
+                            }
+                        }
+                        // File has been modified
+                        if (exists && artifact != null)
+                        {
+                            // Check the last modified date against
+                            // the artifact last modified date if available.  This will loose
+                            // the possibility of the jar being replaced by an older one
+                            // or the content changed without the date being modified, but
+                            // else, we'd have to reinstall all the deployed bundles on restart.
+                            if (artifact.getLastModified() > Util.getLastModified(file))
+                            {
+                                continue;
+                            }
+                            // If there's no listener, this is because this artifact has been installed before
+                            // fileinstall has been restarted.  In this case, try to find a listener.
+                            if (artifact.getListener() == null)
+                            {
+                                ArtifactListener listener = findListener(jar, listeners);
+                                // If no listener can handle this artifact, we need to defer the
+                                // processing for this artifact until one is found
+                                if (listener == null)
+                                {
+                                    processingFailures.add(file);
+                                    continue;
+                                }
+                                artifact.setListener(listener);
+                            }
+                            // If the listener can not handle this file anymore,
+                            // uninstall the artifact and try as if is was new
+                            if (!listeners.contains(artifact.getListener()) || !artifact.getListener().canHandle(jar))
+                            {
+                                deleted.add(artifact);
+                                artifact = null;
+                            }
+                            // The listener is still ok
+                            else
+                            {
+                                deleteTransformedFile(artifact);
+                                artifact.setJaredDirectory(jar);
+                                if (transformArtifact(artifact))
+                                {
+                                    modified.add(artifact);
+                                }
+                                else
+                                {
+                                    deleteJaredDirectory(artifact);
+                                    deleted.add(artifact);
+                                }
+                                continue;
+                            }
+                        }
+                        // File has been added
+                        if (exists && artifact == null)
+                        {
+                            // Find the listener
+                            ArtifactListener listener = findListener(jar, listeners);
+                            // If no listener can handle this artifact, we need to defer the
+                            // processing for this artifact until one is found
+                            if (listener == null)
+                            {
+                                processingFailures.add(file);
+                                continue;
+                            }
+                            // Create the artifact
+                            artifact = new Artifact();
+                            artifact.setPath(file);
+                            artifact.setJaredDirectory(jar);
+                            artifact.setListener(listener);
+                            if (transformArtifact(artifact))
+                            {
+                                created.add(artifact);
+                            }
+                            else
+                            {
+                                deleteJaredDirectory(artifact);
+                            }
+                        }
+                    }
+                }
+                // Handle deleted artifacts
+                // We do the operations in the following order:
+                // uninstall, update, install, refresh & start.
+                Collection uninstalledBundles = uninstall(deleted);
+                Collection updatedBundles = update(modified);
+                Collection installedBundles = install(created);
+                if (uninstalledBundles.size() > 0 || updatedBundles.size() > 0)
+                {
+                    // Refresh if any bundle got uninstalled or updated.
+                    // This can lead to restart of recently updated bundles, but
+                    // don't worry about that at this point of time.
+                    refresh();
+                }
+
+                if (startBundles)
+                {
+                    // Try to start all the bundles that we could not start last time.
+                    // Make a copy, because start() changes the underlying collection
+                    start(new HashSet(startupFailures));
+		            // Start updated bundles.
+		            start(updatedBundles);
+                    // Start newly installed bundles
+                    start(installedBundles);
+                }
+
                 Thread.sleep(poll);
             }
             catch (InterruptedException e)
@@ -153,283 +297,85 @@ public class DirectoryWatcher extends Thread
             }
         }
     }
-    
+
+    ArtifactListener findListener(File artifact, List/* <ArtifactListener> */ listeners)
+    {
+        for (Iterator itL = listeners.iterator(); itL.hasNext();)
+        {
+            ArtifactListener listener = (ArtifactListener) itL.next();
+            if (listener.canHandle(artifact))
+            {
+                return listener;
+            }
+        }
+        return null;
+    }
+
+    boolean transformArtifact(Artifact artifact) {
+        if (artifact.getListener() instanceof ArtifactTransformer)
+        {
+            prepareDir(tmpDir);
+            try
+            {
+                File transformed = ((ArtifactTransformer) artifact.getListener()).transform(artifact.getJaredDirectory(), tmpDir);
+                if (transformed != null)
+                {
+                    artifact.setTransformed(transformed);
+                    return true;
+                }
+            }
+            catch (Exception e)
+            {
+                log("Unable to transform artifact: " + artifact.getPath().getAbsolutePath(), e);
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private void deleteTransformedFile(Artifact artifact) {
+        if (artifact.getTransformed() != null
+                && !artifact.getTransformed().equals(artifact.getPath())
+                && !artifact.getTransformed().delete())
+        {
+            log("Unable to delete transformed artifact: " + artifact.getTransformed().getAbsolutePath(), null);
+        }
+    }
+
+    private void deleteJaredDirectory(Artifact artifact) {
+        if (artifact.getJaredDirectory() != null
+                && !artifact.getJaredDirectory().equals(artifact.getPath())
+                && !artifact.getJaredDirectory().delete())
+        {
+            log("Unable to delete jared artifact: " + artifact.getJaredDirectory().getAbsolutePath(), null);
+        }
+    }
+
     /**
      * Create the watched directory, if not existing.
      * Throws a runtime exception if the directory cannot be created,
      * or if the provided File parameter does not refer to a directory.
-     * 
-     * @param watchedDirectory 
+     *
+     * @param dir
      *            The directory File Install will monitor
      */
-    private void prepareWatchedDir(File watchedDirectory)
+    private void prepareDir(File dir)
     {
-        if (!watchedDirectory.exists() && !watchedDirectory.mkdirs())
+        if (!dir.exists() && !dir.mkdirs())
         {
             log("Cannot create folder "
-                + watchedDirectory
+                + dir
                 + ". Is the folder write-protected?", null);
-            throw new RuntimeException("Cannot create folder: " + watchedDirectory);
+            throw new RuntimeException("Cannot create folder: " + dir);
         }
 
-        if (!watchedDirectory.isDirectory())
+        if (!dir.isDirectory())
         {
-            log("Cannot watch "
-                + watchedDirectory
+            log("Cannot use "
+                + dir
                 + " because it's not a directory", null);
             throw new RuntimeException(
-                "Cannot start FileInstall to watch something that is not a directory");
-        }
-    }
-
-    /**
-     * Handle the changes between the configurations already installed and the
-     * newly found/lost configurations.
-     *
-     * @param current
-     *            Existing installed configurations abspath -> File
-     * @param discovered
-     *            Newly found configurations
-     */
-    void doConfigs(Map current, Set discovered)
-    {
-        try
-        {
-            // Set all old keys as inactive, we remove them
-            // when we find them to be active, will be left
-            // with the inactive ones.
-            Set inactive = new HashSet(current.keySet());
-
-            for (Iterator e = discovered.iterator(); e.hasNext(); )
-            {
-                String path = (String) e.next();
-                File f = new File(path);
-
-                if (!current.containsKey(path))
-                {
-                    // newly found entry, set the config immedialey
-                    Long l = new Long(f.lastModified());
-                    if (setConfig(f))
-                    {
-                        // Remember it for the next round
-                        current.put(path, l);
-                    }
-                }
-                else
-                {
-                    // Found an existing one.
-                    // Check if it has been updated
-                    long lastModified = f.lastModified();
-                    long oldTime = ((Long) current.get(path)).longValue();
-                    if (oldTime < lastModified)
-                    {
-                        if (setConfig(f))
-                        {
-                            // Remember it for the next round.
-                            current.put(path, new Long(lastModified));
-                        }
-                    }
-                }
-                // Mark this one as active
-                inactive.remove(path);
-            }
-            for (Iterator e = inactive.iterator(); e.hasNext();)
-            {
-                String path = (String) e.next();
-                File f = new File(path);
-                if (deleteConfig(f))
-                {
-                    current.remove(path);
-                }
-            }
-        }
-        catch (Exception ee)
-        {
-            log("Processing config: ", ee);
-        }
-    }
-
-    /**
-     * Set the configuration based on the config file.
-     *
-     * @param f
-     *            Configuration file
-     * @return
-     * @throws Exception
-     */
-    boolean setConfig(File f) throws Exception
-    {
-        ConfigurationAdmin cm = (ConfigurationAdmin) FileInstall.cmTracker.getService();
-        if (cm == null)
-        {
-            if (debug != 0 && !reported)
-            {
-                log("Can't find a Configuration Manager, configurations do not work",
-                    null);
-                reported = true;
-            }
-            return false;
-        }
-
-        Properties p = new Properties();
-        InputStream in = new FileInputStream(f);
-        try
-        {
-            p.load(in);
-        }
-        finally
-        {
-            in.close();
-        }
-        for (Enumeration e = p.keys(); e.hasMoreElements(); )
-        {
-            String name = (String) e.nextElement();
-            Object value = p.get(name);
-            p.put(name,
-                value instanceof String
-                    ? Util.substVars((String) value, name, null, p)
-                    : value);
-        }
-        String pid[] = parsePid(f.getName());
-        Hashtable ht = new Hashtable();
-        ht.putAll(p);
-        ht.put(FILENAME, f.getName());
-        Configuration config = getConfiguration(pid[0], pid[1]);
-        if (config.getBundleLocation() != null)
-        {
-            config.setBundleLocation(null);
-        }
-        config.update(ht);
-        return true;
-    }
-
-    /**
-     * Remove the configuration.
-     *
-     * @param f
-     *            File where the configuration in whas defined.
-     * @return
-     * @throws Exception
-     */
-    boolean deleteConfig(File f) throws Exception
-    {
-        String pid[] = parsePid(f.getName());
-        Configuration config = getConfiguration(pid[0], pid[1]);
-        config.delete();
-        return true;
-    }
-
-    String[] parsePid(String path)
-    {
-        String pid = path.substring(0, path.length() - 4);
-        int n = pid.indexOf('-');
-        if (n > 0)
-        {
-            String factoryPid = pid.substring(n + 1);
-            pid = pid.substring(0, n);
-            return new String[]
-                {
-                    pid, factoryPid
-                };
-        }
-        else
-        {
-            return new String[]
-                {
-                    pid, null
-                };
-        }
-    }
-
-    Configuration getConfiguration(String pid, String factoryPid)
-        throws Exception
-    {
-	    Configuration oldConfiguration = findExistingConfiguration(pid, factoryPid);
-        if (oldConfiguration != null)
-        {
-            log("Updating configuration from " + pid
-                + (factoryPid == null ? "" : "-" + factoryPid) + ".cfg", null);
-            return oldConfiguration;
-        }
-        else
-        {
-            ConfigurationAdmin cm = (ConfigurationAdmin) FileInstall.cmTracker.getService();
-            Configuration newConfiguration = null;
-            if (factoryPid != null)
-            {
-                newConfiguration = cm.createFactoryConfiguration(pid, null);
-            }
-            else
-            {
-                newConfiguration = cm.getConfiguration(pid, null);
-            }
-            return newConfiguration;
-        }
-    }
-    
-    Configuration findExistingConfiguration(String pid, String factoryPid) throws Exception
-    {
-        String suffix = factoryPid == null ? ".cfg" : "-" + factoryPid + ".cfg";
-
-        ConfigurationAdmin cm = (ConfigurationAdmin) FileInstall.cmTracker.getService();
-        String filter = "(" + FILENAME + "=" + pid + suffix + ")";
-        Configuration[] configurations = cm.listConfigurations(filter);
-        if (configurations != null && configurations.length > 0)
-        {
-            return configurations[0];
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-    /**
-     * This is the core of this class.
-     * Install bundles that were discovered, uninstall bundles that are gone
-     * from the current state and update the ones that have been changed.
-     * Keep {@link #currentManagedBundles} up-to-date.
-     *
-     * @param discovered
-     *            A map of path to {@link Jar} that holds the discovered state
-     */
-    void doInstalled(Map discovered)
-    {
-        // Find out all the new, deleted and common bundles.
-        // new = discovered - current,
-        Set newBundles = new HashSet(discovered.values());
-        newBundles.removeAll(currentManagedBundles.values());
-
-        // deleted = current - discovered
-        Set deletedBundles = new HashSet(currentManagedBundles.values());
-        deletedBundles.removeAll(discovered.values());
-
-        // existing = intersection of current & discovered
-        Set existingBundles = new HashSet(discovered.values());
-        existingBundles.retainAll(currentManagedBundles.values());
-
-        // We do the operations in the following order:
-        // uninstall, update, install, refresh & start.
-        Collection uninstalledBundles = uninstall(deletedBundles);
-        Collection updatedBundles = update(existingBundles);
-        Collection installedBundles = install(newBundles);
-        if (uninstalledBundles.size() > 0 || updatedBundles.size() > 0)
-        {
-            // Refresh if any bundle got uninstalled or updated.
-            // This can lead to restart of recently updated bundles, but
-            // don't worry about that at this point of time.
-            refresh();
-        }
-
-        if (startBundles)
-        {
-            // Try to start all the bundles that we could not start last time.
-            // Make a copy, because start() changes the underlying collection
-            start(new HashSet(startupFailures));
-            // Start updated bundles.
-            start(updatedBundles);
-            // Start newly installed bundles.
-            start(installedBundles);
+                "Cannot start FileInstall using something that is not a directory");
         }
     }
 
@@ -444,82 +390,7 @@ public class DirectoryWatcher extends Thread
      */
     void log(String message, Throwable e)
     {
-        LogService log = getLogService();
-        if (log == null)
-        {
-            System.out.println(message + (e == null ? "" : ": " + e));
-            if (debug > 0 && e != null)
-            {
-                e.printStackTrace(System.out);
-            }
-        }
-        else
-        {
-            if (e != null)
-            {
-                log.log(LogService.LOG_ERROR, message, e);
-                if (debug > 0 && e != null)
-                {
-                    e.printStackTrace();
-                }
-            }
-            else
-            {
-                log.log(LogService.LOG_INFO, message);
-            }
-        }
-    }
-
-    /**
-     * Answer the Log Service
-     *
-     * @return
-     */
-    LogService getLogService()
-    {
-        ServiceReference ref = context.getServiceReference(LogService.class.getName());
-        if (ref != null)
-        {
-            LogService log = (LogService) context.getService(ref);
-            return log;
-        }
-        return null;
-    }
-
-    /**
-     * Traverse the directory and fill the set with the found jars and
-     * configurations.
-     *
-     * @param jars
-     *            Returns path -> {@link Jar} map for found jars
-     * @param configs
-     *            Returns the abspath -> file for found configurations
-     * @param jardir
-     *            The directory to traverse
-     * @param filter
-     *            A filter for file names
-     */
-    void traverse(Map/* <String, Jar> */ jars, Set configs, File jardir, FilenameFilter filter)
-    {
-        String list[] = jardir.list(filter);
-        if (list == null)
-        {
-            prepareWatchedDir(jardir);
-            list = jardir.list(filter);
-        }
-        for (int i = 0; (list != null) && (i < list.length); i++)
-        {
-            File file = new File(jardir, list[i]);
-            if (list[i].endsWith(".cfg"))
-            {
-                configs.add(file.getAbsolutePath());
-            }
-            else if (Util.isValidJar(file.getAbsolutePath()))
-            {
-                Jar jar = new Jar(file);
-                jars.put(jar.getPath(), jar);
-            }
-        }
+        Util.log(context, debug, message, e);
     }
 
     /**
@@ -530,23 +401,10 @@ public class DirectoryWatcher extends Thread
      */
     boolean isFragment(Bundle bundle)
     {
-        PackageAdmin padmin;
-        if (FileInstall.padmin == null)
+        PackageAdmin padmin = FileInstall.getPackageAdmin();
+        if (padmin != null)
         {
-            return false;
-        }
-
-        try
-        {
-            padmin = (PackageAdmin) FileInstall.padmin.waitForService(10000);
-            if (padmin != null)
-            {
-                return padmin.getBundleType(bundle) == PackageAdmin.BUNDLE_TYPE_FRAGMENT;
-            }
-        }
-        catch (InterruptedException e)
-        {
-            // stupid exception
+            return padmin.getBundleType(bundle) == PackageAdmin.BUNDLE_TYPE_FRAGMENT;
         }
         return false;
     }
@@ -556,24 +414,20 @@ public class DirectoryWatcher extends Thread
      */
     void refresh()
     {
-        PackageAdmin padmin;
-        try
+        PackageAdmin padmin = FileInstall.getPackageAdmin();
+        if (padmin != null)
         {
-            padmin = (PackageAdmin) FileInstall.padmin.waitForService(10000);
             padmin.refreshPackages(null);
-        }
-        catch (InterruptedException e)
-        {
-            Thread.currentThread().interrupt();
         }
     }
 
     /**
-     * Answer the long from a property.
+     * Retrieve a property as a long.
      *
-     * @param property
-     * @param dflt
-     * @return
+     * @param properties the properties to retrieve the value from
+     * @param property the name of the property to retrieve
+     * @param dflt the default value
+     * @return the property as a long or the default value
      */
     long getLong(Dictionary properties, String property, long dflt)
     {
@@ -588,6 +442,42 @@ public class DirectoryWatcher extends Thread
             {
                 log(property + " set, but not a long: " + value, null);
             }
+        }
+        return dflt;
+    }
+
+    /**
+     * Retrieve a property as a File.
+     *
+     * @param properties the properties to retrieve the value from
+     * @param property the name of the property to retrieve
+     * @param dflt the default value
+     * @return the property as a File or the default value
+     */
+    File getFile(Dictionary properties, String property, File dflt)
+    {
+        String value = (String) properties.get(property);
+        if (value != null)
+        {
+            return new File(value);
+        }
+        return dflt;
+    }
+
+    /**
+     * Retrieve a property as a boolan.
+     *
+     * @param properties the properties to retrieve the value from
+     * @param property the name of the property to retrieve
+     * @param dflt the default value
+     * @return the property as a boolean or the default value
+     */
+    boolean getBoolean(Dictionary properties, String property, boolean dflt)
+    {
+        String value = (String) properties.get(property);
+        if (value != null)
+        {
+            return Boolean.parseBoolean(value);
         }
         return dflt;
     }
@@ -616,46 +506,62 @@ public class DirectoryWatcher extends Thread
         String watchedDirPath = watchedDirectory.toURI().normalize().getPath();
         for (int i = 0; i < bundles.length; i++)
         {
-            try
+            Artifact artifact = new Artifact();
+            artifact.setBundleId(bundles[i].getBundleId());
+            artifact.setLastModified(bundles[i].getLastModified());
+            artifact.setListener(null);
+            // Convert to a URI because the location of a bundle
+            // is typically a URI. At least, that's the case for
+            // autostart bundles and bundles installed by fileinstall.
+            // Normalisation is needed to ensure that we don't treat (e.g.)
+            // /tmp/foo and /tmp//foo differently.
+            String location = bundles[i].getLocation();
+            String path = null;
+            if (location != null &&
+                    !location.equals(Constants.SYSTEM_BUNDLE_LOCATION))
             {
-                Jar jar = new Jar(bundles[i]);
-                String path =  jar.getPath();
-                if (path == null)
+                URI uri;
+                try
                 {
-                    // jar.getPath is null means we could not parse the location
-                    // as a meaningful URI or file path. e.g., location
-                    // represented an Opaque URI.
-                    // We can't do any meaningful processing for this bundle.
-                    continue;
+                    uri = new URI(bundles[i].getLocation()).normalize();
                 }
-                final int index = path.lastIndexOf('/');
-                if (index != -1 && path.substring(0, index + 1).equals(watchedDirPath))
+                catch (URISyntaxException e)
                 {
-                    currentManagedBundles.put(path, jar);
+                    // Let's try to interpret the location as a file path
+                    uri = new File(location).toURI().normalize();
                 }
+                path = uri.getPath();
             }
-            catch (URISyntaxException e)
+            if (path == null)
             {
-                // Ignore and continue.
-                // This can never happen for bundles that have been installed
-                // by FileInstall, as we always use proper filepath as location.
+                // jar.getPath is null means we could not parse the location
+                // as a meaningful URI or file path. e.g., location
+                // represented an Opaque URI.
+                // We can't do any meaningful processing for this bundle.
+                continue;
+            }
+            artifact.setPath(new File(path));
+            final int index = path.lastIndexOf('/');
+            if (index != -1 && path.startsWith(watchedDirPath))
+            {
+                currentManagedArtifacts.put(new File(path), artifact);
             }
         }
     }
 
     /**
-     * This method installs a collection of jar files.
-     * @param jars Collection of {@link Jar} to be installed
+     * This method installs a collection of artifacts.
+     * @param artifacts Collection of {@link Artifact}s to be installed
      * @return List of Bundles just installed
      */
-    private Collection/* <Bundle> */ install(Collection jars)
+    private Collection/* <Bundle> */ install(Collection/* <Artifact> */ artifacts)
     {
         List bundles = new ArrayList();
-        for (Iterator iter = jars.iterator(); iter.hasNext();)
+        for (Iterator iter = artifacts.iterator(); iter.hasNext();)
         {
-            Jar jar = (Jar) iter.next();
+            Artifact artifact = (Artifact) iter.next();
 
-            Bundle bundle = install(jar);
+            Bundle bundle = install(artifact);
             if (bundle != null)
             {
                 bundles.add(bundle);
@@ -665,16 +571,17 @@ public class DirectoryWatcher extends Thread
     }
 
     /**
-     * @param jars Collection of {@link Jar} to be uninstalled
+     * This method uninstalls a collection of artifacts.
+     * @param artifacts Collection of {@link Artifact}s to be uninstalled
      * @return Collection of Bundles that got uninstalled
      */
-    private Collection/* <Bundle> */ uninstall(Collection jars)
+    private Collection/* <Bundle> */ uninstall(Collection/* <Artifact> */ artifacts)
     {
         List bundles = new ArrayList();
-        for (Iterator iter = jars.iterator(); iter.hasNext();)
+        for (Iterator iter = artifacts.iterator(); iter.hasNext();)
         {
-            final Jar jar = (Jar) iter.next();
-            Bundle b = uninstall(jar);
+            final Artifact artifact = (Artifact) iter.next();
+            Bundle b = uninstall(artifact);
             if (b != null)
             {
                 bundles.add(b);
@@ -683,45 +590,30 @@ public class DirectoryWatcher extends Thread
         return bundles;
     }
 
-    private void start(Collection bundles)
-    {
-        for (Iterator b = bundles.iterator(); b.hasNext(); )
-        {
-            start((Bundle) b.next());
-        }
-    }
-
     /**
-     * Update the bundles if the underlying files have changed.
-     * This method reads the information about jars to be updated,
-     * compares them with information available in {@link #currentManagedBundles}.
-     * If the file is newer, it updates the bundle.
+     * This method updates a collection of artifacts.
      *
-     * @param jars    Collection of {@link Jar}s representing state of files.
+     * @param artifacts    Collection of {@link Artifact}s to be updated.
      * @return Collection of bundles that got updated
      */
-    private Collection/* <Bundle> */ update(Collection jars)
+    private Collection/* <Bundle> */ update(Collection/* <Artifact> */ artifacts)
     {
         List bundles = new ArrayList();
-        for (Iterator iter = jars.iterator(); iter.hasNext(); )
+        for (Iterator iter = artifacts.iterator(); iter.hasNext(); )
         {
-            Jar e = (Jar) iter.next();
-            Jar c = (Jar) currentManagedBundles.get(e.getPath());
-            if (e.isNewer(c))
+            Artifact e = (Artifact) iter.next();
+            Bundle b = update(e);
+            if (b != null)
             {
-                Bundle b = update(c);
-                if (b != null)
-                {
-                    bundles.add(b);
-                }
+                bundles.add(b);
             }
         }
         return bundles;
     }
 
     /**
-     * Install a jar and return the bundle object.
-     * It uses {@link org.apache.felix.fileinstall.Jar#getPath()} as location
+     * Install an artifact and return the bundle object.
+     * It uses {@link org.apache.felix.fileinstall.Artifact#getPath()} as location
      * of the new bundle. Before installing a file,
      * it sees if the file has been identified as a bad file in
      * earlier run. If yes, then it compares to see if the file has changed
@@ -729,44 +621,55 @@ public class DirectoryWatcher extends Thread
      * If the file has not been identified as a bad file in earlier run,
      * then it always installs it.
      *
-     * @param jar the jar to be installed
+     * @param artifact the artifact to be installed
      * @return Bundle object that was installed
      */
-    private Bundle install(Jar jar)
+    private Bundle install(Artifact artifact)
     {
         Bundle bundle = null;
         try
         {
-            String path = jar.getPath();
-            Jar badJar = (Jar) installationFailures.get(jar.getPath());
-            if (badJar != null && badJar.getLastModified() == jar.getLastModified())
+            File path = artifact.getPath();
+            // If the listener is an installer, ask for an update
+            if (artifact.getListener() instanceof ArtifactInstaller)
             {
-                return null; // Don't attempt to install it; nothing has changed.
+                ((ArtifactInstaller) artifact.getListener()).install(path);
             }
-            File file = new File(path);
-            InputStream in = new FileInputStream(file);
-            try
+            // else we need to ask for an update on the bundle
+            else if (artifact.getListener() instanceof ArtifactTransformer)
             {
-                // Some users wanted the location to be a URI (See FELIX-1269)
-                final String location = file.toURI().normalize().toString();
-                bundle = context.installBundle(location, in);
+                File transformed = artifact.getTransformed();
+                Artifact badArtifact = (Artifact) installationFailures.get(artifact.getPath());
+                if (badArtifact != null && badArtifact.getLastModified() == artifact.getLastModified())
+                {
+                    return null; // Don't attempt to install it; nothing has changed.
+                }
+                InputStream in = new FileInputStream(transformed != null ? transformed : path);
+                try
+                {
+                    // Some users wanted the location to be a URI (See FELIX-1269)
+                    final String location = path.toURI().normalize().toString();
+                    bundle = context.installBundle(location, in);
+                }
+                finally
+                {
+                    in.close();
+                }
+                artifact.setBundleId(bundle.getBundleId());
             }
-            finally
-            {
-                in.close();
-            }
+            artifact.setLastModified(Util.getLastModified(path));
             installationFailures.remove(path);
-            currentManagedBundles.put(path, new Jar(bundle));
-            log("Installed " + file.getAbsolutePath(), null);
+            currentManagedArtifacts.put(path, artifact);
+            log("Installed " + path, null);
         }
         catch (Exception e)
         {
-            log("Failed to install bundle: " + jar.getPath(), e);
+            log("Failed to install artifact: " + artifact.getPath(), e);
 
             // Add it our bad jars list, so that we don't
             // attempt to install it again and again until the underlying
             // jar has been modified.
-            installationFailures.put(jar.getPath(), jar);
+            installationFailures.put(artifact.getPath(), artifact);
         }
         return bundle;
     }
@@ -774,74 +677,97 @@ public class DirectoryWatcher extends Thread
     /**
      * Uninstall a jar file.
      */
-    private Bundle uninstall(Jar jar)
+    private Bundle uninstall(Artifact artifact)
     {
+        Bundle bundle = null;
         try
         {
-            Jar old = (Jar) currentManagedBundles.remove(jar.getPath());
-
-            // old can't be null because of the way we calculate deleted list.
-            Bundle bundle = context.getBundle(old.getBundleId());
-            if (bundle == null)
+            File path = artifact.getPath();
+            // Forget this artifact
+            currentManagedArtifacts.remove(path);
+            // Delete transformed file
+            deleteTransformedFile(artifact);
+            // if the listener is an installer, uninstall the artifact
+            if (artifact.getListener() instanceof ArtifactInstaller)
             {
-            	log("Failed to uninstall bundle: "
-                    + jar.getPath() + " with id: "
-                    + old.getBundleId()
-                    + ". The bundle has already been uninstalled", null);
-            	return null;
+                ((ArtifactInstaller) artifact.getListener()).uninstall(path);
             }
-            bundle.uninstall();
+            // else we need uninstall the bundle
+            else if (artifact.getListener() instanceof ArtifactTransformer)
+            {
+                // old can't be null because of the way we calculate deleted list.
+                bundle = context.getBundle(artifact.getBundleId());
+                if (bundle == null)
+                {
+                    log("Failed to uninstall bundle: "
+                        + path + " with id: "
+                        + artifact.getBundleId()
+                        + ". The bundle has already been uninstalled", null);
+                    return null;
+                }
+                bundle.uninstall();
+            }
             startupFailures.remove(bundle);
-            log("Uninstalled " + jar.getPath(), null);
-            return bundle;
+            log("Uninstalled " + path, null);
         }
         catch (Exception e)
         {
-            log("Failed to uninstall bundle: " + jar.getPath(), e);
+            log("Failed to uninstall artifact: " + artifact.getPath(), e);
         }
-        return null;
+        return bundle;
     }
 
-    private Bundle update(Jar jar)
+    private Bundle update(Artifact artifact)
     {
-        InputStream in = null;
+        Bundle bundle = null;
         try
         {
-            File file = new File(jar.getPath());
-            in = new FileInputStream(file);
-            Bundle bundle = context.getBundle(jar.getBundleId());
-            if (bundle == null)
+            File path = artifact.getPath();
+            // If the listener is an installer, ask for an update
+            if (artifact.getListener() instanceof ArtifactInstaller)
             {
-            	log("Failed to update bundle: "
-                    + jar.getPath() + " with ID "
-                    + jar.getBundleId()
-                    + ". The bundle has been uninstalled", null);
-            	return null;
+                ((ArtifactInstaller) artifact.getListener()).update(path);
             }
-            bundle.update(in);
-            startupFailures.remove(bundle);
-            jar.setLastModified(bundle.getLastModified());
-            log("Updated " + jar.getPath(), null);
-            return bundle;
-        }
-        catch (Exception e)
-        {
-            log("Failed to update bundle " + jar.getPath(), e);
-        }
-        finally
-        {
-            if (in != null)
+            // else we need to ask for an update on the bundle
+            else if (artifact.getListener() instanceof ArtifactTransformer)
             {
+                File transformed = artifact.getTransformed();
+                bundle = context.getBundle(artifact.getBundleId());
+                if (bundle == null)
+                {
+                    log("Failed to update bundle: "
+                        + path + " with ID "
+                        + artifact.getBundleId()
+                        + ". The bundle has been uninstalled", null);
+                    return null;
+                }
+                InputStream in = new FileInputStream(transformed != null ? transformed : path);
                 try
+                {
+                    bundle.update(in);
+                }
+                finally
                 {
                     in.close();
                 }
-                catch (IOException e)
-                {
-                }
             }
+            startupFailures.remove(bundle);
+            artifact.setLastModified(Util.getLastModified(path));
+            log("Updated " + path, null);
         }
-        return null;
+        catch (Exception e)
+        {
+            log("Failed to update artifact " + artifact.getPath(), e);
+        }
+        return bundle;
+    }
+
+    private void start(Collection/* <Bundle> */ bundles)
+    {
+        for (Iterator b = bundles.iterator(); b.hasNext(); )
+        {
+            start((Bundle) b.next());
+        }
     }
 
     private void start(Bundle bundle)

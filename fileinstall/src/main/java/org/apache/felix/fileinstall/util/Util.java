@@ -19,15 +19,48 @@
 package org.apache.felix.fileinstall.util;
 
 import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.File;
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Enumeration;
+import java.util.Set;
+import java.util.Collections;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+import java.util.zip.CRC32;
 import java.util.jar.JarFile;
+import java.util.jar.JarOutputStream;
+
+import org.osgi.service.log.LogService;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.BundleContext;
 
 public class Util
 {
     private static final String DELIM_START = "${";
     private static final String DELIM_STOP = "}";
+
+    /**
+     * Perform substitution on a property set
+     *
+     * @param properties the property set to perform substitution on
+     */
+    public static void performSubstitution(Dictionary properties)
+    {
+        for (Enumeration e = properties.keys(); e.hasMoreElements(); )
+        {
+            String name = (String) e.nextElement();
+            Object value = properties.get(name);
+            properties.put(name,
+                value instanceof String
+                    ? Util.substVars((String) value, name, null, properties)
+                    : value);
+        }
+    }
 
     /**
      * <p>
@@ -133,35 +166,156 @@ public class Util
     }
 
     /**
-     * Check if a file is a legitimate Jar file
-     * @param path
+     * Log a message and optional throwable. If there is a log service we use
+     * it, otherwise we log to the console
+     *
+     * @param message
+     *            The message to log
+     * @param e
+     *            The throwable to log
+     */
+    public static void log(BundleContext context, long debug, String message, Throwable e)
+    {
+        LogService log = getLogService(context);
+        if (log == null)
+        {
+            System.out.println(message + (e == null ? "" : ": " + e));
+            if (debug > 0 && e != null)
+            {
+                e.printStackTrace(System.out);
+            }
+        }
+        else
+        {
+            if (e != null)
+            {
+                log.log(LogService.LOG_ERROR, message, e);
+                if (debug > 0 && e != null)
+                {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                log.log(LogService.LOG_INFO, message);
+            }
+        }
+    }
+
+    /**
+     * Answer the Log Service
+     *
      * @return
      */
-    public static boolean isValidJar(String path)
+    private static LogService getLogService(BundleContext context)
     {
-        JarFile jar = null;
-        try
+        ServiceReference ref = context.getServiceReference(LogService.class.getName());
+        if (ref != null)
         {
-            jar = new JarFile(path);
-            return true;
+            LogService log = (LogService) context.getService(ref);
+            return log;
         }
-        catch (IOException ioe)
-        {
-            return false;
-        }
-        finally
-        {
-            if (jar != null)
-            {
-                try
-                {
-                    jar.close();
+        return null;
+    }
+
+    /**
+     * Jar up a directory
+     *
+     * @param directory
+     * @param zipName
+     * @throws IOException
+     */
+    public static void jarDir(File directory, File zipName) throws IOException {
+        // create a ZipOutputStream to zip the data to
+        JarOutputStream zos = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(zipName)));
+        String path = "";
+        File manFile = new File(directory, JarFile.MANIFEST_NAME);
+        if (manFile.exists()) {
+            byte[] readBuffer = new byte[8192];
+            FileInputStream fis = new FileInputStream(manFile);
+            try {
+                ZipEntry anEntry = new ZipEntry(JarFile.MANIFEST_NAME);
+                zos.putNextEntry(anEntry);
+                int bytesIn = fis.read(readBuffer);
+                while (bytesIn != -1) {
+                    zos.write(readBuffer, 0, bytesIn);
+                    bytesIn = fis.read(readBuffer);
                 }
-                catch (IOException e)
-                {
-                    //do nothing
+            } finally {
+                fis.close();
+            }
+            zos.closeEntry();
+        }
+        zipDir(directory, zos, path, Collections.singleton(JarFile.MANIFEST_NAME));
+        // close the stream
+        zos.close();
+    }
+
+    /**
+     * Zip up a directory path
+     * @param directory
+     * @param zos
+     * @param path
+     * @param exclusions
+     * @throws IOException
+     */
+    public static void zipDir(File directory, ZipOutputStream zos, String path, Set/* <String> */ exclusions) throws IOException {
+        // get a listing of the directory content
+        File[] dirList = directory.listFiles();
+        byte[] readBuffer = new byte[8192];
+        int bytesIn = 0;
+        // loop through dirList, and zip the files
+        for (int i = 0; i < dirList.length; i++) {
+            File f = dirList[i];
+            if (f.isDirectory()) {
+                zipDir(f, zos, path + f.getName() + "/", exclusions);
+                continue;
+            }
+            String entry = path + f.getName();
+            if (!exclusions.contains(entry)) {
+                FileInputStream fis = new FileInputStream(f);
+                try {
+                    ZipEntry anEntry = new ZipEntry(entry);
+                    zos.putNextEntry(anEntry);
+                    bytesIn = fis.read(readBuffer);
+                    while (bytesIn != -1) {
+                        zos.write(readBuffer, 0, bytesIn);
+                        bytesIn = fis.read(readBuffer);
+                    }
+                } finally {
+                    fis.close();
                 }
             }
         }
     }
+
+    /**
+     * Return the latest time at which this file or any child if the file denotes
+     * a directory has been modified
+     *
+     * @param file file or directory to check
+     * @return the latest modification time
+     */
+    public static long getLastModified(File file)
+    {
+        if (file.isFile())
+        {
+            return file.lastModified();
+        }
+        else if (file.isDirectory())
+        {
+            File[] children = file.listFiles();
+            long lastModified = 0;
+            for (int i = 0; i < children.length; i++)
+            {
+                lastModified = Math.max(lastModified, getLastModified(children[i]));
+            }
+            return lastModified;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
 }

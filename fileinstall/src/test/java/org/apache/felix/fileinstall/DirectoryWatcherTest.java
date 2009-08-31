@@ -21,18 +21,13 @@ package org.apache.felix.fileinstall;
 
 import java.io.File;
 import java.util.Dictionary;
-import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.easymock.ArgumentsMatcher;
 import org.easymock.MockControl;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.packageadmin.PackageAdmin;
 
 
@@ -51,10 +46,6 @@ public class DirectoryWatcherTest extends TestCase
     PackageAdmin mockPackageAdmin;
     MockControl mockBundleControl;
     Bundle mockBundle;
-    MockControl mockConfigurationAdminControl;
-    ConfigurationAdmin mockConfigurationAdmin;
-    MockControl mockConfigurationControl;
-    Configuration mockConfiguration;
 
 
     protected void setUp() throws Exception
@@ -66,10 +57,6 @@ public class DirectoryWatcherTest extends TestCase
         mockPackageAdmin = ( PackageAdmin ) mockPackageAdminControl.getMock();
         mockBundleControl = MockControl.createControl( Bundle.class );
         mockBundle = ( Bundle ) mockBundleControl.getMock();
-        mockConfigurationAdminControl = MockControl.createControl( ConfigurationAdmin.class );
-        mockConfigurationAdmin = ( ConfigurationAdmin ) mockConfigurationAdminControl.getMock();
-        mockConfigurationControl = MockControl.createControl( Configuration.class );
-        mockConfiguration = ( Configuration ) mockConfigurationControl.getMock();
     }
 
 
@@ -102,12 +89,60 @@ public class DirectoryWatcherTest extends TestCase
     }
 
 
+    public void testGetBooleanWithNonExistentProperty()
+    {
+        mockBundleContextControl.replay();
+        dw = new DirectoryWatcher( props, mockBundleContext );
+        assertEquals( "getBoolean gives the default value for non-existing properties", true, dw.getBoolean( props, TEST, true ) );
+    }
+
+
+    public void testGetBooleanWithExistentProperty()
+    {
+        props.put( TEST, "true" );
+        mockBundleContextControl.replay();
+        dw = new DirectoryWatcher( props, mockBundleContext );
+        assertEquals( "getBoolean retrieves the right property value", true, dw.getBoolean( props, TEST, false ) );
+    }
+
+
+    public void testGetBooleanWithIncorrectValue()
+    {
+        props.put( TEST, "incorrect" );
+
+        mockBundleContext.getServiceReference( "org.osgi.service.log.LogService" );
+        mockBundleContextControl.setReturnValue( null );
+        mockBundleContextControl.replay();
+        dw = new DirectoryWatcher( props, mockBundleContext );
+        assertEquals( "getBoolean retrieves the right property value", false, dw.getBoolean( props, TEST, true ) );
+    }
+
+
+    public void testGetFileWithNonExistentProperty()
+    {
+        mockBundleContextControl.replay();
+        dw = new DirectoryWatcher( props, mockBundleContext );
+        assertEquals( "getFile gives the default value for non-existing properties", new File("tmp"), dw.getFile( props, TEST, new File("tmp") ) );
+    }
+
+
+    public void testGetFileWithExistentProperty()
+    {
+        props.put( TEST, "test" );
+        mockBundleContextControl.replay();
+        dw = new DirectoryWatcher( props, mockBundleContext );
+        assertEquals( "getBoolean retrieves the right property value", new File("test"), dw.getFile( props, TEST, new File("tmp") ) );
+    }
+
+
     public void testParameterAfterInitialization()
     {
         props.put( DirectoryWatcher.POLL, "500" );
         props.put( DirectoryWatcher.DEBUG, "1" );
         props.put( DirectoryWatcher.START_NEW_BUNDLES, "false" );
         props.put( DirectoryWatcher.DIR, new File( "src/test/resources" ).getAbsolutePath() );
+        props.put( DirectoryWatcher.TMPDIR, new File( "src/test/resources" ).getAbsolutePath() );
+        props.put( DirectoryWatcher.FILTER, ".*\\.cfg" );
         mockBundleContextControl.replay();
         dw = new DirectoryWatcher( props, mockBundleContext );
 
@@ -115,7 +150,10 @@ public class DirectoryWatcherTest extends TestCase
         assertEquals( "DEBUG parameter correctly read", 1l, dw.debug );
         assertTrue( "DIR parameter correctly read", dw.watchedDirectory.getAbsolutePath().endsWith(
             "src" + File.separatorChar + "test" + File.separatorChar + "resources" ) );
+        assertTrue( "TMPDIR parameter correctly read", dw.tmpDir.getAbsolutePath().endsWith(
+            "src" + File.separatorChar + "test" + File.separatorChar + "resources" ) );
         assertEquals( "START_NEW_BUNDLES parameter correctly read", false, dw.startBundles );
+        assertEquals( "FILTER parameter correctly read", ".*\\.cfg", dw.filter );
     }
 
 
@@ -125,30 +163,14 @@ public class DirectoryWatcherTest extends TestCase
         mockBundleContextControl.replay();
         dw = new DirectoryWatcher( props, mockBundleContext );
 
+        assertTrue( "DIR parameter correctly read", dw.watchedDirectory.getAbsolutePath().endsWith(
+            "src" + File.separatorChar + "test" + File.separatorChar + "resources" ) );
         assertEquals( "Default POLL parameter correctly read", 2000l, dw.poll );
         assertEquals( "Default DEBUG parameter correctly read", -1l, dw.debug );
+        assertTrue( "Default TMPDIR parameter correctly read", dw.tmpDir.getAbsolutePath().endsWith(
+            File.separatorChar + "tmp" ) );
         assertEquals( "Default START_NEW_BUNDLES parameter correctly read", true, dw.startBundles );
-    }
-
-
-    public void testParsePidWithoutFactoryPid()
-    {
-        mockBundleContextControl.replay();
-        dw = new DirectoryWatcher( props, mockBundleContext );
-        String path = "pid.cfg";
-        assertEquals( "Pid without Factory Pid calculated", "pid", dw.parsePid( path )[0] );
-        assertEquals( "Pid without Factory Pid calculated", null, dw.parsePid( path )[1] );
-    }
-
-
-    public void testParsePidWithFactoryPid()
-    {
-        mockBundleContextControl.replay();
-        dw = new DirectoryWatcher( props, mockBundleContext );
-
-        String path = "factory-pid.cfg";
-        assertEquals( "Pid with Factory Pid calculated", "factory", dw.parsePid( path )[0] );
-        assertEquals( "Pid with Factory Pid calculated", "pid", dw.parsePid( path )[1] );
+        assertEquals( "Default FILTER parameter correctly read", null, dw.filter );
     }
 
 
@@ -172,146 +194,5 @@ public class DirectoryWatcherTest extends TestCase
         mockBundleContextControl.verify();
     }
 
-
-    public void testGetNewFactoryConfiguration() throws Exception
-    {
-        mockConfigurationControl.replay();
-        mockConfigurationAdmin.listConfigurations( null );
-        mockConfigurationAdminControl.setMatcher( MockControl.ALWAYS_MATCHER );
-        mockConfigurationAdminControl.setReturnValue( null );
-        mockConfigurationAdmin.createFactoryConfiguration( "pid", null );
-        mockConfigurationAdminControl.setReturnValue( mockConfiguration );
-        mockConfigurationAdminControl.replay();
-        mockBundleContext.createFilter( "" );
-        mockBundleContextControl.setMatcher( MockControl.ALWAYS_MATCHER );
-        mockBundleContextControl.setReturnValue( null );
-        mockBundleContextControl.replay();
-
-        FileInstall.cmTracker = new MockServiceTracker( mockBundleContext, mockConfigurationAdmin );
-        dw = new DirectoryWatcher( props, mockBundleContext );
-
-        assertEquals( "Factory configuration retrieved", mockConfiguration, dw.getConfiguration( "pid", "factoryPid" ) );
-
-        mockConfigurationAdminControl.verify();
-        mockConfigurationControl.verify();
-        mockBundleContextControl.verify();
-    }
-
-
-    public void testGetExistentFactoryConfiguration() throws Exception
-    {
-        mockConfigurationControl.replay();
-        mockConfigurationAdmin.listConfigurations( null );
-        mockConfigurationAdminControl.setMatcher( MockControl.ALWAYS_MATCHER );
-        mockConfigurationAdminControl.setReturnValue( null );
-        mockConfigurationAdmin.createFactoryConfiguration( "pid", null );
-        mockConfigurationAdminControl.setReturnValue( mockConfiguration );
-        mockConfigurationAdminControl.replay();
-        mockBundleContext.createFilter( "" );
-        mockBundleContextControl.setMatcher( MockControl.ALWAYS_MATCHER );
-        mockBundleContextControl.setReturnValue( null );
-        mockBundleContextControl.replay();
-
-        FileInstall.cmTracker = new MockServiceTracker( mockBundleContext, mockConfigurationAdmin );
-        dw = new DirectoryWatcher( props, mockBundleContext );
-
-        assertEquals( "Factory configuration retrieved", mockConfiguration, dw.getConfiguration( "pid", "factoryPid" ) );
-
-        mockConfigurationAdminControl.verify();
-        mockConfigurationControl.verify();
-        mockBundleContextControl.verify();
-    }
-
-
-    public void testGetExistentNoFactoryConfiguration() throws Exception
-    {
-        mockConfigurationControl.replay();
-        mockConfigurationAdmin.listConfigurations( null );
-        mockConfigurationAdminControl.setMatcher( MockControl.ALWAYS_MATCHER );
-        mockConfigurationAdminControl.setReturnValue( null );
-        mockConfigurationAdmin.getConfiguration( "pid", null );
-        mockConfigurationAdminControl.setReturnValue( mockConfiguration );
-        mockConfigurationAdminControl.replay();
-        mockBundleContext.createFilter( "" );
-        mockBundleContextControl.setMatcher( MockControl.ALWAYS_MATCHER );
-        mockBundleContextControl.setReturnValue( null );
-        mockBundleContextControl.replay();
-
-        FileInstall.cmTracker = new MockServiceTracker( mockBundleContext, mockConfigurationAdmin );
-        dw = new DirectoryWatcher( props, mockBundleContext );
-
-        assertEquals( "Factory configuration retrieved", mockConfiguration, dw.getConfiguration( "pid", null ) );
-
-        mockConfigurationAdminControl.verify();
-        mockConfigurationControl.verify();
-        mockBundleContextControl.verify();
-    }
-
-
-    public void testDeleteConfig() throws Exception
-    {
-        mockConfiguration.delete();
-        mockConfigurationControl.replay();
-        mockConfigurationAdmin.listConfigurations( null );
-        mockConfigurationAdminControl.setMatcher( MockControl.ALWAYS_MATCHER );
-        mockConfigurationAdminControl.setReturnValue( null );
-        mockConfigurationAdmin.getConfiguration( "pid", null );
-        mockConfigurationAdminControl.setReturnValue( mockConfiguration );
-        mockConfigurationAdminControl.replay();
-        mockBundleContext.createFilter( "" );
-        mockBundleContextControl.setMatcher( MockControl.ALWAYS_MATCHER );
-        mockBundleContextControl.setReturnValue( null );
-        mockBundleContextControl.replay();
-
-        FileInstall.cmTracker = new MockServiceTracker( mockBundleContext, mockConfigurationAdmin );
-        dw = new DirectoryWatcher( props, mockBundleContext );
-
-        assertTrue( dw.deleteConfig( new File( "pid.cfg" ) ) );
-
-        mockConfigurationAdminControl.verify();
-        mockConfigurationControl.verify();
-        mockBundleContextControl.verify();
-    }
-
-
-    public void testSetConfiguration() throws Exception
-    {
-        mockConfiguration.getBundleLocation();
-        mockConfigurationControl.setReturnValue( null );
-        mockConfiguration.update( new Hashtable() );
-        mockConfigurationControl.setMatcher( new ArgumentsMatcher()
-        {
-            public boolean matches( Object[] expected, Object[] actual )
-            {
-                return ( actual.length == 1 ) && ( ( Dictionary ) actual[0] ).get( "testkey" ).equals( "testvalue" );
-            }
-
-
-            public String toString( Object[] arg0 )
-            {
-                return arg0.toString();
-            }
-        } );
-        mockConfigurationControl.replay();
-        mockConfigurationAdmin.listConfigurations( null );
-        mockConfigurationAdminControl.setMatcher( MockControl.ALWAYS_MATCHER );
-        mockConfigurationAdminControl.setReturnValue( null );
-        mockConfigurationAdmin.getConfiguration( "firstcfg", null );
-        mockConfigurationAdminControl.setReturnValue( mockConfiguration );
-        mockConfigurationAdminControl.replay();
-        mockBundleContext.createFilter( "" );
-        mockBundleContextControl.setMatcher( MockControl.ALWAYS_MATCHER );
-        mockBundleContextControl.setReturnValue( null );
-        mockBundleContextControl.replay();
-
-        FileInstall.cmTracker = new MockServiceTracker( mockBundleContext, mockConfigurationAdmin );
-        dw = new DirectoryWatcher( props, mockBundleContext );
-
-        assertTrue( dw.setConfig( new File( "src/test/resources/watched/firstcfg.cfg" ) ) );
-
-        mockConfigurationAdminControl.verify();
-        mockConfigurationControl.verify();
-        mockBundleContextControl.verify();
-    }
 
 }
