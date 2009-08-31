@@ -22,14 +22,18 @@ package org.apache.felix.cm.integration;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
 import org.apache.felix.cm.integration.helper.BaseTestActivator;
 import org.apache.felix.cm.integration.helper.ManagedServiceTestActivator;
 import org.apache.felix.cm.integration.helper.MyTinyBundle;
+import org.apache.felix.cm.integration.helper.UpdateThreadSignalTask;
 import org.junit.After;
 import org.junit.Before;
 import org.ops4j.pax.exam.CoreOptions;
@@ -163,8 +167,42 @@ public abstract class ConfigurationTestBase
     }
 
 
-    protected static void delay()
+    protected void delay()
     {
+        Object ca = configAdminTracker.getService();
+        if ( ca != null )
+        {
+            try
+            {
+
+                Field caf = ca.getClass().getDeclaredField( "configurationManager" );
+                caf.setAccessible( true );
+                Object cm = caf.get( ca );
+
+                Field cmf = cm.getClass().getDeclaredField( "updateThread" );
+                cmf.setAccessible( true );
+                Object ut = cmf.get( cm );
+
+                Method utm = ut.getClass().getDeclaredMethod( "schedule" );
+                utm.setAccessible( true );
+
+                UpdateThreadSignalTask signalTask = new UpdateThreadSignalTask();
+                utm.invoke( ut, signalTask );
+                signalTask.waitSignal();
+
+                return;
+            }
+            catch ( AssertionFailedError afe )
+            {
+                throw afe;
+            }
+            catch ( Throwable t )
+            {
+                // ignore any problem and revert to timed delay (might log this)
+            }
+        }
+
+        // no configadmin or failure while setting up task
         try
         {
             Thread.sleep( 300 );

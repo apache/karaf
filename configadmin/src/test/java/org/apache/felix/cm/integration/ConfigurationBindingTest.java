@@ -640,7 +640,6 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
         // 5. Call Configuration.setBundleLocation( "locationB" )
         config.setBundleLocation( locationB );
         delay();
-        delay();
 
         // ==> configuration is bound to locationB
         TestCase.assertEquals( locationB, config.getBundleLocation() );
@@ -716,7 +715,6 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
 
         // 5. Call Configuration.setBundleLocation( "locationB" )
         config.setBundleLocation( locationB );
-        delay();
         delay();
 
         // ==> configuration is bound to locationB
@@ -800,7 +798,6 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
         // 5. Call Configuration.setBundleLocation( "locationB" )
         config.setBundleLocation( locationB );
         delay();
-        delay();
 
         // ==> configuration is bound to locationB
         TestCase.assertEquals( locationB, config.getBundleLocation() );
@@ -883,7 +880,6 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
         // 5. Uninstall bundle A
         bundleA.uninstall();
         delay();
-        delay();
 
         /*
          * According to BJ Hargrave configuration is not re-dispatched
@@ -958,7 +954,6 @@ public class ConfigurationBindingTest extends ConfigurationTestBase
 
         // 5. Uninstall bundle A
         bundleA.uninstall();
-        delay();
         delay();
 
         /*
