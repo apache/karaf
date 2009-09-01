@@ -1290,7 +1290,7 @@ public class ModuleImpl implements IModule
                 }
                 catch (Exception ex)
                 {
-                    throw new RuntimeException("Unable to create module class loader.", ex);
+                    throw new RuntimeException("Unable to create module class loader: " +  ex.getMessage());
                 }
             }
             else

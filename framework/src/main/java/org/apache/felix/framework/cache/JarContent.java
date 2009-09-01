@@ -441,7 +441,7 @@ public class JarContent implements IContent
             }
             catch (IOException ex)
             {
-                throw new RuntimeException("Unable to open JAR file, probably deleted.", ex);
+                throw new RuntimeException("Unable to open JAR file, probably deleted: " + ex.getMessage());
             }
         }
     }
