@@ -28,8 +28,7 @@ import org.apache.felix.ipojo.test.scenarios.util.Utils;
 import org.osgi.framework.ServiceReference;
 
 /**
- * @author clement
- *
+ * @author <a href="mailto:dev@felix.apache.org">Felix Project Team</a>
  */
 public class LifeCycleControllerTest extends OSGiTestCase {
 
