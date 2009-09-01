@@ -117,7 +117,18 @@ class URLHandlersActivator implements BundleActivator
 
                 for (int i = 0;(i < refs.length) && (service == null);i++)
                 {
-                    if (value.equals(refs[i].getProperty(key)))
+                    Object values = refs[i].getProperty(key);
+                    if (values instanceof String[])
+                    {
+                        for (int j = 0;(j < ((String[]) values).length) && (service == null);j++)
+                        {
+                            if (value.equals(((String[]) values)[j]))
+                            {
+                                service = tracker.getService(refs[i]);
+                            }
+                        }
+                    }
+                    else if (value.equals(values))
                     {
                         service = tracker.getService(refs[i]);
                     }
