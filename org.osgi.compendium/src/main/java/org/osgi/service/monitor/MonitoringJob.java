@@ -40,7 +40,7 @@ package org.osgi.service.monitor;
  * specific whether we still receive updates of the <code>StatusVariable</code>
  * changes or not.
  * 
- * @version $Revision: 5673 $
+ * @version $Revision: 7940 $
  */
 public interface MonitoringJob {
     /**
@@ -50,7 +50,7 @@ public interface MonitoringJob {
     public void stop();
 
     /**
-     * Returns the identitifier of the principal who initiated the job. This is
+     * Returns the identifier of the principal who initiated the job. This is
      * set at the time when
      * {@link MonitorAdmin#startJob MonitorAdmin.startJob()} method is called.
      * This string holds the ServerID if the operation was initiated from a
@@ -79,7 +79,7 @@ public interface MonitoringJob {
      * N (greater than 0) then the <code>MonitorAdmin</code> queries each
      * <code>StatusVariable</code> that belongs to this job every N seconds.
      * The value 0 means that the job is not scheduled but event based: in this
-     * case instant notification on changes is requested (at every nth change of
+     * case instant notification on changes is requested (at every n-th change of
      * the value, as specified by the report count parameter).
      * 
      * @return the delay (in seconds) between samples, or 0 for change based
@@ -115,7 +115,7 @@ public interface MonitoringJob {
     
     /**
      * Returns whether the job is running.   A job is running until it is
-     * explicitely stopped, or, in case of time based jobs with a finite report
+     * explicitly stopped, or, in case of time based jobs with a finite report
      * count, until the given number of measurements have been made.
      *   
      * @return <code>true</code> if the job is still running, <code>false</code>

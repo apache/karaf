@@ -26,7 +26,7 @@ import org.osgi.framework.ServiceRegistration;
  * <code>ApplicationContext</code> is the access point for an OSGi-aware
  * application to the features of the OSGi Service Platform. Each application
  * instance will have its own <code>ApplicationContext</code> instance, which
- * will not be reused after destorying the corresponding application instace.
+ * will not be reused after destroying the corresponding application instance.
  * <p>
  * Application instances can obtain their <code>ApplicationContext</code> using
  * the {@link Framework#getApplicationContext} method.
@@ -41,7 +41,7 @@ import org.osgi.framework.ServiceRegistration;
  * 
  * @see org.osgi.application.Framework
  * 
- * @version $Revision: 5673 $
+ * @version $Revision: 7937 $
  */
 public interface ApplicationContext {
 
@@ -49,7 +49,7 @@ public interface ApplicationContext {
      * Adds the specified {@link ApplicationServiceListener} object to this context
      * application instance's list of listeners. The specified <code>referenceName</code> is a 
      * reference name specified in the descriptor of the corresponding application. The registered
-     * <code>listener> will only receive the {@link ApplicationServiceEvent}s realted to the referred service.
+     * <code>listener> will only receive the {@link ApplicationServiceEvent}s related to the referred service.
      * <p>
      * If the <code>listener</code> was already added, calling this method will overwrite the previous
      * registration.
@@ -73,7 +73,7 @@ public interface ApplicationContext {
      * Adds the specified {@link ApplicationServiceListener} object to this context
      * application instance's list of listeners. The <code>referenceNames</code> parameter is an 
      * array of reference name specified in the descriptor of the corresponding application. The registered
-     * <code>listener> will only receive the {@link ApplicationServiceEvent}s realted to the referred 
+     * <code>listener> will only receive the {@link ApplicationServiceEvent}s related to the referred 
      * services.
      * <p>
      * If the <code>listener</code> was already added, calling this method will overwrite the previous
@@ -109,8 +109,8 @@ public interface ApplicationContext {
     public void removeServiceListener(ApplicationServiceListener listener);
     
     /**
-     * This method returns the identifier of the corresponding application instace.
-     * This identifier is guarateed to be unique within the scope of the device.
+     * This method returns the identifier of the corresponding application instance.
+     * This identifier is guaranteed to be unique within the scope of the device.
      * 
       * Note: this method can safely be called on an invalid 
      * <code>ApplicationContext</code> as well.
@@ -122,7 +122,7 @@ public interface ApplicationContext {
     public String getInstanceId();
     
     /**
-     * This method return the identifier of the correspondig application type. This identifier
+     * This method return the identifier of the corresponding application type. This identifier
      * is the same for the different instances of the same application but it is different for
      * different application type.
      * <p>
@@ -198,7 +198,7 @@ public interface ApplicationContext {
     /**
      * Application can query the service properties of a service object
      * it is bound to. Application gets bound to a service object when
-     * it fisrt obtains a reference to the service by calling 
+     * it first obtains a reference to the service by calling 
      * <code>locateService</code> or <code>locateServices</code> methods.
      * 
      * @param serviceObject A service object the application is bound to.
@@ -227,7 +227,7 @@ public interface ApplicationContext {
 	 * {@link org.osgi.framework.BundleContext#getServiceReferences} or 
 	 * {@link org.osgi.framework.BundleContext#getServiceReference} method. Other applications
 	 * can locate this service by using {@link #locateService(String)} or {@link #locateServices(String)}
-	 * method, if they declared their dependece on the registered service.
+	 * method, if they declared their dependence on the registered service.
 	 * 
 	 * <p>
 	 * An application can register a service object that implements the

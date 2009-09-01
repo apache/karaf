@@ -58,7 +58,7 @@ import org.osgi.framework.Bundle;
  * </pre>
  * The first element of the certificate chain is 
  * not important, only the second (the 
- * Distingushed Name of the root certificate)
+ * Distinguished Name of the root certificate)
  * 
  * <pre>
  * (signer=- ; *, o=Tweety Inc., c=US)
@@ -106,13 +106,13 @@ import org.osgi.framework.Bundle;
  * <b>cancel</b><p>
  * 
  * A holder of this permission can cancel an active deployment action. This action being
- * cancelled could correspond to the install, update or uninstall of a deployment package
+ * canceled could correspond to the install, update or uninstall of a deployment package
  * that satisfies the &lt;filter&gt; string. See {@link DeploymentAdmin#cancel}<p>
  * 
  * <b>metadata</b><p>
  * 
  * A holder of this permission is able to retrieve metadata information about a Deployment 
- * Package (e.g. is able to ask its manifest hedares). 
+ * Package (e.g. is able to ask its manifest headers). 
  * See {@link org.osgi.service.deploymentadmin.DeploymentPackage#getBundle(String)},
  * {@link org.osgi.service.deploymentadmin.DeploymentPackage#getBundleInfos()},
  * {@link org.osgi.service.deploymentadmin.DeploymentPackage#getHeader(String)}, 
@@ -120,7 +120,7 @@ import org.osgi.framework.Bundle;
  * {@link org.osgi.service.deploymentadmin.DeploymentPackage#getResourceProcessor(String)}, 
  * {@link org.osgi.service.deploymentadmin.DeploymentPackage#getResources()}<p>
  *
- * The actions string is converted to lowercase before processing.
+ * The actions string is converted to lower case before processing.
  */
 public final class DeploymentAdminPermission extends Permission {
     
@@ -200,7 +200,7 @@ public final class DeploymentAdminPermission extends Permission {
     /**
      * Creates a new <code>DeploymentAdminPermission</code> object for the given <code>name</code> and 
      * <code>action</code>.<p>
-     * The <code>name</code> parameter identifies the target depolyment package the permission 
+     * The <code>name</code> parameter identifies the target deployment package the permission 
      * relates to. The <code>actions</code> parameter contains the comma separated list of allowed actions. 
      * 
      * @param name filter string, must not be null.

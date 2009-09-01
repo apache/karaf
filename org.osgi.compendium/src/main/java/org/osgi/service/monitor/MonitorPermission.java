@@ -35,7 +35,7 @@ import java.util.StringTokenizer;
  * monitoring commands are allowed on the designated target(s) by the owner of
  * the permission.
  * 
- * @version $Revision: 5673 $
+ * @version $Revision: 7941 $
  */
 public class MonitorPermission extends Permission {
 
@@ -184,7 +184,7 @@ public class MonitorPermission extends Permission {
             mask = 0;
             StringTokenizer st = new StringTokenizer(actions, ",");
             while (st.hasMoreTokens()) {
-                String action = st.nextToken();
+                String action = st.nextToken().trim();
                 if (action.equalsIgnoreCase(READ)) {
                     addToMask(READ_FLAG, READ);
                 } else if (action.equalsIgnoreCase(RESET)) {

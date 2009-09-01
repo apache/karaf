@@ -52,7 +52,7 @@ public class ResourceProcessorException extends Exception {
 	 * Other error condition.<p>
 	 * 
 	 * All Resource Processor methods which throw <code>ResourceProcessorException</code> 
-	 * is allowed throw an exception with this erro code if the error condition cannot be 
+	 * is allowed throw an exception with this error code if the error condition cannot be 
 	 * categorized. 
 	 */
 	public static final int	CODE_OTHER_ERROR				= 463;

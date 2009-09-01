@@ -57,7 +57,7 @@ import java.util.StringTokenizer;
  * returned by {@link #getActions} uses the forms defined by the action
  * constants.
  * 
- * @version $Revision: 5673 $
+ * @version $Revision: 7942 $
  */
 public class DmtPermission extends Permission {
     private static final long serialVersionUID = -1910969921419407809L;
@@ -302,7 +302,7 @@ public class DmtPermission extends Permission {
         // empty tokens (swallowed by StringTokenizer) are not considered errors
         StringTokenizer st = new StringTokenizer(actions, ",");
         while (st.hasMoreTokens()) {
-            String action = st.nextToken();
+            String action = st.nextToken().trim();
             if (action.equalsIgnoreCase(GET)) {
                 mask |= Acl.GET;
             } else if (action.equalsIgnoreCase(ADD)) {

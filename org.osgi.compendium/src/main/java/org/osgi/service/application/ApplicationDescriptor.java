@@ -31,7 +31,7 @@ import org.osgi.framework.InvalidSyntaxException;
  * information about it. The application descriptor can be used for instance
  * creation.
  * 
- * @version $Revision: 6860 $
+ * @version $Revision: 7938 $
  */
 
 public abstract class ApplicationDescriptor {
@@ -346,7 +346,7 @@ public abstract class ApplicationDescriptor {
 	 * Called by launch() to create and start a new instance in an application
 	 * model specific way. It also creates and registeres the application handle
 	 * to represent the newly created and started instance and registeres it.
-	 * The method is synchonous, it return only when the application instance was
+	 * The method is synchronous, it return only when the application instance was
 	 * successfully started or the attempt to start it failed.
 	 * <P>
 	 * This method must not return <code>null</code>. If launching the application
@@ -363,7 +363,7 @@ public abstract class ApplicationDescriptor {
 	 * @throws IllegalStateException
 	 *             if the application descriptor is unregistered
 	 * @throws Exception
-	 *             if any problem occures.
+	 *             if any problem occurs.
 	 */
 	protected abstract ApplicationHandle launchSpecific(Map arguments)
 			throws Exception;

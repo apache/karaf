@@ -22,7 +22,7 @@ import java.io.InputStream;
   * ResourceProcessor interface is implemented by processors handling resource files
   * in deployment packages. Resource Processors expose their services as standard OSGi services.
   * Bundles exporting the service may arrive in the deployment package (customizers) or may be 
-  * preregistered (they are installed prevoiusly). Resource processors has to define the 
+  * preregistered (they are installed previously). Resource processors has to define the 
   * <code>service.pid</code> standard OSGi service property which should be a unique string.<p>
   * 
   * The order of the method calls on a particular Resource Processor in case of install/update 

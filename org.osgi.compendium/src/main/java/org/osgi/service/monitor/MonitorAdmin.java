@@ -57,7 +57,7 @@ package org.osgi.service.monitor;
  * {@link StatusVariable}. If any of the restrictions are violated, the method
  * must throw an <code>IllegalArgumentException</code>.
  * 
- * @version $Revision: 5673 $
+ * @version $Revision: 7940 $
  */
 public interface MonitorAdmin {
 
@@ -269,7 +269,7 @@ public interface MonitorAdmin {
      * <p>
      * The <code>count</code> parameter defines the number of measurements to be
      * taken, and must either be a positive integer, or 0 if the measurement is
-     * to run until explicitely stopped.
+     * to run until explicitly stopped.
      * <p>
      * The entity which initiates a <code>MonitoringJob</code> needs to hold
      * <code>MonitorPermission</code> for all the specified target
@@ -284,7 +284,7 @@ public interface MonitorAdmin {
      *        [Monitorable_PID]/[StatusVariable_ID] format
      * @param schedule the time in seconds between two measurements
      * @param count the number of measurements to be taken, or 0 for the
-     *        measurement to run until explicitely stopped
+     *        measurement to run until explicitly stopped
      * @return the successfully started job object, cannot be <code>null</code>
      * @throws java.lang.IllegalArgumentException if the list of
      *         <code>StatusVariable</code> names contains an invalid or 

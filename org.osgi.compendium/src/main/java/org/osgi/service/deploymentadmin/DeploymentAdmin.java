@@ -84,7 +84,7 @@ public interface DeploymentAdmin {
     DeploymentPackage[] listDeploymentPackages();
 
     /**
-     * Gets the currenlty installed {@link DeploymentPackage} instance which has the given 
+     * Gets the currently installed {@link DeploymentPackage} instance which has the given 
      * symbolic name.<p>
      * 
      * During an installation of an existing package (update) or during an uninstallation, 
@@ -127,7 +127,7 @@ public interface DeploymentAdmin {
      * to cancel the processing of excessively long running, or resource consuming install, update
      * or uninstall operations.<p>
      * 
-     * @return true if there was an active session and it was successfully cancelled.
+     * @return true if there was an active session and it was successfully canceled.
      * @throws SecurityException if the caller doesn't have the appropriate 
      *         {@link DeploymentAdminPermission}("&lt;filter&gt;", "cancel") permission.
      * @see DeploymentAdminPermission

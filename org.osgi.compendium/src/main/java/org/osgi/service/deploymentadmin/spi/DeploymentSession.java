@@ -53,7 +53,7 @@ public interface DeploymentSession {
     /**
      * If the deployment action is an update or an uninstall, this call returns
      * the <code>DeploymentPackage</code> instance for the installed deployment package. If the 
-     * deployment action is an install, this call returns the empty deploymet package (see
+     * deployment action is an install, this call returns the empty deployment package (see
      * {@link DeploymentPackage}).
      * 
      * @return the target deployment package
@@ -65,7 +65,7 @@ public interface DeploymentSession {
      * If the deployment action is an install or an update, this call returns
      * the <code>DeploymentPackage</code> instance that corresponds to the deployment package
      * being streamed in for this session. If the deployment action is an uninstall, this call 
-     * returns the empty deploymet package (see {@link DeploymentPackage}).
+     * returns the empty deployment package (see {@link DeploymentPackage}).
      * 
      * @return the source deployment package
      * @see DeploymentPackage

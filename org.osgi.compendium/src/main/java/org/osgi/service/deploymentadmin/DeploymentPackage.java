@@ -242,7 +242,7 @@ public interface DeploymentPackage {
 	 * @param resource
 	 *            the name of the resource (it is the same as the value of the
 	 *            "Name" attribute in the deployment package's manifest)
-	 * @return resource processor for the resource or <code>null</cpde>.
+	 * @return resource processor for the resource or <code>null</code>.
 	 * @throws SecurityException if the caller doesn't have the appropriate {@link DeploymentAdminPermission} 
 	 *         with "metadata" action
 	 * @throws IllegalStateException if the package is stale
@@ -350,11 +350,11 @@ public interface DeploymentPackage {
 	/**
 	 * Indicates whether some other object is "equal to" this one. Two
 	 * deployment packages are equal if they have the same deployment package
-	 * symbolicname and version.
+	 * symbolic name and version.
 	 * 
 	 * @param other
 	 *            the reference object with which to compare.
-	 * @return true if this object is the same as the obj argument; false
+	 * @return true if this object is the same as the <code>other<code> argument; false
 	 *         otherwise.
 	 */
 	boolean equals(Object other);

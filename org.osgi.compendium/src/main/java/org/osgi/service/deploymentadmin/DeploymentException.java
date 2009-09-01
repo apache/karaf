@@ -135,7 +135,7 @@ public class DeploymentException extends Exception {
 	public static final int	CODE_FOREIGN_CUSTOMIZER			= 458;
 
 	/**
-	 * Bundle with the same symbolic name alerady exists.<p>
+	 * Bundle with the same symbolic name already exists.<p>
 	 * 
 	 * {@link DeploymentAdmin#installDeploymentPackage(InputStream)}
 	 * throws exception with this error code.  
