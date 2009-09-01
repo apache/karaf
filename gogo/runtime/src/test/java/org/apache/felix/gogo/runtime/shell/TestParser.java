@@ -42,8 +42,8 @@ public class TestParser extends TestCase
         c.addCommand("capture", this);
 
         assertEquals("a", c.execute("echo a | capture"));
-        assertEquals("a", c.execute("<echo a> | capture"));
-        assertEquals("a", c.execute("<<echo a>> | capture"));
+        assertEquals("a", c.execute("(echo a) | capture"));
+        assertEquals("a", c.execute("((echo a)) | capture"));
     }
 
     public void testUnknownCommand() throws Exception
@@ -110,12 +110,12 @@ public class TestParser extends TestCase
         c.addCommand("grep", this);
         c.addCommand("echoout", this);
         c.execute("myecho = { echoout $args }");
-        assertEquals("def", c.execute("echo def|grep (d.*)|capture"));
-        assertEquals("def", c.execute("echoout def|grep (d.*)|capture"));
-        assertEquals("def", c.execute("myecho def|grep (d.*)|capture"));
-        assertEquals("def", c.execute("echo abc; echo def; echo ghi|grep (d.*)|capture"));
+        assertEquals("def", c.execute("echo def|grep d.*|capture"));
+        assertEquals("def", c.execute("echoout def|grep d.*|capture"));
+        assertEquals("def", c.execute("myecho def|grep d.*|capture"));
+        assertEquals("def", c.execute("echo abc; echo def; echo ghi|grep d.*|capture"));
         assertEquals("hello world", c.execute("echo hello world|capture"));
-        assertEquals("defghi", c.execute("echo abc; echo def; echo ghi|grep (def|ghi)|capture"));
+        assertEquals("defghi", c.execute("echo abc; echo def; echo ghi|grep 'def|ghi'|capture"));
     }
 
     public void testAssignment() throws Exception
@@ -126,8 +126,8 @@ public class TestParser extends TestCase
         assertEquals("a", c.execute("a = a; echo $$a"));
 
         assertEquals("hello", c.execute("echo hello"));
-        assertEquals("hello", c.execute("a = <echo hello>"));
-        assertEquals("a", c.execute("a = a; echo $<echo a>"));
+        assertEquals("hello", c.execute("a = (echo hello)"));
+        assertEquals("a", c.execute("a = a; echo $(echo a)"));
         assertEquals("3", c.execute("a=3; echo $a"));
         assertEquals("3", c.execute("a = 3; echo $a"));
         assertEquals("a", c.execute("a = a; echo $$a"));
@@ -239,9 +239,9 @@ public class TestParser extends TestCase
         Context c = new Context();
         c.addCommand("echo", this);
         assertEquals("a", c.execute("echo a") + "");
-        assertEquals("a", c.execute("<echo echo> a") + "");
-        assertEquals("a", c.execute("<<echo echo> echo> <echo a>") + "");
-        assertEquals("3", c.execute("[a=2 <echo b>=<echo 3>] get b").toString());
+        assertEquals("a", c.execute("(echo echo) a") + "");
+        assertEquals("a", c.execute("((echo echo) echo) (echo a)") + "");
+        assertEquals("3", c.execute("[a=2 (echo b)=(echo 3)] get b").toString());
     }
 
     public CharSequence echo(Object args[])
@@ -286,7 +286,7 @@ public class TestParser extends TestCase
         assertEquals(10, beentheredonethat);
 
         beentheredonethat = 0;
-        Integer result = (Integer) c.execute("ls <ls 5>");
+        Integer result = (Integer) c.execute("ls (ls 5)");
         assertEquals(10, beentheredonethat);
         assertEquals((Integer) 5, result);
     }
@@ -341,13 +341,13 @@ public class TestParser extends TestCase
 
     public void testSimpleValue()
     {
-        List<CharSequence> x = new Parser("abc def.ghi http://www.osgi.org?abc=&x=1 [1,2,3] {{{{{{{xyz}}}}}}} <immediate> {'{{{{{'} {\\}} 'abc{}'").statement();
+        List<CharSequence> x = new Parser("abc def.ghi http://www.osgi.org?abc=&x=1 [1,2,3] {{{{{{{xyz}}}}}}} (immediate) {'{{{{{'} {\\}} 'abc{}'").statement();
         assertEquals("abc", x.get(0));
         assertEquals("def.ghi", x.get(1));
         assertEquals("http://www.osgi.org?abc=&x=1", x.get(2));
         assertEquals("[1,2,3]", x.get(3));
         assertEquals("{{{{{{{xyz}}}}}}}", x.get(4));
-        assertEquals("<immediate>", x.get(5));
+        assertEquals("(immediate)", x.get(5));
         assertEquals("{'{{{{{'}", x.get(6));
         assertEquals("{\\}}", x.get(7));
         assertEquals("'abc{}'", x.get(8));

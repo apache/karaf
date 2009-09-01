@@ -119,10 +119,10 @@ public class Closure extends Reflective implements Function
 		buf.append(' ');
                 buf.append(token);
             }
-            System.err.println(buf);
+            session.err.println(buf);
         }
 
-        if (statement.size() == 1 && statement.get(0).charAt(0) == '<')
+        if (statement.size() == 1 && statement.get(0).charAt(0) == '(')
         {
             return eval(statement.get(0));
         }
@@ -241,7 +241,7 @@ public class Closure extends Reflective implements Function
             char c = p.peek();
             if (!p.escaped)
             {
-                if (c == '$' || c == '<' || c == '\'' || c == '"' || c == '[' || c == '{')
+                if (c == '$' || c == '(' || c == '\'' || c == '"' || c == '[' || c == '{')
                 {
                     if (start != p.current || res != null)
                     {
@@ -294,9 +294,9 @@ public class Closure extends Reflective implements Function
                             res = array(seq.subSequence(start + 1, p.find(']', '[') - 1));
                             start = p.current;
                             continue;
-                        case '<':
+                        case '(':
                             p.next();
-                            Closure cl = new Closure(session, this, p.text.subSequence(start + 1, p.find('>', '<') - 1));
+                            Closure cl = new Closure(session, this, p.text.subSequence(start + 1, p.find(')', '(') - 1));
                             res = cl.execute(session, parms);
                             start = p.current;
                             continue;

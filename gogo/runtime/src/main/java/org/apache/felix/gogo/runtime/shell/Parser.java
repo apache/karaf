@@ -365,10 +365,10 @@ public class Parser
             int end = find('}', '{');
             return text.subSequence(start, end);
         }
-        if (c == '<')
+        if (c == '(')
         {
             next();
-            int end = find('>', '<');
+            int end = find(')', '(');
             return text.subSequence(start, end);
         }
 
