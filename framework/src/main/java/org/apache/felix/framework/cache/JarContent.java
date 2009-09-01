@@ -23,6 +23,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
@@ -373,7 +374,17 @@ public class JarContent implements IContent
                                     props.setProperty("abspath", libFile.toString());
                                     command = Util.substVars(command, "command", null, props);
                                     Process p = BundleCache.getSecureAction().exec(command);
+                                    // We have to make sure we read stdout and stderr because otherwise
+                                    // we will block on certain unbuffered os's (like eg. windows)
+                                    Thread stdOut = new Thread(new DevNullRunnable(p.getInputStream()));
+                                    Thread stdErr = new Thread(new DevNullRunnable(p.getErrorStream()));
+                                    stdOut.setDaemon(true);
+                                    stdErr.setDaemon(true);
+                                    stdOut.start();
+                                    stdErr.start();
                                     p.waitFor();
+                                    stdOut.join();
+                                    stdErr.join();
                                 }
 
                                 // Return the path to the extracted native library.
@@ -515,6 +526,35 @@ public class JarContent implements IContent
         public Object nextElement()
         {
             return ((ZipEntry) m_enumeration.nextElement()).getName();
+        }
+    }
+
+    private static class DevNullRunnable implements Runnable 
+    {
+        private final InputStream m_in;
+
+        public DevNullRunnable(InputStream in) 
+        {
+            m_in = in;
+        }
+
+        public void run()
+        {
+            try
+            {
+                try
+                {
+                    while (m_in.read() != -1){}
+                }
+                finally 
+                {
+                    m_in.close();
+                }
+            }
+            catch (Exception ex) 
+            {
+                // Not much we can do - maybe we should log it?
+            }
         }
     }
 }
