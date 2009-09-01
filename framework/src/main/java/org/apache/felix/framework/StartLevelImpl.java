@@ -172,6 +172,9 @@ public class StartLevelImpl implements StartLevel, Runnable
         }
         synchronized (m_requestList)
         {
+            // Synchronously persists the start level.
+            ((BundleImpl) bundle).setStartLevel(startlevel);
+            // Asynchronously process the start level change.
             m_requestList.add(new Object[] { bundle, new Integer(startlevel) });
             m_requestList.notifyAll();
         }

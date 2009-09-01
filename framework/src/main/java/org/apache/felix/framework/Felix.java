@@ -1221,15 +1221,16 @@ ex.printStackTrace();
         {
             if (startLevel >= 1)
             {
-                impl.setStartLevel(startLevel);
+                // NOTE: The start level was persistently recorded inside
+                // the start level impl because the spec requires it to be
+                // done synchronously.
 
                 try
                 {
                     // Start the bundle if necessary.
                     if (((impl.getPersistentState() == Bundle.ACTIVE)
                         || (impl.getPersistentState() == Bundle.STARTING))
-                        && (impl.getStartLevel(getInitialBundleStartLevel())
-                            <= getActiveStartLevel()))
+                        && (startLevel <= getActiveStartLevel()))
                     {
 // TODO: LAZY - Not sure if this is the best way...
                         int options = Bundle.START_TRANSIENT;
@@ -1241,8 +1242,7 @@ ex.printStackTrace();
                     // Stop the bundle if necessary.
                     else if (((impl.getState() == Bundle.ACTIVE)
                         || (impl.getState() == Bundle.STARTING))
-                        && (impl.getStartLevel(getInitialBundleStartLevel())
-                            > getActiveStartLevel()))
+                        && (startLevel > getActiveStartLevel()))
                     {
                         stopBundle(impl, false);
                     }
