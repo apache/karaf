@@ -18,10 +18,15 @@
  */
 package org.apache.felix.framework;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
+
 import org.apache.felix.framework.util.FelixConstants;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * <p>
@@ -34,8 +39,8 @@ import org.osgi.framework.BundleContext;
 **/
 class URLHandlersActivator implements BundleActivator
 {
-    private Map m_configMap = null;
-    private Felix m_framework = null;
+    private final Map m_configMap;
+    private final Felix m_framework;
 
     public URLHandlersActivator(Map configMap, Felix framework)
     {
@@ -55,11 +60,71 @@ class URLHandlersActivator implements BundleActivator
                 FelixConstants.SERVICE_URLHANDLERS_PROP) == null)
                 ? true
                 : !m_configMap.get(FelixConstants.SERVICE_URLHANDLERS_PROP).equals("false");
+
+        if (enable)
+        {
+            m_streamTracker = new ServiceTracker(context, "org.osgi.service.url.URLStreamHandlerService", null);
+            m_contentTracker= new ServiceTracker(context, "java.net.ContentHandler", null);
+            m_streamTracker.open();
+            m_contentTracker.open();
+            m_framework.setURLHandlersActivator(this);
+        }
         URLHandlers.registerFrameworkInstance(m_framework, enable);
     }
 
     public void stop(BundleContext context)
     {
         URLHandlers.unregisterFrameworkInstance(m_framework);
+        m_framework.setURLHandlersActivator(null);
+        if (m_streamTracker != null)
+        {
+            m_streamTracker.close();
+        }
+        if (m_contentTracker != null)
+        {
+            m_contentTracker.close();
+        }
+        m_streamTracker = null;
+        m_contentTracker = null;
+    }
+
+    private volatile ServiceTracker m_streamTracker;
+    private volatile ServiceTracker m_contentTracker;
+    
+    protected Object getStreamHandlerService(String protocol)
+    {
+        return get(m_streamTracker, "url.handler.protocol", protocol);
+    }
+
+    protected Object getContentHandlerService(String mimeType)
+    {
+        return get(m_contentTracker, "url.content.mimetype", mimeType);
+    }
+
+    private Object get(ServiceTracker tracker, String key, String value)
+    {
+    	Object service = null;
+        if (tracker != null)
+        {
+            ServiceReference[] refs = tracker.getServiceReferences();
+
+            if (refs != null)
+            {
+                if (refs.length > 1)
+                {
+                    Arrays.sort(refs, Collections.reverseOrder());
+                }
+
+                for (int i = 0;(i < refs.length) && (service == null);i++)
+                {
+                    if (value.equals(refs[i].getProperty(key)))
+                    {
+                        service = tracker.getService(refs[i]);
+                    }
+                }
+            }
+        }
+
+        return service;
     }
 }

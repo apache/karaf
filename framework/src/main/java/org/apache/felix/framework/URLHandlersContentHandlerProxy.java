@@ -52,10 +52,7 @@ import org.apache.felix.framework.util.SecureAction;
 **/
 class URLHandlersContentHandlerProxy extends ContentHandler
 {
-    private static final Object[] SERVICE_RANKING_PARAMS = new Object[]{"service.ranking"};
-    private static final Object[] SERVICE_ID_PARAMS = new Object[]{"service.id"};
     private static final Class[] STRING_TYPES = new Class[]{String.class};
-    private static final Class[] STRING_STRING_TYPES = new Class[]{String.class, String.class};
 
     private static final String CONTENT_HANDLER_PACKAGE_PROP = "java.content.handler.pkgs";
     private static final String DEFAULT_CONTENT_HANDLER_PACKAGE = "sun.net.www.content|com.ibm.oti.net.www.content|gnu.java.net.content|org.apache.harmony.luni.internal.net.www.content|COM.newmonics.www.content";
@@ -75,7 +72,6 @@ class URLHandlersContentHandlerProxy extends ContentHandler
 
     private final String m_mimeType;
     private final SecureAction m_action;
-    private final Object[] m_filter;
 
     public URLHandlersContentHandlerProxy(String mimeType, SecureAction action, 
         ContentHandlerFactory factory)
@@ -83,10 +79,6 @@ class URLHandlersContentHandlerProxy extends ContentHandler
         m_mimeType = mimeType;
         m_action = action;
         m_factory = factory;
-        m_filter = new Object[]{"java.net.ContentHandler", 
-            "(&(objectClass=java.net.ContentHandler)(url.content.mimetype="
-            + mimeType
-            + "))"};
     } 
 
     //
@@ -125,63 +117,19 @@ class URLHandlersContentHandlerProxy extends ContentHandler
         }
         try 
         {
-            Object context = m_action.invoke(
-                    m_action.getMethod(framework.getClass(), "getBundleContext", null),framework, null);
-                
-            Class contextClass = context.getClass();
-            
-            Object[] refs = (Object[]) m_action.invoke(
-                m_action.getMethod(contextClass, "getServiceReferences", STRING_STRING_TYPES), 
-                context, m_filter);
-            
-            Object ref = null;
-            int highestRank = -1;
-            long currentId = -1;
-            if (refs != null) 
+            ContentHandler service;
+            if (framework instanceof Felix)
             {
-                // Loop through all service references and select the reference
-                // with the highest ranking and lower service identifier.
-                for (int i = 0; (refs != null) && (i < refs.length); i++)
-                {
-                    Class refClass = refs[i].getClass();
-                    Long idObj = (Long) m_action.invoke(m_action.getMethod(refClass, 
-                        "getProperty", STRING_TYPES), refs[i], SERVICE_ID_PARAMS);
-                    Integer rankObj = (Integer)  m_action.invoke(m_action.getMethod(refClass, 
-                    "getProperty", STRING_TYPES), refs[i], SERVICE_RANKING_PARAMS);
-                    // Ranking value defaults to zero.
-                    int rank = (rankObj == null) ? 0 : rankObj.intValue();
-                    if ((rank > highestRank) ||
-                        ((rank == highestRank) && (idObj.longValue() < currentId)))
-                    {
-                        ref = refs[i];
-                        highestRank = rank;
-                        currentId = idObj.longValue();
-                    }
-                }
+                service = (ContentHandler) ((Felix) framework).getContentHandlerService(m_mimeType);
             }
-            ContentHandler service = null;
-            if (ref != null) 
+            else
             {
-                Class serviceRef = null;
-                Class[] interfaces = ref.getClass().getInterfaces();
-                for (int i = 0;i < interfaces.length; i++) 
-                {
-                    if ("org.osgi.framework.ServiceReference".equals(interfaces[i].getName()))
-                    {
-                        serviceRef = interfaces[i];
-                        break;
-                    }
-                }
                 service = (ContentHandler) m_action.invoke(
-                    m_action.getMethod(contextClass, "getService", new Class[]{serviceRef}), 
-                    context, new Object[]{ref});
+                    m_action.getMethod(framework.getClass(), "getContentHandlerService", STRING_TYPES),
+                    framework, new Object[]{m_mimeType});
             }
-        
-            if (service == null)
-            {
-                service = getBuiltIn();
-            }
-            return service;
+            
+            return (service == null) ? getBuiltIn() : service;
         }
         catch (Exception ex)
         {

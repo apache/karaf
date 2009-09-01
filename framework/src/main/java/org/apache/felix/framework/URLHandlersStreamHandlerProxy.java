@@ -28,6 +28,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
+import java.util.Collections;
+import java.util.Arrays;
 
 import org.apache.felix.framework.util.SecureAction;
 import org.osgi.service.url.URLStreamHandlerService;
@@ -59,10 +61,7 @@ public class URLHandlersStreamHandlerProxy extends URLStreamHandler
     implements URLStreamHandlerSetter, InvocationHandler
 {
     private static final Class[] URL_PROXY_CLASS;
-    private static final Object[] SERVICE_RANKING_PARAMS = new Object[]{"service.ranking"};
-    private static final Object[] SERVICE_ID_PARAMS = new Object[]{"service.id"};
     private static final Class[] STRING_TYPES = new Class[]{String.class};
-    private static final Class[] STRING_STRING_TYPES = new Class[]{String.class, String.class};
     private static final Method EQUALS;
     private static final Method GET_DEFAULT_PORT;
     private static final Method GET_HOST_ADDRESS;
@@ -129,28 +128,25 @@ public class URLHandlersStreamHandlerProxy extends URLStreamHandler
     private final SecureAction m_action;
     private final URLStreamHandler m_builtIn;
     private final URL m_builtInURL;
-    private final Object[] m_filter;
+    private final String m_protocol;
 
     public URLHandlersStreamHandlerProxy(String protocol, 
         SecureAction action, URLStreamHandler builtIn, URL builtInURL)
     {
+        m_protocol = protocol;
         m_service = null;
         m_action = action;
         m_builtIn = builtIn;
         m_builtInURL = builtInURL;
-        m_filter = new Object[]{"org.osgi.service.url.URLStreamHandlerService", 
-            "(&(objectClass=org.osgi.service.url.URLStreamHandlerService)(url.handler.protocol="
-            + protocol
-            + "))"};
     }
     
     private URLHandlersStreamHandlerProxy(Object service, SecureAction action)
     {
+        m_protocol = null;
         m_service = service;
         m_action = action;
         m_builtIn = null;
         m_builtInURL = null;
-        m_filter = null; 
     }
 
     //
@@ -535,57 +531,19 @@ public class URLHandlersStreamHandlerProxy extends URLStreamHandler
             {
                 return m_builtIn;
             }
-            Object context = m_action.invoke(
-                m_action.getMethod(framework.getClass(), "getBundleContext", null),framework, null);
-            
-            Class contextClass = context.getClass();
-            
-            Object[] refs = (Object[]) m_action.invoke(
-                m_action.getMethod(contextClass, "getServiceReferences", STRING_STRING_TYPES), 
-                context, m_filter);
-            
-            Object ref = null;
-            int highestRank = -1;
-            long currentId = -1;
-            if (refs != null) 
-            {
-                // Loop through all service references and select the reference
-                // with the highest ranking and lower service identifier.
-                for (int i = 0; (refs != null) && (i < refs.length); i++)
-                {
-                    Class refClass = refs[i].getClass();
-                    Long idObj = (Long) m_action.invoke(m_action.getMethod(refClass, 
-                        "getProperty", STRING_TYPES), refs[i], SERVICE_ID_PARAMS);
-                    Integer rankObj = (Integer)  m_action.invoke(m_action.getMethod(refClass, 
-                        "getProperty", STRING_TYPES), refs[i], SERVICE_RANKING_PARAMS);
-                    // Ranking value defaults to zero.
-                    int rank = (rankObj == null) ? 0 : rankObj.intValue();
-                    if ((rank > highestRank) ||
-                        ((rank == highestRank) && (idObj.longValue() < currentId)))
-                    {
-                        ref = refs[i];
-                        highestRank = rank;
-                        currentId = idObj.longValue();
-                    }
-                }
-            }
+
             Object service = null;
-            if (ref != null) 
+            if (framework instanceof Felix)
             {
-                Class serviceRef = null;
-                Class[] interfaces = ref.getClass().getInterfaces();
-                for (int i = 0;i < interfaces.length; i++) 
-                {
-                    if ("org.osgi.framework.ServiceReference".equals(interfaces[i].getName()))
-                    {
-                        serviceRef = interfaces[i];
-                        break;
-                    }
-                }
-                service = m_action.invoke(
-                    m_action.getMethod(contextClass, "getService", new Class[]{serviceRef}), 
-                    context, new Object[]{ref});
+                service = ((Felix) framework).getStreamHandlerService(m_protocol);
             }
+            else
+            {
+                m_action.invoke(
+                    m_action.getMethod(framework.getClass(), "getStreamHandlerService", STRING_TYPES), 
+                    framework, new Object[]{m_protocol});
+            }
+
             if (service == null) 
             {
                 return m_builtIn;

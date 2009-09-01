@@ -307,7 +307,7 @@ public class Felix extends BundleImpl implements Framework
         {
             // This should not throw an exception, but if so, lets convert it to
             // a runtime exception.
-            throw new RuntimeException(ex);
+            throw new RuntimeException(ex.getMessage());
         }
 
         // Read the boot delegation property and parse it.
@@ -4625,5 +4625,22 @@ m_logger.log(Logger.LOG_DEBUG, "DYNAMIC WIRE: " + newWires[newWires.length - 1])
                     "The current thread doesn't own the global lock.");
             }
         }
+    }
+
+    private volatile URLHandlersActivator m_urlHandlersActivator;
+    
+    void setURLHandlersActivator(URLHandlersActivator urlHandlersActivator)
+    {
+        m_urlHandlersActivator = urlHandlersActivator;
+    }
+    
+    Object getStreamHandlerService(String protocol)
+    {
+        return m_urlHandlersActivator.getStreamHandlerService(protocol);
+    }
+    
+    Object getContentHandlerService(String mimeType)
+    {
+        return m_urlHandlersActivator.getContentHandlerService(mimeType);
     }
 }
