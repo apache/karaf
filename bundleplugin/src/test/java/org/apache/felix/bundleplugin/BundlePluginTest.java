@@ -23,10 +23,12 @@ package org.apache.felix.bundleplugin;
 import java.io.File;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Properties;
 
 import org.apache.maven.plugin.testing.stubs.MavenProjectStub;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.osgi.DefaultMaven2OsgiConverter;
+import org.apache.maven.model.Organization;
 
 import aQute.lib.osgi.Analyzer;
 import aQute.lib.osgi.Builder;
@@ -163,6 +165,30 @@ public class BundlePluginTest extends AbstractBundlePluginTest
         assertEquals( "", transformedInstructions.get( "-z" ) );
     }
 
+    public void testDefaultPropertiesIncludeOrganization()
+    {
+        final Organization organization = new Organization();
+        organization.setName( "Example Organization" );
+        organization.setUrl( "http://example.org" );
+
+        // MavenProjectStub.setOrganization(Organization) doesn't do anything, so we have to make it work this way
+        MavenProject project = new MavenProjectStub()
+        {
+            @Override public Organization getOrganization()
+            {
+                return organization;
+            }
+        };
+        project.setGroupId( "group" );
+        project.setArtifactId( "artifact" );
+        project.setVersion( "1.1.0.0" );
+
+        Properties properties = plugin.getDefaultProperties( project );
+        assertEquals( organization.getName(), properties.getProperty( "project.organization.name" ) );
+        assertEquals( organization.getName(), properties.getProperty( "pom.organization.name" ) );
+        assertEquals( organization.getUrl(), properties.getProperty( "project.organization.url" ) );
+        assertEquals( organization.getUrl(), properties.getProperty( "pom.organization.url" ) );
+    }
 
     public void testVersion() throws Exception
     {
