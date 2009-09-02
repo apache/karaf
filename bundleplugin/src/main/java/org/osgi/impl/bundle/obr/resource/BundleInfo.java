@@ -1,5 +1,5 @@
 /*
- * $Id: BundleInfo.java 95 2009-01-19 13:21:52Z peter.kriens@aqute.biz $
+ * $Id: BundleInfo.java 96 2009-08-26 13:44:04Z peter.kriens@aqute.biz $
  * 
  * Copyright (c) OSGi Alliance (2002, 2006, 2007). All Rights Reserved.
  * 
@@ -28,7 +28,7 @@ import org.osgi.service.obr.Resource;
  * Convert a bundle to a generic resource description and store its local
  * dependencies (like for example a license file in the JAR) in a zip file.
  * 
- * @version $Revision: 95 $
+ * @version $Revision: 96 $
  */
 public class BundleInfo {
 	Manifest manifest;
@@ -288,12 +288,12 @@ public class BundleInfo {
 			r.setFilter(sb.toString());
 
 			r.setComment("Require Bundle " + entry.getName() + "; " + v);
-			if (entry.directives == null
-					|| "true".equalsIgnoreCase((String) entry.directives
+			if (entry.directives != null
+					&& "optional".equalsIgnoreCase((String) entry.directives
 							.get("resolution")))
-				r.setOptional(false);
-			else
 				r.setOptional(true);
+			else
+				r.setOptional(false);
 			resource.addRequirement(r);
 		}
 	}

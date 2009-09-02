@@ -570,6 +570,12 @@ public class ResourcesBundle
             addRequire( ( Require ) requirement.get( i ) );
         }
 
+        List categories = ebi.getCategories();
+        for ( int i = 0; i < categories.size(); i++ )
+        {
+            addCategory( ( Category ) categories.get( i ) );
+        }
+
         // we also add the goupId
         Category category = new Category();
         category.setId( project.getGroupId() );

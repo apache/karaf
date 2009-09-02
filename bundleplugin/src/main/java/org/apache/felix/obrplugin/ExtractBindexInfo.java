@@ -183,6 +183,24 @@ public class ExtractBindexInfo
 
 
     /**
+     * extract categories from bindex information.
+     * @return bundle categories List
+     */
+    public List getCategories() 
+    {
+        List list = new ArrayList();
+        String[] res = m_resource.getCategories();
+        for (int i = 0; i < res.length; i++)
+        {
+            Category category = new Category();
+            category.setId( res[i] );
+            list.add( category );
+        }
+        return list;
+    }
+
+
+    /**
      * extract symbolic name from bindex information.
      * @return bundle symbolic name
      */
