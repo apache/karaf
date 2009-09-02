@@ -851,8 +851,8 @@ public class BundlePlugin extends AbstractMojo
         properties.put( Analyzer.IMPORT_PACKAGE, "*" );
         properties.put( Analyzer.BUNDLE_VERSION, currentProject.getVersion() );
 
-        // remove the verbose Include-Resource entry from generated manifest
-        properties.put( Analyzer.REMOVE_HEADERS, Analyzer.INCLUDE_RESOURCE );
+        // remove the extraneous Include-Resource and Private-Package entries from generated manifest
+        properties.put( Analyzer.REMOVE_HEADERS, Analyzer.INCLUDE_RESOURCE + ',' + Analyzer.PRIVATE_PACKAGE );
 
         header( properties, Analyzer.BUNDLE_DESCRIPTION, currentProject.getDescription() );
         StringBuffer licenseText = printLicenses( currentProject.getLicenses() );
@@ -934,7 +934,7 @@ public class BundlePlugin extends AbstractMojo
             String pkg = ( String ) i.next();
 
             // mark all source packages as private by default (can be overridden by export list)
-            privatePkgs.append( pkg ).append( ',' );
+            privatePkgs.append( pkg ).append( ";-split-package:=merge-first," );
 
             // we can't export the default package (".") and we shouldn't export internal packages 
             if ( !( ".".equals( pkg ) || pkg.contains( ".internal" ) || pkg.contains( ".impl" ) ) )
