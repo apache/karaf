@@ -103,7 +103,7 @@ public class BundlePlugin extends AbstractMojo
      * Classifier type of the bundle to be installed.  For example, "jdk14".
      * Defaults to none which means this is the project's main bundle.
      *
-     * @parameter expression="${classifier}"
+     * @parameter
      */
     protected String classifier;
 
