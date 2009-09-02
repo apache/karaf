@@ -41,7 +41,7 @@ public final class PackageVersionAnalyzer extends Builder
         throws IOException
     {
         Map classSpace = super.analyzeBundleClasspath( dot, bundleClasspath, contained, referred, uses );
-        String bundleVersion = getProperties().getProperty( BUNDLE_VERSION );
+        String bundleVersion = getProperty( BUNDLE_VERSION );
         for ( Iterator it = contained.entrySet().iterator(); it.hasNext(); )
         {
             Map.Entry entry = ( Map.Entry ) it.next();

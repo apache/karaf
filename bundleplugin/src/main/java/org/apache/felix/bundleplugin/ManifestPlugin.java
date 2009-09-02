@@ -190,8 +190,13 @@ public class ManifestPlugin extends BundlePlugin
         Collection embeddableArtifacts = getEmbeddableArtifacts( project, analyzer );
         new DependencyEmbedder( getLog(), embeddableArtifacts ).processHeaders( analyzer );
 
+        dumpInstructions( "BND Instructions:", analyzer.getProperties(), getLog() );
+        dumpClasspath( "BND Classpath:", analyzer.getClasspath(), getLog() );
+
         analyzer.mergeManifest( analyzer.getJar().getManifest() );
         analyzer.calcManifest();
+
+        dumpManifest( "BND Manifest:", analyzer.getJar().getManifest(), getLog() );
 
         return analyzer;
     }
