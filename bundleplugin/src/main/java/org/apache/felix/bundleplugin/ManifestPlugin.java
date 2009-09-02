@@ -188,7 +188,7 @@ public class ManifestPlugin extends BundlePlugin
 
         // Apply Embed-Dependency headers, even though the contents won't be changed
         Collection embeddableArtifacts = getEmbeddableArtifacts( project, analyzer );
-        new DependencyEmbedder( embeddableArtifacts ).processHeaders( analyzer );
+        new DependencyEmbedder( getLog(), embeddableArtifacts ).processHeaders( analyzer );
 
         analyzer.mergeManifest( analyzer.getJar().getManifest() );
         analyzer.calcManifest();

@@ -112,6 +112,8 @@ public abstract class AbstractDependencyFilter
 
             // CLAUSE: REGEXP --> { ATTRIBUTE MAP }
             Map.Entry clause = ( Map.Entry ) clauseIterator.next();
+            StringBuilder tag = new StringBuilder();
+            tag.append( clause.getKey() );
 
             filter = new DependencyFilter( ( String ) clause.getKey() )
             {
@@ -128,6 +130,7 @@ public abstract class AbstractDependencyFilter
             {
                 // ATTRIBUTE: KEY --> REGEXP
                 Map.Entry attr = ( Map.Entry ) attrIterator.next();
+                tag.append( ';' ).append( attr );
 
                 if ( "groupId".equals( attr.getKey() ) )
                 {
@@ -221,10 +224,10 @@ public abstract class AbstractDependencyFilter
                 filter.filter( filteredDependencies );
             }
 
-            processDependencies( inline, filteredDependencies );
+            processDependencies( tag.toString(), inline, filteredDependencies );
         }
     }
 
 
-    protected abstract void processDependencies( String inline, Collection filteredDependencies );
+    protected abstract void processDependencies( String clause, String inline, Collection dependencies );
 }

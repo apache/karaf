@@ -384,7 +384,7 @@ public class BundlePlugin extends AbstractMojo
 
         // update BND instructions to embed selected Maven dependencies
         Collection embeddableArtifacts = getEmbeddableArtifacts( currentProject, builder );
-        new DependencyEmbedder( embeddableArtifacts ).processHeaders( builder );
+        new DependencyEmbedder( getLog(), embeddableArtifacts ).processHeaders( builder );
 
         dumpInstructions( "BND Instructions:", builder.getProperties(), getLog() );
         dumpClasspath( "BND Classpath:", builder.getClasspath(), getLog() );

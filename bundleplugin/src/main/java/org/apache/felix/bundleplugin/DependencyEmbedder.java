@@ -26,6 +26,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.codehaus.plexus.util.StringUtils;
 
@@ -53,6 +54,11 @@ public final class DependencyEmbedder extends AbstractDependencyFilter
     private String m_embedStripVersion;
 
     /**
+     * Maven logger.
+     */
+    private final Log m_log;
+
+    /**
      * Inlined paths.
      */
     private final Collection m_inlinedPaths;
@@ -63,9 +69,11 @@ public final class DependencyEmbedder extends AbstractDependencyFilter
     private final Collection m_embeddedArtifacts;
 
 
-    public DependencyEmbedder( Collection dependencyArtifacts )
+    public DependencyEmbedder( Log log, Collection dependencyArtifacts )
     {
         super( dependencyArtifacts );
+
+        m_log = log;
 
         m_inlinedPaths = new LinkedHashSet();
         m_embeddedArtifacts = new LinkedHashSet();
@@ -115,15 +123,20 @@ public final class DependencyEmbedder extends AbstractDependencyFilter
 
 
     @Override
-    protected void processDependencies( String inline, Collection filteredDependencies )
+    protected void processDependencies( String tag, String inline, Collection dependencies )
     {
+        if ( dependencies.isEmpty() )
+        {
+            m_log.warn( EMBED_DEPENDENCY + ": clause \"" + tag + "\" did not match any dependencies" );
+        }
+
         if ( null == inline || "false".equalsIgnoreCase( inline ) )
         {
-            m_embeddedArtifacts.addAll( filteredDependencies );
+            m_embeddedArtifacts.addAll( dependencies );
         }
         else
         {
-            for ( Iterator i = filteredDependencies.iterator(); i.hasNext(); )
+            for ( Iterator i = dependencies.iterator(); i.hasNext(); )
             {
                 addInlinedPaths( ( Artifact ) i.next(), inline, m_inlinedPaths );
             }

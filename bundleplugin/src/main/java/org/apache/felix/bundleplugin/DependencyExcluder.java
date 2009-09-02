@@ -60,9 +60,9 @@ public final class DependencyExcluder extends AbstractDependencyFilter
 
 
     @Override
-    protected void processDependencies( String inline, Collection filteredDependencies )
+    protected void processDependencies( String tag, String inline, Collection dependencies )
     {
-        m_excludedArtifacts.addAll( filteredDependencies );
+        m_excludedArtifacts.addAll( dependencies );
     }
 
 
