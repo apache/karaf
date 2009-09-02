@@ -142,6 +142,15 @@ public class DirectoryWatcher extends Thread
             try
             {
                 Set/*<File>*/ files = scanner.scan();
+                // Check that there is a result.  If not, this means that the directory can not be listed,
+                // so it's presumably not a valid directory (it may have been deleted by someone).
+                // In such case, just sleep
+                if (files == null)
+                {
+                    Thread.sleep(poll);
+                    continue;
+                }
+
                 List/*<ArtifactListener>*/ listeners = FileInstall.getListeners();
                 List/*<Artifact>*/ deleted = new ArrayList/*<Artifact>*/();
                 List/*<Artifact>*/ modified = new ArrayList/*<Artifact>*/();
