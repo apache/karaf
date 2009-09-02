@@ -55,6 +55,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.shared.osgi.DefaultMaven2OsgiConverter;
 import org.apache.maven.shared.osgi.Maven2OsgiConverter;
+import org.apache.felix.bnd.BlueprintComponent;
 import org.codehaus.plexus.archiver.UnArchiver;
 import org.codehaus.plexus.archiver.manager.ArchiverManager;
 import org.codehaus.plexus.util.DirectoryScanner;
@@ -66,6 +67,8 @@ import aQute.lib.osgi.Builder;
 import aQute.lib.osgi.EmbeddedResource;
 import aQute.lib.osgi.FileResource;
 import aQute.lib.osgi.Jar;
+import aQute.lib.spring.SpringXMLType;
+import aQute.lib.spring.JPAComponent;
 
 
 /**
@@ -881,6 +884,10 @@ public class BundlePlugin extends AbstractMojo
         properties.put( "project.build.outputdirectory", getOutputDirectory() );
 
         properties.put( "classifier", classifier == null ? "" : classifier );
+
+        // Add default plugins
+        header( properties, Analyzer.PLUGIN,
+                BlueprintComponent.class.getName() + "," + SpringXMLType.class.getName());
 
         return properties;
     }
