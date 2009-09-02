@@ -338,7 +338,7 @@ public class DependencyTreeResolutionListener implements ResolutionListener, Res
              * Cache management information and apply in includeArtifact, since DefaultArtifactCollector mutates the
              * artifact and then calls includeArtifact after manageArtifact.
              */
-            managedVersions.put( replacement.getId(), artifact.getVersion() );
+            managedVersions.put( getRangeId( replacement ), artifact.getVersion() );
         }
     }
 
@@ -359,7 +359,7 @@ public class DependencyTreeResolutionListener implements ResolutionListener, Res
              * Cache management information and apply in includeArtifact, since DefaultArtifactCollector mutates the
              * artifact and then calls includeArtifact after manageArtifact.
              */
-            managedScopes.put( replacement.getId(), artifact.getScope() );
+            managedScopes.put( getRangeId( replacement ), artifact.getScope() );
         }
     }
     
@@ -525,8 +525,8 @@ public class DependencyTreeResolutionListener implements ResolutionListener, Res
     private void flushDependencyManagement( DependencyNode node )
     {
         Artifact artifact = node.getArtifact();
-        String premanagedVersion = (String) managedVersions.get( artifact.getId() );
-        String premanagedScope = (String) managedScopes.get( artifact.getId() );
+        String premanagedVersion = (String) managedVersions.get( getRangeId( artifact ) );
+        String premanagedScope = (String) managedScopes.get( getRangeId( artifact ) );
         
         if ( premanagedVersion != null || premanagedScope != null )
         {
@@ -543,5 +543,10 @@ public class DependencyTreeResolutionListener implements ResolutionListener, Res
             premanagedVersion = null;
             premanagedScope = null;
         }
+    }
+
+    private static String getRangeId( Artifact artifact )
+    {
+        return artifact.getDependencyConflictId() + ":" + artifact.getVersionRange();
     }
 }
