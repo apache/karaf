@@ -83,7 +83,6 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>2.0-beta-9</version>
                     <configuration>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                     </configuration>
@@ -97,27 +96,6 @@
                     <source>1.5</source>
                     <target>1.5</target>
                 </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.2-beta-4</version>
-                <inherited>false</inherited>
-                <executions>
-                    <execution>
-                        <id>assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <descriptorRefs>
-                                <descriptorRef>project</descriptorRef>
-                            </descriptorRefs>
-                            <tarLongFileMode>gnu</tarLongFileMode>
-                        </configuration>
-                        <inherited>false</inherited>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
