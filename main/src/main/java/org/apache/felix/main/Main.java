@@ -172,8 +172,6 @@ public class Main
     **/
     public static void main(String[] args) throws Exception
     {
-// TODO: MAIN - SHOULD WE ADD A SHUTDOWN HOOK?
-
         // Look for bundle directory and/or cache directory.
         // We support at most one argument, which is the bundle
         // cache directory.
