@@ -99,9 +99,6 @@ public class DirectoryWatcher extends Thread
     // Represents artifacts that could not be installed
     Map/* <File, Artifact> */ installationFailures = new HashMap/* <File, Artifact> */();
 
-    // Represents artifacts that could not be installed
-    Set/* <Bundle> */ startupFailures = new HashSet/* <Bundle> */();
-    
     public DirectoryWatcher(Dictionary properties, BundleContext context)
     {
         super(properties.toString());
@@ -298,12 +295,9 @@ public class DirectoryWatcher extends Thread
 
                 if (startBundles)
                 {
-                    // Try to start all the bundles that we could not start last time.
-                    // Make a copy, because start() changes the underlying collection
-                    start(new HashSet(startupFailures));
-		            // Start updated bundles.
-		            start(updatedBundles);
-                    // Start newly installed bundles
+                    // Try to start all the bundles that are not persistently stopped
+                    startAllBundles();
+                    // Try to start newly installed bundles
                     start(installedBundles);
                 }
 
@@ -729,7 +723,6 @@ public class DirectoryWatcher extends Thread
                 }
                 bundle.uninstall();
             }
-            startupFailures.remove(bundle);
             log("Uninstalled " + path, null);
         }
         catch (Exception e)
@@ -773,7 +766,6 @@ public class DirectoryWatcher extends Thread
                     in.close();
                 }
             }
-            startupFailures.remove(bundle);
             artifact.setLastModified(Util.getLastModified(path));
             log("Updated " + path, null);
         }
@@ -782,6 +774,28 @@ public class DirectoryWatcher extends Thread
             log("Failed to update artifact " + artifact.getPath(), e);
         }
         return bundle;
+    }
+
+    private void startAllBundles()
+    {
+        List bundles = new ArrayList();
+        for (Iterator it = currentManagedArtifacts.values().iterator(); it.hasNext();)
+        {
+            Artifact artifact = (Artifact) it.next();
+            if (artifact.getBundleId() > 0)
+            {
+                Bundle bundle = context.getBundle(artifact.getBundleId());
+                if (bundle != null)
+                {
+                    if (bundle.getState() != Bundle.STARTING && bundle.getState() != Bundle.ACTIVE
+                            && FileInstall.getStartLevel().isBundlePersistentlyStarted(bundle))
+                    {
+                        bundles.add(bundle);
+                    }
+                }
+            }
+        }
+        start(bundles);
     }
 
     private void start(Collection/* <Bundle> */ bundles)
@@ -803,13 +817,11 @@ public class DirectoryWatcher extends Thread
             try
             {
                 bundle.start();
-                startupFailures.remove(bundle);
                 log("Started bundle: " + bundle.getLocation(), null);
             }
             catch (BundleException e)
             {
                 log("Error while starting bundle: " + bundle.getLocation(), e);
-                startupFailures.add(bundle);
             }
         }
     }

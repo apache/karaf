@@ -39,6 +39,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedServiceFactory;
 import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -50,6 +51,7 @@ import org.osgi.util.tracker.ServiceTracker;
 public class FileInstall implements BundleActivator, ManagedServiceFactory
 {
     static ServiceTracker padmin;
+    static ServiceTracker startLevel;
     static ServiceTracker cmTracker;
     static List /* <ArtifactListener> */ listeners = new ArrayList /* <ArtifactListener> */();
     BundleContext context;
@@ -68,6 +70,8 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory
 
         padmin = new ServiceTracker(context, PackageAdmin.class.getName(), null);
         padmin.open();
+        startLevel = new ServiceTracker(context, StartLevel.class.getName(), null);
+        startLevel.open();
         cmTracker = new ServiceTracker(context, ConfigurationAdmin.class.getName(), null)
         {
             public Object addingService(ServiceReference serviceReference)
@@ -208,6 +212,24 @@ public class FileInstall implements BundleActivator, ManagedServiceFactory
         try
         {
             return (PackageAdmin) padmin.waitForService(timeout);
+        }
+        catch (InterruptedException e)
+        {
+            Thread.currentThread().interrupt();
+            return null;
+        }
+    }
+
+    static StartLevel getStartLevel()
+    {
+        return getStartLevel(10000);
+    }
+
+    static StartLevel getStartLevel(long timeout)
+    {
+        try
+        {
+            return (StartLevel) startLevel.waitForService(timeout);
         }
         catch (InterruptedException e)
         {
