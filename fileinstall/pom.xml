@@ -56,8 +56,10 @@
                 org.apache.felix.fileinstall;version=${project.version},
                 org.osgi.service.cm
             </Export-Package>
+            <Private-Package>
+                org.apache.felix.fileinstall.internal
+            </Private-Package>
             <Import-Package>
-                !org.apache.felix.fileinstall.internal*,
                 org.osgi.service.log;resolution:=optional,
                 *
             </Import-Package>
