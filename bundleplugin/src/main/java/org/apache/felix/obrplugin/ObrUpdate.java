@@ -20,7 +20,6 @@ package org.apache.felix.obrplugin;
 
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -42,6 +41,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.util.FileUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -477,18 +477,18 @@ public class ObrUpdate
 
         DOMSource input = new DOMSource( treeToBeWrite );
 
-        File fichier = new File( outputFilename );
-        fichier.getParentFile().mkdirs();
+        File fichier = null;
         FileOutputStream flux = null;
         try
         {
+            fichier = File.createTempFile( "repository", ".xml" );
             flux = new FileOutputStream( fichier );
         }
-        catch ( FileNotFoundException e )
+        catch ( IOException e )
         {
             m_logger.error( "Unable to write to file: " + fichier.getName() );
             e.printStackTrace();
-            throw new MojoExecutionException( "FileNotFoundException" );
+            throw new MojoExecutionException( "Unable to write to file: " + fichier.getName() + " : " + e.getMessage() );
         }
         Result output = new StreamResult( flux );
         try
@@ -505,6 +505,10 @@ public class ObrUpdate
         {
             flux.flush();
             flux.close();
+
+            File outputFile = new File( outputFilename );
+            outputFile.getParentFile().mkdirs();
+            FileUtils.rename( fichier, outputFile );
         }
         catch ( IOException e )
         {

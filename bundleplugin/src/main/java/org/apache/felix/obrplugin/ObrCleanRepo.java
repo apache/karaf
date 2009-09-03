@@ -20,7 +20,6 @@ package org.apache.felix.obrplugin;
 
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -44,6 +43,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.codehaus.plexus.util.FileUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -268,13 +268,14 @@ public class ObrCleanRepo extends AbstractMojo
 
         DOMSource input = new DOMSource( treeToBeWrite );
 
-        File fichier = new File( outputFilename );
+        File fichier = null;
         FileOutputStream flux = null;
         try
         {
+            fichier = File.createTempFile( "repository", ".xml" );
             flux = new FileOutputStream( fichier );
         }
-        catch ( FileNotFoundException e )
+        catch ( IOException e )
         {
             getLog().error( "Unable to write to file: " + fichier.getName() );
             throw new MojoExecutionException( "Unable to write to file: " + fichier.getName() + " : " + e.getMessage() );
@@ -294,6 +295,8 @@ public class ObrCleanRepo extends AbstractMojo
         {
             flux.flush();
             flux.close();
+
+            FileUtils.rename( fichier, new File( outputFilename ) );
         }
         catch ( IOException e )
         {
