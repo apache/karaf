@@ -175,47 +175,91 @@ public class Util
      */
     public static void log(BundleContext context, long debug, String message, Throwable e)
     {
-        LogService log = getLogService(context);
-        if (log == null)
+        getLogger(context).log(debug > 0, message, e);
+    }
+
+    private static Logger getLogger(BundleContext context)
+    {
+        if (logger != null)
         {
-            System.out.println(message + (e == null ? "" : ": " + e));
-            if (debug > 0 && e != null)
-            {
-                e.printStackTrace(System.out);
-            }
+            return logger;
         }
-        else
+        try
         {
-            if (e != null)
+            logger = new OsgiLogger(context);
+        }
+        catch (Throwable t)
+        {
+            logger = new StdOutLogger();
+        }
+        return logger;
+    }
+
+    private static Logger logger;
+
+    interface Logger
+    {
+        void log(boolean debug, java.lang.String message, java.lang.Throwable throwable);
+    }
+
+    static class StdOutLogger implements Logger
+    {
+        public void log(boolean debug, String message, Throwable throwable)
+        {
+            System.out.println(message + (throwable == null ? "" : ": " + throwable));
+            if (debug && throwable != null)
             {
-                log.log(LogService.LOG_ERROR, message, e);
-                if (debug > 0 && e != null)
-                {
-                    e.printStackTrace();
-                }
-            }
-            else
-            {
-                log.log(LogService.LOG_INFO, message);
+                throwable.printStackTrace(System.out);
             }
         }
     }
 
-    /**
-     * Answer the Log Service
-     *
-     * @return
-     */
-    private static LogService getLogService(BundleContext context)
+    static class OsgiLogger extends StdOutLogger
     {
-        ServiceReference ref = context.getServiceReference(LogService.class.getName());
-        if (ref != null)
+
+        private BundleContext context;
+
+        OsgiLogger(BundleContext context)
         {
-            LogService log = (LogService) context.getService(ref);
-            return log;
+            this.context = context;
         }
-        return null;
+
+        public void log(boolean debug, String message, Throwable throwable)
+        {
+            LogService log = getLogService();
+            if (log != null)
+            {
+                if (throwable != null)
+                {
+                    log.log(LogService.LOG_ERROR, message, throwable);
+                    if (debug)
+                    {
+                        throwable.printStackTrace();
+                    }
+                }
+                else
+                {
+                    log.log(LogService.LOG_INFO, message);
+                }
+            }
+            else
+            {
+                super.log(debug, message, throwable);
+            }
+        }
+
+        private LogService getLogService()
+        {
+            ServiceReference ref = context.getServiceReference(LogService.class.getName());
+            if (ref != null)
+            {
+                LogService log = (LogService) context.getService(ref);
+                return log;
+            }
+            return null;
+        }
     }
+
 
     /**
      * Jar up a directory
