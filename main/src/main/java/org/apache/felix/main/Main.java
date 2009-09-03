@@ -80,7 +80,11 @@ public class Main
      * when invoked:
      * </p>
      * <ol>
-     *   <li><i><b>Read the system properties file.<b></i> This is a file
+     *   <li><i><b>Examine and verify command-line arguments.</b></i> The launcher
+     *       accepts a "<tt>-b</tt>" command line switch to set the bundle auto-deploy
+     *       directory and a single argument to set the bundle cache directory.
+     *   </li>
+     *   <li><i><b>Read the system properties file.</b></i> This is a file
      *       containing properties to be pushed into <tt>System.setProperty()</tt>
      *       before starting the framework. This mechanism is mainly shorthand
      *       for people starting the framework from the command line to avoid having
@@ -90,12 +94,6 @@ public class Main
      *       <tt>http.proxyHost</tt>, <tt>http.proxyPort</tt>, and
      *       <tt>http.proxyAuth</tt>. Generally speaking, the framework does
      *       not use system properties at all.
-     *   </li>
-     *   <li><i><b>Perform system property variable substitution on system
-     *       properties.</b></i> Any system properties in the system property
-     *       file whose value adheres to <tt>${&lt;system-prop-name&gt;}</tt>
-     *       syntax will have their value substituted with the appropriate
-     *       system property value.
      *   </li>
      *   <li><i><b>Read the framework's configuration property file.</b></i> This is
      *       a file containing properties used to configure the framework
@@ -115,11 +113,6 @@ public class Main
      *       constructor documentation for more information on framework
      *       configuration properties.
      *   </li>
-     *   <li><i><b>Perform system property variable substitution on configuration
-     *       properties.</b></i> Any configuration properties whose value adheres to
-     *       <tt>${&lt;system-prop-name&gt;}</tt> syntax will have their value
-     *       substituted with the appropriate system property value.
-     *   </li>
      *   <li><i><b>Copy configuration properties specified as system properties
      *       into the set of configuration properties.</b></i> Even though the
      *       Felix framework does not consult system properties for configuration
@@ -128,37 +121,67 @@ public class Main
      *       copies any configuration properties specified as system properties
      *       into the set of configuration properties passed into Felix.
      *   </li>
-     *   <li><i><b>Creates and starts a framework instance.</b></i> The configuration
-     *       properties are passed into the Felix constructor and the {{Felix.start()}}
-     *       method is called to start the framework.
+     *   <li><i><b>Add shutdown hook.</b></i> To make sure the framework shutdowns
+     *       cleanly, the launcher installs a shutdown hook; this can be disabled
+     *       with the <tt>felix.shutdown.hook</tt> configuration property.
+     *   </li>
+     *   <li><i><b>Create and initialize a framework instance.</b></i> The OSGi standard
+     *       <tt>FrameworkFactory</tt> is retrieved from <tt>META-INF/services</tt>
+     *       and used to create a framework instance with the configuration properties.
+     *   </li>
+     *   <li><i><b>Auto-deploy bundles.</b></i> All bundles in the auto-deploy
+     *       directory are deployed into the framework instance.
+     *   </li>
+     *   <li><i><b>Start the framework.</b></i> The framework is started and
+     *       the launcher thread waits for the framework to shutdown.
      *   </li>
      * </ol>
      * <p>
      * It should be noted that simply starting an instance of the framework is not
      * enough to create an interactive session with it. It is necessary to install
      * and start bundles that provide a some means to interact with the framework;
-     * this is generally done by specifying an "auto-start" property in the
-     * configuration property file. If no bundles providing a means to interact
-     * with the framework are installed or if the configuration property
-     * file cannot be found, the framework will appear to be hung or deadlocked.
-     * This is not the case, it is executing correctly, there is just no way to
-     * interact with it. The default launcher provides two configuration properties
-     * to help you automatically install and/or start bundles, which are:
+     * this is generally done by bundles in the auto-deploy directory or specifying
+     * an "auto-start" property in the configuration property file. If no bundles
+     * providing a means to interact with the framework are installed or if the
+     * configuration property file cannot be found, the framework will appear to
+     * be hung or deadlocked. This is not the case, it is executing correctly,
+     * there is just no way to interact with it.
+     * </p>
+     * <p>
+     * The launcher provides two ways to deploy bundles into a framework at
+     * startup, which have associated configuration properties:
      * </p>
      * <ul>
-     *   <li><tt>felix.auto.install.&lt;n&gt;</tt> - Space-delimited list of
-     *       bundle URLs to automatically install into start level <tt>n</tt> when
-     *       the framework is started. Append a specific start level to this
-     *       property name to assign the bundles' start level
-     *       (e.g., <tt>felix.auto.install.2</tt>); otherwise, bundles are
-     *       installed into the default bundle start level.
+     *   <li>Bundle auto-deploy - Automatically deploys all bundles from a
+     *       specified directory, controlled by the following configuration
+     *       properties:
+     *     <ul>
+     *       <li><tt>felix.auto.deploy.dir</tt> - Specifies the auto-deploy directory
+     *           from which bundles are automatically deploy at framework startup.
+     *           The default is the <tt>bundle/</tt> directory of the current directory.
+     *       </li>
+     *       <li><tt>felix.auto.deploy.action</tt> - Specifies the auto-deploy actions
+     *           to be found on bundle JAR files found in the auto-deploy directory.
+     *           The possible actions are <tt>install</tt>, <tt>update</tt>,
+     *           <tt>start</tt>, and <tt>uninstall</tt>. The default value is
+     *           <tt>install</tt>, <tt>update</tt>, and <tt>start</tt>.
+     *       </li>
+     *     </ul>
      *   </li>
-     *   <li><tt>felix.auto.start.&lt;n&gt;</tt> - Space-delimited list of
-     *       bundle URLs to automatically install and start into start level
-     *       <tt>n</tt> when the framework is started. Append a
-     *       specific start level to this property name to assign the
-     *       bundles' start level(e.g., <tt>felix.auto.start.2</tt>); otherwise,
-     *       bundles are installed into the default bundle start level.
+     *   <li>Bundle auto-properties - Configuration properties which specify URLs
+     *       to bundles to install/start:
+     *     <ul>
+     *       <li><tt>felix.auto.install.N</tt> - Space-delimited list of bundle
+     *           URLs to automatically install when the framework is started,
+     *           where <tt>N</tt> is the start level into which the bundle will be
+     *           installed (e.g., felix.auto.install.2).
+     *       </li>
+     *       <li><tt>felix.auto.start.N</tt> - Space-delimited list of bundle URLs
+     *           to automatically install and start when the framework is started,
+     *           where <tt>N</tt> is the start level into which the bundle will be
+     *           installed (e.g., felix.auto.start.2).
+     *       </li>
+     *     </ul>
      *   </li>
      * </ul>
      * <p>
@@ -166,8 +189,8 @@ public class Main
      * so that they can be processed by the launcher during the framework
      * startup process.
      * </p>
-     * @param argv Accepts a single argument, which is the path to use as the
-     *        framework's bundle cache.
+     * @param args Accepts arguments to set the auto-deploy directory and/or
+     *        the bundle cache directory.
      * @throws Exception If an error occurs.
     **/
     public static void main(String[] args) throws Exception
