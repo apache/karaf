@@ -18,16 +18,28 @@
  */
 package org.apache.felix.fileinstall;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.felix.fileinstall.util.Util;
-import org.apache.felix.fileinstall.listener.ArtifactListener;
 import org.apache.felix.fileinstall.listener.ArtifactInstaller;
+import org.apache.felix.fileinstall.listener.ArtifactListener;
 import org.apache.felix.fileinstall.listener.ArtifactTransformer;
-import org.osgi.framework.*;
-import org.osgi.service.cm.*;
-import org.osgi.service.packageadmin.*;
-import org.osgi.util.tracker.*;
+import org.apache.felix.fileinstall.util.Util;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedServiceFactory;
+import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * This clever little bundle watches a directory and will install any jar file

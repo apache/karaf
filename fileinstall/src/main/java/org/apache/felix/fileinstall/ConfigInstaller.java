@@ -19,15 +19,14 @@
 package org.apache.felix.fileinstall;
 
 import java.io.File;
-import java.io.InputStream;
 import java.io.FileInputStream;
-import java.util.Properties;
+import java.io.InputStream;
 import java.util.Hashtable;
+import java.util.Properties;
 
 import org.apache.felix.fileinstall.listener.ArtifactInstaller;
 import org.apache.felix.fileinstall.util.Util;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.Configuration;
 
 /**

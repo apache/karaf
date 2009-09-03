@@ -18,19 +18,32 @@
  */
 package org.apache.felix.fileinstall;
 
-import java.io.*;
-import java.util.*;
-import java.net.URISyntaxException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.apache.felix.fileinstall.util.Util;
 import org.apache.felix.fileinstall.listener.ArtifactInstaller;
-import org.apache.felix.fileinstall.listener.ArtifactTransformer;
 import org.apache.felix.fileinstall.listener.ArtifactListener;
-import org.osgi.framework.*;
-import org.osgi.service.packageadmin.*;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
+import org.apache.felix.fileinstall.listener.ArtifactTransformer;
+import org.apache.felix.fileinstall.util.Util;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
  * -DirectoryWatcher-

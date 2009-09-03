@@ -31,7 +31,6 @@ import java.util.Set;
 import java.util.Collections;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import java.util.zip.CRC32;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 
