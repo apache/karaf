@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.fileinstall;
+package org.apache.felix.fileinstall.internal;
 
 
 import java.io.File;
@@ -29,6 +29,8 @@ import org.easymock.MockControl;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.packageadmin.PackageAdmin;
+import org.apache.felix.fileinstall.internal.DirectoryWatcher;
+import org.apache.felix.fileinstall.internal.FileInstall;
 
 
 /**

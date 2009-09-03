@@ -16,13 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.fileinstall.util;
+package org.apache.felix.fileinstall.internal;
 
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
 import junit.framework.TestCase;
+import org.apache.felix.fileinstall.internal.Util;
 
 public class UtilTest extends TestCase
 {

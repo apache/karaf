@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.fileinstall.util;
+package org.apache.felix.fileinstall.internal;
 
 import java.io.IOException;
 import java.io.FileInputStream;

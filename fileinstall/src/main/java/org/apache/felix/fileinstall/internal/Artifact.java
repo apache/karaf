@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.fileinstall;
+package org.apache.felix.fileinstall.internal;
 
 import java.io.File;
 
-import org.apache.felix.fileinstall.listener.ArtifactListener;
+import org.apache.felix.fileinstall.ArtifactListener;
 
 /**
  * An artifact that has been dropped into one watched directory.

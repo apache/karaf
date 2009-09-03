@@ -53,14 +53,15 @@
         <configuration>
           <instructions>
             <Export-Package>
-                org.apache.felix.fileinstall*,
+                org.apache.felix.fileinstall;version=${project.version},
                 org.osgi.service.cm
             </Export-Package>
             <Import-Package>
+                !org.apache.felix.fileinstall.internal*,
                 org.osgi.service.log;resolution:=optional,
                 *
             </Import-Package>
-            <Bundle-Activator>org.apache.felix.fileinstall.FileInstall</Bundle-Activator>
+            <Bundle-Activator>org.apache.felix.fileinstall.internal.FileInstall</Bundle-Activator>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
             <_versionpolicy>[$(version;==;$(@)),$(version;+;$(@)))</_versionpolicy>

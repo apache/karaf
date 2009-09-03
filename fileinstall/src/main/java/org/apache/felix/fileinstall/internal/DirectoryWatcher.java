@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.fileinstall;
+package org.apache.felix.fileinstall.internal;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,10 +35,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.felix.fileinstall.listener.ArtifactInstaller;
-import org.apache.felix.fileinstall.listener.ArtifactListener;
-import org.apache.felix.fileinstall.listener.ArtifactTransformer;
-import org.apache.felix.fileinstall.util.Util;
+import org.apache.felix.fileinstall.ArtifactInstaller;
+import org.apache.felix.fileinstall.ArtifactListener;
+import org.apache.felix.fileinstall.ArtifactTransformer;
+import org.apache.felix.fileinstall.internal.Util;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -629,7 +629,7 @@ public class DirectoryWatcher extends Thread
 
     /**
      * Install an artifact and return the bundle object.
-     * It uses {@link org.apache.felix.fileinstall.Artifact#getPath()} as location
+     * It uses {@link Artifact#getPath()} as location
      * of the new bundle. Before installing a file,
      * it sees if the file has been identified as a bad file in
      * earlier run. If yes, then it compares to see if the file has changed

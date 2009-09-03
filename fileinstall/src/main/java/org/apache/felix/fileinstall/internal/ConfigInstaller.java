@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.fileinstall;
+package org.apache.felix.fileinstall.internal;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,8 +24,8 @@ import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.Properties;
 
-import org.apache.felix.fileinstall.listener.ArtifactInstaller;
-import org.apache.felix.fileinstall.util.Util;
+import org.apache.felix.fileinstall.ArtifactInstaller;
+import org.apache.felix.fileinstall.internal.Util;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 

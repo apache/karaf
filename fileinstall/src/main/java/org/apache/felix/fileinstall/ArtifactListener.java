@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.felix.fileinstall.listener;
+package org.apache.felix.fileinstall;
 
 import java.io.File;
 
@@ -23,8 +23,8 @@ import java.io.File;
  * Interface representing a custom deployment mechanism.
  * 
  * Classes must implement one of its sub-interface, either
- * {@link org.apache.felix.fileinstall.listener.ArtifactTransformer} or
- * {@link org.apache.felix.fileinstall.listener.ArtifactInstaller}.
+ * {@link ArtifactTransformer} or
+ * {@link ArtifactInstaller}.
  *
  */
 public interface ArtifactListener {

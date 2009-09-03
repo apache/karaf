@@ -16,11 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.fileinstall;
+package org.apache.felix.fileinstall.internal;
 
 import java.io.File;
 
 import junit.framework.TestCase;
+import org.apache.felix.fileinstall.internal.BundleTransformer;
 
 /**
  * Test for the BundleTransformer

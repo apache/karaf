@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.felix.fileinstall;
+package org.apache.felix.fileinstall.internal;
 
 import java.io.File;
 import java.util.Hashtable;
@@ -29,6 +29,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Bundle;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.Configuration;
+import org.apache.felix.fileinstall.internal.ConfigInstaller;
+import org.apache.felix.fileinstall.internal.FileInstall;
 
 /**
  * Tests for ConfigInstaller
