@@ -27,7 +27,7 @@ import org.w3c.dom.Document;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.felix.fileinstall.listener.ArtifactTransformer;
+import org.apache.felix.fileinstall.ArtifactTransformer;
 
 /**
  * A deployment listener that listens for spring xml applications

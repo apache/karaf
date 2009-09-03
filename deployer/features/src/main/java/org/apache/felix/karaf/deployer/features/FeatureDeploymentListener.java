@@ -43,7 +43,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.felix.karaf.features.Feature;
 import org.apache.felix.karaf.features.FeaturesService;
 import org.apache.felix.karaf.features.Repository;
-import org.apache.felix.fileinstall.listener.ArtifactTransformer;
+import org.apache.felix.fileinstall.ArtifactTransformer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
