@@ -898,7 +898,7 @@ public class ModuleImpl implements IModule
         // return it together with the results from the other searches else
         // try to look into the dynamic imports.
         urls = getResourcesLocal(name);
-        if (urls != null)
+        if ((urls != null) && (urls.hasMoreElements()))
         {
             completeUrlList.add(urls);
         }
