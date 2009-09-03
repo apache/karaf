@@ -382,7 +382,7 @@ public class BundlePlugin extends AbstractMojo
         if ( builder.getProperty( Analyzer.PRIVATE_PACKAGE ) == null
             || builder.getProperty( Analyzer.EXPORT_PACKAGE ) == null )
         {
-            addLocalPackages( currentProject.getBuild().getSourceDirectory(), builder );
+            addLocalPackages( currentProject.getCompileSourceRoots(), builder );
         }
 
         // update BND instructions to embed selected Maven dependencies
@@ -917,25 +917,29 @@ public class BundlePlugin extends AbstractMojo
     }
 
 
-    private static void addLocalPackages( String sourceDirectory, Analyzer analyzer )
+    private static void addLocalPackages( List sourceDirectories, Analyzer analyzer )
     {
         Collection packages = new LinkedHashSet();
 
-        if ( sourceDirectory != null && new File( sourceDirectory ).isDirectory() )
+        for ( Iterator d = sourceDirectories.iterator(); d.hasNext(); )
         {
-            // scan local Java sources for potential packages
-            DirectoryScanner scanner = new DirectoryScanner();
-            scanner.setBasedir( sourceDirectory );
-            scanner.setIncludes( new String[]
-                { "**/*.java" } );
-
-            scanner.addDefaultExcludes();
-            scanner.scan();
-
-            String[] paths = scanner.getIncludedFiles();
-            for ( int i = 0; i < paths.length; i++ )
+            String sourceDirectory = (String) d.next();
+            if ( sourceDirectory != null && new File( sourceDirectory ).isDirectory() )
             {
-                packages.add( getPackageName( paths[i] ) );
+                // scan local Java sources for potential packages
+                DirectoryScanner scanner = new DirectoryScanner();
+                scanner.setBasedir( sourceDirectory );
+                scanner.setIncludes( new String[]
+                    { "**/*.java" } );
+
+                scanner.addDefaultExcludes();
+                scanner.scan();
+
+                String[] paths = scanner.getIncludedFiles();
+                for ( int i = 0; i < paths.length; i++ )
+                {
+                    packages.add( getPackageName( paths[i] ) );
+                }
             }
         }
 
