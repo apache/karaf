@@ -31,7 +31,7 @@
   <name>Apache Felix iPOJO Annotations</name>
   
   <description>
-  iPOJO Annotation pack. contained annotaitons are used to define iPOJO component type.
+  iPOJO Annotation pack. contained annotations are used to define iPOJO component type.
   </description>
   <url>
   http://felix.apache.org/site/how-to-use-ipojo-annotations.html
@@ -55,7 +55,8 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-Name>iPOJO Annotations</Bundle-Name>
+            <Bundle-Name>Apache Felix iPOJO Annotations</Bundle-Name>
+            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
             <Bundle-Vendor> The Apache Software Foundation </Bundle-Vendor>
             <Bundle-Description> iPOJO Annotations </Bundle-Description>
             <Bundle-DocURL>http://felix.apache.org/site/how-to-use-ipojo-annotations.html</Bundle-DocURL>
