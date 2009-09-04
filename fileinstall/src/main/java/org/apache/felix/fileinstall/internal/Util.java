@@ -222,6 +222,15 @@ public class Util
         OsgiLogger(BundleContext context)
         {
             this.context = context;
+            // Now make sure we can access the LogService class
+            try
+            {
+                getClass().getClassLoader().loadClass(LogService.class.getName());
+            }
+            catch (ClassNotFoundException e)
+            {
+                throw new NoClassDefFoundError(e.getMessage());
+            }
         }
 
         public void log(boolean debug, String message, Throwable throwable)
