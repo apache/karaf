@@ -70,6 +70,7 @@ public class AutoProcessor
     **/
     public static void process(Map configMap, BundleContext context)
     {
+        configMap = (configMap == null) ? new HashMap() : configMap;
         processAutoDeploy(configMap, context);
         processAutoProperties(configMap, context);
     }
