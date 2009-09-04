@@ -1284,13 +1284,14 @@ public class ModuleImpl implements IModule
                 try
                 {
                     Constructor ctor = (Constructor) m_secureAction.getConstructor(
-                        ModuleClassLoader.class, new Class[] { ClassLoader.class });
+                        ModuleClassLoader.class, new Class[] { ModuleImpl.class, ClassLoader.class });
                     m_classLoader = (ModuleClassLoader)
-                        m_secureAction.invoke(ctor, new Object[] { determineParentClassLoader() });
+                        m_secureAction.invoke(ctor, new Object[] { this, determineParentClassLoader() });
                 }
                 catch (Exception ex)
                 {
-                    throw new RuntimeException("Unable to create module class loader: " +  ex.getMessage());
+                    throw new RuntimeException("Unable to create module class loader: "
+                        + ex.getMessage() + " [" + ex.getClass().getName() + "]");
                 }
             }
             else
