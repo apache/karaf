@@ -1,4 +1,4 @@
-<!--
+ts<!--
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
   distributed with this work for additional information
@@ -114,12 +114,12 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo</artifactId>
-      <version>1.4.0</version>
+      <version>${pom.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo.annotations</artifactId>
-      <version>1.4.0</version>
+      <version>${pom.version}</version>
     </dependency>
   </dependencies>
 </project>
