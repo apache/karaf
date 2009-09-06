@@ -41,7 +41,9 @@ public class AvailableFeatureCompleter implements Completer {
         StringsCompleter delegate = new StringsCompleter();
         try {
             for (Feature feature : featuresService.listFeatures()) {
-                delegate.getStrings().add(feature.getName());
+                if (!featuresService.isInstalled( feature )) {
+                    delegate.getStrings().add(feature.getName());
+                }
             }
         } catch (Exception e) {
             // Ignore
