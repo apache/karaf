@@ -25,15 +25,22 @@ import org.osgi.framework.*;
 
 public class Activator implements BundleActivator
 {
+    private static final String CHECK_INPUT_PROP = "shell.tui.checkinput";
+
     private BundleContext m_context = null;
     private volatile ShellTuiRunnable m_runnable = null;
     private volatile Thread m_thread = null;
     private ServiceReference m_shellRef = null;
     private ShellService m_shell = null;
+    private volatile boolean m_checkInput = false;
 
     public void start(BundleContext context)
     {
         m_context = context;
+
+        // Check for configuration property.
+        String s = context.getProperty(CHECK_INPUT_PROP);
+        m_checkInput = (s == null) ? false : Boolean.valueOf(s).booleanValue();
 
         // Listen for registering/unregistering impl service.
         ServiceListener sl = new ServiceListener() {
@@ -131,20 +138,23 @@ public class Activator implements BundleActivator
                         needPrompt = false;
                     }
 
-                    available = System.in.available();
-
-                    if (available == 0)
+                    if (m_checkInput)
                     {
-                        try
+                        available = System.in.available();
+
+                        if (available == 0)
                         {
-                            Thread.sleep(200);
+                            try
+                            {
+                                Thread.sleep(200);
+                            }
+                            catch (InterruptedException ex)
+                            {
+                                // No one should be interrupting this thread, so
+                                // ignore it.
+                            }
+                            continue;
                         }
-                        catch (InterruptedException ex)
-                        {
-                            // No one should be interrupting this thread, so
-                            // ignore it.
-                        }
-                        continue;
                     }
 
                     line = in.readLine();
