@@ -1,23 +1,24 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html><head><title>Apache Felix - Apache Felix Shell Service</title>
+<html><head>
 
 
   
-    
+    <title>Apache Felix - Apache Felix Shell Service</title>
     <link rel="stylesheet" href="apache-felix-shell-service_files/site.css" type="text/css" media="all">
-    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"></head><body>
-    <div class="title"><div class="logo"><a href="http://felix.apache.org/site/index.html"><img alt="Apache Felix" src="apache-felix-shell-service_files/logo.png" border="0"></a></div><div class="header"><a href="http://www.apache.org/"><img alt="Apache" src="apache-felix-shell-service_files/apache.png" border="0"></a></div></div>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  </head><body>
+    <div class="title"><div class="logo"><a href="http://felix.apache.org/site/index.html"><img alt="Apache Felix" src="apache-felix-shell-service_files/logo.png" border="0"></a></div><div class="header"><a href="http://www.apache.org/"><img alt="Apache" src="apache-felix-shell-service-Dateien/apache.png" border="0"></a></div></div>
     <div class="menu">
 <ul>
 	<li><a href="http://felix.apache.org/site/news.html" title="news">news</a></li>
 	<li><a href="http://felix.apache.org/site/license.html" title="license">license</a></li>
-	<li><span class="nobr"><a href="http://felix.apache.org/site/downloads.cgi" title="Visit page outside Confluence" rel="nofollow">downloads<sup><img class="rendericon" src="apache-felix-shell-service_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
+	<li><a href="http://felix.apache.org/site/downloads.cgi" rel="nofollow">downloads</a></li>
 	<li><a href="http://felix.apache.org/site/documentation.html" title="documentation">documentation</a></li>
 	<li><a href="http://felix.apache.org/site/mailinglists.html" title="mailinglists">mailing lists</a></li>
 	<li><a href="http://felix.apache.org/site/contributing.html" title="Contributing">contributing</a></li>
-	<li><span class="nobr"><a href="http://www.apache.org/" title="Visit page outside Confluence" rel="nofollow">asf<sup><img class="rendericon" src="apache-felix-shell-service_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
-	<li><span class="nobr"><a href="http://www.apache.org/foundation/sponsorship.html" title="Visit page outside Confluence" rel="nofollow">sponsorship<sup><img class="rendericon" src="apache-felix-shell-service_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span></li>
-	<li><span class="nobr"><a href="http://www.apache.org/foundation/thanks.html" title="Visit page outside Confluence" rel="nofollow">sponsors<sup><img class="rendericon" src="apache-felix-shell-service_files/linkext7.gif" alt="" align="absmiddle" border="0" height="7" width="7"></sup></a></span>
+	<li><a href="http://www.apache.org/" rel="nofollow">asf</a></li>
+	<li><a href="http://www.apache.org/foundation/sponsorship.html" rel="nofollow">sponsorship</a></li>
+	<li><a href="http://www.apache.org/foundation/thanks.html" rel="nofollow">sponsors</a>
 <!-- ApacheCon Ad -->
 <iframe src="apache-felix-shell-service_files/button.html" style="border-width: 0pt; float: left;" frameborder="0" height="135" scrolling="no" width="135"></iframe>
 <p style="height: 100px;">
@@ -27,12 +28,12 @@
 <h1><a name="ApacheFelixShellService-ApacheFelixShellService"></a>Apache Felix Shell Service</h1>
 
 <ul>
-	<li><a href="#ApacheFelixShellService-overview" title="overview on Apache Felix Shell Service">Overview</a></li>
-	<li><a href="#ApacheFelixShellService-service" title="service on Apache Felix Shell Service">How the Shell Service Works</a></li>
-	<li><a href="#ApacheFelixShellService-commands" title="commands on Apache Felix Shell Service">How Commands Work</a></li>
-	<li><a href="#ApacheFelixShellService-creating" title="creating on Apache Felix Shell Service">Creating a Command</a></li>
-	<li><a href="#ApacheFelixShellService-security" title="security on Apache Felix Shell Service">Security and the Shell Service</a></li>
-	<li><a href="#ApacheFelixShellService-feedback" title="feedback on Apache Felix Shell Service">Feedback</a></li>
+	<li><a href="#ApacheFelixShellService-overview">Overview</a></li>
+	<li><a href="#ApacheFelixShellService-service">How the Shell Service Works</a></li>
+	<li><a href="#ApacheFelixShellService-commands">How Commands Work</a></li>
+	<li><a href="#ApacheFelixShellService-creating">Creating a Command</a></li>
+	<li><a href="#ApacheFelixShellService-security">Security and the Shell Service</a></li>
+	<li><a href="#ApacheFelixShellService-feedback">Feedback</a></li>
 </ul>
 
 
@@ -74,20 +75,55 @@ just a mechanism to execute commands. The shell service maintains a
 list of command services, each of which have a unique command name. The
 shell service is defined by the following service interface:</p>
 
-<div class="code"><div class="codeContent">
-<pre class="code-java"><span class="code-keyword">package</span> org.apache.felix.shell;
+<style type="text/css">
+@import url(/confluence/download/resources/confluence.ext.code:code/shStyles.css);
+</style>
+<!--[if IE]>
+<style type="text/css">
+    .code textarea, .code input { padding: 0 !important; }
+</style>
+<![endif]-->
+<script class="javascript" src="apache-felix-shell-service_files/shCore.js"></script>
+<script class="javascript" src="apache-felix-shell-service_files/shBrushCSharp.js"></script>
+<script class="javascript" src="apache-felix-shell-service_files/shBrushPhp.js"></script>
+<script class="javascript" src="apache-felix-shell-service_files/shBrushJScript.js"></script>
+<script class="javascript" src="apache-felix-shell-service_files/shBrushVb.js"></script>
+<script class="javascript" src="apache-felix-shell-service_files/shBrushSql.js"></script>
+<script class="javascript" src="apache-felix-shell-service_files/shBrushXml.js"></script>
+<script class="javascript" src="apache-felix-shell-service_files/shBrushShell.html"></script>
+<script class="javascript" src="apache-felix-shell-service_files/shBrushDelphi.js"></script>
+<script class="javascript" src="apache-felix-shell-service_files/shBrushPython.js"></script>
+<script class="javascript" src="apache-felix-shell-service_files/shBrushJava.js"></script>
+<div class="code">
+<textarea name="newcodemacro" class="java:nocontrols:nogutter" rows="10" readonly="readonly">package org.apache.felix.shell;
 
-<span class="code-keyword">public</span> <span class="code-keyword">interface</span> ShellService
+public interface ShellService
 {
-    <span class="code-keyword">public</span> <span class="code-object">String</span>[] getCommands();
-    <span class="code-keyword">public</span> <span class="code-object">String</span> getCommandUsage(<span class="code-object">String</span> name);
-    <span class="code-keyword">public</span> <span class="code-object">String</span> getCommandDescription(<span class="code-object">String</span> name);
-    <span class="code-keyword">public</span> ServiceReference getCommandReference(<span class="code-object">String</span> name);
-    <span class="code-keyword">public</span> void executeCommand(
-        <span class="code-object">String</span> commandLine, PrintStream out, PrintStream err)
-        <span class="code-keyword">throws</span> Exception;
-}</pre>
-</div></div>
+    public String[] getCommands();
+    public String getCommandUsage(String name);
+    public String getCommandDescription(String name);
+    public ServiceReference getCommandReference(String name);
+    public void executeCommand(
+        String commandLine, PrintStream out, PrintStream err)
+        throws Exception;
+}</textarea>
+<script class="javascript">
+    if(!window.newcodemacro_initialised)
+    {
+        window.newcodemacro_initialised = true;
+        window.oldonloadmethod = window.onload;
+        window.onload = function(){
+            dp.SyntaxHighlighter.HighlightAll('newcodemacro');
+            if(window.oldonloadmethod)
+            {
+                window.oldonloadmethod();
+            }
+        }
+    }
+
+</script>
+</div>
+
 
 <p>Using the shell service interface, it is possible to access and
 execute available commands. The shell service methods perform the
@@ -112,7 +148,7 @@ takes the leading string of characters terminated by a space character
 (not including it) and assumes that this leading token is the command
 name. Consider the following command line:</p>
 
-<div class="preformatted"><div class="preformattedContent">
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>update 3 http://www.foo.com/bar.jar
 </pre>
 </div></div>
@@ -140,17 +176,33 @@ can leverage OSGi service events to maintain its list of available
 commands and the set available commands is dynamically extendable by
 installed bundles. The command service interface is defined as follows:</p>
 
-<div class="code"><div class="codeContent">
-<pre class="code-java"><span class="code-keyword">package</span> org.ungoverned.osgi.service.shell;
+<div class="code">
+<textarea name="newcodemacro" class="java:nocontrols:nogutter" rows="10" readonly="readonly">package org.apache.felix.shell;
 
-<span class="code-keyword">public</span> <span class="code-keyword">interface</span> Command
+public interface Command
 {
-    <span class="code-keyword">public</span> <span class="code-object">String</span> getName();
-    <span class="code-keyword">public</span> <span class="code-object">String</span> getUsage();
-    <span class="code-keyword">public</span> <span class="code-object">String</span> getShortDescription();
-    <span class="code-keyword">public</span> void execute(<span class="code-object">String</span> line, PrintStream out, PrintStream err);
-}</pre>
-</div></div>
+    public String getName();
+    public String getUsage();
+    public String getShortDescription();
+    public void execute(String line, PrintStream out, PrintStream err);
+}</textarea>
+<script class="javascript">
+    if(!window.newcodemacro_initialised)
+    {
+        window.newcodemacro_initialised = true;
+        window.oldonloadmethod = window.onload;
+        window.onload = function(){
+            dp.SyntaxHighlighter.HighlightAll('newcodemacro');
+            if(window.oldonloadmethod)
+            {
+                window.oldonloadmethod();
+            }
+        }
+    }
+
+</script>
+</div>
+
 
 <p>The semantics of the command service methods are:</p>
 
@@ -173,120 +225,152 @@ possible (this is used for generating the help command output).</li>
 
 <p>The following example creates a simple version of the <tt>start</tt> command.</p>
 
-<div class="code"><div class="codeContent">
-<pre class="code-java"><span class="code-keyword">package</span> test;
+<div class="code">
+<textarea name="newcodemacro" class="java:nocontrols:nogutter" rows="10" readonly="readonly">package test;
 
-<span class="code-keyword">import</span> java.io.PrintStream;
-<span class="code-keyword">import</span> java.net.URL;
-<span class="code-keyword">import</span> java.net.MalformedURLException;
-<span class="code-keyword">import</span> java.util.StringTokenizer;
+import java.io.PrintStream;
+import java.net.URL;
+import java.net.MalformedURLException;
+import java.util.StringTokenizer;
 
-<span class="code-keyword">import</span> org.osgi.framework.*;
-<span class="code-keyword">import</span> org.apache.felix.shell.ShellService;
-<span class="code-keyword">import</span> org.apache.felix.shell.Command;
+import org.osgi.framework.*;
+import org.apache.felix.shell.ShellService;
+import org.apache.felix.shell.Command;
 
-<span class="code-keyword">public</span> class MyStartCommandImpl <span class="code-keyword">implements</span> Command
+public class MyStartCommandImpl implements Command
 {
-    <span class="code-keyword">private</span> BundleContext m_context = <span class="code-keyword">null</span>;
+    private BundleContext m_context = null;
 
-    <span class="code-keyword">public</span> MyStartCommandImpl(BundleContext context)
+    public MyStartCommandImpl(BundleContext context)
     {
         m_context = context;
     }
 
-    <span class="code-keyword">public</span> <span class="code-object">String</span> getName()
+    public String getName()
     {
-        <span class="code-keyword">return</span> <span class="code-quote">"mystart"</span>;
+        return "mystart";
     }
 
-    <span class="code-keyword">public</span> <span class="code-object">String</span> getUsage()
+    public String getUsage()
     {
-        <span class="code-keyword">return</span> <span class="code-quote">"mystart &lt;id&gt; [&lt;id&gt; ...]"</span>;
+        return "mystart &lt;id&gt; [&lt;id&gt; ...]";
     }
 
-    <span class="code-keyword">public</span> <span class="code-object">String</span> getShortDescription()
+    public String getShortDescription()
     {
-        <span class="code-keyword">return</span> <span class="code-quote">"start bundle(s)."</span>;
+        return "start bundle(s).";
     }
 
-    <span class="code-keyword">public</span> void execute(<span class="code-object">String</span> s, PrintStream out, PrintStream err)
+    public void execute(String s, PrintStream out, PrintStream err)
     {
-        StringTokenizer st = <span class="code-keyword">new</span> StringTokenizer(s, <span class="code-quote">" "</span>);
+        StringTokenizer st = new StringTokenizer(s, " ");
 
-        <span class="code-comment">// Ignore the command name.
-</span>        st.nextToken();
+        // Ignore the command name.
+        st.nextToken();
 
-        <span class="code-comment">// There should be at least one bundle id.
-</span>        <span class="code-keyword">if</span> (st.countTokens() &gt;= 1)
+        // There should be at least one bundle id.
+        if (st.countTokens() &gt;= 1)
         {
-            <span class="code-keyword">while</span> (st.hasMoreTokens())
+            while (st.hasMoreTokens())
             {
-                <span class="code-object">String</span> id = st.nextToken().trim();
+                String id = st.nextToken().trim();
 
-                <span class="code-keyword">try</span> {
-                    <span class="code-object">long</span> l = <span class="code-object">Long</span>.valueOf(id).longValue();
+                try {
+                    long l = Long.valueOf(id).longValue();
                     Bundle bundle = m_context.getBundle(l);
-                    <span class="code-keyword">if</span> (bundle != <span class="code-keyword">null</span>)
+                    if (bundle != null)
                     {
                         bundle.start();
                     }
-                    <span class="code-keyword">else</span>
+                    else
                     {
-                        err.println(<span class="code-quote">"Bundle ID "</span> + id + <span class="code-quote">" is invalid."</span>);
+                        err.println("Bundle ID " + id + " is invalid.");
                     }
-                } <span class="code-keyword">catch</span> (NumberFormatException ex) {
-                    err.println(<span class="code-quote">"Unable to parse id '"</span> + id + <span class="code-quote">"'."</span>);
-                } <span class="code-keyword">catch</span> (BundleException ex) {
-                    <span class="code-keyword">if</span> (ex.getNestedException() != <span class="code-keyword">null</span>)
+                } catch (NumberFormatException ex) {
+                    err.println("Unable to parse id '" + id + "'.");
+                } catch (BundleException ex) {
+                    if (ex.getNestedException() != null)
                         err.println(ex.getNestedException().toString());
-                    <span class="code-keyword">else</span>
+                    else
                         err.println(ex.toString());
-                } <span class="code-keyword">catch</span> (Exception ex) {
+                } catch (Exception ex) {
                     err.println(ex.toString());
                 }
             }
         }
-        <span class="code-keyword">else</span>
+        else
         {
-            err.println(<span class="code-quote">"Incorrect number of arguments"</span>);
+            err.println("Incorrect number of arguments");
         }
     }
-}</pre>
-</div></div>
+}</textarea>
+<script class="javascript">
+    if(!window.newcodemacro_initialised)
+    {
+        window.newcodemacro_initialised = true;
+        window.oldonloadmethod = window.onload;
+        window.onload = function(){
+            dp.SyntaxHighlighter.HighlightAll('newcodemacro');
+            if(window.oldonloadmethod)
+            {
+                window.oldonloadmethod();
+            }
+        }
+    }
+
+</script>
+</div>
+
 
 <p>A bundle activator class is needed for packaging the command servce; the bundle activator registers the command service in its <tt>start()</tt> method. Note: You do not need one activator per command, a single activator can register any number of commands.</p>
 
-<div class="code"><div class="codeContent">
-<pre class="code-java"><span class="code-keyword">package</span> test;
+<div class="code">
+<textarea name="newcodemacro" class="java:nocontrols:nogutter" rows="10" readonly="readonly">package test;
 
-<span class="code-keyword">import</span> org.osgi.framework.BundleActivator;
-<span class="code-keyword">import</span> org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 
-<span class="code-keyword">public</span> class MyStartActivator <span class="code-keyword">implements</span> BundleActivator
+public class MyStartActivator implements BundleActivator
 {
-    <span class="code-keyword">private</span> <span class="code-keyword">transient</span> BundleContext m_context = <span class="code-keyword">null</span>;
+    private transient BundleContext m_context = null;
 
-    <span class="code-keyword">public</span> void start(BundleContext context)
+    public void start(BundleContext context)
     {
         m_context = context;
 
-        <span class="code-comment">// Register the command service.
-</span>        context.registerService(
+        // Register the command service.
+        context.registerService(
             org.apache.felix.shell.Command.class.getName(),
-            <span class="code-keyword">new</span> MyStartCommandImpl(m_context), <span class="code-keyword">null</span>);
+            new MyStartCommandImpl(m_context), null);
     }
 
-    <span class="code-keyword">public</span> void stop(BundleContext context)
+    public void stop(BundleContext context)
     {
-        <span class="code-comment">// Services are automatically unregistered so
-</span>        <span class="code-comment">// we don't have to unregister the factory here.
-</span>    }
-}</pre>
-</div></div>
+        // Services are automatically unregistered so
+        // we don't have to unregister the factory here.
+    }
+}</textarea>
+<script class="javascript">
+    if(!window.newcodemacro_initialised)
+    {
+        window.newcodemacro_initialised = true;
+        window.oldonloadmethod = window.onload;
+        window.onload = function(){
+            dp.SyntaxHighlighter.HighlightAll('newcodemacro');
+            if(window.oldonloadmethod)
+            {
+                window.oldonloadmethod();
+            }
+        }
+    }
+
+</script>
+</div>
+
 
 <p>To compile these classes you will need to have the <tt>framework.jar</tt> file on your class path. Compile all of the source files using a command like:</p>
 
-<div class="preformatted"><div class="preformattedContent">
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>java -d c:\classes *.java
 </pre>
 </div></div>
@@ -297,17 +381,33 @@ you need to create a bundle JAR file of the generated package
 directory. The bundle JAR file needs a manifest, so create a file
 called <tt>manifest.mf</tt> with the following contents:</p>
 
-<div class="code"><div class="codeContent">
-<pre class="code-java">Bundle-Name: My Start Command
-Bundle-Description: A 'start' command <span class="code-keyword">for</span> the shell service.
+<div class="code">
+<textarea name="newcodemacro" class="java:nocontrols:nogutter" rows="10" readonly="readonly">Bundle-Name: My Start Command
+Bundle-Description: A 'start' command for the shell service.
 Bundle-Activator: test.MyStartActivator
 Bundle-ClassPath: .
-Import-Package: org.apache.felix.shell</pre>
-</div></div>
+Import-Package: org.apache.felix.shell</textarea>
+<script class="javascript">
+    if(!window.newcodemacro_initialised)
+    {
+        window.newcodemacro_initialised = true;
+        window.oldonloadmethod = window.onload;
+        window.onload = function(){
+            dp.SyntaxHighlighter.HighlightAll('newcodemacro');
+            if(window.oldonloadmethod)
+            {
+                window.oldonloadmethod();
+            }
+        }
+    }
+
+</script>
+</div>
+
 
 <p>To create the bundle JAR file, issue the command:</p>
 
-<div class="preformatted"><div class="preformattedContent">
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>jar cfm mystart.jar manifest.mf -C c:\classes test
 </pre>
 </div></div>
@@ -334,7 +434,6 @@ usage.</p>
 
 <h2><a name="ApacheFelixShellService-Feedback"></a>Feedback</h2>
 
-<p>Subscribe to the Felix users mailing list by sending a message to <span class="nobr"><a href="mailto:users-subscribe@felix.apache.org" title="Send mail to users-subscribe@felix.apache.org" rel="nofollow">users-subscribe@felix.apache.org<sup><img class="rendericon" src="apache-felix-shell-service_files/mail_small.gif" alt="" align="absmiddle" border="0" height="12" width="13"></sup></a></span>; after subscribing, email questions or feedback to <span class="nobr"><a href="mailto:users@felix.apache.org" title="Send mail to users@felix.apache.org" rel="nofollow">users@felix.apache.org<sup><img class="rendericon" src="apache-felix-shell-service_files/mail_small.gif" alt="" align="absmiddle" border="0" height="12" width="13"></sup></a></span>.</p>
+<p>Subscribe to the Felix users mailing list by sending a message to <a href="mailto:users-subscribe@felix.apache.org" rel="nofollow">users-subscribe@felix.apache.org</a>; after subscribing, email questions or feedback to <a href="mailto:users@felix.apache.org" rel="nofollow">users@felix.apache.org</a>.</p>
     </div>
-  
-</body></html>
+  </body></html>
