@@ -1,3 +1,11 @@
+Changes from 1.4.0 to 1.4.1
+---------------------------
+
+** Bug
+    * [FELIX-1000] - Updating an bundle which was installed via OBR fails
+    * [FELIX-1157] - NPE results in OBR if a resource does not have a presentation name
+    * [FELIX-1433] - java.lang.NumberFormatException in Bundle-Version (org.osgi.framework.Version) due to trailing whitespace
+
 Changes from 1.2.1 to 1.4.0
 ---------------------------
 ** Bug
