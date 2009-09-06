@@ -1,3 +1,13 @@
+Changes from 1.2.0 to 1.4.0
+---------------------------
+
+** Bug
+    * [FELIX-619] - Shell.TUI causes "new java.io.ServerSocket()" to hang
+    * [FELIX-1137] - [PATCH] Shell TUI pom has incorrect Bundle-DocURL tag
+
+** Improvments
+    * Update to shell 1.4.0
+
 Changes from 1.0.2 to 1.2.0
 ---------------------------
 

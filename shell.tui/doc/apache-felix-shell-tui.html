@@ -25,14 +25,16 @@
 </p></li></ul> </div>
     <div class="main">
 <h1><a name="ApacheFelixShellTUI-ApacheFelixShellTUI"></a>Apache Felix Shell TUI</h1>
+<p>The Apache Felix Shell TUI (Textual User Interface) sub-project provides a simple, text-based user interface for the <a href="/confluence/display/FELIX/Apache+Felix+Shell+Service" title="Apache Felix Shell Service">Apache Felix Shell Service</a>. This bundle is not of much use by itself and should always be used in conjunction with the shell service bundle. The shell service and shell TUI bundles are used by the standard Felix launcher to provide a means for interacting with the launched Felix framework instance. The shell TUI bundle is not required to use the shell service; it is possible to use it programmatically, via a GUI interface, or a remote access interface.</p>
 
-<p>The Apache Felix Shell TUI (Textual User Interface) sub-project provides a simple, text-based user interface for the <a href="http://felix.apache.org/site/apache-felix-shell-service.html" title="Apache Felix Shell Service">Apache Felix Shell Service</a>.
-This bundle is not of much use by itself and should always be used in
-conjunction with the shell service bundle. The shell service and shell
-TUI bundles are used by the standard Felix launcher to provide a means
-for interacting with the launched Felix framework instance. The shell
-TUI bundle is not required to use the shell service; it is possible to
-use a GUI interface or remote access interface for interacting with the
-shell service.</p>
+<p>Shell TUI supports one configuration property:</p>
+
+<ul>
+	<li><tt>shell.tui.checkinput</tt> &#45; This is a simple workaround for a JRE bug which can appear when running Shell TUI inside Eclipse; the default value is <tt>false</tt>. Note that if this workaround is enabled, when running from the command line under Windows, character input is not echoed back to the screen.</li>
+</ul>
+
+
+<p>To set this property, add it to the <tt>conf/config.properties</tt> file of your Felix installation.</p>
+
     </div>
   </body></html>
