@@ -1,3 +1,83 @@
+Changes from 1.8.1 to 2.0.0
+---------------------------
+
+** Bug
+    * [FELIX-893] - Felix fails to start using J9 JVM
+    * [FELIX-905] - Felix needs an RFC 126 FindHook
+    * [FELIX-906] - Felix needs an RFC 126 EventHook
+    * [FELIX-1122] - Extension bundles are not being removed from the bundle list when uninstalled
+    * [FELIX-1123] - System bundle does still not correctly handle (export) package attributes
+    * [FELIX-1124] - ResourceNotFoundException too verbose
+    * [FELIX-1130] - Bundle.getHeaders() returns a Dictionary<java.util.jar.Attribute.Name,String>
+    * [FELIX-1138] - URL Handlers performance regression due to service lookups
+    * [FELIX-1170] - MemoryLeak when stopping and restarting Felix
+    * [FELIX-1187] - BundleContext.ungetService() should return false only if the usage count is zero when the method is invoked
+    * [FELIX-1197] - Bundle Fragments not resolved correctly
+    * [FELIX-1198] - config.properties still refers to old org.osgi.framework.startlevel property
+    * [FELIX-1247] - BundleEvent.UNRESOLVED should be fired during update/uninstall not refresh
+    * [FELIX-1249] - Bundle.findEntries() should search fragments as well as the bundle itself
+    * [FELIX-1254] - Bundle#findEntries does not return resources from fragments
+    * [FELIX-1271] - Improve manifest localization to handle special cases
+    * [FELIX-1272] - Need to special case getResource()/getResources()/loadClass() for fragment bundles
+    * [FELIX-1273] - Bundle.getResources() should return null for a non-existent resource
+    * [FELIX-1277] - Fix Service Hooks Tests failures in RFC 126 TCK
+    * [FELIX-1279] - Framework.waitForStop() does not obey timeout
+    * [FELIX-1280] - Package Admin - getExportedPackages must return null instead of an empty array
+    * [FELIX-1285] - SecureAction captures the calling context incorrectly
+    * [FELIX-1286] - Module class loader should use secure action instead of a privileged block
+    * [FELIX-1287] - System bundle operations from RFC-132 (e.g., init(), start(), stop(), waitForStop()) are using wrong lock object
+    * [FELIX-1288] - System bundle context should be null after stopping the framework
+    * [FELIX-1292] - PackageAdmin.getBundle(Class) should return null if the bundle associated with the passed in class is from another framework
+    * [FELIX-1293] - StringMap used for case insensitive properties does not respect ordering if case sensitivity is changed
+    * [FELIX-1295] - ServiceRegistry increments/decrements service use count after/before getService/ungetService() is called on ServiceFactory
+    * [FELIX-1371] - Automatic parent class loader delegation does not correctly filter calls to Bundle.loadClass()
+    * [FELIX-1397] - Required execution environment verification should happen at resolve time, not install time
+    * [FELIX-1400] - bootdelegation and dynamic-import-packages are accepting invalid patterns
+    * [FELIX-1401] - Manifest localization with fragments not handled correctly
+    * [FELIX-1422] - Resolver does not always discard partial results when a cyclically dependency fails
+    * [FELIX-1435] - Resolver does not always resolve a dynamic import to a fragment export
+    * [FELIX-1527] - R4.2 spec errata now specifies uninstalling a bundle must transition through INSTALLED on its way to UNINSTALLED
+    * [FELIX-1551] - Start level service must synchronously persist bundle start level changes
+    * [FELIX-1556] - Bundle.getResource/s is not able to find resources if the package is not alraedy wired when I use DynamicImport-Package: *
+
+** Improvement
+    * [FELIX-712] - Ability to disable automatic parent classloader delegation
+    * [FELIX-883] - JarContent logs and then swallows exceptions when reading from JAR file, should probably throw an exception
+    * [FELIX-1120] - Enable BundleCache customization
+    * [FELIX-1134] - Add support for native libraries in fragments
+    * [FELIX-1189] - Improve error message in main when there is an error processing auto-install/start bundles
+    * [FELIX-1246] - PackageAdmin.getBundle() is not implemented efficiently
+    * [FELIX-1260] - Make Bundle.findEntries() and Bundle.getEntryPaths() more thread safe
+    * [FELIX-1291] - Implement support for proper return type from Framework.waitForStop()
+    * [FELIX-1300] - Remove legacy bundle cache support when extracting embedded JAR files
+    * [FELIX-1360] - Improve native library matching algorithm (part 2)
+    * [FELIX-1404] - Use provided classes from OSGi R4.2 companion code
+    * [FELIX-1432] - Manifest parser doesn't return import package declarations in order of manifest
+    * [FELIX-1462] - Felix framework launcher should only use standard launching API
+
+** New Feature
+    * [FELIX-33] - Implement system bundle update
+    * [FELIX-749] - Add support for lazy activation of bundles
+    * [FELIX-1193] - Implement org.osgi.framework.bundle.parent from RFC 132
+    * [FELIX-1205] - Update to the latest OSGi R4.2 API
+    * [FELIX-1244] - Add support for ServiceEvent.MODIFIED_ENDMATCH
+    * [FELIX-1250] - Support service exceptions for service factories
+    * [FELIX-1289] - Support for FrameworkUtil.getBundle()
+    * [FELIX-1297] - Implement support for new org.osgi.framework.command.execpermission configuration property
+    * [FELIX-1298] - Implement support for new org.osgi.framework.library.extensions configuration property
+    * [FELIX-1446] - Framework launcher should automatically deploy bundles in bundle directory
+    * [FELIX-1478] - Add shutdown hook to launcher to cleanly shutdown the framework if the process is killed
+
+
+
+
+** Task
+    * [FELIX-1144] - The NOTICE file for Main subproject is not correctly copied into the source JAR
+
+
+** Test
+    * [FELIX-1208] - Need migrate the EventDispatcherTest to newer version of EasyMock
+ 
 Changes form 1.6.1 to 1.8.0
 ---------------------------
 ** Bug
