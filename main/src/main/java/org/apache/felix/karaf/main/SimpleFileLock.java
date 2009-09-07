@@ -23,9 +23,11 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 public class SimpleFileLock implements Lock {
 
+    private static final Logger LOG = Logger.getLogger(SimpleFileLock.class.getName());
     private static final String PROPERTY_LOCK_DIR = "karaf.lock.dir";
     private static final String PROP_KARAF_BASE = "karaf.base";
     private RandomAccessFile lockFile;
@@ -33,6 +35,8 @@ public class SimpleFileLock implements Lock {
 
     public SimpleFileLock(Properties props) {
         try {
+
+            LOG.addHandler( BootstrapLogManager.getDefaultHandler() );
             String lock = props.getProperty(PROPERTY_LOCK_DIR);
 
             if (lock != null) {
@@ -50,6 +54,7 @@ public class SimpleFileLock implements Lock {
     }
 
     public boolean lock() throws Exception {
+        LOG.info("locking");
         if (lock == null) {
             lock = lockFile.getChannel().tryLock();
         }
@@ -57,6 +62,7 @@ public class SimpleFileLock implements Lock {
     }
 
     public void release() throws Exception {
+        LOG.info("releasing");
         if (lock != null && lock.isValid()) {
             lock.release();
             lock.channel().close();

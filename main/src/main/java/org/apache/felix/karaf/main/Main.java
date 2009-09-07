@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.logging.Logger;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.felix.karaf.main.Utils;
@@ -126,6 +127,8 @@ public class Main {
 
     public static final String PROPERTY_LOCK_CLASS_DEFAULT = SimpleFileLock.class.getName();
 
+    Logger LOG = Logger.getLogger(this.getClass().getName());
+
     private File karafHome;
     private File karafBase;
     private Properties configProps = null;
@@ -157,6 +160,8 @@ public class Main {
 
         // Read configuration properties.
         configProps = loadConfigProperties();
+        BootstrapLogManager.setProperties(configProps);
+        LOG.addHandler(BootstrapLogManager.getDefaultHandler());
 
         // Copy framework properties from the system properties.
         Main.copySystemProperties(configProps);
@@ -991,7 +996,7 @@ public class Main {
                 for (;;) {
                     if (lock.lock()) {
                         if (lockLogged) {
-                            System.out.println("Lock acquired.");
+                            LOG.info("Lock acquired.");
                         }
                         setStartLevel(defaultStartLevel);
                         for (;;) {
@@ -1001,12 +1006,12 @@ public class Main {
                             Thread.sleep(lockDelay);
                         }
                         if (framework.getState() == Bundle.ACTIVE && !exiting) {
-                            System.out.println("Lost the lock, stopping this instance ...");
+                            LOG.info("Lost the lock, stopping this instance ...");
                             setStartLevel(lockStartLevel);
                         }
                         break;
                     } else if (!lockLogged) {
-                        System.out.println("Waiting for the lock ...");
+                        LOG.info("Waiting for the lock ...");
                         lockLogged = true;
                     }
                     Thread.sleep(lockDelay);

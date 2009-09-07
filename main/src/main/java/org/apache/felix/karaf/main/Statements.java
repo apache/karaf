@@ -22,9 +22,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Logger;
 
 public class Statements {
 
+    private static Logger LOG = Logger.getLogger(Statements.class.getName());
     private String lockTableName = "KARAF_LOCK";
     private String clusterName = "karaf";
     private String lockCreateStatement;
@@ -32,6 +34,8 @@ public class Statements {
     private String lockUpdateStatement;
 
     public Statements(String tableName, String clusterName) {
+        LOG.addHandler( BootstrapLogManager.getDefaultHandler() );
+        
         this.lockTableName = tableName; 
         this.clusterName = clusterName;
         this.lockCreateStatement="create table " + lockTableName + " (TIME bigint, CLUSTER varchar(20))";
@@ -67,7 +71,7 @@ public class Statements {
                 rs = lockConnection.getMetaData().getTables(null, null, lockTableName, new String[] {"TABLE"});
                 alreadyExists = rs.next();
             } catch (Throwable ignore) {
-                System.err.println(ignore);
+                LOG.severe("Error testing for db table: " + ignore);
             } finally {
                 close(rs);
             }
@@ -82,19 +86,19 @@ public class Statements {
                 try {
                     s.execute(createStatments[i]);
                 } catch (SQLException e) {
-                    System.err.println("Could not create JDBC tables; they could already exist."
-                                 + " Failure was: " + createStatments[i] + " Message: " + e.getMessage()
-                                 + " SQLState: " + e.getSQLState() + " Vendor code: " + e.getErrorCode());
+                    LOG.severe("Could not create JDBC tables; they could already exist."
+                             + " Failure was: " + createStatments[i] + " Message: " + e.getMessage()
+                             + " SQLState: " + e.getSQLState() + " Vendor code: " + e.getErrorCode());
                 }
             }
             lockConnection.commit();
         } catch (Exception ignore) {
-            System.err.println(ignore);
+            LOG.severe("Error occured during initialization: " + ignore);
         } finally {
             try {
                 if (s != null) { s.close(); }
             } catch (Throwable e) {
-                // ignore
+                LOG.severe("Error occured while closing connection: " + e);
             }
         }
     }
@@ -103,7 +107,7 @@ public class Statements {
         try {
             rs.close();
         } catch (Throwable e) {
-            // ignore
+            LOG.severe("Error occured while releasing ResultSet: " + e);
         }
     }
 
