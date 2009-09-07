@@ -130,12 +130,12 @@ public class WebConsolePluginAdapter extends AbstractWebConsolePlugin
     {
         if ( ( req instanceof HttpServletRequest ) && ( ( HttpServletRequest ) req ).getMethod().equals( "GET" ) )
         {
-            // not GET request, have the plugin handle it directly
+            // handle the GET request here and call into plugin on renderContent
             super.service( req, resp );
         }
         else
         {
-            // handle the GET request here and call into plugin on renderContent
+            // not a GET request, have the plugin handle it directly
             plugin.service( req, resp );
         }
     }
