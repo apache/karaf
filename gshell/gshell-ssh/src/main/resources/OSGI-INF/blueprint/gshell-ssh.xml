@@ -19,7 +19,7 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xmlns:bp="http://www.osgi.org/xmlns/blueprint/v1.0.0"
-           xmlns:cm="http://www.osgi.org/xmlns/blueprint-cm/v1.0.0"
+           xmlns:cm="http://geronimo.apache.org/blueprint/xmlns/blueprint-cm/v1.0.0"
            xmlns:ext="http://geronimo.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0"
            default-activation="lazy">
 
