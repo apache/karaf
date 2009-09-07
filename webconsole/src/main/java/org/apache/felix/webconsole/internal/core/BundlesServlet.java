@@ -799,7 +799,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
                         if ( ep == null )
                         {
                             String path = r4Import.getName().replace( '.', '/' );
-                            if ( bundle.getResource( path ) != null )
+                            if ( bundle.getEntry( path ) != null )
                             {
                                 continue;
                             }
