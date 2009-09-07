@@ -23,6 +23,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 /**
  * Represents an exclusive lock on a database,
@@ -33,6 +34,7 @@ import java.util.Properties;
  */
 public class DefaultJDBCLock implements Lock {
 
+    private static final Logger LOG = Logger.getLogger(DefaultJDBCLock.class.getName());
     private static final String PROPERTY_LOCK_URL               = "karaf.lock.jdbc.url";
     private static final String PROPERTY_LOCK_JDBC_DRIVER       = "karaf.lock.jdbc.driver";
     private static final String PROPERTY_LOCK_JDBC_USER         = "karaf.lock.jdbc.user";
@@ -52,6 +54,7 @@ public class DefaultJDBCLock implements Lock {
     private int timeout;
 
     public DefaultJDBCLock(Properties props) {
+        LOG.addHandler(BootstrapLogManager.getDefaultHandler());
         this.url = props.getProperty(PROPERTY_LOCK_URL);
         this.driver = props.getProperty(PROPERTY_LOCK_JDBC_DRIVER);
         this.user = props.getProperty(PROPERTY_LOCK_JDBC_USER);
@@ -91,19 +94,19 @@ public class DefaultJDBCLock implements Lock {
             statement = lockConnection.prepareStatement(sql);
             result = statement.execute();
         } catch (Exception e) {
-            System.err.println("Could not obtain connection: " + e.getMessage());
+            LOG.warning("Could not obtain connection: " + e.getMessage());
         } finally {
             if (null != statement) {
                 try {
-                    System.err.println("Cleaning up DB connection.");
+                    LOG.severe("Cleaning up DB connection.");
                     statement.close();
                 } catch (SQLException e1) {
-                    System.err.println("Caught while closing statement: " + e1.getMessage());
+                    LOG.severe("Caught while closing statement: " + e1.getMessage());
                 }
                 statement = null;
             }
         }
-        System.out.println("Connected to data source: " + url);
+        LOG.info("Connected to data source: " + url);
         return result;
     }
 
@@ -117,7 +120,7 @@ public class DefaultJDBCLock implements Lock {
         boolean result = false;
         try {
             if (!setUpdateCursor()) {
-                System.err.println("Could not set DB update cursor");
+                LOG.severe("Could not set DB update cursor");
                 return result;
             }
             long time = System.currentTimeMillis();
@@ -127,13 +130,13 @@ public class DefaultJDBCLock implements Lock {
                 result=true;
             }
         } catch (Exception e) {
-            System.err.println("Failed to acquire database lock: " + e.getMessage());
+            LOG.warning("Failed to acquire database lock: " + e.getMessage());
         }finally {
             if (statement != null) {
                 try {
                     statement.close();
                 } catch (SQLException e) {
-                    System.err.println("Failed to close statement" + e);
+                    LOG.severe("Failed to close statement" + e);
                 }
             }
         }
@@ -156,7 +159,7 @@ public class DefaultJDBCLock implements Lock {
      */
     public boolean isAlive() throws Exception {
         if ((lockConnection == null) || (lockConnection.isClosed())) { 
-            System.err.println("Lost lock!");
+            LOG.severe("Lost lock!");
             return false; 
         }
         PreparedStatement statement = null;
@@ -169,14 +172,14 @@ public class DefaultJDBCLock implements Lock {
                 result = false;
             }
         } catch (Exception ex) {
-            System.err.println("Error occured while testing lock: " + ex + " " + ex.getMessage());
+            LOG.severe("Error occured while testing lock: " + ex + " " + ex.getMessage());
             return false;
         } finally {
             if (statement != null) {
                 try {
                     statement.close();
                 } catch (Exception ex1) {
-                    System.err.println("Error occured after testing lock: " + ex1.getMessage());
+                    LOG.severe("Error occured after testing lock: " + ex1.getMessage());
                 }
             }
         }
@@ -204,7 +207,7 @@ public class DefaultJDBCLock implements Lock {
                 conn = DriverManager.getConnection(url, username, password);
             }
         } catch (Exception e) {
-            System.err.println("Error occured while setting up JDBC connection: " + e);
+            LOG.severe("Error occured while setting up JDBC connection: " + e);
             throw e; 
         }
         return conn;
