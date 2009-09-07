@@ -212,7 +212,7 @@ public class GenerateFeaturesXmlMojo extends MojoSupport {
         } else {
             getLog().info("Step 1 : Building list of kernel exports");
             getLog().warn("Use of 'kernelVersion' is deprecated -- use a dependency with scope 'provided' instead");
-            Artifact kernel = factory.createArtifact("org.apache.servicemix.kernel", "apache-servicemix-kernel", kernelVersion, Artifact.SCOPE_PROVIDED, "pom");
+            Artifact kernel = factory.createArtifact("org.apache.felix.karaf", "apache-felix-karaf", kernelVersion, Artifact.SCOPE_PROVIDED, "pom");
             resolver.resolve(kernel, remoteRepos, localRepo);
             kernelArtifacts = getDependencies(kernel);
         }
