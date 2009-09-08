@@ -523,7 +523,7 @@ public class SCRDescriptorMojo extends AbstractMojo {
                 if ( component.getFactory() == null ) {
                     designate.setFactoryPid( component.getName() );
                 } else {
-                    iLog.addWarning("Component factory " + component.getName() + " should not set metatype factory pid.");
+                    iLog.addError("Component factory " + component.getName() + " should not set metatype factory pid.");
                 }
             }
             // designate.object
