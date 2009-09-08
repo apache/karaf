@@ -46,6 +46,14 @@
           <lineEnding>dos</lineEnding>
       </fileSet>        
       <fileSet>
+          <directory>target/classes/bin</directory>
+          <outputDirectory>/bin/</outputDirectory>
+          <lineEnding>dos</lineEnding>
+          <includes>
+              <include>admin.bat</include>
+          </includes>
+      </fileSet>
+      <fileSet>
           <directory>target/classes/etc</directory>
           <outputDirectory>/etc/</outputDirectory>
           <lineEnding>dos</lineEnding>

@@ -45,6 +45,15 @@
             <lineEnding>unix</lineEnding>
         </fileSet>        
         <fileSet>
+            <directory>target/classes/bin</directory>
+            <outputDirectory>/bin/</outputDirectory>
+            <lineEnding>unix</lineEnding>
+            <fileMode>0755</fileMode>
+            <includes>
+                <include>admin</include>
+            </includes>
+        </fileSet>
+        <fileSet>
             <directory>target/classes/etc</directory>
             <outputDirectory>/etc/</outputDirectory>
             <lineEnding>unix</lineEnding>
