@@ -19,7 +19,6 @@
 ################################################################################
 
 KARAF_HOME=${karaf.home}
-KARAF_BASE=${karaf.base}
 
-export KARAF_BASE
-${KARAF_HOME}/bin/karaf "$*"
+${KARAF_HOME}/bin/admin stop ${karaf.name} "$@"
+

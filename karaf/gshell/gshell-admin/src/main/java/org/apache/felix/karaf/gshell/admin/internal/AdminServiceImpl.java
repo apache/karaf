@@ -148,10 +148,13 @@ public class AdminServiceImpl implements AdminService {
         copyFilteredResourceToDir(serviceMixBase, "etc/system.properties", props);
         copyFilteredResourceToDir(serviceMixBase, "etc/org.apache.felix.karaf.shell.cfg", props);
         if( System.getProperty("os.name").startsWith("Win") ) {
-            copyFilteredResourceToDir(serviceMixBase, "bin/karaf.bat", props);
+            copyFilteredResourceToDir(serviceMixBase, "bin/start.bat", props);
+            copyFilteredResourceToDir(serviceMixBase, "bin/stop.bat", props);
         } else {
-            copyFilteredResourceToDir(serviceMixBase, "bin/karaf", props);
-            chmod(new File(serviceMixBase, "bin/karaf"), "a+x");
+            copyFilteredResourceToDir(serviceMixBase, "bin/start", props);
+            copyFilteredResourceToDir(serviceMixBase, "bin/stop", props);
+            chmod(new File(serviceMixBase, "bin/start"), "a+x");
+            chmod(new File(serviceMixBase, "bin/stop"), "a+x");
         }
         Instance instance = new InstanceImpl(this, name, serviceMixBase.toString());
         instances.put(name, instance);
@@ -188,7 +191,7 @@ public class AdminServiceImpl implements AdminService {
         File outFile = new File(target, resource);
         if( !outFile.exists() ) {
             println(Ansi.ansi().a("Creating file: ").a(Ansi.Attribute.INTENSITY_BOLD).a(outFile.getPath()).a(Ansi.Attribute.RESET).toString());
-            InputStream is = getClass().getClassLoader().getResourceAsStream("/org/apache/felix/karaf/gshell/admin/" + resource);
+            InputStream is = getClass().getClassLoader().getResourceAsStream("org/apache/felix/karaf/gshell/admin/" + resource);
             try {
                 if( text ) {
                     // Read it line at a time so that we can use the platform line ending when we write it out.
@@ -228,7 +231,7 @@ public class AdminServiceImpl implements AdminService {
         File outFile = new File(target, resource);
         if( !outFile.exists() ) {
             println(Ansi.ansi().a("Creating file: ").a(Ansi.Attribute.INTENSITY_BOLD).a(outFile.getPath()).a(Ansi.Attribute.RESET).toString());
-            InputStream is = getClass().getClassLoader().getResourceAsStream("/org/apache/felix/karaf/gshell/admin/" + resource);
+            InputStream is = getClass().getClassLoader().getResourceAsStream("org/apache/felix/karaf/gshell/admin/" + resource);
             try {
                 // Read it line at a time so that we can use the platform line ending when we write it out.
                 PrintStream out = new PrintStream(new FileOutputStream(outFile));

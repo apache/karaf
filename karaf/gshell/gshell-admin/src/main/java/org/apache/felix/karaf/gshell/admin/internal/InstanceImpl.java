@@ -147,7 +147,7 @@ public class InstanceImpl implements Instance {
                 + " -Dkaraf.startRemoteShell=true"
                 + " -classpath " + classpath.toString()
                 + " org.apache.felix.karaf.main.Bootstrap";
-        LOG.debug("Starting instance with command: " + command);
+        LOG.debug("Starting instance " + name + " with command: " + command);
         this.process = ProcessBuilderFactory.newInstance().newBuilder()
                         .directory(new File(location))
                         .command(command)
