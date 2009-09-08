@@ -13,96 +13,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ /* CSS Document */
-#main {
-    font-family: Verdana, Arial, Helvetica, sans-serif;
-    font-size: 10px;
-    color: black;
-    background-color: white;
-    border-collapse: collapse;
-    padding: 0px;
-    margin: 30px;
-    position: absolute;
-    text-align: left;
-    border-color: black;
-}
+ */
 
-#lead {
-    color: #00678C;
-    /* color: #ffffff; */
-    margin: 0px 0px 26px 0px;
-    padding: 0px;
-    height: 100px;
-}
+/*
+ * The admin.css is currently a collection of a lot of CSS styles, which should
+ * be cleaned up for more appropriate and targeted stylings.
+ *
+ * This stylesheet is loaded by the AbstractWebConsolePlugin before the
+ * stylesheet addressed by the BrandingPlugin.getMainStyleSheet() method, which
+ * is the webconsole.css by default.
+ *
+ * See also http://felix.apache.org/site/branding-the-web-console.html
+ */
 
-#lead h1 { /*
-    background-image: url(../imgs/banner_left.jpg);
-    background-repeat: no-repeat;
-    */
-    margin: 0px;
-    padding: 5px 0 0 8px;
-    font-size: 300%;
-    font-weight: bold;
-    line-height: 120%;
-    height: 95px;
-    /* account for 5px top marging to get a total of 100px */
-    float: left;
-}
-
-#lead br {
-    line-height: 20px;
-}
-
-#lead p { /*
-    background-image: url(../imgs/banner_right.jpg);
-    background-repeat: no-repeat;
-    border-left: 1px solid;
-        */
-    margin: 0px;
-    padding: 0px;
-    height: 100px;
-    float: right;
-}
-
-#technav {
-    border-bottom: 1px solid #6181A9;
-    border-top: 1px solid #6181A9;
-    color: black;
-    font-size: 10px;
-    font-weight: bold;
-    /*
-    border-top: 1px solid black;
-    */
-    line-height: 21px;
-    padding: 0;
-    margin: 0;
-}
-
-#technav a {
-    /*
-    display: block;
-    float: left;
-    */
-    text-decoration: none;
-    padding: 3px 10px 3px 10px;
-    color: #6181A9;
-    text-decoration: none;
-}
-
-#technav a:hover {
-    background-color: black;
-}
-
-#technav .technavat {
-    /*
-    display: block;
-    float: left;
-    */
-    text-decoration: none;
-    padding: 3px 10px 3px 10px;
-    background-color: #B6CAE4;
-    color: black;
-}
 
 #claim {
     color: white;
@@ -587,10 +510,7 @@ table.tablelayout tbody tr {
 
 table.tablelayout thead tr th, table.tablelayout tfoot tr th {
     background-color: #e6EEEE;
-    border-left: 1px solid #6181A9;
-    border-right: 1px solid #6181A9;
-    border-top: 1px solid #FFF;
-    border-bottom: 1px solid #FFF;
+    border: 1px solid #6181A9;
     font-size: 8pt;
     padding: 4px;
 }
@@ -629,6 +549,8 @@ background-color: #8dbdd8;
 .col_Actions {
     width: 95px;
 }
+
+/** Added for new Install stuff */
 #plugin_content {
     margin-top: 26px;
     margin-bottom: 26px;

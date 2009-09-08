@@ -143,6 +143,8 @@ public class OsgiManager extends GenericServlet
 
     private ServiceTracker pluginsTracker;
 
+    private ServiceTracker brandingTracker;
+
     private ServiceRegistration configurationListener;
 
     private Map plugins = new HashMap();
@@ -251,6 +253,10 @@ public class OsgiManager extends GenericServlet
                     {
                         bindRender( ( Render ) plugin );
                     }
+                    if ( plugin instanceof BrandingPlugin )
+                    {
+                        AbstractWebConsolePlugin.setBrandingPlugin((BrandingPlugin) plugin);
+                    }
                 }
             }
             catch ( Throwable t )
@@ -266,6 +272,8 @@ public class OsgiManager extends GenericServlet
         rendersTracker.open();
         pluginsTracker = new PluginServiceTracker( this );
         pluginsTracker.open();
+        brandingTracker = new BrandingServiceTracker(this);
+        brandingTracker.open();
     }
 
     public void service( ServletRequest req, ServletResponse res ) throws ServletException, IOException
@@ -343,6 +351,11 @@ public class OsgiManager extends GenericServlet
         {
             pluginsTracker.close();
             pluginsTracker = null;
+        }
+        if( brandingTracker != null )
+        {
+            brandingTracker.close();
+            brandingTracker = null;
         }
 
         // deactivate any remaining plugins
@@ -593,6 +606,34 @@ public class OsgiManager extends GenericServlet
 
             super.removedService( reference, service );
         }
+    }
+
+    private static class BrandingServiceTracker extends ServiceTracker
+    {
+        private final OsgiManager osgiManager;
+        
+        BrandingServiceTracker( OsgiManager osgiManager ){
+            super( osgiManager.getBundleContext(), BrandingPlugin.class.getName(), null );
+            this.osgiManager = osgiManager;
+        }
+
+        public Object addingService( ServiceReference reference ){
+            Object plugin = super.addingService( reference );
+            if ( plugin instanceof BrandingPlugin )
+            {
+                AbstractWebConsolePlugin.setBrandingPlugin((BrandingPlugin) plugin);
+            }
+            return plugin;
+        }
+
+        public void removedService( ServiceReference reference, Object service ){
+            if ( service instanceof BrandingPlugin )
+            {
+                AbstractWebConsolePlugin.setBrandingPlugin(null);
+            }
+            super.removedService( reference, service );
+        }
+
     }
 
 

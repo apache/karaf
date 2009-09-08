@@ -1,0 +1,139 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * The webconsole.css is the main CSS which sets up the following parts
+ *
+ *   div main -> outermost div just inside body
+ *   div lead -> the page lead with title and logo
+ *   div technav -> the top navigation
+ *   div content -> the div surrounding the content being rendered by
+ *      the plugin in the renderContent (or service) method
+ *
+ * See also http://felix.apache.org/site/branding-the-web-console.html
+ */
+
+#main {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 10px;
+    color: black;
+    background-color: white;
+    border-collapse: collapse;
+    padding: 0px;
+    margin: 30px;
+    position: absolute;
+    text-align: left;
+    border-color: black;
+}
+
+#lead {
+    color: #00678C;
+    /* color: #ffffff; */
+    margin: 0px 0px 26px 0px;
+    padding: 0px;
+    height: 100px;
+}
+
+/* This contains the page title */
+#lead h1 {
+    margin: 0px;
+    padding: 5px 0 0 8px;
+    font-size: 300%;
+    font-weight: bold;
+    line-height: 120%;
+    /* account for 5px top padding to get a total of 100px */
+    height: 95px;
+    float: left;
+}
+
+#lead br {
+    line-height: 20px;
+}
+
+/* This contains the logo */
+#lead p {
+    margin: 0px;
+    padding: 0px;
+    height: 100px;
+    position:absolute;
+    right: 0px;
+}
+
+/* This contains the top navigation */
+#technav {
+    border-bottom: 1px solid #6181A9;
+    border-top: 1px solid #6181A9;
+    color: black;
+    font-size: 10px;
+    font-weight: bold;
+    line-height: 21px;
+    padding: 0;
+    margin: 0;
+}
+
+#technav a {
+    text-decoration: none;
+    padding: 3px 10px 3px 10px;
+    color: #6181A9;
+    text-decoration: none;
+}
+
+#technav a:hover {
+    background-color: black;
+}
+
+/* Special rendering of the "button" for the current page */
+#technav .technavat {
+    text-decoration: none;
+    padding: 3px 10px 3px 10px;
+    background-color: #B6CAE4;
+    color: black;
+}
+
+#technav .technavitem {
+    display: inline;
+    white-space: nowrap;
+}
+
+
+/* CENTRAL CONTENT AREA STYLING */
+#content {
+    position: relative;
+}
+
+#content A:link {
+    color: #336600;
+    text-decoration: underline;
+}
+
+#content A:visited {
+    color: #666666;
+    text-decoration: underline;
+}
+
+#content A:hover {
+    color: #ffffff;
+    background-color: #336600;
+    text-decoration: none;
+}
+
+#content A:active {
+    color: #ffffff;
+    background-color: #000000;
+    text-decoration: none;
+}
+

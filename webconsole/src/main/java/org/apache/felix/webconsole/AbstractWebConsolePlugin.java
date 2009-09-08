@@ -45,39 +45,6 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
     /** The name of the request attribute containig the map of FileItems from the POST request */
     public static final String ATTR_FILEUPLOAD = "org.apache.felix.webconsole.fileupload";
 
-    private static final String HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
-        + "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"xhtml1-transitional.dtd\">"
-        + "<html xmlns=\"http://www.w3.org/1999/xhtml\">"
-        + "<head>"
-        + "<meta http-equiv=\"Content-Type\" content=\"text/html; utf-8\">"
-        + "<link rel=\"icon\" href=\"{6}/res/imgs/favicon.ico\">"
-        + "<title>{0} - {2}</title>"
-        + "<script src=\"{5}/res/ui/jquery-1.3.2.min.js\" language=\"JavaScript\"></script>"
-        + "<script src=\"{5}/res/ui/jquery.tablesorter-2.0.3.min.js\" language=\"JavaScript\"></script>"
-        + "<script src=\"{5}/res/ui/admin.js\" language=\"JavaScript\"></script>"
-        + "<script src=\"{5}/res/ui/ui.js\" language=\"JavaScript\"></script>"
-        + "<script language=\"JavaScript\">"
-        + "appRoot = \"{5}\";"
-        + "pluginRoot = appRoot + \"/{6}\";"
-        + "</script>"
-        + "<link href=\"{5}/res/ui/admin.css\" rel=\"stylesheet\" type=\"text/css\">"
-        + "</head>"
-        + "<body>"
-        + "<div id=\"main\">"
-        + "<div id=\"lead\">"
-        + "<h1>"
-        + "{0}<br>{2}"
-        + "</h1>"
-        + "<p>"
-        + "<a target=\"_blank\" href=\"{3}\" title=\"{1}\"><img src=\"{5}/res/imgs/logo.png\" width=\"165\" height=\"63\" border=\"0\"></a>"
-        + "</p>" + "</div>";
-
-    /*
-    String header = MessageFormat.format( HEADER, new Object[]
-         { adminTitle, productName, getTitle(), productWeb, vendorName,
-                 ( String ) request.getAttribute( OsgiManager.ATTR_APP_ROOT ), getLabel() } );
-    */
-
     public static final String GET_RESOURCE_METHOD_NAME = "getResource";
 
     /**
@@ -100,10 +67,8 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
     private BundleContext bundleContext;
 
     private String adminTitle;
-    private String productName;
-    private String productWeb;
-    private String vendorName;
 
+    private static BrandingPlugin brandingPlugin = DefaultBrandingPlugin.getInstance();
 
     //---------- HttpServlet Overwrites ----------------------------------------
 
@@ -136,9 +101,18 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
     {
         if ( !spoolResource( request, response ) )
         {
+            // start the html response, write the header, open body and main div
             PrintWriter pw = startResponse( request, response );
+
+            // render top navigation
             renderTopNavigation( request, pw );
+
+            // wrap content in a separate div
+            pw.println( "<div id='content'>" );
             renderContent( request, response );
+            pw.println( "</div>" );
+
+            // close the main div, body, and html
             endResponse( pw );
         }
     }
@@ -152,10 +126,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
 
         Dictionary headers = bundleContext.getBundle().getHeaders();
 
-        adminTitle = ( String ) headers.get( Constants.BUNDLE_NAME ); // "OSGi Management Console";
-        productName = "Apache Felix";
-        productWeb = ( String ) headers.get( Constants.BUNDLE_DOCURL );
-        vendorName = ( String ) headers.get( Constants.BUNDLE_VENDOR );
+        adminTitle = ( String ) headers.get( Constants.BUNDLE_NAME );
     }
 
 
@@ -383,9 +354,10 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
 
         PrintWriter pw = response.getWriter();
 
-        String header = MessageFormat.format( HEADER, new Object[]
-            { adminTitle, productName, getTitle(), productWeb, vendorName,
-                ( String ) request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT ), getLabel() } );
+        String header = MessageFormat.format( getHeader(), new Object[]
+            { adminTitle, getTitle(), ( String ) request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT ), getLabel(),
+                brandingPlugin.getFavIcon(), brandingPlugin.getMainStyleSheet(), brandingPlugin.getProductURL(),
+                brandingPlugin.getProductName(), brandingPlugin.getProductImage() } );
         pw.println( header );
 
         return pw;
@@ -410,8 +382,8 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
         Map labelMap = ( Map ) request.getAttribute( WebConsoleConstants.ATTR_LABEL_MAP );
         if ( labelMap != null )
         {
-            pw.println( "<div id='technav'>" );
 
+            // prepare the navigation
             SortedMap map = new TreeMap( String.CASE_INSENSITIVE_ORDER );
             for ( Iterator ri = labelMap.entrySet().iterator(); ri.hasNext(); )
             {
@@ -440,13 +412,14 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
                 }
             }
 
+            // render the navigation
+            pw.println( "<div id='technav'>" );
             for ( Iterator li = map.values().iterator(); li.hasNext(); )
             {
-                pw.print( "<nobr>" );
+                pw.print( "<div class='technavitem'>" );
                 pw.print( li.next() );
-                pw.println( "</nobr>" );
+                pw.println( "</div>" );
             }
-
             pw.println( "</div>" );
         }
     }
@@ -454,9 +427,7 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
 
     protected void endResponse( PrintWriter pw )
     {
-        pw.println( "</div>" ); // close the main div
-        pw.println( "</body>" );
-        pw.println( "</html>" );
+        pw.println(getFooter());
     }
 
 
@@ -553,5 +524,84 @@ public abstract class AbstractWebConsolePlugin extends HttpServlet
 
         }
         response.sendRedirect(redirectUrl);
+    }
+
+    /**
+     * @return the brandingPlugin
+     */
+    public static BrandingPlugin getBrandingPlugin() {
+        return AbstractWebConsolePlugin.brandingPlugin;
+    }
+
+    /**
+     * @param brandingPlugin the brandingPlugin to set
+     */
+    public static void setBrandingPlugin(BrandingPlugin brandingPlugin) {
+        if(brandingPlugin == null){
+            AbstractWebConsolePlugin.brandingPlugin = DefaultBrandingPlugin.getInstance();
+        } else {
+            AbstractWebConsolePlugin.brandingPlugin = brandingPlugin;
+        }
+    }
+
+
+    private String getHeader()
+    {
+        // MessageFormat pattern place holder
+        //  0 main title (plugin providing bundle name)
+        //  1 console plugin title
+        //  2 application root path (ATTR_APP_ROOT)
+        //  3 console plugin label (from the URI)
+        //  4 branding favourite icon (BrandingPlugin.getFavIcon())
+        //  5 branding favourite icon (BrandingPlugin.getMainStyleSheet())
+        //  6 branding favourite icon (BrandingPlugin.getProductURL())
+        //  7 branding favourite icon (BrandingPlugin.getProductName())
+        //  8 branding favourite icon (BrandingPlugin.getProductImage())
+
+        final String header = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
+        + "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">"
+
+        + "<html xmlns=\"http://www.w3.org/1999/xhtml\">"
+        + "  <head>"
+        + "    <meta http-equiv=\"Content-Type\" content=\"text/html; utf-8\">"
+        + "    <link rel=\"icon\" href=\"{2}{4}\">"
+        + "    <title>{0} - {1}</title>"
+
+        + "    <link href=\"{2}/res/ui/admin.css\" rel=\"stylesheet\" type=\"text/css\">"
+        + "    <link href=\"{2}{5}\" rel=\"stylesheet\" type=\"text/css\">"
+
+        + "    <script language=\"JavaScript\">"
+        + "      appRoot = \"{2}\";"
+        + "      pluginRoot = \"{2}/{3}\";"
+        + "    </script>"
+
+        + "    <script src=\"{2}/res/ui/jquery-1.3.2.min.js\" language=\"JavaScript\"></script>"
+        + "    <script src=\"{2}/res/ui/jquery.tablesorter-2.0.3.min.js\" language=\"JavaScript\"></script>"
+
+        + "    <script src=\"{2}/res/ui/admin.js\" language=\"JavaScript\"></script>"
+        + "    <script src=\"{2}/res/ui/ui.js\" language=\"JavaScript\"></script>"
+
+        + "  </head>"
+        + "  <body>"
+        + "    <div id=\"main\">"
+        + "      <div id=\"lead\">"
+        + "        <h1>"
+        + "          {0}<br>{1}"
+        + "        </h1>"
+        + "        <p>"
+        + "          <a target=\"_blank\" href=\"{6}\" title=\"{7}\"><img src=\"{2}{8}\" border=\"0\"></a>"
+        + "        </p>"
+        + "      </div>";
+        return header;
+    }
+
+
+    private String getFooter()
+    {
+        // close <div id="main">, body and html
+        final String footer = "    </div>"
+            + "  </body>"
+            + "</html>";
+        return footer;
     }
 }

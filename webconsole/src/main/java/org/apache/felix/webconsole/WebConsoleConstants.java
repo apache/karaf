@@ -46,20 +46,21 @@ public interface WebConsoleConstants
      * property set to a non-empty String values are accepted by the OSGi
      * Manager as a plugin.
      *
-     * @since 1.2.12
+     * @since 2.0.0
      */
     public static final String PLUGIN_TITLE = "felix.webconsole.title";
 
     /**
      * The name of the request attribute providing the absolute path of the
      * Web Console root (value is "felix.webconsole.appRoot"). This consists of
-     * the servlet context path (from <code>ServletRequest.getContextPath()</code>)
-     * and the configured path of the web console root (<code>/system/console</code>
-     * by default).
+     * the servlet context path (from <code>HttpServletRequest.getContextPath()</code>)
+     * and the Web Console servlet path (from
+     * <code>HttpServletRequest.getServletPath()</code>,
+     * <code>/system/console</code> by default).
      * <p>
      * The type of this request attribute is <code>String</code>.
      *
-     * @since 1.2.12
+     * @since 2.0.0
      */
     public static final String ATTR_APP_ROOT = "felix.webconsole.appRoot";
 
@@ -85,7 +86,7 @@ public interface WebConsoleConstants
      * <p>
      * The type of this request attribute is <code>Map<String, String></code>.
      *
-     * @since 1.2.12
+     * @since 2.0.0
      */
     public static final String ATTR_LABEL_MAP = "felix.webconsole.labelMap";
 
