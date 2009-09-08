@@ -95,7 +95,10 @@
                         
                         <Embed-Dependency>
                             <!-- Import/Export-Package parsing -->
-                            org.apache.felix.bundlerepository;inline=org/apache/felix/bundlerepository/R4*.class,
+                            org.apache.felix.bundlerepository;
+                                inline=org/apache/felix/bundlerepository/R4*.class|
+                                    org/apache/felix/bundlerepository/Util.class|
+                                    org/apache/felix/bundlerepository/VersionRange.class,
                             
                             <!-- Required for JSON data transfer -->
                             json,
