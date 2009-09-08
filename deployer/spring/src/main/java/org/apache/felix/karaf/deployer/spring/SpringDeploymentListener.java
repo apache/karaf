@@ -28,6 +28,9 @@ import org.w3c.dom.Document;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.felix.fileinstall.ArtifactTransformer;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.SAXException;
 
 /**
  * A deployment listener that listens for spring xml applications
@@ -74,6 +77,15 @@ public class SpringDeploymentListener implements ArtifactTransformer {
             dbf.setNamespaceAware(true);
         }
         DocumentBuilder db = dbf.newDocumentBuilder();
+        db.setErrorHandler(new ErrorHandler() {
+            public void warning(SAXParseException exception) throws SAXException {
+            }
+            public void error(SAXParseException exception) throws SAXException {
+            }
+            public void fatalError(SAXParseException exception) throws SAXException {
+                throw exception;
+            }
+        });
         return db.parse(artifact);
     }
 
