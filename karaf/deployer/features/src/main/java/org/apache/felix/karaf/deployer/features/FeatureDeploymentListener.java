@@ -49,6 +49,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.Constants;
 import org.osgi.framework.SynchronousBundleListener;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.SAXException;
 
 /**
  * A deployment listener able to hot deploy a feature descriptor
@@ -204,6 +207,15 @@ public class FeatureDeploymentListener implements ArtifactTransformer, Synchrono
             dbf.setNamespaceAware(true);
         }
         DocumentBuilder db = dbf.newDocumentBuilder();
+        db.setErrorHandler(new ErrorHandler() {
+            public void warning(SAXParseException exception) throws SAXException {
+            }
+            public void error(SAXParseException exception) throws SAXException {
+            }
+            public void fatalError(SAXParseException exception) throws SAXException {
+                throw exception;
+            }
+        });
         return db.parse(artifact);
     }
 
