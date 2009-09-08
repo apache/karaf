@@ -16,6 +16,8 @@
  */
 package org.apache.felix.karaf.gshell.osgi;
 
+import java.util.List;
+
 import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
 import org.apache.felix.gogo.commands.Option;
 import org.apache.felix.gogo.commands.Command;
@@ -37,14 +39,10 @@ public class ListBundles extends OsgiCommandSupport {
     @Option(name = "-u", description = "Show update")
     boolean showUpdate;
 
-    private BlueprintListener blueprintListener;
+    private List<BundleStateListener.Factory> bundleStateListenerFactories;
 
-    public BlueprintListener getBlueprintListener() {
-        return blueprintListener;
-    }
-
-    public void setBlueprintListener(BlueprintListener blueprintListener) {
-        this.blueprintListener = blueprintListener;
+    public void setBundleStateListenerFactories(List<BundleStateListener.Factory> bundleStateListenerFactories) {
+        this.bundleStateListenerFactories = bundleStateListenerFactories;
     }
 
     protected Object doExecute() throws Exception {
@@ -85,7 +83,15 @@ public class ListBundles extends OsgiCommandSupport {
                msg = " Update location";
             }
             String level = (sl == null) ? "" : "  Level ";
-            System.out.println("   ID   State         Blueprint   " + level + msg);
+            String headers = "   ID   State       ";
+            for (BundleStateListener.Factory factory : bundleStateListenerFactories) {
+                BundleStateListener listener = factory.getListener();
+                if (listener != null) {
+                    headers += "  " + listener.getName() + " ";
+                }
+            }
+            headers += level + msg;
+            System.out.println(headers);
             for (int i = 0; i < bundles.length; i++) {
                 // Get the bundle name or location.
                 String name = (String) bundles[i].getHeaders().get(Constants.BUNDLE_NAME);
@@ -124,10 +130,16 @@ public class ListBundles extends OsgiCommandSupport {
                 while (id.length() < 4) {
                     id = " " + id;
                 }
-                System.out.println("[" + id + "] ["
-                    + getStateString(bundles[i])
-                    + "] [" + getBlueprintStateString(bundles[i])
-                    + "] [" + level + "] " + name);
+                String line = "[" + id + "] [" + getStateString(bundles[i]) + "]";
+                for (BundleStateListener.Factory factory : bundleStateListenerFactories) {
+                    BundleStateListener listener = factory.getListener();
+                    if (listener != null) {
+                        String state = listener.getState(bundles[i]);
+                        line += " [" + getStateString(state, listener.getName().length()) + "]";
+                    }
+                }
+                line += " [" + level + "] " + name;
+                System.out.println(line);
 
                 if (admin != null) {
                     Bundle[] fragments = admin.getFragments(bundles[i]);
@@ -190,25 +202,13 @@ public class ListBundles extends OsgiCommandSupport {
         }
     }
 
-    public String getBlueprintStateString(Bundle bundle) {
-        BlueprintListener.BlueprintState state = blueprintListener.getBlueprintState(bundle);
-        switch (state) {
-            case Creating:
-                return "Creating   ";
-            case Created:
-                return "Created    ";
-            case Destroying:
-                return "Destroying ";
-            case Destroyed:
-                return "Destroyed  ";
-            case Failure:
-                return "Failure    ";
-            case GracePeriod:
-                return "GracePeriod";
-            case Waiting:
-                return "Waiting    ";
-            default:
-                return "           ";
+    public String getStateString(String state, int length) {
+        if (state == null) {
+            state = "";
         }
+        while (state.length() < length) {
+            state += " ";
+        }
+        return state;
     }
 }
