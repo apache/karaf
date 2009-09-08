@@ -301,7 +301,10 @@ public class FeaturesServiceImpl implements FeaturesService {
             bundles.removeAll(b);
         }
         for (long bundleId : bundles) {
-            getBundleContext().getBundle(bundleId).uninstall();
+            Bundle b = getBundleContext().getBundle(bundleId);
+            if (b != null) {
+                b.uninstall();
+            }
         }
         callListeners(new FeatureEvent(feature, FeatureEvent.EventType.FeatureInstalled, false));
         saveState();
