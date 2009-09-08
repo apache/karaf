@@ -189,13 +189,13 @@ public class ComponentConfigurationPrinter extends AbstractScrPlugin implements 
                             pw.print( name );
                             pw.print( ")" );
                         }
+                        pw.println();
                     }
                 }
                 else
                 {
-                    pw.print( "    No Services bound" );
+                    pw.println( "    No Services bound" );
                 }
-                pw.println();
             }
         }
     }
