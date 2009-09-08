@@ -407,7 +407,7 @@ function createMultiSelect(/* Element */ parent, prop, values, options, width) {
             inputEl.setAttribute( "checked", true );
         }
         
-        var labelEl = createElement( "label" );
+        var labelEl = createElement( "label", "multiselect" );
         labelEl.appendChild( inputEl );
         addText( labelEl, labels[idx] );
         

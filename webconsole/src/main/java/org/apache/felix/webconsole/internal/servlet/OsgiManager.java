@@ -18,12 +18,15 @@ package org.apache.felix.webconsole.internal.servlet;
 
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.GenericServlet;
 import javax.servlet.Servlet;
@@ -54,9 +57,6 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * The <code>OSGi Manager</code> TODO
- *
- * @scr.component ds="no" label="%manager.name"
- *                description="%manager.description"
  */
 public class OsgiManager extends GenericServlet
 {
@@ -89,46 +89,33 @@ public class OsgiManager extends GenericServlet
      */
     public static final String PARAM_NO_REDIRECT_AFTER_ACTION = "_noredir_";
 
-    /**
-     * @scr.property valueRef="DEFAULT_MANAGER_ROOT"
-     */
-    private static final String PROP_MANAGER_ROOT = "manager.root";
+    static final String PROP_MANAGER_ROOT = "manager.root";
 
-    /**
-     * @scr.property valueRef="DEFAULT_PAGE"
-     */
-    private static final String PROP_DEFAULT_RENDER = "default.render";
+    static final String PROP_DEFAULT_RENDER = "default.render";
 
-    /**
-     * @scr.property valueRef="DEFAULT_REALM"
-     */
-    private static final String PROP_REALM = "realm";
+    static final String PROP_REALM = "realm";
 
-    /**
-     * @scr.property valueRef="DEFAULT_USER_NAME"
-     */
-    private static final String PROP_USER_NAME = "username";
+    static final String PROP_USER_NAME = "username";
 
-    /**
-     * @scr.property valueRef="DEFAULT_PASSWORD"
-     */
-    private static final String PROP_PASSWORD = "password";
+    static final String PROP_PASSWORD = "password";
 
-    private static final String DEFAULT_PAGE = BundlesServlet.NAME;
+    static final String PROP_ENABLED_PLUGINS = "plugins";
 
-    private static final String DEFAULT_REALM = "OSGi Management Console";
+    static final String DEFAULT_PAGE = BundlesServlet.NAME;
 
-    private static final String DEFAULT_USER_NAME = "admin";
+    static final String DEFAULT_REALM = "OSGi Management Console";
 
-    private static final String DEFAULT_PASSWORD = "admin";
+    static final String DEFAULT_USER_NAME = "admin";
+
+    static final String DEFAULT_PASSWORD = "admin";
 
     /**
      * The default value for the {@link #PROP_MANAGER_ROOT} configuration
      * property (value is "/system/console").
      */
-    private static final String DEFAULT_MANAGER_ROOT = "/system/console";
+    static final String DEFAULT_MANAGER_ROOT = "/system/console";
 
-    private static final String[] PLUGIN_CLASSES =
+    static final String[] PLUGIN_CLASSES =
         { "org.apache.felix.webconsole.internal.compendium.ComponentConfigurationPrinter",
             "org.apache.felix.webconsole.internal.compendium.ComponentsServlet",
             "org.apache.felix.webconsole.internal.compendium.ConfigManager",
@@ -182,6 +169,8 @@ public class OsgiManager extends GenericServlet
     private boolean httpResourcesRegistered;
 
     private Dictionary configuration;
+
+    private Set enabledPlugins;
 
 
     public OsgiManager( BundleContext bundleContext )
@@ -246,10 +235,19 @@ public class OsgiManager extends GenericServlet
         for ( int i = 0; i < PLUGIN_CLASSES.length; i++ )
         {
             String pluginClassName = PLUGIN_CLASSES[i];
+
             try
             {
                 Class pluginClass = classLoader.loadClass( pluginClassName );
                 Object plugin = pluginClass.newInstance();
+
+                // check whether enabled by configuration
+                if ( isPluginDisabled( pluginClassName, plugin ) )
+                {
+                    log.log( LogService.LOG_INFO, "Ignoring plugin " + pluginClassName + ": Disabled by configuration" );
+                    continue;
+                }
+
                 if ( plugin instanceof OsgiManagerPlugin )
                 {
                     ( ( OsgiManagerPlugin ) plugin ).activate( bundleContext );
@@ -785,6 +783,27 @@ public class OsgiManager extends GenericServlet
             webManagerRoot = "/" + webManagerRoot;
         }
 
+        // get enabled plugins
+        Object pluginValue = config.get( PROP_ENABLED_PLUGINS );
+        if ( pluginValue == null )
+        {
+            enabledPlugins = null;
+        }
+        else if ( pluginValue.getClass().isArray() )
+        {
+            final Object[] names = ( Object[] ) pluginValue;
+            enabledPlugins = new HashSet();
+            for ( int i = 0; i < names.length; i++ )
+            {
+                enabledPlugins.add( String.valueOf( names[i] ) );
+            }
+        }
+        else if ( pluginValue instanceof Collection )
+        {
+            enabledPlugins = new HashSet();
+            enabledPlugins.addAll( ( Collection ) pluginValue );
+        }
+
         // might update http service registration
         HttpService httpService = this.httpService;
         if ( httpService != null )
@@ -822,6 +841,22 @@ public class OsgiManager extends GenericServlet
         }
 
         return String.valueOf( value );
+    }
+
+
+    /**
+     * Returns <code>true</code> if the plugin is an
+     * {@link AbstractWebConsolePlugin} and a list of enabled plugins is
+     * configured but the plugin is not contained in that list.
+     * <p>
+     * This method is intended to be used only for plugins contained in the
+     * web console bundle itself, namely plugins listed in the
+     * {@value #PLUGIN_CLASSES} list.
+     */
+    private boolean isPluginDisabled( String pluginClass, Object plugin )
+    {
+        return enabledPlugins != null && !enabledPlugins.contains( pluginClass )
+            && ( plugin instanceof AbstractWebConsolePlugin );
     }
 
 

@@ -375,6 +375,10 @@ select,textarea {
     border-right: 1px solid #cccccc;
 }
 
+.multiselect {
+    display: block;
+}
+
 .fileinput {
     font-family: Verdana, Arial, Helvetica, san-serif;
     font-size: 9px;
