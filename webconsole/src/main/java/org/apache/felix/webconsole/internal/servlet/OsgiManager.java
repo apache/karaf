@@ -18,16 +18,34 @@ package org.apache.felix.webconsole.internal.servlet;
 
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
 
-import javax.servlet.*;
+import javax.servlet.GenericServlet;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.webconsole.*;
-import org.apache.felix.webconsole.internal.*;
+import org.apache.felix.webconsole.AbstractWebConsolePlugin;
+import org.apache.felix.webconsole.Action;
+import org.apache.felix.webconsole.BrandingPlugin;
+import org.apache.felix.webconsole.WebConsoleConstants;
+import org.apache.felix.webconsole.internal.Logger;
+import org.apache.felix.webconsole.internal.OsgiManagerPlugin;
+import org.apache.felix.webconsole.internal.Util;
+import org.apache.felix.webconsole.internal.WebConsolePluginAdapter;
 import org.apache.felix.webconsole.internal.core.BundlesServlet;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.log.LogService;
@@ -139,8 +157,6 @@ public class OsgiManager extends GenericServlet
 
     private ServiceTracker operationsTracker;
 
-    private ServiceTracker rendersTracker;
-
     private ServiceTracker pluginsTracker;
 
     private ServiceTracker brandingTracker;
@@ -249,10 +265,6 @@ public class OsgiManager extends GenericServlet
                     {
                         bindOperation( ( Action ) plugin );
                     }
-                    if ( plugin instanceof Render )
-                    {
-                        bindRender( ( Render ) plugin );
-                    }
                     if ( plugin instanceof BrandingPlugin )
                     {
                         AbstractWebConsolePlugin.setBrandingPlugin((BrandingPlugin) plugin);
@@ -268,8 +280,6 @@ public class OsgiManager extends GenericServlet
         // start tracking external plugins after setting up our own plugins
         operationsTracker = new OperationServiceTracker( this );
         operationsTracker.open();
-        rendersTracker = new RenderServiceTracker( this );
-        rendersTracker.open();
         pluginsTracker = new PluginServiceTracker( this );
         pluginsTracker.open();
         brandingTracker = new BrandingServiceTracker(this);
@@ -341,11 +351,6 @@ public class OsgiManager extends GenericServlet
         {
             operationsTracker.close();
             operationsTracker = null;
-        }
-        if ( rendersTracker != null )
-        {
-            rendersTracker.close();
-            rendersTracker = null;
         }
         if ( pluginsTracker != null )
         {
@@ -502,41 +507,6 @@ public class OsgiManager extends GenericServlet
         }
     }
 
-    private static class RenderServiceTracker extends ServiceTracker
-    {
-
-        private final OsgiManager osgiManager;
-
-
-        RenderServiceTracker( OsgiManager osgiManager )
-        {
-            super( osgiManager.getBundleContext(), Render.SERVICE, null );
-            this.osgiManager = osgiManager;
-        }
-
-
-        public Object addingService( ServiceReference reference )
-        {
-            Object operation = super.addingService( reference );
-            if ( operation instanceof Render )
-            {
-                osgiManager.bindRender( ( Render ) operation );
-            }
-            return operation;
-        }
-
-
-        public void removedService( ServiceReference reference, Object service )
-        {
-            if ( service instanceof Render )
-            {
-                osgiManager.bindRender( ( Render ) service );
-            }
-
-            super.removedService( reference, service );
-        }
-    }
-
     private static class PluginServiceTracker extends ServiceTracker
     {
 
@@ -611,7 +581,7 @@ public class OsgiManager extends GenericServlet
     private static class BrandingServiceTracker extends ServiceTracker
     {
         private final OsgiManager osgiManager;
-        
+
         BrandingServiceTracker( OsgiManager osgiManager ){
             super( osgiManager.getBundleContext(), BrandingPlugin.class.getName(), null );
             this.osgiManager = osgiManager;
@@ -784,20 +754,6 @@ public class OsgiManager extends GenericServlet
     protected void unbindOperation( Action operation )
     {
         operations.remove( operation.getName() );
-    }
-
-
-    protected void bindRender( Render render )
-    {
-        RenderBridge bridge = new RenderBridge( render );
-        bridge.activate( getBundleContext() );
-        bindServlet( render.getName(), bridge );
-    }
-
-
-    protected void unbindRender( Render render )
-    {
-        unbindServlet( render.getName() );
     }
 
 
