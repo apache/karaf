@@ -31,7 +31,12 @@
         </command>
         <command name="osgi/list">
             <action class="org.apache.felix.karaf.gshell.osgi.ListBundles">
-                <property name="blueprintListener" ref="blueprintListener"/>
+                <property name="bundleStateListenerFactories">
+                    <list xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+                        <ref component-id="blueprintListener" />
+                        <ref component-id="springListener" />
+                    </list>
+                </property>
             </action>
         </command>
         <command name="osgi/ls">
@@ -67,7 +72,10 @@
     </command-bundle>
 
     <bean id="blueprintListener" class="org.apache.felix.karaf.gshell.osgi.BlueprintListener" />
-
     <service ref="blueprintListener" interface="org.osgi.service.blueprint.container.BlueprintListener" />
+
+    <bean id="springListener" class="org.apache.felix.karaf.gshell.osgi.SpringStateListenerFactory" destroy-method="destroy">
+        <property name="bundleContext" ref="blueprintBundleContext" />
+    </bean>
 
 </blueprint>

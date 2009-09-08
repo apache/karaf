@@ -32,7 +32,9 @@ import org.slf4j.Logger;
  * TODO: use event admin to receive WAIT topics notifications from blueprint extender
  *
  */
-public class BlueprintListener implements org.osgi.service.blueprint.container.BlueprintListener, BundleListener {
+public class BlueprintListener implements org.osgi.service.blueprint.container.BlueprintListener, BundleListener,
+                                            BundleStateListener, BundleStateListener.Factory
+{
 
     public static enum BlueprintState {
         Unknown,
@@ -52,6 +54,22 @@ public class BlueprintListener implements org.osgi.service.blueprint.container.B
 
     public BlueprintListener() {
         this.states = new ConcurrentHashMap<Long, BlueprintState>();
+    }
+
+    public String getName() {
+        return "Blueprint   ";
+    }
+
+    public String getState(Bundle bundle) {
+        BlueprintState state = states.get(bundle.getBundleId());
+        if (state == null || bundle.getState() != Bundle.ACTIVE || state == BlueprintState.Unknown) {
+            return null;
+        }
+        return state.toString();
+    }
+
+    public BundleStateListener getListener() {
+        return this;
     }
 
     public BlueprintState getBlueprintState(Bundle bundle) {
