@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,16 +28,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.webconsole.Render;
+import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.apache.felix.webconsole.internal.Util;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -49,12 +46,12 @@ import org.osgi.service.obr.RepositoryAdmin;
 import org.osgi.service.obr.Resource;
 
 
-public class BundleRepositoryRender extends AbstractObrPlugin implements Render
+public class BundleRepositoryRender extends BaseWebConsolePlugin
 {
 
-    public static final String NAME = "bundlerepo";
+    public static final String LABEL = "bundlerepo";
 
-    public static final String LABEL = "OSGi Repository";
+    public static final String TITLE = "OSGi Repository";
 
     public static final String PARAM_REPO_ID = "repositoryId";
 
@@ -89,19 +86,19 @@ public class BundleRepositoryRender extends AbstractObrPlugin implements Render
     }
 
 
-    public String getName()
-    {
-        return NAME;
-    }
-
-
     public String getLabel()
     {
         return LABEL;
     }
 
 
-    public void render( HttpServletRequest request, HttpServletResponse response ) throws IOException
+    public String getTitle()
+    {
+        return TITLE;
+    }
+
+
+    protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
 
         PrintWriter pw = response.getWriter();
@@ -356,7 +353,7 @@ public class BundleRepositoryRender extends AbstractObrPlugin implements Render
 
         pw.println( "<td class='content' valign='top' align='center'>" );
         pw.println( "<select class='select' name='bundle'>" );
-        pw.print( "<option value='" + DONT_INSTALL_OPTION + "'>Select Version...</option>" );
+        pw.print( "<option value='" + AbstractObrPlugin.DONT_INSTALL_OPTION + "'>Select Version...</option>" );
         for ( Iterator vi = versions.iterator(); vi.hasNext(); )
         {
             Version version = ( Version ) vi.next();
@@ -415,6 +412,12 @@ public class BundleRepositoryRender extends AbstractObrPlugin implements Render
         }
 
         return bundles;
+    }
+
+
+    protected RepositoryAdmin getRepositoryAdmin()
+    {
+        return ( RepositoryAdmin ) getService( RepositoryAdmin.class.getName() );
     }
 
 }

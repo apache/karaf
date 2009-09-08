@@ -39,8 +39,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.ConfigurationPrinter;
-import org.apache.felix.webconsole.Render;
-import org.apache.felix.webconsole.internal.BaseManagementPlugin;
+import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -53,12 +52,12 @@ import org.osgi.service.prefs.PreferencesService;
 import org.osgi.util.tracker.ServiceTracker;
 
 
-public class ConfigurationRender extends BaseManagementPlugin implements Render
+public class ConfigurationRender extends BaseWebConsolePlugin
 {
 
-    public static final String NAME = "config";
+    public static final String LABEL = "config";
 
-    public static final String LABEL = "Configuration Status";
+    public static final String TITLE = "Configuration Status";
 
     private ServiceTracker cfgPrinterTracker;
 
@@ -67,9 +66,9 @@ public class ConfigurationRender extends BaseManagementPlugin implements Render
     private SortedMap configurationPrinters = new TreeMap();
 
 
-    public String getName()
+    public String getTitle()
     {
-        return NAME;
+        return TITLE;
     }
 
 
@@ -79,7 +78,7 @@ public class ConfigurationRender extends BaseManagementPlugin implements Render
     }
 
 
-    public void render( HttpServletRequest request, HttpServletResponse response ) throws IOException
+    protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
 
         PrintWriter pw = response.getWriter();
@@ -283,27 +282,27 @@ public class ConfigurationRender extends BaseManagementPlugin implements Render
             return;
         }
 
-        PreferencesService ps = ( PreferencesService ) getBundleContext().getService( sr );
-        try
-        {
-            this.printPreferences( pw, ps.getSystemPreferences() );
-
-            String[] users = ps.getUsers();
-            for ( int i = 0; users != null && i < users.length; i++ )
+            PreferencesService ps = ( PreferencesService ) getBundleContext().getService( sr );
+            try
             {
-                pw.println( "*** User Preferences " + users[i] + ":" );
-                this.printPreferences( pw, ps.getUserPreferences( users[i] ) );
+                this.printPreferences( pw, ps.getSystemPreferences() );
+
+                String[] users = ps.getUsers();
+                for ( int i = 0; users != null && i < users.length; i++ )
+                {
+                    pw.println( "*** User Preferences " + users[i] + ":" );
+                    this.printPreferences( pw, ps.getUserPreferences( users[i] ) );
+                }
+            }
+            catch ( BackingStoreException bse )
+            {
+                // todo or not :-)
+            }
+            finally
+            {
+                getBundleContext().ungetService( sr );
             }
         }
-        catch ( BackingStoreException bse )
-        {
-            // todo or not :-)
-        }
-        finally
-        {
-            getBundleContext().ungetService( sr );
-        }
-    }
 
 
     private void printPreferences( PrintWriter pw, Preferences prefs ) throws BackingStoreException
@@ -538,7 +537,7 @@ public class ConfigurationRender extends BaseManagementPlugin implements Render
         pw.println( "*** Threads:" );
 
         printThreadGroup( pw, rootGroup );
-        
+
         int numGroups = rootGroup.activeGroupCount();
         ThreadGroup[] groups = new ThreadGroup[2 * numGroups];
         rootGroup.enumerate( groups );
