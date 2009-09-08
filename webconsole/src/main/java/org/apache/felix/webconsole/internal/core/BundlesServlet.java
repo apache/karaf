@@ -835,7 +835,8 @@ public class BundlesServlet extends BaseWebConsolePlugin
             JSONArray val = new JSONArray();
 
             appendProperty( val, refs[i], Constants.OBJECTCLASS, "Types" );
-            appendProperty( val, refs[i], Constants.SERVICE_PID, "PID" );
+            appendProperty( val, refs[i], Constants.SERVICE_PID, "Service PID" );
+            appendProperty( val, refs[i], "org.apache.felix.karaf.features.configKey", "Feature PID" );
             appendProperty( val, refs[i], ConfigurationAdmin.SERVICE_FACTORYPID, "Factory PID" );
             appendProperty( val, refs[i], ComponentConstants.COMPONENT_NAME, "Component Name" );
             appendProperty( val, refs[i], ComponentConstants.COMPONENT_ID, "Component ID" );
