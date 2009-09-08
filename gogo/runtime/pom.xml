@@ -68,7 +68,7 @@
                         <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
                         <Bundle-Activator>org.apache.felix.gogo.runtime.Activator</Bundle-Activator>
                         <_versionpolicy>[$(version;==;$(@)),$(version;+;$(@)))</_versionpolicy>
-                        <_removeheaders>Private-Package,Ignore-Package</_removeheaders>
+                        <_removeheaders>Private-Package,Ignore-Package,Include-Resource</_removeheaders>
                     </instructions>
                 </configuration>
             </plugin>
