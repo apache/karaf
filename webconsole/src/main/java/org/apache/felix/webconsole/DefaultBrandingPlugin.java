@@ -86,7 +86,7 @@ public class DefaultBrandingPlugin implements BrandingPlugin
 
     /**
      * The name of the bundle entry providing branding properties for this
-     * defualt branding plugin (value is "/META-INF/webconsole.properties").
+     * default branding plugin (value is "/META-INF/webconsole.properties").
      */
     private static final String BRANDING_PROPERTIES = "/META-INF/webconsole.properties";
 
