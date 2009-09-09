@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -92,7 +93,7 @@ public class ExecuteTest extends TestCase {
             assertEquals("-1", re.getMessage());
             
             String s = new String(baos.toByteArray());            
-            assertTrue(s.contains("storage.file"));
+            assertTrue(s.contains("storage.location"));
             assertTrue(s.contains("instance.properties"));
         } finally {
             System.setErr(oldErr);
@@ -101,26 +102,26 @@ public class ExecuteTest extends TestCase {
     
     public void testSetDir() throws Exception {
         Properties oldProps = (Properties) System.getProperties().clone();
-        File tempFile = File.createTempFile(getName(), ".tmp");
+        final File tempFile = createTempDir(getName());
         assertFalse("Precondition failed", 
             tempFile.getParentFile().getParentFile().getCanonicalPath().equals(System.getProperty("user.dir")));
 
-        System.setProperty("storage.file", tempFile.getCanonicalPath());
+        System.setProperty("storage.location", tempFile.getCanonicalPath());
         try {
             Execute.main(new String [] {"list"});            
             assertTrue(tempFile.getParentFile().getParentFile().getCanonicalPath().equals(System.getProperty("user.dir")));
         } finally {
             System.setProperties(oldProps);
-            assertNull("Postcondition failed", System.getProperty("storage.file"));
-            tempFile.delete();
+            assertNull("Postcondition failed", System.getProperty("storage.location"));
+            delete(tempFile);
         }        
     }
     
     public void testExecute() throws Exception {
-        final File tempFile = File.createTempFile(getName(), ".properties");
+        final File tempFile = createTempDir(getName());
         Properties p = new Properties();
         p.setProperty("port", "1302");
-        FileOutputStream fos = new FileOutputStream(tempFile);
+        FileOutputStream fos = new FileOutputStream(new File(tempFile, AdminServiceImpl.STORAGE_FILE));
         p.store(fos, "");
         fos.close();
 
@@ -154,7 +155,23 @@ public class ExecuteTest extends TestCase {
             
             EasyMock.verify(mockCommand);
         } finally {
-            tempFile.delete();
+            delete(tempFile);
         }
+    }
+
+    private static File createTempDir(String name) throws IOException {
+        final File tempFile = File.createTempFile(name, null);
+        tempFile.delete();
+        tempFile.mkdirs();
+        return tempFile;
+    }
+
+    private static void delete(File tmp) {
+        if (tmp.isDirectory()) {
+            for (File f : tmp.listFiles()) {
+                delete(f);
+            }
+        }
+        tmp.delete();
     }
 }

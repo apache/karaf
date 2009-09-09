@@ -75,7 +75,7 @@ public class Execute {
 
         String storage = System.getProperty("storage.location");
         if (storage == null) {
-            System.err.println("System property 'storage.file' is not set. \n" +
+            System.err.println("System property 'storage.location' is not set. \n" +
         		"This property needs to be set to the full path of the instance.properties file.");
             exit(-1);
         }
