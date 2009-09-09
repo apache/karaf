@@ -18,14 +18,18 @@
 
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
-           xmlns:cm="http://geronimo.apache.org/blueprint/xmlns/blueprint-cm/v1.0.0">
+           xmlns:cm="http://geronimo.apache.org/blueprint/xmlns/blueprint-cm/v1.0.0"
+           xmlns:ext="http://geronimo.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0">
+
+    <!-- Allow the use of system properties -->
+    <ext:property-placeholder/>
 
     <!-- Property place holder -->
     <cm:property-placeholder persistent-id="org.apache.felix.karaf.management">
         <cm:default-properties>
             <cm:property name="rmiRegistryPort" value="1099"/>
             <cm:property name="jmxRealm" value="karaf"/>
-            <cm:property name="serviceUrl" value="service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi"/>
+            <cm:property name="serviceUrl" value="service:jmx:rmi:///jndi/rmi://localhost:1099/karaf-${karaf.name}"/>
             <cm:property name="daemon" value="true"/>
             <cm:property name="threaded" value="true"/>
             <cm:property name="objectName" value="connector:name=rmi"/>
@@ -33,7 +37,8 @@
     </cm:property-placeholder>
 
     <!-- MBeanServer bean -->
-    <bean id="mbeanServerFactory" class="org.apache.felix.karaf.management.MBeanServerFactory" init-method="init" destroy-method="destroy" depends-on="rmiRegistryFactory">
+    <bean id="mbeanServerFactory" class="org.apache.felix.karaf.management.MBeanServerFactory" init-method="init"
+          destroy-method="destroy" depends-on="rmiRegistryFactory">
         <property name="locateExistingServerIfPossible" value="true"/>
     </bean>
     <bean id="mbeanServer" factory-ref="mbeanServerFactory" factory-method="getServer"/>
@@ -42,14 +47,16 @@
     <service ref="mbeanServer" interface="javax.management.MBeanServer"/>
 
     <!-- Create a RMI registry -->
-    <bean id="rmiRegistryFactory" class="org.apache.felix.karaf.management.RmiRegistryFactory" init-method="init" destroy-method="destroy">
+    <bean id="rmiRegistryFactory" class="org.apache.felix.karaf.management.RmiRegistryFactory" init-method="init"
+          destroy-method="destroy">
         <property name="create" value="true"/>
         <property name="locate" value="true"/>
         <property name="port" value="${rmiRegistryPort}"/>
     </bean>
 
     <!-- Create a JMX connector ServiceFactory -->
-    <bean id="connectorFactory" class="org.apache.felix.karaf.management.ConnectorServerFactory" init-method="init" destroy-method="destroy">
+    <bean id="connectorFactory" class="org.apache.felix.karaf.management.ConnectorServerFactory" init-method="init"
+          destroy-method="destroy">
         <property name="server" ref="mbeanServer"/>
         <property name="serviceUrl" value="${serviceUrl}"/>
         <property name="daemon" value="${daemon}"/>
