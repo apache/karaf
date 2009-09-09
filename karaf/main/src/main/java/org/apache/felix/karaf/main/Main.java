@@ -168,9 +168,11 @@ public class Main {
 
         processSecurityProperties(configProps);
 
-        File storage = new File(karafBase.getPath(), "data/cache");
-        storage.mkdirs();
-        configProps.setProperty(Constants.FRAMEWORK_STORAGE, storage.getAbsolutePath());
+        if (configProps.getProperty(Constants.FRAMEWORK_STORAGE) == null) {
+            File storage = new File(karafBase.getPath(), "data/cache");
+            storage.mkdirs();
+            configProps.setProperty(Constants.FRAMEWORK_STORAGE, storage.getAbsolutePath());
+        }
 
         try {
             defaultStartLevel = Integer.parseInt(configProps.getProperty(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
