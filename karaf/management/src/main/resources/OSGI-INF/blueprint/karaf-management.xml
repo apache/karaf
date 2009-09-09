@@ -22,14 +22,14 @@
            xmlns:ext="http://geronimo.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0">
 
     <!-- Allow the use of system properties -->
-    <ext:property-placeholder/>
+    <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]"/>
 
     <!-- Property place holder -->
     <cm:property-placeholder persistent-id="org.apache.felix.karaf.management">
         <cm:default-properties>
             <cm:property name="rmiRegistryPort" value="1099"/>
             <cm:property name="jmxRealm" value="karaf"/>
-            <cm:property name="serviceUrl" value="service:jmx:rmi:///jndi/rmi://localhost:1099/karaf-${karaf.name}"/>
+            <cm:property name="serviceUrl" value="service:jmx:rmi:///jndi/rmi://localhost:1099/karaf-$[karaf.name]"/>
             <cm:property name="daemon" value="true"/>
             <cm:property name="threaded" value="true"/>
             <cm:property name="objectName" value="connector:name=rmi"/>
