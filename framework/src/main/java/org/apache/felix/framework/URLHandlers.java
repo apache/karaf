@@ -521,6 +521,7 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
     **/
     public static void unregisterFrameworkInstance(Object framework)
     {
+        boolean unregister = false;
         synchronized (m_frameworks)
         {
             m_counter--;
@@ -528,23 +529,27 @@ class URLHandlers implements URLStreamHandlerFactory, ContentHandlerFactory
             {    
                 if (m_frameworks.isEmpty())
                 {
-                    try
-                    {
-                        m_secureAction.invoke(m_secureAction.getDeclaredMethod(
-                            m_rootURLHandlers.getClass(), 
-                            "unregisterFrameworkListsForContextSearch", 
-                            new Class[]{ ClassLoader.class}), 
-                            m_rootURLHandlers,
-                            new Object[] {URLHANDLERS_CLASS.getClassLoader()});
-                    }
-                    catch (Exception e)
-                    {
-                        // TODO: this should not happen
-                        e.printStackTrace();
-                    }
+                    unregister = true;
                     m_handler = null;
                 }
             }
+        }
+        if (unregister)
+        {
+             try
+             {
+                 m_secureAction.invoke(m_secureAction.getDeclaredMethod(
+                     m_rootURLHandlers.getClass(), 
+                     "unregisterFrameworkListsForContextSearch", 
+                     new Class[]{ ClassLoader.class}), 
+                     m_rootURLHandlers,
+                     new Object[] {URLHANDLERS_CLASS.getClassLoader()});
+             }
+             catch (Exception e)
+             {
+                 // TODO: this should not happen
+                 e.printStackTrace();
+             }
         }
     }
 
