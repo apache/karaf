@@ -54,7 +54,7 @@ if "%KARAF_BASE%" == "" (
   set KARAF_BASE=%KARAF_HOME%
 )
 
-set DEFAULT_JAVA_OPTS=-Dstorage.file="%KARAF_HOME%\etc\instances.properties"
+set DEFAULT_JAVA_OPTS=-Dstorage.location="%KARAF_HOME%\instances"
 set DEFAULT_JAVA_DEBUG_OPTS=-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005
 
 rem Support for loading native libraries

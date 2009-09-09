@@ -37,6 +37,8 @@ import org.fusesource.jansi.Ansi;
 
 public class AdminServiceImpl implements AdminService {
 
+    public static final String STORAGE_FILE = "instance.properties";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AdminServiceImpl.class);
 
     private Map<String, Instance> instances = new HashMap<String, Instance>();
@@ -81,13 +83,14 @@ public class AdminServiceImpl implements AdminService {
 
     public synchronized void init() throws Exception {
         try {
-            if (!storageLocation.isFile()) {
-                if (storageLocation.exists()) {
-                    LOGGER.error("Instances storage location should be a file: " + storageLocation);
+            File storageFile = new File(storageLocation, STORAGE_FILE);
+            if (!storageFile.isFile()) {
+                if (storageFile.exists()) {
+                    LOGGER.error("Instances storage location should be a file: " + storageFile);
                 }
                 return;
             }
-            Properties storage = loadStorage(storageLocation);
+            Properties storage = loadStorage(storageFile);
             int count = Integer.parseInt(storage.getProperty("count", "0"));
             defaultPortStart = Integer.parseInt(storage.getProperty("port", Integer.toString(defaultPortStart)));
             Map<String, Instance> newInstances = new HashMap<String, Instance>();
@@ -117,7 +120,11 @@ public class AdminServiceImpl implements AdminService {
         if (instances.get(name) != null) {
             throw new IllegalArgumentException("Instance '" + name + "' already exists");
         }
-        File serviceMixBase = new File(location != null ? location : ("instances/" + name)).getCanonicalFile();
+        String loc = location != null ? location : name;
+        File serviceMixBase = new File(loc);
+        if (!serviceMixBase.isAbsolute()) {
+            serviceMixBase = new File(storageLocation, loc);
+        }
         int sshPort = port;
         if (sshPort <= 0) {
             sshPort = ++defaultPortStart;
@@ -184,7 +191,7 @@ public class AdminServiceImpl implements AdminService {
             storage.setProperty("item." + i + ".loc", data[i].getLocation());
             storage.setProperty("item." + i + ".pid", Integer.toString(data[i].getPid()));
         }
-        saveStorage(storage, storageLocation);
+        saveStorage(storage, new File(storageLocation, STORAGE_FILE));
     }
 
     private void copyResourceToDir(File target, String resource, boolean text) throws Exception {
