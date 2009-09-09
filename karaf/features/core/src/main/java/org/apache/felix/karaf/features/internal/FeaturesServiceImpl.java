@@ -54,6 +54,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 import org.osgi.service.prefs.PreferencesService;
+import org.osgi.service.packageadmin.PackageAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,6 +73,7 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     private BundleContext bundleContext;
     private ConfigurationAdmin configAdmin;
+    private PackageAdmin packageAdmin;
     private PreferencesService preferences;
     private Set<URI> uris;
     private Map<URI, RepositoryImpl> repositories = new HashMap<URI, RepositoryImpl>();
@@ -95,6 +97,14 @@ public class FeaturesServiceImpl implements FeaturesService {
 
     public void setConfigAdmin(ConfigurationAdmin configAdmin) {
         this.configAdmin = configAdmin;
+    }
+
+    public PackageAdmin getPackageAdmin() {
+        return packageAdmin;
+    }
+
+    public void setPackageAdmin(PackageAdmin packageAdmin) {
+        this.packageAdmin = packageAdmin;
     }
 
     public PreferencesService getPreferences() {
@@ -219,11 +229,11 @@ public class FeaturesServiceImpl implements FeaturesService {
                 b.start();
             }
         }
-
         callListeners(new FeatureEvent(f, FeatureEvent.EventType.FeatureInstalled, false));
         installed.put(f, bundles);
         saveState();
     }
+
     protected Bundle installBundleIfNeeded(String bundleLocation) throws IOException, BundleException {
         LOGGER.debug("Checking " + bundleLocation);
         InputStream is;
@@ -305,6 +315,9 @@ public class FeaturesServiceImpl implements FeaturesService {
             if (b != null) {
                 b.uninstall();
             }
+        }
+        if (getPackageAdmin() != null) {
+            getPackageAdmin().refreshPackages(null);
         }
         callListeners(new FeatureEvent(feature, FeatureEvent.EventType.FeatureInstalled, false));
         saveState();

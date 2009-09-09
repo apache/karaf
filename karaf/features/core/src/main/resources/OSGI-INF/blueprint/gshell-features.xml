@@ -34,6 +34,7 @@
         <property name="urls" value="$[featuresRepositories]" />
         <property name="boot" value="$[featuresBoot]" />
         <property name="configAdmin" ref="configAdmin" />
+        <property name="packageAdmin" ref="packageAdmin" />
         <property name="preferences" ref="preferences" />
         <property name="bundleContext" ref="blueprintBundleContext" />
     </bean>
@@ -47,6 +48,8 @@
     <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin" />
 
     <reference id="preferences" interface="org.osgi.service.prefs.PreferencesService" availability="optional"/>
+
+    <reference id="packageAdmin" interface="org.osgi.service.packageadmin.PackageAdmin" />
 
     <service ref="featuresService" interface="org.apache.felix.karaf.features.FeaturesService" />
 
