@@ -80,7 +80,7 @@
     </command-bundle>
 
     <bean id="adminService" class="org.apache.felix.karaf.gshell.admin.internal.AdminServiceImpl" init-method="init">
-        <property name="storageLocation" value="${karaf.home}/etc/instances.properties" />
+        <property name="storageLocation" value="${karaf.home}/instances" />
     </bean>
 
     <bean id="instanceCompleter" class="org.apache.felix.karaf.gshell.admin.internal.completers.InstanceCompleter">

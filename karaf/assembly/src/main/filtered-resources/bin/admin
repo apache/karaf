@@ -200,7 +200,7 @@ setupDebugOptions() {
 }
 
 setupDefaults() {
-    DEFAULT_JAVA_OPTS="-Dstorage.file=${KARAF_HOME}/etc/instances.properties -Xms$JAVA_MIN_MEM -Xmx$JAVA_MAX_MEM "
+    DEFAULT_JAVA_OPTS="-Dstorage.location=${KARAF_HOME}/instances -Xms$JAVA_MIN_MEM -Xmx$JAVA_MAX_MEM "
 
     #Set the JVM_VENDOR specific JVM flags
     if [ "$JVM_VENDOR" = "SUN" ]; then
