@@ -64,6 +64,7 @@
                         <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
                         <Bundle-Vendor>The Apache Software Foundation</Bundle-Vendor>
                         <Bundle-Activator>org.apache.felix.gogo.console.Activator</Bundle-Activator>
+                        <Include-Resource>{maven-resources},META-INF/NOTICE=../NOTICE</Include-Resource>
                         <_versionpolicy>[$(version;==;$(@)),$(version;+;$(@)))</_versionpolicy>
                         <_removeheaders>Private-Package,Ignore-Package,Include-Resource</_removeheaders>
                     </instructions>
