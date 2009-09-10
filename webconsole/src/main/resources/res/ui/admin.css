@@ -86,6 +86,16 @@ tr {
     border-right: 1px solid #cccccc;  
 }
 
+/*
+ * Disable left and right border on content table rows. Opera 10 and IE 7
+ * would otherwise render the left and right borders inherited from the tr
+ * definition
+ */
+tr.content {
+    border-left: none;  
+    border-right: none;  
+}
+
 td.content {
     color: #333333;
     border: 0px solid #66dd44;
