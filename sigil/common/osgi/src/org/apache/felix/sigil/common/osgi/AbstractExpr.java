@@ -19,8 +19,12 @@
 
 package org.apache.felix.sigil.common.osgi;
 
-
-public interface ExprVisitor
+public abstract class AbstractExpr implements LDAPExpr
 {
-    void visitExpr(LDAPExpr expr);
+    public void visit(ExprVisitor visitor) {
+        visitor.visitExpr(this);
+        for ( LDAPExpr expr : getChildren() ) {
+            visitor.visitExpr( expr );
+        }
+    }
 }

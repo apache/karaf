@@ -23,7 +23,7 @@ package org.apache.felix.sigil.common.osgi;
 import java.util.Map;
 
 
-public class And implements LDAPExpr
+public class And extends AbstractExpr
 {
 
     /**
@@ -88,12 +88,6 @@ public class And implements LDAPExpr
             }
         }
         return true;
-    }
-
-
-    public void visit( ExprVisitor v )
-    {
-        v.visitAnd( this );
     }
 
 

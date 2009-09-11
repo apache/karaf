@@ -27,8 +27,8 @@ import java.util.Map;
 public interface LDAPExpr extends Serializable
 {
 
-    public static final LDAPExpr[] CHILDLESS = new LDAPExpr[]
-        {};
+    public static final LDAPExpr[] CHILDLESS = new LDAPExpr[0];
+    
     public static LDAPExpr ACCEPT_ALL = Expressions.T;
 
 

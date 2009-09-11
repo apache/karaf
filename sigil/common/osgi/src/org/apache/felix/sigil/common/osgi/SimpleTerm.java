@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Vector;
 
 
-public class SimpleTerm implements LDAPExpr
+public class SimpleTerm extends AbstractExpr
 {
 
     /**
@@ -294,12 +294,6 @@ public class SimpleTerm implements LDAPExpr
             }
         }
         return out.toString();
-    }
-
-
-    public void visit( ExprVisitor v )
-    {
-        v.visitSimple( this );
     }
 
 
