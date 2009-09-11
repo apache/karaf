@@ -58,7 +58,7 @@
               http://felix.apache.org/site/ipojo-webconsole-plugin.html
             </Bundle-DocURL>
             <Private-Package>
-              org.apache.felix.org.apache.felix.ipojo.webconsole
+              org.apache.felix.ipojo.webconsole
             </Private-Package>
             <Import-Package>*</Import-Package>
             <Include-Resource> META-INF/LICENSE=LICENSE,
@@ -70,6 +70,7 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-ipojo-plugin</artifactId>
+        <version>1.4.0</version>
         <executions>
           <execution>
             <goals>
@@ -114,12 +115,12 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo</artifactId>
-      <version>${pom.version}</version>
+      <version>1.4.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo.annotations</artifactId>
-      <version>${pom.version}</version>
+      <version>1.4.0</version>
     </dependency>
   </dependencies>
 </project>
