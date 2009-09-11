@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.felix.sigil.model.common;
+package org.apache.felix.sigil.common.osgi;
 
 
 import java.io.Serializable;

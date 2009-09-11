@@ -17,6 +17,6 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<project name="common.obr" default="build">
+<project name="common.osgi" default="build">
       <import file="../build.xml"/>
 </project>

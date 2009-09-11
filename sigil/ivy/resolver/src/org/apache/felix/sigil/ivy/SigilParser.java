@@ -31,10 +31,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.apache.felix.sigil.common.osgi.VersionRange;
 import org.apache.felix.sigil.config.BldFactory;
 import org.apache.felix.sigil.config.IBldProject;
 import org.apache.felix.sigil.model.IModelElement;
-import org.apache.felix.sigil.model.common.VersionRange;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.model.osgi.IBundleModelElement;
 import org.apache.felix.sigil.model.osgi.IPackageImport;

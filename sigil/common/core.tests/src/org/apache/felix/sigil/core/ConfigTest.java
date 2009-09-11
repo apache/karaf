@@ -26,10 +26,10 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.apache.felix.sigil.common.osgi.VersionRange;
 import org.apache.felix.sigil.config.BldFactory;
 import org.apache.felix.sigil.config.IBldProject;
 import org.apache.felix.sigil.core.internal.model.osgi.PackageImport;
-import org.apache.felix.sigil.model.common.VersionRange;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.model.osgi.IBundleModelElement;
 import org.apache.felix.sigil.model.osgi.IPackageImport;

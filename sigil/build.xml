@@ -37,11 +37,14 @@
 
   <target name="build" depends="build-list" />
 
+  <target name="report" depends="report-list" />
+
   <target name="site" depends="common-init">
     <!-- eclipse -->
     <ivy:retrieve organisation="org.apache" module="felix.sigil.common.core" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
     <ivy:retrieve organisation="org.apache" module="felix.sigil.common.junit" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
     <ivy:retrieve organisation="org.apache" module="felix.sigil.common.obr" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.common.osgi" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
     <ivy:retrieve organisation="org.apache" module="felix.sigil.common.runtime" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
     <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.core" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
     <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.help" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>

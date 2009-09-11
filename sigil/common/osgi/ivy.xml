@@ -17,6 +17,12 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<project name="common.obr" default="build">
-      <import file="../build.xml"/>
-</project>
+<ivy-module version="1.0">
+  <info 
+        organisation="org.apache"
+        module="felix.sigil.common.osgi"
+        status="integration"/>
+   <publications>
+     <artifact name="org.apache.felix.sigil.common.osgi" />
+   </publications>
+</ivy-module>

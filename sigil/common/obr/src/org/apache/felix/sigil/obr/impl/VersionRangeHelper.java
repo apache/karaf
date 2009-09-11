@@ -23,13 +23,13 @@ package org.apache.felix.sigil.obr.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.felix.sigil.model.common.LDAPExpr;
-import org.apache.felix.sigil.model.common.LDAPParseException;
-import org.apache.felix.sigil.model.common.LDAPParser;
-import org.apache.felix.sigil.model.common.Not;
-import org.apache.felix.sigil.model.common.Ops;
-import org.apache.felix.sigil.model.common.SimpleTerm;
-import org.apache.felix.sigil.model.common.VersionRange;
+import org.apache.felix.sigil.common.osgi.LDAPExpr;
+import org.apache.felix.sigil.common.osgi.LDAPParseException;
+import org.apache.felix.sigil.common.osgi.LDAPParser;
+import org.apache.felix.sigil.common.osgi.Not;
+import org.apache.felix.sigil.common.osgi.Ops;
+import org.apache.felix.sigil.common.osgi.SimpleTerm;
+import org.apache.felix.sigil.common.osgi.VersionRange;
 import org.osgi.framework.Version;
 
 

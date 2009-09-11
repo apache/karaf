@@ -20,9 +20,9 @@
 package org.apache.felix.sigil.ui.eclipse.ui.preferences;
 
 
+import org.apache.felix.sigil.common.osgi.VersionRange;
+import org.apache.felix.sigil.common.osgi.VersionRangeBoundingRule;
 import org.apache.felix.sigil.eclipse.SigilCore;
-import org.apache.felix.sigil.model.common.VersionRange;
-import org.apache.felix.sigil.model.common.VersionRangeBoundingRule;
 import org.apache.felix.sigil.ui.eclipse.ui.SigilUI;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;

@@ -29,12 +29,12 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+import org.apache.felix.sigil.common.osgi.LDAPExpr;
+import org.apache.felix.sigil.common.osgi.LDAPParseException;
+import org.apache.felix.sigil.common.osgi.LDAPParser;
+import org.apache.felix.sigil.common.osgi.SimpleTerm;
+import org.apache.felix.sigil.common.osgi.VersionRange;
 import org.apache.felix.sigil.model.ModelElementFactory;
-import org.apache.felix.sigil.model.common.LDAPExpr;
-import org.apache.felix.sigil.model.common.LDAPParseException;
-import org.apache.felix.sigil.model.common.LDAPParser;
-import org.apache.felix.sigil.model.common.SimpleTerm;
-import org.apache.felix.sigil.model.common.VersionRange;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.model.osgi.IBundleModelElement;
 import org.apache.felix.sigil.model.osgi.IPackageExport;

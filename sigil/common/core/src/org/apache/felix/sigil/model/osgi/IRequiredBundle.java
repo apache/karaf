@@ -20,9 +20,9 @@
 package org.apache.felix.sigil.model.osgi;
 
 
+import org.apache.felix.sigil.common.osgi.VersionRange;
 import org.apache.felix.sigil.model.IModelElement;
 import org.apache.felix.sigil.model.IRequirementModelElement;
-import org.apache.felix.sigil.model.common.VersionRange;
 
 
 public interface IRequiredBundle extends IModelElement, IRequirementModelElement, Comparable<IRequiredBundle>

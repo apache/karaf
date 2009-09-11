@@ -17,10 +17,24 @@
  * under the License.
  */
 
-package org.apache.felix.sigil.model.common;
+package org.apache.felix.sigil.common.osgi;
 
 
-public enum VersionRangeBoundingRule
+public interface ExprVisitor
 {
-    Exact, Micro, Minor, Major, Any
+
+    void visitAnd( And a );
+
+
+    void visitOr( Or o );
+
+
+    void visitNot( Not n );
+
+
+    void visitSimple( SimpleTerm st );
+
+
+    // if none of the above matches use this
+    void visitAny( LDAPExpr ex );
 }

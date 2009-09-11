@@ -20,8 +20,8 @@
 package org.apache.felix.sigil.core.internal.model.eclipse;
 
 
+import org.apache.felix.sigil.common.osgi.VersionRange;
 import org.apache.felix.sigil.model.AbstractModelElement;
-import org.apache.felix.sigil.model.common.VersionRange;
 import org.apache.felix.sigil.model.eclipse.ILibraryImport;
 
 

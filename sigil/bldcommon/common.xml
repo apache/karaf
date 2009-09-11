@@ -57,7 +57,7 @@
     <!-- ================================= 
           target: build (default target)
          ================================= -->
-    <target name="build" depends="publish-local, composites" />
+    <target name="build" depends="publish-local" />
 
     <target name="ident">
       <echo message="${ant.project.name}"/>
@@ -145,36 +145,12 @@
     </target>
 
     <!-- ================================= 
-          target: composites              
-         ================================= -->
-    <available file="${composite.dir}" type="dir"
-               property="composite.dir.present"/>
-
-    <target name="composites" if="composite.dir.present"
-    	description="--> filter xml composites replacing ${VERSION} etc.">
-	<mkdir dir="${build.etc.dir}"/>
-	<copy todir="${build.etc.dir}">
-	  <fileset dir="${composite.dir}">
-	    <exclude name="*-template.composite"/>
-	    <include name="*.composite"/>
-	    <include name="*.system"/>
-	  </fileset>
-	  <filterset begintoken="@" endtoken="@">
-	    <filter token="VERSION" value="${bundle.version}"/>
-	    <filter token="COMMUNITY_VERSION" value="${community.version}"/>
-	    <filter token="JINI_VERSION" value="${jini.version}"/>
-	    <filter token="PAREMUS_VERSION" value="${paremus.version}"/>
-	  </filterset>
-	</copy>
-    </target>
-
-    <!-- ================================= 
           target: install              
 	  install-bin, install-etc deprecated in favour of single
 	  assemble/bin, assemble/etc dirs
          ================================= -->
     <target name="install"
-    	 depends="install-lib, install-composites"/>
+    	 depends="install-lib"/>
 
     <available file="bin" type="dir"
                property="bin.dir.present"/>
@@ -193,19 +169,6 @@
 	<mkdir dir="${install.dir}/etc"/>
 	<copy todir="${install.dir}/etc">
 	  <fileset dir="etc" />
-	</copy>
-    </target>
-
-    <target name="composites-available">
-      <available file="${build.etc.dir}" type="dir"
-               property="build.etc.dir.present"/>
-    </target>
-
-    <target name="install-composites"
-	 depends="composites, composites-available"
-	      if="build.etc.dir.present">
-	<copy todir="${install.dir}/etc">
-	  <fileset dir="${build.etc.dir}" />
 	</copy>
     </target>
 
@@ -294,6 +257,16 @@
 	  <propertyref name="ivy.loaded" />
 	</propertyset>
       </subant>
+    </target>
+
+    <!-- ================================= 
+          target: report-list
+         ================================= -->
+    <target name="report-list"
+	  description="--> report all projects">
+      <antcall target="build-list">
+        <param name="target" value="report"/>
+      </antcall>
     </target>
 
     <!-- ================================= 

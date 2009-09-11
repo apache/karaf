@@ -22,10 +22,10 @@ package org.apache.felix.sigil.core;
 
 import java.util.Arrays;
 
+import org.apache.felix.sigil.common.osgi.VersionRange;
 import org.apache.felix.sigil.core.internal.model.osgi.BundleModelElement;
 import org.apache.felix.sigil.core.internal.model.osgi.PackageImport;
 import org.apache.felix.sigil.core.internal.model.osgi.RequiredBundle;
-import org.apache.felix.sigil.model.common.VersionRange;
 
 import junit.framework.TestCase;
 

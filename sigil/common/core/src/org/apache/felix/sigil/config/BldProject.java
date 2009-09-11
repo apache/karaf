@@ -42,12 +42,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeSet;
 
+import org.apache.felix.sigil.common.osgi.VersionRange;
 import org.apache.felix.sigil.core.internal.model.osgi.BundleModelElement;
 import org.apache.felix.sigil.core.internal.model.osgi.PackageExport;
 import org.apache.felix.sigil.core.internal.model.osgi.PackageImport;
 import org.apache.felix.sigil.core.internal.model.osgi.RequiredBundle;
 import org.apache.felix.sigil.model.IModelElement;
-import org.apache.felix.sigil.model.common.VersionRange;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.model.osgi.IBundleModelElement;
 import org.apache.felix.sigil.model.osgi.IPackageExport;

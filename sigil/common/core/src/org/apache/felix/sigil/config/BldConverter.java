@@ -31,11 +31,11 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.felix.sigil.common.osgi.VersionRange;
 import org.apache.felix.sigil.config.IBldProject.IBldBundle;
 import org.apache.felix.sigil.core.BldCore;
 import org.apache.felix.sigil.core.internal.model.eclipse.SigilBundle;
 import org.apache.felix.sigil.core.internal.model.osgi.BundleModelElement;
-import org.apache.felix.sigil.model.common.VersionRange;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.model.osgi.IBundleModelElement;
 import org.apache.felix.sigil.model.osgi.IPackageExport;

@@ -28,13 +28,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.felix.sigil.common.osgi.VersionRange;
 import org.apache.felix.sigil.config.BldFactory;
 import org.apache.felix.sigil.config.IBldProject;
 import org.apache.felix.sigil.config.IBldProject.IBldBundle;
 import org.apache.felix.sigil.core.internal.model.eclipse.SigilBundle;
 import org.apache.felix.sigil.core.internal.model.osgi.BundleModelElement;
 import org.apache.felix.sigil.core.licence.ILicensePolicy;
-import org.apache.felix.sigil.model.common.VersionRange;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.model.osgi.IBundleModelElement;
 import org.apache.felix.sigil.model.osgi.IPackageExport;

@@ -23,7 +23,7 @@ package org.apache.felix.sigil.ui.eclipse.ui.editors.project;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.felix.sigil.model.common.VersionRange;
+import org.apache.felix.sigil.common.osgi.VersionRange;
 import org.apache.felix.sigil.ui.eclipse.ui.util.IValidationListener;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.swt.SWT;

@@ -33,11 +33,11 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.jar.Attributes;
 
+import org.apache.felix.sigil.common.osgi.VersionRange;
 import org.apache.felix.sigil.config.BldAttr;
 import org.apache.felix.sigil.config.IBldProject;
 import org.apache.felix.sigil.config.IBldProject.IBldBundle;
 import org.apache.felix.sigil.core.repository.SystemRepositoryProvider;
-import org.apache.felix.sigil.model.common.VersionRange;
 import org.apache.felix.sigil.model.osgi.IPackageExport;
 import org.apache.felix.sigil.model.osgi.IPackageImport;
 import org.apache.felix.sigil.model.osgi.IRequiredBundle;

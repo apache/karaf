@@ -20,8 +20,8 @@
 package org.apache.felix.sigil.ui.eclipse.ui.editors.project;
 
 
+import org.apache.felix.sigil.common.osgi.VersionRange;
 import org.apache.felix.sigil.model.ModelElementFactory;
-import org.apache.felix.sigil.model.common.VersionRange;
 import org.apache.felix.sigil.model.osgi.IPackageImport;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;

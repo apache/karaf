@@ -20,9 +20,9 @@
 package org.apache.felix.sigil.ui.eclipse.ui.editors.project;
 
 
+import org.apache.felix.sigil.common.osgi.VersionRange;
+import org.apache.felix.sigil.common.osgi.VersionRangeBoundingRule;
 import org.apache.felix.sigil.eclipse.SigilCore;
-import org.apache.felix.sigil.model.common.VersionRange;
-import org.apache.felix.sigil.model.common.VersionRangeBoundingRule;
 import org.apache.felix.sigil.model.osgi.IVersionedModelElement;
 import org.apache.felix.sigil.ui.eclipse.ui.util.BackgroundLoadingSelectionDialog;
 import org.apache.felix.sigil.ui.eclipse.ui.util.IValidationListener;

@@ -32,8 +32,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 
 import org.apache.bcel.classfile.JavaClass;
+import org.apache.felix.sigil.common.osgi.VersionRange;
 import org.apache.felix.sigil.model.ModelElementFactory;
-import org.apache.felix.sigil.model.common.VersionRange;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.model.osgi.IPackageExport;
 import org.apache.felix.sigil.model.osgi.IRequiredBundle;

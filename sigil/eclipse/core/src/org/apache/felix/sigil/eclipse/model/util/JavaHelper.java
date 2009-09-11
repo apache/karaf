@@ -41,13 +41,13 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.regex.Pattern;
 
+import org.apache.felix.sigil.common.osgi.VersionRange;
+import org.apache.felix.sigil.common.osgi.VersionRangeBoundingRule;
 import org.apache.felix.sigil.eclipse.SigilCore;
 import org.apache.felix.sigil.eclipse.model.project.ISigilProjectModel;
 import org.apache.felix.sigil.model.IModelElement;
 import org.apache.felix.sigil.model.IModelWalker;
 import org.apache.felix.sigil.model.ModelElementFactory;
-import org.apache.felix.sigil.model.common.VersionRange;
-import org.apache.felix.sigil.model.common.VersionRangeBoundingRule;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.model.osgi.IBundleModelElement;
 import org.apache.felix.sigil.model.osgi.IPackageExport;

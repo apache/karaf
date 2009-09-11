@@ -37,10 +37,10 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
+import org.apache.felix.sigil.common.osgi.VersionRange;
 import org.apache.felix.sigil.config.BldFactory;
 import org.apache.felix.sigil.core.internal.model.osgi.RequiredBundle;
 import org.apache.felix.sigil.model.IModelElement;
-import org.apache.felix.sigil.model.common.VersionRange;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.model.osgi.IBundleModelElement;
 import org.apache.felix.sigil.repository.IResolution;
@@ -54,6 +54,7 @@ import org.apache.ivy.plugins.repository.url.URLResource;
 import org.apache.ivy.plugins.resolver.BasicResolver;
 import org.apache.ivy.plugins.resolver.util.ResolvedResource;
 import org.apache.ivy.util.FileUtil;
+import org.eclipse.core.runtime.IPath;
 
 
 /**
@@ -386,11 +387,10 @@ public class SigilResolver extends BasicResolver implements IBldResolver
 
         private boolean bundleContains( ISigilBundle bundle, String j )
         {
-            URI uri = bundle.getBundleInfo().getUpdateLocation();
             InputStream is = null;
             try
             {
-                URL url = ( uri != null ) ? uri.toURL() : bundle.getLocation().toFile().toURL();
+                URL url = getURL( bundle );
                 is = url.openStream();
                 JarInputStream js = new JarInputStream( is, false );
                 JarEntry entry;
@@ -427,11 +427,10 @@ public class SigilResolver extends BasicResolver implements IBldResolver
             if ( bundle == null )
                 return null;
 
-            URI uri = bundle.getBundleInfo().getUpdateLocation();
             InputStream is = null;
             try
             {
-                URL url = ( uri != null ) ? uri.toURL() : bundle.getLocation().toFile().toURL();
+                URL url = getURL( bundle );
                 is = url.openStream();
                 JarInputStream js = new JarInputStream( is, false );
                 Manifest m = js.getManifest();
@@ -456,6 +455,22 @@ public class SigilResolver extends BasicResolver implements IBldResolver
             }
 
             return null;
+        }
+
+
+        private URL getURL( ISigilBundle bundle ) throws MalformedURLException
+        {
+            URI uri = bundle.getBundleInfo().getUpdateLocation();
+            if ( uri != null ) {
+                return uri.toURL();
+            }
+            else {
+                IPath path = bundle.getLocation();
+                if ( path == null ) {
+                    throw new NullPointerException( "Missing location for " + bundle.getSymbolicName() );
+                }
+                return path.toFile().toURI().toURL();
+            }
         }
 
 

@@ -17,32 +17,24 @@
  * under the License.
  */
 
-package org.apache.felix.sigil.model.common;
+package org.apache.felix.sigil.common.osgi;
 
 
-import java.io.Serializable;
-import java.util.Map;
-
-
-public interface LDAPExpr extends Serializable
+public interface FilterValidator
 {
 
-    public static final LDAPExpr[] CHILDLESS = new LDAPExpr[]
-        {};
-    public static LDAPExpr ACCEPT_ALL = Expressions.T;
+    public static FilterValidator ACCEPT_ALL = new AcceptEverythingValidator();
 
 
-    LDAPExpr[] getChildren();
+    boolean validate( LDAPExpr filter );
 
+    static class AcceptEverythingValidator implements FilterValidator
+    {
 
-    void visit( ExprVisitor v );
+        public boolean validate( LDAPExpr filter )
+        {
+            return true;
+        }
 
-
-    boolean equals( Object other );
-
-
-    int hashCode();
-
-
-    boolean eval( Map<String, ?> map );
+    }
 }

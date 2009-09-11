@@ -20,10 +20,10 @@
 package org.apache.felix.sigil.core.internal.model.osgi;
 
 
+import org.apache.felix.sigil.common.osgi.VersionRange;
 import org.apache.felix.sigil.model.AbstractModelElement;
 import org.apache.felix.sigil.model.IModelElement;
 import org.apache.felix.sigil.model.InvalidModelException;
-import org.apache.felix.sigil.model.common.VersionRange;
 import org.apache.felix.sigil.model.osgi.IPackageExport;
 import org.apache.felix.sigil.model.osgi.IPackageImport;
 

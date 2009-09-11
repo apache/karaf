@@ -17,18 +17,18 @@
  * under the License.
  */
 
-package org.apache.felix.sigil.model.common;
+package org.apache.felix.sigil.common.osgi;
 
 
-import static org.apache.felix.sigil.model.common.Expressions.and;
-import static org.apache.felix.sigil.model.common.Expressions.not;
-import static org.apache.felix.sigil.model.common.Expressions.or;
-import static org.apache.felix.sigil.model.common.Ops.APPROX;
-import static org.apache.felix.sigil.model.common.Ops.EQ;
-import static org.apache.felix.sigil.model.common.Ops.GE;
-import static org.apache.felix.sigil.model.common.Ops.GT;
-import static org.apache.felix.sigil.model.common.Ops.LE;
-import static org.apache.felix.sigil.model.common.Ops.LT;
+import static org.apache.felix.sigil.common.osgi.Expressions.and;
+import static org.apache.felix.sigil.common.osgi.Expressions.not;
+import static org.apache.felix.sigil.common.osgi.Expressions.or;
+import static org.apache.felix.sigil.common.osgi.Ops.APPROX;
+import static org.apache.felix.sigil.common.osgi.Ops.EQ;
+import static org.apache.felix.sigil.common.osgi.Ops.GE;
+import static org.apache.felix.sigil.common.osgi.Ops.GT;
+import static org.apache.felix.sigil.common.osgi.Ops.LE;
+import static org.apache.felix.sigil.common.osgi.Ops.LT;
 
 import java.util.ArrayList;
 import java.util.List;
