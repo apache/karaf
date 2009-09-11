@@ -382,10 +382,8 @@
                                 <descriptor>src/main/descriptors/windows-bin.xml</descriptor>
                             </descriptors>
                             <finalName>${pom.artifactId}-${pom.version}</finalName>
-<!--
                             <appendAssemblyId>true</appendAssemblyId>
                             <assemblyId/>
--->
                         </configuration>
                     </execution>
                     <execution>
