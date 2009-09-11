@@ -163,8 +163,9 @@ public class Main
      *       <li><tt>felix.auto.deploy.action</tt> - Specifies the auto-deploy actions
      *           to be found on bundle JAR files found in the auto-deploy directory.
      *           The possible actions are <tt>install</tt>, <tt>update</tt>,
-     *           <tt>start</tt>, and <tt>uninstall</tt>. The default value is
-     *           <tt>install</tt>, <tt>update</tt>, and <tt>start</tt>.
+     *           <tt>start</tt>, and <tt>uninstall</tt>. If no actions are specified,
+     *           then the auto-deploy directory is not processed. There is no default
+     *           value for this property.
      *       </li>
      *     </ul>
      *   </li>
