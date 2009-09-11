@@ -75,7 +75,7 @@
         <felix.compendium.version>1.2.0</felix.compendium.version>
         <felix.configadmin.version>1.2.4</felix.configadmin.version>
         <felix.fileinstall.version>1.3.0-SNAPSHOT</felix.fileinstall.version>
-        <felix.framework.version>1.9.0-SNAPSHOT</felix.framework.version>
+        <felix.framework.version>2.0.0</felix.framework.version>
         <felix.gogo.version>0.9.0-SNAPSHOT</felix.gogo.version>
         <felix.osgi.version>1.3.0-SNAPSHOT</felix.osgi.version>
         <felix.plugin.version>2.0.0</felix.plugin.version>
