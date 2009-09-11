@@ -111,7 +111,7 @@ public class R4Library
 
             // If we have other native library extensions to try, then
             // calculate the new native library name.
-            if (extIdx < exts.length)
+            if ((exts != null) && (extIdx < exts.length))
             {
                 int idx = libname.lastIndexOf(".");
                 libname = (idx < 0)
