@@ -1,3 +1,8 @@
+Changes from the 1.4.2 to 1.4.4
+-------------------------------
+** Bug
+    * [FELIX-1579] - iPOJO Web Console Plugin 1.4.2 does not work as expected
+
 Changes from the 1.4.0 to 1.4.2
 -------------------------------
 ** Bug
