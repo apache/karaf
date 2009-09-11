@@ -109,10 +109,15 @@ public class R4Library
                 return true;
             }
 
-            int idx = libname.lastIndexOf(".");
-            libname = (idx < 0)
-                ? libname + "." + exts[extIdx++]
-                : libname.substring(0, idx) + "." + exts[extIdx++];
+            // If we have other native library extensions to try, then
+            // calculate the new native library name.
+            if (extIdx < exts.length)
+            {
+                int idx = libname.lastIndexOf(".");
+                libname = (idx < 0)
+                    ? libname + "." + exts[extIdx++]
+                    : libname.substring(0, idx) + "." + exts[extIdx++];
+            }
         }
         while ((exts != null) && (extIdx < exts.length));
 
