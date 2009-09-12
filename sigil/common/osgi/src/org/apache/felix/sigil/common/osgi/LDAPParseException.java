@@ -20,13 +20,9 @@
 package org.apache.felix.sigil.common.osgi;
 
 
-public class LDAPParseException extends Exception
+public class LDAPParseException extends RuntimeException
 {
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     private ParseState ps;
     private static final String LINE_SEPARATOR = System.getProperty( "line.separator", "\\r\\n" );
