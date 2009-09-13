@@ -22,7 +22,7 @@ public interface FelixConstants extends org.osgi.framework.Constants
 {
     public static final String SYSTEM_BUNDLE_SYMBOLICNAME = "org.apache.felix.framework";
     // Framework constants and values.
-    public static final String FRAMEWORK_VERSION_VALUE = "1.3";
+    public static final String FRAMEWORK_VERSION_VALUE = "1.5";
     public static final String FRAMEWORK_VENDOR_VALUE = "Apache Software Foundation";
 
     // Framework constants and values.
