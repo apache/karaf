@@ -352,14 +352,9 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
     }
     
     public void invokeAdded(ServiceReference reference, Object serviceInstance) {
-        Object callbackInstance = getCallbackInstance();
-        if ((callbackInstance != null) && (m_callbackAdded != null)) {
-            try {
-                invokeCallbackMethod(callbackInstance, m_callbackAdded, reference, serviceInstance);
-            }
-            catch (NoSuchMethodException e) {
-                m_logger.log(Logger.LOG_ERROR, "Could not invoke method " + m_callbackAdded + " on " + callbackInstance + ".", e);
-            }
+        Object[] callbackInstances = getCallbackInstances();
+        if ((callbackInstances != null) && (m_callbackAdded != null)) {
+                invokeCallbackMethod(callbackInstances, m_callbackAdded, reference, serviceInstance);
         }
     }
 
@@ -374,17 +369,12 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
     }
 
     public void invokeChanged(ServiceReference reference, Object serviceInstance) {
-        Object callbackInstance = getCallbackInstance();
-        if ((callbackInstance != null) && (m_callbackChanged != null)) {
-            try {
+        Object[] callbackInstances = getCallbackInstances();
+        if ((callbackInstances != null) && (m_callbackChanged != null)) {
                 if (m_reference == null) {
                     Thread.dumpStack();
                 }
-                invokeCallbackMethod(callbackInstance, m_callbackChanged, reference, serviceInstance);
-            }
-            catch (NoSuchMethodException e) {
-                m_logger.log(Logger.LOG_ERROR, "Could not invoke method " + m_callbackChanged + " on " + callbackInstance + ".", e);
-            }
+                invokeCallbackMethod(callbackInstances, m_callbackChanged, reference, serviceInstance);
         }
     }
 
@@ -407,17 +397,12 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
     }
     
     public void invokeRemoved(ServiceReference reference, Object serviceInstance) {
-        Object callbackInstance = getCallbackInstance();
-        if ((callbackInstance != null) && (m_callbackRemoved != null)) {
-            try {
+        Object[] callbackInstances = getCallbackInstances();
+        if ((callbackInstances != null) && (m_callbackRemoved != null)) {
                 if (m_reference == null) {
                     Thread.dumpStack();
                 }
-                invokeCallbackMethod(callbackInstance, m_callbackRemoved, reference, serviceInstance);
-            }
-            catch (NoSuchMethodException e) {
-                m_logger.log(Logger.LOG_ERROR, "Could not invoke method " + m_callbackRemoved + " on " + callbackInstance + ".", e);
-            }
+                invokeCallbackMethod(callbackInstances, m_callbackRemoved, reference, serviceInstance);
         }
     }
     
@@ -437,14 +422,28 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
         return false;
     }
     
-    private synchronized Object getCallbackInstance() {
-        Object callbackInstance = m_callbackInstance;
-        if (callbackInstance == null) {
-            callbackInstance = m_service.getService();
+    private synchronized Object[] getCallbackInstances() {
+        Object[] callbackInstances = ((ServiceImpl) m_service).getCompositionInstances();
+        if (m_callbackInstance == null) {
+            return callbackInstances;
         }
-        return callbackInstance;
+        Object[] res = new Object[callbackInstances.length + 1];
+        res[0] = m_callbackInstance; //this could also be extended to an array...?
+        System.arraycopy(callbackInstances, 0, res, 1, callbackInstances.length);
+        return res;
     }
-    
+
+    private void invokeCallbackMethod(Object[] instances, String methodName, ServiceReference reference, Object service) {
+        for (int i = 0; i < instances.length; i++) {
+            try {
+                invokeCallbackMethod(instances[i], methodName, reference, service);
+            }
+            catch (NoSuchMethodException e) {
+                m_logger.log(Logger.LOG_DEBUG, "Method '" + methodName + "' does not exist on " + instances[i] + ". Callback skipped.");
+            }
+        }
+    }
+
     private void invokeCallbackMethod(Object instance, String methodName, ServiceReference reference, Object service) throws NoSuchMethodException {
         Class currentClazz = instance.getClass();
         boolean done = false;

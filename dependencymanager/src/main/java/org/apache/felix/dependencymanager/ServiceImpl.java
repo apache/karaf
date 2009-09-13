@@ -733,29 +733,7 @@ public class ServiceImpl implements Service, ServiceComponent {
      * @param instanceName the name of the instance to fill in, or <code>null</code> if not used
      */
     private void configureImplementation(Class clazz, Object instance, String instanceName) {
-    	Object[] instances = null;
-    	if (m_compositionManagerGetMethod != null) {
-			if (m_compositionManager != null) {
-    			m_compositionManagerInstance = m_compositionManager;
-    		}
-    		else {
-    			m_compositionManagerInstance = m_serviceInstance;
-    		}
-    		if (m_compositionManagerInstance != null) {
-	    		try {
-					Method m = m_compositionManagerInstance.getClass().getDeclaredMethod(m_compositionManagerGetMethod, null);
-            		m.setAccessible(true);
-					instances = (Object[]) m.invoke(m_compositionManagerInstance, null);
-				}
-	    		catch (Exception e) {
-                    m_logger.log(Logger.LOG_ERROR, "Could not obtain instances from the composition manager.", e);
-                    return;
-				}
-    		}
-    	}
-    	else {
-    		instances = new Object[] { m_serviceInstance };
-    	}
+    	Object[] instances = getCompositionInstances();
     	if (instances != null) {
 	    	for (int i = 0; i < instances.length; i++) {
 	    		Object serviceInstance = instances[i];
@@ -783,6 +761,33 @@ public class ServiceImpl implements Service, ServiceComponent {
     	}
     }
     
+    public Object[] getCompositionInstances() {
+      Object[] instances = null;
+      if (m_compositionManagerGetMethod != null) {
+	if (m_compositionManager != null) {
+	  m_compositionManagerInstance = m_compositionManager;
+	}
+	else {
+	  m_compositionManagerInstance = m_serviceInstance;
+	}
+	if (m_compositionManagerInstance != null) {
+	  try {
+	    Method m = m_compositionManagerInstance.getClass().getDeclaredMethod(m_compositionManagerGetMethod, null);
+	    m.setAccessible(true);
+	    instances = (Object[]) m.invoke(m_compositionManagerInstance, null);
+	  }
+	  catch (Exception e) {
+	    m_logger.log(Logger.LOG_ERROR, "Could not obtain instances from the composition manager.", e);
+	    instances = new Object[] { m_serviceInstance };
+	  }
+	}
+      }
+      else {
+	instances = new Object[] { m_serviceInstance };
+      }
+      return instances;
+    }
+
     private void configureImplementation(Class clazz, Object instance) {
         configureImplementation(clazz, instance, null);
     }
