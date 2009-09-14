@@ -103,17 +103,7 @@ public class SigilProject extends AbstractCompoundModelElement implements ISigil
         this.project = project;
         bldProjectFile = project.getFile( new Path( SigilCore.SIGIL_PROJECT_FILE ) );
     }
-
-
-    // to aid testing conversion between project file formats
-    public InputStream saveBundle( ISigilBundle b ) throws CoreException
-    {
-        setBundle( b );
-        // FIXME causes NPE in JavaHelper
-        // calculateUses();
-        return buildContents();
-    }
-
+    
 
     public void save( IProgressMonitor monitor ) throws CoreException
     {
@@ -260,9 +250,11 @@ public class SigilProject extends AbstractCompoundModelElement implements ISigil
 
     public ISigilBundle getBundle()
     {
-        if ( bundle == null && bldProjectFile != null )
+        ISigilBundle b = null;
+        
+        synchronized ( bldProjectFile )
         {
-            synchronized ( bldProjectFile )
+            if ( bundle == null )
             {
                 try
                 {
@@ -283,14 +275,19 @@ public class SigilProject extends AbstractCompoundModelElement implements ISigil
                     SigilCore.error( "Failed to build bundle", e );
                 }
             }
+            
+            b = bundle;
         }
-        return bundle;
+        
+        return b;
     }
 
 
     public void setBundle( ISigilBundle bundle )
     {
-        this.bundle = bundle;
+        synchronized( bldProjectFile ) {
+            this.bundle = bundle;
+        }
     }
 
 
@@ -542,20 +539,6 @@ public class SigilProject extends AbstractCompoundModelElement implements ISigil
         return new ByteArrayInputStream( buf.toByteArray() );
     }
 
-
-    //    private InputStream buildXMLContents() throws CoreException {
-    //    	Serializer serializer = SigilCore.getDefault().getDescriptorSerializer();
-    //    	
-    //    	ByteArrayOutputStream buf = new ByteArrayOutputStream();
-    //    	
-    //    	try {
-    //    		serializer.serialize(getBundle(), buf);
-    //    	} catch (SerializingException e) {
-    //			throw SigilCore.newCoreException("Failed to serialize " + this, e);
-    //    	}
-    //    	
-    //        return new ByteArrayInputStream(buf.toByteArray());
-    //    }
 
     public String getName()
     {
