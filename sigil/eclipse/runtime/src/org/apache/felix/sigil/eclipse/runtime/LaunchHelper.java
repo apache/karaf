@@ -28,12 +28,6 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 public class LaunchHelper {
 
 	public static IOSGiInstall getInstall(ILaunchConfiguration config) {
-//	    OSGiInstall install = new OSGiInstall( "felix" );
-//	    OSGiInstallType type = new OSGiInstallType();
-//	    type.setMainClass( "org.apache.felix.main.Main" );
-//	    type.setClassPath( new String[] { "/Users/dave/development/felix-trunk/main/target/org.apache.felix.main-1.9.0-SNAPSHOT.jar" } );
-//	    install.setType( type );
-//		return install;
 	    return null;
 	}
 
