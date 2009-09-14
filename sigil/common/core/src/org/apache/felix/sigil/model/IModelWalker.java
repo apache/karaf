@@ -20,7 +20,22 @@
 package org.apache.felix.sigil.model;
 
 
+/**
+ * Visitor pattern to traverse nodes in the model.
+ * 
+ * @see ICompoundModelElement#visit(IModelWalker);
+ * 
+ * @author dave
+ *
+ */
 public interface IModelWalker
 {
+    /**
+     * Callback method providing the part of the model currently being visited.
+     * 
+     * @param element the element being visited
+     * 
+     * @return true to continue walking the model, false otherwise
+     */
     boolean visit( IModelElement element );
 }

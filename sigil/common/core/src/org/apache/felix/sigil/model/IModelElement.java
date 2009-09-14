@@ -25,8 +25,7 @@ import java.util.Set;
 
 
 /**
- * Descriptors represent static information about component, composite or system. They allow other services to decide
- * how to deal with the given entity without the need to directly interact with the entity.
+ * IModelElement represent static information about a part of a model.
  * 
  * @author dave
  * 
@@ -34,7 +33,7 @@ import java.util.Set;
 public interface IModelElement extends Cloneable
 {
     /**
-     * A brief human readable description of the component, composite or system.
+     * A brief human readable description of the element.
      * 
      * @return
      */
@@ -42,7 +41,7 @@ public interface IModelElement extends Cloneable
 
 
     /**
-     * A set of key value pairs designed for use by a machine to classify a particular component, composite or system.
+     * A set of key value pairs designed for use by a machine to classify a particular element.
      * 
      * @return
      */
@@ -51,7 +50,7 @@ public interface IModelElement extends Cloneable
 
     /**
      * Set meta data on this descriptor. Meta data is designed for use by a machine to classify or further enhance a
-     * particular component, composite or system.
+     * particular element.
      * 
      * @param meta
      */
@@ -59,7 +58,7 @@ public interface IModelElement extends Cloneable
 
 
     /**
-     * Check to see if this descriptor defines a complete set of properties. The definition of what constitutes a
+     * Check to see if this element defines a complete set of properties. The definition of what constitutes a
      * complete set is up to the implementing class.
      * 
      * @throws InvalidModelException
