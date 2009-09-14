@@ -30,8 +30,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.felix.sigil.ui.eclipse.ui.editors.project.IElementDescriptor;
-import org.apache.felix.sigil.ui.eclipse.ui.editors.project.WrappedContentProposal;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
@@ -85,7 +83,7 @@ public class BackgroundLoadingSelectionDialog<E> extends TitleAreaDialog impleme
             String result;
             if ( element instanceof WrappedContentProposal<?> )
             {
-                WrappedContentProposal<E> contentProposal = ( WrappedContentProposal<E> ) element;
+                WrappedContentProposal<E> contentProposal = (org.apache.felix.sigil.ui.eclipse.ui.util.WrappedContentProposal<E> ) element;
                 result = contentProposal.getLabel();
             }
             else
@@ -321,7 +319,7 @@ public class BackgroundLoadingSelectionDialog<E> extends TitleAreaDialog impleme
                 public void proposalAccepted( IContentProposal proposal )
                 {
                     @SuppressWarnings("unchecked")
-                    WrappedContentProposal<E> valueProposal = ( WrappedContentProposal<E> ) proposal;
+                    WrappedContentProposal<E> valueProposal = (org.apache.felix.sigil.ui.eclipse.ui.util.WrappedContentProposal<E> ) proposal;
                     E selected = valueProposal.getElement();
                     selection = new ArrayList<E>( 1 );
                     selection.add( selected );

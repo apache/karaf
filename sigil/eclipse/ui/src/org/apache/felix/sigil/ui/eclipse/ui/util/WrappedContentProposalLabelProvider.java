@@ -20,8 +20,6 @@
 package org.apache.felix.sigil.ui.eclipse.ui.util;
 
 
-import org.apache.felix.sigil.ui.eclipse.ui.editors.project.IElementDescriptor;
-import org.apache.felix.sigil.ui.eclipse.ui.editors.project.WrappedContentProposal;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
@@ -46,7 +44,7 @@ public class WrappedContentProposalLabelProvider<E> extends LabelProvider
         E result;
         if ( element instanceof WrappedContentProposal<?> )
         {
-            WrappedContentProposal<?> proposal = ( WrappedContentProposal<?> ) element;
+            WrappedContentProposal<?> proposal = (org.apache.felix.sigil.ui.eclipse.ui.util.WrappedContentProposal<?> ) element;
             result = ( E ) proposal.getElement();
         }
         else

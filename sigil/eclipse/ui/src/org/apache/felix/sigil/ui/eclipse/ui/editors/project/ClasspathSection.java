@@ -34,6 +34,7 @@ import org.apache.felix.sigil.ui.eclipse.ui.form.SigilPage;
 import org.apache.felix.sigil.ui.eclipse.ui.form.SigilSection;
 import org.apache.felix.sigil.ui.eclipse.ui.util.BackgroundLoadingSelectionDialog;
 import org.apache.felix.sigil.ui.eclipse.ui.util.DefaultTableProvider;
+import org.apache.felix.sigil.ui.eclipse.ui.util.IElementDescriptor;
 import org.apache.felix.sigil.ui.eclipse.ui.util.IFilter;
 import org.apache.felix.sigil.ui.eclipse.ui.util.ModelLabelProvider;
 import org.eclipse.core.runtime.CoreException;

@@ -26,8 +26,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.felix.sigil.ui.eclipse.ui.editors.project.IElementDescriptor;
-import org.apache.felix.sigil.ui.eclipse.ui.editors.project.WrappedContentProposal;
+import org.apache.felix.sigil.eclipse.SigilCore;
 import org.apache.felix.sigil.utils.GlobCompiler;
 import org.eclipse.jface.fieldassist.IContentProposal;
 import org.eclipse.jface.fieldassist.IContentProposalProvider;
@@ -68,7 +67,7 @@ public class ExclusionContentProposalProvider<T> implements IContentProposalProv
 
         for ( T element : elementArray )
         {
-            if ( filter != null && filter.select( element ) )
+            if ( filter == null || filter.select( element ) )
             {
                 IContentProposal proposal = WrappedContentProposal.newInstance( element, descriptor );
                 Matcher matcher = pattern.matcher( proposal.getContent() );

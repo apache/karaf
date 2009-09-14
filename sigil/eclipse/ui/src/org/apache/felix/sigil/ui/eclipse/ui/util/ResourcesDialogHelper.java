@@ -37,7 +37,6 @@ import org.apache.felix.sigil.model.osgi.IPackageExport;
 import org.apache.felix.sigil.model.osgi.IPackageImport;
 import org.apache.felix.sigil.model.osgi.IPackageModelElement;
 import org.apache.felix.sigil.model.osgi.IRequiredBundle;
-import org.apache.felix.sigil.ui.eclipse.ui.editors.project.IElementDescriptor;
 import org.apache.felix.sigil.ui.eclipse.ui.editors.project.NewPackageExportDialog;
 import org.apache.felix.sigil.ui.eclipse.ui.editors.project.NewResourceSelectionDialog;
 import org.eclipse.core.runtime.IProgressMonitor;

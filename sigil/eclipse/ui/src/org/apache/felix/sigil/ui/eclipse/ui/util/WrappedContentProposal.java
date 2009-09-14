@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.felix.sigil.ui.eclipse.ui.editors.project;
+package org.apache.felix.sigil.ui.eclipse.ui.util;
 
 
 import org.eclipse.jface.fieldassist.IContentProposal;
