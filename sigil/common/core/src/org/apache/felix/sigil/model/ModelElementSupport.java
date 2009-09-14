@@ -311,7 +311,7 @@ public class ModelElementSupport implements Serializable
     }
 
 
-    private static PropertyAdapter[] cachedProps( Class<? extends IModelElement> type )
+    private static synchronized PropertyAdapter[] cachedProps( Class<? extends IModelElement> type )
     {
         SoftReference<PropertyAdapter[]> ref = propertyCache.get( type );
 
@@ -391,7 +391,7 @@ public class ModelElementSupport implements Serializable
     }
 
 
-    private static ChildAdapter[] loadAdapters( IModelElement target )
+    private static synchronized ChildAdapter[] loadAdapters( IModelElement target )
     {
         Class<? extends IModelElement> type = target.getClass();
         SoftReference<ChildAdapter[]> ref = adapterCache.get( type );
