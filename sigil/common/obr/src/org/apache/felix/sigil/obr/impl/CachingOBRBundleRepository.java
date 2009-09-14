@@ -71,24 +71,16 @@ public class CachingOBRBundleRepository extends AbstractOBRBundleRepository
         List<ISigilBundle> cached = bundles == null ? null : bundles.get();
         if ( cached == null )
         {
-            try
+            final LinkedList<ISigilBundle> read = new LinkedList<ISigilBundle>();
+            readBundles( new OBRListener()
             {
-                final LinkedList<ISigilBundle> read = new LinkedList<ISigilBundle>();
-                readBundles( new OBRListener()
+                public void handleBundle( ISigilBundle bundle )
                 {
-                    public void handleBundle( ISigilBundle bundle )
-                    {
-                        read.add( bundle );
-                    }
-                } );
-                cached = read;
-                bundles = new SoftReference<List<ISigilBundle>>( cached );
-            }
-            catch ( Exception e )
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+                    read.add( bundle );
+                }
+            } );
+            cached = read;
+            bundles = new SoftReference<List<ISigilBundle>>( cached );
         }
 
         return cached;

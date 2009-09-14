@@ -29,10 +29,12 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.felix.sigil.repository.AbstractBundleRepository;
+import org.xml.sax.SAXException;
 
 
 public abstract class AbstractOBRBundleRepository extends AbstractBundleRepository
@@ -61,64 +63,86 @@ public abstract class AbstractOBRBundleRepository extends AbstractBundleReposito
     }
 
 
-    protected void readBundles( OBRListener listener ) throws Exception
+    protected void readBundles( OBRListener listener ) 
     {
-        syncOBRIndex();
+        File index = syncOBRIndex();
         OBRHandler handler = new OBRHandler( getObrURL(), getBundleCache(), listener );
-        SAXParser parser = factory.newSAXParser();
-        parser.parse( findLocalOBR(), handler );
+        try
+        {
+            SAXParser parser = factory.newSAXParser();
+            parser.parse( index, handler );
+        }
+        catch ( ParserConfigurationException e )
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch ( SAXException e )
+        {
+            System.out.println( "Failed to parse " + index );
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch ( IOException e )
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
 
-    private File findLocalOBR()
+    private File syncOBRIndex()
     {
+        File file = null;
         if ( "file".equals( getObrURL().getProtocol() ) ) {
             try
             {
-               return new File( getObrURL().toURI() );
+               file = new File( getObrURL().toURI() );
             }
             catch ( URISyntaxException e )
             {
                 // should be impossible ?
                 throw new IllegalStateException( "Failed to convert file url to uri", e );
-            }
+            }            
         }
         else {
-            return getObrlCache();
+            file = getObrlCache();
+            if ( isUpdated() )
+            {
+                cacheIndex(file);
+            }
         }
+        
+        return file;
     }
 
 
-    private void syncOBRIndex()
+    private void cacheIndex(File file)
     {
-        if ( !"file".equals( getObrURL().getProtocol() ) && isUpdated() )
-        {
-            InputStream in = null;
-            OutputStream out = null;
+        InputStream in = null;
+        OutputStream out = null;
 
-            try
+        try
+        {
+            URLConnection c = getObrURL().openConnection();
+            c.connect();
+            in = c.getInputStream();
+            if ( !file.getParentFile().exists() && !file.getParentFile().mkdirs() )
             {
-                URLConnection c = getObrURL().openConnection();
-                c.connect();
-                in = c.getInputStream();
-                File file = getObrlCache();
-                if ( !file.getParentFile().exists() && !file.getParentFile().mkdirs() )
-                {
-                    throw new IOException( "Failed to create obr cache dir " + file.getParentFile() );
-                }
-                out = new FileOutputStream( file );
-                stream( in, out );
+                throw new IOException( "Failed to create obr cache dir " + file.getParentFile() );
             }
-            catch ( IOException e )
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-                getObrlCache().setLastModified( 0 );
-            }
-            finally
-            {
-                close( in, out );
-            }
+            out = new FileOutputStream( file );
+            stream( in, out );
+        }
+        catch ( IOException e )
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            getObrlCache().setLastModified( 0 );
+        }
+        finally
+        {
+            close( in, out );
         }
     }
 

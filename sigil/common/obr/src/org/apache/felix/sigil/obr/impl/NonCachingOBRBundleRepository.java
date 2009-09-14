@@ -55,27 +55,19 @@ public class NonCachingOBRBundleRepository extends AbstractOBRBundleRepository
     @Override
     public void accept( final IRepositoryVisitor visitor, int options )
     {
-        try
+        readBundles( new OBRListener()
         {
-            readBundles( new OBRListener()
+            boolean visit = true;
+
+
+            public void handleBundle( ISigilBundle bundle )
             {
-                boolean visit = true;
-
-
-                public void handleBundle( ISigilBundle bundle )
+                if ( visit )
                 {
-                    if ( visit )
-                    {
-                        visit = visitor.visit( bundle );
-                    }
+                    visit = visitor.visit( bundle );
                 }
-            } );
-        }
-        catch ( Exception e )
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+            }
+        } );
     }
 
 }
