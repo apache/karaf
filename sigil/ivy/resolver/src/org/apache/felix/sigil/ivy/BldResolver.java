@@ -92,10 +92,11 @@ public class BldResolver implements IBldResolver
             manager = new BldRepositoryManager( repos );
         }
 
-        IResolutionMonitor nullMonitor = new IResolutionMonitor()
+        IResolutionMonitor ivyMonitor = new IResolutionMonitor()
         {
             public void endResolution( IModelElement requirement, ISigilBundle sigilBundle )
             {
+                Log.debug( "Resolved " + requirement + " -> " + sigilBundle );
             }
 
 
@@ -107,9 +108,10 @@ public class BldResolver implements IBldResolver
 
             public void startResolution( IModelElement requirement )
             {
+                Log.verbose( "Resolving " + requirement );
             }
         };
 
-        return manager.getBundleResolver().resolve( element, config, nullMonitor );
+        return manager.getBundleResolver().resolve( element, config, ivyMonitor );
     }
 }
