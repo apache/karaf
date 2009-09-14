@@ -54,10 +54,6 @@
     <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.ui" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
     <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.utils" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
 
-    <ivy:retrieve organisation="org.eclipse" module="org.eclipse.draw2d" revision="3.4.2.v20090114-1330" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
-    <ivy:retrieve organisation="org.eclipse" module="org.eclipse.zest.core" revision="1.0.0.v20080115" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
-    <ivy:retrieve organisation="org.eclipse" module="org.eclipse.zest.layouts" revision="1.0.0.v20080226" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
-
     <ivy:retrieve organisation="biz.aQute" module="bndlib" revision="0.0.312" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
 
     <ivy:retrieve organisation="sigil" module="com.springsource.org.apache.commons.lang" revision="2.4.0" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
