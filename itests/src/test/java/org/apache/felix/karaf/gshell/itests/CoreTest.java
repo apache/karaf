@@ -126,7 +126,7 @@ public class CoreTest extends AbstractIntegrationTest {
             // Felix Config Admin
             mavenBundle("org.apache.felix", "org.apache.felix.configadmin"),
             // Blueprint
-            mavenBundle("org.apache.geronimo", "blueprint-bundle"),
+            mavenBundle("org.apache.geronimo.blueprint", "geronimo-blueprint"),
 
             // Bundles
             mavenBundle("org.apache.mina", "mina-core"),

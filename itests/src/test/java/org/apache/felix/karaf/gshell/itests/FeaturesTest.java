@@ -70,7 +70,7 @@ public class FeaturesTest extends AbstractIntegrationTest {
             // Felix Preferences Service
             mavenBundle("org.apache.felix", "org.apache.felix.prefs"),
             // Blueprint
-            mavenBundle("org.apache.geronimo", "blueprint-bundle"),
+            mavenBundle("org.apache.geronimo.blueprint", "geronimo-blueprint"),
 
             // Bundles
             mavenBundle("org.apache.mina", "mina-core"),
