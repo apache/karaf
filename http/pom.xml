@@ -25,6 +25,7 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>felix-parent</artifactId>
         <version>1.2.0</version>
+        <relativePath>../pom/pom.xml</relativePath>
     </parent>
 
     <artifactId>org.apache.felix.http</artifactId>

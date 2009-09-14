@@ -108,7 +108,8 @@
         <module>bundlerepository</module>
         <module>log</module>
         <module>eventadmin</module>
-        <module>http.jetty</module>
+        <module>http</module>
+        <!--module>http.jetty</module-->
         <module>upnp</module>
         <module>scr</module>
         <module>configadmin</module>
