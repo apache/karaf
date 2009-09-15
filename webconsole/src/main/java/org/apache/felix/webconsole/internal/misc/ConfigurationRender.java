@@ -18,27 +18,33 @@ package org.apache.felix.webconsole.internal.misc;
 
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Writer;
+import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.webconsole.ConfigurationPrinter;
+import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
@@ -59,6 +65,20 @@ public class ConfigurationRender extends BaseWebConsolePlugin
 
     public static final String TITLE = "Configuration Status";
 
+    /**
+     * Formatter pattern to generate a relative path for the generation
+     * of the plain text or zip file representation of the status. The file
+     * name consists of a base name and the current time of status generation.
+     */
+    private static final SimpleDateFormat FILE_NAME_FORMAT = new SimpleDateFormat( "'" + LABEL
+        + "/configuration-status-'yyyyMMdd'-'HHmmZ" );
+
+    /**
+     * Formatter pattern to render the current time of status generation.
+     */
+    private static final DateFormat DISPLAY_DATE_FORMAT = SimpleDateFormat.getDateTimeInstance( SimpleDateFormat.LONG,
+        SimpleDateFormat.LONG, Locale.US );
+
     private ServiceTracker cfgPrinterTracker;
 
     private int cfgPrinterTrackerCount;
@@ -78,28 +98,82 @@ public class ConfigurationRender extends BaseWebConsolePlugin
     }
 
 
+    protected void doGet( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
+        IOException
+    {
+        if ( request.getPathInfo().endsWith( ".txt" ) )
+        {
+            response.setContentType( "text/plain; charset=utf-8" );
+            ConfigurationWriter pw = new PlainTextConfigurationWriter( response.getWriter() );
+            printConfigurationStatus( pw );
+            pw.flush();
+        }
+        else if ( request.getPathInfo().endsWith( ".zip" ) )
+        {
+            String type = getServletContext().getMimeType( request.getPathInfo() );
+            if ( type == null )
+            {
+                type = "application/x-zip";
+            }
+            response.setContentType( type );
+
+            ZipOutputStream zip = new ZipOutputStream( response.getOutputStream() );
+            zip.setLevel( 9 );
+            zip.setMethod( ZipOutputStream.DEFLATED );
+
+            ConfigurationWriter pw = new ZipConfigurationWriter( zip );
+            printConfigurationStatus( pw );
+            pw.flush();
+
+            zip.finish();
+        }
+        else
+        {
+            super.doGet( request, response );
+        }
+    }
+
+
     protected void renderContent( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
 
-        PrintWriter pw = response.getWriter();
+        ConfigurationWriter pw = new HtmlConfigurationWriter( response.getWriter() );
 
-        pw.println( "<table class='content' cellpadding='0' cellspacing='0' width='100%'>" );
+        String appRoot = ( String ) request.getAttribute( WebConsoleConstants.ATTR_APP_ROOT );
+        pw.println( "<link href='" + appRoot + "/res/ui/configurationrender.css' rel='stylesheet' type='text/css'>" );
+        pw.println( "<script src='" + appRoot + "/res/ui/tw-1.1.js' language='JavaScript'></script>" );
 
-        pw.println( "<tr class='content'>" );
-        pw.println( "<th class='content container'>Configuration Details</th>" );
-        pw.println( "</tr>" );
+        pw.println( "<script>$(document).ready(function(){ $('#cfgprttabs').tabworld() });</script>" );
 
-        pw.println( "<tr class='content'>" );
-        pw.println( "<td class='content'>" );
-        pw.println( "<pre>" );
+        final Date currentTime = new Date();
+        synchronized ( DISPLAY_DATE_FORMAT )
+        {
+            pw.println( "<p>Date: " + DISPLAY_DATE_FORMAT.format( currentTime ) + "</p>" );
+        }
 
-        pw.println( "*** Date: "
-            + SimpleDateFormat.getDateTimeInstance( SimpleDateFormat.LONG, SimpleDateFormat.LONG, Locale.US ).format(
-                new Date() ) );
-        pw.println();
+        synchronized ( FILE_NAME_FORMAT )
+        {
+            String fileName = FILE_NAME_FORMAT.format( currentTime );
+            pw.println( "<p>Download as <a href='" + fileName + ".txt'>[Single File]</a> or as <a href='" + fileName
+                + ".zip'>[ZIP]</a></p>" );
+        }
 
+        pw.println( "<div id='divcfgprttabs'>" );
+
+        pw.println( "<ul id='cfgprttabs'>" );
+
+        printConfigurationStatus( pw );
+
+        pw.println( "</ul>" );
+        pw.println( "</div>" );
+
+        pw.flush();
+    }
+
+
+    private void printConfigurationStatus( ConfigurationWriter pw )
+    {
         this.printSystemProperties( pw );
-        this.printBundles( pw );
         this.printServices( pw );
         this.printPreferences( pw );
         this.printConfigurations( pw );
@@ -109,11 +183,6 @@ public class ConfigurationRender extends BaseWebConsolePlugin
         {
             printConfigurationPrinter( pw, ( ConfigurationPrinter ) cpi.next() );
         }
-
-        pw.println( "</pre>" );
-        pw.println( "</td>" );
-        pw.println( "</tr>" );
-        pw.println( "</table>" );
     }
 
 
@@ -147,9 +216,9 @@ public class ConfigurationRender extends BaseWebConsolePlugin
     }
 
 
-    private void printSystemProperties( PrintWriter pw )
+    private void printSystemProperties( ConfigurationWriter pw )
     {
-        pw.println( "*** System properties:" );
+        pw.title( "System properties" );
 
         Properties props = System.getProperties();
         SortedSet keys = new TreeSet( props.keySet() );
@@ -159,7 +228,7 @@ public class ConfigurationRender extends BaseWebConsolePlugin
             this.infoLine( pw, null, ( String ) key, props.get( key ) );
         }
 
-        pw.println();
+        pw.end();
     }
 
 
@@ -194,31 +263,10 @@ public class ConfigurationRender extends BaseWebConsolePlugin
     //        pw.println();
     //    }
 
-    private void printBundles( PrintWriter pw )
+
+    private void printServices( ConfigurationWriter pw )
     {
-        pw.println( "*** Bundles:" );
-        // biz.junginger.freemem.FreeMem (1.3.0) "FreeMem Eclipse Memory
-        // Monitor" [Resolved]
-
-        Bundle[] bundles = getBundleContext().getBundles();
-        SortedSet keys = new TreeSet();
-        for ( int i = 0; i < bundles.length; i++ )
-        {
-            keys.add( this.getBundleString( bundles[i], true ) );
-        }
-
-        for ( Iterator ki = keys.iterator(); ki.hasNext(); )
-        {
-            this.infoLine( pw, null, null, ki.next() );
-        }
-
-        pw.println();
-    }
-
-
-    private void printServices( PrintWriter pw )
-    {
-        pw.println( "*** Services:" );
+        pw.title(  "Services" );
 
         // get the list of services sorted by service ID (ascending)
         SortedMap srMap = new TreeMap();
@@ -242,17 +290,15 @@ public class ConfigurationRender extends BaseWebConsolePlugin
 
             this.infoLine( pw, null, String.valueOf( sr.getProperty( Constants.SERVICE_ID ) ), sr
                 .getProperty( Constants.OBJECTCLASS ) );
-            this.infoLine( pw, "  ", "Bundle", this.getBundleString( sr.getBundle(), false ) );
+            this.infoLine( pw, "  ", "Bundle", this.getBundleString( sr.getBundle() ) );
 
             Bundle[] users = sr.getUsingBundles();
             if ( users != null && users.length > 0 )
             {
-                List userString = new ArrayList();
                 for ( int i = 0; i < users.length; i++ )
                 {
-                    userString.add( this.getBundleString( users[i], false ) );
+                    this.infoLine( pw, "  ", "Using Bundle", this.getBundleString( users[i] ) );
                 }
-                this.infoLine( pw, "  ", "Using Bundles", userString );
             }
 
             String[] keys = sr.getPropertyKeys();
@@ -267,21 +313,22 @@ public class ConfigurationRender extends BaseWebConsolePlugin
 
             pw.println();
         }
+
+        pw.end();
     }
 
 
-    private void printPreferences( PrintWriter pw )
+    private void printPreferences( ConfigurationWriter pw )
     {
-        pw.println( "*** System Preferences:" );
+        pw.title( "Preferences" );
 
         ServiceReference sr = getBundleContext().getServiceReference( PreferencesService.class.getName() );
         if ( sr == null )
         {
             pw.println( "  Preferences Service not registered" );
-            pw.println();
-            return;
         }
-
+        else
+        {
             PreferencesService ps = ( PreferencesService ) getBundleContext().getService( sr );
             try
             {
@@ -304,6 +351,9 @@ public class ConfigurationRender extends BaseWebConsolePlugin
             }
         }
 
+        pw.end();
+    }
+
 
     private void printPreferences( PrintWriter pw, Preferences prefs ) throws BackingStoreException
     {
@@ -324,9 +374,9 @@ public class ConfigurationRender extends BaseWebConsolePlugin
     }
 
 
-    private void printConfigurations( PrintWriter pw )
+    private void printConfigurations( ConfigurationWriter pw )
     {
-        pw.println( "*** Configurations:" );
+        pw.title(  "Configurations" );
 
         ServiceReference sr = getBundleContext().getServiceReference( ConfigurationAdmin.class.getName() );
         if ( sr == null )
@@ -368,15 +418,15 @@ public class ConfigurationRender extends BaseWebConsolePlugin
             }
         }
 
-        pw.println();
+        pw.end();
     }
 
 
-    private void printConfigurationPrinter( PrintWriter pw, ConfigurationPrinter cp )
+    private void printConfigurationPrinter( ConfigurationWriter pw, ConfigurationPrinter cp )
     {
-        pw.println( "*** " + cp.getTitle() + ":" );
+        pw.title(  cp.getTitle() );
         cp.printConfiguration( pw );
-        pw.println();
+        pw.end();
     }
 
 
@@ -466,7 +516,7 @@ public class ConfigurationRender extends BaseWebConsolePlugin
     }
 
 
-    private String getBundleString( Bundle bundle, boolean withState )
+    private String getBundleString( Bundle bundle )
     {
         StringBuffer buf = new StringBuffer();
 
@@ -494,38 +544,11 @@ public class ConfigurationRender extends BaseWebConsolePlugin
             buf.append( " \"" ).append( headers.get( Constants.BUNDLE_NAME ) ).append( '"' );
         }
 
-        if ( withState )
-        {
-            buf.append( " [" );
-            switch ( bundle.getState() )
-            {
-                case Bundle.INSTALLED:
-                    buf.append( "Installed" );
-                    break;
-                case Bundle.RESOLVED:
-                    buf.append( "Resolved" );
-                    break;
-                case Bundle.STARTING:
-                    buf.append( "Starting" );
-                    break;
-                case Bundle.ACTIVE:
-                    buf.append( "Active" );
-                    break;
-                case Bundle.STOPPING:
-                    buf.append( "Stopping" );
-                    break;
-                case Bundle.UNINSTALLED:
-                    buf.append( "Uninstalled" );
-                    break;
-            }
-            buf.append( ']' );
-        }
-
         return buf.toString();
     }
 
 
-    private void printThreads( PrintWriter pw )
+    private void printThreads( ConfigurationWriter pw )
     {
         // first get the root thread group
         ThreadGroup rootGroup = Thread.currentThread().getThreadGroup();
@@ -534,7 +557,7 @@ public class ConfigurationRender extends BaseWebConsolePlugin
             rootGroup = rootGroup.getParent();
         }
 
-        pw.println( "*** Threads:" );
+        pw.title(  "Threads" );
 
         printThreadGroup( pw, rootGroup );
 
@@ -546,7 +569,7 @@ public class ConfigurationRender extends BaseWebConsolePlugin
             printThreadGroup( pw, groups[i] );
         }
 
-        pw.println();
+        pw.end();
     }
 
 
@@ -603,6 +626,118 @@ public class ConfigurationRender extends BaseWebConsolePlugin
             info.append( ']' );
 
             infoLine( pw, "  ", null, info.toString() );
+        }
+    }
+
+    private abstract static class ConfigurationWriter extends PrintWriter
+    {
+
+        ConfigurationWriter( Writer delegatee )
+        {
+            super( delegatee );
+        }
+
+
+        abstract void title( String title );
+
+
+        abstract void end();
+
+    }
+
+    private static class HtmlConfigurationWriter extends ConfigurationWriter
+    {
+
+        HtmlConfigurationWriter( Writer delegatee )
+        {
+            super( delegatee );
+        }
+
+
+        public void title( String title )
+        {
+            println( "<li>" );
+            println( title );
+            println( "<q><pre>" );
+        }
+
+
+        public void end()
+        {
+            println( "</pre>" );
+            println( "</q>" );
+            println( "</li>" );
+        }
+    }
+
+    private static class PlainTextConfigurationWriter extends ConfigurationWriter
+    {
+
+        PlainTextConfigurationWriter( Writer delegatee )
+        {
+            super( delegatee );
+        }
+
+
+        public void title( String title )
+        {
+            print( "*** " );
+            print( title );
+            println( ":" );
+        }
+
+
+        public void end()
+        {
+            println();
+        }
+    }
+
+    private static class ZipConfigurationWriter extends ConfigurationWriter
+    {
+        private final ZipOutputStream zip;
+
+        private int counter;
+
+
+        ZipConfigurationWriter( ZipOutputStream zip )
+        {
+            super( new OutputStreamWriter( zip ) );
+            this.zip = zip;
+        }
+
+
+        public void title( String title )
+        {
+            String name = MessageFormat.format( "{0,number,000}-{1}.txt", new Object[]
+                { new Integer( counter ), title } );
+
+            counter++;
+
+            ZipEntry entry = new ZipEntry( name );
+            try
+            {
+                zip.putNextEntry( entry );
+            }
+            catch ( IOException ioe )
+            {
+                // should handle
+            }
+        }
+
+
+        public void end()
+        {
+            flush();
+
+            try
+            {
+                zip.closeEntry();
+            }
+            catch ( IOException ioe )
+            {
+                // should handle
+            }
         }
     }
 }

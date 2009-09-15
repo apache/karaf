@@ -19,18 +19,45 @@ package org.apache.felix.webconsole.internal.core;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.*;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.bundlerepository.*;
+import org.apache.felix.bundlerepository.R4Attribute;
+import org.apache.felix.bundlerepository.R4Export;
+import org.apache.felix.bundlerepository.R4Import;
+import org.apache.felix.bundlerepository.R4Package;
+import org.apache.felix.webconsole.ConfigurationPrinter;
 import org.apache.felix.webconsole.WebConsoleConstants;
 import org.apache.felix.webconsole.internal.BaseWebConsolePlugin;
 import org.apache.felix.webconsole.internal.Util;
-import org.json.*;
-import org.osgi.framework.*;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONWriter;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.Version;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.log.LogService;
@@ -42,7 +69,7 @@ import org.osgi.service.startlevel.StartLevel;
 /**
  * The <code>BundlesServlet</code> TODO
  */
-public class BundlesServlet extends BaseWebConsolePlugin
+public class BundlesServlet extends BaseWebConsolePlugin implements ConfigurationPrinter
 {
 
     public static final String NAME = "bundles";
@@ -62,6 +89,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
     // see #activate and #isBootDelegated
     private boolean[] bootPkgWildcards;
 
+    private ServiceRegistration configurationPrinter;
 
     public void activate( BundleContext bundleContext )
     {
@@ -83,6 +111,20 @@ public class BundlesServlet extends BaseWebConsolePlugin
             }
             bootPkgs[i] = bootDelegation;
         }
+
+        configurationPrinter = bundleContext.registerService( ConfigurationPrinter.SERVICE, this, null );
+    }
+
+
+    public void deactivate()
+    {
+        if ( configurationPrinter != null )
+        {
+            configurationPrinter.unregister();
+            configurationPrinter = null;
+        }
+
+        super.deactivate();
     }
 
 
@@ -97,6 +139,72 @@ public class BundlesServlet extends BaseWebConsolePlugin
         return LABEL;
     }
 
+
+    //---------- ConfigurationPrinter
+
+    public void printConfiguration( PrintWriter pw )
+    {
+        try
+        {
+            StringWriter w = new StringWriter();
+            writeJSON( w, null, null, true );
+            String jsonString = w.toString();
+            JSONObject json = new JSONObject( jsonString );
+
+            pw.println( "Status: " + json.get( "status" ) );
+            pw.println();
+
+            JSONArray data = json.getJSONArray( "data" );
+            for ( int i = 0; i < data.length(); i++ )
+            {
+                if ( !data.isNull( i ) )
+                {
+                    JSONObject bundle = data.getJSONObject( i );
+
+                    pw.println( MessageFormat.format( "Bundle {0} - {1} {2} (state: {3})", new Object[]
+                        { bundle.get( "id" ), bundle.get( "name" ), bundle.get( "version" ), bundle.get( "state" ) } ) );
+
+                    JSONArray props = bundle.getJSONArray( "props" );
+                    for ( int pi = 0; pi < props.length(); pi++ )
+                    {
+                        if ( !props.isNull( pi ) )
+                        {
+                            JSONObject entry = props.getJSONObject( pi );
+
+                            pw.print( "    " + entry.get( "key" ) + ": " );
+
+                            Object entryValue = entry.get( "value" );
+                            if ( entryValue instanceof JSONArray )
+                            {
+                                pw.println();
+                                JSONArray entryArray = ( JSONArray ) entryValue;
+                                for ( int ei = 0; ei < entryArray.length(); ei++ )
+                                {
+                                    if ( !entryArray.isNull( ei ) )
+                                    {
+                                        pw.println( "        " + entryArray.get( ei ) );
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                pw.println( entryValue );
+                            }
+                        }
+                    }
+
+                    pw.println();
+                }
+            }
+        }
+        catch ( Exception e )
+        {
+            getLog().log( LogService.LOG_ERROR, "Problem rendering Bundle details for configuration status", e );
+        }
+    }
+
+
+    //---------- BaseWebConsolePlugin
 
     protected void doGet( HttpServletRequest request, HttpServletResponse response ) throws ServletException,
         IOException
@@ -331,7 +439,15 @@ public class BundlesServlet extends BaseWebConsolePlugin
         writeJSON(pw, bundle, pluginRoot);
     }
 
-    private void writeJSON( final PrintWriter pw, final Bundle bundle, final String pluginRoot) throws IOException
+
+    private void writeJSON( final PrintWriter pw, final Bundle bundle, final String pluginRoot ) throws IOException
+    {
+        writeJSON( pw, bundle, pluginRoot, false );
+    }
+
+
+    private void writeJSON( final Writer pw, final Bundle bundle, final String pluginRoot,
+        final boolean fullDetails ) throws IOException
     {
         final Bundle[] allBundles = this.getBundles();
         final String statusLine = this.getStatusLine(allBundles);
@@ -354,7 +470,7 @@ public class BundlesServlet extends BaseWebConsolePlugin
 
             for ( int i = 0; i < bundles.length; i++ )
             {
-                bundleInfo( jw, bundles[i], bundle != null, pluginRoot );
+                bundleInfo( jw, bundles[i], fullDetails || bundle != null, pluginRoot );
             }
 
             jw.endArray();
@@ -1023,7 +1139,12 @@ public class BundlesServlet extends BaseWebConsolePlugin
     private String getBundleDescriptor( Bundle bundle, final String pluginRoot )
     {
         StringBuffer val = new StringBuffer();
-        val.append("<a href='").append(pluginRoot).append('/').append(bundle.getBundleId()).append("'>");
+
+        if ( pluginRoot != null )
+        {
+            val.append( "<a href='" ).append( pluginRoot ).append( '/' ).append( bundle.getBundleId() ).append( "'>" );
+        }
+
         if ( bundle.getSymbolicName() != null )
         {
             // list the bundle name if not null
@@ -1044,7 +1165,10 @@ public class BundlesServlet extends BaseWebConsolePlugin
             // only append the bundle
             val.append( bundle.getBundleId() );
         }
-        val.append("</a>");
+        if ( pluginRoot != null )
+        {
+            val.append( "</a>" );
+        }
         return val.toString();
     }
 

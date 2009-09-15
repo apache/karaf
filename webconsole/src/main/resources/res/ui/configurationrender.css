@@ -1,0 +1,70 @@
+/* tabbed view */
+
+#divcfgprttabs {
+}
+
+#divcfgprttabs ul { 
+    list-style: none;
+}
+
+#divcfgprttabs ul li {
+    display: inline; 
+    background: #fff;
+    height: 21px;
+    margin: 0 2px 0 0 ;
+    border: 1px solid #999;
+    float: left;
+    padding: 1px 1px 0 1px
+}
+
+#divcfgprttabs ul li.tabactive {
+    border-bottom-color: white;
+}
+
+#divcfgprttabs ul li a {
+    color: #6181A9;
+    background-color: white;
+    display: block;
+    float: left;
+    height: 100%;
+    line-height: 2;
+    padding: 0 10px 0 10px;
+    cursor: pointer;
+}
+
+#divcfgprttabs ul li a.tabactive {
+}
+
+#divcfgprttabs ul li a:hover {
+    color: white;
+    background-color: #6181A9;
+}
+
+.menu {
+    background: none;
+    height: 23px;
+    margin-bottom: 0;
+    padding-left: 0;
+}
+.area {
+    background: #fff;
+    border: 1px solid #999;
+    padding: 1px;
+}
+
+/* Contents container of the tabs */
+.tabcont {
+    background: #fff;
+    border: 1px solid #999;
+    border-right: none;
+    padding: 1px;
+}
+
+/* The actual content of the tabs */
+.space {
+    padding: 10px;
+    
+    /* don't let this area make the display wider */
+    width: 100px;
+    overflow: visible;
+}
