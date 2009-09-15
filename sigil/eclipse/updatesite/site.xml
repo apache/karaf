@@ -18,9 +18,16 @@
   under the License.
 -->
 <site>
-   <category-def name="Sigil" label="Sigil">
+   <feature url="features/org.apache.felix.sigil.eclipse.core.feature_0.9.0.SNAPSHOT.jar" id="org.apache.felix.sigil.eclipse.core.feature" version="0.9.0.SNAPSHOT">
+      <category name="Sigil"/>
+   </feature>
+   <feature url="features/org.apache.felix.sigil.eclipse.obr.feature_0.9.0.SNAPSHOT.jar" id="org.apache.felix.sigil.eclipse.obr.feature" version="0.9.0.SNAPSHOT">
+      <category name="Sigil"/>
+   </feature>
+   
+   <category-def name="Sigil" label="Sigil-Core">
       <description>
-         Sigil is an SDK for developing applications to be deployed on the Newton framework (http://newton.codecauldron.org)
+         Sigil is an SDK for developing OSGi applications
       </description>
-   </category-def>
+   </category-def>   
 </site>
