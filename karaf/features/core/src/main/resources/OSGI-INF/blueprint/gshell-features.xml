@@ -27,7 +27,7 @@
             <ext:property name="featuresRepositories" value=""/>
             <ext:property name="featuresBoot" value=""/>
         </ext:default-properties>
-        <ext:location>file:$(karaf.home)/etc/org.apache.felix.karaf.features.cfg</ext:location>
+        <ext:location>file:$(karaf.base)/etc/org.apache.felix.karaf.features.cfg</ext:location>
     </ext:property-placeholder>
 
     <bean id="featuresService" class="org.apache.felix.karaf.features.internal.FeaturesServiceImpl" init-method="start" destroy-method="stop">
