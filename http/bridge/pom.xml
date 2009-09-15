@@ -80,7 +80,7 @@
             <groupId>${pom.groupId}</groupId>
             <artifactId>org.apache.felix.http.base</artifactId>
             <version>${pom.version}</version>
-            <scope>provided</scope>
+            <!-- TEMP FIX <scope>provided</scope>-->
         </dependency>
     </dependencies>
 
