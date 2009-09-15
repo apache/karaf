@@ -48,6 +48,7 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
     private volatile Class m_trackedServiceName;
     private Object m_nullObject;
     private volatile String m_trackedServiceFilter;
+    private volatile String m_trackedServiceFilterUnmodified;
     private volatile ServiceReference m_trackedServiceReference;
     private volatile boolean m_isStarted;
     private Object m_callbackInstance;
@@ -531,9 +532,11 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
         }
         m_trackedServiceName = serviceName;
         if (serviceFilter != null) {
+            m_trackedServiceFilterUnmodified = serviceFilter;
             m_trackedServiceFilter ="(&(" + Constants.OBJECTCLASS + "=" + serviceName.getName() + ")" + serviceFilter + ")";
         }
         else {
+            m_trackedServiceFilterUnmodified = null;
             m_trackedServiceFilter = null;
         }
         m_trackedServiceReference = null;
@@ -557,6 +560,7 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
         }
         m_trackedServiceName = serviceName;
         m_trackedServiceReference = serviceReference;
+        m_trackedServiceFilterUnmodified = null;
         m_trackedServiceFilter = null;
         return this;
     }
@@ -694,7 +698,7 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
     }
     
     public synchronized String toString() {
-        return "ServiceDependency[" + m_trackedServiceName + " " + m_trackedServiceFilter + "]";
+        return "ServiceDependency[" + m_trackedServiceName + " " + m_trackedServiceFilterUnmodified + "]";
     }
 
     public String getAutoConfigName() {
@@ -702,7 +706,12 @@ public class ServiceDependency implements Dependency, ServiceTrackerCustomizer, 
     }
 
     public String getName() {
-        return m_trackedServiceName.getName();
+        StringBuilder sb = new StringBuilder();
+        sb.append(m_trackedServiceName.getName());
+        if (m_trackedServiceFilterUnmodified != null) {
+            sb.append(m_trackedServiceFilterUnmodified);
+        }
+        return sb.toString();
     }
 
     public int getState() {
