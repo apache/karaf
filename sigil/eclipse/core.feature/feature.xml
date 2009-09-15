@@ -18,9 +18,9 @@
   under the License.
 -->
 <feature
-      id="org.apache.felix.sigil.feature"
+      id="org.apache.felix.sigil.eclipse.core.feature"
       label="Sigil SDK"
-      version="0.9.0.qualifier"
+      version="0.9.0.SNAPSHOT"
       provider-name="Paremus Ltd">
 
    <description>
@@ -41,9 +41,9 @@ and
 limitations under the License.
    </license>
 
-   <url>
+   <!--url>
       <update url="http://replace.with.real.url"/>
-   </url>
+   </url-->
 
    <requires>
       <import plugin="org.eclipse.ant.core"/>
@@ -74,50 +74,69 @@ limitations under the License.
       <import plugin="org.eclipse.ui.cheatsheets" version="3.3.100" match="greaterOrEqual"/>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.equinox.common" version="3.4.0" match="greaterOrEqual"/>
-      <import plugin="org.apache.felix.sigil.eclipse.ui" version="0.9.0" match="greaterOrEqual"/>
-      <import plugin="org.apache.felix.sigil.eclipse.core" version="0.9.0" match="greaterOrEqual"/>
    </requires>
+
+   <plugin
+         id="org.apache.felix.sigil.common.core"
+         download-size="0"
+         install-size="0"
+         version="0.9.0.SNAPSHOT"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.felix.sigil.common.osgi"
+         download-size="0"
+         install-size="0"
+         version="0.9.0.SNAPSHOT"
+         unpack="false"/>
+         
+   <plugin
+         id="org.apache.felix.sigil.common.runtime"
+         download-size="0"
+         install-size="0"
+         version="0.9.0.SNAPSHOT"
+         unpack="false"/>
 
    <plugin
          id="org.apache.felix.sigil.eclipse.core"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="0.9.0.SNAPSHOT"
+         unpack="false"/>
+
+   <!--plugin
+         id="org.apache.felix.sigil.eclipse.help"
+         download-size="0"
+         install-size="0"
+         version="0.9.0.SNAPSHOT"
+         unpack="false"/-->
+
+   <plugin
+         id="org.apache.felix.sigil.eclipse.runtime"
+         download-size="0"
+         install-size="0"
+         version="0.9.0.SNAPSHOT"
+         unpack="false"/>
+         
+   <plugin
+         id="org.apache.felix.sigil.eclipse.search"
+         download-size="0"
+         install-size="0"
+         version="0.9.0.SNAPSHOT"
          unpack="false"/>
 
    <plugin
          id="org.apache.felix.sigil.eclipse.ui"
          download-size="0"
          install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.felix.sigil.eclipse.help"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
+         version="0.9.0.SNAPSHOT"
          unpack="false"/>
 
    <plugin
          id="org.apache.felix.sigil.eclipse.utils"
          download-size="0"
          install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.cauldron.bld.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.felix.sigil.eclipse.search"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
+         version="0.9.0.SNAPSHOT"
          unpack="false"/>
 
 </feature>
