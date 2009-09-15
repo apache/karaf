@@ -40,23 +40,29 @@
   <target name="report" depends="report-list" />
 
   <target name="site" depends="common-init">
-    <!-- eclipse -->
-    <ivy:retrieve organisation="org.apache" module="felix.sigil.common.core" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
-    <ivy:retrieve organisation="org.apache" module="felix.sigil.common.junit" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
-    <ivy:retrieve organisation="org.apache" module="felix.sigil.common.obr" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
-    <ivy:retrieve organisation="org.apache" module="felix.sigil.common.osgi" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
-    <ivy:retrieve organisation="org.apache" module="felix.sigil.common.runtime" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
-    <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.core" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
-    <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.help" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
-    <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.obr" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
-    <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.runtime" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
-    <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.search" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
-    <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.ui" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
-    <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.utils" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
+    <copy file="eclipse/updatesite/site.xml" todir="${site.dir}" />
+    <!-- eclipse features -->
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.core.feature" revision="latest.integration" inline="true" pattern="${site.dir}/features/[artifact]_${buildVersion}.[ext]" transitive="false"/>
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.obr.feature" revision="latest.integration" inline="true" pattern="${site.dir}/features/[artifact]_${buildVersion}.[ext]" transitive="false"/>
 
-    <ivy:retrieve organisation="biz.aQute" module="bndlib" revision="0.0.312" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
+    <!-- eclipse plugins -->
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.common.core" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact]_${buildVersion}.[ext]" transitive="false"/>
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.common.junit" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact]_${buildVersion}.[ext]" transitive="false"/>
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.common.obr" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact]_${buildVersion}.[ext]" transitive="false"/>
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.common.osgi" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact]_${buildVersion}.[ext]" transitive="false"/>
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.common.runtime" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact]_${buildVersion}.[ext]" transitive="false"/>
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.core" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact]_${buildVersion}.[ext]" transitive="false"/>
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.help" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact]_${buildVersion}.[ext]" transitive="false"/>
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.obr" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact]_${buildVersion}.[ext]" transitive="false"/>
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.runtime" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact]_${buildVersion}.[ext]" transitive="false"/>
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.search" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact]_${buildVersion}.[ext]" transitive="false"/>
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.ui" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact]_${buildVersion}.[ext]" transitive="false"/>
+    <ivy:retrieve organisation="org.apache" module="felix.sigil.eclipse.utils" revision="latest.integration" inline="true" pattern="${site.dir}/plugins/[artifact]_${buildVersion}.[ext]" transitive="false"/>
 
-    <ivy:retrieve organisation="sigil" module="com.springsource.org.apache.commons.lang" revision="2.4.0" inline="true" pattern="${site.dir}/plugins/[artifact].[ext]" transitive="false"/>
+    <!-- extras -->
+    <ivy:retrieve organisation="biz.aQute" module="bndlib" revision="0.0.312" inline="true" pattern="${site.dir}/extras/[artifact]_[revision].[ext]" transitive="false"/>
+
+    <ivy:retrieve organisation="sigil" module="com.springsource.org.apache.commons.lang" revision="2.4.0" inline="true" pattern="${site.dir}/extras/[artifact]_[revision].[ext]" transitive="false"/>
     
     <!-- ivy -->
     <ivy:retrieve organisation="org.apache" module="felix.sigil.ivy.resolver" revision="latest.integration" inline="true" pattern="${site.dir}/ivy/[artifact].[ext]" transitive="false"/>
