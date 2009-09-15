@@ -18,7 +18,7 @@
   under the License.
 -->
 <ivysettings>
-  <properties file="${ivy.settings.dir}/build.properties"/>
+  <properties file="${ivy.settings.dir}/build.properties" override="false"/>
   <caches defaultCacheDir="${cache.dir}/all" />
 
   <settings defaultResolver="default" circularDependencyStrategy="error" />
@@ -58,7 +58,6 @@
         <ivy pattern="${repository.dir}/shared/${repository.pattern}" />
         <artifact pattern="${repository.dir}/shared/${repository.pattern}" />
       </filesystem>
-
     </chain>
 
     <url name="eclipse">
