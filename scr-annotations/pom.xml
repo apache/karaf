@@ -32,9 +32,9 @@
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>Annotations for Maven SCR Plugin</name>
+	<name>Annotations for SCR</name>
 	<description>
-		Annotations for generating OSGi service descriptors with Maven SCR plugin.
+		Annotations for generating OSGi service descriptors.
 	</description>
 
 	<scm>
