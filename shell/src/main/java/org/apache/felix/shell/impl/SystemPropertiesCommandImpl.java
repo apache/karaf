@@ -18,13 +18,11 @@
  */
 package org.apache.felix.shell.impl;
 
-
 import java.io.PrintStream;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
 import org.apache.felix.shell.Command;
-
 
 /**
  * Command to display, set and modify system properties
@@ -35,61 +33,55 @@ import org.apache.felix.shell.Command;
  */
 public class SystemPropertiesCommandImpl implements Command
 {
-
-    public void execute( String line, PrintStream out, PrintStream err )
+    public void execute(String line, PrintStream out, PrintStream err)
     {
-        StringTokenizer st = new StringTokenizer( line );
+        StringTokenizer st = new StringTokenizer(line);
         int tokens = st.countTokens();
 
-        if ( tokens == 1 )
+        if (tokens == 1)
         {
-            printAll( out );
+            printAll(out);
         }
         else
         {
             st.nextToken();
             String propertyKey = st.nextToken();
 
-            if ( tokens == 2 )
+            if (tokens == 2)
             {
-                out.println( propertyKey + "=" + System.getProperty( propertyKey ) );
+                out.println(propertyKey + "=" + System.getProperty(propertyKey));
             }
             else
             {
                 String value = st.nextToken();
-                System.setProperty( propertyKey, value );
-                out.println( "Set " + propertyKey + "=" + value );
+                System.setProperty(propertyKey, value);
+                out.println("Set " + propertyKey + "=" + value);
             }
         }
     }
 
-
-    private void printAll( PrintStream out )
+    private void printAll(PrintStream out)
     {
-        out.println( "-------System properties------" );
-        for ( Iterator keyIterator = System.getProperties().keySet().iterator(); keyIterator.hasNext(); )
+        out.println("-------System properties------");
+        for (Iterator keyIterator = System.getProperties().keySet().iterator(); keyIterator.hasNext(); )
         {
             Object key = keyIterator.next();
-            out.println( key.toString() + "=" + System.getProperty( key.toString() ) );
+            out.println(key.toString() + "=" + System.getProperty(key.toString()));
         }
     }
-
 
     public String getName()
     {
         return "sysprop";
     }
 
-
     public String getShortDescription()
     {
         return "Display, set and modify system properties";
     }
 
-
     public String getUsage()
     {
         return "sysprop [<key>] [<value>]";
     }
-
 }
