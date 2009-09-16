@@ -20,7 +20,7 @@
 <feature
       id="org.apache.felix.sigil.eclipse.obr.feature"
       label="Sigil OBR"
-      version="0.9.0.SNAPSHOT"
+      version="${version}"
       provider-name="Apache Software Foundation">
 
    <description>
@@ -48,9 +48,9 @@ limitations under the License.
    <requires>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="org.apache.felix.sigil.eclipse.core" version="0.9.0.SNAPSHOT" match="greaterOrEqual"/>
-      <import plugin="org.apache.felix.sigil.eclipse.ui" version="0.9.0.SNAPSHOT" match="greaterOrEqual"/>
-      <import plugin="org.apache.felix.sigil.common.core" version="0.9.0.SNAPSHOT" match="greaterOrEqual"/>
+      <import plugin="org.apache.felix.sigil.eclipse.core" version="${version}" match="greaterOrEqual"/>
+      <import plugin="org.apache.felix.sigil.eclipse.ui" version="${version}" match="greaterOrEqual"/>
+      <import plugin="org.apache.felix.sigil.common.core" version="${version}" match="greaterOrEqual"/>
       <import plugin="org.eclipse.osgi"/>
       <import plugin="org.eclipse.equinox.common" version="3.4.0" match="greaterOrEqual"/>
    </requires>
@@ -59,14 +59,14 @@ limitations under the License.
          id="org.apache.felix.sigil.common.obr"
          download-size="0"
          install-size="0"
-         version="0.9.0.SNAPSHOT"
+         version="${version}"
          unpack="false"/>
 
    <plugin
          id="org.apache.felix.sigil.eclipse.obr"
          download-size="0"
          install-size="0"
-         version="0.9.0.SNAPSHOT"
+         version="${version}"
          unpack="false"/>
 
 </feature>
