@@ -402,7 +402,8 @@ public class BundleBuilder
         String sn = bundle.isSingleton() ? bundle.getSymbolicName() + ";singleton:=true" : bundle.getSymbolicName();
 
         spec.setProperty( Constants.BUNDLE_SYMBOLICNAME, sn );
-        spec.setProperty( Constants.BUNDLE_VERSION, bundle.getVersion() );
+        spec.setProperty( "version", bundle.getVersion() );
+        spec.setProperty( Constants.BUNDLE_VERSION, "${version}" );
 
         String activator = bundle.getActivator();
         if ( activator != null )
@@ -541,49 +542,96 @@ public class BundleBuilder
         for ( String bPath : resources.keySet() )
         {
             if ( bPath.startsWith( "@" ) )
-            { // Bnd in-line jar
-                if ( sb.length() > 0 )
-                    sb.append( "," );
-                sb.append( '@' );
-                sb.append( bundle.resolve( bPath.substring( 1 ) ) );
-                continue;
-            }
-
-            String fsPath = resources.get( bPath );
-            if ( "".equals( fsPath ) )
-                fsPath = bPath;
-
-            File resolved = bundle.resolve( fsPath );
-
-            // fsPath may contain Bnd variable, making path appear to not exist
-
-            if ( !resolved.exists() )
             {
-                // Bnd already looks for classpath jars
-                File found = findInClasspathDir( fsPath );
-                if ( found != null )
-                {
-                    fsPath = found.getPath();
-                }
-                else
-                {
-                    fsPath = resolved.getAbsolutePath();
-                }
+                handleInlineJar(bundle, sb, bPath);
+            }
+            else if ( bPath.startsWith( "{" ) ) 
+            {
+                handlePreprocessedResource(bundle, resources, sb, bPath);
+            }
+            else 
+            {
+                handleStandardResource(bundle, resources, sb, bPath);
+            }
+        }
+
+        if ( sb.length() > 0 )
+            spec.setProperty( Constants.INCLUDE_RESOURCE, sb.toString() );
+    }
+
+
+    private void handlePreprocessedResource( IBldBundle bundle, Map<String, String> resources, StringBuilder sb,
+        String bPath )
+    {
+        String fsPath = resources.get( bPath );
+        
+        bPath = bPath.substring( 1, bPath.length() - 1 );
+        
+        if ( "".equals( fsPath ) )
+            fsPath = bPath;
+        
+        fsPath = findFileSystemPath(bundle, fsPath);
+        
+        if ( sb.length() > 0 )
+            sb.append( "," );
+        sb.append( "{" );
+        sb.append( bPath );
+        sb.append( '=' );
+        sb.append( fsPath );
+        sb.append( "}" );
+    }
+
+
+    private void handleStandardResource(IBldBundle bundle, Map<String, String> resources, StringBuilder sb, String bPath)
+    {
+        String fsPath = resources.get( bPath );
+        if ( "".equals( fsPath ) )
+            fsPath = bPath;
+
+        fsPath = findFileSystemPath(bundle, fsPath);
+        
+        if ( sb.length() > 0 )
+            sb.append( "," );
+        sb.append( bPath );
+        sb.append( '=' );
+        sb.append( fsPath );
+    }
+
+
+    private String findFileSystemPath(IBldBundle bundle, String fsPath)
+    {
+        File resolved = bundle.resolve( fsPath );
+
+        // fsPath may contain Bnd variable, making path appear to not exist
+
+        if ( !resolved.exists() )
+        {
+            // Bnd already looks for classpath jars
+            File found = findInClasspathDir( fsPath );
+            if ( found != null )
+            {
+                fsPath = found.getPath();
             }
             else
             {
                 fsPath = resolved.getAbsolutePath();
             }
-
-            if ( sb.length() > 0 )
-                sb.append( "," );
-            sb.append( bPath );
-            sb.append( '=' );
-            sb.append( fsPath );
         }
+        else
+        {
+            fsPath = resolved.getAbsolutePath();
+        }
+        
+        return fsPath;
+    }
 
+
+    private void handleInlineJar(IBldBundle bundle, StringBuilder sb, String bPath)
+    {
         if ( sb.length() > 0 )
-            spec.setProperty( Constants.INCLUDE_RESOURCE, sb.toString() );
+            sb.append( "," );
+        sb.append( '@' );
+        sb.append( bundle.resolve( bPath.substring( 1 ) ) );
     }
 
 
