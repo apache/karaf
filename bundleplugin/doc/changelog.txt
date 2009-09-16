@@ -1,3 +1,21 @@
+Changes from 2.0.0 to 2.0.1
+---------------------------
+
+ * [2009-09-03] FELIX-1461: make local repository updates a bit more atomic
+ * [2009-09-03] Temporary local bnd patch for Include-Resource bug on Windows
+ * [2009-09-03] FELIX-1539: include additional source directories in local package calculation
+ * [2009-09-03] FELIX-1439: add project organization name/url properties
+ * [2009-09-03] FELIX-1501: use getProperty() instead of getProperties().getProperty()
+ * [2009-09-03] FELIX-1552: add bnd support for blueprint and spring-dm declarations
+ * [2009-09-03] FELIX-1148: apply local patch for MSHARED-101
+ * [2009-09-03] FELIX-981: avoid spurious split package warnings
+ * [2009-09-03] FELIX-1290: warn if Embed-Dependency doesn't match any dependencies
+ * [2009-09-03] FELIX-1021: remove expression from classifier parameter (ie. same as jar plugin)
+ * [2009-09-03] FELIX-1023: apply patch to add category information to OBR
+ * [2009-09-03] Upgrade to bndlib 0.0.357
+ * [2009-07-13] FELIX-1262: remove duplicate resource entries to avoid Bnd Tool error
+ * [2009-04-24] FELIX-1054: when deploying a bundle, print computed uri on the console
+
 Changes from 1.4.3 to 2.0.0
 ---------------------------
 
