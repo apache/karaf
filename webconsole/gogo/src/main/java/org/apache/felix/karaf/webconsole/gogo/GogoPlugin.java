@@ -52,7 +52,7 @@ import org.osgi.service.command.CommandSession;
 /**
  * The <code>GogoPlugin</code>
  */
-public class GogoPlugin extends AbstractWebConsolePlugin {
+public class GogoPlugin extends AbstractResourceAwareWebConsolePlugin {
 
     /** Pseudo class version ID to keep the IDE quite. */
     private static final long serialVersionUID = 1L;

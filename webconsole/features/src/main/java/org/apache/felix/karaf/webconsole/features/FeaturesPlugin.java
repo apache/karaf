@@ -50,7 +50,7 @@ import org.osgi.framework.BundleContext;
 /**
  * The <code>FeaturesPlugin</code>
  */
-public class FeaturesPlugin extends AbstractWebConsolePlugin
+public class FeaturesPlugin extends AbstractResourceAwareWebConsolePlugin
 {
 
     /** Pseudo class version ID to keep the IDE quite. */

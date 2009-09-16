@@ -37,7 +37,7 @@ import org.json.JSONWriter;
 /**
  * Felix Web Console plugin for interacting with the {@link AdminService}
  */
-public class AdminPlugin extends AbstractWebConsolePlugin {
+public class AdminPlugin extends AbstractResourceAwareWebConsolePlugin {
 
     public static final String NAME = "admin";
     public static final String LABEL = "Admin";
