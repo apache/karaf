@@ -156,6 +156,11 @@ public class Activator implements BundleActivator
         context.registerService(
             org.apache.felix.shell.Command.class.getName(),
             new StopCommandImpl(m_context), null);
+        
+        // Register "sysprop" command service.
+        context.registerService(
+            org.apache.felix.shell.Command.class.getName(),
+            new SystemPropertiesCommandImpl(), null);
 
         // Register "uninstall" command service.
         context.registerService(
