@@ -37,14 +37,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <version>1.0.0</version>
+            <version>4.0.0</version>
         </dependency>
         <dependency>
-            <groupId>${pom.groupId}</groupId>
+            <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
-            <version>1.0.0</version>
+            <version>4.2.0</version>
         </dependency>
         
         <!-- Integration Testing with Pax Exam -->
@@ -96,7 +96,7 @@
                         <Export-Package>
                             org.apache.felix.cm;
                             org.apache.felix.cm.file;version=1.0,
-                            org.osgi.service.cm;-split-package:=merge-first
+                            org.osgi.service.cm
                         </Export-Package>
                         <Private-Package>
                             org.apache.felix.cm.impl,
