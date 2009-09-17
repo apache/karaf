@@ -19,7 +19,6 @@
 
 package org.apache.felix.sigil.ivy;
 
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,72 +29,78 @@ import org.apache.felix.sigil.repository.AbstractRepositoryManager;
 import org.apache.felix.sigil.repository.IBundleRepository;
 import org.apache.felix.sigil.repository.IRepositoryProvider;
 
-
 public class BldRepositoryManager extends AbstractRepositoryManager
 {
     private static Map<String, String> aliases = new HashMap<String, String>();
 
     static
     {
-        aliases.put( "filesystem", "org.apache.felix.sigil.core.repository.FileSystemRepositoryProvider" );
-        aliases.put( "obr", "org.apache.felix.sigil.obr.OBRRepositoryProvider" );
-        aliases.put( "project", "org.apache.felix.sigil.ivy.ProjectRepositoryProvider" );
-        aliases.put( "system", "org.apache.felix.sigil.core.repository.SystemRepositoryProvider" );
+        aliases.put("filesystem",
+            "org.apache.felix.sigil.core.repository.FileSystemRepositoryProvider");
+        aliases.put("obr", "org.apache.felix.sigil.obr.OBRRepositoryProvider");
+        aliases.put("project", "org.apache.felix.sigil.ivy.ProjectRepositoryProvider");
+        aliases.put("system",
+            "org.apache.felix.sigil.core.repository.SystemRepositoryProvider");
     };
 
     private Map<String, Properties> repos;
 
-
-    public BldRepositoryManager( Map<String, Properties> repos )
+    public BldRepositoryManager(Map<String, Properties> repos)
     {
         this.repos = repos;
     }
 
-
     @Override
     protected void loadRepositories()
     {
-        for ( String name : repos.keySet() )
+        for (String name : repos.keySet())
         {
-            Properties repo = repos.get( name );
+            Properties repo = repos.get(name);
+            String optStr = repo.getProperty("optional", "false");
+            boolean optional = Boolean.parseBoolean(optStr.trim());
 
-            String alias = repo.getProperty( IRepositoryConfig.REPOSITORY_PROVIDER );
-            if ( alias == null )
+            String alias = repo.getProperty(IRepositoryConfig.REPOSITORY_PROVIDER);
+            if (alias == null)
             {
-                Log.error( "provider not specified for repository: " + name );
+                Log.error("provider not specified for repository: " + name);
                 continue;
             }
 
-            String provider = ( aliases.containsKey( alias ) ? aliases.get( alias ) : alias );
+            String provider = (aliases.containsKey(alias) ? aliases.get(alias) : alias);
 
-            if ( alias.equals( "obr" ) )
+            if (alias.equals("obr"))
             {
                 // cache is directory where synchronized bundles are stored;
                 // not needed in ivy.
-                repo.setProperty( "cache", "/no-cache" );
+                repo.setProperty("cache", "/no-cache");
 
-                if ( !repo.containsKey( "index" ) )
+                if (!repo.containsKey("index"))
                 {
                     // index is created as copy of url
-                    File indexFile = new File( System.getProperty( "java.io.tmpdir" ), "obr-index-" + name );
+                    File indexFile = new File(System.getProperty("java.io.tmpdir"),
+                        "obr-index-" + name);
                     indexFile.deleteOnExit();
-                    repo.setProperty( "index", indexFile.getAbsolutePath() );
+                    repo.setProperty("index", indexFile.getAbsolutePath());
                 }
             }
 
-            int level = Integer.parseInt( repo.getProperty( IRepositoryConfig.REPOSITORY_LEVEL,
-                IBundleRepository.NORMAL_PRIORITY + "" ) );
+            int level = Integer.parseInt(repo.getProperty(
+                IRepositoryConfig.REPOSITORY_LEVEL, IBundleRepository.NORMAL_PRIORITY
+                    + ""));
 
             try
             {
-                IRepositoryProvider instance = ( IRepositoryProvider ) ( Class.forName( provider ).newInstance() );
-                IBundleRepository repository = instance.createRepository( name, repo );
-                addRepository( repository, level );
-                Log.verbose( "added repository: " + repository );
+                IRepositoryProvider instance = (IRepositoryProvider) (Class.forName(provider).newInstance());
+                IBundleRepository repository = instance.createRepository(name, repo);
+                addRepository(repository, level);
+                Log.verbose("added repository: " + repository);
             }
-            catch ( Exception e )
+            catch (Exception e)
             {
-                throw new Error( "createRepository() failed: " + repo + " : " + e, e );
+                String msg = "failed to create repository: " + repo + " : " + e;
+                if (!optional)
+                    throw new Error(msg, e);
+                System.err.println("WARNING: " + msg);
             }
         }
     }

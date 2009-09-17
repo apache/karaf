@@ -19,9 +19,8 @@
 
 package org.apache.felix.sigil.obr;
 
-
 import java.io.File;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -32,30 +31,42 @@ import org.apache.felix.sigil.repository.IBundleRepository;
 import org.apache.felix.sigil.repository.IRepositoryProvider;
 import org.apache.felix.sigil.repository.RepositoryException;
 
-
 public class OBRRepositoryProvider implements IRepositoryProvider
 {
-    public IBundleRepository createRepository( String id, Properties preferences ) throws RepositoryException
+    public IBundleRepository createRepository(String id, Properties preferences)
+        throws RepositoryException
     {
+        String urlStr = preferences.getProperty("url");
+        if (urlStr == null)
+            throw new RepositoryException("url is not specified.");
+
         try
         {
-            URL repositoryURL = new URL( preferences.getProperty( "url" ) );
-            File indexCache = new File( preferences.getProperty( "index" ) );
-            File localCache = new File( preferences.getProperty( "cache" ) );
+            URL testURL = new URL(urlStr);
+            if (testURL.openConnection().getLastModified() == 0)
+                throw new RepositoryException("Failed to connect to repository: "
+                    + urlStr);
+
+            URL repositoryURL = new URL(urlStr);
+            File indexCache = new File(preferences.getProperty("index"));
+            File localCache = new File(preferences.getProperty("cache"));
             // TODO create user configurable updatePeriod
-            long updatePeriod = TimeUnit.MILLISECONDS.convert( 60 * 60 * 24 * 7, TimeUnit.SECONDS );
-            if ( preferences.getProperty( "inmemory" ) == null )
+            long updatePeriod = TimeUnit.MILLISECONDS.convert(60 * 60 * 24 * 7,
+                TimeUnit.SECONDS);
+            if (preferences.getProperty("inmemory") == null)
             {
-                return new NonCachingOBRBundleRepository( id, repositoryURL, indexCache, localCache, updatePeriod );
+                return new NonCachingOBRBundleRepository(id, repositoryURL, indexCache,
+                    localCache, updatePeriod);
             }
             else
             {
-                return new CachingOBRBundleRepository( id, repositoryURL, indexCache, localCache, updatePeriod );
+                return new CachingOBRBundleRepository(id, repositoryURL, indexCache,
+                    localCache, updatePeriod);
             }
         }
-        catch ( MalformedURLException e )
+        catch (IOException e)
         {
-            throw new RepositoryException( "Invalid repository url", e );
+            throw new RepositoryException("Invalid repository url", e);
         }
     }
 }
