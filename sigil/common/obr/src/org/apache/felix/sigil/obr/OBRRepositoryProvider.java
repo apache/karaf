@@ -42,26 +42,33 @@ public class OBRRepositoryProvider implements IRepositoryProvider
 
         try
         {
-            URL testURL = new URL(urlStr);
-            if (testURL.openConnection().getLastModified() == 0)
-                throw new RepositoryException("Failed to connect to repository: "
-                    + urlStr);
-
             URL repositoryURL = new URL(urlStr);
             File indexCache = new File(preferences.getProperty("index"));
             File localCache = new File(preferences.getProperty("cache"));
+            String auth = preferences.getProperty("auth");
+            File authFile = auth == null ? null : new File(auth);
+            URL testURL = new URL(urlStr);
+
+            if (testURL.openConnection().getLastModified() == 0)
+            {
+                String msg = "Failed to read OBR index: ";
+                if (!indexCache.exists())
+                    throw new RepositoryException(msg + urlStr);
+                System.err.println("WARNING: " + msg + "using cache: " + urlStr);
+            }
+
             // TODO create user configurable updatePeriod
             long updatePeriod = TimeUnit.MILLISECONDS.convert(60 * 60 * 24 * 7,
                 TimeUnit.SECONDS);
             if (preferences.getProperty("inmemory") == null)
             {
                 return new NonCachingOBRBundleRepository(id, repositoryURL, indexCache,
-                    localCache, updatePeriod);
+                    localCache, updatePeriod, authFile);
             }
             else
             {
                 return new CachingOBRBundleRepository(id, repositoryURL, indexCache,
-                    localCache, updatePeriod);
+                    localCache, updatePeriod, authFile);
             }
         }
         catch (IOException e)

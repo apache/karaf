@@ -19,13 +19,11 @@
 
 package org.apache.felix.sigil.obr.impl;
 
-
 import java.io.File;
 import java.net.URL;
 
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.repository.IRepositoryVisitor;
-
 
 public class NonCachingOBRBundleRepository extends AbstractOBRBundleRepository
 {
@@ -45,29 +43,26 @@ public class NonCachingOBRBundleRepository extends AbstractOBRBundleRepository
     	});
     } */
 
-    public NonCachingOBRBundleRepository( String id, URL repositoryURL, File obrCache, File bundleCache,
-        long updatePeriod )
+    public NonCachingOBRBundleRepository(String id, URL repositoryURL, File obrCache, File bundleCache, long updatePeriod, File authFile)
     {
-        super( id, repositoryURL, obrCache, bundleCache, updatePeriod );
+        super(id, repositoryURL, obrCache, bundleCache, updatePeriod, authFile);
     }
 
-
     @Override
-    public void accept( final IRepositoryVisitor visitor, int options )
+    public void accept(final IRepositoryVisitor visitor, int options)
     {
-        readBundles( new OBRListener()
+        readBundles(new OBRListener()
         {
             boolean visit = true;
 
-
-            public void handleBundle( ISigilBundle bundle )
+            public void handleBundle(ISigilBundle bundle)
             {
-                if ( visit )
+                if (visit)
                 {
-                    visit = visitor.visit( bundle );
+                    visit = visitor.visit(bundle);
                 }
             }
-        } );
+        });
     }
 
 }

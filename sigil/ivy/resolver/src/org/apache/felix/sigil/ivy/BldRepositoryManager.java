@@ -73,14 +73,22 @@ public class BldRepositoryManager extends AbstractRepositoryManager
                 // cache is directory where synchronized bundles are stored;
                 // not needed in ivy.
                 repo.setProperty("cache", "/no-cache");
+                String index = repo.getProperty("index");
 
-                if (!repo.containsKey("index"))
+                if (index == null)
                 {
-                    // index is created as copy of url
+                    // index is created to cache OBR url
                     File indexFile = new File(System.getProperty("java.io.tmpdir"),
                         "obr-index-" + name);
                     indexFile.deleteOnExit();
                     repo.setProperty("index", indexFile.getAbsolutePath());
+                }
+                else
+                {
+                    if (!new File(index).getParentFile().mkdirs())
+                    {
+                        // ignore - but keeps findbugs happy
+                    }
                 }
             }
 
@@ -97,10 +105,10 @@ public class BldRepositoryManager extends AbstractRepositoryManager
             }
             catch (Exception e)
             {
-                String msg = "failed to create repository: " + repo + " : " + e;
+                String msg = "failed to create repository: ";
                 if (!optional)
-                    throw new Error(msg, e);
-                System.err.println("WARNING: " + msg);
+                    throw new Error(msg + repo + " " + e, e);
+                System.err.println("WARNING: " + msg + e);
             }
         }
     }

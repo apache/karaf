@@ -19,7 +19,6 @@
 
 package org.apache.felix.sigil.obr.impl;
 
-
 import java.io.File;
 import java.lang.ref.SoftReference;
 import java.net.URL;
@@ -29,58 +28,53 @@ import java.util.List;
 import org.apache.felix.sigil.model.eclipse.ISigilBundle;
 import org.apache.felix.sigil.repository.IRepositoryVisitor;
 
-
 public class CachingOBRBundleRepository extends AbstractOBRBundleRepository
 {
 
     private SoftReference<List<ISigilBundle>> bundles;
 
-
-    public CachingOBRBundleRepository( String id, URL repositoryURL, File obrCache, File bundleCache, long updatePeriod )
+    public CachingOBRBundleRepository(String id, URL repositoryURL, File obrCache, File bundleCache, long updatePeriod, File authFile)
     {
-        super( id, repositoryURL, obrCache, bundleCache, updatePeriod );
+        super(id, repositoryURL, obrCache, bundleCache, updatePeriod, authFile);
     }
 
-
     @Override
-    public void accept( IRepositoryVisitor visitor, int options )
+    public void accept(IRepositoryVisitor visitor, int options)
     {
-        for ( ISigilBundle b : loadFromCache( options ) )
+        for (ISigilBundle b : loadFromCache(options))
         {
-            if ( !visitor.visit( b ) )
+            if (!visitor.visit(b))
             {
                 break;
             }
         }
     }
 
-
     public synchronized void refresh()
     {
         super.refresh();
-        if ( bundles != null )
+        if (bundles != null)
         {
             bundles.clear();
             notifyChange();
         }
     }
 
-
-    private synchronized List<ISigilBundle> loadFromCache( int options )
+    private synchronized List<ISigilBundle> loadFromCache(int options)
     {
         List<ISigilBundle> cached = bundles == null ? null : bundles.get();
-        if ( cached == null )
+        if (cached == null)
         {
             final LinkedList<ISigilBundle> read = new LinkedList<ISigilBundle>();
-            readBundles( new OBRListener()
+            readBundles(new OBRListener()
             {
-                public void handleBundle( ISigilBundle bundle )
+                public void handleBundle(ISigilBundle bundle)
                 {
-                    read.add( bundle );
+                    read.add(bundle);
                 }
-            } );
+            });
             cached = read;
-            bundles = new SoftReference<List<ISigilBundle>>( cached );
+            bundles = new SoftReference<List<ISigilBundle>>(cached);
         }
 
         return cached;
