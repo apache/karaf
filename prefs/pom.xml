@@ -29,7 +29,7 @@
 
     <artifactId>org.apache.felix.prefs</artifactId>
     <packaging>bundle</packaging>
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.0.4</version>
 
     <name>Apache Felix Preferences Service</name>
     <description>
@@ -86,4 +86,10 @@
             </plugin>
         </plugins>
     </build>
+
+  <scm>
+    <connection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.prefs-1.0.4</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.prefs-1.0.4</developerConnection>
+    <url>scm:svn:https://svn.apache.org/repos/asf/felix/releases/org.apache.felix.prefs-1.0.4</url>
+  </scm>
 </project>
