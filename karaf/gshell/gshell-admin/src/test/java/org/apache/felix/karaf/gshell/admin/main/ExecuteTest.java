@@ -163,7 +163,7 @@ public class ExecuteTest extends TestCase {
         final File tempFile = File.createTempFile(name, null);
         tempFile.delete();
         tempFile.mkdirs();
-        return tempFile;
+        return tempFile.getCanonicalFile();
     }
 
     private static void delete(File tmp) {
