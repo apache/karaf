@@ -19,7 +19,6 @@
 
 package org.apache.felix.sigil.bnd;
 
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -48,7 +47,6 @@ import aQute.lib.osgi.Constants;
 import aQute.lib.osgi.Jar;
 import aQute.lib.osgi.Processor;
 
-
 public class BundleBuilder
 {
     private IBldProject project;
@@ -67,12 +65,10 @@ public class BundleBuilder
 
     public interface Log
     {
-        void warn( String msg );
+        void warn(String msg);
 
-
-        void verbose( String msg );
+        void verbose(String msg);
     }
-
 
     /**
      * creates a BundleBuilder.
@@ -84,7 +80,7 @@ public class BundleBuilder
      *            [ext] is replaced with "jar".
      * @param hashtable
      */
-    public BundleBuilder( IBldProject project, File[] classpath, String destPattern, Properties env )
+    public BundleBuilder(IBldProject project, File[] classpath, String destPattern, Properties env)
     {
         this.project = project;
         this.classpath = classpath;
@@ -93,19 +89,19 @@ public class BundleBuilder
 
         Properties options = project.getOptions();
 
-        addMissingImports = options.containsKey( BldAttr.OPTION_ADD_IMPORTS )
-            && Boolean.parseBoolean( options.getProperty( BldAttr.OPTION_ADD_IMPORTS ) );
-        omitUnusedImports = options.containsKey( BldAttr.OPTION_OMIT_IMPORTS )
-            && Boolean.parseBoolean( options.getProperty( BldAttr.OPTION_OMIT_IMPORTS ) );
+        addMissingImports = options.containsKey(BldAttr.OPTION_ADD_IMPORTS)
+            && Boolean.parseBoolean(options.getProperty(BldAttr.OPTION_ADD_IMPORTS));
+        omitUnusedImports = options.containsKey(BldAttr.OPTION_OMIT_IMPORTS)
+            && Boolean.parseBoolean(options.getProperty(BldAttr.OPTION_OMIT_IMPORTS));
 
-        for ( IBldBundle b : project.getBundles() )
+        for (IBldBundle b : project.getBundles())
         {
             lastBundle = b.getId();
-            for ( IPackageImport import1 : b.getImports() )
+            for (IPackageImport import1 : b.getImports())
             {
-                if ( import1.getOSGiImport().equals( IPackageImport.OSGiImport.AUTO ) )
+                if (import1.getOSGiImport().equals(IPackageImport.OSGiImport.AUTO))
                 {
-                    unused.add( import1.getPackageName() );
+                    unused.add(import1.getPackageName());
                 }
             }
         }
@@ -113,126 +109,122 @@ public class BundleBuilder
         try
         {
             systemPkgs = new HashSet<String>();
-            Properties profile = SystemRepositoryProvider.readProfile( null );
-            String pkgs = profile.getProperty( "org.osgi.framework.system.packages" );
-            for ( String pkg : pkgs.split( ",\\s*" ) )
+            Properties profile = SystemRepositoryProvider.readProfile(null);
+            String pkgs = profile.getProperty("org.osgi.framework.system.packages");
+            for (String pkg : pkgs.split(",\\s*"))
             {
-                systemPkgs.add( pkg );
+                systemPkgs.add(pkg);
             }
         }
-        catch ( IOException e )
+        catch (IOException e)
         {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
 
-
     public List<String> errors()
     {
         return errors;
     }
-
 
     public List<String> warnings()
     {
         return warnings;
     }
 
-
     @SuppressWarnings("unchecked")
-    private void convertErrors( String prefix, List messages )
+    private void convertErrors(String prefix, List messages)
     {
         // TODO: make error mapping more generic
         final String jarEmpty = "The JAR is empty";
 
-        for ( Object omsg : messages )
+        for (Object omsg : messages)
         {
-            if ( jarEmpty.equals( omsg ) )
-                warnings.add( prefix + omsg );
+            if (jarEmpty.equals(omsg))
+                warnings.add(prefix + omsg);
             else
-                errors.add( prefix + omsg );
+                errors.add(prefix + omsg);
         }
     }
-
 
     @SuppressWarnings("unchecked")
-    private void convertWarnings( String prefix, List messages )
+    private void convertWarnings(String prefix, List messages)
     {
-        for ( Object omsg : messages )
+        for (Object omsg : messages)
         {
-            warnings.add( prefix + omsg );
+            warnings.add(prefix + omsg);
         }
     }
 
-
-    public boolean createBundle( IBldBundle bundle, boolean force, Log log ) throws Exception
+    public boolean createBundle(IBldBundle bundle, boolean force, Log log)
+        throws Exception
     {
-        int bracket = destPattern.indexOf( '[' );
-        if ( bracket < 0 )
+        int bracket = destPattern.indexOf('[');
+        if (bracket < 0)
         {
-            throw new Exception( "destPattern MUST contain [id] or [name]." );
+            throw new Exception("destPattern MUST contain [id] or [name].");
         }
 
-        String dest = destPattern.replaceFirst( "\\[id\\]", bundle.getId() );
-        dest = dest.replaceFirst( "\\[name\\]", bundle.getSymbolicName() );
-        dest = dest.replaceFirst( "\\[ext\\]", "jar" );
+        String dest = destPattern.replaceFirst("\\[id\\]", bundle.getId());
+        dest = dest.replaceFirst("\\[name\\]", bundle.getSymbolicName());
+        dest = dest.replaceFirst("\\[ext\\]", "jar");
 
-        bracket = dest.indexOf( '[' );
-        if ( bracket >= 0 )
+        bracket = dest.indexOf('[');
+        if (bracket >= 0)
         {
-            String token = dest.substring( bracket );
-            throw new Exception( "destPattern: expected [id] or [name]: " + token );
+            String token = dest.substring(bracket);
+            throw new Exception("destPattern: expected [id] or [name]: " + token);
         }
 
         errors.clear();
         warnings.clear();
 
-        Properties spec = getBndSpec( bundle, dest );
+        Properties spec = getBndSpec(bundle, dest);
 
-        if ( log != null )
+        if (log != null)
         {
-            log.verbose( "BND instructions: " + spec.toString() );
+            log.verbose("BND instructions: " + spec.toString());
         }
 
         Builder builder = new Builder();
-        builder.setPedantic( true );
-        builder.setProperties( spec );
-        builder.mergeProperties( env, false );
+        builder.setPedantic(true);
+        builder.setProperties(spec);
+        builder.mergeProperties(env, false);
 
-        builder.setClasspath( classpath );
+        builder.setClasspath(classpath);
         // builder.setSourcepath(sourcepath);
 
         Jar jar = builder.build();
 
-        convertErrors( "BND: ", builder.getErrors() );
-        convertWarnings( "BND: ", builder.getWarnings() );
+        convertErrors("BND: ", builder.getErrors());
+        convertWarnings("BND: ", builder.getWarnings());
 
-        augmentImports( builder, jar, bundle );
+        augmentImports(builder, jar, bundle);
 
-        if ( log != null )
+        if (log != null)
         {
-            for ( String warn : warnings )
+            for (String warn : warnings)
             {
-                log.warn( warn );
+                log.warn(warn);
             }
         }
 
-        if ( !errors.isEmpty() )
+        if (!errors.isEmpty())
         {
-            throw new Exception( errors.toString() );
+            throw new Exception(errors.toString());
         }
 
         boolean modified = false;
-        File output = new File( dest );
+        File output = new File(dest);
 
-        if ( !output.exists() || force || ( output.lastModified() <= jar.lastModified() )
-            || ( output.lastModified() <= project.getLastModified() ) )
+        if (!output.exists() || force || (output.lastModified() <= jar.lastModified())
+            || (output.lastModified() <= project.getLastModified()))
         {
             modified = true;
             // jar.write(dest) catches and ignores IOException
-            OutputStream out = new FileOutputStream( dest );
-            jar.write( out );
+            OutputStream out = new FileOutputStream(dest);
+            jar.write(out);
             out.close();
             jar.close();
         }
@@ -242,14 +234,15 @@ public class BundleBuilder
         return modified;
     }
 
-
-    private void augmentImports( Builder builder, Jar jar, IBldBundle bundle ) throws IOException
+    private void augmentImports(Builder builder, Jar jar, IBldBundle bundle)
+        throws IOException
     {
         Attributes main = jar.getManifest().getMainAttributes();
-        String impHeader = main.getValue( Constants.IMPORT_PACKAGE );
-        Map<String, Map<String, String>> bndImports = Processor.parseHeader( impHeader, builder );
+        String impHeader = main.getValue(Constants.IMPORT_PACKAGE);
+        Map<String, Map<String, String>> bndImports = Processor.parseHeader(impHeader,
+            builder);
 
-        if ( bndImports.isEmpty() )
+        if (bndImports.isEmpty())
             return;
 
         ArrayList<String> self = new ArrayList<String>();
@@ -257,127 +250,131 @@ public class BundleBuilder
         ArrayList<String> modified = new ArrayList<String>();
         ArrayList<String> unversioned = new ArrayList<String>();
 
-        String expHeader = main.getValue( Constants.EXPORT_PACKAGE );
-        Set<String> bndExports = Processor.parseHeader( expHeader, builder ).keySet();
+        String expHeader = main.getValue(Constants.EXPORT_PACKAGE);
+        Set<String> bndExports = Processor.parseHeader(expHeader, builder).keySet();
 
         HashMap<String, IPackageImport> imports = new HashMap<String, IPackageImport>();
-        for ( IPackageImport pi : getImports( bundle ) )
+        for (IPackageImport pi : getImports(bundle))
         {
-            switch ( pi.getOSGiImport() )
+            switch (pi.getOSGiImport())
             {
                 case NEVER:
                     break;
                 case ALWAYS:
                     String pkg = pi.getPackageName();
-                    if ( !bndImports.containsKey( pkg ) )
+                    if (!bndImports.containsKey(pkg))
                     {
                         // Bnd doesn't think this import is needed - but we know
                         // better
                         HashMap<String, String> attrs = new HashMap<String, String>();
-                        attrs.put( BldAttr.VERSION_ATTRIBUTE, pi.getVersions().toString() );
-                        bndImports.put( pkg, attrs );
-                        modified.add( pkg + ";resolve=runtime" );
+                        attrs.put(BldAttr.VERSION_ATTRIBUTE, pi.getVersions().toString());
+                        bndImports.put(pkg, attrs);
+                        modified.add(pkg + ";resolve=runtime");
                     }
                     // fall thru */
                 case AUTO:
-                    imports.put( pi.getPackageName(), pi );
+                    imports.put(pi.getPackageName(), pi);
                     break;
             }
         }
 
         boolean importDot = false;
 
-        for ( String pkg : bndImports.keySet() )
+        for (String pkg : bndImports.keySet())
         {
-            unused.remove( pkg );
-            Map<String, String> attrs = bndImports.get( pkg );
-            String currentVersion = ( String ) attrs.get( BldAttr.VERSION_ATTRIBUTE );
-            IPackageImport pi = imports.get( pkg );
+            unused.remove(pkg);
+            Map<String, String> attrs = bndImports.get(pkg);
+            String currentVersion = (String) attrs.get(BldAttr.VERSION_ATTRIBUTE);
+            IPackageImport pi = imports.get(pkg);
 
-            if ( pi != null )
+            if (pi != null)
             {
                 VersionRange range = pi.getVersions();
                 String version = range.toString();
 
-                if ( !version.equals( currentVersion ) && !range.equals( VersionRange.ANY_VERSION ) )
+                if (!version.equals(currentVersion)
+                    && !range.equals(VersionRange.ANY_VERSION))
                 {
-                    attrs.put( BldAttr.VERSION_ATTRIBUTE, version );
-                    if ( pi.isOptional() )
-                        attrs.put( BldAttr.RESOLUTION_ATTRIBUTE, BldAttr.RESOLUTION_OPTIONAL );
-                    modified.add( pkg + ";version=" + version + ( pi.isOptional() ? ";optional" : "" ) );
+                    attrs.put(BldAttr.VERSION_ATTRIBUTE, version);
+                    if (pi.isOptional())
+                        attrs.put(BldAttr.RESOLUTION_ATTRIBUTE,
+                            BldAttr.RESOLUTION_OPTIONAL);
+                    modified.add(pkg + ";version=" + version
+                        + (pi.isOptional() ? ";optional" : ""));
                 }
-                else if ( ( currentVersion == null ) && !systemPkgs.contains( pkg ) )
+                else if ((currentVersion == null) && !systemPkgs.contains(pkg))
                 {
-                    unversioned.add( pkg );
+                    unversioned.add(pkg);
                 }
             }
             else
             {
                 // bnd added the import ...
-                if ( currentVersion == null )
+                if (currentVersion == null)
                 {
-                    String defaultVersion = project.getDefaultPackageVersion( pkg );
-                    if ( defaultVersion != null )
+                    String defaultVersion = project.getDefaultPackageVersion(pkg);
+                    if (defaultVersion != null)
                     {
-                        attrs.put( BldAttr.VERSION_ATTRIBUTE, defaultVersion );
+                        attrs.put(BldAttr.VERSION_ATTRIBUTE, defaultVersion);
                         currentVersion = defaultVersion;
                     }
                 }
 
-                String imp = pkg + ( currentVersion == null ? "" : ";version=" + currentVersion );
-                if ( bndExports.contains( pkg ) )
+                String imp = pkg
+                    + (currentVersion == null ? "" : ";version=" + currentVersion);
+                if (bndExports.contains(pkg))
                 {
-                    self.add( imp );
+                    self.add(imp);
                 }
                 else
                 {
-                    if ( pkg.equals( "." ) )
+                    if (pkg.equals("."))
                     {
-                        warnings.add( "Bnd wants to import '.' (ignored)" );
+                        warnings.add("Bnd wants to import '.' (ignored)");
                         importDot = true;
                     }
                     else
                     {
-                        missing.add( imp );
+                        missing.add(imp);
                     }
                 }
             }
         }
 
-        if ( !modified.isEmpty() || importDot )
+        if (!modified.isEmpty() || importDot)
         {
-            if ( importDot )
-                bndImports.remove( "." );
+            if (importDot)
+                bndImports.remove(".");
             // warnings.add("INFO: sigil modified imports: " + modified);
-            main.putValue( Constants.IMPORT_PACKAGE, Processor.printClauses( bndImports, "resolution:" ) );
+            main.putValue(Constants.IMPORT_PACKAGE, Processor.printClauses(bndImports,
+                "resolution:"));
         }
 
-        if ( !self.isEmpty() )
+        if (!self.isEmpty())
         {
             // warnings.add("INFO: added self imports: " + self);
         }
 
-        if ( !missing.isEmpty() )
+        if (!missing.isEmpty())
         {
-            warnings.add( "missing imports (added): " + missing );
+            warnings.add("missing imports (added): " + missing);
         }
 
-        if ( !unversioned.isEmpty() )
+        if (!unversioned.isEmpty())
         {
-            warnings.add( "unversioned imports: " + unversioned );
+            warnings.add("unversioned imports: " + unversioned);
         }
 
-        if ( bundle.getId().equals( lastBundle ) )
+        if (bundle.getId().equals(lastBundle))
         {
-            if ( !unused.isEmpty() )
+            if (!unused.isEmpty())
             {
-                warnings.add( "unused imports (omitted): " + unused );
+                warnings.add("unused imports (omitted): " + unused);
             }
         }
     }
 
-
-    public Properties getBndSpec( IBldBundle bundle, String dest ) throws IOException
+    public Properties getBndSpec(IBldBundle bundle, String dest) throws IOException
     {
         Properties spec = new Properties();
 
@@ -388,86 +385,85 @@ public class BundleBuilder
         // use it for exported
         // content too.
 
-        spec.setProperty( Constants.REMOVE_HEADERS, junkHeaders );
-        spec.setProperty( Constants.NOEXTRAHEADERS, "true" ); // Created-By,
+        spec.setProperty(Constants.REMOVE_HEADERS, junkHeaders);
+        spec.setProperty(Constants.NOEXTRAHEADERS, "true"); // Created-By,
         // Bnd-LastModified
         // and Tool
-        spec.setProperty( Constants.CREATED_BY, "sigil.felix.apache.org" );
+        spec.setProperty(Constants.CREATED_BY, "sigil.felix.apache.org");
 
         Properties headers = bundle.getHeaders();
         // XXX: catch attempts to set headers that conflict with Bnd
         // instructions we generate?
-        spec.putAll( headers );
+        spec.putAll(headers);
 
-        String sn = bundle.isSingleton() ? bundle.getSymbolicName() + ";singleton:=true" : bundle.getSymbolicName();
+        String sn = bundle.isSingleton() ? bundle.getSymbolicName() + ";singleton:=true"
+            : bundle.getSymbolicName();
 
-        spec.setProperty( Constants.BUNDLE_SYMBOLICNAME, sn );
-        spec.setProperty( "version", bundle.getVersion() );
-        spec.setProperty( Constants.BUNDLE_VERSION, "${version}" );
+        spec.setProperty(Constants.BUNDLE_SYMBOLICNAME, sn);
+        spec.setProperty("version", bundle.getVersion());
+        spec.setProperty(Constants.BUNDLE_VERSION, "${version}");
 
         String activator = bundle.getActivator();
-        if ( activator != null )
-            spec.setProperty( Constants.BUNDLE_ACTIVATOR, activator );
+        if (activator != null)
+            spec.setProperty(Constants.BUNDLE_ACTIVATOR, activator);
 
-        addRequirements( bundle, spec );
+        addRequirements(bundle, spec);
 
-        List<String> exports = addExports( bundle, spec );
+        List<String> exports = addExports(bundle, spec);
 
-        addResources( bundle, spec );
+        addResources(bundle, spec);
 
         ArrayList<String> contents = new ArrayList<String>();
-        contents.addAll( bundle.getContents() );
+        contents.addAll(bundle.getContents());
 
-        if ( contents.isEmpty() )
+        if (contents.isEmpty())
         {
-            if ( !project.getSourcePkgs().isEmpty() )
+            if (!project.getSourcePkgs().isEmpty())
             {
-                contents.addAll( project.getSourcePkgs() );
+                contents.addAll(project.getSourcePkgs());
             }
             else
             {
-                contents.addAll( exports );
+                contents.addAll(exports);
             }
         }
 
-        addLibs( bundle, dest, spec );
+        addLibs(bundle, dest, spec);
 
-        addContents( contents, spec );
+        addContents(contents, spec);
 
         IRequiredBundle fh = bundle.getFragmentHost();
-        if ( fh != null )
+        if (fh != null)
         {
             StringBuilder sb = new StringBuilder();
-            sb.append( fh.getSymbolicName() );
-            addVersions( fh.getVersions(), sb );
-            spec.setProperty( Constants.FRAGMENT_HOST, sb.toString() );
+            sb.append(fh.getSymbolicName());
+            addVersions(fh.getVersions(), sb);
+            spec.setProperty(Constants.FRAGMENT_HOST, sb.toString());
         }
 
         return spec;
     }
 
-
-    private void addContents( List<String> contents, Properties spec )
+    private void addContents(List<String> contents, Properties spec)
     {
         // add contents
         StringBuilder sb = new StringBuilder();
-        for ( String pkg : contents )
+        for (String pkg : contents)
         {
-            if ( sb.length() > 0 )
-                sb.append( "," );
-            sb.append( pkg );
+            if (sb.length() > 0)
+                sb.append(",");
+            sb.append(pkg);
         }
 
-        if ( sb.length() > 0 )
-            spec.setProperty( Constants.PRIVATE_PACKAGE, sb.toString() );
+        if (sb.length() > 0)
+            spec.setProperty(Constants.PRIVATE_PACKAGE, sb.toString());
     }
 
-
-    private void appendProperty( String key, String value, Properties p )
+    private void appendProperty(String key, String value, Properties p)
     {
-        String list = p.getProperty( key );
+        String list = p.getProperty(key);
 
-        if ( list == null )
+        if (list == null)
         {
             list = value;
         }
@@ -476,139 +472,136 @@ public class BundleBuilder
             list = list + "," + value;
         }
 
-        p.setProperty( key, list );
+        p.setProperty(key, list);
     }
 
-
-    private void addLibs( IBldBundle bundle, String dest, Properties spec ) throws IOException
+    private void addLibs(IBldBundle bundle, String dest, Properties spec)
+        throws IOException
     {
         // final String cleanVersion =
         // Builder.cleanupVersion(bundle.getVersion());
 
         Map<String, Map<String, String>> libs = bundle.getLibs();
 
-        for ( String jarpath : libs.keySet() )
+        for (String jarpath : libs.keySet())
         {
-            Map<String, String> attr = libs.get( jarpath );
-            String kind = attr.get( BldAttr.KIND_ATTRIBUTE );
+            Map<String, String> attr = libs.get(jarpath);
+            String kind = attr.get(BldAttr.KIND_ATTRIBUTE);
 
             // first find the lib ..
-            String path = attr.get( BldAttr.PATH_ATTRIBUTE );
-            if ( path == null )
+            String path = attr.get(BldAttr.PATH_ATTRIBUTE);
+            if (path == null)
                 path = jarpath;
 
-            File fsPath = bundle.resolve( path );
+            File fsPath = bundle.resolve(path);
 
-            if ( !fsPath.exists() )
+            if (!fsPath.exists())
             {
                 // try destDir
-                File destDir = new File( dest ).getParentFile();
-                File file = new File( destDir, fsPath.getName() );
+                File destDir = new File(dest).getParentFile();
+                File file = new File(destDir, fsPath.getName());
 
-                if ( !file.exists() )
+                if (!file.exists())
                 {
                     // try searching classpath
-                    file = findInClasspathDir( fsPath.getName() );
+                    file = findInClasspathDir(fsPath.getName());
                 }
 
-                if ( file != null && file.exists() )
+                if (file != null && file.exists())
                     fsPath = file;
             }
 
-            if ( !fsPath.exists() )
+            if (!fsPath.exists())
             {
                 // XXX: find external bundle using name and version range?
                 // For now just let BND fail when it can't find resource.
             }
 
-            appendProperty( Constants.INCLUDE_RESOURCE, jarpath + "=" + fsPath, spec );
+            appendProperty(Constants.INCLUDE_RESOURCE, jarpath + "=" + fsPath, spec);
 
-            if ( "classpath".equals( kind ) )
+            if ("classpath".equals(kind))
             {
-                String bcp = spec.getProperty( Constants.BUNDLE_CLASSPATH );
-                if ( bcp == null || bcp.length() == 0 )
-                    spec.setProperty( Constants.BUNDLE_CLASSPATH, "." );
-                appendProperty( Constants.BUNDLE_CLASSPATH, jarpath, spec );
+                String bcp = spec.getProperty(Constants.BUNDLE_CLASSPATH);
+                if (bcp == null || bcp.length() == 0)
+                    spec.setProperty(Constants.BUNDLE_CLASSPATH, ".");
+                appendProperty(Constants.BUNDLE_CLASSPATH, jarpath, spec);
             }
         }
     }
 
-
-    private void addResources( IBldBundle bundle, Properties spec )
+    private void addResources(IBldBundle bundle, Properties spec)
     {
         Map<String, String> resources = bundle.getResources();
         StringBuilder sb = new StringBuilder();
 
-        for ( String bPath : resources.keySet() )
+        for (String bPath : resources.keySet())
         {
-            if ( bPath.startsWith( "@" ) )
+            if (bPath.startsWith("@"))
             {
                 handleInlineJar(bundle, sb, bPath);
             }
-            else if ( bPath.startsWith( "{" ) ) 
+            else if (bPath.startsWith("{"))
             {
                 handlePreprocessedResource(bundle, resources, sb, bPath);
             }
-            else 
+            else
             {
                 handleStandardResource(bundle, resources, sb, bPath);
             }
         }
 
-        if ( sb.length() > 0 )
-            spec.setProperty( Constants.INCLUDE_RESOURCE, sb.toString() );
+        if (sb.length() > 0)
+            spec.setProperty(Constants.INCLUDE_RESOURCE, sb.toString());
     }
 
-
-    private void handlePreprocessedResource( IBldBundle bundle, Map<String, String> resources, StringBuilder sb,
-        String bPath )
+    private void handlePreprocessedResource(IBldBundle bundle,
+        Map<String, String> resources, StringBuilder sb, String bPath)
     {
-        String fsPath = resources.get( bPath );
-        
-        bPath = bPath.substring( 1, bPath.length() - 1 );
-        
-        if ( "".equals( fsPath ) )
-            fsPath = bPath;
-        
-        fsPath = findFileSystemPath(bundle, fsPath);
-        
-        if ( sb.length() > 0 )
-            sb.append( "," );
-        sb.append( "{" );
-        sb.append( bPath );
-        sb.append( '=' );
-        sb.append( fsPath );
-        sb.append( "}" );
-    }
+        String fsPath = resources.get(bPath);
 
+        bPath = bPath.substring(1, bPath.length() - 1);
 
-    private void handleStandardResource(IBldBundle bundle, Map<String, String> resources, StringBuilder sb, String bPath)
-    {
-        String fsPath = resources.get( bPath );
-        if ( "".equals( fsPath ) )
+        if ("".equals(fsPath))
             fsPath = bPath;
 
         fsPath = findFileSystemPath(bundle, fsPath);
-        
-        if ( sb.length() > 0 )
-            sb.append( "," );
-        sb.append( bPath );
-        sb.append( '=' );
-        sb.append( fsPath );
+
+        if (sb.length() > 0)
+            sb.append(",");
+        sb.append("{");
+        sb.append(bPath);
+        sb.append('=');
+        sb.append(fsPath);
+        sb.append("}");
     }
 
+    private void handleStandardResource(IBldBundle bundle, Map<String, String> resources,
+        StringBuilder sb, String bPath)
+    {
+        String fsPath = resources.get(bPath);
+        if ("".equals(fsPath))
+            fsPath = bPath;
+
+        fsPath = findFileSystemPath(bundle, fsPath);
+
+        if (sb.length() > 0)
+            sb.append(",");
+        sb.append(bPath);
+        sb.append('=');
+        sb.append(fsPath);
+    }
 
     private String findFileSystemPath(IBldBundle bundle, String fsPath)
     {
-        File resolved = bundle.resolve( fsPath );
+        File resolved = bundle.resolve(fsPath);
 
         // fsPath may contain Bnd variable, making path appear to not exist
 
-        if ( !resolved.exists() )
+        if (!resolved.exists())
         {
             // Bnd already looks for classpath jars
-            File found = findInClasspathDir( fsPath );
-            if ( found != null )
+            File found = findInClasspathDir(fsPath);
+            if (found != null)
             {
                 fsPath = found.getPath();
             }
@@ -621,35 +614,40 @@ public class BundleBuilder
         {
             fsPath = resolved.getAbsolutePath();
         }
-        
+
         return fsPath;
     }
 
-
     private void handleInlineJar(IBldBundle bundle, StringBuilder sb, String bPath)
     {
-        if ( sb.length() > 0 )
-            sb.append( "," );
-        sb.append( '@' );
-        sb.append( bundle.resolve( bPath.substring( 1 ) ) );
+        if (sb.length() > 0)
+            sb.append(",");
+
+        File f = bundle.resolve(bPath.substring(1));
+
+        if (f.exists())
+        {
+            sb.append('@');
+            sb.append(f);
+        }
+        else
+            sb.append(bPath);
     }
 
-
-    private List<IPackageImport> getImports( IBldBundle bundle )
+    private List<IPackageImport> getImports(IBldBundle bundle)
     {
         List<IPackageImport> imports = bundle.getImports();
         Set<String> pkgs = new HashSet<String>();
 
-        for ( IPackageImport pi : imports )
+        for (IPackageImport pi : imports)
         {
-            pkgs.add( pi.getPackageName() );
+            pkgs.add(pi.getPackageName());
         }
 
         return imports;
     }
 
-
-    private void addRequirements( IBldBundle bundle, Properties spec )
+    private void addRequirements(IBldBundle bundle, Properties spec)
     {
         StringBuilder sb = new StringBuilder();
 
@@ -663,67 +661,65 @@ public class BundleBuilder
         // avoids warnings like:
         // "Importing packages that are never referred to by any class on the Bundle-ClassPath"
 
-        if ( omitUnusedImports && !addMissingImports )
+        if (omitUnusedImports && !addMissingImports)
         {
-            warnings.add( "omitUnusedImports ignored as addMissingImports=false." );
+            warnings.add("omitUnusedImports ignored as addMissingImports=false.");
             omitUnusedImports = false;
         }
 
-        sb.setLength( 0 );
+        sb.setLength(0);
 
         // allow existing header;Package-Import to specify ignored packages
-        sb.append( spec.getProperty( Constants.IMPORT_PACKAGE, "" ) );
+        sb.append(spec.getProperty(Constants.IMPORT_PACKAGE, ""));
 
-        buildImports( sb, getImports( bundle ) );
+        buildImports(sb, getImports(bundle));
 
-        if ( sb.length() > 0 )
+        if (sb.length() > 0)
         {
-            spec.setProperty( Constants.IMPORT_PACKAGE, sb.toString() );
+            spec.setProperty(Constants.IMPORT_PACKAGE, sb.toString());
         }
 
-        sb.setLength( 0 );
+        sb.setLength(0);
 
-        buildRequires( sb, bundle.getRequires() );
+        buildRequires(sb, bundle.getRequires());
 
-        if ( sb.length() > 0 )
+        if (sb.length() > 0)
         {
-            spec.setProperty( Constants.REQUIRE_BUNDLE, sb.toString() );
+            spec.setProperty(Constants.REQUIRE_BUNDLE, sb.toString());
         }
     }
-
 
     /**
      * @param sb
      * @param list 
      */
-    private void buildRequires( StringBuilder sb, List<IRequiredBundle> requires )
+    private void buildRequires(StringBuilder sb, List<IRequiredBundle> requires)
     {
-        for ( IRequiredBundle rb : requires )
+        for (IRequiredBundle rb : requires)
         {
-            if ( sb.length() > 0 )
-                sb.append( "," );
-            sb.append( rb.getSymbolicName() );
-            addVersions( rb.getVersions(), sb );
+            if (sb.length() > 0)
+                sb.append(",");
+            sb.append(rb.getSymbolicName());
+            addVersions(rb.getVersions(), sb);
         }
     }
-
 
     /**
      * @param sb
      */
-    private void buildImports( StringBuilder sb, List<IPackageImport> imports )
+    private void buildImports(StringBuilder sb, List<IPackageImport> imports)
     {
-        for ( IPackageImport pi : imports )
+        for (IPackageImport pi : imports)
         {
-            switch ( pi.getOSGiImport() )
+            switch (pi.getOSGiImport())
             {
                 case AUTO:
-                    if ( omitUnusedImports )
+                    if (omitUnusedImports)
                         continue; // added by Import-Package: * and fixed by
                     // augmentImports()
                     break;
                 case NEVER:
-                    if ( pi.isDependency() )
+                    if (pi.isDependency())
                         continue; // resolve=compile
                     break;
                 case ALWAYS:
@@ -731,95 +727,92 @@ public class BundleBuilder
                     // we omit it here and replace it in augmentImports,
                     // but only if addMissingImports is true;
                     // otherwise, if the import is used, Bnd will fail.
-                    if ( addMissingImports )
+                    if (addMissingImports)
                         continue;
                     break;
             }
 
-            if ( sb.length() > 0 )
-                sb.append( "," );
+            if (sb.length() > 0)
+                sb.append(",");
 
-            if ( pi.getOSGiImport().equals( IPackageImport.OSGiImport.NEVER ) )
+            if (pi.getOSGiImport().equals(IPackageImport.OSGiImport.NEVER))
             {
-                sb.append( "!" );
-                sb.append( pi.getPackageName() );
+                sb.append("!");
+                sb.append(pi.getPackageName());
             }
             else
             {
-                sb.append( pi.getPackageName() );
-                addVersions( pi.getVersions(), sb );
+                sb.append(pi.getPackageName());
+                addVersions(pi.getVersions(), sb);
 
-                if ( pi.isOptional() )
+                if (pi.isOptional())
                 {
-                    sb.append( ";resolution:=optional" );
+                    sb.append(";resolution:=optional");
                 }
             }
         }
 
-        if ( sb.length() > 0 )
-            sb.append( "," );
+        if (sb.length() > 0)
+            sb.append(",");
 
-        if ( addMissingImports )
+        if (addMissingImports)
         {
-            sb.append( "*" );
+            sb.append("*");
         }
         else
         {
-            sb.append( "!*" );
+            sb.append("!*");
         }
     }
 
-
-    private List<String> addExports( IBldBundle bundle, Properties spec )
+    private List<String> addExports(IBldBundle bundle, Properties spec)
     {
         List<IPackageExport> exports = bundle.getExports();
         ArrayList<String> list = new ArrayList<String>();
         StringBuilder sb = new StringBuilder();
 
-        for ( IPackageExport export : exports )
+        for (IPackageExport export : exports)
         {
-            if ( sb.length() > 0 )
-                sb.append( "," );
-            sb.append( export.getPackageName() );
-            if ( !export.getVersion().equals( Version.emptyVersion ) )
+            if (sb.length() > 0)
+                sb.append(",");
+            sb.append(export.getPackageName());
+            if (!export.getVersion().equals(Version.emptyVersion))
             {
-                sb.append( ";version=\"" );
-                sb.append( export.getVersion() );
-                sb.append( "\"" );
+                sb.append(";version=\"");
+                sb.append(export.getVersion());
+                sb.append("\"");
             }
-            list.add( export.getPackageName() );
+            list.add(export.getPackageName());
         }
 
-        if ( sb.length() > 0 )
+        if (sb.length() > 0)
         {
             // EXPORT_CONTENTS just sets the Export-Package manifest header;
             // it doesn't add contents like EXPORT_PACKAGE does.
-            spec.setProperty( Constants.EXPORT_CONTENTS, sb.toString() );
+            spec.setProperty(Constants.EXPORT_CONTENTS, sb.toString());
         }
 
         return list;
     }
 
-
-    private void addVersions( VersionRange range, StringBuilder sb )
+    private void addVersions(VersionRange range, StringBuilder sb)
     {
-        if ( !range.equals( VersionRange.ANY_VERSION ) )
+        if (!range.equals(VersionRange.ANY_VERSION))
         {
-            sb.append( ";version=\"" );
-            sb.append( range );
-            sb.append( "\"" );
+            sb.append(";version=\"");
+            sb.append(range);
+            sb.append("\"");
         }
     }
 
-
-    private File findInClasspathDir( String file )
+    private File findInClasspathDir(String file)
     {
-        for ( File cp : classpath )
+        for (File cp : classpath)
         {
-            if ( cp.isDirectory() )
+            if (cp.isDirectory())
             {
-                File path = new File( cp, file );
-                if ( path.exists() )
+                File path = new File(cp, file);
+                if (path.exists())
                 {
                     return path;
                 }
