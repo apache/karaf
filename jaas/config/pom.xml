@@ -37,6 +37,10 @@
         Provides the JAAS Config
     </description>
 
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.felix.karaf.jaas</groupId>
@@ -71,7 +75,7 @@
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
                         <Export-Package>${pom.artifactId}*;version=${project.version}</Export-Package>
-                        <Import-Package>*</Import-Package>
+                        <Import-Package>!${pom.artifactId}*,*</Import-Package>
                         <Private-Package>${artifactId}.impl</Private-Package>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>

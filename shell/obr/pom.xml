@@ -37,6 +37,10 @@
         Provides the OBR Shell commands
     </description>
 
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -67,6 +71,7 @@
                             ${pom.artifactId}*;version=${project.version}
                         </Export-Package>
                         <Import-Package>
+                            !${pom.artifactId}*,
                             org.osgi.service.command,
                             org.apache.felix.gogo.commands,
                             org.apache.felix.karaf.shell.console,

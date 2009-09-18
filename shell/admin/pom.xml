@@ -37,6 +37,10 @@
         Provides administration commands
     </description>
 
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.felix.karaf.shell</groupId>
@@ -100,7 +104,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.2</version>
                 <executions>
                     <execution>
                         <id>create-prop</id>
@@ -130,18 +133,6 @@
                         </goals>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>ant-contrib</groupId>
-                        <artifactId>ant-contrib</artifactId>
-                        <version>1.0b3</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>ant</groupId>
-                        <artifactId>ant-optional</artifactId>
-                        <version>1.5.3-1</version>
-                    </dependency>
-               </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -210,6 +201,7 @@
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
                         <Export-Package>${pom.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>
+                            !${pom.artifactId}*,
                             org.osgi.service.command,
                             org.apache.felix.gogo.commands,
                             org.apache.felix.karaf.shell.console,

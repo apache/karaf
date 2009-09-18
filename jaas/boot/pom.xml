@@ -37,6 +37,10 @@
         Provides the JAAS Boot classes
     </description>
 
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -52,9 +56,9 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
-                        <Export-Package>${pom.artifactId}*;version=${project.version}</Export-Package>
-                        <Import-Package>*</Import-Package>
+                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+                        <Export-Package>${pom.artifactId}*;version=${pom.version}</Export-Package>
+                        <Import-Package>!${pom.artifactId}*,*</Import-Package>
                         <Private-Package>!*</Private-Package>
                         <_versionpolicy>${bnd.version.policy}</_versionpolicy>
                     </instructions>

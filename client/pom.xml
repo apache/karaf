@@ -82,7 +82,6 @@
                             META-INF;-split-package:=merge-first
                         </Private-Package>
                         <Import-Package>!*</Import-Package>
-                        <Include-Resource>{maven-resources},META-INF/NOTICE=NOTICE</Include-Resource>
                     </instructions>
                     <unpackBundle>true</unpackBundle>
                 </configuration>

@@ -34,6 +34,10 @@
       A Maven 2 plugin for working with feature descriptors
     </description>
 
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
+
     <dependencies>
       <dependency>
         <groupId>org.apache.maven</groupId>
