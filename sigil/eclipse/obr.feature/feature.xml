@@ -42,7 +42,7 @@ limitations under the License.
    </license>
 
    <!--url>
-      <update url="http://replace.with.real.url"/>
+      <update url="${update-site}"/>
    </url-->
 
    <requires>
