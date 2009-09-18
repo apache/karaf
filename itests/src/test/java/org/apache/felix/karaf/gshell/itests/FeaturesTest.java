@@ -18,17 +18,18 @@ package org.apache.felix.karaf.gshell.itests;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import static org.junit.Assert.assertNotNull;
 import static org.ops4j.pax.exam.CoreOptions.bootClasspathLibrary;
-import static org.ops4j.pax.exam.CoreOptions.felix;
+import static org.ops4j.pax.exam.CoreOptions.equinox;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.ops4j.pax.exam.CoreOptions.equinox;
 import org.ops4j.pax.exam.Option;
 import static org.ops4j.pax.exam.container.def.PaxRunnerOptions.scanFeatures;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
+import org.osgi.service.blueprint.container.BlueprintContainer;
 import org.osgi.service.command.CommandProcessor;
 import org.osgi.service.command.CommandSession;
 
@@ -37,8 +38,11 @@ public class FeaturesTest extends AbstractIntegrationTest {
 
     @Test
     public void testFeatures() throws Exception {
-        Thread.sleep(5000);
+        // Make sure the command services are available
+        assertNotNull(getOsgiService(BlueprintContainer.class, "osgi.blueprint.container.symbolicname=org.apache.felix.karaf.gshell.obr", 20000));
+        assertNotNull(getOsgiService(BlueprintContainer.class, "osgi.blueprint.container.symbolicname=org.apache.felix.karaf.gshell.wrapper", 20000));
 
+        // Run some commands to make sure they are installed properly
         CommandProcessor cp = getOsgiService(CommandProcessor.class);
         CommandSession cs = cp.createSession(System.in, System.out, System.err);
         cs.execute("obr:listUrl");
