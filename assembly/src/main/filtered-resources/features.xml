@@ -21,8 +21,8 @@
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.aopalliance/${aopalliance.version}</bundle>
         <bundle>mvn:org.springframework/spring-core/${spring.version}</bundle>
         <bundle>mvn:org.springframework/spring-beans/${spring.version}</bundle>
+        <bundle>mvn:org.springframework/spring-aop/${spring.version}</bundle>        
         <bundle>mvn:org.springframework/spring-context/${spring.version}</bundle>
-        <bundle>mvn:org.springframework/spring-aop/${spring.version}</bundle>
         <bundle>mvn:org.springframework/spring-context-support/${spring.version}</bundle>
     </feature>
     <feature name="spring-dm" version="${spring.osgi.version}">
