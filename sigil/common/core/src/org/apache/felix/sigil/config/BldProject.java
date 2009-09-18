@@ -154,8 +154,24 @@ public class BldProject implements IBldProject, IRepositoryConfig
         BldConfig dflt) throws IOException
     {
         boolean cached = false;
-        String defaults = props.getProperty(BldConfig.S_DEFAULTS, "-"
-            + IBldProject.PROJECT_DEFAULTS);
+        String defaults = props.getProperty(BldConfig.S_DEFAULTS);
+
+        if (defaults != null)
+        {
+            defaults = BldUtil.expand(defaults, new Properties()
+            {
+                private static final long serialVersionUID = 1L;
+
+                public String getProperty(String name)
+                {
+                    return System.getenv(name);
+                }
+            });
+        }
+        else
+        {
+            defaults = "-" + IBldProject.PROJECT_DEFAULTS;
+        }
 
         if (base != null && defaults.length() > 0)
         {
