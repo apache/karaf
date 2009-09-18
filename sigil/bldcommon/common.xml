@@ -18,7 +18,8 @@
   under the License.
 -->
 <project name="bldcommon" 
-         xmlns:ivy="antlib:org.apache.ivy.ant">
+         xmlns:ivy="antlib:org.apache.ivy.ant"
+         xmlns:groovy="antlib:org.codehaus.groovy">
     
     <dirname property="common.dir" file="${ant.file.bldcommon}"/>
     <property file="${common.dir}/sigil-defaults.properties" prefix="default."/>
@@ -51,8 +52,22 @@
           target: load-ivy
          ================================= -->
     <target name="load-ivy" depends="init-sigil">
-	<echo message="Loading Ivy ... common.dir=${common.dir}"/>
+	<echo message="Loading Ivy ... ${common.dir}/ivysettings.xml"/>
 	<ivy:settings file="${common.dir}/ivysettings.xml" />
+    </target>
+
+    <target name="load-groovy">
+        <ivy:cachepath 
+             organisation="org.codehaus.groovy" 
+             module="groovy-all" 
+             revision="1.6.4" 
+             inline="true" 
+             pathid="groovy.classpath" 
+             transitive="false" 
+             log="quiet"/>
+
+        <taskdef resource="org/codehaus/groovy/antlib.xml"
+             uri="antlib:org.codehaus.groovy" classpathref="groovy.classpath"/>
     </target>
 
     <!-- ================================= 
@@ -145,14 +160,6 @@
 		property="bundle.modified" />
     </target>
 
-    <!-- ================================= 
-          target: install              
-	  install-bin, install-etc deprecated in favour of single
-	  assemble/bin, assemble/etc dirs
-         ================================= -->
-    <target name="install"
-    	 depends="install-lib"/>
-
     <available file="bin" type="dir"
                property="bin.dir.present"/>
     <available file="etc" type="dir"
@@ -222,7 +229,7 @@
     <!-- ================================= 
           target: boot
          ================================= -->
-    <target name="boot" depends="load-ivy">
+    <target name="boot" depends="load-ivy,load-groovy">
     </target>
 
     <!-- ================================= 
@@ -356,8 +363,6 @@
       <fileset dir="${sigil.jar.dir}" includes="*.jar"/>
     </path>
 
-    <echo>Initialising sigil with ${sigil.jar.dir}</echo>
-
     <taskdef resource="org/apache/ivy/ant/antlib.xml"
              uri="antlib:org.apache.ivy.ant" classpathref="sigil.lib.path"/>
 
@@ -366,6 +371,7 @@
 
     <taskdef name="sigil.bundle.info"
              classname="org.apache.felix.sigil.ant.BundleInfoTask" classpathref="sigil.lib.path"/>
+
   </target>
 	
 </project>

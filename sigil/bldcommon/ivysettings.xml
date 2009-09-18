@@ -72,6 +72,7 @@
 
     <url name="apache" m2compatible="true">
       <artifact pattern="http://repo1.maven.org/maven2/[organisation]/[module]/[artifact]/[revision]/[artifact]-[revision].[ext]"/>
+      <artifact pattern="http://repo1.maven.org/maven2/[organisation]/[module]/[revision]/[artifact]-[revision].[ext]"/>
     </url>
 
     <url name="aQute" m2compatible="true">
@@ -91,5 +92,6 @@
     <module organisation="org.apache" name="felix\.sigil.*" matcher="regexp" resolver="default"/>
     <module organisation="org.apache" resolver="apache"/>
     <module organisation="biz.aQute" resolver="aQute"/>
+    <module organisation="org.codehaus.groovy" resolver="apache" />
   </modules>
 </ivysettings>
