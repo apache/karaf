@@ -38,6 +38,9 @@
         through the /META-INF/webconsole.properties.
     </description>
 
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
 
     <build>
         <plugins>

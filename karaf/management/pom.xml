@@ -69,6 +69,7 @@
                     <instructions>
                         <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
                         <Import-Package>
+                            !${pom.artifactId}*,
                             javax.management,
                             *
                         </Import-Package>

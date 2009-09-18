@@ -33,6 +33,10 @@
     <version>0.9.0-SNAPSHOT</version>
     <name>Apache Felix Karaf :: Features Management</name>
 
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -95,17 +99,17 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
+                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
                         <Export-Package>
-                            ${artifactId}*;version=${version}
+                            ${pom.artifactId}*;version=${pom.version}
                         </Export-Package>
                         <Import-Package>
+                            !${pom.artifactId}*,
                             javax.management,
                             javax.management.loading,
                             org.osgi.service.command,
                             org.apache.felix.gogo.commands,
                             org.apache.felix.karaf.shell.console,
-                            !${artifactId}*,
                             *
                         </Import-Package>
                         <Private-Package>org.apache.felix.karaf.features.management.internal</Private-Package>

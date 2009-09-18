@@ -37,6 +37,10 @@
         Provides the OSGi Shell integration
     </description>
 
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>jline</groupId>
@@ -101,10 +105,10 @@
                     <instructions>
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
                         <Import-Package>
-                            !javax.swing,
                             !org.apache.felix.karaf.shell.console*,
-                            !org.fusesource.jansi*,
                             !org.apache.felix.gogo.commands*,
+                            !org.fusesource.jansi*,
+                            !javax.swing,
                             !jline,
                             com.sun.jna*;resolution:=optional,
                             org.apache.felix.karaf.branding;resolution:=optional,

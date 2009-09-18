@@ -67,7 +67,6 @@
                         <Bundle-Description>OSGi R4 framework.</Bundle-Description>
                         <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
                         <Export-Package>org.apache.felix.karaf.main.spi.*;version=${pom.version}</Export-Package>
-                        <Include-Resource>{maven-resources},META-INF/NOTICE=NOTICE</Include-Resource>
                         <!--
                         <Private-Package>
                             org.apache.felix.*;-split-package:=merge-first,

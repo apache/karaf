@@ -34,6 +34,10 @@
   <version>0.9.0-SNAPSHOT</version>
   <name>Apache Felix Karaf :: Web Console :: Gogo Plugin</name>
   
+  <properties>
+      <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -86,7 +90,8 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-            <Export-Package>org.apache.felix.karaf.webconsole.gogo;version=${pom.version}</Export-Package>
+            <Import-Package>!${pom.artifactId}*,*</Import-Package>
+            <Export-Package>${pom.artifactId}*;version=${pom.version}</Export-Package>
             <Embed-Dependency>
                <!-- Required for JSON data transfer -->
                <!-- TODO: this needs to be put in a common place for reuse. -->

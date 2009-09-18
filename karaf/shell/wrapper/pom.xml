@@ -37,6 +37,10 @@
         Provides the Service Wrapper Shell integration
     </description>
 
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.felix.karaf.shell</groupId>
@@ -82,6 +86,7 @@
                         <Bundle-SymbolicName>${artifactId}</Bundle-SymbolicName>
                         <Export-Package>${pom.artifactId}*;version=${project.version}</Export-Package>
                         <Import-Package>
+                            !${pom.artifactId}*,
                             org.osgi.service.command,
                             org.apache.felix.gogo.commands,
                             org.apache.felix.karaf.shell.console,

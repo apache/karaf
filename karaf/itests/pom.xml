@@ -37,6 +37,10 @@
         Integration tests
     </description>
 
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
+
     <dependencies>
         <!-- This is required to be first so that pax-exam classloader is not messed up with a newer version of felix
               which would lead to java.lang.NoSuchMethodError: org.apache.felix.framework.Logger.<init>(I)V -->
