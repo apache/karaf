@@ -41,9 +41,9 @@ and
 limitations under the License.
    </license>
 
-   <!--url>
-      <update url="http://replace.with.real.url"/>
-   </url-->
+   <url>
+      <update url="${update-site}"/>
+   </url>
 
    <requires>
       <import plugin="org.eclipse.ant.core"/>
