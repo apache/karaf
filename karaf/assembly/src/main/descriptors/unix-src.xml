@@ -26,9 +26,11 @@
             <directory>${basedir}/..</directory>
             <outputDirectory>/</outputDirectory>
             <includes>
-                <include>BUILDING.txt</include>
-                <include>README.txt</include>
-                <include>RELEASE*.txt</include>
+                <include>BUILDING</include>
+                <include>README</include>
+                <include>NOTICE</include>
+                <include>LICENSE</include>
+                <include>RELEASE*</include>
             </includes>
             <lineEnding>unix</lineEnding>
         </fileSet>
@@ -104,20 +106,4 @@
             <lineEnding>unix</lineEnding>
         </fileSet>
     </fileSets>
-    <files>
-        <file>
-            <source>${basedir}/target/maven-shared-archive-resources/META-INF/LICENSE</source>
-            <outputDirectory>/</outputDirectory>
-            <destName>LICENSE.txt</destName>
-            <fileMode>0644</fileMode>
-            <lineEnding>unix</lineEnding>
-        </file>
-        <file>
-            <source>${basedir}/target/maven-shared-archive-resources/META-INF/NOTICE</source>
-            <outputDirectory>/</outputDirectory>
-            <destName>NOTICE.txt</destName>
-            <fileMode>0644</fileMode>
-            <lineEnding>unix</lineEnding>
-        </file>
-    </files>
 </assembly>

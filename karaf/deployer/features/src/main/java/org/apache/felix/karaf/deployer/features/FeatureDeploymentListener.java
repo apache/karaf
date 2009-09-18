@@ -58,7 +58,7 @@ import org.xml.sax.SAXException;
  */
 public class FeatureDeploymentListener implements ArtifactTransformer, SynchronousBundleListener {
 
-    public static final String FEATURE_PATH = "org.apache.felix.karaf.gshell.features";
+    public static final String FEATURE_PATH = "org.apache.felix.karaf.shell.features";
 
     private static final Log LOGGER = LogFactory.getLog(FeatureDeploymentListener.class);
 

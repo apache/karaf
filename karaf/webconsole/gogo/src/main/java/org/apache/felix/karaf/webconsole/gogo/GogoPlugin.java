@@ -40,9 +40,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletException;
 
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
-import org.apache.felix.karaf.gshell.console.jline.Console;
-import org.apache.felix.karaf.gshell.console.Completer;
-import org.apache.felix.karaf.gshell.console.completer.AggregateCompleter;
+import org.apache.felix.karaf.shell.console.jline.Console;
+import org.apache.felix.karaf.shell.console.Completer;
+import org.apache.felix.karaf.shell.console.completer.AggregateCompleter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;

@@ -81,13 +81,13 @@ if "%KARAF_DEBUG%" == "" goto :KARAF_DEBUG_END
     call :warn Enabling Java debug options: %JAVA_DEBUG_OPTS%
 :KARAF_DEBUG_END
 
-set CLASSPATH=%KARAF_HOME%\system\org\apache\felix\karaf\gshell\org.apache.felix.karaf.gshell.admin\${project.version}\org.apache.felix.karaf.gshell.admin-${project.version}.jar;%KARAF_HOME%\system\org\apache\felix\karaf\gshell\org.apache.felix.karaf.gshell.console\${project.version}\org.apache.felix.karaf.gshell.console-${project.version}.jar;%KARAF_HOME%\system\org\apache\felix\gogo\org.apache.felix.gogo.runtime\${felix.gogo.version}\org.apache.felix.gogo.runtime-${felix.gogo.version}.jar;%KARAF_HOME%\system\org\apache\geronimo\blueprint\geronimo-blueprint\${geronimo.blueprint.version}\geronimo-blueprint-${geronimo.blueprint.version}.jar;%KARAF_HOME%\system\org\ops4j\pax\logging\pax-logging-api\${pax.logging.version}\pax-logging-api-${pax.logging.version}.jar;%KARAF_HOME%\system\org\apache\felix\org.apache.felix.framework\${felix.framework.version}\org.apache.felix.framework-${felix.framework.version}.jar
+set CLASSPATH=%KARAF_HOME%\system\org\apache\felix\karaf\shell\org.apache.felix.karaf.shell.admin\${project.version}\org.apache.felix.karaf.shell.admin-${project.version}.jar;%KARAF_HOME%\system\org\apache\felix\karaf\shell\org.apache.felix.karaf.shell.console\${project.version}\org.apache.felix.karaf.shell.console-${project.version}.jar;%KARAF_HOME%\system\org\apache\felix\gogo\org.apache.felix.gogo.runtime\${felix.gogo.version}\org.apache.felix.gogo.runtime-${felix.gogo.version}.jar;%KARAF_HOME%\system\org\apache\geronimo\blueprint\geronimo-blueprint\${geronimo.blueprint.version}\geronimo-blueprint-${geronimo.blueprint.version}.jar;%KARAF_HOME%\system\org\ops4j\pax\logging\pax-logging-api\${pax.logging.version}\pax-logging-api-${pax.logging.version}.jar;%KARAF_HOME%\system\org\apache\felix\org.apache.felix.framework\${felix.framework.version}\org.apache.felix.framework-${felix.framework.version}.jar
 
 :EXECUTE
     if "%SHIFT%" == "true" SET ARGS=%2 %3 %4 %5 %6 %7 %8
     if not "%SHIFT%" == "true" SET ARGS=%1 %2 %3 %4 %5 %6 %7 %8    
     rem Execute the Java Virtual Machine
-    "%JAVA%" %JAVA_OPTS% %OPTS% -classpath "%CLASSPATH%" -Dkaraf.home="%KARAF_HOME%" -Dkaraf.base="%KARAF_BASE%" -Djava.util.logging.config.file=%KARAF_BASE%\etc\java.util.logging.properties org.apache.felix.karaf.gshell.admin.main.Execute %ARGS%
+    "%JAVA%" %JAVA_OPTS% %OPTS% -classpath "%CLASSPATH%" -Dkaraf.home="%KARAF_HOME%" -Dkaraf.base="%KARAF_BASE%" -Djava.util.logging.config.file=%KARAF_BASE%\etc\java.util.logging.properties org.apache.felix.karaf.shell.admin.main.Execute %ARGS%
 
 rem # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 

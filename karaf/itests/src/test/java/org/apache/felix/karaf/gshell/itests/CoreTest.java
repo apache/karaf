@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.felix.karaf.gshell.itests;
+package org.apache.felix.karaf.shell.itests;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -60,7 +60,7 @@ public class CoreTest extends AbstractIntegrationTest {
             assertTrue(e.getMessage().indexOf("Command not found") >= 0);
         }
 
-        Bundle b = getInstalledBundle("org.apache.felix.karaf.gshell.log");
+        Bundle b = getInstalledBundle("org.apache.felix.karaf.shell.log");
         b.start();
 
         Thread.sleep(1000);
@@ -93,7 +93,7 @@ public class CoreTest extends AbstractIntegrationTest {
 //
 //    @Test
 //    public void testCommandGroupAfterInstall() throws Exception {
-//        Bundle b = getInstalledBundle("org.apache.felix.karaf.gshell.log");
+//        Bundle b = getInstalledBundle("org.apache.felix.karaf.shell.log");
 //        b.start();
 //
 //        Thread.sleep(5000);
@@ -133,9 +133,9 @@ public class CoreTest extends AbstractIntegrationTest {
             mavenBundle("org.apache.sshd", "sshd-core"),
             mavenBundle("org.apache.felix.karaf.jaas", "org.apache.felix.karaf.jaas.config"),
             mavenBundle("org.apache.felix.gogo", "org.apache.felix.gogo.runtime"),
-            mavenBundle("org.apache.felix.karaf.gshell", "org.apache.felix.karaf.gshell.console"),
-            mavenBundle("org.apache.felix.karaf.gshell", "org.apache.felix.karaf.gshell.osgi"),
-            mavenBundle("org.apache.felix.karaf.gshell", "org.apache.felix.karaf.gshell.log").noStart(),
+            mavenBundle("org.apache.felix.karaf.shell", "org.apache.felix.karaf.shell.console"),
+            mavenBundle("org.apache.felix.karaf.shell", "org.apache.felix.karaf.shell.osgi"),
+            mavenBundle("org.apache.felix.karaf.shell", "org.apache.felix.karaf.shell.log").noStart(),
 
             equinox()
         );

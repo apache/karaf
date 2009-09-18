@@ -149,8 +149,8 @@ public class Main {
         karafHome = Utils.getKarafHome();
         karafBase = Utils.getKarafBase(karafHome);
 
-        //System.out.println("Karaf Home: "+main.servicemixHome.getPath());
-        //System.out.println("Karaf Base: "+main.servicemixBase.getPath());
+        //System.out.println("Karaf Home: "+main.karafHome.getPath());
+        //System.out.println("Karaf Base: "+main.karafBase.getPath());
 
         System.setProperty(PROP_KARAF_HOME, karafHome.getPath());
         System.setProperty(PROP_KARAF_BASE, karafBase.getPath());

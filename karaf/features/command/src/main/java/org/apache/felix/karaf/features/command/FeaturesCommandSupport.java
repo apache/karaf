@@ -16,7 +16,7 @@
  */
 package org.apache.felix.karaf.features.command;
 
-import org.apache.felix.karaf.gshell.console.OsgiCommandSupport;
+import org.apache.felix.karaf.shell.console.OsgiCommandSupport;
 import org.apache.felix.karaf.features.FeaturesService;
 import org.osgi.framework.ServiceReference;
 

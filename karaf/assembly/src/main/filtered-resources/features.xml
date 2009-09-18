@@ -35,11 +35,11 @@
         <bundle>mvn:org.apache.felix.karaf.deployer/org.apache.felix.karaf.deployer.spring/${version}</bundle>
     </feature>
     <feature name="wrapper" version="${version}">
-        <bundle>mvn:org.apache.felix.karaf.gshell/org.apache.felix.karaf.gshell.wrapper/${version}</bundle>
+        <bundle>mvn:org.apache.felix.karaf.shell/org.apache.felix.karaf.shell.wrapper/${version}</bundle>
     </feature>
     <feature name="obr" version="${version}">
         <bundle>mvn:org.apache.felix/org.apache.felix.bundlerepository/${felix.bundlerepository.version}</bundle>
-        <bundle>mvn:org.apache.felix.karaf.gshell/org.apache.felix.karaf.gshell.obr/${version}</bundle>
+        <bundle>mvn:org.apache.felix.karaf.shell/org.apache.felix.karaf.shell.obr/${version}</bundle>
     </feature>
     <feature name="http" version="${version}">
         <config name="org.ops4j.pax.web">
@@ -65,13 +65,13 @@
         <bundle>mvn:org.apache.felix.karaf.webconsole/org.apache.felix.karaf.webconsole.gogo/${version}</bundle>
     </feature>
     <feature name="ssh" version="${version}">
-        <config name="org.apache.felix.karaf.gshell.ssh">
+        <config name="org.apache.felix.karaf.shell.ssh">
             sshPort=8101
             sshRealm=karaf
         </config>
         <bundle>mvn:org.apache.mina/mina-core/${mina.version}</bundle>
         <bundle>mvn:org.apache.sshd/sshd-core/${sshd.version}</bundle>
-        <bundle>mvn:org.apache.felix.karaf.gshell/org.apache.felix.karaf.gshell.ssh/${version}</bundle>
+        <bundle>mvn:org.apache.felix.karaf.shell/org.apache.felix.karaf.shell.ssh/${version}</bundle>
     </feature>
     <feature name="management" version="${version}">
         <bundle>mvn:org.apache.felix.karaf/org.apache.felix.karaf.management/${version}</bundle>

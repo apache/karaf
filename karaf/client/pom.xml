@@ -33,6 +33,10 @@
     <version>0.9.0-SNAPSHOT</version>
     <name>Apache Felix Karaf :: Client</name>
 
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>jline</groupId>
@@ -63,7 +67,7 @@
                         <Class-Path>
                             ../system/org/apache/sshd/sshd-core/${sshd.version}/sshd-core-${sshd.version}.jar
                             ../system/org/apache/mina/mina-core/${mina.version}/mina-core-${mina.version}.jar
-                            ../system/org/apache/felix/karaf/gshell/org.apache.felix.karaf.gshell.console/${pom.version}/org.apache.felix.karaf.gshell.console-${pom.version}.jar
+                            ../system/org/apache/felix/karaf/shell/org.apache.felix.karaf.shell.console/${pom.version}/org.apache.felix.karaf.shell.console-${pom.version}.jar
                         </Class-Path>
                         <Bundle-Name>Apache Felix Karaf Shell Client</Bundle-Name>
                         <Bundle-Description>Shell client bundle for Apache Felix Karaf.</Bundle-Description>
@@ -78,6 +82,7 @@
                             META-INF;-split-package:=merge-first
                         </Private-Package>
                         <Import-Package>!*</Import-Package>
+                        <Include-Resource>{maven-resources},META-INF/NOTICE=NOTICE</Include-Resource>
                     </instructions>
                     <unpackBundle>true</unpackBundle>
                 </configuration>

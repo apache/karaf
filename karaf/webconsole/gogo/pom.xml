@@ -61,8 +61,8 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.felix.karaf.gshell</groupId>
-      <artifactId>org.apache.felix.karaf.gshell.console</artifactId>
+      <groupId>org.apache.felix.karaf.shell</groupId>
+      <artifactId>org.apache.felix.karaf.shell.console</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.servicemix.bundles</groupId>

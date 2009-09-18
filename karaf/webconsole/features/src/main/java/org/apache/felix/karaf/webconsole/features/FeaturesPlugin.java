@@ -221,7 +221,7 @@ public class FeaturesPlugin extends AbstractResourceAwareWebConsolePlugin
         boolean success = false;
         if ( featuresService == null )
         {
-            this.log.error( "GShell Features service is unavailable." );
+            this.log.error( "Shell Features service is unavailable." );
         }
         try
         {
@@ -240,7 +240,7 @@ public class FeaturesPlugin extends AbstractResourceAwareWebConsolePlugin
         boolean success = false;
         if ( featuresService == null )
         {
-            this.log.error( "GShell Features service is unavailable." );
+            this.log.error( "Shell Features service is unavailable." );
         }
         try
         {
@@ -259,7 +259,7 @@ public class FeaturesPlugin extends AbstractResourceAwareWebConsolePlugin
         boolean success = false;
         if ( featuresService == null )
         {
-            this.log.error( "GShell Features service is unavailable." );
+            this.log.error( "Shell Features service is unavailable." );
         }
         try
         {
@@ -278,7 +278,7 @@ public class FeaturesPlugin extends AbstractResourceAwareWebConsolePlugin
         boolean success = false;
         if ( featuresService == null )
         {
-            this.log.error( "GShell Features service is unavailable." );
+            this.log.error( "Shell Features service is unavailable." );
         }
         try
         {
@@ -298,7 +298,7 @@ public class FeaturesPlugin extends AbstractResourceAwareWebConsolePlugin
         boolean success = false;
         if ( featuresService == null )
         {
-            this.log.error( "GShell Features service is unavailable." );
+            this.log.error( "Shell Features service is unavailable." );
         }
         try
         {
@@ -386,7 +386,7 @@ public class FeaturesPlugin extends AbstractResourceAwareWebConsolePlugin
 
         if ( featuresService == null )
         {
-            this.log.error( "GShell Features service is unavailable." );
+            this.log.error( "Shell Features service is unavailable." );
             return repositories;
         }
 
@@ -411,7 +411,7 @@ public class FeaturesPlugin extends AbstractResourceAwareWebConsolePlugin
 
         if ( featuresService == null )
         {
-            this.log.error( "GShell Features service is unavailable." );
+            this.log.error( "Shell Features service is unavailable." );
             return features;
         }
 

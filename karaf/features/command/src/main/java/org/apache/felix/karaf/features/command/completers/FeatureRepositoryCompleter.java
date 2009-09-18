@@ -18,8 +18,8 @@ package org.apache.felix.karaf.features.command.completers;
 
 import java.util.List;
 
-import org.apache.felix.karaf.gshell.console.completer.StringsCompleter;
-import org.apache.felix.karaf.gshell.console.Completer;
+import org.apache.felix.karaf.shell.console.completer.StringsCompleter;
+import org.apache.felix.karaf.shell.console.Completer;
 import org.apache.felix.karaf.features.FeaturesService;
 import org.apache.felix.karaf.features.Repository;
 
