@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.felix.karaf.gshell.itests;
+package org.apache.felix.karaf.shell.itests;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -80,10 +80,10 @@ public class FeaturesTest extends AbstractIntegrationTest {
             mavenBundle("org.apache.mina", "mina-core"),
             mavenBundle("org.apache.sshd", "sshd-core"),
             mavenBundle("org.apache.felix.karaf.jaas", "org.apache.felix.karaf.jaas.config"),
-            mavenBundle("org.apache.felix.karaf.gshell", "org.apache.felix.karaf.gshell.console"),
+            mavenBundle("org.apache.felix.karaf.shell", "org.apache.felix.karaf.shell.console"),
             mavenBundle("org.apache.felix.gogo", "org.apache.felix.gogo.runtime"),
-            mavenBundle("org.apache.felix.karaf.gshell", "org.apache.felix.karaf.gshell.osgi"),
-            mavenBundle("org.apache.felix.karaf.gshell", "org.apache.felix.karaf.gshell.log").noStart(),
+            mavenBundle("org.apache.felix.karaf.shell", "org.apache.felix.karaf.shell.osgi"),
+            mavenBundle("org.apache.felix.karaf.shell", "org.apache.felix.karaf.shell.log").noStart(),
 
             scanFeatures(
                     maven().groupId("org.apache.felix.karaf").artifactId("apache-felix-karaf").type("xml").classifier("features").versionAsInProject(),

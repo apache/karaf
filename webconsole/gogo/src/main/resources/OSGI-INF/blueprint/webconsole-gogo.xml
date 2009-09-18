@@ -38,7 +38,7 @@
                             unbind-method="unregister"/>
     </reference-list>
 
-    <bean id="commandCompleter" class="org.apache.felix.karaf.gshell.console.completer.CommandsCompleter">
+    <bean id="commandCompleter" class="org.apache.felix.karaf.shell.console.completer.CommandsCompleter">
         <property name="bundleContext" ref="blueprintBundleContext" />
     </bean>
 

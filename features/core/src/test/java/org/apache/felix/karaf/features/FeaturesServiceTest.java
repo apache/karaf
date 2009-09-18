@@ -36,13 +36,12 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.prefs.Preferences;
 import org.osgi.service.prefs.PreferencesService;
-import org.springframework.context.ApplicationContext;
 
 public class FeaturesServiceTest extends TestCase {
 
     public void testInstallFeature() throws Exception {
 
-        String name = ApplicationContext.class.getName();
+        String name = Bundle.class.getName();
         name = name.replace(".", "/")  + ".class";
         name = getClass().getClassLoader().getResource(name).toString();
         name = name.substring("jar:".length(), name.indexOf('!'));
@@ -131,7 +130,7 @@ public class FeaturesServiceTest extends TestCase {
 
     public void testUninstallFeature() throws Exception {
     	
-        String name = ApplicationContext.class.getName();
+        String name = Bundle.class.getName();
         name = name.replace(".", "/")  + ".class";
         name = getClass().getClassLoader().getResource(name).toString();
         name = name.substring("jar:".length(), name.indexOf('!'));
@@ -274,7 +273,7 @@ public class FeaturesServiceTest extends TestCase {
     // Tests Add and Remove Repository
     public void testAddAndRemoveRepository() throws Exception {        
 
-    	String name = ApplicationContext.class.getName();
+    	String name = Bundle.class.getName();
         name = name.replace(".", "/")  + ".class";
         name = getClass().getClassLoader().getResource(name).toString();
         name = name.substring("jar:".length(), name.indexOf('!'));        
@@ -351,7 +350,7 @@ public class FeaturesServiceTest extends TestCase {
     // all features in a repo
     public void testInstallUninstallAllFeatures() throws Exception {        
 
-    	String name = ApplicationContext.class.getName();
+    	String name = Bundle.class.getName();
         name = name.replace(".", "/")  + ".class";
         name = getClass().getClassLoader().getResource(name).toString();
         name = name.substring("jar:".length(), name.indexOf('!'));        
@@ -555,7 +554,7 @@ public class FeaturesServiceTest extends TestCase {
     // Tests uninstall of features
     public void testInstallFeatureWithDependantFeatures() throws Exception {          
 
-    	String name = ApplicationContext.class.getName();
+    	String name = Bundle.class.getName();
         name = name.replace(".", "/")  + ".class";
         name = getClass().getClassLoader().getResource(name).toString();
         name = name.substring("jar:".length(), name.indexOf('!'));        

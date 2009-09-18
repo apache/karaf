@@ -20,7 +20,7 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xmlns:ext="http://geronimo.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0">
 
-    <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/gshell/v1.0.0">
+    <command-bundle xmlns="http://felix.apache.org/karaf/xmlns/shell/v1.0.0">
         <command name="features/addUrl">
             <action class="org.apache.felix.karaf.features.command.AddUrlCommand"/>
         </command>

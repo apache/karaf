@@ -40,8 +40,8 @@ public class SimpleFileLock implements Lock {
             String lock = props.getProperty(PROPERTY_LOCK_DIR);
 
             if (lock != null) {
-                File servicemixLock = getServiceMixLock(new File(lock), props);
-                props.setProperty(PROPERTY_LOCK_DIR, servicemixLock.getPath());
+                File karafLock = getKarafLock(new File(lock), props);
+                props.setProperty(PROPERTY_LOCK_DIR, karafLock.getPath());
             } else {
                 props.setProperty(PROPERTY_LOCK_DIR, System.getProperty(PROP_KARAF_BASE));
             }
@@ -74,7 +74,7 @@ public class SimpleFileLock implements Lock {
         return lock != null;
     }
 
-    private static File getServiceMixLock(File lock,Properties props) {
+    private static File getKarafLock(File lock,Properties props) {
         File rc = null;
 
         String path = lock.getPath();

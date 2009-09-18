@@ -62,7 +62,7 @@ public class RepositoryTest extends TestCase {
     }
     
     public void testShowWrongUriInException() throws Exception {
-        String uri = "src/test/resources/org/apache/felix/karaf/gshell/features/repo1.xml";
+        String uri = "src/test/resources/org/apache/felix/karaf/shell/features/repo1.xml";
         RepositoryImpl r = new RepositoryImpl(new URI(uri));
         try {
             r.load();

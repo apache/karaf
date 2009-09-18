@@ -33,6 +33,10 @@
     <version>0.9.0-SNAPSHOT</version>
     <name>Apache Felix Karaf :: Management</name>
 
+    <properties>
+        <appendedResourcesDirectory>${basedir}/../etc/appended-resources</appendedResourcesDirectory>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.felix</groupId>

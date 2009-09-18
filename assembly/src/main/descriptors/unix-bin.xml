@@ -27,8 +27,8 @@
             <directory>..</directory>
             <outputDirectory>/</outputDirectory>
             <includes>
-                <include>README.txt</include>
-                <include>RELEASE*.txt</include>
+                <include>README</include>
+                <include>RELEASE*</include>
             </includes>
             <lineEnding>unix</lineEnding>
         </fileSet>
@@ -100,16 +100,16 @@
 
     <files>
         <file>
-            <source>${basedir}/target/maven-shared-archive-resources/META-INF/LICENSE</source>
+            <source>${basedir}/../LICENSE</source>
             <outputDirectory>/</outputDirectory>
-            <destName>LICENSE.txt</destName>
+            <destName>LICENSE</destName>
             <fileMode>0644</fileMode>
             <lineEnding>unix</lineEnding>
         </file>
         <file>
-            <source>${basedir}/target/maven-shared-archive-resources/META-INF/NOTICE</source>
+            <source>${basedir}/NOTICE</source>
             <outputDirectory>/</outputDirectory>
-            <destName>NOTICE.txt</destName>
+            <destName>NOTICE</destName>
             <fileMode>0644</fileMode>
             <lineEnding>unix</lineEnding>
         </file>
@@ -200,16 +200,16 @@
             <outputDirectory>/system</outputDirectory>
             <unpack>false</unpack>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputFileNameMapping>org/apache/felix/karaf/gshell/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <outputFileNameMapping>org/apache/felix/karaf/shell/${artifact.artifactId}/${artifact.baseVersion}/${artifact.artifactId}-${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
-                <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.console</include>
-                <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.admin</include>
-                <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.osgi</include>
-                <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.log</include>
-                <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.config</include>
-                <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.packages</include>
-                <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.ssh</include>
-                <include>org.apache.felix.karaf.gshell:org.apache.felix.karaf.gshell.commands</include>
+                <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.console</include>
+                <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.admin</include>
+                <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.osgi</include>
+                <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.log</include>
+                <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.config</include>
+                <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.packages</include>
+                <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.ssh</include>
+                <include>org.apache.felix.karaf.shell:org.apache.felix.karaf.shell.commands</include>
             </includes>
         </dependencySet>
         <dependencySet>

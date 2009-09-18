@@ -118,7 +118,7 @@ public class GenerateFeaturesFileMojo extends MojoSupport {
      * 
      * @parameter
      */
-    private String kernelVersion;
+    private String karafVersion;
     
     /**
      * A properties file containing bundle translations
@@ -223,9 +223,9 @@ public class GenerateFeaturesFileMojo extends MojoSupport {
     	
     	Artifact kernel = factory.createArtifact("org.apache.felix.karaf", 
     			                                 "apache-felix-karaf",
-    			                                 kernelVersion, Artifact.SCOPE_PROVIDED, "pom");
+    			                                 karafVersion, Artifact.SCOPE_PROVIDED, "pom");
     	resolver.resolve(kernel, remoteRepos, localRepo);
-    	getLog().info("-- List of bundles provided by ServiceMix Kernel " + kernelVersion + " --");
+    	getLog().info("-- List of bundles provided by Karaf " + karafVersion + " --");
         for (Artifact artifact : getDependencies(kernel)) {
         	getLog().info(" " + artifact);
             provided.add(artifact);

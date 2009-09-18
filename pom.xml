@@ -38,7 +38,7 @@
         <module>main</module>
         <module>features</module>
         <module>deployer</module>
-        <module>gshell</module>
+        <module>shell</module>
         <module>jaas</module>
         <module>client</module>
         <module>management</module>
@@ -96,7 +96,6 @@
         <pax.runner.version>1.1.1</pax.runner.version>
         <pax.url.version>1.0.0</pax.url.version>
         <pax.web.version>0.6.0</pax.web.version>
-        <servicemix.legal.version>1.0</servicemix.legal.version>
         <servlet.api.version>2.5</servlet.api.version>
         <spring.osgi.version>1.2.0</spring.osgi.version>
         <spring.version>2.5.6.SEC01</spring.version>
@@ -104,7 +103,7 @@
         <osgi.jmx.version>4.2.0.200907080519</osgi.jmx.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
+        <appendedResourcesDirectory>${basedir}/etc/appended-resources</appendedResourcesDirectory>
         <bnd.version.policy>[$(version;==;$(@)),$(version;+;$(@)))</bnd.version.policy>
     </properties>
 
@@ -206,58 +205,58 @@
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.felix.karaf.gshell</groupId>
-                <artifactId>org.apache.felix.karaf.gshell.core</artifactId>
+                <groupId>org.apache.felix.karaf.shell</groupId>
+                <artifactId>org.apache.felix.karaf.shell.core</artifactId>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.felix.karaf.gshell</groupId>
-                <artifactId>org.apache.felix.karaf.gshell.console</artifactId>
+                <groupId>org.apache.felix.karaf.shell</groupId>
+                <artifactId>org.apache.felix.karaf.shell.console</artifactId>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.felix.karaf.gshell</groupId>
-                <artifactId>org.apache.felix.karaf.gshell.run</artifactId>
+                <groupId>org.apache.felix.karaf.shell</groupId>
+                <artifactId>org.apache.felix.karaf.shell.run</artifactId>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.felix.karaf.gshell</groupId>
-                <artifactId>org.apache.felix.karaf.gshell.admin</artifactId>
+                <groupId>org.apache.felix.karaf.shell</groupId>
+                <artifactId>org.apache.felix.karaf.shell.admin</artifactId>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.felix.karaf.gshell</groupId>
-                <artifactId>org.apache.felix.karaf.gshell.obr</artifactId>
+                <groupId>org.apache.felix.karaf.shell</groupId>
+                <artifactId>org.apache.felix.karaf.shell.obr</artifactId>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.felix.karaf.gshell</groupId>
-                <artifactId>org.apache.felix.karaf.gshell.osgi</artifactId>
+                <groupId>org.apache.felix.karaf.shell</groupId>
+                <artifactId>org.apache.felix.karaf.shell.osgi</artifactId>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.felix.karaf.gshell</groupId>
-                <artifactId>org.apache.felix.karaf.gshell.log</artifactId>
+                <groupId>org.apache.felix.karaf.shell</groupId>
+                <artifactId>org.apache.felix.karaf.shell.log</artifactId>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.felix.karaf.gshell</groupId>
-                <artifactId>org.apache.felix.karaf.gshell.config</artifactId>
+                <groupId>org.apache.felix.karaf.shell</groupId>
+                <artifactId>org.apache.felix.karaf.shell.config</artifactId>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.felix.karaf.gshell</groupId>
-                <artifactId>org.apache.felix.karaf.gshell.packages</artifactId>
+                <groupId>org.apache.felix.karaf.shell</groupId>
+                <artifactId>org.apache.felix.karaf.shell.packages</artifactId>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.felix.karaf.gshell</groupId>
-                <artifactId>org.apache.felix.karaf.gshell.ssh</artifactId>
+                <groupId>org.apache.felix.karaf.shell</groupId>
+                <artifactId>org.apache.felix.karaf.shell.ssh</artifactId>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.felix.karaf.gshell</groupId>
-                <artifactId>org.apache.felix.karaf.gshell.commands</artifactId>
+                <groupId>org.apache.felix.karaf.shell</groupId>
+                <artifactId>org.apache.felix.karaf.shell.commands</artifactId>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
@@ -392,6 +391,12 @@
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-aop</artifactId>
                 <version>${spring.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.aopalliance</groupId>
+                        <artifactId>com.springsource.org.aopalliance</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
@@ -417,6 +422,24 @@
                 <groupId>org.springframework.osgi</groupId>
                 <artifactId>spring-osgi-core</artifactId>
                 <version>${spring.osgi.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>org.springframework.aop</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>org.springframework.beans</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>org.springframework.context</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>org.springframework.core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.springframework.osgi</groupId>
@@ -729,40 +752,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.0</version>
-                <executions>
-                    <execution>
-                        <id>copy-legal</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.apache.servicemix.legal</groupId>
-                                    <artifactId>legal</artifactId>
-                                    <version>${servicemix.legal.version}</version>
-                                    <type>xml</type>
-                                    <outputDirectory>target/legal/</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
-                            <stripVersion>true</stripVersion>
-                        </configuration>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.servicemix.legal</groupId>
-                        <artifactId>legal</artifactId>
-                        <version>${servicemix.legal.version}</version>
-                        <type>xml</type>
-                    </dependency>
-                </dependencies>
-            </plugin>
-            <plugin>
                 <artifactId>maven-remote-resources-plugin</artifactId>
                 <version>1.0</version>
                 <executions>
@@ -771,17 +760,10 @@
                             <goal>process</goal>
                         </goals>
                         <configuration>
+                            <appendedResourcesDirectory>${appendedResourcesDirectory}</appendedResourcesDirectory>
                             <resourceBundles>
                                 <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
                             </resourceBundles>
-                            <supplementalModels>
-                                <supplementalModel>target/legal/legal.xml</supplementalModel>
-                            </supplementalModels>
-                            <properties>
-                                <addLicense>true</addLicense>
-                                <addArtifact>true</addArtifact>
-                                <projectName>Apache ServiceMix</projectName>
-                            </properties>
                         </configuration>
                     </execution>
                 </executions>

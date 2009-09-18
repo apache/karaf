@@ -34,9 +34,9 @@
     <name>Apache Felix Karaf :: JAAS</name>
 
     <modules>
-        <module>jaas-boot</module>
-        <module>jaas-config</module>
-        <module>jaas-modules</module>
+        <module>boot</module>
+        <module>config</module>
+        <module>modules</module>
     </modules>
 
 </project>
