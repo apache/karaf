@@ -349,6 +349,10 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>make-assembly</id>
+                        <phase>none</phase>
+                    </execution>
+                    <execution>
                         <id>unix-bin</id>
                         <phase>package</phase>
                         <goals>
