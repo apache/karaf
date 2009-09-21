@@ -16,6 +16,137 @@
  */
 
 
+                    Apache Felix Karaf 1.0.0
+                    ========================
+
+  Overview
+  --------
+
+ The Apache Felix Karaf 1.0.0 release is the first release since the move of ServiceMix Kernel to Apache Felix.
+ This release brings a lot of new features:
+  * Switch from Spring-DM to Blueprint for the default Dependency Injection container (Spring-DM is still
+       fully supported and easy to install through the features service)
+  * Switch from Geronimo GShell to Felix Gogo
+      This changes is a bit disruptive for the command line syntax, but offers much more features such
+      as closures
+  * Integration with the Felix Web Console (easily installed using the features service).
+  * Built-in support for Equinox
+  * Upgrade to OSGi 4.2 frameworks (both Felix and Equinox)
+ This release also contains a lot of small improvements and bug fixes.  The changelog below contains the whole
+ list of changes.
+
+
+ Changelog
+ ---------
+
+ The following list shows the bug fixes and enhancements included in this release:
+
+ ** Bug
+     * [FELIX-1087] - Unable to log into ServiceMix Kernel using Windows putty SSH client
+     * [FELIX-1097] - ServiceMix -> Karaf in base directory notices
+     * [FELIX-1100] - Cat Command fails to display ?wsdl files 
+     * [FELIX-1125] - "features/list -i" returns "ERROR CommandLineExecutionFailed: org.apache.geronimo.gshell.command.CommandException: java.lang.ArrayStoreException: org.apache.servicemix.kernel.gshell.features.internal.FeatureImpl"
+     * [FELIX-1128] - Features installed via the deploy directory aren't listed by the "features/list" command
+     * [FELIX-1152] - wrapper scripts fail to start Karaf
+     * [FELIX-1153] - change parent artifact id from kernel to karaf in some modules to make the build pass from clean local maven repo
+     * [FELIX-1161] - Stange classloading issues when using compendium services
+     * [FELIX-1192] - KARAF: Locking error in DefaultJDBCLock, also contains an eventual OutOfMemory error on locked processes.
+     * [FELIX-1199] - Karaf: closing IO stream, removal of minor file descriptor leak.
+     * [FELIX-1212] - Possible infinit loop when a remote ssh connection is closed
+     * [FELIX-1218] - Existing configurations are not retrieved when installing a feature
+     * [FELIX-1222] - [features-maven-plugin:add-features-to-repo] Incorrect parsing of pax mvn url string
+     * [FELIX-1243] - Change the default port for the OSGI HTTP Service from 8080 to 8181
+     * [FELIX-1253] - Cursor is blocked when the correct syntax is not displaed
+     * [FELIX-1265] - The command refreshUrl does not work if the features.xml file is embedded in a Jar. The JVM caches jar entries
+     * [FELIX-1274] - Spring deployer fails when bean class is from java.* packages
+     * [FELIX-1315] - Karaf console is garbled on Windows
+     * [FELIX-1320] - Authentication failed connecting via ssh on Windows
+     * [FELIX-1361] - Issue with import/export version of the package : org.osgi.util.tracker in Apache Felix Karaf
+     * [FELIX-1373] - featuresBoot in etc/org.apache.felix.karaf.featues no longer works
+     * [FELIX-1375] - [Karaf] There's no 'help' command
+     * [FELIX-1378] - Optional branding does not work in new gogo console
+     * [FELIX-1391] - Unable to create new ConfigAdmin PID through karaf console
+     * [FELIX-1423] - karaf fails to start in cygwin bash
+     * [FELIX-1431] - Add a web console plugin to have access to the gogo shell
+     * [FELIX-1449] - Tab completion doesn't work on Windows
+     * [FELIX-1454] - install --help throws exception
+     * [FELIX-1458] - 'servicemix server' and servicemix client' not working properly on windows
+     * [FELIX-1459] - bin/karaf may fail to start when CDPATH is set (on POSIX shells)
+     * [FELIX-1465] - Make symbolic names of Karaf webconsole bundles consistent with other bundles
+     * [FELIX-1466] - org.apache.felix.karaf.features.FeaturesServiceTest fails
+     * [FELIX-1468] - wrapper:install and admin:create prints old ansi output that need to be converted to real ansi 
+     * [FELIX-1472] - Better handling of configurations from the deployer and feature service
+     * [FELIX-1515] - Entering an illegal command has an unusual effect
+     * [FELIX-1517] - Manually deleting an instance breaks admin:list
+     * [FELIX-1519] - Karaf Failover does not work with PostgreSQL and Oracle
+     * [FELIX-1529] - The console does not work anymore when connecting to another karaf instance
+     * [FELIX-1564] - Authentication failed when using admin:connect to connect to a newly created instance
+     * [FELIX-1566] - Possible NPE when uninstalling a feature
+     * [FELIX-1567] - When dropping an empty xml file (i.e. just an empty file with an xml extension) in the deploy folder, errors are printed to the console
+     * [FELIX-1575] - The JMX connector can not be registered because of a clash in the name in the RMI registry
+     * [FELIX-1576] - The features service should do a PackageAdmin.refresh() after uninstalling a feature
+     * [FELIX-1602] - Unable to configure boot features on admin:create-d instance
+     * [FELIX-1618] - in spring-dm feature, optional imports in spring-context won't get resolved
+
+ ** Improvement
+     * [FELIX-1062] - Upgrade to latest Felix Runtime
+     * [FELIX-1063] - Upgrade to latest Felix Bundle Repository
+     * [FELIX-1092] - The client jar / ssh deamon should support direct commands
+     * [FELIX-1102] - Make gshell-core really independant of the MainService
+     * [FELIX-1104] - Allow osgi/stop command to specify more than one bundle per command entry.
+     * [FELIX-1107] - Make org.apache.servicemix.kernel.gshell.features dependency on org.apache.servicemix.kernel.filemonitor optional
+     * [FELIX-1110] - Refactor filemonitor / deployers inside a deployer sub module
+     * [FELIX-1112] - [PATCH] Allow osgi/start command to specify more than one bundle per command entry
+     * [FELIX-1115] - Use better version ranges for imports
+     * [FELIX-1121] - Add feature for installing Felix Web Console 
+     * [FELIX-1126] - No errors are generated for a bad URL passed to the "features/addUrl", "features/refreshUrl", or "features/list" commands.
+     * [FELIX-1127] - Add a name for a repository
+     * [FELIX-1133] - Allow usage of fragments in Karaf features
+     * [FELIX-1149] - Describe ConfigAdmin configurations using metatype
+     * [FELIX-1150] - Upgrade to SpringDM and SpringFramework 
+     * [FELIX-1172] - Rebrand Karaf locking mechanism.
+     * [FELIX-1180] - Improve Karaf DefaultJDBCLock to use proper logging mechanism instead of System err prints.
+     * [FELIX-1196] - Felix Web Console can't list Karaf features
+     * [FELIX-1204] - Fix the karaf client to allow direct execution of commands
+     * [FELIX-1220] - Remove unnecssary parts of a filter
+     * [FELIX-1276] - There is no way to get all the Feature information from the FeaturesService
+     * [FELIX-1303] - add an osgi/imports and osgi/exports to show a pretty-printed output of the imports/exports packages for a bundle
+     * [FELIX-1450] - Karaf branding and plugins for Felix webconsole
+     * [FELIX-1455] - OSGi Storage is hardcoded to be data/cache
+     * [FELIX-1457] - Externalize and refactory management layer for FeatureService to be more scalable and more consistent with the OSGi management (using open mbeans)
+     * [FELIX-1463] - Switch to Felix Fileinstall instead of our own file deployer
+     * [FELIX-1467] - Add Karaf to top-level build files
+     * [FELIX-1469] - Add svn:ignore property to a few Karaf projects
+     * [FELIX-1528] - [karaf] Use a defined location for storing the list of managed instances create by the admin service
+     * [FELIX-1555] - The osgi:list command should print spring-dm bundle state if spring-dm has been deployed
+     * [FELIX-1558] - use com.sun.* instead of com.sun.management* for boot delegation
+     * [FELIX-1594] - include blueprint bundle in karaf kit system folder
+
+ ** New Feature
+     * [FELIX-1109] - Deployer for blueprint applications
+     * [FELIX-1111] - Ability to run Karaf on Equinox
+     * [FELIX-1206] - [PATCH] config/propappend
+     * [FELIX-1261] - Install/Uninstall Karaf Features from Felix WebConsole
+     * [FELIX-1485] - Admin commands support in Karaf webconsole
+     * [FELIX-1524] - Implement a better tac command
+     * [FELIX-1547] - OS shell level admin commands for Karaf
+
+ ** Task
+     * [FELIX-1098] - Switch from spring-dm to blueprint
+     * [FELIX-1099] - Switch from spring-dm integration tests to pax-exam
+     * [FELIX-1116] - Rename to Apache Felix Karaf
+     * [FELIX-1200] - Move features-maven-plugin into Karaf
+     * [FELIX-1312] - Switch from gshell to gogo
+     * [FELIX-1523] - Fix Karaf version to 0.9.0-SNAPSHOT as next release will be 1.0.0
+
+ ** Sub-task
+     * [FELIX-1117] - Update branding
+     * [FELIX-1118] - Update shell scripts
+     * [FELIX-1132] - Get rid of the JMX spring stuff in gshell-features
+
+
+
+
                     Apache ServiceMix Kernel 1.1.0
                     ==============================
 

@@ -27,7 +27,7 @@ The following features are included:
       be handled automatically. In addition, the Kernel also supports exploded bundles and custom
       deployers (a spring one is included by default).
     * Dynamic configuration: Services are usually configured through the ConfigurationAdmin OSGi
-      service. Such configuration can be defined in Karf using property files inside
+      service. Such configuration can be defined in Karaf using property files inside
       the [home]/etc directory. These configurations are monitored and changes on the properties
       files will be propagated to the services.
     * Logging System: using a centralized logging back end supported by Log4J, Karaf
